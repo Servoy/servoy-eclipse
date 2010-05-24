@@ -1,0 +1,251 @@
+/*
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2010 Servoy BV
+
+ This program is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Affero General Public License as published by the Free
+ Software Foundation; either version 3 of the License, or (at your option) any
+ later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License along
+ with this program; if not, see http://www.gnu.org/licenses or write to the Free
+ Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+ */
+package com.servoy.eclipse.ui;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.eclipse.core.runtime.Preferences;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.text.source.ISharedTextColors;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
+
+import com.servoy.eclipse.ui.preferences.TeamPreferences;
+import com.servoy.j2db.IApplication;
+
+/**
+ * The activator class controls the plug-in life cycle.
+ */
+public class Activator extends AbstractUIPlugin
+{
+
+	/**
+	 * The PLUGIN_ID for com.servoy.eclipse.ui.
+	 */
+	public static final String PLUGIN_ID = "com.servoy.eclipse.ui"; //$NON-NLS-1$
+
+	// The shared instance
+	private static Activator plugin;
+
+	private final ISharedTextColors sharedTextColors = new SharedTextColors();
+
+	/**
+	 * The path to icons used by this view (relative to the plug-in folder).
+	 */
+	public static final String ICONS_PATH = "$nl$/icons"; //$NON-NLS-1$
+
+	private final Map<String, Image> imageCacheOld = new HashMap<String, Image>();
+
+	private final Map<String, Image> imageCacheBundle = new HashMap<String, Image>();
+
+	private final Map<String, Image> grayCacheBundle = new HashMap<String, Image>();
+
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
+	 */
+	@Override
+	public void start(BundleContext context) throws Exception
+	{
+		super.start(context);
+		plugin = this;
+
+		Preferences store = Activator.getDefault().getPluginPreferences();
+		store.setDefault(TeamPreferences.AUTOMATIC_RESOURCE_SYNCH_PROPERTY, true);
+		store.setDefault(TeamPreferences.AUTOMATIC_MODULES_SYNCH_PROPERTY, true);
+
+		// make sure that core is fully initialized.
+		com.servoy.eclipse.core.Activator.getDefault();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
+	 */
+	@Override
+	public void stop(BundleContext context) throws Exception
+	{
+		Iterator<Image> it = imageCacheOld.values().iterator();
+		while (it.hasNext())
+		{
+			it.next().dispose();
+		}
+		imageCacheOld.clear();
+
+		it = imageCacheBundle.values().iterator();
+		while (it.hasNext())
+		{
+			it.next().dispose();
+		}
+		imageCacheBundle.clear();
+
+		it = grayCacheBundle.values().iterator();
+		while (it.hasNext())
+		{
+			it.next().dispose();
+		}
+		grayCacheBundle.clear();
+
+		sharedTextColors.dispose();
+		plugin = null;
+		super.stop(context);
+	}
+
+	/**
+	 * @return the sharedTextColors
+	 */
+	public ISharedTextColors getSharedTextColors()
+	{
+		return sharedTextColors;
+	}
+
+	public Image loadImageFromBundle(String name)
+	{
+		return loadImageFromBundle(name, false);
+	}
+
+	public Image loadImageFromBundle(String name, boolean disabled)
+	{
+		String storeName = name;
+		if (disabled)
+		{
+			storeName = name + "__DISABLED__"; //$NON-NLS-1$
+		}
+		Image img = imageCacheBundle.get(storeName);
+		if (img == null)
+		{
+			ImageDescriptor id = Activator.loadImageDescriptorFromBundle(name);
+			if (id != null)
+			{
+				img = id.createImage();
+				if (img != null)
+				{
+					if (disabled)
+					{
+						img = new Image(img.getDevice(), img, SWT.IMAGE_GRAY);
+					}
+					imageCacheBundle.put(storeName, img);
+				}
+			}
+		}
+		return img;
+	}
+
+	public Image loadImageFromOldLocation(String name)
+	{
+		return loadImageFromOldLocation(name, false);
+	}
+
+	public Image loadImageFromOldLocation(String name, boolean disabled)
+	{
+		String storeName = name;
+		if (disabled)
+		{
+			storeName = name + "__DISABLED__"; //$NON-NLS-1$
+		}
+
+		Image img = imageCacheOld.get(storeName);
+		if (img == null)
+		{
+			ImageDescriptor id = Activator.loadImageDescriptorFromOldLocations(name);
+			if (id != null)
+			{
+				img = id.createImage();
+				if (img != null)
+				{
+					if (disabled)
+					{
+						img = new Image(img.getDevice(), img, SWT.IMAGE_GRAY);
+					}
+					imageCacheOld.put(storeName, img);
+				}
+			}
+		}
+		return img;
+	}
+
+	/**
+	 * Tries to find the image with the specified file name in the old application image folder.
+	 * 
+	 * @param name the filename of the image to load.
+	 * @return the loaded image descriptor or null if the image was not found.
+	 */
+	public static ImageDescriptor loadImageDescriptorFromOldLocations(String name)
+	{
+		ImageDescriptor neededDescriptor = null;
+		ImageDescriptor id = ImageDescriptor.createFromFile(IApplication.class, "images/" + name); //$NON-NLS-1$
+		if (id.getImageData() != null)
+		{
+			neededDescriptor = id;
+		}
+		return neededDescriptor;
+	}
+
+	/**
+	 * Get an image with the given name from this plugin's bundle.
+	 * 
+	 * @param name the name of the image file.
+	 * @return the image descriptor for the file.
+	 */
+	public static ImageDescriptor loadImageDescriptorFromBundle(String name)
+	{
+		return getImageDescriptor(ICONS_PATH + "/" + name);
+	}
+
+	/**
+	 * Returns the shared instance.
+	 * 
+	 * @return the shared instance
+	 */
+	public static Activator getDefault()
+	{
+		return plugin;
+	}
+
+	/**
+	 * Returns an image descriptor for the image file at the given plug-in relative path.
+	 * 
+	 * @param path the path
+	 * @return the image descriptor
+	 */
+	public static ImageDescriptor getImageDescriptor(String path)
+	{
+		return imageDescriptorFromPlugin(PLUGIN_ID, path);
+	}
+
+	/**
+	 * @param icon
+	 * @return
+	 */
+	public Image createGrayImage(String name, Image icon)
+	{
+		Image gray = grayCacheBundle.get(name);
+		if (gray == null)
+		{
+			gray = new Image(icon.getDevice(), icon, SWT.IMAGE_GRAY);
+			grayCacheBundle.put(name, gray);
+		}
+		return gray;
+	}
+}
