@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="org.eclipse.team.core.repository">
+      <repository
+            class="com.servoy.eclipse.team.ServoyTeamProvider"
+            id="com.servoy.eclipse.team.servoynature">
+      </repository>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <wizard
+            canFinishEarly="false"
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.team.ui.NewSolutionWizard"
+            hasPages="true"
+            icon="icons/server.gif"
+            id="com.servoy.eclipse.team.ui.NewSolutionWizard"
+            name="Project from Servoy repository"
+            project="true">
+      </wizard>
+   </extension>
+  
+	<extension
+		point="org.eclipse.team.ui.configurationWizards">
+		<wizard
+			name="Servoy repository"
+			icon="icons/server.gif"
+			class="com.servoy.eclipse.team.ui.SharingWizard"
+			id="com.servoy.eclipse.team.ui.SharingWizard">
+		</wizard>
+	</extension>   
+   
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.core.resources.mapping.ResourceMapping"
+            adaptable="true"
+            id="com.servoy.eclipse.team.resource">
+		 <enablement>
+           <adapt type="org.eclipse.core.resources.mapping.ResourceMapping">
+              <test property="org.eclipse.core.resources.projectPersistentProperty" args="org.eclipse.team.core.repository,com.servoy.eclipse.team.servoynature" />
+           </adapt>
+         </enablement>
+         <action
+               label="Remove share"
+               class="com.servoy.eclipse.team.ui.actions.RemoveShareAction"
+               tooltip="Remove share"
+               menubarPath="team.main/group1"
+               id="com.servoy.eclipse.team.ui.actions.RemoveShareAction">
+         </action>         
+         <action
+               label="Commit"
+               class="com.servoy.eclipse.team.ui.actions.CommitAction"
+               tooltip="Commit"
+               menubarPath="team.main/group1"
+               id="com.servoy.eclipse.team.ui.actions.CommitAction">
+         </action>         
+         <action
+               label="Update"
+               class="com.servoy.eclipse.team.ui.actions.UpdateAction"
+               tooltip="Update"
+               menubarPath="team.main/group1"
+               id="com.servoy.eclipse.team.ui.actions.UpdateAction">
+         </action>
+         <action
+               label="Synchronize"
+               class="com.servoy.eclipse.team.ui.actions.SynchronizeAction"
+               tooltip="Synchronize"
+               menubarPath="team.main/group1"
+               id="com.servoy.eclipse.team.ui.actions.SynchronizeAction">
+         </action>
+      </objectContribution>
+      
+		
+      <objectContribution
+			objectClass="com.servoy.eclipse.ui.node.SimpleUserNode"
+            id="com.servoy.eclipse.ui.views.SolutionExplorerView.tree">
+		  <enablement>
+		      <test
+              forcePluginActivation="true"
+              property="com.servoy.eclipse.ui.node.canCheckout"/>      
+		  </enablement>            
+	     <action
+	           label="Checkout from Servoy repository"
+	           class="com.servoy.eclipse.team.actions.CheckoutActionDelegate"
+	           tooltip="Checkout"
+	           id="com.servoy.eclipse.team.actions.CheckoutAction">
+	     </action>            
+      </objectContribution>       
+   </extension>
+   
+ 	<extension point="org.eclipse.team.ui.synchronizeParticipants">
+		<participant
+      		persistent="false"
+      		class="com.servoy.eclipse.team.ui.SolutionSynchronizeParticipant"
+      		icon="icons/server.gif"
+      		name="Servoy"
+      		id="com.servoy.eclipse.team.ui.SolutionSynchronizeParticipant"/>
+ 	</extension>
+	 
+  <extension
+        point="org.eclipse.team.core.ignore">        
+     <ignore
+           enabled="false"
+           pattern="*.obj">
+     </ignore>     
+  </extension>
+  <extension
+        point="org.eclipse.core.expressions.propertyTesters">
+     <propertyTester
+           class="com.servoy.eclipse.team.ui.SimpleUserNodeTester"
+           id="com.servoy.eclipse.team.ui.SimpleUserNodeTester"
+           namespace="com.servoy.eclipse.ui.node"
+           properties="canCheckout"
+           type="com.servoy.eclipse.ui.node.SimpleUserNode">
+     </propertyTester>
+  </extension>   
+  
+  <extension
+     point="org.eclipse.ui.decorators">
+  	<decorator  	
+         class="com.servoy.eclipse.team.ui.ResourceDecorator"
+         id="com.servoy.eclipse.team.ui.ResourceDecorator"
+         label="Servoy resource decorator"
+         lightweight="true"
+         objectClass="org.eclipse.core.resources.IResource"
+         adaptable="true"
+         state="true">
+	<enablement>
+		<objectClass name= "org.eclipse.core.resources.IResource"/>
+	</enablement>	
+     <description>
+        Servoy resource decorator
+     </description>
+  	</decorator>  	
+  	<decorator  	
+         class="com.servoy.eclipse.team.ui.ResourceDecorator"
+         id="com.servoy.eclipse.team.ui.ResourceMappingDecorator"
+         label="Servoy resource mapping decorator"
+         lightweight="true"
+         objectClass="org.eclipse.core.resources.mapping.ResourceMapping"
+         adaptable="true"
+         state="true">
+	<enablement>
+		<objectClass name= "org.eclipse.core.resources.mapping.ResourceMapping"/>
+	</enablement>	
+     <description>
+        Servoy resource mapping decorator
+     </description>
+  	</decorator>  	
+   </extension>
+  
+	<extension
+      point="org.eclipse.ui.preferencePages">
+		<page
+			name="Servoy Team Provider"
+			category="org.eclipse.team.ui.TeamPreferences"
+			class="com.servoy.eclipse.team.ui.PreferencesPage"
+			id="com.servoy.eclipse.team.ui.PreferencesPage">
+		</page>
+	</extension>  
+   
+  <extension
+        point="org.eclipse.ui.cheatsheets.cheatSheetContent">
+     <category
+           id="com.servoy.eclipse.team.usage"
+           name="Team">
+     </category>
+     <cheatsheet
+           category="com.servoy.eclipse.team.usage"
+           contentFile="cheatsheets/CheckoutSolution.xml"
+           id="com.servoy.eclipse.team.cheatsheet.checkout"
+           name="Checking out a solution">
+           <description>
+           This sheet will show how to checkout a solution with team via solution explorer view
+           </description>
+     </cheatsheet>
+  </extension>
+  
+  <extension
+        point="org.eclipse.team.ui.synchronizeWizards">
+     <wizard
+           class="com.servoy.eclipse.team.ui.SynchronizeWizard"
+           description="Synchronize solution from Servoy repository"
+           icon="icons/server.gif"
+           id="com.servoy.eclipse.team.ui.SynchronizeWizard"
+           name="Servoy">
+     </wizard>
+  </extension>
+  
+</plugin>
