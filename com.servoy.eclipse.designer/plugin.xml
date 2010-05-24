@@ -1,0 +1,578 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="com.servoy.eclipse.designer.Startup">
+      </startup>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="com.servoy.eclipse.designer.editor.VisualFormEditor"
+            contributorClass="com.servoy.eclipse.designer.editor.ActionBarContributor"
+            default="true"
+            extensions="frm"
+            icon="icons/designer.gif"
+            id="com.servoy.eclipse.designer.editor.VisualFormEditor"
+            matchingStrategy="com.servoy.eclipse.core.resource.PersistMatchingStrategy"
+            name="Form Editor">
+            <contentTypeBinding
+               contentTypeId="com.servoy.eclipse.core.resource.form"/>
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="java.awt.Dimension"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
+      </factory>
+      <factory
+            adaptableType="java.awt.Point"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.j2db.persistence.FormElementGroup"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.eclipse.ui.node.SimpleUserNode"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
+      </factory>
+      <factory
+            adaptableType="org.eclipse.gef.editparts.AbstractGraphicalEditPart"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.eclipse.ui.editors.PersistEditor"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.eclipse.designer.property.PersistContext"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.eclipse.designer.property.PersistContext"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="com.servoy.j2db.persistence.IPersist"/>
+      </factory>
+      <factory
+            adaptableType="org.eclipse.gef.EditPart"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="org.eclipse.core.resources.IResource"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.eclipse.ui.editors.PersistEditor"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="org.eclipse.core.resources.IResource"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.eclipse.ui.node.SimpleUserNode"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="com.servoy.j2db.persistence.IPersist"/>
+      </factory>
+      <factory
+            adaptableType="org.eclipse.gef.EditPart"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="com.servoy.j2db.persistence.IPersist"/>
+      </factory>
+      <factory
+            adaptableType="org.eclipse.gef.EditPart"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="com.servoy.j2db.persistence.FormElementGroup"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.eclipse.ui.editors.PersistEditor"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="com.servoy.j2db.persistence.IPersist"/>
+      </factory>
+      <factory
+            adaptableType="org.eclipse.gef.EditPart"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="com.servoy.eclipse.ui.actions.Openable"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.j2db.persistence.IPersist"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="com.servoy.eclipse.ui.actions.Openable"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.j2db.persistence.IPersist"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
+      </factory>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="com.servoy.eclipse.designer.PlaceElementsActionSet"
+            label="Place Elements"
+            visible="true">
+         <menu
+               id="com.servoy.eclipse.designer.ElementsMenu"
+               label="&amp;Elements">
+            <separator
+                  name="elements">
+            </separator>
+         </menu>
+         <action
+               class="com.servoy.eclipse.designer.actions.ApplyTemplateActionDelegate"
+               definitionId="com.servoy.eclipse.designer.action.applyTemplateAction"
+               icon="icons/template.gif"
+               id="com.servoy.eclipse.designer.action.applyTemplateAction"
+               label="Place Template..."
+               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               state="false"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Place Template..."/>
+         <action
+               class="com.servoy.eclipse.designer.actions.AddTabActionDelegate"
+               definitionId="com.servoy.eclipse.designer.action.addTabAction"
+               icon="icons/tabs.gif"
+               id="com.servoy.eclipse.designer.action.addTabAction"
+               label="Place TabPanel..."
+               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               state="false"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Place TabPanel..."/>
+         <action
+               class="com.servoy.eclipse.designer.actions.AddSplitPaneActionDelegate"
+               definitionId="com.servoy.eclipse.designer.action.addSplitPaneAction"
+               icon="icons/split.gif"
+               id="com.servoy.eclipse.designer.action.addSplitPaneAction"
+               label="Place SplitPane..."
+               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               state="false"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Place SplitPane..."/>               
+         <action
+               class="com.servoy.eclipse.designer.actions.AddMediaActionDelegate"
+               definitionId="com.servoy.eclipse.designer.action.addMedaAction"
+               icon="icons/image.gif"
+               id="com.servoy.eclipse.designer.action.addMedaAction"
+               label="Place Image..."
+               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               state="false"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Place Image..."/>
+         <action
+               class="com.servoy.eclipse.designer.actions.AddBeanActionDelegate"
+               definitionId="com.servoy.eclipse.designer.action.addBeanAction"
+               icon="icons/bean.gif"
+               id="com.servoy.eclipse.designer.action.addBeanAction"
+               label="Place Bean..."
+               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               state="false"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Place Bean..."/>
+         <action
+               class="com.servoy.eclipse.designer.actions.AddPortalActionDelegate"
+               definitionId="com.servoy.eclipse.designer.action.addPortalAction"
+               icon="icons/portal.gif"
+               id="com.servoy.eclipse.designer.action.addPortalAction"
+               label="Place Portal..."
+               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               state="false"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Place Portal..."/>
+         <action
+               class="com.servoy.eclipse.designer.actions.AddButtonActionDelegate"
+               icon="icons/button.gif"
+               id="com.servoy.eclipse.designer.action.addButtonAction"
+               definitionId="com.servoy.eclipse.designer.action.addButtonAction"
+               label="Place Button"
+               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               state="false"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Place Button"/>
+         <action
+               class="com.servoy.eclipse.designer.actions.AddFieldActionDelegate"
+               definitionId="com.servoy.eclipse.designer.action.addFieldAction"
+               icon="icons/field.gif"
+               id="com.servoy.eclipse.designer.action.addFieldAction"
+               label="Place Field..."
+               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               state="false"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Place Field..."/>
+         <action
+               class="com.servoy.eclipse.designer.actions.AddLabelActionDelegate"
+               definitionId="com.servoy.eclipse.designer.action.addLabelAction"
+               icon="icons/text.gif"
+               id="com.servoy.eclipse.designer.action.addLabelAction"
+               label="Place Label"
+               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               state="false"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Place Label"/>
+         <action
+               class="com.servoy.eclipse.designer.actions.AddHorizontalLineActionDelegate"
+               icon="icons/hline.gif"
+               id="com.servoy.eclipse.designer.action.addHLineAction"
+               label="Horizontal Line"
+               menubarPath="com.servoy.eclipse.designer.ElementsMenu/drawing"
+               state="false"
+               style="push"
+               toolbarPath="Normal/drawing"
+               tooltip="Horizontal Line"/>
+         <action
+               class="com.servoy.eclipse.designer.actions.AddVerticalLineActionDelegate"
+               icon="icons/vline.gif"
+               id="com.servoy.eclipse.designer.action.addVLineAction"
+               label="Vertical Line"
+               menubarPath="com.servoy.eclipse.designer.ElementsMenu/drawing"
+               state="false"
+               style="push"
+               toolbarPath="Normal/drawing"
+               tooltip="Vertical Line"/>
+      </actionSet>
+      <actionSet
+            id="com.servoy.eclipse.designer.PlaceShapesActionSet"
+            label="Place Shapes"
+            visible="true">
+         <action
+               class="com.servoy.eclipse.designer.actions.AddBorderPanelActionDelegate"
+               icon="icons/titledBorder.gif"
+               id="com.servoy.eclipse.designer.action.addBorderPanelAction"
+               label="Place Border panel"
+               state="false"
+               style="push"
+               toolbarPath="Normal/shapes"
+               tooltip="Place Border Panel"/>
+         <action
+               class="com.servoy.eclipse.designer.actions.AddRoundedRectangleActionDelegate"
+               icon="icons/rrect.gif"
+               id="com.servoy.eclipse.designer.action.addRoundedRectangleAction"
+               label="Place Rounded Rectangle"
+               state="false"
+               style="push"
+               toolbarPath="Normal/shapes"
+               tooltip="Place Rounded Rectangle"/>
+         <action
+               class="com.servoy.eclipse.designer.actions.AddRectangleActionDelegate"
+               icon="icons/rectangle.gif"
+               id="com.servoy.eclipse.designer.action.addRectangleAction"
+               label="Place Rectangle"
+               state="false"
+               style="push"
+               toolbarPath="Normal/shapes"
+               tooltip="Place Rectangle"/>
+         <action
+               class="com.servoy.eclipse.designer.actions.AddCircleActionDelegate"
+               icon="icons/circle.gif"
+               id="com.servoy.eclipse.designer.action.addCircleAction"
+               label="Place Circle"
+               state="false"
+               style="push"
+               toolbarPath="Normal/shapes"
+               tooltip="Place Circle"/>
+      </actionSet>
+       <actionSet
+            id="com.servoy.eclipse.designer.open_actions"
+            label="Open Form Designer"
+            visible="true">
+         <action
+               class="com.servoy.eclipse.designer.actions.OpenFormInDesignerActionDelegate"
+               id="com.servoy.eclipse.designer.command.showDesigner"
+               definitionId="com.servoy.eclipse.designer.command.showDesigner"
+               label="Open form in designer"
+               style="push"
+               tooltip="Open form in designer">
+         </action>
+      </actionSet>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="com.servoy.eclipse.ui.DesignPerspective">
+         <actionSet
+               id="com.servoy.eclipse.designer.PlaceElementsActionSet">
+         </actionSet>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="org.eclipse.ui.edit.delete"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="BS">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.action.applyTemplateAction"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="ALT+M1+E">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.action.addTabAction"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="ALT+M1+T">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.action.addSplitPaneAction"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="ALT+M1+S">
+      </key>      
+      <key
+            commandId="com.servoy.eclipse.designer.action.addMedaAction"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="ALT+M1+I">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.action.addBeanAction"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="ALT+M1+N">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.action.addPortalAction"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="ALT+M1+P">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.action.addButtonAction"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="ALT+M1+B">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.action.addFieldAction"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="ALT+M1+F">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.action.addLabelAction"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="ALT+M1+L">
+      </key>
+      <key
+          commandId="com.servoy.eclipse.designer.command.showDesigner"
+          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+          sequence="M1+M2+A">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.NewWizardCommandHandler"
+            id="com.servoy.eclipse.designer.newWizardCommandId"
+            name="Open Wizard Command">
+         <commandParameter
+               id="com.servoy.eclipse.designer.wizardType"
+               name="WizardType"
+               optional="true">
+         </commandParameter>
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            id="com.servoy.eclipse.designer.action.applyTemplateAction"
+            description="Place Template"
+            name="Place Template">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            id="com.servoy.eclipse.designer.action.addTabAction"
+            description="Place TabPanel"
+            name="Place TabPanel">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            id="com.servoy.eclipse.designer.action.addSplitPaneAction"
+            description="Place SplitPane"
+            name="Place SplitPane">
+      </command>      
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            id="com.servoy.eclipse.designer.action.addMedaAction"
+            description="Place Image"
+            name="Place Image">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            id="com.servoy.eclipse.designer.action.addBeanAction"
+            description="Place Bean"
+            name="Place Bean">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            id="com.servoy.eclipse.designer.action.addPortalAction"
+            description="Place Portal"
+            name="Place Portal">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            id="com.servoy.eclipse.designer.action.addButtonAction"
+            description="Place Button"
+            name="Place Button">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            id="com.servoy.eclipse.designer.action.addFieldAction"
+            description="Place Field"
+            name="Place Field">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            id="com.servoy.eclipse.designer.action.addLabelAction"
+            description="Place Label"
+            name="Place Label">
+      </command>
+      <category
+            id="com.servoy.eclipse.designer.category"
+            name="Servoy">
+      </category>
+      <command
+          description="Show Form in Designer"
+          id="com.servoy.eclipse.designer.command.showDesigner"
+          name="Show Form in Designer">
+       </command>
+   </extension>
+      <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="com.servoy.eclipse.ui.preference"
+            class="com.servoy.eclipse.designer.preferences.DesignerPreferencePage"
+            id="com.servoy.eclipse.ui.designer"
+            name="Designer">
+      </page>
+   </extension>
+      <extension
+            point="org.eclipse.ui.menus">
+         <menuContribution
+               locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+            <toolbar
+                  id="org.eclipse.ui.workbench.file">
+               <command
+                     commandId="com.servoy.eclipse.designer.newWizardCommandId"
+                     icon="icons/designer.gif"
+                     id="com.servoy.eclipse.designer.toolbar.newWizardCommandId"
+                     label="New Form"
+                     style="pulldown"
+                     tooltip="New Form">
+                  <parameter
+                        name="com.servoy.eclipse.designer.wizardType"
+                        value="NEW_FORM">
+                  </parameter>
+               </command>
+            </toolbar>
+         </menuContribution>
+         <menuContribution
+               locationURI="menu:com.servoy.eclipse.designer.toolbar.newWizardCommandId">
+            <command
+                  commandId="com.servoy.eclipse.designer.newWizardCommandId"
+                  icon="icons/designer.gif"
+                  id="com.servoy.eclipse.designer.newFormCommandId2"
+                  label="New Form"
+                  style="push"
+                  tooltip="New Form">
+               <parameter
+                     name="com.servoy.eclipse.designer.wizardType"
+                     value="NEW_FORM">
+               </parameter>
+            </command>
+            <separator
+                  name="com.servoy.eclipse.designer.separator1"
+                  visible="false">
+            </separator>
+            <command
+                  commandId="com.servoy.eclipse.designer.newWizardCommandId"
+                  icon="icons/newrelation.gif"
+                  id="com.servoy.eclipse.designer.toolbar.newRelationId"
+                  label="New Relation"
+                  style="push"
+                  tooltip="New relation">
+               <parameter
+                     name="com.servoy.eclipse.designer.wizardType"
+                     value="NEW_RELATION">
+               </parameter>
+            </command>
+            <separator
+                  name="com.servoy.eclipse.designer.separator2">
+            </separator>
+            <command
+                  commandId="com.servoy.eclipse.designer.newWizardCommandId"
+                  icon="icons/newvaluelist.gif"
+                  id="com.servoy.eclipse.designer.designer.toolbar.newValueListId"
+                  label="New Valuelist"
+                  style="push"
+                  tooltip="New Valuelist">
+               <parameter
+                     name="com.servoy.eclipse.designer.wizardType"
+                     value="NEW_VALUELIST">
+               </parameter>
+            </command>
+            <separator
+                  name="com.servoy.eclipse.designer.separator3">
+            </separator>
+            <command
+                  commandId="com.servoy.eclipse.designer.newWizardCommandId"
+                  icon="icons/new_form_method.gif"
+                  id="com.servoy.eclipse.designer.toolbar.newMethodId"
+                  label="New Method"
+                  tooltip="New Method">
+               <parameter
+                     name="com.servoy.eclipse.designer.wizardType"
+                     value="NEW_METHOD">
+               </parameter>
+            </command>
+         </menuContribution>
+      </extension>
+      <extension
+         point="org.eclipse.ui.popupMenus">
+       <objectContribution
+            objectClass="com.servoy.j2db.persistence.IPersist"
+            adaptable="true"
+            id="com.servoy.eclipse.ui.OpenDesignerContributions">
+         <action
+               class="com.servoy.eclipse.designer.actions.OpenFormInDesignerActionDelegate"
+               definitionId="com.servoy.eclipse.designer.command.showDesigner"
+               enablesFor="1"
+               icon="icons/designer.gif"
+               id="com.servoy.eclipse.designer.OpenFormDesignerAction"
+               label="Open in form designer"
+               menubarPath="open.ext"
+               state="false"
+               style="push"
+               tooltip="Open in form designer">
+         </action>
+         <visibility>
+            <objectClass
+                  name="com.servoy.j2db.persistence.Form">
+            </objectClass>
+         </visibility>
+      </objectContribution>
+   </extension>
+      <extension
+            point="org.eclipse.ui.contexts">
+         <context
+               id="com.servoy.eclipse.designer.context"
+               name="Editing Forms"
+               parentId="org.eclipse.ui.contexts.window">
+         </context>
+      </extension>
+</plugin>
