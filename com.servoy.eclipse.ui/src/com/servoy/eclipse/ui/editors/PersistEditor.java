@@ -1,0 +1,341 @@
+/*
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2010 Servoy BV
+
+ This program is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Affero General Public License as published by the Free
+ Software Foundation; either version 3 of the License, or (at your option) any
+ later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License along
+ with this program; if not, see http://www.gnu.org/licenses or write to the Free
+ Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+*/
+package com.servoy.eclipse.ui.editors;
+
+import java.util.Collection;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.EditorPart;
+import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.views.properties.IPropertySource;
+import org.eclipse.ui.views.properties.IPropertySourceProvider;
+
+import com.servoy.eclipse.core.IActiveProjectListener;
+import com.servoy.eclipse.core.IPersistChangeListener;
+import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.ServoyProject;
+import com.servoy.eclipse.core.repository.SolutionDeserializer;
+import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistVisitor;
+import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.Solution;
+
+/**
+ * @author jcompagner
+ */
+public abstract class PersistEditor extends EditorPart implements IActiveProjectListener, IPersistChangeListener
+{
+	private ServoyProject servoyProject;
+	private IPersist persist;
+	private boolean disposed = false;
+	private boolean refreshing = false;
+
+	/**
+	 * @return the persist
+	 */
+	public IPersist getPersist()
+	{
+		return persist;
+	}
+
+	@Override
+	public Object getAdapter(Class adapter)
+	{
+		if (adapter.equals(IPersist.class))
+		{
+			return getPersist();
+		}
+		if (adapter.equals(IPropertySourceProvider.class))
+		{
+			// enable setting stuff via the properties editor
+			return new IPropertySourceProvider()
+			{
+				public IPropertySource getPropertySource(Object object)
+				{
+					return new PersistPropertySource(getPersist(), getPersist(), false/* readOnly */);
+				}
+			};
+		}
+		return super.getAdapter(adapter);
+	}
+
+	/**
+	 * @see org.eclipse.ui.part.EditorPart#setInput(org.eclipse.ui.IEditorInput)
+	 */
+	@Override
+	protected void setInput(IEditorInput input)
+	{
+		if (input == null) return;
+
+		super.setInput(input);
+
+		if (input instanceof PersistEditorInput)
+		{
+			PersistEditorInput persistInput = (PersistEditorInput)input;
+
+			servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(persistInput.getSolutionName());
+			if (servoyProject == null)
+			{
+				throw new IllegalArgumentException("Cannot open solution " + persistInput.getSolutionName());
+			}
+			try
+			{
+				persist = servoyProject.getEditingPersist(persistInput.getUuid());
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+				throw new RuntimeException("Could not initialize persist editor: " + e.getMessage());
+			}
+		}
+		else
+		{
+			throw new IllegalArgumentException("This editor does not support input " + input.getClass());
+		}
+
+		if (persist == null)
+		{
+			throw new IllegalArgumentException("Could not find element for input " + input);
+		}
+
+		if (!validatePersist(persist))
+		{
+			throw new IllegalArgumentException("This editor does not support type " + persist.getClass());
+		}
+		updateTitle();
+	}
+
+	protected final void refresh()
+	{
+		if (refreshing || disposed) return;
+
+		getSite().getShell().getDisplay().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				if (refreshing || disposed) return;
+				refreshing = true;
+				try
+				{
+					doRefresh();
+				}
+				finally
+				{
+					refreshing = false;
+				}
+			}
+		});
+	}
+
+	protected abstract void doRefresh();
+
+	/**
+	 * Validate if the persist is supported by this editor.
+	 * 
+	 * @param p
+	 */
+	protected abstract boolean validatePersist(IPersist p);
+
+	@Override
+	public void dispose()
+	{
+		disposed = true;
+		ServoyModelManager.getServoyModelManager().getServoyModel().removeActiveProjectListener(this);
+		ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(false, this);
+		revert(false);
+		super.dispose();
+	}
+
+	/**
+	 * Revert persist, remove changes.
+	 * 
+	 * @param force
+	 */
+	public void revert(boolean force)
+	{
+		if (force || isDirty())
+		{
+			try
+			{
+				servoyProject.revertEditingPersist(persist);
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError("Could not revert object", e);
+			}
+		}
+	}
+
+	protected void updateTitle()
+	{
+		if (persist instanceof ISupportName)
+		{
+			String name = ((ISupportName)persist).getName();
+			setPartName(name);
+			setTitleToolTip(persist.getRootObject().getName() + '.' + name);
+		}
+		else
+		{
+			IEditorInput input = getEditorInput();
+			setPartName(input.getName());
+			setTitleToolTip(input.getToolTipText());
+		}
+	}
+
+	/**
+	 * @see org.eclipse.ui.part.EditorPart#doSaveAs()
+	 */
+	@Override
+	public void doSaveAs()
+	{
+	}
+
+	/**
+	 * @see org.eclipse.ui.part.EditorPart#init(org.eclipse.ui.IEditorSite, org.eclipse.ui.IEditorInput)
+	 */
+	@Override
+	public void init(IEditorSite site, IEditorInput input) throws PartInitException
+	{
+		setSite(site);
+		if (input != null)
+		{
+			setInput(convertInput(input));
+			ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(this);
+			ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(false, this);
+		}
+	}
+
+	protected IEditorInput convertInput(IEditorInput input)
+	{
+		if (input instanceof FileEditorInput)
+		{
+			IPersist filePersist = SolutionDeserializer.findPersistFromFile((FileEditorInput)input);
+			if (filePersist != null)
+			{
+				Solution solution = (Solution)filePersist.getAncestor(IRepository.SOLUTIONS);
+				if (solution != null && filePersist instanceof ISupportName)
+				{
+					return new PersistEditorInput(((ISupportName)filePersist).getName(), solution.getName(), filePersist.getUUID());
+				}
+			}
+		}
+		return input;
+	}
+
+	/**
+	 * @see org.eclipse.ui.part.EditorPart#isDirty()
+	 */
+	@Override
+	public boolean isDirty()
+	{
+		return persist != null && Boolean.TRUE.equals(persist.acceptVisitor(new IPersistVisitor()
+		{
+			public Object visit(IPersist o)
+			{
+				if (o.isChanged())
+				{
+					return Boolean.TRUE;
+				}
+				return IPersistVisitor.CONTINUE_TRAVERSAL;
+			}
+		}));
+	}
+
+	@Override
+	public void doSave(IProgressMonitor monitor)
+	{
+		if (isDirty())
+		{
+			try
+			{
+				servoyProject.saveEditingSolutionNodes(new IPersist[] { persist }, true);
+				firePropertyChange(IEditorPart.PROP_DIRTY);
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+				MessageDialog.openError(getSite().getShell(), "Error", "Save failed: " + e.getMessage());
+				if (monitor != null) monitor.setCanceled(true);
+			}
+		}
+	}
+
+	@Override
+	public boolean isSaveAsAllowed()
+	{
+		return false;
+	}
+
+	public void activeProjectChanged(ServoyProject activeProject)
+	{
+	}
+
+	public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+	{
+	}
+
+	public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+	{
+		closeEditor(true);
+		return true;
+	}
+
+	protected void closeEditor(final boolean save)
+	{
+		getSite().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				getSite().getPage().closeEditor(PersistEditor.this, save);
+			}
+		});
+	}
+
+	public void persistChanges(Collection<IPersist> changes)
+	{
+		for (IPersist changed : changes)
+		{
+			// is it a child of the current persist (or the current persist itself)?
+			IPersist parent = changed.getAncestor(persist.getTypeID());
+			if (persist.equals(parent))
+			{
+				getSite().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						if (!disposed)
+						{
+							refresh();
+							firePropertyChange(IEditorPart.PROP_DIRTY);
+						}
+					}
+				});
+				return;
+			}
+		}
+	}
+}

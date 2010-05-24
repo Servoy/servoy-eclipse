@@ -1,0 +1,44 @@
+/*
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2010 Servoy BV
+
+ This program is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Affero General Public License as published by the Free
+ Software Foundation; either version 3 of the License, or (at your option) any
+ later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License along
+ with this program; if not, see http://www.gnu.org/licenses or write to the Free
+ Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+*/
+package com.servoy.eclipse.team.ui;
+
+import org.eclipse.core.expressions.PropertyTester;
+
+import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.node.UserNodeType;
+
+/**
+ * Attaches the properties of SimpleUserNode type. These properties can be used in plugin.xml for property tests (such as when to add an action to a context
+ * menu).
+ * 
+ * @author Andrei Costescu
+ */
+public class SimpleUserNodeTester extends PropertyTester
+{
+
+	public boolean test(Object receiver, String property, Object[] args, Object expectedValue)
+	{
+		SimpleUserNode userNode = (SimpleUserNode)receiver;
+
+		if ("canCheckout".equals(property))
+		{
+			return userNode.getType() == UserNodeType.ALL_SOLUTIONS;
+		}
+
+		return false;
+	}
+}

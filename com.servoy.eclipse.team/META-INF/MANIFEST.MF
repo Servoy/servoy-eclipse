@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Servoy Team Plug-in
+Bundle-SymbolicName: com.servoy.eclipse.team;singleton:=true
+Bundle-Version: 5.2.0.990
+Bundle-Activator: com.servoy.eclipse.team.Activator
+Bundle-Vendor: Servoy
+Require-Bundle: org.eclipse.core.resources,
+ org.eclipse.core.filesystem,
+ org.eclipse.core.runtime,
+ org.eclipse.team.core,
+ org.eclipse.ui,
+ org.eclipse.team.ui,
+ org.eclipse.core.expressions,
+ org.eclipse.ui.cheatsheets,
+ org.eclipse.dltk.javascript.core,
+ servoy_shared,
+ com.servoy.eclipse.core,
+ com.servoy.eclipse.ui,
+ org.eclipse.compare
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Export-Package: com.servoy.eclipse.team,com.servoy.eclipse.team.actions
+ ,com.servoy.eclipse.team.subscriber,com.servoy.eclipse.team.ui,com.ser
+ voy.eclipse.team.ui.actions
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
