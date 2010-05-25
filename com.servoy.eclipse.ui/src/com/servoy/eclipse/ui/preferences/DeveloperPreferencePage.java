@@ -41,7 +41,7 @@ public class DeveloperPreferencePage extends PreferencePage implements IWorkbenc
 {
 
 	private Button enhancedSecurityButton;
-	private Button useDummyAuthButton;
+//	private Button useDummyAuthButton;
 
 	public void init(IWorkbench workbench)
 	{
@@ -55,16 +55,16 @@ public class DeveloperPreferencePage extends PreferencePage implements IWorkbenc
 		Composite composite = new Composite(parent, SWT.NONE);
 
 		enhancedSecurityButton = new Button(composite, SWT.CHECK);
-		enhancedSecurityButton.setText("Run Servoy Application Server with Enhanced Security)");
+		enhancedSecurityButton.setText("Run Servoy Application Server with Enhanced Security");
 
-		useDummyAuthButton = new Button(composite, SWT.CHECK);
-		useDummyAuthButton.setText("Use dummy authentication for debug smart client (when server is in Enhanced Security Mode)");
+//		useDummyAuthButton = new Button(composite, SWT.CHECK);
+//		useDummyAuthButton.setText("Use dummy authentication for debug smart client (when server is in Enhanced Security Mode)");
 
 		enhancedSecurityButton.addSelectionListener(new SelectionListener()
 		{
 			public void widgetSelected(SelectionEvent e)
 			{
-				useDummyAuthButton.setEnabled(enhancedSecurityButton.getSelection());
+//				useDummyAuthButton.setEnabled(enhancedSecurityButton.getSelection());
 			}
 
 			public void widgetDefaultSelected(SelectionEvent e)
@@ -93,8 +93,8 @@ public class DeveloperPreferencePage extends PreferencePage implements IWorkbenc
 		DeveloperPreferences prefs = new DeveloperPreferences(ServoyModel.getSettings());
 
 		enhancedSecurityButton.setSelection(prefs.getEnhancedSecurity());
-		useDummyAuthButton.setSelection(prefs.getUseDummyAuth());
-		useDummyAuthButton.setEnabled(enhancedSecurityButton.getSelection());
+//		useDummyAuthButton.setSelection(prefs.getUseDummyAuth());
+//		useDummyAuthButton.setEnabled(enhancedSecurityButton.getSelection());
 	}
 
 	@Override
@@ -102,7 +102,7 @@ public class DeveloperPreferencePage extends PreferencePage implements IWorkbenc
 	{
 		DeveloperPreferences prefs = new DeveloperPreferences(ServoyModel.getSettings());
 		prefs.setEnhancedSecurity(enhancedSecurityButton.getSelection());
-		prefs.setUseDummyAuth(useDummyAuthButton.getSelection());
+//		prefs.setUseDummyAuth(useDummyAuthButton.getSelection());
 
 		return true;
 	}
@@ -111,8 +111,8 @@ public class DeveloperPreferencePage extends PreferencePage implements IWorkbenc
 	protected void performDefaults()
 	{
 		enhancedSecurityButton.setSelection(DeveloperPreferences.ENHANCED_SECURITY_DEFAULT);
-		useDummyAuthButton.setSelection(DeveloperPreferences.DUMMY_AUTHENTICATION_DEFAULT);
-		useDummyAuthButton.setEnabled(enhancedSecurityButton.getSelection());
+//		useDummyAuthButton.setSelection(DeveloperPreferences.DUMMY_AUTHENTICATION_DEFAULT);
+//		useDummyAuthButton.setEnabled(enhancedSecurityButton.getSelection());
 
 		super.performDefaults();
 	}
