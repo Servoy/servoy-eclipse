@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.6"?>
 
-<target name="servoy_target_win32_64">
+<target name="servoy_target_mac_64">
 <locations>
 <location path="${servoy_install}\developer" type="Profile"/>
 </locations>
