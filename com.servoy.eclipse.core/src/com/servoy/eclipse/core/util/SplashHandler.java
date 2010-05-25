@@ -116,20 +116,22 @@ public class SplashHandler extends BasicSplashHandler
 				{
 					Thread.sleep(200);
 					count++;
-					if (count > 20) break;
+					if (count > 50) break;
 				}
 			}
 			catch (InterruptedException e)
 			{
 				//ignore
 			}
-
-			Settings settings = ApplicationServerSingleton.get().loadSettings();
-			if (settings != null)
+			if (ApplicationServerSingleton.get() != null)
 			{
-				String regText = ApplicationServerSingleton.get().initLicenseManagerAsDeveloper(settings);
-				text.append("\n");
-				text.append(regText);
+				Settings settings = ApplicationServerSingleton.get().loadSettings();
+				if (settings != null)
+				{
+					String regText = ApplicationServerSingleton.get().initLicenseManagerAsDeveloper(settings);
+					text.append("\n");
+					text.append(regText);
+				}
 			}
 		}
 		return text;
