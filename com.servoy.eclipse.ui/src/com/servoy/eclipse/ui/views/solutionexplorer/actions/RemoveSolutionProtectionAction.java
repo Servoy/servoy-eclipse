@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
@@ -31,7 +31,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.server.ApplicationServerSingleton;
 
 public class RemoveSolutionProtectionAction extends Action implements ISelectionChangedListener
 {
@@ -90,11 +90,11 @@ public class RemoveSolutionProtectionAction extends Action implements ISelection
 			Solution solution = selectedSolutionProject.getEditingSolution();
 			String inputPassword = UIUtils.showPasswordDialog(shell, "Solution '" + solution.getName() + "' is password protected",
 				"Please enter protection password for solution : '" + solution.getName() + "'", "", null);
-			inputPassword = SolutionMetaData.calculateProtectionPasswordHash(solution.getName(), solution.getUUID().toString(), inputPassword);
+			inputPassword = ApplicationServerSingleton.get().calculateProtectionPasswordHash(solution.getName(), solution.getUUID().toString(), inputPassword);
 			if (inputPassword.equals(solution.getProtectionPassword()))
 			{
 				solution.getSolutionMetaData().setProtectionPassword(
-					SolutionMetaData.calculateProtectionPasswordHash(solution.getName(), solution.getUUID().toString(), null));
+					ApplicationServerSingleton.get().calculateProtectionPasswordHash(solution.getName(), solution.getUUID().toString(), null));
 				try
 				{
 					selectedSolutionProject.saveEditingSolutionNodes(new IPersist[] { solution }, false);

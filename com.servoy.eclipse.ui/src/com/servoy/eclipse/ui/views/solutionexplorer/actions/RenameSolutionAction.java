@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.core.resources.IProjectDescription;
@@ -39,7 +39,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.server.ApplicationServerSingleton;
 import com.servoy.j2db.util.IdentDocumentValidator;
 
 public class RenameSolutionAction extends Action implements ISelectionChangedListener
@@ -113,7 +113,8 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 						servoyProject.getProject().move(description, false, null);
 						ServoyModelManager.getServoyModelManager().getServoyModel();
 						EclipseRepository repository = (EclipseRepository)ServoyModel.getDeveloperRepository();
-						String protectionPassword = SolutionMetaData.calculateProtectionPasswordHash(name, editingSolution.getUUID().toString(), null);
+						String protectionPassword = ApplicationServerSingleton.get().calculateProtectionPasswordHash(name,
+							editingSolution.getUUID().toString(), null);
 						editingSolution.getSolutionMetaData().setProtectionPassword(protectionPassword);
 						servoyProject.getSolution().getSolutionMetaData().setProtectionPassword(protectionPassword);
 						repository.updateNodesInWorkspace(new IPersist[] { editingSolution }, true);

@@ -494,7 +494,8 @@ public class ServoyTeamProvider extends RepositoryProvider
 					{
 						public String isValid(String newText)
 						{
-							String passHashed = solutionMetaData.calculateProtectionPasswordHash(newText);
+							String passHashed = ApplicationServerSingleton.get().calculateProtectionPasswordHash(solutionMetaData.getName(),
+								solutionMetaData.getRootObjectUuid().toString(), newText);
 							if (!passHashed.equals(solutionMetaData.getProtectionPassword()))
 							{
 								return "";
