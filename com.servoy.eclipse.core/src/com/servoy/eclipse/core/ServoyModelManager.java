@@ -13,12 +13,14 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core;
 
 import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.swt.widgets.Display;
+
+import com.servoy.j2db.server.ApplicationServerSingleton;
 
 /**
  * Is similar to JavaModelManager, single entry point for anything about servoy in eclipse
@@ -87,6 +89,13 @@ public class ServoyModelManager
 				{
 					ServoyLog.logError(e);
 				}
+			}
+			// notify the client debug handler that servoy model has been initialized.
+			// on the mac the debug smart client must wait until the swt main thread is not busy,
+			// otherwise the smart client frame will not paint.
+			if (ApplicationServerSingleton.get().getDebugClientHandler() != null)
+			{
+				ApplicationServerSingleton.get().getDebugClientHandler().flagModelInitialised();
 			}
 		}
 		return servoyModel;

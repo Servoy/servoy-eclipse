@@ -465,12 +465,6 @@
       </attribute>
    </extension>
    <extension
-         point="org.eclipse.ui.startup">
-      <startup
-            class="com.servoy.eclipse.core.Startup">
-      </startup>
-   </extension>
-   <extension
          id="com.servoy.eclipse.core.securityGroupBrokenReference"
          name="Security Group Broken Reference"
          point="org.eclipse.core.resources.markers">
