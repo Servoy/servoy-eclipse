@@ -42,7 +42,6 @@ import javax.swing.JMenu;
 
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.IApplicationServer;
 import com.servoy.j2db.IBeanManager;
 import com.servoy.j2db.IDataRendererFactory;
 import com.servoy.j2db.IFormManager;
@@ -68,6 +67,7 @@ import com.servoy.j2db.plugins.IPluginManager;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.server.ApplicationServerSingleton;
+import com.servoy.j2db.server.IApplicationServer;
 import com.servoy.j2db.server.IUserManager;
 import com.servoy.j2db.smart.J2DBClient;
 import com.servoy.j2db.smart.dataui.SwingItemFactory;
