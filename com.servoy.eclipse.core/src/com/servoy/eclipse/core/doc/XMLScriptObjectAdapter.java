@@ -19,7 +19,7 @@ package com.servoy.eclipse.core.doc;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.servoy.j2db.documentaton.ParameterDocumentation;
+import com.servoy.j2db.documentation.ParameterDocumentation;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.util.Debug;
 

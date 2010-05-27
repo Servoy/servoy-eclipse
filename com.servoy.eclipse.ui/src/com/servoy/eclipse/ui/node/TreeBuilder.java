@@ -33,7 +33,7 @@ import com.servoy.eclipse.core.doc.IDocumentationManager;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.core.doc.IFunctionDocumentation;
 import com.servoy.eclipse.core.doc.IObjectDocumentation;
-import com.servoy.j2db.documentaton.ParameterDocumentation;
+import com.servoy.j2db.documentation.ParameterDocumentation;
 import com.servoy.j2db.util.HtmlUtils;
 
 public class TreeBuilder
