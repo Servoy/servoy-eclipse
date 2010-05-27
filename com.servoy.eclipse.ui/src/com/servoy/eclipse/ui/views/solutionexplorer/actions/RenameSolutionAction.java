@@ -115,8 +115,8 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 						EclipseRepository repository = (EclipseRepository)ServoyModel.getDeveloperRepository();
 						String protectionPassword = ApplicationServerSingleton.get().calculateProtectionPassword(editingSolution.getSolutionMetaData(), null);
 						editingSolution.getSolutionMetaData().setProtectionPassword(protectionPassword);
-						servoyProject.getSolution().getSolutionMetaData().setProtectionPassword(protectionPassword);
 						repository.updateNodesInWorkspace(new IPersist[] { editingSolution }, true);
+						servoyProject.getSolution().getSolutionMetaData().setProtectionPassword(protectionPassword);
 					}
 					catch (RepositoryException e)
 					{

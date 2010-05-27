@@ -553,7 +553,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 			{
 				// ask for protection password
 				String protectionPassword = x11handler.getUserChannel().askProtectionPassword(rootObjectImportInfo.info.name);
-				if (protectionPassword == null || !ApplicationServerSingleton.get().checkSolutionPassword(rootObjectImportInfo, protectionPassword))
+				if (protectionPassword == null || ApplicationServerSingleton.get().checkSolutionPassword(rootObjectImportInfo, protectionPassword))
 				{
 					throw new RepositoryException("Wrong password, cannot import solution.");
 				}
