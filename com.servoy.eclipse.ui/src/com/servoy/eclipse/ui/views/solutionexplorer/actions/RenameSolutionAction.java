@@ -39,7 +39,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.IdentDocumentValidator;
 
 public class RenameSolutionAction extends Action implements ISelectionChangedListener

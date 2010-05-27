@@ -29,7 +29,7 @@ import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.j2db.dataprocessing.IDataSet;
-import com.servoy.j2db.server.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 public class SecurityModel
 {

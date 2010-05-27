@@ -62,8 +62,8 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
-import com.servoy.j2db.server.ApplicationServerSingleton;
-import com.servoy.j2db.server.IDebugHeadlessClient;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.IDebugHeadlessClient;
 import com.servoy.j2db.smart.J2DBClient;
 import com.servoy.j2db.util.Settings;
 

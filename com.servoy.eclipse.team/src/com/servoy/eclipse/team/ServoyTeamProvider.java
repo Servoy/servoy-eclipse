@@ -95,7 +95,7 @@ import com.servoy.j2db.persistence.ITeamRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.server.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;

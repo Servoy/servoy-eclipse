@@ -53,8 +53,8 @@ import com.servoy.eclipse.core.repository.XMLEclipseWorkspaceImportHandlerVersio
 import com.servoy.eclipse.ui.util.MessageDialog;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.server.ApplicationServerSingleton;
-import com.servoy.j2db.server.IApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.xmlxport.IXMLImportEngine;
 import com.servoy.j2db.util.xmlxport.IXMLImportHandlerVersions11AndHigher;

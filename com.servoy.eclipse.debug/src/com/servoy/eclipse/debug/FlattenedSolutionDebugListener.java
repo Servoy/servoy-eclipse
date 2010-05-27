@@ -21,7 +21,7 @@ import java.util.Set;
 import org.eclipse.dltk.rhino.dbgp.DBGPDebugger;
 import org.mozilla.javascript.Context;
 
-import com.servoy.j2db.server.IFlattenedSolutionDebugListener;
+import com.servoy.j2db.server.shared.IFlattenedSolutionDebugListener;
 
 public class FlattenedSolutionDebugListener implements IFlattenedSolutionDebugListener
 {

@@ -20,7 +20,7 @@ import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.j2db.server.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 /**
  * Is similar to JavaModelManager, single entry point for anything about servoy in eclipse

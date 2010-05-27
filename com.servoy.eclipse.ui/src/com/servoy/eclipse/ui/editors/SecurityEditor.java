@@ -62,7 +62,7 @@ import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.builder.ServoyBuilder;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.server.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.ServoyException;
 
 public class SecurityEditor extends EditorPart implements IActiveProjectListener

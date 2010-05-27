@@ -44,7 +44,7 @@ import com.servoy.j2db.persistence.QuerySet;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.query.QueryAggregate;
 import com.servoy.j2db.query.QuerySelect;
-import com.servoy.j2db.server.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Utils;
 

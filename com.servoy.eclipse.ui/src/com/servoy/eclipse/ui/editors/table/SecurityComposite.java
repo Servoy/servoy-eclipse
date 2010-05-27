@@ -41,7 +41,7 @@ import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.NameComparator;
-import com.servoy.j2db.server.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 public class SecurityComposite extends Composite implements EclipseUserManager.IUserGroupChangeListener
 {

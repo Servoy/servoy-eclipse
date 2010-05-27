@@ -110,7 +110,7 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.property.I18NMessagesModel;
 import com.servoy.j2db.property.I18NMessagesModel.I18NMessagesModelEntry;
-import com.servoy.j2db.server.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 

@@ -42,7 +42,7 @@ import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
 import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.server.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 /**
  * @author jcompagner

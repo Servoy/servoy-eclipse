@@ -31,7 +31,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 public class RemoveSolutionProtectionAction extends Action implements ISelectionChangedListener
 {
