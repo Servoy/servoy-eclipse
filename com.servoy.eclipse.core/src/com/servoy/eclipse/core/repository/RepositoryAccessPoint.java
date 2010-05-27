@@ -215,7 +215,7 @@ public class RepositoryAccessPoint
 
 		try
 		{
-			return getApplicationServerAccess().getUserManager();
+			return getApplicationServerAccess().getUserManager(clientID);
 		}
 		catch (Exception e)
 		{
