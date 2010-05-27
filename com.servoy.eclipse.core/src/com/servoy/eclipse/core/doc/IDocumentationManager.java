@@ -19,7 +19,7 @@ package com.servoy.eclipse.core.doc;
 
 import java.util.SortedMap;
 
-import com.servoy.j2db.annotations.ServoyDocumented;
+import com.servoy.j2db.documentation.ServoyDocumented;
 
 /**
  * Documentation manager interface, implemented via extension point.

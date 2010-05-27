@@ -17,8 +17,8 @@
 package com.servoy.eclipse.core.scripting.docs;
 
 import com.servoy.j2db.FormController.JSForm;
-import com.servoy.j2db.annotations.ServoyDocumented;
 import com.servoy.j2db.dataprocessing.FoundSet;
+import com.servoy.j2db.documentation.ServoyDocumented;
 
 @ServoyDocumented(category = ServoyDocumented.RUNTIME, publicName = "Form", scriptingName = "Form")
 public class Form

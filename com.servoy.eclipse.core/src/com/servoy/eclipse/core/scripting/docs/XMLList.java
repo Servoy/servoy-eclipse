@@ -16,7 +16,7 @@
 */
 package com.servoy.eclipse.core.scripting.docs;
 
-import com.servoy.j2db.annotations.ServoyDocumented;
+import com.servoy.j2db.documentation.ServoyDocumented;
 
 @ServoyDocumented(category = ServoyDocumented.JSLIB, publicName = "XMLList")
 public class XMLList

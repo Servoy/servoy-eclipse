@@ -17,7 +17,7 @@
 package com.servoy.eclipse.core.scripting.docs;
 
 import com.servoy.j2db.FormController.JSForm;
-import com.servoy.j2db.annotations.ServoyDocumented;
+import com.servoy.j2db.documentation.ServoyDocumented;
 
 @ServoyDocumented(category = ServoyDocumented.RUNTIME, publicName = "Globals", scriptingName = "globals")
 public class Globals

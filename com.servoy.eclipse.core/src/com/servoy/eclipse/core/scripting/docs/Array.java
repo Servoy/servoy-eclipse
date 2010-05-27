@@ -18,7 +18,7 @@ package com.servoy.eclipse.core.scripting.docs;
 
 import org.mozilla.javascript.Function;
 
-import com.servoy.j2db.annotations.ServoyDocumented;
+import com.servoy.j2db.documentation.ServoyDocumented;
 
 @ServoyDocumented(category = ServoyDocumented.JSLIB, publicName = "Array", scriptingName = "Array")
 public class Array
