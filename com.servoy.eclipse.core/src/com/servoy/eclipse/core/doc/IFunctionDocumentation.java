@@ -21,8 +21,8 @@ import java.util.LinkedHashMap;
 
 import org.dom4j.Element;
 
-import com.servoy.j2db.scripting.ParameterDocumentation;
-import com.servoy.j2db.scripting.QualifiedDocumentationName;
+import com.servoy.j2db.documentaton.ParameterDocumentation;
+import com.servoy.j2db.documentaton.QualifiedDocumentationName;
 import com.servoy.j2db.util.ITagResolver;
 
 /**

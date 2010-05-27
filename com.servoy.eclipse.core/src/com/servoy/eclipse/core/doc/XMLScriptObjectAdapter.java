@@ -19,8 +19,8 @@ package com.servoy.eclipse.core.doc;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.servoy.j2db.documentaton.ParameterDocumentation;
 import com.servoy.j2db.scripting.IScriptObject;
-import com.servoy.j2db.scripting.ParameterDocumentation;
 import com.servoy.j2db.util.Debug;
 
 public class XMLScriptObjectAdapter implements IScriptObject

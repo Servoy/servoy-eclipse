@@ -16,7 +16,7 @@
 */
 package com.servoy.eclipse.core.scripting.docs;
 
-import com.servoy.j2db.scripting.ServoyDocumented;
+import com.servoy.j2db.annotations.ServoyDocumented;
 
 @ServoyDocumented(category = ServoyDocumented.RUNTIME, publicName = "elements", scriptingName = "elements")
 public class FormElements

@@ -16,7 +16,7 @@
 */
 package com.servoy.eclipse.core.scripting.docs;
 
-import com.servoy.j2db.scripting.ServoyDocumented;
+import com.servoy.j2db.annotations.ServoyDocumented;
 
 @ServoyDocumented(category = ServoyDocumented.JSLIB, publicName = "Number", scriptingName = "Number")
 public class Number
