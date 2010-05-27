@@ -90,11 +90,11 @@ public class RemoveSolutionProtectionAction extends Action implements ISelection
 			Solution solution = selectedSolutionProject.getEditingSolution();
 			String inputPassword = UIUtils.showPasswordDialog(shell, "Solution '" + solution.getName() + "' is password protected",
 				"Please enter protection password for solution : '" + solution.getName() + "'", "", null);
-			inputPassword = ApplicationServerSingleton.get().calculateProtectionPasswordHash(solution.getName(), solution.getUUID().toString(), inputPassword);
+			inputPassword = ApplicationServerSingleton.get().calculateProtectionPassword(solution.getSolutionMetaData(), inputPassword);
 			if (inputPassword.equals(solution.getProtectionPassword()))
 			{
 				solution.getSolutionMetaData().setProtectionPassword(
-					ApplicationServerSingleton.get().calculateProtectionPasswordHash(solution.getName(), solution.getUUID().toString(), null));
+					ApplicationServerSingleton.get().calculateProtectionPassword(solution.getSolutionMetaData(), null));
 				try
 				{
 					selectedSolutionProject.saveEditingSolutionNodes(new IPersist[] { solution }, false);
