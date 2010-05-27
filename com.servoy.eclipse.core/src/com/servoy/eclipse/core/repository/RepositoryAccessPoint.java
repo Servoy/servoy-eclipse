@@ -16,12 +16,18 @@
  */
 package com.servoy.eclipse.core.repository;
 
-import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.Platform;
 
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
@@ -35,7 +41,6 @@ import com.servoy.j2db.server.shared.IApplicationServerAccess;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.LocalhostRMIRegistry;
-import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.rmi.IRMIClientSocketFactoryFactory;
 import com.servoy.j2db.util.rmi.IReconnectListener;
@@ -289,23 +294,10 @@ public class RepositoryAccessPoint
 			try
 			{
 				URL url = new URL("http", serverAddress, "");
-				String rmiFactory = getServoySettings().getProperty("SocketFactory.rmiClientFactory", "com.servoy.j2db.rmi.DefaultClientSocketFactoryFactory"); //$NON-NLS-1$ //$NON-NLS-2$
-				try
-				{
-					Class< ? > cls = Class.forName(rmiFactory.trim());
-					Constructor< ? > constructor = cls.getConstructor(new Class[] { URL.class, IApplication.class, Properties.class, IReconnectListener.class });
-					rmiFactoryFactory = (IRMIClientSocketFactoryFactory)constructor.newInstance(new Object[] { url, null, Settings.getInstance(), this });
-					Debug.trace("IRMISocketFactoryFactory instantiated: " + cls); //$NON-NLS-1$
-				}
-				catch (Exception e)
-				{
-					Debug.error("couldn't instantiate the rmi socketfactory", e); //$NON-NLS-1$
-					throw new ApplicationServerAccessException("Error getting remote repository", e); //$NON-NLS-1$
-				}
+				rmiFactoryFactory = createRMIClientSocketFactoryFactory(url, null, getServoySettings(), null);
 
 				IApplicationServer as = (IApplicationServer)LocateRegistry.getRegistry(serverAddress, usedRMIPort,
 					rmiFactoryFactory.getRemoteClientSocketFactory()).lookup(IApplicationServer.NAME);
-
 
 				clientID = as.getClientID(user, passwordHash); // RemoteApplicationServer
 				if (clientID != null)
@@ -323,6 +315,58 @@ public class RepositoryAccessPoint
 
 		return asa;
 	}
+
+	public IRMIClientSocketFactoryFactory createRMIClientSocketFactoryFactory(URL url, IApplication application, Properties settings,
+		IReconnectListener reconnectListener) throws ApplicationServerAccessException
+	{
+		IExtensionRegistry reg = Platform.getExtensionRegistry();
+		IExtensionPoint ep = reg.getExtensionPoint(IRMIClientFactoryProvider.EXTENSION_ID);
+		IExtension[] extensions = ep.getExtensions();
+
+		if (extensions == null || extensions.length == 0)
+		{
+			ServoyLog.logWarning("Could not find rmi client factory provider server starter plugin (extension point " + //$NON-NLS-1$
+				IRMIClientFactoryProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$
+			return null;
+		}
+		if (extensions.length > 1)
+		{
+			ServoyLog.logWarning("Multiple rmi client factory plugins found (extension point " + //$NON-NLS-1$
+				IRMIClientFactoryProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$
+		}
+		IConfigurationElement[] ce = extensions[0].getConfigurationElements();
+		if (ce == null || ce.length == 0)
+		{
+			ServoyLog.logWarning("Could not read rmi client factory provider plugin (extension point " + IRMIClientFactoryProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$ //$NON-NLS-2$
+			return null;
+		}
+		if (ce.length > 1)
+		{
+			ServoyLog.logWarning("Multiple extensions for rmi client factory plugins found (extension point " + //$NON-NLS-1$
+				IRMIClientFactoryProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$
+		}
+		IRMIClientFactoryProvider rmiClientFactoryProvider;
+		try
+		{
+			rmiClientFactoryProvider = (IRMIClientFactoryProvider)ce[0].createExecutableExtension("class"); //$NON-NLS-1$
+		}
+		catch (CoreException e)
+		{
+			ServoyLog.logWarning("Could not create rmi client factory provider plugin (extension point " + IRMIClientFactoryProvider.EXTENSION_ID + ")", e); //$NON-NLS-1$ //$NON-NLS-2$
+			return null;
+		}
+		try
+		{
+			return rmiClientFactoryProvider.createRMIClientSocketFactoryFactory(url, application, settings, reconnectListener);
+		}
+		catch (Exception e)
+		{
+			Debug.error("couldn't instantiate the rmi socketfactory", e); //$NON-NLS-1$
+			throw new ApplicationServerAccessException("Error getting remote repository", e); //$NON-NLS-1$
+
+		}
+	}
+
 
 	private Properties getServoySettings()
 	{

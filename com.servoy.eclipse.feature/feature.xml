@@ -803,6 +803,13 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="j2db_tunnel"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 <!--
    <plugin
          id="j2db_runtime"
