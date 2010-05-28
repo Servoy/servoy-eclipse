@@ -664,11 +664,14 @@ public class EclipseUserManager implements IUserManager
 				if (infos != null && infos.size() > 0)
 				{
 					int access = infos.get(0).access;
-					changed = true;
-					infos.clear();
-					for (String columnName : table.getColumnNames())
+					changed = changed || isTableSecurityChanged(table, infos);
+					if (changed)
 					{
-						setSecurityInfo(infos, columnName, access, false);
+						infos.clear();
+						for (String columnName : table.getColumnNames())
+						{
+							setSecurityInfo(infos, columnName, access, false);
+						}
 					}
 					if (table.getColumnNames().length == 0) setSecurityInfo(infos, TABLE_PERMISSION_KEY, access, false); // if a new table is created and a sec file already exists for it, remember permission even if no columns are available for it yet...
 				}
@@ -685,6 +688,26 @@ public class EclipseUserManager implements IUserManager
 				}
 			}
 		}
+	}
+
+	private boolean isTableSecurityChanged(Table table, List<SecurityInfo> infos)
+	{
+		if (table.getColumnCount() != infos.size()) return true;
+		for (String columnName : table.getColumnNames())
+		{
+			boolean columnFound = false;
+			Iterator<SecurityInfo> it = infos.iterator();
+			while (it.hasNext())
+			{
+				if (it.next().element_uid.equals(columnName))
+				{
+					columnFound = true;
+					break;
+				}
+			}
+			if (!columnFound) return true;
+		}
+		return false;
 	}
 
 	public static String getFileName(String name)
