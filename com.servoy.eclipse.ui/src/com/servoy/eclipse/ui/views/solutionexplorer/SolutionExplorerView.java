@@ -190,9 +190,10 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.LoadRelationsAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.MovePersistAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.MoveTextAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewPostgresDbAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewRelationAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewServerAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewPostgresDbAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewSybaseDbAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewTableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewValueListAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewVariableAction;
@@ -351,6 +352,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private MovePersistAction moveFormAction;
 
 	private NewPostgresDbAction newDatabase;
+	private NewSybaseDbAction newSybaseDatabase;
+
 	private DuplicateServerAction duplicateServer;
 	private EnableServerAction enableServer;
 
@@ -1761,6 +1764,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (removeSolutionProtectionAction.isEnabled()) manager.add(removeSolutionProtectionAction);
 		if (duplicateServer.isEnabled()) manager.add(duplicateServer);
 		if (newDatabase.isEnabled()) manager.add(newDatabase);
+		if (newSybaseDatabase.isEnabled()) manager.add(newSybaseDatabase);
 		if (enableServer.isEnabled()) manager.add(enableServer);
 		manager.add(new Separator());
 		if (synchronizeTablesWithDBAction.isEnabled()) manager.add(synchronizeTablesWithDBAction);
@@ -2021,6 +2025,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction newValueList = new NewValueListAction(this);
 		IAction newTable = new NewTableAction(this);
 		newDatabase = new NewPostgresDbAction(this);
+		newSybaseDatabase = new NewSybaseDbAction(this);
 		duplicateServer = new DuplicateServerAction(this);
 		enableServer = new EnableServerAction(getSite().getShell());
 		toggleFormCommandsActions = new ToggleFormCommandsAction(this);
@@ -2219,6 +2224,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		tree.addSelectionChangedListener(duplicateServer);
 		tree.addSelectionChangedListener(enableServer);
 		tree.addSelectionChangedListener(newDatabase);
+		tree.addSelectionChangedListener(newSybaseDatabase);
 		tree.addSelectionChangedListener(toggleFormCommandsActions);
 		tree.addSelectionChangedListener(expandNodeAction);
 
