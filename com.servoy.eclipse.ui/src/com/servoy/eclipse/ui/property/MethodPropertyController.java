@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import java.util.ArrayList;
@@ -42,6 +42,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.MethodTemplate;
@@ -118,7 +119,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 		};
 	}
 
-	public static IPropertyDescriptor[] createMethodPropertyDescriptors(IScriptProvider scriptMethod, String methodKey)
+	public static IPropertyDescriptor[] createMethodPropertyDescriptors(IScriptProvider scriptMethod, final IPersist context, final String methodKey)
 	{
 		if (!(scriptMethod instanceof AbstractBase))
 		{
@@ -150,7 +151,33 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			}
 			else
 			{
-				propertyController = new PropertyController<String, String>(new Integer(i), formalArguments[i].getName(), null, null, new ICellEditorFactory()
+				final int index = i;
+				propertyController = new PropertyController<String, String>(new Integer(i), formalArguments[i].getName(), null, new LabelProvider()
+				{
+					@Override
+					public String getText(Object element)
+					{
+						if (element == null || "".equals(element)) //$NON-NLS-1$
+						{
+							// argument is not set in method call in subform, show inherited value
+							List<Form> formHierarchy = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(context).getFormHierarchy(
+								(Form)context.getAncestor(IRepository.FORMS));
+							for (Form form : formHierarchy)
+							{
+								List<Object> instanceMethodArguments = form.getInstanceMethodArguments(methodKey);
+								if (instanceMethodArguments != null && instanceMethodArguments.size() > index)
+								{
+									Object inherited = instanceMethodArguments.get(index);
+									if (inherited != null)
+									{
+										return inherited.toString() + " [" + form.getName() + ']'; //$NON-NLS-1$
+									}
+								}
+							}
+						}
+						return super.getText(element);
+					}
+				}, new ICellEditorFactory()
 				{
 					public CellEditor createPropertyEditor(Composite parent)
 					{
@@ -256,7 +283,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 				}
 				IScriptProvider scriptMethod = CoreUtils.getScriptMethod(persist, context, table, methodId);
 				// make sure sub-properties are sorted in defined order
-				propertyDescriptors = PropertyController.applySequencePropertyComparator(createMethodPropertyDescriptors(scriptMethod, methodKey));
+				propertyDescriptors = PropertyController.applySequencePropertyComparator(createMethodPropertyDescriptors(scriptMethod, context, methodKey));
 			}
 			return propertyDescriptors;
 		}
