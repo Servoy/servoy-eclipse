@@ -3,7 +3,7 @@
 
 <target name="servoy_target_mac">
 <locations>
-<location path="${servoy_install}\developer" type="Profile"/>
+<location path="${servoy_install}/developer" type="Profile"/>
 </locations>
 <environment>
 <os>macosx</os>
