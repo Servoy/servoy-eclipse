@@ -707,7 +707,7 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
    </plugins>
 
    <features>
-      <feature id="com.servoy.eclipse.feature" version="5.2.0.990"/>
+      <feature id="com.servoy.eclipse.feature" version="5.2.0.991"/>
       <feature id="org.eclipse.dltk.core.servoy" version="2.0.0.201004201013"/>
       <feature id="org.eclipse.dltk.javascript.servoy" version="2.0.0.201004201013"/>
       <feature id="org.eclipse.gef" version="3.5.2.v20100111-1352-777928194B66D5D476C33B2A"/>
