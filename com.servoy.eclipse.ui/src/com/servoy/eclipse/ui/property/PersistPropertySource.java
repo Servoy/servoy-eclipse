@@ -180,21 +180,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 	public final int ADVANCED_FILTER = 1;
 	public final int WEB_FILTER = 2;
 
-	public static final String[] FORMAT_VALUES = new String[] { "#%", //
-	"�#.00",//first char is currency symbol //
-	"dd-MM-yyyy", //
-	"dd/MM/yyyy", //
-	"MM-dd-yyyy", //
-	"MM/dd/yyyy", // 
-	"dd-MM-yyyy HH:mm:ss", //
-	"MM-dd-yyyy hh:mm:ss", //
-	"dd-MM-yyyy HH:mm", //
-	"MM-dd-yyyy hh:mm", //
-	"yyyy-MM-dd HH:mm:ss.S", //
-	"|L", //
-	"|U", //
-	"converter" }; //
-
 	public static final String[] MNEMONIC_VALUES = new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" };
 	public static IPropertyConverter<String, String> NULL_STRING_CONVERTER = new IPropertyConverter<String, String>()
 	{
