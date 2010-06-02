@@ -1165,7 +1165,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 
 		String name = propertyDescriptor.propertyDescriptor.getName();
 
-		IPropertyDescriptor retval = getGeneralPropertyDescriptor(id, displayName, name, form, flattenedEditingSolution);
+		IPropertyDescriptor retval = getGeneralPropertyDescriptor(id, displayName, name, form);
 		if (retval != null)
 		{
 			return retval;
@@ -2055,8 +2055,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		}
 	}
 
-	private IPropertyDescriptor getGeneralPropertyDescriptor(final String id, String displayName, String name, final Form form,
-		final FlattenedSolution flattenedEditingSolution)
+	private IPropertyDescriptor getGeneralPropertyDescriptor(final String id, String displayName, String name, final Form form)
 	{
 		// Some properties apply to both persists and beans
 
@@ -2064,25 +2063,25 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		{
 			// cannot change table when we have a super-form
 			boolean propertyReadOnly = (persist instanceof Form && ((Form)persist).getExtendsFormID() > 0);
-			return new DatasourceController(id, "table", "Select table", readOnly || propertyReadOnly, new TableContentProvider.TableListOptions(
+			return new DatasourceController(id, name, "Select table", readOnly || propertyReadOnly, new TableContentProvider.TableListOptions(
 				TableListOptions.TableListType.ALL, true));
 		}
 
 		if (name.equals("i18nDataSource"))
 		{
-			return new DatasourceController(id, "i18nTable", "Select I18N table", readOnly, new TableContentProvider.TableListOptions(
+			return new DatasourceController(id, name, "Select I18N table", readOnly, new TableContentProvider.TableListOptions(
 				TableListOptions.TableListType.I18N, true));
 		}
 
 		if (name.equals("primaryDataSource"))
 		{
-			return new DatasourceController(id, "primaryTable", "Select Primary table", readOnly, new TableContentProvider.TableListOptions(
+			return new DatasourceController(id, name, "Select Primary table", readOnly, new TableContentProvider.TableListOptions(
 				TableListOptions.TableListType.ALL, false));
 		}
 
 		if (name.equals("foreignDataSource"))
 		{
-			return new DatasourceController(id, "foreignTable", "Select Foreign table", readOnly, new TableContentProvider.TableListOptions(
+			return new DatasourceController(id, name, "Select Foreign table", readOnly, new TableContentProvider.TableListOptions(
 				TableListOptions.TableListType.ALL, false));
 		}
 
