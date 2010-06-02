@@ -118,7 +118,7 @@ public class NewPostgresDbAction extends Action implements ISelectionChangedList
 								try
 								{
 									connection = s.getUnmanagedConnection();
-									ps = connection.prepareStatement("CREATE DATABASE " + name + " WITH ENCODING 'UNICODE';");
+									ps = connection.prepareStatement("CREATE DATABASE \"" + name + "\" WITH ENCODING 'UNICODE';");
 									ps.execute();
 									ps.close();
 									ps = null;
