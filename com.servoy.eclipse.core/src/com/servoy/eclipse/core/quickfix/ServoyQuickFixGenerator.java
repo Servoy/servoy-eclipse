@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.quickfix;
 
 import java.io.File;
@@ -211,7 +211,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 			{
 				String solName = (String)marker.getAttribute("SolutionName");
 				String uuid = (String)marker.getAttribute("Uuid");
-				fixes = new IMarkerResolution[] { new DeleteOrphanPersistQuickFix("orphan element", uuid, solName) };
+				fixes = new IMarkerResolution[] { new DeleteOrphanPersistQuickFix("invalid element: " + uuid, uuid, solName) };
 			}
 			else if (type.equals(ServoyBuilder.EVENT_METHOD_MARKER_TYPE))
 			{

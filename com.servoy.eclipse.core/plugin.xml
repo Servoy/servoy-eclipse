@@ -419,6 +419,10 @@
             class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.missingStyle">
       </markerResolutionGenerator>
+      <markerResolutionGenerator
+            class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.badStructure">
+      </markerResolutionGenerator>
    </extension>
    <extension
          point="org.eclipse.ui.splashHandlers">

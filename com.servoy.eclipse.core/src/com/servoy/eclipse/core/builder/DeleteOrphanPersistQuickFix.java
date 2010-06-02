@@ -42,7 +42,7 @@ public class DeleteOrphanPersistQuickFix implements IMarkerResolution
 
 	public String getLabel()
 	{
-		return "Delete '" + name + "'.";
+		return "Delete " + name + ".";
 	}
 
 	public void run(IMarker marker)
@@ -58,7 +58,7 @@ public class DeleteOrphanPersistQuickFix implements IMarkerResolution
 					IPersist persist = servoyProject.getEditingPersist(id);
 					EclipseRepository repository = (EclipseRepository)servoyProject.getSolution().getRepository();
 					repository.deleteObject(persist);
-					servoyProject.saveEditingSolutionNodes(new IPersist[] { persist }, true);
+					servoyProject.saveEditingSolutionNodes(new IPersist[] { persist.getParent() != null ? persist.getParent() : persist }, true);
 				}
 				catch (Exception e)
 				{

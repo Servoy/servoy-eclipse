@@ -1069,12 +1069,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																			SolutionSerializer.getFileName(p, false) + ".", -1, IMarker.SEVERITY_ERROR, //$NON-NLS-1$
 																			IMarker.PRIORITY_HIGH, null, other);
 																	}
-																	addMarker(
-																		moduleProject,
-																		DUPLICATE_UUID,
-																		"UUID duplicate found " + p.getUUID() + " in " + //$NON-NLS-1$ //$NON-NLS-2$
-																			SolutionSerializer.getRelativePath(other, false) +
-																			SolutionSerializer.getFileName(other, false) + ".", -1, IMarker.SEVERITY_ERROR, //$NON-NLS-1$
+																	addMarker(moduleProject, DUPLICATE_UUID, "UUID duplicate found " + p.getUUID() + " in " + //$NON-NLS-1$ //$NON-NLS-2$
+																		SolutionSerializer.getRelativePath(other, false) +
+																		SolutionSerializer.getFileName(other, false) + ".", -1, IMarker.SEVERITY_ERROR, //$NON-NLS-1$
 																		IMarker.PRIORITY_HIGH, null, p);
 																}
 																return IPersistVisitor.CONTINUE_TRAVERSAL;
@@ -1261,8 +1258,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														catch (Exception ex)
 														{
 															Debug.trace(ex);
-															addMarker(project, PROJECT_FORM_MARKER_TYPE,
-																messagePrefix + " has invalid format:" + field.getFormat(), -1, //$NON-NLS-1$
+															addMarker(project, PROJECT_FORM_MARKER_TYPE, messagePrefix +
+																" has invalid format:" + field.getFormat(), -1, //$NON-NLS-1$
 																IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, o);
 														}
 													}
@@ -2464,7 +2461,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		{
 			message += " Entity " + ((ISupportName)o).getName() + " has been manually moved?"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		addMarker(project, BAD_STRUCTURE_MARKER_TYPE, message, -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, path, o);
+		addMarker(project, BAD_STRUCTURE_MARKER_TYPE, message, -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_LOW, path, o);
 	}
 
 	private ServoyProject getServoyProject(IProject project)
