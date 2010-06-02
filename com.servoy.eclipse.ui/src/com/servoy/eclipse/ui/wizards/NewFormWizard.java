@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.wizards;
 
 import java.awt.Dimension;
@@ -62,13 +62,13 @@ import com.servoy.eclipse.core.repository.TableWrapper;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
-import com.servoy.eclipse.ui.dialogs.FormContentProvider;
-import com.servoy.eclipse.ui.dialogs.TableContentProvider;
-import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
+import com.servoy.eclipse.ui.dialogs.FormContentProvider;
 import com.servoy.eclipse.ui.dialogs.FormContentProvider.FormListOptions;
+import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
+import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
@@ -154,7 +154,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
 		Form selectedForm = null;
-		TableWrapper selectedTable = null;
+		TableWrapper selectedDataSource = null;
 		// find the Servoy project to which the new form will be added
 		if (selection.size() == 1)
 		{
@@ -173,7 +173,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 				else if (node.getRealObject() instanceof TableWrapper)
 				{
-					selectedTable = (TableWrapper)node.getRealObject();
+					selectedDataSource = (TableWrapper)node.getRealObject();
 				}
 				SimpleUserNode projectNode = node.getAncestorOfType(ServoyProject.class);
 				if (projectNode != null)
@@ -208,9 +208,9 @@ public class NewFormWizard extends Wizard implements INewWizard
 		else
 		{
 			// create pages for this wizard
-			if (selectedTable != null)
+			if (selectedDataSource != null)
 			{
-				newFormWizardPage = new NewFormWizardPage("New form", selectedTable);
+				newFormWizardPage = new NewFormWizardPage("New form", selectedDataSource);
 			}
 			else
 			{
@@ -333,7 +333,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		private Text formNameField;
 
-		private TreeSelectViewer tableNameViewer;
+		private TreeSelectViewer dataSourceViewer;
 
 		private ComboViewer styleNameCombo;
 
@@ -389,7 +389,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		private TableWrapper getTableWrapper()
 		{
-			IStructuredSelection selection = (IStructuredSelection)tableNameViewer.getSelection();
+			IStructuredSelection selection = (IStructuredSelection)dataSourceViewer.getSelection();
 			if (selection.isEmpty())
 			{
 				return new TableWrapper(null, null);
@@ -464,10 +464,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			setControl(topLevel);
 
-			Label extendsLabel = new Label(topLevel, SWT.NONE);
-			extendsLabel.setText("Extends");
+			Label datasourceLabel = new Label(topLevel, SWT.NONE);
+			datasourceLabel.setText("&Datasource");
 
-			tableNameViewer = new TreeSelectViewer(topLevel, SWT.NONE)
+			dataSourceViewer = new TreeSelectViewer(topLevel, SWT.NONE)
 			{
 				@Override
 				protected IStructuredSelection openDialogBox(Control control)
@@ -476,32 +476,78 @@ public class NewFormWizard extends Wizard implements INewWizard
 					{
 						return super.openDialogBox(control);
 					}
-					MessageDialog.openInformation(control.getShell(), "Cannot change table",
-						"The new form and the extends form must be based on the same table");
+					MessageDialog.openInformation(control.getShell(), "Cannot change data source",
+						"The new form and the extends form must be based on the same data source");
 					return null;
 				}
 			};
 
-			tableNameViewer.setContentProvider(new TableContentProvider());
-			tableNameViewer.setLabelProvider(DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY);
-			tableNameViewer.setTextLabelProvider(new DatasourceLabelProvider(Messages.LabelSelect, false, true));
-			tableNameViewer.addStatusChangedListener(new IStatusChangedListener()
+			dataSourceViewer.setContentProvider(new TableContentProvider());
+			dataSourceViewer.setLabelProvider(DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY);
+			dataSourceViewer.setTextLabelProvider(new DatasourceLabelProvider(Messages.LabelSelect, false, true));
+			dataSourceViewer.addStatusChangedListener(new IStatusChangedListener()
 			{
 				public void statusChanged(boolean valid)
 				{
 					setPageComplete(validatePage());
 				}
 			});
-			tableNameViewer.addSelectionChangedListener(new ISelectionChangedListener()
+			dataSourceViewer.addSelectionChangedListener(new ISelectionChangedListener()
 			{
 				public void selectionChanged(SelectionChangedEvent event)
 				{
-					handleTableSelected();
+					handleDataSourceSelected();
 				}
 			});
-			tableNameViewer.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, true));
-			tableNameViewer.setEditable(true);
-			Control tableNameControl = tableNameViewer.getControl();
+			dataSourceViewer.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, true));
+			dataSourceViewer.setEditable(true);
+			Control dataSOurceControl = dataSourceViewer.getControl();
+
+			Label extendsLabel = new Label(topLevel, SWT.NONE);
+			extendsLabel.setText("E&xtends");
+
+			extendsFormViewer = new TreeSelectViewer(topLevel, SWT.NONE);
+			extendsFormViewer.setTitleText("Select super form");
+
+			FlattenedSolution flattenedSolution = servoyProject.getEditingFlattenedSolution();
+			extendsFormViewer.setContentProvider(new FormContentProvider(flattenedSolution, null));
+			extendsFormViewer.setInput(new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, false, true, false));
+			extendsFormViewer.setLabelProvider(new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedSolution, true),
+				flattenedSolution.getSolution()));
+			extendsFormViewer.addStatusChangedListener(new IStatusChangedListener()
+			{
+				public void statusChanged(boolean valid)
+				{
+					setPageComplete(validatePage());
+				}
+			});
+			extendsFormViewer.addSelectionChangedListener(new ISelectionChangedListener()
+			{
+				public void selectionChanged(SelectionChangedEvent event)
+				{
+					handleExtendsFormChanged();
+				}
+			});
+
+			extendsFormViewer.setEditable(true);
+			Control extendsFormControl = extendsFormViewer.getControl();
+
+			Label styleLabel = new Label(topLevel, SWT.NONE);
+			styleLabel.setText("St&yle");
+
+			styleNameCombo = new ComboViewer(topLevel, SWT.BORDER | SWT.READ_ONLY);
+			styleNameCombo.setContentProvider(new ArrayContentProvider());
+			styleNameCombo.addSelectionChangedListener(new ISelectionChangedListener()
+			{
+				public void selectionChanged(SelectionChangedEvent event)
+				{
+					handleStyleSelected();
+				}
+			});
+			Combo styleNameComboControl = styleNameCombo.getCombo();
+
+			Label templateLabel = new Label(topLevel, SWT.NONE);
+			templateLabel.setText("T&emplate");
 
 			templateNameCombo = new ComboViewer(topLevel, SWT.BORDER | SWT.READ_ONLY);
 			templateNameCombo.setContentProvider(new ArrayContentProvider());
@@ -530,23 +576,6 @@ public class NewFormWizard extends Wizard implements INewWizard
 			});
 			Combo templateNameComboControl = templateNameCombo.getCombo();
 
-			Label styleLabel = new Label(topLevel, SWT.NONE);
-			styleLabel.setText("St&yle");
-
-			styleNameCombo = new ComboViewer(topLevel, SWT.BORDER | SWT.READ_ONLY);
-			styleNameCombo.setContentProvider(new ArrayContentProvider());
-			styleNameCombo.addSelectionChangedListener(new ISelectionChangedListener()
-			{
-				public void selectionChanged(SelectionChangedEvent event)
-				{
-					handleStyleSelected();
-				}
-			});
-			Combo styleNameComboControl = styleNameCombo.getCombo();
-
-			Label templateLabel = new Label(topLevel, SWT.NONE);
-			templateLabel.setText("T&emplate");
-
 			Label projectLabel = new Label(topLevel, SWT.NONE);
 			projectLabel.setText("S&olution");
 
@@ -561,50 +590,15 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 			});
 
-			Label tableLabel = new Label(topLevel, SWT.NONE);
-			tableLabel.setText("&Table");
-
-			extendsFormViewer = new TreeSelectViewer(topLevel, SWT.NONE);
-			extendsFormViewer.setTitleText("Select super form");
-
-			FlattenedSolution flattenedSolution = servoyProject.getEditingFlattenedSolution();
-			extendsFormViewer.setContentProvider(new FormContentProvider(flattenedSolution, null));
-			extendsFormViewer.setInput(new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, false, true, false));
-			extendsFormViewer.setLabelProvider(new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedSolution, true),
-				flattenedSolution.getSolution()));
-			extendsFormViewer.addStatusChangedListener(new IStatusChangedListener()
-			{
-				public void statusChanged(boolean valid)
-				{
-					setPageComplete(validatePage());
-				}
-			});
-			extendsFormViewer.addSelectionChangedListener(new ISelectionChangedListener()
-			{
-				public void selectionChanged(SelectionChangedEvent event)
-				{
-					handleExtendsFormChanged();
-				}
-			});
-			if (superForm != null)
-			{
-				extendsFormViewer.setSelection(new StructuredSelection(new Integer(superForm.getID())));
-			}
-			else
-			{
-				extendsFormViewer.setSelection(new StructuredSelection(new Integer(Form.NAVIGATOR_NONE)));
-			}
-			extendsFormViewer.setEditable(true);
-			Control extendsFormControl = extendsFormViewer.getControl();
 
 			final GroupLayout groupLayout = new GroupLayout(topLevel);
 			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 				groupLayout.createSequentialGroup().addContainerGap().add(
-					groupLayout.createParallelGroup(GroupLayout.LEADING).add(formNameLabel).add(extendsLabel).add(tableLabel).add(projectLabel).add(styleLabel).add(
-						templateLabel)).add(15, 15, 15).add(
+					groupLayout.createParallelGroup(GroupLayout.LEADING).add(formNameLabel).add(extendsLabel).add(datasourceLabel).add(projectLabel).add(
+						styleLabel).add(templateLabel)).add(15, 15, 15).add(
 					groupLayout.createParallelGroup(GroupLayout.LEADING).add(projectComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
 						templateNameComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(styleNameComboControl, GroupLayout.DEFAULT_SIZE, 159,
-						Short.MAX_VALUE).add(extendsFormControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(tableNameControl,
+						Short.MAX_VALUE).add(extendsFormControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(dataSOurceControl,
 						GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
 						groupLayout.createSequentialGroup().add(formNameField, GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE).addPreferredGap(
 							LayoutStyle.RELATED))).addContainerGap()));
@@ -613,7 +607,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 					groupLayout.createParallelGroup(GroupLayout.LEADING).add(formNameLabel).add(formNameField, GroupLayout.PREFERRED_SIZE,
 						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 					groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-						groupLayout.createSequentialGroup().addPreferredGap(LayoutStyle.RELATED).add(tableNameControl)).add(tableLabel)).addPreferredGap(
+						groupLayout.createSequentialGroup().addPreferredGap(LayoutStyle.RELATED).add(dataSOurceControl)).add(datasourceLabel)).addPreferredGap(
 					LayoutStyle.RELATED).add(
 					groupLayout.createParallelGroup(GroupLayout.LEADING).add(extendsLabel).add(extendsFormControl, GroupLayout.PREFERRED_SIZE,
 						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
@@ -624,7 +618,16 @@ public class NewFormWizard extends Wizard implements INewWizard
 					groupLayout.createParallelGroup(GroupLayout.LEADING).add(projectLabel).add(projectComboControl, GroupLayout.PREFERRED_SIZE,
 						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addContainerGap(142, Short.MAX_VALUE)));
 			topLevel.setLayout(groupLayout);
-			topLevel.setTabList(new Control[] { formNameField, tableNameControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl });
+			topLevel.setTabList(new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl });
+
+			if (superForm != null)
+			{
+				extendsFormViewer.setSelection(new StructuredSelection(new Integer(superForm.getID())));
+			}
+			else
+			{
+				extendsFormViewer.setSelection(new StructuredSelection(new Integer(Form.NAVIGATOR_NONE)));
+			}
 		}
 
 		/*
@@ -639,9 +642,9 @@ public class NewFormWizard extends Wizard implements INewWizard
 			{
 				String serverName = settings.get("servername");
 				String tableName = settings.get("tablename");
-				if (!Utils.stringIsEmpty(serverName) && !Utils.stringIsEmpty(tableName) && tableNameViewer.getSelection().isEmpty())
+				if (!Utils.stringIsEmpty(serverName) && !Utils.stringIsEmpty(tableName) && dataSourceViewer.getSelection().isEmpty())
 				{
-					tableNameViewer.setSelection(new StructuredSelection(new TableWrapper(serverName, tableName)));
+					dataSourceViewer.setSelection(new StructuredSelection(new TableWrapper(serverName, tableName)));
 				}
 
 				String styleName = settings.get("style");
@@ -748,9 +751,9 @@ public class NewFormWizard extends Wizard implements INewWizard
 			return referringProjects.toArray(new ServoyProject[referringProjects.size()]);
 		}
 
-		private void handleTableSelected()
+		private void handleDataSourceSelected()
 		{
-			IStructuredSelection selection = (IStructuredSelection)tableNameViewer.getSelection();
+			IStructuredSelection selection = (IStructuredSelection)dataSourceViewer.getSelection();
 			if (!selection.isEmpty())
 			{
 				if (!formNameTyped)
@@ -783,13 +786,13 @@ public class NewFormWizard extends Wizard implements INewWizard
 			{
 				// project combo can now have everything again.
 				fillProjectCombo();
-				tableNameViewer.setEditable(true);
+				dataSourceViewer.setEditable(true);
 			}
 			else
 			{
 				// if selected prefill table and style
-				tableNameViewer.setSelection(new StructuredSelection(new TableWrapper(superForm.getServerName(), superForm.getTableName())));
-				tableNameViewer.setEditable(false);
+				dataSourceViewer.setSelection(new StructuredSelection(new TableWrapper(superForm.getServerName(), superForm.getTableName())));
+				dataSourceViewer.setEditable(false);
 				styleNameCombo.setSelection(new StructuredSelection(superForm.getStyleName() == null ? "" : superForm.getStyleName()));
 
 				// projectCombo should only display the solution or a module
@@ -800,7 +803,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				projectCombo.setSelection(new StructuredSelection(ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
 					superForm.getSolution().getName())));
 			}
-			tableNameViewer.setButtonText((superForm == null || superForm.getDataSource() == null) ? TreeSelectViewer.DEFAULT_BUTTON_TEXT : "");
+			dataSourceViewer.setButtonText((superForm == null || superForm.getDataSource() == null) ? TreeSelectViewer.DEFAULT_BUTTON_TEXT : "");
 		}
 
 		private void handleTemplateSelected() throws Exception
@@ -822,7 +825,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 						String[] stn = DataSourceUtils.getDBServernameTablename(formObject.getString("dataSource"));
 						if (stn != null)
 						{
-							tableNameViewer.setSelection(new StructuredSelection(new TableWrapper(stn[0], stn[1])));
+							dataSourceViewer.setSelection(new StructuredSelection(new TableWrapper(stn[0], stn[1])));
 						}
 					}
 
@@ -904,9 +907,9 @@ public class NewFormWizard extends Wizard implements INewWizard
 			{
 				error = "Invalid form name";
 			}
-			else if (!tableNameViewer.isValid())
+			else if (!dataSourceViewer.isValid())
 			{
-				error = "Invalid table name";
+				error = "Invalid data source";
 			}
 			else if (!extendsFormViewer.isValid())
 			{
@@ -1042,11 +1045,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 			}
 			catch (RemoteException e)
 			{
-				ServoyLog.logError("Could not get table for new form", e);
+				ServoyLog.logError("Could not get data source for new form", e);
 			}
 			catch (RepositoryException e)
 			{
-				ServoyLog.logError("Could not get table for new form", e);
+				ServoyLog.logError("Could not get data source for new form", e);
 			}
 		}
 
