@@ -616,6 +616,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				createCalculationsPage();
 				createAggregationsPage();
 				createEventsPage();
+				createDataPage();
 				if (activePage >= 0)
 				{
 					setActivePage(activePage);
