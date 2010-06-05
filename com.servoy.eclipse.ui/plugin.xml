@@ -1,0 +1,643 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="Servoy"
+            id="com.servoy.eclipse.ui">
+      </category>
+      <view
+            name="Solution Explorer"
+            icon="icons/solution.gif"
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView"
+            id="com.servoy.eclipse.ui.views.SolutionExplorerView">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.ui.resourcePerspective">
+         <view
+               ratio="0.5"
+               relative="org.eclipse.ui.views.TaskList"
+               relationship="right"
+               id="com.servoy.eclipse.ui.views.SolutionExplorerView">
+         </view>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.eclipse.team.ui.TeamSynchronizingPerspective">
+         <view
+               id="org.eclipse.ui.navigator.ProjectExplorer"
+               relationship="stack"
+               relative="org.eclipse.team.sync.views.SynchronizeView">
+         </view>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="com.servoy.eclipse.ui.DesignPerspective">
+         <viewShortcut
+               id="com.servoy.eclipse.ui.views.SolutionExplorerView">
+         </viewShortcut>
+		 <showInPart
+               id="com.servoy.eclipse.ui.views.SolutionExplorerView">
+         </showInPart>
+         <showInPart
+               id=" org.eclipse.ui.views.ResourceNavigator">
+         </showInPart>
+         <actionSet
+               id="com.servoy.eclipse.ui.servoySearchActionSet">
+         </actionSet>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.eclipse.debug.ui.DebugPerspective">
+         <view
+               id="org.eclipse.debug.ui.ExpressionView"
+               ratio="0.5"
+               relationship="stack"
+               relative="org.eclipse.debug.ui.VariableView"
+               visible="true">
+         </view>
+         <actionSet
+               id="com.servoy.eclipse.ui.servoySearchActionSet">
+         </actionSet>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="com.servoy.eclipse.ui.DesignPerspective"
+            icon="icons/windowicon.gif"
+            id="com.servoy.eclipse.ui.DesignPerspective"
+            name="Servoy Design">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="com.servoy.eclipse.ui"
+            name="Servoy">
+      </category>
+      <wizard
+            canFinishEarly="false"
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.wizards.NewFormWizard"
+            hasPages="true"
+            icon="icons/designer.gif"
+            id="com.servoy.eclipse.ui.NewFormWizard"
+            name="New Form"
+            project="false">
+      </wizard>
+      <wizard
+            canFinishEarly="false"
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.wizards.NewSolutionWizard"
+            icon="icons/solution_icon.gif"
+            id="com.servoy.eclipse.ui.NewSolutionWizard"
+            name="New Solution"
+            project="true">
+      </wizard>
+      <wizard
+            canFinishEarly="false"
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.wizards.NewStyleWizard"
+            icon="icons/styles.gif"
+            id="com.servoy.eclipse.ui.NewStyleWizard"
+            name="New Style"
+            project="false">
+      </wizard>
+      <wizard
+            canFinishEarly="false"
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.wizards.NewRelationWizard"
+            icon="icons/newrelation.gif"
+            id="com.servoy.eclipse.ui.NewRelationWizard"
+            name="New Relations"
+            project="false">
+      </wizard>
+      <wizard
+            canFinishEarly="false"
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.wizards.NewValueListWizard"
+            icon="icons/newvaluelist.gif"
+            id="com.servoy.eclipse.ui.NewValueListWizard"
+            name="New Valuelist"
+            project="false">
+      </wizard>
+      <wizard
+            canFinishEarly="false"
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.wizards.NewMethodWizard"
+            icon="icons/new_form_method.gif"
+            id="com.servoy.eclipse.ui.NewMethodWizard"
+            name="New Method"
+            project="false">
+      </wizard>
+   </extension>
+   <extension 
+   		point="org.eclipse.ui.exportWizards">
+   		<category
+            name="Servoy"
+            id="com.servoy.eclipse.ui">
+   		</category>
+   		<wizard
+            category="com.servoy.eclipse.ui"
+       		class="com.servoy.eclipse.ui.wizards.ExportSolutionWizard"
+       		icon="icons/solution_icon.gif"
+       		id="com.servoy.eclipse.ui.ExportSolutionWizard"
+       		name="Export Active Solution">
+   		</wizard>
+     <wizard
+           category="com.servoy.eclipse.ui"
+           class="com.servoy.eclipse.ui.wizards.RuntimeBuilderWizard"
+           icon="icons/solution_icon.gif"
+           id="com.servoy.eclipse.ui.ExportRuntimeWizard"
+           name="Runtime Builder">
+     </wizard>
+ </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="com.servoy.eclipse.ui.editors.I18NEditor"
+            default="true"
+            extensions="properties"
+            icon="icons/i18n.gif"
+            id="com.servoy.eclipse.ui.editors.I18NEditor"
+            matchingStrategy="com.servoy.eclipse.core.resource.I18NMatchingStrategy"
+            name="I18N Editor">
+         <contentTypeBinding
+               contentTypeId="com.servoy.eclipse.core.resource.i18n">
+         </contentTypeBinding>
+      </editor>         
+      <editor
+            class="com.servoy.eclipse.ui.editors.RelationEditor"
+            default="true"
+            extensions="rel"
+            icon="icons/relation.gif"
+            id="com.servoy.eclipse.ui.editors.RelationEditor"
+            matchingStrategy="com.servoy.eclipse.core.resource.PersistMatchingStrategy"
+            name="Relation Editor">
+         <contentTypeBinding
+               contentTypeId="com.servoy.eclipse.core.resource.relation">
+         </contentTypeBinding>
+      </editor>
+      <editor
+            class="com.servoy.eclipse.ui.editors.ValueListEditor"
+            default="true"
+            extensions="val"
+            icon="icons/valuelist.gif"
+            id="com.servoy.eclipse.ui.editors.ValueListEditor"
+            matchingStrategy="com.servoy.eclipse.core.resource.PersistMatchingStrategy"
+            name="ValueList Editor">
+         <contentTypeBinding
+               contentTypeId="com.servoy.eclipse.core.resource.valuelist">
+         </contentTypeBinding>
+      </editor>
+      <editor
+            class="com.servoy.eclipse.ui.editors.MediaViewer"
+            default="true"
+            icon="icons/image.gif"
+            id="com.servoy.eclipse.ui.editors.MediaViewer"
+            matchingStrategy="com.servoy.eclipse.core.resource.PersistMatchingStrategy"
+            name="Media Viewer">
+         <contentTypeBinding
+               contentTypeId="com.servoy.eclipse.core.resource.media">
+         </contentTypeBinding>
+      </editor>
+      <editor
+            class="com.servoy.eclipse.ui.editors.TableEditor"
+            default="true"
+            extensions="tbl"
+            icon="icons/portal.gif"
+            id="com.servoy.eclipse.ui.editors.TableEditor"
+            matchingStrategy="com.servoy.eclipse.core.resource.TableMatchingStrategy"
+            name="Table Editor">
+         <contentTypeBinding
+               contentTypeId="com.servoy.eclipse.core.resource.table">
+         </contentTypeBinding>
+         <contentTypeBinding
+               contentTypeId="com.servoy.eclipse.core.resource.tablenode">
+         </contentTypeBinding>
+      </editor>
+      <editor
+            class="com.servoy.eclipse.ui.editors.ServerEditor"
+            default="true"
+            icon="icons/server.gif"
+            id="com.servoy.eclipse.ui.editors.ServerEditor"
+            name="Server Editor">
+         <contentTypeBinding
+               contentTypeId="com.servoy.eclipse.core.resource.server">
+         </contentTypeBinding>
+      </editor>
+      <editor
+            class="com.servoy.eclipse.ui.editors.SecurityEditor"
+            default="true"
+            icon="icons/lock.gif"
+            id="com.servoy.eclipse.ui.editors.SecurityEditor"
+            name="User/Group Editor">
+         <contentTypeBinding
+               contentTypeId="com.servoy.eclipse.core.resource.security">
+         </contentTypeBinding>
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="com.servoy.eclipse.ui.preferences.ServoyGlobalPreferencePage"
+            id="com.servoy.eclipse.ui.preference"
+            name="Servoy">
+      </page>
+      <page
+            category="com.servoy.eclipse.ui.preference"
+            class="com.servoy.eclipse.ui.preferences.ServicesPreferences"
+            id="com.servoy.eclipse.ui.services"
+            name="Services">
+      </page>
+      <page
+            category="com.servoy.eclipse.ui.preference"
+            class="com.servoy.eclipse.ui.preferences.I18NPreferences"
+            id="com.servoy.eclipse.ui.i18n"
+            name="I18N">
+      </page>
+      <page
+            category="com.servoy.eclipse.ui.preference"
+            class="com.servoy.eclipse.ui.preferences.StartupPreferences"
+            id="com.servoy.eclipse.ui.startup"
+            name="Startup">
+      </page>
+      <page
+            category="com.servoy.eclipse.ui.preference"
+            class="com.servoy.eclipse.ui.preferences.DeveloperPreferencePage"
+            id="com.servoy.eclipse.ui.developer"
+            name="Developer">
+      </page>
+      <page
+            category="com.servoy.eclipse.ui.preference"
+            class="com.servoy.eclipse.ui.preferences.TeamPreferences"
+            id="com.servoy.eclipse.ui.team"
+            name="Team">
+      </page>
+      <page
+            category="com.servoy.eclipse.ui.preference"
+            class="com.servoy.eclipse.ui.preferences.SolutionExplorerPreferences"
+            id="com.servoy.eclipse.ui.solutionExplorer"
+            name="Solution Explorer">
+      </page>      
+   </extension>
+     <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="com.servoy.eclipse.ui.actions"
+            label="Actions"
+            visible="true">
+             <menu
+               id="com.servoy.eclipse.ui.actionsMenu"
+               label="&amp;Actions">
+            <separator
+                  name="actions">
+            </separator>
+         </menu>
+         <action
+               class="com.servoy.eclipse.ui.actions.ShowI18NDialogActionDelegate"
+               icon="icons/i18n.gif"
+               id="com.servoy.eclipse.ui.actions.OpenI18nDialog"
+               label="Show I18N Dialog"
+               menubarPath="com.servoy.eclipse.ui.actionsMenu/actions"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Edit I18N Messages">
+         </action>
+         <action
+               class="com.servoy.eclipse.ui.actions.ShowI18NDialogActionDelegate"
+               icon="icons/i18n_ext.gif"
+               id="com.servoy.eclipse.ui.actions.I18nExternalizeDialog"
+               label="Show Externalize Dialog"
+               menubarPath="com.servoy.eclipse.ui.actionsMenu/actions"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Externalize Messages">
+         </action>         
+         <!--action
+               class="com.servoy.eclipse.ui.actions.ShowI1n8DialogActionDelegate"
+               id="com.servoy.eclipse.ui.actions.I18nExternalizeDialog"
+               label="Externalize"
+               menubarPath="com.servoy.eclipse.ui.actionsMenu/actions"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Externalize current solution's messages">
+         </action -->         
+      </actionSet>
+      <actionSet
+            description="Locate Servoy Resource"
+            id="com.servoy.eclipse.ui.servoySearchActionSet"
+            label="Locate Servoy Resource">
+         <action
+               class="com.servoy.eclipse.ui.actions.SearchServoyAction"
+               definitionId="com.servoy.eclipse.ui.search"
+               icon="icons/search_it.gif"
+               id="searchServoyResource"
+               label="Locate Servoy Resource"
+               menubarPath="navigate/open.ext2"
+               toolbarPath="org.eclipse.search.searchActionSet/Search"
+               tooltip="Locate Servoy Resource">
+         </action>
+      </actionSet>
+      <actionSet
+            id="com.servoy.eclipse.ui.open_actions"
+            label="Open Form"
+            visible="true">
+         <action
+               class="com.servoy.eclipse.ui.actions.OpenFormInScripteditorActionDelegate"
+               id="com.servoy.eclipse.ui.openFormInJs"
+               definitionId="com.servoy.eclipse.ui.OpenFormJsAction"
+               label="Open form in script editor"
+               style="radio"
+               tooltip="Open form in script editor">
+         </action>
+         <action
+               class="com.servoy.eclipse.ui.actions.OpenFormInClientActionDelegate"
+               id="com.servoy.eclipse.ui.openFormInClient"
+               definitionId="com.servoy.eclipse.ui.OpenFormInClientAction"
+               label="Open form in client"
+               style="push"
+               tooltip="Open form in client">
+         </action>
+      </actionSet>
+      <actionSet
+            id="com.servoy.eclipse.ui.openURL"
+            label="Open Url"
+            visible="true">
+         <action
+               class="com.servoy.eclipse.ui.actions.OpenUrlAction"
+               definitionId="com.servoy.eclipse.ui.OpenWikiAction"
+               id="com.servoy.eclipse.ui.openWiki"
+               label="Servoy Wiki"
+               menubarPath="help/intro"
+               style="push"
+               tooltip="Open Servoy Wiki">
+         </action>
+         <action
+               class="com.servoy.eclipse.ui.actions.OpenUrlAction"
+               definitionId="com.servoy.eclipse.ui.OpenForumAction"
+               id="com.servoy.eclipse.ui.openForum"
+               label="Servoy Forum"
+               menubarPath="help/intro"
+               style="push"
+               tooltip="Open Servoy Forum">
+         </action>
+      </actionSet>
+   </extension>
+     <extension
+           point="org.eclipse.ui.editorActions">
+        <editorContribution
+              id="com.servoy.eclipse.ui.ScriptEditorContribution"
+              targetID="org.eclipse.dltk.javascript.ui.editor.JavascriptEditor">
+           <action
+                 class="com.servoy.eclipse.ui.actions.ShowFontChooserActionDelegate"
+                 icon="icons/text.gif"
+                 id="com.servoy.eclipse.ui.actions.OpenFontDialog"
+                 label="Font Chooser"
+                 menubarPath="edit/Choosers"
+                 style="push"
+                 tooltip="Insert Font">
+           </action>
+           <menu
+                 id="edit"
+                 label="&amp;Edit">
+              <separator
+                    name="Choosers">
+              </separator>
+           </menu>
+           <action
+                 class="com.servoy.eclipse.ui.actions.ShowColorChooserActionDelegate"
+                 icon="icons/colorchooser.gif"
+                 id="com.servoy.eclipse.ui.actions.OpenColorDialog"
+                 label="Color Chooser"
+                 menubarPath="edit/Choosers"
+                 style="push"
+                 tooltip="Insert Color">
+           </action>
+        </editorContribution>
+        <editorContribution
+              id="com.servoy.eclipse.ui.TextEditorContribution"
+              targetID="org.eclipse.ui.DefaultTextEditor">
+           <action
+                 class="com.servoy.eclipse.ui.actions.ShowFontChooserActionDelegate"
+                 icon="icons/text.gif"
+                 id="com.servoy.eclipse.ui.actions.OpenFontDialog"
+                 label="Font Chooser"
+                 menubarPath="edit/Choosers"
+                 style="push"
+                 tooltip="Insert Font">
+           </action>
+           <menu
+                 id="edit"
+                 label="&amp;Edit">
+              <separator
+                    name="Choosers">
+              </separator>
+           </menu>
+             <action
+                 class="com.servoy.eclipse.ui.actions.ShowColorChooserActionDelegate"
+                 icon="icons/colorchooser.gif"
+                 id="com.servoy.eclipse.ui.actions.OpenColorDialog"
+                 label="Color Chooser"
+                 menubarPath="edit/Choosers"
+                 style="push"
+                 tooltip="Insert Color">
+           </action>           
+        </editorContribution>
+     </extension>
+     <extension
+           point="org.eclipse.ui.ide.markerResolution">
+        <markerResolutionGenerator
+              class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+              markerType="com.servoy.eclipse.core.databaseInformationProblem">
+        </markerResolutionGenerator>
+        <markerResolutionGenerator
+              class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+              markerType="com.servoy.eclipse.core.invalidSortOption">
+        </markerResolutionGenerator>
+        <markerResolutionGenerator
+              class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+              markerType="com.servoy.eclipse.core.deprecatedPropertyUsage">
+        </markerResolutionGenerator>
+     </extension>
+     <extension
+           point="org.eclipse.dltk.javascript.ui.keywordsprovider">
+        <provider
+              class="com.servoy.eclipse.ui.scripting.ScriptColorProvider"
+              id="com.servoy.eclipse.ui.scriptcolor.provider">
+        </provider>
+     </extension>
+     <extension
+           point="org.eclipse.ui.commands">
+        <command
+              categoryId="org.eclipse.ui.category.navigate"
+              description="Locate Servoy Resource"
+              id="com.servoy.eclipse.ui.search"
+              name="Locate Servoy Resource">
+        </command>
+        <command
+              categoryId="com.servoy.eclipse.ui"
+              description="Open form in script editor"
+              id="com.servoy.eclipse.ui.OpenFormJsAction"
+              name="Open form in script editor">
+        </command>
+        <command
+              categoryId="com.servoy.eclipse.ui"
+              description="Open form in client"
+              id="com.servoy.eclipse.ui.OpenFormInClientAction"
+              name="Open form in client">
+        </command>
+         <category
+              id="com.servoy.eclipse.ui"
+              name="Servoy">
+        </category>  
+     </extension>
+     <extension
+           point="org.eclipse.ui.bindings">
+        <key
+              commandId="com.servoy.eclipse.ui.search"
+              schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+              sequence="M1+M2+L">
+        </key>
+        <key
+              commandId="com.servoy.eclipse.ui.OpenFormJsAction"
+              schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+              sequence="M1+M2+Z">
+        </key>
+        <key
+              commandId="com.servoy.eclipse.ui.OpenFormInClientAction"
+              schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+              sequence="M1+L">
+        </key>
+     </extension>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="com.servoy.eclipse.ui.node.SimpleUserNode"
+            class="com.servoy.eclipse.ui.views.solutionexplorer.SimpleUserNodeAdapterFactory">
+            <adapter type="org.eclipse.core.resources.IResource"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.eclipse.ui.node.SimpleUserNode"
+            class="com.servoy.eclipse.ui.views.solutionexplorer.SimpleUserNodeAdapterFactory">
+            <adapter type="org.eclipse.core.resources.mapping.ResourceMapping"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.eclipse.ui.node.SimpleUserNode"
+            class="com.servoy.eclipse.ui.views.solutionexplorer.SimpleUserNodeAdapterFactory">
+            <adapter type="com.servoy.eclipse.ui.actions.Openable"/>
+      </factory>
+      <factory
+            adaptableType="org.eclipse.ui.IEditorPart"
+            class="com.servoy.eclipse.ui.views.solutionexplorer.SimpleUserNodeAdapterFactory">
+            <adapter type="com.servoy.eclipse.ui.actions.Openable"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.eclipse.core.resource.PersistEditorInput"
+            class="com.servoy.eclipse.ui.resource.EditorInputFactory">
+            <adapter type="org.eclipse.ui.IPersistableElement"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.eclipse.core.resource.TableEditorInput"
+            class="com.servoy.eclipse.ui.resource.EditorInputFactory">
+            <adapter type="org.eclipse.ui.IPersistableElement"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.eclipse.core.resource.ServerEditorInput"
+            class="com.servoy.eclipse.ui.resource.EditorInputFactory">
+            <adapter type="org.eclipse.ui.IPersistableElement"/>
+      </factory>
+   </extension>
+   <extension
+         point="org.eclipse.ui.elementFactories">
+      <factory
+            class="com.servoy.eclipse.ui.resource.FileEditorInputFactory"
+            id="org.eclipse.ui.part.FileEditorInputFactory">
+      </factory>
+      <factory
+            class="com.servoy.eclipse.ui.resource.EditorInputFactory"
+            id="com.servoy.eclipse.core.resource.EditorInputFactory">
+      </factory>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <viewerContribution
+            id="com.servoy.eclipse.ui.viewer.JavascriptEditor"
+            targetID="#JavascriptEditorContext">
+         <action
+               class="com.servoy.eclipse.ui.actions.ShowDesignerAction"
+               definitionId="com.servoy.eclipse.designer.command.showDesigner"
+               id="com.servoy.eclipse.ui.javascript.showDesigner"
+               label="Open form in designer"
+               menubarPath="additions">
+         </action>
+      </viewerContribution>
+       <objectContribution
+            objectClass="com.servoy.eclipse.ui.actions.Openable"
+            adaptable="true"
+            id="com.servoy.eclipse.ui.OpenScriptContributions">
+         <action
+               class="com.servoy.eclipse.ui.actions.OpenFormInScripteditorActionDelegate"
+               definitionId="com.servoy.eclipse.ui.OpenFormJsAction"
+               enablesFor="1"
+               icon="icons/js.gif"
+               id="com.servoy.eclipse.ui.OpenFormJsAction"
+               label="Open in script editor"
+               menubarPath="open.ext"
+               state="false"
+               style="push"
+               tooltip="Open form in script editor">
+         </action>
+         <visibility>
+            <or>
+               <objectClass
+                  name="com.servoy.eclipse.ui.actions.Openable$OpenableForm">
+            </objectClass>
+               <objectClass
+                  name="com.servoy.eclipse.ui.actions.Openable$OpenableSolution">
+            </objectClass></or>
+         </visibility>
+      </objectContribution>
+       <objectContribution
+            objectClass="com.servoy.eclipse.ui.actions.Openable"
+            adaptable="true"
+            id="com.servoy.eclipse.ui.OpenScriptContributions">
+         <action
+               class="com.servoy.eclipse.ui.actions.OpenFormInClientActionDelegate"
+               definitionId="com.servoy.eclipse.ui.OpenFormInClientAction"
+               enablesFor="1"
+               icon="icons/showform.gif"
+               id="com.servoy.eclipse.ui.OpenFormInClientAction"
+               label="Open form in client"
+               menubarPath="open.ext"
+               state="false"
+               style="push"
+               tooltip="Open form in client">
+         </action>
+         <visibility>
+            <objectClass
+               name="com.servoy.eclipse.ui.actions.Openable$OpenableForm">
+            </objectClass>
+         </visibility>
+      </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.importWizards">
+      <category
+            id="com.servoy.eclipse.ui.ImportCategory"
+            name="Servoy">
+      </category>
+      <wizard
+            category="com.servoy.eclipse.ui.ImportCategory"
+            class="com.servoy.eclipse.ui.wizards.ImportSolutionWizard"
+            icon="icons/solution_icon.gif"
+            id="com.servoy.eclipse.ui.ImportSolutionWizard"
+            name="Import Solution">
+      </wizard>
+   </extension>
+   
+</plugin>
