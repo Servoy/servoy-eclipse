@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            allowMultiple="false"
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.profiler.views.ProfilerView"
+            icon="icons/viewicon.gif"
+            id="com.servoy.eclipse.uicom.servoy.eclipse.profiler.views.ProfilerView"
+            name="Profiler View">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.debug.ui.DebugPerspective">
+         <view
+               id="com.servoy.eclipse.uicom.servoy.eclipse.profiler.views.ProfilerView"
+               minimized="false"
+               relationship="stack"
+               relative="org.eclipse.ui.console.ConsoleView"
+               visible="true">
+         </view>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="com.servoy.eclipse.ui.DesignPerspective">
+         <view
+               id="com.servoy.eclipse.uicom.servoy.eclipse.profiler.views.ProfilerView"
+               minimized="false"
+               relationship="stack"
+               relative="org.eclipse.ui.console.ConsoleView"
+               visible="true">
+         </view>
+         <viewShortcut
+               id="com.servoy.eclipse.uicom.servoy.eclipse.profiler.views.ProfilerView">
+         </viewShortcut>
+      </perspectiveExtension>
+   </extension>
+
+</plugin>
