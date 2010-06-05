@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet title="Checking out a solution">
+	<intro>
+		<description>
+			This sheet will show how to checkout a solution with team via checkout wizard.
+		</description>
+	</intro>
+	<item title="Start solution checkout wizard">
+		<action pluginId="com.servoy.eclipse.team" class="com.servoy.eclipse.team.actions.CheckoutAction"/>
+		<description>
+			Open the checkout wizard (<b>Click to perform</b> link).<br/><br/> In the login screen just click <b>Next</b> in order to see a list of solutions from local repository.<br/><br/> Select a solution (<b>HEAD</b> node from tree - for example under <b>servoy_sample_crm</b>) and click <b>Finish</b>.  
+		</description>
+	</item>
+</cheatsheet>
