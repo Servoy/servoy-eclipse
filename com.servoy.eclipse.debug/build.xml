@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.servoy.eclipse.debug" default="build.jars" basedir=".">
+
+	<property name="basews" value="${ws}"></property>
+	<property name="baseos" value="${os}"></property>
+	<property name="basearch" value="${arch}"></property>
+	<property name="basenl" value="${nl}"></property>
+	<property name="bundleId" value="com.servoy.eclipse.debug"></property>
+	<property name="bundleVersion" value="6.0.0.1200"></property>
+
+	
+	<property name="javacFailOnError" value="false"></property>
+	<property name="javacDebugInfo" value="on"></property>
+	<property name="javacVerbose" value="false"></property>
+	<property name="logExtension" value=".log"></property>
+	<property name="compilerArg" value=""></property>
+	<property name="javacSource" value="1.5"></property>
+	<property name="javacTarget" value="1.5"></property>
+	<condition property="dir_bootclasspath" value="${java.home}/../Classes">
+		<os family="mac"></os>
+	</condition>
+	<property name="dir_bootclasspath" value="${java.home}/lib"></property>
+	<path id="path_bootclasspath">
+		<fileset dir="${dir_bootclasspath}">
+			<include name="*.jar"></include>
+		</fileset>
+	</path>
+	<property name="bootclasspath" refid="path_bootclasspath"></property>
+	<condition property="bundleBootClasspath" value="${J2SE-1.5}">
+		<isset property="J2SE-1.5"></isset>
+	</condition>
+	<condition property="bundleJavacSource" value="1.5">
+		<isset property="J2SE-1.5"></isset>
+	</condition>
+	<condition property="bundleJavacTarget" value="1.5">
+		<isset property="J2SE-1.5"></isset>
+	</condition>
+	<property name="bundleJavacSource" value="${javacSource}"></property>
+	<property name="bundleJavacTarget" value="${javacTarget}"></property>
+	<property name="bundleBootClasspath" value="${bootclasspath}"></property>
+
+	<target name="init" depends="properties">
+		<condition property="pluginTemp" value="${buildTempFolder}/plugins">
+			<isset property="buildTempFolder"></isset>
+		</condition>
+		<property name="pluginTemp" value="${basedir}"></property>
+		<condition property="build.result.folder" value="${pluginTemp}/com.servoy.eclipse.debug_6.0.0.1200">
+			<isset property="buildTempFolder"></isset>
+		</condition>
+		<property name="build.result.folder" value="${basedir}"></property>
+		<property name="temp.folder" value="${basedir}/temp.folder"></property>
+		<property name="plugin.destination" value="${basedir}"></property>
+	</target>
+
+	<target name="properties" if="eclipse.running">
+		<property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"></property>
+
+	</target>
+
+	<target name="build.update.jar" depends="init" description="Build the plug-in: com.servoy.eclipse.debug for an update site.">
+		<delete dir="${temp.folder}"></delete>
+		<mkdir dir="${temp.folder}"></mkdir>
+		<antcall target="build.jars"></antcall>
+		<antcall target="gather.bin.parts">
+			<param name="destination.temp.folder" value="${temp.folder}/"></param>
+		</antcall>
+		<jar destfile="${plugin.destination}/com.servoy.eclipse.debug_6.0.0.1200.jar" basedir="${temp.folder}/com.servoy.eclipse.debug_6.0.0.1200" filesetmanifest="merge"></jar>
+		<delete dir="${temp.folder}"></delete>
+	</target>
+
+	<target name="@dot" depends="init" unless="@dot" description="Create jar: com.servoy.eclipse.debug @dot.">
+		<delete dir="${temp.folder}/@dot.bin"></delete>
+		<mkdir dir="${temp.folder}/@dot.bin"></mkdir>
+		<path id="@dot.classpath">
+			<fileset dir="../eclipse_build/eclipse_target/plugins">
+				<include name="**/*.jar"></include>
+			</fileset>
+			<fileset dir="../eclipse_build/eclipse_target_win32/plugins">
+				<include name="**/*.jar"></include>
+			</fileset>
+			
+			<fileset dir="../j2db_core/build/lib/">
+				<include name="*.jar"></include>
+			</fileset>
+			<fileset dir="../j2db/build/lib/">
+				<include name="*.jar"></include>
+			</fileset>
+
+			<pathelement path="../j2db_core/build/classes"></pathelement>
+			<pathelement path="../j2db_core/src-test"></pathelement>
+			<pathelement path="../j2db_core/src/"></pathelement>
+			<pathelement path="../j2db_core/@dot"></pathelement>
+			<pathelement path="../rhino16r7/bin/"></pathelement>
+			<pathelement path="../rhino16r7/@dot"></pathelement>
+			<pathelement path="../j2db/build/classes"></pathelement>
+			<pathelement path="../j2db/src-test"></pathelement>
+			<pathelement path="../j2db/src/"></pathelement>
+			<pathelement path="../j2db/@dot"></pathelement>
+
+			<pathelement path="../com.servoy.eclipse.core/@dot"></pathelement>
+			<pathelement path="../com.servoy.eclipse.appserver/@dot"></pathelement>
+			<pathelement path="../com.servoy.eclipse.ui/@dot"></pathelement>
+			<pathelement path="../com.servoy.eclipse.ui/baseline.jar"></pathelement>
+			<pathelement path="../com.servoy.eclipse.ui/swt-grouplayout.jar"></pathelement>
+		</path>
+		
+		<javac encoding="ISO-8859-1" destdir="${temp.folder}/@dot.bin" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}"><compilerarg line="${compilerArg}" compiler="${build.compiler}"></compilerarg><classpath refid="@dot.classpath">
+</classpath><src path="src/">
+</src><compilerarg line="-log '${temp.folder}/@dot.bin${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"></compilerarg></javac>
+		
+		<copy todir="${temp.folder}/@dot.bin" failonerror="true" overwrite="false">
+			<fileset dir="src/">
+				<exclude name="**/*.java"></exclude>
+				<exclude name="**/package.htm*"></exclude>
+			</fileset>
+		</copy>
+		<mkdir dir="${build.result.folder}"></mkdir>
+		<copy todir="${build.result.folder}/@dot" failonerror="true" overwrite="false">
+			<fileset dir="${temp.folder}/@dot.bin">
+			</fileset>
+		</copy>
+		<delete dir="${temp.folder}/@dot.bin"></delete>
+	</target>
+
+	<target name="src.zip" depends="init" unless="src.zip">
+		<mkdir dir="${build.result.folder}"></mkdir>
+		<zip destfile="${build.result.folder}/src.zip" filesonly="false" whenempty="skip" update="false">
+			<fileset dir="src/">
+				<include name="**/*.java"></include>
+			</fileset>
+		</zip>
+	</target>
+
+	<target name="build.jars" depends="init" description="Compile classes and build nested jars for the plug-in: com.servoy.eclipse.debug.">
+		<available property="@dot" file="${build.result.folder}/@dot"></available>
+		<antcall target="@dot"></antcall>
+	</target>
+
+	<target name="build.sources" depends="init">
+		<available property="src.zip" file="${build.result.folder}/src.zip"></available>
+		<antcall target="src.zip"></antcall>
+	</target>
+
+	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.debug_6.0.0.1200"></mkdir>
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.debug_6.0.0.1200" failonerror="true" overwrite="false">
+			<fileset dir="${build.result.folder}/@dot">
+				<include name="**"></include>
+			</fileset>
+		</copy>
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.debug_6.0.0.1200" failonerror="true" overwrite="false">
+			<fileset dir="${basedir}">
+				<include name="META-INF/"></include>
+				<include name="icons/"></include>
+				<include name="plugin.xml"></include>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="build.zips" depends="init">
+	</target>
+
+	<target name="gather.sources" depends="init" if="destination.temp.folder">
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.debug_6.0.0.1200"></mkdir>
+		<copy file="${build.result.folder}/src.zip" todir="${destination.temp.folder}/com.servoy.eclipse.debug_6.0.0.1200" failonerror="false" overwrite="false"></copy>
+	</target>
+
+	<target name="gather.logs" depends="init" if="destination.temp.folder">
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.debug_6.0.0.1200"></mkdir>
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.debug_6.0.0.1200" failonerror="false" overwrite="false">
+			<fileset dir="${temp.folder}">
+				<include name="@dot.bin${logExtension}"></include>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="clean" depends="init" description="Clean the plug-in: com.servoy.eclipse.debug of all the zips, jars and logs created.">
+		<delete dir="${build.result.folder}/@dot"></delete>
+		<delete file="${build.result.folder}/src.zip"></delete>
+		<delete file="${plugin.destination}/com.servoy.eclipse.debug_6.0.0.1200.jar"></delete>
+		<delete file="${plugin.destination}/com.servoy.eclipse.debug_6.0.0.1200.zip"></delete>
+		<delete dir="${temp.folder}"></delete>
+	</target>
+
+	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
+		<eclipse.convertPath fileSystemPath="C:/dev/com.servoy.eclipse.debug" property="resourcePath"></eclipse.convertPath>
+		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"></eclipse.refreshLocal>
+	</target>
+
+	<target name="zip.plugin" depends="init" description="Create a zip containing all the elements for the plug-in: com.servoy.eclipse.debug.">
+		<delete dir="${temp.folder}"></delete>
+		<mkdir dir="${temp.folder}"></mkdir>
+		<antcall target="build.jars"></antcall>
+		<antcall target="build.sources"></antcall>
+		<antcall target="gather.bin.parts">
+			<param name="destination.temp.folder" value="${temp.folder}/"></param>
+		</antcall>
+		<antcall target="gather.sources">
+			<param name="destination.temp.folder" value="${temp.folder}/"></param>
+		</antcall>
+		<delete>
+			<fileset dir="${temp.folder}">
+				<include name="**/*.bin${logExtension}"></include>
+			</fileset>
+		</delete>
+		<zip destfile="${plugin.destination}/com.servoy.eclipse.debug_6.0.0.1200.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"></zip>
+		<delete dir="${temp.folder}"></delete>
+	</target>
+
+</project>

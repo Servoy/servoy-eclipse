@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+	<extension-point id="shortcuts" name="Shortcuts for debug smart client" schema="schema/shortcuts.exsd"/>
+	
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="com.servoy.eclipse.ui.start_actions"
+            label="Start Servoy Clients"
+            visible="true">
+        <menu
+               id="com.servoy.eclipse.ui.actionsMenu"
+               label="&amp;Actions">
+            <separator
+                  name="start">
+            </separator>
+         </menu>
+         <action
+               class="com.servoy.eclipse.debug.actions.StartWebClientActionDelegate"
+               definitionId="com.servoy.eclipse.ui.StartWebClient"
+               icon="icons/launch_web.gif"
+               id="com.servoy.eclipse.ui.startWebClient"
+               label="Start WebClient"
+               menubarPath="com.servoy.eclipse.ui.actionsMenu/start"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Start WebClient">
+         </action>
+         <action
+               class="com.servoy.eclipse.debug.actions.StartSmartClientActionDelegate"
+               definitionId="com.servoy.eclipse.ui.StartSmartClient"
+               icon="icons/launch.gif"
+               id="com.servoy.eclipse.ui.startSmartClient"
+               label="Start SmartClient"
+               menubarPath="com.servoy.eclipse.ui.actionsMenu/start"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Start SmartClient">
+         </action>
+      </actionSet>
+   </extension>
+   <extension
+         point="org.eclipse.dltk.javascript.core.dom.support.domprovider">
+      <provider
+            class="com.servoy.eclipse.debug.script.FormDomProvider"
+            id="com.servoy.eclipse.debug.form.provider">
+      </provider>
+   </extension>
+   <extension
+         point="org.eclipse.dltk.launching.debuggingEngine">
+      <engineContribution
+            natureId="org.eclipse.dltk.javascript.core.nature">
+         <engine
+               class="com.servoy.eclipse.debug.ServoyDebuggableEngineFactory"
+               description="ServoyDebuggableEngine"
+               id="com.servoy.eclipse.debug.engine"
+               name="ServoyDebuggableEngine"
+               priority="100">
+         </engine>
+      </engineContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <viewerContribution
+            id="com.servoy.eclipse.debug.javascript"
+            targetID="org.eclipse.dltk.ui.outline">
+         <action
+               class="com.servoy.eclipse.debug.actions.DebugMethod"
+               enablesFor="1"
+               id="com.servoy.eclipse.debug.javascript.run"
+               label="Debug Method"
+               menubarPath="additions">
+         </action>
+      </viewerContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.viewActions">
+      <viewContribution
+            id="org.eclipse.jdt.debug.ui.BreakpointViewActions"
+            targetID="org.eclipse.debug.ui.BreakpointView">
+         <action
+               class="com.servoy.eclipse.debug.actions.ToggleGlobalExitBreak"
+               icon="icons/exit_ovr.gif"
+               id="com.servoy.eclipse.debug.toggle.global.exitbreak"
+               label="Toggle Global ExitBreak"
+               style="toggle"
+               toolbarPath="javascriptGlobalBreakpoints"
+               tooltip="Toggle Global ExitBreak">
+         </action>
+         <action
+               class="com.servoy.eclipse.debug.actions.ToggleGlobalEntryBreak"
+               icon="icons/entry_ovr.gif"
+               id="com.servoy.eclipse.debug.toggle.global.entrybreak"
+               label="Toggle Global EntryBreak"
+               style="toggle"
+               toolbarPath="javascriptGlobalBreakpoints"
+               tooltip="Toggle Global EntryBreak">
+         </action>
+         <action
+               class="com.servoy.eclipse.debug.actions.ToggleGlobalExceptionBreak"
+               icon="icons/jexception_obj.gif"
+               id="com.servoy.eclipse.debug.toggle.global.exceptionbreak"
+               label="Toggle Global Exception Break"
+               style="toggle"
+               toolbarPath="javascriptGlobalBreakpoints"
+               tooltip="Toggle Global ExceptionBreak">
+         </action>
+      </viewContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.servoy.eclipse.ui.StartSmartClient"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M3+M2+A">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.ui.StartWebClient"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M3+M2+B">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            categoryId="com.servoy.eclipse.ui"
+            description="Start SmartClient"
+            id="com.servoy.eclipse.ui.StartSmartClient"
+            name="Start SmartClient">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.ui"
+            description="Start WebClient"
+            id="com.servoy.eclipse.ui.StartWebClient"
+            name="Start WebClient">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.dltk.javascript.core.customtype">
+      <provider
+            class="com.servoy.eclipse.debug.script.CustomTypeProvider"
+            id="com.servoy.eclipse.debug.customtype.provider">
+      </provider>
+   </extension>
+   <extension
+         point="org.eclipse.dltk.javascript.core.typeinfo">
+      <provider
+            class="com.servoy.eclipse.debug.script.TypeProvider">
+      </provider>
+      <resolver
+            class="com.servoy.eclipse.debug.script.ElementResolver">
+      </resolver>
+   </extension>
+</plugin>
