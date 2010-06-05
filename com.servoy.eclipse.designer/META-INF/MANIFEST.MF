@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Servoy Designer Plug-in
+Bundle-SymbolicName: com.servoy.eclipse.designer; singleton:=true
+Bundle-Version: 6.0.0.1200
+Bundle-ClassPath: .
+Bundle-Activator: com.servoy.eclipse.designer.Activator
+Bundle-Vendor: Servoy
+Require-Bundle: org.eclipse.core.databinding,
+ org.eclipse.core.databinding.beans,
+ org.eclipse.jface.databinding,
+ org.eclipse.ui,
+ org.eclipse.ui.views,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.ui.editors,
+ org.eclipse.ui.ide,
+ servoy_shared,
+ servoy_smart_client,
+ org.eclipse.gef,
+ com.servoy.eclipse.core,
+ com.servoy.eclipse.appserver,
+ com.servoy.eclipse.ui,
+ org.eclipse.core.expressions
+Bundle-ActivationPolicy: lazy
+Export-Package: com.servoy.eclipse.designer;uses:="org.eclipse.jface.re
+ source,org.eclipse.ui.plugin,org.osgi.framework"
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
