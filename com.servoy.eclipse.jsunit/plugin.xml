@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            categoryId="com.servoy.eclipse.ui"
+            description="Run Solution Javascript Unit Tests"
+            id="com.servoy.eclipse.jsunit.actions.runJSTests"
+            name="Run Solution Unit Tests">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            id="com.servoy.eclipse.jsunit.solutioncontribution"
+            objectClass="com.servoy.eclipse.jsunit.SolutionUnitTestTarget">
+         <action
+               class="com.servoy.eclipse.jsunit.actions.RunJSTests"
+               definitionId="com.servoy.eclipse.jsunit.actions.runJSTests"
+               enablesFor="1"
+               id="com.servoy.eclipse.jsunit.actions.runJSTestsMenuContribution"
+               label="Run &amp;Unit Tests"
+               menubarPath="additions"
+               style="push"
+               tooltip="Run Solution Javascript Unit Tests">
+         </action>
+      </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="com.servoy.eclipse.jsunit.RunJSTests"
+            label="Run Solution Unit Tests">
+         <action
+               class="com.servoy.eclipse.jsunit.actions.RunJSTests"
+               definitionId="com.servoy.eclipse.jsunit.actions.runJSTests"
+               id="com.servoy.eclipse.jsunit.actions.runJSTests"
+               label="Run Solution Unit Tests"
+               style="push"
+               tooltip="Run Solution Javascript Unit Tests">
+         </action>
+      </actionSet>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="com.servoy.eclipse.ui.node.SimpleUserNode"
+            class="com.servoy.eclipse.jsunit.AdapterFactory">
+         <adapter
+               type="com.servoy.eclipse.jsunit.SolutionUnitTestTarget">
+         </adapter>
+      </factory>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.servoy.eclipse.jsunit.actions.runJSTests"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M3+M2+U">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="com.servoy.eclipse.ui.DesignPerspective">
+         <actionSet
+               id="com.servoy.eclipse.jsunit.RunJSTests">
+         </actionSet>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.eclipse.debug.ui.DebugPerspective">
+         <actionSet
+               id="com.servoy.eclipse.jsunit.RunJSTests">
+         </actionSet>
+      </perspectiveExtension>
+   </extension>
+   <!--extension
+         point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut
+            class="com.servoy.eclipse.jsunit.actions.RunJSTests"
+            helpContextId="org.eclipse.jdt.junit.launch_shortcut"
+            id="com.servoy.eclipse.jsunit.launchShortcut"
+            label="JSUnit tests"
+            modes="run">
+         <contextualLaunch>
+            <enablement>
+               <with variable="selection">
+                  <count value="1"/>
+                  <iterate>
+                     <adapt type="com.servoy.j2db.persistence.IPersist">
+                        <test property="org.eclipse.jdt.core.isInJavaProject"/>
+                        <test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="junit.framework.Test"/>
+                        <test property="org.eclipse.jdt.junit.canLaunchAsJUnit" forcePluginActivation="true"/>
+                     </adapt>
+                  </iterate>
+               </with>
+            </enablement>
+         </contextualLaunch>
+         <perspective
+               id="com.servoy.eclipse.ui.DesignPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.debug.ui.DebugPerspective">
+         </perspective>
+      </shortcut>
+   </extension-->
+
+</plugin>
