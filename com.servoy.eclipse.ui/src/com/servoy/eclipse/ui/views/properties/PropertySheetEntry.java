@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.properties;
 
 import java.util.ArrayList;
@@ -218,7 +218,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 				Object object = propertyDescriptorMaps[i].get(ids[j]);
 				if (object == null ||
 				// see if the descriptors (which have the same id) are
-					// compatible
+				// compatible
 					!((IPropertyDescriptor)intersection.get(ids[j])).isCompatibleWith((IPropertyDescriptor)object))
 				{
 					intersection.remove(ids[j]);
@@ -791,7 +791,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 	 * 
 	 * @param newValue the new value
 	 */
-	private void setValue(Object newValue)
+	public void setValue(Object newValue)
 	{
 		// Set the value
 		for (int i = 0; i < values.length; i++)
