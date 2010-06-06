@@ -13,13 +13,15 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.property;
 
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.internal.GEFMessages;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.IPropertySource2;
+
+import com.servoy.eclipse.ui.views.properties.PropertySheetEntry;
 
 public class ResetValueCommand extends Command
 {
@@ -30,6 +32,7 @@ public class ResetValueCommand extends Command
 	protected Object undoValue;
 	/** the property source whose property has to be reset */
 	protected IPropertySource target;
+	private PropertySheetEntry propertySheetEntry;
 
 	/**
 	 * Default Constructor: Sets the label for the Command
@@ -84,6 +87,11 @@ public class ResetValueCommand extends Command
 		target = propSource;
 	}
 
+	public void setPropertySheetEntry(PropertySheetEntry propertySheetEntry)
+	{
+		this.propertySheetEntry = propertySheetEntry;
+	}
+
 	/**
 	 * Resets the specified property on the specified IPropertySource
 	 * 
@@ -93,6 +101,10 @@ public class ResetValueCommand extends Command
 	public void redo()
 	{
 		target.resetPropertyValue(propertyName);
+		if (propertySheetEntry != null)
+		{
+			propertySheetEntry.setValue(target.getPropertyValue(propertyName));
+		}
 	}
 
 	/**
@@ -114,6 +126,9 @@ public class ResetValueCommand extends Command
 	public void undo()
 	{
 		target.setPropertyValue(propertyName, undoValue);
+		if (propertySheetEntry != null)
+		{
+			propertySheetEntry.setValue(target.getPropertyValue(propertyName));
+		}
 	}
-
 }

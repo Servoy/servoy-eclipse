@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.property;
 
 import java.util.EventObject;
@@ -115,6 +115,7 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 				//source.resetPropertyValue(getDescriptor()getId());
 				restoreCmd = new ResetValueCommand();
 				restoreCmd.setTarget(source);
+				restoreCmd.setPropertySheetEntry(this);
 				restoreCmd.setPropertyId(getDescriptor().getId());
 				cc.add(restoreCmd);
 				change = true;
