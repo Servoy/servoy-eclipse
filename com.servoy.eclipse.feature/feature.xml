@@ -787,6 +787,15 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          version="0.0.0"
          unpack="false"/>
          
+<!--
+   <plugin
+         id="j2db_runtime"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+-->
+
    <plugin
          id="j2db_server"
          download-size="0"
