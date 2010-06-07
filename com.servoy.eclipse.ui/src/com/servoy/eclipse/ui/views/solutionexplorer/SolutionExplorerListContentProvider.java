@@ -58,9 +58,9 @@ import com.servoy.eclipse.ui.node.UserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
-import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
@@ -157,6 +157,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		TYPES.put("IFoundSetInternal", FoundSet.JS_FOUNDSET);
 		TYPES.put("Foundset", FoundSet.JS_FOUNDSET);
 		TYPES.put(FormScope.class.getName(), "Form");
+		TYPES.put("org.mozilla.javascript.NativeArray", "Array");
 		Method[] methods = Object.class.getMethods();
 		for (Method method : methods)
 		{
