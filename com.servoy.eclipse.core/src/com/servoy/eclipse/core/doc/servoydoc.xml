@@ -3441,7 +3441,8 @@ NOTE: For more detail on named server connections, see the chapter on Database C
           <return type="com.servoy.j2db.dataprocessing.Record[]"><![CDATA[Array of outstanding/unsaved JSRecords.]]></return>
           <description><![CDATA[Returns an array of edited records with outstanding (unsaved) data. 
 
-NOTE: To return a dataset of outstanding (unsaved) edited data for each record, see JSRecord.getChangedData();]]></description>
+NOTE: To return a dataset of outstanding (unsaved) edited data for each record, see JSRecord.getChangedData();
+NOTE2: The fields focus may be lost in user interface in order to determine the edits. ]]></description>
           <summary><![CDATA[Returns an array of edited records with outstanding (unsaved) data.]]></summary>
           <sample><![CDATA[//This method can be used to loop through all outstanding changes,
 //the application.output line contains all the changed data, their tablename and primary key
@@ -3751,7 +3752,9 @@ var firstViewName = viewNamesArray[0];]]></sample>
         </function>
         <function name="hasRecordChanges">
           <return type="com.servoy.eclipse.core.scripting.docs.Boolean"><![CDATA[true if there are changes in the JSFoundset or JSRecord.]]></return>
-          <description><![CDATA[Returns true if the specified foundset, on a specific index or in any of its records, or the specified record has changes.]]></description>
+          <description><![CDATA[Returns true if the specified foundset, on a specific index or in any of its records, or the specified record has changes.
+          
+NOTE: The fields focus may be lost in user interface in order to determine the edits.]]></description>
           <summary><![CDATA[Returns true if the specified foundset, on a specific index or in any of its records, or the specified record has changes.]]></summary>
           <sample><![CDATA[if (databaseManager.hasRecordChanges(foundset,2))
 {
@@ -3917,7 +3920,9 @@ if (cancel || !databaseManager.commitTransaction())
         <function name="saveData">
           <return type="com.servoy.eclipse.core.scripting.docs.Boolean"><![CDATA[true if the save was done without an error.]]></return>
           <description><![CDATA[Saves all outstanding (unsaved) data and exits the current record. 
-Optionally, by specifying a record, can save a single record instead of all the data.]]></description>
+Optionally, by specifying a record, can save a single record instead of all the data.
+
+NOTE: The fields focus may be lost in user interface in order to determine the edits.]]></description>
           <summary><![CDATA[Saves all outstanding (unsaved) data and exits the current record.]]></summary>
           <sample><![CDATA[databaseManager.saveData();
 //databaseManager.saveData(foundset.getRecord(1));//save specific record]]></sample>
