@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.actions;
 
 import org.eclipse.gef.EditPart;
@@ -44,6 +44,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 
 /**
@@ -74,6 +75,7 @@ public class AddFieldActionDelegate extends AbstractEditpartActionDelegate
 		if (portal != null)
 		{
 			flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(portal);
+			if (flattenedSolution.getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION) return null;
 			Relation[] relations = flattenedSolution.getRelationSequence(portal.getRelationName());
 			if (relations == null)
 			{
@@ -86,13 +88,16 @@ public class AddFieldActionDelegate extends AbstractEditpartActionDelegate
 		{
 			form = (Form)getModel(editPart, IRepository.FORMS);
 			flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
-			try
+			if (flattenedSolution.getSolution().getSolutionType() != SolutionMetaData.LOGIN_SOLUTION)
 			{
-				table = form.getTable();
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError("Could not get table for form " + form, e);
+				try
+				{
+					table = form.getTable();
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError("Could not get table for form " + form, e);
+				}
 			}
 			input = new DataProviderTreeViewer.DataProviderOptions(false, table != null, table != null, table != null, true, true, table != null,
 				table != null, INCLUDE_RELATIONS.NESTED, true, null);

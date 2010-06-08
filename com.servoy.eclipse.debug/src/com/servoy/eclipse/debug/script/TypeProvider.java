@@ -37,8 +37,8 @@ import org.mozilla.javascript.JavaMembers;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.Record;
@@ -180,8 +180,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			DynamicTypeFiller dynamicTypeFiller = dynamicTypeCreator.get(getRealName(memberReturnType.getSimpleName()));
 			if (dynamicTypeFiller != null)
 			{
-				String memberType = dynamicTypeFiller.generateMemberType(context, memberName, memberReturnType,
-					objectTypeName.substring(index + 1, objectTypeName.length() - 1));
+				String memberType = dynamicTypeFiller.generateMemberType(context, memberName, memberReturnType, objectTypeName.substring(index + 1,
+					objectTypeName.length() - 1));
 				if (memberType != null) return memberType;
 			}
 		}
@@ -249,16 +249,19 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						// form variables
 						addDataProviders(formToUse.getScriptVariables(false), members, context);
 
-						// data providers
-						Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(formToUse.getTable());
-
-						if (allDataProvidersForTable != null)
+						if (!isLoginSolution(context))
 						{
-							addDataProviders(allDataProvidersForTable.values().iterator(), members, context);
-						}
+							// data providers
+							Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(formToUse.getTable());
 
-						// relations
-						addRelations(context, fs, members, fs.getRelations(formToUse.getTable(), true, false));
+							if (allDataProvidersForTable != null)
+							{
+								addDataProviders(allDataProvidersForTable.values().iterator(), members, context);
+							}
+
+							// relations
+							addRelations(context, fs, members, fs.getRelations(formToUse.getTable(), true, false));
+						}
 
 						// element scope
 						members.add(createProperty(context, "elements", true, "Elements<" + formToUse.getName() + '>'));
@@ -470,15 +473,17 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 			EList<Member> members = type.getMembers();
 
+			boolean isLoginSolution = isLoginSolution(context);
+
 			members.add(createProperty(context, "allnames", true, "Array"));
-			members.add(createProperty(context, "alldataproviders", true, "Array"));
+			if (!isLoginSolution) members.add(createProperty(context, "alldataproviders", true, "Array"));
 			members.add(createProperty(context, "allmethods", true, "Array"));
-			members.add(createProperty(context, "allrelations", true, "Array"));
+			if (!isLoginSolution) members.add(createProperty(context, "allrelations", true, "Array"));
 			members.add(createProperty(context, "allvariables", true, "Array"));
 
 			// controller and foundset
 			members.add(createProperty(context, "controller", true, "controller"));
-			members.add(createProperty(context, "foundset", true, FoundSet.JS_FOUNDSET));
+			if (!isLoginSolution) members.add(createProperty(context, "foundset", true, FoundSet.JS_FOUNDSET));
 
 			return type;
 		}

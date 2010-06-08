@@ -243,8 +243,8 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					members.add(createProperty(context, form.getName(), true, "Form<" + form.getName() + '>',
-						"Form based on datasource: " + form.getDataSource()));
+					members.add(createProperty(context, form.getName(), true, "Form<" + form.getName() + '>', "Form based on datasource: " +
+						form.getDataSource()));
 				}
 			}
 			return type;
@@ -267,7 +267,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 
 			members.add(createProperty(context, "allmethods", true, "Array"));
 			members.add(createProperty(context, "allvariables", true, "Array"));
-			members.add(createProperty(context, "allrelations", true, "Array"));
+			if (!isLoginSolution(context)) members.add(createProperty(context, "allrelations", true, "Array"));
 			members.add(createProperty(context, "currentcontroller", true, "controller"));
 
 			FlattenedSolution fs = getFlattenedSolution(context);

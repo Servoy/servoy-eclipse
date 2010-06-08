@@ -138,6 +138,7 @@ import org.eclipse.ui.views.properties.PropertySheetPage;
 import com.servoy.eclipse.core.I18NChangeListener;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.IPersistChangeListener;
+import com.servoy.eclipse.core.ISolutionMetaDataChangeListener;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -405,6 +406,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 //	private IPersistListener persistListener;
 	private IPersistChangeListener persistChangeListener;
+
+	private ISolutionMetaDataChangeListener solutionMetaDataChangeListener;
 
 	private ControlListener resizeListener;
 
@@ -1309,6 +1312,21 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			};
 			servoyModel.addPersistChangeListener(true, persistChangeListener);
 		}
+
+		if (solutionMetaDataChangeListener == null)
+		{
+			solutionMetaDataChangeListener = new ISolutionMetaDataChangeListener()
+			{
+				public void solutionMetaDataChanged(Solution changedSolution)
+				{
+					ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+					if (activeProject != null && activeProject.getSolution().getSolutionID() == changedSolution.getSolutionID()) SolutionExplorerView.this.refreshTreeCompletely();
+				}
+
+			};
+			servoyModel.addSolutionMetaDataChangeListener(solutionMetaDataChangeListener);
+		}
+
 		tree.setInput(roots);
 		drillDownAdapter.reset();
 		treeRoots = roots;
@@ -2465,6 +2483,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		}
 
 		ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(true, persistChangeListener);
+		ServoyModelManager.getServoyModelManager().getServoyModel().removeSolutionMetaDataChangeListener(solutionMetaDataChangeListener);
 //		ServoyProject[] currentRoots = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 //		registerPersistListener(currentRoots, null);
 

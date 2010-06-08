@@ -64,21 +64,21 @@ import com.servoy.eclipse.core.repository.EclipseRepository;
 import com.servoy.eclipse.core.util.CoreUtils;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
+import com.servoy.eclipse.ui.dialogs.FormContentProvider;
+import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
-import com.servoy.eclipse.ui.dialogs.FormContentProvider;
 import com.servoy.eclipse.ui.dialogs.FormContentProvider.FormListOptions;
-import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.editors.BeanCustomCellEditor;
 import com.servoy.eclipse.ui.editors.DataProviderCellEditor;
-import com.servoy.eclipse.ui.editors.DataProviderCellEditor.DataProviderValueEditor;
 import com.servoy.eclipse.ui.editors.FontCellEditor;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
 import com.servoy.eclipse.ui.editors.PageFormatEditor;
 import com.servoy.eclipse.ui.editors.SortCellEditor;
 import com.servoy.eclipse.ui.editors.TagsAndI18NTextCellEditor;
+import com.servoy.eclipse.ui.editors.DataProviderCellEditor.DataProviderValueEditor;
 import com.servoy.eclipse.ui.labelproviders.ArrayLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FontLabelProvider;
@@ -112,7 +112,6 @@ import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
-import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
@@ -149,6 +148,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.query.ISQLJoin;
 import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.util.ComponentFactoryHelper;
@@ -826,14 +826,17 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 				{
 					// String property, select a data provider
 					Table table = null;
-					try
+					if (flattenedEditingSolution.getSolution().getSolutionType() != SolutionMetaData.LOGIN_SOLUTION)
 					{
-						table = form.getTable();
-					}
-					catch (Exception ex)
-					{
-						ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
-						return null;
+						try
+						{
+							table = form.getTable();
+						}
+						catch (Exception ex)
+						{
+							ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
+							return null;
+						}
 					}
 
 					INCLUDE_RELATIONS includeRelations;
@@ -1378,12 +1381,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 
 		if (persist instanceof Form && ((Form)persist).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION)
 		{
-			if (CoreUtils.isCommandProperty(name)) return false;
-			if ("onRecordEditStartMethodID".equals(name) || "onRecordEditStopMethodID".equals(name) || "onRecordSelectionMethodID".equals(name))
-			{
-				return false;
-			}
-			if ("dataSource".equals(name) || "initialSort".equals(name) || "namedFoundSet".equals(name)) return false;
+			if (CoreUtils.isCommandProperty(name) || "onRecordEditStartMethodID".equals(name) || "onRecordEditStopMethodID".equals(name) ||
+				"onRecordSelectionMethodID".equals(name) || "dataSource".equals(name) || "initialSort".equals(name) || "namedFoundSet".equals(name)) return false;
 		}
 
 		if (name.equals("labelFor") && persist instanceof GraphicalComponent)
@@ -1726,8 +1725,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 					else
 					{
 						// value not a string
-						ServoyLog.logWarning(
-							"Cannot set " + id + " property on object " + beanPropertyDescriptor.valueObject + " with type " + value.getClass(), null);
+						ServoyLog.logWarning("Cannot set " + id + " property on object " + beanPropertyDescriptor.valueObject + " with type " +
+							value.getClass(), null);
 					}
 				}
 				else
@@ -2293,6 +2292,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			final DataProviderOptions options;
 			if (portal != null)
 			{
+				if (flattenedEditingSolution.getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION) return null;
 				Relation[] relations = flattenedEditingSolution.getRelationSequence(portal.getRelationName());
 				if (relations == null)
 				{
@@ -2304,14 +2304,17 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			else
 			{
 				if (form == null) return null;
-				try
+				if (flattenedEditingSolution.getSolution().getSolutionType() != SolutionMetaData.LOGIN_SOLUTION)
 				{
-					table = form.getTable();
-				}
-				catch (Exception ex)
-				{
-					ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
-					return null;
+					try
+					{
+						table = form.getTable();
+					}
+					catch (Exception ex)
+					{
+						ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
+						return null;
+					}
 				}
 				options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, table != null, true, true, table != null,
 					table != null, INCLUDE_RELATIONS.NESTED, true, null);

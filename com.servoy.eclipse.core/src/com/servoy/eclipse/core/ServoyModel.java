@@ -33,8 +33,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.wicket.Request;
@@ -87,8 +87,8 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import com.servoy.eclipse.core.builder.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.builder.ServoyBuilder;
+import com.servoy.eclipse.core.builder.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.DataModelManager;
 import com.servoy.eclipse.core.repository.EclipseMessages;
 import com.servoy.eclipse.core.repository.EclipseRepository;
@@ -160,6 +160,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 	private final List<IActiveProjectListener> activeProjectListeners;
 	private final List<IPersistChangeListener> realPersistChangeListeners;
 	private final List<IPersistChangeListener> editingPersistChangeListeners;
+	private final List<ISolutionMetaDataChangeListener> solutionMetaDataChangeListener;
 	private final List<I18NChangeListener> i18nChangeListeners;
 
 	private final Job fireRealPersistchangesJob;
@@ -189,6 +190,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 		activeProjectListeners = new ArrayList<IActiveProjectListener>();
 		realPersistChangeListeners = new ArrayList<IPersistChangeListener>();
 		editingPersistChangeListeners = new ArrayList<IPersistChangeListener>();
+		solutionMetaDataChangeListener = new ArrayList<ISolutionMetaDataChangeListener>();
 		i18nChangeListeners = new ArrayList<I18NChangeListener>();
 		fireRealPersistchangesJob = createFirePersistchangesJob(true);
 		fireEditingPersistchangesJob = createFirePersistchangesJob(false);
@@ -1491,6 +1493,15 @@ public class ServoyModel implements IWorkspaceSaveListener
 		}
 	}
 
+	public void fireSolutionMetaDataChanged(Solution changedSolution)
+	{
+		ArrayList<ISolutionMetaDataChangeListener> clone = new ArrayList<ISolutionMetaDataChangeListener>(solutionMetaDataChangeListener);
+		for (ISolutionMetaDataChangeListener listener : clone)
+		{
+			listener.solutionMetaDataChanged(changedSolution);
+		}
+	}
+
 	private List<IPersist> getOutstandingPersistChanges(boolean realSolution)
 	{
 		List<IPersist> outstandingChanges;
@@ -1521,6 +1532,16 @@ public class ServoyModel implements IWorkspaceSaveListener
 		(realSolution ? realPersistChangeListeners : editingPersistChangeListeners).remove(listener);
 	}
 
+	public void addSolutionMetaDataChangeListener(ISolutionMetaDataChangeListener listener)
+	{
+		solutionMetaDataChangeListener.add(listener);
+	}
+
+	public void removeSolutionMetaDataChangeListener(ISolutionMetaDataChangeListener listener)
+	{
+		solutionMetaDataChangeListener.remove(listener);
+	}
+
 	public void addI18NChangeListener(I18NChangeListener listener)
 	{
 		i18nChangeListeners.add(listener);
@@ -1530,6 +1551,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 	{
 		i18nChangeListeners.remove(listener);
 	}
+
 
 	/**
 	 * Returns the workbench associated with this object.
@@ -1951,6 +1973,12 @@ public class ServoyModel implements IWorkspaceSaveListener
 				// file outside of visited tree, ignore
 				continue;
 			}
+			else if (file.getName().equals(SolutionSerializer.ROOT_METADATA))
+			{
+				fireSolutionMetaDataChanged(solution);
+				continue;
+			}
+
 			File parentFile = SolutionSerializer.getParentFile(wsDir, file);
 			if (parentFile == null || !parentFile.exists())
 			{
@@ -2068,12 +2096,12 @@ public class ServoyModel implements IWorkspaceSaveListener
 													Integer lineNumber = (Integer)map.get(IMarker.LINE_NUMBER);
 													String oldLine = oldLines[lineNumber.intValue() - 1];
 													if (oldLine.trim().equals("")) continue;
-													int find = findLines(newLines, oldLine, lineNumber.intValue(), true,
-														Math.abs(oldLines.length - newLines.length) + 1);
+													int find = findLines(newLines, oldLine, lineNumber.intValue(), true, Math.abs(oldLines.length -
+														newLines.length) + 1);
 													if (find == -1)
 													{
-														find = findLines(newLines, oldLine, lineNumber.intValue(), false,
-															Math.abs(oldLines.length - newLines.length) + 1);
+														find = findLines(newLines, oldLine, lineNumber.intValue(), false, Math.abs(oldLines.length -
+															newLines.length) + 1);
 													}
 													if (find == -1) continue;
 													lineNumber = new Integer(find + 1);
