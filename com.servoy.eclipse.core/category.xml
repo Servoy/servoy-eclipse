@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.eclipse.dltk.core.servoy_2.0.0.201004201013.jar" id="org.eclipse.dltk.core.servoy" version="2.0.0.201004201013">
+      <category name="servoy.dltk"/>
+   </feature>
+   <feature url="features/org.eclipse.dltk.javascript.servoy_2.0.0.201004201013.jar" id="org.eclipse.dltk.javascript.servoy" version="2.0.0.201004201013">
+      <category name="servoy.dltk"/>
+   </feature>
+   <feature url="features/org.eclipse.emf.common_2.5.0.v200906151043.jar" id="org.eclipse.emf.common" version="2.5.0.v200906151043">
+      <category name="servoy.emf"/>
+   </feature>
+   <feature url="features/org.eclipse.emf.common.ui_2.5.0.v200906151043.jar" id="org.eclipse.emf.common.ui" version="2.5.0.v200906151043">
+      <category name="servoy.emf"/>
+   </feature>
+   <feature url="features/org.eclipse.emf.ecore_2.5.0.v200906151043.jar" id="org.eclipse.emf.ecore" version="2.5.0.v200906151043">
+      <category name="servoy.emf"/>
+   </feature>
+   <feature url="features/org.eclipse.emf.edit_2.5.0.v200906151043.jar" id="org.eclipse.emf.edit" version="2.5.0.v200906151043">
+      <category name="servoy.emf"/>
+   </feature>
+   <feature url="features/org.eclipse.emf.edit.ui_2.5.0.v200906151043.jar" id="org.eclipse.emf.edit.ui" version="2.5.0.v200906151043">
+      <category name="servoy.emf"/>
+   </feature>
+   <feature url="features/org.eclipse.draw2d_3.5.2.v20100111-1352-4417w311A223702A19.jar" id="org.eclipse.draw2d" version="3.5.2.v20100111-1352-4417w311A223702A19">
+      <category name="servoy.gef.draw2d"/>
+   </feature>
+   <feature url="features/org.eclipse.gef_3.5.2.v20100111-1352-777928194B66D5D476C33B2A.jar" id="org.eclipse.gef" version="3.5.2.v20100111-1352-777928194B66D5D476C33B2A">
+      <category name="servoy.gef.draw2d"/>
+   </feature>
+   <feature url="features/com.servoy.eclipse.feature_5.2.0.992.jar" id="com.servoy.eclipse.feature" version="5.2.0.992">
+      <category name="servoy.developer"/>
+   </feature>
+   <feature url="features/com.servoy.css.core_1.0.0.201003231300.jar" id="com.servoy.css.core" version="1.0.0.201003231300">
+      <category name="servoy.css"/>
+   </feature>
+   <category-def name="servoy.developer" label="Servoy Developer"/>
+   <category-def name="servoy.dltk" label="Servoy DLTK"/>
+   <category-def name="servoy.emf" label="Eclipse EMF"/>
+   <category-def name="servoy.gef.draw2d" label="Gef &amp; Draw2d"/>
+   <category-def name="servoy.css" label="CSS Editor"/>
+</site>
