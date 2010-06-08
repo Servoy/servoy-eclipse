@@ -30,17 +30,21 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.jface.resource.ImageDescriptor;
 
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
+import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Table;
@@ -146,6 +150,8 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 	{
 		Type type = getType(context, name);
 		boolean readOnly = true;
+		ImageDescriptor image = null;
+		Object resource = null;
 		if (type == null)
 		{
 			FlattenedSolution fs = getFlattenedSolution(context);
@@ -155,6 +161,8 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 				if (relation != null)
 				{
 					type = context.getType(FoundSet.JS_FOUNDSET + "<" + relation.getName() + ">");
+					image = RELATION_IMAGE;
+					resource = relation;
 				}
 				else
 				{
@@ -170,6 +178,15 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 								if (allDataProvidersForTable != null)
 								{
 									provider = allDataProvidersForTable.get(name);
+									image = COLUMN_IMAGE;
+									if (provider instanceof AggregateVariable)
+									{
+										image = COLUMN_AGGR_IMAGE;
+									}
+									else if (provider instanceof ScriptCalculation)
+									{
+										image = COLUMN_CALC_IMAGE;
+									}
 								}
 							}
 							catch (Exception e)
@@ -177,20 +194,29 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 								ServoyLog.logError(e);
 							}
 						}
+						else
+						{
+							image = FORM_VARIABLE_IMAGE;
+						}
 						if (provider != null)
 						{
 							readOnly = false;
 							type = getDataPRoviderType(context, provider);
+							resource = provider;
 						}
 					}
 				}
 
 			}
 		}
+		else
+		{
+			image = (ImageDescriptor)type.getAttribute(IMAGE_DESCRIPTOR);
+		}
 
 		if (type != null)
 		{
-			return createProperty(name, readOnly, type);
+			return createProperty(name, readOnly, type, null, image, resource);
 		}
 		return null;
 	}
@@ -230,10 +256,11 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName("forms");
 			type.setKind(TypeKind.JAVA);
+			type.setAttribute(IMAGE_DESCRIPTOR, FORMS);
 
 			EList<Member> members = type.getMembers();
-			members.add(createProperty(context, "allnames", true, "Array", "All form names as an array"));
-			members.add(createProperty(context, "length", true, "Number", "Number of forms"));
+			members.add(createProperty(context, "allnames", true, "Array", "All form names as an array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "length", true, "Number", "Number of forms", PROPERTY));
 
 			FlattenedSolution fs = getFlattenedSolution(context);
 			if (fs != null)
@@ -243,8 +270,8 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					members.add(createProperty(context, form.getName(), true, "Form<" + form.getName() + '>', "Form based on datasource: " +
-						form.getDataSource()));
+					members.add(createProperty(context, form.getName(), true, "Form<" + form.getName() + '>',
+						"Form based on datasource: " + form.getDataSource(), FORM_IMAGE, form));
 				}
 			}
 			return type;
@@ -261,14 +288,15 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName("globals");
-			type.setKind(TypeKind.JAVA);
+			type.setKind(TypeKind.JAVASCRIPT);
+			type.setAttribute(IMAGE_DESCRIPTOR, GLOBALS);
 
 			EList<Member> members = type.getMembers();
 
-			members.add(createProperty(context, "allmethods", true, "Array"));
-			members.add(createProperty(context, "allvariables", true, "Array"));
-			if (!isLoginSolution(context)) members.add(createProperty(context, "allrelations", true, "Array"));
-			members.add(createProperty(context, "currentcontroller", true, "controller"));
+			members.add(createProperty(context, "allmethods", true, "Array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "allvariables", true, "Array", SPECIAL_PROPERTY));
+			if (!isLoginSolution(context)) members.add(createProperty(context, "allrelations", true, "Array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "currentcontroller", true, "controller", PROPERTY));
 
 			FlattenedSolution fs = getFlattenedSolution(context);
 
@@ -278,14 +306,16 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 				while (scriptVariables.hasNext())
 				{
 					ScriptVariable sv = scriptVariables.next();
-					members.add(createProperty(sv.getName(), false, getDataPRoviderType(context, sv), sv.getComment()));
+
+					members.add(createProperty(sv.getName(), false, getDataPRoviderType(context, sv), sv.getComment(), GLOBAL_VAR_IMAGE,
+						sv.getSerializableRuntimeProperty(IScriptProvider.FILENAME)));
 				}
 
 				Iterator<ScriptMethod> scriptMethods = fs.getScriptMethods(false);
 				while (scriptMethods.hasNext())
 				{
 					ScriptMethod sm = scriptMethods.next();
-					members.add(createMethod(context, sm));
+					members.add(createMethod(context, sm, GLOBAL_METHOD_IMAGE, sm.getSerializableRuntimeProperty(IScriptProvider.FILENAME)));
 				}
 			}
 			return type;
@@ -301,11 +331,17 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		public Type createType(ITypeInfoContext context, String fullTypeName)
 		{
 			Form form = getForm(context);
+			Type type = null;
 			if (form != null)
 			{
-				return context.getType("Elements<" + form.getName() + '>');
+				type = context.getType("Elements<" + form.getName() + '>');
 			}
-			return context.getType("Elements");
+			else
+			{
+				type = context.getType("Elements");
+			}
+			type.setAttribute(IMAGE_DESCRIPTOR, PROPERTY);
+			return type;
 		}
 	}
 
@@ -317,12 +353,13 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		public Type createType(ITypeInfoContext context, String fullTypeName)
 		{
 			Form form = getForm(context);
+			Type type = null;
 			if (form != null)
 			{
 				try
 				{
 					Table table = form.getTable();
-					if (table != null) return context.getType(FoundSet.JS_FOUNDSET + '<' + FOUNDSET_TABLE_CONFIG + table.getServerName() + '.' +
+					if (table != null) type = context.getType(FoundSet.JS_FOUNDSET + '<' + FOUNDSET_TABLE_CONFIG + table.getServerName() + '.' +
 						table.getName() + '>');
 				}
 				catch (RepositoryException e)
@@ -331,7 +368,12 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 				}
 
 			}
-			return context.getType(FoundSet.JS_FOUNDSET);
+			else
+			{
+				type = context.getType(FoundSet.JS_FOUNDSET);
+			}
+			type.setAttribute(IMAGE_DESCRIPTOR, FOUNDSET_IMAGE);
+			return type;
 		}
 	}
 }

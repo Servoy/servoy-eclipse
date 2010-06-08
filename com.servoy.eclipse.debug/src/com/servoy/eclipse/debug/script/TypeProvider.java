@@ -32,16 +32,18 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.mozilla.javascript.JavaMembers;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.IApplication;
 import com.servoy.j2db.FormController.JSForm;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.Record;
+import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -49,10 +51,13 @@ import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.scripting.GroupScriptObject;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
@@ -71,19 +76,25 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	public TypeProvider()
 	{
 		addType(Record.JS_RECORD, Record.class);
-		addType(FoundSet.JS_FOUNDSET, FoundSet.class);
 		addType("JSDataSet", JSDataSet.class);
 		addType(IExecutingEnviroment.TOPLEVEL_SERVOY_EXCEPTION, ServoyException.class);
 		addType("controller", JSForm.class);
 
+		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
 		addScopeType("Form", new FormScopeCreator());
 		addScopeType("Elements", new ElementsScopeCreator());
 
-		dynamicTypeCreator.put(FoundSet.JS_FOUNDSET, new FoundSetTypeFiller());
-		dynamicTypeCreator.put(Record.JS_RECORD, new FoundSetTypeFiller());
+		dynamicTypeCreator.put(FoundSet.JS_FOUNDSET, new DataProviderFiller());
+		dynamicTypeCreator.put(Record.JS_RECORD, new DataProviderFiller());
 		dynamicTypeCreator.put("Form", new FormScopeFiller());
 		dynamicTypeCreator.put("Elements", new ElementsScopeFiller());
 
+	}
+
+	@Override
+	protected void initalize()
+	{
+		super.initalize();
 		Set<String> typeNames = getTypeNames(null);
 		for (String name : typeNames)
 		{
@@ -180,8 +191,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			DynamicTypeFiller dynamicTypeFiller = dynamicTypeCreator.get(getRealName(memberReturnType.getSimpleName()));
 			if (dynamicTypeFiller != null)
 			{
-				String memberType = dynamicTypeFiller.generateMemberType(context, memberName, memberReturnType, objectTypeName.substring(index + 1,
-					objectTypeName.length() - 1));
+				String memberType = dynamicTypeFiller.generateMemberType(context, memberName, memberReturnType,
+					objectTypeName.substring(index + 1, objectTypeName.length() - 1));
 				if (memberType != null) return memberType;
 			}
 		}
@@ -222,7 +233,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						if (form.getExtendsFormID() > 0)
 						{
 							formToUse = fs.getFlattenedForm(form);
-							members.add(createProperty(context, "_super", true, "SuperForm")); // TODO super form scope
+							members.add(createProperty(context, "_super", true, "SuperForm", FORM_IMAGE)); // TODO super form scope
 						}
 						Table table = formToUse.getTable();
 						if (table != null)
@@ -243,7 +254,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						while (scriptMethods.hasNext())
 						{
 							ScriptMethod sm = scriptMethods.next();
-							members.add(createMethod(context, sm));
+							members.add(createMethod(context, sm, FORM_METHOD_IMAGE, sm.getSerializableRuntimeProperty(IScriptProvider.FILENAME)));
 						}
 
 						// form variables
@@ -264,7 +275,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						}
 
 						// element scope
-						members.add(createProperty(context, "elements", true, "Elements<" + formToUse.getName() + '>'));
+						members.add(createProperty(context, "elements", true, "Elements<" + formToUse.getName() + '>', PROPERTY));
 					}
 					catch (Exception e)
 					{
@@ -313,14 +324,14 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 								if (!Utils.stringIsEmpty(formElement.getName()))
 								{
 									Class< ? > persistClass = SwingItemFactory.getPersistClass(application, persist);
-									members.add(createProperty(formElement.getName(), true, getElementType(context, persistClass)));
+									members.add(createProperty(formElement.getName(), true, getElementType(context, persistClass), null, PROPERTY));
 								}
 								else if (formElement.getGroupID() != null)
 								{
 									String groupName = FormElementGroup.getName(formElement.getGroupID());
 									if (groupName != null)
 									{
-										members.add(createProperty(groupName, true, getElementType(context, GroupScriptObject.class)));
+										members.add(createProperty(groupName, true, getElementType(context, GroupScriptObject.class), null, PROPERTY));
 									}
 								}
 							}
@@ -354,8 +365,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 	}
 
-
-	private class FoundSetTypeFiller implements DynamicTypeFiller
+	private class DataProviderFiller implements DynamicTypeFiller
 	{
 		/**
 		 * @see com.servoy.eclipse.debug.script.TypeProvider.DynamicTypeFiller#fillType(org.eclipse.dltk.javascript.typeinfo.model.Type, org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext, java.lang.String)
@@ -462,7 +472,27 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		}
 	}
 
-	public class FormScopeCreator implements IScopeTypeCreator
+	private class FoundSetCreator implements IScopeTypeCreator
+	{
+
+		public Type createType(ITypeInfoContext context, String fullTypeName)
+		{
+			Type type = TypeProvider.this.createType(context, FoundSet.JS_FOUNDSET, FoundSet.class);
+			type.setAttribute(IMAGE_DESCRIPTOR, FOUNDSET_IMAGE);
+
+			Property alldataproviders = TypeInfoModelFactory.eINSTANCE.createProperty();
+			alldataproviders.setName("alldataproviders");
+			alldataproviders.setDescription("the dataproviders array of this foundset");
+			alldataproviders.setAttribute(IMAGE_DESCRIPTOR, SPECIAL_PROPERTY);
+			type.getMembers().add(alldataproviders);
+
+			return type;
+		}
+
+	}
+
+
+	private static class FormScopeCreator implements IScopeTypeCreator
 	{
 
 		public Type createType(ITypeInfoContext context, String typeName)
@@ -475,21 +505,21 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 			boolean isLoginSolution = isLoginSolution(context);
 
-			members.add(createProperty(context, "allnames", true, "Array"));
-			if (!isLoginSolution) members.add(createProperty(context, "alldataproviders", true, "Array"));
-			members.add(createProperty(context, "allmethods", true, "Array"));
-			if (!isLoginSolution) members.add(createProperty(context, "allrelations", true, "Array"));
-			members.add(createProperty(context, "allvariables", true, "Array"));
+			members.add(createProperty(context, "allnames", true, "Array", SPECIAL_PROPERTY));
+			if (!isLoginSolution) members.add(createProperty(context, "alldataproviders", true, "Array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "allmethods", true, "Array", SPECIAL_PROPERTY));
+			if (!isLoginSolution) members.add(createProperty(context, "allrelations", true, "Array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "allvariables", true, "Array", SPECIAL_PROPERTY));
 
 			// controller and foundset
-			members.add(createProperty(context, "controller", true, "controller"));
-			if (!isLoginSolution) members.add(createProperty(context, "foundset", true, FoundSet.JS_FOUNDSET));
-
+			members.add(createProperty(context, "controller", true, "controller", PROPERTY));
+			if (!isLoginSolution) members.add(createProperty(context, "foundset", true, FoundSet.JS_FOUNDSET, FOUNDSET_IMAGE));
+			type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
 			return type;
 		}
 	}
 
-	public class ElementsScopeCreator implements IScopeTypeCreator
+	public static class ElementsScopeCreator implements IScopeTypeCreator
 	{
 
 		public Type createType(ITypeInfoContext context, String typeName)
@@ -500,9 +530,10 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 			EList<Member> members = type.getMembers();
 
-			members.add(createProperty(context, "allnames", true, "Array"));
-			members.add(createProperty(context, "length", true, "Number"));
+			members.add(createProperty(context, "allnames", true, "Array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "length", true, "Number", PROPERTY));
 
+			type.setAttribute(IMAGE_DESCRIPTOR, PROPERTY);
 			return type;
 		}
 	}
@@ -514,6 +545,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			IDataProvider provider = dataproviders.next();
 			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 			property.setName(provider.getDataProviderID());
+			property.setAttribute(RESOURCE, provider);
 			switch (provider.getDataProviderType())
 			{
 				case IColumnTypes.DATETIME :
@@ -527,6 +559,26 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 					property.setType(context.getType("String"));
 					break;
 			}
+			ImageDescriptor image = COLUMN_IMAGE;
+			String variableType = "Column";
+			if (provider instanceof AggregateVariable)
+			{
+				image = COLUMN_AGGR_IMAGE;
+				variableType = "Aggregate (" + ((AggregateVariable)provider).getRootObject().getName() + ")";
+			}
+			else if (provider instanceof ScriptCalculation)
+			{
+				image = COLUMN_CALC_IMAGE;
+				variableType = "Calculation (" + ((ScriptCalculation)provider).getRootObject().getName() + ")";
+			}
+			else if (provider instanceof ScriptVariable)
+			{
+				image = FORM_VARIABLE_IMAGE;
+				variableType = "ScriptVariable";
+				property.setAttribute(RESOURCE, ((ScriptVariable)provider).getSerializableRuntimeProperty(IScriptProvider.FILENAME));
+			}
+			property.setAttribute(IMAGE_DESCRIPTOR, image);
+			property.setDescription(variableType);
 			members.add(property);
 		}
 	}
@@ -544,11 +596,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		while (relations.hasNext())
 		{
 			Relation relation = relations.next();
-			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
-			property.setName(relation.getName());
-			property.setReadOnly(true);
-			property.setDescription(getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()));
-			property.setType(context.getType(FoundSet.JS_FOUNDSET + "<" + relation.getName() + ">"));
+			Property property = createProperty(relation.getName(), true, context.getType(FoundSet.JS_FOUNDSET + "<" + relation.getName() + ">"),
+				getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE, relation);
 			members.add(property);
 		}
 	}

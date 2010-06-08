@@ -28,7 +28,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Method;
@@ -39,11 +41,11 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.mozilla.javascript.JavaMembers;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 
-import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
@@ -53,9 +55,9 @@ import com.servoy.eclipse.core.doc.IParameter;
 import com.servoy.eclipse.core.doc.ITypedScriptObject;
 import com.servoy.eclipse.core.doc.ScriptParameter;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -85,22 +87,69 @@ import com.servoy.j2db.util.ServoyException;
 @SuppressWarnings("nls")
 public abstract class TypeCreator
 {
+	protected final static ImageDescriptor METHOD = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
+		new Path("/icons/function.gif"), null));
+	protected final static ImageDescriptor PROPERTY = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
+		new Path("/icons/properties_icon.gif"), null));
+	protected final static ImageDescriptor CONSTANT = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
+		new Path("/icons/constant.gif"), null));
+
+	protected final static ImageDescriptor SPECIAL_PROPERTY = ImageDescriptor.createFromURL(FileLocator.find(
+		com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/special_properties_icon.gif"), null));
+
+	protected final static ImageDescriptor GLOBAL_VAR_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
+		"/icons/global_variable.gif"), null));
+	protected final static ImageDescriptor GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
+		"/icons/global_method.gif"), null));
+
+	protected final static ImageDescriptor FORM_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(
+		com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/designer.gif"), null));
+	protected final static ImageDescriptor FORM_METHOD_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
+		"/icons/form_method.gif"), null));
+	protected final static ImageDescriptor FORM_VARIABLE_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
+		"/icons/form_variable.gif"), null));
+
+	protected final static ImageDescriptor FOUNDSET_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
+		"/icons/foundset.gif"), null));
+	protected final static ImageDescriptor RELATION_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
+		"/icons/relation.gif"), null));
+
+	protected final static ImageDescriptor COLUMN_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
+		"/icons/column.gif"), null));
+	protected final static ImageDescriptor COLUMN_AGGR_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
+		"/icons/columnaggr.gif"), null));
+	protected final static ImageDescriptor COLUMN_CALC_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
+		"/icons/columncalc.gif"), null));
+
+	protected final static ImageDescriptor GLOBALS = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
+		new Path("/icons/globe.gif"), null));
+	protected final static ImageDescriptor FORMS = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
+		new Path("/icons/forms.gif"), null));
+
+	public static final String IMAGE_DESCRIPTOR = "ImageDescriptor";
+	public static final String RESOURCE = "RESOURCE";
+
 	private final ConcurrentMap<String, Type> types = new ConcurrentHashMap<String, Type>();
 	private final ConcurrentMap<String, Type> dynamicTypes = new ConcurrentHashMap<String, Type>();
 	private final ConcurrentMap<String, Class< ? >> classTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, IScopeTypeCreator> scopeTypes = new ConcurrentHashMap<String, IScopeTypeCreator>();
+	private boolean initialized;
 	protected static final List<String> objectMethods = Arrays.asList(new String[] { "wait", "toString", "hashCode", "equals", "notify", "notifyAll", "getClass" });
 
 	public TypeCreator()
 	{
 		super();
+	}
+
+	protected void initalize()
+	{
 		registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class));
 		registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class));
 		registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class));
 		registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class));
 		registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(ServoyException.class));
 
-		List<IClientPlugin> lst = Activator.getDefault().getDesignClient().getPluginManager().getPlugins(IClientPlugin.class);
+		List<IClientPlugin> lst = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getPluginManager().getPlugins(IClientPlugin.class);
 		for (IClientPlugin clientPlugin : lst)
 		{
 			try
@@ -152,7 +201,8 @@ public abstract class TypeCreator
 
 	public Type getType(ITypeInfoContext context, String typeName)
 	{
-		if (typeName.equals("Number") || typeName.equals("Array") || typeName.equals("String")) return null;
+		if (typeName.equals("Number") || typeName.equals("Array") || typeName.equals("String") || typeName.equals("Date")) return null;
+		if (!initialized) initalize();
 		Type type = types.get(typeName);
 		if (type == null)
 		{
@@ -251,18 +301,19 @@ public abstract class TypeCreator
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(typeName);
 		type.setKind(TypeKind.JAVA);
-
 		EList<Member> members = type.getMembers();
 
-		if (cls == FoundSet.class)
+		fill(context, members, cls, typeName);
+
+		if (constantsOnly(typeName))
 		{
-			Property alldataproviders = TypeInfoModelFactory.eINSTANCE.createProperty();
-			alldataproviders.setName("alldataproviders");
-			alldataproviders.setDescription("the dataproviders array of this foundset");
-			members.add(alldataproviders);
+			type.setAttribute(IMAGE_DESCRIPTOR, CONSTANT);
+		}
+		else
+		{
+			type.setAttribute(IMAGE_DESCRIPTOR, PROPERTY);
 		}
 
-		fill(context, members, cls, typeName);
 		return type;
 	}
 
@@ -324,50 +375,84 @@ public abstract class TypeCreator
 
 				if (object != null)
 				{
-					Class< ? > returnType = FormDomProvider.getReturnType(object);
+					Class< ? > returnTypeClz = FormDomProvider.getReturnType(object);
 					if (type == 1)
 					{
-						Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
-						method.setName(name);
-						if (scriptObject != null && scriptObject.isDeprecated(name))
+						MemberBox[] members = null;
+						if (object instanceof NativeJavaMethod)
 						{
-							method.setDeprecated(true);
-							method.setVisible(false);
+							members = ((NativeJavaMethod)object).getMethods();
 						}
-						method.setDescription(FormDomProvider.getDoc(name, scriptObjectClass, name)); // TODO name should be of parent.
-						if (returnType != null)
+						int membersSize = members == null ? 1 : members.length;
+						for (int i = 0; i < membersSize; i++)
 						{
-							method.setType(context.getType(getMemberTypeName(context, name, returnType, typeName)));
-						}
-
-						IParameter[] scriptParams = getParameters(name, scriptObjectClass);
-						if (scriptParams.length > 0)
-						{
-							EList<Parameter> parameters = method.getParameters();
-							for (IParameter param : scriptParams)
+							Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+							method.setName(name);
+							if (scriptObject != null && scriptObject.isDeprecated(name))
 							{
-								Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
-								parameter.setName(param.getName());
-								parameter.setType(context.getType(param.getType()));
-								parameter.setKind(param.isOptional() ? ParameterKind.OPTIONAL : ParameterKind.NORMAL);
-								parameters.add(parameter);
+								method.setDeprecated(true);
+								method.setVisible(false);
 							}
+							method.setDescription(FormDomProvider.getDoc(name, scriptObjectClass, name)); // TODO name should be of parent.
+							if (returnTypeClz != null)
+							{
+								method.setType(context.getType(getMemberTypeName(context, name, returnTypeClz, typeName)));
+							}
+
+							Class< ? >[] parameterTypes = null;
+							if (membersSize > 1)
+							{
+								parameterTypes = members[i].getParameterTypes();
+							}
+
+							method.setAttribute(IMAGE_DESCRIPTOR, METHOD);
+
+
+							if (membersSize == 1 ||
+								(parameterTypes.length == 1 && parameterTypes[0].isArray() && parameterTypes[0].getComponentType() == Object.class))
+							{
+								IParameter[] scriptParams = getParameters(name, scriptObjectClass);
+								if (scriptParams.length > 0)
+								{
+									EList<Parameter> parameters = method.getParameters();
+									for (IParameter param : scriptParams)
+									{
+										Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
+										parameter.setName(param.getName());
+										parameter.setType(context.getType(param.getType()));
+										parameter.setKind(param.isOptional() ? ParameterKind.OPTIONAL : ParameterKind.NORMAL);
+										parameters.add(parameter);
+									}
+								}
+							}
+							else
+							{
+								EList<Parameter> parameters = method.getParameters();
+								for (Class< ? > paramClass : parameterTypes)
+								{
+									Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
+									parameter.setName(SolutionExplorerListContentProvider.TYPES.get(paramClass.getName()));
+									parameter.setType(context.getType(SolutionExplorerListContentProvider.TYPES.get(paramClass.getName())));
+									parameter.setKind(ParameterKind.NORMAL);
+									parameters.add(parameter);
+								}
+							}
+							membersList.add(method);
 						}
-						membersList.add(method);
 					}
 					else
 					{
-						Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
-						property.setName(name);
+						Type returnType = null;
+						if (returnTypeClz != null)
+						{
+							returnType = context.getType(getMemberTypeName(context, name, returnTypeClz, typeName));
+						}
+						Property property = createProperty(name, false, returnType, FormDomProvider.getDoc(name, scriptObjectClass, name), type == 3 ? CONSTANT
+							: PROPERTY);
 						if (scriptObject != null && scriptObject.isDeprecated(name))
 						{
 							property.setDeprecated(true);
 							property.setVisible(false);
-						}
-						property.setDescription(FormDomProvider.getDoc(name, scriptObjectClass, name)); // TODO name should be of parent.
-						if (returnType != null)
-						{
-							property.setType(context.getType(getMemberTypeName(context, name, returnType, typeName)));
 						}
 						membersList.add(property);
 					}
@@ -506,24 +591,16 @@ public abstract class TypeCreator
 		return null;
 	}
 
-	public static Property createProperty(ITypeInfoContext context, String name, boolean readonly, String type, String description)
+	protected static Member createMethod(ITypeInfoContext context, ScriptMethod sm, ImageDescriptor image)
 	{
-		Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
-		property.setName(name);
-		property.setDescription(description);
-		property.setReadOnly(readonly);
-		if (type != null)
-		{
-			property.setType(context.getType(type));
-		}
-		return property;
+		return createMethod(context, sm, image, null);
 	}
 
 	/**
 	 * @param sm
 	 * @return
 	 */
-	protected static Member createMethod(ITypeInfoContext context, ScriptMethod sm)
+	protected static Member createMethod(ITypeInfoContext context, ScriptMethod sm, ImageDescriptor image, String fileName)
 	{
 		Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
 		method.setName(sm.getName());
@@ -552,43 +629,69 @@ public abstract class TypeCreator
 		{
 			method.setDescription(comment);
 		}
+		if (image != null)
+		{
+			method.setAttribute(IMAGE_DESCRIPTOR, image);
+		}
+		if (fileName != null)
+		{
+			method.setAttribute(RESOURCE, fileName);
+		}
 		return method;
 	}
 
-
-	public static Property createProperty(ITypeInfoContext context, String name, boolean readonly, String type)
+	public static Property createProperty(ITypeInfoContext context, String name, boolean readonly, String typeName, String description, ImageDescriptor image)
 	{
-		Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
-		property.setName(name);
-		property.setReadOnly(readonly);
-		if (type != null)
-		{
-			property.setType(context.getType(type));
-		}
-		return property;
+		return createProperty(context, name, readonly, typeName, description, image, null);
 	}
 
-	public static Property createProperty(String name, boolean readonly, Type type)
+	public static Property createProperty(ITypeInfoContext context, String name, boolean readonly, String typeName, String description, ImageDescriptor image,
+		Object resource)
+	{
+		Type type = null;
+		if (typeName != null)
+		{
+			type = context.getType(typeName);
+		}
+		return createProperty(name, readonly, type, description, image, resource);
+	}
+
+
+	public static Property createProperty(ITypeInfoContext context, String name, boolean readonly, String typeName, ImageDescriptor image)
+	{
+		Type type = null;
+		if (typeName != null)
+		{
+			type = context.getType(typeName);
+		}
+		return createProperty(name, readonly, type, null, image);
+	}
+
+	public static Property createProperty(String name, boolean readonly, Type type, String description, ImageDescriptor image)
+	{
+		return createProperty(name, readonly, type, description, image, null);
+	}
+
+	public static Property createProperty(String name, boolean readonly, Type type, String description, ImageDescriptor image, Object resource)
 	{
 		Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 		property.setName(name);
 		property.setReadOnly(readonly);
+		if (description != null)
+		{
+			property.setDescription(description);
+		}
 		if (type != null)
 		{
 			property.setType(type);
 		}
-		return property;
-	}
-
-	public static Property createProperty(String name, boolean readonly, Type type, String description)
-	{
-		Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
-		property.setName(name);
-		property.setReadOnly(readonly);
-		property.setDescription(description);
-		if (type != null)
+		if (image != null)
 		{
-			property.setType(type);
+			property.setAttribute(IMAGE_DESCRIPTOR, image);
+		}
+		if (resource != null)
+		{
+			property.setAttribute(RESOURCE, resource);
 		}
 		return property;
 	}
