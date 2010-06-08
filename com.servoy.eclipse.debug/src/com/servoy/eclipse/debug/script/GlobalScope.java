@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.debug.script;
 
 import java.net.URL;
@@ -39,6 +39,7 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.scripting.DefaultScope;
 
 /**
@@ -75,6 +76,7 @@ class GlobalScope extends DefaultScope
 	{
 		ArrayList<String> al = new ArrayList<String>();
 		FlattenedSolution fs = FormDomProvider.CURRENT_PROJECT.get().getEditingFlattenedSolution();
+		boolean isLoginSolution = fs.getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION;
 		Iterator<ScriptVariable> scriptGlobalVariables = fs.getScriptVariables(false);
 		while (scriptGlobalVariables.hasNext())
 		{
@@ -84,7 +86,7 @@ class GlobalScope extends DefaultScope
 		{
 			al.add("allmethods"); //$NON-NLS-1$
 			al.add("allvariables"); //$NON-NLS-1$
-			al.add("allrelations"); //$NON-NLS-1$
+			if (!isLoginSolution) al.add("allrelations"); //$NON-NLS-1$
 			al.add("currentcontroller"); //$NON-NLS-1$
 			Iterator<ScriptMethod> scriptMethods = fs.getScriptMethods(false);
 			while (scriptMethods.hasNext())
@@ -92,18 +94,21 @@ class GlobalScope extends DefaultScope
 				al.add(scriptMethods.next().getName());
 			}
 		}
-		// relations
-		try
+		if (!isLoginSolution)
 		{
-			Iterator<Relation> relations = fs.getRelations(null, true, false); // returns only global relations
-			while (relations.hasNext())
+			// relations
+			try
 			{
-				al.add(relations.next().getName());
+				Iterator<Relation> relations = fs.getRelations(null, true, false); // returns only global relations
+				while (relations.hasNext())
+				{
+					al.add(relations.next().getName());
+				}
 			}
-		}
-		catch (RepositoryException e)
-		{
-			ServoyLog.logError("error in codecompletion global relations", e);
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError("error in codecompletion global relations", e);
+			}
 		}
 
 		return al.toArray();

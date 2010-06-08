@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.debug.script;
 
 import java.net.URL;
@@ -45,6 +45,7 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.scripting.DefaultScope;
 
 /**
@@ -96,25 +97,27 @@ class FormScope extends DefaultScope implements IProposalHolder
 	@Override
 	public Object[] getIds()
 	{
+		FlattenedSolution fs = FormDomProvider.CURRENT_PROJECT.get().getEditingFlattenedSolution();
+		boolean isLoginSolution = fs.getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION;
+
 		ArrayList<String> al = new ArrayList<String>();
 
 		// first the fixed.
 		al.add("allnames"); //$NON-NLS-1$
-		al.add("alldataproviders"); //$NON-NLS-1$
+		if (!isLoginSolution) al.add("alldataproviders"); //$NON-NLS-1$
 		al.add("allmethods"); //$NON-NLS-1$
-		al.add("allrelations"); //$NON-NLS-1$
+		if (!isLoginSolution) al.add("allrelations"); //$NON-NLS-1$
 		al.add("allvariables"); //$NON-NLS-1$
 
 		// controller, elements and foundset
 		al.add("controller"); //$NON-NLS-1$
 		al.add("elements"); //$NON-NLS-1$
-		al.add("foundset"); //$NON-NLS-1$
+		if (!isLoginSolution) al.add("foundset"); //$NON-NLS-1$
 
 		if (form != null)
 		{
 			try
 			{
-				FlattenedSolution fs = FormDomProvider.CURRENT_PROJECT.get().getEditingFlattenedSolution();
 				// all methods of this form.
 				Form formToUse = form;
 				if (form.getExtendsFormID() > 0)
@@ -135,16 +138,19 @@ class FormScope extends DefaultScope implements IProposalHolder
 					al.add(scriptVariables.next().getDataProviderID());
 				}
 
-				// data providers
-				Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(form.getTable());
-
-				if (allDataProvidersForTable != null) al.addAll(allDataProvidersForTable.keySet());
-
-				// relations
-				Iterator<Relation> relations = fs.getRelations(form.getTable(), true, false);
-				while (relations.hasNext())
+				if (!isLoginSolution)
 				{
-					al.add(relations.next().getName());
+					// data providers
+					Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(form.getTable());
+
+					if (allDataProvidersForTable != null) al.addAll(allDataProvidersForTable.keySet());
+
+					// relations
+					Iterator<Relation> relations = fs.getRelations(form.getTable(), true, false);
+					while (relations.hasNext())
+					{
+						al.add(relations.next().getName());
+					}
 				}
 			}
 			catch (Exception e)
