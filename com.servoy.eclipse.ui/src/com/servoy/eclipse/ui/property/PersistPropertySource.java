@@ -825,17 +825,14 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 				{
 					// String property, select a data provider
 					Table table = null;
-					if (flattenedEditingSolution.getSolution().getSolutionType() != SolutionMetaData.LOGIN_SOLUTION)
+					try
 					{
-						try
-						{
-							table = form.getTable();
-						}
-						catch (Exception ex)
-						{
-							ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
-							return null;
-						}
+						table = form.getTable();
+					}
+					catch (Exception ex)
+					{
+						ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
+						return null;
 					}
 
 					INCLUDE_RELATIONS includeRelations;
@@ -1376,12 +1373,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		if (!RepositoryHelper.shouldShow(name, element, persist.getClass()))
 		{
 			return false;
-		}
-
-		if (persist instanceof Form && ((Form)persist).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION)
-		{
-			if (CoreUtils.isCommandProperty(name) || "onRecordEditStartMethodID".equals(name) || "onRecordEditStopMethodID".equals(name) ||
-				"onRecordSelectionMethodID".equals(name) || "dataSource".equals(name) || "initialSort".equals(name) || "namedFoundSet".equals(name)) return false;
 		}
 
 		if (name.equals("labelFor") && persist instanceof GraphicalComponent)
@@ -2290,7 +2281,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			final DataProviderOptions options;
 			if (portal != null)
 			{
-				if (flattenedEditingSolution.getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION) return null;
 				Relation[] relations = flattenedEditingSolution.getRelationSequence(portal.getRelationName());
 				if (relations == null)
 				{
@@ -2302,18 +2292,16 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			else
 			{
 				if (form == null) return null;
-				if (flattenedEditingSolution.getSolution().getSolutionType() != SolutionMetaData.LOGIN_SOLUTION)
+				try
 				{
-					try
-					{
-						table = form.getTable();
-					}
-					catch (Exception ex)
-					{
-						ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
-						return null;
-					}
+					table = form.getTable();
 				}
+				catch (Exception ex)
+				{
+					ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
+					return null;
+				}
+
 				options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, table != null, true, true, table != null,
 					table != null, INCLUDE_RELATIONS.NESTED, true, null);
 			}

@@ -45,7 +45,6 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
-import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.scripting.DefaultScope;
 
 /**
@@ -98,21 +97,19 @@ class FormScope extends DefaultScope implements IProposalHolder
 	public Object[] getIds()
 	{
 		FlattenedSolution fs = FormDomProvider.CURRENT_PROJECT.get().getEditingFlattenedSolution();
-		boolean isLoginSolution = fs.getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION;
-
 		ArrayList<String> al = new ArrayList<String>();
 
 		// first the fixed.
 		al.add("allnames"); //$NON-NLS-1$
-		if (!isLoginSolution) al.add("alldataproviders"); //$NON-NLS-1$
+		al.add("alldataproviders"); //$NON-NLS-1$
 		al.add("allmethods"); //$NON-NLS-1$
-		if (!isLoginSolution) al.add("allrelations"); //$NON-NLS-1$
+		al.add("allrelations"); //$NON-NLS-1$
 		al.add("allvariables"); //$NON-NLS-1$
 
 		// controller, elements and foundset
 		al.add("controller"); //$NON-NLS-1$
 		al.add("elements"); //$NON-NLS-1$
-		if (!isLoginSolution) al.add("foundset"); //$NON-NLS-1$
+		al.add("foundset"); //$NON-NLS-1$
 
 		if (form != null)
 		{
@@ -138,19 +135,16 @@ class FormScope extends DefaultScope implements IProposalHolder
 					al.add(scriptVariables.next().getDataProviderID());
 				}
 
-				if (!isLoginSolution)
+				// data providers
+				Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(form.getTable());
+
+				if (allDataProvidersForTable != null) al.addAll(allDataProvidersForTable.keySet());
+
+				// relations
+				Iterator<Relation> relations = fs.getRelations(form.getTable(), true, false);
+				while (relations.hasNext())
 				{
-					// data providers
-					Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(form.getTable());
-
-					if (allDataProvidersForTable != null) al.addAll(allDataProvidersForTable.keySet());
-
-					// relations
-					Iterator<Relation> relations = fs.getRelations(form.getTable(), true, false);
-					while (relations.hasNext())
-					{
-						al.add(relations.next().getName());
-					}
+					al.add(relations.next().getName());
 				}
 			}
 			catch (Exception e)

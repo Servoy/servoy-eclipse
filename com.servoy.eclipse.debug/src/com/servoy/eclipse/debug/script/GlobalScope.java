@@ -39,7 +39,6 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
-import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.scripting.DefaultScope;
 
 /**
@@ -76,7 +75,7 @@ class GlobalScope extends DefaultScope
 	{
 		ArrayList<String> al = new ArrayList<String>();
 		FlattenedSolution fs = FormDomProvider.CURRENT_PROJECT.get().getEditingFlattenedSolution();
-		boolean isLoginSolution = fs.getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION;
+
 		Iterator<ScriptVariable> scriptGlobalVariables = fs.getScriptVariables(false);
 		while (scriptGlobalVariables.hasNext())
 		{
@@ -86,7 +85,7 @@ class GlobalScope extends DefaultScope
 		{
 			al.add("allmethods"); //$NON-NLS-1$
 			al.add("allvariables"); //$NON-NLS-1$
-			if (!isLoginSolution) al.add("allrelations"); //$NON-NLS-1$
+			al.add("allrelations"); //$NON-NLS-1$
 			al.add("currentcontroller"); //$NON-NLS-1$
 			Iterator<ScriptMethod> scriptMethods = fs.getScriptMethods(false);
 			while (scriptMethods.hasNext())
@@ -94,21 +93,19 @@ class GlobalScope extends DefaultScope
 				al.add(scriptMethods.next().getName());
 			}
 		}
-		if (!isLoginSolution)
+
+		// relations
+		try
 		{
-			// relations
-			try
+			Iterator<Relation> relations = fs.getRelations(null, true, false); // returns only global relations
+			while (relations.hasNext())
 			{
-				Iterator<Relation> relations = fs.getRelations(null, true, false); // returns only global relations
-				while (relations.hasNext())
-				{
-					al.add(relations.next().getName());
-				}
+				al.add(relations.next().getName());
 			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError("error in codecompletion global relations", e);
-			}
+		}
+		catch (RepositoryException e)
+		{
+			ServoyLog.logError("error in codecompletion global relations", e);
 		}
 
 		return al.toArray();
