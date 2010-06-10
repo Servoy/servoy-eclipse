@@ -67,7 +67,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 
 				if ("loginFormID".equals(propertyName))
 				{
-					resolutions.add(new CreateLoginSolutionQuickFix(solName));
+					//resolutions.add(new CreateLoginSolutionQuickFix(solName));
 					resolutions.add(new MarkSolutionAsWebclientOnlyQuickFix(solName));
 					resolutions.add(new TurnEnhancedSecurityOffQuickFix());
 				}
