@@ -172,11 +172,16 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			String classType = typeName.substring(0, index);
 			Type type = createType(context, classType, typeName);
 			if (type == null) type = createDynamicType(context, classType);
-			type.setName(typeName);
 			DynamicTypeFiller filler = dynamicTypeCreator.get(classType);
 			if (type != null && filler != null)
 			{
+				type.setName(typeName);
 				filler.fillType(type, context, typeName.substring(index + 1, typeName.length() - 1));
+			}
+			if (type == null)
+			{
+				// TODO better support for Array<Object> or Array<byte>
+				type = context.getType(classType);
 			}
 			return type;
 		}
