@@ -423,6 +423,10 @@
             class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.badStructure">
       </markerResolutionGenerator>
+      <markerResolutionGenerator
+            class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.formWithDatasourceInLoginSolution">
+      </markerResolutionGenerator>      
    </extension>
    <extension
          point="org.eclipse.ui.splashHandlers">
@@ -722,7 +726,7 @@
             type="com.servoy.eclipse.core.builderProblem">
       </super>
    </extension>
-      <extension
+   <extension
          id="com.servoy.eclipse.core.deprecatedPropertyUsage"
          name="Deprecated Property Usage"
          point="org.eclipse.core.resources.markers">
@@ -733,5 +737,19 @@
             type="com.servoy.eclipse.core.builderProblem">
       </super>
    </extension>
+   <extension
+         id="com.servoy.eclipse.core.formWithDatasourceInLoginSolution"
+         name="Form with datasource in login solution"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+   </extension>   
+   
+   
+   
    
 </plugin>

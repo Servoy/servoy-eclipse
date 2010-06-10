@@ -268,6 +268,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String INVALID_EVENT_METHOD = Activator.PLUGIN_ID + ".invalidEventMethod"; //$NON-NLS-1$
 	public static final String DEPRECATED_METHOD_USAGE = Activator.PLUGIN_ID + ".deprecatedMethodUsage"; //$NON-NLS-1$
 	public static final String DEPRECATED_PROPERTY_USAGE = Activator.PLUGIN_ID + ".deprecatedPropertyUsage"; //$NON-NLS-1$
+	public static final String FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION = Activator.PLUGIN_ID + ".formWithDatasourceInLoginSolution"; //$NON-NLS-1$
 
 	private SAXParserFactory parserFactory;
 	private final HashSet<String> referencedProjectsSet = new HashSet<String>();
@@ -2062,12 +2063,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						return IPersistVisitor.CONTINUE_TRAVERSAL;
 					}
-
 				});
 				checkRelations(project, missingServers);
 				checkCancel();
 				checkStyles(project);
 				checkI18n(project);
+				checkLoginSolution(project);
 			}
 
 
@@ -2721,6 +2722,61 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 							return IPersistVisitor.CONTINUE_TRAVERSAL;
 						}
+					});
+				}
+			}
+		}
+	}
+
+	private void checkLoginSolution(IProject project)
+	{
+		ServoyProject servoyProject = servoyModel.getServoyProject(project.getName());
+		if (servoyProject != null)
+		{
+			boolean isLoginSolution = servoyProject.getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION;
+			ServoyProject[] modules = getSolutionModules(servoyProject);
+			ServoyProject[] projectWithModules = new ServoyProject[modules.length + 1];
+			projectWithModules[0] = servoyProject;
+			System.arraycopy(modules, 0, projectWithModules, 1, modules.length);
+
+			for (ServoyProject sp : projectWithModules)
+			{
+				final IProject prj = sp.getProject();
+				deleteMarkers(prj, FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION);
+				if (isLoginSolution)
+				{
+					sp.getSolution().acceptVisitor(new IPersistVisitor()
+					{
+						public Object visit(IPersist o)
+						{
+							if (o.getTypeID() == IRepository.FORMS)
+							{
+								Form form = (Form)o;
+								if (((Form)o).getDataSource() != null) // login solution cannot have forms with datasource
+								{
+									String message = "Form '" + form.getName() + "' is part of a login solution and it must not have the datasource property set; its current datasource is : '" + form.getDataSource() + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+									IMarker marker = addMarker(prj, FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION, message, -1, IMarker.SEVERITY_ERROR,
+										IMarker.PRIORITY_HIGH, null, form);
+									if (marker != null)
+									{
+										try
+										{
+											marker.setAttribute("Uuid", o.getUUID().toString()); //$NON-NLS-1$
+											marker.setAttribute("SolutionName", form.getSolution().getName()); //$NON-NLS-1$
+											marker.setAttribute("PropertyName", "dataSource"); //$NON-NLS-1$ //$NON-NLS-2$
+											marker.setAttribute("DisplayName", RepositoryHelper.getDisplayName("dataSource", o.getClass())); //$NON-NLS-1$ //$NON-NLS-2$
+										}
+										catch (CoreException ex)
+										{
+											ServoyLog.logError(ex);
+										}
+									}
+								}
+								return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+							}
+							return IPersistVisitor.CONTINUE_TRAVERSAL;
+						}
+
 					});
 				}
 			}
