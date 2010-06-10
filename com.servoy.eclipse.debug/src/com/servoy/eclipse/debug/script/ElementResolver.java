@@ -88,6 +88,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 	public Set<String> listGlobals(ITypeInfoContext context, String prefix)
 	{
 		Set<String> typeNames = getTypeNames(prefix);
+		typeNames.addAll(typeNameCreators.keySet());
 		Form form = getForm(context);
 		if (form != null)
 		{

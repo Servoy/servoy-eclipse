@@ -70,7 +70,7 @@ import com.servoy.j2db.util.Utils;
 @SuppressWarnings("nls")
 public class TypeProvider extends TypeCreator implements ITypeProvider
 {
-	private final ConcurrentMap<String, DynamicTypeFiller> dynamicTypeCreator = new ConcurrentHashMap<String, DynamicTypeFiller>();
+	private final ConcurrentMap<String, DynamicTypeFiller> dynamicTypeFillers = new ConcurrentHashMap<String, DynamicTypeFiller>();
 	private final Set<String> constantOnly = new HashSet<String>();
 
 	public TypeProvider()
@@ -84,10 +84,10 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addScopeType("Form", new FormScopeCreator());
 		addScopeType("Elements", new ElementsScopeCreator());
 
-		dynamicTypeCreator.put(FoundSet.JS_FOUNDSET, new DataProviderFiller());
-		dynamicTypeCreator.put(Record.JS_RECORD, new DataProviderFiller());
-		dynamicTypeCreator.put("Form", new FormScopeFiller());
-		dynamicTypeCreator.put("Elements", new ElementsScopeFiller());
+		dynamicTypeFillers.put(FoundSet.JS_FOUNDSET, new DataProviderFiller());
+		dynamicTypeFillers.put(Record.JS_RECORD, new DataProviderFiller());
+		dynamicTypeFillers.put("Form", new FormScopeFiller());
+		dynamicTypeFillers.put("Elements", new ElementsScopeFiller());
 
 	}
 
@@ -163,20 +163,19 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	}
 
 	@Override
-	protected Type createDynamicType(ITypeInfoContext context, String typeName)
+	protected Type createDynamicType(ITypeInfoContext context, String typeNameClassName, String fullTypeName)
 	{
 		// is it a 'generified' type
-		int index = typeName.indexOf('<');
+		int index = typeNameClassName.indexOf('<');
 		if (index != -1)
 		{
-			String classType = typeName.substring(0, index);
-			Type type = createType(context, classType, typeName);
-			if (type == null) type = createDynamicType(context, classType);
-			DynamicTypeFiller filler = dynamicTypeCreator.get(classType);
+			String classType = typeNameClassName.substring(0, index);
+			Type type = createType(context, classType, typeNameClassName);
+			if (type == null) type = createDynamicType(context, classType, typeNameClassName);
+			DynamicTypeFiller filler = dynamicTypeFillers.get(classType);
 			if (type != null && filler != null)
 			{
-				type.setName(typeName);
-				filler.fillType(type, context, typeName.substring(index + 1, typeName.length() - 1));
+				filler.fillType(type, context, typeNameClassName.substring(index + 1, typeNameClassName.length() - 1));
 			}
 			if (type == null)
 			{
@@ -185,48 +184,16 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			}
 			return type;
 		}
-		return super.createDynamicType(context, typeName);
+		return super.createDynamicType(context, typeNameClassName, fullTypeName);
 	}
-
-	/**
-	 * @see com.servoy.eclipse.debug.script.TypeCreator#getTypeName(java.lang.String, java.lang.Class, java.lang.Class, java.lang.String)
-	 */
-	@Override
-	protected String getMemberTypeName(ITypeInfoContext context, String memberName, Class< ? > memberReturnType, String objectTypeName)
-	{
-		int index = objectTypeName.indexOf('<');
-		if (index != -1)
-		{
-			DynamicTypeFiller dynamicTypeFiller = dynamicTypeCreator.get(getRealName(memberReturnType.getSimpleName()));
-			if (dynamicTypeFiller != null)
-			{
-				String memberType = dynamicTypeFiller.generateMemberType(context, memberName, memberReturnType,
-					objectTypeName.substring(index + 1, objectTypeName.length() - 1));
-				if (memberType != null) return memberType;
-			}
-		}
-		return super.getMemberTypeName(context, memberName, memberReturnType, objectTypeName);
-	}
-
 
 	private interface DynamicTypeFiller
 	{
 		public void fillType(Type type, ITypeInfoContext context, String config);
-
-		/**
-		 * @param context TODO
-		 * @param memberName
-		 * @param memberReturnType
-		 * @param substring
-		 * @param i
-		 * @return
-		 */
-		public String generateMemberType(ITypeInfoContext context, String memberName, Class< ? > memberReturnType, String config);
 	}
 
 	private class FormScopeFiller implements DynamicTypeFiller
 	{
-
 		public void fillType(Type type, ITypeInfoContext context, String config)
 		{
 			FlattenedSolution fs = getFlattenedSolution(context);
@@ -293,12 +260,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				}
 			}
 		}
-
-		public String generateMemberType(ITypeInfoContext context, String memberName, Class< ? > memberReturnType, String config)
-		{
-			return null;
-		}
-
 	}
 
 
@@ -352,12 +313,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 					}
 				}
 			}
-		}
-
-		public String generateMemberType(ITypeInfoContext context, String memberName, Class< ? > memberReturnType, String config)
-		{
-			// TODO Auto-generated method stub
-			return null;
 		}
 
 		private Type getElementType(ITypeInfoContext context, Class< ? > cls)
@@ -445,40 +400,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			}
 
 		}
-
-		/**
-		 * @see com.servoy.eclipse.debug.script.TypeProvider.DynamicTypeFiller#generateMemberType(java.lang.String, java.lang.Class, java.lang.String, int)
-		 */
-		public String generateMemberType(ITypeInfoContext context, String memberName, Class< ? > memberReturnType, String config)
-		{
-			if (memberReturnType == Record.class)
-			{
-				return Record.JS_RECORD + '<' + config + '>';
-			}
-			if (memberReturnType == FoundSet.class)
-			{
-				if (memberName.equals("unrelated"))
-				{
-					if (!config.startsWith(ElementResolver.FOUNDSET_TABLE_CONFIG))
-					{
-						// its really a relation, unrelate it.
-						FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
-						if (fs != null)
-						{
-							Relation relation = fs.getRelation(config);
-							if (relation != null)
-							{
-								return FoundSet.JS_FOUNDSET + '<' + ElementResolver.FOUNDSET_TABLE_CONFIG + relation.getForeignServerName() + '.' +
-									relation.getForeignTableName() + '>';
-							}
-						}
-						return FoundSet.JS_FOUNDSET;
-					}
-				}
-				return FoundSet.JS_FOUNDSET + '<' + config + '>';
-			}
-			return null;
-		}
 	}
 
 	private class FoundSetCreator implements IScopeTypeCreator
@@ -486,7 +407,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 		public Type createType(ITypeInfoContext context, String fullTypeName)
 		{
-			Type type = TypeProvider.this.createType(context, FoundSet.JS_FOUNDSET, FoundSet.class);
+			Type type = TypeProvider.this.createType(context, fullTypeName, FoundSet.class);
 			type.setAttribute(IMAGE_DESCRIPTOR, FOUNDSET_IMAGE);
 
 			Property alldataproviders = TypeInfoModelFactory.eINSTANCE.createProperty();

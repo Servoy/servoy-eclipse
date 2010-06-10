@@ -66,6 +66,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.MethodArgument;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.plugins.IClientPlugin;
@@ -224,7 +225,7 @@ public abstract class TypeCreator
 				}
 				else
 				{
-					type = createDynamicType(context, typeName);
+					type = createDynamicType(context, typeName, typeName);
 					if (type != null)
 					{
 						Type previous = dynamicTypes.putIfAbsent(typeName, type);
@@ -273,12 +274,12 @@ public abstract class TypeCreator
 		}
 	}
 
-	protected Type createDynamicType(ITypeInfoContext context, String typeName)
+	protected Type createDynamicType(ITypeInfoContext context, String typeNameClassName, String fullTypeName)
 	{
-		IScopeTypeCreator creator = scopeTypes.get(typeName);
+		IScopeTypeCreator creator = scopeTypes.get(typeNameClassName);
 		if (creator != null)
 		{
-			return creator.createType(context, typeName);
+			return creator.createType(context, fullTypeName);
 		}
 		return null;
 	}
@@ -470,6 +471,38 @@ public abstract class TypeCreator
 	@SuppressWarnings("unused")
 	protected String getMemberTypeName(ITypeInfoContext context, String memberName, Class< ? > memberReturnType, String objectTypeName)
 	{
+		int index = objectTypeName.indexOf('<');
+		if (index != -1)
+		{
+			String config = objectTypeName.substring(index + 1, objectTypeName.length() - 1);
+
+			if (memberReturnType == Record.class)
+			{
+				return Record.JS_RECORD + '<' + config + '>';
+			}
+			if (memberReturnType == FoundSet.class)
+			{
+				if (memberName.equals("unrelated"))
+				{
+					if (!config.startsWith(ElementResolver.FOUNDSET_TABLE_CONFIG))
+					{
+						// its really a relation, unrelate it.
+						FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
+						if (fs != null)
+						{
+							Relation relation = fs.getRelation(config);
+							if (relation != null)
+							{
+								return FoundSet.JS_FOUNDSET + '<' + ElementResolver.FOUNDSET_TABLE_CONFIG + relation.getForeignServerName() + '.' +
+									relation.getForeignTableName() + '>';
+							}
+						}
+						return FoundSet.JS_FOUNDSET;
+					}
+				}
+				return FoundSet.JS_FOUNDSET + '<' + config + '>';
+			}
+		}
 		return memberReturnType.getSimpleName();
 	}
 
