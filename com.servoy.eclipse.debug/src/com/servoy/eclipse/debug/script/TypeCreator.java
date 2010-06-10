@@ -133,7 +133,7 @@ public abstract class TypeCreator
 	private final ConcurrentMap<String, Type> dynamicTypes = new ConcurrentHashMap<String, Type>();
 	private final ConcurrentMap<String, Class< ? >> classTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, IScopeTypeCreator> scopeTypes = new ConcurrentHashMap<String, IScopeTypeCreator>();
-	private boolean initialized;
+	private volatile boolean initialized;
 	protected static final List<String> objectMethods = Arrays.asList(new String[] { "wait", "toString", "hashCode", "equals", "notify", "notifyAll", "getClass" });
 
 	public TypeCreator()
@@ -141,8 +141,9 @@ public abstract class TypeCreator
 		super();
 	}
 
-	protected void initalize()
+	protected synchronized void initalize()
 	{
+		if (initialized) return;
 		registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class));
 		registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class));
 		registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class));
@@ -170,6 +171,7 @@ public abstract class TypeCreator
 				clearDynamicTypes();
 			}
 		});
+		initialized = true;
 	}
 
 	private void clearDynamicTypes()

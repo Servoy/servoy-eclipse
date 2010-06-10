@@ -17,6 +17,7 @@
 package com.servoy.eclipse.debug.script;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,8 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 
 	private static final List<String> noneConstantTypes = Arrays.asList(new String[] { "application", "security", "solutionModel", "databaseManager", "controller", "currentcontroller", "foundset", "forms", "elements", "globals" });
 
+	private final Map<String, ITypeNameCreator> typeNameCreators = new HashMap<String, ElementResolver.ITypeNameCreator>();
+
 	public ElementResolver()
 	{
 		addType("application", JSApplication.class);
@@ -68,10 +71,12 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		addType("controller", JSForm.class);
 		addType("currentcontroller", JSForm.class);
 
-		addScopeType("foundset", new FoundsetScopeCreator());
 		addScopeType("forms", new FormsScopeCreator());
-		addScopeType("elements", new ElementsScopeCreator());
 		addScopeType("globals", new GlobalScopeCreator());
+
+		typeNameCreators.put("foundset", new FoundsetTypeNameCreator());
+		typeNameCreators.put("elements", new ElementsTypeNameCreator());
+
 	}
 
 	@Override
@@ -148,7 +153,16 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 
 	public Element resolveElement(ITypeInfoContext context, String name)
 	{
-		Type type = getType(context, name);
+		Type type = null;
+		String typeName = getTypeName(context, name);
+		if (typeName != null)
+		{
+			type = context.getType(typeName);
+		}
+		else
+		{
+			type = getType(context, name);
+		}
 		boolean readOnly = true;
 		ImageDescriptor image = null;
 		Object resource = null;
@@ -218,6 +232,13 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		{
 			return createProperty(name, readOnly, type, null, image, resource);
 		}
+		return null;
+	}
+
+	private String getTypeName(ITypeInfoContext context, String name)
+	{
+		ITypeNameCreator nameCreator = typeNameCreators.get(name);
+		if (nameCreator != null) return nameCreator.getTypeName(context, name);
 		return null;
 	}
 
@@ -323,44 +344,36 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		}
 	}
 
-	private class ElementsScopeCreator implements IScopeTypeCreator
+	private class ElementsTypeNameCreator implements ITypeNameCreator
 	{
 		/**
 		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
 		 */
-		public Type createType(ITypeInfoContext context, String fullTypeName)
+		public String getTypeName(ITypeInfoContext context, String fullTypeName)
 		{
 			Form form = getForm(context);
-			Type type = null;
 			if (form != null)
 			{
-				type = context.getType("Elements<" + form.getName() + '>');
+				return "Elements<" + form.getName() + '>';
 			}
-			else
-			{
-				type = context.getType("Elements");
-			}
-			type.setAttribute(IMAGE_DESCRIPTOR, PROPERTY);
-			return type;
+			return "Elements";
 		}
 	}
 
-	private class FoundsetScopeCreator implements IScopeTypeCreator
+	private class FoundsetTypeNameCreator implements ITypeNameCreator
 	{
 		/**
 		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
 		 */
-		public Type createType(ITypeInfoContext context, String fullTypeName)
+		public String getTypeName(ITypeInfoContext context, String fullTypeName)
 		{
 			Form form = getForm(context);
-			Type type = null;
 			if (form != null)
 			{
 				try
 				{
 					Table table = form.getTable();
-					if (table != null) type = context.getType(FoundSet.JS_FOUNDSET + '<' + FOUNDSET_TABLE_CONFIG + table.getServerName() + '.' +
-						table.getName() + '>');
+					if (table != null) return FoundSet.JS_FOUNDSET + '<' + FOUNDSET_TABLE_CONFIG + table.getServerName() + '.' + table.getName() + '>';
 				}
 				catch (RepositoryException e)
 				{
@@ -368,12 +381,12 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 				}
 
 			}
-			else
-			{
-				type = context.getType(FoundSet.JS_FOUNDSET);
-			}
-			type.setAttribute(IMAGE_DESCRIPTOR, FOUNDSET_IMAGE);
-			return type;
+			return FoundSet.JS_FOUNDSET;
 		}
+	}
+
+	public interface ITypeNameCreator
+	{
+		public String getTypeName(ITypeInfoContext context, String typeName);
 	}
 }

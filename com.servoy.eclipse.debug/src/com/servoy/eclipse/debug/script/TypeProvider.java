@@ -92,33 +92,36 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	}
 
 	@Override
-	protected void initalize()
+	protected synchronized void initalize()
 	{
 		super.initalize();
-		Set<String> typeNames = getTypeNames(null);
-		for (String name : typeNames)
+		if (constantOnly.size() == 0)
 		{
-			Class< ? > cls = getTypeClass(name);
-			if (cls != null)
+			Set<String> typeNames = getTypeNames(null);
+			for (String name : typeNames)
 			{
-				ArrayList<String> al = new ArrayList<String>();
-				JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(cls, null);
-				if (javaMembers != null)
+				Class< ? > cls = getTypeClass(name);
+				if (cls != null)
 				{
-					Object[] members = javaMembers.getIds(false);
-					for (Object element : members)
+					ArrayList<String> al = new ArrayList<String>();
+					JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(cls, null);
+					if (javaMembers != null)
 					{
-						al.add((String)element);
+						Object[] members = javaMembers.getIds(false);
+						for (Object element : members)
+						{
+							al.add((String)element);
+						}
+						if (javaMembers instanceof InstanceJavaMembers)
+						{
+							al.removeAll(((InstanceJavaMembers)javaMembers).getGettersAndSettersToHide());
+						}
+						else
+						{
+							al.removeAll(objectMethods);
+						}
+						if (al.size() == 0) constantOnly.add(name);
 					}
-					if (javaMembers instanceof InstanceJavaMembers)
-					{
-						al.removeAll(((InstanceJavaMembers)javaMembers).getGettersAndSettersToHide());
-					}
-					else
-					{
-						al.removeAll(objectMethods);
-					}
-					if (al.size() == 0) constantOnly.add(name);
 				}
 			}
 		}
@@ -169,6 +172,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			String classType = typeName.substring(0, index);
 			Type type = createType(context, classType, typeName);
 			if (type == null) type = createDynamicType(context, classType);
+			type.setName(typeName);
 			DynamicTypeFiller filler = dynamicTypeCreator.get(classType);
 			if (type != null && filler != null)
 			{
