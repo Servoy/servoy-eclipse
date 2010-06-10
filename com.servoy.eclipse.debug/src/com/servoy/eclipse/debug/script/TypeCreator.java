@@ -43,6 +43,7 @@ import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.mozilla.javascript.JavaMembers;
+import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 
@@ -58,7 +59,9 @@ import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
+import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
@@ -78,7 +81,9 @@ import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.ServoyException;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner
@@ -377,7 +382,7 @@ public abstract class TypeCreator
 
 				if (object != null)
 				{
-					Class< ? > returnTypeClz = FormDomProvider.getReturnType(object);
+					Class< ? > returnTypeClz = getReturnType(object);
 					if (type == 1)
 					{
 						MemberBox[] members = null;
@@ -395,7 +400,7 @@ public abstract class TypeCreator
 								method.setDeprecated(true);
 								method.setVisible(false);
 							}
-							method.setDescription(FormDomProvider.getDoc(name, scriptObjectClass, name)); // TODO name should be of parent.
+							method.setDescription(getDoc(name, scriptObjectClass, name)); // TODO name should be of parent.
 							if (returnTypeClz != null)
 							{
 								method.setType(context.getType(getMemberTypeName(context, name, returnTypeClz, typeName)));
@@ -449,8 +454,7 @@ public abstract class TypeCreator
 						{
 							returnType = context.getType(getMemberTypeName(context, name, returnTypeClz, typeName));
 						}
-						Property property = createProperty(name, false, returnType, FormDomProvider.getDoc(name, scriptObjectClass, name), type == 3 ? CONSTANT
-							: PROPERTY);
+						Property property = createProperty(name, false, returnType, getDoc(name, scriptObjectClass, name), type == 3 ? CONSTANT : PROPERTY);
 						if (scriptObject != null && scriptObject.isDeprecated(name))
 						{
 							property.setDeprecated(true);
@@ -707,5 +711,75 @@ public abstract class TypeCreator
 		}
 
 		return false;
+	}
+
+	/**
+	 * @param key
+	 * @param scriptObject
+	 * @param name
+	 * @return
+	 */
+	public static String getDoc(String key, Class< ? > scriptObjectClass, String name)
+	{
+		if (scriptObjectClass == null) return null;
+		String doc = key;
+		IScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectForClass(scriptObjectClass);
+		if (scriptObject != null)
+		{
+			String toolTip = scriptObject.getToolTip(key);
+			if (toolTip != null)
+			{
+				doc = toolTip;
+			}
+			String sample = scriptObject.getSample(key);
+
+			if (sample != null)
+			{
+				doc = doc + "\n<pre>" + HtmlUtils.escapeMarkup(sample) + "</pre>"; //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			if (doc != null)
+			{
+				doc = Utils.stringReplace(doc, "\n", "<br/>"); //$NON-NLS-1$ //$NON-NLS-2$
+				doc = Utils.stringReplace(doc, "%%prefix%%", ""); //$NON-NLS-1$ //$NON-NLS-2$
+				doc = Utils.stringReplace(doc, "%%elementName%%", name); //$NON-NLS-1$
+				doc = "<html><body><font size='2'>" + doc + "</font></body></html>"; //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
+		return doc;
+	}
+
+	public static Class< ? > getReturnType(Object object)
+	{
+		Class< ? > returnType = null;
+		if (object instanceof NativeJavaMethod)
+		{
+			NativeJavaMethod method = (NativeJavaMethod)object;
+			MemberBox[] methods = method.getMethods();
+			if (methods != null && methods.length > 0)
+			{
+				returnType = methods[0].getReturnType();
+			}
+		}
+		else if (object instanceof BeanProperty)
+		{
+			returnType = ((BeanProperty)object).getGetter().getReturnType();
+		}
+		if (returnType != null && returnType != Object.class)
+		{
+			if (returnType.isAssignableFrom(Record.class))
+			{
+				returnType = Record.class;
+			}
+			else if (returnType.isAssignableFrom(FoundSet.class))
+			{
+				returnType = FoundSet.class;
+			}
+			JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(returnType, null);
+			if (javaMembers != null)
+			{
+				return returnType;
+			}
+		}
+		return null;
 	}
 }

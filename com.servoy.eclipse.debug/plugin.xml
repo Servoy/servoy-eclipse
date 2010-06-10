@@ -41,13 +41,6 @@
       </actionSet>
    </extension>
    <extension
-         point="org.eclipse.dltk.javascript.core.dom.support.domprovider">
-      <provider
-            class="com.servoy.eclipse.debug.script.FormDomProvider"
-            id="com.servoy.eclipse.debug.form.provider">
-      </provider>
-   </extension>
-   <extension
          point="org.eclipse.dltk.launching.debuggingEngine">
       <engineContribution
             natureId="org.eclipse.dltk.javascript.core.nature">
@@ -135,13 +128,6 @@
             id="com.servoy.eclipse.ui.StartWebClient"
             name="Start WebClient">
       </command>
-   </extension>
-   <extension
-         point="org.eclipse.dltk.javascript.core.customtype">
-      <provider
-            class="com.servoy.eclipse.debug.script.CustomTypeProvider"
-            id="com.servoy.eclipse.debug.customtype.provider">
-      </provider>
    </extension>
    <extension
          point="org.eclipse.dltk.javascript.core.typeinfo">
