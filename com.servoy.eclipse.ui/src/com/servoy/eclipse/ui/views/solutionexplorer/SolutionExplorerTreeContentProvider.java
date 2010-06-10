@@ -839,7 +839,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			{
 				projectNode.children = new PlatformSimpleUserNode[] { globalsFolder, forms, allRelations, valuelists, media };
 				// solution's allRelations not allowed in login solutions
-				if (((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
+				if (activeSolutionNode != null &&
+					((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
 					allRelations != null) allRelations.hide();
 			}
 
@@ -864,7 +865,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		globalsFolder.children = new PlatformSimpleUserNode[] { currentForm, globalVariables, globalRelations };
 
 		// globals relations not allowed in login solution
-		if (solution.getSolutionType() == SolutionMetaData.LOGIN_SOLUTION && solutionOfCalculation == null) globalRelations.hide();
+
+		if (activeSolutionNode != null &&
+			((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
+			solutionOfCalculation == null) globalRelations.hide();
 	}
 
 	private void addFormsNodeChildren(PlatformSimpleUserNode formsNode)
@@ -926,7 +930,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			addFormRelationsNodeChildren(relationsNode);
 
 			// columns & relations not allowed in login solution
-			if (f.getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION && solutionOfCalculation == null)
+			if (activeSolutionNode != null &&
+				((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
+				solutionOfCalculation == null)
 			{
 				if (columnsNode != null) columnsNode.hide();
 				relationsNode.hide();
