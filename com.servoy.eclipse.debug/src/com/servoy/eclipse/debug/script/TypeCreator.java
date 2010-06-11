@@ -43,9 +43,9 @@ import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.mozilla.javascript.JavaMembers;
-import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
+import org.mozilla.javascript.JavaMembers.BeanProperty;
 
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyLog;
@@ -68,7 +68,6 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ScriptMethod;
-import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IDeprecated;
@@ -733,17 +732,6 @@ public abstract class TypeCreator
 			property.setAttribute(RESOURCE, resource);
 		}
 		return property;
-	}
-
-	public static boolean isLoginSolution(ITypeInfoContext context)
-	{
-		FlattenedSolution fs = getFlattenedSolution(context);
-		if (fs != null)
-		{
-			return fs.getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION;
-		}
-
-		return false;
 	}
 
 	/**

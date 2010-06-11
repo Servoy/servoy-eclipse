@@ -38,8 +38,8 @@ import org.mozilla.javascript.JavaMembers;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.Record;
@@ -236,19 +236,16 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						// form variables
 						addDataProviders(formToUse.getScriptVariables(false), members, context);
 
-						if (!isLoginSolution(context))
+						// data providers
+						Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(formToUse.getTable());
+
+						if (allDataProvidersForTable != null)
 						{
-							// data providers
-							Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(formToUse.getTable());
-
-							if (allDataProvidersForTable != null)
-							{
-								addDataProviders(allDataProvidersForTable.values().iterator(), members, context);
-							}
-
-							// relations
-							addRelations(context, fs, members, fs.getRelations(formToUse.getTable(), true, false));
+							addDataProviders(allDataProvidersForTable.values().iterator(), members, context);
 						}
+
+						// relations
+						addRelations(context, fs, members, fs.getRelations(formToUse.getTable(), true, false));
 
 						// element scope
 						members.add(createProperty(context, "elements", true, "Elements<" + formToUse.getName() + '>', PROPERTY));
@@ -433,17 +430,15 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 			EList<Member> members = type.getMembers();
 
-			boolean isLoginSolution = isLoginSolution(context);
-
 			members.add(createProperty(context, "allnames", true, "Array", SPECIAL_PROPERTY));
-			if (!isLoginSolution) members.add(createProperty(context, "alldataproviders", true, "Array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "alldataproviders", true, "Array", SPECIAL_PROPERTY));
 			members.add(createProperty(context, "allmethods", true, "Array", SPECIAL_PROPERTY));
-			if (!isLoginSolution) members.add(createProperty(context, "allrelations", true, "Array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "allrelations", true, "Array", SPECIAL_PROPERTY));
 			members.add(createProperty(context, "allvariables", true, "Array", SPECIAL_PROPERTY));
 
 			// controller and foundset
 			members.add(createProperty(context, "controller", true, "controller", PROPERTY));
-			if (!isLoginSolution) members.add(createProperty(context, "foundset", true, FoundSet.JS_FOUNDSET, FOUNDSET_IMAGE));
+			members.add(createProperty(context, "foundset", true, FoundSet.JS_FOUNDSET, FOUNDSET_IMAGE));
 			type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
 			return type;
 		}

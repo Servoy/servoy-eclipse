@@ -39,7 +39,6 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 
 /**
@@ -78,11 +77,6 @@ public class AddPortalActionDelegate extends AbstractEditpartActionDelegate
 		}
 
 		FlattenedSolution editingFlattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
-		if (editingFlattenedSolution.getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION)
-		{
-			MessageDialog.openConfirm(getShell(), "Add Portal", "The form is part of a login solution, and it has no access to the form table");
-			return null;
-		}
 		Table table = null;
 		try
 		{
