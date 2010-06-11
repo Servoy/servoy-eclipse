@@ -104,7 +104,7 @@ public class SplashHandler extends BasicSplashHandler
 		text.append("Version " + ClientVersion.getVersion());
 		text.append("\n");
 		text.append("This program is protected by international\ncopyright laws as described in Help About");
-		text.append("\nCopyright © Servoy BV 1997 - " + Utils.formatTime(System.currentTimeMillis(), "yyyy"));
+		text.append("\nCopyright \u00A9 Servoy BV 1997 - " + Utils.formatTime(System.currentTimeMillis(), "yyyy"));
 
 		if (doGetRegisterString)
 		{
