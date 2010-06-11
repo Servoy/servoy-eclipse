@@ -569,7 +569,9 @@ public class DataModelManager implements IColumnInfoManager
 			{
 				int t1 = Column.mapToDefaultType(c.getType());
 				int t2 = Column.mapToDefaultType(cid.datatype);
-				if ((t1 == t2 && c.getLength() == cid.length) || (t1 == IColumnTypes.NUMBER && c.getScale() == 0 && t2 == IColumnTypes.INTEGER))
+				if ((t1 == t2 && c.getLength() == cid.length) ||
+					(t1 == IColumnTypes.NUMBER && c.getScale() == 0 && t2 == IColumnTypes.INTEGER) ||
+					(t1 == t2 && (t1 == IColumnTypes.MEDIA || t1 == IColumnTypes.TEXT) && (Math.abs((float)c.getLength() - (float)cid.length) > (Integer.MAX_VALUE / 2)))) // this check is for -1 and big value lengths
 				{
 					severity = IMarker.SEVERITY_WARNING; // somewhat compatible types... but still different
 				}
