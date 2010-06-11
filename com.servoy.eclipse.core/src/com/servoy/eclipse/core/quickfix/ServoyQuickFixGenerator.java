@@ -284,7 +284,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 	{
 		if (possibleTableFixes == null)
 		{
-			possibleTableFixes = new TableDifferenceQuickFix[] { DBIQuickFixCreateColumnInDB.getInstance(), DBIQuickFixDeleteInfoForColumn.getInstance(), DBIQuickFixCreateInfoForColumn.getInstance(), DBIQuickFixDeleteColumnFromDB.getInstance(), DBIQuickFixUpdateColumnFromInfo.getInstance(), DBIQuickFixUpdateInfoFromColumn.getInstance(), DBIQuickFixChangeInfoPkIntoUserRowIdent.getInstance() };
+			possibleTableFixes = new TableDifferenceQuickFix[] { DBIQuickFixCreateColumnInDB.getInstance(), DBIQuickFixDeleteInfoForColumn.getInstance(), DBIQuickFixCreateInfoForColumn.getInstance(), DBIQuickFixDeleteColumnFromDB.getInstance(), DBIQuickFixUpdateInfoFromColumn.getInstance(), DBIQuickFixUpdateColumnFromInfo.getInstance(), DBIQuickFixChangeInfoPkIntoUserRowIdent.getInstance() };
 		}
 		List<IMarkerResolution> fixes = new ArrayList<IMarkerResolution>();
 		TableDifference difference = TableDifferenceQuickFix.getTableDifference(marker);
