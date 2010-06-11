@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
@@ -59,9 +59,7 @@ public class ComplexPropertySource<T> implements IPropertySource
 		complexProperty.setValue(setComplexPropertyValue(id, v));
 	}
 
-	protected T setComplexPropertyValue(@SuppressWarnings("unused")
-	Object id, @SuppressWarnings("unused")
-	Object v)
+	protected T setComplexPropertyValue(@SuppressWarnings("unused") Object id, @SuppressWarnings("unused") Object v)
 	{
 		return null;
 	}
@@ -73,12 +71,22 @@ public class ComplexPropertySource<T> implements IPropertySource
 
 	public boolean isPropertySet(Object id)
 	{
+		IPropertyDescriptor[] properties = complexProperty.getPropertySource().getPropertyDescriptors();
+		for (IPropertyDescriptor prop : properties)
+		{
+			if (prop.getId().equals(id)) return true;
+		}
 		return false;
 	}
 
 	public void resetPropertyValue(Object id)
 	{
+		setPropertyValue(id, resetComplexPropertyValue(id));
 	}
 
+	protected Object resetComplexPropertyValue(@SuppressWarnings("unused") Object id)
+	{
+		return null;
+	}
 
 }

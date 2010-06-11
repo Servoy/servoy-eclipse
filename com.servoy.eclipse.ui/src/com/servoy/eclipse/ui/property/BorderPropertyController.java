@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.property;
 
 import java.awt.Color;
 import java.awt.Insets;
+import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.border.BevelBorder;
@@ -64,6 +65,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		Default, Empty, Etched, Bevel, Line, Title, Matte, SpecialMatte
 	}
 
+	public static HashMap<BorderType, Border> defaultBorderValues = new HashMap<BorderType, Border>();
 	private final IPersist persist;
 
 	final static ComboboxPropertyController<BorderType> comboboxController = new ComboboxPropertyController<BorderType>("BORDER_TYPE", "borderTypes",
@@ -81,6 +83,19 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		super(id, displayName);
 		this.propertySource = propertySource;
 		this.persist = persist;
+		populateDefaultBorderValuesMap();
+	}
+
+	private void populateDefaultBorderValuesMap()
+	{
+		defaultBorderValues.put(BorderType.Default, null);
+		defaultBorderValues.put(BorderType.Empty, new EmptyBorder(0, 0, 0, 0));
+		defaultBorderValues.put(BorderType.Etched, new EtchedBorder(EtchedBorder.RAISED));
+		defaultBorderValues.put(BorderType.Bevel, new BevelBorder(BevelBorder.RAISED));
+		defaultBorderValues.put(BorderType.Line, new LineBorder(Color.BLACK));
+		defaultBorderValues.put(BorderType.Title, new TitledBorder("Title")); //$NON-NLS-1$
+		defaultBorderValues.put(BorderType.Matte, new MatteBorder(0, 0, 0, 0, Color.BLACK));
+		defaultBorderValues.put(BorderType.SpecialMatte, new SpecialMatteBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK));
 	}
 
 	private static BorderType getBorderTypeConstant(Border border)
@@ -312,6 +327,29 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			}
 			return null;
 		}
+
+		@Override
+		protected Object resetComplexPropertyValue(Object id)
+		{
+			EmptyBorder defVal = (EmptyBorder)defaultBorderValues.get(BorderType.Empty);
+			if (id instanceof String && ((String)id).contains("top")) //$NON-NLS-1$
+			{
+				return defVal.getBorderInsets().top;
+			}
+			if (id instanceof String && ((String)id).contains("bottom")) //$NON-NLS-1$
+			{
+				return defVal.getBorderInsets().bottom;
+			}
+			if (id instanceof String && ((String)id).contains("left")) //$NON-NLS-1$
+			{
+				return defVal.getBorderInsets().left;
+			}
+			if (id instanceof String && ((String)id).contains("right")) //$NON-NLS-1$
+			{
+				return defVal.getBorderInsets().right;
+			}
+			return null;
+		}
 	}
 
 	public static class MatteBorderPropertySource extends ComplexPropertySource<MatteBorder>
@@ -377,6 +415,33 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			{
 				Insets insets = insetPropertySource.setComplexPropertyValue(((String)id).substring(INSETS.length()), v);
 				return new MatteBorder(insets, border.getMatteColor());
+			}
+			return null;
+		}
+
+		@Override
+		protected Object resetComplexPropertyValue(Object id)
+		{
+			MatteBorder defVal = (MatteBorder)defaultBorderValues.get(BorderType.Matte);
+			if (COLOR.equals(id))
+			{
+				return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty(id, defVal.getMatteColor());
+			}
+			if (id instanceof String && ((String)id).contains("top")) //$NON-NLS-1$
+			{
+				return defVal.getBorderInsets().top;
+			}
+			if (id instanceof String && ((String)id).contains("bottom")) //$NON-NLS-1$
+			{
+				return defVal.getBorderInsets().bottom;
+			}
+			if (id instanceof String && ((String)id).contains("left")) //$NON-NLS-1$
+			{
+				return defVal.getBorderInsets().left;
+			}
+			if (id instanceof String && ((String)id).contains("right")) //$NON-NLS-1$
+			{
+				return defVal.getBorderInsets().right;
 			}
 			return null;
 		}
@@ -543,6 +608,53 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 				smb.setDashPattern(SpecialMatteBorder.createDash((String)v));
 			}
 			return smb;
+		}
+
+		@Override
+		protected Object resetComplexPropertyValue(Object id)
+		{
+			SpecialMatteBorder defVal = (SpecialMatteBorder)defaultBorderValues.get(BorderType.SpecialMatte);
+			if (TOP_SIZE.equals(id))
+			{
+				return defVal.getTop();
+			}
+			else if (LEFT_SIZE.equals(id))
+			{
+				return defVal.getLeft();
+			}
+			else if (BOTTOM_SIZE.equals(id))
+			{
+				return defVal.getBottom();
+			}
+			else if (RIGHT_SIZE.equals(id))
+			{
+				return defVal.getRight();
+			}
+			else if (TOP_COLOR.equals(id))
+			{
+				return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty(id, defVal.getTopColor());
+			}
+			else if (LEFT_COLOR.equals(id))
+			{
+				return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty(id, defVal.getLeftColor());
+			}
+			else if (BOTTOM_COLOR.equals(id))
+			{
+				return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty(id, defVal.getBottomColor());
+			}
+			else if (RIGHT_COLOR.equals(id))
+			{
+				return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty(id, defVal.getRightColor());
+			}
+			else if (ROUNDING_RADIUS.equals(id))
+			{
+				return defVal.getRoundingRadius();
+			}
+			else if (DASH_PATTERN.equals(id))
+			{
+				return defVal.getDashPattern();
+			}
+			return null;
 		}
 	}
 
@@ -762,6 +874,22 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			}
 			return null;
 		}
+
+		@Override
+		protected Object resetComplexPropertyValue(Object id)
+		{
+			LineBorder defVal = (LineBorder)defaultBorderValues.get(BorderType.Line);
+			if (COLOR.equals(id))
+			{
+				//even though this worked (default color work with null values); was added for the sake of completeness
+				return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty(id, defVal.getLineColor());
+			}
+			if (THICKNESS.equals(id))
+			{
+				return defVal.getThickness();
+			}
+			return null;
+		}
 	}
 
 	public static class TitledBorderPropertySource extends ComplexPropertySource<TitledBorder>
@@ -907,8 +1035,35 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 				return new TitledBorder(null, border.getTitle(), border.getTitleJustification(), border.getTitlePosition(), border.getTitleFont(),
 					ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (RGB)v));
 			}
-
 			return null;
 		}
+
+		@Override
+		protected Object resetComplexPropertyValue(@SuppressWarnings("unused") Object id)
+		{
+			TitledBorder defVal = (TitledBorder)defaultBorderValues.get(BorderType.Title);
+			if (TITLE.equals(id))
+			{
+				return defVal.getTitle();
+			}
+			if (JUSTIFICATION.equals(id))
+			{
+				return defVal.getTitleJustification();
+			}
+			if (POSITION.equals(id))
+			{
+				return defVal.getTitlePosition();
+			}
+			if (FONT.equals(id))
+			{
+				return PropertyFontConverter.INSTANCE.convertProperty(id, defVal.getTitleFont());
+			}
+			if (COLOR.equals(id))
+			{
+				return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty(id, defVal.getTitleColor());
+			}
+			return null;
+		}
+
 	}
 }
