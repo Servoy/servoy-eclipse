@@ -44,7 +44,6 @@ public class SimpleUserNode
 	public SimpleUserNode parent;
 
 	protected boolean hidden = false;
-	private SimpleUserNode[] childrenHidden;
 
 	public SimpleUserNode(String displayName, UserNodeType type)
 	{
@@ -74,6 +73,16 @@ public class SimpleUserNode
 		this._realObject = realObject;
 		this.icon = icon;
 		this.developerFeedback = developerFeedback;
+	}
+
+	public void setChildren(SimpleUserNode[] children)
+	{
+		this.children = children;
+		if (hidden && this.children != null)
+		{
+			for (SimpleUserNode un : children)
+				un.hide();
+		}
 	}
 
 	private void storeContainingPersistIfNeeded(Object realObject)
@@ -118,6 +127,11 @@ public class SimpleUserNode
 		return type;
 	}
 
+	public UserNodeType getRealType()
+	{
+		return type;
+	}
+
 	public String getName()
 	{
 		return name;
@@ -141,16 +155,22 @@ public class SimpleUserNode
 	public void hide()
 	{
 		hidden = true;
-		childrenHidden = children;
-		children = new SimpleUserNode[0];
+		if (children != null)
+		{
+			for (SimpleUserNode un : children)
+				un.hide();
+		}
 	}
 
 	public void unhide()
 	{
 		if (hidden)
 		{
-			children = childrenHidden;
-			childrenHidden = null;
+			if (children != null)
+			{
+				for (SimpleUserNode un : children)
+					un.unhide();
+			}
 			hidden = false;
 		}
 	}

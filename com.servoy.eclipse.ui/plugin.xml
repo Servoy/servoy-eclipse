@@ -463,6 +463,10 @@
               class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
               markerType="com.servoy.eclipse.core.deprecatedPropertyUsage">
         </markerResolutionGenerator>
+        <markerResolutionGenerator
+              class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+              markerType="com.servoy.eclipse.core.formWithDatasourceInLoginSolution">
+        </markerResolutionGenerator>        
      </extension>
      <extension
            point="org.eclipse.dltk.javascript.ui.keywordsprovider">

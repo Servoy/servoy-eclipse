@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.quickfix;
 
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				String uuid = (String)marker.getAttribute("Uuid");
 				fixes = new IMarkerResolution[] { new RemoveInvalidSortColumnsQuickFix(uuid, solName) };
 			}
-			else if (type.equals(ServoyBuilder.DEPRECATED_PROPERTY_USAGE))
+			else if (type.equals(ServoyBuilder.DEPRECATED_PROPERTY_USAGE) || type.equals(ServoyBuilder.FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION))
 			{
 				String propertyName = (String)marker.getAttribute("PropertyName");
 				String displayName = (String)marker.getAttribute("DisplayName");
@@ -67,7 +67,9 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 
 				if ("loginFormID".equals(propertyName))
 				{
+					resolutions.add(0, new CreateLoginSolutionQuickFix(solName));
 					resolutions.add(new MarkSolutionAsWebclientOnlyQuickFix(solName));
+					resolutions.add(new TurnEnhancedSecurityOffQuickFix());
 				}
 
 				fixes = resolutions.toArray(new IMarkerResolution[resolutions.size()]);

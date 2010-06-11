@@ -473,25 +473,22 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		activeSolutionNode.setRealObject(servoyModel.getActiveProject());
 		if (activeSolutionNode.getRealObject() != null)
 		{
+			boolean isLoginSolution = ((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION;
+
+			if (isLoginSolution) imgActive = uiActivator.loadImageFromBundle("login_solution.gif");
 			activeSolutionNode.setIcon(imgActive);
 			String name = ((ServoyProject)activeSolutionNode.getRealObject()).getProject().getName();
 			if (solutionOfCalculation != null)
 			{
 				name += " (calculation mode)";
 			}
+			else
+			{
+				// databaseManager not allowed in login solution
+				if (isLoginSolution) databaseManager.hide();
+				else databaseManager.unhide();
+			}
 			activeSolutionNode.setDisplayName(name);
-
-			// solutionModel and databaseManager not allowed in login solution
-			if (((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION)
-			{
-				databaseManager.hide();
-				name += " (login solution)";
-				activeSolutionNode.setDisplayName(name);
-			}
-			else if (solutionOfCalculation == null)
-			{
-				databaseManager.unhide();
-			}
 		}
 		else
 		{
@@ -553,11 +550,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							addSolutionNodeChildren(un);
 						}
 					}
-					else if (type == UserNodeType.FORMS)
+					else if (type == UserNodeType.FORMS || (type == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.FORMS))
 					{
 						addFormsNodeChildren(un);
 					}
-					else if (type == UserNodeType.FORM)
+					else if (type == UserNodeType.FORM || (type == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.FORM))
 					{
 						addFormNodeChildren(un);
 					}
@@ -603,11 +600,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				{
 					return un.isEnabled();
 				}
-				else if (un.getType() == UserNodeType.FORMS)
+				else if (un.getType() == UserNodeType.FORMS || (un.getType() == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.FORMS))
 				{
 					return ((Solution)un.getRealObject()).getForms(null, false).hasNext();
 				}
-				else if (un.getType() == UserNodeType.FORM)
+				else if (un.getType() == UserNodeType.FORM || (un.getType() == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.FORM))
 				{
 					return true;
 				}
@@ -792,7 +789,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	{
 		ServoyProject servoyProject = (ServoyProject)projectNode.getRealObject();
 		Solution solution = servoyProject.getSolution();
-		boolean isLoginSolution = solution.getSolutionType() == SolutionMetaData.LOGIN_SOLUTION;
 		if (solution != null)
 		{
 			PlatformSimpleUserNode globalsFolder;
@@ -809,16 +805,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			addGlobalsNodeChildren(globalsFolder, solution);
 
 			allRelations = null;
+			forms = new PlatformSimpleUserNode(Messages.TreeStrings_Forms, UserNodeType.FORMS, solution, uiActivator.loadImageFromBundle("forms.gif"));
+			forms.parent = projectNode;
 			if (solutionOfCalculation == null)
 			{
-				forms = new PlatformSimpleUserNode(Messages.TreeStrings_Forms, UserNodeType.FORMS, solution, uiActivator.loadImageFromBundle("forms.gif"));
-				forms.parent = projectNode;
-				if (!isLoginSolution)
-				{
-					allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.ALL_RELATIONS, solution,
-						uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
-					allRelations.parent = projectNode;
-				}
+				allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.ALL_RELATIONS, solution,
+					uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
+				allRelations.parent = projectNode;
 			}
 			valuelists = new PlatformSimpleUserNode(Messages.TreeStrings_ValueLists, UserNodeType.VALUELISTS, solution,
 				uiActivator.loadImageFromBundle("valuelists.gif"));
@@ -828,27 +821,29 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			valuelists.parent = projectNode;
 			media.parent = projectNode;
 
-			if (!isLoginSolution)
+			if (solutionOfCalculation != null)
 			{
-				if (solutionOfCalculation != null)
-				{
-					// in case of calculation editor
-					PlatformSimpleUserNode dataProvidersNode = new PlatformSimpleUserNode(Messages.TreeStrings_DataProviders, UserNodeType.TABLE_COLUMNS,
-						tableOfCalculation, solution, uiActivator.loadImageFromBundle("selected_record.gif"));
-					PlatformSimpleUserNode relationsNode = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.RELATIONS,
-						tableOfCalculation, uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
-					addRelationsNodeChildren(relationsNode, solution, (Table)tableOfCalculation, UserNodeType.CALC_RELATION);
+				// in case of calculation editor
+				PlatformSimpleUserNode dataProvidersNode = new PlatformSimpleUserNode(Messages.TreeStrings_DataProviders, UserNodeType.TABLE_COLUMNS,
+					tableOfCalculation, solution, uiActivator.loadImageFromBundle("selected_record.gif"));
+				allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.RELATIONS, tableOfCalculation,
+					uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
+				addRelationsNodeChildren(allRelations, solution, (Table)tableOfCalculation, UserNodeType.CALC_RELATION);
 
-					dataProvidersNode.parent = projectNode;
-					relationsNode.parent = projectNode;
-					projectNode.children = new PlatformSimpleUserNode[] { globalsFolder, dataProvidersNode, relationsNode, valuelists, media };
-				}
-				else
-				{
-					projectNode.children = new PlatformSimpleUserNode[] { globalsFolder, forms, allRelations, valuelists, media };
-				}
+				dataProvidersNode.parent = projectNode;
+				allRelations.parent = projectNode;
+				projectNode.children = new PlatformSimpleUserNode[] { globalsFolder, dataProvidersNode, forms, allRelations, valuelists, media };
+				forms.hide();
 			}
-			else projectNode.children = new PlatformSimpleUserNode[] { globalsFolder, forms, valuelists, media };
+			else
+			{
+				projectNode.children = new PlatformSimpleUserNode[] { globalsFolder, forms, allRelations, valuelists, media };
+				// solution's allRelations not allowed in login solutions
+				if (activeSolutionNode != null &&
+					((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
+					allRelations != null) allRelations.hide();
+			}
+
 		}
 	}
 
@@ -858,29 +853,22 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			uiActivator.loadImageFromBundle("global_variabletree.gif"));
 		globalVariables.parent = globalsFolder;
 
-
-		PlatformSimpleUserNode currentForm;
-		if (solutionOfCalculation == null)
-		{
-			currentForm = new PlatformSimpleUserNode(Messages.TreeStrings_currentcontroller, UserNodeType.CURRENT_FORM, null,
-				uiActivator.loadImageFromBundle("formula.gif"));
-		}
-		else
-		{
-			currentForm = new PlatformSimpleUserNode(Messages.TreeStrings_currentcontroller, UserNodeType.CURRENT_FORM_GRAYED_OUT, null,
-				uiActivator.loadImageFromOldLocation("formula.gif", true));
-		}
+		PlatformSimpleUserNode currentForm = new PlatformSimpleUserNode(Messages.TreeStrings_currentcontroller, UserNodeType.CURRENT_FORM, null,
+			uiActivator.loadImageFromBundle("formula.gif"));
+		if (solutionOfCalculation != null) currentForm.hide();
 		currentForm.parent = globalsFolder;
 
-		if (solution.getSolutionType() != SolutionMetaData.LOGIN_SOLUTION)
-		{
-			PlatformSimpleUserNode globalRelations = new PlatformSimpleUserNode(Messages.TreeStrings_relations, UserNodeType.GLOBALRELATIONS, solution,
-				uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
-			addGlobalRelationsNodeChildren(globalRelations);
-			globalRelations.parent = globalsFolder;
-			globalsFolder.children = new PlatformSimpleUserNode[] { currentForm, globalVariables, globalRelations };
-		}
-		else globalsFolder.children = new PlatformSimpleUserNode[] { currentForm, globalVariables };
+		PlatformSimpleUserNode globalRelations = new PlatformSimpleUserNode(Messages.TreeStrings_relations, UserNodeType.GLOBALRELATIONS, solution,
+			uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
+		addGlobalRelationsNodeChildren(globalRelations);
+		globalRelations.parent = globalsFolder;
+		globalsFolder.children = new PlatformSimpleUserNode[] { currentForm, globalVariables, globalRelations };
+
+		// globals relations not allowed in login solution
+
+		if (activeSolutionNode != null &&
+			((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
+			solutionOfCalculation == null) globalRelations.hide();
 	}
 
 	private void addFormsNodeChildren(PlatformSimpleUserNode formsNode)
@@ -896,7 +884,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			forms.add(node);
 			node.parent = formsNode;
 		}
-		formsNode.children = forms.toArray(new PlatformSimpleUserNode[forms.size()]);
+		formsNode.setChildren(forms.toArray(new PlatformSimpleUserNode[forms.size()]));
 	}
 
 	private void addFormNodeChildren(PlatformSimpleUserNode formNode)
@@ -905,7 +893,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		try
 		{
 			List<PlatformSimpleUserNode> node = new ArrayList<PlatformSimpleUserNode>();
-
 			PlatformSimpleUserNode functionsNode = new PlatformSimpleUserNode(Messages.TreeStrings_controller, UserNodeType.FORM_CONTROLLER, f,
 				uiActivator.loadImageFromBundle("formula.gif"));
 			functionsNode.parent = formNode;
@@ -922,29 +909,36 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			node.add(elementsNode);
 			addFormElementsChildren(elementsNode);
 
-			if (f.getSolution().getSolutionType() != SolutionMetaData.LOGIN_SOLUTION)
+			PlatformSimpleUserNode columnsNode = null;
+			try
 			{
-				try
-				{
-					PlatformSimpleUserNode columnsNode = new PlatformSimpleUserNode(Messages.TreeStrings_selectedrecord, UserNodeType.TABLE_COLUMNS,
-						f.getTable(), f, uiActivator.loadImageFromBundle("selected_record.gif"));
-					columnsNode.parent = formNode;
-					node.add(columnsNode);
-				}
-				catch (DbcpException e)
-				{
-					ServoyLog.logInfo("Cannot create 'selectedrecord' node for " + formNode.getName() + ": " + e.getMessage());
-					disableServer(f.getServerName());
-				}
-
-				PlatformSimpleUserNode relationsNode = new PlatformSimpleUserNode(Messages.TreeStrings_relations, UserNodeType.RELATIONS, f, f,
-					uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
-				relationsNode.parent = formNode;
-				node.add(relationsNode);
-				addFormRelationsNodeChildren(relationsNode);
+				columnsNode = new PlatformSimpleUserNode(Messages.TreeStrings_selectedrecord, UserNodeType.TABLE_COLUMNS, f.getTable(), f,
+					uiActivator.loadImageFromBundle("selected_record.gif"));
+				columnsNode.parent = formNode;
+				node.add(columnsNode);
+			}
+			catch (DbcpException e)
+			{
+				ServoyLog.logInfo("Cannot create 'selectedrecord' node for " + formNode.getName() + ": " + e.getMessage());
+				disableServer(f.getServerName());
 			}
 
-			formNode.children = node.toArray(new PlatformSimpleUserNode[node.size()]);
+			PlatformSimpleUserNode relationsNode = new PlatformSimpleUserNode(Messages.TreeStrings_relations, UserNodeType.RELATIONS, f, f,
+				uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
+			relationsNode.parent = formNode;
+			node.add(relationsNode);
+			addFormRelationsNodeChildren(relationsNode);
+
+			// columns & relations not allowed in login solution
+			if (activeSolutionNode != null &&
+				((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
+				solutionOfCalculation == null)
+			{
+				if (columnsNode != null) columnsNode.hide();
+				relationsNode.hide();
+			}
+
+			formNode.setChildren(node.toArray(new PlatformSimpleUserNode[node.size()]));
 		}
 		catch (RepositoryException e)
 		{
