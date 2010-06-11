@@ -2754,7 +2754,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								Form form = (Form)o;
 								if (((Form)o).getDataSource() != null) // login solution cannot have forms with datasource
 								{
-									String message = "Form '" + form.getName() + "' is part of a login solution and it must not have the datasource property set; its current datasource is : '" + form.getDataSource() + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+									String message = "Form '" + form.getName() +
+										"' is part of a login solution and it must not have the datasource property set; its current datasource is : '" +
+										form.getDataSource() + "'";
 									IMarker marker = addMarker(prj, FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION, message, -1, IMarker.SEVERITY_ERROR,
 										IMarker.PRIORITY_HIGH, null, form);
 									if (marker != null)

@@ -25,10 +25,9 @@ import com.servoy.eclipse.core.ServoyModel;
 
 public class TurnEnhancedSecurityOffQuickFix implements IMarkerResolution
 {
-
 	public String getLabel()
 	{
-		return "Turn enhanced security off"; //$NON-NLS-1$
+		return "Turn enhanced security off";
 	}
 
 	public void run(IMarker marker)
