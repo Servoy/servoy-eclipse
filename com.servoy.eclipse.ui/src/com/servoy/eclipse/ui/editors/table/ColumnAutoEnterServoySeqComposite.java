@@ -33,10 +33,10 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.IColumnInfoBasedSequenceProvider;
 import com.servoy.j2db.persistence.ISequenceProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
-import com.servoy.j2db.persistence.IColumnInfoBasedSequenceProvider;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.Utils;
 
@@ -135,6 +135,9 @@ public class ColumnAutoEnterServoySeqComposite extends Composite implements Sele
 					{
 						updateRepositoryButton.setEnabled(false);
 						refreshFromRepositoryButton.setEnabled(false);
+						calculateFromDataButton.setEnabled(false);
+						nextValueText.setEditable(false);
+						stepSizeText.setEditable(false);
 					}
 				}
 				else
