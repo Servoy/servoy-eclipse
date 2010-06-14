@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor.commands;
 
 import java.util.ArrayList;
@@ -24,6 +24,7 @@ import org.eclipse.gef.ui.actions.SelectAllAction;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IWorkbenchPart;
 
+import com.servoy.eclipse.designer.editor.GroupGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.PersistGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.j2db.persistence.GraphicalComponent;
@@ -91,7 +92,7 @@ public class FixedSelectAllAction extends SelectAllAction
 				selectedElements = new ArrayList();
 				for (Object element : elements)
 				{
-					if (element instanceof PersistGraphicalEditPart)
+					if (element instanceof PersistGraphicalEditPart || element instanceof GroupGraphicalEditPart)
 					{
 						selectedElements.add(element);
 					}
