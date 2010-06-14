@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.CellEditor;
@@ -195,6 +195,12 @@ public class SlidingoptionsPropertyController extends PropertyController<Integer
 			if (HEIGHT_GROW.equals(id)) return Boolean.valueOf((getEditableValue().height_grow));
 			if (HEIGHT_SHRINK.equals(id)) return Boolean.valueOf((getEditableValue().height_shrink));
 			return null;
+		}
+
+		@Override
+		public Object resetComplexPropertyValue(Object id)
+		{
+			return Boolean.FALSE;
 		}
 
 		@Override

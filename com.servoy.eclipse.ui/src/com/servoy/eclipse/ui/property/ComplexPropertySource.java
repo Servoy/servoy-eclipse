@@ -69,7 +69,7 @@ public class ComplexPropertySource<T> implements IPropertySource
 		return null;
 	}
 
-	public boolean isPropertySet(Object id)
+	public final boolean isPropertySet(Object id)
 	{
 		IPropertyDescriptor[] properties = complexProperty.getPropertySource().getPropertyDescriptors();
 		for (IPropertyDescriptor prop : properties)
@@ -79,12 +79,12 @@ public class ComplexPropertySource<T> implements IPropertySource
 		return false;
 	}
 
-	public void resetPropertyValue(Object id)
+	public final void resetPropertyValue(Object id)
 	{
 		setPropertyValue(id, resetComplexPropertyValue(id));
 	}
 
-	protected Object resetComplexPropertyValue(@SuppressWarnings("unused") Object id)
+	public Object resetComplexPropertyValue(@SuppressWarnings("unused") Object id)
 	{
 		return null;
 	}
