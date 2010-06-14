@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.CellEditor;
@@ -32,8 +32,8 @@ import org.eclipse.swt.widgets.Shell;
 import com.servoy.eclipse.core.repository.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.I18NServerTableDialog;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
-import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
+import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.j2db.persistence.Table;
@@ -48,20 +48,14 @@ public class DatasourceController extends PropertyController<String, TableWrappe
 	private final TableContentProvider.TableListOptions tableListOptions;
 	private final String title;
 
-	public DatasourceController(String id, String displayName, String title, boolean readOnly, TableContentProvider.TableListOptions tableListOptions)
+	public DatasourceController(String id, String displayName, String title, boolean readOnly, TableContentProvider.TableListOptions tableListOptions,
+		ILabelProvider labelProvider)
 	{
-		super(id, displayName);
+		super(id, displayName, null, labelProvider, null);
 		this.title = title;
 		this.tableListOptions = tableListOptions;
 		setReadonly(readOnly);
 		setSupportsReadonly(true);
-	}
-
-
-	@Override
-	public ILabelProvider getLabelProvider()
-	{
-		return DatasourceLabelProvider.INSTANCE_NO_IMAGE_FULLY_QUALIFIED;
 	}
 
 	@Override
@@ -71,7 +65,7 @@ public class DatasourceController extends PropertyController<String, TableWrappe
 		{
 			public String convertValue(Object id, TableWrapper tw)
 			{
-				return DataSourceUtils.createDBTableDataSource(tw.getServerName(), tw.getTableName());
+				return tw == null ? null : DataSourceUtils.createDBTableDataSource(tw.getServerName(), tw.getTableName());
 			}
 
 			public TableWrapper convertProperty(Object id, String dataSource)

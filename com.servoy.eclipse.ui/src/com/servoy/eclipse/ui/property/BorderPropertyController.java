@@ -329,7 +329,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 		
 		@Override
-		protected Object resetComplexPropertyValue(Object id)
+		public Object resetComplexPropertyValue(Object id)
 		{
 			EmptyBorder defVal = (EmptyBorder)defaultBorderValues.get(BorderType.Empty);
 			if (id instanceof String && ((String)id).contains("top")) //$NON-NLS-1$
@@ -420,7 +420,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 		
 		@Override
-		protected Object resetComplexPropertyValue(Object id)
+		public Object resetComplexPropertyValue(Object id)
 		{
 			MatteBorder defVal = (MatteBorder)defaultBorderValues.get(BorderType.Matte);
 			if (COLOR.equals(id))
@@ -611,7 +611,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 		
 		@Override
-		protected Object resetComplexPropertyValue(Object id)
+		public Object resetComplexPropertyValue(Object id)
 		{
 			SpecialMatteBorder defVal = (SpecialMatteBorder)defaultBorderValues.get(BorderType.SpecialMatte);
 			if (TOP_SIZE.equals(id))
@@ -876,7 +876,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 		
 		@Override
-		protected Object resetComplexPropertyValue(Object id)
+		public Object resetComplexPropertyValue(Object id)
 		{
 			LineBorder defVal = (LineBorder)defaultBorderValues.get(BorderType.Line);
 			if (COLOR.equals(id))
@@ -1039,7 +1039,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 		
 		@Override
-		protected Object resetComplexPropertyValue(@SuppressWarnings("unused") Object id)
+		public Object resetComplexPropertyValue(@SuppressWarnings("unused") Object id)
 		{
 			TitledBorder defVal = (TitledBorder)defaultBorderValues.get(BorderType.Title);
 			if (TITLE.equals(id))

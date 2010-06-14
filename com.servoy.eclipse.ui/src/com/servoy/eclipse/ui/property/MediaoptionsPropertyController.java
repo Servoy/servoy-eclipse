@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.CellEditor;
@@ -238,6 +238,16 @@ public class MediaoptionsPropertyController extends PropertyController<Integer, 
 				return Boolean.valueOf((getEditableValue().keepAspectRatio));
 			}
 			return null;
+		}
+
+		@Override
+		public Object resetComplexPropertyValue(Object id)
+		{
+			if (KEEP_ASPECT_RATIO.equals(id))
+			{
+				return Boolean.TRUE;
+			}
+			return super.resetComplexPropertyValue(id);
 		}
 
 		@Override

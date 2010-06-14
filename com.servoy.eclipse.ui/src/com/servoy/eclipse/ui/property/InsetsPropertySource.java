@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import java.util.StringTokenizer;
@@ -78,17 +78,9 @@ public class InsetsPropertySource extends ComplexPropertySource<java.awt.Insets>
 	}
 
 	@Override
-	public boolean isPropertySet(Object id)
+	public Object resetComplexPropertyValue(Object id)
 	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void resetPropertyValue(Object id)
-	{
-		// TODO Auto-generated method stub
-
+		return Integer.valueOf(0);
 	}
 
 	@Override

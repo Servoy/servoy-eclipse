@@ -64,23 +64,24 @@ import com.servoy.eclipse.core.repository.EclipseRepository;
 import com.servoy.eclipse.core.util.CoreUtils;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
-import com.servoy.eclipse.ui.dialogs.FormContentProvider;
-import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
+import com.servoy.eclipse.ui.dialogs.FormContentProvider;
 import com.servoy.eclipse.ui.dialogs.FormContentProvider.FormListOptions;
+import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.editors.BeanCustomCellEditor;
 import com.servoy.eclipse.ui.editors.DataProviderCellEditor;
+import com.servoy.eclipse.ui.editors.DataProviderCellEditor.DataProviderValueEditor;
 import com.servoy.eclipse.ui.editors.FontCellEditor;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
 import com.servoy.eclipse.ui.editors.PageFormatEditor;
 import com.servoy.eclipse.ui.editors.SortCellEditor;
 import com.servoy.eclipse.ui.editors.TagsAndI18NTextCellEditor;
-import com.servoy.eclipse.ui.editors.DataProviderCellEditor.DataProviderValueEditor;
 import com.servoy.eclipse.ui.labelproviders.ArrayLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FontLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormInheritenceDelegateLabelProvider;
@@ -111,6 +112,7 @@ import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
+import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
@@ -124,7 +126,6 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportName;
-import com.servoy.j2db.persistence.ISupportScrollbars;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
 import com.servoy.j2db.persistence.ITableDisplay;
 import com.servoy.j2db.persistence.Media;
@@ -147,7 +148,6 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.query.ISQLJoin;
 import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.util.ComponentFactoryHelper;
@@ -1715,8 +1715,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 					else
 					{
 						// value not a string
-						ServoyLog.logWarning("Cannot set " + id + " property on object " + beanPropertyDescriptor.valueObject + " with type " +
-							value.getClass(), null);
+						ServoyLog.logWarning(
+							"Cannot set " + id + " property on object " + beanPropertyDescriptor.valueObject + " with type " + value.getClass(), null);
 					}
 				}
 				else
@@ -2062,27 +2062,26 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		if (name.equals("dataSource"))
 		{
 			// cannot change table when we have a super-form
-			boolean propertyReadOnly = (persist instanceof Form && ((Form)persist).getExtendsFormID() > 0);
-			return new DatasourceController(id, name, "Select table", readOnly || propertyReadOnly, new TableContentProvider.TableListOptions(
-				TableListOptions.TableListType.ALL, true));
+			return new DatasourceController(id, name, "Select table", readOnly, new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL,
+				true), getFormInheritanceLabelProvider(persist, DatasourceLabelProvider.INSTANCE_NO_IMAGE_FULLY_QUALIFIED, id));
 		}
 
 		if (name.equals("i18nDataSource"))
 		{
 			return new DatasourceController(id, name, "Select I18N table", readOnly, new TableContentProvider.TableListOptions(
-				TableListOptions.TableListType.I18N, true));
+				TableListOptions.TableListType.I18N, true), DatasourceLabelProvider.INSTANCE_NO_IMAGE_FULLY_QUALIFIED);
 		}
 
 		if (name.equals("primaryDataSource"))
 		{
 			return new DatasourceController(id, name, "Select Primary table", readOnly, new TableContentProvider.TableListOptions(
-				TableListOptions.TableListType.ALL, false));
+				TableListOptions.TableListType.ALL, false), DatasourceLabelProvider.INSTANCE_NO_IMAGE_FULLY_QUALIFIED);
 		}
 
 		if (name.equals("foreignDataSource"))
 		{
 			return new DatasourceController(id, name, "Select Foreign table", readOnly, new TableContentProvider.TableListOptions(
-				TableListOptions.TableListType.ALL, false));
+				TableListOptions.TableListType.ALL, false), DatasourceLabelProvider.INSTANCE_NO_IMAGE_FULLY_QUALIFIED);
 		}
 
 		if (name.equals("scrollbars"))
@@ -2097,40 +2096,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 						@Override
 						public IPropertySource getPropertySource()
 						{
-							ScrollbarSettingPropertySource scrollbarSettingPropertySource = new ScrollbarSettingPropertySource(this)
-							{
-								@Override
-								public boolean isPropertySet(Object id)
-								{
-									int scrollBits = getEditableValue() == null ? 0 : getEditableValue().intValue();
-									if (scrollBits == 0) return false;
-									if (ScrollbarSettingPropertySource.VERTICAL.equals(id) &&
-										((scrollBits & ISupportScrollbars.VERTICAL_SCROLLBAR_AS_NEEDED) == 0))
-									{
-										return true;
-									}
-									if (ScrollbarSettingPropertySource.HORIZONTAL.equals(id) &&
-										((scrollBits & ISupportScrollbars.HORIZONTAL_SCROLLBAR_AS_NEEDED) == 0))
-									{
-										return true;
-									}
-									return false;
-								}
-
-								@Override
-								public void resetPropertyValue(Object id)
-								{
-									if (ScrollbarSettingPropertySource.VERTICAL.equals(id))
-									{
-										setPropertyValue(id, null);
-									}
-									else if (ScrollbarSettingPropertySource.HORIZONTAL.equals(id))
-									{
-										setPropertyValue(id, null);
-									}
-									PersistPropertySource.this.setPersistPropertyValue("scrollbars", getEditableValue());
-								}
-							};
+							ScrollbarSettingPropertySource scrollbarSettingPropertySource = new ScrollbarSettingPropertySource(this);
 							scrollbarSettingPropertySource.setReadonly(readOnly);
 							return scrollbarSettingPropertySource;
 						}

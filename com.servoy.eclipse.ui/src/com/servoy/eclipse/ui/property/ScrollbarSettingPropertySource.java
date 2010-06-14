@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -47,12 +47,18 @@ public class ScrollbarSettingPropertySource extends ComplexPropertySource<Intege
 	}
 
 	@Override
+	public Object resetComplexPropertyValue(Object id)
+	{
+		return Integer.valueOf(ISupportScrollbars.SCROLLBARS_WHEN_NEEDED);
+	}
+
+	@Override
 	public Object getPropertyValue(Object id)
 	{
 		Integer scrollBits = getEditableValue();
 		if (scrollBits == null)
 		{
-			return new Integer(ISupportScrollbars.SCROLLBARS_WHEN_NEEDED);
+			return resetComplexPropertyValue(id);
 		}
 		if (VERTICAL.equals(id))
 		{
@@ -93,20 +99,6 @@ public class ScrollbarSettingPropertySource extends ComplexPropertySource<Intege
 			default :
 				return ISupportScrollbars.VERTICAL_SCROLLBAR_AS_NEEDED;
 		}
-	}
-
-	@Override
-	public boolean isPropertySet(Object id)
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void resetPropertyValue(Object id)
-	{
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
