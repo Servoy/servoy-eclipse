@@ -351,6 +351,29 @@
                tooltip="Open form in client">
          </action>
       </actionSet>
+      <actionSet
+            id="com.servoy.eclipse.ui.openURL"
+            label="Open Url"
+            visible="true">
+         <action
+               class="com.servoy.eclipse.ui.actions.OpenUrlAction"
+               definitionId="com.servoy.eclipse.ui.OpenWikiAction"
+               id="com.servoy.eclipse.ui.openWiki"
+               label="Servoy Wiki"
+               menubarPath="help/intro"
+               style="push"
+               tooltip="Open Servoy Wiki">
+         </action>
+         <action
+               class="com.servoy.eclipse.ui.actions.OpenUrlAction"
+               definitionId="com.servoy.eclipse.ui.OpenForumAction"
+               id="com.servoy.eclipse.ui.openForum"
+               label="Servoy Forum"
+               menubarPath="help/intro"
+               style="push"
+               tooltip="Open Servoy Forum">
+         </action>
+      </actionSet>
    </extension>
      <extension
            point="org.eclipse.ui.editorActions">
