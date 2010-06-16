@@ -16,20 +16,15 @@
  */
 package com.servoy.eclipse.ui.property;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.ui.dialogs.SolutionContentProvider;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -60,32 +55,21 @@ public class LoginSolutionPropertyController extends PropertyController<String, 
 	 */
 	public void setProperty(IPropertySource propertySource, String value)
 	{
-		String[] modulesNames = (String[])propertySource.getPropertyValue("modulesNames");
-		List<String> newModulesNames = new ArrayList<String>();
-		if (modulesNames != null)
+		if (propertySource instanceof PersistPropertySource)
 		{
-			try
+			IPersist persist = ((PersistPropertySource)propertySource).getPersist();
+			if (persist instanceof Solution)
 			{
-				for (String module : modulesNames)
+				try
 				{
-					SolutionMetaData meta;
-					meta = (SolutionMetaData)ServoyModel.getDeveloperRepository().getRootObjectMetaData(module, IRepository.SOLUTIONS);
-					if (meta != null && meta.getSolutionType() != SolutionMetaData.LOGIN_SOLUTION)
-					{
-						newModulesNames.add(module);
-					}
+					((Solution)persist).setLoginSolutionName(value);
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
 				}
 			}
-			catch (Exception e)
-			{
-				ServoyLog.logError(e);
-			}
 		}
-		if (value != null)
-		{
-			newModulesNames.add(value);
-		}
-		propertySource.setPropertyValue("modulesNames", (newModulesNames.size() == 0) ? null : newModulesNames.toArray(new String[newModulesNames.size()]));
 	}
 
 
