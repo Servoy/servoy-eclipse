@@ -243,6 +243,11 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 		return createRootObject(createNewRootObjectMetaData(newElementID, uuid, name, objectTypeId, 1, 1));
 	}
 
+	@Override
+	public void restoreObjectToCurrentRelease(IPersist object)
+	{
+	}
+
 	public void registerResourceMetaDatas(String resourcesProjectName, int objectTypeId)
 	{
 		this.resourcesProjectName = resourcesProjectName;
