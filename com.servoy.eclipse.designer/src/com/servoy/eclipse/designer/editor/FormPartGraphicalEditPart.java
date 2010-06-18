@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 
@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.DragTracker;
@@ -184,50 +183,15 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 			@Override
 			protected void updateTargetRequest()
 			{
-				FormPartGraphicalEditPart currentPart = FormPartGraphicalEditPart.this;
-				EditPart parentPart = currentPart.getParent();
-				List<FormPartGraphicalEditPart> neighboursNode = new ArrayList<FormPartGraphicalEditPart>();
-
-				for (Object children : parentPart.getChildren())
-				{
-					if (children instanceof FormPartGraphicalEditPart && children != currentPart)
-					{
-						neighboursNode.add((FormPartGraphicalEditPart)children);
-					}
-				}
-
 				super.updateTargetRequest();
-				limitChangeBoundsRequest((ChangeBoundsRequest)getTargetRequest(), neighboursNode);
-
+				ChangeBoundsRequest targetRequest = (ChangeBoundsRequest)getTargetRequest();
+				targetRequest.setMoveDelta(limitPartMove(targetRequest.getMoveDelta()));
 			}
 
 			@Override
-			protected List createOperationSet()
+			protected List<Object> createOperationSet()
 			{
-				List editParts = super.createOperationSet();
-				List<Object> newEditParts = new ArrayList<Object>(editParts.size());
-				for (Object editPart : editParts)
-				{
-					boolean foundParent = false;
-					if (editPart instanceof IPersistEditPart)
-					{
-						IPersistEditPart persistEditpart = (IPersistEditPart)editPart;
-						if (persistEditpart.isReadOnly())
-						{
-							continue;
-						}
-						IPersist persist = persistEditpart.getPersist();
-						for (Object editPart2 : editParts)
-						{
-							if (editPart2 instanceof IPersistEditPart && ((IPersistEditPart)editPart2).getPersist() == persist.getParent())
-							{
-								foundParent = true;
-							}
-						}
-					}
-					if (!foundParent) newEditParts.add(editPart);
-				}
-				return newEditParts;
+				return filterMovableEditParts(super.createOperationSet());
 			}
 
 			@Override
@@ -237,91 +201,95 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 				// Disabled direct edit via drag tracker, it activates direct edit on single click on selected	  element;
 				// direct edit is handled in FormSelectionTool on double-click 
 			}
-
-			@Override
-			protected void performSelection()
-			{
-				super.performSelection();
-
-			}
 		};
+	}
+
+	public boolean canBeMoved()
+	{
+		return !isReadOnly();
+	}
+
+	public static List<Object> filterMovableEditParts(List<Object> editParts)
+	{
+		List<Object> newEditParts = new ArrayList<Object>(editParts.size());
+		for (Object editPart : editParts)
+		{
+			boolean foundParent = false;
+			if (editPart instanceof FormPartGraphicalEditPart)
+			{
+				FormPartGraphicalEditPart partEditpart = (FormPartGraphicalEditPart)editPart;
+				if (!partEditpart.canBeMoved())
+				{
+					continue;
+				}
+				IPersist persist = partEditpart.getPersist();
+				for (Object editPart2 : editParts)
+				{
+					if (editPart2 instanceof IPersistEditPart && ((IPersistEditPart)editPart2).getPersist() == persist.getParent())
+					{
+						foundParent = true;
+					}
+				}
+			}
+			if (!foundParent) newEditParts.add(editPart);
+		}
+		return newEditParts;
 	}
 
 	/**
 	 * Limit a change bounds request.
 	 * 
-	 * <p>
 	 * Update the request when it updates the edit parts to move/resize beyond (0, 0)
 	 * 
-	 * @param targetRequest
-	 * @param neighboursNode
-	 * @param currentPart
 	 */
-
-	public static void limitChangeBoundsRequest(ChangeBoundsRequest targetRequest, List<FormPartGraphicalEditPart> neighboursNode)
+	public Point limitPartMove(Point moveDelta)
 	{
-
-		Point moveDelta = targetRequest.getMoveDelta();
-		Dimension sizeDelta = targetRequest.getSizeDelta();
-		List editParts = targetRequest.getEditParts();
-		FormPartGraphicalEditPart currentPart = null;
-		if ((moveDelta != null && (moveDelta.x != 0 || moveDelta.y != 0)))
+		if ((moveDelta == null || (moveDelta.x == 0 && moveDelta.y == 0)))
 		{
-			int minX = Integer.MAX_VALUE;
-			int minY = Integer.MAX_VALUE;
-			int yCorrection = 0;
-			int xCorrection = 0;
-
-			boolean checkComplete = true;
-			for (Object editPart : targetRequest.getEditParts())
-			{
-				boolean localCheck = true;
-				if (editPart instanceof FormPartGraphicalEditPart)
-				{
-					Rectangle bounds = ((FormPartGraphicalEditPart)editPart).getFigure().getBounds();
-					if (bounds.x < minX) minX = bounds.x;
-					if (bounds.y < minY) minY = bounds.y;
-
-					xCorrection = (minX != Integer.MAX_VALUE && minX + moveDelta.x < 0) ? -minX - moveDelta.x : 0;
-					yCorrection = (minY != Integer.MAX_VALUE && minY + moveDelta.y < 0) ? -minY - moveDelta.y : 0;
-					localCheck = checkMovement(((FormPartGraphicalEditPart)editPart), neighboursNode, moveDelta.y);
-				}
-
-				checkComplete = checkComplete && localCheck;
-			}
-
-			if (checkComplete == true)
-			{
-				if (xCorrection != 0 || yCorrection != 0)
-				{
-					targetRequest.setMoveDelta(new Point(moveDelta.x + xCorrection, moveDelta.y + yCorrection));
-					// do not allow resize beyond (0,0) 
-					if (sizeDelta != null && (sizeDelta.width != 0 || sizeDelta.height != 0))
-					{
-						targetRequest.setSizeDelta(new Dimension(sizeDelta.width - xCorrection, sizeDelta.height - yCorrection));
-					}
-				}
-			}
-			else
-			{
-				targetRequest.setMoveDelta(new Point(0, 0));
-			}
-
+			return moveDelta;
 		}
+
+		EditPart parentPart = getParent();
+		List<Part> neighboursNode = new ArrayList<Part>();
+		for (Object child : parentPart.getChildren())
+		{
+			if (child instanceof FormPartGraphicalEditPart && child != this)
+			{
+				neighboursNode.add(((FormPartGraphicalEditPart)child).getPersist());
+			}
+		}
+
+		int minX = Integer.MAX_VALUE;
+		int minY = Integer.MAX_VALUE;
+		int yCorrection = 0;
+		int xCorrection = 0;
+
+		Rectangle bounds = getFigure().getBounds();
+		if (bounds.x < minX) minX = bounds.x;
+		if (bounds.y < minY) minY = bounds.y;
+
+		xCorrection = (minX != Integer.MAX_VALUE && minX + moveDelta.x < 0) ? -minX - moveDelta.x : 0;
+		yCorrection = (minY != Integer.MAX_VALUE && minY + moveDelta.y < 0) ? -minY - moveDelta.y : 0;
+		if (!checkMovement(getPersist(), neighboursNode, moveDelta.y))
+		{
+			return new Point(0, 0);
+		}
+
+		return new Point(moveDelta.x + xCorrection, moveDelta.y + yCorrection);
 	}
 
-	private static boolean checkMovement(FormPartGraphicalEditPart currentPart, List<FormPartGraphicalEditPart> neighboursNode, int deltaY)
+	private static boolean checkMovement(Part currentPart, List<Part> neighboursNode, int deltaY)
 	{
-		int part_type = currentPart.getPersist().getPartType();
+		int part_type = currentPart.getPartType();
 		if (Part.BODY == part_type)
 		{
-			for (FormPartGraphicalEditPart nPart : neighboursNode)
+			for (Part nPart : neighboursNode)
 			{
-				int neighbourType = nPart.getPersist().getPartType();
+				int neighbourType = nPart.getPartType();
 				if (neighbourType == Part.HEADER || neighbourType == Part.TITLE_HEADER || neighbourType == Part.LEADING_GRAND_SUMMARY ||
 					neighbourType == Part.LEADING_SUBSUMMARY)
 				{
-					if (nPart.getFigure().getBounds().y > currentPart.getFigure().getBounds().y + deltaY)
+					if (nPart.getHeight() > currentPart.getHeight() + deltaY)
 					{
 						return false;
 					}
@@ -330,7 +298,7 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 				else if (neighbourType == Part.TRAILING_SUBSUMMARY || neighbourType == Part.TRAILING_GRAND_SUMMARY || neighbourType == Part.FOOTER ||
 					neighbourType == Part.TITLE_FOOTER)
 				{
-					if (nPart.getFigure().getBounds().y < currentPart.getFigure().getBounds().y + deltaY)
+					if (nPart.getHeight() < currentPart.getHeight() + deltaY)
 					{
 						return false;
 					}
@@ -340,14 +308,14 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 		}
 		else if (Part.TITLE_HEADER == part_type)
 		{
-			for (FormPartGraphicalEditPart nPart : neighboursNode)
+			for (Part nPart : neighboursNode)
 			{
-				int neighbourType = nPart.getPersist().getPartType();
+				int neighbourType = nPart.getPartType();
 				if (neighbourType == Part.HEADER || neighbourType == Part.LEADING_GRAND_SUMMARY || neighbourType == Part.LEADING_SUBSUMMARY ||
 					neighbourType == Part.BODY || neighbourType == Part.TRAILING_SUBSUMMARY || neighbourType == Part.TRAILING_GRAND_SUMMARY ||
 					neighbourType == Part.FOOTER || neighbourType == Part.TITLE_FOOTER)
 				{
-					if (nPart.getFigure().getBounds().y < currentPart.getFigure().getBounds().y + deltaY)
+					if (nPart.getHeight() < currentPart.getHeight() + deltaY)
 					{
 						return false;
 					}
@@ -356,12 +324,12 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 		}
 		else if (Part.HEADER == part_type)
 		{
-			for (FormPartGraphicalEditPart nPart : neighboursNode)
+			for (Part nPart : neighboursNode)
 			{
-				int neighbourType = nPart.getPersist().getPartType();
+				int neighbourType = nPart.getPartType();
 				if (neighbourType == Part.TITLE_HEADER)
 				{
-					if (nPart.getFigure().getBounds().y > currentPart.getFigure().getBounds().y + deltaY)
+					if (nPart.getHeight() > currentPart.getHeight() + deltaY)
 					{
 						return false;
 					}
@@ -370,22 +338,21 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 					neighbourType == Part.TRAILING_SUBSUMMARY || neighbourType == Part.TRAILING_GRAND_SUMMARY || neighbourType == Part.FOOTER ||
 					neighbourType == Part.TITLE_FOOTER)
 				{
-					if (nPart.getFigure().getBounds().y < currentPart.getFigure().getBounds().y + deltaY)
+					if (nPart.getHeight() < currentPart.getHeight() + deltaY)
 					{
 						return false;
 					}
 				}
 			}
-
 		}
 		else if (Part.LEADING_GRAND_SUMMARY == part_type)
 		{
-			for (FormPartGraphicalEditPart nPart : neighboursNode)
+			for (Part nPart : neighboursNode)
 			{
-				int neighbourType = nPart.getPersist().getPartType();
+				int neighbourType = nPart.getPartType();
 				if (neighbourType == Part.HEADER || neighbourType == Part.TITLE_HEADER)
 				{
-					if (nPart.getFigure().getBounds().y > currentPart.getFigure().getBounds().y + deltaY)
+					if (nPart.getHeight() > currentPart.getHeight() + deltaY)
 					{
 						return false;
 					}
@@ -393,7 +360,7 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 				else if (neighbourType == Part.LEADING_SUBSUMMARY || neighbourType == Part.BODY || neighbourType == Part.TRAILING_SUBSUMMARY ||
 					neighbourType == Part.TRAILING_GRAND_SUMMARY || neighbourType == Part.FOOTER || neighbourType == Part.TITLE_FOOTER)
 				{
-					if (nPart.getFigure().getBounds().y < currentPart.getFigure().getBounds().y + deltaY)
+					if (nPart.getHeight() < currentPart.getHeight() + deltaY)
 					{
 						return false;
 					}
@@ -404,12 +371,12 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 
 		else if (Part.LEADING_SUBSUMMARY == part_type)
 		{
-			for (FormPartGraphicalEditPart nPart : neighboursNode)
+			for (Part nPart : neighboursNode)
 			{
-				int neighbourType = nPart.getPersist().getPartType();
+				int neighbourType = nPart.getPartType();
 				if (neighbourType == Part.HEADER || neighbourType == Part.TITLE_HEADER || neighbourType == Part.LEADING_GRAND_SUMMARY)
 				{
-					if (nPart.getFigure().getBounds().y > currentPart.getFigure().getBounds().y + deltaY)
+					if (nPart.getHeight() > currentPart.getHeight() + deltaY)
 					{
 						return false;
 					}
@@ -417,7 +384,7 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 				else if (neighbourType == Part.BODY || neighbourType == Part.TRAILING_SUBSUMMARY || neighbourType == Part.TRAILING_GRAND_SUMMARY ||
 					neighbourType == Part.FOOTER || neighbourType == Part.TITLE_FOOTER)
 				{
-					if (nPart.getFigure().getBounds().y < currentPart.getFigure().getBounds().y + deltaY)
+					if (nPart.getHeight() < currentPart.getHeight() + deltaY)
 					{
 						return false;
 					}
@@ -428,20 +395,20 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 
 		else if (Part.TRAILING_SUBSUMMARY == part_type)
 		{
-			for (FormPartGraphicalEditPart nPart : neighboursNode)
+			for (Part nPart : neighboursNode)
 			{
-				int neighbourType = nPart.getPersist().getPartType();
+				int neighbourType = nPart.getPartType();
 				if (neighbourType == Part.HEADER || neighbourType == Part.TITLE_HEADER || neighbourType == Part.LEADING_GRAND_SUMMARY ||
 					neighbourType == Part.LEADING_SUBSUMMARY || neighbourType == Part.BODY)
 				{
-					if (nPart.getFigure().getBounds().y > currentPart.getFigure().getBounds().y + deltaY)
+					if (nPart.getHeight() > currentPart.getHeight() + deltaY)
 					{
 						return false;
 					}
 				}
 				else if (neighbourType == Part.TRAILING_GRAND_SUMMARY || neighbourType == Part.FOOTER || neighbourType == Part.TITLE_FOOTER)
 				{
-					if (nPart.getFigure().getBounds().y < currentPart.getFigure().getBounds().y + deltaY)
+					if (nPart.getHeight() < currentPart.getHeight() + deltaY)
 					{
 						return false;
 					}
@@ -452,20 +419,20 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 
 		else if (Part.TRAILING_GRAND_SUMMARY == part_type)
 		{
-			for (FormPartGraphicalEditPart nPart : neighboursNode)
+			for (Part nPart : neighboursNode)
 			{
-				int neighbourType = nPart.getPersist().getPartType();
+				int neighbourType = nPart.getPartType();
 				if (neighbourType == Part.HEADER || neighbourType == Part.TITLE_HEADER || neighbourType == Part.LEADING_GRAND_SUMMARY ||
 					neighbourType == Part.LEADING_SUBSUMMARY || neighbourType == Part.BODY || neighbourType == Part.TRAILING_SUBSUMMARY)
 				{
-					if (nPart.getFigure().getBounds().y > currentPart.getFigure().getBounds().y + deltaY)
+					if (nPart.getHeight() > currentPart.getHeight() + deltaY)
 					{
 						return false;
 					}
 				}
 				else if (neighbourType == Part.FOOTER || neighbourType == Part.TITLE_FOOTER)
 				{
-					if (nPart.getFigure().getBounds().y < currentPart.getFigure().getBounds().y + deltaY)
+					if (nPart.getHeight() < currentPart.getHeight() + deltaY)
 					{
 						return false;
 					}
@@ -476,22 +443,22 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 
 		else if (Part.FOOTER == part_type)
 		{
-			for (FormPartGraphicalEditPart nPart : neighboursNode)
+			for (Part nPart : neighboursNode)
 			{
-				int neighbourType = nPart.getPersist().getPartType();
+				int neighbourType = nPart.getPartType();
 				if (neighbourType == Part.HEADER || neighbourType == Part.TITLE_HEADER || neighbourType == Part.LEADING_GRAND_SUMMARY ||
 					neighbourType == Part.LEADING_SUBSUMMARY || neighbourType == Part.BODY || neighbourType == Part.TRAILING_SUBSUMMARY ||
 					neighbourType == Part.TRAILING_GRAND_SUMMARY)
 				{
 
-					if (nPart.getFigure().getBounds().y > currentPart.getFigure().getBounds().y + deltaY)
+					if (nPart.getHeight() > currentPart.getHeight() + deltaY)
 					{
 						return false;
 					}
 				}
 				else if (neighbourType == Part.TITLE_FOOTER)
 				{
-					if (nPart.getFigure().getBounds().y < currentPart.getFigure().getBounds().y + deltaY)
+					if (nPart.getHeight() < currentPart.getHeight() + deltaY)
 					{
 						return false;
 					}
@@ -502,15 +469,15 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 
 		else if (Part.TITLE_FOOTER == part_type)
 		{
-			for (FormPartGraphicalEditPart nPart : neighboursNode)
+			for (Part nPart : neighboursNode)
 			{
-				int neighbourType = nPart.getPersist().getPartType();
+				int neighbourType = nPart.getPartType();
 				if (neighbourType == Part.HEADER || neighbourType == Part.TITLE_HEADER || neighbourType == Part.LEADING_GRAND_SUMMARY ||
 					neighbourType == Part.LEADING_SUBSUMMARY || neighbourType == Part.BODY || neighbourType == Part.TRAILING_SUBSUMMARY ||
 					neighbourType == Part.TRAILING_GRAND_SUMMARY || neighbourType == Part.FOOTER)
 				{
 
-					if (nPart.getFigure().getBounds().y > currentPart.getFigure().getBounds().y + deltaY)
+					if (nPart.getHeight() > currentPart.getHeight() + deltaY)
 					{
 						return false;
 					}

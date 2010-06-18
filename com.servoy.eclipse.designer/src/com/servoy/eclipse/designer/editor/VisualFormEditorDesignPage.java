@@ -384,8 +384,8 @@ public class VisualFormEditorDesignPage extends GraphicalEditor implements Prope
 	private void refreshRulers()
 	{
 		GraphicalViewer viewer = getGraphicalViewer();
-		viewer.setProperty(RulerProvider.PROPERTY_HORIZONTAL_RULER, new FormRulerProvider(editorPart.getForm(), true));
-		viewer.setProperty(RulerProvider.PROPERTY_VERTICAL_RULER, new FormRulerProvider(editorPart.getForm(), false));
+		viewer.setProperty(RulerProvider.PROPERTY_HORIZONTAL_RULER, new FormRulerProvider(viewer.getContents(), true));
+		viewer.setProperty(RulerProvider.PROPERTY_VERTICAL_RULER, new FormRulerProvider(viewer.getContents(), false));
 		viewer.setProperty(RulerProvider.PROPERTY_RULER_VISIBILITY, Boolean.TRUE);
 	}
 
