@@ -513,10 +513,17 @@ if ( (m & 1) == 1)
           <sample><![CDATA[var release = application.getSolutionRelease();]]></sample>
         </function>
         <function name="getStartupArguments">
-          <return type="Object[]"><![CDATA[Array with startup arguments]]></return>
-          <description><![CDATA[Get the parameters as array which are provided by startup.]]></description>
-          <summary><![CDATA[Get the parameters as array which are provided by startup.]]></summary>
-          <sample><![CDATA[var args_array = application.getStartupArguments();]]></sample>
+          <return type="Object[]"><![CDATA[Array with 2 elements, the startup argument and an object containing all startup arguments, or
+ null if there is no argument passed]]></return>
+          <description><![CDATA[Get the parameters which are provided by startup.]]></description>
+          <summary><![CDATA[Get the parameters which are provided by startup.]]></summary>
+          <sample><![CDATA[var args_array = application.getStartupArguments();
+// the first element in the array is the 'argument' value from the startup
+var argument = args_array[0];
+// the second element is an object containing all the startup arguments
+var startupArgumentObj = args_array[1];
+var arg1 = startupArgumentObj.arg1_name;
+var arg2 = startupArgumentObj.arg2_name;]]></sample>
         </function>
         <function name="getTimeStamp">
           <return type="com.servoy.eclipse.core.scripting.docs.Date"><![CDATA[Current time at the client]]></return>
@@ -3498,12 +3505,17 @@ application.output(nextValue);]]></sample>
         </function>
         <function name="getSQL">
           <return type="com.servoy.eclipse.core.scripting.docs.String"><![CDATA[String representing the sql of the JSFoundset.]]></return>
-          <description><![CDATA[Returns the internal SQL which defines the specified (related)foundset.]]></description>
+          <description><![CDATA[Returns the internal SQL which defines the specified (related)foundset.
+Optionally, the foundset and table filter params can be excluded in the sql (includeFilters=false).
+Make sure to set the applicable filters when the sql is used in a loadRecords() call.]]></description>
           <summary><![CDATA[Returns the internal SQL which defines the specified (related)foundset.]]></summary>
           <sample><![CDATA[var sql = databaseManager.getSQL(foundset)]]></sample>
           <parameters>
             <parameter name="foundset" type="Object">
               <description><![CDATA[The JSFoundset to get the sql for.]]></description>
+            </parameter>
+            <parameter name="includeFilters" type="boolean">
+              <description><![CDATA[optional, include the foundset and table filters, default true.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -3515,6 +3527,9 @@ application.output(nextValue);]]></sample>
           <parameters>
             <parameter name="foundset" type="Object">
               <description><![CDATA[The JSFoundset to get the sql parameters for.]]></description>
+            </parameter>
+            <parameter name="includeFilters" type="boolean">
+              <description><![CDATA[optional, include the parameters for the filters, default true.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -3650,7 +3665,7 @@ var firstViewName = viewNamesArray[0];]]></sample>
         <function name="hasRecordChanges">
           <return type="com.servoy.eclipse.core.scripting.docs.Boolean"><![CDATA[true if there are changes in the JSFoundset or JSRecord.]]></return>
           <description><![CDATA[Returns true if the specified foundset, on a specific index or in any of its records, or the specified record has changes.
-          
+
 NOTE: The fields focus may be lost in user interface in order to determine the edits.]]></description>
           <summary><![CDATA[Returns true if the specified foundset, on a specific index or in any of its records, or the specified record has changes.]]></summary>
           <sample><![CDATA[if (databaseManager.hasRecordChanges(foundset,2))
@@ -6636,7 +6651,8 @@ forms['someForm'].controller.show();]]></sample>
         </property>
         <property name="onFocusGained">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
-          <description><![CDATA[The method that is executed when the component gains focus.]]></description>
+          <description><![CDATA[The method that is executed when the component gains focus.
+NOTE: Do not call methods that will influence the focus itself.]]></description>
           <summary><![CDATA[The method that is executed when the component gains focus.]]></summary>
           <sample><![CDATA[var form = solutionModel.newForm('someForm', 'example_data', 'parent_table', 'null', false, 620, 300);
 var onFocusLostMethod = form.newFormMethod('function onFocusLost(event) { application.output("Focus lost at " + event.getTimestamp()); }');
@@ -16667,7 +16683,7 @@ security.addUserToGroup(userUID, 'groupname');]]></sample>
           </parameters>
         </function>
         <function name="authenticate">
-          <return type="Object"><![CDATA[authentication result from authenticator solution]]></return>
+          <return type="Object"><![CDATA[authentication result from authenticator solution or boolean in case of servoy built-in authentication]]></return>
           <description><![CDATA[Authenticate to the Servoy Server using one of the installed authenticators or the Servoy default authenticator.
 
 Note: this method should be called from a login solution.]]></description>
@@ -16677,13 +16693,19 @@ var ok =  security.authenticate('myldap_authenticator', 'login', [globals.userNa
 if (!ok)
 {
 	plugins.dialogs.showErrorDialog('Login failed', 'OK')
-}]]></sample>
+}
+
+// if no authenticator name is used, the credentials are checked using the Servoy built-in user management
+ok = security.authenticate(null, null, [globals.userName, globals.passWord])]]></sample>
           <parameters>
             <parameter name="authenticator_solution" type="String">
               <description><![CDATA[authenticator solution installed on the Servoy Server, null for servoy built-in authentication]]></description>
             </parameter>
-            <parameter name="credentials" type="java.lang.Object[]">
-              <description><![CDATA[Object with input for the selected authenticator]]></description>
+            <parameter name="method" type="String">
+              <description><![CDATA[authenticator method, null for servoy built-in authentication]]></description>
+            </parameter>
+            <parameter name="credentials" type="java.lang.Object[]" optional="true">
+              <description><![CDATA[array whose elements are passed as arguments to the authenticator method, in case of servoy built-in authentication this should be [username, password]]]></description>
             </parameter>
           </parameters>
         </function>
