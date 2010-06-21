@@ -146,6 +146,11 @@ public class DesignApplication implements IApplication, IMessagesCallback
 		return true;
 	}
 
+	public boolean isShutDown()
+	{
+		return getClient().isShutDown();
+	}
+
 	public int getClientPlatform()
 	{
 		return getClient().getClientPlatform();
