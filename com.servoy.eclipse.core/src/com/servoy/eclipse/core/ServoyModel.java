@@ -77,12 +77,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.activities.IActivityManager;
-import org.eclipse.ui.activities.IWorkbenchActivitySupport;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -104,7 +101,6 @@ import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.j2db.AbstractActiveSolutionHandler;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.debug.DebugClientHandler;
@@ -194,28 +190,6 @@ public class ServoyModel implements IWorkspaceSaveListener
 		editingOutstandingChanges = new ArrayList<IPersist>();
 
 		startAppServer();
-
-
-		String dir = getSettings().getProperty(J2DBGlobals.SERVOY_APPLICATION_SERVER_DIRECTORY_KEY);
-		File sybaseRuntimeDir = new File(dir, "/sybase_runtime_db");
-		String id = "com.servoy.eclipse.ui.runtimebuilder";
-		IWorkbench wb = PlatformUI.getWorkbench();
-		IWorkbenchActivitySupport as = wb.getActivitySupport();
-		IActivityManager am = as.getActivityManager();
-		Set<String> activities = new HashSet<String>(am.getEnabledActivityIds());
-		if (sybaseRuntimeDir.exists())
-		{
-			if (am.getActivity(id).isDefined())
-			{
-				activities.add(id);
-				as.setEnabledActivityIds(activities);
-			}
-		}
-		else
-		{
-			activities.remove(id);
-			as.setEnabledActivityIds(activities);
-		}
 
 		// the in-process repository is only meant to work by itself - so all servoy related projects in the workspace should
 		// either not be attached to team or attached to the in-process repository (because database information

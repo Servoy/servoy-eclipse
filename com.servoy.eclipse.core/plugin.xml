@@ -510,17 +510,6 @@
       </super>
    </extension>
    <extension
-         point="org.eclipse.ui.activities">
-      <activity
-            id="com.servoy.eclipse.ui.runtimebuilder"
-            name="Runtime Builder Activity">
-      </activity>
-      <activityPatternBinding
-            activityId="com.servoy.eclipse.ui.runtimebuilder"
-            pattern="com.servoy.eclipse.ui/com.servoy.eclipse.ui.ExportRuntimeWizard">
-      </activityPatternBinding>
-   </extension>
-   <extension
          id="com.servoy.eclipse.core.valuelistProblem"
          name="Valuelist Problem"
          point="org.eclipse.core.resources.markers">
