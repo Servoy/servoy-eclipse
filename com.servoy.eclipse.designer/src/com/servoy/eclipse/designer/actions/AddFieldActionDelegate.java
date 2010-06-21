@@ -89,7 +89,7 @@ public class AddFieldActionDelegate extends AbstractEditpartActionDelegate
 
 			try
 			{
-				table = form.getTable();
+				table = flattenedSolution.getFlattenedForm(form).getTable();
 			}
 			catch (RepositoryException e)
 			{

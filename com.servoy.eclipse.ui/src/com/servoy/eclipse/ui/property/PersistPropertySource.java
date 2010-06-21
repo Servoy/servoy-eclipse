@@ -64,21 +64,21 @@ import com.servoy.eclipse.core.repository.EclipseRepository;
 import com.servoy.eclipse.core.util.CoreUtils;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
+import com.servoy.eclipse.ui.dialogs.FormContentProvider;
+import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
-import com.servoy.eclipse.ui.dialogs.FormContentProvider;
 import com.servoy.eclipse.ui.dialogs.FormContentProvider.FormListOptions;
-import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.editors.BeanCustomCellEditor;
 import com.servoy.eclipse.ui.editors.DataProviderCellEditor;
-import com.servoy.eclipse.ui.editors.DataProviderCellEditor.DataProviderValueEditor;
 import com.servoy.eclipse.ui.editors.FontCellEditor;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
 import com.servoy.eclipse.ui.editors.PageFormatEditor;
 import com.servoy.eclipse.ui.editors.SortCellEditor;
 import com.servoy.eclipse.ui.editors.TagsAndI18NTextCellEditor;
+import com.servoy.eclipse.ui.editors.DataProviderCellEditor.DataProviderValueEditor;
 import com.servoy.eclipse.ui.labelproviders.ArrayLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
@@ -113,7 +113,6 @@ import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
-import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
@@ -149,6 +148,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.query.ISQLJoin;
 import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.util.ComponentFactoryHelper;
@@ -240,106 +240,113 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 	{
 		if (propertyDescriptors == null)
 		{
-			Form form = (Form)persist.getAncestor(IRepository.FORMS);
-			FlattenedSolution flattenedEditingSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist);
-
-			java.beans.BeanInfo info = null;
-			Object valueObject = null;
 			try
 			{
-				if (persist instanceof Bean) //step into the bean instance
+				FlattenedSolution flattenedEditingSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist);
+				Form flattenedForm = flattenedEditingSolution.getFlattenedForm(persist);
+
+				java.beans.BeanInfo info = null;
+				Object valueObject = null;
+				try
 				{
-					try
+					if (persist instanceof Bean) //step into the bean instance
 					{
-						FlattenedSolution editingFlattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(
-							persist);
-						valueObject = ComponentFactory.getBeanDesignInstance(Activator.getDefault().getDesignClient(), editingFlattenedSolution, (Bean)persist,
-							(Form)persist.getAncestor(IRepository.FORMS));
+						try
+						{
+							FlattenedSolution editingFlattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(
+								persist);
+							valueObject = ComponentFactory.getBeanDesignInstance(Activator.getDefault().getDesignClient(), editingFlattenedSolution,
+								(Bean)persist, (Form)persist.getAncestor(IRepository.FORMS));
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError("Could not instantiate bean " + persist, e);
+						}
+						if (valueObject instanceof InvisibleBean) //step into the invisible bean instance
+						{
+							valueObject = ((InvisibleBean)valueObject).getDelegate();
+						}
 					}
-					catch (Exception e)
+					else
 					{
-						ServoyLog.logError("Could not instantiate bean " + persist, e);
+						valueObject = persist;
 					}
-					if (valueObject instanceof InvisibleBean) //step into the invisible bean instance
+					if (valueObject != null)
 					{
-						valueObject = ((InvisibleBean)valueObject).getDelegate();
+						info = java.beans.Introspector.getBeanInfo(valueObject.getClass());
+					}
+				}
+				catch (java.beans.IntrospectionException e)
+				{
+					ServoyLog.logError(e);
+				}
+				java.beans.PropertyDescriptor[] properties;
+				if (info != null)
+				{
+					properties = info.getPropertyDescriptors();
+				}
+				else
+				{
+					properties = new java.beans.PropertyDescriptor[0];
+				}
+
+				propertyDescriptors = new HashMap<Object, IPropertyDescriptor>();
+				hiddenPropertyDescriptors = new HashMap<Object, IPropertyDescriptor>();
+				beansProperties = new HashMap<Object, PropertyDescriptorWrapper>();
+
+				for (java.beans.PropertyDescriptor element : properties)
+				{
+					registerProperty(new PropertyDescriptorWrapper(element, valueObject), flattenedForm, flattenedEditingSolution);
+				}
+				if (valueObject == persist)
+				{
+					// check for pseudo properties
+					String[] pseudoPropertyNames = getPseudoPropertyNames(persist.getClass());
+					if (pseudoPropertyNames != null)
+					{
+						for (String propName : pseudoPropertyNames)
+						{
+							IPropertyDescriptor desc;
+							try
+							{
+								desc = getPropertiesPropertyDescriptor(propName, getDisplayName(propName), propName, flattenedForm, flattenedEditingSolution);
+								if (desc != null)
+								{
+									setCategory(desc, PropertyCategory.createPropertyCategory(propName));
+									propertyDescriptors.put(propName, desc);
+								}
+							}
+							catch (RepositoryException e)
+							{
+								ServoyLog.logError(e);
+							}
+						}
 					}
 				}
 				else
 				{
-					valueObject = persist;
-				}
-				if (valueObject != null)
-				{
-					info = java.beans.Introspector.getBeanInfo(valueObject.getClass());
-				}
-			}
-			catch (java.beans.IntrospectionException e)
-			{
-				ServoyLog.logError(e);
-			}
-			java.beans.PropertyDescriptor[] properties;
-			if (info != null)
-			{
-				properties = info.getPropertyDescriptors();
-			}
-			else
-			{
-				properties = new java.beans.PropertyDescriptor[0];
-			}
-
-			propertyDescriptors = new HashMap<Object, IPropertyDescriptor>();
-			hiddenPropertyDescriptors = new HashMap<Object, IPropertyDescriptor>();
-			beansProperties = new HashMap<Object, PropertyDescriptorWrapper>();
-
-			for (java.beans.PropertyDescriptor element : properties)
-			{
-				registerProperty(new PropertyDescriptorWrapper(element, valueObject), form, flattenedEditingSolution);
-			}
-			if (valueObject == persist)
-			{
-				// check for pseudo properties
-				String[] pseudoPropertyNames = getPseudoPropertyNames(persist.getClass());
-				if (pseudoPropertyNames != null)
-				{
-					for (String propName : pseudoPropertyNames)
+					// bean: use size, location and name descriptors from the persist (Bean)
+					try
 					{
-						IPropertyDescriptor desc;
-						try
+						for (java.beans.PropertyDescriptor element : java.beans.Introspector.getBeanInfo(persist.getClass()).getPropertyDescriptors())
 						{
-							desc = getPropertiesPropertyDescriptor(propName, getDisplayName(propName), propName, form, flattenedEditingSolution);
-							if (desc != null)
+							registerProperty(new PropertyDescriptorWrapper(element, persist), flattenedForm, flattenedEditingSolution);
+							if (propertyDescriptors.containsKey(element.getName()))
 							{
-								setCategory(desc, PropertyCategory.createPropertyCategory(propName));
-								propertyDescriptors.put(propName, desc);
+								// if same property is defined in bean and persist, override with persist version
+								propertyDescriptors.remove(BEAN_PROPERTY_PREFIX_DOT + element.getName());
 							}
 						}
-						catch (RepositoryException e)
-						{
-							ServoyLog.logError(e);
-						}
+					}
+					catch (IntrospectionException e)
+					{
+						ServoyLog.logError(e);
 					}
 				}
 			}
-			else
+			catch (RepositoryException ex)
 			{
-				// bean: use size, location and name descriptors from the persist (Bean)
-				try
-				{
-					for (java.beans.PropertyDescriptor element : java.beans.Introspector.getBeanInfo(persist.getClass()).getPropertyDescriptors())
-					{
-						registerProperty(new PropertyDescriptorWrapper(element, persist), form, flattenedEditingSolution);
-						if (propertyDescriptors.containsKey(element.getName()))
-						{
-							// if same property is defined in bean and persist, override with persist version
-							propertyDescriptors.remove(BEAN_PROPERTY_PREFIX_DOT + element.getName());
-						}
-					}
-				}
-				catch (IntrospectionException e)
-				{
-					ServoyLog.logError(e);
-				}
+				ServoyLog.logError(ex);
 			}
 		}
 	}
@@ -353,13 +360,13 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		return null;
 	}
 
-	private void registerProperty(PropertyDescriptorWrapper propertyDescriptor, Form form, FlattenedSolution flattenedEditingSolution)
+	private void registerProperty(PropertyDescriptorWrapper propertyDescriptor, Form flattenedForm, FlattenedSolution flattenedEditingSolution)
 	{
 		IPropertyDescriptor pd = null;
 		IPropertyDescriptor combinedPropertyDesciptor = null;
 		try
 		{
-			pd = createPropertyDescriptor(propertyDescriptor, form, flattenedEditingSolution);
+			pd = createPropertyDescriptor(propertyDescriptor, flattenedForm, flattenedEditingSolution);
 			if (propertyDescriptor.valueObject == persist)
 			{
 				combinedPropertyDesciptor = createCombinedPropertyDescriptor(propertyDescriptor);
@@ -459,8 +466,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		return beansProperties;
 	}
 
-	protected IPropertyDescriptor createPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor, Form form, FlattenedSolution flattenedEditingSolution)
-		throws RepositoryException
+	protected IPropertyDescriptor createPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor, Form flattenedForm,
+		FlattenedSolution flattenedEditingSolution) throws RepositoryException
 	{
 
 		if ((propertyDescriptor.propertyDescriptor.getReadMethod() == null) || propertyDescriptor.propertyDescriptor.getWriteMethod() == null ||
@@ -483,7 +490,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			id = BEAN_PROPERTY_PREFIX_DOT + propertyDescriptor.propertyDescriptor.getName();
 		}
 		IPropertyDescriptor desc = getPropertyDescriptor(propertyDescriptor, id, getDisplayName(propertyDescriptor.propertyDescriptor.getName()), category,
-			form, flattenedEditingSolution);
+			flattenedForm, flattenedEditingSolution);
 		setCategory(desc, category);
 		return desc;
 	}
@@ -524,7 +531,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 	}
 
 	private IPropertyDescriptor getPropertyDescriptor(final PropertyDescriptorWrapper propertyDescriptor, final String id, String displayName,
-		PropertyCategory category, final Form form, final FlattenedSolution flattenedEditingSolution) throws RepositoryException
+		PropertyCategory category, final Form flattenedForm, final FlattenedSolution flattenedEditingSolution) throws RepositoryException
 	{
 		/*
 		 * Category based property controllers.
@@ -532,7 +539,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 
 		if (category == PropertyCategory.Events || category == PropertyCategory.Commands)
 		{
-			return new MethodPropertyController<Integer>(id, displayName, persist, context, true, category == PropertyCategory.Commands, form != null, true)
+			return new MethodPropertyController<Integer>(id, displayName, persist, context, true, category == PropertyCategory.Commands, flattenedForm != null,
+				true)
 			{
 				@Override
 				protected IPropertyConverter<Integer, Object> createConverter()
@@ -707,7 +715,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 				propertyEditorHint = null;
 			}
 
-			if (propertyEditorHint != null && form != null)
+			if (propertyEditorHint != null && flattenedForm != null)
 			{
 				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.method)
 				{
@@ -829,7 +837,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 
 					try
 					{
-						table = form.getTable();
+						table = flattenedForm.getTable();
 					}
 					catch (Exception ex)
 					{
@@ -879,7 +887,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 							public CellEditor createPropertyEditor(Composite parent)
 							{
 								return new DataProviderCellEditor(parent, labelProviderHidePrefix, getFormInheritanceValueEditor(persist,
-									new DataProviderValueEditor(converter), id), form, flattenedEditingSolution, readOnly, options, converter);
+									new DataProviderValueEditor(converter), id), flattenedForm, flattenedEditingSolution, readOnly, options, converter);
 							}
 						});
 					propertyController.setSupportsReadonly(true);
@@ -891,11 +899,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 				{
 					// String property, select a relation
 					Table primaryTable = null;
-					if (form != null)
+					if (flattenedForm != null)
 					{
 						try
 						{
-							primaryTable = form.getTable();
+							primaryTable = flattenedForm.getTable();
 						}
 						catch (Exception ex)
 						{
@@ -1167,14 +1175,15 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 
 		String name = propertyDescriptor.propertyDescriptor.getName();
 
-		IPropertyDescriptor retval = getGeneralPropertyDescriptor(id, displayName, name, form, flattenedEditingSolution);
+
+		IPropertyDescriptor retval = getGeneralPropertyDescriptor(id, displayName, name, flattenedForm, flattenedEditingSolution);
 		if (retval != null)
 		{
 			return retval;
 		}
 		if (category == PropertyCategory.Properties) // name based props for IPersists only (not beans)
 		{
-			retval = getPropertiesPropertyDescriptor(id, displayName, name, form, flattenedEditingSolution);
+			retval = getPropertiesPropertyDescriptor(id, displayName, name, flattenedForm, flattenedEditingSolution);
 			if (retval != null)
 			{
 				return retval;
@@ -1717,8 +1726,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 					else
 					{
 						// value not a string
-						ServoyLog.logWarning(
-							"Cannot set " + id + " property on object " + beanPropertyDescriptor.valueObject + " with type " + value.getClass(), null);
+						ServoyLog.logWarning("Cannot set " + id + " property on object " + beanPropertyDescriptor.valueObject + " with type " +
+							value.getClass(), null);
 					}
 				}
 				else
@@ -2155,7 +2164,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		return null;
 	}
 
-	private IPropertyDescriptor getPropertiesPropertyDescriptor(final String id, String displayName, String name, final Form form,
+	private IPropertyDescriptor getPropertiesPropertyDescriptor(final String id, String displayName, String name, final Form flattenedForm,
 		final FlattenedSolution flattenedEditingSolution) throws RepositoryException
 	{
 		if ("tabSeq".equals(name))
@@ -2262,11 +2271,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			}
 			else
 			{
-				if (form == null) return null;
+				if (flattenedForm == null) return null;
 
 				try
 				{
-					table = form.getTable();
+					table = flattenedForm.getTable();
 				}
 				catch (Exception ex)
 				{
@@ -2292,7 +2301,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 					public CellEditor createPropertyEditor(Composite parent)
 					{
 						return new DataProviderCellEditor(parent, labelProviderHidePrefix, getFormInheritanceValueEditor(persist, new DataProviderValueEditor(
-							converter), id), form, flattenedEditingSolution, readOnly, options, converter);
+							converter), id), flattenedForm, flattenedEditingSolution, readOnly, options, converter);
 					}
 				});
 			propertyController.setSupportsReadonly(true);
@@ -2302,11 +2311,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		if (name.equals("relationName"))
 		{
 			Table primaryTable = null;
-			if (form != null)
+			if (flattenedForm != null)
 			{
 				try
 				{
-					primaryTable = form.getTable();
+					primaryTable = flattenedForm.getTable();
 				}
 				catch (Exception ex)
 				{
@@ -2345,7 +2354,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 
 		if (name.endsWith("rowBGColorCalculation"))
 		{
-			if (form == null) return null;
+			if (flattenedForm == null) return null;
 			Table table = null;
 			if (persist instanceof Portal)
 			{
@@ -2359,7 +2368,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			{
 				try
 				{
-					table = form.getTable();
+					table = flattenedForm.getTable();
 				}
 				catch (RepositoryException e)
 				{
@@ -2644,10 +2653,10 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		}
 		if (name.equals("labelFor"))
 		{
-			if (form != null)
+			if (flattenedForm != null)
 			{
 				List<String> names = new ArrayList<String>();
-				Iterator<Field> it = form.getFields();
+				Iterator<Field> it = flattenedForm.getFields();
 				while (it.hasNext())
 				{
 					Field field = it.next();
@@ -2705,13 +2714,14 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 
 		if (name.equals("extendsFormID"))
 		{
-			if (form == null) return null;
+			if (flattenedForm == null) return null;
 			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, true), context);
 			PropertyDescriptor pd = new PropertyDescriptor(id, displayName)
 			{
 				@Override
 				public CellEditor createPropertyEditor(Composite parent)
 				{
+					Form form = flattenedEditingSolution.getForm(flattenedForm.getID());
 					return new ListSelectCellEditor(parent, "Select parent form", new FormContentProvider(flattenedEditingSolution, form), formLabelProvider,
 						new FormValueEditor(flattenedEditingSolution), readOnly, new FormContentProvider.FormListOptions(
 							FormListOptions.FormListType.HIERARCHY, null, false, true, false), SWT.NONE, null, "parentFormDialog");
@@ -2841,9 +2851,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 					}
 				};
 			}
-			else if (form != null)
+			else if (flattenedForm != null)
 			{
-				tableDisplay = form;
+				tableDisplay = flattenedForm;
 			}
 			else if (persist instanceof Relation)
 			{
@@ -2883,11 +2893,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		if (name.equals("text") || name.equals("toolTipText") || name.equals("titleText"))
 		{
 			Table table = null;
-			if (form != null)
+			if (flattenedForm != null)
 			{
 				try
 				{
-					table = form.getTable();
+					table = flattenedForm.getTable();
 				}
 				catch (Exception ex)
 				{
@@ -2982,7 +2992,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			{
 				public CellEditor createPropertyEditor(Composite parent)
 				{
-					return new PageFormatEditor(parent, form, "Page Setup", labelProvider);
+					return new PageFormatEditor(parent, flattenedForm, "Page Setup", labelProvider);
 				}
 			});
 		}
