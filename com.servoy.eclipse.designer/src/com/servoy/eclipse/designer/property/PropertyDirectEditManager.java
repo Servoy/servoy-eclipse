@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.property;
 
 import org.eclipse.draw2d.ColorConstants;
@@ -213,12 +213,30 @@ public class PropertyDirectEditManager extends DirectEditManager
 		{
 			Control control = cellEditor.getControl();
 			Point sel = null;
-			if (control instanceof Text) sel = ((Text)control).getSelection();
+			if (control instanceof Text)
+			{
+				sel = ((Text)control).getSelection();
+			}
 			Point pref = control.computeSize(-1, -1);
+			Point textSize = pref;
+			// look for a text component, determine its size
+			if (control instanceof Composite)
+			{
+				Control[] children = ((Composite)control).getChildren();
+				for (Control child : children)
+				{
+					if (child instanceof Text)
+					{
+						textSize = child.computeSize(-1, -1);
+						break;
+					}
+				}
+			}
 			IFigure figure = editPart.getFigure();
 			Rectangle rect = figure.getBounds().getCopy();
 			figure.translateToAbsolute(rect);
-			control.setBounds(rect.x, rect.y, pref.x + 1, pref.y + 1);
+			// if there is a text-inner control, make the text control as large as the figure
+			control.setBounds(rect.x, rect.y, Math.max(rect.width + pref.x - textSize.x, pref.x + 1), Math.max(rect.height + pref.y - textSize.y, pref.y + 1));
 			control.setBackground(ColorConstants.white);
 			if (control instanceof Text)
 			{
