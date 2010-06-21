@@ -80,7 +80,7 @@ public class AddPortalActionDelegate extends AbstractEditpartActionDelegate
 		Table table = null;
 		try
 		{
-			table = form.getTable();
+			table = editingFlattenedSolution.getFlattenedForm(form).getTable();
 			if (!editingFlattenedSolution.getRelations(table, true, false).hasNext())
 			{
 				MessageDialog.openConfirm(getShell(), "Add Portal", "No relations are defined on form table " + table);

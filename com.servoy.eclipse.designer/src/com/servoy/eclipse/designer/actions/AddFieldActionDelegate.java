@@ -88,7 +88,7 @@ public class AddFieldActionDelegate extends AbstractEditpartActionDelegate
 			flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
 			try
 			{
-				table = form.getTable();
+				table = flattenedSolution.getFlattenedForm(form).getTable();
 			}
 			catch (RepositoryException e)
 			{

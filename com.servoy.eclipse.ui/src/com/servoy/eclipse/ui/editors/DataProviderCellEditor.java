@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors;
 
 
@@ -32,6 +32,7 @@ import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.property.DataProviderConverter;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -58,7 +59,7 @@ public class DataProviderCellEditor extends DialogCellEditor
 		FlattenedSolution flattenedSolution, boolean readOnly, DataProviderOptions input, DataProviderConverter converter)
 	{
 		super(parent, labelProvider, valueEditor, readOnly, SWT.NONE);
-		this.form = form;
+		this.form = form instanceof FlattenedForm ? flattenedSolution.getForm(form.getID()) : form;
 		this.flattenedSolution = flattenedSolution;
 		this.input = input;
 		this.converter = converter;
@@ -69,8 +70,8 @@ public class DataProviderCellEditor extends DialogCellEditor
 	{
 		try
 		{
-			DataProviderDialog dialog = new DataProviderDialog(cellEditorWindow.getShell(), getLabelProvider(), form, flattenedSolution, form.getTable(),
-				input, getSelection(), SWT.NONE, "Select Data Provider");
+			DataProviderDialog dialog = new DataProviderDialog(cellEditorWindow.getShell(), getLabelProvider(), form, flattenedSolution,
+				flattenedSolution.getFlattenedForm(form).getTable(), input, getSelection(), SWT.NONE, "Select Data Provider");
 			dialog.open();
 
 			if (dialog.getReturnCode() != Window.CANCEL)

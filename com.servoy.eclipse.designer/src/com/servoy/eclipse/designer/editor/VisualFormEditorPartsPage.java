@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 import java.util.ArrayList;
@@ -684,7 +684,7 @@ public class VisualFormEditorPartsPage extends Composite
 		{
 			FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(editor.getForm());
 			dialog = new DataProviderDialog(getShell(), DataProviderLabelProvider.INSTANCE_HIDEPREFIX, editor.getForm(), flattenedSolution,
-				editor.getForm().getTable(), new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, false, false, false,
+				editor.getFlattenedForm().getTable(), new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, false, false, false,
 					INCLUDE_RELATIONS.NESTED, true, null), null, SWT.MULTI, "Select Group-by fields");
 			if (dialog.open() == SWT.CANCEL)
 			{
