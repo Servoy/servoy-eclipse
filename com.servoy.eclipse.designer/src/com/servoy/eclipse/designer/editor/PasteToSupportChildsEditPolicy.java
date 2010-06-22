@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 import org.eclipse.gef.EditPart;
@@ -25,15 +25,11 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
 import com.servoy.eclipse.designer.editor.commands.PersistPlaceCommandWrapper;
-import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
-import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
-import com.servoy.j2db.persistence.AbstractRepository;
+import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
@@ -114,30 +110,6 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 					{
 						return null;
 					}
-					if (o instanceof PersistDragData)
-					{
-						PersistDragData dragData = (PersistDragData)o;
-						if ((parent instanceof TabPanel && dragData.type != IRepository.TABS) ||
-							(!(parent instanceof TabPanel) && dragData.type == IRepository.TABS))
-						{
-							if (dragData.type == IRepository.TABS)
-							{
-								int tabIndex = getTabParentIndex((Object[])clipboardContents, dragData);
-								if (tabIndex >= 0)
-								{
-									if (tabIndex > i)
-									{
-										// switch them, the tab should be placed first
-										Object temp = ((Object[])clipboardContents)[i];
-										((Object[])clipboardContents)[i] = ((Object[])clipboardContents)[tabIndex];
-										((Object[])clipboardContents)[tabIndex] = temp;
-									}
-									continue;
-								}
-							}
-							return null;
-						}
-					}
 				}
 			}
 
@@ -145,39 +117,6 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 			// Refresh the form
 			return new PersistPlaceCommandWrapper((EditPart)getHost().getViewer().getEditPartRegistry().get(parent.getAncestor(IRepository.FORMS)), command,
 				true);
-		}
-
-		protected int getTabParentIndex(Object[] elements, PersistDragData tab)
-		{
-			if (elements != null && tab.type == IRepository.TABS)
-			{
-				IPersist tabParent = null;
-				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(tab.solutionName);
-				if (servoyProject != null)
-				{
-					IPersist draggedPersist = AbstractRepository.searchPersist(servoyProject.getEditingSolution(), tab.uuid);
-					if (draggedPersist != null)
-					{
-						tabParent = draggedPersist.getParent();
-					}
-				}
-				int tabIndex = -1;
-				for (int i = 0; i < elements.length; i++)
-				{
-					Object o = elements[i];
-					if (o instanceof PersistDragData)
-					{
-						PersistDragData dragData = (PersistDragData)o;
-						if (dragData.type == IRepository.TABPANELS)
-						{
-							if (tabParent != null && tabParent.getUUID().equals(dragData.uuid)) tabIndex = i;
-							else return -1;
-						}
-					}
-				}
-				return tabIndex;
-			}
-			return -1;
 		}
 	}
 

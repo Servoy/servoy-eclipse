@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor.commands;
 
 import java.util.ArrayList;
@@ -113,8 +113,16 @@ public abstract class DesignerSelectionAction extends SelectionAction
 	protected GroupRequest createRequest(List<EditPart> selected)
 	{
 		GroupRequest groupRequest = new GroupRequest(requestType);
-		groupRequest.setEditParts(selected);
+		groupRequest.setEditParts(getSelectedElements(selected));
 		return groupRequest;
+	}
+
+	/**
+	 * This may be overridden in subclasses to change the selected set
+	 */
+	protected List<EditPart> getSelectedElements(List<EditPart> selected)
+	{
+		return selected;
 	}
 
 	/**

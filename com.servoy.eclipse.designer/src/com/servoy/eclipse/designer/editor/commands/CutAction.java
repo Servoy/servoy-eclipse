@@ -16,9 +16,13 @@
  */
 package com.servoy.eclipse.designer.editor.commands;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.gef.EditPart;
+import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
@@ -26,7 +30,9 @@ import org.eclipse.ui.actions.ActionFactory;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportChilds;
 
 /**
  * An action to cut selected objects.
@@ -56,6 +62,44 @@ public class CutAction extends DesignerSelectionAction
 		ISharedImages sharedImages = PlatformUI.getWorkbench().getSharedImages();
 		setImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_CUT));
 		setDisabledImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_CUT_DISABLED));
+	}
+
+	/**
+	 * When a parent edit part is selected select its all children also.
+	 */
+	@Override
+	protected List<EditPart> getSelectedElements(List<EditPart> selected)
+	{
+		if (selected == null)
+		{
+			return null;
+		}
+		List<EditPart> newSelected = new ArrayList<EditPart>();
+		for (EditPart editPart : selected)
+		{
+			if (!newSelected.contains(editPart))
+			{
+				newSelected.add(editPart);
+			}
+
+			// add children
+			Object model = editPart.getModel();
+			if (model instanceof ISupportChilds && !(model instanceof Form))
+			{
+				Map editPartRegistry = ((GraphicalViewer)getWorkbenchPart().getAdapter(GraphicalViewer.class)).getEditPartRegistry();
+
+				Iterator<IPersist> children = ((ISupportChilds)model).getAllObjects();
+				while (children != null && children.hasNext())
+				{
+					EditPart childEditPart = (EditPart)editPartRegistry.get(children.next());
+					if (childEditPart != null && !newSelected.contains(childEditPart))
+					{
+						newSelected.add(childEditPart);
+					}
+				}
+			}
+		}
+		return newSelected;
 	}
 
 	@Override

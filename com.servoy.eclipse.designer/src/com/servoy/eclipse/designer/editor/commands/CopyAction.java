@@ -16,6 +16,15 @@
  */
 package com.servoy.eclipse.designer.editor.commands;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.eclipse.gef.EditPart;
+import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.internal.GEFMessages;
 import org.eclipse.ui.ISharedImages;
@@ -24,6 +33,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportChilds;
 
 /**
  * An action to delete selected objects.
@@ -32,7 +44,7 @@ public class CopyAction extends DesignerSelectionAction
 {
 
 	/**
-	 * Constructs a <code>DeleteAction</code> using the specified part.
+	 * Constructs a <code>CopyAction</code> using the specified part.
 	 * 
 	 * @param part The part for this action
 	 */
@@ -55,6 +67,59 @@ public class CopyAction extends DesignerSelectionAction
 		setImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
 		setDisabledImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_DISABLED));
 		setEnabled(false);
+	}
+
+	/**
+	 * When a parent edit part is selected select its all children also (if none of the children were selected).
+	 */
+	@Override
+	protected List<EditPart> getSelectedElements(List<EditPart> selected)
+	{
+		if (selected == null)
+		{
+			return null;
+		}
+		Set<Object> selectedModels = new HashSet<Object>();
+		for (EditPart editPart : selected)
+		{
+			selectedModels.add(editPart.getModel());
+		}
+		List<EditPart> newSelected = new ArrayList<EditPart>();
+		for (EditPart editPart : selected)
+		{
+			newSelected.add(editPart);
+
+			// add children if no children were selected
+			Object model = editPart.getModel();
+			if (model instanceof ISupportChilds && !(model instanceof Form))
+			{
+				Map editPartRegistry = ((GraphicalViewer)getWorkbenchPart().getAdapter(GraphicalViewer.class)).getEditPartRegistry();
+
+				List<EditPart> childEditParts = new ArrayList<EditPart>();
+				Iterator<IPersist> children = ((ISupportChilds)model).getAllObjects();
+				while (children != null && children.hasNext())
+				{
+					IPersist child = children.next();
+					if (selectedModels.contains(child))
+					{
+						// parent and child was selected, do not automatically add all children
+						childEditParts = null;
+						break;
+					}
+
+					EditPart childEditPart = (EditPart)editPartRegistry.get(child);
+					if (childEditPart != null)
+					{
+						childEditParts.add(childEditPart);
+					}
+				}
+				if (childEditParts != null)
+				{
+					newSelected.addAll(childEditParts);
+				}
+			}
+		}
+		return newSelected;
 	}
 
 	@Override
