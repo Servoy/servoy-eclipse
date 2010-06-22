@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.builder;
 
 import org.eclipse.core.resources.IMarker;
@@ -87,9 +87,9 @@ public class AddTemplateArgumentsQuickFix implements IMarkerResolution
 							method.setDeclaration(mixedTemplate.getMethodDeclaration(null, null));
 							method.flagChanged();
 						}
-					}
 
-					servoyProject.saveEditingSolutionNodes(new IPersist[] { persist }, true);
+						servoyProject.saveEditingSolutionNodes(new IPersist[] { persist }, true);
+					}
 				}
 				catch (Exception e)
 				{
