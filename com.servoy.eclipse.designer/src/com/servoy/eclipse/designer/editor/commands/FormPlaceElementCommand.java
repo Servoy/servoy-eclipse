@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor.commands;
 
 import java.beans.BeanInfo;
@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.gef.Request;
 import org.eclipse.gef.commands.Command;
@@ -50,6 +50,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.ColumnWrapper;
+import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -120,11 +121,11 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 		{
 			models = placeElements(getNextLocation());
 			// set data in request.getExtendedData map as properties in the created persists
-			if (models != null && request.getExtendedData() != null && request.getExtendedData().size() > 0)
+			if (models != null)
 			{
 				for (Object model : models)
 				{
-					if (model instanceof IPersist)
+					if (model instanceof IPersist && request.getExtendedData() != null && request.getExtendedData().size() > 0)
 					{
 						IPersist persist = (IPersist)model;
 						PersistPropertySource persistProperties = new PersistPropertySource(persist, persist, false);
@@ -135,6 +136,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 							persistProperties.setPersistPropertyValue(entry.getKey(), entry.getValue());
 						}
 					}
+					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, model, true);
 				}
 			}
 		}
@@ -231,7 +233,9 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 				else if (o instanceof PersistDragData)
 				{
 					IPersist[] persists = pastePersist((PersistDragData)o, loc, origLocations, groupMap);
-					if (persists != null && persists.length > 0 && !(parent instanceof TabPanel) && ((PersistDragData)o).type == IRepository.TABPANELS)
+					if (persists != null &&
+						persists.length > 0 &&
+						((!(parent instanceof TabPanel) && ((PersistDragData)o).type == IRepository.TABPANELS) || (!(parent instanceof Portal) && ((PersistDragData)o).type == IRepository.PORTALS)))
 					{
 						alternativeParent = persists[0];
 					}
@@ -376,9 +380,18 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 			IPersist persist;
 			if (draggedPersist instanceof Tab)
 			{
-				if (!(parent instanceof TabPanel) && alternativeParent instanceof TabPanel) persist = ElementFactory.copyComponent(
-					(ISupportChilds)alternativeParent, (Tab)draggedPersist, x, y, IRepository.TABS, groupMap);
-				else persist = ElementFactory.copyComponent(parent, (Tab)draggedPersist, x, y, IRepository.TABS, groupMap);
+				if (!(parent instanceof TabPanel) && alternativeParent instanceof TabPanel)
+				{
+					persist = ElementFactory.copyComponent((ISupportChilds)alternativeParent, (Tab)draggedPersist, x, y, IRepository.TABS, groupMap);
+				}
+				else
+				{
+					persist = ElementFactory.copyComponent(parent, (Tab)draggedPersist, x, y, IRepository.TABS, groupMap);
+				}
+			}
+			else if (draggedPersist instanceof Field && !(parent instanceof Portal) && alternativeParent instanceof Portal)
+			{
+				persist = ElementFactory.copyComponent((ISupportChilds)alternativeParent, (Field)draggedPersist, x, y, IRepository.ELEMENTS, groupMap);
 			}
 			else
 			{
@@ -546,6 +559,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 				try
 				{
 					((IDeveloperRepository)persist.getRootObject().getRepository()).deleteObject(persist);
+					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, model, true);
 				}
 				catch (RepositoryException e)
 				{
