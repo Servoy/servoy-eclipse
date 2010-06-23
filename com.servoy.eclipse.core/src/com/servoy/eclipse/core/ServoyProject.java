@@ -64,7 +64,7 @@ import com.servoy.j2db.util.UUID;
 /**
  * models servoy solution as project
  * 
- * @author Jan Blok
+ * @author jblok
  */
 public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exception>
 {
