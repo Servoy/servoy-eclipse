@@ -25,7 +25,7 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 /**
  * Is similar to JavaModelManager, single entry point for anything about servoy in eclipse
  * 
- * @author Jan Blok
+ * @author jblok
  */
 public class ServoyModelManager
 {

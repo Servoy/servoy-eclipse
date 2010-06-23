@@ -42,9 +42,8 @@ import com.servoy.j2db.util.IdentDocumentValidator;
 /**
  * Action to create a new table depending on the selection of a solution view.
  * 
- * @author Jan Blok
+ * @author jblok
  */
-
 public class NewTableAction extends Action implements ISelectionChangedListener
 {
 

@@ -143,7 +143,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * models servoy as JavaModel in eclipse
  * 
- * @author Jan Blok
+ * @author jblok
  */
 @SuppressWarnings("nls")
 public class ServoyModel implements IWorkspaceSaveListener

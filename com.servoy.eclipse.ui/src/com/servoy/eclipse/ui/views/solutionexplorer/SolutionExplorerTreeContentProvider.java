@@ -98,7 +98,7 @@ import com.servoy.j2db.util.UUID;
 /**
  * Content provider for the solution explorer tree.
  * 
- * @author Jan Blok
+ * @author jblok
  */
 public class SolutionExplorerTreeContentProvider implements IStructuredContentProvider, ITreeContentProvider
 {
