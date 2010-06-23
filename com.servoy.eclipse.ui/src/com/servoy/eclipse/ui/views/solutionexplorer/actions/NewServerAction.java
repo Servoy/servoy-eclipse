@@ -31,7 +31,7 @@ import com.servoy.j2db.persistence.ServerConfig;
 /**
  * Action to create a new server depending on the selection of a solution view.
  * 
- * @author Jan Blok
+ * @author jblok
  */
 public class NewServerAction extends Action implements ISelectionChangedListener
 {
