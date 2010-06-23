@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core;
 
 import org.eclipse.core.resources.IProject;
@@ -29,6 +29,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.core.util.UIUtils.MessageAndCheckBoxDialog;
+import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -148,7 +149,8 @@ public class TeamShareMonitor
 		ignoreSetExtensionCheck = true;
 
 		// in case multiple projects have just been checked out and the user chose to modify the setting, don't ask him again
-		boolean initRepAsTeamProvider = Utils.getAsBoolean(sm.getSettings().getProperty("servoy.application_server.startRepositoryAsTeamProvider", "true"));
+		boolean initRepAsTeamProvider = Utils.getAsBoolean(ServoyModel.getSettings().getProperty(Settings.START_AS_TEAMPROVIDER_SETTING,
+			String.valueOf(Settings.START_AS_TEAMPROVIDER_DEFAULT)));
 		if (initRepAsTeamProvider)
 		{
 			Runnable r = new Runnable()
@@ -166,7 +168,10 @@ public class TeamShareMonitor
 							sh,
 							"Developer started repository",
 							null,
-							"The internal database based repository is being used.\nYou should only use Servoy Team Provider and only share to 'localhost'.\nUsing other team providers/locations may result in unwanted behavior or limited functionality (mainly related to database information and servoy sequences).\n\nYou should disable starting such a repository with developer if you are going to use other team providers/locations), by setting 'servoy.application_server.startRepositoryAsTeamProvider' to false.",
+							"The internal database based repository is being used.\n" +
+								"You should only use Servoy Team Provider and only share to 'localhost'.\nUsing other team providers/locations may result in unwanted behavior or limited functionality (mainly related to database information and servoy sequences).\n" +
+								"\nYou should disable starting such a repository with developer if you are going to use other team providers/locations), by setting '" +
+								Settings.START_AS_TEAMPROVIDER_SETTING + "' to false.",
 							"Do not show this warning in the future (can be changed in preferences). Always ignore.", false, MessageDialog.QUESTION,
 							new String[] { "Change setting / restart", "Ignore" }, 0);
 						dialogShown = true;
@@ -179,10 +184,10 @@ public class TeamShareMonitor
 							}
 							if (opt == 0)
 							{
-								sm.getSettings().setProperty("servoy.application_server.startRepositoryAsTeamProvider", "false");
+								ServoyModel.getSettings().setProperty(Settings.START_AS_TEAMPROVIDER_SETTING, "false");
 								try
 								{
-									sm.getSettings().save();
+									ServoyModel.getSettings().save();
 
 									// run later as we could be during startup - and some things are not initialized properly in this case
 									// and could cause restart to fail

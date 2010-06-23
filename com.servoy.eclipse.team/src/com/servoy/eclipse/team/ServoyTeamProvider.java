@@ -68,8 +68,8 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.ServoyResourcesProject;
 import com.servoy.eclipse.core.TeamShareMonitor;
-import com.servoy.eclipse.core.WorkspaceFileAccess;
 import com.servoy.eclipse.core.TeamShareMonitor.TeamShareMonitorExtension;
+import com.servoy.eclipse.core.WorkspaceFileAccess;
 import com.servoy.eclipse.core.repository.DataModelManager;
 import com.servoy.eclipse.core.repository.EclipseMessages;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
@@ -644,7 +644,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 	private static void checkIfLocalRepositoryIsUsedAndExist()
 	{
 		Settings settings = ServoyModel.getSettings();
-		String s_initRepAsTeamProvider = settings.getProperty("servoy.application_server.startRepositoryAsTeamProvider", "true");
+		String s_initRepAsTeamProvider = settings.getProperty(Settings.START_AS_TEAMPROVIDER_SETTING, String.valueOf(Settings.START_AS_TEAMPROVIDER_DEFAULT));
 		boolean initRepAsTeamProvider = Utils.getAsBoolean(s_initRepAsTeamProvider);
 		if (initRepAsTeamProvider)
 		{

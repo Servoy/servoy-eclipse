@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.preferences;
 
 import org.eclipse.core.runtime.Preferences;
@@ -32,6 +32,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyResourcesProject;
 import com.servoy.eclipse.core.TeamShareMonitor;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.j2db.util.Settings;
 
 public class TeamPreferences extends PreferencePage implements IWorkbenchPreferencePage
 {
@@ -71,7 +72,7 @@ public class TeamPreferences extends PreferencePage implements IWorkbenchPrefere
 		warnWhenUsingOtherTeamProvidersWithInProcessRep.setText("Show warning when using non-Servoy team provider or non 'localhost' location while internal database");
 
 		Label nextLineLabel = new Label(cp, SWT.CHECK);
-		nextLineLabel.setText("based repository is active (see admin setting 'servoy.application_server.startRepositoryAsTeamProvider')");
+		nextLineLabel.setText("based repository is active (see admin setting '" + Settings.START_AS_TEAMPROVIDER_SETTING + "')");
 
 		initializeValues();
 

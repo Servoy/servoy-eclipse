@@ -30,6 +30,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.j2db.debug.DeveloperPreferences;
+import com.servoy.j2db.util.Settings;
 
 /**
  * Preferences page for developer settings.
@@ -41,6 +42,7 @@ public class DeveloperPreferencePage extends PreferencePage implements IWorkbenc
 {
 
 	private Button enhancedSecurityButton;
+
 //	private Button useDummyAuthButton;
 
 	public void init(IWorkbench workbench)
@@ -110,7 +112,7 @@ public class DeveloperPreferencePage extends PreferencePage implements IWorkbenc
 	@Override
 	protected void performDefaults()
 	{
-		enhancedSecurityButton.setSelection(DeveloperPreferences.ENHANCED_SECURITY_DEFAULT);
+		enhancedSecurityButton.setSelection(Settings.ENHANCED_SECURITY_DEFAULT);
 //		useDummyAuthButton.setSelection(DeveloperPreferences.DUMMY_AUTHENTICATION_DEFAULT);
 //		useDummyAuthButton.setEnabled(enhancedSecurityButton.getSelection());
 

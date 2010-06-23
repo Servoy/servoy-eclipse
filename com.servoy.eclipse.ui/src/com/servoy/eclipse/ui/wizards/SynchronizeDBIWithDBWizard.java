@@ -86,13 +86,14 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.j2db.persistence.IColumnInfoBasedSequenceProvider;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
-import com.servoy.j2db.persistence.IColumnInfoBasedSequenceProvider;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Utils;
 
@@ -167,7 +168,9 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 
 			};
 			errorPage.setTitle("This wizard is unavailable");
-			errorPage.setErrorMessage("Synchronizing requires that '.dbi' files are used. When the developer is started with admin setting\n\"servoy.application_server.startRepositoryAsTeamProvider = true\", database information is handled by the team repository directly, not through '.dbi' files.");
+			errorPage.setErrorMessage("Synchronizing requires that '.dbi' files are used. When the developer is started with admin setting\n\"" +
+				Settings.START_AS_TEAMPROVIDER_SETTING +
+				" = true\", database information is handled by the team repository directly, not through '.dbi' files.");
 			errorPage.setPageComplete(false);
 			page1 = null;
 			page2 = null;

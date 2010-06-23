@@ -33,8 +33,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.wicket.Request;
@@ -84,8 +84,8 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import com.servoy.eclipse.core.builder.ServoyBuilder;
 import com.servoy.eclipse.core.builder.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
+import com.servoy.eclipse.core.builder.ServoyBuilder;
 import com.servoy.eclipse.core.repository.DataModelManager;
 import com.servoy.eclipse.core.repository.EclipseMessages;
 import com.servoy.eclipse.core.repository.EclipseRepository;
@@ -203,7 +203,8 @@ public class ServoyModel implements IWorkspaceSaveListener
 		Settings settings = getSettings();
 		Preferences pluginPreferences = Activator.getDefault().getPluginPreferences();
 		pluginPreferences.setDefault(TeamShareMonitor.WARN_ON_NON_IN_PROCESS_TEAM_SHARE, true);
-		initRepAsTeamProvider = new Boolean(Utils.getAsBoolean(settings.getProperty("servoy.application_server.startRepositoryAsTeamProvider", "true")));
+		initRepAsTeamProvider = new Boolean(Utils.getAsBoolean(settings.getProperty(Settings.START_AS_TEAMPROVIDER_SETTING,
+			String.valueOf(Settings.START_AS_TEAMPROVIDER_DEFAULT))));
 
 		// load in background all servers and all tables needed by current solution
 		backgroundTableLoader = new BackgroundTableLoader(getServerManager());
@@ -2070,12 +2071,12 @@ public class ServoyModel implements IWorkspaceSaveListener
 													Integer lineNumber = (Integer)map.get(IMarker.LINE_NUMBER);
 													String oldLine = oldLines[lineNumber.intValue() - 1];
 													if (oldLine.trim().equals("")) continue;
-													int find = findLines(newLines, oldLine, lineNumber.intValue(), true, Math.abs(oldLines.length -
-														newLines.length) + 1);
+													int find = findLines(newLines, oldLine, lineNumber.intValue(), true,
+														Math.abs(oldLines.length - newLines.length) + 1);
 													if (find == -1)
 													{
-														find = findLines(newLines, oldLine, lineNumber.intValue(), false, Math.abs(oldLines.length -
-															newLines.length) + 1);
+														find = findLines(newLines, oldLine, lineNumber.intValue(), false,
+															Math.abs(oldLines.length - newLines.length) + 1);
 													}
 													if (find == -1) continue;
 													lineNumber = new Integer(find + 1);

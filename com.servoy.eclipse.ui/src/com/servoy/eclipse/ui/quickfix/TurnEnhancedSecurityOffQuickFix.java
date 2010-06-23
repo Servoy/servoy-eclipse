@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.ui.IMarkerResolution;
 
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.j2db.util.Settings;
 
 
 public class TurnEnhancedSecurityOffQuickFix implements IMarkerResolution
@@ -32,7 +33,7 @@ public class TurnEnhancedSecurityOffQuickFix implements IMarkerResolution
 
 	public void run(IMarker marker)
 	{
-		ServoyModel.getSettings().setProperty("servoy.application_server.enhancedSecurity", "false"); //$NON-NLS-1$ //$NON-NLS-2$
+		ServoyModel.getSettings().setProperty(Settings.ENHANCED_SECURITY_SETTING, "false"); //$NON-NLS-1$ 
 	}
 
 }
