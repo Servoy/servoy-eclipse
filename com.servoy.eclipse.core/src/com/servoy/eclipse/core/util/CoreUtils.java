@@ -202,14 +202,4 @@ public class CoreUtils
 		return sm;
 	}
 
-	public static boolean isCommandProperty(String propertyName)
-	{
-		return propertyName != null && propertyName.endsWith("CmdMethodID"); //$NON-NLS-1$
-	}
-
-	public static boolean isEventProperty(String propertyName)
-	{
-		return propertyName != null && propertyName.endsWith("MethodID") && !isCommandProperty(propertyName); //$NON-NLS-1$
-	}
-
 }

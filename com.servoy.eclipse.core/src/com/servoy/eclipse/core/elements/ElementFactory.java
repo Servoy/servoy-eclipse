@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.elements;
 
 import java.awt.Dimension;
@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -564,8 +564,8 @@ public class ElementFactory
 		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
 
 		JSONObject json = new JSONObject();
-		json.put(Template.PROP_FORM, cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, repository),
-			null));
+		json.put(Template.PROP_FORM,
+			cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, repository), null));
 		json.put(Template.PROP_LOCATION, PersistHelper.createPointString(location));
 		JSONArray elements = new JSONArray();
 
@@ -599,7 +599,7 @@ public class ElementFactory
 		while (keys.hasNext())
 		{
 			String key = keys.next();
-			if (CoreUtils.isCommandProperty(key) || CoreUtils.isEventProperty(key))
+			if (BaseComponent.isCommandProperty(key) || BaseComponent.isEventProperty(key))
 			{
 				// replace method references with their string name to be resolved when template is applied
 				UUID uuid;
@@ -844,7 +844,7 @@ public class ElementFactory
 		while (keys.hasNext())
 		{
 			String key = keys.next();
-			if (CoreUtils.isCommandProperty(key) || CoreUtils.isEventProperty(key))
+			if (BaseComponent.isCommandProperty(key) || BaseComponent.isEventProperty(key))
 			{
 				String name = object.getString(key);
 				ScriptMethod scriptMethod = null;

@@ -1023,8 +1023,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														if (lst.size() == 1)
 														{
 															String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																other.getUUID(), SolutionSerializer.getRelativePath(p, false) +
-																	SolutionSerializer.getFileName(p, false));
+																other.getUUID(),
+																SolutionSerializer.getRelativePath(p, false) + SolutionSerializer.getFileName(p, false));
 															addMarker(project, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_HIGH, null,
 																other);
 														}
@@ -1070,14 +1070,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																	// for now only add it on both if there is 1, just skip the rest.
 																	if (lst.size() == 1)
 																	{
-																		String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																			other.getUUID(), SolutionSerializer.getRelativePath(p, false) +
+																		String msg = MarkerMessages.getMessage(
+																			MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
+																			other.getUUID(),
+																			SolutionSerializer.getRelativePath(p, false) +
 																				SolutionSerializer.getFileName(p, false));
 																		addMarker(moduleProject, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR,
 																			IMarker.PRIORITY_HIGH, null, other);
 																	}
-																	String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																		p.getUUID(), SolutionSerializer.getRelativePath(other, false) +
+																	String msg = MarkerMessages.getMessage(
+																		MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
+																		p.getUUID(),
+																		SolutionSerializer.getRelativePath(other, false) +
 																			SolutionSerializer.getFileName(other, false));
 																	addMarker(moduleProject, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR,
 																		IMarker.PRIORITY_HIGH, null, p);
@@ -1111,7 +1115,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												else msg = MarkerMessages.getMessage(MarkerMessages.Marker_Form_Solution_PropertyOnElementInFormTargetNotFound,
 													element.getName(), elementName, inForm);
 											}
-											if (CoreUtils.isEventProperty(element.getName()))
+											if (BaseComponent.isEventProperty(element.getName()))
 											{
 												IMarker marker = addMarker(project, INVALID_EVENT_METHOD, msg, -1, IMarker.SEVERITY_WARNING,
 													IMarker.PRIORITY_LOW, null, o);
@@ -1150,7 +1154,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											String msg = MarkerMessages.getMessage(MarkerMessages.Marker_PropertyFormCannotBeInstantiated, element.getName());
 											addMarker(project, PROJECT_FORM_MARKER_TYPE, msg, -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, o);
 										}
-										if (CoreUtils.isEventProperty(element.getName()) && !skipEventMethod(element.getName()) &&
+										if (BaseComponent.isEventProperty(element.getName()) && !skipEventMethod(element.getName()) &&
 											(foundPersist instanceof ScriptMethod) && !methodsParsed.contains(foundPersist.getUUID()))
 										{
 											methodsParsed.add(foundPersist.getUUID());
