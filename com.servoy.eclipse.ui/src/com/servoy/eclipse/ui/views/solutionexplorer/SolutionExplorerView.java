@@ -188,6 +188,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.EnableServerAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ExpandNodeAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NCreateFromDBAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NExternalizeAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NWriteToDBAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportMediaAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportMediaFolderAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.LinkWithEditorAction;
@@ -448,6 +449,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private IAction i18nExternalizeAction;
 	private IAction i18nCreateFromDBAction;
+	private IAction i18nWriteToDBAction;
 	private I18NChangeListener i18nChangeListener;
 
 	//copy table action
@@ -1867,6 +1869,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		{
 			manager.add(new Separator());
 			manager.add(i18nCreateFromDBAction);
+			manager.add(i18nWriteToDBAction);
 		}
 
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.SOLUTION)
@@ -2114,6 +2117,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			"Import solution"); //$NON-NLS-1$
 		i18nExternalizeAction = new I18NExternalizeAction();
 		i18nCreateFromDBAction = new I18NCreateFromDBAction();
+		i18nWriteToDBAction = new I18NWriteToDBAction();
 
 		suggestForeignTypes = new SuggestForeignTypesAction(this);
 
