@@ -201,7 +201,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 				if (arguments.get(i) != null) len = i + 1;
 			}
 			// save a copy of the mwa.arguments list so that changes in mwa.arguments are not affecting customProperties
-			((AbstractBase)persist).putInstancMethodArguments(id.toString(), len == 0 ? null : new ArrayList<Object>(arguments.subList(0, len)));
+			((AbstractBase)persist).putInstanceMethodArguments(id.toString(), len == 0 ? null : new ArrayList<Object>(arguments.subList(0, len)));
 		}
 	}
 
