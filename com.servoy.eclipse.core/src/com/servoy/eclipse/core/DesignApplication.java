@@ -107,7 +107,7 @@ public class DesignApplication implements IApplication, IMessagesCallback
 	/**
 	 * @return
 	 */
-	private IApplication getClient()
+	IApplication getClient()
 	{
 		if (client == null)
 		{
@@ -446,7 +446,8 @@ public class DesignApplication implements IApplication, IMessagesCallback
 	{
 		if (pluginManager == null)
 		{
-			getClient(); // make sure the client is created before we sync on DesignApplication, this may require the awt thread.
+			//getClient(); // do not create the client here, it needs to be created from within a job, otherwise the main thread 
+			// may be blocked on the awt thread which causes problems on the mac (debug SC does not paint)
 			synchronized (this)
 			{
 				if (pluginManager == null)
@@ -604,7 +605,8 @@ public class DesignApplication implements IApplication, IMessagesCallback
 
 	public boolean isRunningRemote()
 	{
-		return getClient().isRunningRemote();
+		// do not call getClient() here, this my be called from getPluginManager() within a sync block
+		return false; // Design client is not running remote
 	}
 
 	public ImageIcon loadImage(String name)
