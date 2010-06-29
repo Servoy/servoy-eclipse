@@ -41,6 +41,8 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManager;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.util.ITransactionConnection;
+import com.servoy.j2db.util.Utils;
 
 public class I18NServerTableDialog extends Dialog
 {
@@ -159,10 +161,12 @@ public class I18NServerTableDialog extends Dialog
 			{
 				String prefix = "i18n_messages"; //$NON-NLS-1$
 				adjustedTableName = prefix;
+				ITransactionConnection connection = null;
 				try
 				{
 					IServerInternal srv = (IServerInternal)ServoyModel.getServerManager().getServer(serverName);
-					if (srv.checkIfTableExistsInDatabase(adjustedTableName))
+					connection = srv.getConnection();
+					if (srv.checkIfTableExistsInDatabase(connection, adjustedTableName))
 					{
 						int counter = 0;
 						do
@@ -170,12 +174,16 @@ public class I18NServerTableDialog extends Dialog
 							counter++;
 							adjustedTableName = prefix + "_" + counter; //$NON-NLS-1$
 						}
-						while ((counter < 20) && (srv.checkIfTableExistsInDatabase(adjustedTableName)));
+						while ((counter < 20) && (srv.checkIfTableExistsInDatabase(connection, adjustedTableName)));
 					}
 				}
 				catch (Exception ex)
 				{
 					ServoyLog.logError("Failed to propose a default name for the I18N table on server '" + serverName + "'.", ex); //$NON-NLS-1$//$NON-NLS-2$
+				}
+				finally
+				{
+					Utils.closeConnection(connection);
 				}
 			}
 
