@@ -35,7 +35,6 @@ import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.SnapToGrid;
 import org.eclipse.gef.rulers.RulerProvider;
 import org.eclipse.gef.ui.actions.ActionRegistry;
-import org.eclipse.gef.ui.actions.AlignmentAction;
 import org.eclipse.gef.ui.actions.DeleteAction;
 import org.eclipse.gef.ui.actions.DirectEditAction;
 import org.eclipse.gef.ui.actions.PrintAction;
@@ -69,6 +68,7 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.designer.actions.AlignmentSortPartsAction;
 import com.servoy.eclipse.designer.actions.DistributeAction;
 import com.servoy.eclipse.designer.actions.DistributeRequest;
 import com.servoy.eclipse.designer.actions.ToggleShowGridAction;
@@ -266,27 +266,27 @@ public class VisualFormEditorDesignPage extends GraphicalEditor implements Prope
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
 
-		action = new AlignmentAction((IWorkbenchPart)editorPart, PositionConstants.LEFT);
+		action = new AlignmentSortPartsAction((IWorkbenchPart)editorPart, PositionConstants.LEFT);
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
 
-		action = new AlignmentAction((IWorkbenchPart)editorPart, PositionConstants.RIGHT);
+		action = new AlignmentSortPartsAction((IWorkbenchPart)editorPart, PositionConstants.RIGHT);
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
 
-		action = new AlignmentAction((IWorkbenchPart)editorPart, PositionConstants.TOP);
+		action = new AlignmentSortPartsAction((IWorkbenchPart)editorPart, PositionConstants.TOP);
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
 
-		action = new AlignmentAction((IWorkbenchPart)editorPart, PositionConstants.BOTTOM);
+		action = new AlignmentSortPartsAction((IWorkbenchPart)editorPart, PositionConstants.BOTTOM);
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
 
-		action = new AlignmentAction((IWorkbenchPart)editorPart, PositionConstants.CENTER);
+		action = new AlignmentSortPartsAction((IWorkbenchPart)editorPart, PositionConstants.CENTER);
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
 
-		action = new AlignmentAction((IWorkbenchPart)editorPart, PositionConstants.MIDDLE);
+		action = new AlignmentSortPartsAction((IWorkbenchPart)editorPart, PositionConstants.MIDDLE);
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
 

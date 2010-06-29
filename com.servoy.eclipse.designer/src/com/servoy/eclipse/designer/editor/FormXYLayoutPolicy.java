@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 import java.util.ArrayList;
@@ -175,22 +175,34 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 		}
 
 		//sort top-to-bottom or left-to-right, this maintains visual order when we set the coordinates
+		//Sorting is also done according to leftmost, rightmost, topmost, bottommost and center point
 		Arrays.sort(figs, new Comparator<ISupportBounds>()
 		{
 			public int compare(ISupportBounds o1, ISupportBounds o2)
 			{
 				int a, b;
 				if (request.getDistribution() == DistributeRequest.Distribution.HORIZONTAL_SPACING ||
-					request.getDistribution() == DistributeRequest.Distribution.HORIZONTAL_CENTERS ||
 					request.getDistribution() == DistributeRequest.Distribution.HORIZONTAL_PACK)
 				{
 					a = o1.getLocation().x;
 					b = o2.getLocation().x;
 				}
-				else
+				else if (request.getDistribution() == DistributeRequest.Distribution.VERTICAL_SPACING ||
+					request.getDistribution() == DistributeRequest.Distribution.VERTICAL_PACK)
 				{
 					a = o1.getLocation().y;
 					b = o2.getLocation().y;
+				}
+				else if (request.getDistribution() == DistributeRequest.Distribution.HORIZONTAL_CENTERS)
+				{
+					a = o1.getLocation().x + o1.getSize().width / 2;
+					b = o2.getLocation().x + o2.getSize().width / 2;
+				}
+				else
+				//VERTICAL_CENTERS
+				{
+					a = o1.getLocation().y + o1.getSize().height / 2;
+					b = o2.getLocation().y + o2.getSize().height / 2;
 				}
 				if (a > b) return 1;
 				if (a < b) return -1;
