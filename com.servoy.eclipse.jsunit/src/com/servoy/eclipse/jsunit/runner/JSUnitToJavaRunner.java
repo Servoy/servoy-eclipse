@@ -14,7 +14,6 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
-
 package com.servoy.eclipse.jsunit.runner;
 
 import java.io.BufferedReader;
@@ -39,12 +38,13 @@ import de.berlios.jsunit.JsUnitException;
 import de.berlios.jsunit.JsUnitRuntimeException;
 
 
+@SuppressWarnings("nls")
 public class JSUnitToJavaRunner
 {
 
 	public final static Object NEXT_CHILD_GROUP = null;
 	public final static String ASSERTION_EXCEPTION_MESSAGE = "just for stack";
-	private final static String testListenerName = "servoySolutionJavaTestListener";
+	private final static String testListenerName = "javaTestListener";
 
 	private Scriptable baseScope;
 	private Scriptable testCodeScope;

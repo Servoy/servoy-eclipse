@@ -14,7 +14,6 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
-
 package com.servoy.eclipse.jsunit.runner;
 
 import java.util.List;
@@ -23,7 +22,7 @@ import junit.framework.Test;
 import junit.framework.TestResult;
 
 /**
- * This object is wrapped in to a javascript object so as to be seen by JSUnit as a test result listener. It only contains the interface methods that will be
+ * This object is wrapped into a javascript object so as to be seen by JSUnit as a test result listener. It only contains the interface methods that will be
  * available to JS, and forwards requests to it's JSUnitTestListenerHandler so that the obfuscation of test result conversion logic is not obstructed.
  * 
  * @author Andrei Costescu
