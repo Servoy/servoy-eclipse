@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -771,6 +772,16 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					}
 					n.parent = node;
 				}
+			}
+			if (children.size() > 0)
+			{
+				Collections.sort(children, new Comparator<PlatformSimpleUserNode>()
+				{
+					public int compare(PlatformSimpleUserNode o1, PlatformSimpleUserNode o2)
+					{
+						return o1.getName().compareTo(o2.getName());
+					}
+				});
 			}
 			PlatformSimpleUserNode constants = null;
 			if (constantsChildren.size() > 0)
