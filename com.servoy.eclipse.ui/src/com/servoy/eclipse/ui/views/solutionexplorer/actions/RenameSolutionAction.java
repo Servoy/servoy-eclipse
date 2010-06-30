@@ -68,11 +68,7 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 			state = false;
 			if (((SimpleUserNode)sel.getFirstElement()).getRealObject() instanceof ServoyProject)
 			{
-				ServoyProject servoyProject = (ServoyProject)((SimpleUserNode)sel.getFirstElement()).getRealObject();
-				if (!ServoyModelManager.getServoyModelManager().getServoyModel().isModuleActive(servoyProject.getProject().getName()))
-				{
-					state = true;
-				}
+				state = true;
 			}
 		}
 		setEnabled(state);
@@ -110,6 +106,12 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 				{
 					try
 					{
+						boolean isActive = ServoyModelManager.getServoyModelManager().getServoyModel().isModuleActive(servoyProject.getProject().getName());
+						ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+						if (isActive)
+						{
+							ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(null);
+						}
 						servoyProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
 						editingSolution.updateName(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), name);
 						IProjectDescription description = servoyProject.getProject().getDescription();
@@ -121,6 +123,18 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 						editingSolution.getSolutionMetaData().setProtectionPassword(protectionPassword);
 						repository.updateNodesInWorkspace(new IPersist[] { editingSolution }, true);
 						servoyProject.getSolution().getSolutionMetaData().setProtectionPassword(protectionPassword);
+						if (isActive)
+						{
+							if (activeProject.getEditingSolution().getName().equals(name))
+							{
+								ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(
+									ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name));
+							}
+							else
+							{
+								ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(activeProject);
+							}
+						}
 					}
 					catch (RepositoryException e)
 					{
