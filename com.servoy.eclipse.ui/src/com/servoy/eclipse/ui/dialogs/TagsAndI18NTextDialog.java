@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
+import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderNodeWrapper;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
 import com.servoy.eclipse.ui.dialogs.TagsAndI18NTextDialog.StandardTagsContentProvider.StandardTagsLeafNode;
 import com.servoy.eclipse.ui.dialogs.TagsAndI18NTextDialog.StandardTagsContentProvider.StandardTagsRelationNode;
@@ -78,6 +79,7 @@ public class TagsAndI18NTextDialog extends Dialog
 
 	private static final String STANDARD_TAGS_LABEL = "Standard tags";
 	public static final String[] STANDARD_TAGS = new String[] { "selectedIndex", "maxRecordIndex", "lazyMaxRecordIndex", "serverURL", "currentRecordIndex", "pageNumber", "totalNumberOfPages", "i18n:<messagekey>" };
+	public static final String[] STANDARD_TAGS_ON_RELATION = new String[] { "maxRecordIndex", "lazyMaxRecordIndex" };
 
 	private final FlattenedSolution flattenedSolution;
 	private final IPersist persist;
@@ -285,16 +287,25 @@ public class TagsAndI18NTextDialog extends Dialog
 			if (parentElement instanceof StandardTagsRelationNode)
 			{
 				Relation relation = ((StandardTagsRelationNode)parentElement).relation;
-				Object[] tags = new Object[STANDARD_TAGS.length];
-				for (int i = 0; i < STANDARD_TAGS.length; i++)
+				String[] standardTags = relation != null ? STANDARD_TAGS_ON_RELATION : STANDARD_TAGS;
+				Object[] tags = new Object[standardTags.length];
+				for (int i = 0; i < standardTags.length; i++)
 				{
-					tags[i] = new StandardTagsLeafNode(relation, STANDARD_TAGS[i]);
+					tags[i] = new StandardTagsLeafNode(relation, standardTags[i]);
 				}
 				return tags;
 			}
 			if (parentElement instanceof Relation)
 			{
 				return new Object[] { new StandardTagsRelationNode((Relation)parentElement) };
+			}
+			if (parentElement instanceof DataProviderNodeWrapper)
+			{
+				Relation[] relations = ((DataProviderNodeWrapper)parentElement).relations;
+				if (relations != null && relations.length > 0)
+				{
+					return new Object[] { new StandardTagsRelationNode(relations[0]) };
+				}
 			}
 			return new Object[0];
 		}
