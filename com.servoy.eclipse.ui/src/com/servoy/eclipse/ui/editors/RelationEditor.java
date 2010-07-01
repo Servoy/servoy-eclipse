@@ -88,7 +88,7 @@ public class RelationEditor extends PersistEditor
 	public static int NUMBER_VISIBLE_ITEMS = 10;
 
 	public final static String EMPTY = "";//Leave the spaces!! //$NON-NLS-1$
-	public final static String SEPARATOR = "-"; //$NON-NLS-1$
+	private final static String SEPARATOR = "-"; //$NON-NLS-1$
 
 	private TableViewer tableViewer;
 	private Text nameField;
