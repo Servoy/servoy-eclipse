@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.util.ArrayList;
@@ -59,7 +59,7 @@ public class AddAsModuleAction extends Action implements ISelectionChangedListen
 	public AddAsModuleAction(Shell shell)
 	{
 		this.shell = shell;
-		setText("Add as module...");
+		setText("Add as module");
 		setToolTipText("Add as a module to an already active module");
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("add_as_module.gif"));
 	}
@@ -84,7 +84,7 @@ public class AddAsModuleAction extends Action implements ISelectionChangedListen
 						modulesList.add(module);
 					}
 				}
-				String modulesTokenized = CoreUtils.getTokenValue(modulesList.toArray(new String[] {}), ",");
+				String modulesTokenized = CoreUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
 				editingSolution.setModulesNames(modulesTokenized);
 
 				try
@@ -163,12 +163,12 @@ public class AddAsModuleAction extends Action implements ISelectionChangedListen
 		}
 		if (selectedProjects.size() > 1)
 		{
-			setText("Add as modules...");
+			setText("Add as modules");
 			setToolTipText("Add as modules to an already active module");
 		}
 		else if (selectedProjects.size() == 1)
 		{
-			setText("Add as module...");
+			setText("Add as module");
 			setToolTipText("Add as a module to an already active module");
 		}
 		setEnabled(state);
