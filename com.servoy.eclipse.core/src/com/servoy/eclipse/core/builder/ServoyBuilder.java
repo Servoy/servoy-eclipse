@@ -1023,8 +1023,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														if (lst.size() == 1)
 														{
 															String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																other.getUUID(),
-																SolutionSerializer.getRelativePath(p, false) + SolutionSerializer.getFileName(p, false));
+																other.getUUID(), SolutionSerializer.getRelativePath(p, false) +
+																	SolutionSerializer.getFileName(p, false));
 															addMarker(project, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_HIGH, null,
 																other);
 														}
@@ -1070,18 +1070,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																	// for now only add it on both if there is 1, just skip the rest.
 																	if (lst.size() == 1)
 																	{
-																		String msg = MarkerMessages.getMessage(
-																			MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																			other.getUUID(),
-																			SolutionSerializer.getRelativePath(p, false) +
+																		String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
+																			other.getUUID(), SolutionSerializer.getRelativePath(p, false) +
 																				SolutionSerializer.getFileName(p, false));
 																		addMarker(moduleProject, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR,
 																			IMarker.PRIORITY_HIGH, null, other);
 																	}
-																	String msg = MarkerMessages.getMessage(
-																		MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																		p.getUUID(),
-																		SolutionSerializer.getRelativePath(other, false) +
+																	String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
+																		p.getUUID(), SolutionSerializer.getRelativePath(other, false) +
 																			SolutionSerializer.getFileName(other, false));
 																	addMarker(moduleProject, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR,
 																		IMarker.PRIORITY_HIGH, null, p);
@@ -1289,6 +1285,17 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																IMarker.PRIORITY_NORMAL, null, o);
 														}
 													}
+												}
+												if (((dataProvider instanceof ScriptVariable && ((ScriptVariable)dataProvider).getVariableType() == IColumnTypes.MEDIA) ||
+													(dataProvider instanceof AggregateVariable && ((AggregateVariable)dataProvider).getType() == IColumnTypes.MEDIA) ||
+													(dataProvider instanceof ScriptCalculation && ((ScriptCalculation)dataProvider).getType() == IColumnTypes.MEDIA) || (dataProvider instanceof Column && Column.mapToDefaultType(((Column)dataProvider).getType()) == IColumnTypes.MEDIA) &&
+													((Column)dataProvider).getColumnInfo() != null &&
+													((Column)dataProvider).getColumnInfo().getConverterName() == null) &&
+													field.getDisplayType() != Field.IMAGE_MEDIA)
+												{
+													addMarker(project, PROJECT_FORM_MARKER_TYPE, MarkerMessages.getMessage(
+														MarkerMessages.Marker_Form_IncompatibleElementType, elementName != null ? elementName : "", inForm),
+														-1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, o);
 												}
 											}
 

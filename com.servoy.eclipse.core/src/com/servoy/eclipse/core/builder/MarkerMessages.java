@@ -237,6 +237,11 @@ public class MarkerMessages
 	/**
 	 * The dataprovider used by an element cannot be found. This can happen for example if the structure of a database is changed and columns are deleted or renamed.
 	 */
+	public static String Marker_Form_IncompatibleElementType = "Element \"{0}\" in form \"{1}\" has incompatible dataprovider type (MEDIA)."; //$NON-NLS-1$
+
+	/**
+	 * The dataprovider used by an element cannot be found. This can happen for example if the structure of a database is changed and columns are deleted or renamed.
+	 */
 	public static String Marker_Form_DataproviderOnElementNotFound = "Element \"{0}\" in form \"{1}\" has dataprovider \"{2}\" that does not exist."; //$NON-NLS-1$
 
 	public static String Marker_Column_UUIDFlagNotSet = "Table \"{0}\" has column \"{1}\" which is an UUID generator but does not have the UUID flag set."; //$NON-NLS-1$
