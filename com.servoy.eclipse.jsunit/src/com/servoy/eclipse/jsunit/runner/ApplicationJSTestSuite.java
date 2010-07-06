@@ -95,6 +95,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 	public ApplicationJSTestSuite(IApplication application)
 	{
 		super();
+		setUseFileForJavaQualifiedNameInStack(true);
 		init(application);
 	}
 

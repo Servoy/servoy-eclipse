@@ -33,9 +33,9 @@ public class JSUnitTestListener
 
 	private final JSUnitTestListenerHandler handler;
 
-	public JSUnitTestListener(TestResult result, List<Test> testList)
+	public JSUnitTestListener(TestResult result, List<Test> testList, boolean useFileInStackQualifiedName)
 	{
-		handler = new JSUnitTestListenerHandler(result, testList);
+		handler = new JSUnitTestListenerHandler(result, testList, useFileInStackQualifiedName);
 	}
 
 	// JS parameters (Test, Error)

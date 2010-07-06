@@ -50,11 +50,13 @@ public class JSUnitTestListenerHandler
 	private final List<Test> testList;
 	private final Stack<Test> testStack = new Stack<Test>();
 	private int startedTestsCount;
+	private final boolean useFileInStackQualifiedName;
 
-	public JSUnitTestListenerHandler(TestResult result, List<Test> testList)
+	public JSUnitTestListenerHandler(TestResult result, List<Test> testList, boolean useFileInStackQualifiedName)
 	{
 		this.result = result;
 		this.testList = testList;
+		this.useFileInStackQualifiedName = useFileInStackQualifiedName;
 	}
 
 	// JS parameters (Test, Error)
@@ -195,8 +197,16 @@ public class JSUnitTestListenerHandler
 							fileOrMethodName.equals("JsUtil.js") || fileOrMethodName.equals("JsUnitToJava.js"))/* ) */) // this line can be uncommented to show stack inside testing code
 					{
 						// ignoreAllButClientStackTraces = false; // this line can be uncommented to show stack inside testing code
-						filteredStack.add(new StackTraceElement("javascript", isMethod ? fileOrMethodName : "method", isFile ? fileOrMethodName : "file",
-							lineNumber));
+						if (useFileInStackQualifiedName)
+						{
+							filteredStack.add(new StackTraceElement(isFile ? getFileNameAsJavaType(fileOrMethodName) : "javascript", isMethod
+								? fileOrMethodName : "method", "file", lineNumber));
+						}
+						else
+						{
+							filteredStack.add(new StackTraceElement("javascript", isMethod ? fileOrMethodName : "method", isFile ? fileOrMethodName : "file",
+								lineNumber));
+						}
 					}
 				}
 			}
@@ -205,14 +215,32 @@ public class JSUnitTestListenerHandler
 		else if (throwable instanceof NativeError)
 		{
 			stackTrace = new StackTraceElement[1];
-			stackTrace[0] = new StackTraceElement("java", "script", getScriptablePropertyAsString(throwable, "fileName"), getScriptablePropertyAsInt(throwable,
-				"lineNumber"));
+			if (useFileInStackQualifiedName)
+			{
+				stackTrace[0] = new StackTraceElement(getFileNameAsJavaType(getScriptablePropertyAsString(throwable, "fileName")), "javascript", "file",
+					getScriptablePropertyAsInt(throwable, "lineNumber"));
+			}
+			else
+			{
+				stackTrace[0] = new StackTraceElement("java", "script", getScriptablePropertyAsString(throwable, "fileName"), getScriptablePropertyAsInt(
+					throwable, "lineNumber"));
+			}
 		}
 		else
 		{
 			stackTrace = new StackTraceElement[0];
 		}
 		return stackTrace;
+	}
+
+	public static String getFileNameAsJavaType(String fileOrMethodName)
+	{
+		return fileOrMethodName.replace(".", "..").replace(":\\", "...").replace("/", ".").replace("\\", ".");
+	}
+
+	public static String getFileNameFromJavaType(String javaType)
+	{
+		return javaType.replace("...", ":/").replace("..", ".").replace(".", "/");
 	}
 
 	private String getScriptablePropertyAsString(Scriptable s, String property)

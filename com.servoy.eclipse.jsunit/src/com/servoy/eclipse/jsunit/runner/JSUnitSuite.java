@@ -31,8 +31,6 @@ import junit.framework.TestSuite;
 
 import org.mozilla.javascript.Scriptable;
 
-import com.servoy.j2db.util.Debug;
-
 import de.berlios.jsunit.JsUnitException;
 
 public class JSUnitSuite extends TestSuite
@@ -44,6 +42,7 @@ public class JSUnitSuite extends TestSuite
 
 	private String testFileName;
 	private boolean createSeparateScopeForTestCode;
+	private boolean useFileInStackQualifiedName = false;
 
 	public static Test suite()
 	{
@@ -209,6 +208,16 @@ public class JSUnitSuite extends TestSuite
 		}
 	}
 
+	/**
+	 * When Java exception stacks are generated from javascript stacks, if this is set to true, the javascript filename is transformed into a Java package like string and
+	 * set to the "java type" part of the stack trace (this is less user-readeable, but makes integrating with some existing java tools easier - such as eclipse test runner view).
+	 * @param useFileInStackQualifiedName set it to true if you want stack traces to show java type like string based on javascript file; default value is false.
+	 */
+	public void setUseFileForJavaQualifiedNameInStack(boolean useFileInStackQualifiedName)
+	{
+		this.useFileInStackQualifiedName = useFileInStackQualifiedName;
+	}
+
 	protected void changeScope(Scriptable scope, Reader jsTestCode)
 	{
 		runner = new JSUnitToJavaRunner(scope, createSeparateScopeForTestCode);
@@ -244,7 +253,7 @@ public class JSUnitSuite extends TestSuite
 	@Override
 	public void run(TestResult result)
 	{
-		JSUnitTestListener testListener = new JSUnitTestListener(result, testList);
+		JSUnitTestListener testListener = new JSUnitTestListener(result, testList, useFileInStackQualifiedName);
 		try
 		{
 			runner.runSuite(testListener, jsSuiteClassName);
@@ -256,7 +265,7 @@ public class JSUnitSuite extends TestSuite
 			if (!"Current script terminated".equals(e.getMessage()))
 			{
 				result.addError(this, e);
-				Debug.log(e);
+				e.printStackTrace();
 			}
 			else
 			{
