@@ -1624,6 +1624,17 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return media;
 	}
 
+	public SimpleUserNode getSolutionFromAllSolutionsNode(String solutionName)
+	{
+		for (SimpleUserNode solutionNode : allSolutionsNode.children)
+		{
+			if (solutionNode.getRealObject() instanceof ServoyProject &&
+				((ServoyProject)solutionNode.getRealObject()).getSolution().getName().equals(solutionName)) return solutionNode;
+		}
+
+		return null;
+	}
+
 	public void refreshServerList()
 	{
 		addServersNodeChildren(servers);

@@ -1179,13 +1179,16 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				Object[] elements = event.getElements();
 				if (elements != null)
 				{
+					SolutionExplorerTreeContentProvider cp = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
 					ArrayList<SimpleUserNode> changedUserNodeA = new ArrayList<SimpleUserNode>();
+					SimpleUserNode simpleUserNode;
 
 					for (Object e : elements)
 					{
+						simpleUserNode = null;
 						if (e instanceof SimpleUserNode)
 						{
-							changedUserNodeA.add((SimpleUserNode)e);
+							simpleUserNode = (SimpleUserNode)e;
 						}
 						else if (e instanceof IResource)
 						{
@@ -1193,12 +1196,23 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 							if (adaptableResource.exists())
 							{
-								SimpleUserNode simpleUserNode = SolutionExplorerView.this.resourceToSimpleUserNode(adaptableResource);
-								if (simpleUserNode != null) changedUserNodeA.add(simpleUserNode);
+								simpleUserNode = SolutionExplorerView.this.resourceToSimpleUserNode(adaptableResource);
 							}
 						}
+
+						if (simpleUserNode != null)
+						{
+							SimpleUserNode servoyProjectNode = simpleUserNode.getAncestorOfType(ServoyProject.class);
+							if (servoyProjectNode != null)
+							{
+								SimpleUserNode solutionNodeFromAllSolutions = cp.getSolutionFromAllSolutionsNode(((ServoyProject)servoyProjectNode.getRealObject()).getSolution().getName());
+								if (solutionNodeFromAllSolutions != null && changedUserNodeA.indexOf(solutionNodeFromAllSolutions) == -1) changedUserNodeA.add(solutionNodeFromAllSolutions);
+							}
+
+							changedUserNodeA.add(simpleUserNode);
+						}
 					}
-					tree.update(changedUserNodeA.toArray(), null);
+					if (changedUserNodeA.size() > 0) tree.update(changedUserNodeA.toArray(), null);
 				}
 				else
 				{
