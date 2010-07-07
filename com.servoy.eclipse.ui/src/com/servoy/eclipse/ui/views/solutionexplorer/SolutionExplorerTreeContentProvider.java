@@ -1626,10 +1626,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	public SimpleUserNode getSolutionFromAllSolutionsNode(String solutionName)
 	{
-		for (SimpleUserNode solutionNode : allSolutionsNode.children)
+		if (solutionName != null)
 		{
-			if (solutionNode.getRealObject() instanceof ServoyProject &&
-				((ServoyProject)solutionNode.getRealObject()).getSolution().getName().equals(solutionName)) return solutionNode;
+			for (SimpleUserNode solutionNode : allSolutionsNode.children)
+			{
+				if (solutionName.equals(solutionNode.getName())) return solutionNode;
+			}
 		}
 
 		return null;
