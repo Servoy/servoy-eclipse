@@ -1235,7 +1235,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 							SimpleUserNode servoyProjectNode = simpleUserNode.getAncestorOfType(ServoyProject.class);
 							if (servoyProjectNode != null)
 							{
-								SimpleUserNode solutionNodeFromAllSolutions = cp.getSolutionFromAllSolutionsNode(((ServoyProject)servoyProjectNode.getRealObject()).getSolution().getName());
+								SimpleUserNode solutionNodeFromAllSolutions = cp.getSolutionFromAllSolutionsNode(servoyProjectNode.getName());
 								if (solutionNodeFromAllSolutions != null && changedUserNodeA.indexOf(solutionNodeFromAllSolutions) == -1) changedUserNodeA.add(solutionNodeFromAllSolutions);
 							}
 
