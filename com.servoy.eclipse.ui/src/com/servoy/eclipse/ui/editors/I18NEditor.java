@@ -29,6 +29,9 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
@@ -154,6 +157,23 @@ public class I18NEditor extends EditorPart
 
 		});
 
+		Button bCopy = new Button(keyComposite, SWT.PUSH);
+		bCopy.setText("Copy");
+		bCopy.addSelectionListener(new SelectionListener()
+		{
+
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+				// ignored
+			}
+
+			public void widgetSelected(SelectionEvent e)
+			{
+				onCopy();
+			}
+
+		});
+
 		SashForm textComposite = new SashForm(upperComposite, SWT.HORIZONTAL);
 		GridData textCompositeGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		textCompositeGridData.widthHint = 500;
@@ -250,6 +270,18 @@ public class I18NEditor extends EditorPart
 		messagesManager.removeMessage(i18nDatasource, messageKey);
 		i18nComposite.refresh();
 		firePropertyChange(IEditorPart.PROP_DIRTY);
+	}
+
+	private void onCopy()
+	{
+		String kt = keyText.getText();
+		if (kt.length() > 0)
+		{
+			kt = "i18n:" + kt;
+			Clipboard clipboard = new Clipboard(getSite().getShell().getDisplay());
+			clipboard.setContents(new Object[] { kt }, new Transfer[] { TextTransfer.getInstance() });
+			clipboard.dispose();
+		}
 	}
 
 	private void onChange(String key, String refText, String locText)
