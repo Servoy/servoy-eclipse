@@ -31,6 +31,9 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
@@ -106,7 +109,7 @@ public class I18NEditor extends EditorPart
 		keyGroup.setLayout(new FillLayout());
 
 		Composite keyComposite = new Composite(keyGroup, SWT.NONE);
-		keyComposite.setLayout(new GridLayout(4, false));
+		keyComposite.setLayout(new GridLayout(5, false));
 		keyText = new Text(keyComposite, SWT.BORDER);
 		keyText.setLayoutData(new GridData(SWT.FILL, SWT.DEFAULT, true, false));
 		Button bAddUpdate = new Button(keyComposite, SWT.PUSH);
@@ -155,6 +158,23 @@ public class I18NEditor extends EditorPart
 			public void widgetSelected(SelectionEvent e)
 			{
 				onDelete();
+			}
+
+		});
+
+		Button bCopy = new Button(keyComposite, SWT.PUSH);
+		bCopy.setText("Copy");
+		bCopy.addSelectionListener(new SelectionListener()
+		{
+
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+				// ignored
+			}
+
+			public void widgetSelected(SelectionEvent e)
+			{
+				onCopy();
 			}
 
 		});
@@ -303,6 +323,17 @@ public class I18NEditor extends EditorPart
 		}
 	}
 
+	private void onCopy()
+	{
+		String kt = keyText.getText();
+		if (kt.length() > 0)
+		{
+			kt = "i18n:" + kt;
+			Clipboard clipboard = new Clipboard(getSite().getShell().getDisplay());
+			clipboard.setContents(new Object[] { kt }, new Transfer[] { TextTransfer.getInstance() });
+			clipboard.dispose();
+		}
+	}
 
 	private void save()
 	{
