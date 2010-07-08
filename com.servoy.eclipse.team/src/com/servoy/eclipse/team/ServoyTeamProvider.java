@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.team;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.rmi.UnmarshalException;
 import java.util.ArrayList;
@@ -108,6 +109,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 	public static final String RESOURCE_SUFFIX = "_resources";
 
 	private static final String BASE_DIR = ".stp";
+	private static final String SCRIPT_BUILDPATH = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><buildpath><buildpathentry excluding=\".stp/\" kind=\"src\" path=\"\"/></buildpath>";
 
 	private RepositoryOperations repositoryOperations;
 	private IOFileAccess baseFileAccess;
@@ -198,6 +200,23 @@ public class ServoyTeamProvider extends RepositoryProvider
 			}
 			//baseFile.mkdir();
 		}
+		try
+		{
+			IResource jsBuildPath = getProject().findMember(".buildpath");
+			if (jsBuildPath == null)
+			{
+				jsBuildPath = getProject().getFile(".buildpath");
+				((IFile)jsBuildPath).create(new ByteArrayInputStream(SCRIPT_BUILDPATH.getBytes()), false, null);
+			}
+			if (!jsBuildPath.isTeamPrivateMember())
+			{
+				jsBuildPath.setTeamPrivateMember(true);
+			}
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+		}
 		if (getOperations() == null) // project has no .teamprovider config file
 		{
 			try
@@ -268,6 +287,18 @@ public class ServoyTeamProvider extends RepositoryProvider
 					return Status.OK_STATUS;
 				}
 			}.schedule();
+		}
+		try
+		{
+			IResource jsBuildPath = getProject().findMember(".buildpath");
+			if (jsBuildPath != null)
+			{
+				jsBuildPath.setTeamPrivateMember(false);
+			}
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
 		}
 		SolutionSubscriber.getInstance().getSynchronizer().flush(getProject(), IResource.DEPTH_INFINITE);
 	}
