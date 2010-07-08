@@ -16,13 +16,12 @@
  */
 package com.servoy.eclipse.ui.editors;
 
-import java.util.Arrays;
-
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.swt.SWT;
@@ -43,8 +42,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
@@ -68,11 +69,12 @@ import com.servoy.j2db.util.ServoyException;
 public class SecurityEditor extends EditorPart implements IActiveProjectListener
 {
 
-	private List list;
-	private Tree tree;
+	private Table groupTable;
+	private Tree usersTree;
 	private Text userNameText;
 	private Text groupText;
 	private Composite treeContainer;
+	private Composite tableContainer;
 	public static final String ID = "com.servoy.eclipse.ui.editors.SecurityEditor"; //$NON-NLS-1$
 
 	private boolean disposed = false;
@@ -116,20 +118,23 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 		userNameText = new Text(container, SWT.BORDER);
 
 		treeContainer = new Composite(container, SWT.NONE);
-		tree = new Tree(treeContainer, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION | SWT.CHECK | SWT.V_SCROLL);
+		tableContainer = new Composite(container, SWT.NONE);
 
-		list = new List(container, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL);
+		usersTree = new Tree(treeContainer, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION | SWT.CHECK | SWT.V_SCROLL);
+
+		groupTable = new Table(tableContainer, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.FULL_SELECTION);
 
 		final Button removeUserButton;
 		removeUserButton = new Button(container, SWT.NONE);
 		removeUserButton.setText("Remove User");
 		removeUserButton.setEnabled(false);
+		removeUserButton.setToolTipText("Delete selected user");
 
 		final Button removeGroupButton;
 		removeGroupButton = new Button(container, SWT.NONE);
 		removeGroupButton.setText("Remove Group");
 		removeGroupButton.setEnabled(false);
-
+		removeGroupButton.setToolTipText("Delete selected group");
 
 		newGroupButton.addSelectionListener(new SelectionAdapter()
 		{
@@ -139,9 +144,13 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 				if (groupText.getText() != null && groupText.getText().length() != 0 && model.isColumnValid(groupText.getText(), CI_GROUP))
 				{
 					model.addGroup(groupText.getText());
-					list.add(groupText.getText());
+					TableItem item = new TableItem(groupTable, SWT.NONE);
+					item.setText(groupText.getText());
 					flagModified();
-
+				}
+				else
+				{
+					MessageDialog.openError(getSite().getShell(), "Cannot create group", "Please enter a valid name in textbox");
 				}
 			}
 		});
@@ -153,11 +162,14 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 				if (userNameText.getText() != null && userNameText.getText().length() != 0 && model.isColumnValid(userNameText.getText(), CI_NAME))
 				{
 					model.addUser(userNameText.getText());
-					TreeItem item = new TreeItem(tree, SWT.NONE);
+					TreeItem item = new TreeItem(usersTree, SWT.NONE);
 					item.setText(new String[] { userNameText.getText(), "password" });
 					item.setChecked(false);
 					flagModified();
-
+				}
+				else
+				{
+					MessageDialog.openError(getSite().getShell(), "Cannot create user", "Please enter a valid name in textbox");
 				}
 			}
 		});
@@ -166,24 +178,24 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				if (tree.getSelectionCount() == 1)
+				if (usersTree.getSelectionCount() == 1)
 				{
-					model.removeUser(tree.getSelection()[0].getText(CI_NAME));
-					tree.getSelection()[0].dispose();
+					model.removeUser(usersTree.getSelection()[0].getText(CI_NAME));
+					usersTree.getSelection()[0].dispose();
 					flagModified();
 
 				}
 			}
 		});
 
-		list.addSelectionListener(new SelectionAdapter()
+		groupTable.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				if (list.getSelectionCount() == 1)
+				if (groupTable.getSelectionCount() == 1)
 				{
-					String group = list.getSelection()[0];
+					String group = groupTable.getSelection()[0].getText();
 					if (group.equals(IRepository.ADMIN_GROUP))
 					{
 						removeGroupButton.setEnabled(false);
@@ -192,14 +204,20 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 					{
 						removeGroupButton.setEnabled(true);
 					}
-					model.createTreeData(tree, list.getSelection()[0]);
+					model.createTreeData(usersTree, groupTable.getSelection()[0].getText());
 				}
 
 			}
 		});
 
+		groupTable.setToolTipText("Group name(s)");
+		groupTable.setHeaderVisible(true);
+		groupTable.setLinesVisible(true);
 
-		tree.addSelectionListener(new SelectionAdapter()
+		usersTree.setHeaderVisible(true);
+		usersTree.setLinesVisible(true);
+
+		usersTree.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
@@ -214,16 +232,22 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				if (list.getSelectionCount() == 1)
+				if (groupTable.getSelectionCount() == 1)
 				{
-					String group = list.getSelection()[0];
+					String group = groupTable.getSelection()[0].getText();
 					if (MessageDialog.openConfirm(getSite().getShell(), "Delete group", "Are you sure you want to delete the group " + group + " ?"))
 					{
 						model.removeGroup(group);
-						list.remove(group);
+						for (TableItem item : groupTable.getItems())
+						{
+							if (group.equals(item.getText()))
+							{
+								groupTable.remove(groupTable.indexOf(item));
+								break;
+							}
+						}
 						flagModified();
 					}
-
 				}
 			}
 		});
@@ -233,8 +257,8 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 			groupLayout.createSequentialGroup().addContainerGap().add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 					groupLayout.createSequentialGroup().add(groupText, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-						LayoutStyle.RELATED).add(newGroupButton)).add(removeGroupButton).add(list, GroupLayout.PREFERRED_SIZE, 288, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-				LayoutStyle.RELATED).add(
+						LayoutStyle.RELATED).add(newGroupButton)).add(removeGroupButton).add(tableContainer, GroupLayout.PREFERRED_SIZE, 288,
+					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
 					groupLayout.createSequentialGroup().add(userNameText, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE).addPreferredGap(
 						LayoutStyle.RELATED).add(newUserButton)).add(removeUserButton).add(treeContainer, GroupLayout.PREFERRED_SIZE, 183, Short.MAX_VALUE)).addContainerGap()));
@@ -242,7 +266,7 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 			groupLayout.createSequentialGroup().addContainerGap().add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(newUserButton).add(userNameText).add(groupText).add(newGroupButton)).addPreferredGap(
 				LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(list, GroupLayout.PREFERRED_SIZE, 249, Short.MAX_VALUE).add(treeContainer,
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(tableContainer, GroupLayout.PREFERRED_SIZE, 249, Short.MAX_VALUE).add(treeContainer,
 					GroupLayout.PREFERRED_SIZE, 249, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(removeUserButton).add(removeGroupButton)).addContainerGap()));
 		container.setLayout(groupLayout);
@@ -258,95 +282,106 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 
 	private void initDataBindings()
 	{
-		TreeColumn nameColumn = new TreeColumn(tree, SWT.LEFT, CI_NAME);
-		nameColumn.setText("Name");
-		//nameColumn.setWidth(400);
+		TreeColumn nameColumn = new TreeColumn(usersTree, SWT.LEFT, CI_NAME);
+		nameColumn.setText("Username");
+		nameColumn.setToolTipText("Doubleclick cell to edit/Use checkbox for user assignment to selected group");
 
-		TreeColumn passwordColumn = new TreeColumn(tree, SWT.LEFT, CI_PASSWORD);
-		nameColumn.setText("Password");
+		TreeColumn passwordColumn = new TreeColumn(usersTree, SWT.LEFT, CI_PASSWORD);
+		passwordColumn.setText("Password");
+		passwordColumn.setToolTipText("Doubleclick cell to edit");
 
 		TreeColumnLayout layout = new TreeColumnLayout();
 		treeContainer.setLayout(layout);
 		layout.setColumnData(nameColumn, new ColumnWeightData(20, 50, true));
 		layout.setColumnData(passwordColumn, new ColumnWeightData(20, 50, true));
 
-		model.createTreeData(tree, null);
-		final TreeEditor editor = new TreeEditor(tree);
+		TableColumn groupColumn = new TableColumn(groupTable, SWT.NONE, 0);
+		groupColumn.setText("Group name");
+		groupColumn.setToolTipText("Select a group to assign users to it (users checkbox)");
+		TableColumnLayout tableLayout = new TableColumnLayout();
+		tableLayout.setColumnData(groupColumn, new ColumnWeightData(20, 50, true));
+		tableContainer.setLayout(tableLayout);
+
+		model.createTreeData(usersTree, null);
+		final TreeEditor editor = new TreeEditor(usersTree);
 		editor.horizontalAlignment = SWT.LEFT;
 		editor.grabHorizontal = true;
 
-		tree.addMouseListener(new MouseAdapter()
+		usersTree.addMouseListener(new MouseAdapter()
 		{
 			@Override
 			public void mouseDoubleClick(MouseEvent event)
 			{
-				final TreeItem item = tree.getItem(new Point(event.x, event.y));
-				boolean editUserName = item.getBounds(CI_NAME).contains(new Point(event.x, event.y));
-
-				final Text text;
-				final int columnCount;
-				if (editUserName)
+				final TreeItem item = usersTree.getItem(new Point(event.x, event.y));
+				if (item != null)
 				{
-					text = new Text(tree, SWT.NONE);
-					text.setText(item.getText());
-					columnCount = CI_NAME;
-				}
-				else
-				{
-					text = new Text(tree, SWT.PASSWORD);
-					columnCount = CI_PASSWORD;
-					text.setText("");
-				}
+					boolean editUserName = item.getBounds(CI_NAME).contains(new Point(event.x, event.y));
 
-				text.selectAll();
-				text.setFocus();
-
-				text.addFocusListener(new FocusAdapter()
-				{
-					@Override
-					public void focusLost(FocusEvent event)
+					final Text text;
+					final int columnCount;
+					if (editUserName)
 					{
-						if (model.isColumnValid(text.getText(), columnCount))
-						{
-							model.editElement(item.getText(CI_NAME), text.getText(), columnCount);
-							if (columnCount != CI_PASSWORD) item.setText(columnCount, text.getText());
-							flagModified();
-						}
-						text.dispose();
+						text = new Text(usersTree, SWT.NONE);
+						text.setText(item.getText());
+						columnCount = CI_NAME;
 					}
-				});
-
-				text.addKeyListener(new KeyAdapter()
-				{
-					@Override
-					public void keyPressed(KeyEvent event)
+					else
 					{
-						switch (event.keyCode)
-						{
-							case SWT.CR :
-								if (model.isColumnValid(text.getText(), columnCount))
-								{
-									model.editElement(item.getText(CI_NAME), text.getText(), columnCount);
-									if (columnCount != CI_PASSWORD) item.setText(columnCount, text.getText());
-									flagModified();
-								}
-							case SWT.ESC :
-								text.dispose();
-								break;
-						}
+						text = new Text(usersTree, SWT.PASSWORD);
+						columnCount = CI_PASSWORD;
+						text.setText("");
 					}
-				});
 
-				editor.setEditor(text, item, columnCount);
+					text.selectAll();
+					text.setFocus();
+
+					text.addFocusListener(new FocusAdapter()
+					{
+						@Override
+						public void focusLost(FocusEvent event)
+						{
+							if (model.isColumnValid(text.getText(), columnCount))
+							{
+								model.editElement(item.getText(CI_NAME), text.getText(), columnCount);
+								if (columnCount != CI_PASSWORD) item.setText(columnCount, text.getText());
+								flagModified();
+							}
+							text.dispose();
+						}
+					});
+
+					text.addKeyListener(new KeyAdapter()
+					{
+						@Override
+						public void keyPressed(KeyEvent event)
+						{
+							switch (event.keyCode)
+							{
+								case SWT.CR :
+									if (model.isColumnValid(text.getText(), columnCount))
+									{
+										model.editElement(item.getText(CI_NAME), text.getText(), columnCount);
+										if (columnCount != CI_PASSWORD) item.setText(columnCount, text.getText());
+										flagModified();
+									}
+								case SWT.ESC :
+									text.dispose();
+									break;
+							}
+						}
+					});
+
+					editor.setEditor(text, item, columnCount);
+				}
 			}
 		});
-		tree.addListener(SWT.Selection, new Listener()
+		usersTree.addListener(SWT.Selection, new Listener()
 		{
 			public void handleEvent(Event event)
 			{
-				if (event.detail == SWT.CHECK && list.getSelectionCount() == 1)
+				if (event.detail == SWT.CHECK && groupTable.getSelectionCount() == 1)
 				{
-					model.modifyUserGroup(((TreeItem)event.item).getText(CI_NAME), list.getSelection()[0], ((TreeItem)event.item).getChecked());
+					model.modifyUserGroup(((TreeItem)event.item).getText(CI_NAME), groupTable.getSelection()[0].getText(), ((TreeItem)event.item).getChecked());
 					flagModified();
 				}
 			}
@@ -354,13 +389,14 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 
 		addDataToGroupList();
 
-		list.setSelection(0);
-		list.notifyListeners(SWT.Selection, new Event());
+		groupTable.setSelection(0);
+		groupTable.notifyListeners(SWT.Selection, new Event());
 
 	}
 
 	private void addDataToGroupList()
 	{
+		groupTable.removeAll();
 		IDataSet groups = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getGroups(ApplicationServerSingleton.get().getClientId());
 		int groupsNr = groups.getRowCount();
 		String[] groupNames = new String[groupsNr];
@@ -373,15 +409,19 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 				mustCreateAdmin = false;
 			}
 		}
-
-		list.setItems(groupNames);
+		for (String name : groupNames)
+		{
+			TableItem item = new TableItem(groupTable, SWT.NONE, groupTable.getItemCount());
+			item.setText(name);
+		}
 		if (mustCreateAdmin)
 		{
 			try
 			{
 				ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().createGroup(ApplicationServerSingleton.get().getClientId(),
 					IRepository.ADMIN_GROUP);
-				list.add(IRepository.ADMIN_GROUP, 0);
+				TableItem item = new TableItem(groupTable, SWT.NONE, 0);
+				item.setText(IRepository.ADMIN_GROUP);
 			}
 			catch (ServoyException e)
 			{
@@ -471,21 +511,27 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 
 				public void run()
 				{
-					if (!disposed && model != null && list != null && tree != null && tree.isDisposed() != true && list.isDisposed() != true)
+					if (!disposed && model != null && groupTable != null && usersTree != null && usersTree.isDisposed() != true &&
+						groupTable.isDisposed() != true)
 					{
 						String selection = null;
-						if (list.getSelection() != null && list.getSelection().length > 0) selection = list.getSelection()[0];
+						if (groupTable.getSelection() != null && groupTable.getSelection().length > 0) selection = groupTable.getSelection()[0].getText();
 						addDataToGroupList();
-						java.util.List<String> items = Arrays.asList(list.getItems());
-						if (selection != null && items.contains(selection))
+						boolean selected = false;
+						if (selection != null)
 						{
-							list.setSelection(items.indexOf(selection));
+							for (TableItem item : groupTable.getItems())
+							{
+								if (selection.equals(item.getText()))
+								{
+									groupTable.setSelection(item);
+									selected = true;
+									break;
+								}
+							}
 						}
-						else
-						{
-							list.setSelection(0);
-						}
-						list.notifyListeners(SWT.Selection, new Event());
+						if (!selected) groupTable.setSelection(0);
+						groupTable.notifyListeners(SWT.Selection, new Event());
 					}
 				}
 			});
