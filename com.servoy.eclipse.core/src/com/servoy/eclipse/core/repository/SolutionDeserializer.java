@@ -1331,7 +1331,7 @@ public class SolutionDeserializer
 		{
 			((AbstractBase)retval).setSerializableRuntimeProperty(IScriptProvider.FILENAME, file.getAbsolutePath());
 		}
-		persist_json_map.put(retval, obj);
+		if (!persist_json_map.containsKey(retval) || obj.has(SolutionSerializer.PROP_UUID)) persist_json_map.put(retval, obj);
 
 		if (retval instanceof ISupportChilds && SolutionSerializer.isCompositeWithItems(retval))
 		{
