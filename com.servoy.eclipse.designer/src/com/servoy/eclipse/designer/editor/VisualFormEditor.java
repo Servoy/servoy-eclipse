@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 import java.util.ArrayList;
@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.commands.CommandStackListener;
+import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
@@ -130,6 +131,8 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		if (projectIsNoLongerActive())
 		{
 			// editor is being restored but project is not active
+			ServoyLog.logWarning("Closing form editor for " + input.getName() + " because solution " + servoyProject + " is not part of the active solution",
+				null);
 			close(false);
 			return;
 		}
@@ -195,6 +198,10 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		if (seceditor != null)
 		{
 			seceditor.dispose();
+		}
+		if (dummyActionRegistry != null)
+		{
+			dummyActionRegistry.dispose();
 		}
 		super.dispose();
 	}
@@ -299,8 +306,8 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 					}
 					if (marker.getAttribute(IMarker.CHAR_START, -1) != -1)
 					{
-						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(), Utils.getAsInteger(marker.getAttribute(
-							IMarker.CHAR_START, -1)));
+						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(),
+							Utils.getAsInteger(marker.getAttribute(IMarker.CHAR_START, -1)));
 					}
 					if (elementUuid != null)
 					{
@@ -326,7 +333,23 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		{
 			return graphicaleditor.getAdapter(adapter);
 		}
+		if (result == null && adapter.equals(ActionRegistry.class))
+		{
+			// dummy return, this prevents a NPE when form editor is opened for form that is not part of the active solution
+			return getDummyActionRegistry();
+		}
 		return result;
+	}
+
+	private ActionRegistry dummyActionRegistry;
+
+	protected ActionRegistry getDummyActionRegistry()
+	{
+		if (dummyActionRegistry == null)
+		{
+			dummyActionRegistry = new ActionRegistry();
+		}
+		return dummyActionRegistry;
 	}
 
 	public CommandStack getCommandStack()
