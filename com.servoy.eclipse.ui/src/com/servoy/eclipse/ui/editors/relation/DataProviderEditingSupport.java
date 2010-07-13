@@ -134,7 +134,7 @@ public class DataProviderEditingSupport extends EditingSupport
 				{
 					table = ((Relation)re.getPersist()).getForeignTable();
 				}
-				if (table != null)
+				if (table != null || index == RelationEditor.CI_FROM)
 				{
 					boolean includeGlobalsAndCalcs = (index == RelationEditor.CI_FROM);
 					FlattenedSolution flattenedEditingSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(
@@ -175,6 +175,7 @@ public class DataProviderEditingSupport extends EditingSupport
 							}
 						}
 					}
+
 				}
 			}
 
