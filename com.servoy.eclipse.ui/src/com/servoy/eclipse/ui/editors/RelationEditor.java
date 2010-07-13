@@ -19,7 +19,9 @@ package com.servoy.eclipse.ui.editors;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.ChangeEvent;
@@ -637,12 +639,22 @@ public class RelationEditor extends PersistEditor
 			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 			com.servoy.j2db.persistence.Table t = null;
+			Map<String, ScriptCalculation> calcs = null;
+			FlattenedSolution fs = servoyModel.getEditingFlattenedSolution(getPersist());
 			if (index == CI_FROM)
 			{
 				IServerInternal s = (IServerInternal)ServoyModel.getServerManager().getServer(getRelation().getPrimaryServerName());
 				if (s != null)
 				{
 					t = s.getTable(getRelation().getPrimaryTableName());
+
+					calcs = new LinkedHashMap<String, ScriptCalculation>();
+					Iterator<ScriptCalculation> calcsIt = fs.getScriptCalculations(t, true);
+					while (calcsIt.hasNext())
+					{
+						ScriptCalculation calc = calcsIt.next();
+						calcs.put(calc.getDataProviderID(), calc);
+					}
 				}
 			}
 			else if (index == CI_TO)
@@ -658,21 +670,23 @@ public class RelationEditor extends PersistEditor
 				Iterator<Column> cols = t.getColumnsSortedByName();
 				while (cols.hasNext())
 				{
-					retval.add(cols.next());
+					// stored calcs are shown in calculations section
+					Column col = cols.next();
+					if (calcs == null || !calcs.containsKey(col.getDataProviderID()))
+					{
+						retval.add(col);
+					}
 				}
 			}
 			if (index == CI_FROM)
 			{
-				FlattenedSolution fs = servoyModel.getEditingFlattenedSolution(getPersist());
-
-				Iterator<ScriptCalculation> calcs = fs.getSolution().getScriptCalculations(t, true);
-				if (calcs.hasNext())
+				if (calcs != null && calcs.size() > 0)
 				{
 					retval.add(SEPARATOR);
-				}
-				while (calcs.hasNext())
-				{
-					retval.add(calcs.next());
+					for (String dp : calcs.keySet())
+					{
+						retval.add(calcs.get(dp));
+					}
 				}
 				Iterator<ScriptVariable> globs = fs.getScriptVariables(true);
 				if (globs.hasNext())

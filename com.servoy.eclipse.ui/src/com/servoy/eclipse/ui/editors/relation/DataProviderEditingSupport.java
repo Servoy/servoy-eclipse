@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.relation;
 
 import java.util.Arrays;
@@ -42,6 +42,7 @@ import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
 import com.servoy.eclipse.ui.editors.RelationEditor;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.DataProviderConverter;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.FlattenedSolution;
@@ -135,7 +136,7 @@ public class DataProviderEditingSupport extends EditingSupport
 				}
 				if (table != null || index == RelationEditor.CI_FROM)
 				{
-					boolean includeGlobals = (index == RelationEditor.CI_FROM);
+					boolean includeGlobalsAndCalcs = (index == RelationEditor.CI_FROM);
 					FlattenedSolution flattenedEditingSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(
 						re.getPersist());
 
@@ -151,10 +152,10 @@ public class DataProviderEditingSupport extends EditingSupport
 					{
 						provider = DataProviderConverter.getDataProvider(flattenedEditingSolution, null, table, dataProviders[valueIndex.intValue()]);
 					}
-					DataProviderDialog dialog = new DataProviderDialog(re.getSite().getShell(), DataProviderLabelProvider.INSTANCE_HIDEPREFIX, re.getPersist(),
-						flattenedEditingSolution, table, new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, includeGlobals,
-							false, false, INCLUDE_RELATIONS.NO, true, null), provider != null ? new StructuredSelection(provider) : null, SWT.NONE,
-						"Select Data Provider");
+					DataProviderDialog dialog = new DataProviderDialog(re.getSite().getShell(), new SolutionContextDelegateLabelProvider(
+						DataProviderLabelProvider.INSTANCE_HIDEPREFIX, re.getPersist()), re.getPersist(), flattenedEditingSolution, table,
+						new DataProviderTreeViewer.DataProviderOptions(false, true, includeGlobalsAndCalcs, false, false, includeGlobalsAndCalcs, false, false,
+							INCLUDE_RELATIONS.NO, true, null), provider != null ? new StructuredSelection(provider) : null, SWT.NONE, "Select Data Provider");
 					dialog.open();
 
 					if (dialog.getReturnCode() != Window.CANCEL)
@@ -166,9 +167,12 @@ public class DataProviderEditingSupport extends EditingSupport
 							int i = 0;
 							for (i = 0; i < dataProviders.length; i++)
 							{
-								if (id.equals(dataProviders[i])) break;
+								if (id.equals(dataProviders[i]))
+								{
+									setValue(rowInput, new Integer(i));
+									break;
+								}
 							}
-							setValue(rowInput, i);
 						}
 					}
 
