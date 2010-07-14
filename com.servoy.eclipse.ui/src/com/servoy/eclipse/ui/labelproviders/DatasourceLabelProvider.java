@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.labelproviders;
 
 import org.eclipse.jface.viewers.LabelProvider;
@@ -23,6 +23,12 @@ import com.servoy.eclipse.core.repository.TableWrapper;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
+
+/**
+ * LabelProvider for data sources.
+ * 
+ * @author rgansevles
+ */
 
 public class DatasourceLabelProvider extends LabelProvider
 {
