@@ -13,12 +13,19 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.dnd;
 
 import java.io.Serializable;
 
 import com.servoy.j2db.util.UUID;
+
+/**
+ * Holders for dragging elements or dataproviders.
+ * 
+ * @author rgansevles
+ */
+
 
 public abstract class FormElementDragData implements IDragData, Serializable
 {
@@ -55,5 +62,4 @@ public abstract class FormElementDragData implements IDragData, Serializable
 			this.relationName = relationName;
 		}
 	}
-
 }

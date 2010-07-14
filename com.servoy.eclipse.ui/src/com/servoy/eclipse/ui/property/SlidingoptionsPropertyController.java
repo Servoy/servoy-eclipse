@@ -25,6 +25,12 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.j2db.persistence.ISupportPrintSliding;
 
+/**
+ * Property controller for printSliding property.
+ * 
+ * @author rgansevles
+ */
+
 public class SlidingoptionsPropertyController extends PropertyController<Integer, Object>
 {
 	private static ILabelProvider labelProvider = null;
@@ -158,7 +164,6 @@ public class SlidingoptionsPropertyController extends PropertyController<Integer
 	 * Sliding option source property implementation
 	 * 
 	 * @author rgansevles
-	 * 
 	 */
 
 	public static class SlidingoptionsPropertySource extends ComplexPropertySource<Slidingoption>
@@ -223,5 +228,4 @@ public class SlidingoptionsPropertyController extends PropertyController<Integer
 			return null;
 		}
 	}
-
 }

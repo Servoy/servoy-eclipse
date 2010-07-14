@@ -26,6 +26,12 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 
+/**
+ * IPropertySource for awt Insets, show top, right, bottom and left subproperties.
+ * 
+ * @author rgansevles
+ */
+
 public class InsetsPropertySource extends ComplexPropertySource<java.awt.Insets>
 {
 	private static final String RIGHT = "right";
@@ -188,5 +194,4 @@ public class InsetsPropertySource extends ComplexPropertySource<java.awt.Insets>
 		}
 
 	}
-
 }

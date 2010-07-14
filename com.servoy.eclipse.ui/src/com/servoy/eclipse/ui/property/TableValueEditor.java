@@ -13,12 +13,17 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
+
+/**
+ * IValueEditor for tables, opens table editor.
+ * 
+ * @author rgansevles
+ */
 
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.TableWrapper;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -40,8 +45,7 @@ public class TableValueEditor implements IValueEditor<Object>
 		{
 			TableWrapper tw = (TableWrapper)value;
 
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-			IServer server = servoyModel.getServerManager().getServer(tw.getServerName(), true, true);
+			IServer server = ServoyModel.getServerManager().getServer(tw.getServerName(), true, true);
 			if (server != null)
 			{
 				try

@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
@@ -79,6 +79,12 @@ import org.eclipse.ui.progress.WorkbenchJob;
 
 import com.servoy.eclipse.ui.labelproviders.DelegateLabelProvider;
 import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
+
+/**
+ * JFace-like viewer for selecting a value from a tree. A filter is built-in.
+ * 
+ * @author rgansevles
+ */
 
 public class FilteredTreeViewer extends FilteredTree implements ISelectionProvider, IDoubleClickListener
 {
@@ -873,5 +879,4 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 			return null;
 		}
 	}
-
 }

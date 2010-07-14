@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import java.util.ArrayList;
@@ -41,6 +41,12 @@ import com.servoy.eclipse.ui.util.ModifiedComboBoxCellEditor;
 import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
 import com.servoy.j2db.util.IDelegate;
+
+/**
+ * Property controller for properties with a fixed list of values to be shown in a combo box.
+ * 
+ * @author rgansevles
+ */
 
 
 public class ComboboxPropertyController<T> extends PropertyController<T, Integer> implements IMergeablePropertyDescriptor

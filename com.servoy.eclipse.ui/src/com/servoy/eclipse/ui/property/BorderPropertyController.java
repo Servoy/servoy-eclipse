@@ -58,6 +58,13 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.gui.SpecialMatteBorder;
 
+/**
+ * Property controller for selecting border in Properties view.
+ * 
+ * @author rgansevles
+ *
+ */
+
 public class BorderPropertyController extends PropertyController<Border, Object>
 {
 	public static enum BorderType
