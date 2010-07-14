@@ -31,6 +31,12 @@ import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 
+/**
+ * Select-all action with logic for selecting elements based on type of the already selected elements.
+ * 
+ * @author lvostinar
+ */
+
 public class FixedSelectAllAction extends SelectAllAction
 {
 	private final IWorkbenchPart part;

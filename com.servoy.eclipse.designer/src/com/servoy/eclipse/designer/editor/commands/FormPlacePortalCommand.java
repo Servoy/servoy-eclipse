@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor.commands;
 
 import org.eclipse.gef.Request;
@@ -26,7 +26,11 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.RepositoryException;
 
-
+/**
+ * Command to place a portal in the form designer.
+ * 
+ * @author rgansevles
+ */
 public class FormPlacePortalCommand extends FormPlaceElementCommand
 {
 	private final boolean fillText;

@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 
@@ -26,10 +26,21 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.AutoexposeHelper;
 import org.eclipse.gef.GraphicalEditPart;
 
+/**
+ * 
+ * An implementation of org.eclipse.gef.AutoexposeHelper  that performs autoscrolling of a Viewport figure. This helper is for 
+ * use with graphical editparts that contain a viewport figure. This helper will search the editpart and find the viewport. 
+ * Autoscroll will occur when the detect location is inside the viewport's bounds, but near its edge. It will continue for as 
+ * long as the location continues to meet these criteria. The autoscroll direction is approximated to the nearest orthogonal 
+ * or diagonal direction (north, northeast, east, etc.). 
+ * 
+ * Copied from gef ViewportAutoexposeHelper with some adjustments.
+ * 
+ * @author asisu
+ */
 
 abstract class CustomViewportHelper
 {
-
 	protected GraphicalEditPart owner;
 
 	protected CustomViewportHelper(GraphicalEditPart owner)
@@ -59,8 +70,6 @@ abstract class CustomViewportHelper
 
 public class CustomViewportAutoexposeHelper extends CustomViewportHelper implements AutoexposeHelper
 {
-
-
 	/** defines the range where autoscroll is active inside a viewer */
 	private static final Insets DEFAULT_EXPOSE_THRESHOLD = new Insets(18);
 

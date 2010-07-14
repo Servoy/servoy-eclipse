@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 
@@ -62,9 +62,9 @@ import org.eclipse.swt.widgets.TableItem;
 
 import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
+import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.dnd.IDragData;
-import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.views.IndexedListViewer;
 import com.servoy.eclipse.ui.views.IndexedStructuredSelection;
@@ -74,6 +74,13 @@ import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.util.SortedList;
 
+/**
+ * Tab in form editor for managing tab sequences.
+ * 
+ * @author rgansevles
+ */
+
+@SuppressWarnings("nls")
 public class VisualFormEditorTabSequencePage extends Composite
 {
 	public static final ILabelProvider LABELPROVIDER = new LabelProvider();
@@ -256,20 +263,20 @@ public class VisualFormEditorTabSequencePage extends Composite
 				if (FormElementTransfer.getInstance().isSupportedType(event.currentDataType))
 				{
 					// Get the dropped data
-					DropTarget target = (DropTarget)event.widget;
-					Table table = (Table)target.getControl();
+					DropTarget dropTarget = (DropTarget)event.widget;
+					Table table = (Table)dropTarget.getControl();
 					Object data = event.data;
 					if (data instanceof Object[] && ((Object[])data).length == 1)
 					{
-						Object source = ((Object[])data)[0];
-						if (source instanceof PersistDragData && event.item instanceof TableItem)
+						Object dragSource = ((Object[])data)[0];
+						if (dragSource instanceof PersistDragData && event.item instanceof TableItem)
 						{
 							int targetIndex = Arrays.asList(table.getItems()).indexOf(event.item);
 							List<IPersist> input = (List<IPersist>)selectedTableViewer.getInput();
 							int sourceIndex = -1;
 							for (IPersist persist : input)
 							{
-								if (persist.getUUID().equals(((PersistDragData)source).uuid))
+								if (persist.getUUID().equals(((PersistDragData)dragSource).uuid))
 								{
 									sourceIndex = input.indexOf(persist);
 									break;

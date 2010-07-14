@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -24,6 +24,12 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportName;
+
+/**
+ * Label provider for setting security checkboxes in form editor security page.
+ * 
+ * @author lvostinar
+ */
 
 public class ElementSettingsLabelProvider extends LabelProvider implements ITableLabelProvider
 {
@@ -74,6 +80,4 @@ public class ElementSettingsLabelProvider extends LabelProvider implements ITabl
 		if (columnIndex == VisualFormEditorSecurityPage.CI_NAME) return ((ISupportName)element).getName();
 		return null;
 	}
-
-
 }

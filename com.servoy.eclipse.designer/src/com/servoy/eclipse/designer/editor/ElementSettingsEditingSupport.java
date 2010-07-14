@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 import org.eclipse.core.databinding.observable.ChangeEvent;
@@ -30,6 +30,12 @@ import org.eclipse.jface.viewers.TableViewer;
 
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+
+/**
+ * Editing support for setting security checkboxes in form editor security page.
+ * 
+ * @author lvostinar
+ */
 
 public class ElementSettingsEditingSupport extends EditingSupport implements IObservable
 {
@@ -88,7 +94,7 @@ public class ElementSettingsEditingSupport extends EditingSupport implements IOb
 	{
 		if (element instanceof IPersist)
 		{
-			return model.hasRight((IPersist)element, mask);
+			return Boolean.valueOf(model.hasRight((IPersist)element, mask));
 		}
 		return null;
 	}
@@ -99,7 +105,7 @@ public class ElementSettingsEditingSupport extends EditingSupport implements IOb
 		if (element instanceof IPersist && value != null)
 		{
 			IPersist persist = (IPersist)element;
-			Boolean right = Boolean.parseBoolean(value.toString());
+			boolean right = Boolean.parseBoolean(value.toString());
 			model.setRight(right, persist, mask);
 			changeSupport.fireEvent(new ChangeEvent(ElementSettingsEditingSupport.this));
 			getViewer().update(element, null);
@@ -147,6 +153,4 @@ public class ElementSettingsEditingSupport extends EditingSupport implements IOb
 	{
 
 	}
-
-
 }

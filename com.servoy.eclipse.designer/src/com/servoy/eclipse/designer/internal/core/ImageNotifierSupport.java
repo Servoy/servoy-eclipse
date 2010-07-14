@@ -13,17 +13,20 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.internal.core;
 
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.swt.graphics.ImageData;
 
+/**
+ * Fire when form element image is done painting.
+ * 
+ * @author rgansevles
+ */
 
 public class ImageNotifierSupport
 {
-
-
 	protected ListenerList imageListeners = null;
 
 	/**
@@ -75,6 +78,4 @@ public class ImageNotifierSupport
 	{
 		if (imageListeners != null) imageListeners.remove(aListener);
 	}
-
-
 }

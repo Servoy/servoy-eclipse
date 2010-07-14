@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 import java.util.ArrayList;
@@ -25,16 +25,22 @@ import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.gef.ui.actions.AlignmentRetargetAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.ui.actions.ActionFactory;
-import org.eclipse.ui.actions.RetargetAction;
 import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
+import org.eclipse.ui.actions.RetargetAction;
 
 import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
+
+/**
+ * ActionBarContributor, builds actions for form designer.
+ * Actions are contributed to the toolbar and are declared as global action keys. 
+ * 
+ * @author rgansevles
+ */
 
 public class ActionBarContributor extends org.eclipse.gef.ui.actions.ActionBarContributor
 {
 	public ActionBarContributor()
 	{
-
 	}
 
 	List<IWorkbenchAction> myActions = new ArrayList<IWorkbenchAction>();

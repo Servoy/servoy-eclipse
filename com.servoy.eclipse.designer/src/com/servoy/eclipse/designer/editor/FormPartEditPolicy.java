@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 import org.eclipse.gef.RequestConstants;
@@ -21,6 +21,12 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editpolicies.ComponentEditPolicy;
 import org.eclipse.gef.requests.ForwardedRequest;
 import org.eclipse.gef.requests.GroupRequest;
+
+/**
+ * Edit policy for form parts.
+ * 
+ * @author rgansevles
+ */
 
 public class FormPartEditPolicy extends ComponentEditPolicy
 {

@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor.commands;
 
 import org.eclipse.jface.action.IAction;
@@ -24,6 +24,13 @@ import org.eclipse.ui.actions.RetargetAction;
 
 import com.servoy.eclipse.ui.Activator;
 
+/**
+ * Factory for actions in form designer.
+ * 
+ * @author rgansevles
+ */
+
+@SuppressWarnings("nls")
 public abstract class DesignerActionFactory extends ActionFactory
 {
 	public static final String GROUP_ANCHORING = "group.anchoring";

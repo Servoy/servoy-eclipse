@@ -40,6 +40,12 @@ import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.ui.editors.IDialogDirectCellEditor;
 import com.servoy.eclipse.ui.editors.TextDialogCellEditor;
 
+/**
+ * Edit properties in form editor, cell editor is same one as used in the properties view.
+ * 
+ * @author rgansevles
+ */
+
 public class PropertyDirectEditManager extends DirectEditManager
 {
 	protected Font scaledFont;
@@ -244,6 +250,5 @@ public class PropertyDirectEditManager extends DirectEditManager
 				((Text)control).setSelection(sel);
 			}
 		}
-
 	}
 }

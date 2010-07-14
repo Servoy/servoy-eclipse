@@ -48,6 +48,12 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.Part;
 
+/**
+ * layout policy for move/resize in form designer.
+ * 
+ * @author rgansevles
+ */
+
 public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 {
 	private final FormGraphicalEditPart parent;
@@ -282,7 +288,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 							protected void updateSourceRequest()
 							{
 								super.updateSourceRequest();
-								PersistGraphicalEditPart.limitChangeBoundsRequest((ChangeBoundsRequest)getSourceRequest());
+								BasePersistGraphicalEditPart.limitChangeBoundsRequest((ChangeBoundsRequest)getSourceRequest());
 							}
 						};
 					}

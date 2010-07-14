@@ -71,6 +71,12 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.Utils;
 
+/**
+ * Tab in form editor for managing form parts.
+ * 
+ * @author rgansevles
+ */
+
 public class VisualFormEditorPartsPage extends Composite
 {
 

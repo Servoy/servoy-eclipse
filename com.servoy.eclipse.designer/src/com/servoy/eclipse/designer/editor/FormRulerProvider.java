@@ -39,6 +39,12 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 
+/**
+ * Ruler provider for form designer, vertical rule is form widt, horizontal rules are part boundaries.
+ * 
+ * @author rgansevles
+ */
+
 public class FormRulerProvider extends RulerProvider
 {
 	private final boolean horizontal;

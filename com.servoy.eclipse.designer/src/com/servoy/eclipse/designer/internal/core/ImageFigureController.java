@@ -13,12 +13,9 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.internal.core;
 
-import java.util.List;
-
-import org.eclipse.draw2d.Border;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.ImageFigure;
@@ -27,6 +24,11 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
+/**
+ * Places painted image on form designer elements when image is painted.
+ * 
+ * @author rgansevles
+ */
 
 public class ImageFigureController
 {
@@ -193,27 +195,6 @@ public class ImageFigureController
 
 		});
 	}
-
-	/*
-	 * Set the border enable state. This will go through the figure and its children and disable the border state. It will only do this for ImageFigures that have an OutlineBorder.
-	 * Since non-image figures don't really participate in the lightening we don't look at them. @param fig @param b
-	 * 
-	 * @since 1.0.0
-	 */
-	private void setBorderEanbleStates(IFigure fig, boolean disableBorder)
-	{
-		if (fig instanceof ImageFigure)
-		{
-			Border border = fig.getBorder();
-			if (border instanceof OutlineBorder) ((OutlineBorder)border).setOverrideAndDisable(disableBorder);
-			List children = fig.getChildren();
-			for (int i = 0; i < children.size(); i++)
-			{
-				setBorderEanbleStates((IFigure)children.get(i), disableBorder);
-			}
-		}
-	}
-
 
 	/**
 	 * Set to crosshatch any lightened area. It will only crosshatch lightened areas, it won't crosshatch regular areas.

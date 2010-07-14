@@ -32,6 +32,12 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.UUID;
 
+/**
+ * Model for setting security checkboxes in form editor security page.
+ * 
+ * @author lvostinar
+ */
+
 public class ElementSettingsModel
 {
 	private String currentGroup;
@@ -60,17 +66,17 @@ public class ElementSettingsModel
 		Map<UUID, Integer> currentGroupSecurityInfo = securityInfo.get(currentGroup);
 		if (currentGroupSecurityInfo != null && currentGroupSecurityInfo.containsKey(uuid))
 		{
-			access = currentGroupSecurityInfo.get(uuid);
+			access = currentGroupSecurityInfo.get(uuid).intValue();
 		}
 		else
 		{
 			Form form = null;
 			if (element instanceof Form) form = (Form)element;
 			else form = (Form)element.getAncestor(IRepository.FORMS);
-			List<SecurityInfo> securityInfo = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getSecurityInfos(currentGroup, form);
-			if (securityInfo != null)
+			List<SecurityInfo> infos = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getSecurityInfos(currentGroup, form);
+			if (infos != null)
 			{
-				Iterator<SecurityInfo> iterator = securityInfo.iterator();
+				Iterator<SecurityInfo> iterator = infos.iterator();
 				while (iterator.hasNext())
 				{
 					SecurityInfo info = iterator.next();
@@ -99,7 +105,7 @@ public class ElementSettingsModel
 			securityInfo.put(currentGroup, currentGroupSecurityInfo);
 		}
 		currentGroupSecurityInfo.remove(uuid);
-		currentGroupSecurityInfo.put(uuid, access);
+		currentGroupSecurityInfo.put(uuid, new Integer(access));
 	}
 
 	public void saveSecurityElements(Form form)
@@ -107,10 +113,10 @@ public class ElementSettingsModel
 		try
 		{
 			ArrayList<IPersist> formElements = new ArrayList<IPersist>();
-			Iterator it = form.getAllObjects();
+			Iterator<IPersist> it = form.getAllObjects();
 			while (it.hasNext())
 			{
-				IPersist elem = (IPersist)it.next();
+				IPersist elem = it.next();
 				if (elem instanceof IFormElement && ((IFormElement)elem).getName() != null && ((IFormElement)elem).getName().length() != 0)
 				{
 					formElements.add(elem);

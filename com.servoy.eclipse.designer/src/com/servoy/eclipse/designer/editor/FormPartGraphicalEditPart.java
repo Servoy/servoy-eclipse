@@ -47,6 +47,12 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
 
+/**
+ * Edit part for parts in form designer.
+ * 
+ * @author rgansevles
+ */
+
 public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistEditPart, IPersistChangeListener
 {
 	protected IApplication application;

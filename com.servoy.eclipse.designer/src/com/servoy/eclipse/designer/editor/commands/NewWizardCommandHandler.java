@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor.commands;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -34,39 +34,41 @@ import com.servoy.eclipse.ui.wizards.NewRelationWizard;
 import com.servoy.eclipse.ui.wizards.NewValueListWizard;
 import com.servoy.j2db.persistence.Solution;
 
+/**
+ * Handles dropdown for new-wizards (form, relation, ...)
+ * 
+ * @author asisu
+ */
+
+@SuppressWarnings("nls")
 public class NewWizardCommandHandler extends AbstractHandler
 {
+	static final String NEW_FORM = "NEW_FORM";
+	static final String NEW_RELATION = "NEW_RELATION";
+	static final String NEW_VALUELIST = "NEW_VALUELIST";
+	static final String NEW_METHOD = "NEW_METHOD";
 
 	public Object execute(ExecutionEvent arg0) throws ExecutionException
 	{
-		final String NEW_FORM = "NEW_FORM";
-		final String NEW_RELATION = "NEW_RELATION";
-		final String NEW_VALUELIST = "NEW_VALUELIST";
-		final String NEW_METHOD = "NEW_METHOD";
-
-
-		NewFormWizard newFormWizard = new NewFormWizard();
-
 		String wizardType = arg0.getParameter("com.servoy.eclipse.designer.wizardType");
 		if (wizardType != null)
 		{
-			if (wizardType.equals("NEW_FORM"))
+			if (wizardType.equals(NEW_FORM))
 			{
 				openNewFormWizard();
 			}
-			else if (wizardType.equals("NEW_RELATION"))
+			else if (wizardType.equals(NEW_RELATION))
 			{
 				openNewRelationWizard();
 			}
-			else if (wizardType.equals("NEW_VALUELIST"))
+			else if (wizardType.equals(NEW_VALUELIST))
 			{
 				openNewValueListWizard();
 			}
-			else if (wizardType.equals("NEW_METHOD"))
+			else if (wizardType.equals(NEW_METHOD))
 			{
 				openNewMethodWizard();
 			}
-
 		}
 
 		return null;
@@ -111,7 +113,6 @@ public class NewWizardCommandHandler extends AbstractHandler
 		WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), newMethodWizard);
 		dialog.create();
 		dialog.open();
-
 	}
 
 	private void openNewValueListWizard()
@@ -141,8 +142,6 @@ public class NewWizardCommandHandler extends AbstractHandler
 						Solution edSolution = servoyProject.getEditingSolution();
 						solutionName = edSolution.getName();
 					}
-
-
 				}
 			}
 		}
@@ -154,7 +153,6 @@ public class NewWizardCommandHandler extends AbstractHandler
 		WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), newValueListWizard);
 		dialog.create();
 		dialog.open();
-
 	}
 
 	private void openNewRelationWizard()
@@ -184,8 +182,6 @@ public class NewWizardCommandHandler extends AbstractHandler
 						Solution edSolution = servoyProject.getEditingSolution();
 						solutionName = edSolution.getName();
 					}
-
-
 				}
 			}
 		}

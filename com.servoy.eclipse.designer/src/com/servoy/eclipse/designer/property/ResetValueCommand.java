@@ -24,6 +24,13 @@ import org.eclipse.ui.views.properties.IPropertySource2;
 import com.servoy.eclipse.ui.property.ComplexPropertySource;
 import com.servoy.eclipse.ui.views.properties.PropertySheetEntry;
 
+/**
+ * Command to reset a value on a IPropertySource target.
+ * Copied from gef with minor changes.
+ * 
+ * @author rgansevles
+ */
+
 public class ResetValueCommand extends Command
 {
 

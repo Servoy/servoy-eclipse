@@ -42,6 +42,12 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.util.SortedList;
 
+/**
+ * Content provider for Servoy form in outline view.
+ * 
+ * @author rgansevles
+ */
+
 public class FormOutlineContentProvider implements ITreeContentProvider
 {
 	public static final Object ELEMENTS = new Object();

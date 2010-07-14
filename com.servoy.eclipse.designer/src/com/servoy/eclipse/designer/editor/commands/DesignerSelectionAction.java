@@ -28,6 +28,12 @@ import org.eclipse.gef.requests.GroupRequest;
 import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.ui.IWorkbenchPart;
 
+/**
+ * Base class for actions based on the selection in form designer.
+ * 
+ * @author rgansevles
+ */
+
 public abstract class DesignerSelectionAction extends SelectionAction
 {
 	protected final Object requestType;
