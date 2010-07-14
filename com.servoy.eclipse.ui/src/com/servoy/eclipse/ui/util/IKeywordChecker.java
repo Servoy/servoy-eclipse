@@ -19,7 +19,7 @@ package com.servoy.eclipse.ui.util;
 /**
  * Interface for checking for keywords in content providers.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public interface IKeywordChecker

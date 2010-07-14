@@ -25,7 +25,7 @@ import com.servoy.eclipse.ui.Messages;
 /**
  * Label provider for BeanInfo.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class BeanInfoLabelProvider extends LabelProvider

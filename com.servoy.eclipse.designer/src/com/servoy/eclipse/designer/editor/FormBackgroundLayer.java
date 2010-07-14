@@ -45,7 +45,7 @@ import com.servoy.j2db.util.PersistHelper;
 /**
  * Layer to print form background stuff like data-renders and page-breaks.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class FormBackgroundLayer extends FreeformLayer

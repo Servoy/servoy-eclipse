@@ -31,7 +31,7 @@ import com.servoy.j2db.persistence.Form;
  * 
  * Used for both menu object contribution and action handler.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class OpenFormInDesignerActionDelegate extends AbstractFormSelectionActionDelegate

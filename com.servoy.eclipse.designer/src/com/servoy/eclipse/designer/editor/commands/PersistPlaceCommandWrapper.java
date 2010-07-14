@@ -27,7 +27,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 /**
  * Select the persists after executing or undoing of the command, optionally refresh the host.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class PersistPlaceCommandWrapper extends RefreshingCommand

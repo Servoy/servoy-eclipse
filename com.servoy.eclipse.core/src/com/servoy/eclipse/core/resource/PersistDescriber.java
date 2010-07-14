@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.content.IContentDescription;
 /**
  * A describer that peeks in the json-file for a typeid value
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public abstract class PersistDescriber implements IContentDescriber

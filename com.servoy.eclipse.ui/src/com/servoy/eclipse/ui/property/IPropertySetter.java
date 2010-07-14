@@ -21,7 +21,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 /**
  * Interface that handles get/set of a property on a IPropertySource.
  * 
- * @author rob
+ * @author rgansevles
  * 
  * @param <T>
  */

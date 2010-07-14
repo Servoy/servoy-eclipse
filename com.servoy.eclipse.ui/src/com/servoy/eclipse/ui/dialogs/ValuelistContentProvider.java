@@ -27,7 +27,7 @@ import com.servoy.j2db.persistence.ValueList;
 /**
  * Content provider class for value lists.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 

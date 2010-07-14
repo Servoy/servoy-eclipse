@@ -712,7 +712,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 
 	/**
 	 * Toggle the filter mode
-	 * @author rob
+	 * @author rgansevles
 	 *
 	 */
 	private class ToggleFiltermodeAction extends Action
@@ -736,7 +736,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 	}
 	/**
 	 * Submenu action for search depth
-	 * @author rob
+	 * @author rgansevles
 	 *
 	 */
 	private class SelectSearchdepthAction extends Action implements IMenuCreator
@@ -819,7 +819,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 	/**
 	 * Label provider to provide default folder images on expandable items
 	 * 
-	 * @author rob
+	 * @author rgansevles
 	 * 
 	 */
 	public static class TreeFolderLabelProvider extends DelegateLabelProvider implements IFontProvider, IColorProvider

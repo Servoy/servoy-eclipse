@@ -26,7 +26,7 @@ import com.servoy.j2db.persistence.Part;
 /**
  * Command to apply moving to a Part.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class MovePartCommand extends Command

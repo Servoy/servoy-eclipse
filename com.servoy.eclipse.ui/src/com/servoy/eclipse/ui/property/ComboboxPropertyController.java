@@ -101,7 +101,7 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 	/**
 	 * Convert values based on model index.
 	 * 
-	 * @author rob
+	 * @author rgansevles
 	 * 
 	 */
 	public static class ComboboxModelConverter<T> implements IPropertyConverter<T, Integer>
@@ -186,7 +186,7 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 	/**
 	 * Merged ComboboxPropertyController.
 	 * 
-	 * @author rob
+	 * @author rgansevles
 	 * 
 	 * @param <T>
 	 */

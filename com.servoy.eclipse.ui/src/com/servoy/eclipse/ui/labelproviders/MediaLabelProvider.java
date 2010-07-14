@@ -26,7 +26,7 @@ import com.servoy.j2db.persistence.Media;
 /**
  * Label provider for Media, value may be Media of mediaId (Integer).
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class MediaLabelProvider extends LabelProvider implements IPersistLabelProvider

@@ -51,7 +51,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * Action to import media from file.
  * 
- * @author rob
+ * @author rgansevles
  */
 public class ImportMediaAction extends Action implements ISelectionChangedListener
 {

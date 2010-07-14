@@ -46,7 +46,7 @@ import com.servoy.j2db.persistence.Table;
  * <p>
  * The actual command is performed via the selected edit parts' edit policy.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class AddPortalActionDelegate extends AbstractEditpartActionDelegate

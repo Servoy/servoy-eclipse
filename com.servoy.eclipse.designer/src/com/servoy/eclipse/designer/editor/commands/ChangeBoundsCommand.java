@@ -37,7 +37,7 @@ import com.servoy.j2db.persistence.ISupportName;
 /**
  * Command to apply dragging changes to the ISupportBounds object. Children of the persist are moved along.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class ChangeBoundsCommand extends Command implements ISupportModels

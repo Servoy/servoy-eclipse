@@ -24,7 +24,7 @@ import org.eclipse.gef.requests.GroupRequest;
 /**
  * Request to set a property value.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class SetPropertyRequest extends GroupRequest

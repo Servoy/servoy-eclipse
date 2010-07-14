@@ -32,7 +32,7 @@ import com.servoy.j2db.util.UUID;
 /**
  * Match input for persist editors against file editor input.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class PersistMatchingStrategy implements IEditorMatchingStrategy

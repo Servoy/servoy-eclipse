@@ -107,7 +107,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * Create new form.
  * 
- * @author rob
+ * @author rgansevles
  */
 public class NewFormWizard extends Wizard implements INewWizard
 {

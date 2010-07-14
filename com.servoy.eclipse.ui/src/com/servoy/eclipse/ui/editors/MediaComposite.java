@@ -33,7 +33,7 @@ import com.servoy.j2db.persistence.Media;
 /**
  * Composite to view a media image
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class MediaComposite extends ScrolledComposite

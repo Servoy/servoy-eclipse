@@ -19,7 +19,7 @@ package com.servoy.eclipse.ui.util;
 /**
  * Simple callback-interface for getting a default value for anything.
  * 
- * @author rob
+ * @author rgansevles
  * 
  * @param <T>
  */

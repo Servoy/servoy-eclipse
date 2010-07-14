@@ -39,7 +39,7 @@ import com.servoy.j2db.persistence.IPersist;
  * The action delegate subclasses collect data for the command (typically via a dialog). The command is performed by the selected edit parts' edit policy using
  * a DataRequest request.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindowActionDelegate

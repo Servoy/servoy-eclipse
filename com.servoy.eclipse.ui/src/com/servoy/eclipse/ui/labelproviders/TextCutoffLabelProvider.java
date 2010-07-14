@@ -22,7 +22,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 /**
  * Wrapper label provider for limiting display of too long texts; newlines are also removed.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class TextCutoffLabelProvider extends DelegateLabelProvider

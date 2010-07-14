@@ -24,7 +24,7 @@ import org.eclipse.swt.widgets.Composite;
 /**
  * Text cell editor that adds verify listeners to the text field.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class VerifyingTextCellEditor extends TextCellEditor

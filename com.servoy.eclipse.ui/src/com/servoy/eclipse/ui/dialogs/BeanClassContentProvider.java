@@ -30,7 +30,7 @@ import com.servoy.j2db.plugins.IBeanClassProvider;
 /**
  * Content provider class for bean classes.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 

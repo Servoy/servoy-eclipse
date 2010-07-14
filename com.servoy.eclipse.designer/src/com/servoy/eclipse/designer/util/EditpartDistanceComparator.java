@@ -26,7 +26,7 @@ import org.eclipse.gef.GraphicalEditPart;
 /**
  * Sort edit parts based on distance from a location.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class EditpartDistanceComparator implements Comparator<EditPart>

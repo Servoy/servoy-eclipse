@@ -30,7 +30,7 @@ import com.servoy.j2db.persistence.Part;
 /**
  * Edit policy for dragging the part in form designer.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class DragFormPartPolicy extends ResizableEditPolicy

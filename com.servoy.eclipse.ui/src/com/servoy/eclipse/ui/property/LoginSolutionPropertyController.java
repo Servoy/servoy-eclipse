@@ -32,7 +32,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 /**
  * Property controller for pseudo loginSolutionName property (is stored in modulesNames).
  * 
- * @author rob
+ * @author rgansevles
  *
  */
 

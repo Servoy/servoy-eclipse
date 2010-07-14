@@ -177,7 +177,7 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptor
 	/**
 	 * Label provider for checkboxes.
 	 * 
-	 * @author rob
+	 * @author rgansevles
 	 * 
 	 */
 	public static class CheckboxLabelProvider extends BaseLabelProvider implements ILabelProvider

@@ -24,7 +24,7 @@ import com.servoy.j2db.persistence.Solution;
 /**
  * Openable items for Open menu actions.
  * 
- * @author rob
+ * @author rgansevles
  *
  */
 public class Openable

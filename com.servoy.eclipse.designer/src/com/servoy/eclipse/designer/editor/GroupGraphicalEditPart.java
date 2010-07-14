@@ -42,7 +42,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * Graphical edit part for element groups.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class GroupGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistChangeListener

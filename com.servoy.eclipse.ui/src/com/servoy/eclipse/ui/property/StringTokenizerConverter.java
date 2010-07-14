@@ -22,7 +22,7 @@ import com.servoy.eclipse.core.util.CoreUtils;
 /**
  * Split strings to array of elements.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class StringTokenizerConverter implements IPropertyConverter<String, Object[]>

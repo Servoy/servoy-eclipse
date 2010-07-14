@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.Listener;
 /**
  * Added IPostSelectionProvider to existing ScrollingGraphicalViewer. Needed for some selection listeners (for instance history view).
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class ModifiedScrollingGraphicalViewer extends ScrollingGraphicalViewer implements IPostSelectionProvider

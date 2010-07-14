@@ -25,7 +25,7 @@ import org.eclipse.swt.graphics.Font;
 /**
  * Delegate label provider that marks invalid values with a special font
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 

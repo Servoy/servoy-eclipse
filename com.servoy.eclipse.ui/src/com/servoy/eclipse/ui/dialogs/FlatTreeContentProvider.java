@@ -22,7 +22,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 /**
  * Tree content provider when there are no children to present. Useful when showing a list of values in a tree view.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class FlatTreeContentProvider extends ArrayContentProvider implements ITreeContentProvider

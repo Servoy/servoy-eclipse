@@ -38,7 +38,7 @@ import com.servoy.j2db.persistence.IPersist;
 /**
  * Property controller for selecting value list in Properties view.
  * 
- * @author rob
+ * @author rgansevles
  *
  * @param <P> property type
  */

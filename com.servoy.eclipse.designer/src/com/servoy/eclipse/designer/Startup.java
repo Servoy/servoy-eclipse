@@ -20,7 +20,7 @@ import org.eclipse.ui.IStartup;
 
 /**
  * Start load the plugin. This enables properties on elements outside the editor (like SolutionExplorerView)
- * @author rob
+ * @author rgansevles
  *
  */
 public class Startup implements IStartup

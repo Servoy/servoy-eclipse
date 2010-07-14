@@ -23,7 +23,7 @@ import com.servoy.j2db.persistence.IPersist;
 /**
  * Open Form in script menu object contribution and action class.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class OpenFormInScripteditorActionDelegate extends AbstractFormSelectionActionDelegate

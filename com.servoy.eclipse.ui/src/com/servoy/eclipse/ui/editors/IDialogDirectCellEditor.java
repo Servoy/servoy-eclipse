@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Control;
 /**
  * Interface for direct edit part editors that just show a dialog
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public interface IDialogDirectCellEditor

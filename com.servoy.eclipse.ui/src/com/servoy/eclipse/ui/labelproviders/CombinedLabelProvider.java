@@ -25,7 +25,7 @@ import org.eclipse.swt.graphics.Image;
 /**
  * Combine 2 label providers. labelProvider1 overrides labelProvider2.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class CombinedLabelProvider implements ILabelProvider, IFontProvider

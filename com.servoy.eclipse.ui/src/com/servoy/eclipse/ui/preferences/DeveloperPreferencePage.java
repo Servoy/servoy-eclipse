@@ -34,7 +34,7 @@ import com.servoy.j2db.debug.DeveloperPreferences;
 /**
  * Preferences page for developer settings.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class DeveloperPreferencePage extends PreferencePage implements IWorkbenchPreferencePage

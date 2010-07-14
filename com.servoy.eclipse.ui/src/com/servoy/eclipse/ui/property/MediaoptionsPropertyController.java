@@ -206,7 +206,7 @@ public class MediaoptionsPropertyController extends PropertyController<Integer, 
 	/*
 	 * Media option source property implementation
 	 * 
-	 * @author rob
+	 * @author rgansevles
 	 * 
 	 */
 

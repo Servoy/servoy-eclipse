@@ -21,7 +21,7 @@ import org.eclipse.gef.commands.Command;
 /**
  * Interface for all commands that wrap around another command.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public interface ICommandWrapper

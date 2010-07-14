@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.Text;
 /**
  * Viewer for selecting a color value
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class ColorSelectViewer extends TreeSelectViewer

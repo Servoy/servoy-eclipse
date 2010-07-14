@@ -46,7 +46,7 @@ import com.servoy.j2db.util.SafeArrayList;
 /**
  * Property controller for String properties that are script names, subproperties are instance arguments
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class ScriptProviderPropertyController extends PropertyController<String, Object>

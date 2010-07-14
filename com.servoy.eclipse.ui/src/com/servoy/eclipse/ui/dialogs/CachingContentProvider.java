@@ -26,7 +26,7 @@ import org.eclipse.jface.viewers.Viewer;
 /**
  * Tree content provider that caches the children values for a parent element.
  * 
- * @author rob
+ * @author rgansevles
  *
  */
 public abstract class CachingContentProvider extends ArrayContentProvider implements ITreeContentProvider

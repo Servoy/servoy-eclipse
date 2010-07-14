@@ -29,7 +29,7 @@ import com.servoy.j2db.persistence.IRepository;
 /**
  * Delegate label provider that adds the form context to the label.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class FormContextDelegateLabelProvider extends DelegateLabelProvider implements IFontProvider, IColorProvider, IPersistLabelProvider

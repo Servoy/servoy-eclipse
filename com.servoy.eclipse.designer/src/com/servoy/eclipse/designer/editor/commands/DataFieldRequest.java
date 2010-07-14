@@ -20,7 +20,7 @@ package com.servoy.eclipse.designer.editor.commands;
 /**
  * Request with options for placing fields.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class DataFieldRequest extends DataRequest

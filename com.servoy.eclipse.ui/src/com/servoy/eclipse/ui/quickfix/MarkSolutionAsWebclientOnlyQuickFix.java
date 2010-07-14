@@ -29,7 +29,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 
 /**
  * Quickfix for solution settings that should only be used if then solution is declares as webclient-only.
- * @author rob
+ * @author rgansevles
  *
  */
 public class MarkSolutionAsWebclientOnlyQuickFix implements IMarkerResolution

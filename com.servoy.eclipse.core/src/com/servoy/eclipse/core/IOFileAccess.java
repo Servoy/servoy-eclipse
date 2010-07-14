@@ -32,7 +32,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * IFileAccess implementation for accessing files using the java.io package
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class IOFileAccess implements IFileAccess

@@ -892,7 +892,7 @@ public class ElementFactory
 	/**
 	 * Container for selected relation sequence (optional) and form.
 	 * 
-	 * @author rob
+	 * @author rgansevles
 	 * 
 	 */
 	public static class RelatedForm

@@ -29,7 +29,7 @@ import com.servoy.j2db.persistence.NameComparator;
 /**
  * Content provider class for forms.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 

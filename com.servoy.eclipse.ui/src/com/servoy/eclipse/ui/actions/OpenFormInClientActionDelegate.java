@@ -24,7 +24,7 @@ import com.servoy.j2db.persistence.Form;
 /**
  * Open Form in client menu object contribution and action class.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class OpenFormInClientActionDelegate extends AbstractFormSelectionActionDelegate

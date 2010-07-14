@@ -31,7 +31,7 @@ import com.servoy.j2db.util.UUID;
 /**
  * Quickfix for properties by resetting them.
  * 
- * @author rob
+ * @author rgansevles
  *
  */
 public class ClearPropertyQuickFix implements IMarkerResolution

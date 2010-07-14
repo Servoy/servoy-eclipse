@@ -2037,7 +2037,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 	/**
 	 * Wrapper class for PropertyDescriptor and value object.
 	 * 
-	 * @author rob
+	 * @author rgansevles
 	 * 
 	 */
 	private static class PropertyDescriptorWrapper

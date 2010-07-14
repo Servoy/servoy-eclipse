@@ -36,7 +36,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 /**
  * Content provider class for tables.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 

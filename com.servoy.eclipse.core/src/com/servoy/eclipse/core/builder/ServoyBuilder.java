@@ -3312,7 +3312,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	/**
 	 * Container class for problem and optional fix.
 	 * 
-	 * @author rob
+	 * @author rgansevles
 	 *
 	 */
 	public static class Problem

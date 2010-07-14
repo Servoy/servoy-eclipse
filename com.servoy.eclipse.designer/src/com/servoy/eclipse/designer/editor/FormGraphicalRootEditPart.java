@@ -37,7 +37,7 @@ import com.servoy.j2db.util.Settings;
 /**
  * Root pane for forms, add datarender-layer.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart implements PropertyChangeListener

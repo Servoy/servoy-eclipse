@@ -33,7 +33,7 @@ import com.servoy.eclipse.core.ServoyLog;
 /**
  * Observer immutable objects, the setters will create a new instance.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class ImmutableObjectObservable<T>

@@ -24,7 +24,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
  * 
  * @see IMergeablePropertyDescriptor
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public interface IMergedPropertyDescriptor extends IPropertyDescriptor

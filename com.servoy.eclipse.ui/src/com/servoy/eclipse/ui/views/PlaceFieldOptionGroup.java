@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Group;
 /**
  * Group with buttons for place-fields options.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class PlaceFieldOptionGroup extends Group implements SelectionListener

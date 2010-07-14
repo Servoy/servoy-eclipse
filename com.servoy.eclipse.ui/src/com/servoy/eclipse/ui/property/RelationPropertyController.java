@@ -39,7 +39,7 @@ import com.servoy.j2db.persistence.Table;
 /**
  * Property controller for selecting relations in Properties view.
  * 
- * @author rob
+ * @author rgansevles
  *
  */
 public class RelationPropertyController extends PropertyController<String, Object>

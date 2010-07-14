@@ -27,7 +27,7 @@ import com.servoy.eclipse.core.ServoyLog;
 /**
  * Match input for table editors against file editor input. Try do as many checks as possible before activating the plugin.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class TableMatchingStrategy implements IEditorMatchingStrategy

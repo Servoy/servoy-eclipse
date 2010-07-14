@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Control;
  * <p>
  * When a value is selected, the value is applied immediately when the user makes a selection.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class ModifiedComboBoxCellEditor extends ComboBoxCellEditor

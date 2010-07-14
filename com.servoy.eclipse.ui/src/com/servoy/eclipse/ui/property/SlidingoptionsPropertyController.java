@@ -157,7 +157,7 @@ public class SlidingoptionsPropertyController extends PropertyController<Integer
 	/*
 	 * Sliding option source property implementation
 	 * 
-	 * @author rob
+	 * @author rgansevles
 	 * 
 	 */
 

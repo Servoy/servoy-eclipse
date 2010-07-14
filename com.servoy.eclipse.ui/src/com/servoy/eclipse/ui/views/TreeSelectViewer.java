@@ -78,7 +78,7 @@ import com.servoy.eclipse.ui.util.IStatusProvider;
  * 
  * <p>When a IValueEditor is passed in the constructor, an open-button is added to the viewer.
  * 
- * @author rob
+ * @author rgansevles
  */
 public class TreeSelectViewer extends StructuredViewer implements IStatusProvider
 {

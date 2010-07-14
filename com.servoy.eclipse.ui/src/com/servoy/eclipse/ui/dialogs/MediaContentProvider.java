@@ -27,7 +27,7 @@ import com.servoy.j2db.persistence.Media;
 /**
  * Content provider class for media.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 

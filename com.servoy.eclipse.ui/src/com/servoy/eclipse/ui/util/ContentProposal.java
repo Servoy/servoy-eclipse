@@ -21,7 +21,7 @@ import org.eclipse.jface.fieldassist.IContentProposal;
 /**
  * IContentProposal implementation with input object.
  * 
- * @author rob
+ * @author rgansevles
  *
  */
 public class ContentProposal implements IContentProposal

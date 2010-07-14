@@ -57,7 +57,7 @@ public class ComplexProperty<T> implements IAdaptable
 	/**
 	 * Convert from base object to ComplexProperty wrapper.
 	 * 
-	 * @author rob
+	 * @author rgansevles
 	 * 
 	 * @param <T>
 	 */

@@ -24,7 +24,7 @@ import com.servoy.eclipse.ui.Messages;
 /**
  * Convert bean properties to/from string when the bean supports get/setAsText.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class BeanAsTextPropertyConverter implements IPropertyConverter<Object, String>

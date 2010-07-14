@@ -23,7 +23,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 /**
  * set properties via the editor's command stack
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class UndoablePropertySource implements IPropertySource

@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.Text;
 /**
  * Message dialog with detail optional message. The window is resizable.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class MessageDialog extends org.eclipse.jface.dialogs.MessageDialog

@@ -27,7 +27,7 @@ import com.servoy.j2db.util.gui.SpecialMatteBorder;
 /**
  * Add a label with some special settings so that it appears as a vertical line.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 
