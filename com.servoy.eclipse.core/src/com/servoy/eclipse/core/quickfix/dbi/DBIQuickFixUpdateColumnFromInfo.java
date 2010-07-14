@@ -34,7 +34,7 @@ import com.servoy.j2db.persistence.ValidatorSearchContext;
 /**
  * Quick fix for differences between column info in the dbi file and columns in the DB. It will change the DB column to match the column information.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 {

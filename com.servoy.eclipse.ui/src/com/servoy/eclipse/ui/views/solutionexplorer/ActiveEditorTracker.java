@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import org.eclipse.ui.IWorkbenchPart;
 /**
  * This class is able to filter the part listener events and provide support for ActiveEditorListeners.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class ActiveEditorTracker implements IPartListener
 {

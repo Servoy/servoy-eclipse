@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.util;
 
 import java.util.List;
@@ -31,7 +31,7 @@ import org.eclipse.core.runtime.jobs.Job;
  * Utility class that speeds up an update resources process if this process is composed of lots of runnables. Helpful to avoid jobs for each update if you
  * expect to have lots of updates happening (hundreds, thousands of jobs).
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class UpdateMarkersJob
 {

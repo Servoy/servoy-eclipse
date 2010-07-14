@@ -39,7 +39,7 @@ import com.servoy.j2db.util.xmlxport.TableDef;
 /**
  * Set of utility methods related to database operations.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public final class DatabaseUtils
 {

@@ -35,6 +35,10 @@ import com.servoy.j2db.util.Debug;
 
 import de.berlios.jsunit.JsUnitException;
 
+/**
+ * This class runs a JSUnit testsuite wrapped as a JUnit TestSuite.
+ * @author acostescu
+ */
 public class JSUnitSuite extends TestSuite
 {
 

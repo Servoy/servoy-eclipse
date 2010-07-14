@@ -41,7 +41,7 @@ import com.servoy.j2db.util.xmlxport.TableDef;
 /**
  * Quick fix for differences between column info in the dbi file and columns in the DB. It will change the column information to match the DB column.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 {

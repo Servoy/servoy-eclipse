@@ -37,7 +37,7 @@ import com.servoy.j2db.util.xmlxport.TableDef;
 /**
  * Quick fix for missing columns in DB (although they are present in the dbi files). It will delete the info from the dbi file.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class DBIQuickFixDeleteInfoForColumn extends TableDifferenceQuickFix
 {

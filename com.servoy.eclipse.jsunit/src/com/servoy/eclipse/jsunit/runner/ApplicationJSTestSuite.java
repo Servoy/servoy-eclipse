@@ -42,6 +42,10 @@ import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 
+/**
+ * This class is generates a javascript test suite from an existing initialized Servoy application, with a loaded Servoy solution.
+ * @author acostescu
+ */
 public class ApplicationJSTestSuite extends JSUnitSuite
 {
 

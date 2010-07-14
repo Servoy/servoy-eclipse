@@ -35,7 +35,7 @@ import com.servoy.j2db.util.Debug;
  * Loads table lists for servers in background job.<br>
  * When a solution is activated, it also starts loading in background the tables that are used in that solution (except for ones referenced in scripting).
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class BackgroundTableLoader implements IActiveProjectListener
 {

@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.util;
 
 import java.awt.image.BufferedImage;
@@ -54,7 +54,7 @@ import com.servoy.eclipse.core.ServoyLog;
 /**
  * Utility class that offers all kinds of utilities (UI related functionality).
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class UIUtils
 {

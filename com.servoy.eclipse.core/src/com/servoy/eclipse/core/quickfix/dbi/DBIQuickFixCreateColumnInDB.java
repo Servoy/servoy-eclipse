@@ -34,7 +34,7 @@ import com.servoy.j2db.persistence.ValidatorSearchContext;
 /**
  * Quick fix for missing columns in DB (although they are present in the dbi files). It will create a column.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 {

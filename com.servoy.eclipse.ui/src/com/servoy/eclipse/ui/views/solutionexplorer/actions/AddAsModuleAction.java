@@ -43,7 +43,7 @@ import com.servoy.j2db.persistence.Solution;
 /**
  * Action for adding the selected solution(s) as (a) module(s) of one of the already active modules.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class AddAsModuleAction extends Action implements ISelectionChangedListener
 {

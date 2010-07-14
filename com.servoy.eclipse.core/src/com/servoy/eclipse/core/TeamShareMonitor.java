@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core;
 
 import org.eclipse.core.resources.IProject;
@@ -41,7 +41,7 @@ import com.servoy.j2db.util.Utils;
  * 
  * It is only meant to be used when the in-process repository is activated.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  * 
  */
 public class TeamShareMonitor
@@ -148,7 +148,8 @@ public class TeamShareMonitor
 		ignoreSetExtensionCheck = true;
 
 		// in case multiple projects have just been checked out and the user chose to modify the setting, don't ask him again
-		boolean initRepAsTeamProvider = Utils.getAsBoolean(sm.getSettings().getProperty("servoy.application_server.startRepositoryAsTeamProvider", "true"));
+		boolean initRepAsTeamProvider = Utils.getAsBoolean(ServoyModel.getSettings().getProperty("servoy.application_server.startRepositoryAsTeamProvider",
+			"true"));
 		if (initRepAsTeamProvider)
 		{
 			Runnable r = new Runnable()
@@ -179,10 +180,10 @@ public class TeamShareMonitor
 							}
 							if (opt == 0)
 							{
-								sm.getSettings().setProperty("servoy.application_server.startRepositoryAsTeamProvider", "false");
+								ServoyModel.getSettings().setProperty("servoy.application_server.startRepositoryAsTeamProvider", "false");
 								try
 								{
-									sm.getSettings().save();
+									ServoyModel.getSettings().save();
 
 									// run later as we could be during startup - and some things are not initialized properly in this case
 									// and could cause restart to fail

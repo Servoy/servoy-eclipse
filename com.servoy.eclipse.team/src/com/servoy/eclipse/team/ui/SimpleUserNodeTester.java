@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.team.ui;
 
 import org.eclipse.core.expressions.PropertyTester;
@@ -25,7 +25,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
  * Attaches the properties of SimpleUserNode type. These properties can be used in plugin.xml for property tests (such as when to add an action to a context
  * menu).
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class SimpleUserNodeTester extends PropertyTester
 {

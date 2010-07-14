@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
@@ -87,7 +87,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * Action to create a new form/global variable depending on the selection of a solution view.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class NewVariableAction extends Action implements ISelectionChangedListener
 {
@@ -308,7 +308,7 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 	/**
 	 * This is a dialog that allows you to specify a name/type/default value for a variable.
 	 * 
-	 * @author Andrei Costescu
+	 * @author acostescu
 	 */
 	public static class VariableEditDialog extends Dialog
 	{

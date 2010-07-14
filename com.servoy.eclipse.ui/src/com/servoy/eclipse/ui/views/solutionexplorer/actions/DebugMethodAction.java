@@ -31,7 +31,7 @@ import com.servoy.j2db.persistence.ScriptMethod;
 /**
  * An action that is able to edit variables.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class DebugMethodAction extends Action implements ISelectionChangedListener
 {

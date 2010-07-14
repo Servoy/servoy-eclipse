@@ -52,7 +52,7 @@ import com.servoy.j2db.util.Utils;
  * Sequence provider that always looks in the db when computing next sequence. Has no ties to the repository db. Only uses column info manager to update column
  * info & the column infos from the Column itself + SQL queries to compute next sequence.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class EclipseSequenceProvider implements ISequenceProvider
 {

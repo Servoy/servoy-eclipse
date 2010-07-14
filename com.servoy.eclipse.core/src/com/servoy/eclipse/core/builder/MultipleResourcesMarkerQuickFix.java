@@ -13,17 +13,17 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.builder;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
 /**
- * This class is able to quick-fix multiple resources problems markers by letting the user choose the one resources project to remain referenced to the servoy
+ * This class is able to quick-fix multiple resources problems markers by letting the user choose the one resources project to remain referenced to the Servoy
  * solution project.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class MultipleResourcesMarkerQuickFix extends ChooseResourcesProjectQuickFix
 {

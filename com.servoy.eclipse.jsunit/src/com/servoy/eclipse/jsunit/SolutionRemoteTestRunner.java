@@ -13,26 +13,34 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.jsunit;
 
 import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
 
 import com.servoy.eclipse.core.ServoyLog;
 
+/**
+ * A remote test runnner who's class loader is able to access Servoy classes.
+ * @author acostescu
+ */
 public class SolutionRemoteTestRunner extends RemoteTestRunner
 {
-	
-	public static void main(String[] args) {
-		try {
-			SolutionRemoteTestRunner testRunServer= new SolutionRemoteTestRunner();
+
+	public static void main(String[] args)
+	{
+		try
+		{
+			SolutionRemoteTestRunner testRunServer = new SolutionRemoteTestRunner();
 			testRunServer.init(args);
 			testRunServer.run();
-		} catch (Throwable e) {
+		}
+		catch (Throwable e)
+		{
 			ServoyLog.logError(e);
 		}
 	}
-	
+
 	// the reason this class exists - so that the com.servoy.eclipse.jsunit class loader is used
 	// instead of the class loader for the jUnit plugins - that does not have access to classes in Servoy proj.
 	@Override

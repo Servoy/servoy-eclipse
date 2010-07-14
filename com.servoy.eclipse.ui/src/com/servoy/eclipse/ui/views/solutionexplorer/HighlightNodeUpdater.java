@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import org.eclipse.jface.viewers.TreeViewer;
@@ -26,7 +26,7 @@ import com.servoy.j2db.persistence.IPersist;
  * Some changes of the active editor need to update node appearance in the tree. For example if the active editor is a form designer, the corresponding form in
  * the tree changes background.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class HighlightNodeUpdater implements ActiveEditorListener
 {

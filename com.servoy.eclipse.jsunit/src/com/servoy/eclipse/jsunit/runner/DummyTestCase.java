@@ -19,6 +19,10 @@ package com.servoy.eclipse.jsunit.runner;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 
+/**
+ * A JUnit test case that does nothing, but is able to report a testName. It is only used to create a JUnit test tree from the JSUnit test tree in order to help existing JUnit tools in reporting.
+ * @author acostescu
+ */
 public class DummyTestCase extends TestCase
 {
 	public DummyTestCase(String testName)

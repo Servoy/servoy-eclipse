@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.builder;
 
 import org.eclipse.core.resources.IFile;
@@ -32,7 +32,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 /**
  * Quick fix that opens the file using a kind of editor, so user can fix the problem using that editor.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class OpenUsingEditor implements IMarkerResolution
 {
