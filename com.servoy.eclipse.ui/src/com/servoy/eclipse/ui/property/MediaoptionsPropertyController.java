@@ -28,6 +28,12 @@ import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.property.MediaoptionsPropertyController.Mediaoption.MediaoptionsType;
 import com.servoy.eclipse.ui.util.ModifiedComboBoxCellEditor;
 
+/**
+ * Property controller for mediaOptions property.
+ * 
+ * @author rgansevles
+ */
+
 public class MediaoptionsPropertyController extends PropertyController<Integer, Object>
 {
 	final static ComboboxPropertyController<MediaoptionsType> comboboxController = new ComboboxPropertyController<MediaoptionsType>("MEDIA_OPTIONS",
@@ -207,7 +213,6 @@ public class MediaoptionsPropertyController extends PropertyController<Integer, 
 	 * Media option source property implementation
 	 * 
 	 * @author rgansevles
-	 * 
 	 */
 
 	public static class MediaoptionsPropertySource extends ComplexPropertySource<Mediaoption>
@@ -260,6 +265,4 @@ public class MediaoptionsPropertyController extends PropertyController<Integer, 
 			return null;
 		}
 	}
-
-
 }

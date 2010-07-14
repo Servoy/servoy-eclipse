@@ -26,6 +26,12 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 
+/**
+ * IPropertySource for awt Point, show x and y subproperties
+ * 
+ * @author rgansevles
+ */
+
 public class PointPropertySource extends ComplexPropertySource<java.awt.Point>
 {
 	private static final String Y = "y";
@@ -163,5 +169,4 @@ public class PointPropertySource extends ComplexPropertySource<java.awt.Point>
 		}
 
 	}
-
 }

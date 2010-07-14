@@ -39,10 +39,12 @@ import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.DataSourceUtils;
 
-/*
+/**
  * Property controller for dataSources
  * 
+ * @author rgansevles
  */
+
 public class DatasourceController extends PropertyController<String, TableWrapper>
 {
 	private final TableContentProvider.TableListOptions tableListOptions;

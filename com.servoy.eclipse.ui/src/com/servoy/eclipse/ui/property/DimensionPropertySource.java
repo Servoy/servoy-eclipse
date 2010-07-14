@@ -27,6 +27,12 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 
+/**
+ * IPropertySource for awt Dimension, show height and width subproperties.
+ * 
+ * @author rgansevles
+ */
+
 public class DimensionPropertySource extends ComplexPropertySource<java.awt.Dimension>
 {
 	private static final String HEIGHT = "height";
@@ -183,5 +189,4 @@ public class DimensionPropertySource extends ComplexPropertySource<java.awt.Dime
 		}
 
 	}
-
 }

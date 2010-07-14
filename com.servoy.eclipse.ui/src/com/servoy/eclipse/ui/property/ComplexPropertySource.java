@@ -19,6 +19,12 @@ package com.servoy.eclipse.ui.property;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
+/**
+ * Base IPropertySource implementation for properties with sub-properties (like Dimension, Point, ..).
+ * 
+ * @author rgansevles
+ */
+
 public class ComplexPropertySource<T> implements IPropertySource
 {
 	private final ComplexProperty<T> complexProperty;
@@ -88,5 +94,4 @@ public class ComplexPropertySource<T> implements IPropertySource
 	{
 		return null;
 	}
-
 }

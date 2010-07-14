@@ -24,6 +24,12 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.persistence.ISupportScrollbars;
 
+/**
+ * Property controller for scrollbars property.
+ * 
+ * @author rgansevles
+ */
+
 public class ScrollbarSettingPropertySource extends ComplexPropertySource<Integer>
 {
 	public static final String HORIZONTAL = "horizontal";
@@ -178,5 +184,4 @@ public class ScrollbarSettingPropertySource extends ComplexPropertySource<Intege
 		}
 		return scrollbarSettingsLabelProvider;
 	}
-
 }

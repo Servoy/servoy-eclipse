@@ -13,11 +13,16 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.swt.graphics.FontData;
 
+/**
+ * Converter between swing (awt) fonts and swt FontData.
+ * 
+ * @author rgansevles
+ */
 
 public class PropertyFontConverter implements IPropertyConverter<java.awt.Font, FontData[]>
 {
@@ -45,5 +50,4 @@ public class PropertyFontConverter implements IPropertyConverter<java.awt.Font, 
 		if (swtfont == null || swtfont.length == 0) return null;
 		return new java.awt.Font(swtfont[0].getName(), swtfont[0].getStyle(), swtfont[0].getHeight());
 	}
-
 }

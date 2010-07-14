@@ -58,6 +58,13 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.gui.SpecialMatteBorder;
 
+/**
+ * Property controller for selecting border in Properties view.
+ * 
+ * @author rgansevles
+ *
+ */
+
 public class BorderPropertyController extends PropertyController<Border, Object>
 {
 	public static enum BorderType
@@ -85,7 +92,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		this.persist = persist;
 		populateDefaultBorderValuesMap();
 	}
-	
+
 	private void populateDefaultBorderValuesMap()
 	{
 		defaultBorderValues.put(BorderType.Default, null);
@@ -327,7 +334,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			}
 			return null;
 		}
-		
+
 		@Override
 		public Object resetComplexPropertyValue(Object id)
 		{
@@ -418,7 +425,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			}
 			return null;
 		}
-		
+
 		@Override
 		public Object resetComplexPropertyValue(Object id)
 		{
@@ -609,7 +616,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			}
 			return smb;
 		}
-		
+
 		@Override
 		public Object resetComplexPropertyValue(Object id)
 		{
@@ -874,7 +881,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			}
 			return null;
 		}
-		
+
 		@Override
 		public Object resetComplexPropertyValue(Object id)
 		{
@@ -1037,7 +1044,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			}
 			return null;
 		}
-		
+
 		@Override
 		public Object resetComplexPropertyValue(@SuppressWarnings("unused") Object id)
 		{
@@ -1064,6 +1071,6 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			}
 			return null;
 		}
-		
+
 	}
 }
