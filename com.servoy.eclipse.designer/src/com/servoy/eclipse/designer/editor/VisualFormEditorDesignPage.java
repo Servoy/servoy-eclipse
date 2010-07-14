@@ -92,6 +92,11 @@ import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.Settings;
 
+/**
+ * Tab in form editor for designing the form visually.
+ * 
+ * @author rgansevles
+ */
 
 public class VisualFormEditorDesignPage extends GraphicalEditor implements PropertyChangeListener
 {

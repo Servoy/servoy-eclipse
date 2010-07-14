@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.outline;
 
 import java.util.ArrayList;
@@ -38,6 +38,12 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptVariable;
+
+/**
+ * Content provider for Servoy form in outline view.
+ * 
+ * @author rgansevles
+ */
 
 public class FormOutlineContentProvider implements ITreeContentProvider
 {

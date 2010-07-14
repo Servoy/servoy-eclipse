@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 import java.util.ArrayList;
@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.commands.ChangeBoundsCommand;
 import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
@@ -41,6 +42,12 @@ import com.servoy.eclipse.ui.property.FormValueEditor;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.Tab;
+
+/**
+ * Selection tool in form designer, handles keyboard-arrow actions, optionally with shift/control.
+ * 
+ * @author rgansevles
+ */
 
 public class FormSelectionTool extends SelectionTool
 {
@@ -141,7 +148,8 @@ public class FormSelectionTool extends SelectionTool
 		int magnitude = 1;
 		if ((e.stateMask & SWT.MOD1) != 0)
 		{
-			DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModelManager.getServoyModelManager().getServoyModel().getSettings());
+			ServoyModelManager.getServoyModelManager().getServoyModel();
+			DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
 			magnitude = designerPreferences.getStepSize();
 		}
 

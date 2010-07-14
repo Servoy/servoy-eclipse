@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 import java.util.ArrayList;
@@ -23,6 +23,7 @@ import java.util.List;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.rulers.RulerProvider;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -30,6 +31,12 @@ import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
+
+/**
+ * Ruler provider for form designer, vertical rule is form widt, horizontal rules are part boundaries.
+ * 
+ * @author rgansevles
+ */
 
 public class FormRulerProvider extends RulerProvider
 {
@@ -105,7 +112,8 @@ public class FormRulerProvider extends RulerProvider
 	@Override
 	public int getUnit()
 	{
-		DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModelManager.getServoyModelManager().getServoyModel().getSettings());
+		ServoyModelManager.getServoyModelManager().getServoyModel();
+		DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
 		switch (designerPreferences.getMetrics())
 		{
 			case DesignerPreferences.CM :

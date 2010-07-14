@@ -62,6 +62,12 @@ import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
+/**
+ * Multi-page form editor.
+ * 
+ * @author rgansevles
+ */
+
 public class VisualFormEditor extends MultiPageEditorPart implements CommandStackListener, IActiveProjectListener, IPersistChangeListener, IShowEditorInput
 {
 	private static final String COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.context";

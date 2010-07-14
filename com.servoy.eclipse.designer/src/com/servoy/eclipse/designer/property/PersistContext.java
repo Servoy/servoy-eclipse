@@ -13,10 +13,18 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.property;
 
 import com.servoy.j2db.persistence.IPersist;
+
+/**
+ * Container for persist with context.
+ * Used to mark a persist that is shown in another context as defined, 
+ * for example a button (persist) shown in subform (context) but defined in superform (persist.parent)
+ * 
+ * @author rgansevles
+ */
 
 public class PersistContext
 {
@@ -74,5 +82,4 @@ public class PersistContext
 	{
 		return "PersistContext(" + (persist == null ? "NULL" : persist.toString()) + ", " + (context == null ? "NULL" : context.toString()) + ')';
 	}
-
 }

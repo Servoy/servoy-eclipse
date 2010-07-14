@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 
@@ -55,6 +55,12 @@ import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.util.SortedList;
+
+/**
+ * Tab in form editor for managing tab sequences.
+ * 
+ * @author rgansevles
+ */
 
 public class VisualFormEditorTabSequencePage extends Composite
 {

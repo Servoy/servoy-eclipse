@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.property;
 
 import org.eclipse.gef.commands.CommandStack;
@@ -23,6 +23,13 @@ import org.eclipse.ui.views.properties.IPropertySourceProvider;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.IPersist;
+
+/**
+ * IPropertySourceProvider implementation that provides UndoablePropertySource wrapper around PersistPropertySource.
+ * Properties are set via the command stack, this enables undo/redo.
+ * 
+ * @author rgansevles
+ */
 
 public class UndoablePersistPropertySourceProvider implements IPropertySourceProvider
 {

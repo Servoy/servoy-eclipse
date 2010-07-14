@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.property;
 
 import org.eclipse.draw2d.ColorConstants;
@@ -39,6 +39,12 @@ import com.servoy.eclipse.designer.editor.FormGraphicalRootEditPart;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.ui.editors.IDialogDirectCellEditor;
 import com.servoy.eclipse.ui.editors.TextDialogCellEditor;
+
+/**
+ * Edit properties in form editor, cell editor is same one as used in the properties view.
+ * 
+ * @author rgansevles
+ */
 
 public class PropertyDirectEditManager extends DirectEditManager
 {
@@ -226,6 +232,5 @@ public class PropertyDirectEditManager extends DirectEditManager
 				((Text)control).setSelection(sel);
 			}
 		}
-
 	}
 }

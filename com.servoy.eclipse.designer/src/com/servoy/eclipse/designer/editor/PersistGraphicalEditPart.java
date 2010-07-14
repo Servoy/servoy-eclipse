@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 import java.util.Collections;
@@ -40,8 +40,8 @@ import com.servoy.eclipse.designer.internal.core.ImageFigureController;
 import com.servoy.eclipse.designer.internal.core.OutlineBorder;
 import com.servoy.eclipse.designer.internal.core.PersistImageNotifier;
 import com.servoy.eclipse.designer.property.PropertyDirectEditManager;
-import com.servoy.eclipse.designer.property.PropertyDirectEditPolicy;
 import com.servoy.eclipse.designer.property.PropertyDirectEditManager.PropertyCellEditorLocator;
+import com.servoy.eclipse.designer.property.PropertyDirectEditPolicy;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.IApplication;
@@ -52,6 +52,8 @@ import com.servoy.j2db.persistence.ISupportBounds;
 
 /**
  * Graphical editpart for a IPersist.
+ * 
+ * @author rgansevles
  */
 public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 {

@@ -35,6 +35,11 @@ import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 
+/**
+ * Handles painting of form editor elements using awt printing.
+ * 
+ * @author rgansevles
+ */
 
 public class PersistImageNotifier implements IImageNotifier, IImageListener
 {

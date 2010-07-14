@@ -51,6 +51,12 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
+/**
+ * Tab in form editor for managing form security.
+ * 
+ * @author lvostinar
+ */
+
 public class VisualFormEditorSecurityPage extends Composite
 {
 	private final VisualFormEditor editor;

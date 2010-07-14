@@ -75,6 +75,12 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.util.UUID;
 
+/**
+ * Command to place an element in the form designer.
+ * 
+ * @author rgansevles
+ */
+
 public class FormPlaceElementCommand extends Command implements ISupportModels
 {
 	protected final ISupportChilds parent;
