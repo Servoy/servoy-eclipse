@@ -74,6 +74,11 @@ import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
+/**
+ * This class manages the column information from Eclipse Servoy Resources projects.
+ * It reads dbi files into column information, writes dbi files from column information and checks for dbi errors and inconsistencies between dbi files and actual database structure.
+ * @author acostescu
+ */
 public class DataModelManager implements IColumnInfoManager
 {
 	public static final String COLUMN_INFO_FILE_EXTENSION = "dbi";

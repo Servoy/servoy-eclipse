@@ -63,7 +63,7 @@ import com.servoy.j2db.persistence.TableNode;
 /**
  * Creates a new delete table action. It can be used to delete the table given by the selected SimpleUserNode.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class DeleteTableAction extends Action implements ISelectionChangedListener
 {

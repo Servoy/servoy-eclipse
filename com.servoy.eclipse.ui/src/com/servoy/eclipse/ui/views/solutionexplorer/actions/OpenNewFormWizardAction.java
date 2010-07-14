@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
@@ -29,7 +29,7 @@ import com.servoy.eclipse.ui.wizards.NewFormWizard;
 /**
  * Action for opening the new form wizard. It is only enabled on the active solution node if there is an active solution.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class OpenNewFormWizardAction extends OpenWizardAction implements ISelectionChangedListener
 {

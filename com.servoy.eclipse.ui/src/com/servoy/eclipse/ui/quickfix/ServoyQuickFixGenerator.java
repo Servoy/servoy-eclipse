@@ -33,7 +33,7 @@ import com.servoy.eclipse.core.repository.DataModelManager.TableDifference;
 /**
  * Class that gives the list of quick-fixes (available in the ui plugin) for Servoy markers.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 {

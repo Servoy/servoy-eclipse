@@ -40,7 +40,7 @@ import com.servoy.j2db.util.xmlxport.TableDef;
 /**
  * Quick fix for missing column info in the dbi file (although they are present in the DB). It will create the column info.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class DBIQuickFixCreateInfoForColumn extends TableDifferenceQuickFix
 {

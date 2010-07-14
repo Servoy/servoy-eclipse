@@ -34,7 +34,7 @@ import com.servoy.j2db.persistence.IServerInternal;
  * either to create a new table according to that file, or delete the file.<BR>
  * This action will also create default .dbi files for tables that exist, but do not have a corresponding file.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class SynchronizeTablesAction extends OpenWizardAction implements ISelectionChangedListener
 {

@@ -25,7 +25,7 @@ import junit.framework.TestResult;
  * This object is wrapped into a javascript object so as to be seen by JSUnit as a test result listener. It only contains the interface methods that will be
  * available to JS, and forwards requests to it's JSUnitTestListenerHandler so that the obfuscation of test result conversion logic is not obstructed.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  * 
  */
 public class JSUnitTestListener

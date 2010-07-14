@@ -72,7 +72,7 @@ import com.servoy.j2db.util.IdentDocumentValidator;
 /**
  * Wizard used in order to create a new Servoy solution project. Will optionally create linked resource project (with styles & other info).
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class NewSolutionWizard extends Wizard implements INewWizard
 {

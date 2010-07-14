@@ -40,7 +40,7 @@ import org.mozilla.javascript.ScriptableObject;
 /**
  * Class that makes the conversion between JSUnit test result and JUnit test result.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  * 
  */
 public class JSUnitTestListenerHandler

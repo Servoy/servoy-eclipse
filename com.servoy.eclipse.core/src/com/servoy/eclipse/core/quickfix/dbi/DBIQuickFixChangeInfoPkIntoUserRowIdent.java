@@ -38,7 +38,7 @@ import com.servoy.j2db.util.xmlxport.TableDef;
  * Quick fix for differences between column info in the dbi file and columns in the DB. It will change the column information so that is is marked as user row
  * ident column rather then pk.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class DBIQuickFixChangeInfoPkIntoUserRowIdent extends TableDifferenceQuickFix
 {

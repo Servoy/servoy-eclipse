@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core;
 
 import org.eclipse.core.resources.IProject;
@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 /**
  * Project nature for Resources Servoy projects.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class ServoyResourcesProject implements IProjectNature
 {

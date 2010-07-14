@@ -90,6 +90,10 @@ import com.servoy.j2db.util.StringComparator;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
+/**
+ * This class manages security information when running from an Eclipse-Servoy workspace.
+ * @author acostescu
+ */
 public class EclipseUserManager implements IUserManager
 {
 	public interface IUserGroupChangeListener

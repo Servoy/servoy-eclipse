@@ -71,6 +71,13 @@ import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 
+/**
+ * Runs the JS unit tests on active Servoy solution using the existing JUnit runner view.<br>
+ * This class contains a lot of hacks and not so nice class accesses in order to reuse the JUnit runner view, as this view was only designed to work on an existing JavaModel from the
+ * running workspace.<br>
+ * If we would want to avoid this, we would either have to somehow simulate a complete Java Model in the workspace, or rewrite a similar view from scratch.
+ * @author acostescu
+ */
 public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowActionDelegate
 {
 

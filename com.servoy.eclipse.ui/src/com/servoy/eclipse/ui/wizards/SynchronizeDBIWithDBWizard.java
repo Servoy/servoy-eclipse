@@ -102,7 +102,7 @@ import com.servoy.j2db.util.Utils;
  * either to create a new table according to that file, or delete the file.<BR>
  * This wizard will also automatically create default .dbi files for tables that exist, but do not have a corresponding file.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWizard
 {

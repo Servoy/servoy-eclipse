@@ -89,7 +89,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * Class that gives the list of quick-fixes (available in the core plugin) for Servoy markers.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 {

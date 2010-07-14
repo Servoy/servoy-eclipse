@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.builder;
 
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ import com.servoy.eclipse.core.util.UIUtils;
  * This class is able to quick-fix multiple/no resources problems markers by letting the user choose the one resources project to remain referenced to the
  * servoy solution project.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public abstract class ChooseResourcesProjectQuickFix implements IMarkerResolution
 {
@@ -205,6 +205,10 @@ public abstract class ChooseResourcesProjectQuickFix implements IMarkerResolutio
 		}
 	}
 
+	/**
+	 * Should return a list of projects from which the Servoy Resource projects will be presented to the user.
+	 * @return the list of Servoy Resource projects that will be presented to the user. Only projects in this list that have nature ServoyResourcesProject.NATURE_ID are taken into account.
+	 */
 	protected abstract IProject[] getProjectListToFilter(IProject servoyProject) throws CoreException;
 
 }

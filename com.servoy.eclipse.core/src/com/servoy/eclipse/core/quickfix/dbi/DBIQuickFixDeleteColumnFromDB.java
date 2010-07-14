@@ -27,7 +27,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 /**
  * Quick fix for missing column info in the dbi file (although they are present in the DB). It will delete the DB column.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class DBIQuickFixDeleteColumnFromDB extends TableDifferenceQuickFix
 {

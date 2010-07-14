@@ -42,7 +42,7 @@ import com.servoy.j2db.util.Utils;
  * 
  * It is only meant to be used when the in-process repository is activated.
  * 
- * @author Andrei Costescu
+ * @author acostescu
  * 
  */
 public class TeamShareMonitor

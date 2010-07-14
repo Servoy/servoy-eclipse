@@ -73,7 +73,7 @@ import com.servoy.j2db.util.IdentDocumentValidator;
 /**
  * Wizard used in order to create a new Servoy style. Will optionally create new resource project (for styles & other info).
  * 
- * @author Andrei Costescu
+ * @author acostescu
  */
 public class NewStyleWizard extends Wizard implements INewWizard
 {
