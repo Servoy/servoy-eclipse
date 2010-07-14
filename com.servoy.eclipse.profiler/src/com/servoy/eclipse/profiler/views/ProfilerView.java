@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.profiler.views;
 
 import java.util.ArrayList;
@@ -100,9 +100,9 @@ public class ProfilerView extends ViewPart
 {
 	private static final class AggregateData
 	{
-		private String methodName;
+		private final String methodName;
 
-		private String sourceName;
+		private final String sourceName;
 
 		private int count;
 
@@ -112,6 +112,8 @@ public class ProfilerView extends ViewPart
 
 		private final List<AggregateData> callees = new ArrayList<AggregateData>();
 
+		private int innerFunctionLineStart = -1;
+
 		/**
 		 * @param aggregateData
 		 */
@@ -119,13 +121,30 @@ public class ProfilerView extends ViewPart
 		{
 			this.methodName = pd.getMethodName();
 			this.sourceName = pd.getSourceName();
+			if (pd.isInnerFunction() && pd.getLineNumbers() != null && pd.getLineNumbers().length > 0)
+			{
+				this.innerFunctionLineStart = pd.getLineNumbers()[0];
+			}
 			add(pd);
 		}
 
+		public int getInnerFunctionLineStart()
+		{
+			return innerFunctionLineStart;
+		}
+
+		@SuppressWarnings("nls")
 		public void add(ProfileData pd)
 		{
 			if (pd.getMethodName().equals(methodName) && pd.getSourceName().equals(sourceName))
 			{
+				if (pd.isInnerFunction() && pd.getLineNumbers() != null && pd.getLineNumbers().length > 0)
+				{
+					if (this.innerFunctionLineStart != pd.getLineNumbers()[0])
+					{
+						throw new IllegalArgumentException("ProfileData should have the right method and/or sourcename and inner function linestart");
+					}
+				}
 				time += pd.getTime();
 				ownTime += pd.getOwnTime();
 				count++;
@@ -169,8 +188,8 @@ public class ProfilerView extends ViewPart
 		{
 			if (obj instanceof AggregateData)
 			{
-				AggregateData ad = (AggregateData) obj;
-				return ad.methodName.equals(methodName) && ad.sourceName.equals(sourceName);
+				AggregateData ad = (AggregateData)obj;
+				return ad.methodName.equals(methodName) && ad.sourceName.equals(sourceName) && ad.innerFunctionLineStart == this.innerFunctionLineStart;
 			}
 			return false;
 		}
@@ -260,7 +279,7 @@ public class ProfilerView extends ViewPart
 		 */
 		public int compare(AggregateData o1, AggregateData o2)
 		{
-			return (int) (o2.ownTime - o1.ownTime);
+			return (int)(o2.ownTime - o1.ownTime);
 		}
 
 	}
@@ -311,7 +330,10 @@ public class ProfilerView extends ViewPart
 		{
 			if (parent.equals(getViewSite()))
 			{
-				if (aggregateView) { return aggregateData.toArray(); }
+				if (aggregateView)
+				{
+					return aggregateData.toArray();
+				}
 				return invisibleRoot.toArray();
 			}
 			return getChildren(parent);
@@ -319,23 +341,30 @@ public class ProfilerView extends ViewPart
 
 		public Object getParent(Object child)
 		{
-			if (child instanceof ProfileData) { return ((ProfileData) child).getParent(); }
+			if (child instanceof ProfileData)
+			{
+				return ((ProfileData)child).getParent();
+			}
 			return null;
 		}
 
 		public Object[] getChildren(Object parent)
 		{
-			if (parent instanceof ProfileData) { return ((ProfileData) parent).getChildren(); }
-			if (parent instanceof AggregateData) { return ((AggregateData) parent).getChildren(); }
+			if (parent instanceof ProfileData)
+			{
+				return ((ProfileData)parent).getChildren();
+			}
+			if (parent instanceof AggregateData)
+			{
+				return ((AggregateData)parent).getChildren();
+			}
 			return new Object[0];
 		}
 
 		public boolean hasChildren(Object parent)
 		{
-			if (parent instanceof ProfileData)
-				return ((ProfileData) parent).getChildren().length > 0;
-			if (parent instanceof AggregateData)
-				return ((AggregateData) parent).getChildren().length > 0;
+			if (parent instanceof ProfileData) return ((ProfileData)parent).getChildren().length > 0;
+			if (parent instanceof AggregateData) return ((AggregateData)parent).getChildren().length > 0;
 			return false;
 		}
 
@@ -426,19 +455,19 @@ public class ProfilerView extends ViewPart
 			boolean calc = false;
 			if (element instanceof ProfileData)
 			{
-				calc = ((ProfileData) element).isCalculation();
+				calc = ((ProfileData)element).isCalculation();
 			}
 			switch (columnIndex)
 			{
-				case 0:
+				case 0 :
 					return calc ? calcImage : methodImage;
-				case 1:
+				case 1 :
 					return null;
-				case 2:
+				case 2 :
 					return null;
-				case 3:
+				case 3 :
 					return null;
-				case 4:
+				case 4 :
 					return null;
 			}
 			return null;
@@ -448,39 +477,46 @@ public class ProfilerView extends ViewPart
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object,
 		 *      int)
 		 */
+		@SuppressWarnings("nls")
 		public String getColumnText(Object element, int columnIndex)
 		{
 			if (element instanceof ProfileData)
 			{
-				ProfileData pd = (ProfileData) element;
+				ProfileData pd = (ProfileData)element;
 				switch (columnIndex)
 				{
-					case 0:
-						return pd.getMethodName();
-					case 1:
+					case 0 :
+						String lineStart = "";
+						int[] lineNumbers = pd.getLineNumbers();
+						if (lineNumbers != null && lineNumbers.length > 0)
+						{
+							lineStart = "#" + lineNumbers[0];
+						}
+						return pd.isInnerFunction() ? pd.getMethodName() + " (innerfunction" + lineStart + ")" : pd.getMethodName();
+					case 1 :
 						return Long.toString(pd.getOwnTime());
-					case 2:
+					case 2 :
 						return Long.toString(pd.getTime());
-					case 3:
+					case 3 :
 						return pd.getArgs();
-					case 4:
+					case 4 :
 						return pd.getSourceName();
 				}
 			}
 			else if (element instanceof AggregateData)
 			{
-				AggregateData pd = (AggregateData) element;
+				AggregateData pd = (AggregateData)element;
 				switch (columnIndex)
 				{
-					case 0:
-						return pd.getMethodName();
-					case 1:
+					case 0 :
+						return pd.getInnerFunctionLineStart() == -1 ? pd.getMethodName() : pd.getMethodName() + "#" + pd.getInnerFunctionLineStart();
+					case 1 :
 						return Long.toString(pd.getOwnTime());
-					case 2:
+					case 2 :
 						return Long.toString(pd.getTime());
-					case 3:
+					case 3 :
 						return Integer.toString(pd.getCount());
-					case 4:
+					case 4 :
 						return pd.getSourceName();
 				}
 			}
@@ -535,6 +571,7 @@ public class ProfilerView extends ViewPart
 	 * This is a callback that will allow us to create the viewer and initialize
 	 * it.
 	 */
+	@Override
 	public void createPartControl(Composite parent)
 	{
 		viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
@@ -628,8 +665,8 @@ public class ProfilerView extends ViewPart
 	private void fillContextMenu(IMenuManager manager)
 	{
 		ISelection selection = viewer.getSelection();
-		Object obj = ((IStructuredSelection) selection).getFirstElement();
-		if (obj instanceof ProfileData && ((ProfileData) obj).getParentSourceCall() != null)
+		Object obj = ((IStructuredSelection)selection).getFirstElement();
+		if (obj instanceof ProfileData && ((ProfileData)obj).getParentSourceCall() != null)
 		{
 			manager.add(openCallPostion);
 		}
@@ -659,6 +696,7 @@ public class ProfilerView extends ViewPart
 	{
 		clearData = new Action()
 		{
+			@Override
 			public void run()
 			{
 				contentProvider.invisibleRoot.clear();
@@ -675,6 +713,7 @@ public class ProfilerView extends ViewPart
 
 		exportData = new Action()
 		{
+			@Override
 			public void run()
 			{
 				exportData();
@@ -686,6 +725,7 @@ public class ProfilerView extends ViewPart
 
 		toggleAggregateView = new Action("Aggregate View", IAction.AS_CHECK_BOX)
 		{
+			@Override
 			public void run()
 			{
 				contentProvider.toggleAggregateView();
@@ -697,6 +737,7 @@ public class ProfilerView extends ViewPart
 
 		toggleProfile = new Action("Start profiling", IAction.AS_CHECK_BOX)
 		{
+			@Override
 			public void run()
 			{
 				if (toggleProfile.isChecked())
@@ -719,13 +760,14 @@ public class ProfilerView extends ViewPart
 
 		openCallPostion = new Action()
 		{
+			@Override
 			public void run()
 			{
 				ISelection selection = viewer.getSelection();
-				Object obj = ((IStructuredSelection) selection).getFirstElement();
-				if (obj instanceof ProfileData && ((ProfileData) obj).getParentSourceCall() != null)
+				Object obj = ((IStructuredSelection)selection).getFirstElement();
+				if (obj instanceof ProfileData && ((ProfileData)obj).getParentSourceCall() != null)
 				{
-					String parentSource = ((ProfileData) obj).getParentSourceCall();
+					String parentSource = ((ProfileData)obj).getParentSourceCall();
 
 					int lineNumberIndex = parentSource.indexOf('#');
 					if (lineNumberIndex > 0)
@@ -739,7 +781,7 @@ public class ProfilerView extends ViewPart
 							IEditorPart editorPart = EditorUtility.openInEditor(file, true);
 							if (editorPart instanceof ITextEditor && lineNumber > 0)
 							{
-								ITextEditor textEditor = (ITextEditor) editorPart;
+								ITextEditor textEditor = (ITextEditor)editorPart;
 								IDocumentProvider provider = textEditor.getDocumentProvider();
 								IEditorInput input = editorPart.getEditorInput();
 								provider.connect(input);
@@ -775,31 +817,47 @@ public class ProfilerView extends ViewPart
 
 		doubleClickAction = new Action()
 		{
+			@Override
 			public void run()
 			{
 				ISelection selection = viewer.getSelection();
-				Object obj = ((IStructuredSelection) selection).getFirstElement();
+				Object obj = ((IStructuredSelection)selection).getFirstElement();
 				String sourceName = null;
 				String methodName = null;
+				int lineNumber = -1;
 				if (obj instanceof ProfileData)
 				{
-					sourceName = ((ProfileData) obj).getSourceName();
-					methodName = ((ProfileData) obj).getMethodName();
+					ProfileData pd = (ProfileData)obj;
+					sourceName = pd.getSourceName();
+					methodName = pd.getMethodName();
+					if (pd.isInnerFunction() && pd.getLineNumbers() != null && pd.getLineNumbers().length > 0)
+					{
+						lineNumber = pd.getLineNumbers()[0];
+					}
 				}
 				else if (obj instanceof AggregateData)
 				{
-					sourceName = ((AggregateData) obj).getSourceName();
-					methodName = ((AggregateData) obj).getMethodName();
+					sourceName = ((AggregateData)obj).getSourceName();
+					methodName = ((AggregateData)obj).getMethodName();
+					lineNumber = ((AggregateData)obj).getInnerFunctionLineStart();
 				}
 				IFile f = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(sourceName));
 				if (f != null)
 				{
-					ISourceModule sourceModule = DLTKUIPlugin.getEditorInputModelElement(FileEditorInputFactory
-							.createFileEditorInput(f));
+					ISourceModule sourceModule = DLTKUIPlugin.getEditorInputModelElement(FileEditorInputFactory.createFileEditorInput(f));
 					IMethod method = sourceModule.getMethod(methodName);
 					try
 					{
-						DLTKUIPlugin.openInEditor(method);
+						IEditorPart openInEditor = DLTKUIPlugin.openInEditor(method);
+						if (openInEditor instanceof ITextEditor && lineNumber != -1)
+						{
+							ITextEditor editor = (ITextEditor)openInEditor;
+
+							IDocumentProvider provider = editor.getDocumentProvider();
+							IDocument document = provider.getDocument(editor.getEditorInput());
+							int start = document.getLineOffset(lineNumber);
+							editor.selectAndReveal(start, 0);
+						}
 					}
 					catch (Exception ex)
 					{
@@ -871,6 +929,7 @@ public class ProfilerView extends ViewPart
 	/**
 	 * Passing the focus request to the viewer's control.
 	 */
+	@Override
 	public void setFocus()
 	{
 		viewer.getControl().setFocus();
