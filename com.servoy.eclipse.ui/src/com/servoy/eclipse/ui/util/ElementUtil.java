@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.util;
 
 import com.servoy.j2db.component.ComponentFactory;
@@ -29,6 +29,12 @@ import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.ValueList;
+
+/**
+ * Utilities for elements and label providers.
+ * 
+ * @author rgansevles
+ */
 
 public class ElementUtil
 {
@@ -124,5 +130,4 @@ public class ElementUtil
 		// child of this form, not of a inherited form
 		return false;
 	}
-
 }

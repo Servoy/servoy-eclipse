@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.util;
 
 import java.util.Comparator;
@@ -43,6 +43,12 @@ import org.eclipse.swt.widgets.TableColumn;
 
 import com.servoy.eclipse.ui.editors.table.ColumnLabelProvider;
 import com.servoy.eclipse.ui.editors.table.ColumnsSorter;
+
+/**
+ * Editor for name-value pairs in a table view editor.
+ * 
+ * @author jblok
+ */
 
 public class MapEntryValueEditor extends TableViewer
 {
@@ -310,5 +316,4 @@ public class MapEntryValueEditor extends TableViewer
 		Object convertSetValue(String key, Object value);
 
 	}
-
 }

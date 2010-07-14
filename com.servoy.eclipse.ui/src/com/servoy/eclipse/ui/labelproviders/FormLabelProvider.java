@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.labelproviders;
 
 import org.eclipse.jface.viewers.LabelProvider;
@@ -22,6 +22,12 @@ import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+
+/**
+ * LabelProvider for forms.
+ * 
+ * @author rgansevles
+ */
 
 public class FormLabelProvider extends LabelProvider implements IPersistLabelProvider
 {

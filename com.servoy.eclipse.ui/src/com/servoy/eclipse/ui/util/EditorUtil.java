@@ -97,6 +97,12 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.UUID;
 
+/**
+ * Utilities for editors.
+ * 
+ * @author rgansevles
+ */
+
 public class EditorUtil
 {
 	/**
