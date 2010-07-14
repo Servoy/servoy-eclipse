@@ -26,7 +26,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
  * Edit policy for directly editing edit parts based on a property source.
  * 
  * @see PropertyDirectEditManager
- * @author rob
+ * @author rgansevles
  * 
  */
 public class PropertyDirectEditPolicy extends DirectEditPolicy

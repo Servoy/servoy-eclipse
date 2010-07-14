@@ -54,7 +54,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * Property controller for method properties, subproperties are instance arguments
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class MethodPropertyController<P> extends PropertyController<P, Object>

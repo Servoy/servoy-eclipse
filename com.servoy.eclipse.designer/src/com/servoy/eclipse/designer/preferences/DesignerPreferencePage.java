@@ -44,7 +44,7 @@ import com.servoy.j2db.util.PersistHelper;
 /**
  * Preferences page for designer settings.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class DesignerPreferencePage extends PreferencePage implements IWorkbenchPreferencePage

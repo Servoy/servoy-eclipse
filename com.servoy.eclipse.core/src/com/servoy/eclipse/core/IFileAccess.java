@@ -22,7 +22,7 @@ import java.io.OutputStream;
 /**
  * Interface for accessing files.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public interface IFileAccess

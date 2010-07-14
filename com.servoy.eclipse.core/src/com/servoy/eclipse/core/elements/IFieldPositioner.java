@@ -22,7 +22,7 @@ import org.eclipse.swt.graphics.Point;
 /**
  * Interface for positioners for new fields.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public interface IFieldPositioner

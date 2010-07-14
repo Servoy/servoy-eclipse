@@ -21,7 +21,7 @@ import com.servoy.j2db.util.SafeArrayList;
 /**
  * Holder for method id and actual arguments
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class MethodWithArguments

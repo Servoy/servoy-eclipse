@@ -30,7 +30,7 @@ import com.servoy.j2db.persistence.Table;
 /**
  * label provider for forms with relations.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class RelatedFormsLabelProvider extends LabelProvider

@@ -37,7 +37,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * Preferences page for developer startup settings.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class StartupPreferences extends PreferencePage implements IWorkbenchPreferencePage

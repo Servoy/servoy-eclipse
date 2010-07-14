@@ -83,7 +83,7 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 	/**
 	 * Converter class for colors, convert AWT to RGB.
 	 * 
-	 * @author rob
+	 * @author rgansevles
 	 * 
 	 */
 	public static class PropertyColorConverter implements IPropertyConverter<java.awt.Color, RGB>
@@ -113,7 +113,7 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 	/**
 	 * Label provider for colors.
 	 * 
-	 * @author rob
+	 * @author rgansevles
 	 * 
 	 */
 	public static class ColorLabelProvider extends LabelProvider

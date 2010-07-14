@@ -28,7 +28,7 @@ import com.servoy.j2db.persistence.Table;
 /**
  * Convert between {@link IDataProvider} and String representation
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class DataProviderConverter implements IPropertyConverter<String, IDataProvider>

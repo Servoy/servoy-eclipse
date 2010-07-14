@@ -36,7 +36,7 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 /**
  * Show a dialog that holds an AWT component;
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class AwtComponentDialog extends Dialog

@@ -277,7 +277,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 	/*
 	 * Border source property implementations
 	 * 
-	 * @author rob
+	 * @author rgansevles
 	 */
 
 	public static class EmptyBorderPropertySource extends ComplexPropertySource<EmptyBorder>

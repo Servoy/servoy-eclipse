@@ -30,7 +30,7 @@ import com.servoy.eclipse.ui.Messages;
 /**
  * simple IPropertyController implementation.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class PropertyController<P, E> extends PropertyDescriptor implements IPropertyController<P, E>, ICellEditorFactory, IAdaptable,

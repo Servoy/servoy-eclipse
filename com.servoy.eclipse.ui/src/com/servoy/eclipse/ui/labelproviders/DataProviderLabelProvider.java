@@ -35,7 +35,7 @@ import com.servoy.j2db.persistence.IPersist;
  * <p>
  * dataProvider may be IDataProvider or String.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class DataProviderLabelProvider extends LabelProvider implements IFontProvider, IPersistLabelProvider

@@ -19,7 +19,7 @@ package com.servoy.eclipse.core.repository;
 /**
  * Wrapper to hold table and server name, used for l;azy loading of tables.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class TableWrapper

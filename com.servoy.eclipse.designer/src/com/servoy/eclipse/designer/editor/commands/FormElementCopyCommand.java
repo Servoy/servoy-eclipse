@@ -38,7 +38,7 @@ import com.servoy.j2db.persistence.ISupportText;
 /**
  * Copy an draggable objects and their name or text as string (if available) to the clipboard.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class FormElementCopyCommand extends Command

@@ -22,7 +22,7 @@ package com.servoy.eclipse.ui.util;
  *
  * @see IStatusChangedListener
  * 
- * @author rob
+ * @author rgansevles
  */
 public interface IStatusProvider
 {

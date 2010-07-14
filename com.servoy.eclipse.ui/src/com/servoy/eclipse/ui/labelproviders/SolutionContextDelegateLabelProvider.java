@@ -27,7 +27,7 @@ import com.servoy.j2db.persistence.Solution;
 /**
  * Delegate label provider that adds the solution context to the label.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class SolutionContextDelegateLabelProvider extends DelegateLabelProvider implements IFontProvider, IPersistLabelProvider

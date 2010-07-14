@@ -55,7 +55,7 @@ import com.servoy.j2db.persistence.StringResource;
  * Action to delete IPersist objects from a solution or string resources. The selected IPersist objects must be either all resources, or all descendants of the
  * same solution object.
  * 
- * @author rob
+ * @author rgansevles
  */
 public class DeletePersistAction extends Action implements ISelectionChangedListener
 {

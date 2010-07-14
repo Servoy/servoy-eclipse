@@ -19,7 +19,7 @@ package com.servoy.eclipse.dnd;
 /**
  * Interface for data objects that can be used as data in drag n drop transfers.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 

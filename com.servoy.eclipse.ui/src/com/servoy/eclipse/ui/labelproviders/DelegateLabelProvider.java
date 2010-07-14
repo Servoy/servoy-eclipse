@@ -27,7 +27,7 @@ import com.servoy.j2db.util.IDelegate;
 /**
  * Base delegate label provider.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public abstract class DelegateLabelProvider implements ILabelProvider, IDelegate

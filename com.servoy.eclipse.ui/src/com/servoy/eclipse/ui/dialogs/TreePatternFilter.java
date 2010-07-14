@@ -33,7 +33,7 @@ import com.servoy.j2db.util.IDelegate;
 /**
  * Pattern filter for use in {@link FilteredTreeViewer}.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class TreePatternFilter extends PatternFilter

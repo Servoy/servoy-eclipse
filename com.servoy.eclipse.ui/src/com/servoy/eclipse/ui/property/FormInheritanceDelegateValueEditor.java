@@ -26,7 +26,7 @@ import com.servoy.j2db.persistence.Form;
 /**
  * Value editor delegate that finds the value to be edited following form inheritance.
  * 
- * @author rob
+ * @author rgansevles
  * 
  * @param <T>
  */

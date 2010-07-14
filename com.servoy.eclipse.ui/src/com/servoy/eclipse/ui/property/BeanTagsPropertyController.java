@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Composite;
 /**
  * Property controller for bean property editor that supports getTags().
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class BeanTagsPropertyController extends PropertyController<Object, Integer>

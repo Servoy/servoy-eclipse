@@ -25,7 +25,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * Combine 2 tree content providers into 1
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class CombinedTreeContentProvider implements ITreeContentProvider, IKeywordChecker

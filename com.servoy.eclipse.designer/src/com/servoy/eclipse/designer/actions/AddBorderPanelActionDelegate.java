@@ -27,7 +27,7 @@ import com.servoy.j2db.util.ComponentFactoryHelper;
  * <p>
  * The actual command is performed via the selected edit parts' edit policy.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class AddBorderPanelActionDelegate extends AbstractEditpartActionDelegate

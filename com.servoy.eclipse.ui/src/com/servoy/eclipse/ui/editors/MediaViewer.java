@@ -26,7 +26,7 @@ import com.servoy.j2db.persistence.Media;
 /**
  * Read-only editor for media.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class MediaViewer extends PersistEditor

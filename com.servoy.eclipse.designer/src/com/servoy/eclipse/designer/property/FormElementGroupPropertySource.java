@@ -53,7 +53,7 @@ import com.servoy.j2db.persistence.ValidatorSearchContext;
 /**
  * Property source for form element groups.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class FormElementGroupPropertySource implements IPropertySource

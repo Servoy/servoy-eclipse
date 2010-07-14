@@ -21,7 +21,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 /**
  * ITreeContentProvider content provider extended with max depth check for filtering.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public interface IMaxDepthTreeContentProvider extends ITreeContentProvider

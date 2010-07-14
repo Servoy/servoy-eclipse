@@ -29,7 +29,7 @@ import com.servoy.eclipse.ui.util.ContentProposal;
 /**
  * ContentProposalProvider that creates proposals based on the elements created by a tree content provider, the elements are formatted using a label provider.
  * 
- * @author rob
+ * @author rgansevles
  *
  */
 public class ContentLabelProviderProposalProvider implements IContentProposalProvider

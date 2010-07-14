@@ -23,7 +23,7 @@ import com.servoy.eclipse.ui.property.IComboboxPropertyModel;
 /**
  * Standard ComboBoxLabelProvider with a custom unresolved string.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class ComboBoxLabelProvider extends LabelProvider

@@ -28,7 +28,7 @@ import com.servoy.j2db.persistence.Relation;
 /**
  * Label provider for relations.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class RelationLabelProvider extends SupportNameLabelProvider implements IPersistLabelProvider

@@ -21,7 +21,7 @@ import org.eclipse.gef.commands.Command;
 /**
  * Execute a command and and add refresh()
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public abstract class RefreshingCommand extends Command implements ICommandWrapper

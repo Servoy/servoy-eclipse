@@ -19,7 +19,7 @@ package com.servoy.eclipse.core.repository;
 /**
  * Listen for when workspace save is done.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public interface IWorkspaceSaveListener

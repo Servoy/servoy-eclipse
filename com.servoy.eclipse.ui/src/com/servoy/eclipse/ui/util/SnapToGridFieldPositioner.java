@@ -24,7 +24,7 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 /**
  * Determine next fields position using snap-to-grid when needed.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class SnapToGridFieldPositioner implements IFieldPositioner

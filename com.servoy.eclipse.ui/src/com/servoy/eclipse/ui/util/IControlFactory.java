@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Control;
 /**
  * General interface for creating controls.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public interface IControlFactory

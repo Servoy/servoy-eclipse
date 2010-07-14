@@ -30,7 +30,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * when values are changed, do this via the editor that handles the persist. Open the editor when it is not already open.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class RetargetToEditorPersistProperties implements IPropertySource, IAdaptable

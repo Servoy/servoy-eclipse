@@ -22,7 +22,7 @@ import org.eclipse.gef.Request;
 /**
  * Typed request with a data object and location.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class DataRequest extends Request

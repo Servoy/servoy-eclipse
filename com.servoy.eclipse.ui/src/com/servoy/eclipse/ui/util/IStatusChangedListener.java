@@ -19,7 +19,7 @@ package com.servoy.eclipse.ui.util;
 /** 
  * A listener which is notified when a viewer's valid state changes.
  * 
- * @author rob
+ * @author rgansevles
  */
 public interface IStatusChangedListener
 {

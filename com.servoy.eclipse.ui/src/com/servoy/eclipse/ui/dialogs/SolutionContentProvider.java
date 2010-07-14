@@ -31,7 +31,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 /**
  * Content provider for solution names. 
  *  
- * @author rob
+ * @author rgansevles
  *
  */
 public class SolutionContentProvider extends FlatTreeContentProvider

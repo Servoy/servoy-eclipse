@@ -27,7 +27,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 /**
  * Save all changes straight through.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class SavingPersistPropertySource implements IPropertySource

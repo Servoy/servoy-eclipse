@@ -24,7 +24,7 @@ import org.eclipse.gef.handles.HandleBounds;
 /**
  * Figure for Groups
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class GroupFigure extends Figure implements HandleBounds

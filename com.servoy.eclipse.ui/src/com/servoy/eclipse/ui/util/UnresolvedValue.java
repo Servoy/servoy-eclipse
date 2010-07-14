@@ -23,7 +23,7 @@ import com.servoy.eclipse.ui.Messages;
 /**
  * Container for unresolved values in designer.
  * 
- * @author rob
+ * @author rgansevles
  *
  */
 public class UnresolvedValue

@@ -282,7 +282,7 @@ public class MethodDialog extends TreeSelectDialog
 	/**
 	 * Label provider that adds text and images for the nodes defined by the dialog
 	 * 
-	 * @author rob
+	 * @author rgansevles
 	 * 
 	 */
 	public static class MethodDialogLabelProvider extends DelegateLabelProvider implements IFontProvider

@@ -26,7 +26,7 @@ import com.servoy.j2db.persistence.Part;
  * <p>
  * Value may be Part or Integer (part type).
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class PartTypeLabelProvider extends LabelProvider

@@ -40,7 +40,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * IFileAccess implementation for accessing files in an eclipse workspace.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class WorkspaceFileAccess implements IFileAccess

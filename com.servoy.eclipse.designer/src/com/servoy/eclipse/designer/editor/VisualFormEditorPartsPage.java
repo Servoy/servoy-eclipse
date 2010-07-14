@@ -787,7 +787,7 @@ public class VisualFormEditorPartsPage extends Composite
 	 * <p>
 	 * Changes to the bean properties are set via the command stack.
 	 * 
-	 * @author rob
+	 * @author rgansevles
 	 * 
 	 */
 	public class PartBean

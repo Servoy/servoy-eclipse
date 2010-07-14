@@ -23,7 +23,7 @@ import com.servoy.j2db.persistence.IScriptProvider;
 /**
  * Property converter that converts the referred script id to the actual selected method id according to form inheritance.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class FormInheritenceMethodConverter implements IPropertyConverter<MethodWithArguments, MethodWithArguments>

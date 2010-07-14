@@ -26,7 +26,7 @@ import com.servoy.j2db.persistence.IRepository;
 /**
  * Property controller for selecting a style class in Properties view.
  * 
- * @author rob
+ * @author rgansevles
  *
  */
 public class StyleclassPropertyController extends ComboboxPropertyController<String>

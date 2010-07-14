@@ -26,7 +26,7 @@ import com.servoy.j2db.persistence.ServerConfig;
  * 
  * @see ServerConfigSyncer will be used in ApplicationServer
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class DeveloperServerConfigSyncer implements IServerConfigListener

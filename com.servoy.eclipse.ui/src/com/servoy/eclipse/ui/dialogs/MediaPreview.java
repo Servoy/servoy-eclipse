@@ -38,7 +38,7 @@ import com.servoy.j2db.FlattenedSolution;
 /**
  * Group composite for previewing images.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class MediaPreview extends Group implements ISelectionChangedListener

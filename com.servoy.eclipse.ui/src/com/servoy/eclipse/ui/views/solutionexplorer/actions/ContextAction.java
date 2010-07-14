@@ -36,7 +36,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 /**
  * Action delegates to other registered action depending on the selection.
  * 
- * @author rob
+ * @author rgansevles
  */
 public class ContextAction extends Action implements ISelectionChangedListener
 {

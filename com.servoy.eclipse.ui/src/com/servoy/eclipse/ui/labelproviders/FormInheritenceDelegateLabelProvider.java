@@ -30,7 +30,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * Delegate label provider that adds the form inheritance context to the label.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class FormInheritenceDelegateLabelProvider extends DelegateLabelProvider implements IFontProvider

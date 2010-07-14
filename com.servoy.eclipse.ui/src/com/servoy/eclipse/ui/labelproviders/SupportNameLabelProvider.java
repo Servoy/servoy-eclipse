@@ -25,7 +25,7 @@ import com.servoy.j2db.persistence.ISupportName;
 /**
  * Simple label provider for ISupportName objects.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class SupportNameLabelProvider extends LabelProvider implements IPersistLabelProvider

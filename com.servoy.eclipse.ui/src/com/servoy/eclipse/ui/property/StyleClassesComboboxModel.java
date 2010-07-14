@@ -35,7 +35,7 @@ import com.servoy.j2db.persistence.Style;
  * <p>
  * Style classes are not cached, when a form style changes the new classes should be updated automatically.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class StyleClassesComboboxModel implements IComboboxPropertyModel<String>

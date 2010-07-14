@@ -21,7 +21,7 @@ package com.servoy.eclipse.ui.property;
  * Property converter that 'converts' using a cast.
  * 
  * 
- * @author rob
+ * @author rgansevles
  *
  * @param <P>
  * @param <E>

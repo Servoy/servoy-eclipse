@@ -37,7 +37,7 @@ import com.servoy.j2db.persistence.Form;
 /**
  * Abstract base class for menu object contributions and command actions that work on a form.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public abstract class AbstractFormSelectionActionDelegate implements IWorkbenchWindowActionDelegate, IObjectActionDelegate

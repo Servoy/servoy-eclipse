@@ -24,7 +24,7 @@ import com.servoy.eclipse.ui.property.IPropertyConverter;
 /**
  * Label provider that uses a IPropertyConverter for text conversion
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class ArrayLabelProvider extends LabelProvider

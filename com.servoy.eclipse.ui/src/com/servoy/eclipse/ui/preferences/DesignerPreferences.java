@@ -26,7 +26,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * Preferences holder for designer settings.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class DesignerPreferences

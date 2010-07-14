@@ -22,7 +22,7 @@ import com.servoy.j2db.persistence.IRepository;
 /**
  * Content provider class for templates.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 

@@ -29,7 +29,7 @@ import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
 /**
  * Edit policy for GroupEditParts
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class GroupEditPolicy extends AbstractEditPolicy

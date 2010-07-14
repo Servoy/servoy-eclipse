@@ -22,7 +22,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 /**
  * Selection filter, filter out items that have children so that only leaf nodes can be selected.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class LeafnodesSelectionFilter implements IFilter

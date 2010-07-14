@@ -22,7 +22,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 /**
  * Mergeable property descriptors.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public interface IMergeablePropertyDescriptor extends IPropertyDescriptor

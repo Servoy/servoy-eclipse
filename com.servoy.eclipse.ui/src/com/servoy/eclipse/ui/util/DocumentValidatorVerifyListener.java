@@ -34,7 +34,7 @@ import com.servoy.j2db.util.ValidatingDocument.IDocumentValidator;
 /**
  * Verify listener that uses document validators for validating changes.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class DocumentValidatorVerifyListener implements VerifyListener

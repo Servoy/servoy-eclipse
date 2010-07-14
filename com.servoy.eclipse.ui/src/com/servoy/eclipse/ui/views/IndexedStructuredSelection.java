@@ -24,7 +24,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 /**
  * Structured selection with selected indices.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 

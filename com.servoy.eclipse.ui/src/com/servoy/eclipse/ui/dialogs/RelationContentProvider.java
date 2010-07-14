@@ -34,7 +34,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * Content provider class for relations.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 

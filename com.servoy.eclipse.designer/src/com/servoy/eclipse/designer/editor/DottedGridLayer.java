@@ -30,7 +30,7 @@ import com.servoy.j2db.persistence.Form;
 /**
  * A Grid that shows dots in stead of lines and is printed on a limited area.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 public class DottedGridLayer extends GridLayer

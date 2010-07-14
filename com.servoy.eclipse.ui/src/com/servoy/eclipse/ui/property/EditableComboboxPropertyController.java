@@ -31,7 +31,7 @@ import com.servoy.eclipse.ui.util.ModifiedComboBoxCellEditor;
  * <p>
  * A combobox is shown with predefined values.
  * 
- * @author rob
+ * @author rgansevles
  * 
  */
 
