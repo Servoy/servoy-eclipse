@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.dialogs;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,6 +36,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.dltk.ast.ASTNode;
+import org.eclipse.dltk.ast.ASTVisitor;
+import org.eclipse.dltk.compiler.problem.IProblem;
+import org.eclipse.dltk.compiler.problem.IProblemReporter;
+import org.eclipse.dltk.javascript.ast.CallExpression;
+import org.eclipse.dltk.javascript.ast.Script;
+import org.eclipse.dltk.javascript.ast.StringLiteral;
+import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -88,6 +97,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.WorkspaceFileAccess;
 import com.servoy.eclipse.core.repository.EclipseMessages;
+import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.FilterDelayJob;
@@ -138,6 +148,8 @@ public class I18NExternalizeDialog extends Dialog
 	private FilterDelayJob delayedFilterJob;
 	private static final long FILTER_TYPE_DELAY = 300;
 	private boolean externalizeDatabaseMessages = true;
+
+	private final IFileAccess workspaceFileAccess = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 
 	public I18NExternalizeDialog(Shell parentShell, ServoyProject project)
 	{
@@ -559,9 +571,96 @@ public class I18NExternalizeDialog extends Dialog
 						}
 					}
 				}
+
+				if (o.getTypeID() == IRepository.FORMS || o.getTypeID() == IRepository.SOLUTIONS)
+				{
+					ArrayList<JSText> jsTexts = getJSTexts(o);
+					if (jsTexts.size() > 0)
+					{
+						boolean visible = filterText == null;
+						ArrayList<IPersist> treePath = new ArrayList<IPersist>();
+
+						IPersist persist = o;
+						do
+						{
+							treePath.add(0, persist);
+							if (filterText != null) visible = visible || (getPersistName(persist).toString().toLowerCase().indexOf(filterText) != -1);
+						}
+						while ((persist = persist.getParent()) != null);
+
+						for (JSText jsText : jsTexts)
+						{
+							visible = (filterText == null) || (jsText.getText().toLowerCase().indexOf(filterText) != -1);
+							if (visible) content.addPersistElement(treePath, jsText);
+						}
+					}
+				}
+
 				return IPersistVisitor.CONTINUE_TRAVERSAL;
 			}
 		});
+	}
+
+	private ArrayList<JSText> getJSTexts(final IPersist persist)
+	{
+		final ArrayList<JSText> jsTexts = new ArrayList<JSText>();
+		String jsPath = SolutionSerializer.getScriptPath(persist, false);
+		if (jsPath != null && workspaceFileAccess.exists(jsPath))
+		{
+			try
+			{
+				String jsContent = workspaceFileAccess.getUTF8Contents(jsPath);
+				JavaScriptParser parser = new JavaScriptParser();
+				parser.setTypeInformationEnabled(true);
+				final ArrayList<IProblem> problems = new ArrayList<IProblem>();
+				IProblemReporter reporter = new IProblemReporter()
+				{
+
+					public Object getAdapter(Class adapter)
+					{
+						return null;
+					}
+
+					public void reportProblem(IProblem problem)
+					{
+						if (problem.isError())
+						{
+							problems.add(problem);
+						}
+					}
+				};
+				Script script = parser.parse(jsContent, reporter);
+				if (problems.size() == 0 && script != null)
+				{
+					final int[] idx = new int[] { 0 };
+					script.traverse(new ASTVisitor()
+					{
+						@Override
+						public boolean visitGeneral(ASTNode node) throws Exception
+						{
+							if (node instanceof StringLiteral)
+							{
+								ASTNode parent = ((StringLiteral)node).getParent();
+								if (!(parent instanceof CallExpression && ((CallExpression)parent).getExpression().toString().equalsIgnoreCase(
+									"i18n.getI18NMessage")))
+								{
+									StringLiteral sl = (StringLiteral)node;
+									jsTexts.add(new JSText(persist, sl.getText(), sl.sourceStart(), sl.sourceEnd(), getPersistName(persist) + "_" + idx[0]++));
+								}
+							}
+							return true;
+						}
+					});
+				}
+
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
+			}
+		}
+
+		return jsTexts;
 	}
 
 	private String getKeyHint(IPersist persist, Element element)
@@ -663,16 +762,16 @@ public class I18NExternalizeDialog extends Dialog
 
 	private void writeMessages() throws RepositoryException
 	{
-		final IFileAccess workspace = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 		final Solution editingSolution = project.getEditingSolution();
 		final TreeMap<String, I18NUtil.MessageEntry> projectMessages = EclipseMessages.readMessages(editingSolution.getI18nServerName(),
-			editingSolution.getI18nTableName(), workspace);
+			editingSolution.getI18nTableName(), workspaceFileAccess);
 
 		ArrayList<TreeNode> selectedNodes = new ArrayList<TreeNode>();
 		fillSelectedNodes(treeViewer.getTree().getItems(), selectedNodes);
 
 		final HashMap<Solution, ArrayList<IPersist>> solutionChangedPersistsMap = new HashMap<Solution, ArrayList<IPersist>>();
 		final ArrayList<Table> changedTables = new ArrayList<Table>();
+		final HashMap<IPersist, TreeMap<Integer, JSText>> persistJSTextMap = new HashMap<IPersist, TreeMap<Integer, JSText>>();
 		for (TreeNode selNode : selectedNodes)
 		{
 			if (selNode.isElement())
@@ -699,6 +798,18 @@ public class I18NExternalizeDialog extends Dialog
 				ci.flagChanged();
 				changedTables.add((Table)selNode.getParent().getParent().getData());
 			}
+			else if (selNode.isJSText())
+			{
+				JSText jstxt = (JSText)selNode.getData();
+				TreeMap<Integer, JSText> persistJSTexts = persistJSTextMap.get(jstxt.getParent());
+				if (persistJSTexts == null)
+				{
+					persistJSTexts = new TreeMap<Integer, JSText>();
+					persistJSTextMap.put(jstxt.getParent(), persistJSTexts);
+				}
+				jstxt.keyHint = selNode.getKey();
+				persistJSTexts.put(Integer.valueOf(jstxt.getStartPosition()), jstxt);
+			}
 
 			if (!defaultMessages.containsKey(selNode.getKey()))
 			{
@@ -712,9 +823,49 @@ public class I18NExternalizeDialog extends Dialog
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 			{
+
+				Iterator<Map.Entry<IPersist, TreeMap<Integer, JSText>>> persistJSTextMapIte = persistJSTextMap.entrySet().iterator();
+				Map.Entry<IPersist, TreeMap<Integer, JSText>> persistJSTextMapEntry;
+				while (persistJSTextMapIte.hasNext())
+				{
+					persistJSTextMapEntry = persistJSTextMapIte.next();
+					String jsPath = SolutionSerializer.getScriptPath(persistJSTextMapEntry.getKey(), false);
+					if (jsPath != null && workspaceFileAccess.exists(jsPath))
+					{
+						TreeMap<Integer, JSText> persistJSTexts = persistJSTextMapEntry.getValue();
+						ArrayList<Integer> persistJSTextStartPos = new ArrayList<Integer>(persistJSTexts.keySet());
+						try
+						{
+							String persistJSContent = workspaceFileAccess.getUTF8Contents(jsPath);
+							StringBuffer replacedPersistJSContent = new StringBuffer();
+							for (int i = 0; i < persistJSContent.length();)
+							{
+								if (persistJSTextStartPos.size() > 0 && i == persistJSTextStartPos.get(0).intValue())
+								{
+									JSText jstxt = persistJSTexts.get(persistJSTextStartPos.get(0));
+									replacedPersistJSContent.append("i18n.getI18NMessage('").append(jstxt.getKeyHint()).append("')");
+									i = jstxt.getEndPosition();
+									persistJSTextStartPos.remove(0);
+								}
+								else
+								{
+									replacedPersistJSContent.append(persistJSContent.charAt(i));
+									i++;
+								}
+							}
+
+							workspaceFileAccess.setUTF8Contents(jsPath, replacedPersistJSContent.toString());
+						}
+						catch (IOException ex)
+						{
+							ServoyLog.logError(ex);
+						}
+					}
+				}
+
 				try
 				{
-					EclipseMessages.writeMessages(editingSolution.getI18nServerName(), editingSolution.getI18nTableName(), projectMessages, workspace);
+					EclipseMessages.writeMessages(editingSolution.getI18nServerName(), editingSolution.getI18nTableName(), projectMessages, workspaceFileAccess);
 					Iterator<Map.Entry<Solution, ArrayList<IPersist>>> changedSolutions = solutionChangedPersistsMap.entrySet().iterator();
 					Map.Entry<Solution, ArrayList<IPersist>> solutionChangedPersistsMapEntry;
 					while (changedSolutions.hasNext())
@@ -759,7 +910,7 @@ public class I18NExternalizeDialog extends Dialog
 			for (TreeItem treeItem : items)
 			{
 				node = (TreeNode)treeItem.getData();
-				if (!node.isElement() && !node.isColumnInfo()) fillSelectedNodes(treeItem.getItems(), selectedNodes);
+				if (!node.isElement() && !node.isColumnInfo() && !node.isJSText()) fillSelectedNodes(treeItem.getItems(), selectedNodes);
 				else if (treeItem.getChecked()) selectedNodes.add(node);
 			}
 		}
@@ -784,6 +935,49 @@ public class I18NExternalizeDialog extends Dialog
 			ServoyLog.logError(ex);
 		}
 		super.okPressed();
+	}
+
+	private class JSText
+	{
+		IPersist parent;
+		String text;
+		int startPosition;
+		int endPosition;
+		String keyHint;
+
+		JSText(IPersist parent, String text, int startPosition, int endPosition, String keyHint)
+		{
+			this.parent = parent;
+			this.text = text;
+			this.startPosition = startPosition;
+			this.endPosition = endPosition;
+			this.keyHint = keyHint;
+		}
+
+		IPersist getParent()
+		{
+			return parent;
+		}
+
+		String getText()
+		{
+			return text;
+		}
+
+		int getStartPosition()
+		{
+			return startPosition;
+		}
+
+		int getEndPosition()
+		{
+			return endPosition;
+		}
+
+		String getKeyHint()
+		{
+			return keyHint;
+		}
 	}
 
 	private class TreeContentProvider implements ITreeContentProvider
@@ -893,7 +1087,7 @@ public class I18NExternalizeDialog extends Dialog
 		}
 
 
-		void addPersistElement(List<IPersist> treePath, Element el)
+		void addPersistElement(List<IPersist> treePath, Object el)
 		{
 			if (treePath.size() == 0)
 			{
@@ -953,53 +1147,64 @@ public class I18NExternalizeDialog extends Dialog
 			return itemData instanceof IPersist;
 		}
 
+		boolean isJSText()
+		{
+			return itemData instanceof JSText;
+		}
+
 		String getText()
 		{
-			if (isElement())
+			if (text == null)
 			{
-				if (text == null)
+				if (isElement())
 				{
 					IPersist persistParent = (IPersist)parent.getData();
 					text = I18NExternalizeDialog.this.getProperty(persistParent, (Element)getData());
 					if (text == null) text = "";
+
 				}
-				return text;
-			}
-			else if (isColumnInfo())
-			{
-				if (text == null)
+				else if (isColumnInfo())
 				{
 					text = ((Column)parent.getData()).getName();
 					text = Utils.stringInitCap(Utils.stringReplace(text, "_", " "));
+
 				}
-				return text;
+				else if (isJSText())
+				{
+					text = ((JSText)itemData).getText();
+					text = text.substring(1, text.length() - 1);
+				}
+				else text = "";
 			}
-			else return "";
+
+			return text;
 		}
 
 		String getKey()
 		{
-			if (isElement())
+			if (key == null)
 			{
-				if (key == null)
+				if (isElement())
 				{
 					IPersist persistParent = (IPersist)parent.getData();
 					key = I18NExternalizeDialog.this.getKeyHint(persistParent, (Element)getData());
+
 				}
-				return key;
-			}
-			else if (isColumnInfo())
-			{
-				if (key == null)
+				else if (isColumnInfo())
 				{
 					String server = parent.getParent().getParent().toString();
 					String table = parent.getParent().toString();
 					String column = parent.toString();
 					key = new StringBuffer(server).append(".").append(table).append(".").append(column).toString();
 				}
-				return key;
+				else if (isJSText())
+				{
+					key = ((JSText)itemData).getKeyHint();
+				}
+				else key = "";
 			}
-			else return "";
+
+			return key;
 		}
 
 		void setKey(String key)
@@ -1021,6 +1226,10 @@ public class I18NExternalizeDialog extends Dialog
 			else if (isPersist())
 			{
 				return getPersistName((IPersist)itemData);
+			}
+			else if (isJSText())
+			{
+				return "";
 			}
 
 			return itemData.toString();
