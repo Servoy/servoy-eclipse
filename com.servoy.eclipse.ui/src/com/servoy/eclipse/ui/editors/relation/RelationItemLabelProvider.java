@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.relation;
 
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -25,6 +25,12 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.ui.editors.RelationEditor;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.util.Utils;
+
+/**
+ * Label provider for relation items in relation editor.
+ * 
+ * @author jblok
+ */
 
 public class RelationItemLabelProvider extends LabelProvider implements ITableLabelProvider
 {

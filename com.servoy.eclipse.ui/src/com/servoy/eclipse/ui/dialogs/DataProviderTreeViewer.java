@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
@@ -61,6 +61,12 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.IDelegate;
 import com.servoy.j2db.util.Utils;
+
+/**
+ * JFace-like viewer for selecting a data provider from a tree. A filter is built-in.
+ * 
+ * @author rgansevles
+ */
 
 public class DataProviderTreeViewer extends FilteredTreeViewer
 {

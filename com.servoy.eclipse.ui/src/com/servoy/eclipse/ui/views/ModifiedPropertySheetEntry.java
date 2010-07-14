@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views;
 
 import java.util.ArrayList;
@@ -31,7 +31,11 @@ import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.PropertySheetEntry;
 
-
+/**
+ * PropertySheetEntry with additional Servoy features.
+ * 
+ * @author acostescu
+ */
 public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IAdaptable
 {
 
@@ -136,7 +140,7 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 				Object object = propertyDescriptorMaps[i].get(ids[j]);
 				if (object == null ||
 				// see if the descriptors (which have the same id) are
-					// compatible
+				// compatible
 					!((IPropertyDescriptor)intersection.get(ids[j])).isCompatibleWith((IPropertyDescriptor)object))
 				{
 					intersection.remove(ids[j]);

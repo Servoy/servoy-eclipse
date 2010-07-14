@@ -42,6 +42,8 @@ import com.servoy.j2db.persistence.RepositoryException;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
+ * 
+ * @author rgansevles
  */
 public class DataProviderCellEditor extends DialogCellEditor
 {

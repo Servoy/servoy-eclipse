@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.resource;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -22,6 +22,7 @@ import org.eclipse.ui.IElementFactory;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
@@ -30,6 +31,12 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
+
+/**
+ * Factory for re-creating editor input from a previously saved memento.
+ * 
+ * @author rgansevles
+ */
 
 public class EditorInputFactory implements IElementFactory, IAdapterFactory
 {
@@ -141,7 +148,8 @@ public class EditorInputFactory implements IElementFactory, IAdapterFactory
 			{
 				return null;
 			}
-			ServerConfig serverConfig = ServoyModelManager.getServoyModelManager().getServoyModel().getServerManager().getServerConfig(name);
+			ServoyModelManager.getServoyModelManager().getServoyModel();
+			ServerConfig serverConfig = ServoyModel.getServerManager().getServerConfig(name);
 			if (serverConfig == null)
 			{
 				return null;
@@ -192,7 +200,8 @@ public class EditorInputFactory implements IElementFactory, IAdapterFactory
 
 	public Object getAdapter(Object adaptableObject, Class adapterType)
 	{
-		Settings settings = ServoyModelManager.getServoyModelManager().getServoyModel().getSettings();
+		ServoyModelManager.getServoyModelManager().getServoyModel();
+		Settings settings = ServoyModel.getSettings();
 		if (new DesignerPreferences(settings).getSaveEditorState())
 		{
 			if (adaptableObject instanceof PersistEditorInput)
