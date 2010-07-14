@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors;
 
 import org.eclipse.jface.dialogs.IInputValidator;
@@ -47,6 +47,12 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.util.IdentDocumentValidator;
 import com.servoy.j2db.util.Utils;
+
+/**
+ * Composite for creating script providers (calc or global) for rowBGColorCalculation select dialog in Properties View.
+ * 
+ * @author gboros
+ */
 
 public class AddScriptProviderButtonsComposite extends Composite
 {
@@ -223,5 +229,4 @@ public class AddScriptProviderButtonsComposite extends Composite
 	{
 		this.dialog = dialog;
 	}
-
 }

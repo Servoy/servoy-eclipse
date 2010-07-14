@@ -13,11 +13,17 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.property;
 
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.j2db.persistence.IPersist;
+
+/**
+ * Interface for editparts with model based on {@link IPersist}
+ * 
+ * @author rgansevles
+ */
 
 public interface IPersistEditPart
 {

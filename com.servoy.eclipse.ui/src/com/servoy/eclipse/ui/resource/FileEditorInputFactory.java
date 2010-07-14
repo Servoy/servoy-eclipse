@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.resource;
 
 import org.eclipse.core.resources.IFile;
@@ -24,9 +24,17 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.part.FileEditorInput;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.j2db.util.Settings;
+
+/**
+ * Factory for persisted editor inputs.
+ * Editors state is saved over sessions when configured in preferences.
+ * 
+ * @author rgansevles
+ */
 
 public class FileEditorInputFactory extends org.eclipse.ui.part.FileEditorInputFactory
 {
@@ -37,7 +45,8 @@ public class FileEditorInputFactory extends org.eclipse.ui.part.FileEditorInputF
 			@Override
 			public IPersistableElement getPersistable()
 			{
-				Settings settings = ServoyModelManager.getServoyModelManager().getServoyModel().getSettings();
+				ServoyModelManager.getServoyModelManager().getServoyModel();
+				Settings settings = ServoyModel.getSettings();
 				if (new DesignerPreferences(settings).getSaveEditorState())
 				{
 					return super.getPersistable();

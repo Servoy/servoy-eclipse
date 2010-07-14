@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -45,6 +45,12 @@ import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.editors.DialogCellEditor;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.util.Utils;
+
+/**
+ * PropertySheetPage with additional Servoy features.
+ * 
+ * @author acostescu
+ */
 
 public class ModifiedPropertySheetPage extends PropertySheetPage implements IPropertySheetEntryListener
 {
@@ -214,5 +220,4 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 			propertiesLabel.setText(text);
 		}
 	}
-
 }

@@ -13,14 +13,18 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.internal.core;
 
 
+/**
+ * Interface for image notifiers, notify of changes to images.
+ * 
+ * @author rgansevles
+ */
+
 public interface IImageNotifier
 {
-
-
 	/**
 	 * Add an image listener. Do not add an image listener except if you need the actual image. This is because if you are the only listener and you don't need the image it will
 	 * still cause an image to be captured. This is a waste. Use {@link IVisualComponentListener#componentValidated()} instead.
