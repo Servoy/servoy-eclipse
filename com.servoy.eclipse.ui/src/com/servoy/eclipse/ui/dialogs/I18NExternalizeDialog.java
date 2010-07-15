@@ -41,7 +41,9 @@ import org.eclipse.dltk.ast.ASTVisitor;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.javascript.ast.CallExpression;
+import org.eclipse.dltk.javascript.ast.Comment;
 import org.eclipse.dltk.javascript.ast.Script;
+import org.eclipse.dltk.javascript.ast.SingleLineComment;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import org.eclipse.jface.dialogs.Dialog;
@@ -117,6 +119,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.property.I18NMessagesModel;
 import com.servoy.j2db.property.I18NMessagesModel.I18NMessagesModelEntry;
@@ -134,6 +137,7 @@ public class I18NExternalizeDialog extends Dialog
 	private TreeContentProvider treeContentProvider;
 	private Text filterTextField;
 	private Button databaseMessagesButton;
+	private Button ignoreMessageButton;
 
 	private final ContentSpec contentSpec = StaticContentSpecLoader.getContentSpec();
 	private final Image solutionImage = Activator.getDefault().loadImageFromBundle("solution.gif");
@@ -229,6 +233,15 @@ public class I18NExternalizeDialog extends Dialog
 								Column column = tableObj.getColumn(columnName);
 								addColumnInfoToTree(content, server, tableObj, column, filter);
 							}
+
+							for (ServoyProject s : allProjects)
+							{
+								Iterator<TableNode> tableNodesIte = s.getSolution().getTableNodes(tableObj);
+								while (tableNodesIte.hasNext())
+								{
+									addTableNodeToTree(content, server, tableObj, tableNodesIte.next(), filter);
+								}
+							}
 						}
 					}
 				}
@@ -237,6 +250,58 @@ public class I18NExternalizeDialog extends Dialog
 			{
 				ServoyLog.logError(ex);
 			}
+		}
+
+		if (ignoreMessageButton != null)
+		{
+			ignoreMessageButton.setSelection(false);
+			ignoreMessageButton.setEnabled(false);
+		}
+	}
+
+	private void addTableNodeToTree(TreeNode root, IServer server, Table table, TableNode tableNode, String filterText)
+	{
+		ArrayList<JSText> jsTexts = getJSTexts(tableNode);
+		TreeNode tableNodeFound = null;
+		for (JSText jstxt : jsTexts)
+		{
+			//check filter
+			if (filterText != null && server.toString().toLowerCase().indexOf(filterText) == -1 && table.toString().toLowerCase().indexOf(filterText) == -1 &&
+				jstxt.getText().toLowerCase().indexOf(filterText) == -1) continue;
+
+			if (tableNodeFound == null)
+			{
+				ArrayList<TreeNode> serverNodes = root.getChildren();
+				TreeNode serverNodeFound = null;
+				for (TreeNode serverNode : serverNodes)
+				{
+					if (serverNode.getData().equals(server))
+					{
+						serverNodeFound = serverNode;
+					}
+				}
+				if (serverNodeFound == null)
+				{
+					serverNodeFound = new TreeNode(root, server);
+					root.addChild(serverNodeFound);
+				}
+
+				ArrayList<TreeNode> tableNodes = serverNodeFound.getChildren();
+				for (TreeNode tblNode : tableNodes)
+				{
+					if (tblNode.getData().equals(table))
+					{
+						tableNodeFound = tblNode;
+					}
+				}
+				if (tableNodeFound == null)
+				{
+					tableNodeFound = new TreeNode(serverNodeFound, table);
+					serverNodeFound.addChild(tableNodeFound);
+				}
+			}
+
+			tableNodeFound.addChild(new TreeNode(tableNodeFound, jstxt));
 		}
 	}
 
@@ -332,6 +397,17 @@ public class I18NExternalizeDialog extends Dialog
 					TreeItem treeItem = (TreeItem)event.item;
 					checkTreeItemChildren(treeItem, treeItem.getChecked());
 				}
+				TreeNode node = (TreeNode)((TreeItem)event.item).getData();
+				if (node.isJSText())
+				{
+					I18NExternalizeDialog.this.ignoreMessageButton.setEnabled(true);
+					I18NExternalizeDialog.this.ignoreMessageButton.setSelection(((JSText)node.getData()).isIgnored());
+				}
+				else
+				{
+					I18NExternalizeDialog.this.ignoreMessageButton.setSelection(false);
+					I18NExternalizeDialog.this.ignoreMessageButton.setEnabled(false);
+				}
 			}
 
 			private void checkTreeItemChildren(TreeItem treeItem, boolean flag)
@@ -410,7 +486,8 @@ public class I18NExternalizeDialog extends Dialog
 			@Override
 			protected boolean canEdit(Object element)
 			{
-				return ((TreeNode)element).isElement() || ((TreeNode)element).isColumnInfo();
+				return ((TreeNode)element).isElement() || ((TreeNode)element).isColumnInfo() ||
+					(((TreeNode)element).isJSText() && !((JSText)((TreeNode)element).getData()).isIgnored());
 			}
 
 			@Override
@@ -491,11 +568,41 @@ public class I18NExternalizeDialog extends Dialog
 
 		});
 
+		ignoreMessageButton = new Button(composite, SWT.CHECK);
+		ignoreMessageButton.setText("Ignore selected message");
+		ignoreMessageButton.addSelectionListener(new SelectionListener()
+		{
+
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+				// ignore
+			}
+
+			public void widgetSelected(SelectionEvent e)
+			{
+				TreeItem[] selection = treeViewer.getTree().getSelection();
+				if (selection != null && selection.length > 0)
+				{
+					TreeNode node = (TreeNode)selection[selection.length - 1].getData();
+					if (node.isJSText())
+					{
+						((JSText)node.getData()).setIgnored(I18NExternalizeDialog.this.ignoreMessageButton.getSelection());
+						treeViewer.refresh(node);
+					}
+				}
+			}
+
+		});
+		ignoreMessageButton.setSelection(false);
+		ignoreMessageButton.setEnabled(false);
+
+
 		GroupLayout i18NLayout = new GroupLayout(composite);
 		i18NLayout.setHorizontalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(
 			i18NLayout.createSequentialGroup().addContainerGap().add(
 				i18NLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING, treeViewerComposite, GroupLayout.PREFERRED_SIZE, 0,
-					Short.MAX_VALUE).add(GroupLayout.LEADING, databaseMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+					Short.MAX_VALUE).add(GroupLayout.LEADING, ignoreMessageButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, databaseMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(
 					i18NLayout.createSequentialGroup().add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
 						LayoutStyle.RELATED).add(filterTextField, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))).addContainerGap()));
@@ -503,8 +610,9 @@ public class I18NExternalizeDialog extends Dialog
 			i18NLayout.createSequentialGroup().addContainerGap().add(
 				i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(filterTextField, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(
-				treeViewerComposite, GroupLayout.PREFERRED_SIZE, 100, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(databaseMessagesButton,
-				GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap()));
+				treeViewerComposite, GroupLayout.PREFERRED_SIZE, 100, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(ignoreMessageButton,
+				GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
+				databaseMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap()));
 
 		composite.setLayout(i18NLayout);
 
@@ -629,10 +737,11 @@ public class I18NExternalizeDialog extends Dialog
 						}
 					}
 				};
+
 				Script script = parser.parse(jsContent, reporter);
 				if (problems.size() == 0 && script != null)
 				{
-					final int[] idx = new int[] { 0 };
+					final HashMap<Integer, ASTNode> startIdxNodeMap = new HashMap<Integer, ASTNode>();
 					script.traverse(new ASTVisitor()
 					{
 						@Override
@@ -644,13 +753,45 @@ public class I18NExternalizeDialog extends Dialog
 								if (!(parent instanceof CallExpression && ((CallExpression)parent).getExpression().toString().equalsIgnoreCase(
 									"i18n.getI18NMessage")))
 								{
-									StringLiteral sl = (StringLiteral)node;
-									jsTexts.add(new JSText(persist, sl.getText(), sl.sourceStart(), sl.sourceEnd(), getPersistName(persist) + "_" + idx[0]++));
+									startIdxNodeMap.put(Integer.valueOf(node.sourceStart()), node);
 								}
 							}
 							return true;
 						}
 					});
+
+					List<Comment> comments = script.getComments();
+					for (Comment c : comments)
+					{
+						if (c instanceof SingleLineComment)
+						{
+							startIdxNodeMap.put(Integer.valueOf(c.sourceStart()), c);
+						}
+					}
+
+					Map<Integer, ArrayList<ASTNode>> lineNumberForASTNodes = getLineNumbersForASTNodes(jsContent, startIdxNodeMap);
+					Iterator<ArrayList<ASTNode>> astNodesIte = lineNumberForASTNodes.values().iterator();
+					ArrayList<ASTNode> astNodes;
+					StringLiteral stringLiteral;
+					SingleLineComment comment = null;
+					int keyIdx = 0;
+					while (astNodesIte.hasNext())
+					{
+						astNodes = astNodesIte.next();
+						if (astNodes.get(0) instanceof SingleLineComment)
+						{
+							comment = (SingleLineComment)astNodes.remove(0);
+						}
+
+						for (int y = 0; y < astNodes.size(); y++)
+						{
+							if (comment != null && comment.getText().indexOf("$NON-NLS-" + (y + 1) + "$") != -1) continue;
+							stringLiteral = (StringLiteral)astNodes.get(y);
+							String keyHint = getKeyHint(persist, null) + keyIdx++;
+							jsTexts.add(new JSText(persist, stringLiteral.getText(), stringLiteral.sourceStart(), stringLiteral.sourceEnd(), keyHint));
+						}
+
+					}
 				}
 
 			}
@@ -663,17 +804,59 @@ public class I18NExternalizeDialog extends Dialog
 		return jsTexts;
 	}
 
+	private Map<Integer, ArrayList<ASTNode>> getLineNumbersForASTNodes(String jsConent, Map<Integer, ASTNode> astNodesMap)
+	{
+		Map<Integer, ArrayList<ASTNode>> lineNumbersForASTNodesMap = new HashMap<Integer, ArrayList<ASTNode>>();
+
+		int line = 1;
+		for (int i = 0; i < jsConent.length(); i++)
+		{
+			if (jsConent.charAt(i) == '\n')
+			{
+				line++;
+			}
+			else
+			{
+				Integer oI = Integer.valueOf(i);
+				if (astNodesMap.containsKey(oI))
+				{
+					Integer oLine = Integer.valueOf(line);
+					ArrayList<ASTNode> lineNodes = lineNumbersForASTNodesMap.get(oLine);
+					if (lineNodes == null)
+					{
+						lineNodes = new ArrayList<ASTNode>();
+						lineNumbersForASTNodesMap.put(oLine, lineNodes);
+					}
+					ASTNode node = astNodesMap.get(oI);
+					if (node instanceof SingleLineComment) lineNodes.add(0, node);
+					else lineNodes.add(node);
+				}
+			}
+		}
+
+		return lineNumbersForASTNodesMap;
+	}
+
 	private String getKeyHint(IPersist persist, Element element)
 	{
-		String defaultText = getProperty(persist, element);
-		if (defaultMessages.containsValue(defaultText))
+
+		if (persist instanceof TableNode)
 		{
-			Iterator<Map.Entry<String, String>> defMsgIte = defaultMessages.entrySet().iterator();
-			Map.Entry<String, String> msgEntry;
-			while (defMsgIte.hasNext())
+			return ((TableNode)persist).getServerName() + "." + ((TableNode)persist).getTableName() + ".";
+		}
+
+		if (element != null)
+		{
+			String defaultText = getProperty(persist, element);
+			if (defaultMessages.containsValue(defaultText))
 			{
-				msgEntry = defMsgIte.next();
-				if (msgEntry.getValue().equals(defaultText)) return msgEntry.getKey();
+				Iterator<Map.Entry<String, String>> defMsgIte = defaultMessages.entrySet().iterator();
+				Map.Entry<String, String> msgEntry;
+				while (defMsgIte.hasNext())
+				{
+					msgEntry = defMsgIte.next();
+					if (msgEntry.getValue().equals(defaultText)) return msgEntry.getKey();
+				}
 			}
 		}
 
@@ -710,7 +893,7 @@ public class I18NExternalizeDialog extends Dialog
 			keyHint.insert(0, name);
 		}
 		while ((p = p.getParent()) != null);
-		keyHint.append(element.getName());
+		if (element != null) keyHint.append(element.getName());
 
 		return keyHint.toString();
 	}
@@ -823,49 +1006,51 @@ public class I18NExternalizeDialog extends Dialog
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 			{
-
-				Iterator<Map.Entry<IPersist, TreeMap<Integer, JSText>>> persistJSTextMapIte = persistJSTextMap.entrySet().iterator();
-				Map.Entry<IPersist, TreeMap<Integer, JSText>> persistJSTextMapEntry;
-				while (persistJSTextMapIte.hasNext())
-				{
-					persistJSTextMapEntry = persistJSTextMapIte.next();
-					String jsPath = SolutionSerializer.getScriptPath(persistJSTextMapEntry.getKey(), false);
-					if (jsPath != null && workspaceFileAccess.exists(jsPath))
-					{
-						TreeMap<Integer, JSText> persistJSTexts = persistJSTextMapEntry.getValue();
-						ArrayList<Integer> persistJSTextStartPos = new ArrayList<Integer>(persistJSTexts.keySet());
-						try
-						{
-							String persistJSContent = workspaceFileAccess.getUTF8Contents(jsPath);
-							StringBuffer replacedPersistJSContent = new StringBuffer();
-							for (int i = 0; i < persistJSContent.length();)
-							{
-								if (persistJSTextStartPos.size() > 0 && i == persistJSTextStartPos.get(0).intValue())
-								{
-									JSText jstxt = persistJSTexts.get(persistJSTextStartPos.get(0));
-									replacedPersistJSContent.append("i18n.getI18NMessage('").append(jstxt.getKeyHint()).append("')");
-									i = jstxt.getEndPosition();
-									persistJSTextStartPos.remove(0);
-								}
-								else
-								{
-									replacedPersistJSContent.append(persistJSContent.charAt(i));
-									i++;
-								}
-							}
-
-							workspaceFileAccess.setUTF8Contents(jsPath, replacedPersistJSContent.toString());
-						}
-						catch (IOException ex)
-						{
-							ServoyLog.logError(ex);
-						}
-					}
-				}
-
 				try
 				{
 					EclipseMessages.writeMessages(editingSolution.getI18nServerName(), editingSolution.getI18nTableName(), projectMessages, workspaceFileAccess);
+
+					// write js i18n keys 
+					Iterator<Map.Entry<IPersist, TreeMap<Integer, JSText>>> persistJSTextMapIte = persistJSTextMap.entrySet().iterator();
+					Map.Entry<IPersist, TreeMap<Integer, JSText>> persistJSTextMapEntry;
+					while (persistJSTextMapIte.hasNext())
+					{
+						persistJSTextMapEntry = persistJSTextMapIte.next();
+						String jsPath = SolutionSerializer.getScriptPath(persistJSTextMapEntry.getKey(), false);
+						if (jsPath != null && workspaceFileAccess.exists(jsPath))
+						{
+							TreeMap<Integer, JSText> persistJSTexts = persistJSTextMapEntry.getValue();
+							ArrayList<Integer> persistJSTextStartPos = new ArrayList<Integer>(persistJSTexts.keySet());
+							try
+							{
+								String persistJSContent = workspaceFileAccess.getUTF8Contents(jsPath);
+								StringBuffer replacedPersistJSContent = new StringBuffer();
+								for (int i = 0; i < persistJSContent.length();)
+								{
+									if (persistJSTextStartPos.size() > 0 && i == persistJSTextStartPos.get(0).intValue())
+									{
+										JSText jstxt = persistJSTexts.get(persistJSTextStartPos.get(0));
+										replacedPersistJSContent.append("i18n.getI18NMessage('").append(jstxt.getKeyHint()).append("')");
+										i = jstxt.getEndPosition();
+										persistJSTextStartPos.remove(0);
+									}
+									else
+									{
+										replacedPersistJSContent.append(persistJSContent.charAt(i));
+										i++;
+									}
+								}
+
+								workspaceFileAccess.setUTF8Contents(jsPath, replacedPersistJSContent.toString());
+							}
+							catch (IOException ex)
+							{
+								ServoyLog.logError(ex);
+							}
+						}
+					}
+
+					// write elements i18n keys
 					Iterator<Map.Entry<Solution, ArrayList<IPersist>>> changedSolutions = solutionChangedPersistsMap.entrySet().iterator();
 					Map.Entry<Solution, ArrayList<IPersist>> solutionChangedPersistsMapEntry;
 					while (changedSolutions.hasNext())
@@ -944,6 +1129,7 @@ public class I18NExternalizeDialog extends Dialog
 		int startPosition;
 		int endPosition;
 		String keyHint;
+		boolean ignored;
 
 		JSText(IPersist parent, String text, int startPosition, int endPosition, String keyHint)
 		{
@@ -977,6 +1163,16 @@ public class I18NExternalizeDialog extends Dialog
 		String getKeyHint()
 		{
 			return keyHint;
+		}
+
+		void setIgnored(boolean ignored)
+		{
+			this.ignored = ignored;
+		}
+
+		boolean isIgnored()
+		{
+			return ignored;
 		}
 	}
 
@@ -1027,7 +1223,7 @@ public class I18NExternalizeDialog extends Dialog
 				case I18NExternalizeDialog.COLUMN_TEXT :
 					return treeNode.getText();
 				case I18NExternalizeDialog.COLUMN_KEY :
-					return treeNode.getKey();
+					return treeNode.isJSText() && ((JSText)treeNode.getData()).isIgnored() ? "<<IGNORED>>" : treeNode.getKey();
 			}
 
 			return "";
