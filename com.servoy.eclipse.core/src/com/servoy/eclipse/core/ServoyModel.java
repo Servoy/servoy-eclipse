@@ -2410,7 +2410,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 						if (server.hasTable(tableName))
 						{
 							tableOrServerAreNotFound = false;
-							if (!dataModelManager.isWritingMarkerFreeDBIFile(file))
+							if (!dataModelManager.isWritingMarkerFreeDBIFile(file) && !tableName.toUpperCase().startsWith(DataModelManager.TEMP_UPPERCASE_PREFIX))
 							{
 								Table table = server.getTable(tableName);
 								columnInfoChanged = true;
