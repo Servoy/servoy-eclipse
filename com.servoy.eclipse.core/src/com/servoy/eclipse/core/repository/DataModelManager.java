@@ -82,6 +82,7 @@ public class DataModelManager implements IColumnInfoManager
 {
 	public static final String COLUMN_INFO_FILE_EXTENSION = "dbi";
 	public static final String COLUMN_INFO_FILE_EXTENSION_WITH_DOT = '.' + COLUMN_INFO_FILE_EXTENSION;
+	public static final String TEMP_UPPERCASE_PREFIX = "TEMP_"; // tables that are not considered as being 'real'
 	private static final String PROP_TABLE_TYPE = "tableType";
 	private static final String PROP_COLUMNS = "columns";
 
@@ -221,6 +222,12 @@ public class DataModelManager implements IColumnInfoManager
 				addDeserializeErrorMarker(t, e.getMessage());
 				throw new RepositoryException(e);
 			}
+			catch (RepositoryException e)
+			{
+				// maybe the .dbi file content is corrupt... add an error marker
+				addDeserializeErrorMarker(t, e.getMessage());
+				throw e;
+			}
 			finally
 			{
 				if (is != null)
@@ -233,7 +240,7 @@ public class DataModelManager implements IColumnInfoManager
 		else
 		{
 			addMissingColumnMarkersIfNeeded = false; // no need adding missing column information markers if the file is missing altogether...
-			addDifferenceMarker(new TableDifference(t, null, TableDifference.MISSING_DBI_FILE, null, null), IMarker.SEVERITY_ERROR);
+			addDifferenceMarker(new TableDifference(t, null, TableDifference.MISSING_DBI_FILE, null, null), getErrorSeverity(t.getName()));
 		}
 
 		Iterator<Column> columns = t.getColumns().iterator();
@@ -243,7 +250,7 @@ public class DataModelManager implements IColumnInfoManager
 			if (c.getColumnInfo() == null)
 			{
 				if (addMissingColumnMarkersIfNeeded) addDifferenceMarker(new TableDifference(t, c.getName(), TableDifference.COLUMN_MISSING_FROM_DBI_FILE,
-					null, null), IMarker.SEVERITY_ERROR);
+					null, null), getErrorSeverity(t.getName()));
 				// only create servoy sequences when this was a new table and there is only 1 pk column
 				createNewColumnInfo(c, existingColumnInfo == 0 && t.getPKColumnTypeRowIdentCount() == 1);//was missing - create automatic sequences if missing
 			}
@@ -564,7 +571,7 @@ public class DataModelManager implements IColumnInfoManager
 		if (c == null)
 		{
 			if (t.getExistInDB()) addDifferenceMarker(new TableDifference(t, columnName, TableDifference.COLUMN_MISSING_FROM_DB, null, cid),
-				IMarker.SEVERITY_ERROR); // else table is probably being created as we speak - and it's save/sync with DB will reload/rewrite the column info anyway
+				getErrorSeverity(t.getName())); // else table is probably being created as we speak - and it's save/sync with DB will reload/rewrite the column info anyway
 			// if we would add these markers even when table is being created, warnings for writing dbi files with error markers will appear
 		}
 		else
@@ -582,7 +589,7 @@ public class DataModelManager implements IColumnInfoManager
 				}
 				else
 				{
-					severity = IMarker.SEVERITY_ERROR;
+					severity = getErrorSeverity(t.getName());
 				}
 			}
 			else if (c.getAllowNull() != cid.allowNull)
@@ -599,7 +606,7 @@ public class DataModelManager implements IColumnInfoManager
 					if ((c.isDatabasePK() && ((cid.flags & Column.IDENT_COLUMNS) == 0)) || columnInfoIsPk)
 					{
 						// column is pk, but columninfo knows it as normal column, or column is not pk and columninfo knows it as pk
-						severity = IMarker.SEVERITY_ERROR;
+						severity = getErrorSeverity(t.getName());
 					}
 					else if (c.isDatabasePK() && ((cid.flags & Column.USER_ROWID_COLUMN) != 0))
 					{
@@ -856,7 +863,7 @@ public class DataModelManager implements IColumnInfoManager
 		if (fileRd.getKind() == IResourceDelta.ADDED) // added or moved from somewhere
 		{
 			// a .dbi file was added for a table that does not exist - add problem marker
-			addDifferenceMarker(new TableDifference(serverName, tableName, null, TableDifference.MISSING_TABLE, null, null), IMarker.SEVERITY_ERROR);
+			addDifferenceMarker(new TableDifference(serverName, tableName, null, TableDifference.MISSING_TABLE, null, null), getErrorSeverity(tableName));
 		}
 	}
 
@@ -909,7 +916,7 @@ public class DataModelManager implements IColumnInfoManager
 		});
 	}
 
-	private void addDeserializeErrorMarker(Table t, final String message)
+	private void addDeserializeErrorMarker(final Table t, final String message)
 	{
 		differences.addDifference(new TableDifference(t));
 		final IFile file = getDBIFile(t.getServerName(), t.getName());
@@ -941,12 +948,18 @@ public class DataModelManager implements IColumnInfoManager
 						}
 					}
 
-					// we have an active solution with a resources project but with invalid security info; add problem marker
+					// we have an active solution with a resources project but with invalid dbi info; add problem marker
 					ServoyBuilder.addMarker(file, ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE, "Bad database information: " + message, charNo,
-						IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, "JSON file");
+						getErrorSeverity(t.getName()), IMarker.PRIORITY_NORMAL, "JSON file");
 				}
 			}
 		});
+	}
+
+	private int getErrorSeverity(String name)
+	{
+		if (name.toUpperCase().startsWith(TEMP_UPPERCASE_PREFIX)) return IMarker.SEVERITY_WARNING; // this will normally not happen as column info reads/writes for temp_ tables are ignored in Server class; but just in case make sure no error markers appear for them
+		return IMarker.SEVERITY_ERROR;
 	}
 
 	private void removeErrorMarker(final String serverName, final String tableName)
