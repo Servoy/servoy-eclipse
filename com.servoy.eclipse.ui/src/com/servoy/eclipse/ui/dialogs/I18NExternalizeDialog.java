@@ -596,7 +596,6 @@ public class I18NExternalizeDialog extends Dialog
 		ignoreMessageButton.setSelection(false);
 		ignoreMessageButton.setEnabled(false);
 
-
 		GroupLayout i18NLayout = new GroupLayout(composite);
 		i18NLayout.setHorizontalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(
 			i18NLayout.createSequentialGroup().addContainerGap().add(
@@ -709,6 +708,8 @@ public class I18NExternalizeDialog extends Dialog
 		});
 	}
 
+	private final HashMap<IPersist, Map<Integer, ArrayList<ASTNode>>> persistToLineNumberForASTNodes = new HashMap<IPersist, Map<Integer, ArrayList<ASTNode>>>();
+
 	private ArrayList<JSText> getJSTexts(final IPersist persist)
 	{
 		final ArrayList<JSText> jsTexts = new ArrayList<JSText>();
@@ -770,22 +771,31 @@ public class I18NExternalizeDialog extends Dialog
 					}
 
 					Map<Integer, ArrayList<ASTNode>> lineNumberForASTNodes = getLineNumbersForASTNodes(jsContent, startIdxNodeMap);
+					persistToLineNumberForASTNodes.put(persist, lineNumberForASTNodes);
 					Iterator<ArrayList<ASTNode>> astNodesIte = lineNumberForASTNodes.values().iterator();
 					ArrayList<ASTNode> astNodes;
 					StringLiteral stringLiteral;
-					SingleLineComment comment = null;
+					ArrayList<SingleLineComment> lineComments;
 					int keyIdx = 0;
 					while (astNodesIte.hasNext())
 					{
 						astNodes = astNodesIte.next();
+						lineComments = new ArrayList<SingleLineComment>();
 						if (astNodes.get(0) instanceof SingleLineComment)
 						{
-							comment = (SingleLineComment)astNodes.remove(0);
+
+							lineComments.add((SingleLineComment)astNodes.remove(0));
 						}
 
 						for (int y = 0; y < astNodes.size(); y++)
 						{
-							if (comment != null && comment.getText().indexOf("$NON-NLS-" + (y + 1) + "$") != -1) continue;
+							boolean isIgnored = false;
+							for (SingleLineComment lineComment : lineComments)
+							{
+								isIgnored = isIgnored || (lineComment.getText().indexOf("$NON-NLS-" + (y + 1) + "$") != -1);
+								if (isIgnored) break;
+							}
+							if (isIgnored) continue;
 							stringLiteral = (StringLiteral)astNodes.get(y);
 							String keyHint = getKeyHint(persist, null) + keyIdx++;
 							jsTexts.add(new JSText(persist, stringLiteral.getText(), stringLiteral.sourceStart(), stringLiteral.sourceEnd(), keyHint));
@@ -811,7 +821,7 @@ public class I18NExternalizeDialog extends Dialog
 		int line = 1;
 		for (int i = 0; i < jsConent.length(); i++)
 		{
-			if (jsConent.charAt(i) == '\n')
+			if (jsConent.charAt(i) == '\r' || (jsConent.charAt(i) == '\n' && (i == 0 || jsConent.charAt(i - 1) != '\r')))
 			{
 				line++;
 			}
@@ -1025,18 +1035,59 @@ public class I18NExternalizeDialog extends Dialog
 							{
 								String persistJSContent = workspaceFileAccess.getUTF8Contents(jsPath);
 								StringBuffer replacedPersistJSContent = new StringBuffer();
+								ArrayList<Integer> lineIdxOfIgnoredString = new ArrayList<Integer>();
+								int line = 1;
+								StringBuffer ignoreLineComment;
 								for (int i = 0; i < persistJSContent.length();)
 								{
 									if (persistJSTextStartPos.size() > 0 && i == persistJSTextStartPos.get(0).intValue())
 									{
 										JSText jstxt = persistJSTexts.get(persistJSTextStartPos.get(0));
-										replacedPersistJSContent.append("i18n.getI18NMessage('").append(jstxt.getKeyHint()).append("')");
-										i = jstxt.getEndPosition();
+										if (jstxt.isIgnored())
+										{
+											Map<Integer, ArrayList<ASTNode>> linesNodes = persistToLineNumberForASTNodes.get(persistJSTextMapEntry.getKey());
+											if (linesNodes != null)
+											{
+												ArrayList<ASTNode> lineNodes = linesNodes.get(Integer.valueOf(line));
+												if (lineNodes != null)
+												{
+													for (int j = 0; j < lineNodes.size(); j++)
+													{
+														if (lineNodes.get(j) instanceof StringLiteral &&
+															((StringLiteral)lineNodes.get(j)).getText().equals(jstxt.getText()))
+														{
+															lineIdxOfIgnoredString.add(Integer.valueOf(j + 1));
+															break;
+														}
+													}
+												}
+											}
+										}
+										else
+										{
+											replacedPersistJSContent.append("i18n.getI18NMessage('").append(jstxt.getKeyHint()).append("')");
+											i = jstxt.getEndPosition();
+										}
 										persistJSTextStartPos.remove(0);
 									}
 									else
 									{
-										replacedPersistJSContent.append(persistJSContent.charAt(i));
+										char nextChar = persistJSContent.charAt(i);
+										if (nextChar == '\r' || (nextChar == '\n' && (i == 0 || persistJSContent.charAt(i - 1) != '\r')))
+										{
+											ignoreLineComment = new StringBuffer();
+											for (Integer ignoredIdx : lineIdxOfIgnoredString)
+											{
+												ignoreLineComment.append(" //$NON-NLS-").append(ignoredIdx).append("$");
+											}
+											if (ignoreLineComment.length() > 0)
+											{
+												replacedPersistJSContent.append(ignoreLineComment);
+											}
+											lineIdxOfIgnoredString.clear();
+											line++;
+										}
+										replacedPersistJSContent.append(nextChar);
 										i++;
 									}
 								}
