@@ -516,7 +516,7 @@ public class SuggestForeignTypesWizard extends Wizard
 			{
 				try
 				{
-					List<String> tableNames = server.getTableNames();
+					List<String> tableNames = server.getTableNames(true);
 					allTableNames = new String[tableNames.size()];
 					allTableNames = tableNames.toArray(allTableNames);
 					Arrays.sort(allTableNames);

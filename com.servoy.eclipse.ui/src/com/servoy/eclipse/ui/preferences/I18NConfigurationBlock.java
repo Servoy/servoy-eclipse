@@ -296,7 +296,7 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 				else tableName = oldText;
 				IServerManagerInternal sm = ServoyModel.getServerManager();
 				IServer server = sm.getServer(serverName);
-				List<String> tableNames = server.getTableAndViewNames();
+				List<String> tableNames = server.getTableAndViewNames(true);
 				Collections.sort(tableNames);
 
 				int index = 1;

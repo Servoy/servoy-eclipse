@@ -333,7 +333,7 @@ public class DataModelManager implements IColumnInfoManager
 	{
 		try
 		{
-			Iterator<String> tables = ((IServerInternal)server).getTableAndViewNames().iterator();
+			Iterator<String> tables = ((IServerInternal)server).getTableAndViewNames(true).iterator();
 			while (tables.hasNext())
 			{
 				String tableName = tables.next();
@@ -951,8 +951,8 @@ public class DataModelManager implements IColumnInfoManager
 
 					// we have an active solution with a resources project but with invalid security info; add problem marker
 					String msg = MarkerMessages.getMessage(MarkerMessages.Marker_DBI_BadDBInfo, message);
-					ServoyBuilder.addMarker(file, ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE, msg, charNo, getErrorSeverity(t.getName()), IMarker.PRIORITY_NORMAL,
-						"JSON file");
+					ServoyBuilder.addMarker(file, ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE, msg, charNo, getErrorSeverity(t.getName()),
+						IMarker.PRIORITY_NORMAL, "JSON file");
 				}
 			}
 		});

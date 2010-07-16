@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 import java.rmi.RemoteException;
@@ -528,7 +528,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		{
 			try
 			{
-				List<String> tableNames = ServoyModel.getServerManager().getServer(serverName).getTableAndViewNames();
+				List<String> tableNames = ServoyModel.getServerManager().getServer(serverName).getTableAndViewNames(true);
 				for (String tableName : tableNames)
 				{
 					contentProvider.add(new Table(serverName, tableName), itemsFilter);

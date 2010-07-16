@@ -132,7 +132,7 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 		{
 			try
 			{
-				for (String tableName : server.getTableAndViewNames())
+				for (String tableName : server.getTableAndViewNames(true))
 				{
 					if (options.type == TableListType.I18N)
 					{

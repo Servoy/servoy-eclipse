@@ -308,7 +308,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			{
 				try
 				{
-					final List<String> tableNames = s.getTableAndViewNames();
+					final List<String> tableNames = s.getTableAndViewNames(true);
 					serverInformationFolder.accept(new IResourceVisitor()
 					{
 
@@ -320,7 +320,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 								// we found a .dbi file... see if the table exists
 								String tableName = resource.getName().substring(0,
 									resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
-								if (!tableNames.contains(tableName))
+								if (!tableNames.contains(tableName) && !tableName.toUpperCase().startsWith(DataModelManager.TEMP_UPPERCASE_PREFIX))
 								{
 									if (tableName.toLowerCase().equals(tableName))
 									{
@@ -362,7 +362,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			IFolder serverInformationFolder = dmm.getDBIFileContainer(s.getName());
 			try
 			{
-				for (String tableName : s.getTableAndViewNames())
+				for (String tableName : s.getTableAndViewNames(true))
 				{
 					if (!serverInformationFolder.getFile(tableName + DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT).exists())
 					{
@@ -470,7 +470,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					{
 						for (IServerInternal s : servers)
 						{
-							count += s.getTableAndViewNames().size();
+							count += s.getTableAndViewNames(true).size();
 						}
 					}
 					catch (RepositoryException e)
@@ -607,7 +607,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					{
 						for (IServerInternal s : servers)
 						{
-							for (String tableName : s.getTableAndViewNames())
+							for (String tableName : s.getTableAndViewNames(true))
 							{
 								monitor.worked(1);
 								s.refreshTable(tableName);

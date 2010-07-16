@@ -148,7 +148,7 @@ public class UpdateServoySequencesAction extends Action implements ISelectionCha
 						List<String> tables = null;
 						try
 						{
-							tables = server.getTableAndViewNames();
+							tables = server.getTableAndViewNames(true);
 						}
 						catch (Exception e)
 						{

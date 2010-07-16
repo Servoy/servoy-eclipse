@@ -307,7 +307,7 @@ public class RepositoryOperations
 						remoteServer = repo.getServer(serverName);
 						if (remoteServer != null && remoteServer.isValid())
 						{
-							serverTablesNames = remoteServer.getTableAndViewNames();
+							serverTablesNames = remoteServer.getTableAndViewNames(true);
 
 							for (String serverTableName : serverTablesNames)
 							{

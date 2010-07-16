@@ -514,7 +514,7 @@ public class EclipseUserManager implements IUserManager
 			{
 				try
 				{
-					for (String tableName : server.getTableNames())
+					for (String tableName : server.getTableNames(false))
 					{
 						if (server.isTableLoaded(tableName))
 						{
@@ -2828,7 +2828,7 @@ public class EclipseUserManager implements IUserManager
 			{
 				try
 				{
-					Iterator<String> tables = s.getTableAndViewNames().iterator();
+					Iterator<String> tables = s.getTableAndViewNames(false).iterator();
 					while (tables.hasNext())
 					{
 						String tableName = tables.next();
@@ -2904,7 +2904,7 @@ public class EclipseUserManager implements IUserManager
 				{
 					try
 					{
-						Iterator<String> tables = s.getTableAndViewNames().iterator();
+						Iterator<String> tables = s.getTableAndViewNames(false).iterator();
 						while (tables.hasNext())
 						{
 							String tableName = tables.next();
@@ -3127,7 +3127,7 @@ public class EclipseUserManager implements IUserManager
 				{
 					try
 					{
-						for (String tableName : server.getTableNames())
+						for (String tableName : server.getTableNames(false))
 						{
 							if (server.isTableLoaded(tableName))
 							{

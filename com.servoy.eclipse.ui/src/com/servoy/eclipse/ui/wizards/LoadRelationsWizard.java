@@ -215,7 +215,7 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 			List<RelationSelectorModel> relations = new ArrayList<RelationSelectorModel>();
 			try
 			{
-				for (String tableName : server.getTableNames())
+				for (String tableName : server.getTableNames(true))
 				{
 					Table table = server.getTable(tableName);
 					Connection connection = null;

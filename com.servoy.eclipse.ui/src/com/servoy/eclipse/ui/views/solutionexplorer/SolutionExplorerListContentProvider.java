@@ -819,7 +819,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			try
 			{
-				List<String> viewNames = s.getViewNames();
+				List<String> viewNames = s.getViewNames(true);
 				if (viewNames != null && viewNames.size() > 0)
 				{
 					Iterator<String> it = viewNames.iterator();
@@ -844,7 +844,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		if (s.isValid() && s.getConfig().isEnabled())
 		{
 			Iterator<String> tableNames;
-			tableNames = s.getTableNames().iterator();
+			tableNames = s.getTableNames(true).iterator();
 
 			while (tableNames.hasNext())
 			{

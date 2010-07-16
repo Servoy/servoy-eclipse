@@ -122,7 +122,7 @@ public class BackgroundTableLoader implements IActiveProjectListener
 								((IServerInternal)s).testConnection(0);
 								try
 								{
-									s.getTableAndViewNames(); //load all table names
+									s.getTableAndViewNames(false); //load all table names
 								}
 								catch (Exception e)
 								{

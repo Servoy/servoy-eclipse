@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
@@ -244,7 +244,7 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 				server = repository.getServer(serverName);
 				if (server != null)
 				{
-					List<String> tableNames = server.getTableAndViewNames();
+					List<String> tableNames = server.getTableAndViewNames(true);
 					allTables = new String[tableNames.size()];
 
 					int counter = 0;

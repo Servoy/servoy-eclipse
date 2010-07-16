@@ -2661,7 +2661,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			try
 			{
 				IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(server_name, true, true);
-				Iterator<String> tables = server.getTableAndViewNames().iterator();
+				Iterator<String> tables = server.getTableAndViewNames(true).iterator();
 				while (tables.hasNext())
 				{
 					String tableName = tables.next();

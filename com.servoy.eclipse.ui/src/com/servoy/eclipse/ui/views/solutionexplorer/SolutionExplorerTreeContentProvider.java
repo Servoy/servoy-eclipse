@@ -674,7 +674,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				List<String> views = null;
 				try
 				{
-					views = serverObj.getViewNames();
+					views = serverObj.getViewNames(true);
 				}
 				catch (RepositoryException e)
 				{
