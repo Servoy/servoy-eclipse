@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.debug.actions;
 
 
@@ -250,16 +250,18 @@ public abstract class StartDebugAction implements IWorkbenchWindowActionDelegate
 	 */
 	protected ILaunchConfiguration findLaunchConfiguration(IResource script, ILaunchConfigurationType configType)
 	{
-		List candidateConfigs = Collections.EMPTY_LIST;
+		List<ILaunchConfiguration> candidateConfigs = Collections.emptyList();
 		try
 		{
 			ILaunchConfiguration[] configs = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurations(configType);
-			candidateConfigs = new ArrayList(configs.length);
+			candidateConfigs = new ArrayList<ILaunchConfiguration>(configs.length);
 			for (ILaunchConfiguration config : configs)
 			{
-				if (config.getAttribute(ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME, "").equals(script.getProjectRelativePath().toString()) &&
+				if (config.getAttribute(ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME, "").equals(script.getProjectRelativePath().toString()) && //$NON-NLS-1$
 					config.getAttribute(ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME, "").equals(script.getProject().getName())) { //$NON-NLS-1$
-					candidateConfigs.add(config);
+					// tryfix for mac.. delete it instead of add the config.
+					config.delete();
+					//candidateConfigs.add(config);
 				}
 			}
 		}
@@ -281,7 +283,7 @@ public abstract class StartDebugAction implements IWorkbenchWindowActionDelegate
 		}
 		else if (candidateCount >= 1)
 		{
-			return (ILaunchConfiguration)candidateConfigs.get(0);
+			return candidateConfigs.get(0);
 		}
 		return null;
 	}
@@ -297,8 +299,8 @@ public abstract class StartDebugAction implements IWorkbenchWindowActionDelegate
 			wc.setAttribute(ScriptLaunchConfigurationConstants.ATTR_SCRIPT_NATURE, JavaScriptNature.NATURE_ID);
 			wc.setAttribute(ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME, script.getProject().getName());
 			wc.setAttribute(ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME, script.getProjectRelativePath().toPortableString()/*
-																																		 * script.getFullPath().toPortableString
-																																		 * ()
+																																		 * script.getFullPath().
+																																		 * toPortableString ()
 																																		 */);
 			wc.setAttribute(IDebugUIConstants.ATTR_LAUNCH_IN_BACKGROUND, true);
 
