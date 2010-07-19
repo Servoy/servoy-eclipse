@@ -40,7 +40,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
@@ -209,18 +208,6 @@ public class Activator extends Plugin
 		String serviceClass = URLStreamHandlerService.class.getName();
 		context.registerService(serviceClass, new MediaURLStreamHandlerService(), properties);
 
-		// start the design client here from within a job.
-		// Without this, the main thread may block on the awt thread when the debig SC client is created which causes
-		// paint issues in debug SC on the mac.
-		new Job("DesignClientStarter")
-		{
-			@Override
-			protected IStatus run(IProgressMonitor monitor)
-			{
-				getDefault().getDesignClient().getClient();
-				return Status.OK_STATUS;
-			}
-		}.schedule();
 	}
 
 	public boolean isSqlExplorerLoaded()

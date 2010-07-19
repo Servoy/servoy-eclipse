@@ -46,6 +46,7 @@ import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.util.ITagResolver;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner,jblok
@@ -123,7 +124,8 @@ public class StartSmartClientActionDelegate extends StartDebugAction implements 
 					{
 						public void run()
 						{
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution type problem" ,"Cant open this solution type in this client"); //$NON-NLS-1$
+							MessageDialog.openError(Display.getDefault().getActiveShell(),
+								"Solution type problem", "Cant open this solution type in this client"); //$NON-NLS-1$
 						}
 					});
 					return;
@@ -167,5 +169,25 @@ public class StartSmartClientActionDelegate extends StartDebugAction implements 
 		{
 			monitor.done();
 		}
+	}
+
+	@Override
+	protected void aboutToStartDebugClient()
+	{
+		// add some delay, this seems to fix grey screens in developer on the mac.
+		// If action returns and at the same time the frame is shown, awt/swt events get mixed up?
+		long delay = Utils.getAsLong(ServoyModel.getSettings().getProperty("servoy.developer.startsc.delay", Utils.isAppleMacOS() ? "1000" : "0")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		if (delay > 0)
+		{
+			try
+			{
+				Thread.sleep(delay);
+			}
+			catch (InterruptedException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+		super.aboutToStartDebugClient();
 	}
 }
