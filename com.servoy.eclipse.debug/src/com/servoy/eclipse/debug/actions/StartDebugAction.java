@@ -204,6 +204,7 @@ public abstract class StartDebugAction implements IWorkbenchWindowActionDelegate
 
 				try
 				{
+					aboutToStartDebugClient();
 					final ILaunchConfiguration config = findLaunchConfiguration(script, configType);
 					if (config != null)
 					{
@@ -229,6 +230,12 @@ public abstract class StartDebugAction implements IWorkbenchWindowActionDelegate
 			}
 		}
 		return true;
+	}
+
+
+	protected void aboutToStartDebugClient()
+	{
+		// by default do nothing, see StartSmartClientActionDelegate
 	}
 
 
@@ -259,9 +266,7 @@ public abstract class StartDebugAction implements IWorkbenchWindowActionDelegate
 			{
 				if (config.getAttribute(ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME, "").equals(script.getProjectRelativePath().toString()) && //$NON-NLS-1$
 					config.getAttribute(ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME, "").equals(script.getProject().getName())) { //$NON-NLS-1$
-					// tryfix for mac.. delete it instead of add the config.
-					config.delete();
-					//candidateConfigs.add(config);
+					candidateConfigs.add(config);
 				}
 			}
 		}
