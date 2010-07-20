@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
@@ -388,114 +389,127 @@ public class Activator extends Plugin
 	private void initialize()
 	{
 		defaultAccessed = true;
-		final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		XMLScriptObjectAdapterLoader.loadDocumentationFromXML();
 		MethodTemplatesLoader.loadMethodTemplatesFromXML();
 
-
-		IActiveProjectListener apl = new IActiveProjectListener()
+		// install servoy model listeners in separate job, when ServoyModel is created in bundle.activator thread
+		// a deadlock may occur (display thread waits for loading of ui bundle which waits for core bundle 
+		// which waits for ServoyModel latch, but the ServoyModel runnable is never running because display thread is blocking in wait)  
+		new Job("HookupToServoyModel") //$NON-NLS-1$
 		{
-			public void activeProjectChanged(final ServoyProject project)
+			@Override
+			protected IStatus run(IProgressMonitor monitor)
 			{
-				if (designClient != null)
+				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+
+				IActiveProjectListener apl = new IActiveProjectListener()
 				{
-					designClient.refreshI18NMessages();
-				}
-				// can this be really later? or should we wait?
-				// its much nice to do that later in the event thread.
-				SwingUtilities.invokeLater(new Runnable()
-				{
-					public void run()
+					public void activeProjectChanged(final ServoyProject project)
 					{
-						IDebugClientHandler dch = getDebugClientHandler();
-						if (project != null)
+						if (designClient != null)
 						{
-							dch.reloadDebugSolution(project.getSolution());
-							dch.reloadDebugSolutionSecurity();
+							designClient.refreshI18NMessages();
 						}
-						else
+						// can this be really later? or should we wait?
+						// its much nice to do that later in the event thread.
+						SwingUtilities.invokeLater(new Runnable()
 						{
-							dch.reloadDebugSolution(null);
+							public void run()
+							{
+								IDebugClientHandler dch = getDebugClientHandler();
+								if (project != null)
+								{
+									dch.reloadDebugSolution(project.getSolution());
+									dch.reloadDebugSolutionSecurity();
+								}
+								else
+								{
+									dch.reloadDebugSolution(null);
+								}
+							}
+						});
+					}
+
+					public void activeProjectUpdated(final ServoyProject activeProject, int updateInfo)
+					{
+						if (activeProject == null) return;
+						if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
+						{
+							// in order to have a good module cache in the flattened solution
+							SwingUtilities.invokeLater(new Runnable()
+							{
+								public void run()
+								{
+									IDebugClientHandler dch = getDebugClientHandler();
+									dch.reloadDebugSolution(activeProject.getSolution());
+									dch.reloadDebugSolutionSecurity();
+								}
+							});
+						}
+						else if (updateInfo == IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT)
+						{
+							SwingUtilities.invokeLater(new Runnable()
+							{
+								public void run()
+								{
+									IDebugClientHandler dch = getDebugClientHandler();
+									dch.reloadDebugSolutionSecurity();
+									dch.reloadAllStyles();
+								}
+							});
+						}
+						else if (updateInfo == IActiveProjectListener.STYLES_ADDED_OR_REMOVED)
+						{
+							SwingUtilities.invokeLater(new Runnable()
+							{
+								public void run()
+								{
+									IDebugClientHandler dch = getDebugClientHandler();
+									dch.reloadAllStyles();
+								}
+							});
+						}
+						else if (updateInfo == IActiveProjectListener.SECURITY_INFO_CHANGED)
+						{
+							SwingUtilities.invokeLater(new Runnable()
+							{
+								public void run()
+								{
+									IDebugClientHandler dch = getDebugClientHandler();
+									dch.reloadDebugSolutionSecurity();
+								}
+							});
 						}
 					}
-				});
-			}
 
-			public void activeProjectUpdated(final ServoyProject activeProject, int updateInfo)
-			{
-				if (activeProject == null) return;
-				if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
-				{
-					// in order to have a good module cache in the flattened solution
-					SwingUtilities.invokeLater(new Runnable()
+					public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
 					{
-						public void run()
-						{
-							IDebugClientHandler dch = getDebugClientHandler();
-							dch.reloadDebugSolution(activeProject.getSolution());
-							dch.reloadDebugSolutionSecurity();
-						}
-					});
-				}
-				else if (updateInfo == IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT)
-				{
-					SwingUtilities.invokeLater(new Runnable()
-					{
-						public void run()
-						{
-							IDebugClientHandler dch = getDebugClientHandler();
-							dch.reloadDebugSolutionSecurity();
-							dch.reloadAllStyles();
-						}
-					});
-				}
-				else if (updateInfo == IActiveProjectListener.STYLES_ADDED_OR_REMOVED)
-				{
-					SwingUtilities.invokeLater(new Runnable()
-					{
-						public void run()
-						{
-							IDebugClientHandler dch = getDebugClientHandler();
-							dch.reloadAllStyles();
-						}
-					});
-				}
-				else if (updateInfo == IActiveProjectListener.SECURITY_INFO_CHANGED)
-				{
-					SwingUtilities.invokeLater(new Runnable()
-					{
-						public void run()
-						{
-							IDebugClientHandler dch = getDebugClientHandler();
-							dch.reloadDebugSolutionSecurity();
-						}
-					});
-				}
-			}
+						return true;
+					}
+				};
 
-			public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
-			{
-				return true;
-			}
-		};
-		servoyModel.addActiveProjectListener(apl);
-		apl.activeProjectChanged(servoyModel.getActiveProject());
+				servoyModel.addActiveProjectListener(apl);
+				apl.activeProjectChanged(servoyModel.getActiveProject());
 
-		servoyModel.addPersistChangeListener(true, new IPersistChangeListener()
-		{
-			public void persistChanges(final Collection<IPersist> changes)
-			{
-				SwingUtilities.invokeLater(new Runnable()
+				servoyModel.addPersistChangeListener(true, new IPersistChangeListener()
 				{
-					public void run()
+					public void persistChanges(final Collection<IPersist> changes)
 					{
-						IDebugClientHandler dch = getDebugClientHandler();
-						dch.refreshDebugClients(changes);
+						SwingUtilities.invokeLater(new Runnable()
+						{
+							public void run()
+							{
+								IDebugClientHandler dch = getDebugClientHandler();
+								dch.refreshDebugClients(changes);
+							}
+						});
 					}
 				});
+				return Status.OK_STATUS;
 			}
-		});
+		}.schedule();
+
 	}
 
 	public synchronized IDocumentationManagerProvider getDocumentationManagerProvider()
