@@ -21,7 +21,6 @@ import java.util.LinkedHashMap;
 
 import org.dom4j.Element;
 
-import com.servoy.j2db.documentation.ParameterDocumentation;
 import com.servoy.j2db.documentation.QualifiedDocumentationName;
 import com.servoy.j2db.util.ITagResolver;
 
@@ -46,6 +45,8 @@ public interface IFunctionDocumentation
 
 	public Integer getType();
 
+	Class< ? > getReturnedType();
+
 	public boolean isSpecial();
 
 	public int getState();
@@ -56,21 +57,27 @@ public interface IFunctionDocumentation
 
 	public String getMainName();
 
+	public Class< ? >[] getArgumentsTypes();
+
 	public String getSample();
 
 	public void setSample(String sample);
 
-	public String getSignature(String prefix);
+	public String getFullSignature();
 
-	public String getReturnedType();
+	public String getSignature(String prefix);
 
 	public boolean answersTo(String name);
 
-	public LinkedHashMap<String, ParameterDocumentation> getArguments();
+	public boolean answersTo(String name, Class< ? >[] argsTypes);
+
+	public boolean answersTo(String name, String[] argsTypes);
+
+	public LinkedHashMap<String, IParameterDocumentation> getArguments();
 
 	public boolean isDeprecated();
 
-	public void addArgument(ParameterDocumentation argDoc);
+	public void addArgument(IParameterDocumentation argDoc);
 
 	public void runResolver(ITagResolver resolver);
 
@@ -84,7 +91,7 @@ public interface IFunctionDocumentation
 
 	public QualifiedDocumentationName getRedirect();
 
-	public Element toXML(boolean hideSample);
+	public Element toXML(boolean hideSample, boolean pretty);
 
 	public QualifiedDocumentationName getCloneDescRedirect();
 }

@@ -31,13 +31,13 @@ public interface IObjectDocumentation
 {
 	public IFunctionDocumentation getFunction(String functionName);
 
+	public IFunctionDocumentation getFunction(String functionName, String[] argumentsTypes);
+
 	public SortedSet<IFunctionDocumentation> getFunctions();
 
 	public void addReturnedType(String qname);
 
 	public SortedSet<String> getReturnedTypes();
-
-	public void setPublicName(String publicName);
 
 	public String getQualifiedName();
 
@@ -55,5 +55,5 @@ public interface IObjectDocumentation
 
 	public boolean goesToXML(boolean hideDeprecated);
 
-	public Element toXML(IDocumentationManager docManager, boolean hideDeprecated);
+	public Element toXML(IDocumentationManager docManager, boolean hideDeprecated, boolean pretty);
 }

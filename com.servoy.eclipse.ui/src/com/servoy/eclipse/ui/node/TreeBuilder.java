@@ -21,11 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeSet;
-
-import org.eclipse.swt.graphics.Image;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.XMLScriptObjectAdapterLoader;
@@ -33,8 +29,6 @@ import com.servoy.eclipse.core.doc.IDocumentationManager;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.core.doc.IFunctionDocumentation;
 import com.servoy.eclipse.core.doc.IObjectDocumentation;
-import com.servoy.j2db.documentation.ParameterDocumentation;
-import com.servoy.j2db.util.HtmlUtils;
 
 public class TreeBuilder
 {
@@ -74,93 +68,47 @@ public class TreeBuilder
 
 	public static UserNode[] createJSArray(IImageLookup imageLookup)
 	{
-		Object propertiesIcon = imageLookup.loadImage("properties_icon.gif"); //$NON-NLS-1$
-		Object functionIcon = imageLookup.loadImage("function.gif"); //$NON-NLS-1$
-
 		List<UserNode> dlm = new ArrayList<UserNode>();
-		dlm.add(new UserNode(
-			"Array()", UserNodeType.ARRAY, "new Array()", "var array = new Array();", "<html><body><b>Array()</b><br><pre>Constructs a new default array</pre></body></html>", null, functionIcon)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-		dlm.add(new UserNode(
-			"Array(number)", UserNodeType.ARRAY, "new Array(number)", "var array = new Array(number);", "<html><body><b>Array(number)</b><br><pre>Constructs a new array with size [number]</pre></body></html>", null, functionIcon)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-		dlm.add(new UserNode(
-			"Array(value1,value2)", UserNodeType.ARRAY, "new Array(value1,value2)", "var array = new Array(value1,value2);", "<html><body><b>Array(value1,value2)</b><br><pre>Constructs a new array that contains the given values</pre></body></html>", null, functionIcon)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-
-		return createTypedArray(imageLookup, com.servoy.eclipse.core.scripting.docs.Array.class, UserNodeType.ARRAY, dlm, true);
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Array.class, UserNodeType.ARRAY, dlm);
 	}
 
 	public static UserNode[] createJSDate(IImageLookup imageLookup)
 	{
-		Object functionIcon = imageLookup.loadImage("function.gif");
-
 		List<UserNode> dlm = new ArrayList<UserNode>();
-
-		dlm.add(new UserNode("Date()", UserNodeType.DATE, "new Date()", "var date = new Date();",
-			"<html><body><b>Date()</b><br><pre>Use the current date and time to create an instance of the object date</pre></body></html>", null, functionIcon)); //$NON-NLS-1$
-		dlm.add(new UserNode(
-			"Date(dateString)",
-			UserNodeType.DATE,
-			"new Date(dateString)",
-			"var date = new Date(dateString);",
-			"<html><body><b>Date(dateString)</b><br><pre>Use the date specified by the string to create the instance of the date object. String format is \"month day, year hours:minutes:seconds\". </pre></body></html>",
-			null, functionIcon));
-		dlm.add(new UserNode("Date(year, month, day)", UserNodeType.DATE, "new Date(year, month, day)", "var date = new Date(year, month, day);",
-			"<html><body><b>Date(year, month, day)</b><br><pre>Create an instance of date with the specified values.</pre></body></html>", null, functionIcon));
-		dlm.add(new UserNode(
-			"Date(year, month, day, hours, minutes, seconds)",
-			UserNodeType.DATE,
-			"new Date(year, month, day, hours, minutes, seconds)",
-			"var date = new Date(year, month, day, hours, minutes, seconds);",
-			"<html><body><b>Date(year, month, day, hours, minutes, seconds)</b><br><pre>Create an instance of date with the specified values</pre></body></html>",
-			null, functionIcon));
-		dlm.add(new UserNode(
-			"Date(year, month, day, hours, minutes, seconds, milliseconds)",
-			UserNodeType.DATE,
-			"new Date(year, month, day, hours, minutes, seconds, milliseconds);",
-			"var date = new Date(year, month, day, hours, minutes, seconds, milliseconds)",
-			"<html><body><b>Date(year, month, day, hours, minutes, seconds, milliseconds)</b><br><pre>Create an instance of date with the specified values</pre></body></html>",
-			null, functionIcon));
-		dlm.add(new UserNode(
-			"Date(milliseconds)",
-			UserNodeType.DATE,
-			"new Date(milliseconds)",
-			"var date = new Date(milliseconds);",
-			"<html><body><b>Date(milliseconds)</b><br><pre>Create instance of date 1 January 1970 00:00:00 UTC. Constructor argument is the number of milliseconds since 1 January 1970 00:00:00 UTC</pre></body></html>",
-			null, functionIcon));
-
-		return createTypedArray(imageLookup, com.servoy.eclipse.core.scripting.docs.Date.class, UserNodeType.DATE, dlm, true);
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Date.class, UserNodeType.DATE, dlm);
 	}
 
 	public static UserNode[] createJSString(IImageLookup imageLookup)
 	{
-		return createTypedArray(imageLookup, com.servoy.eclipse.core.scripting.docs.String.class, UserNodeType.STRING, null, true);
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.String.class, UserNodeType.STRING, null);
 	}
 
 	public static UserNode[] createJSMathFunctions(IImageLookup imageLookup)
 	{
-		return createTypedArray(imageLookup, com.servoy.eclipse.core.scripting.docs.Math.class, UserNodeType.FUNCTIONS_ITEM, null, true);
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Math.class, UserNodeType.FUNCTIONS_ITEM, null);
 	}
 
 	public static UserNode[] createFlows(IImageLookup imageLookup)
 	{
-		return createTypedArray(imageLookup, com.servoy.eclipse.core.scripting.docs.Statements.class, UserNodeType.STATEMENTS_ITEM, null, false);
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Statements.class, UserNodeType.STATEMENTS_ITEM, null);
 	}
 
 	public static UserNode[] createXMLListMethods(IImageLookup imageLookup)
 	{
-		return createTypedArray(imageLookup, com.servoy.eclipse.core.scripting.docs.XMLList.class, UserNodeType.XML_LIST_METHODS, null, true);
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.XMLList.class, UserNodeType.XML_LIST_METHODS, null);
 	}
 
 	public static UserNode[] createXMLMethods(IImageLookup imageLookup)
 	{
-		return createTypedArray(imageLookup, com.servoy.eclipse.core.scripting.docs.XML.class, UserNodeType.XML_METHODS, null, true);
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.XML.class, UserNodeType.XML_METHODS, null);
 	}
 
 	public static UserNode[] createJSRegexp(IImageLookup imageLookup)
 	{
-		return createTypedArray(imageLookup, com.servoy.eclipse.core.scripting.docs.RegExp.class, UserNodeType.REGEXP, null, true);
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.RegExp.class, UserNodeType.REGEXP, null);
 	}
 
-	public static UserNode[] createTypedArray(IImageLookup imageLookup, Class< ? > clazz, UserNodeType type, List<UserNode> existingDlm, boolean extendedTooltip)
+	public static UserNode[] createTypedArray(IImageLookup imageLookup, Class< ? > clazz, UserNodeType type, List<UserNode> existingDlm)
 	{
 		Object functionIcon = imageLookup.loadImage("function.gif"); //$NON-NLS-1$
 		Object propertiesIcon = imageLookup.loadImage("properties_icon.gif"); //$NON-NLS-1$
@@ -178,14 +126,14 @@ public class TreeBuilder
 				{
 					if (fdoc.getType() == IFunctionDocumentation.TYPE_PROPERTY)
 					{
-						dlm.add(fdoc2usernode(fdoc, type, functionIcon, extendedTooltip));
+						dlm.add(fdoc2usernode(fdoc, type, propertiesIcon));
 					}
 				}
 				for (IFunctionDocumentation fdoc : objDoc.getFunctions())
 				{
 					if (fdoc.getType() == IFunctionDocumentation.TYPE_FUNCTION)
 					{
-						dlm.add(fdoc2usernode(fdoc, type, functionIcon, extendedTooltip));
+						dlm.add(fdoc2usernode(fdoc, type, functionIcon));
 					}
 				}
 			}
@@ -194,16 +142,9 @@ public class TreeBuilder
 		return dlm.toArray(new UserNode[dlm.size()]);
 	}
 
-	private static UserNode fdoc2usernode(IFunctionDocumentation fdoc, UserNodeType type, Object functionIcon, boolean extendedTooltip)
+	private static UserNode fdoc2usernode(IFunctionDocumentation fdoc, UserNodeType type, Object functionIcon)
 	{
-		String retType = fdoc.getReturnedType();
-		if (retType != null)
-		{
-			int idx = retType.lastIndexOf(".");
-			if (idx >= 0) retType = retType.substring(idx + 1);
-		}
-		String tooltip = fdoc.getDescription();
-		if (extendedTooltip) tooltip = "<html><body><b>" + retType + " " + fdoc.getMainName() + "</b> " + tooltip + "</body></html>";
+		String tooltip = "<html><body><b>" + fdoc.getFullSignature() + "</b> " + fdoc.getDescription() + "</body></html>"; //$NON-NLS-1$//$NON-NLS-2$
 		UserNode un = new UserNode(fdoc.getMainName(), type, fdoc.getSignature("."), fdoc.getSample(), tooltip, null, //$NON-NLS-1$
 			functionIcon);
 		return un;
@@ -280,105 +221,5 @@ public class TreeBuilder
 				}
 		}
 		return result;
-	}
-
-	public static List<IObjectDocumentation> generateDocumentation()
-	{
-		Set<String> addedJSLib = new TreeSet<String>();
-		List<IObjectDocumentation> docs = new ArrayList<IObjectDocumentation>();
-		IDocumentationManager dm = getDocManager();
-		if (dm != null)
-		{
-			docs.add(generateObjectDocumentation("Array", createJSArray(DummyImageLoader.INSTANCE), addedJSLib)); //$NON-NLS-1$
-			docs.add(generateObjectDocumentation("Date", createJSDate(DummyImageLoader.INSTANCE), addedJSLib)); //$NON-NLS-1$
-			docs.add(generateObjectDocumentation("String", createJSString(DummyImageLoader.INSTANCE), addedJSLib)); //$NON-NLS-1$
-			docs.add(generateObjectDocumentation("Math", createJSMathFunctions(DummyImageLoader.INSTANCE), addedJSLib)); //$NON-NLS-1$
-			docs.add(generateObjectDocumentation("RegExp", createJSRegexp(DummyImageLoader.INSTANCE), addedJSLib)); //$NON-NLS-1$
-			docs.add(generateObjectDocumentation("Flow", createFlows(DummyImageLoader.INSTANCE), addedJSLib)); //$NON-NLS-1$
-			docs.add(generateObjectDocumentation("XML", createXMLMethods(DummyImageLoader.INSTANCE), addedJSLib)); //$NON-NLS-1$
-			docs.add(generateObjectDocumentation("XMLList", createXMLListMethods(DummyImageLoader.INSTANCE), addedJSLib)); //$NON-NLS-1$
-
-			IObjectDocumentation allJSLib = dm.createObjectDocumentation(IDocumentationManager.TAG_JSLIB, "AllJSLib", null); //$NON-NLS-1$ 
-			allJSLib.setPublicName("JSLib"); //$NON-NLS-1$
-			for (String key : addedJSLib)
-			{
-				allJSLib.addReturnedType(key);
-			}
-			docs.add(allJSLib);
-		}
-		return docs;
-	}
-
-	private static IObjectDocumentation generateObjectDocumentation(String name, UserNode[] nodes, Set<String> addedJSLib)
-	{
-		Object propertiesIcon = DummyImageLoader.INSTANCE.loadImage("properties_icon.gif"); //$NON-NLS-1$
-
-		IDocumentationManager dm = getDocManager();
-		if (dm == null)
-		{
-			return null;
-		}
-		IObjectDocumentation objDoc = dm.createObjectDocumentation(IDocumentationManager.TAG_JSLIB, name, new String[] { });
-		objDoc.setPublicName(name);
-		addedJSLib.add(name);
-		for (UserNode node : nodes)
-		{
-			boolean isProperty = false;
-			if (propertiesIcon != null) isProperty = propertiesIcon.equals(node.getIcon());
-
-			String nameAndArgs = node.getName();
-			String fName = nameAndArgs;
-			List<String> args = new ArrayList<String>();
-			int idx = nameAndArgs.indexOf("(");
-			if (idx >= 0)
-			{
-				fName = nameAndArgs.substring(0, idx);
-				String strArgs = nameAndArgs.substring(idx + 1, nameAndArgs.indexOf(")"));
-				if (strArgs.trim().length() > 0)
-				{
-					String[] parts = strArgs.split(",");
-					for (String p : parts)
-						if (p.trim().length() > 0) args.add(p);
-				}
-			}
-
-			IFunctionDocumentation fdoc = dm.createFunctionDocumentation(fName, isProperty ? IFunctionDocumentation.TYPE_PROPERTY
-				: IFunctionDocumentation.TYPE_FUNCTION, false, IFunctionDocumentation.STATE_DOCUMENTED);
-			fdoc.setSample(node.getSampleCode());
-
-			String description = HtmlUtils.stripHTML(node.getToolTipText());
-			if (description.startsWith(nameAndArgs)) description = description.substring(nameAndArgs.length());
-			description = description.replaceAll("^[\\(\\)\\s]*", "");
-			description = description.trim();
-			fdoc.setDescription(description);
-			for (String arg : args)
-			{
-				boolean optional = false;
-				if (arg.endsWith("]")) optional = true;
-				arg = arg.replaceAll("\\[", "");
-				arg = arg.replaceAll("\\]", "");
-				arg = arg.trim();
-				fdoc.addArgument(new ParameterDocumentation(arg, "", "", optional));
-			}
-			objDoc.addFunction(fdoc);
-		}
-		return objDoc;
-	}
-
-	private static class DummyImageLoader implements IImageLookup
-	{
-		public static final DummyImageLoader INSTANCE = new DummyImageLoader();
-
-		private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
-
-		public Object loadImage(String name)
-		{
-			Image img = uiActivator.loadImageFromBundle(name);
-			if (img == null)
-			{
-				img = uiActivator.loadImageFromOldLocation(name);
-			}
-			return img;
-		}
 	}
 }

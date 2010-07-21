@@ -41,7 +41,6 @@ Export-Package: com.servoy.eclipse.core,
  com.servoy.eclipse.core.elements,
  com.servoy.eclipse.core.repository,
  com.servoy.eclipse.core.resource,
- com.servoy.eclipse.core.scripting.docs,
  com.servoy.eclipse.core.util,
  com.servoy.eclipse.dnd
 Bundle-ClassPath: .

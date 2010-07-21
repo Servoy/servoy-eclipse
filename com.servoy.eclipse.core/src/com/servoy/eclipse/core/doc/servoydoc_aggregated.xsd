@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
-	<xs:element name="aggregatedDocs" type="all"/>
+
+	<xs:include schemaLocation="servoydoc.xsd" />
+
+	<xs:element name="aggregatedDocs" type="all" />
 
 	<xs:complexType name="all">
 		<xs:sequence>
@@ -30,163 +33,6 @@
 			<xs:element name="jslib" type="objectlist" maxOccurs="1"
 				minOccurs="0" />
 		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="objectlist">
-		<xs:sequence>
-			<xs:element name="object" type="object" maxOccurs="unbounded" />
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="object">
-		<xs:sequence>
-			<xs:element name="constants" type="constantlist"
-				maxOccurs="1" minOccurs="0"></xs:element>
-			<xs:element name="properties" type="propertylist"
-				maxOccurs="1" minOccurs="0"></xs:element>
-			<xs:element name="functions" type="functionlist"
-				maxOccurs="1" minOccurs="0"></xs:element>
-			<xs:element name="events" type="eventlist" maxOccurs="1"
-				minOccurs="0"></xs:element>
-			<xs:element name="commands" type="commandlist" maxOccurs="1"
-				minOccurs="0"></xs:element>
-			<xs:element name="returnTypes" type="returnedtypeslist"
-				maxOccurs="1" minOccurs="0"></xs:element>
-			<xs:element name="serverProperties" type="serverpropertieslist"
-				maxOccurs="1" minOccurs="0"></xs:element>
-		</xs:sequence>
-		<xs:attribute name="publicName" type="xs:string" use="required" />
-		<xs:attribute name="qualifiedName" type="xs:string" use="required" />
-		<xs:attribute name="scriptingName" type="xs:string" use="optional" />
-		<xs:attribute name="deprecated" type="xs:boolean" use="optional" />
-	</xs:complexType>
-
-	<xs:complexType name="constantlist">
-		<xs:sequence>
-			<xs:element name="constant" type="function" maxOccurs="unbounded" />
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="propertylist">
-		<xs:sequence>
-			<xs:element name="property" type="function" maxOccurs="unbounded" />
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="functionlist">
-		<xs:sequence>
-			<xs:element name="function" type="function" maxOccurs="unbounded" />
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="eventlist">
-		<xs:sequence>
-			<xs:element name="event" type="function" maxOccurs="unbounded" />
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="commandlist">
-		<xs:sequence>
-			<xs:element name="command" type="function" maxOccurs="unbounded" />
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="returnedtypeslist">
-		<xs:sequence>
-			<xs:element name="returnType" type="returnedtype"
-				maxOccurs="unbounded" />
-		</xs:sequence>
-	</xs:complexType>
-	
-	<xs:complexType name="serverpropertieslist">
-		<xs:sequence>
-			<xs:element name="serverProperty" type="serverproperty" maxOccurs="unbounded"/>
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="linklist">
-		<xs:sequence>
-			<xs:element name="link" type="link" maxOccurs="unbounded" />
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="link">
-		<xs:sequence>
-			<xs:element name="url" type="xs:string" maxOccurs="1" minOccurs="1" />
-			<xs:element name="description" type="xs:string" maxOccurs="1" minOccurs="0" />
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="seelist">
-		<xs:sequence>
-			<xs:element name="see" type="see" maxOccurs="unbounded" />
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="function">
-		<xs:sequence>
-			<xs:element name="return" type="return" maxOccurs="1"
-				minOccurs="0"></xs:element>
-			<xs:element name="description" type="xs:string" maxOccurs="1"
-				minOccurs="0"></xs:element>
-			<xs:element name="summary" type="xs:string" maxOccurs="1"
-				minOccurs="0"></xs:element>
-			<xs:element name="sample" type="xs:string" maxOccurs="1"
-				minOccurs="0"></xs:element>
-			<xs:element name="parameters" type="parameterlist"
-				maxOccurs="1" minOccurs="0"></xs:element>
-			<xs:element name="links" type="linklist" maxOccurs="1"
-				minOccurs="0"></xs:element>
-			<xs:element name="sees" type="seelist" maxOccurs="1"
-				minOccurs="0"></xs:element>
-		</xs:sequence>
-		<xs:attribute name="undocumented" type="xs:boolean" use="optional"></xs:attribute>
-		<xs:attribute name="deprecated" type="xs:boolean" use="optional"></xs:attribute>
-		<xs:attribute name="name" type="xs:string" use="required"></xs:attribute>
-		<xs:attribute name="since" type="xs:string" use="optional"></xs:attribute>
-		<xs:attribute name="until" type="xs:string" use="optional"></xs:attribute>
-		<xs:attribute name="special" type="xs:boolean" use="optional"></xs:attribute>
-	</xs:complexType>
-
-	<xs:complexType name="return">
-		<xs:simpleContent>
-			<xs:extension base="xs:string">
-				<xs:attribute name="type" type="xs:string" use="optional"></xs:attribute>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-
-	<xs:complexType name="returnedtype">
-		<xs:attribute name="qualifiedName" type="xs:string" use="required"></xs:attribute>
-	</xs:complexType>
-	
-	<xs:complexType name="serverproperty">
-		<xs:sequence>
-			<xs:element name="description" type="xs:string" maxOccurs="1"
-				minOccurs="1"></xs:element>
-		</xs:sequence>
-		<xs:attribute name="name" type="xs:string" use="required"></xs:attribute>
-	</xs:complexType>
-
-	<xs:complexType name="parameterlist">
-		<xs:sequence>
-			<xs:element name="parameter" type="parameter" maxOccurs="unbounded" />
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="parameter">
-		<xs:sequence>
-			<xs:element name="description" type="xs:string" maxOccurs="1"
-				minOccurs="0"></xs:element>
-		</xs:sequence>
-		<xs:attribute name="name" type="xs:string" use="required"></xs:attribute>
-		<xs:attribute name="optional" type="xs:boolean" use="optional"></xs:attribute>
-		<xs:attribute name="type" type="xs:string" use="optional"></xs:attribute>
-	</xs:complexType>
-
-	<xs:complexType name="see">
-		<xs:attribute name="object" type="xs:string" use="optional"></xs:attribute>
-		<xs:attribute name="member" type="xs:string" use="optional"></xs:attribute>
 	</xs:complexType>
 
 	<xs:complexType name="keywordlistoflist">

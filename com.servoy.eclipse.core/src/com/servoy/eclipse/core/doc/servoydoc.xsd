@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
 	<xs:element name="servoydoc">
 		<xs:complexType>
 			<xs:sequence>
@@ -45,7 +46,7 @@
 		</xs:sequence>
 		<xs:attribute name="publicName" type="xs:string" use="required" />
 		<xs:attribute name="qualifiedName" type="xs:string" use="required" />
-		<xs:attribute name="scriptingName" type="xs:string" use="optional" />
+		<xs:attribute name="scriptingName" type="xs:string" use="required" />
 		<xs:attribute name="deprecated" type="xs:boolean" use="optional" />
 	</xs:complexType>
 
@@ -101,8 +102,10 @@
 
 	<xs:complexType name="link">
 		<xs:sequence>
-			<xs:element name="url" type="xs:string" maxOccurs="1" minOccurs="1" />
-			<xs:element name="description" type="xs:string" maxOccurs="1" minOccurs="0" />
+			<xs:element name="url" type="xs:string" maxOccurs="1"
+				minOccurs="1" />
+			<xs:element name="description" type="xs:string" maxOccurs="1"
+				minOccurs="0" />
 		</xs:sequence>
 	</xs:complexType>
 
@@ -114,6 +117,8 @@
 
 	<xs:complexType name="function">
 		<xs:sequence>
+			<xs:element name="argumentsTypes" type="argumentstypeslist"
+				maxOccurs="1" minOccurs="0"></xs:element>
 			<xs:element name="return" type="return" maxOccurs="1"
 				minOccurs="0"></xs:element>
 			<xs:element name="description" type="xs:string" maxOccurs="1"
@@ -137,10 +142,27 @@
 		<xs:attribute name="special" type="xs:boolean" use="optional"></xs:attribute>
 	</xs:complexType>
 
+	<xs:complexType name="argumentstypeslist">
+		<xs:sequence>
+			<xs:element name="argumentType" type="argumentType"
+				minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="argumentType">
+		<xs:complexContent>
+			<xs:restriction base="xs:anyType">
+				<xs:attribute name="type" type="xs:string" use="optional" />
+				<xs:attribute name="typecode" type="xs:string" use="required" />
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+
 	<xs:complexType name="return">
 		<xs:simpleContent>
 			<xs:extension base="xs:string">
-				<xs:attribute name="type" type="xs:string" use="optional"></xs:attribute>
+				<xs:attribute name="type" type="xs:string" use="required"></xs:attribute>
+				<xs:attribute name="typecode" type="xs:string" use="optional"></xs:attribute>
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
@@ -171,6 +193,7 @@
 		<xs:attribute name="name" type="xs:string" use="required"></xs:attribute>
 		<xs:attribute name="optional" type="xs:boolean" use="optional"></xs:attribute>
 		<xs:attribute name="type" type="xs:string" use="optional"></xs:attribute>
+		<xs:attribute name="typecode" type="xs:string" use="optional"></xs:attribute>
 	</xs:complexType>
 
 	<xs:complexType name="see">

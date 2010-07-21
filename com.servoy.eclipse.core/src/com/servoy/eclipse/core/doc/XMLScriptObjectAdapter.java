@@ -19,10 +19,10 @@ package com.servoy.eclipse.core.doc;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.servoy.j2db.documentation.ParameterDocumentation;
+import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.util.Debug;
 
-public class XMLScriptObjectAdapter implements ITypedScriptObject
+public class XMLScriptObjectAdapter implements IScriptObject
 {
 	private final IObjectDocumentation objDoc;
 	private Class< ? >[] returnedTypes = null;
@@ -75,7 +75,7 @@ public class XMLScriptObjectAdapter implements ITypedScriptObject
 		{
 			String[] argNames = new String[fdoc.getArguments().size()];
 			int i = 0;
-			for (ParameterDocumentation argDoc : fdoc.getArguments().values())
+			for (IParameterDocumentation argDoc : fdoc.getArguments().values())
 			{
 				String name = argDoc.isOptional() ? "[" + argDoc.getName() + "]" : argDoc.getName(); //$NON-NLS-1$//$NON-NLS-2$
 				argNames[i++] = name;
@@ -92,10 +92,10 @@ public class XMLScriptObjectAdapter implements ITypedScriptObject
 		{
 			IParameter[] params = new IParameter[fdoc.getArguments().size()];
 			int i = 0;
-			for (ParameterDocumentation argDoc : fdoc.getArguments().values())
+			for (IParameterDocumentation argDoc : fdoc.getArguments().values())
 			{
 				String name = argDoc.getName();
-				String type = argDoc.getType();
+				String type = argDoc.getType().getSimpleName();
 				boolean optional = argDoc.isOptional();
 				params[i++] = new ScriptParameter(name, type, optional);
 			}

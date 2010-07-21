@@ -47,7 +47,7 @@ public interface IDocumentationManager
 
 	public IObjectDocumentation getObjectByQualifiedName(String qualifiedName);
 
-	public IFunctionDocumentation createFunctionDocumentation(String mainName, Integer type, boolean deprecated, int state);
+	public IFunctionDocumentation createFunctionDocumentation(String mainName, Class< ? >[] argsTypes, Integer type, boolean deprecated, int state);
 
-	public IObjectDocumentation createObjectDocumentation(String category, String qualifiedName, String[] parentClasses);
+	public IObjectDocumentation createObjectDocumentation(String category, String qualifiedName, String publicName, String scriptingName, String[] parentClasses);
 }
