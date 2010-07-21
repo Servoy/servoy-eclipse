@@ -60,10 +60,10 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
-import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider.UnresolvedDataProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
+import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.editors.table.ColumnDetailsComposite.NotSameValidator;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
@@ -263,7 +263,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		columnAutoEnterDBSeqComposite.initDataBindings(c);
 		ColumnInfo columnInfo = c.getColumnInfo();
 		List<String> systemTypes = new ArrayList<String>();
-		int type = c.getType();
+		int type = Column.mapToDefaultType(c.getType());
 		systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.NO_SYSTEM_VALUE));//no system value
 		systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.DATABASE_MANAGED));
 		if (type == IColumnTypes.DATETIME) systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER,
@@ -353,11 +353,10 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		}
 		databaseDefaultValue.setText(columnInfo.getDatabaseDefaultValue() == null ? "" : columnInfo.getDatabaseDefaultValue());
 
-		int columnType = Column.mapToDefaultType(c.getType());
-		sequenceButton.setEnabled(columnType != IColumnTypes.DATETIME);
-		sequenceCombo.setEnabled(columnType != IColumnTypes.DATETIME);
-		customValueButton.setEnabled(columnType != IColumnTypes.DATETIME);
-		customValueText.setEnabled(columnType != IColumnTypes.DATETIME);
+		sequenceButton.setEnabled(type != IColumnTypes.DATETIME);
+		sequenceCombo.setEnabled(type != IColumnTypes.DATETIME);
+		customValueButton.setEnabled(type != IColumnTypes.DATETIME);
+		customValueText.setEnabled(type != IColumnTypes.DATETIME);
 
 		enableControls();
 
@@ -374,8 +373,8 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 
 		bindingContext.bindValue(customValueTextObserveWidget, getCICustomValueObserveValue,
 			new UpdateValueStrategy().setAfterGetValidator(new NotSameValidator(getCICustomValueObserveValue)), null);
-		bindingContext.bindValue(lookUpValueSelectObserveWidget, getCILookUpValueObserveValue, new UpdateValueStrategy().setConverter(
-			DataProvider2LookupValueConverter.INSTANCE).setAfterGetValidator(new LookupValueValidator(column)),
+		bindingContext.bindValue(lookUpValueSelectObserveWidget, getCILookUpValueObserveValue,
+			new UpdateValueStrategy().setConverter(DataProvider2LookupValueConverter.INSTANCE).setAfterGetValidator(new LookupValueValidator(column)),
 			new UpdateValueStrategy().setConverter(new LookupValue2DataProviderConverter(flattenedSolution, column.getTable())));
 
 		BindingHelper.addGlobalChangeListener(bindingContext, new IChangeListener()
