@@ -448,11 +448,13 @@ public class DesignApplication implements IApplication, IMessagesCallback
 		{
 			//getClient(); // do not create the client here, it needs to be created from within a job, otherwise the main thread 
 			// may be blocked on the awt thread which causes problems on the mac (debug SC does not paint)
+
+			// make sure appserver is started here, plugin manager depends on Settings being initialized
+			ServoyModel.startAppServer();
 			synchronized (this)
 			{
 				if (pluginManager == null)
 				{
-
 					pluginManager = new PluginManager(this)
 					{
 						/**
