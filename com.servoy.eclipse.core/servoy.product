@@ -27,7 +27,8 @@ and will be prosecuted to the maximum extent possible under law.
       <programArgs>--launcher.XXMaxPermSize
 256m</programArgs>
       <vmArgs>-Xms40m
--Xmx512m</vmArgs>
+-Xmx512m
+-XX:MaxPermSize=256M</vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
 
