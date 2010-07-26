@@ -418,13 +418,21 @@ public class EditorUtil
 		return part;
 	}
 
+
 	public static IEditorPart openServerEditor(ServerConfig serverConfig)
+	{
+		return openServerEditor(serverConfig, false);
+	}
+
+	public static IEditorPart openServerEditor(ServerConfig serverConfig, boolean isNew)
 	{
 		if (serverConfig == null) return null;
 		try
 		{
+			ServerEditorInput sei = new ServerEditorInput(serverConfig);
+			sei.setIsNew(isNew);
 			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-				new ServerEditorInput(serverConfig),
+				sei,
 				PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
 					Platform.getContentTypeManager().getContentType(ServerEditorInput.SERVER_RESOURCE_ID)).getId());
 		}

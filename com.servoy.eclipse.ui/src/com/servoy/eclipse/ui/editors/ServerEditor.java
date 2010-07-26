@@ -385,7 +385,7 @@ public class ServerEditor extends EditorPart
 			new String[] { "serverName", "userName", "password", "serverUrl", "driver", "catalog", "schema", "maxActive", "maxIdle", "maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", "skipSysTables" });
 
 		serverConfigObservable.setPropertyValue("serverName", serverInput.getName());
-
+		if (serverInput.getIsNew()) flagModified();
 		updateTitle();
 	}
 
