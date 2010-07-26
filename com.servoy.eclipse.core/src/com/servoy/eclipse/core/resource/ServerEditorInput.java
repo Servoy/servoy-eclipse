@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.resource;
 
 import org.eclipse.core.runtime.Platform;
@@ -32,6 +32,7 @@ public class ServerEditorInput implements IEditorInput
 {
 	public static final String SERVER_RESOURCE_ID = "com.servoy.eclipse.core.resource.server";
 	private final ServerConfig serverConfig;
+	private boolean isNew = false;
 
 	/**
 	 * Creates a form input.
@@ -79,6 +80,16 @@ public class ServerEditorInput implements IEditorInput
 	public ServerConfig getServerConfig()
 	{
 		return serverConfig;
+	}
+
+	public boolean getIsNew()
+	{
+		return isNew;
+	}
+
+	public void setIsNew(boolean isNew)
+	{
+		this.isNew = isNew;
 	}
 
 	/*
