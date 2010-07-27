@@ -13,13 +13,14 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 import com.servoy.eclipse.ui.util.IKeywordChecker;
+import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -28,7 +29,7 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  * 
  */
-public class CombinedTreeContentProvider implements ITreeContentProvider, IKeywordChecker
+public class CombinedTreeContentProvider implements ITreeContentProvider, IKeywordChecker, IMaxDepthTreeContentProvider
 {
 	private final ITreeContentProvider contentProvider1;
 	private final ITreeContentProvider contentProvider2;
@@ -84,5 +85,19 @@ public class CombinedTreeContentProvider implements ITreeContentProvider, IKeywo
 			return true;
 		}
 		return (contentProvider2 instanceof IKeywordChecker && ((IKeywordChecker)contentProvider2).isKeyword(element));
+	}
+
+	public boolean searchLimitReached(Object element, int maxDepth)
+	{
+		boolean limitReached = false;
+		if (contentProvider1 instanceof IMaxDepthTreeContentProvider)
+		{
+			limitReached = ((IMaxDepthTreeContentProvider)contentProvider1).searchLimitReached(element, maxDepth);
+			if (!limitReached && contentProvider2 instanceof IMaxDepthTreeContentProvider)
+			{
+				limitReached = ((IMaxDepthTreeContentProvider)contentProvider2).searchLimitReached(element, maxDepth);
+			}
+		}
+		return limitReached;
 	}
 }
