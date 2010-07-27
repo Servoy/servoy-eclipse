@@ -81,6 +81,7 @@ public class ServerEditor extends EditorPart
 	private Button skipSysTablesButton;
 	private Text validationQueryField;
 	private Combo validationTypeField;
+	private Text maxPreparedStatementsIdleField;
 	private Text maxIdleField;
 	private Text maxActiveField;
 	private Combo dataModel_cloneFromField;
@@ -153,15 +154,21 @@ public class ServerEditor extends EditorPart
 
 		Label maxActiveLabel;
 		maxActiveLabel = new Label(comp, SWT.RIGHT);
-		maxActiveLabel.setText("Max Active");
+		maxActiveLabel.setText("Max Connections Active");
 
 		maxActiveField = new Text(comp, SWT.BORDER);
 
 		Label maxIdleLabel;
 		maxIdleLabel = new Label(comp, SWT.RIGHT);
-		maxIdleLabel.setText("Max Idle");
+		maxIdleLabel.setText("Max Connections Idle");
 
 		maxIdleField = new Text(comp, SWT.BORDER);
+
+		Label maxPreparedStatementsIdleLabel;
+		maxPreparedStatementsIdleLabel = new Label(comp, SWT.RIGHT);
+		maxPreparedStatementsIdleLabel.setText("Max Prepared Statements Idle");
+
+		maxPreparedStatementsIdleField = new Text(comp, SWT.BORDER);
 
 		Label validationTypeLabel;
 		validationTypeLabel = new Label(comp, SWT.RIGHT);
@@ -177,8 +184,8 @@ public class ServerEditor extends EditorPart
 		validationQueryField = new Text(comp, SWT.BORDER);
 
 		Label dataModel_cloneFromLabel;
-		dataModel_cloneFromLabel = new Label(comp, SWT.RIGHT | SWT.WRAP);
-		dataModel_cloneFromLabel.setText("Data model\nclone from");
+		dataModel_cloneFromLabel = new Label(comp, SWT.RIGHT);
+		dataModel_cloneFromLabel.setText("Data model clone from");
 
 		dataModel_cloneFromField = new Combo(comp, SWT.BORDER | SWT.READ_ONLY);
 		UIUtils.setDefaultVisibleItemCount(dataModel_cloneFromField);
@@ -232,11 +239,11 @@ public class ServerEditor extends EditorPart
 						logTable.createNewColumn(validator, "table_name", IColumnTypes.TEXT, 50); //$NON-NLS-1$
 						logTable.createNewColumn(validator, "column_name", IColumnTypes.TEXT, 50); //$NON-NLS-1$
 						logTable.createNewColumn(validator, "log_action", IColumnTypes.INTEGER, 0); //$NON-NLS-1$
-						logTable.createNewColumn(validator, "pk_data", IColumnTypes.TEXT, 200); //$NON-NLS-1$
+						logTable.createNewColumn(validator, "pk_data", IColumnTypes.TEXT, 190); //$NON-NLS-1$
 						logTable.createNewColumn(validator, "old_data", IColumnTypes.TEXT, 0); //$NON-NLS-1$
 						logTable.createNewColumn(validator, "new_data", IColumnTypes.TEXT, 0); //$NON-NLS-1$
 						logTable.createNewColumn(validator, "event_time", IColumnTypes.DATETIME, 0); //$NON-NLS-1$
-						logTable.createNewColumn(validator, "user_uid", IColumnTypes.TEXT, 200); //$NON-NLS-1$
+						logTable.createNewColumn(validator, "user_uid", IColumnTypes.TEXT, 190); //$NON-NLS-1$
 						logServer.syncTableObjWithDB(logTable, false, false, null);
 						MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Table log created", "Table log successfully created in '" + //$NON-NLS-1$ //$NON-NLS-2$
 							ServoyModel.getServerManager().getLogServerName() + "'."); //$NON-NLS-1$
@@ -269,30 +276,32 @@ public class ServerEditor extends EditorPart
 
 		Label skipSysTablesLabel;
 		skipSysTablesLabel = new Label(comp, SWT.RIGHT);
-		skipSysTablesLabel.setText("Skip System\nTables"); //$NON-NLS-1$
+		skipSysTablesLabel.setText("Skip System Tables"); //$NON-NLS-1$
 
 		skipSysTablesButton = new Button(comp, SWT.CHECK);
 
 		final GroupLayout groupLayout = new GroupLayout(comp);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(serverNameLabel, GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE).add(
-					validationTypeLabel, GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE).add(validationQueryLabel, GroupLayout.PREFERRED_SIZE,
-					103, GroupLayout.PREFERRED_SIZE).add(enabledLabel, GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE).add(logServerLabel,
-					GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE).add(maxIdleLabel, GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE).add(
-					maxActiveLabel, GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE).add(schemaLabel, GroupLayout.PREFERRED_SIZE, 103,
-					GroupLayout.PREFERRED_SIZE).add(catalogLabel, GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE).add(driverLabel,
-					GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE).add(urlLabel, GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE).add(
-					passwordLabel, GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE).add(userNameLabel, GroupLayout.PREFERRED_SIZE, 103,
-					GroupLayout.PREFERRED_SIZE).add(dataModel_cloneFromLabel, GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE).add(
-					skipSysTablesLabel, GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(serverNameLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(
+					validationTypeLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(validationQueryLabel, GroupLayout.PREFERRED_SIZE,
+					190, GroupLayout.PREFERRED_SIZE).add(enabledLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(logServerLabel,
+					GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(maxPreparedStatementsIdleLabel, GroupLayout.PREFERRED_SIZE, 190,
+					GroupLayout.PREFERRED_SIZE).add(maxIdleLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(maxActiveLabel,
+					GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(schemaLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(
+					catalogLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(driverLabel, GroupLayout.PREFERRED_SIZE, 190,
+					GroupLayout.PREFERRED_SIZE).add(urlLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(passwordLabel,
+					GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(userNameLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(
+					dataModel_cloneFromLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(skipSysTablesLabel, GroupLayout.PREFERRED_SIZE,
+					190, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(serverNameField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(userNameField,
 					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(passwordField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(urlField,
 					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(driverField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(catalogField,
 					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(schemaField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(maxActiveField,
 					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(maxIdleField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(
-					validationTypeField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(validationQueryField, GroupLayout.PREFERRED_SIZE, 161,
-					Short.MAX_VALUE).add(enabledButton, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(
+					maxPreparedStatementsIdleField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(validationTypeField, GroupLayout.PREFERRED_SIZE, 161,
+					Short.MAX_VALUE).add(validationQueryField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(enabledButton, GroupLayout.PREFERRED_SIZE,
+					161, Short.MAX_VALUE).add(
 					groupLayout.createSequentialGroup().add(logServerButton, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(createLogTableButton,
 						GroupLayout.PREFERRED_SIZE, 161, GroupLayout.PREFERRED_SIZE)).add(dataModel_cloneFromField, GroupLayout.PREFERRED_SIZE, 161,
 					Short.MAX_VALUE).add(skipSysTablesButton, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE)).addContainerGap()));
@@ -325,6 +334,9 @@ public class ServerEditor extends EditorPart
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(maxIdleField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(maxIdleLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10,
 				10, 10).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(maxPreparedStatementsIdleField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+					GroupLayout.PREFERRED_SIZE).add(maxPreparedStatementsIdleLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+					GroupLayout.PREFERRED_SIZE)).add(10, 10, 10).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(validationTypeLabel).add(validationTypeField, GroupLayout.PREFERRED_SIZE,
 					GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10, 10, 10).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(validationQueryField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
@@ -482,6 +494,7 @@ public class ServerEditor extends EditorPart
 
 		maxActiveField.addVerifyListener(DocumentValidatorVerifyListener.NUMBER_VERIFIER);
 		maxIdleField.addVerifyListener(DocumentValidatorVerifyListener.NUMBER_VERIFIER);
+		maxPreparedStatementsIdleField.addVerifyListener(DocumentValidatorVerifyListener.NUMBER_VERIFIER);
 
 		validationTypeField.removeAll();
 		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_EXCEPTION_VALIDATION));
@@ -586,6 +599,8 @@ public class ServerEditor extends EditorPart
 //		IObservableValue getMaxIdleObserveValue = PojoObservables.observeValue(serverConfig, "maxIdle");
 		IObservableValue getMaxIdleObserveValue = serverConfigObservable.observePropertyValue("maxIdle");
 		IObservableValue maxIdleTextObserveWidget = SWTObservables.observeText(maxIdleField, SWT.Modify);
+		IObservableValue getMaxPreparedStatementsIdleObserveValue = serverConfigObservable.observePropertyValue("maxPreparedStatementsIdle");
+		IObservableValue maxPreparedStatementsIdleTextObserveWidget = SWTObservables.observeText(maxPreparedStatementsIdleField, SWT.Modify);
 		IObservableValue getValidationTypeObserveValue = new AbstractObservableValue()
 		{
 			public Object getValueType()
@@ -640,6 +655,7 @@ public class ServerEditor extends EditorPart
 		m_bindingContext.bindValue(schemaSelectionObserveWidget, getSchemaObserveValue, null, null);
 		m_bindingContext.bindValue(maxActiveTextObserveWidget, getMaxActiveObserveValue, null, null);
 		m_bindingContext.bindValue(maxIdleTextObserveWidget, getMaxIdleObserveValue, null, null);
+		m_bindingContext.bindValue(maxPreparedStatementsIdleTextObserveWidget, getMaxPreparedStatementsIdleObserveValue, null, null);
 		m_bindingContext.bindValue(validationTypeSelectionObserveWidget, getValidationTypeObserveValue, null, null);
 		m_bindingContext.bindValue(validationQueryTextObserveWidget, getValidationQueryObserveValue, null, null);
 		m_bindingContext.bindValue(dataModel_cloneFromTextObserveWidget, getDataModel_cloneFromObserveValue, null, null);
