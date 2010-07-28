@@ -720,7 +720,9 @@ public class ServerEditor extends EditorPart
 			(serverConfigObservable.getObject().getServerName().equals(ServoyModel.getServerManager().getLogServerName())))
 		{
 			createLogTableButton.setEnabled(true);
-			createLogTableButton.setToolTipText("Create the log table"); //$NON-NLS-1$
+			createLogTableButton.setToolTipText("Create a log table for tracking; " //$NON-NLS-1$
+				+ "the creation of such a table is possible only if the current database server is the log server " //$NON-NLS-1$
+				+ "and if it does not already contain a log table."); //$NON-NLS-1$
 		}
 		else
 		{
