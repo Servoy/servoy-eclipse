@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
 
 import java.util.ArrayList;
@@ -49,10 +49,12 @@ import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Scrollable;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Widget;
 
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
@@ -386,7 +388,69 @@ public class ColumnComposite extends Composite
 			}
 		});
 
-		final TableColumnLayout layout = new TableColumnLayout();
+		final TableColumnLayout layout = new TableColumnLayout()
+		{
+			public boolean attachedListener = false;
+			public boolean firstTime = true;
+
+			@Override
+			protected void setColumnWidths(Scrollable tableTree, int[] widths)
+			{
+				super.setColumnWidths(tableTree, widths);
+				if (!attachedListener)
+				{
+					ControlAdapter listener = new ControlAdapter()
+					{
+						@Override
+						public void controlResized(ControlEvent e)
+						{
+							TableColumn tb = (TableColumn)e.getSource();
+							if (tb.getWidth() < MIN_COLUMN_WIDTH)
+							{
+								tb.setWidth(MIN_COLUMN_WIDTH);
+							}
+							else
+							{
+								tableViewer.getTable().layout();
+							}
+						}
+					};
+					nameColumn.addControlListener(listener);
+					typeColumn.addControlListener(listener);
+					lengthColumn.addControlListener(listener);
+					rowIdentColumn.addControlListener(listener);
+					allowNullColumn.addControlListener(listener);
+					seqType.addControlListener(listener);
+					attachedListener = true;
+				}
+			}
+
+			@Override
+			protected void updateColumnData(Widget column)
+			{
+				if (firstTime)
+				{
+					//setting of column data here is important for first resize of columns
+					//after the creation of columns page
+					this.setColumnData(nameColumn, new ColumnPixelData(nameColumn.getWidth(), true));
+					this.setColumnData(typeColumn, new ColumnPixelData(typeColumn.getWidth(), true));
+					this.setColumnData(lengthColumn, new ColumnPixelData(lengthColumn.getWidth(), true));
+					this.setColumnData(rowIdentColumn, new ColumnPixelData(rowIdentColumn.getWidth(), true));
+					this.setColumnData(seqType, new ColumnPixelData(seqType.getWidth(), true));
+					firstTime = false;
+					super.updateColumnData(column);
+				}
+				else
+				{
+					super.updateColumnData(column);
+					this.setColumnData(nameColumn, new ColumnPixelData(nameColumn.getWidth(), true));
+					this.setColumnData(typeColumn, new ColumnPixelData(typeColumn.getWidth(), true));
+					this.setColumnData(lengthColumn, new ColumnPixelData(lengthColumn.getWidth(), true));
+					this.setColumnData(rowIdentColumn, new ColumnPixelData(rowIdentColumn.getWidth(), true));
+					this.setColumnData(seqType, new ColumnPixelData(seqType.getWidth(), true));
+				}
+			}
+		};
 		tableContainer.setLayout(layout);
 		layout.setColumnData(nameColumn, new ColumnWeightData(20, 50, true));
 		layout.setColumnData(typeColumn, new ColumnWeightData(10, 25, true));
@@ -403,27 +467,6 @@ public class ColumnComposite extends Composite
 			new TableColumn[] { nameColumn, typeColumn, lengthColumn, rowIdentColumn, allowNullColumn },
 			new Comparator[] { NameComparator.INSTANCE, ColumnTypeComparator.INSTANCE, ColumnLengthComparator.INSTANCE, ColumnRowIdentComparator.INSTANCE, ColumnAllowNullComparator.INSTANCE }));
 
-		ControlAdapter listener = new ControlAdapter()
-		{
-			@Override
-			public void controlResized(ControlEvent e)
-			{
-				TableColumn tb = (TableColumn)e.getSource();
-				layout.setColumnData(nameColumn, new ColumnPixelData(nameColumn.getWidth(), true));
-				layout.setColumnData(typeColumn, new ColumnPixelData(typeColumn.getWidth(), true));
-				layout.setColumnData(lengthColumn, new ColumnPixelData(lengthColumn.getWidth(), true));
-				layout.setColumnData(rowIdentColumn, new ColumnPixelData(rowIdentColumn.getWidth(), true));
-				layout.setColumnData(seqType, new ColumnPixelData(seqType.getWidth(), true));
-				if (tb.getWidth() < MIN_COLUMN_WIDTH) tb.setWidth(MIN_COLUMN_WIDTH);
-				else tableViewer.getTable().layout();
-			}
-		};
-		nameColumn.addControlListener(listener);
-		typeColumn.addControlListener(listener);
-		lengthColumn.addControlListener(listener);
-		rowIdentColumn.addControlListener(listener);
-		allowNullColumn.addControlListener(listener);
-		seqType.addControlListener(listener);
 	}
 
 	protected void initDataBindings(Table t)
