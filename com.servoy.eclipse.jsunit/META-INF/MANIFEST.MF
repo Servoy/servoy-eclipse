@@ -7,18 +7,15 @@ Bundle-Activator: com.servoy.eclipse.jsunit.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.dltk.javascript.rhino,
  servoy_shared,
- servoy_smart_client,
  servoy_debug,
  org.eclipse.core.runtime,
  org.eclipse.ui,
- org.eclipse.debug.core,
  org.eclipse.debug.ui,
  org.eclipse.jdt.core,
  org.eclipse.jdt.junit,
  org.eclipse.jdt.launching,
  org.eclipse.jdt.junit.runtime,
  org.junit;bundle-version="3.8.2",
- com.servoy.eclipse.appserver,
  com.servoy.eclipse.debug,
  com.servoy.eclipse.core,
  com.servoy.eclipse.ui

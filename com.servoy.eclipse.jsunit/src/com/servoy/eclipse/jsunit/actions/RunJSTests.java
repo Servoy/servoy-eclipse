@@ -21,13 +21,22 @@ import java.util.List;
 
 import javax.swing.SwingUtilities;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.Launch;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -49,12 +58,14 @@ import org.eclipse.ui.progress.WorkbenchJob;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.debug.actions.StartJsUnitClientActionDelegate;
 import com.servoy.eclipse.jsunit.SolutionRemoteTestRunner;
 import com.servoy.eclipse.jsunit.runner.ApplicationJSTestSuite;
+import com.servoy.eclipse.jsunit.runner.JSUnitTestListenerHandler;
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.persistence.Solution;
@@ -129,11 +140,25 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 					showTestRunnerViewPartInActivePage(findTestRunnerViewPartInActivePage());
 
 					final Launch launch = new Launch(null, ILaunchManager.RUN_MODE, null);
+
 					try
 					{
 						// start junit test run session
 						DebugPlugin.getDefault().getLaunchManager().addLaunch(launch);
-						JUnitPlugin.getModel().addTestRunSession(new TestRunSession(launch, new JavaProject(sp.getProject(), null), port));
+						JUnitPlugin.getModel().addTestRunSession(new TestRunSession(launch, new JavaProject(sp.getProject(), null)
+						{
+							@Override
+							public IType findType(String fullyQualifiedName, IProgressMonitor progressMonitor) throws JavaModelException
+							{
+								return getJavaType(fullyQualifiedName);
+							}
+
+							@Override
+							public String[] getRequiredProjectNames() throws JavaModelException
+							{
+								return new String[0];
+							}
+						}, port));
 
 						// start tests in AWT thread so that debugger gets attached
 						skipCleanup1 = true;
@@ -323,6 +348,47 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 		}
 	}
 
+	// return a reference to the js file as a Java IType so that it is handled correctly by the JUnit view when presenting error/failure stacks
+	private IType getJavaType(String fullyQualifiedName)
+	{
+		if (fullyQualifiedName != null)
+		{
+			String fileName = JSUnitTestListenerHandler.getFileNameFromJavaType(fullyQualifiedName);
+			IPath pathToFile = new Path(fileName);
+			IPath workspacePath = ServoyModel.getWorkspace().getRoot().getLocation();
+			if (workspacePath.isPrefixOf(pathToFile))
+			{
+				pathToFile = pathToFile.makeRelativeTo(workspacePath);
+				String[] path = pathToFile.segments();
+				if (path.length >= 3)
+				{
+					// first element is project then the rest are the path to a js file; get them as Java model ITypes
+					try
+					{
+						IProject p = ServoyModel.getWorkspace().getRoot().getProject(path[0]);
+						IJavaProject javaProject = JavaCore.create(p);
+						IPackageFragmentRoot pfr = javaProject.getPackageFragmentRoot(p);
+
+						String pkg = "";
+						for (int i = 1; i < (path.length - 2); i++)
+						{
+							pkg += path[i];
+							if ((i + 3) < path.length) pkg += ".";
+						}
+						IPackageFragment pf = pfr.getPackageFragment(pkg);
+						return pf.getCompilationUnit(path[path.length - 2] + "." + path[path.length - 1]).getType(path[path.length - 2]);
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logWarning("Cannot jump from stack trace into JS editor because of exception", e);
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
 	private void cleanUp1(Launch launch)
 	{
 		// TestRunSession expects to be notified by launch manager that the launch ended in order for
@@ -423,7 +489,7 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 						action.setEnabled(false);
 					}
 				}
-				// else ... this event is already restricted by extendsion point to only be called for Solution
+				// else ... this event is already restricted by extension point to only be called for Solution
 				// objects or other objects that can adapt to solution - only alter enablement state if we get the solution obj.
 			}
 		}
