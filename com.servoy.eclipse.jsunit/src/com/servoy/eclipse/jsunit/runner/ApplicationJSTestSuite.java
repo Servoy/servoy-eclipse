@@ -100,6 +100,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 	{
 		super();
 		setUseFileForJavaQualifiedNameInStack(true);
+		setStackElementFilters(new String[] { "\\A" + SOLUTION_TEST_JS_NAME + "\\z" });
 		init(application);
 	}
 
@@ -108,6 +109,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 	 */
 	protected ApplicationJSTestSuite()
 	{
+		setStackElementFilters(new String[] { "\\A" + SOLUTION_TEST_JS_NAME + "\\z" });
 	}
 
 	protected void initWithError(String errorMessage)

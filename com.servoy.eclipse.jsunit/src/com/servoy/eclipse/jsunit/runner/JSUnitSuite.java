@@ -47,6 +47,7 @@ public class JSUnitSuite extends TestSuite
 	private String testFileName;
 	private boolean createSeparateScopeForTestCode;
 	private boolean useFileInStackQualifiedName = false;
+	private String[] stackElementFilters;
 
 	public static Test suite()
 	{
@@ -222,6 +223,16 @@ public class JSUnitSuite extends TestSuite
 		this.useFileInStackQualifiedName = useFileInStackQualifiedName;
 	}
 
+	/**
+	 * Set this to hide stack elements that match the given filters.
+	 * @param stackElementFilters a list of regex strings (see {@link String#matches(String)}). If any of these match the file/method name in a stack element of a failure/error, that stack element
+	 * will be ignored. 
+	 */
+	public void setStackElementFilters(String[] stackElementFilters)
+	{
+		this.stackElementFilters = stackElementFilters;
+	}
+
 	protected void changeScope(Scriptable scope, Reader jsTestCode)
 	{
 		runner = new JSUnitToJavaRunner(scope, createSeparateScopeForTestCode);
@@ -257,7 +268,7 @@ public class JSUnitSuite extends TestSuite
 	@Override
 	public void run(TestResult result)
 	{
-		JSUnitTestListener testListener = new JSUnitTestListener(result, testList, useFileInStackQualifiedName);
+		JSUnitTestListener testListener = new JSUnitTestListener(result, testList, useFileInStackQualifiedName, stackElementFilters);
 		try
 		{
 			runner.runSuite(testListener, jsSuiteClassName);

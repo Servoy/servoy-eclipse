@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
@@ -46,17 +48,42 @@ import org.mozilla.javascript.ScriptableObject;
 public class JSUnitTestListenerHandler
 {
 
+	private static final String[] DEFAULT_STACK_ELEMENT_FILTERS = new String[] { "\\AJsUnit.js\\z", "\\AsuiteName\\z", "\\AJsUtil.js\\z", "\\AJsUnitToJava.js\\z" };
+
 	private final TestResult result;
 	private final List<Test> testList;
 	private final Stack<Test> testStack = new Stack<Test>();
 	private int startedTestsCount;
 	private final boolean useFileInStackQualifiedName;
+	private final Pattern[] stackElementFilters;
 
 	public JSUnitTestListenerHandler(TestResult result, List<Test> testList, boolean useFileInStackQualifiedName)
+	{
+		this(result, testList, useFileInStackQualifiedName, null);
+	}
+
+	/**
+	 * @param stackElementFilters a list of regex strings (see {@link String#matches(String)}). If any of these match the file/method name in a stack element of a failure/error, that stack element
+	 * will be ignored. 
+	 */
+	public JSUnitTestListenerHandler(TestResult result, List<Test> testList, boolean useFileInStackQualifiedName, String[] stackElementFilters)
 	{
 		this.result = result;
 		this.testList = testList;
 		this.useFileInStackQualifiedName = useFileInStackQualifiedName;
+
+		final int filtersSize = (stackElementFilters == null ? 0 : stackElementFilters.length);
+		final int defaultFiltersSize = DEFAULT_STACK_ELEMENT_FILTERS.length;
+		this.stackElementFilters = new Pattern[defaultFiltersSize + filtersSize];
+		int i = 0;
+		for (; i < defaultFiltersSize; i++)
+		{
+			this.stackElementFilters[i] = Pattern.compile(DEFAULT_STACK_ELEMENT_FILTERS[i]);
+		}
+		for (; i < filtersSize + defaultFiltersSize; i++)
+		{
+			this.stackElementFilters[i] = Pattern.compile(stackElementFilters[i - defaultFiltersSize]);
+		}
 	}
 
 	// JS parameters (Test, Error)
@@ -190,11 +217,8 @@ public class JSUnitTestListenerHandler
 					}
 					boolean isFile = (fileOrMethodName.endsWith(".js"));
 					boolean isMethod = ((!isFile) && line.contains("org.mozilla.javascript.gen."));
-					if (fileOrMethodName != null &&
-						lineNumber > -1 &&
-						(isFile || isMethod) &&
-						!/* (ignoreAllButClientStackTraces && */(fileOrMethodName.equals("JsUnit.js") || fileOrMethodName.equals("suiteName") ||
-							fileOrMethodName.equals("JsUtil.js") || fileOrMethodName.equals("JsUnitToJava.js"))/* ) */) // this line can be uncommented to show stack inside testing code
+					if (fileOrMethodName != null && lineNumber > -1 && (isFile || isMethod) &&
+						!/* (ignoreAllButClientStackTraces && */isStackElementFilterMatch(fileOrMethodName)/* ) */) // this line can be uncommented to show stack inside testing code
 					{
 						// ignoreAllButClientStackTraces = false; // this line can be uncommented to show stack inside testing code
 						if (useFileInStackQualifiedName)
@@ -231,6 +255,20 @@ public class JSUnitTestListenerHandler
 			stackTrace = new StackTraceElement[0];
 		}
 		return stackTrace;
+	}
+
+	private boolean isStackElementFilterMatch(String fileOrMethodName)
+	{
+		boolean match = false;
+		if (stackElementFilters != null)
+		{
+			for (int i = 0; i < (stackElementFilters.length) && !match; i++)
+			{
+				Matcher m = stackElementFilters[i].matcher(fileOrMethodName);
+				match = m.matches();
+			}
+		}
+		return match;
 	}
 
 	public static String getFileNameAsJavaType(String fileOrMethodName)
