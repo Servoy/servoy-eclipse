@@ -1070,9 +1070,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																			SolutionSerializer.getFileName(p, false) + ".", -1, IMarker.SEVERITY_ERROR, //$NON-NLS-1$
 																			IMarker.PRIORITY_HIGH, null, other);
 																	}
-																	addMarker(moduleProject, DUPLICATE_UUID, "UUID duplicate found " + p.getUUID() + " in " + //$NON-NLS-1$ //$NON-NLS-2$
-																		SolutionSerializer.getRelativePath(other, false) +
-																		SolutionSerializer.getFileName(other, false) + ".", -1, IMarker.SEVERITY_ERROR, //$NON-NLS-1$
+																	addMarker(
+																		moduleProject,
+																		DUPLICATE_UUID,
+																		"UUID duplicate found " + p.getUUID() + " in " + //$NON-NLS-1$ //$NON-NLS-2$
+																			SolutionSerializer.getRelativePath(other, false) +
+																			SolutionSerializer.getFileName(other, false) + ".", -1, IMarker.SEVERITY_ERROR, //$NON-NLS-1$
 																		IMarker.PRIORITY_HIGH, null, p);
 																}
 																return IPersistVisitor.CONTINUE_TRAVERSAL;
@@ -1132,7 +1135,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										else if (foundPersist instanceof Form && !"extendsFormID".equals(element.getName()) && //$NON-NLS-1$
 											!formCanBeInstantiated(((Form)foundPersist), flattenedSolution, formsAbstractChecked))
 										{
-											addMarker(project, PROJECT_FORM_MARKER_TYPE, "Property " + element.getName() + //$NON-NLS-1$
+											addMarker(project, SOLUTION_PROBLEM_MARKER_TYPE, "Property " + element.getName() + //$NON-NLS-1$
 												" refers to a form that cannot be instantiated", -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, o); //$NON-NLS-1$
 										}
 										if (CoreUtils.isEventProperty(element.getName()) && !skipEventMethod(element.getName()) &&
@@ -1259,8 +1262,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														catch (Exception ex)
 														{
 															Debug.trace(ex);
-															addMarker(project, PROJECT_FORM_MARKER_TYPE, messagePrefix +
-																" has invalid format:" + field.getFormat(), -1, //$NON-NLS-1$
+															addMarker(project, PROJECT_FORM_MARKER_TYPE,
+																messagePrefix + " has invalid format:" + field.getFormat(), -1, //$NON-NLS-1$
 																IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, o);
 														}
 													}
