@@ -1148,7 +1148,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											!formCanBeInstantiated(((Form)foundPersist), flattenedSolution, formsAbstractChecked))
 										{
 											String msg = MarkerMessages.getMessage(MarkerMessages.Marker_PropertyFormCannotBeInstantiated, element.getName());
-											addMarker(project, PROJECT_FORM_MARKER_TYPE, msg, -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, o);
+											addMarker(project, SOLUTION_PROBLEM_MARKER_TYPE, msg, -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, o);
 										}
 										if (BaseComponent.isEventProperty(element.getName()) && !skipEventMethod(element.getName()) &&
 											(foundPersist instanceof ScriptMethod) && !methodsParsed.contains(foundPersist.getUUID()))
