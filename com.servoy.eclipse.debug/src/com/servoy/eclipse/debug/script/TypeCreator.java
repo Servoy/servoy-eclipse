@@ -43,9 +43,9 @@ import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.mozilla.javascript.JavaMembers;
+import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
-import org.mozilla.javascript.JavaMembers.BeanProperty;
 
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyLog;
@@ -756,14 +756,13 @@ public abstract class TypeCreator
 
 			if (sample != null)
 			{
-				doc = doc + "\n<pre>" + HtmlUtils.escapeMarkup(sample) + "</pre>"; //$NON-NLS-1$ //$NON-NLS-2$
+				doc = doc + HtmlUtils.escapeMarkup(sample); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			if (doc != null)
 			{
 				doc = Utils.stringReplace(doc, "\n", "<br/>"); //$NON-NLS-1$ //$NON-NLS-2$
 				doc = Utils.stringReplace(doc, "%%prefix%%", ""); //$NON-NLS-1$ //$NON-NLS-2$
 				doc = Utils.stringReplace(doc, "%%elementName%%", name); //$NON-NLS-1$
-				doc = "<html><body><font size='2'>" + doc + "</font></body></html>"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		return doc;
