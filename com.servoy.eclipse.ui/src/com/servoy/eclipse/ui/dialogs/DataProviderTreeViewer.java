@@ -30,8 +30,12 @@ import java.util.TreeMap;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
@@ -94,6 +98,11 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			// selectionFilter
 			new LeafnodesSelectionFilter(contentProvider));
 		setInput(input);
+
+		if (getLabelProvider() instanceof ISelectionChangedListener)
+		{
+			addSelectionChangedListener((ISelectionChangedListener)getLabelProvider());
+		}
 	}
 
 	public void refreshTree()
@@ -104,7 +113,13 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 	@Override
 	public void setLabelProvider(ILabelProvider labelProvider)
 	{
-		super.setLabelProvider(new DataProviderDialogLabelProvider(labelProvider));
+		if (getLabelProvider() instanceof ISelectionChangedListener)
+		{
+			removeSelectionChangedListener((ISelectionChangedListener)getLabelProvider());
+		}
+		DataProviderDialogLabelProvider labelProvider2 = new DataProviderDialogLabelProvider(labelProvider);
+		addSelectionChangedListener(labelProvider2);
+		super.setLabelProvider(labelProvider2);
 	}
 
 	public static class DataProviderContentProvider extends ArrayContentProvider implements IMaxDepthTreeContentProvider, IKeywordChecker
@@ -679,9 +694,10 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		}
 	}
 
-	public static class DataProviderDialogLabelProvider extends LabelProvider implements IFontProvider, IDelegate<ILabelProvider>
+	public static class DataProviderDialogLabelProvider extends LabelProvider implements IFontProvider, IDelegate<ILabelProvider>, ISelectionChangedListener
 	{
 		private final ILabelProvider labelProvider;
+		private Object selectedElement;
 
 		public DataProviderDialogLabelProvider(ILabelProvider labelProvider)
 		{
@@ -691,12 +707,38 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		@Override
 		public String getText(Object value)
 		{
+			String append = ""; //$NON-NLS-1$
+			if (selectedElement == value)
+			{
+				append += getDataProviderTypeByValue(value);
+			}
 			String dpDialogText = getDataProviderDialogText(value);
 			if (dpDialogText == null)
 			{
-				return labelProvider.getText(value);
+				return labelProvider.getText(value) + append;
 			}
-			return dpDialogText;
+			return dpDialogText + append;
+		}
+
+		private String getDataProviderTypeByValue(Object value)
+		{
+			if (value instanceof Column)
+			{
+				return " - " + Column.getDisplayTypeString(((Column)value).getDataProviderType()); //$NON-NLS-1$
+			}
+			else if (value instanceof ScriptVariable)
+			{
+				return " - " + Column.getDisplayTypeString(((ScriptVariable)value).getVariableType()); //$NON-NLS-1$
+			}
+			else if (value instanceof ScriptCalculation)
+			{
+				return " - " + ((ScriptCalculation)value).getTypeAsString(); //$NON-NLS-1$
+			}
+			else if (value instanceof AggregateVariable)
+			{
+				return " - " + Column.getDisplayTypeString(((AggregateVariable)value).getDataProviderType()); //$NON-NLS-1$
+			}
+			return "";//$NON-NLS-1$
 		}
 
 		protected String getDataProviderDialogText(Object value)
@@ -783,6 +825,29 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					return dpDialogImage;
 				}
 			};
+		}
+
+		public void selectionChanged(SelectionChangedEvent event)
+		{
+			Object previous = selectedElement;
+			selectedElement = ((IStructuredSelection)event.getSelection()).getFirstElement();
+
+			if (event.getSource() instanceof TreeViewer)
+			{
+				if (previous != null && selectedElement != null)
+				{
+					((TreeViewer)event.getSource()).update(new Object[] { selectedElement, previous }, null);
+				}
+				else if (selectedElement != null)
+				{
+					((TreeViewer)event.getSource()).update(selectedElement, null);
+				}
+				else if (previous != null)
+				{
+					((TreeViewer)event.getSource()).update(previous, null);
+				}
+			}
+
 		}
 	}
 }
