@@ -697,7 +697,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 	public static class DataProviderDialogLabelProvider extends LabelProvider implements IFontProvider, IDelegate<ILabelProvider>, ISelectionChangedListener
 	{
 		private final ILabelProvider labelProvider;
-		private Object selectedElement;
+		private Object[] selectedElements;
 
 		public DataProviderDialogLabelProvider(ILabelProvider labelProvider)
 		{
@@ -708,9 +708,12 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		public String getText(Object value)
 		{
 			String append = ""; //$NON-NLS-1$
-			if (selectedElement == value)
+			if (selectedElements != null)
 			{
-				append += getDataProviderTypeByValue(value);
+				for (Object selectedElement : selectedElements)
+				{
+					if (selectedElement.equals(value)) append += getDataProviderTypeByValue(value);
+				}
 			}
 			String dpDialogText = getDataProviderDialogText(value);
 			if (dpDialogText == null)
@@ -829,22 +832,27 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 
 		public void selectionChanged(SelectionChangedEvent event)
 		{
-			Object previous = selectedElement;
-			selectedElement = ((IStructuredSelection)event.getSelection()).getFirstElement();
+			Object[] previousElems = selectedElements;
+			selectedElements = ((IStructuredSelection)event.getSelection()).toArray();
 
 			if (event.getSource() instanceof TreeViewer)
 			{
-				if (previous != null && selectedElement != null)
+				if (previousElems != null && selectedElements != null)
 				{
-					((TreeViewer)event.getSource()).update(new Object[] { selectedElement, previous }, null);
+					List list = new ArrayList();
+					list.addAll(Arrays.asList(previousElems));
+					list.addAll(Arrays.asList(selectedElements));
+
+					Object[] selected = list.toArray();
+					((TreeViewer)event.getSource()).update(selected, null);
 				}
-				else if (selectedElement != null)
+				else if (selectedElements != null)
 				{
-					((TreeViewer)event.getSource()).update(selectedElement, null);
+					((TreeViewer)event.getSource()).update(selectedElements, null);
 				}
-				else if (previous != null)
+				else if (previousElems != null)
 				{
-					((TreeViewer)event.getSource()).update(previous, null);
+					((TreeViewer)event.getSource()).update(previousElems, null);
 				}
 			}
 
