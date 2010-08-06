@@ -43,7 +43,6 @@ import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
@@ -521,21 +520,20 @@ public class ServoyTeamProvider extends RepositoryProvider
 			public void run()
 			{
 				final PasswordInputDialog protectionDlg = new PasswordInputDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), "Protection",
-					"Please enter protection password for solution : '" + solutionMetaData.getName() + "'", "", new IInputValidator()
-					{
-						public String isValid(String newText)
-						{
-							String passHashed = ApplicationServerSingleton.get().calculateProtectionPassword(solutionMetaData, newText);
-							if (!passHashed.equals(solutionMetaData.getProtectionPassword()))
-							{
-								return "";
-							}
-							else return null;
-						}
-
-					});
+					"Please enter protection password for solution : '" + solutionMetaData.getName() + "'", "", null);
 				protectionDlg.setBlockOnOpen(true);
-				bCheckProtection = (protectionDlg.open() == Window.OK);
+				if (protectionDlg.open() == Window.OK)
+				{
+					String passHashed = ApplicationServerSingleton.get().calculateProtectionPassword(solutionMetaData, protectionDlg.getValue());
+					if (passHashed.equals(solutionMetaData.getProtectionPassword()))
+					{
+						bCheckProtection = true;
+					}
+					else
+					{
+						MessageDialog.openError(PlatformUI.getWorkbench().getDisplay().getActiveShell(), "Checkout fails", "Password is incorrect.");
+					}
+				}
 			}
 		});
 
