@@ -506,7 +506,8 @@ public class DesignApplication implements IApplication, IMessagesCallback
 
 	public IExecutingEnviroment getScriptEngine()
 	{
-		return getClient().getScriptEngine();
+		if (getClient() != null) return getClient().getScriptEngine();
+		return null;
 	}
 
 	public Remote getServerService(String name)
