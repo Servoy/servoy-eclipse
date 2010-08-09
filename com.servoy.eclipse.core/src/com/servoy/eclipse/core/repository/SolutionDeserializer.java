@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.repository;
 
 import java.io.File;
@@ -437,38 +437,46 @@ public class SolutionDeserializer
 					if (jsonFile.exists())
 					{
 						ISupportChilds parentForm = (ISupportChilds)persistFileMap.get(jsonFile);
-						List<JSONObject> childrenJSObjects = childrenJSObjectMapEntry.getValue();
-						testDuplicates(parentForm, childrenJSObjects);
-
-						if (childrenJSObjects != null)
+						if (parentForm != null)
 						{
-							scriptFiles.add(jsFile);
-							for (JSONObject object : childrenJSObjects)
+							List<JSONObject> childrenJSObjects = childrenJSObjectMapEntry.getValue();
+							testDuplicates(parentForm, childrenJSObjects);
+
+							if (childrenJSObjects != null)
 							{
-								setMissingTypeOnScriptObject(object, parentForm);
-								IPersist persist = null;
-								try
+								scriptFiles.add(jsFile);
+								for (JSONObject object : childrenJSObjects)
 								{
-									persist = deserializePersist(repository, parentForm, persist_json_map, object, strayCats, jsFile, saved,
-										useFilesForDirtyMark);
+									setMissingTypeOnScriptObject(object, parentForm);
+									IPersist persist = null;
+									try
+									{
+										persist = deserializePersist(repository, parentForm, persist_json_map, object, strayCats, jsFile, saved,
+											useFilesForDirtyMark);
+									}
+									catch (JSONException e)
+									{
+										ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e); //$NON-NLS-1$ //$NON-NLS-2$
+									}
+									catch (RepositoryException e)
+									{
+										ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e); //$NON-NLS-1$//$NON-NLS-2$
+									}
+									if (persist != null)
+									{
+										saved.add(persist.getUUID());
+									}
 								}
-								catch (JSONException e)
+								if (jsFile != null)
 								{
-									ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e); //$NON-NLS-1$ //$NON-NLS-2$
-								}
-								catch (RepositoryException e)
-								{
-									ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e); //$NON-NLS-1$//$NON-NLS-2$
-								}
-								if (persist != null)
-								{
-									saved.add(persist.getUUID());
+									jsParentFileMap.put(jsFile, parentForm);
 								}
 							}
-							if (jsFile != null)
-							{
-								jsParentFileMap.put(jsFile, parentForm);
-							}
+						}
+						else
+						{
+							errorKeeper.addError(jsFile, new Exception("Invalid javascript file name '" + jsFile.getName() +
+								"', doesn't have a corresponding form."));
 						}
 					}
 				}
