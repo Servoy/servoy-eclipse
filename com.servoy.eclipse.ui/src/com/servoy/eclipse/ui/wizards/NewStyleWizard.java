@@ -269,7 +269,7 @@ public class NewStyleWizard extends Wizard implements INewWizard
 							Style s = (Style)rep.createNewRootObject(page1.getNewStyleName(), IRepository.STYLES);
 							s.setCSSText(page2.getInitialStyleContent());
 							rep.updateRootObject(s);
-							StringResourceDeserializer.fixStyleCssProfile(activeProject.getResourcesProject().getProject().getName(), s);
+							StringResourceDeserializer.fixStyleCssProfile(activeProject.getResourcesProject().getProject().getName(), s, false);
 
 							activeProject.getResourcesProject().getProject().refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
 						}

@@ -176,7 +176,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 						}
 						if (romd.getObjectTypeId() == IRepository.STYLES)
 						{
-							StringResourceDeserializer.fixStyleCssProfile(resourcesProject.getProject().getName(), (Style)rootObject);
+							StringResourceDeserializer.fixStyleCssProfile(resourcesProject.getProject().getName(), (Style)rootObject, true);
 						}
 					}
 					else

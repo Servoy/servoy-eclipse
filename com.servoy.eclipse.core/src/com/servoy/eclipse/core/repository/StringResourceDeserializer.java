@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.repository;
 
 import java.io.File;
@@ -24,10 +24,15 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.wst.css.core.internal.contentproperties.CSSContentProperties;
 import org.json.JSONException;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IFileAccess;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
@@ -247,14 +252,48 @@ public class StringResourceDeserializer
 		}
 	}
 
-	public static void fixStyleCssProfile(String resourcesProjectName, Style style)
+	public static void fixStyleCssProfile(String resourcesProjectName, Style style, boolean async)
 	{
 		try
 		{
 			String relativePath = getStringResourceContentFilePath(resourcesProjectName, style.getName(), IRepository.STYLES);
-			IFile resource = ServoyModel.getWorkspace().getRoot().getFile(new Path(relativePath));
-			if (resource.exists() && CSSContentProperties.getProperty(CSSContentProperties.CSS_PROFILE, resource, false) == null) CSSContentProperties.setProperty(
-				CSSContentProperties.CSS_PROFILE, resource, CSS1_PROFILE);
+			final IFile resource = ServoyModel.getWorkspace().getRoot().getFile(new Path(relativePath));
+			if (resource.exists() && CSSContentProperties.getProperty(CSSContentProperties.CSS_PROFILE, resource, false) == null)
+			{
+				if (async)
+				{
+					// this avoids deadlocks by not requiring access to the resource synchronously (as current thread might already hold locks when called from EclipseRepository)
+					// for example a deadlock could happen between a resource change event that holds resource lock and needs root object metadata lock and a form open operation
+					// that reads a new style that hasn't been already configured to use css1 in editor that will enter here and already hold the metadata lock
+					Job j = new Job("Configuring CSS profile for style " + resource.toString())
+					{
+
+						@Override
+						protected IStatus run(IProgressMonitor monitor)
+						{
+							try
+							{
+								CSSContentProperties.setProperty(CSSContentProperties.CSS_PROFILE, resource, CSS1_PROFILE);
+							}
+							catch (CoreException e)
+							{
+								ServoyLog.logError(e);
+								return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Cannot configure CSS editor to use CSS1 for style " +
+									resource.toString());
+							}
+							return Status.OK_STATUS;
+						}
+					};
+					j.setRule(resource.getProject());
+					j.setUser(false);
+					j.setSystem(true);
+					j.schedule();
+				}
+				else
+				{
+					CSSContentProperties.setProperty(CSSContentProperties.CSS_PROFILE, resource, CSS1_PROFILE);
+				}
+			}
 		}
 		catch (CoreException e)
 		{
