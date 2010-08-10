@@ -82,6 +82,7 @@ import com.servoy.j2db.util.toolbar.IToolbarPanel;
  * @author jcompagner
  * 
  */
+@SuppressWarnings("nls")
 public class DesignApplication implements IApplication, IMessagesCallback
 {
 
@@ -133,12 +134,12 @@ public class DesignApplication implements IApplication, IMessagesCallback
 
 	public String getApplicationName()
 	{
-		return getClient().getApplicationName();
+		return "Servoy Client";
 	}
 
 	public int getApplicationType()
 	{
-		return getClient().getApplicationType();
+		return CLIENT;
 	}
 
 	public boolean isInDeveloper()
@@ -153,7 +154,7 @@ public class DesignApplication implements IApplication, IMessagesCallback
 
 	public int getClientPlatform()
 	{
-		return getClient().getClientPlatform();
+		return Utils.getPlatform();
 	}
 
 	public IBeanManager getBeanManager()
@@ -411,7 +412,7 @@ public class DesignApplication implements IApplication, IMessagesCallback
 			Locale loc = PersistHelper.createLocale(settingsLocale);
 			if (loc != null) return loc;
 		}
-		return getClient().getLocale();
+		return Locale.getDefault();
 	}
 
 	public JFrame getMainApplicationFrame()
@@ -506,7 +507,8 @@ public class DesignApplication implements IApplication, IMessagesCallback
 
 	public IExecutingEnviroment getScriptEngine()
 	{
-		return getClient().getScriptEngine();
+		if (getClient() != null) return getClient().getScriptEngine();
+		return null;
 	}
 
 	public Remote getServerService(String name)
@@ -542,7 +544,7 @@ public class DesignApplication implements IApplication, IMessagesCallback
 
 	public TimeZone getTimeZone()
 	{
-		return getClient().getTimeZone();
+		return TimeZone.getDefault();
 	}
 
 	public IToolbarPanel getToolbarPanel()
