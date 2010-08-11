@@ -391,11 +391,11 @@ public class UIUtils
 	}
 
 	/**
-	 * Creates a SWT image from the given swing icon + the SWT device.
+	 * Creates a SWT image from the given swing icon + the SWT device. Take care to dispose the resources used by the returned Image object when it's no longer used.
 	 * 
 	 * @param swingIcon the swing icon to convert.
 	 * @param device the SWT device used in the Image constructor.
-	 * @return the SWT image object created based on the swing icon.
+	 * @return the SWT image object created based on the swing icon. Remember to dispose it when it will no longer be used.
 	 */
 	public static Image getSWTImageFromSwingIcon(Icon swingIcon, Device device)
 	{

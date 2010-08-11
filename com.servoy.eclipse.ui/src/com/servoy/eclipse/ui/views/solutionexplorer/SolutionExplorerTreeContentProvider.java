@@ -153,6 +153,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
+	private final List<Image> imagesConvertedFromSwing = new ArrayList<Image>();
+
 	SolutionExplorerTreeContentProvider(SolutionExplorerView v)
 	{
 		view = v;
@@ -308,6 +310,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		invisibleRootNode = null;
 		activeSolutionNode = null;
 		allSolutionsNode = null;
+
+		// dispose the (plugin) images that were allocated in SWT after conversion from Swing
+		for (Image i : imagesConvertedFromSwing)
+		{
+			i.dispose();
+		}
+		imagesConvertedFromSwing.clear();
 	}
 
 	/**
@@ -710,10 +719,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					if (scriptObject != null)
 					{
 						Icon icon = plugin.getImage();
-						Object image = null; // will need SWT image
+						Image image = null; // will need SWT image
 						if (icon != null)
 						{
 							image = UIUtils.getSWTImageFromSwingIcon(icon, view.getSite().getShell().getDisplay());
+							imagesConvertedFromSwing.add(image);
 						}
 						if (image == null)
 						{
