@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -44,6 +45,8 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	// The shared instance
 	private static Activator plugin;
+
+	private final List<Image> imageList = new ArrayList<Image>();
 
 	/**
 	 * The constructor
@@ -74,6 +77,17 @@ public class Activator extends AbstractUIPlugin implements IStartup
 	{
 		plugin = null;
 		super.stop(context);
+		for (Image image : imageList)
+		{
+			image.dispose();
+		}
+		imageList.clear();
+	}
+
+
+	public void registerImage(Image image)
+	{
+		imageList.add(image);
 	}
 
 	/**

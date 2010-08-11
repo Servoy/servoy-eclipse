@@ -17,12 +17,16 @@
 package com.servoy.eclipse.debug.script;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import javax.swing.Icon;
 
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeProvider;
@@ -33,13 +37,16 @@ import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.mozilla.javascript.JavaMembers;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.IApplication;
 import com.servoy.j2db.FormController.JSForm;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.Record;
@@ -59,8 +66,11 @@ import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.plugins.IClientPlugin;
+import com.servoy.j2db.plugins.IPluginManager;
 import com.servoy.j2db.scripting.GroupScriptObject;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
+import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.smart.dataui.SwingItemFactory;
@@ -83,6 +93,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
 		addScopeType("Form", new FormScopeCreator());
 		addScopeType("Elements", new ElementsScopeCreator());
+		addScopeType("Plugins", new PluginsScopeCreator());
 
 		dynamicTypeFillers.put(FoundSet.JS_FOUNDSET, new DataProviderFiller());
 		dynamicTypeFillers.put(Record.JS_RECORD, new DataProviderFiller());
@@ -418,6 +429,70 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 	}
 
+
+	private class PluginsScopeCreator implements IScopeTypeCreator
+	{
+		private final Map<String, Image> images = new HashMap<String, Image>();
+
+		/**
+		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
+		 */
+		public Type createType(ITypeInfoContext context, String fullTypeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName("plugins");
+			type.setKind(TypeKind.JAVA);
+			type.setAttribute(IMAGE_DESCRIPTOR, PLUGINS);
+
+			EList<Member> members = type.getMembers();
+			members.add(createProperty(context, "allnames", true, "Array", "All form names as an array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "length", true, "Number", "Number of forms", PROPERTY));
+
+
+			IPluginManager pluginManager = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getPluginManager();
+			List<IClientPlugin> clientPlugins = pluginManager.getPlugins(IClientPlugin.class);
+			for (IClientPlugin clientPlugin : clientPlugins)
+			{
+				IScriptObject scriptObject = clientPlugin.getScriptObject();
+				if (scriptObject != null)
+				{
+					ScriptObjectRegistry.registerScriptObjectForClass(scriptObject.getClass(), scriptObject);
+					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+					property.setName(clientPlugin.getName());
+					property.setReadOnly(true);
+					property.setType(TypeProvider.this.createType(context, clientPlugin.getName(), scriptObject.getClass()));
+
+					Image clientImage = null;
+					Icon icon = clientPlugin.getImage();
+					if (icon != null)
+					{
+						clientImage = images.get(clientPlugin.getName());
+						if (clientImage == null)
+						{
+							clientImage = UIUtils.getSWTImageFromSwingIcon(icon, Display.getDefault());
+						}
+						if (clientImage != null)
+						{
+							com.servoy.eclipse.debug.Activator.getDefault().registerImage(clientImage);
+							images.put(clientPlugin.getName(), clientImage);
+						}
+					}
+					if (clientImage == null)
+					{
+						property.setAttribute(IMAGE_DESCRIPTOR, PLUGIN_DEFAULT);
+					}
+					else
+					{
+						property.setAttribute(IMAGE_DESCRIPTOR, ImageDescriptor.createFromImage(clientImage));
+					}
+
+					members.add(property);
+				}
+			}
+
+			return type;
+		}
+	}
 
 	private static class FormScopeCreator implements IScopeTypeCreator
 	{

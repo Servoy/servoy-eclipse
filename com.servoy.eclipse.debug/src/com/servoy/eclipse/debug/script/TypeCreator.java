@@ -131,6 +131,12 @@ public abstract class TypeCreator
 	protected final static ImageDescriptor FORMS = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
 		new Path("/icons/forms.gif"), null));
 
+	protected final static ImageDescriptor PLUGINS = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
+		new Path("/icons/plugin.gif"), null));
+
+	protected final static ImageDescriptor PLUGIN_DEFAULT = ImageDescriptor.createFromURL(FileLocator.find(
+		com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/plugin_conn.gif"), null));
+
 	public static final String IMAGE_DESCRIPTOR = "ImageDescriptor";
 	public static final String RESOURCE = "RESOURCE";
 

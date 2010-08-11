@@ -28,8 +28,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
@@ -40,6 +40,8 @@ import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.internal.javascript.parser.JavaScriptSourceParser;
+import org.eclipse.dltk.internal.javascript.ti.IValueReference;
+import org.eclipse.dltk.internal.javascript.ti.TypeInferencer2;
 import org.eclipse.dltk.javascript.ast.Argument;
 import org.eclipse.dltk.javascript.ast.ArrayInitializer;
 import org.eclipse.dltk.javascript.ast.CallExpression;
@@ -86,6 +88,7 @@ import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
+import com.servoy.j2db.persistence.MethodArgument.ArgumentType;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RuntimeProperty;
 import com.servoy.j2db.persistence.ScriptVariable;
@@ -93,7 +96,6 @@ import com.servoy.j2db.persistence.ServerProxy;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.TableNode;
-import com.servoy.j2db.persistence.MethodArgument.ArgumentType;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyJSONArray;
@@ -109,6 +111,7 @@ import com.servoy.j2db.util.Utils;
  */
 public class SolutionDeserializer
 {
+	private static final String INITIALIZER_JSON_ATTRIBUTE = "INITIALIZER";
 	private static final String VARIABLE_TYPE_JSON_ATTRIBUTE = "variableType"; //$NON-NLS-1$
 	private static final String JS_TYPE_JSON_ATTRIBUTE = "jsType"; //$NON-NLS-1$
 	private static final String ARGUMENTS_JSON_ATTRIBUTE = "arguments"; //$NON-NLS-1$
@@ -436,8 +439,8 @@ public class SolutionDeserializer
 					else
 					{
 						// tablenode
-						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0, jsFileName.length() -
-							SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length()) +
+						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0,
+							jsFileName.length() - SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length()) +
 							SolutionSerializer.TABLENODE_FILE_EXTENSION);
 					}
 
@@ -1046,12 +1049,24 @@ public class SolutionDeserializer
 							else
 							{
 								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+								TypeInferencer2 inferencer = new TypeInferencer2();
+								inferencer.doInferencing(script);
+								IValueReference child = inferencer.getCollection().getChild(objectclass);
+								if (child != null)
+								{
+									json.put(INITIALIZER_JSON_ATTRIBUTE, child);
+								}
+								else
+								{
+									json.put(INITIALIZER_JSON_ATTRIBUTE, code);
+								}
 							}
 						}
 					}
 					else if (code instanceof FunctionStatement || code instanceof ObjectInitializer || code instanceof ArrayInitializer)
 					{
 						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+						json.put(INITIALIZER_JSON_ATTRIBUTE, code);
 					}
 					else
 					{
@@ -1450,6 +1465,15 @@ public class SolutionDeserializer
 				{
 					String type = obj.getString(JS_TYPE_JSON_ATTRIBUTE);
 					((ScriptVariable)retval).setSerializableRuntimeProperty(IScriptProvider.TYPE, type);
+				}
+				if (obj.has(INITIALIZER_JSON_ATTRIBUTE))
+				{
+					Object type = obj.get(INITIALIZER_JSON_ATTRIBUTE);
+					((ScriptVariable)retval).setRuntimeProperty(IScriptProvider.INITIALIZER, type);
+				}
+				else
+				{
+					((ScriptVariable)retval).setRuntimeProperty(IScriptProvider.INITIALIZER, null);
 				}
 			}
 			else if (retval instanceof AbstractScriptProvider)

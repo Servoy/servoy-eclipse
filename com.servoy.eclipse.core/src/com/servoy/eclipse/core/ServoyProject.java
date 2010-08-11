@@ -37,10 +37,10 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import com.servoy.eclipse.core.builder.ErrorKeeper;
-import com.servoy.eclipse.core.builder.ServoyBuilder;
 import com.servoy.eclipse.core.builder.ChangeResourcesProjectQuickFix.ResourceProjectChoiceDialog;
 import com.servoy.eclipse.core.builder.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
+import com.servoy.eclipse.core.builder.ErrorKeeper;
+import com.servoy.eclipse.core.builder.ServoyBuilder;
 import com.servoy.eclipse.core.repository.EclipseRepository;
 import com.servoy.eclipse.core.util.CoreUtils;
 import com.servoy.j2db.AbstractActiveSolutionHandler;
@@ -317,6 +317,8 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 							((AbstractBase)src).getSerializableRuntimeProperty(IScriptProvider.FILENAME));
 						((AbstractBase)dest).setSerializableRuntimeProperty(IScriptProvider.TYPE,
 							((AbstractBase)src).getSerializableRuntimeProperty(IScriptProvider.TYPE));
+						((AbstractBase)dest).setRuntimeProperty(IScriptProvider.INITIALIZER,
+							((AbstractBase)src).getRuntimeProperty(IScriptProvider.INITIALIZER));
 					}
 					editingSolution.clearEditingState(dest);
 
