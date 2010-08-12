@@ -119,12 +119,12 @@ class GlobalScope extends DefaultScope
 	{
 		if (name.equals("allmethods") || name.equals("allrelations") || name.equals("allvariables"))
 		{
-			String doc = FormDomProvider.getDoc(name, com.servoy.eclipse.core.scripting.docs.Globals.class, ""); //$NON-NLS-1$
+			String doc = FormDomProvider.getDoc(name, com.servoy.j2db.documentation.scripting.docs.Globals.class, ""); //$NON-NLS-1$
 			return new ProposalHolder(null, null, "Array", doc, false, null, null); //$NON-NLS-1$
 		}
 		if (name.equals("currentcontroller"))
 		{
-			String doc = FormDomProvider.getDoc(name, com.servoy.eclipse.core.scripting.docs.Globals.class, ""); //$NON-NLS-1$
+			String doc = FormDomProvider.getDoc(name, com.servoy.j2db.documentation.scripting.docs.Globals.class, ""); //$NON-NLS-1$
 			return new ScriptObjectClassScope(this, JSForm.class, "currentcontroller", null, doc, false);
 		}
 

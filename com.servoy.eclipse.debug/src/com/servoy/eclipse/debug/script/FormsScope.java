@@ -75,7 +75,7 @@ class FormsScope extends DefaultScope
 	{
 		if (name.equals("allnames") || name.equals("length")) //$NON-NLS-1$ //$NON-NLS-2$
 		{
-			String doc = FormDomProvider.getDoc(name, com.servoy.eclipse.core.scripting.docs.Forms.class, ""); //$NON-NLS-1$
+			String doc = FormDomProvider.getDoc(name, com.servoy.j2db.documentation.scripting.docs.Forms.class, ""); //$NON-NLS-1$
 			return new ProposalHolder(null, null, name.equals("allnames") ? "Array" : "Number", doc, false, null, null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 

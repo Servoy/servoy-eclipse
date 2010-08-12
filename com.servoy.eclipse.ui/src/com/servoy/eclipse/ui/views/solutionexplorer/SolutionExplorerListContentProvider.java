@@ -46,9 +46,6 @@ import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.TableWrapper;
-import com.servoy.eclipse.core.scripting.docs.FormElements;
-import com.servoy.eclipse.core.scripting.docs.Forms;
-import com.servoy.eclipse.core.scripting.docs.Globals;
 import com.servoy.eclipse.ui.node.IDeveloperFeedback;
 import com.servoy.eclipse.ui.node.IImageLookup;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
@@ -65,6 +62,9 @@ import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
+import com.servoy.j2db.documentation.scripting.docs.FormElements;
+import com.servoy.j2db.documentation.scripting.docs.Forms;
+import com.servoy.j2db.documentation.scripting.docs.Globals;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
@@ -417,7 +417,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				// (calculation
 				// edit
 				// mode)
-				lm = TreeBuilder.docToOneNode(com.servoy.eclipse.core.scripting.docs.Form.class, this, UserNodeType.ARRAY, null, null,
+				lm = TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.ARRAY, null, null,
 					"allrelations", realObject, null).toArray(); //$NON-NLS-1$
 			}
 			else if (type == UserNodeType.RELATION)
@@ -501,7 +501,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.NUMBER)
 			{
-				lm = TreeBuilder.createTypedArray(this, com.servoy.eclipse.core.scripting.docs.Number.class, UserNodeType.NUMBER, null);
+				lm = TreeBuilder.createTypedArray(this, com.servoy.j2db.documentation.scripting.docs.Number.class, UserNodeType.NUMBER, null);
 			}
 			else if (type == UserNodeType.DATE)
 			{
@@ -521,7 +521,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.SPECIAL_OPERATORS)
 			{
-				lm = TreeBuilder.createTypedArray(this, com.servoy.eclipse.core.scripting.docs.SpecialOperators.class, UserNodeType.SPECIAL_OPERATORS, null);
+				lm = TreeBuilder.createTypedArray(this, com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, UserNodeType.SPECIAL_OPERATORS, null);
 			}
 			else if (type == UserNodeType.FOUNDSET_MANAGER)
 			{
@@ -629,7 +629,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.JSLIB)
 			{
-				lm = TreeBuilder.createTypedArray(this, com.servoy.eclipse.core.scripting.docs.JSLib.class, UserNodeType.JSLIB, null);
+				lm = TreeBuilder.createTypedArray(this, com.servoy.j2db.documentation.scripting.docs.JSLib.class, UserNodeType.JSLIB, null);
 			}
 			if (lm != null && key != null)
 			{
@@ -849,7 +849,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		HashMap<String, Solution> modulesOfSolution = new HashMap<String, Solution>();
 		solution.getReferencedModulesRecursive(modulesOfSolution);
 		modulesOfSolution.put(solution.getName(), solution);
-		TreeBuilder.docToOneNode(com.servoy.eclipse.core.scripting.docs.Form.class, this, UserNodeType.ARRAY, prefix, dlm, "alldataproviders", null, null);
+		TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.ARRAY, prefix, dlm, "alldataproviders", null, null);
 
 		Iterator<Column> cols = table.getColumnsSortedByName();
 		while (cols.hasNext())
@@ -897,9 +897,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			dlm.add(new UserNode(form.getName(), UserNodeType.FORM_FOUNDSET, form.getName(), form.getName(), form,
 				uiActivator.loadImageFromBundle("designer.gif"))); //$NON-NLS-1$
-			TreeBuilder.docToOneNode(com.servoy.eclipse.core.scripting.docs.Form.class, this, UserNodeType.FOUNDSET_ITEM, null, dlm, "foundset", form,
+			TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.FOUNDSET_ITEM, null, dlm, "foundset", form,
 				uiActivator.loadImageFromBundle("foundset.gif"));
-			TreeBuilder.docToOneNode(com.servoy.eclipse.core.scripting.docs.Form.class, this, UserNodeType.ARRAY, null, dlm, "allmethods", form, null);
+			TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.ARRAY, null, dlm, "allmethods", form, null);
 			FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 			if (flatSolution != null)
 			{
@@ -982,7 +982,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					ServoyLog.logError(e);
 				}
 			}
-			TreeBuilder.docToOneNode(com.servoy.eclipse.core.scripting.docs.Form.class, this, UserNodeType.ARRAY, null, dlm, "allvariables", form, null);
+			TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.ARRAY, null, dlm, "allvariables", form, null);
 
 			Iterator<ScriptVariable> it = form.getScriptVariables(true);
 			String nodeText;

@@ -164,12 +164,12 @@ class FormScope extends DefaultScope implements IProposalHolder
 		if (name.equals("allnames") || name.equals("alldataproviders") || name.equals("allmethods") || name.equals("allrelations") || //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			name.equals("allvariables")) //$NON-NLS-1$
 		{
-			String doc = FormDomProvider.getDoc(name, com.servoy.eclipse.core.scripting.docs.Form.class, ""); //$NON-NLS-1$
+			String doc = FormDomProvider.getDoc(name, com.servoy.j2db.documentation.scripting.docs.Form.class, ""); //$NON-NLS-1$
 			return new ProposalHolder(null, null, "Array", doc, false, null, null); //$NON-NLS-1$
 		}
 		if (name.equals("controller")) //$NON-NLS-1$
 		{
-			String doc = FormDomProvider.getDoc(name, com.servoy.eclipse.core.scripting.docs.Form.class, ""); //$NON-NLS-1$
+			String doc = FormDomProvider.getDoc(name, com.servoy.j2db.documentation.scripting.docs.Form.class, ""); //$NON-NLS-1$
 			return new ScriptObjectClassScope(this, JSForm.class, "controller", null, doc, false); //$NON-NLS-1$
 		}
 		if (name.equals("elements")) //$NON-NLS-1$

@@ -19,7 +19,6 @@ package com.servoy.eclipse.core.doc;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.servoy.j2db.documentation.ParameterDocumentation;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.util.Debug;
 
@@ -76,7 +75,7 @@ public class XMLScriptObjectAdapter implements IScriptObject
 		{
 			String[] argNames = new String[fdoc.getArguments().size()];
 			int i = 0;
-			for (ParameterDocumentation argDoc : fdoc.getArguments().values())
+			for (IParameterDocumentation argDoc : fdoc.getArguments().values())
 			{
 				String name = argDoc.isOptional() ? "[" + argDoc.getName() + "]" : argDoc.getName(); //$NON-NLS-1$//$NON-NLS-2$
 				argNames[i++] = name;

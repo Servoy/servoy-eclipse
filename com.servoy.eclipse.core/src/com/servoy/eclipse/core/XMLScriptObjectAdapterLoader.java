@@ -23,6 +23,7 @@ import com.servoy.eclipse.core.doc.IDocumentationManager;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.core.doc.IObjectDocumentation;
 import com.servoy.eclipse.core.doc.XMLScriptObjectAdapter;
+import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 
@@ -52,7 +53,7 @@ public class XMLScriptObjectAdapterLoader
 			{
 				try
 				{
-					Class< ? > clazz = Class.forName(objDoc.getQualifiedName());
+					Class< ? > clazz = DocumentationUtil.loadClass(objDoc.getQualifiedName());
 					XMLScriptObjectAdapter adapter = new XMLScriptObjectAdapter(objDoc);
 					// see if there are already return types that the class itself specifies (to be exactly the same as a real client)
 					IScriptObject scriptObjectForClass = ScriptObjectRegistry.getScriptObjectForClass(clazz);
@@ -88,5 +89,4 @@ public class XMLScriptObjectAdapterLoader
 		if (docManager != null) return docManager.getObjectByQualifiedName(clz.getCanonicalName());
 		return null;
 	}
-
 }
