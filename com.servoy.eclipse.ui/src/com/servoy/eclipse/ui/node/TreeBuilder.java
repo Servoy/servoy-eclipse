@@ -68,14 +68,12 @@ public class TreeBuilder
 
 	public static UserNode[] createJSArray(IImageLookup imageLookup)
 	{
-		List<UserNode> dlm = new ArrayList<UserNode>();
-		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Array.class, UserNodeType.ARRAY, dlm);
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Array.class, UserNodeType.ARRAY, null);
 	}
 
 	public static UserNode[] createJSDate(IImageLookup imageLookup)
 	{
-		List<UserNode> dlm = new ArrayList<UserNode>();
-		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Date.class, UserNodeType.DATE, dlm);
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Date.class, UserNodeType.DATE, null);
 	}
 
 	public static UserNode[] createJSString(IImageLookup imageLookup)
