@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.debug.script;
 
 import java.net.URL;
@@ -24,6 +24,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dlkt.javascript.dom.support.IProposalHolder;
+import org.eclipse.dltk.internal.javascript.typeinference.ReferenceFactory;
+import org.eclipse.dltk.javascript.typeinference.IScriptableTypeProvider;
 import org.mozilla.javascript.Scriptable;
 
 import com.servoy.eclipse.core.repository.SolutionSerializer;
@@ -55,9 +57,32 @@ public class MethodScope extends DefaultScope implements IProposalHolder
 	{
 		ArrayList<String> al = new ArrayList<String>();
 
-		al.add("apply"); //$NON-NLS-1$
-		al.add("toString"); //$NON-NLS-1$
-		al.add("call"); //$NON-NLS-1$
+		String returnType = getReturnType();
+		if (returnType == null)
+		{
+			al.add("apply"); //$NON-NLS-1$
+			al.add("toString"); //$NON-NLS-1$
+			al.add("call"); //$NON-NLS-1$
+		}
+		else
+		{
+			IScriptableTypeProvider[] scriptTypeProviders = ReferenceFactory.getScriptTypeProviders();
+
+			for (IScriptableTypeProvider scriptTypeProvider : scriptTypeProviders)
+			{
+				if (scriptTypeProvider instanceof CustomTypeProvider)
+				{
+					CustomTypeProvider customTypeProvider = (CustomTypeProvider)scriptTypeProvider;
+					Scriptable type = customTypeProvider.getType(scriptMethod.getName(), returnType);
+					if (type != null)
+					{
+						return type.getIds();
+					}
+					break;
+				}
+			}
+		}
+
 
 		return al.toArray();
 	}
@@ -65,6 +90,24 @@ public class MethodScope extends DefaultScope implements IProposalHolder
 	@Override
 	public Object get(String name, Scriptable start)
 	{
+		if (getReturnType() != null)
+		{
+			IScriptableTypeProvider[] scriptTypeProviders = ReferenceFactory.getScriptTypeProviders();
+
+			for (IScriptableTypeProvider scriptTypeProvider : scriptTypeProviders)
+			{
+				if (scriptTypeProvider instanceof CustomTypeProvider)
+				{
+					CustomTypeProvider customTypeProvider = (CustomTypeProvider)scriptTypeProvider;
+					Scriptable type = customTypeProvider.getType(scriptMethod.getName(), getReturnType());
+					if (type != null)
+					{
+						return type.get(name, type);
+					}
+					break;
+				}
+			}
+		}
 		if (name.equals("toString")) //$NON-NLS-1$
 		{
 			return new ProposalHolder("", null, null, true, null); //$NON-NLS-1$
