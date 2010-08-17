@@ -41,7 +41,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.IFileAccess;
 import com.servoy.eclipse.core.ServoyLog;
@@ -684,9 +691,9 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 									EclipseUserManager.SECURITY_FILE_EXTENSION;
 								if (wsa.exists(oldSecFileRelativePath))
 								{
-									wsa.move(oldSecFileRelativePath, fileFromPath.getLeft() +
-										fileToName.substring(0, fileToName.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) +
-										EclipseUserManager.SECURITY_FILE_EXTENSION);
+									wsa.move(oldSecFileRelativePath,
+										fileFromPath.getLeft() + fileToName.substring(0, fileToName.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) +
+											EclipseUserManager.SECURITY_FILE_EXTENSION);
 								}
 							}
 						}
@@ -746,6 +753,33 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 							{
 								if (fileContent.trim().length() > 0)
 								{
+									IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
+									for (IWorkbenchWindow workbenchWindow : workbenchWindows)
+									{
+										if (workbenchWindow.getActivePage() == null) continue;
+										IEditorReference[] editorReferences = workbenchWindow.getActivePage().getEditorReferences();
+										for (IEditorReference reference : editorReferences)
+										{
+											IEditorInput editorInput = reference.getEditorInput();
+											if (editorInput instanceof IFileEditorInput)
+											{
+												if (((IFileEditorInput)editorInput).getFile().equals(scriptFile))
+												{
+
+													IEditorPart editor = reference.getEditor(false);
+													if (editor != null && editor.isDirty())
+													{
+														if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
+															"Saving script changes with dirty editor", //$NON-NLS-1$
+															"Overwrite editor changes? (if not then (property) changes could be ignored)")) //$NON-NLS-1$
+														{
+															return;
+														}
+													}
+												}
+											}
+										}
+									}
 									scriptFile.setContents(Utils.getUTF8EncodedStream(fileContent), IResource.FORCE, null);
 								}
 								else
