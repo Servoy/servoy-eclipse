@@ -137,17 +137,14 @@
       <resolver
             class="com.servoy.eclipse.debug.script.ElementResolver">
       </resolver>
+      <converter
+            class="com.servoy.eclipse.debug.script.ReferenceResolver">
+      </converter>
    </extension>
    <extension
          point="org.eclipse.dltk.javascript.ui.typeInfoLabelProvider">
       <labelProvider
             class="com.servoy.eclipse.debug.script.ElementLabelProvider">
       </labelProvider>
-   </extension>
-   <extension
-         point="org.eclipse.dltk.ui.openDelegate">
-      <delegate
-            class="com.servoy.eclipse.debug.script.OpenAdapter">
-      </delegate>
    </extension>
 </plugin>
