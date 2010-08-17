@@ -15563,6 +15563,21 @@ forms.myForm.show(win);]]></sample>
             </parameter>
           </parameters>
         </function>
+        <function name="show">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return typecode="void" type="void"/>
+          <description><![CDATA[Shows the given form in this window.]]></description>
+          <summary><![CDATA[Shows the given form in this window.]]></summary>
+          <sample><![CDATA[win.show(forms.myForm);
+// win.show("myForm");]]></sample>
+          <parameters>
+            <parameter name="form" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the form that will be shown inside this window. It can be a form name or a form object (actual form or JSFrom).]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function name="showTextToolbar">
           <argumentsTypes>
             <argumentType typecode="boolean"/>
