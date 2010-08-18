@@ -521,7 +521,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.SPECIAL_OPERATORS)
 			{
-				lm = TreeBuilder.createTypedArray(this, com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, UserNodeType.SPECIAL_OPERATORS, null);
+				lm = TreeBuilder.createTypedArray(this, com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, UserNodeType.SPECIAL_OPERATORS,
+					null);
 			}
 			else if (type == UserNodeType.FOUNDSET_MANAGER)
 			{
@@ -900,6 +901,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.FOUNDSET_ITEM, null, dlm, "foundset", form,
 				uiActivator.loadImageFromBundle("foundset.gif"));
 			TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.ARRAY, null, dlm, "allmethods", form, null);
+			if (f.getExtendsFormID() > 0)
+			{
+				TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.FORM, null, dlm, "_super", form,
+					uiActivator.loadImageFromBundle("designer.gif"));
+			}
 			FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 			if (flatSolution != null)
 			{

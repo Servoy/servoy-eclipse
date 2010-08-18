@@ -178,7 +178,8 @@ class FormScope extends DefaultScope implements IProposalHolder
 		}
 		if (form != null && name.equals("_super") && form.getExtendsFormID() > 0) //$NON-NLS-1$
 		{
-			return new SuperScope(this, form);
+			String doc = FormDomProvider.getDoc(name, com.servoy.j2db.documentation.scripting.docs.Form.class, ""); //$NON-NLS-1$
+			return new SuperScope(this, form, doc);
 		}
 		if (name.equals("foundset")) //$NON-NLS-1$
 		{

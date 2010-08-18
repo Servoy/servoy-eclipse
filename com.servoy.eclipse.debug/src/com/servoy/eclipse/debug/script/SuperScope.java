@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.debug.script;
 
 import java.net.URL;
@@ -43,14 +43,16 @@ public class SuperScope extends DefaultScope implements IProposalHolder
 {
 	private final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 	private final Form form;
+	private final String proposalInfo;
 
 	/**
 	 * @param parent
 	 */
-	public SuperScope(Scriptable parent, Form form)
+	public SuperScope(Scriptable parent, Form form, String proposalInfo)
 	{
 		super(parent);
 		this.form = form;
+		this.proposalInfo = proposalInfo;
 	}
 
 	/**
@@ -108,9 +110,9 @@ public class SuperScope extends DefaultScope implements IProposalHolder
 			ScriptMethod method = scriptMethods.next();
 			if (method.getDataProviderID().equals(name))
 			{
-				String proposalInfo = null;
-				proposalInfo = "Method of form: " + ((Form)method.getParent()).getName(); //$NON-NLS-1$
-				return new MethodScope(this, method, proposalInfo, true, FormScope.FORM_METHOD_IMAGE);
+				String methodProposalInfo = null;
+				methodProposalInfo = "Method of form: " + ((Form)method.getParent()).getName(); //$NON-NLS-1$
+				return new MethodScope(this, method, methodProposalInfo, true, FormScope.FORM_METHOD_IMAGE);
 			}
 		}
 		return super.get(name, start);
@@ -153,7 +155,7 @@ public class SuperScope extends DefaultScope implements IProposalHolder
 	 */
 	public String getProposalInfo()
 	{
-		return "super form: " + getFormToUse().getName(); //$NON-NLS-1$
+		return proposalInfo;
 	}
 
 	/**
