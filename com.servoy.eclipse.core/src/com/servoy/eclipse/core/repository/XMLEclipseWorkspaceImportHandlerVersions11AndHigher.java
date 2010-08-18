@@ -232,7 +232,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 							}
 							else
 							{
-								if (SolutionMetaData.isPreImportHook(root.getName()) || SolutionMetaData.isPostImportHook(root.getName()))
+								if (SolutionMetaData.isPreImportHook(root) || SolutionMetaData.isPostImportHook(root))
 								{
 									userChannel.info("Execution of hook module '" + root.getName() + "' skipped, it's only supported in repository import.",
 										ILogLevel.INFO);
