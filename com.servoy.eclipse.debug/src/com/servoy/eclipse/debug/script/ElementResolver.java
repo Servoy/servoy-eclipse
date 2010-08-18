@@ -109,6 +109,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		typeNameCreators.put("foundset", new FoundsetTypeNameCreator());
 		typeNameCreators.put("plugins", new PluginsTypeNameCreator());
 		typeNameCreators.put("elements", new ElementsTypeNameCreator());
+		typeNameCreators.put("_super", new SuperTypeNameCreator());
 
 	}
 
@@ -130,7 +131,6 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 			typeNames.remove("currentcontroller");
 			if (form.getExtendsFormID() > 0)
 			{
-				typeNames.add("_super");
 				try
 				{
 					formToUse = fs.getFlattenedForm(form);
@@ -139,6 +139,10 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 				{
 					ServoyLog.logError("Cant get super flattened form for " + form, e);
 				}
+			}
+			else
+			{
+				typeNames.remove("_super");
 			}
 // TODO is this needed? should already be done
 //			Iterator<ScriptMethod> scriptMethods = formToUse.getScriptMethods(false);
@@ -599,6 +603,27 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 
 			}
 			return FoundSet.JS_FOUNDSET;
+		}
+	}
+
+	private class SuperTypeNameCreator implements ITypeNameCreator
+	{
+		/**
+		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
+		 */
+		public String getTypeName(ITypeInfoContext context, String fullTypeName)
+		{
+			Form form = getForm(context);
+			if (form != null)
+			{
+				if (form.getExtendsFormID() > 0)
+				{
+					FlattenedSolution fs = getFlattenedSolution(context);
+					Form superForm = fs.getForm(form.getExtendsFormID());
+					if (superForm != null) return "Super<" + superForm.getName() + '>';
+				}
+			}
+			return "Super";
 		}
 	}
 

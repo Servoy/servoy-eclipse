@@ -94,10 +94,12 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addScopeType("Form", new FormScopeCreator());
 		addScopeType("Elements", new ElementsScopeCreator());
 		addScopeType("Plugins", new PluginsScopeCreator());
+		addScopeType("Super", new SuperScopeCreator());
 
 		dynamicTypeFillers.put(FoundSet.JS_FOUNDSET, new DataProviderFiller());
 		dynamicTypeFillers.put(Record.JS_RECORD, new DataProviderFiller());
 		dynamicTypeFillers.put("Form", new FormScopeFiller());
+		dynamicTypeFillers.put("Super", new SuperScopeFiller());
 		dynamicTypeFillers.put("Elements", new ElementsScopeFiller());
 
 	}
@@ -270,6 +272,41 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		}
 	}
 
+
+	private class SuperScopeFiller implements DynamicTypeFiller
+	{
+		public void fillType(Type type, ITypeInfoContext context, String config)
+		{
+			FlattenedSolution fs = getFlattenedSolution(context);
+			if (fs != null)
+			{
+				Form form = fs.getForm(config);
+				if (form != null)
+				{
+					try
+					{
+						EList<Member> members = type.getMembers();
+						Form formToUse = form;
+						if (form.getExtendsFormID() > 0)
+						{
+							formToUse = fs.getFlattenedForm(form);
+						}
+
+						Iterator<ScriptMethod> scriptMethods = formToUse.getScriptMethods(false);
+						while (scriptMethods.hasNext())
+						{
+							ScriptMethod sm = scriptMethods.next();
+							members.add(createMethod(context, sm, FORM_METHOD_IMAGE, sm.getSerializableRuntimeProperty(IScriptProvider.FILENAME)));
+						}
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+			}
+		}
+	}
 
 	private class ElementsScopeFiller implements DynamicTypeFiller
 	{
@@ -514,6 +551,20 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			// controller and foundset
 			members.add(createProperty(context, "controller", true, "controller", PROPERTY));
 			members.add(createProperty(context, "foundset", true, FoundSet.JS_FOUNDSET, FOUNDSET_IMAGE));
+			type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
+			return type;
+		}
+	}
+
+	private static class SuperScopeCreator implements IScopeTypeCreator
+	{
+
+		public Type createType(ITypeInfoContext context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+
 			type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
 			return type;
 		}
