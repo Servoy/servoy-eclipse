@@ -703,8 +703,8 @@ public class RepositoryOperations
 			{
 				for (String userUIDGroup : userUIDGroups)
 				{
-					eclipseUserManager.addUserToGroup(ApplicationServerSingleton.get().getClientId(), userID, eclipseUserManager.getGroupId(
-						ApplicationServerSingleton.get().getClientId(), userUIDGroup));
+					eclipseUserManager.addUserToGroup(ApplicationServerSingleton.get().getClientId(), userID,
+						eclipseUserManager.getGroupId(ApplicationServerSingleton.get().getClientId(), userUIDGroup));
 				}
 			}
 		}
@@ -1069,7 +1069,7 @@ public class RepositoryOperations
 		{
 			i18NTable = (Table)i18NServer.getTable(i18NTableName);
 		}
-		if (i18NTable == null) throw new Exception("Remote repository does not have an i18n table named : " + i18NServer + "." + i18NTable +
+		if (i18NTable == null) throw new Exception("Remote repository does not have an i18n table named : " + i18NServerName + "." + i18NTableName +
 			"\nYou should create one manually if you want to be able to commit i18n messages.");
 		I18NUtil.writeMessagesToRepository(i18NServerName, i18NTableName, repository, dataServer, clientID, messages, false, false);
 	}
