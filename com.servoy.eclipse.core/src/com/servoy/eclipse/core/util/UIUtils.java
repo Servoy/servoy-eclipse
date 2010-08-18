@@ -17,7 +17,6 @@
 package com.servoy.eclipse.core.util;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
@@ -408,7 +407,7 @@ public class UIUtils
 			ImageIO.write(bufferedImage, "PNG", outBytes);
 			return new Image(device, inBytes);
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
 			ServoyLog.logWarning("Cannot convert swing icon into SWT image", e);
 			return null;
