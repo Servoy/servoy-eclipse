@@ -847,6 +847,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 
 	public void importingFailed(ImportInfo importInfo, ImportTransactable importTransactable, Exception e)
 	{
+		ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(null);
 		rollback(importTransactable);
 		x11handler.importingFailed(importInfo, importTransactable, e);
 	}
