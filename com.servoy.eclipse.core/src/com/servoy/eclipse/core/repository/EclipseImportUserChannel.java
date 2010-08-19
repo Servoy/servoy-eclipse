@@ -571,4 +571,9 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 			solutionName + '\'', "", null);
 
 	}
+
+	public int askUpdateSequences()
+	{
+		return CANCEL_ACTION;
+	}
 }
