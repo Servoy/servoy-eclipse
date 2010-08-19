@@ -13,8 +13,11 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
@@ -39,7 +42,7 @@ class RelayEditorProvider implements IRelayEditorProvider
 	private IPropertyDescriptorProvider propertyProvider;
 
 	private ComboBoxCellEditor comboCellEditor;
-	private MethodCellEditor methodCellEditor;
+	private final Map<String, MethodCellEditor> methodCellEditors = new HashMap<String, MethodCellEditor>();
 
 	/**
 	 * @see com.servoy.eclipse.ui.util.MapEntryValueEditor.IRelayEditorProvider#getCellEditor(java.lang.Object, org.eclipse.jface.viewers.TableViewer)
@@ -53,12 +56,13 @@ class RelayEditorProvider implements IRelayEditorProvider
 			{
 				if (propertyDescriptor.getType() == IPropertyDescriptor.GLOBAL_METHOD)
 				{
+					MethodCellEditor methodCellEditor = methodCellEditors.get(key);
 					if (methodCellEditor == null)
 					{
 						Solution solution = servoyModel.getFlattenedSolution().getSolution();
 						MethodLabelProvider methodLabelProvider = new MethodLabelProvider(solution, solution, false, false);
-						methodCellEditor = new MethodCellEditor(parent.getTable(), methodLabelProvider, null, solution, "globalMethod", false, true, false, //$NON-NLS-1$
-							false, true);
+						methodCellEditor = new MethodCellEditor(parent.getTable(), methodLabelProvider, null, solution, key, false, true, false, false, true);
+						methodCellEditors.put(key, methodCellEditor);
 					}
 					return methodCellEditor;
 				}
