@@ -564,7 +564,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
-
+			type.setDescription(getDoc("_super", com.servoy.j2db.documentation.scripting.docs.Form.class, ""));
 			type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
 			return type;
 		}
