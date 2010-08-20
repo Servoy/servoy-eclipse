@@ -19,6 +19,7 @@ package com.servoy.eclipse.core;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Map;
 
 import javax.swing.SwingUtilities;
 
@@ -59,10 +60,17 @@ import com.servoy.j2db.IDebugClientHandler;
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.IDesignerCallback;
+import com.servoy.j2db.dataprocessing.IColumnConverter;
+import com.servoy.j2db.dataprocessing.IColumnValidator;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IMethodTemplate;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
+import com.servoy.j2db.persistence.MethodTemplate;
+import com.servoy.j2db.persistence.MethodTemplatesFactory;
+import com.servoy.j2db.plugins.IMethodTemplatesProvider;
+import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
 import com.servoy.j2db.smart.J2DBClient;
@@ -525,6 +533,40 @@ public class Activator extends Plugin
 				return Status.OK_STATUS;
 			}
 		}.schedule();
+
+		// Visit all column validators/converters and let them add any method templates to
+		// MethodTemplate.
+		PluginManager pluginManager = (PluginManager)getDesignClient().getPluginManager();
+		Map<String, IColumnConverter> converters = pluginManager.getColumnConverterManager().getConverters();
+		for (IColumnConverter conv : converters.values())
+		{
+			if (conv instanceof IMethodTemplatesProvider)
+			{
+				Map<String, IMethodTemplate> templs = ((IMethodTemplatesProvider)conv).getMethodTemplates(MethodTemplatesFactory.getInstance());
+				processMethodTemplates(templs);
+			}
+		}
+		Map<String, IColumnValidator> validators = pluginManager.getColumnValidatorManager().getValidators();
+		for (IColumnValidator val : validators.values())
+		{
+			if (val instanceof IMethodTemplatesProvider)
+			{
+				Map<String, IMethodTemplate> templs = ((IMethodTemplatesProvider)val).getMethodTemplates(MethodTemplatesFactory.getInstance());
+				processMethodTemplates(templs);
+			}
+		}
+	}
+
+	private void processMethodTemplates(Map<String, IMethodTemplate> templs)
+	{
+		if (templs != null)
+		{
+			for (String key : templs.keySet())
+			{
+				IMethodTemplate src = templs.get(key);
+				MethodTemplate.COMMON_TEMPLATES.put(key, new MethodTemplate(src));
+			}
+		}
 	}
 
 	public synchronized IDocumentationManagerProvider getDocumentationManagerProvider()
