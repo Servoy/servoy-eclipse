@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.repository;
 
 
@@ -38,6 +38,7 @@ import com.servoy.eclipse.core.ServoyUpdatingProject;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AbstractScriptProvider;
+import com.servoy.j2db.persistence.ArgumentType;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
@@ -165,6 +166,7 @@ public class SolutionSerializer
 	public static final String PROP_FILE_VERSION = "fileVersion"; //$NON-NLS-1$
 
 	public static final String PROPERTIESKEY = "@properties="; //$NON-NLS-1$
+	public static final String TYPEKEY = "@type"; //$NON-NLS-1$
 
 	public static String generateScriptFile(final ISupportChilds parent, final IDeveloperRepository repository)
 	{
@@ -512,6 +514,21 @@ public class SolutionSerializer
 					{
 						generateDefaultJSDoc(obj, sb);
 					}
+					int type = sv.getVariableType();
+					// Add the "@type" tag.
+					String typeStr = ArgumentType.convertFromColumnType(type).getName();
+					int index = sb.lastIndexOf(TYPEKEY);
+					if (index != -1)
+					{
+						int lineEnd = sb.indexOf("\n", index); //$NON-NLS-1$
+						sb.replace(index + TYPEKEY.length() + 1, lineEnd, typeStr);
+					}
+					else
+					{
+						int startComment = sb.indexOf(SV_COMMENT);
+						int lineEnd = sb.indexOf("\n", startComment); //$NON-NLS-1$
+						sb.insert(lineEnd, "\n * " + TYPEKEY + " " + typeStr + "\n *"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
 					sb.append(VAR_KEYWORD);
 					sb.append(' ');
 					sb.append(sv.getName());
@@ -522,7 +539,6 @@ public class SolutionSerializer
 						sb.append(jsType);
 					}
 					String val = sv.getDefaultValue();
-					int type = sv.getVariableType();
 					if (type == IColumnTypes.TEXT)
 					{
 						if (val == null)
