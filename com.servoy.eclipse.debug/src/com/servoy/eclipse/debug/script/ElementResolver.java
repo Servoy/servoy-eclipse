@@ -268,7 +268,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 
 		if (type != null)
 		{
-			return createProperty(name, readOnly, type, null, image, resource);
+			return createProperty(name, readOnly, type, type.getDescription(), image, resource);
 		}
 		return null;
 	}
