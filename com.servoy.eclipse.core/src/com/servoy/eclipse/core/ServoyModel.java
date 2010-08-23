@@ -160,9 +160,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 	private final List<I18NChangeListener> i18nChangeListeners;
 
 	private final Job fireRealPersistchangesJob;
-	private final Job fireEditingPersistchangesJob;
 	private List<IPersist> realOutstandingChanges;
-	private List<IPersist> editingOutstandingChanges;
 
 	private Map<String, ServoyProject> servoyProjectCache;
 
@@ -188,10 +186,8 @@ public class ServoyModel implements IWorkspaceSaveListener
 		editingPersistChangeListeners = new ArrayList<IPersistChangeListener>();
 		solutionMetaDataChangeListener = new ArrayList<ISolutionMetaDataChangeListener>();
 		i18nChangeListeners = new ArrayList<I18NChangeListener>();
-		fireRealPersistchangesJob = createFirePersistchangesJob(true);
-		fireEditingPersistchangesJob = createFirePersistchangesJob(false);
+		fireRealPersistchangesJob = createFireRealPersistchangesJob();
 		realOutstandingChanges = new ArrayList<IPersist>();
-		editingOutstandingChanges = new ArrayList<IPersist>();
 		messagesManager = new EclipseMessages();
 		Messages.customMessageLoader = messagesManager;
 
@@ -1407,7 +1403,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 	 * Create the refresh job for the receiver.
 	 * 
 	 */
-	private Job createFirePersistchangesJob(final boolean realSolution)
+	private Job createFireRealPersistchangesJob()
 	{
 		Job refreshJob = new Job("Refresh Servoy Model")
 		{
@@ -1419,17 +1415,10 @@ public class ServoyModel implements IWorkspaceSaveListener
 			@Override
 			public IStatus run(IProgressMonitor monitor)
 			{
-				List<IPersist> changes = getOutstandingPersistChanges(realSolution);
+				List<IPersist> changes = getOutstandingRealPersistChanges();
 				if (changes.size() > 0)
 				{
-					Set<IPersist> set = new HashSet<IPersist>();
-					set.addAll(changes);
-
-					List<IPersistChangeListener> listeners = realSolution ? realPersistChangeListeners : editingPersistChangeListeners;
-					for (IPersistChangeListener listener : listeners.toArray(new IPersistChangeListener[listeners.size()]))
-					{
-						listener.persistChanges(set);
-					}
+					firePersistsChangedEx(true, new HashSet<IPersist>(changes));
 				}
 				return Status.OK_STATUS;
 			}
@@ -1437,7 +1426,6 @@ public class ServoyModel implements IWorkspaceSaveListener
 		refreshJob.setSystem(true);
 		return refreshJob;
 	}
-
 
 	/**
 	 * Notify listeners of changes to persists. Changes can be notified for the real solutions or the editing solutions.
@@ -1449,13 +1437,32 @@ public class ServoyModel implements IWorkspaceSaveListener
 	{
 		if (changes.size() == 0) return;
 
-		Job refreshJob = realSolution ? fireRealPersistchangesJob : fireEditingPersistchangesJob;
-		synchronized (refreshJob)
+		if (realSolution)
 		{
-			List<IPersist> outstandingChanges = realSolution ? realOutstandingChanges : editingOutstandingChanges;
-			outstandingChanges.addAll(changes);
-			refreshJob.cancel();
-			refreshJob.schedule(100);// wait .1 sec for more changes before start firing
+			synchronized (fireRealPersistchangesJob)
+			{
+				realOutstandingChanges.addAll(changes);
+				fireRealPersistchangesJob.cancel();
+				fireRealPersistchangesJob.schedule(100);// wait .1 sec for more changes before start firing
+			}
+		}
+		else
+		{
+			// editing solution
+			firePersistsChangedEx(false, changes);
+		}
+	}
+
+	/**
+	 * @param realSolution
+	 * @param changes
+	 */
+	private void firePersistsChangedEx(boolean realSolution, Collection<IPersist> changes)
+	{
+		List<IPersistChangeListener> listeners = realSolution ? realPersistChangeListeners : editingPersistChangeListeners;
+		for (IPersistChangeListener listener : listeners.toArray(new IPersistChangeListener[listeners.size()]))
+		{
+			listener.persistChanges(changes);
 		}
 	}
 
@@ -1477,22 +1484,13 @@ public class ServoyModel implements IWorkspaceSaveListener
 		}
 	}
 
-	private List<IPersist> getOutstandingPersistChanges(boolean realSolution)
+	private List<IPersist> getOutstandingRealPersistChanges()
 	{
 		List<IPersist> outstandingChanges;
-		Job refreshJob = realSolution ? fireRealPersistchangesJob : fireEditingPersistchangesJob;
-		synchronized (refreshJob)
+		synchronized (fireRealPersistchangesJob)
 		{
-			if (realSolution)
-			{
-				outstandingChanges = realOutstandingChanges;
-				realOutstandingChanges = new ArrayList<IPersist>();
-			}
-			else
-			{
-				outstandingChanges = editingOutstandingChanges;
-				editingOutstandingChanges = new ArrayList<IPersist>();
-			}
+			outstandingChanges = realOutstandingChanges;
+			realOutstandingChanges = new ArrayList<IPersist>();
 		}
 		return outstandingChanges;
 	}
@@ -2410,7 +2408,8 @@ public class ServoyModel implements IWorkspaceSaveListener
 						if (server.hasTable(tableName))
 						{
 							tableOrServerAreNotFound = false;
-							if (!dataModelManager.isWritingMarkerFreeDBIFile(file) && !tableName.toUpperCase().startsWith(DataModelManager.TEMP_UPPERCASE_PREFIX))
+							if (!dataModelManager.isWritingMarkerFreeDBIFile(file) &&
+								!tableName.toUpperCase().startsWith(DataModelManager.TEMP_UPPERCASE_PREFIX))
 							{
 								Table table = server.getTable(tableName);
 								columnInfoChanged = true;

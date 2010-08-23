@@ -66,6 +66,7 @@ public class VisualFormEditorSecurityPage extends Composite
 	private final Composite tableContainer;
 	private final Composite treeContainer;
 	final ElementSettingsModel model;
+	private boolean doRefresh;
 
 	public VisualFormEditorSecurityPage(VisualFormEditor formEditor, Composite parent, int style)
 	{
@@ -202,7 +203,7 @@ public class VisualFormEditorSecurityPage extends Composite
 		});
 
 		initialised = true;
-		refresh();
+		doRefresh();
 		IDataSet groups = (IDataSet)groupViewer.getInput();
 		if (groups != null && groups.getRowCount() > 0)
 		{
@@ -214,16 +215,39 @@ public class VisualFormEditorSecurityPage extends Composite
 	public static final int CI_VIEWABLE = 1;
 	public static final int CI_ACCESSABLE = 2;
 
+	@Override
+	public void setVisible(boolean visible)
+	{
+		super.setVisible(visible);
+		if (visible && doRefresh)
+		{
+			doRefresh();
+		}
+	}
+
 	public void refresh()
 	{
 		if (!initialised || isDisposed() || editor.getForm() == null) return;
+		if (isVisible())
+		{
+			doRefresh();
+		}
+		else
+		{
+			doRefresh = true;
+		}
+	}
 
+	public void doRefresh()
+	{
 		IDataSet groups = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getGroups(ApplicationServerSingleton.get().getClientId());
 		groupViewer.setInput(groups);
 		if (groups.getRowCount() == 0)
 		{
 			elementsViewer.setInput(null);
 		}
+
+		doRefresh = false;
 	}
 
 	private void setElements()

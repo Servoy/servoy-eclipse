@@ -95,6 +95,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 	private Button downButton;
 	private Button defaultButton;
 	private boolean initialised = false;
+	private boolean doRefresh;
 
 
 	public VisualFormEditorTabSequencePage(VisualFormEditor editor, Composite parent, int style)
@@ -103,7 +104,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 		this.editor = editor;
 		createContents();
 		initialised = true;
-		refresh();
+		doRefresh();
 	}
 
 	protected void createContents()
@@ -334,70 +335,82 @@ public class VisualFormEditorTabSequencePage extends Composite
 
 	public void refresh()
 	{
-		if (!isDisposed() && getVisible()) // use getVisible() in stead of isVisible(), if this tab is shown but the 
-		// editor is not we still refresh (setVisible() is not called so we might miss an update)
+		if (!initialised || isDisposed() || editor.getForm() == null) return;
+
+		if (isVisible())
 		{
-			if (!initialised || isDisposed() || editor.getForm() == null) return;
-
-			// preserve selection when possible
-			ISelection availableSelection = availableListViewer.getSelection();
-			ISelection selectedSelection = selectedTableViewer.getSelection();
-
-
-			SortedList<ISupportTabSeq> available = new SortedList<ISupportTabSeq>(new Comparator<ISupportTabSeq>()
-			{
-				public int compare(ISupportTabSeq o1, ISupportTabSeq o2)
-				{
-					String name1 = "";
-					String name2 = "";
-					if (o1 instanceof ISupportName && ((ISupportName)o1).getName() != null)
-					{
-						name1 += ((ISupportName)o1).getName();
-					}
-					if (o2 instanceof ISupportName && ((ISupportName)o2).getName() != null)
-					{
-						name2 += ((ISupportName)o2).getName();
-					}
-					if (o1 instanceof ISupportDataProviderID)
-					{
-						name1 += ((ISupportDataProviderID)o1).getDataProviderID();
-					}
-					if (o2 instanceof ISupportDataProviderID)
-					{
-						name2 += ((ISupportDataProviderID)o2).getDataProviderID();
-					}
-					return name1.compareTo(name2);
-				}
-			});
-			List<ISupportTabSeq> selected = new ArrayList<ISupportTabSeq>();
-			Iterator<ISupportTabSeq> iterator = editor.getForm().getFieldsByTabOrder();
-			for (int i = 0; iterator.hasNext(); i++)
-			{
-				ISupportTabSeq tabSeq = iterator.next();
-				if ((tabSeq).getTabSeq() >= 0)
-				{
-					selected.add(tabSeq);
-				}
-				else
-				{
-					available.add(tabSeq);
-				}
-			}
-			availableListViewer.setInput(available);
-			selectedTableViewer.setInput(selected);
-
-			availableListViewer.setSelection(availableSelection);
-			selectedTableViewer.setSelection(selectedSelection);
-
-			configureButtons();
+			doRefresh();
 		}
+		else
+		{
+			doRefresh = true;
+		}
+	}
+
+	public void doRefresh()
+	{
+		// preserve selection when possible
+		ISelection availableSelection = availableListViewer.getSelection();
+		ISelection selectedSelection = selectedTableViewer.getSelection();
+
+		SortedList<ISupportTabSeq> available = new SortedList<ISupportTabSeq>(new Comparator<ISupportTabSeq>()
+		{
+			public int compare(ISupportTabSeq o1, ISupportTabSeq o2)
+			{
+				String name1 = "";
+				String name2 = "";
+				if (o1 instanceof ISupportName && ((ISupportName)o1).getName() != null)
+				{
+					name1 += ((ISupportName)o1).getName();
+				}
+				if (o2 instanceof ISupportName && ((ISupportName)o2).getName() != null)
+				{
+					name2 += ((ISupportName)o2).getName();
+				}
+				if (o1 instanceof ISupportDataProviderID)
+				{
+					name1 += ((ISupportDataProviderID)o1).getDataProviderID();
+				}
+				if (o2 instanceof ISupportDataProviderID)
+				{
+					name2 += ((ISupportDataProviderID)o2).getDataProviderID();
+				}
+				return name1.compareTo(name2);
+			}
+		});
+		List<ISupportTabSeq> selected = new ArrayList<ISupportTabSeq>();
+		Iterator<ISupportTabSeq> iterator = editor.getForm().getFieldsByTabOrder();
+		for (int i = 0; iterator.hasNext(); i++)
+		{
+			ISupportTabSeq tabSeq = iterator.next();
+			if ((tabSeq).getTabSeq() >= 0)
+			{
+				selected.add(tabSeq);
+			}
+			else
+			{
+				available.add(tabSeq);
+			}
+		}
+		availableListViewer.setInput(available);
+		selectedTableViewer.setInput(selected);
+
+		availableListViewer.setSelection(availableSelection);
+		selectedTableViewer.setSelection(selectedSelection);
+
+		configureButtons();
+
+		doRefresh = false;
 	}
 
 	@Override
 	public void setVisible(boolean visible)
 	{
 		super.setVisible(visible);
-		refresh(); // make sure everyting is up-to-date
+		if (visible && doRefresh)
+		{
+			doRefresh();
+		}
 	}
 
 	protected void configureButtons()
@@ -449,7 +462,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 				ts = selected.get(i - nAvailable);
 			}
 
-			if ((ts).getTabSeq() != tabSeqs[i] && ts instanceof IPersist)
+			if (ts.getTabSeq() != tabSeqs[i] && ts instanceof IPersist)
 			{
 				if (command == null)
 				{

@@ -58,6 +58,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 	private final Form form;
 	private final GraphicalViewer viewer;
 	private final ActionRegistry registry;
+	private volatile boolean refreshing;
 
 	public FormOutlinePage(Form form, GraphicalViewer viewer, ActionRegistry registry)
 	{
@@ -142,12 +143,18 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 
 	public void persistChanges(Collection<IPersist> changes)
 	{
+		if (refreshing)
+		{
+			// Do not stack multiple refresh actions
+		}
+
 		List<Form> formHierarchy = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form).getFormHierarchy(form);
 		for (IPersist changed : changes)
 		{
 			IPersist parentForm = changed.getAncestor(IRepository.FORMS);
 			if (parentForm != null && formHierarchy.contains(parentForm))
 			{
+				refreshing = true;
 				Display.getDefault().asyncExec(new Runnable()
 				{
 					public void run()
@@ -157,10 +164,12 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 						{
 							getTreeViewer().refresh();
 						}
+						refreshing = false;
 					}
 				});
 				return;
 			}
 		}
 	}
+
 }

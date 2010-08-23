@@ -100,6 +100,7 @@ public class VisualFormEditorPartsPage extends Composite
 	private IndexedListViewer groupByFields;
 	private Button removeGroupByButton;
 	private Button addGroupByButton;
+	private boolean doRefresh;
 
 	public VisualFormEditorPartsPage(VisualFormEditor editor, Composite parent, int style)
 	{
@@ -108,8 +109,7 @@ public class VisualFormEditorPartsPage extends Composite
 		createContents();
 		m_bindingContext = initDataBindings();
 
-		fillPartsSection();
-		fillOptionsection();
+		doRefresh();
 	}
 
 
@@ -518,13 +518,33 @@ public class VisualFormEditorPartsPage extends Composite
 		removeGroupByButton.setEnabled(enableRemove);
 	}
 
+	@Override
+	public void setVisible(boolean visible)
+	{
+		super.setVisible(visible);
+		if (visible && doRefresh)
+		{
+			doRefresh();
+		}
+	}
+
 	public void refresh()
 	{
-		if (!isDisposed())
+		if (isVisible() && !isDisposed())
 		{
-			fillPartsSection();
-			fillOptionsection();
+			doRefresh();
 		}
+		else
+		{
+			doRefresh = true;
+		}
+	}
+
+	public void doRefresh()
+	{
+		fillPartsSection();
+		fillOptionsection();
+		doRefresh = false;
 	}
 
 	/**
