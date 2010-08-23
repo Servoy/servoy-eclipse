@@ -146,6 +146,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 		if (refreshing)
 		{
 			// Do not stack multiple refresh actions
+			return;
 		}
 
 		List<Form> formHierarchy = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form).getFormHierarchy(form);
