@@ -759,6 +759,11 @@ public class DesignApplication implements IApplication, IMessagesCallback
 		messages.clear();
 	}
 
+	public String getSolutionName()
+	{
+		return getClient().getSolutionName();
+	}
+
 	/**
 	 * @see com.servoy.j2db.IMessagesCallback#getI18NColumnNameFilter()
 	 */
