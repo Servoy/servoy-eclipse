@@ -19,10 +19,10 @@ package com.servoy.eclipse.core.doc;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.util.Debug;
 
-public class XMLScriptObjectAdapter implements IScriptObject
+@SuppressWarnings("nls")
+public class XMLScriptObjectAdapter implements ITypedScriptObject
 {
 	private final IObjectDocumentation objDoc;
 	private Class< ? >[] returnedTypes = null;
@@ -57,7 +57,7 @@ public class XMLScriptObjectAdapter implements IScriptObject
 					}
 					catch (ClassNotFoundException e)
 					{
-						Debug.error("Cannot load returned class '" + className + "' from documented object '" + objDoc.getQualifiedName() + "'."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						Debug.error("Cannot load returned class '" + className + "' from documented object '" + objDoc.getQualifiedName() + "'.");
 					}
 				}
 				returnedTypes = new Class< ? >[returnedTypesSet.size()];
@@ -77,7 +77,7 @@ public class XMLScriptObjectAdapter implements IScriptObject
 			int i = 0;
 			for (IParameterDocumentation argDoc : fdoc.getArguments().values())
 			{
-				String name = argDoc.isOptional() ? "[" + argDoc.getName() + "]" : argDoc.getName(); //$NON-NLS-1$//$NON-NLS-2$
+				String name = argDoc.isOptional() ? "[" + argDoc.getName() + "]" : argDoc.getName();
 				argNames[i++] = name;
 			}
 			return argNames;
@@ -95,7 +95,7 @@ public class XMLScriptObjectAdapter implements IScriptObject
 			for (IParameterDocumentation argDoc : fdoc.getArguments().values())
 			{
 				String name = argDoc.getName();
-				String type = argDoc.getType().getSimpleName();
+				String type = argDoc.getType() != null ? argDoc.getType().getSimpleName() : "Object";
 				boolean optional = argDoc.isOptional();
 				params[i++] = new ScriptParameter(name, type, optional);
 			}
