@@ -13,8 +13,11 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -24,6 +27,7 @@ import org.eclipse.jface.viewers.IFilter;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -79,7 +83,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 	private final boolean showFilter;
 
-	private ISelection selection;
+	private List<Object> selection;
 
 	private IControlFactory optionsAreaFactory;
 	private final boolean showFilterMenu;
@@ -113,8 +117,8 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 		this.labelProvider = labelProvider;
 		this.comparator = comparator;
 		this.input = input;
-		this.selection = selection;
 		this.name = name;
+		updateSelection(selection);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 
@@ -175,7 +179,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 		treeViewer.addOpenListener(this);
 		if (selection != null)
 		{
-			treeViewer.setSelection(selection);
+			treeViewer.setSelection(new StructuredSelection(selection));
 		}
 
 		applyDialogFont(treeViewer);
@@ -260,7 +264,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	 */
 	public ISelection getSelection()
 	{
-		return selection == null ? StructuredSelection.EMPTY : selection;
+		return selection == null ? StructuredSelection.EMPTY : new StructuredSelection(selection);
 	}
 
 	/**
@@ -283,7 +287,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	 */
 	public void selectionChanged(SelectionChangedEvent event)
 	{
-		updateSelection();
+		updateSelection(treeViewer.getSelection());
 		updateButtons();
 	}
 
@@ -299,11 +303,31 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	}
 
 	/**
-	 * Update the selection object.
+	 * Update the selection object, keep the selection order.
 	 */
-	protected void updateSelection()
+	protected void updateSelection(ISelection treeSelection)
 	{
-		selection = treeViewer.getSelection();
+		List<Object> newSelection = new ArrayList<Object>();
+		List<Object> treeList = null;
+		if (treeSelection instanceof IStructuredSelection)
+		{
+			treeList = new ArrayList<Object>(((IStructuredSelection)treeSelection).toList());
+		}
+		if (treeList != null)
+		{
+			if (selection != null)
+			{
+				for (Object o : selection)
+				{
+					if (treeList.remove(o))
+					{
+						newSelection.add(o);
+					}
+				}
+			}
+			newSelection.addAll(treeList);
+		}
+		selection = newSelection;
 	}
 
 	public void open(OpenEvent event)
