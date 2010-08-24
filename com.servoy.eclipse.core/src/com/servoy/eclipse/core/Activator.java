@@ -48,6 +48,9 @@ import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.WorkbenchJob;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.NativeJavaObject;
+import org.mozilla.javascript.Scriptable;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
@@ -71,6 +74,7 @@ import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.MethodTemplatesFactory;
 import com.servoy.j2db.plugins.IMethodTemplatesProvider;
 import com.servoy.j2db.plugins.PluginManager;
+import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
 import com.servoy.j2db.smart.J2DBClient;
@@ -329,6 +333,20 @@ public class Activator extends Plugin
 							}
 						}
 					});
+				}
+
+				public void addScriptObjects(Scriptable scope)
+				{
+					Context.enter();
+					try
+					{
+						scope.put("developerSolutionModel", scope, new NativeJavaObject(scope, new JSDeveloperSolutionModel(), new InstanceJavaMembers(scope,
+							JSDeveloperSolutionModel.class)));
+					}
+					finally
+					{
+						Context.exit();
+					}
 				}
 			};
 			dch.setDesignerCallback(designerCallback);
