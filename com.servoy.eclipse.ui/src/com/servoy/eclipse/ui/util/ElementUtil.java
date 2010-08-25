@@ -49,7 +49,7 @@ public class ElementUtil
 			}
 			if ("check".equals(lookupName))
 			{
-				return "chk_on.gif";
+				return "chk_on_icon.gif";
 			}
 			if ("combobox".equals(lookupName))
 			{
@@ -70,6 +70,10 @@ public class ElementUtil
 			if ("label".equals(lookupName))
 			{
 				return "text.gif";
+			}
+			if ("radio".equals(lookupName))
+			{
+				return "radio_on.gif";
 			}
 		}
 		if (persist instanceof Form)
