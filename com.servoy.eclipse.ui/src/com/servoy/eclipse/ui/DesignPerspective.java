@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui;
 
 import org.eclipse.core.runtime.IExtension;
@@ -44,9 +44,9 @@ public class DesignPerspective implements IPerspectiveFactory
 		String editorArea = layout.getEditorArea();
 		IFolderLayout left = layout.createFolder("left", IPageLayout.LEFT, 0.21f, editorArea);
 		left.addView(SolutionExplorerView.PART_ID);
-//		left.addView(IPageLayout.ID_RES_NAV);//move to sychronize perspective only
+//		left.addView(IPageLayout.ID_RES_NAV);//move to synchronize perspective only
 
-		IFolderLayout right = layout.createFolder("right", IPageLayout.RIGHT, 0.75f, editorArea);
+		IFolderLayout right = layout.createFolder("right", IPageLayout.RIGHT, 0.8f, editorArea);
 		right.addView(IPageLayout.ID_OUTLINE);
 		right.addView(IPageLayout.ID_PROP_SHEET);
 
