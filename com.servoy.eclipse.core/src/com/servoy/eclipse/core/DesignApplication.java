@@ -142,6 +142,16 @@ public class DesignApplication implements IApplication, IMessagesCallback
 		return CLIENT;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.j2db.IApplication#getOSName()
+	 */
+	public String getOSName()
+	{
+		return System.getProperty("os.name"); //$NON-NLS-1$
+	}
+
 	public boolean isInDeveloper()
 	{
 		return true;
