@@ -524,10 +524,10 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 
 			EList<Member> members = type.getMembers();
 
-			members.add(createProperty(context, "allmethods", true, "Array", SPECIAL_PROPERTY));
-			members.add(createProperty(context, "allvariables", true, "Array", SPECIAL_PROPERTY));
-			members.add(createProperty(context, "allrelations", true, "Array", SPECIAL_PROPERTY));
-			members.add(createProperty(context, "currentcontroller", true, "controller", PROPERTY));
+			members.add(createProperty(context, "allmethods", true, "Array", "Returns all global method names in an Array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "allvariables", true, "Array", "Returns all global variable names in an Array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "allrelations", true, "Array", "Returns all global relation names in an Array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "currentcontroller", true, "controller", "The current active main forms controller", PROPERTY));
 
 			FlattenedSolution fs = getFlattenedSolution(context);
 
