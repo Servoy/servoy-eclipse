@@ -85,25 +85,6 @@ public class XMLScriptObjectAdapter implements ITypedScriptObject
 		return null;
 	}
 
-	public IParameter[] getParameters(String methodName, int argCount)
-	{
-		IFunctionDocumentation fdoc = objDoc.getFunction(methodName, argCount);
-		if (fdoc != null && fdoc.getArguments().size() > 0)
-		{
-			IParameter[] params = new IParameter[fdoc.getArguments().size()];
-			int i = 0;
-			for (IParameterDocumentation argDoc : fdoc.getArguments().values())
-			{
-				String name = argDoc.getName();
-				String type = argDoc.getType() != null ? argDoc.getType().getSimpleName() : "Object";
-				boolean optional = argDoc.isOptional();
-				params[i++] = new ScriptParameter(name, type, optional);
-			}
-			return params;
-		}
-		return null;
-	}
-
 	public IParameter[] getParameters(String methodName, Class< ? >[] argTypes)
 	{
 		IFunctionDocumentation fdoc = objDoc.getFunction(methodName, argTypes);
@@ -130,6 +111,13 @@ public class XMLScriptObjectAdapter implements ITypedScriptObject
 		return null;
 	}
 
+	public String getSample(String methodName, Class< ? >[] argTypes)
+	{
+		IFunctionDocumentation fdoc = objDoc.getFunction(methodName, argTypes);
+		if (fdoc != null) return fdoc.getSample();
+		return null;
+	}
+
 	public String getToolTip(String methodName)
 	{
 		IFunctionDocumentation fdoc = objDoc.getFunction(methodName);
@@ -137,9 +125,23 @@ public class XMLScriptObjectAdapter implements ITypedScriptObject
 		return null;
 	}
 
+	public String getToolTip(String methodName, Class< ? >[] argTypes)
+	{
+		IFunctionDocumentation fdoc = objDoc.getFunction(methodName, argTypes);
+		if (fdoc != null) return fdoc.getDescription();
+		return null;
+	}
+
 	public boolean isDeprecated(String methodName)
 	{
 		IFunctionDocumentation fdoc = objDoc.getFunction(methodName);
+		if (fdoc != null) return fdoc.isDeprecated();
+		return false;
+	}
+
+	public boolean isDeprecated(String methodName, Class< ? >[] argTypes)
+	{
+		IFunctionDocumentation fdoc = objDoc.getFunction(methodName, argTypes);
 		if (fdoc != null) return fdoc.isDeprecated();
 		return false;
 	}
