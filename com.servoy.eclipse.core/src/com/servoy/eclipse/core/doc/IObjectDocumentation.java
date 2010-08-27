@@ -33,6 +33,8 @@ public interface IObjectDocumentation
 
 	public IFunctionDocumentation getFunction(String functionName, String[] argumentsTypes);
 
+	public IFunctionDocumentation getFunction(String functionName, Class< ? >[] argumentsTypes);
+
 	public SortedSet<IFunctionDocumentation> getFunctions();
 
 	public void addReturnedType(String qname);

@@ -43,9 +43,9 @@ import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.mozilla.javascript.JavaMembers;
-import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
+import org.mozilla.javascript.JavaMembers.BeanProperty;
 
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyLog;
@@ -536,7 +536,7 @@ public abstract class TypeCreator
 		String[] parameterNames = null;
 		if (scriptObject instanceof ITypedScriptObject)
 		{
-			parameters = ((ITypedScriptObject)scriptObject).getParameters(key);
+			parameters = ((ITypedScriptObject)scriptObject).getParameters(key, null);
 		}
 		else if (scriptObject != null)
 		{

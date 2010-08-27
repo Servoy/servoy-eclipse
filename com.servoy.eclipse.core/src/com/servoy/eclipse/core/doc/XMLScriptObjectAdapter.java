@@ -85,9 +85,9 @@ public class XMLScriptObjectAdapter implements ITypedScriptObject
 		return null;
 	}
 
-	public IParameter[] getParameters(String methodName)
+	public IParameter[] getParameters(String methodName, Class< ? >[] argTypes)
 	{
-		IFunctionDocumentation fdoc = objDoc.getFunction(methodName);
+		IFunctionDocumentation fdoc = objDoc.getFunction(methodName, argTypes);
 		if (fdoc != null && fdoc.getArguments().size() > 0)
 		{
 			IParameter[] params = new IParameter[fdoc.getArguments().size()];
