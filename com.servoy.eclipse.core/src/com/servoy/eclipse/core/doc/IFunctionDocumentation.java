@@ -69,6 +69,8 @@ public interface IFunctionDocumentation
 
 	public boolean answersTo(String name);
 
+	public boolean answersTo(String name, int argCount);
+
 	public boolean answersTo(String name, Class< ? >[] argsTypes);
 
 	public boolean answersTo(String name, String[] argsTypes);

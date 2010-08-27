@@ -20,5 +20,7 @@ import com.servoy.j2db.scripting.IScriptObject;
 
 public interface ITypedScriptObject extends IScriptObject
 {
+	IParameter[] getParameters(String methodName, int argCount);
+
 	IParameter[] getParameters(String methodName, Class< ? >[] argTypes);
 }
