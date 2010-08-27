@@ -516,7 +516,8 @@ public class SolutionSerializer
 					}
 					int type = sv.getVariableType();
 					// Add the "@type" tag.
-					String typeStr = ArgumentType.convertFromColumnType(type).getName();
+					String jsType = sv.getSerializableRuntimeProperty(IScriptProvider.TYPE);
+					String typeStr = ArgumentType.convertFromColumnType(type, jsType).getName();
 					int index = sb.lastIndexOf(TYPEKEY);
 					if (index != -1)
 					{
@@ -532,7 +533,6 @@ public class SolutionSerializer
 					sb.append(VAR_KEYWORD);
 					sb.append(' ');
 					sb.append(sv.getName());
-					String jsType = sv.getSerializableRuntimeProperty(IScriptProvider.TYPE);
 					if (jsType != null)
 					{
 						sb.append(':');
