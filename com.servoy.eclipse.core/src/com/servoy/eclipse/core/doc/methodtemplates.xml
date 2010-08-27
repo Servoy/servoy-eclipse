@@ -48,7 +48,7 @@
       <description><![CDATA[Callback method for data broadcast]]></description>
       <arguments>
         <methodargument name="dataSource" type="String"><![CDATA[table data source]]></methodargument>
-        <methodargument name="action" type="Number"><![CDATA[see ACTION constants]]></methodargument>
+        <methodargument name="action" type="Number"><![CDATA[see SQL_ACTION_TYPES constants]]></methodargument>
         <methodargument name="pks" type="JSDataSet"><![CDATA[affected primary keys]]></methodargument>
         <methodargument name="cached" type="Boolean"><![CDATA[data was cached]]></methodargument>
       </arguments>
@@ -125,8 +125,13 @@ DRAGNDROP.NONE if nothing is supported (drag should start).]]></description>
   </event>
   <event name="onDragOverMethodID">
     <methodtemplate name="onDragOver" type="Boolean" addtodo="true">
-      <description><![CDATA[Handle a drag over]]></description>
-      <code><![CDATA[return false]]></code>
+      <description><![CDATA[Handle a drag over. Determines of a drop is allowed in this location.
+
+Return true is drop is allowed, otherwise false.]]></description>
+      <code><![CDATA[if(event.getSource() && event.data){
+   return true;
+ }
+ return false;]]></code>
       <arguments>
         <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
       </arguments>
@@ -455,16 +460,16 @@ return true]]></code>
     <methodtemplate name="rowBGColorCalculation" type="Color" addtodo="true">
       <description><![CDATA[Calculate the row background color]]></description>
       <code><![CDATA[if (selected)
-	return '#FF0000';
+  return '#c4ffff';
 else if (index % 2)
-	return '#77FF77';
+  return '#f4ffff';
 else
-	return '#77DD77';]]></code>
+  return '#FFFFFF';]]></code>
       <arguments>
         <methodargument name="index" type="Number"><![CDATA[row index]]></methodargument>
         <methodargument name="selected" type="Boolean"><![CDATA[is the row selected]]></methodargument>
-        <methodargument name="elementType" type="String"><![CDATA[element type]]></methodargument>
-        <methodargument name="dataProviderID" type="String"><![CDATA[element data provider]]></methodargument>
+        <methodargument name="elementType" type="String"><![CDATA[element type (not supported in webclient)]]></methodargument>
+        <methodargument name="dataProviderID" type="String"><![CDATA[element data provider (not supported in webclient)]]></methodargument>
         <methodargument name="formName" type="String"><![CDATA[form name]]></methodargument>
         <methodargument name="record" type="JSRecord"><![CDATA[selected record]]></methodargument>
         <methodargument name="edited" type="Boolean"><![CDATA[is the record edited]]></methodargument>
