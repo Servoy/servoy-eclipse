@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.core.elements;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.beans.BeanInfo;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.EclipseRepository;
@@ -256,6 +258,23 @@ public class ElementFactory
 	{
 		Bean bean = form.createNewBean("bean_" + random.nextInt(1024), beanInfo.getBeanDescriptor().getBeanClass().getName()); //$NON-NLS-1$
 		bean.setLocation(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
+
+		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
+		Object beanInstance = ComponentFactory.getBeanDesignInstance(Activator.getDefault().getDesignClient(), flattenedSolution, bean, form);
+		if (beanInstance instanceof Component)
+		{
+			// check preferredSize and minimumSize
+			Dimension initSize = ((Component)beanInstance).getPreferredSize();
+			if (initSize == null)
+			{
+				initSize = ((Component)beanInstance).getMinimumSize();
+			}
+			if (initSize != null)
+			{
+				bean.setSize(initSize);
+			}
+		}
+
 		placeElementOnTop(bean);
 		return bean;
 	}
