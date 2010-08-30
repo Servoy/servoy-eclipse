@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -117,19 +116,6 @@ public class MethodDialog extends TreeSelectDialog
 			}
 		}
 		return new StructuredSelection(lst.toArray(new MethodWithArguments[lst.size()]));
-	}
-
-	@Override
-	protected void buttonPressed(int buttonId)
-	{
-		super.buttonPressed(buttonId);
-		if (buttonId == IDialogConstants.OPEN_ID) openPressed();
-	}
-
-	protected void openPressed()
-	{
-		setReturnCode(IDialogConstants.OPEN_ID);
-		close();
 	}
 
 	public static class MethodTreeContentProvider extends ArrayContentProvider implements ITreeContentProvider, IKeywordChecker

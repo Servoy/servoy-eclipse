@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
@@ -368,9 +369,8 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	{
 		int retCode = super.open();
 
-		if (retCode == IDialogConstants.OPEN_ID)
+		if (retCode != Window.CANCEL)
 		{
-			//check if get selection is an iselection & use entire selection (so it also works for multiple selection)
 			if (!getSelection().isEmpty() && getSelection() instanceof IStructuredSelection)
 			{
 				IStructuredSelection selection = (IStructuredSelection)getSelection();
