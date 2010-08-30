@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.actions;
 
 
@@ -88,7 +88,7 @@ public class AddTabActionDelegate extends AbstractEditpartActionDelegate
 		};
 		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, true, TreePatternFilter.FILTER_LEAFS, IMaxDepthTreeContentProvider.DEPTH_DEFAULT,
 			contentProvider, RelatedFormsLabelProvider.INSTANCE, null, new LeafnodesSelectionFilter(contentProvider), SWT.MULTI, "Select tabpanel form", form,
-			null, TreeSelectDialog.TAB_DIALOG);
+			null, TreeSelectDialog.TAB_DIALOG, null);
 		dialog.open();
 
 		if (dialog.getReturnCode() == Window.CANCEL)

@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.actions;
 
 import org.eclipse.gef.EditPart;
@@ -50,7 +50,7 @@ public class AddBeanActionDelegate extends AbstractEditpartActionDelegate
 	{
 		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS, IMaxDepthTreeContentProvider.DEPTH_DEFAULT,
 			BeanClassContentProvider.DEFAULT, BeanInfoLabelProvider.INSTANCE_NAME, null, null, SWT.NONE, "Select bean",
-			BeanClassContentProvider.BEANS_DUMMY_INPUT, null, TreeSelectDialog.BEAN_DIALOG);
+			BeanClassContentProvider.BEANS_DUMMY_INPUT, null, TreeSelectDialog.BEAN_DIALOG, null);
 		dialog.open();
 
 		if (dialog.getReturnCode() == Window.CANCEL)

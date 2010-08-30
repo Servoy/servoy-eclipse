@@ -575,7 +575,7 @@ public class EditorUtil
 										}
 										return super.getText(element);
 									}
-								}, null, null, SWT.CHECK, "Select editors to save", dirtyparts, new StructuredSelection(dirtyparts), "saveEditors");
+								}, null, null, SWT.CHECK, "Select editors to save", dirtyparts, new StructuredSelection(dirtyparts), "saveEditors", null);
 							dialog.open();
 							if (dialog.getReturnCode() == Window.OK)
 							{

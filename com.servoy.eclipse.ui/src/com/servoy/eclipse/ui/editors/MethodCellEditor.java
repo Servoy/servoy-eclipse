@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors;
 
 
@@ -46,6 +46,7 @@ public class MethodCellEditor extends DialogCellEditor
 	private final boolean includeGlobalMethods;
 	private final ILabelProvider labelProvider;
 	private final Object id;
+	private final IValueEditor valueEditor;
 
 	/**
 	 * Creates a new method cell editor parented under the given control.
@@ -63,13 +64,14 @@ public class MethodCellEditor extends DialogCellEditor
 		this.includeDefault = includeDefault;
 		this.includeFormMethods = includeFormMethods;
 		this.includeGlobalMethods = includeGlobalMethods;
+		this.valueEditor = valueEditor;
 	}
 
 	@Override
 	public MethodWithArguments openDialogBox(Control cellEditorWindow)
 	{
 		final MethodDialog dialog = new MethodDialog(cellEditorWindow.getShell(), labelProvider, new MethodTreeContentProvider(persist), getSelection(),
-			new MethodListOptions(includeNone, includeDefault, includeFormMethods, includeGlobalMethods), SWT.NONE, "Select Method");
+			new MethodListOptions(includeNone, includeDefault, includeFormMethods, includeGlobalMethods), SWT.NONE, "Select Method", this.valueEditor);
 		dialog.setOptionsAreaFactory(new IControlFactory()
 		{
 			public Control createControl(Composite composite)

@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.actions;
 
 import org.eclipse.gef.EditPart;
@@ -66,7 +66,7 @@ public class AddMediaActionDelegate extends AbstractEditpartActionDelegate
 		final TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS,
 			IMaxDepthTreeContentProvider.DEPTH_DEFAULT, new MediaContentProvider(flattenedSolution), new SolutionContextDelegateLabelProvider(
 				new MediaLabelProvider(flattenedSolution), flattenedSolution.getSolution()), null, null, SWT.NONE, "Select image",
-			new MediaContentProvider.MediaListOptions(false), null, TreeSelectDialog.MEDIA_DIALOG);
+			new MediaContentProvider.MediaListOptions(false), null, TreeSelectDialog.MEDIA_DIALOG, null);
 		dialog.setOptionsAreaFactory(new IControlFactory()
 		{
 			public Control createControl(Composite composite)

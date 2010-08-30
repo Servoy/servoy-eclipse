@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -40,8 +41,10 @@ import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.IControlFactory;
 
@@ -66,6 +69,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	private static final int LIST_WIDTH = 250;
 
 	private Button okButton;
+	private Button openButton;
 
 	private final Object input;
 
@@ -90,6 +94,8 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	private final int defaultFilterMode;
 	private final int defaultFilterSearchDepth;
 
+	private final IValueEditor valueEditor;
+
 	/**
 	 * Constructs a new TreeSelectDialog.
 	 * 
@@ -103,7 +109,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	 */
 	public TreeSelectDialog(Shell shell, boolean showFilter, boolean showFilterMenu, int defaultFilterMode, int defaultFilterSearchDepth,
 		ITreeContentProvider contentProvider, IBaseLabelProvider labelProvider, ViewerComparator comparator, IFilter selectionFilter, int treeStyle,
-		String title, Object input, ISelection selection, String name)
+		String title, Object input, ISelection selection, String name, IValueEditor valueEditor)
 	{
 		super(shell);
 		this.showFilter = showFilter;
@@ -118,6 +124,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 		this.comparator = comparator;
 		this.input = input;
 		this.name = name;
+		this.valueEditor = valueEditor;
 		updateSelection(selection);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
@@ -157,6 +164,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	protected void createButtonsForButtonBar(Composite parent)
 	{
 		okButton = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+		if (valueEditor != null) openButton = createButton(parent, IDialogConstants.OPEN_ID, IDialogConstants.OPEN_LABEL, false);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		updateButtons();
 	}
@@ -300,6 +308,25 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 		{
 			okButton.setEnabled((treeStyle & SWT.MULTI) != 0 || !getSelection().isEmpty());
 		}
+
+		if (openButton != null)
+		{
+			boolean enabledState = false;
+			if (!getSelection().isEmpty() && getSelection() instanceof IStructuredSelection)
+			{
+				IStructuredSelection selection = (IStructuredSelection)getSelection();
+				Iterator it = selection.iterator();
+				while (it.hasNext())
+				{
+					Object o = it.next();
+					if (valueEditor.canEdit(o))
+					{
+						enabledState = true;
+					}
+				}
+			}
+			openButton.setEnabled(enabledState);
+		}
 	}
 
 	/**
@@ -334,6 +361,41 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	{
 		setReturnCode(OK);
 		close();
+	}
+
+	@Override
+	public int open()
+	{
+		int retCode = super.open();
+
+		if (retCode == IDialogConstants.OPEN_ID)
+		{
+			//check if get selection is an iselection & use entire selection (so it also works for multiple selection)
+			if (!getSelection().isEmpty() && getSelection() instanceof IStructuredSelection)
+			{
+				IStructuredSelection selection = (IStructuredSelection)getSelection();
+				Iterator it = selection.iterator();
+				while (it.hasNext())
+				{
+					final Object value = it.next();
+					// open button is always present when we have a valueEditor so don't have to check for null
+					if (value != null && valueEditor.canEdit(value))
+					{
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							public void run()
+							{
+								valueEditor.openEditor(value);
+							}
+						});
+					}
+				}
+			}
+
+
+		}
+
+		return retCode;
 	}
 
 	@Override

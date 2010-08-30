@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 
@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -40,6 +41,7 @@ import org.eclipse.swt.widgets.Shell;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.labelproviders.DelegateLabelProvider;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.resource.FontResource;
@@ -81,7 +83,7 @@ public class MethodDialog extends TreeSelectDialog
 	 * @param parent the parent control
 	 */
 	public MethodDialog(Shell shell, ILabelProvider labelProvider, ITreeContentProvider contentProvider, ISelection selection,
-		Object /* MethodListOptions */input, int treeStyle, String title)
+		Object /* MethodListOptions */input, int treeStyle, String title, IValueEditor valueEditor)
 	{
 		super(shell, true, true, TreePatternFilter.FILTER_LEAFS, IMaxDepthTreeContentProvider.DEPTH_DEFAULT,
 		// content provider
@@ -99,7 +101,7 @@ public class MethodDialog extends TreeSelectDialog
 			// input: MethodListOptions
 			input,
 			// selection
-			selection, TreeSelectDialog.METHOD_DIALOG);
+			selection, TreeSelectDialog.METHOD_DIALOG, valueEditor);
 	}
 
 	@Override
@@ -115,6 +117,19 @@ public class MethodDialog extends TreeSelectDialog
 			}
 		}
 		return new StructuredSelection(lst.toArray(new MethodWithArguments[lst.size()]));
+	}
+
+	@Override
+	protected void buttonPressed(int buttonId)
+	{
+		super.buttonPressed(buttonId);
+		if (buttonId == IDialogConstants.OPEN_ID) openPressed();
+	}
+
+	protected void openPressed()
+	{
+		setReturnCode(IDialogConstants.OPEN_ID);
+		close();
 	}
 
 	public static class MethodTreeContentProvider extends ArrayContentProvider implements ITreeContentProvider, IKeywordChecker
