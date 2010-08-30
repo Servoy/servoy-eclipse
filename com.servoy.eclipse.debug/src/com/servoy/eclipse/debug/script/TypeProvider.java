@@ -222,7 +222,11 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						if (form.getExtendsFormID() > 0)
 						{
 							formToUse = fs.getFlattenedForm(form);
-							members.add(createProperty(context, "_super", true, "SuperForm", FORM_IMAGE)); // TODO super form scope
+							Form superForm = fs.getForm(form.getExtendsFormID());
+							if (superForm != null)
+							{
+								members.add(createProperty(context, "_super", true, "Super<" + superForm.getName() + '>', FORM_IMAGE));
+							}
 						}
 						Table table = formToUse.getTable();
 						if (table != null)
@@ -564,7 +568,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
-			type.setDescription(getDoc("_super", com.servoy.j2db.documentation.scripting.docs.Form.class, ""));
+			type.setDescription(getDoc("_super", com.servoy.j2db.documentation.scripting.docs.Form.class, "", null));
 			type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
 			return type;
 		}

@@ -43,9 +43,9 @@ import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.mozilla.javascript.JavaMembers;
+import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
-import org.mozilla.javascript.JavaMembers.BeanProperty;
 
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyLog;
@@ -401,44 +401,39 @@ public abstract class TypeCreator
 						{
 							Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
 							method.setName(name);
-							if (scriptObject != null && scriptObject.isDeprecated(name))
+							Class< ? >[] parameterTypes = members[i].getParameterTypes();
+
+							if (scriptObject instanceof ITypedScriptObject && ((ITypedScriptObject)scriptObject).isDeprecated(name, parameterTypes))
 							{
 								method.setDeprecated(true);
 								method.setVisible(false);
 							}
-							method.setDescription(getDoc(name, scriptObjectClass, name)); // TODO name should be of parent.
+							else if (scriptObject != null && scriptObject.isDeprecated(name))
+							{
+								method.setDeprecated(true);
+								method.setVisible(false);
+							}
+							method.setDescription(getDoc(name, scriptObjectClass, name, parameterTypes)); // TODO name should be of parent.
 							if (returnTypeClz != null)
 							{
 								method.setType(context.getType(getMemberTypeName(context, name, returnTypeClz, typeName)));
 							}
-
-							Class< ? >[] parameterTypes = null;
-							if (membersSize > 1)
-							{
-								parameterTypes = members[i].getParameterTypes();
-							}
-
 							method.setAttribute(IMAGE_DESCRIPTOR, METHOD);
 
-
-							if (membersSize == 1 ||
-								(parameterTypes.length == 1 && parameterTypes[0].isArray() && parameterTypes[0].getComponentType() == Object.class))
+							IParameter[] scriptParams = getParameters(name, scriptObjectClass, parameterTypes);
+							if (scriptParams != null && scriptParams.length > 0)
 							{
-								IParameter[] scriptParams = getParameters(name, scriptObjectClass);
-								if (scriptParams.length > 0)
+								EList<Parameter> parameters = method.getParameters();
+								for (IParameter param : scriptParams)
 								{
-									EList<Parameter> parameters = method.getParameters();
-									for (IParameter param : scriptParams)
-									{
-										Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
-										parameter.setName(param.getName());
-										parameter.setType(context.getType(param.getType()));
-										parameter.setKind(param.isOptional() ? ParameterKind.OPTIONAL : ParameterKind.NORMAL);
-										parameters.add(parameter);
-									}
+									Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
+									parameter.setName(param.getName());
+									parameter.setType(context.getType(SolutionExplorerListContentProvider.TYPES.get(param.getType())));
+									parameter.setKind(param.isOptional() ? ParameterKind.OPTIONAL : ParameterKind.NORMAL);
+									parameters.add(parameter);
 								}
 							}
-							else
+							else if (parameterTypes != null && parameterTypes.length > 0)
 							{
 								EList<Parameter> parameters = method.getParameters();
 								for (Class< ? > paramClass : parameterTypes)
@@ -460,7 +455,8 @@ public abstract class TypeCreator
 						{
 							returnType = context.getType(getMemberTypeName(context, name, returnTypeClz, typeName));
 						}
-						Property property = createProperty(name, false, returnType, getDoc(name, scriptObjectClass, name), type == 3 ? CONSTANT : PROPERTY);
+						Property property = createProperty(name, false, returnType, getDoc(name, scriptObjectClass, name, null), type == 3 ? CONSTANT
+							: PROPERTY);
 						if (scriptObject != null && scriptObject.isDeprecated(name))
 						{
 							property.setDeprecated(true);
@@ -528,7 +524,7 @@ public abstract class TypeCreator
 		Type createType(ITypeInfoContext context, String fullTypeName);
 	}
 
-	public static IParameter[] getParameters(String key, Class< ? > scriptObjectClass)
+	public static IParameter[] getParameters(String key, Class< ? > scriptObjectClass, Class< ? >[] parameterTypes)
 	{
 		if (scriptObjectClass == null) return null;
 		IScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectForClass(scriptObjectClass);
@@ -536,7 +532,7 @@ public abstract class TypeCreator
 		String[] parameterNames = null;
 		if (scriptObject instanceof ITypedScriptObject)
 		{
-			parameters = ((ITypedScriptObject)scriptObject).getParameters(key, null);
+			parameters = ((ITypedScriptObject)scriptObject).getParameters(key, parameterTypes);
 		}
 		else if (scriptObject != null)
 		{
@@ -663,6 +659,17 @@ public abstract class TypeCreator
 			}
 		}
 
+		String declaration = sm.getDeclaration();
+		int commentStart = declaration.indexOf("/**");
+		if (commentStart != -1)
+		{
+			int commentEnd = declaration.indexOf("*/", commentStart);
+			if (declaration.lastIndexOf("@deprecated", commentEnd) != -1)
+			{
+				method.setDeprecated(true);
+			}
+		}
+
 		String type = sm.getSerializableRuntimeProperty(IScriptProvider.TYPE);
 		if (type != null)
 		{
@@ -746,20 +753,26 @@ public abstract class TypeCreator
 	 * @param name
 	 * @return
 	 */
-	public static String getDoc(String key, Class< ? > scriptObjectClass, String name)
+	public static String getDoc(String key, Class< ? > scriptObjectClass, String name, Class[] parameterTypes)
 	{
 		if (scriptObjectClass == null) return null;
 		String doc = key;
 		IScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectForClass(scriptObjectClass);
 		if (scriptObject != null)
 		{
-			String toolTip = scriptObject.getToolTip(key);
-			if (toolTip != null)
+			String sample = null;
+			if (scriptObject instanceof ITypedScriptObject)
 			{
-				doc = toolTip;
+				String toolTip = ((ITypedScriptObject)scriptObject).getToolTip(key, parameterTypes);
+				if (toolTip != null) doc = toolTip;
+				sample = ((ITypedScriptObject)scriptObject).getSample(key, parameterTypes);
 			}
-			String sample = scriptObject.getSample(key);
-
+			else
+			{
+				String toolTip = scriptObject.getToolTip(name);
+				if (toolTip != null) doc = toolTip;
+				sample = scriptObject.getSample(key);
+			}
 			if (sample != null)
 			{
 				doc = doc + HtmlUtils.escapeMarkup(sample); //$NON-NLS-1$ //$NON-NLS-2$

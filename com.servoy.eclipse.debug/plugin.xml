@@ -157,11 +157,10 @@
             class="com.servoy.eclipse.debug.script.ElementLabelProvider">
       </labelProvider>
    </extension>
-<!--   <extension
+   <extension
          point="org.eclipse.dltk.ui.openDelegate">
       <delegate
             class="com.servoy.eclipse.debug.script.OpenAdapter">
       </delegate>
    </extension>
--->
 </plugin>
