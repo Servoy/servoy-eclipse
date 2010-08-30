@@ -1299,7 +1299,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												}
 											}
 
-											if (dataProvider == null)
+											if (dataProvider == null &&
+												((parentForm.getDataSource() != null) || (id.startsWith(ScriptVariable.GLOBAL_DOT_PREFIX))))
 											{
 												String msg;
 												if (elementName == null)
