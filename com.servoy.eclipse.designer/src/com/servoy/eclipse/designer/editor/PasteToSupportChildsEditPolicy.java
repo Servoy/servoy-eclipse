@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Display;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
 import com.servoy.eclipse.designer.editor.commands.PersistPlaceCommandWrapper;
-import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
+import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -101,22 +101,30 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 		{
 			Object clipboardContents = getClipboardContents();
 			// tabs can only be pasted to tab panels
+			IPersist pasteParent = parent;
 			if (clipboardContents instanceof Object[])
 			{
 				for (int i = 0; i < ((Object[])clipboardContents).length; i++)
 				{
 					Object o = ((Object[])clipboardContents)[i];
-					if (o instanceof DataProviderDragData && parent instanceof TabPanel)
+					if (parent instanceof TabPanel && (!(o instanceof PersistDragData) || ((PersistDragData)o).type != IRepository.TABS))
 					{
+						// paste something else then a tab into a tabpanel? in stead paste to form 
+						pasteParent = parent.getAncestor(IRepository.FORMS);
+						break;
+					}
+					if (!(parent instanceof TabPanel) && o instanceof PersistDragData && ((PersistDragData)o).type == IRepository.TABS)
+					{
+						// paste tab into non-tabpanel
 						return null;
 					}
 				}
 			}
 
-			Command command = new FormPlaceElementCommand(request, (ISupportChilds)parent, clipboardContents, fieldPositioner, null);
+			Command command = new FormPlaceElementCommand(request, (ISupportChilds)pasteParent, clipboardContents, fieldPositioner, null);
 			// Refresh the form
-			return new PersistPlaceCommandWrapper((EditPart)getHost().getViewer().getEditPartRegistry().get(parent.getAncestor(IRepository.FORMS)), command,
-				true);
+			return new PersistPlaceCommandWrapper((EditPart)getHost().getViewer().getEditPartRegistry().get(pasteParent.getAncestor(IRepository.FORMS)),
+				command, true);
 		}
 	}
 
