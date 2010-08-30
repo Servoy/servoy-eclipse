@@ -33,8 +33,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.wicket.Request;
@@ -84,8 +84,8 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import com.servoy.eclipse.core.builder.ServoyBuilder;
 import com.servoy.eclipse.core.builder.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
+import com.servoy.eclipse.core.builder.ServoyBuilder;
 import com.servoy.eclipse.core.repository.DataModelManager;
 import com.servoy.eclipse.core.repository.EclipseMessages;
 import com.servoy.eclipse.core.repository.EclipseRepository;
@@ -826,12 +826,15 @@ public class ServoyModel implements IWorkspaceSaveListener
 						}
 					};
 					Display.getDefault().syncExec(uiRunnable);
-					if (((Boolean)uiRunnable.getReturnValue()).booleanValue() == true)
+					if (((Boolean)uiRunnable.getReturnValue()).booleanValue())
 					{
 						progressMonitor.worked(1);
 
 						nameValidator = null;
-						resetActiveEditingFlattenedSolutions();
+						if (project != null) // active project was deleted
+						{
+							resetActiveEditingFlattenedSolutions();
+						}
 						activeProject = project;
 						activatingProject.set(false);
 
@@ -2028,12 +2031,12 @@ public class ServoyModel implements IWorkspaceSaveListener
 													Integer lineNumber = (Integer)map.get(IMarker.LINE_NUMBER);
 													String oldLine = oldLines[lineNumber.intValue() - 1];
 													if (oldLine.trim().equals("")) continue;
-													int find = findLines(newLines, oldLine, lineNumber.intValue(), true, Math.abs(oldLines.length -
-														newLines.length) + 1);
+													int find = findLines(newLines, oldLine, lineNumber.intValue(), true,
+														Math.abs(oldLines.length - newLines.length) + 1);
 													if (find == -1)
 													{
-														find = findLines(newLines, oldLine, lineNumber.intValue(), false, Math.abs(oldLines.length -
-															newLines.length) + 1);
+														find = findLines(newLines, oldLine, lineNumber.intValue(), false,
+															Math.abs(oldLines.length - newLines.length) + 1);
 													}
 													if (find == -1) continue;
 													lineNumber = new Integer(find + 1);
@@ -2357,7 +2360,8 @@ public class ServoyModel implements IWorkspaceSaveListener
 						if (server.hasTable(tableName))
 						{
 							tableOrServerAreNotFound = false;
-							if (!dataModelManager.isWritingMarkerFreeDBIFile(file) && !tableName.toUpperCase().startsWith(DataModelManager.TEMP_UPPERCASE_PREFIX))
+							if (!dataModelManager.isWritingMarkerFreeDBIFile(file) &&
+								!tableName.toUpperCase().startsWith(DataModelManager.TEMP_UPPERCASE_PREFIX))
 							{
 								Table table = server.getTable(tableName);
 								columnInfoChanged = true;
