@@ -836,12 +836,15 @@ public class ServoyModel implements IWorkspaceSaveListener
 						}
 					};
 					Display.getDefault().syncExec(uiRunnable);
-					if (((Boolean)uiRunnable.getReturnValue()).booleanValue() == true)
+					if (((Boolean)uiRunnable.getReturnValue()).booleanValue())
 					{
 						progressMonitor.worked(1);
 
 						nameValidator = null;
-						resetActiveEditingFlattenedSolutions();
+						if (project != null) // active project was deleted
+						{
+							resetActiveEditingFlattenedSolutions();
+						}
 						activeProject = project;
 						activatingProject.set(false);
 
