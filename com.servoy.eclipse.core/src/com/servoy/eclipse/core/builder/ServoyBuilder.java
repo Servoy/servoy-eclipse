@@ -150,6 +150,7 @@ import com.servoy.j2db.util.Utils;
 public class ServoyBuilder extends IncrementalProjectBuilder
 {
 	public static int MAX_EXCEPTIONS = 25;
+	public static int MIN_FIELD_LENGTH = 1000;
 	public static int exceptionCount = 0;
 	private final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 	private final JavaScriptParser javascriptParser = new JavaScriptParser();
@@ -1284,6 +1285,19 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 															addMarker(project, PROJECT_FORM_MARKER_TYPE, msg, -1, IMarker.SEVERITY_WARNING,
 																IMarker.PRIORITY_NORMAL, null, o);
 														}
+													}
+												}
+												if (field.getEditable() &&
+													(field.getDisplayType() == Field.HTML_AREA || field.getDisplayType() == Field.RTF_AREA) &&
+													dataProvider.getColumnWrapper() != null && dataProvider.getColumnWrapper().getColumn() instanceof Column)
+												{
+													Column column = (Column)dataProvider.getColumnWrapper().getColumn();
+													if (column.getLength() < MIN_FIELD_LENGTH && column.getLength() > 0)
+													{
+														addMarker(project, PROJECT_FORM_MARKER_TYPE,
+															MarkerMessages.getMessage(MarkerMessages.Marker_Form_ColumnLengthTooSmall, elementName != null
+																? elementName : "", inForm), -1, //$NON-NLS-1$
+															IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, o);
 													}
 												}
 												if (((dataProvider instanceof ScriptVariable && ((ScriptVariable)dataProvider).getVariableType() == IColumnTypes.MEDIA) ||

@@ -240,6 +240,11 @@ public class MarkerMessages
 	public static String Marker_Form_IncompatibleElementType = "Element \"{0}\" in form \"{1}\" has incompatible dataprovider type (MEDIA)."; //$NON-NLS-1$
 
 	/**
+	 * The HTML or RTF field has as dataprovider a column whose length may be too small.
+	 */
+	public static String Marker_Form_ColumnLengthTooSmall = "HTML/RTF element \"{0}\" in form \"{1}\" has column dataprovider with small length. This may cause unpredictable results(if length of value will get bigger than column length)."; //$NON-NLS-1$
+
+	/**
 	 * The dataprovider used by an element cannot be found. This can happen for example if the structure of a database is changed and columns are deleted or renamed.
 	 */
 	public static String Marker_Form_DataproviderOnElementNotFound = "Element \"{0}\" in form \"{1}\" has dataprovider \"{2}\" that does not exist."; //$NON-NLS-1$
