@@ -81,6 +81,13 @@ import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 
+/**
+ * Class that resolves names in javascript like application or controller to a {@link Property} with a reference to the {@link Type} of that name.
+ * It also lists all possible global names for the current context for the code completion to use.
+ * 
+ * @author jcompagner
+ * @since 6.0
+ */
 @SuppressWarnings("nls")
 public class ElementResolver extends TypeCreator implements IElementResolver
 {
