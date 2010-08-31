@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
@@ -27,6 +27,7 @@ import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.persistence.RelationList;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.Utils;
@@ -207,15 +208,18 @@ public class RelationContentProvider extends CachingContentProvider implements I
 	 */
 	public static boolean exceedsRelationsDepth(Relation[] relations, int depth)
 	{
-		if (depth != IMaxDepthTreeContentProvider.DEPTH_INFINITE && relations != null && relations.length > depth)
+		if (relations == null) return false;
+		int size = relations.length;
+		if (depth != IMaxDepthTreeContentProvider.DEPTH_INFINITE && size > depth)
 		{
 			return true;
 		}
-		if (relations != null && relations.length > 2) // max limit when we are in a cycle of relations
+		if (size > 2) // max limit when we are in a cycle of relations
 		{
-			for (int i = 0; i < relations.length - 1; i++)
+			Relation relation = relations[size - 1];
+			for (int i = 0; i < size - 1; i++)
 			{
-				if (relations[relations.length - 1].equals(relations[i]))
+				if (relation.equals(relations[i]))
 				{
 					// cycle
 					return true;
@@ -224,6 +228,36 @@ public class RelationContentProvider extends CachingContentProvider implements I
 		}
 		return false;
 	}
+
+
+	/**
+	 * @param relations
+	 * @param depth
+	 * @return
+	 */
+	public static boolean exceedsRelationsDepth(RelationList relations, int depth)
+	{
+		if (relations == null) return false;
+		int size = relations.getSize();
+		if (depth != IMaxDepthTreeContentProvider.DEPTH_INFINITE && relations != null && size > depth)
+		{
+			return true;
+		}
+		if (size > 2) // max limit when we are in a cycle of relations
+		{
+			Relation relation = relations.getRelation();
+			for (int i = 0; i < size - 1; i++)
+			{
+				if (relation.equals(relations.getRelation(i)))
+				{
+					// cycle
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 
 	public static class RelationsWrapper
 	{
