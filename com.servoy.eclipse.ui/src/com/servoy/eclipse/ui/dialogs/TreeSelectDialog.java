@@ -34,7 +34,6 @@ import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerComparator;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
@@ -365,40 +364,6 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	}
 
 	@Override
-	public int open()
-	{
-		int retCode = super.open();
-
-		if (retCode != Window.CANCEL)
-		{
-			if (!getSelection().isEmpty() && getSelection() instanceof IStructuredSelection)
-			{
-				IStructuredSelection selection = (IStructuredSelection)getSelection();
-				Iterator it = selection.iterator();
-				while (it.hasNext())
-				{
-					final Object value = it.next();
-					// open button is always present when we have a valueEditor so don't have to check for null
-					if (value != null && valueEditor.canEdit(value))
-					{
-						Display.getDefault().asyncExec(new Runnable()
-						{
-							public void run()
-							{
-								valueEditor.openEditor(value);
-							}
-						});
-					}
-				}
-			}
-
-
-		}
-
-		return retCode;
-	}
-
-	@Override
 	public boolean close()
 	{
 		((TreePatternFilter)getTreeViewer().getPatternFilter()).saveSettings(getDialogBoundsSettings());
@@ -417,6 +382,38 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	public IDialogSettings getDialogBoundsSettings()
 	{
 		return EditorUtil.getDialogSettings(name);
+	}
+
+	@Override
+	protected void buttonPressed(int buttonId)
+	{
+		super.buttonPressed(buttonId);
+		if (buttonId == IDialogConstants.OPEN_ID) openPressed();
+	}
+
+	protected void openPressed()
+	{
+		if (!getSelection().isEmpty() && getSelection() instanceof IStructuredSelection)
+		{
+			IStructuredSelection selection = (IStructuredSelection)getSelection();
+			Iterator it = selection.iterator();
+			while (it.hasNext())
+			{
+				final Object value = it.next();
+				// open button is always present when we have a valueEditor so don't have to check for null
+				if (value != null && valueEditor.canEdit(value))
+				{
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						public void run()
+						{
+							valueEditor.openEditor(value);
+						}
+					});
+				}
+			}
+		}
+		okPressed();
 	}
 
 
