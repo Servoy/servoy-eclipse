@@ -428,7 +428,7 @@ public abstract class TypeCreator
 								{
 									Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
 									parameter.setName(param.getName());
-									parameter.setType(context.getType(SolutionExplorerListContentProvider.TYPES.get(param.getType())));
+									if (param.getType() != null) parameter.setType(context.getType(SolutionExplorerListContentProvider.TYPES.get(param.getType())));
 									parameter.setKind(param.isOptional() ? ParameterKind.OPTIONAL : ParameterKind.NORMAL);
 									parameters.add(parameter);
 								}
