@@ -59,6 +59,7 @@ import com.servoy.j2db.IDebugClientHandler;
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.IDesignerCallback;
+import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -504,6 +505,25 @@ public class Activator extends Plugin
 								dch.refreshDebugClients(changes);
 							}
 						});
+					}
+				});
+				// flush bean design instances of changed beans
+				servoyModel.addPersistChangeListener(false, new IPersistChangeListener()
+				{
+					public void persistChanges(final Collection<IPersist> changes)
+					{
+						for (IPersist persist : changes)
+						{
+							if (persist instanceof Bean)
+							{
+								FlattenedSolution editingFlattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(
+									persist);
+								if (editingFlattenedSolution != null)
+								{
+									editingFlattenedSolution.flushBeanDesignInstance((Bean)persist);
+								}
+							}
+						}
 					}
 				});
 				return Status.OK_STATUS;
