@@ -21,7 +21,6 @@ import java.awt.print.PageFormat;
 import java.io.File;
 import java.io.FileFilter;
 import java.lang.reflect.Method;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -140,7 +139,6 @@ import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.RoundHalfUpDecimalFormat;
 import com.servoy.j2db.util.ScriptingUtils;
-import com.servoy.j2db.util.StateFullSimpleDateFormat;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -1262,14 +1260,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														{
 															if (dataType == IColumnTypes.DATETIME)
 															{
-																SimpleDateFormat dateFormat = new StateFullSimpleDateFormat(displayFormat, false);
-																if (editFormat != null) dateFormat = new StateFullSimpleDateFormat(editFormat, false);
+																new SimpleDateFormat(displayFormat);
+																if (editFormat != null) new SimpleDateFormat(editFormat);
 															}
 															else if (dataType == IColumnTypes.INTEGER || dataType == IColumnTypes.NUMBER)
 															{
-																DecimalFormat decimalFormat = new RoundHalfUpDecimalFormat(displayFormat, Locale.getDefault());
-																if (editFormat != null) decimalFormat = new RoundHalfUpDecimalFormat(editFormat,
-																	Locale.getDefault());
+																new RoundHalfUpDecimalFormat(displayFormat, Locale.getDefault());
+																if (editFormat != null) new RoundHalfUpDecimalFormat(editFormat, Locale.getDefault());
 															}
 														}
 														catch (Exception ex)
