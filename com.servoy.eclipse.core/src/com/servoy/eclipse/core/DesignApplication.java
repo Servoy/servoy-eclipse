@@ -62,6 +62,7 @@ import com.servoy.j2db.dataprocessing.SwingFoundSetFactory;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.plugins.ClientPluginAccessProvider;
 import com.servoy.j2db.plugins.IPluginAccess;
 import com.servoy.j2db.plugins.IPluginManager;
 import com.servoy.j2db.plugins.PluginManager;
@@ -95,6 +96,7 @@ public class DesignApplication implements IApplication, IMessagesCallback
 	private PluginManager pluginManager;
 	private PageFormat pageFormat;
 	private IBeanManager beanManager;
+	private ClientPluginAccessProvider pluginAccess;
 
 	DesignApplication()
 	{
@@ -450,13 +452,15 @@ public class DesignApplication implements IApplication, IMessagesCallback
 
 	public IPluginAccess getPluginAccess()
 	{
-		return getClient().getPluginAccess();
+		getPluginManager();
+		return pluginAccess;
 	}
 
 	public IPluginManager getPluginManager()
 	{
 		if (pluginManager == null)
 		{
+			pluginAccess = new ClientPluginAccessProvider(this);
 			//getClient(); // do not create the client here, it needs to be created from within a job, otherwise the main thread 
 			// may be blocked on the awt thread which causes problems on the mac (debug SC does not paint)
 
