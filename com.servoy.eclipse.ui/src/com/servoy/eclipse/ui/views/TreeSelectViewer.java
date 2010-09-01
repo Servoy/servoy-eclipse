@@ -57,6 +57,7 @@ import org.eclipse.swt.layout.grouplayout.GroupLayout.SequentialGroup;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
@@ -110,6 +111,19 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 
 	private boolean skipNextFocusGained = false;
 
+	private boolean selectTextOnEnter = true;
+
+	public boolean isSelectTextOnEnter()
+	{
+		return selectTextOnEnter;
+	}
+
+	public void setSelectTextOnEnter(boolean selectText)
+	{
+		this.selectTextOnEnter = selectText;
+	}
+
+
 	public TreeSelectViewer(Composite parent, int style)
 	{
 		init(parent, style, null);
@@ -132,6 +146,8 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 		composite = new Composite(parent, style);
 
 		text = createTextField(composite); // may return null if no text field is wanted
+
+		setSelectTextOnEnter(true); // may have to override this setting in places we don't want autoselection of text 
 
 		if (valueEditor != null)
 		{
@@ -179,6 +195,17 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 				@Override
 				public void focusGained(FocusEvent e)
 				{
+					if (isSelectTextOnEnter())
+					{
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							public void run()
+							{
+								text.selectAll();
+							}
+						});
+					}
+
 					if (getEditable())
 					{
 						if (skipNextFocusGained)
