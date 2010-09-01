@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -112,9 +112,9 @@ public class TagsAndI18NTextDialog extends Dialog
 		dpTree = new DataProviderTreeViewer(composite_1, new CombinedLabelProvider(StandardTagsLabelProvider.INSTANCE_HIDEPREFIX,
 			new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(DataProviderLabelProvider.INSTANCE_HIDEPREFIX, persist), persist)),
 			new CombinedTreeContentProvider(new DataProviderContentProvider(persist, flattenedSolution, table), StandardTagsContentProvider.INSTANCE),
-			new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true, INCLUDE_RELATIONS.NESTED, true, null), true, true,
-			TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_PARENTS), TreePatternFilter.getSavedFilterSearchDepth(
-				getDialogBoundsSettings(), IMaxDepthTreeContentProvider.DEPTH_DEFAULT), SWT.MULTI);
+			new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true, INCLUDE_RELATIONS.NESTED, true, true, null), true,
+			true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_PARENTS),
+			TreePatternFilter.getSavedFilterSearchDepth(getDialogBoundsSettings(), IMaxDepthTreeContentProvider.DEPTH_DEFAULT), SWT.MULTI);
 
 		addButton = new Button(composite_1, SWT.NONE);
 		addButton.setText(">>");

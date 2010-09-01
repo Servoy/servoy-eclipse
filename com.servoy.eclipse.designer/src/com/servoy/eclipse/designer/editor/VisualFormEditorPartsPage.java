@@ -691,7 +691,7 @@ public class VisualFormEditorPartsPage extends Composite
 			FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(editor.getForm());
 			dialog = new DataProviderDialog(getShell(), DataProviderLabelProvider.INSTANCE_HIDEPREFIX, editor.getForm(), flattenedSolution,
 				editor.getFlattenedForm().getTable(), new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, false, false, false,
-					INCLUDE_RELATIONS.NESTED, true, null), null, SWT.MULTI, "Select Group-by fields");
+					INCLUDE_RELATIONS.NESTED, false, true, null), null, SWT.MULTI, "Select Group-by fields");
 			if (dialog.open() == SWT.CANCEL)
 			{
 				return;

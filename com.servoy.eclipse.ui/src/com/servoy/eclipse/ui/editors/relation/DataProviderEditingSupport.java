@@ -155,7 +155,8 @@ public class DataProviderEditingSupport extends EditingSupport
 					DataProviderDialog dialog = new DataProviderDialog(re.getSite().getShell(), new SolutionContextDelegateLabelProvider(
 						DataProviderLabelProvider.INSTANCE_HIDEPREFIX, re.getPersist()), re.getPersist(), flattenedEditingSolution, table,
 						new DataProviderTreeViewer.DataProviderOptions(false, true, includeGlobalsAndCalcs, false, false, includeGlobalsAndCalcs, false, false,
-							INCLUDE_RELATIONS.NO, true, null), provider != null ? new StructuredSelection(provider) : null, SWT.NONE, "Select Data Provider");
+							INCLUDE_RELATIONS.NO, false, true, null), provider != null ? new StructuredSelection(provider) : null, SWT.NONE,
+						"Select Data Provider");
 					dialog.open();
 
 					if (dialog.getReturnCode() != Window.CANCEL)

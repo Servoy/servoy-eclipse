@@ -94,8 +94,8 @@ public class AddPortalActionDelegate extends AbstractEditpartActionDelegate
 		}
 
 		DataProviderDialog dialog = new DataProviderDialog(getShell(), DataProviderLabelProvider.INSTANCE_HIDEPREFIX, form, editingFlattenedSolution, table,
-			new DataProviderTreeViewer.DataProviderOptions(false, false, false, true, false, false, false, false, INCLUDE_RELATIONS.NESTED, false, null), null,
-			SWT.MULTI, "Select Data Providers");
+			new DataProviderTreeViewer.DataProviderOptions(false, false, false, true, false, false, false, false, INCLUDE_RELATIONS.NESTED, true, false, null),
+			null, SWT.MULTI, "Select Data Providers");
 		dialog.setOptionsAreaFactory(new IControlFactory()
 		{
 			public Control createControl(Composite composite)

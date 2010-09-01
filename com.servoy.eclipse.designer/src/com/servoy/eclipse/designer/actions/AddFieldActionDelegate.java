@@ -80,7 +80,7 @@ public class AddFieldActionDelegate extends AbstractEditpartActionDelegate
 				return null;
 			}
 			input = new DataProviderTreeViewer.DataProviderOptions(false, false, false, true /* related calcs */, false, false, false, false,
-				INCLUDE_RELATIONS.YES, true, relations);
+				INCLUDE_RELATIONS.YES, false, true, relations);
 		}
 		else
 		{
@@ -96,7 +96,7 @@ public class AddFieldActionDelegate extends AbstractEditpartActionDelegate
 			}
 
 			input = new DataProviderTreeViewer.DataProviderOptions(false, table != null, table != null, table != null, true, true, table != null,
-				table != null, INCLUDE_RELATIONS.NESTED, true, null);
+				table != null, INCLUDE_RELATIONS.NESTED, true, true, null);
 		}
 
 		DataProviderDialog dialog = new DataProviderDialog(getShell(), new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(

@@ -241,7 +241,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 							while (relations.hasNext())
 							{
 								Relation relation = relations.next();
-								if ((options.includeGlobals || !relation.isGlobal()) && relationNames.add(relation.getName()))
+								if ((options.includeGlobalRelations || !relation.isGlobal()) && relationNames.add(relation.getName()))
 								{
 									input.add(new DataProviderNodeWrapper(RELATIONS, new RelationList(relation)));
 								}
@@ -730,13 +730,14 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		public final boolean includeGlobals;
 		public final boolean includeAggregates;
 		public final INCLUDE_RELATIONS includeRelations;
+		public final boolean includeGlobalRelations;
 		private final Relation[] relations;
 		private final boolean includeRelatedCalculations;
 		private final boolean includeRelatedAggregates;
 
 		public DataProviderOptions(boolean includeNone, boolean includeColumns, boolean includeCalculations, boolean includeRelatedCalculations,
 			boolean includeFormVariables, boolean includeGlobals, boolean includeAggregates, boolean includeRelatedAggregates,
-			INCLUDE_RELATIONS includeRelations, boolean expandSingleParent, Relation[] relations)
+			INCLUDE_RELATIONS includeRelations, boolean includeGlobalRelations, boolean expandSingleParent, Relation[] relations)
 		{
 			this.includeNone = includeNone;
 			this.includeColumns = includeColumns;
@@ -747,6 +748,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			this.includeAggregates = includeAggregates;
 			this.includeRelatedAggregates = includeRelatedAggregates;
 			this.includeRelations = includeRelations;
+			this.includeGlobalRelations = includeGlobalRelations;
 			this.expandSingleParent = expandSingleParent;
 			this.relations = relations;
 		}

@@ -978,7 +978,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			setControl(topLevel);
 			treeViewer = new DataProviderTreeViewer(topLevel, DataProviderLabelProvider.INSTANCE_HIDEPREFIX,// label provider will be overwritten when superform is known
 				new DataProviderContentProvider(null, servoyProject.getEditingFlattenedSolution(), null), new DataProviderTreeViewer.DataProviderOptions(false,
-					true, true, true, true, true, true, true, INCLUDE_RELATIONS.NESTED, true, null), true, true, TreePatternFilter.getSavedFilterMode(
+					true, true, true, true, true, true, true, INCLUDE_RELATIONS.NESTED, true, true, null), true, true, TreePatternFilter.getSavedFilterMode(
 					getDialogSettings(), TreePatternFilter.FILTER_LEAFS), TreePatternFilter.getSavedFilterSearchDepth(getDialogSettings(),
 					IMaxDepthTreeContentProvider.DEPTH_DEFAULT), SWT.MULTI);
 
