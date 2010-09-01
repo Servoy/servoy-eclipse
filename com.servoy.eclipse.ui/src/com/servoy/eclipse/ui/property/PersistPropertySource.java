@@ -869,6 +869,16 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 					{
 						includeRelations = INCLUDE_RELATIONS.NO;
 					}
+					boolean includeGlobalRelations;
+					if (propertyEditorHint.getOption(PropertyEditorOption.includeGlobalRelations) != null)
+					{
+						includeGlobalRelations = Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeGlobalRelations));
+					}
+					else
+					{
+						includeGlobalRelations = Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeGlobal));
+					}
+
 
 					final DataProviderOptions options = new DataProviderTreeViewer.DataProviderOptions(
 						Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)), table != null &&
@@ -878,7 +888,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 						Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeForm)),
 						Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeGlobal)), table != null &&
 							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeAggregates)), table != null &&
-							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeRelatedAggregates)), includeRelations, true, null);
+							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeRelatedAggregates)), includeRelations,
+						includeGlobalRelations, true, null);
 					final DataProviderConverter converter = new DataProviderConverter(flattenedEditingSolution, persist, table);
 					DataProviderLabelProvider showPrefix = new DataProviderLabelProvider(false);
 					showPrefix.setConverter(converter);
@@ -2275,7 +2286,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 					return null;
 				}
 				options = new DataProviderTreeViewer.DataProviderOptions(false, false, false, true /* related calcs */, false, false, false, false,
-					INCLUDE_RELATIONS.YES, true, relations);
+					INCLUDE_RELATIONS.YES, true, true, relations);
 			}
 			else
 			{
@@ -2291,7 +2302,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 					return null;
 				}
 				options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, table != null, true, true, table != null,
-					table != null, INCLUDE_RELATIONS.NESTED, true, null);
+					table != null, INCLUDE_RELATIONS.NESTED, true, true, null);
 			}
 			final DataProviderConverter converter = new DataProviderConverter(flattenedEditingSolution, persist, table);
 			DataProviderLabelProvider showPrefix = new DataProviderLabelProvider(false);

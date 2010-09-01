@@ -114,9 +114,9 @@ public class TagsAndI18NTextDialog extends Dialog
 		dpTree = new DataProviderTreeViewer(composite_1, new CombinedLabelProvider(StandardTagsLabelProvider.INSTANCE_HIDEPREFIX,
 			new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(DataProviderLabelProvider.INSTANCE_HIDEPREFIX, persist), persist)),
 			new CombinedTreeContentProvider(new DataProviderContentProvider(persist, flattenedSolution, table), StandardTagsContentProvider.INSTANCE),
-			new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true, INCLUDE_RELATIONS.NESTED, true, null), true, true,
-			TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_PARENTS), TreePatternFilter.getSavedFilterSearchDepth(
-				getDialogBoundsSettings(), IMaxDepthTreeContentProvider.DEPTH_DEFAULT), SWT.MULTI);
+			new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true, INCLUDE_RELATIONS.NESTED, true, true, null), true,
+			true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_PARENTS),
+			TreePatternFilter.getSavedFilterSearchDepth(getDialogBoundsSettings(), IMaxDepthTreeContentProvider.DEPTH_DEFAULT), SWT.MULTI);
 
 		addButton = new Button(composite_1, SWT.NONE);
 		addButton.setText(">>");

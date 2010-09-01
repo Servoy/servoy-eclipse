@@ -165,7 +165,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			{
 				return new DataProviderDialog(control.getShell(), (ILabelProvider)getLabelProvider(), null, ColumnAutoEnterComposite.this.flattenedSolution,
 					column.getTable(), new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, true, false, false,
-						INCLUDE_RELATIONS.NESTED, true, null), getSelection(), SWT.NONE, title);
+						INCLUDE_RELATIONS.NESTED, true, true, null), getSelection(), SWT.NONE, title);
 			}
 		};
 		lookupValueSelect.setTitleText("Specify Field");

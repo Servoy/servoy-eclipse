@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.valuelist;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -36,9 +36,9 @@ import org.eclipse.swt.widgets.Event;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
-import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
+import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.editors.ValueListEditor;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.util.BindingHelper;
@@ -73,8 +73,8 @@ public class ValueListDPSelectionComposite extends Composite
 		showInFieldButton.setText("Show in field / list");
 
 		tree = new DataProviderTreeViewer(this, DataProviderLabelProvider.INSTANCE_HIDEPREFIX, new DataProviderContentProvider(null, flattenedSolution, null),
-			new DataProviderTreeViewer.DataProviderOptions(false, true, true, false, false, false, false, false, INCLUDE_RELATIONS.NO, true, null), false,
-			false, TreePatternFilter.FILTER_LEAFS, IMaxDepthTreeContentProvider.DEPTH_DEFAULT, SWT.SINGLE);
+			new DataProviderTreeViewer.DataProviderOptions(false, true, true, false, false, false, false, false, INCLUDE_RELATIONS.NO, false, true, null),
+			false, false, TreePatternFilter.FILTER_LEAFS, IMaxDepthTreeContentProvider.DEPTH_DEFAULT, SWT.SINGLE);
 
 		returnInDataproviderButton = new Button(this, SWT.CHECK);
 		returnInDataproviderButton.setText("Return in dataprovider");
