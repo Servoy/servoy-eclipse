@@ -1024,8 +1024,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														if (lst.size() == 1)
 														{
 															String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																other.getUUID(), SolutionSerializer.getRelativePath(p, false) +
-																	SolutionSerializer.getFileName(p, false));
+																other.getUUID(),
+																SolutionSerializer.getRelativePath(p, false) + SolutionSerializer.getFileName(p, false));
 															addMarker(project, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_HIGH, null,
 																other);
 														}
@@ -1071,14 +1071,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																	// for now only add it on both if there is 1, just skip the rest.
 																	if (lst.size() == 1)
 																	{
-																		String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																			other.getUUID(), SolutionSerializer.getRelativePath(p, false) +
+																		String msg = MarkerMessages.getMessage(
+																			MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
+																			other.getUUID(),
+																			SolutionSerializer.getRelativePath(p, false) +
 																				SolutionSerializer.getFileName(p, false));
 																		addMarker(moduleProject, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR,
 																			IMarker.PRIORITY_HIGH, null, other);
 																	}
-																	String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																		p.getUUID(), SolutionSerializer.getRelativePath(other, false) +
+																	String msg = MarkerMessages.getMessage(
+																		MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
+																		p.getUUID(),
+																		SolutionSerializer.getRelativePath(other, false) +
 																			SolutionSerializer.getFileName(other, false));
 																	addMarker(moduleProject, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR,
 																		IMarker.PRIORITY_HIGH, null, p);
@@ -2024,7 +2028,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												if (indx > 0)
 												{
 													String rel_name = id.substring(0, indx);
-													if (!portal.getRelationName().equals(rel_name))
+													if (!rel_name.startsWith(portal.getRelationName()))
 													{
 														String message;
 														String elementName = null;

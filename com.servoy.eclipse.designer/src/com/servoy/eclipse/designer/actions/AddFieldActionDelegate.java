@@ -80,7 +80,7 @@ public class AddFieldActionDelegate extends AbstractEditpartActionDelegate
 				return null;
 			}
 			input = new DataProviderTreeViewer.DataProviderOptions(false, false, false, true /* related calcs */, false, false, false, false,
-				INCLUDE_RELATIONS.YES, true, relations);
+				INCLUDE_RELATIONS.NESTED, true, relations);
 		}
 		else
 		{
