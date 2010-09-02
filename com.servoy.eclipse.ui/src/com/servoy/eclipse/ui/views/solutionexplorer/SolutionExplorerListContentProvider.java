@@ -57,9 +57,9 @@ import com.servoy.eclipse.ui.node.UserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
-import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
@@ -1726,7 +1726,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				returnTypeStringBuffer.append("[]"); //$NON-NLS-1$
 				returnType = returnType.getComponentType();
 			}
-			returnTypeStringBuffer.insert(0, TYPES.get(returnType.getName()));
+			returnTypeStringBuffer.insert(0, TYPES.get(returnType.getSimpleName()));
 
 			String tmp = "<html><body><b>" + returnTypeStringBuffer.toString() + " " + name + "(" + sbParamsString + ")</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			if ("".equals(tooltip)) //$NON-NLS-1$
