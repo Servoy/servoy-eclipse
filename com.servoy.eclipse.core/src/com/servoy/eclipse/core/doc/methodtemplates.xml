@@ -425,7 +425,7 @@ return true]]></code>
       <code><![CDATA[controller.sort(dataProviderID+(asc?' asc':' desc'), false)]]></code>
       <arguments>
         <methodargument name="dataProviderID" type="String"><![CDATA[element data provider]]></methodargument>
-        <methodargument name="asc" type="Boolean"><![CDATA[sort acscending [true] or descending [false]]]></methodargument>
+        <methodargument name="asc" type="Boolean"><![CDATA[sort ascending [true] or descending [false]]]></methodargument>
         <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
       </arguments>
     </methodtemplate>
