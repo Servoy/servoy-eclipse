@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.builder;
 
 import java.io.OutputStream;
@@ -21,8 +21,6 @@ import java.util.Iterator;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMarkerResolution;
 
 import com.servoy.eclipse.core.IFileAccess;
@@ -33,10 +31,12 @@ import com.servoy.eclipse.core.WorkspaceFileAccess;
 import com.servoy.eclipse.core.repository.EclipseRepository;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
-import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.IVariable;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
@@ -49,14 +49,7 @@ public class DuplicateUuidQuickFix implements IMarkerResolution
 	public DuplicateUuidQuickFix(IPersist persist, String uuid, String solName)
 	{
 		super();
-		if (SolutionSerializer.isCompositeWithItems(persist.getParent()))
-		{
-			this.persist = persist.getParent();
-		}
-		else
-		{
-			this.persist = persist;
-		}
+		this.persist = persist;
 		this.uuid = uuid;
 		this.solutionName = solName;
 	}
@@ -85,17 +78,21 @@ public class DuplicateUuidQuickFix implements IMarkerResolution
 					IFileAccess fileAccess = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 					Pair<String, String> filepathname = SolutionSerializer.getFilePath(persist, false);
 					String fileRelativePath = filepathname.getLeft() + filepathname.getRight();
-					((AbstractBase)persist).resetUUID();
-					if (persist instanceof ISupportChilds && SolutionSerializer.isCompositeWithItems(persist))
+					if (persist.getParent() instanceof Relation)
 					{
 						// also do the children
-						Iterator<IPersist> allObjects = ((ISupportChilds)persist).getAllObjects();
+						Iterator<IPersist> allObjects = persist.getParent().getAllObjects();
 						while (allObjects.hasNext())
 						{
 							IPersist child = allObjects.next();
 							((AbstractBase)child).resetUUID();
 						}
 					}
+					else
+					{
+						((AbstractBase)persist).resetUUID();
+					}
+
 					Pair<String, String> newfilepathname = SolutionSerializer.getFilePath(persist, false);
 					String newfileRelativePath = newfilepathname.getLeft() + newfilepathname.getRight();
 					if (!newfileRelativePath.equals(fileRelativePath))
@@ -109,7 +106,19 @@ public class DuplicateUuidQuickFix implements IMarkerResolution
 					}
 					else
 					{
-						content = SolutionSerializer.serializePersist(persist, true, repository);
+						Form form = (Form)persist.getAncestor(IRepository.FORMS);
+						if (form != null && SolutionSerializer.isCompositeWithItems(form))
+						{
+							content = SolutionSerializer.serializePersist(form, true, repository);
+						}
+						else if (SolutionSerializer.isCompositeWithItems(persist.getParent()))
+						{
+							content = SolutionSerializer.serializePersist(persist.getParent(), true, repository);
+						}
+						else
+						{
+							content = SolutionSerializer.serializePersist(persist, true, repository);
+						}
 					}
 
 					OutputStream fos = fileAccess.getOutputStream(newfileRelativePath);
@@ -122,8 +131,6 @@ public class DuplicateUuidQuickFix implements IMarkerResolution
 						fos.write(content.toString().getBytes("UTF8")); //$NON-NLS-1$
 					}
 					Utils.closeOutputStream(fos);
-					MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "UUID generated sucessfully", //$NON-NLS-1$
-						"Restart application in order for the change to be effective."); //$NON-NLS-1$
 				}
 				catch (Exception e)
 				{
