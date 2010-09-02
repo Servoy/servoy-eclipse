@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.core;
 
+import java.net.URL;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -46,6 +47,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWebBrowser;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.progress.WorkbenchJob;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.url.URLConstants;
@@ -55,6 +58,7 @@ import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.IBrowserLauncher;
 import com.servoy.j2db.IDebugClientHandler;
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.IDebugWebClient;
@@ -334,7 +338,26 @@ public class Activator extends Plugin
 	 */
 	public IDebugJ2DBClient getDebugJ2DBClient()
 	{
-		return getDebugClientHandler().getDebugSmartClient();
+		IDebugJ2DBClient debugSmartClient = getDebugClientHandler().getDebugSmartClient();
+		debugSmartClient.setBrowserLauncher(new IBrowserLauncher()
+		{
+			public boolean showURL(String url)
+			{
+				try
+				{
+					IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
+					IWebBrowser browser = support.getExternalBrowser();
+					browser.openURL(new URL(url));
+					return true;
+				}
+				catch (Exception ex)
+				{
+					ServoyLog.logError(ex);
+					return false;
+				}
+			}
+		});
+		return debugSmartClient;
 	}
 
 	public IDebugJ2DBClient getJSUnitJ2DBClient()
