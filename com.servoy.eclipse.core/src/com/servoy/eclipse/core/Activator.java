@@ -339,24 +339,27 @@ public class Activator extends Plugin
 	public IDebugJ2DBClient getDebugJ2DBClient()
 	{
 		IDebugJ2DBClient debugSmartClient = getDebugClientHandler().getDebugSmartClient();
-		debugSmartClient.setBrowserLauncher(new IBrowserLauncher()
+		if (debugSmartClient.getBrowserLauncher() == null)
 		{
-			public boolean showURL(String url)
+			debugSmartClient.setBrowserLauncher(new IBrowserLauncher()
 			{
-				try
+				public boolean showURL(String url)
 				{
-					IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
-					IWebBrowser browser = support.getExternalBrowser();
-					browser.openURL(new URL(url));
-					return true;
+					try
+					{
+						IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
+						IWebBrowser browser = support.getExternalBrowser();
+						browser.openURL(new URL(url));
+						return true;
+					}
+					catch (Exception ex)
+					{
+						ServoyLog.logError(ex);
+						return false;
+					}
 				}
-				catch (Exception ex)
-				{
-					ServoyLog.logError(ex);
-					return false;
-				}
-			}
-		});
+			});
+		}
 		return debugSmartClient;
 	}
 
