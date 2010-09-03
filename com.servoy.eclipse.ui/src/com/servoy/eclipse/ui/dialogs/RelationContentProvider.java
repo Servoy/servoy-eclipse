@@ -245,8 +245,8 @@ public class RelationContentProvider extends CachingContentProvider implements I
 		}
 		if (size > 2) // max limit when we are in a cycle of relations
 		{
-			Relation relation = relations.getRelation(size - 2);
-			for (int i = 0; i < size - 2; i++)
+			Relation relation = relations.getRelation();
+			for (int i = 0; i < size - 1; i++)
 			{
 				if (relation.equals(relations.getRelation(i)))
 				{

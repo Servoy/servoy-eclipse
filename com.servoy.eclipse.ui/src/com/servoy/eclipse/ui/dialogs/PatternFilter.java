@@ -53,8 +53,6 @@ public class PatternFilter extends ViewerFilter
 	 */
 	private final Map<Object, Boolean> foundAnyCache = new HashMap<Object, Boolean>();
 
-	private final Map<Object, Boolean> searchKeyCache = new HashMap<Object, Boolean>();
-
 	private boolean useCache = false;
 
 	private ITreeContentProvider contentProvider;
@@ -90,7 +88,7 @@ public class PatternFilter extends ViewerFilter
 			return elements;
 		}
 
-		contentProvider = (ITreeContentProvider)((AbstractTreeViewer)viewer).getContentProvider();
+		contentProvider = null; // reset
 
 		if (!useCache)
 		{
@@ -228,11 +226,10 @@ public class PatternFilter extends ViewerFilter
 	 * Clears the caches used for optimizing this filter. Needs to be called whenever
 	 * the tree content changes.
 	 */
-	/* package */void clearCaches()
+	protected void clearCaches()
 	{
 		cache.clear();
 		foundAnyCache.clear();
-		searchKeyCache.clear();
 	}
 
 	/**
@@ -281,26 +278,7 @@ public class PatternFilter extends ViewerFilter
 	 */
 	public boolean isElementVisible(Viewer viewer, Object element)
 	{
-		Object searchKey = null;
-		if (contentProvider instanceof ISearchKeyAdapter)
-		{
-			searchKey = ((ISearchKeyAdapter)contentProvider).getSearchKey(element);
-			if (searchKey != null)
-			{
-				Boolean b = searchKeyCache.get(searchKey);
-				if (b != null)
-				{
-					return b.booleanValue();
-				}
-			}
-		}
-
-		boolean elementVisible = isParentMatch(viewer, element) || isLeafMatch(viewer, element);
-		if (searchKey != null)
-		{
-			searchKeyCache.put(searchKey, elementVisible ? Boolean.TRUE : Boolean.FALSE);
-		}
-		return elementVisible;
+		return isParentMatch(viewer, element) || isLeafMatch(viewer, element);
 	}
 
 	/**
@@ -316,13 +294,22 @@ public class PatternFilter extends ViewerFilter
 	 */
 	protected boolean isParentMatch(Viewer viewer, Object element)
 	{
-		Object[] children = contentProvider.getChildren(element);
+		Object[] children = getTreeContentProvider(viewer).getChildren(element);
 
 		if ((children != null) && (children.length > 0))
 		{
 			return isAnyVisible(viewer, element, children);
 		}
 		return false;
+	}
+
+	protected final ITreeContentProvider getTreeContentProvider(Viewer viewer)
+	{
+		if (contentProvider == null)
+		{
+			contentProvider = ((ITreeContentProvider)((AbstractTreeViewer)viewer).getContentProvider());
+		}
+		return contentProvider;
 	}
 
 	/**

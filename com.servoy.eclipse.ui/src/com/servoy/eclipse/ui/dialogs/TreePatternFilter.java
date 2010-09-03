@@ -13,12 +13,13 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.viewers.AbstractTreeViewer;
-import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -46,6 +47,8 @@ public class TreePatternFilter extends PatternFilter
 
 	protected int filterMode = FILTER_LEAFS;
 	protected int maxSearchDepth = IMaxDepthTreeContentProvider.DEPTH_DEFAULT;
+
+	private final Map<Object, Boolean> searchKeyCache = new HashMap<Object, Boolean>();
 
 	public TreePatternFilter(int filterMode, int maxSearchDepth)
 	{
@@ -131,6 +134,18 @@ public class TreePatternFilter extends PatternFilter
 		return null;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.dialogs.PatternFilter#clearCaches()
+	 */
+	@Override
+	protected void clearCaches()
+	{
+		super.clearCaches();
+		searchKeyCache.clear();
+	}
+
 	/**
 	 * Answers whether the given element in the given viewer matches the filter pattern. This is a default implementation that will show a leaf element in the
 	 * tree based on whether the provided filter text matches the text of the given element's text, or that of it's children (if the element has any).
@@ -146,9 +161,9 @@ public class TreePatternFilter extends PatternFilter
 	public boolean isElementVisible(Viewer viewer, Object element)
 	{
 		// limit max depth for searching
-		IContentProvider contentProvider = ((AbstractTreeViewer)viewer).getContentProvider();
+		ITreeContentProvider contentProvider = getTreeContentProvider(viewer);
 		if (contentProvider instanceof IMaxDepthTreeContentProvider &&
-			(((IMaxDepthTreeContentProvider)contentProvider)).searchLimitReached(element, maxSearchDepth))
+			(((IMaxDepthTreeContentProvider)contentProvider)).searchLimitReached(element, maxSearchDepth * 2))
 		{
 			return false;
 		}
@@ -165,14 +180,33 @@ public class TreePatternFilter extends PatternFilter
 //				return false;
 //			}
 
-		return super.isElementVisible(viewer, element);
+		Object searchKey = null;
+		if (contentProvider instanceof ISearchKeyAdapter)
+		{
+			searchKey = ((ISearchKeyAdapter)contentProvider).getSearchKey(element);
+			if (searchKey != null)
+			{
+				Boolean b = searchKeyCache.get(searchKey);
+				if (b != null)
+				{
+					return b.booleanValue();
+				}
+			}
+		}
+
+		boolean elementVisible = super.isElementVisible(viewer, element);
+		if (searchKey != null)
+		{
+			searchKeyCache.put(searchKey, elementVisible ? Boolean.TRUE : Boolean.FALSE);
+		}
+		return elementVisible;
 	}
 
 	@Override
 	protected boolean isLeafMatch(Viewer viewer, Object element)
 	{
-		ITreeContentProvider treeContentProvider = ((ITreeContentProvider)((AbstractTreeViewer)viewer).getContentProvider());
-		if (treeContentProvider instanceof IKeywordChecker && ((IKeywordChecker)treeContentProvider).isKeyword(element))
+		ITreeContentProvider contentProvider = getTreeContentProvider(viewer);
+		if (contentProvider instanceof IKeywordChecker && ((IKeywordChecker)contentProvider).isKeyword(element))
 		{
 			// no isLeafmatch for keyword nodes
 			return false;
@@ -202,15 +236,15 @@ public class TreePatternFilter extends PatternFilter
 
 	protected boolean isAnyParentLeafMatch(Viewer viewer, Object element)
 	{
-		ITreeContentProvider treeContentProvider = ((ITreeContentProvider)((AbstractTreeViewer)viewer).getContentProvider());
-		Object parent = treeContentProvider.getParent(element);
+		ITreeContentProvider contentProvider = getTreeContentProvider(viewer);
+		Object parent = contentProvider.getParent(element);
 		while (parent != null)
 		{
 			if (isLeafMatch(viewer, parent))
 			{
 				return true;
 			}
-			parent = treeContentProvider.getParent(parent);
+			parent = contentProvider.getParent(parent);
 		}
 		return false;
 	}
@@ -243,7 +277,8 @@ public class TreePatternFilter extends PatternFilter
 
 	protected boolean hasLeafMatchChild(Viewer viewer, Object element)
 	{
-		Object[] children = ((ITreeContentProvider)((AbstractTreeViewer)viewer).getContentProvider()).getChildren(element);
+		ITreeContentProvider contentProvider = getTreeContentProvider(viewer);
+		Object[] children = contentProvider.getChildren(element);
 		if (children != null)
 		{
 			for (Object child : children)

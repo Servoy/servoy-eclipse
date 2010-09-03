@@ -201,7 +201,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					String node = ((DataProviderNodeWrapper)element).node;
 					if (node == CALCULATIONS || node == AGGREGATES)
 					{
-						return rl.getRelation().getName() + '.' + node;
+						return null;
 					}
 					return rl.getRelation();
 				}
