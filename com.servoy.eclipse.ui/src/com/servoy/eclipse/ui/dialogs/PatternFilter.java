@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
@@ -46,14 +46,18 @@ public class PatternFilter extends ViewerFilter
 	/*
 	 * Cache of filtered elements in the tree
 	 */
-	private final Map cache = new HashMap();
+	private final Map<Object, Object[]> cache = new HashMap<Object, Object[]>();
 
 	/*
 	 * Maps parent elements to TRUE or FALSE
 	 */
-	private final Map foundAnyCache = new HashMap();
+	private final Map<Object, Boolean> foundAnyCache = new HashMap<Object, Boolean>();
+
+	private final Map<Object, Boolean> searchKeyCache = new HashMap<Object, Boolean>();
 
 	private boolean useCache = false;
+
+	private ITreeContentProvider contentProvider;
 
 	/**
 	 * Whether to include a leading wildcard for all provided patterns.  A
@@ -86,15 +90,17 @@ public class PatternFilter extends ViewerFilter
 			return elements;
 		}
 
+		contentProvider = (ITreeContentProvider)((AbstractTreeViewer)viewer).getContentProvider();
+
 		if (!useCache)
 		{
 			return super.filter(viewer, parent, elements);
 		}
 
-		Object[] filtered = (Object[])cache.get(parent);
+		Object[] filtered = cache.get(parent);
 		if (filtered == null)
 		{
-			Boolean foundAny = (Boolean)foundAnyCache.get(parent);
+			Boolean foundAny = foundAnyCache.get(parent);
 			if (foundAny != null && !foundAny.booleanValue())
 			{
 				filtered = EMPTY;
@@ -130,12 +136,12 @@ public class PatternFilter extends ViewerFilter
 			return computeAnyVisible(viewer, elements);
 		}
 
-		Object[] filtered = (Object[])cache.get(parent);
+		Object[] filtered = cache.get(parent);
 		if (filtered != null)
 		{
 			return filtered.length > 0;
 		}
-		Boolean foundAny = (Boolean)foundAnyCache.get(parent);
+		Boolean foundAny = foundAnyCache.get(parent);
 		if (foundAny == null)
 		{
 			foundAny = computeAnyVisible(viewer, elements) ? Boolean.TRUE : Boolean.FALSE;
@@ -226,6 +232,7 @@ public class PatternFilter extends ViewerFilter
 	{
 		cache.clear();
 		foundAnyCache.clear();
+		searchKeyCache.clear();
 	}
 
 	/**
@@ -274,7 +281,26 @@ public class PatternFilter extends ViewerFilter
 	 */
 	public boolean isElementVisible(Viewer viewer, Object element)
 	{
-		return isParentMatch(viewer, element) || isLeafMatch(viewer, element);
+		Object searchKey = null;
+		if (contentProvider instanceof ISearchKeyAdapter)
+		{
+			searchKey = ((ISearchKeyAdapter)contentProvider).getSearchKey(element);
+			if (searchKey != null)
+			{
+				Boolean b = searchKeyCache.get(searchKey);
+				if (b != null)
+				{
+					return b.booleanValue();
+				}
+			}
+		}
+
+		boolean elementVisible = isParentMatch(viewer, element) || isLeafMatch(viewer, element);
+		if (searchKey != null)
+		{
+			searchKeyCache.put(searchKey, elementVisible ? Boolean.TRUE : Boolean.FALSE);
+		}
+		return elementVisible;
 	}
 
 	/**
@@ -290,7 +316,7 @@ public class PatternFilter extends ViewerFilter
 	 */
 	protected boolean isParentMatch(Viewer viewer, Object element)
 	{
-		Object[] children = ((ITreeContentProvider)((AbstractTreeViewer)viewer).getContentProvider()).getChildren(element);
+		Object[] children = contentProvider.getChildren(element);
 
 		if ((children != null) && (children.length > 0))
 		{

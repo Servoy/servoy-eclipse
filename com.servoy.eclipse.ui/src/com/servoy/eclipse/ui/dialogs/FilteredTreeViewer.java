@@ -393,7 +393,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 							expanded = true;
 						}
 					}
-					if (lst.size() > 50)
+					if (lst.size() > 10)
 					{
 						return expanded;
 					}

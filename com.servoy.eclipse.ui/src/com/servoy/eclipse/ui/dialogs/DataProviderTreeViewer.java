@@ -109,7 +109,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		super.setLabelProvider(new DataProviderDialogLabelProvider(labelProvider));
 	}
 
-	public static class DataProviderContentProvider extends ArrayContentProvider implements IMaxDepthTreeContentProvider, IKeywordChecker
+	public static class DataProviderContentProvider extends ArrayContentProvider implements IMaxDepthTreeContentProvider, IKeywordChecker, ISearchKeyAdapter
 	{
 		public static final IDataProvider NONE = new NoDataProvider();
 
@@ -184,6 +184,29 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		{
 			this.table = table;
 			this.persist = persist;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.servoy.eclipse.ui.dialogs.ISearchKeyAdapter#getSearchKey(java.lang.Object)
+		 */
+		public Object getSearchKey(Object element)
+		{
+			if (element instanceof DataProviderNodeWrapper)
+			{
+				RelationList rl = ((DataProviderNodeWrapper)element).relations;
+				if (rl != null)
+				{
+					String node = ((DataProviderNodeWrapper)element).node;
+					if (node == CALCULATIONS || node == AGGREGATES)
+					{
+						return rl.getRelation().getName() + '.' + node;
+					}
+					return rl.getRelation();
+				}
+			}
+			return null;
 		}
 
 		@Override
@@ -670,7 +693,6 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				this.relations = null;
 			}
 		}
-
 
 		@Override
 		public int hashCode()
