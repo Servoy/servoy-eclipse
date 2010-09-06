@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 import org.eclipse.gef.EditPart;
@@ -106,14 +106,14 @@ class PersistEditPolicy extends ComponentEditPolicy
 			if (VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()))
 			{
 				DataFieldRequest dataFieldRequest = ((DataFieldRequest)request);
-				command = new FormPlaceFieldCommand(request, portal, dataFieldRequest.getData(), fieldPositioner, fieldsLocation,
-					dataFieldRequest.placeAsLabels, dataFieldRequest.placeWithLabels, dataFieldRequest.placeHorizontal, dataFieldRequest.fillText,
-					dataFieldRequest.fillName);
+				command = new FormPlaceFieldCommand(portal, dataFieldRequest.getData(), dataFieldRequest.getType(), dataFieldRequest.getExtendedData(),
+					fieldPositioner, fieldsLocation, dataFieldRequest.placeAsLabels, dataFieldRequest.placeWithLabels, dataFieldRequest.placeHorizontal,
+					dataFieldRequest.fillText, dataFieldRequest.fillName);
 			}
 			else
 			{
 				// other element
-				command = new FormPlaceElementCommand(request, portal, data, fieldPositioner, fieldsLocation);
+				command = new FormPlaceElementCommand(portal, data, request.getType(), request.getExtendedData(), fieldPositioner, fieldsLocation);
 			}
 		}
 
@@ -122,7 +122,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 			request instanceof DataRequest)
 		{
 			// add tab to existing tab panel
-			command = new FormPlaceElementCommand(request, (TabPanel)persist, ((DataRequest)request).getData(), null, null);
+			command = new FormPlaceElementCommand((TabPanel)persist, ((DataRequest)request).getData(), request.getType(), request.getExtendedData(), null, null);
 		}
 
 		else if ((VisualFormEditor.REQ_BRING_TO_FRONT.equals(request.getType()) || VisualFormEditor.REQ_SEND_TO_BACK.equals(request.getType()) &&

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Dimension;
@@ -42,7 +43,9 @@ import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.gef.tools.ResizeTracker;
 
 import com.servoy.eclipse.designer.actions.DistributeRequest;
+import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.commands.ChangeBoundsCommand;
+import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.ISupportBounds;
@@ -89,6 +92,23 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 	@Override
 	protected Command getCreateCommand(CreateRequest request)
 	{
+		if (request.getNewObjectType() instanceof RequestType)
+		{
+			RequestType requestType = (RequestType)request.getNewObjectType();
+
+			Map<Object, Object> extendedData = request.getExtendedData();
+			if (request.getSize() != null)
+			{
+				extendedData.put("size", new java.awt.Dimension(request.getSize().width, request.getSize().height));
+			}
+
+			if (requestType.type == RequestType.TYPE_BUTTON)
+			{
+				return new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), "button", requestType, extendedData, null,
+					request.getLocation().getSWTPoint());
+			}
+			// TODO: add more
+		}
 		return null;
 	}
 

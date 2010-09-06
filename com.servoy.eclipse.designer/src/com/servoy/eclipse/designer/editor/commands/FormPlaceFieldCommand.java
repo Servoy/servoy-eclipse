@@ -16,7 +16,8 @@
  */
 package com.servoy.eclipse.designer.editor.commands;
 
-import org.eclipse.gef.Request;
+import java.util.Map;
+
 import org.eclipse.swt.graphics.Point;
 
 import com.servoy.eclipse.core.elements.ElementFactory;
@@ -48,10 +49,11 @@ public class FormPlaceFieldCommand extends FormPlaceElementCommand
 	 * @param location
 	 * @param object
 	 */
-	public FormPlaceFieldCommand(Request request, ISupportChilds parent, Object object, IFieldPositioner fieldPositioner, Point defaultLocation,
-		boolean placeAsLabels, boolean placeWithLabels, boolean placeHorizontal, boolean fillText, boolean fillName)
+	public FormPlaceFieldCommand(ISupportChilds parent, Object object, Object requestType, Map<Object, Object> objectProperties,
+		IFieldPositioner fieldPositioner, Point defaultLocation, boolean placeAsLabels, boolean placeWithLabels, boolean placeHorizontal, boolean fillText,
+		boolean fillName)
 	{
-		super(request, parent, object, fieldPositioner, defaultLocation);
+		super(parent, object, requestType, objectProperties, fieldPositioner, defaultLocation);
 		this.fieldPositioner = fieldPositioner;
 		this.placeAsLabels = placeAsLabels;
 		this.placeWithLabels = placeWithLabels;

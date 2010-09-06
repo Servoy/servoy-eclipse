@@ -121,7 +121,8 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 				}
 			}
 
-			Command command = new FormPlaceElementCommand(request, (ISupportChilds)pasteParent, clipboardContents, fieldPositioner, null);
+			Command command = new FormPlaceElementCommand((ISupportChilds)pasteParent, clipboardContents, request.getType(), request.getExtendedData(),
+				fieldPositioner, null);
 			// Refresh the form
 			return new PersistPlaceCommandWrapper((EditPart)getHost().getViewer().getEditPartRegistry().get(pasteParent.getAncestor(IRepository.FORMS)),
 				command, true);

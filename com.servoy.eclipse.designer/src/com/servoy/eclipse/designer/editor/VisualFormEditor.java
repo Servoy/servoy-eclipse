@@ -84,16 +84,16 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	public static final String REQ_PASTE = "VFE_PASTE"; //$NON-NLS-1$
 	public static final String REQ_DROP_COPY = "VFE_DROP_COPY"; //$NON-NLS-1$
 	public static final String REQ_DROP_LINK = "VFE_DROP_LINK"; //$NON-NLS-1$
-	public static final String REQ_PLACE_TAB = "VFE_PLACE_TAB"; //$NON-NLS-1$
-	public static final String REQ_PLACE_SPLIT_PANE = "VFE_PLACE_SPLIT_PANE"; //$NON-NLS-1$
-	public static final String REQ_PLACE_PORTAL = "VFE_PLACE_PORTAL"; //$NON-NLS-1$
-	public static final String REQ_PLACE_MEDIA = "VFE_PLACE_MEDIA"; //$NON-NLS-1$
-	public static final String REQ_PLACE_BEAN = "VFE_PLACE_BEAN"; //$NON-NLS-1$
-	public static final String REQ_PLACE_BUTTON = "VFE_PLACE_BUTTON"; //$NON-NLS-1$
-	public static final String REQ_PLACE_FIELD = "VFE_PLACE_FIELD"; //$NON-NLS-1$
-	public static final String REQ_PLACE_LABEL = "VFE_PLACE_LABEL"; //$NON-NLS-1$
-	public static final String REQ_PLACE_RECT_SHAPE = "VFE_PLACE_RECT_SHAPE"; //$NON-NLS-1$
-	public static final String REQ_PLACE_TEMPLATE = "VFE_PLACE_TEMPLATE"; //$NON-NLS-1$
+	public static final RequestType REQ_PLACE_TAB = new RequestType(RequestType.TYPE_TAB);
+	public static final RequestType REQ_PLACE_SPLIT_PANE = new RequestType(RequestType.TYPE_SPLIT_PANE);
+	public static final RequestType REQ_PLACE_PORTAL = new RequestType(RequestType.TYPE_PORTAL);
+	public static final RequestType REQ_PLACE_MEDIA = new RequestType(RequestType.TYPE_MEDIA);
+	public static final RequestType REQ_PLACE_BEAN = new RequestType(RequestType.TYPE_BEAN);
+	public static final RequestType REQ_PLACE_BUTTON = new RequestType(RequestType.TYPE_BUTTON);
+	public static final RequestType REQ_PLACE_FIELD = new RequestType(RequestType.TYPE_FIELD);
+	public static final RequestType REQ_PLACE_LABEL = new RequestType(RequestType.TYPE_LABEL);
+	public static final RequestType REQ_PLACE_RECT_SHAPE = new RequestType(RequestType.TYPE_SHAPE);
+	public static final RequestType REQ_PLACE_TEMPLATE = new RequestType(RequestType.TYPE_TEMPLATE);
 	public static final String REQ_DISTRIBUTE = "VFE_DISTRIBUTE"; //$NON-NLS-1$
 	public static final String REQ_SET_PROPERTY = "VFE_SET_PROPERTY"; //$NON-NLS-1$
 
@@ -767,5 +767,31 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		{
 			showPersist(SolutionDeserializer.findPersistFromFile((FileEditorInput)editorInput));
 		}
+	}
+
+	/** Request type for actions in Visual Form Editor.
+	 * @author rgansevles
+	 *
+	 */
+	public static class RequestType
+	{
+		public static final int TYPE_TEMPLATE = 1;
+		public static final int TYPE_SHAPE = 2;
+		public static final int TYPE_LABEL = 3;
+		public static final int TYPE_FIELD = 4;
+		public static final int TYPE_BEAN = 5;
+		public static final int TYPE_MEDIA = 6;
+		public static final int TYPE_PORTAL = 7;
+		public static final int TYPE_SPLIT_PANE = 8;
+		public static final int TYPE_BUTTON = 9;
+		public static final int TYPE_TAB = 10;
+
+		public final int type;
+
+		public RequestType(int type)
+		{
+			this.type = type;
+		}
+
 	}
 }

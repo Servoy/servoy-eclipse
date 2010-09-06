@@ -19,13 +19,11 @@ package com.servoy.eclipse.designer.editor.commands;
 import java.beans.BeanInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.eclipse.gef.Request;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.commands.CompoundCommand;
@@ -42,6 +40,7 @@ import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -91,7 +90,8 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 	private final IFieldPositioner fieldPositioner;
 
 	protected Object[] models;
-	protected final Request request;
+	private final Map<Object, Object> objectProperties;
+	private final Object requestType;
 
 	/**
 	 * Command to add a field.
@@ -101,11 +101,13 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 	 * @param object
 	 * @param
 	 */
-	public FormPlaceElementCommand(Request request, ISupportChilds parent, Object object, IFieldPositioner fieldPositioner, Point defaultLocation)
+	public FormPlaceElementCommand(ISupportChilds parent, Object object, Object requestType, Map<Object, Object> objectProperties,
+		IFieldPositioner fieldPositioner, Point defaultLocation)
 	{
-		this.request = request;
 		this.parent = parent;
 		this.object = object;
+		this.requestType = requestType;
+		this.objectProperties = objectProperties;
 		this.fieldPositioner = fieldPositioner;
 		this.defaultLocation = defaultLocation;
 	}
@@ -132,14 +134,12 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 			{
 				for (Object model : models)
 				{
-					if (model instanceof IPersist && request.getExtendedData() != null && request.getExtendedData().size() > 0)
+					if (model instanceof IPersist && objectProperties != null && objectProperties.size() > 0)
 					{
 						IPersist persist = (IPersist)model;
 						PersistPropertySource persistProperties = new PersistPropertySource(persist, persist, false);
-						Iterator<Map.Entry<Object, Object>> iterator = request.getExtendedData().entrySet().iterator();
-						while (iterator.hasNext())
+						for (Map.Entry<Object, Object> entry : objectProperties.entrySet())
 						{
-							Map.Entry<Object, Object> entry = iterator.next();
 							persistProperties.setPersistPropertyValue(entry.getKey(), entry.getValue());
 						}
 					}
@@ -164,12 +164,23 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 
 	protected IPersist[] placeElements(Point location) throws RepositoryException
 	{
-		Object requestType = request.getType();
-
-		if (VisualFormEditor.REQ_PLACE_TAB.equals(requestType))
+		if (requestType instanceof RequestType)
 		{
-			setLabel("place tabpanel");
-			return ElementFactory.createTabs(parent, (Object[])object, location, TabPanel.DEFAULT);
+			if (((RequestType)requestType).type == RequestType.TYPE_TAB)
+			{
+				setLabel("place tabpanel");
+				return ElementFactory.createTabs(parent, (Object[])object, location, TabPanel.DEFAULT);
+			}
+
+			if (parent instanceof ISupportFormElements)
+			{
+				if (((RequestType)requestType).type == RequestType.TYPE_BUTTON)
+				{
+					setLabel("place button");
+					return new IPersist[] { ElementFactory.createButton((ISupportFormElements)parent, null, (object instanceof String) ? (String)object
+						: "button", location) };
+				}
+			}
 		}
 
 		if (VisualFormEditor.REQ_PLACE_SPLIT_PANE.equals(requestType))
@@ -184,13 +195,6 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 			{
 				setLabel("place image");
 				return new IPersist[] { ElementFactory.createImage((ISupportFormElements)parent, (Media)object, location) };
-			}
-
-			if (VisualFormEditor.REQ_PLACE_BUTTON.equals(requestType))
-			{
-				setLabel("place button");
-				return new IPersist[] { ElementFactory.createButton((ISupportFormElements)parent, null, (object instanceof String) ? (String)object : "button",
-					location) };
 			}
 
 			if (VisualFormEditor.REQ_PLACE_LABEL.equals(requestType) || object instanceof String)

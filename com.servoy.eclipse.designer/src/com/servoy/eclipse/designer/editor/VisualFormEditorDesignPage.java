@@ -33,6 +33,7 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.SnapToGrid;
+import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.gef.rulers.RulerProvider;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.actions.DeleteAction;
@@ -42,7 +43,7 @@ import org.eclipse.gef.ui.actions.RedoAction;
 import org.eclipse.gef.ui.actions.SaveAction;
 import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.gef.ui.actions.UndoAction;
-import org.eclipse.gef.ui.parts.GraphicalEditor;
+import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
 import org.eclipse.gef.ui.parts.GraphicalViewerKeyHandler;
 import org.eclipse.gef.ui.parts.ScrollingGraphicalViewer;
 import org.eclipse.gef.ui.rulers.RulerComposite;
@@ -55,6 +56,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -67,7 +69,6 @@ import org.eclipse.ui.views.properties.PropertySheetPage;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.actions.AlignmentSortPartsAction;
 import com.servoy.eclipse.designer.actions.DistributeAction;
 import com.servoy.eclipse.designer.actions.DistributeRequest;
@@ -103,10 +104,12 @@ import com.servoy.j2db.util.Settings;
  * @author rgansevles
  */
 
-public class VisualFormEditorDesignPage extends GraphicalEditor implements PropertyChangeListener
+public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette implements PropertyChangeListener
 {
 	protected GraphicalViewer graphicalViewer;
 	private final VisualFormEditor editorPart;
+	private PaletteRoot paletteModel;
+	private RulerComposite rulerComposite;
 
 	public VisualFormEditorDesignPage(VisualFormEditor editorPart)
 	{
@@ -117,7 +120,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditor implements Prope
 		editDomain.setActiveTool(selectionTool);
 		editDomain.getCommandStack().addCommandStackListener(editorPart);
 		setEditDomain(editDomain);
-		ServoyModelManager.getServoyModelManager().getServoyModel();
 		Settings settings = ServoyModel.getSettings();
 		settings.addPropertyChangeListener(this, DesignerPreferences.GUIDE_SIZE_SETTING);
 		settings.addPropertyChangeListener(this, DesignerPreferences.METRICS_SETTING);
@@ -360,6 +362,29 @@ public class VisualFormEditorDesignPage extends GraphicalEditor implements Prope
 	{
 		GraphicalViewer viewer = getGraphicalViewer();
 
+		if (editorPart.getFlattenedForm() != null)
+		{
+			viewer.addDropTargetListener(new FormElementTransferDropTarget(getGraphicalViewer()));
+
+			getEditorSite().getShell().getDisplay().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					try
+					{
+						// So that we can get the editor up and displaying as soon as possible we will
+						// push this off to
+						// the next async cycle.
+						openViewers(getEditorSite());
+					}
+					catch (PartInitException e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+			});
+		}
+
 		viewer.setRootEditPart(new FormGraphicalRootEditPart(editorPart));
 		viewer.setContents(createGraphicalViewerContents());
 		getEditDomain().addViewer(viewer);
@@ -371,7 +396,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditor implements Prope
 		viewer.setContextMenu(cmProvider);
 		getSite().registerContextMenu(cmProvider, viewer);
 
-		ServoyModelManager.getServoyModelManager().getServoyModel();
 		DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
 		viewer.setProperty(SnapToGrid.PROPERTY_GRID_VISIBLE, Boolean.valueOf(designerPreferences.getGridShow()));
 		viewer.setProperty(SnapToGrid.PROPERTY_GRID_ENABLED, Boolean.valueOf(designerPreferences.getGridSnapTo()));
@@ -400,6 +424,12 @@ public class VisualFormEditorDesignPage extends GraphicalEditor implements Prope
 		getGraphicalViewer().getControl().setBackground(ColorConstants.lightGray);
 	}
 
+	@Override
+	protected Control getGraphicalControl()
+	{
+		return rulerComposite;
+	}
+
 	/**
 	 * Creates the GraphicalViewer on the specified <code>Composite</code>.
 	 * 
@@ -408,7 +438,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditor implements Prope
 	@Override
 	protected void createGraphicalViewer(Composite parent)
 	{
-		RulerComposite rulerComposite = new RulerComposite(parent, SWT.NONE);
+		rulerComposite = new RulerComposite(parent, SWT.NONE);
 
 		GraphicalViewer viewer = new ModifiedScrollingGraphicalViewer();
 		viewer.createControl(rulerComposite);
@@ -417,30 +447,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditor implements Prope
 		hookGraphicalViewer();
 		initializeGraphicalViewer();
 
-		if (editorPart.getFlattenedForm() != null)
-		{
-			rulerComposite.setGraphicalViewer((ScrollingGraphicalViewer)getGraphicalViewer());
-			getGraphicalViewer().addDropTargetListener(new FormElementTransferDropTarget(getGraphicalViewer()));
-			applyGuidePreferences();
-
-			parent.getDisplay().asyncExec(new Runnable()
-			{
-				public void run()
-				{
-					try
-					{
-						// So that we can get the editor up and displaying as soon as possible we will
-						// push this off to
-						// the next async cycle.
-						openViewers(getEditorSite());
-					}
-					catch (PartInitException e)
-					{
-						ServoyLog.logError(e);
-					}
-				}
-			});
-		}
+		rulerComposite.setGraphicalViewer((ScrollingGraphicalViewer)getGraphicalViewer());
 	}
 
 	/*
@@ -475,7 +482,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditor implements Prope
 	public void dispose()
 	{
 		getEditDomain().getCommandStack().removeCommandStackListener(editorPart);
-		ServoyModelManager.getServoyModelManager().getServoyModel();
 		Settings settings = ServoyModel.getSettings();
 		settings.removePropertyChangeListener(this, DesignerPreferences.GUIDE_SIZE_SETTING);
 		settings.removePropertyChangeListener(this, DesignerPreferences.METRICS_SETTING);
@@ -586,7 +592,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditor implements Prope
 
 	protected void applyGuidePreferences()
 	{
-		ServoyModelManager.getServoyModelManager().getServoyModel();
 		DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
 		int guideSize = designerPreferences.getGuideSize();
 		getGraphicalViewer().setProperty(SnapToGrid.PROPERTY_GRID_SPACING, new Dimension(guideSize, guideSize));
@@ -603,5 +608,15 @@ public class VisualFormEditorDesignPage extends GraphicalEditor implements Prope
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	protected PaletteRoot getPaletteRoot()
+	{
+		if (paletteModel == null)
+		{
+			paletteModel = VisualFormEditorPaletteFactory.createPalette();
+		}
+		return paletteModel;
 	}
 }

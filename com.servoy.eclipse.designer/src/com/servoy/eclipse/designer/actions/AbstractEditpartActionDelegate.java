@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.actions;
 
 import java.util.HashMap;
@@ -30,6 +30,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.ide.ResourceUtil;
 
+import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.j2db.persistence.IPersist;
 
@@ -46,10 +47,10 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 {
 	private ISelection fSelection;
 	private Shell fCurrentShell;
-	protected final String requestType;
+	protected final RequestType requestType;
 	protected final Map<Object, Object> extendedData = new HashMap<Object, Object>();
 
-	public AbstractEditpartActionDelegate(String requestType)
+	public AbstractEditpartActionDelegate(RequestType requestType)
 	{
 		this.requestType = requestType;
 	}
@@ -63,7 +64,7 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 		fCurrentShell = window.getShell();
 	}
 
-	public String getRequestType()
+	public RequestType getRequestType()
 	{
 		return requestType;
 	}
