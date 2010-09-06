@@ -420,7 +420,7 @@ public abstract class TypeCreator
 							}
 							method.setAttribute(IMAGE_DESCRIPTOR, METHOD);
 
-							IParameter[] scriptParams = getParameters(name, scriptObjectClass, parameterTypes);
+							IParameter[] scriptParams = getParameters(name, scriptObjectClass, members[i]);
 							if (scriptParams != null && scriptParams.length > 0)
 							{
 								EList<Parameter> parameters = method.getParameters();
@@ -524,7 +524,7 @@ public abstract class TypeCreator
 		Type createType(ITypeInfoContext context, String fullTypeName);
 	}
 
-	public static IParameter[] getParameters(String key, Class< ? > scriptObjectClass, Class< ? >[] parameterTypes)
+	public static IParameter[] getParameters(String key, Class< ? > scriptObjectClass, MemberBox member)
 	{
 		if (scriptObjectClass == null) return null;
 		IScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectForClass(scriptObjectClass);
@@ -532,63 +532,71 @@ public abstract class TypeCreator
 		String[] parameterNames = null;
 		if (scriptObject instanceof ITypedScriptObject)
 		{
-			parameters = ((ITypedScriptObject)scriptObject).getParameters(key, parameterTypes);
+			parameters = ((ITypedScriptObject)scriptObject).getParameters(key, member.getParameterTypes());
 		}
 		else if (scriptObject != null)
 		{
 			parameterNames = scriptObject.getParameterNames(key);
 		}
 
-		if (parameters == null && scriptObjectClass != null)
+		if (parameterNames != null && parameters == null)
 		{
-			JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(scriptObjectClass, null);
-			NativeJavaMethod method = javaMembers.getMethod(key, false);
-			if (method != null)
+			int memberParamLength = member.getParameterTypes().length;
+			if (memberParamLength < parameterNames.length)
 			{
-				MemberBox[] methods = method.getMethods();
-
-				MemberBox selectedMethod = methods[0];
-				for (int i = 1; i < methods.length; i++)
-				{
-					if (methods[i].getParameterTypes().length > selectedMethod.getParameterTypes().length)
-					{
-						selectedMethod = methods[i];
-					}
-				}
-				if (parameterNames != null && selectedMethod.getParameterTypes().length != parameterNames.length)
+				boolean removeOptional = false;
+				// if parameterNames bigger then the members parameter types and it is not a vararg, just get the first names.
+				if (memberParamLength == 1 && member.getParameterTypes()[0].isArray())
 				{
 					parameters = new IParameter[parameterNames.length];
-					for (int i = 0; i < parameterNames.length; i++)
-					{
-						parameters[i] = new ScriptParameter(parameterNames[i], null, false);
-					}
 				}
 				else
 				{
-					parameters = new IParameter[selectedMethod.getParameterTypes().length];
-					for (int i = 0; i < selectedMethod.getParameterTypes().length; i++)
+					parameters = new IParameter[memberParamLength];
+					removeOptional = true;
+				}
+				for (int i = 0; i < parameters.length; i++)
+				{
+					String name = parameterNames[i];
+					boolean optional = name.startsWith("[") && name.endsWith("]");
+					if (optional && removeOptional)
 					{
-						Class< ? > paramClass = selectedMethod.getParameterTypes()[i];
-						String name = null;
-						String type = null;
-						if (parameterNames != null)
-						{
-							type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getName());
-							name = parameterNames[i];
-						}
-						else if (paramClass.isArray())
-						{
-							type = "Array<" + SolutionExplorerListContentProvider.TYPES.get(paramClass.getComponentType().getName()) + '>';
-							name = SolutionExplorerListContentProvider.TYPES.get(paramClass.getComponentType().getName()) + "[]";
-
-						}
-						else
-						{
-							type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getName());
-							name = SolutionExplorerListContentProvider.TYPES.get(paramClass.getName());
-						}
-						parameters[i] = new ScriptParameter(name, type, false);
+						optional = false;
+						name = name.substring(1, name.length() - 1);
 					}
+					parameters[i] = new ScriptParameter(name, null, optional);
+				}
+			}
+			else if (memberParamLength == parameterNames.length)
+			{
+				parameters = new IParameter[memberParamLength];
+				for (int i = 0; i < memberParamLength; i++)
+				{
+					Class< ? > paramClass = member.getParameterTypes()[i];
+					String name = null;
+					String type = null;
+					if (parameterNames != null)
+					{
+						type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getName());
+						name = parameterNames[i];
+
+						if (name.startsWith("[") && name.endsWith("]"))
+						{
+							name = name.substring(1, name.length() - 1);
+						}
+					}
+					else if (paramClass.isArray())
+					{
+						type = "Array<" + SolutionExplorerListContentProvider.TYPES.get(paramClass.getComponentType().getName()) + '>';
+						name = SolutionExplorerListContentProvider.TYPES.get(paramClass.getComponentType().getName()) + "[]";
+
+					}
+					else
+					{
+						type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getName());
+						name = SolutionExplorerListContentProvider.TYPES.get(paramClass.getName());
+					}
+					parameters[i] = new ScriptParameter(name, type, false);
 				}
 			}
 		}
