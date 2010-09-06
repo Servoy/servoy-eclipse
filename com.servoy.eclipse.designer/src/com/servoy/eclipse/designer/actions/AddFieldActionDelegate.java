@@ -95,8 +95,8 @@ public class AddFieldActionDelegate extends AbstractEditpartActionDelegate
 			{
 				ServoyLog.logError("Could not get table for form " + form, e);
 			}
-			input = new DataProviderTreeViewer.DataProviderOptions(false, table != null, table != null, table != null, true, true, table != null,
-				table != null, INCLUDE_RELATIONS.NESTED, true, true, null);
+			input = new DataProviderTreeViewer.DataProviderOptions(false, table != null, table != null, true, true, true, table != null, true,
+				INCLUDE_RELATIONS.NESTED, true, true, null);
 		}
 
 		DataProviderDialog dialog = new DataProviderDialog(getShell(), new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(
