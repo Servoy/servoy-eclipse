@@ -13,12 +13,15 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.util;
 
 import java.util.Properties;
 
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IViewReference;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.cheatsheets.OpenCheatSheetAction;
 import org.eclipse.ui.intro.IIntroSite;
@@ -28,11 +31,21 @@ public class IntroCheatSheetBridge implements IIntroAction
 {
 	public void run(IIntroSite site, Properties params)
 	{
-		final String cheatSheetId = params.getProperty("cheatSheetId", "com.servoy.eclipse.team.cheatsheet.checkout");
+//		final String cheatSheetId = params.getProperty("cheatSheetId", "com.servoy.eclipse.ui.cheatsheet.firstcontact");
+		final String cheatSheetId = "com.servoy.eclipse.ui.cheatsheet.firstcontact";
 		Display.getDefault().syncExec(new Runnable()
 		{
 			public void run()
 			{
+				IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+				if (page != null)
+				{
+					for (IViewReference vw : page.getViewReferences())
+						page.setPartState(vw, IWorkbenchPage.STATE_MINIMIZED);
+					for (IEditorReference ed : page.getEditorReferences())
+						page.setPartState(ed, IWorkbenchPage.STATE_MINIMIZED);
+				}
+
 				new OpenCheatSheetAction(cheatSheetId).run();
 				Display.getDefault().asyncExec(new Runnable()
 				{

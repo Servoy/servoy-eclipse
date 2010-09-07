@@ -643,5 +643,60 @@
             name="Import Solution">
       </wizard>
    </extension>
+   <extension
+         point="org.eclipse.ui.cheatsheets.cheatSheetContent">
+      <category
+            id="com.servoy.eclipse.ui.CheatSheetCategory"
+            name="Servoy">
+      </category>
+      <cheatsheet
+            category="com.servoy.eclipse.ui.CheatSheetCategory"
+            composite="false"
+            contentFile="cheatsheets/CreateSolution.xml"
+            id="com.servoy.eclipse.ui.cheatsheet.createsolution"
+            name="Create a Servoy Solution">
+         <description>
+			Shows you how to create a Servoy solution and how to run it with the Smart Client and the Web Client.
+         </description>
+      </cheatsheet>
+      <cheatsheet
+            category="com.servoy.eclipse.ui.CheatSheetCategory"
+            composite="false"
+            contentFile="cheatsheets/CreateDataModel.xml"
+            id="com.servoy.eclipse.ui.cheatsheet.createdatamodel"
+            name="Create Data Model">
+         <description>
+			Shows you how to create tables for your data model.
+         </description>
+      </cheatsheet>
+      <cheatsheet
+            category="com.servoy.eclipse.ui.CheatSheetCategory"
+            composite="false"
+            contentFile="cheatsheets/CreateForms.xml"
+            id="com.servoy.eclipse.ui.cheatsheet.createui"
+            name="Create Graphical User Interface">
+         <description>
+			Shows you how to create forms for your graphical user interface.
+         </description>
+      </cheatsheet>
+      <cheatsheet
+            category="com.servoy.eclipse.ui.CheatSheetCategory"
+            composite="false"
+            contentFile="cheatsheets/WriteUnitTests.xml"
+            id="com.servoy.eclipse.ui.cheatsheet.unittests"
+            name="Write Unit Tests">
+         <description>
+            Shows you how to write unit tests for your code.
+         </description>
+      </cheatsheet>
+      <cheatsheet
+            category="com.servoy.eclipse.ui.CheatSheetCategory"
+            composite="true"
+            contentFile="cheatsheets/FirstContact.xml"
+            id="com.servoy.eclipse.ui.cheatsheet.firstcontact"
+            name="Getting Started with Servoy"
+     		listener="com.servoy.eclipse.cheatsheets.FirstContactCheatSheetListener">
+      </cheatsheet>
+   </extension>
    
 </plugin>

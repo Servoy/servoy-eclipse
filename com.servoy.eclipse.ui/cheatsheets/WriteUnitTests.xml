@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet
+      title="Write Unit Tests">
+   <intro>
+      <description>
+         This cheat sheet shows you how to write unit tests for your code. Unit tests are an essential part of the development process if you want to make sure that you deliver quality code.
+      </description>
+   </intro>
+   <item
+         title="Item">
+      <description>
+         <b>Body</b>
+      </description>
+   </item>
+   <item
+         title="Item (1)">
+      <description>
+         <b>Body</b>
+      </description>
+   </item>
+</cheatsheet>

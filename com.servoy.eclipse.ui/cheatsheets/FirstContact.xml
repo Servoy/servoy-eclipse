@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<compositeCheatsheet name="Getting Started with Servoy">
+   <taskGroup kind="sequence" name="Getting Started with Servoy" skip="false">
+      <intro>
+         If you are a newcomer to Servoy, this cheat sheet will guide you through the main steps for creating, running and testing a Servoy solution.
+      </intro>
+      <onCompletion>
+         Congratulations! Now you should be able to find your way around Servoy Developer in order to perform the most common development and testing tasks.
+      </onCompletion>
+      <task kind="cheatsheet" name="Create a Servoy Solution" skip="false">
+         <intro>
+            <b>Introduction</b>
+         </intro>
+         <onCompletion>
+            <b>Conclusion</b>
+         </onCompletion>
+         <param name="path" value="CreateSolution.xml">
+         </param>
+      </task>
+      <task kind="cheatsheet" name="Define the Data Model" skip="false">
+         <intro>
+            <b>Introduction</b>
+         </intro>
+         <onCompletion>
+            <b>Conclusion</b>
+         </onCompletion>
+         <param name="path" value="CreateDataModel.xml">
+         </param>
+      </task>
+      <task kind="cheatsheet" name="Create the Forms" skip="false">
+         <intro>
+            <b>Introduction</b>
+         </intro>
+         <onCompletion>
+            <b>Conclusion</b>
+         </onCompletion>
+         <param name="path" value="CreateForms.xml">
+         </param>
+      </task>
+      <task kind="cheatsheet" name="Write Unit Tests" skip="false">
+         <intro>
+            <b>Introduction</b>
+         </intro>
+         <onCompletion>
+            <b>Conclusion</b>
+         </onCompletion>
+         <param name="path" value="WriteUnitTests.xml">
+         </param>
+      </task>
+   </taskGroup>
+</compositeCheatsheet>

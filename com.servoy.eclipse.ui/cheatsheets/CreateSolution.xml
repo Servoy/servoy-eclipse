@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet
+      title="Create a Servoy Solution">
+   <intro>
+      <description>
+         This cheat sheet shows you how to create a new Servoy Solution with some very basic functionality. You will learn how to run the solution with the Smart Client and the Web Client.
+      </description>
+   </intro>
+   <item
+         title="Item">
+      <description>
+         <b>Body</b>
+      </description>
+   </item>
+   <item
+         title="Item (1)">
+      <description>
+         <b>Body</b>
+      </description>
+   </item>
+</cheatsheet>
