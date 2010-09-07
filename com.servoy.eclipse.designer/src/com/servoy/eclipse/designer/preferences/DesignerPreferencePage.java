@@ -178,7 +178,8 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 						groupLayout.createParallelGroup(GroupLayout.LEADING).add(copypasteOffsetLabel, GroupLayout.PREFERRED_SIZE, 171,
 							GroupLayout.PREFERRED_SIZE).add(stepsizeLabel, GroupLayout.PREFERRED_SIZE, 171, GroupLayout.PREFERRED_SIZE)).add(25, 25, 25).add(
 						groupLayout.createParallelGroup(GroupLayout.LEADING).add(copyPasetOffsetText, GroupLayout.DEFAULT_SIZE, 259, Short.MAX_VALUE).add(
-							stepSizeSpinner, GroupLayout.DEFAULT_SIZE, 259, Short.MAX_VALUE)).addContainerGap()).add(
+							groupLayout.createSequentialGroup().add(stepSizeSpinner, GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE).add(19, 19, 19).add(
+								largeStepSizeSpinner, GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE))).addContainerGap()).add(
 					groupLayout.createSequentialGroup().add(
 						groupLayout.createParallelGroup(GroupLayout.LEADING).add(metricsLabel, GroupLayout.PREFERRED_SIZE, 171, GroupLayout.PREFERRED_SIZE).add(
 							editorsLabel, GroupLayout.PREFERRED_SIZE, 139, GroupLayout.PREFERRED_SIZE)).add(25, 25, 25).add(
@@ -202,8 +203,9 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 					groupLayout.createSequentialGroup().add(18, 18, 18).add(copypasteOffsetLabel, GroupLayout.PREFERRED_SIZE, 20, GroupLayout.PREFERRED_SIZE)).add(
 					groupLayout.createSequentialGroup().add(13, 13, 13).add(copyPasetOffsetText, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 						GroupLayout.PREFERRED_SIZE))).add(10, 10, 10).add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(stepSizeSpinner, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE).add(
-					stepsizeLabel, GroupLayout.PREFERRED_SIZE, 20, GroupLayout.PREFERRED_SIZE)).add(
+				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(largeStepSizeSpinner, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE).add(
+					stepSizeSpinner, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE).add(stepsizeLabel, GroupLayout.PREFERRED_SIZE, 20,
+					GroupLayout.PREFERRED_SIZE)).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 					groupLayout.createSequentialGroup().add(19, 19, 19).add(metricsLabel, GroupLayout.PREFERRED_SIZE, 20, GroupLayout.PREFERRED_SIZE)).add(
 					groupLayout.createSequentialGroup().add(18, 18, 18).add(metricsControl, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
