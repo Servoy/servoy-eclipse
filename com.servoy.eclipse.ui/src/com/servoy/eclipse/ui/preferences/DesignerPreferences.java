@@ -49,7 +49,7 @@ public class DesignerPreferences
 
 	public static final int COPY_PASTE_OFFSET_DEFAULT = 10;
 	public static final int STEP_SIZE_DEFAULT = 10;
-	public static final int LARGE_STEP_SIZE_DEFAULT = 10;
+	public static final int LARGE_STEP_SIZE_DEFAULT = 20;
 	public static final int GUIDE_SIZE_DEFAULT = 10;
 	public static final int GRID_SIZE_DEFAULT = 10;
 	public static final String GRID_COLOR_DEFAULT = "#b4b4b4";
@@ -78,12 +78,12 @@ public class DesignerPreferences
 
 	public int getStepSize()
 	{
-		return PersistHelper.createDimension(settings.getProperty(STEP_SIZE_SETTING, "0," + LARGE_STEP_SIZE_DEFAULT)).height;
+		return PersistHelper.createDimension(settings.getProperty(STEP_SIZE_SETTING, STEP_SIZE_DEFAULT + ",0")).width;
 	}
 
 	public int getLargeStepSize()
 	{
-		int largeStepSize = PersistHelper.createDimension(settings.getProperty(STEP_SIZE_SETTING, STEP_SIZE_DEFAULT + ",0")).width;
+		int largeStepSize = PersistHelper.createDimension(settings.getProperty(STEP_SIZE_SETTING, "0," + LARGE_STEP_SIZE_DEFAULT)).height;
 		if (largeStepSize == getStepSize())
 		{
 			// old prefs stored 2 same numbers
