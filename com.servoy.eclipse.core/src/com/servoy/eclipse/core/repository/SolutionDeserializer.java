@@ -28,16 +28,18 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.ast.parser.ISourceParser;
 import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.internal.javascript.parser.JavaScriptSourceParser;
 import org.eclipse.dltk.internal.javascript.ti.IValueReference;
@@ -68,6 +70,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.builder.ErrorKeeper;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -439,8 +443,8 @@ public class SolutionDeserializer
 					else
 					{
 						// tablenode
-						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0, jsFileName.length() -
-							SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length()) +
+						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0,
+							jsFileName.length() - SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length()) +
 							SolutionSerializer.TABLENODE_FILE_EXTENSION);
 					}
 
@@ -1050,6 +1054,9 @@ public class SolutionDeserializer
 							{
 								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
 								TypeInferencer2 inferencer = new TypeInferencer2();
+								ServoyModelManager.getServoyModelManager().getServoyModel();
+								inferencer.setModelElement(DLTKCore.createSourceModuleFrom(ServoyModel.getWorkspace().getRoot().getFileForLocation(
+									Path.fromOSString(file.getAbsolutePath()))));
 								inferencer.doInferencing(script);
 								IValueReference child = inferencer.getCollection().getChild(objectclass);
 								if (child != null)
