@@ -20,6 +20,7 @@ package com.servoy.eclipse.designer.editor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.draw2d.ColorConstants;
@@ -30,6 +31,8 @@ import org.eclipse.gef.DragTracker;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.Request;
+import org.eclipse.gef.commands.Command;
+import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.tools.DragEditPartsTracker;
@@ -206,6 +209,39 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 				return;
 				// Disabled direct edit via drag tracker, it activates direct edit on single click on selected	  element;
 				// direct edit is handled in FormSelectionTool on double-click 
+			}
+
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see org.eclipse.gef.tools.DragEditPartsTracker#getCommand()
+			 */
+			@Override
+			protected Command getCommand()
+			{
+				// handle move parts with control key
+				if (isMove() && isCloneActive())
+				{
+
+					CompoundCommand command = new CompoundCommand();
+					command.setDebugLabel("Drag Object Tracker");//$NON-NLS-1$
+
+					Request request = getTargetRequest();
+
+					request.setType(REQ_CLONE);
+
+					Iterator<EditPart> iter = getOperationSet().iterator();
+					while (iter.hasNext())
+					{
+						command.add(iter.next().getCommand(request));
+					}
+					if (command.canExecute())
+					{
+						return command;
+					}
+				}
+
+				return super.getCommand();
 			}
 		};
 	}

@@ -13,12 +13,11 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor.commands;
 
 import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.commands.Command;
-import org.eclipse.gef.requests.ChangeBoundsRequest;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.j2db.persistence.Part;
@@ -37,7 +36,7 @@ public class MovePartCommand extends Command
 	/** Stores the old size and location. */
 	private int oldHeight;
 	/** A request to move/resize an edit part. */
-	private final ChangeBoundsRequest request;
+	private final Object requestType;
 
 	/** Object to manipulate. */
 	private final Part part;
@@ -50,14 +49,14 @@ public class MovePartCommand extends Command
 	 * @param newBounds the new size and location
 	 * @throws IllegalArgumentException if any of the parameters is null
 	 */
-	public MovePartCommand(Part part, ChangeBoundsRequest req, int newHeight)
+	public MovePartCommand(Part part, Object requestType, int newHeight)
 	{
-		if (part == null || req == null)
+		if (part == null || requestType == null)
 		{
 			throw new IllegalArgumentException();
 		}
 		this.part = part;
-		this.request = req;
+		this.requestType = requestType;
 		this.newHeight = newHeight;
 		setLabel("move part");
 	}
@@ -70,9 +69,8 @@ public class MovePartCommand extends Command
 	@Override
 	public boolean canExecute()
 	{
-		Object type = request.getType();
 		// make sure the Request is of a type we support:
-		return (RequestConstants.REQ_MOVE.equals(type) || RequestConstants.REQ_MOVE_CHILDREN.equals(type));
+		return (RequestConstants.REQ_MOVE.equals(requestType) || RequestConstants.REQ_MOVE_CHILDREN.equals(requestType) || RequestConstants.REQ_CLONE.equals(requestType));
 	}
 
 	/*

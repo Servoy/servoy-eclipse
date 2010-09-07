@@ -24,7 +24,6 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.commands.Command;
-import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.rulers.RulerProvider;
 
 import com.servoy.eclipse.core.ServoyLog;
@@ -111,8 +110,7 @@ public class FormRulerProvider extends RulerProvider
 
 			delta = editPart.limitPartMove(new Point(0, positionDelta)).y;
 
-			return new MovePartCommand((Part)editPart.getModel(), new ChangeBoundsRequest(RequestConstants.REQ_MOVE), ((Part)editPart.getModel()).getHeight() +
-				delta);
+			return new MovePartCommand((Part)editPart.getModel(), RequestConstants.REQ_MOVE, ((Part)editPart.getModel()).getHeight() + delta);
 		}
 
 		if (guide == formEditPart) // horizontal
