@@ -172,7 +172,7 @@ public class PatternFilter extends ViewerFilter
 	 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public final boolean select(Viewer viewer, Object parentElement, Object element)
+	public boolean select(Viewer viewer, Object parentElement, Object element)
 	{
 		return isElementVisible(viewer, element);
 	}
@@ -278,7 +278,7 @@ public class PatternFilter extends ViewerFilter
 	 */
 	public boolean isElementVisible(Viewer viewer, Object element)
 	{
-		return isParentMatch(viewer, element) || isLeafMatch(viewer, element);
+		return isLeafMatch(viewer, element) || isParentMatch(viewer, element);
 	}
 
 	/**

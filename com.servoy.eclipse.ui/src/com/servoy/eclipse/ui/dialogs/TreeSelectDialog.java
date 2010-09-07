@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -224,8 +224,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	protected FilteredTreeViewer createFilteredTreeViewer(Composite parent)
 	{
 		FilteredTreeViewer ftv = new FilteredTreeViewer(parent, showFilter, showFilterMenu, contentProvider, labelProvider, comparator, treeStyle,
-			new TreePatternFilter(TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), defaultFilterMode),
-				TreePatternFilter.getSavedFilterSearchDepth(getDialogBoundsSettings(), defaultFilterSearchDepth)), selectionFilter);
+			new TreePatternFilter(TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), defaultFilterMode)), selectionFilter);
 		ftv.setInput(input);
 		return ftv;
 	}

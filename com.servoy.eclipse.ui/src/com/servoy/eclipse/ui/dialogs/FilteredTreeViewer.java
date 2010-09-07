@@ -24,9 +24,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
@@ -78,7 +76,6 @@ import org.eclipse.ui.internal.WorkbenchImages;
 import org.eclipse.ui.progress.WorkbenchJob;
 
 import com.servoy.eclipse.ui.labelproviders.DelegateLabelProvider;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 
 /**
  * JFace-like viewer for selecting a value from a tree. A filter is built-in.
@@ -366,11 +363,29 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 			 */
 			private boolean recursiveExpand(TreePath path, Object[] items, IProgressMonitor monitor, List<TreePath> lst)
 			{
+				if (path != null && path.getSegmentCount() > 5) return false;
 				boolean expanded = false;
+				ISearchKeyAdapter searchKeyAdapter = null;
+				if (getContentProvider() instanceof ISearchKeyAdapter)
+				{
+					searchKeyAdapter = (ISearchKeyAdapter)getContentProvider();
+				}
 				TreePatternFilter treePatternFilter = (TreePatternFilter)getPatternFilter();
-				for (Object item : items)
+				outer : for (Object item : items)
 				{
 					if (!treePatternFilter.isElementVisible(treeViewer, item)) continue;
+					if (path != null && searchKeyAdapter != null)
+					{
+						Object currentSearchKey = searchKeyAdapter.getSearchKey(item);
+						if (currentSearchKey != null)
+						{
+							for (int i = 0; i < path.getSegmentCount(); i++)
+							{
+								Object pathSearchKey = searchKeyAdapter.getSearchKey(path.getSegment(i));
+								if (currentSearchKey.equals(pathSearchKey)) continue outer;
+							}
+						}
+					}
 					TreePath itemPath = null;
 					if (path == null)
 					{
@@ -481,10 +496,6 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 	protected void fillViewMenu()
 	{
 		menuManager.add(new ToggleFiltermodeAction());
-		if (contentProvider instanceof IMaxDepthTreeContentProvider)
-		{
-			menuManager.add(new SelectSearchdepthAction());
-		}
 	}
 
 	/**
@@ -740,87 +751,6 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 			textChanged();
 		}
 	}
-	/**
-	 * Submenu action for search depth
-	 * @author rgansevles
-	 *
-	 */
-	private class SelectSearchdepthAction extends Action implements IMenuCreator
-	{
-		private Menu menu;
-
-		private final IAction[] setSearchDepthActions = new IAction[] { //
-		new SetSearchDepthAction(1) //
-		, new SetSearchDepthAction(2)//
-		, new SetSearchDepthAction(3)//
-		, new SetSearchDepthAction(4)//
-		, new SetSearchDepthAction(5) //
-		//, new SetSearchDepthAction(IMaxDepthTreeContentProvider.DEPTH_INFINITE) //
-		};
-
-		public SelectSearchdepthAction()
-		{
-			super("Maximal filter search depth", IAction.AS_DROP_DOWN_MENU);
-			setToolTipText("Limit search depth when searching using the filter");
-		}
-
-		@Override
-		public IMenuCreator getMenuCreator()
-		{
-			return this;
-		}
-
-		public Menu getMenu(@SuppressWarnings("hiding") Control parent)
-		{
-			return menu;
-		}
-
-		public void dispose()
-		{
-			if (menu != null)
-			{
-				menu.dispose();
-				menu = null;
-			}
-		}
-
-		public Menu getMenu(Menu parentMenu)
-		{
-			dispose();
-			menu = new Menu(parentMenu);
-			for (IAction action : setSearchDepthActions)
-			{
-				new ActionContributionItem(action).fill(menu, -1);
-			}
-			return menu;
-		}
-	}
-
-	public class SetSearchDepthAction extends Action
-	{
-		private final int depth;
-
-		public SetSearchDepthAction(int depth)
-		{
-			super(depth == IMaxDepthTreeContentProvider.DEPTH_INFINITE ? "infinite" : String.valueOf(depth), IAction.AS_RADIO_BUTTON);
-			this.depth = depth;
-			setChecked(((TreePatternFilter)getPatternFilter()).getMaxSearchDepth() == depth);
-		}
-
-		/**
-		 * @see org.eclipse.jface.action.Action#run()
-		 */
-		@Override
-		public void run()
-		{
-			if (isChecked())
-			{
-				((TreePatternFilter)getPatternFilter()).setMaxSearchDepth(depth);
-				textChanged();
-			}
-		}
-	}
-
 
 	/**
 	 * Label provider to provide default folder images on expandable items

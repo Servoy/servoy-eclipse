@@ -16,7 +16,9 @@
  */
 package com.servoy.eclipse.ui.dialogs;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -27,7 +29,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.servoy.eclipse.ui.util.IKeywordChecker;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.util.IDelegate;
 
 
@@ -46,14 +47,15 @@ public class TreePatternFilter extends PatternFilter
 	public static final int FILTER_PARENTS = 2;
 
 	protected int filterMode = FILTER_LEAFS;
-	protected int maxSearchDepth = IMaxDepthTreeContentProvider.DEPTH_DEFAULT;
 
 	private final Map<Object, Boolean> searchKeyCache = new HashMap<Object, Boolean>();
+	private final Map<Object, Object[]> searchKeyRecursiveCache = new HashMap<Object, Object[]>();
 
-	public TreePatternFilter(int filterMode, int maxSearchDepth)
+	private final List<Object> recursiveKeyCache = new ArrayList<Object>();
+
+	public TreePatternFilter(int filterMode)
 	{
 		this.filterMode = filterMode;
-		this.maxSearchDepth = maxSearchDepth;
 	}
 
 	public void setFilterMode(int filterMode)
@@ -64,16 +66,6 @@ public class TreePatternFilter extends PatternFilter
 	public int getFilterMode()
 	{
 		return filterMode;
-	}
-
-	public void setMaxSearchDepth(int maxSearchDepth)
-	{
-		this.maxSearchDepth = maxSearchDepth;
-	}
-
-	public int getMaxSearchDepth()
-	{
-		return maxSearchDepth;
 	}
 
 	public static int getSavedFilterMode(IDialogSettings settings, int defaultFilterMode)
@@ -91,27 +83,11 @@ public class TreePatternFilter extends PatternFilter
 		return defaultFilterMode;
 	}
 
-	public static int getSavedFilterSearchDepth(IDialogSettings settings, int defaultSearchDepth)
-	{
-		if (settings != null)
-		{
-			try
-			{
-				return settings.getInt(TREE_PATTERN_SEARCH_DEPTH);
-			}
-			catch (NumberFormatException e)
-			{
-			}
-		}
-		return defaultSearchDepth;
-	}
-
 	public void saveSettings(IDialogSettings settings)
 	{
 		if (settings != null)
 		{
 			settings.put(TREE_PATTERN_FILTER_MODE, filterMode);
-			settings.put(TREE_PATTERN_SEARCH_DEPTH, maxSearchDepth);
 		}
 	}
 
@@ -144,6 +120,8 @@ public class TreePatternFilter extends PatternFilter
 	{
 		super.clearCaches();
 		searchKeyCache.clear();
+		recursiveKeyCache.clear();
+		searchKeyRecursiveCache.clear();
 	}
 
 	/**
@@ -160,26 +138,7 @@ public class TreePatternFilter extends PatternFilter
 	@Override
 	public boolean isElementVisible(Viewer viewer, Object element)
 	{
-		// limit max depth for searching
 		ITreeContentProvider contentProvider = getTreeContentProvider(viewer);
-		if (contentProvider instanceof IMaxDepthTreeContentProvider &&
-			(((IMaxDepthTreeContentProvider)contentProvider)).searchLimitReached(element, maxSearchDepth * 2))
-		{
-			return false;
-		}
-
-		if (filterMode == FILTER_PARENTS && isAnyParentLeafMatch(viewer, element))
-		{
-			return true;
-		}
-		// do not show leaf nodes when mode is FILTER_PARENTS
-//			Object[] children = ((ITreeContentProvider) ((AbstractTreeViewer) viewer)
-//                .getContentProvider()).getChildren(element);
-//			if (children == null || children.length == 0)
-//			{
-//				return false;
-//			}
-
 		Object searchKey = null;
 		if (contentProvider instanceof ISearchKeyAdapter)
 		{
@@ -191,13 +150,120 @@ public class TreePatternFilter extends PatternFilter
 				{
 					return b.booleanValue();
 				}
+				// is this in a recursion, return false
+				if (recursiveKeyCache.contains(searchKey))
+				{
+					// first add this one to the top so that the caller will know which one he depends on.
+					recursiveKeyCache.add(searchKey);
+					return false;
+				}
+
+				// look if this object is already tested but then it encountered recursion
+				Object[] objects = searchKeyRecursiveCache.get(searchKey);
+				if (objects != null)
+				{
+					boolean allcaclulated = true;
+					// test for those search keys if they already know there final state
+					for (Object object : objects)
+					{
+						b = searchKeyCache.get(object);
+						if (b != null)
+						{
+							if (b.booleanValue())
+							{
+								// one is found that was visible, this one is now also visible
+								searchKeyRecursiveCache.remove(searchKey);
+								searchKeyCache.put(searchKey, Boolean.TRUE);
+								return true;
+							}
+						}
+						else
+						{
+							// still not found, so this search also depends on that recursion.
+							allcaclulated = false;
+						}
+					}
+					if (allcaclulated)
+					{
+						// all our found now but all where false, reflect this in its own caching.
+						searchKeyRecursiveCache.remove(searchKey);
+						searchKeyCache.put(searchKey, Boolean.FALSE);
+						return false;
+					}
+					// return a semi false, but first add this one to the top so that the caller will know which one he depends on.
+					recursiveKeyCache.add(searchKey);
+					return false;
+				}
 			}
+		}
+
+
+		if (filterMode == FILTER_PARENTS && isAnyParentLeafMatch(viewer, element))
+		{
+			if (searchKey != null)
+			{
+				searchKeyCache.put(searchKey, Boolean.TRUE);
+			}
+			return true;
+		}
+		// do not show leaf nodes when mode is FILTER_PARENTS
+//			Object[] children = ((ITreeContentProvider) ((AbstractTreeViewer) viewer)
+//                .getContentProvider()).getChildren(element);
+//			if (children == null || children.length == 0)
+//			{
+//				return false;
+//			}
+
+		if (recursiveKeyCache.size() > 50)
+		{
+			// we are more the 50 deep, add this as a recursion and return false.
+			recursiveKeyCache.add(searchKey);
+			return false;
+		}
+
+		int index = recursiveKeyCache.size();
+		if (searchKey != null)
+		{
+			recursiveKeyCache.add(searchKey);
 		}
 
 		boolean elementVisible = super.isElementVisible(viewer, element);
 		if (searchKey != null)
 		{
-			searchKeyCache.put(searchKey, elementVisible ? Boolean.TRUE : Boolean.FALSE);
+			Object[] array = null;
+			if (!elementVisible)
+			{
+				// find and remove all until itself from the recursiveKeyCache.
+				if (recursiveKeyCache.size() != index + 1)
+				{
+					int counter = 0;
+					array = new Object[recursiveKeyCache.size() - index - 1];
+					for (int i = recursiveKeyCache.size(); --i > index;)
+					{
+						array[counter++] = recursiveKeyCache.remove(i);
+					}
+				}
+				recursiveKeyCache.remove(index);
+			}
+			else
+			{
+				while (recursiveKeyCache.size() > index)
+				{
+					recursiveKeyCache.remove(index);
+				}
+				searchKeyCache.put(searchKey, Boolean.TRUE);
+				return true;
+			}
+			if (array == null)
+			{
+				// no recursive hits found, so this in is just false.
+				searchKeyCache.put(searchKey, Boolean.FALSE);
+			}
+			else
+			{
+				// there was 1 or more recursive calls.
+				searchKeyRecursiveCache.put(searchKey, array);
+			}
 		}
 		return elementVisible;
 	}

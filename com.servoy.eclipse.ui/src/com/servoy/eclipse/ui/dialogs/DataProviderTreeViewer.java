@@ -80,7 +80,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 	public static final Object[] EMPTY_ARRAY = new Object[0];
 
 	public DataProviderTreeViewer(Composite parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, DataProviderOptions input,
-		boolean showFilter, boolean showFilterMenu, int filterMode, int filterSearchDepth, int treeStyle)
+		boolean showFilter, boolean showFilterMenu, int filterMode, int treeStyle)
 	{
 		super(parent, showFilter, showFilterMenu,
 		// contentProvider
@@ -92,7 +92,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			// treeStyle
 			treeStyle,
 			// filter
-			new TreePatternFilter(filterMode, filterSearchDepth),
+			new TreePatternFilter(filterMode),
 			// selectionFilter
 			new LeafnodesSelectionFilter(contentProvider));
 		setInput(input);

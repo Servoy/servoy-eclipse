@@ -57,7 +57,6 @@ import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -113,8 +112,7 @@ public class TagsAndI18NTextDialog extends Dialog
 			new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(DataProviderLabelProvider.INSTANCE_HIDEPREFIX, persist), persist)),
 			new CombinedTreeContentProvider(new DataProviderContentProvider(persist, flattenedSolution, table), StandardTagsContentProvider.INSTANCE),
 			new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true, INCLUDE_RELATIONS.NESTED, true, true, null), true,
-			true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_PARENTS),
-			TreePatternFilter.getSavedFilterSearchDepth(getDialogBoundsSettings(), IMaxDepthTreeContentProvider.DEPTH_DEFAULT), SWT.MULTI);
+			true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
 
 		addButton = new Button(composite_1, SWT.NONE);
 		addButton.setText(">>");

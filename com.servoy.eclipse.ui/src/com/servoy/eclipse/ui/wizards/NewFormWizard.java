@@ -80,7 +80,6 @@ import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.IStatusChangedListener;
 import com.servoy.eclipse.ui.util.SnapToGridFieldPositioner;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.eclipse.ui.views.PlaceFieldOptionGroup;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.j2db.FlattenedSolution;
@@ -979,8 +978,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			treeViewer = new DataProviderTreeViewer(topLevel, DataProviderLabelProvider.INSTANCE_HIDEPREFIX,// label provider will be overwritten when superform is known
 				new DataProviderContentProvider(null, servoyProject.getEditingFlattenedSolution(), null), new DataProviderTreeViewer.DataProviderOptions(false,
 					true, true, true, true, true, true, true, INCLUDE_RELATIONS.NESTED, true, true, null), true, true, TreePatternFilter.getSavedFilterMode(
-					getDialogSettings(), TreePatternFilter.FILTER_LEAFS), TreePatternFilter.getSavedFilterSearchDepth(getDialogSettings(),
-					IMaxDepthTreeContentProvider.DEPTH_DEFAULT), SWT.MULTI);
+					getDialogSettings(), TreePatternFilter.FILTER_LEAFS), SWT.MULTI);
 
 			IDialogSettings settings = NewFormWizard.this.getDialogSettings();
 			final boolean isPlaceHorizontal = settings.getBoolean("placeHorizontal");

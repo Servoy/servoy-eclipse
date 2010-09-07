@@ -42,7 +42,6 @@ import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.editors.ValueListEditor;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.util.BindingHelper;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -74,7 +73,7 @@ public class ValueListDPSelectionComposite extends Composite
 
 		tree = new DataProviderTreeViewer(this, DataProviderLabelProvider.INSTANCE_HIDEPREFIX, new DataProviderContentProvider(null, flattenedSolution, null),
 			new DataProviderTreeViewer.DataProviderOptions(false, true, true, false, false, false, false, false, INCLUDE_RELATIONS.NO, false, true, null),
-			false, false, TreePatternFilter.FILTER_LEAFS, IMaxDepthTreeContentProvider.DEPTH_DEFAULT, SWT.SINGLE);
+			false, false, TreePatternFilter.FILTER_LEAFS, SWT.SINGLE);
 
 		returnInDataproviderButton = new Button(this, SWT.CHECK);
 		returnInDataproviderButton.setText("Return in dataprovider");
