@@ -146,9 +146,13 @@ public class FormSelectionTool extends SelectionTool
 		}
 
 		int magnitude = 1;
-		if ((e.stateMask & SWT.MOD1) != 0)
+		if ((e.stateMask & SWT.ALT) != 0)
 		{
-			ServoyModelManager.getServoyModelManager().getServoyModel();
+			DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
+			magnitude = designerPreferences.getLargeStepSize();
+		}
+		else if ((e.stateMask & SWT.MOD1) != 0)
+		{
 			DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
 			magnitude = designerPreferences.getStepSize();
 		}

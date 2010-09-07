@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.preferences;
 
 import org.eclipse.swt.graphics.RGB;
@@ -49,6 +49,7 @@ public class DesignerPreferences
 
 	public static final int COPY_PASTE_OFFSET_DEFAULT = 10;
 	public static final int STEP_SIZE_DEFAULT = 10;
+	public static final int LARGE_STEP_SIZE_DEFAULT = 10;
 	public static final int GUIDE_SIZE_DEFAULT = 10;
 	public static final int GRID_SIZE_DEFAULT = 10;
 	public static final String GRID_COLOR_DEFAULT = "#b4b4b4";
@@ -77,12 +78,23 @@ public class DesignerPreferences
 
 	public int getStepSize()
 	{
-		return PersistHelper.createDimension(settings.getProperty(STEP_SIZE_SETTING, STEP_SIZE_DEFAULT + "," + STEP_SIZE_DEFAULT)).width;
+		return PersistHelper.createDimension(settings.getProperty(STEP_SIZE_SETTING, "0," + LARGE_STEP_SIZE_DEFAULT)).height;
 	}
 
-	public void setStepSize(int stepSize)
+	public int getLargeStepSize()
 	{
-		settings.setProperty(STEP_SIZE_SETTING, stepSize + "," + stepSize);
+		int largeStepSize = PersistHelper.createDimension(settings.getProperty(STEP_SIZE_SETTING, STEP_SIZE_DEFAULT + ",0")).width;
+		if (largeStepSize == getStepSize())
+		{
+			// old prefs stored 2 same numbers
+			return 2 * getStepSize();
+		}
+		return largeStepSize;
+	}
+
+	public void setStepSize(int stepSize, int largeStepSize)
+	{
+		settings.setProperty(STEP_SIZE_SETTING, stepSize + "," + largeStepSize);
 	}
 
 	public int getCopyPasteOffset()
@@ -107,8 +119,8 @@ public class DesignerPreferences
 
 	public RGB getGridColor()
 	{
-		return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty("gridColor", PersistHelper.createColor(settings.getProperty(GRID_COLOR_SETTING,
-			GRID_COLOR_DEFAULT)));
+		return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty("gridColor",
+			PersistHelper.createColor(settings.getProperty(GRID_COLOR_SETTING, GRID_COLOR_DEFAULT)));
 	}
 
 	public void setGridColor(RGB rgb)

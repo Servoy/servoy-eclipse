@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.preferences;
 
 import org.eclipse.jface.preference.PreferencePage;
@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.ColorPropertyController;
 import com.servoy.eclipse.ui.views.ColorSelectViewer;
@@ -50,12 +50,23 @@ import com.servoy.j2db.util.PersistHelper;
 public class DesignerPreferencePage extends PreferencePage implements IWorkbenchPreferencePage
 {
 
+	private static final String STEP_SIZE_TOOLTIPTEXT = "Shortcuts for moving elements in form designer:\n" + //
+		"\tMove:\n" + //
+		"\t\t* 1px: Just Arrow\n" + //
+		"\t\t* Small step: Ctrl-Arrows\n" + //
+		"\t\t* Large step: Ctrl-Alt-Arrows\n" + //
+		"\tResize:\n" + //
+		"\t\t* 1px: Shift-Arrows\n" + //
+		"\t\t* Small step: Ctrl-Shift-Arrows\n" + //
+		"\t\t* Large step: Alt-Shift-Arrows";
+
 	private Spinner gridSizeSpinner;
 	private ComboViewer gridPointSizeCombo;
 	private ColorSelectViewer gridColorViewer;
 	private Spinner guideSizeSpinner;
 	private ComboViewer copyPasetOffsetCombo;
 	private Spinner stepSizeSpinner;
+	private Spinner largeStepSizeSpinner;
 	private ComboViewer metricsCombo;
 	private Button gridShowButton;
 	private Button gridSnapToButton;
@@ -94,6 +105,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		Label stepsizeLabel = new Label(composite, SWT.NONE);
 		stepsizeLabel.setText("Stepsize");
+		stepsizeLabel.setToolTipText(STEP_SIZE_TOOLTIPTEXT);
 
 		Label gridColorLabel = new Label(composite, SWT.NONE);
 		gridColorLabel.setText("Grid color");
@@ -103,6 +115,11 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		stepSizeSpinner = new Spinner(composite, SWT.BORDER);
 		stepSizeSpinner.setValues(0, 1, 100, 0, 1, 5);
+		stepSizeSpinner.setToolTipText(STEP_SIZE_TOOLTIPTEXT);
+
+		largeStepSizeSpinner = new Spinner(composite, SWT.BORDER);
+		largeStepSizeSpinner.setValues(0, 1, 100, 0, 1, 5);
+		largeStepSizeSpinner.setToolTipText(STEP_SIZE_TOOLTIPTEXT);
 
 		copyPasetOffsetCombo = new ComboViewer(composite);
 		copyPasetOffsetCombo.setContentProvider(new ArrayContentProvider());
@@ -203,7 +220,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 	protected void initializeFields()
 	{
-		DesignerPreferences prefs = new DesignerPreferences(ServoyModelManager.getServoyModelManager().getServoyModel().getSettings());
+		DesignerPreferences prefs = new DesignerPreferences(ServoyModel.getSettings());
 
 		gridPointSizeCombo.setSelection(new StructuredSelection(new Integer(prefs.getGridPointSize())));
 		gridSizeSpinner.setSelection(prefs.getGridSize());
@@ -214,13 +231,14 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		guideSizeSpinner.setSelection(prefs.getGuideSize());
 		copyPasetOffsetCombo.setSelection(new StructuredSelection(new Integer(prefs.getCopyPasteOffset())));
 		stepSizeSpinner.setSelection(prefs.getStepSize());
+		largeStepSizeSpinner.setSelection(prefs.getLargeStepSize());
 		setMetricsComboValue(prefs.getMetrics());
 	}
 
 	@Override
 	public boolean performOk()
 	{
-		DesignerPreferences prefs = new DesignerPreferences(ServoyModelManager.getServoyModelManager().getServoyModel().getSettings());
+		DesignerPreferences prefs = new DesignerPreferences(ServoyModel.getSettings());
 
 		prefs.setGridPointSize(((Integer)((IStructuredSelection)gridPointSizeCombo.getSelection()).getFirstElement()).intValue());
 		prefs.setGridSize(gridSizeSpinner.getSelection());
@@ -230,7 +248,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		prefs.setSaveEditorState(saveEditorStateButton.getSelection());
 		prefs.setGuideSize(guideSizeSpinner.getSelection());
 		prefs.setCopyPasteOffset(((Integer)((IStructuredSelection)copyPasetOffsetCombo.getSelection()).getFirstElement()).intValue());
-		prefs.setStepSize(stepSizeSpinner.getSelection());
+		prefs.setStepSize(stepSizeSpinner.getSelection(), largeStepSizeSpinner.getSelection());
 		prefs.setMetrics(((Integer)((ObjectWrapper)((IStructuredSelection)metricsCombo.getSelection()).getFirstElement()).getType()).intValue());
 
 		return true;
@@ -249,6 +267,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		saveEditorStateButton.setSelection(DesignerPreferences.SAVE_EDITOR_STATE_DEFAULT);
 		copyPasetOffsetCombo.setSelection(new StructuredSelection(new Integer(DesignerPreferences.COPY_PASTE_OFFSET_DEFAULT)));
 		stepSizeSpinner.setSelection(DesignerPreferences.STEP_SIZE_DEFAULT);
+		largeStepSizeSpinner.setSelection(DesignerPreferences.LARGE_STEP_SIZE_DEFAULT);
 		setMetricsComboValue(DesignerPreferences.METRICS_DEFAULT);
 
 		super.performDefaults();
