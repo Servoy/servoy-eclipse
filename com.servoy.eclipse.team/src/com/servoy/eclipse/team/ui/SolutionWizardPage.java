@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.team.ui;
 
 import java.util.Date;
@@ -37,7 +37,6 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.dialogs.FilteredTreeViewer;
 import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
@@ -71,7 +70,7 @@ public class SolutionWizardPage extends WizardPage
 
 			SolutionContentProvider contentProvider = new SolutionContentProvider();
 			treeViewer = new FilteredTreeViewer(container, true, false, contentProvider, new SolutionLabelProvider(), null, SWT.SINGLE, new TreePatternFilter(
-				TreePatternFilter.FILTER_PARENTS, IMaxDepthTreeContentProvider.DEPTH_DEFAULT), new LeafnodesSelectionFilter(contentProvider));
+				TreePatternFilter.FILTER_PARENTS), new LeafnodesSelectionFilter(contentProvider));
 			treeViewer.addSelectionChangedListener(new ISelectionChangedListener()
 			{
 				public void selectionChanged(SelectionChangedEvent event)

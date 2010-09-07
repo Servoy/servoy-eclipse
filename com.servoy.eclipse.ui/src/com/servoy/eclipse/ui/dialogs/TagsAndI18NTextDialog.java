@@ -58,12 +58,12 @@ import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.persistence.RelationList;
 import com.servoy.j2db.persistence.Table;
 
 public class TagsAndI18NTextDialog extends Dialog
@@ -115,8 +115,7 @@ public class TagsAndI18NTextDialog extends Dialog
 			new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(DataProviderLabelProvider.INSTANCE_HIDEPREFIX, persist), persist)),
 			new CombinedTreeContentProvider(new DataProviderContentProvider(persist, flattenedSolution, table), StandardTagsContentProvider.INSTANCE),
 			new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true, INCLUDE_RELATIONS.NESTED, true, true, null), true,
-			true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_PARENTS),
-			TreePatternFilter.getSavedFilterSearchDepth(getDialogBoundsSettings(), IMaxDepthTreeContentProvider.DEPTH_DEFAULT), SWT.MULTI);
+			true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
 
 		addButton = new Button(composite_1, SWT.NONE);
 		addButton.setText(">>");
@@ -301,10 +300,10 @@ public class TagsAndI18NTextDialog extends Dialog
 			}
 			if (parentElement instanceof DataProviderNodeWrapper)
 			{
-				Relation[] relations = ((DataProviderNodeWrapper)parentElement).relations;
-				if (relations != null && relations.length > 0)
+				RelationList relations = ((DataProviderNodeWrapper)parentElement).relations;
+				if (relations != null)
 				{
-					return new Object[] { new StandardTagsRelationNode(relations[0]) };
+					return new Object[] { new StandardTagsRelationNode(relations.getRelation(0)) };
 				}
 			}
 			return new Object[0];

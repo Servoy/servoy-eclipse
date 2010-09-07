@@ -13,12 +13,15 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.viewers.AbstractTreeViewer;
-import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -26,7 +29,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.servoy.eclipse.ui.util.IKeywordChecker;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.util.IDelegate;
 
 
@@ -45,12 +47,15 @@ public class TreePatternFilter extends PatternFilter
 	public static final int FILTER_PARENTS = 2;
 
 	protected int filterMode = FILTER_LEAFS;
-	protected int maxSearchDepth = IMaxDepthTreeContentProvider.DEPTH_DEFAULT;
 
-	public TreePatternFilter(int filterMode, int maxSearchDepth)
+	private final Map<Object, Boolean> searchKeyCache = new HashMap<Object, Boolean>();
+	private final Map<Object, Object[]> searchKeyRecursiveCache = new HashMap<Object, Object[]>();
+
+	private final List<Object> recursiveKeyCache = new ArrayList<Object>();
+
+	public TreePatternFilter(int filterMode)
 	{
 		this.filterMode = filterMode;
-		this.maxSearchDepth = maxSearchDepth;
 	}
 
 	public void setFilterMode(int filterMode)
@@ -61,16 +66,6 @@ public class TreePatternFilter extends PatternFilter
 	public int getFilterMode()
 	{
 		return filterMode;
-	}
-
-	public void setMaxSearchDepth(int maxSearchDepth)
-	{
-		this.maxSearchDepth = maxSearchDepth;
-	}
-
-	public int getMaxSearchDepth()
-	{
-		return maxSearchDepth;
 	}
 
 	public static int getSavedFilterMode(IDialogSettings settings, int defaultFilterMode)
@@ -88,27 +83,11 @@ public class TreePatternFilter extends PatternFilter
 		return defaultFilterMode;
 	}
 
-	public static int getSavedFilterSearchDepth(IDialogSettings settings, int defaultSearchDepth)
-	{
-		if (settings != null)
-		{
-			try
-			{
-				return settings.getInt(TREE_PATTERN_SEARCH_DEPTH);
-			}
-			catch (NumberFormatException e)
-			{
-			}
-		}
-		return defaultSearchDepth;
-	}
-
 	public void saveSettings(IDialogSettings settings)
 	{
 		if (settings != null)
 		{
 			settings.put(TREE_PATTERN_FILTER_MODE, filterMode);
-			settings.put(TREE_PATTERN_SEARCH_DEPTH, maxSearchDepth);
 		}
 	}
 
@@ -131,6 +110,20 @@ public class TreePatternFilter extends PatternFilter
 		return null;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.dialogs.PatternFilter#clearCaches()
+	 */
+	@Override
+	protected void clearCaches()
+	{
+		super.clearCaches();
+		searchKeyCache.clear();
+		recursiveKeyCache.clear();
+		searchKeyRecursiveCache.clear();
+	}
+
 	/**
 	 * Answers whether the given element in the given viewer matches the filter pattern. This is a default implementation that will show a leaf element in the
 	 * tree based on whether the provided filter text matches the text of the given element's text, or that of it's children (if the element has any).
@@ -145,16 +138,72 @@ public class TreePatternFilter extends PatternFilter
 	@Override
 	public boolean isElementVisible(Viewer viewer, Object element)
 	{
-		// limit max depth for searching
-		IContentProvider contentProvider = ((AbstractTreeViewer)viewer).getContentProvider();
-		if (contentProvider instanceof IMaxDepthTreeContentProvider &&
-			(((IMaxDepthTreeContentProvider)contentProvider)).searchLimitReached(element, maxSearchDepth))
+		ITreeContentProvider contentProvider = getTreeContentProvider(viewer);
+		Object searchKey = null;
+		if (contentProvider instanceof ISearchKeyAdapter)
 		{
-			return false;
+			searchKey = ((ISearchKeyAdapter)contentProvider).getSearchKey(element);
+			if (searchKey != null)
+			{
+				Boolean b = searchKeyCache.get(searchKey);
+				if (b != null)
+				{
+					return b.booleanValue();
+				}
+				// is this in a recursion, return false
+				if (recursiveKeyCache.contains(searchKey))
+				{
+					// first add this one to the top so that the caller will know which one he depends on.
+					recursiveKeyCache.add(searchKey);
+					return false;
+				}
+
+				// look if this object is already tested but then it encountered recursion
+				Object[] objects = searchKeyRecursiveCache.get(searchKey);
+				if (objects != null)
+				{
+					boolean allcaclulated = true;
+					// test for those search keys if they already know there final state
+					for (Object object : objects)
+					{
+						b = searchKeyCache.get(object);
+						if (b != null)
+						{
+							if (b.booleanValue())
+							{
+								// one is found that was visible, this one is now also visible
+								searchKeyRecursiveCache.remove(searchKey);
+								searchKeyCache.put(searchKey, Boolean.TRUE);
+								return true;
+							}
+						}
+						else
+						{
+							// still not found, so this search also depends on that recursion.
+							allcaclulated = false;
+						}
+					}
+					if (allcaclulated)
+					{
+						// all our found now but all where false, reflect this in its own caching.
+						searchKeyRecursiveCache.remove(searchKey);
+						searchKeyCache.put(searchKey, Boolean.FALSE);
+						return false;
+					}
+					// return a semi false, but first add this one to the top so that the caller will know which one he depends on.
+					recursiveKeyCache.add(searchKey);
+					return false;
+				}
+			}
 		}
+
 
 		if (filterMode == FILTER_PARENTS && isAnyParentLeafMatch(viewer, element))
 		{
+			if (searchKey != null)
+			{
+				searchKeyCache.put(searchKey, Boolean.TRUE);
+			}
 			return true;
 		}
 		// do not show leaf nodes when mode is FILTER_PARENTS
@@ -165,14 +214,65 @@ public class TreePatternFilter extends PatternFilter
 //				return false;
 //			}
 
-		return super.isElementVisible(viewer, element);
+		if (recursiveKeyCache.size() > 50)
+		{
+			// we are more the 50 deep, add this as a recursion and return false.
+			recursiveKeyCache.add(searchKey);
+			return false;
+		}
+
+		int index = recursiveKeyCache.size();
+		if (searchKey != null)
+		{
+			recursiveKeyCache.add(searchKey);
+		}
+
+		boolean elementVisible = super.isElementVisible(viewer, element);
+		if (searchKey != null)
+		{
+			Object[] array = null;
+			if (!elementVisible)
+			{
+				// find and remove all until itself from the recursiveKeyCache.
+				if (recursiveKeyCache.size() != index + 1)
+				{
+					int counter = 0;
+					array = new Object[recursiveKeyCache.size() - index - 1];
+					for (int i = recursiveKeyCache.size(); --i > index;)
+					{
+						array[counter++] = recursiveKeyCache.remove(i);
+					}
+				}
+				recursiveKeyCache.remove(index);
+			}
+			else
+			{
+				while (recursiveKeyCache.size() > index)
+				{
+					recursiveKeyCache.remove(index);
+				}
+				searchKeyCache.put(searchKey, Boolean.TRUE);
+				return true;
+			}
+			if (array == null)
+			{
+				// no recursive hits found, so this in is just false.
+				searchKeyCache.put(searchKey, Boolean.FALSE);
+			}
+			else
+			{
+				// there was 1 or more recursive calls.
+				searchKeyRecursiveCache.put(searchKey, array);
+			}
+		}
+		return elementVisible;
 	}
 
 	@Override
 	protected boolean isLeafMatch(Viewer viewer, Object element)
 	{
-		ITreeContentProvider treeContentProvider = ((ITreeContentProvider)((AbstractTreeViewer)viewer).getContentProvider());
-		if (treeContentProvider instanceof IKeywordChecker && ((IKeywordChecker)treeContentProvider).isKeyword(element))
+		ITreeContentProvider contentProvider = getTreeContentProvider(viewer);
+		if (contentProvider instanceof IKeywordChecker && ((IKeywordChecker)contentProvider).isKeyword(element))
 		{
 			// no isLeafmatch for keyword nodes
 			return false;
@@ -202,15 +302,15 @@ public class TreePatternFilter extends PatternFilter
 
 	protected boolean isAnyParentLeafMatch(Viewer viewer, Object element)
 	{
-		ITreeContentProvider treeContentProvider = ((ITreeContentProvider)((AbstractTreeViewer)viewer).getContentProvider());
-		Object parent = treeContentProvider.getParent(element);
+		ITreeContentProvider contentProvider = getTreeContentProvider(viewer);
+		Object parent = contentProvider.getParent(element);
 		while (parent != null)
 		{
 			if (isLeafMatch(viewer, parent))
 			{
 				return true;
 			}
-			parent = treeContentProvider.getParent(parent);
+			parent = contentProvider.getParent(parent);
 		}
 		return false;
 	}
@@ -243,7 +343,8 @@ public class TreePatternFilter extends PatternFilter
 
 	protected boolean hasLeafMatchChild(Viewer viewer, Object element)
 	{
-		Object[] children = ((ITreeContentProvider)((AbstractTreeViewer)viewer).getContentProvider()).getChildren(element);
+		ITreeContentProvider contentProvider = getTreeContentProvider(viewer);
+		Object[] children = contentProvider.getChildren(element);
 		if (children != null)
 		{
 			for (Object child : children)

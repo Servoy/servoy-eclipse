@@ -58,7 +58,6 @@ import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.
 import com.servoy.eclipse.ui.editors.table.ColumnLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.SortColumn;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -104,8 +103,7 @@ public class SortDialog extends Dialog
 		dataProviderViewer = new DataProviderTreeViewer(composite, DataProviderLabelProvider.INSTANCE_HIDEPREFIX, new DataProviderContentProvider(null,
 			flattenedEditingSolution, table), new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, false, false, true,
 			INCLUDE_RELATIONS.NESTED, false, true, null), true, true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(),
-			TreePatternFilter.FILTER_PARENTS), TreePatternFilter.getSavedFilterSearchDepth(getDialogBoundsSettings(),
-			IMaxDepthTreeContentProvider.DEPTH_DEFAULT), SWT.MULTI);
+			TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
 
 		final Button leftButton = new Button(composite, SWT.NONE);
 		leftButton.setText("<<"); //$NON-NLS-1$

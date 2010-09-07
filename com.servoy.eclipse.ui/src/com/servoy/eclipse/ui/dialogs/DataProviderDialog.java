@@ -68,7 +68,7 @@ public class DataProviderDialog extends TreeSelectDialog
 	{
 		DataProviderTreeViewer dataProviderTreeViewer = new DataProviderTreeViewer(parent, labelProvider, new DataProviderContentProvider(persist,
 			flattenedSolution, table), input, true, true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_LEAFS),
-			TreePatternFilter.getSavedFilterSearchDepth(getDialogBoundsSettings(), IMaxDepthTreeContentProvider.DEPTH_DEFAULT), treeStyle);
+			treeStyle);
 		return dataProviderTreeViewer;
 	}
 

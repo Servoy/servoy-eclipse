@@ -237,8 +237,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	protected FilteredTreeViewer createFilteredTreeViewer(Composite parent)
 	{
 		FilteredTreeViewer ftv = new FilteredTreeViewer(parent, showFilter, showFilterMenu, contentProvider, labelProvider, comparator, treeStyle,
-			new TreePatternFilter(TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), defaultFilterMode),
-				TreePatternFilter.getSavedFilterSearchDepth(getDialogBoundsSettings(), defaultFilterSearchDepth)), selectionFilter);
+			new TreePatternFilter(TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), defaultFilterMode)), selectionFilter);
 		ftv.setInput(input);
 		return ftv;
 	}

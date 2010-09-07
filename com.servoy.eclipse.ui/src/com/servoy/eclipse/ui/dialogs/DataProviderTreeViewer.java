@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,6 +60,7 @@ import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.persistence.RelationList;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptVariable;
@@ -82,7 +84,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 	public static final Object[] EMPTY_ARRAY = new Object[0];
 
 	public DataProviderTreeViewer(Composite parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, DataProviderOptions input,
-		boolean showFilter, boolean showFilterMenu, int filterMode, int filterSearchDepth, int treeStyle)
+		boolean showFilter, boolean showFilterMenu, int filterMode, int treeStyle)
 	{
 		super(parent, showFilter, showFilterMenu,
 		// contentProvider
@@ -94,7 +96,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			// treeStyle
 			treeStyle,
 			// filter
-			new TreePatternFilter(filterMode, filterSearchDepth),
+			new TreePatternFilter(filterMode),
 			// selectionFilter
 			new LeafnodesSelectionFilter(contentProvider));
 		setInput(input);
@@ -122,7 +124,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		super.setLabelProvider(labelProvider2);
 	}
 
-	public static class DataProviderContentProvider extends ArrayContentProvider implements IMaxDepthTreeContentProvider, IKeywordChecker
+	public static class DataProviderContentProvider extends ArrayContentProvider implements IMaxDepthTreeContentProvider, IKeywordChecker, ISearchKeyAdapter
 	{
 		public static final IDataProvider NONE = new NoDataProvider();
 
@@ -199,13 +201,36 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			this.persist = persist;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.servoy.eclipse.ui.dialogs.ISearchKeyAdapter#getSearchKey(java.lang.Object)
+		 */
+		public Object getSearchKey(Object element)
+		{
+			if (element instanceof DataProviderNodeWrapper)
+			{
+				RelationList rl = ((DataProviderNodeWrapper)element).relations;
+				if (rl != null)
+				{
+					String node = ((DataProviderNodeWrapper)element).node;
+					if (node == CALCULATIONS || node == AGGREGATES)
+					{
+						return null;
+					}
+					return rl.getRelation();
+				}
+			}
+			return null;
+		}
+
 		@Override
 		public Object[] getElements(Object inputElement)
 		{
 			if (inputElement instanceof DataProviderOptions)
 			{
 				options = (DataProviderOptions)inputElement;
-				List<Object> input = new ArrayList<Object>();
+				ArrayList<Object> input = new ArrayList<Object>(20);
 				try
 				{
 					// none
@@ -217,31 +242,31 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					// columns
 					if (options.includeColumns && table != null)
 					{
-						addTableColumns(input, table, null, options.includeCalculations);
+						input = addTableColumns(input, table, null, options.includeCalculations);
 					}
 
 					// calculations
 					if (options.includeCalculations && table != null)
 					{
-						input.add(new DataProviderNodeWrapper(CALCULATIONS, null));
+						input.add(new DataProviderNodeWrapper(CALCULATIONS, (RelationList)null));
 					}
 
 					// form variables
 					if (options.includeFormVariables && persist != null && persist.getAncestor(IRepository.FORMS) != null)
 					{
-						input.add(new DataProviderNodeWrapper(FORM_VARIABLES, null));
+						input.add(new DataProviderNodeWrapper(FORM_VARIABLES, (RelationList)null));
 					}
 
 					// globals
 					if (options.includeGlobals)
 					{
-						input.add(new DataProviderNodeWrapper(GLOBALS, null));
+						input.add(new DataProviderNodeWrapper(GLOBALS, (RelationList)null));
 					}
 
 					// aggregates
 					if (options.includeAggregates && table != null)
 					{
-						input.add(new DataProviderNodeWrapper(AGGREGATES, null));
+						input.add(new DataProviderNodeWrapper(AGGREGATES, (RelationList)null));
 					}
 
 					// relations
@@ -256,7 +281,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 								Relation relation = relations.next();
 								if ((options.includeGlobalRelations || !relation.isGlobal()) && relationNames.add(relation.getName()))
 								{
-									input.add(new DataProviderNodeWrapper(RELATIONS, new Relation[] { relation }));
+									input.add(new DataProviderNodeWrapper(RELATIONS, new RelationList(relation)));
 								}
 							}
 						}
@@ -298,7 +323,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 
 		public Object[] getChildren(Object parentElement)
 		{
-			List<Object> children = new ArrayList<Object>();
+			ArrayList<Object> children = null;
 			try
 			{
 				if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).node == CALCULATIONS)
@@ -311,22 +336,26 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					}
 					else
 					{
-						calcsTable = nodeWrapper.relations[nodeWrapper.relations.length - 1].getForeignTable();
+						calcsTable = nodeWrapper.relations.getRelation().getForeignTable();
 					}
 					if (calcsTable != null)
 					{
 						Map<String, ScriptCalculation> map = getCalculationMap(calcsTable);
-						Iterator<ScriptCalculation> calcs = map.values().iterator();
-						while (calcs.hasNext())
+						if (map.size() > 0)
 						{
-							ScriptCalculation calc = calcs.next();
+							Collection<ScriptCalculation> calcs = map.values();
 							if (nodeWrapper.relations == null)
 							{
-								children.add(calc);
+								children = new ArrayList<Object>(calcs);
 							}
 							else
 							{
-								children.add(new ColumnWrapper(calc, nodeWrapper.relations));
+								children = new ArrayList<Object>(calcs.size() + 10);
+								Iterator<ScriptCalculation> iterator = calcs.iterator();
+								while (iterator.hasNext())
+								{
+									children.add(new ColumnWrapper(iterator.next(), nodeWrapper.relations));
+								}
 							}
 						}
 					}
@@ -339,6 +368,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					if (flattenedForm != null)
 					{
 						Iterator<ScriptVariable> formVariables = flattenedForm.getScriptVariables(true);
+						if (formVariables.hasNext() && children == null) children = new ArrayList<Object>(10);
 						while (formVariables.hasNext())
 						{
 							children.add(formVariables.next());
@@ -349,6 +379,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).node == GLOBALS)
 				{
 					Iterator<ScriptVariable> globals = flattenedSolution.getScriptVariables(true);
+					if (globals.hasNext() && children == null) children = new ArrayList<Object>(10);
 					while (globals.hasNext())
 					{
 						children.add(globals.next());
@@ -365,14 +396,14 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					}
 					else
 					{
-						aggsTable = nodeWrapper.relations[nodeWrapper.relations.length - 1].getForeignTable();
+						aggsTable = nodeWrapper.relations.getRelation().getForeignTable();
 					}
 					if (aggsTable != null)
 					{
 						List<AggregateVariable> list = aggregatesCache.get(aggsTable);
 						if (list == null)
 						{
-							list = new ArrayList<AggregateVariable>();
+							list = new ArrayList<AggregateVariable>(4);
 							Iterator<AggregateVariable> aggs = flattenedSolution.getAggregateVariables(aggsTable, true);
 							while (aggs.hasNext())
 							{
@@ -380,53 +411,61 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 							}
 							aggregatesCache.put(aggsTable, list);
 						}
-						Iterator<AggregateVariable> aggs = list.iterator();
-						while (aggs.hasNext())
+
+						if (list.size() > 0)
 						{
-							AggregateVariable agg = aggs.next();
 							if (nodeWrapper.relations == null)
 							{
-								children.add(agg);
+								if (children == null) children = new ArrayList<Object>(list);
+								else children.addAll(list);
 							}
 							else
 							{
-								children.add(new ColumnWrapper(agg, nodeWrapper.relations));
+								if (children == null) children = new ArrayList<Object>(list.size() + 10);
+								else children.ensureCapacity(children.size() + list.size() + 10);
+								Iterator<AggregateVariable> aggs = list.iterator();
+
+								while (aggs.hasNext())
+								{
+									children.add(new ColumnWrapper(aggs.next(), nodeWrapper.relations));
+								}
 							}
 						}
 					}
 				}
 
 				if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).node == RELATIONS &&
-					((DataProviderNodeWrapper)parentElement).relations.length > 0)
+					((DataProviderNodeWrapper)parentElement).relations != null)
 				{
-					Relation relation = ((DataProviderNodeWrapper)parentElement).relations[((DataProviderNodeWrapper)parentElement).relations.length - 1];
+					Relation relation = ((DataProviderNodeWrapper)parentElement).relations.getRelation();
 					if (relation.getForeignTable() != null)
 					{
-						addTableColumns(children, relation.getForeignTable(), ((DataProviderNodeWrapper)parentElement).relations,
+						children = addTableColumns(children, relation.getForeignTable(), ((DataProviderNodeWrapper)parentElement).relations,
 							options.includeRelatedCalculations);
 
 						// related calculations
 						if (options.includeRelatedCalculations)
 						{
+							if (children == null) children = new ArrayList<Object>(4);
 							children.add(new DataProviderNodeWrapper(CALCULATIONS, ((DataProviderNodeWrapper)parentElement).relations));
 						}
 
 						// related aggregates
 						if (options.includeRelatedAggregates)
 						{
+							if (children == null) children = new ArrayList<Object>(4);
 							children.add(new DataProviderNodeWrapper(AGGREGATES, ((DataProviderNodeWrapper)parentElement).relations));
 						}
 
 						// nested relations
 						if (options.includeRelations == INCLUDE_RELATIONS.NESTED)
 						{
-							Iterator<Relation> relations = null;
 							List<Relation> tableRelations = relationsCache.get(relation.getForeignTable());
 							if (tableRelations == null)
 							{
 								tableRelations = new ArrayList<Relation>();
 								Set<String> relationNames = new HashSet<String>();
-								relations = flattenedSolution.getRelations(relation.getForeignTable(), true, true);
+								Iterator<Relation> relations = flattenedSolution.getRelations(relation.getForeignTable(), true, true);
 								while (relations.hasNext())
 								{
 									Relation rel = relations.next();
@@ -437,14 +476,18 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 								}
 								relationsCache.put(relation.getForeignTable(), tableRelations);
 							}
-							relations = tableRelations.iterator();
-							List<Relation> relChain = Arrays.asList(((DataProviderNodeWrapper)parentElement).relations);
-							while (relations.hasNext())
+							if (tableRelations.size() > 0)
 							{
-								Relation rel = relations.next();
-								if (relChain.contains(rel) && (rel.isExactPKRef(flattenedSolution) || rel.isParentRef())) continue;
-								children.add(new DataProviderNodeWrapper(RELATIONS, Utils.arrayAdd(((DataProviderNodeWrapper)parentElement).relations, rel,
-									true)));
+								if (children == null) children = new ArrayList<Object>(tableRelations.size());
+								else children.ensureCapacity(children.size() + tableRelations.size());
+								Iterator<Relation> relations = tableRelations.iterator();
+								RelationList relChain = ((DataProviderNodeWrapper)parentElement).relations;
+								while (relations.hasNext())
+								{
+									Relation rel = relations.next();
+									if (relChain.contains(rel) && (rel.isExactPKRef(flattenedSolution) || rel.isParentRef())) continue;
+									children.add(new DataProviderNodeWrapper(RELATIONS, new RelationList(relChain, rel)));
+								}
 							}
 						}
 					}
@@ -454,7 +497,23 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			{
 				ServoyLog.logError(e);
 			}
-			return children.size() == 0 ? EMPTY_ARRAY : children.toArray();
+			return children == null ? EMPTY_ARRAY : children.toArray();
+		}
+
+		public static Relation[] arrayAdd(Relation[] array, Relation element)
+		{
+			Relation[] res;
+			if (array == null)
+			{
+				res = new Relation[1];
+			}
+			else
+			{
+				res = new Relation[array.length + 1];
+				System.arraycopy(array, 0, res, 0, array.length);
+			}
+			res[res.length - 1] = element;
+			return res;
 		}
 
 		/**
@@ -486,32 +545,32 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				ColumnWrapper columnWrapper = (ColumnWrapper)value;
 				if (columnWrapper.getColumn() instanceof ScriptCalculation)
 				{
-					return new DataProviderNodeWrapper(CALCULATIONS, columnWrapper.getRelations());
+					return new DataProviderNodeWrapper(CALCULATIONS, columnWrapper.getRelationList());
 				}
 				if (columnWrapper.getColumn() instanceof AggregateVariable)
 				{
-					return new DataProviderNodeWrapper(AGGREGATES, columnWrapper.getRelations());
+					return new DataProviderNodeWrapper(AGGREGATES, columnWrapper.getRelationList());
 				}
-				return new DataProviderNodeWrapper(RELATIONS, columnWrapper.getRelations());
+				return new DataProviderNodeWrapper(RELATIONS, columnWrapper.getRelationList());
 			}
 			if (value instanceof ScriptCalculation)
 			{
-				return new DataProviderNodeWrapper(CALCULATIONS, null);
+				return new DataProviderNodeWrapper(CALCULATIONS, (RelationList)null);
 			}
 			if (value instanceof ScriptVariable)
 			{
 				if (((ScriptVariable)value).getParent() instanceof Form)
 				{
-					return new DataProviderNodeWrapper(FORM_VARIABLES, null);
+					return new DataProviderNodeWrapper(FORM_VARIABLES, (RelationList)null);
 				}
 				else
 				{
-					return new DataProviderNodeWrapper(GLOBALS, null);
+					return new DataProviderNodeWrapper(GLOBALS, (RelationList)null);
 				}
 			}
 			if (value instanceof AggregateVariable)
 			{
-				return new DataProviderNodeWrapper(AGGREGATES, null);
+				return new DataProviderNodeWrapper(AGGREGATES, (RelationList)null);
 			}
 			if (value instanceof DataProviderNodeWrapper)
 			{
@@ -520,9 +579,9 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				{
 					if (wrapper.node == RELATIONS)
 					{
-						if (wrapper.relations.length > 1)
+						if (wrapper.relations.getParent() != null)
 						{
-							return new DataProviderNodeWrapper(RELATIONS, Utils.arraySub(wrapper.relations, 0, wrapper.relations.length - 1));
+							return new DataProviderNodeWrapper(RELATIONS, wrapper.relations.getParent());
 						}
 					}
 					else
@@ -547,54 +606,61 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			}
 			if (element instanceof ColumnWrapper)
 			{
-				return RelationContentProvider.exceedsRelationsDepth(((ColumnWrapper)element).getRelations(), depth);
+				return RelationContentProvider.exceedsRelationsDepth(((ColumnWrapper)element).getRelationList(), depth);
 			}
 			return false;
 		}
 
-		private void addTableColumns(List<Object> input, Table table, Relation[] relations, boolean includeCalculations) throws RepositoryException
+		private ArrayList<Object> addTableColumns(ArrayList<Object> input, Table t, RelationList relations, boolean includeCalculations)
+			throws RepositoryException
 		{
+			ArrayList<Object> retValue = input;
 			Map<String, ScriptCalculation> calculations = Collections.emptyMap();
 			if (includeCalculations)
 			{
-				calculations = getCalculationMap(table);
+				calculations = getCalculationMap(t);
 			}
 
-			List<Column> lst = columnCache.get(table);
+			List<Column> lst = columnCache.get(t);
 			if (lst == null)
 			{
 				lst = new ArrayList<Column>();
-				Iterator<Column> columns = table.getColumnsSortedByName();
+				Iterator<Column> columns = t.getColumnsSortedByName();
 				while (columns.hasNext())
 				{
-					lst.add(columns.next());
+					Column column = columns.next();
+					ColumnInfo ci = column.getColumnInfo();
+					if (ci != null && ci.isExcluded())
+					{
+						continue;
+					}
+					// do not add the column if there is a stored calc for it, so prevent duplicate select values
+					if (!calculations.containsKey(column.getDataProviderID()))
+					{
+						lst.add(column);
+					}
 				}
-				columnCache.put(table, lst);
+				columnCache.put(t, lst);
 			}
-			Iterator<Column> columns = lst.iterator();
-			while (columns.hasNext())
+			int size = lst.size();
+			if (size > 0)
 			{
-				Column column = columns.next();
-
-				ColumnInfo ci = column.getColumnInfo();
-				if (ci != null && ci.isExcluded())
+				if (relations == null)
 				{
-					continue;
+					if (retValue == null) retValue = new ArrayList<Object>(lst);
+					else retValue.addAll(lst);
 				}
-
-				// do not add the column if there is a stored calc for it, so prevent duplicate select values
-				if (!calculations.containsKey(column.getDataProviderID()))
+				else
 				{
-					if (relations == null)
+					if (retValue == null) retValue = new ArrayList<Object>(size + 4);
+					else retValue.ensureCapacity(retValue.size() + size);
+					for (int i = 0; i < size; i++)
 					{
-						input.add(column);
-					}
-					else
-					{
-						input.add(new ColumnWrapper(column, relations));
+						retValue.add(new ColumnWrapper(lst.get(i), relations));
 					}
 				}
 			}
+			return retValue;
 		}
 
 		public boolean isKeyword(Object element)
@@ -614,23 +680,47 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 	public static class DataProviderNodeWrapper
 	{
 		public final String node;
-		public final Relation[] relations;
+
+		public final RelationList relations;
+
+		private int hashcode;
+
+		public DataProviderNodeWrapper(String node, RelationList relations)
+		{
+			this.node = node;
+			this.relations = relations;
+		}
 
 		public DataProviderNodeWrapper(String node, Relation[] relations)
 		{
 			this.node = node;
-			this.relations = (relations == null || relations.length == 0) ? null : relations;
+			if (relations != null && relations.length > 0)
+			{
+				RelationList list = new RelationList(relations[0]);
+				for (int i = 1; i < relations.length; i++)
+				{
+					list = new RelationList(list, relations[i]);
+				}
+				this.relations = list;
+			}
+			else
+			{
+				this.relations = null;
+			}
 		}
-
 
 		@Override
 		public int hashCode()
 		{
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((node == null) ? 0 : node.hashCode());
-			result = prime * result + Arrays.hashCode(relations);
-			return result;
+			if (hashcode == 0)
+			{
+				final int prime = 31;
+				int result = 1;
+				result = prime * result + ((node == null) ? 0 : node.hashCode());
+				result = prime * result + ((relations == null) ? 0 : relations.hashCode());
+				hashcode = result;
+			}
+			return hashcode;
 		}
 
 		@Override
@@ -645,15 +735,20 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				if (other.node != null) return false;
 			}
 			else if (!node.equals(other.node)) return false;
-			if (!Arrays.equals(relations, other.relations)) return false;
+			if (relations == null)
+			{
+				if (other.relations != null) return false;
+			}
+			else if (!relations.equals(other.relations)) return false;
 			return true;
 		}
 
 
+		@SuppressWarnings("nls")
 		@Override
 		public String toString()
 		{
-			return "DataProviderNode(" + String.valueOf(node) + ',' + Utils.stringJoin(relations, '.') + ')';
+			return "DataProviderNode(" + String.valueOf(node) + ',' + (relations != null ? Utils.stringJoin(relations.getRelations(), '.') : "") + ')';
 		}
 	}
 
@@ -748,9 +843,9 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			if (value instanceof DataProviderNodeWrapper)
 			{
 				DataProviderNodeWrapper wrapper = (DataProviderNodeWrapper)value;
-				if (wrapper.node == RELATIONS && wrapper.relations.length > 0)
+				if (wrapper.node == RELATIONS && wrapper.relations != null)
 				{
-					return wrapper.relations[wrapper.relations.length - 1].getName();
+					return wrapper.relations.getRelation().getName();
 				}
 				return ((DataProviderNodeWrapper)value).node;
 			}
@@ -786,16 +881,19 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			if (value instanceof DataProviderNodeWrapper)
 			{
 				DataProviderNodeWrapper wrapper = (DataProviderNodeWrapper)value;
-				if (wrapper.node == RELATIONS && wrapper.relations.length > 0)
+				if (wrapper.node == RELATIONS && wrapper.relations != null)
 				{
-					return RelationLabelProvider.INSTANCE_LAST_NAME_ONLY.getImage(wrapper.relations[wrapper.relations.length - 1]);
+					return RelationLabelProvider.INSTANCE_LAST_NAME_ONLY.getImage(wrapper.relations.getRelation());
 				}
 			}
 			return null;
 		}
 
+		private ILabelProvider delegatingLabelProvider = null;
+
 		public ILabelProvider getDelegate()
 		{
+			if (delegatingLabelProvider != null) return delegatingLabelProvider;
 			// special implementation of getDelegate, add DataProviderDialogLabelProvider stuff to delegate label provider.
 			Object delegate = labelProvider;
 			while (delegate instanceof IDelegate)
@@ -803,7 +901,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				delegate = ((IDelegate)delegate).getDelegate();
 			}
 			final ILabelProvider delegateLabelProvider = (ILabelProvider)delegate;
-			return new LabelProvider()
+			delegatingLabelProvider = new LabelProvider()
 			{
 				@Override
 				public String getText(Object element)
@@ -827,6 +925,8 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					return dpDialogImage;
 				}
 			};
+
+			return delegatingLabelProvider;
 		}
 
 		public void selectionChanged(SelectionChangedEvent event)
