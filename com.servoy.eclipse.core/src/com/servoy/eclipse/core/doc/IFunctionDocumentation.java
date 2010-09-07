@@ -36,6 +36,7 @@ public interface IFunctionDocumentation
 	public static final Integer TYPE_CONSTANT = new Integer(3);
 	public static final Integer TYPE_EVENT = new Integer(4);
 	public static final Integer TYPE_COMMAND = new Integer(5);
+	public static final Integer TYPE_CONSTRUCTOR = new Integer(6);
 
 	// states
 	public static final int STATE_DOCUMENTED = 0;

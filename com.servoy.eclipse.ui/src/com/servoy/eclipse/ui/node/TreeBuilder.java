@@ -108,6 +108,7 @@ public class TreeBuilder
 
 	public static UserNode[] createTypedArray(IImageLookup imageLookup, Class< ? > clazz, UserNodeType type, List<UserNode> existingDlm)
 	{
+		Object constructorIcon = imageLookup.loadImage("constructor.gif"); //$NON-NLS-1$
 		Object functionIcon = imageLookup.loadImage("function.gif"); //$NON-NLS-1$
 		Object propertiesIcon = imageLookup.loadImage("properties_icon.gif"); //$NON-NLS-1$
 
@@ -119,6 +120,14 @@ public class TreeBuilder
 			IObjectDocumentation objDoc = dm.getObjectByQualifiedName(clazz.getCanonicalName());
 			if (objDoc != null)
 			{
+				// We need constructors listed before anything else.
+				for (IFunctionDocumentation fdoc : objDoc.getFunctions())
+				{
+					if (fdoc.getType() == IFunctionDocumentation.TYPE_CONSTRUCTOR)
+					{
+						dlm.add(fdoc2usernode(fdoc, type, constructorIcon));
+					}
+				}
 				// We need properties listed before functions.
 				for (IFunctionDocumentation fdoc : objDoc.getFunctions())
 				{
