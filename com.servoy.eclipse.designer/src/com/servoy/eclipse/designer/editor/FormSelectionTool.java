@@ -26,6 +26,7 @@ import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.commands.CompoundCommand;
+import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.requests.DirectEditRequest;
 import org.eclipse.gef.tools.SelectionTool;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -34,13 +35,11 @@ import org.eclipse.swt.events.KeyEvent;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.designer.editor.commands.ChangeBoundsCommand;
 import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.FormValueEditor;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.Tab;
 
 /**
@@ -115,35 +114,10 @@ public class FormSelectionTool extends SelectionTool
 			default :
 				return false;
 		}
-
 		// shift -> resize, else move
-		Request request;
 		boolean resize = (e.stateMask & SWT.SHIFT) != 0;
-		if (resize)
-		{
-			request = new Request(RequestConstants.REQ_RESIZE);
-		}
-		else
-		{
-			request = new Request(RequestConstants.REQ_MOVE);
-		}
 
 		final EditPartViewer viewer = getCurrentViewer();
-		// check the selected edit parts if they understand the request.
-		final List<EditPart> selectedEditParts = viewer.getSelectedEditParts();
-		List<EditPart> applicableEditParts = new ArrayList<EditPart>(selectedEditParts.size());
-		for (EditPart editPart : selectedEditParts)
-		{
-			if (editPart.understandsRequest(request) && editPart.getModel() instanceof ISupportBounds)
-			{
-				applicableEditParts.add(editPart);
-			}
-		}
-		// Que?
-		if (applicableEditParts.size() == 0)
-		{
-			return false;
-		}
 
 		int magnitude = 1;
 		if ((e.stateMask & SWT.ALT) != 0)
@@ -157,8 +131,6 @@ public class FormSelectionTool extends SelectionTool
 			magnitude = designerPreferences.getStepSize();
 		}
 
-		// create a command for moving / resizing
-		CompoundCommand command = new CompoundCommand();
 		int x = 0;
 		int y = 0;
 		int width = 0;
@@ -183,12 +155,33 @@ public class FormSelectionTool extends SelectionTool
 				break;
 		}
 
+		ChangeBoundsRequest request = new ChangeBoundsRequest(resize ? RequestConstants.REQ_RESIZE : RequestConstants.REQ_MOVE);
+		request.setMoveDelta(new Point(x, y));
+		request.setSizeDelta(new Dimension(width, height));
+
+		// check the selected edit parts if they understand the request.
+		final List<EditPart> selectedEditParts = viewer.getSelectedEditParts();
+		List<EditPart> applicableEditParts = new ArrayList<EditPart>(selectedEditParts.size());
+		for (EditPart editPart : selectedEditParts)
+		{
+			if (editPart.understandsRequest(request))
+			{
+				applicableEditParts.add(editPart);
+			}
+		}
+		// Que?
+		if (applicableEditParts.size() == 0)
+		{
+			return false;
+		}
+
 		applicableEditParts = DesignerUtil.removeChildEditParts(applicableEditParts);
 
+		// create a command for moving / resizing
+		CompoundCommand command = new CompoundCommand();
 		for (EditPart editPart : applicableEditParts)
 		{
-			ISupportBounds supportBounds = (ISupportBounds)editPart.getModel();
-			command.add(new ChangeBoundsCommand(supportBounds, new Point(x, y), new Dimension(width, height)));
+			command.add(editPart.getCommand(request));
 		}
 
 		// execute on the command stack
