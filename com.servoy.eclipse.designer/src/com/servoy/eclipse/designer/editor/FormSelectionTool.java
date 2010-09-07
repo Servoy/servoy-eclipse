@@ -28,7 +28,7 @@ import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.requests.DirectEditRequest;
-import org.eclipse.gef.tools.SelectionTool;
+import org.eclipse.gef.tools.PanningSelectionTool;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -48,7 +48,7 @@ import com.servoy.j2db.persistence.Tab;
  * @author rgansevles
  */
 
-public class FormSelectionTool extends SelectionTool
+public class FormSelectionTool extends PanningSelectionTool
 {
 	/**
 	 * Handle double click.
