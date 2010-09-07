@@ -15,31 +15,41 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.cheatsheets;
+package com.servoy.eclipse.cheatsheets.actions;
 
-import org.eclipse.ui.IEditorReference;
+import org.eclipse.jface.action.Action;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.cheatsheets.CheatSheetListener;
-import org.eclipse.ui.cheatsheets.ICheatSheetEvent;
+
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.util.Debug;
 
 /**
+ * Shows the Solution Explorer view, restoring it in case it is minimized.
+ * 
  * @author gerzse
- *
  */
-public class FirstContactCheatSheetListener extends CheatSheetListener
+public class ShowSolutionExplorerAction extends Action
 {
 	@Override
-	public void cheatSheetEvent(ICheatSheetEvent event)
+	public void run()
 	{
-		if (event.getEventType() == ICheatSheetEvent.CHEATSHEET_CLOSED)
+		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		IViewReference solex = page.findViewReference(SolutionExplorerView.PART_ID);
+		if (solex == null)
 		{
-			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-			for (IViewReference vw : page.getViewReferences())
-				page.setPartState(vw, IWorkbenchPage.STATE_RESTORED);
-			for (IEditorReference ed : page.getEditorReferences())
-				page.setPartState(ed, IWorkbenchPage.STATE_RESTORED);
+			try
+			{
+				page.showView(SolutionExplorerView.PART_ID);
+				solex = page.findViewReference(SolutionExplorerView.PART_ID);
+			}
+			catch (PartInitException e)
+			{
+				Debug.log("Failed to show Solution Explorer.", e); //$NON-NLS-1$
+			}
 		}
+		if (solex != null) page.setPartState(solex, IWorkbenchPage.STATE_RESTORED);
 	}
 }

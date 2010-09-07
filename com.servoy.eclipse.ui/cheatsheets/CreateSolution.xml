@@ -3,19 +3,32 @@
       title="Create a Servoy Solution">
    <intro>
       <description>
-         This cheat sheet shows you how to create a new Servoy Solution with some very basic functionality. You will learn how to run the solution with the Smart Client and the Web Client.
+         This cheat sheet shows you how to create a new Servoy Solution.
       </description>
    </intro>
    <item
-         title="Item">
-      <description>
-         <b>Body</b>
-      </description>
+         skip="true"
+         title="Open the Servoy Design perspective">
+   		<description>
+        In general you will do your development work in a perspective that is called Servoy Design. At any point, if you find yourself in a different perspective, you can open the Servoy Design perspective by accessing the Window -&gt; Open Perspective menu, selecting Other... and then selecting Servoy Design from the list that shows up.
+   		</description>
+		<command
+           required="false"
+           serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=com.servoy.eclipse.ui.DesignPerspective)"/>
    </item>
    <item
-         title="Item (1)">
-      <description>
-         <b>Body</b>
-      </description>
+         skip="true"
+         title="Make the Solution Explorer view visible">
+		<description>
+         In Servoy Developer you can manage your solutions through the Solution Explorer. At any moment, if the Solution Explorer is not visible you can make it visible by accessing the Window -&gt; Show View menu and selecting Solution Explorer in the list that shows up. If Solution Explorer is not visible in the list, then click on Others... and you will find it under the Servoy Category.         
+		</description>
+		<action pluginId="com.servoy.eclipse.ui" class="com.servoy.eclipse.cheatsheets.actions.ShowSolutionExplorerAction"/>
+   </item>
+   <item
+         title="Create a new solution">
+		<description>
+         In the Solution Explorer right-click on the All Solutions node and select Create New Solution. A wizard will show up. Enter a name for the new solution and click Finish. Leave the solution type to Normal and also leave the settings about the resource project unchanged.
+		</description>
+		<action pluginId="com.servoy.eclipse.ui" class="com.servoy.eclipse.cheatsheets.actions.CreateNewSolutionAction"/>
    </item>
 </cheatsheet>
