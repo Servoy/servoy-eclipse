@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors;
 
 
@@ -55,7 +55,6 @@ import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.IControlFactory;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
@@ -125,7 +124,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 
 		ScriptDialog(Shell shell, IPersist persist, IPersist context, Table table, ISelection selection, int treeStyle, String title)
 		{
-			super(shell, true, false, TreePatternFilter.FILTER_LEAFS, IMaxDepthTreeContentProvider.DEPTH_DEFAULT,
+			super(shell, true, false, TreePatternFilter.FILTER_LEAFS,
 			// content provider
 				new ScriptTreeContentProvider(table, persist),
 				// label provider

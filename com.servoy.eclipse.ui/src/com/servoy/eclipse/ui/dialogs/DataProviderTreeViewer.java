@@ -45,7 +45,6 @@ import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
@@ -109,7 +108,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		super.setLabelProvider(new DataProviderDialogLabelProvider(labelProvider));
 	}
 
-	public static class DataProviderContentProvider extends ArrayContentProvider implements IMaxDepthTreeContentProvider, IKeywordChecker, ISearchKeyAdapter
+	public static class DataProviderContentProvider extends ArrayContentProvider implements ITreeContentProvider, IKeywordChecker, ISearchKeyAdapter
 	{
 		public static final IDataProvider NONE = new NoDataProvider();
 
@@ -581,19 +580,6 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		public boolean hasChildren(Object value)
 		{
 			return value instanceof DataProviderNodeWrapper;
-		}
-
-		public boolean searchLimitReached(Object element, int depth)
-		{
-			if (element instanceof DataProviderNodeWrapper)
-			{
-				return RelationContentProvider.exceedsRelationsDepth(((DataProviderNodeWrapper)element).relations, depth);
-			}
-			if (element instanceof ColumnWrapper)
-			{
-				return RelationContentProvider.exceedsRelationsDepth(((ColumnWrapper)element).getRelationList(), depth);
-			}
-			return false;
 		}
 
 		private ArrayList<Object> addTableColumns(ArrayList<Object> input, Table t, RelationList relations, boolean includeCalculations)

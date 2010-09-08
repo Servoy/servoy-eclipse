@@ -84,7 +84,6 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	private IControlFactory optionsAreaFactory;
 	private final boolean showFilterMenu;
 	private final int defaultFilterMode;
-	private final int defaultFilterSearchDepth;
 
 	/**
 	 * Constructs a new TreeSelectDialog.
@@ -97,15 +96,14 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	 * @param title
 	 * @param input
 	 */
-	public TreeSelectDialog(Shell shell, boolean showFilter, boolean showFilterMenu, int defaultFilterMode, int defaultFilterSearchDepth,
-		ITreeContentProvider contentProvider, IBaseLabelProvider labelProvider, ViewerComparator comparator, IFilter selectionFilter, int treeStyle,
-		String title, Object input, ISelection selection, String name)
+	public TreeSelectDialog(Shell shell, boolean showFilter, boolean showFilterMenu, int defaultFilterMode, ITreeContentProvider contentProvider,
+		IBaseLabelProvider labelProvider, ViewerComparator comparator, IFilter selectionFilter, int treeStyle, String title, Object input,
+		ISelection selection, String name)
 	{
 		super(shell);
 		this.showFilter = showFilter;
 		this.showFilterMenu = showFilterMenu;
 		this.defaultFilterMode = defaultFilterMode;
-		this.defaultFilterSearchDepth = defaultFilterSearchDepth;
 		this.selectionFilter = selectionFilter;
 		this.treeStyle = treeStyle;
 		this.title = title;

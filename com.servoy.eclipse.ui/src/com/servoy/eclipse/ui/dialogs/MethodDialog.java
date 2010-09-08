@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 
@@ -44,7 +44,6 @@ import com.servoy.eclipse.ui.labelproviders.DelegateLabelProvider;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -83,7 +82,7 @@ public class MethodDialog extends TreeSelectDialog
 	public MethodDialog(Shell shell, ILabelProvider labelProvider, ITreeContentProvider contentProvider, ISelection selection,
 		Object /* MethodListOptions */input, int treeStyle, String title)
 	{
-		super(shell, true, true, TreePatternFilter.FILTER_LEAFS, IMaxDepthTreeContentProvider.DEPTH_DEFAULT,
+		super(shell, true, true, TreePatternFilter.FILTER_LEAFS,
 		// content provider
 			contentProvider,
 			// label provider

@@ -20,7 +20,6 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 import com.servoy.eclipse.ui.util.IKeywordChecker;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -29,7 +28,7 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  * 
  */
-public class CombinedTreeContentProvider implements ITreeContentProvider, IKeywordChecker, IMaxDepthTreeContentProvider
+public class CombinedTreeContentProvider implements ITreeContentProvider, IKeywordChecker, ISearchKeyAdapter
 {
 	private final ITreeContentProvider contentProvider1;
 	private final ITreeContentProvider contentProvider2;
@@ -87,17 +86,23 @@ public class CombinedTreeContentProvider implements ITreeContentProvider, IKeywo
 		return (contentProvider2 instanceof IKeywordChecker && ((IKeywordChecker)contentProvider2).isKeyword(element));
 	}
 
-	public boolean searchLimitReached(Object element, int maxDepth)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.dialogs.ISearchKeyAdapter#getSearchKey(java.lang.Object)
+	 */
+	public Object getSearchKey(Object element)
 	{
-		boolean limitReached = false;
-		if (contentProvider1 instanceof IMaxDepthTreeContentProvider)
+		if (contentProvider1 instanceof ISearchKeyAdapter)
 		{
-			limitReached = ((IMaxDepthTreeContentProvider)contentProvider1).searchLimitReached(element, maxDepth);
-			if (!limitReached && contentProvider2 instanceof IMaxDepthTreeContentProvider)
+			Object object = ((ISearchKeyAdapter)contentProvider1).getSearchKey(element);
+			if (object != null) return object;
+
+			if (contentProvider2 instanceof ISearchKeyAdapter)
 			{
-				limitReached = ((IMaxDepthTreeContentProvider)contentProvider2).searchLimitReached(element, maxDepth);
+				return ((ISearchKeyAdapter)contentProvider2).getSearchKey(element);
 			}
 		}
-		return limitReached;
+		return null;
 	}
 }

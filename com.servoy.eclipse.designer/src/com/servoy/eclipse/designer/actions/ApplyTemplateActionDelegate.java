@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.actions;
 
 import org.eclipse.gef.EditPart;
@@ -28,7 +28,6 @@ import com.servoy.eclipse.designer.editor.commands.DataRequest;
 import com.servoy.eclipse.ui.dialogs.TemplateContentProvider;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.eclipse.ui.views.PlaceFieldOptionGroup;
 
 /**
@@ -51,9 +50,8 @@ public class ApplyTemplateActionDelegate extends AbstractEditpartActionDelegate
 	@Override
 	protected Request createRequest(EditPart editPart)
 	{
-		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS, IMaxDepthTreeContentProvider.DEPTH_DEFAULT,
-			TemplateContentProvider.DEFAULT, new LabelProvider(), null, null, SWT.NONE, "Select template", TemplateContentProvider.TEMPLATES_DUMMY_INPUT, null,
-			TreeSelectDialog.TEMPLATE_DIALOG);
+		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS, TemplateContentProvider.DEFAULT,
+			new LabelProvider(), null, null, SWT.NONE, "Select template", TemplateContentProvider.TEMPLATES_DUMMY_INPUT, null, TreeSelectDialog.TEMPLATE_DIALOG);
 		dialog.open();
 
 		if (dialog.getReturnCode() == Window.CANCEL)

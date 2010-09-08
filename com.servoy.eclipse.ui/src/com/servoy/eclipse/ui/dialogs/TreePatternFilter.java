@@ -52,6 +52,7 @@ public class TreePatternFilter extends PatternFilter
 	private final Map<Object, Object[]> searchKeyRecursiveCache = new HashMap<Object, Object[]>();
 
 	private final List<Object> recursiveKeyCache = new ArrayList<Object>();
+	private final List<Object> foundElements = new ArrayList<Object>();
 
 	public TreePatternFilter(int filterMode)
 	{
@@ -122,6 +123,7 @@ public class TreePatternFilter extends PatternFilter
 		searchKeyCache.clear();
 		recursiveKeyCache.clear();
 		searchKeyRecursiveCache.clear();
+		foundElements.clear();
 	}
 
 	/**
@@ -190,9 +192,7 @@ public class TreePatternFilter extends PatternFilter
 						searchKeyCache.put(searchKey, Boolean.FALSE);
 						return false;
 					}
-					// return a semi false, but first add this one to the top so that the caller will know which one he depends on.
-					recursiveKeyCache.add(searchKey);
-					return false;
+					// if still not everything is found, and no recursion, just try again under this node.
 				}
 			}
 		}
@@ -214,7 +214,7 @@ public class TreePatternFilter extends PatternFilter
 //				return false;
 //			}
 
-		if (recursiveKeyCache.size() > 50)
+		if (recursiveKeyCache.size() > 4)
 		{
 			// we are more the 50 deep, add this as a recursion and return false.
 			recursiveKeyCache.add(searchKey);
@@ -297,7 +297,17 @@ public class TreePatternFilter extends PatternFilter
 		{
 			return false;
 		}
-		return wordMatches(labelText);
+		boolean b = wordMatches(labelText);
+		if (b)
+		{
+			foundElements.add(element);
+		}
+		return b;
+	}
+
+	public List<Object> getFoundElements()
+	{
+		return foundElements;
 	}
 
 	protected boolean isAnyParentLeafMatch(Viewer viewer, Object element)

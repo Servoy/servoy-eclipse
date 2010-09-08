@@ -67,7 +67,6 @@ import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -532,7 +531,7 @@ public class EditorUtil
 						if (prompt)
 						{
 							TreeSelectDialog dialog = new TreeSelectDialog(shell, false, false, TreePatternFilter.FILTER_LEAFS,
-								IMaxDepthTreeContentProvider.DEPTH_DEFAULT, FlatTreeContentProvider.INSTANCE, new LabelProvider()
+								FlatTreeContentProvider.INSTANCE, new LabelProvider()
 								{
 									@Override
 									public String getText(Object element)

@@ -31,7 +31,6 @@ import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.util.IControlFactory;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 
 /**
  * A cell editor that manages a field.
@@ -52,7 +51,6 @@ public class ListSelectCellEditor extends DialogCellEditor
 	private final ListSelectControlFactory controlFactory;
 	private boolean showFilterMenu = false;
 	private int defaultFilterMode = TreePatternFilter.FILTER_LEAFS;
-	private int defaultSearchDepth = IMaxDepthTreeContentProvider.DEPTH_DEFAULT;
 
 	/**
 	 * Creates a new list cell editor parented under the given control. Use this constructor for selecting from a list of values
@@ -98,11 +96,6 @@ public class ListSelectCellEditor extends DialogCellEditor
 		this.selectionFilter = selectionFilter;
 	}
 
-	public void setDefaultSearchDepth(int defaultSearchDepth)
-	{
-		this.defaultSearchDepth = defaultSearchDepth;
-	}
-
 	public IFilter getSelectionFilter()
 	{
 		if (selectionFilter == null)
@@ -117,8 +110,8 @@ public class ListSelectCellEditor extends DialogCellEditor
 	{
 		boolean showFilter = (treeStyle & SWT.CHECK) == 0; // filter does not work correctly with CheckboxTreeViewer // TODO : fix
 
-		TreeSelectDialog dialog = new TreeSelectDialog(cellEditorWindow.getShell(), showFilter, showFilterMenu, defaultFilterMode, defaultSearchDepth,
-			contentProvider, getLabelProvider(), null, getSelectionFilter(), treeStyle, title, input, getSelection(), name);
+		TreeSelectDialog dialog = new TreeSelectDialog(cellEditorWindow.getShell(), showFilter, showFilterMenu, defaultFilterMode, contentProvider,
+			getLabelProvider(), null, getSelectionFilter(), treeStyle, title, input, getSelection(), name);
 		if (controlFactory != null)
 		{
 			controlFactory.setTreeSelectDialog(dialog);
