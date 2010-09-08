@@ -31,6 +31,8 @@
 		<xs:sequence>
 			<xs:element name="constants" type="constantlist"
 				maxOccurs="1" minOccurs="0"></xs:element>
+			<xs:element name="constructors" type="constructorlist"
+				maxOccurs="1" minOccurs="0"></xs:element>
 			<xs:element name="properties" type="propertylist"
 				maxOccurs="1" minOccurs="0"></xs:element>
 			<xs:element name="functions" type="functionlist"
@@ -53,6 +55,12 @@
 	<xs:complexType name="constantlist">
 		<xs:sequence>
 			<xs:element name="constant" type="function" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="constructorlist">
+		<xs:sequence>
+			<xs:element name="constructor" type="function" maxOccurs="unbounded" />
 		</xs:sequence>
 	</xs:complexType>
 

@@ -12,7 +12,9 @@
 				minOccurs="1" maxOccurs="1" />
 			<xs:element name="reservedKeywords" type="keywordlistoflist"
 				minOccurs="1" maxOccurs="1" />
-			<xs:element name="markers" type="markerlist"
+			<xs:element name="markers" type="markerlist" minOccurs="1"
+				maxOccurs="1" />
+			<xs:element name="webAdminSettings" type="webadminlist"
 				minOccurs="1" maxOccurs="1" />
 		</xs:sequence>
 		<xs:attribute name="version" type="xs:string" use="required"></xs:attribute>
@@ -56,12 +58,41 @@
 
 	<xs:complexType name="marker">
 		<xs:sequence>
-			<xs:element name="message" type="xs:string"
-				maxOccurs="1" minOccurs="0"></xs:element>
-			<xs:element name="description" type="xs:string"
-				maxOccurs="1" minOccurs="0"></xs:element>
+			<xs:element name="message" type="xs:string" maxOccurs="1"
+				minOccurs="0"></xs:element>
+			<xs:element name="description" type="xs:string" maxOccurs="1"
+				minOccurs="0"></xs:element>
 		</xs:sequence>
 		<xs:attribute name="id" type="xs:string" use="required" />
 	</xs:complexType>
 
+	<xs:complexType name="webadminlist">
+		<xs:sequence>
+			<xs:element name="category" type="category" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="category">
+		<xs:sequence>
+			<xs:element name="property" type="property" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="property">
+		<xs:sequence>
+			<xs:element name="description" type="xs:string" maxOccurs="1"
+				minOccurs="0"></xs:element>
+			<xs:element name="defaultValue" type="xs:string" maxOccurs="1"
+				minOccurs="0"></xs:element>
+			<xs:element name="options" type="optionlist" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="optionlist">
+		<xs:sequence>
+			<xs:element name="option" type="xs:string" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
 </xs:schema>
