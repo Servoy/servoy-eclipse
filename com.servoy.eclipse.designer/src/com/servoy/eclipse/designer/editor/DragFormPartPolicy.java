@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.editor;
 import java.util.List;
 
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
@@ -104,14 +105,17 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 			Debug.error(e);
 			return;
 		}
-		ChangeBoundsRequest changeBoundsRequest = new ChangeBoundsRequest(RequestConstants.REQ_MOVE);
-		changeBoundsRequest.setMoveDelta(new Point(0, moveDelta));
+		ChangeBoundsRequest moveRequest = new ChangeBoundsRequest(RequestConstants.REQ_MOVE);
+		moveRequest.setMoveDelta(new Point(0, moveDelta));
+		ChangeBoundsRequest resizeRequest = new ChangeBoundsRequest(RequestConstants.REQ_RESIZE);
+		resizeRequest.setSizeDelta(new Dimension(0, moveDelta));
 
 		List<EditPart> siblings = getHost().getParent().getChildren();
 		for (EditPart sibling : siblings)
 		{
 			Object model = sibling.getModel();
 			boolean move = false;
+			boolean resize = false;
 			if (model instanceof Part && model != part && ((Part)model).getHeight() >= part.getHeight())
 			{
 				// part below current part, needs to move as well
@@ -130,13 +134,24 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 					// element on this part, only move when anchored SOUTH
 					if (model instanceof ISupportAnchors && (((ISupportAnchors)model).getAnchors() & IAnchorConstants.SOUTH) != 0)
 					{
-						move = true;
+						if ((((ISupportAnchors)model).getAnchors() & IAnchorConstants.NORTH) != 0)
+						{
+							resize = true;
+						}
+						else
+						{
+							move = true;
+						}
 					}
 				}
 			}
 			if (move)
 			{
-				command.add(sibling.getCommand(changeBoundsRequest));
+				command.add(sibling.getCommand(moveRequest));
+			}
+			else if (resize)
+			{
+				command.add(sibling.getCommand(resizeRequest));
 			}
 		}
 	}
