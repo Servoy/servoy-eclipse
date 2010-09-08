@@ -57,12 +57,15 @@ import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
+import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EnableServerAction;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
+import com.servoy.j2db.documentation.scripting.docs.JSLib;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -87,6 +90,8 @@ import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSSecurity;
+import com.servoy.j2db.scripting.JSUnitAssertFunctions;
+import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.smart.dataui.SwingItemFactory;
@@ -160,29 +165,29 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		view = v;
 		invisibleRootNode = new PlatformSimpleUserNode("root", UserNodeType.ARRAY);
 
-		PlatformSimpleUserNode jslib = new PlatformSimpleUserNode(Messages.TreeStrings_JSLib, UserNodeType.JSLIB, null,
-			uiActivator.loadImageFromBundle("jslibfolder.gif"));
+		PlatformSimpleUserNode jslib = new PlatformSimpleUserNode(Messages.TreeStrings_JSLib, UserNodeType.JSLIB, null, IconProvider.instance().image(
+			JSLib.class));
 
-		PlatformSimpleUserNode jsarray = new PlatformSimpleUserNode(Messages.TreeStrings_Array, UserNodeType.ARRAY, null,
-			uiActivator.loadImageFromBundle("jslibarray.gif"));
-		PlatformSimpleUserNode jsdate = new PlatformSimpleUserNode(Messages.TreeStrings_Date, UserNodeType.DATE, null, null,
-			uiActivator.loadImageFromOldLocation("day_obj.gif"));
-		PlatformSimpleUserNode jsstring = new PlatformSimpleUserNode(Messages.TreeStrings_String, UserNodeType.STRING, null,
-			uiActivator.loadImageFromBundle("jslibstring.gif"));
-		PlatformSimpleUserNode jsmath = new PlatformSimpleUserNode(Messages.TreeStrings_Math, UserNodeType.FUNCTIONS, null,
-			uiActivator.loadImageFromBundle("sum.gif"));
+		PlatformSimpleUserNode jsarray = new PlatformSimpleUserNode(Messages.TreeStrings_Array, UserNodeType.ARRAY, null, IconProvider.instance().image(
+			com.servoy.j2db.documentation.scripting.docs.Array.class));
+		PlatformSimpleUserNode jsdate = new PlatformSimpleUserNode(Messages.TreeStrings_Date, UserNodeType.DATE, null, null, IconProvider.instance().image(
+			com.servoy.j2db.documentation.scripting.docs.Date.class));
+		PlatformSimpleUserNode jsstring = new PlatformSimpleUserNode(Messages.TreeStrings_String, UserNodeType.STRING, null, IconProvider.instance().image(
+			com.servoy.j2db.documentation.scripting.docs.String.class));
+		PlatformSimpleUserNode jsmath = new PlatformSimpleUserNode(Messages.TreeStrings_Math, UserNodeType.FUNCTIONS, null, IconProvider.instance().image(
+			com.servoy.j2db.documentation.scripting.docs.Math.class));
 		PlatformSimpleUserNode jsstatements = new PlatformSimpleUserNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, null,
-			uiActivator.loadImageFromBundle("statements.gif"));
+			IconProvider.instance().image(com.servoy.j2db.documentation.scripting.docs.Statements.class));
 		PlatformSimpleUserNode jsspecialops = new PlatformSimpleUserNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS, null,
-			uiActivator.loadImageFromBundle("special_operators.gif"));
+			IconProvider.instance().image(com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class));
 		PlatformSimpleUserNode jsxml = new PlatformSimpleUserNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, null,
-			uiActivator.loadImageFromBundle("xml_image.gif"));
+			IconProvider.instance().image(com.servoy.j2db.documentation.scripting.docs.XML.class));
 		PlatformSimpleUserNode jsxmllist = new PlatformSimpleUserNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, null,
-			uiActivator.loadImageFromBundle("xmlList_image.gif"));
-		PlatformSimpleUserNode jsregexp = new PlatformSimpleUserNode(Messages.TreeStrings_RegExp, UserNodeType.REGEXP, null,
-			uiActivator.loadImageFromBundle("regExp_image.gif"));
-		PlatformSimpleUserNode jsnumber = new PlatformSimpleUserNode(Messages.TreeStrings_Number, UserNodeType.NUMBER, null,
-			uiActivator.loadImageFromBundle("number.gif"));
+			IconProvider.instance().image(com.servoy.j2db.documentation.scripting.docs.XMLList.class));
+		PlatformSimpleUserNode jsregexp = new PlatformSimpleUserNode(Messages.TreeStrings_RegExp, UserNodeType.REGEXP, null, IconProvider.instance().image(
+			com.servoy.j2db.documentation.scripting.docs.RegExp.class));
+		PlatformSimpleUserNode jsnumber = new PlatformSimpleUserNode(Messages.TreeStrings_Number, UserNodeType.NUMBER, null, IconProvider.instance().image(
+			com.servoy.j2db.documentation.scripting.docs.Number.class));
 
 		jslib.children = new PlatformSimpleUserNode[] { jsarray, jsdate, jsstring, jsnumber, jsmath, jsregexp, jsstatements, jsspecialops, jsxml, jsxmllist };
 		jsarray.parent = jslib;
@@ -196,7 +201,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		jsxmllist.parent = jslib;
 
 		PlatformSimpleUserNode application = new PlatformSimpleUserNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, null,
-			uiActivator.loadImageFromBundle("application.gif"));
+			IconProvider.instance().image(JSApplication.class));
 		addReturnTypeNodes(application, ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes());
 
 		resources = new PlatformSimpleUserNode(Messages.TreeStrings_Resources, UserNodeType.RESOURCES, null, uiActivator.loadImageFromBundle("resources.png"));
@@ -223,8 +228,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		allSolutionsNode = new PlatformSimpleUserNode(Messages.TreeStrings_AllSolutions, UserNodeType.ALL_SOLUTIONS, null,
 			PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
 
-		databaseManager = new PlatformSimpleUserNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, null,
-			uiActivator.loadImageFromBundle("server.gif"));
+		databaseManager = new PlatformSimpleUserNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, null, IconProvider.instance().image(
+			JSDatabaseManager.class));
 		addReturnTypeNodes(databaseManager, ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class).getAllReturnedTypes());
 		PlatformSimpleUserNode[] children = (PlatformSimpleUserNode[])databaseManager.children;
 		PlatformSimpleUserNode[] newChildren = new PlatformSimpleUserNode[children.length + 2];
@@ -235,26 +240,26 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		newChildren[children.length + 1].parent = databaseManager;
 		databaseManager.children = newChildren;
 
-		PlatformSimpleUserNode utils = new PlatformSimpleUserNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, null,
-			uiActivator.loadImageFromOldLocation("toolbox.gif"));
+		PlatformSimpleUserNode utils = new PlatformSimpleUserNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, null, IconProvider.instance().image(
+			JSUtils.class));
 
-		PlatformSimpleUserNode jsunit = new PlatformSimpleUserNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, null,
-			uiActivator.loadImageFromBundle("jsunit.png"));
+		PlatformSimpleUserNode jsunit = new PlatformSimpleUserNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, null, IconProvider.instance().image(
+			JSUnitAssertFunctions.class));
 
-		solutionModel = new PlatformSimpleUserNode("SolutionModel", UserNodeType.SOLUTION_MODEL, null, uiActivator.loadImageFromBundle("blueprint.gif"));
+		solutionModel = new PlatformSimpleUserNode("SolutionModel", UserNodeType.SOLUTION_MODEL, null, IconProvider.instance().image(JSSolutionModel.class));
 
 		addReturnTypeNodes(solutionModel, ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class).getAllReturnedTypes());
 
-		history = new PlatformSimpleUserNode(Messages.TreeStrings_History, UserNodeType.HISTORY, null, uiActivator.loadImageFromBundle("history.gif"));
+		history = new PlatformSimpleUserNode(Messages.TreeStrings_History, UserNodeType.HISTORY, null, IconProvider.instance().image(HistoryProvider.class));
 
-		security = new PlatformSimpleUserNode(Messages.TreeStrings_Security, UserNodeType.SECURITY, null, uiActivator.loadImageFromBundle("lock.gif"));
+		security = new PlatformSimpleUserNode(Messages.TreeStrings_Security, UserNodeType.SECURITY, null, IconProvider.instance().image(JSSecurity.class));
 		addReturnTypeNodes(security, ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class).getAllReturnedTypes());
 
-		i18n = new PlatformSimpleUserNode(Messages.TreeStrings_i18n, UserNodeType.I18N, null, uiActivator.loadImageFromBundle("i18n.gif"));
+		i18n = new PlatformSimpleUserNode(Messages.TreeStrings_i18n, UserNodeType.I18N, null, IconProvider.instance().image(JSI18N.class));
 		addReturnTypeNodes(i18n, ScriptObjectRegistry.getScriptObjectForClass(JSI18N.class).getAllReturnedTypes());
 
 		PlatformSimpleUserNode exceptions = new PlatformSimpleUserNode(Messages.TreeStrings_ServoyException, UserNodeType.EXCEPTIONS, null,
-			uiActivator.loadImageFromBundle("exception.gif"));
+			IconProvider.instance().image(ServoyException.class));
 		addReturnTypeNodes(exceptions, new ServoyException(0).getAllReturnedTypes());
 
 		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.gif"));

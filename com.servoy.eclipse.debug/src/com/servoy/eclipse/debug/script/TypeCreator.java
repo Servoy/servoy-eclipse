@@ -43,9 +43,9 @@ import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.mozilla.javascript.JavaMembers;
-import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
+import org.mozilla.javascript.JavaMembers.BeanProperty;
 
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyLog;
@@ -57,6 +57,7 @@ import com.servoy.eclipse.core.doc.ITypedScriptObject;
 import com.servoy.eclipse.core.doc.ScriptParameter;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.debug.Activator;
+import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
@@ -318,15 +319,13 @@ public abstract class TypeCreator
 
 		fill(context, members, cls, typeName);
 
-		if (constantsOnly(typeName))
+		ImageDescriptor desc = IconProvider.instance().descriptor(cls);
+		if (desc == null)
 		{
-			type.setAttribute(IMAGE_DESCRIPTOR, CONSTANT);
+			if (constantsOnly(typeName)) desc = CONSTANT;
+			else desc = PROPERTY;
 		}
-		else
-		{
-			type.setAttribute(IMAGE_DESCRIPTOR, PROPERTY);
-		}
-
+		type.setAttribute(IMAGE_DESCRIPTOR, desc);
 		return type;
 	}
 
