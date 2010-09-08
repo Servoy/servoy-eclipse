@@ -52,12 +52,14 @@ import com.servoy.eclipse.core.IFileAccess;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.builder.ServoyBuilder;
 import com.servoy.eclipse.core.util.ResourcesUtils;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UpdateMarkersJob;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IServer;
@@ -67,6 +69,7 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
@@ -576,54 +579,16 @@ public class DataModelManager implements IColumnInfoManager
 		}
 		else
 		{
-			int severity = -1;
-			if (c.getType() != cid.datatype || c.getLength() != cid.length)
-			{
-				int t1 = Column.mapToDefaultType(c.getType());
-				int t2 = Column.mapToDefaultType(cid.datatype);
-				if ((t1 == t2 && c.getLength() == cid.length) ||
-					(t1 == IColumnTypes.NUMBER && c.getScale() == 0 && t2 == IColumnTypes.INTEGER) ||
-					(t1 == t2 && (t1 == IColumnTypes.MEDIA || t1 == IColumnTypes.TEXT) && (Math.abs((float)c.getLength() - (float)cid.length) > (Integer.MAX_VALUE / 2)))) // this check is for -1 and big value lengths
-				{
-					severity = IMarker.SEVERITY_WARNING; // somewhat compatible types... but still different
-				}
-				else
-				{
-					severity = getErrorSeverity(t.getName());
-				}
-			}
-			else if (c.getAllowNull() != cid.allowNull)
-			{
-				severity = IMarker.SEVERITY_WARNING;
-			}
-
-			if (severity != IMarker.SEVERITY_ERROR) // if we already discovered an error, no use checking further
-			{
-				// real column can only know if it's pk or not (doesn't know about USER_ROWID_COLUMN)
-				boolean columnInfoIsPk = ((cid.flags & Column.PK_COLUMN) != 0);
-				if (c.isDatabasePK() != columnInfoIsPk)
-				{
-					if ((c.isDatabasePK() && ((cid.flags & Column.IDENT_COLUMNS) == 0)) || columnInfoIsPk)
-					{
-						// column is pk, but columninfo knows it as normal column, or column is not pk and columninfo knows it as pk
-						severity = getErrorSeverity(t.getName());
-					}
-					else if (c.isDatabasePK() && ((cid.flags & Column.USER_ROWID_COLUMN) != 0))
-					{
-						// columns is pk, column info says it's USER_ROWID_COLUMN - both ident columns, but not quite the same
-						severity = IMarker.SEVERITY_WARNING;
-					} // else no other case should be left
-				}
-			}
-
+			ColumnInfoDef dbCid = new ColumnInfoDef();
+			dbCid.datatype = c.getType();
+			dbCid.length = c.getLength();
+			dbCid.allowNull = c.getAllowNull();
+			dbCid.flags = c.getFlags();
+			TableDifference tableDifference = new TableDifference(t, columnName, TableDifference.COLUMN_CONFLICT, dbCid, cid);
+			int severity = tableDifference.getSeverity();
 			if (severity != -1)
 			{
-				ColumnInfoDef dbCid = new ColumnInfoDef();
-				dbCid.datatype = c.getType();
-				dbCid.length = c.getLength();
-				dbCid.allowNull = c.getAllowNull();
-				dbCid.flags = c.getFlags();
-				addDifferenceMarker(new TableDifference(t, columnName, TableDifference.COLUMN_CONFLICT, dbCid, cid), severity);
+				addDifferenceMarker(tableDifference, severity);
 			}
 		}
 	}
@@ -891,7 +856,21 @@ public class DataModelManager implements IColumnInfoManager
 					{
 						IMarker marker = resource.createMarker(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
 						marker.setAttribute(IMarker.MESSAGE, columnDifference.getUserFriendlyMessage());
-						marker.setAttribute(IMarker.SEVERITY, severity);
+						int adjustedSeverity = severity;
+						if (adjustedSeverity == IMarker.SEVERITY_ERROR)
+						{
+							DataSourceCollectorVisitor datasourceCollector = new DataSourceCollectorVisitor();
+							for (ServoyProject sp : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
+							{
+								sp.getSolution().acceptVisitor(datasourceCollector);
+							}
+							String datasource = DataSourceUtils.createDBTableDataSource(columnDifference.getServerName(), columnDifference.getTableName());
+							if (!datasourceCollector.getDataSources().contains(datasource))
+							{
+								adjustedSeverity = IMarker.SEVERITY_WARNING;
+							}
+						}
+						marker.setAttribute(IMarker.SEVERITY, adjustedSeverity);
 						marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
 						marker.setAttribute(IMarker.LOCATION, "JSON file");
 						marker.setAttribute(TableDifference.ATTRIBUTE_SERVERNAME, columnDifference.getServerName());
@@ -956,7 +935,7 @@ public class DataModelManager implements IColumnInfoManager
 		});
 	}
 
-	private int getErrorSeverity(String name)
+	private static int getErrorSeverity(String name)
 	{
 		if (name.toUpperCase().startsWith(TEMP_UPPERCASE_PREFIX)) return IMarker.SEVERITY_WARNING; // this will normally not happen as column info reads/writes for temp_ tables are ignored in Server class; but just in case make sure no error markers appear for them
 		return IMarker.SEVERITY_ERROR;
@@ -1247,6 +1226,58 @@ public class DataModelManager implements IColumnInfoManager
 			message.append(tableName);
 			message.append("->");
 			message.append(columnName);
+		}
+
+		public int getSeverity()
+		{
+			int severity = -1;
+			if (type == COLUMN_MISSING_FROM_DB || type == COLUMN_MISSING_FROM_DBI_FILE || type == MISSING_TABLE || type == MISSING_DBI_FILE)
+			{
+				severity = getErrorSeverity(tableName);
+			}
+			else if (type == COLUMN_CONFLICT)
+			{
+				Column c = table.getColumn(columnName);
+				if (c.getType() != dbiFileDefinition.datatype || c.getLength() != dbiFileDefinition.length)
+				{
+					int t1 = Column.mapToDefaultType(c.getType());
+					int t2 = Column.mapToDefaultType(dbiFileDefinition.datatype);
+					if ((t1 == t2 && c.getLength() == dbiFileDefinition.length) ||
+						(t1 == IColumnTypes.NUMBER && c.getScale() == 0 && t2 == IColumnTypes.INTEGER) ||
+						(t1 == t2 && (t1 == IColumnTypes.MEDIA || t1 == IColumnTypes.TEXT) && (Math.abs((float)c.getLength() - (float)dbiFileDefinition.length) > (Integer.MAX_VALUE / 2)))) // this check is for -1 and big value lengths
+					{
+						severity = IMarker.SEVERITY_WARNING; // somewhat compatible types... but still different
+					}
+					else
+					{
+						severity = getErrorSeverity(tableName);
+					}
+				}
+				else if (c.getAllowNull() != dbiFileDefinition.allowNull)
+				{
+					severity = IMarker.SEVERITY_WARNING;
+				}
+
+				if (severity != IMarker.SEVERITY_ERROR) // if we already discovered an error, no use checking further
+				{
+					// real column can only know if it's pk or not (doesn't know about USER_ROWID_COLUMN)
+					boolean columnInfoIsPk = ((dbiFileDefinition.flags & Column.PK_COLUMN) != 0);
+					if (c.isDatabasePK() != columnInfoIsPk)
+					{
+						if ((c.isDatabasePK() && ((dbiFileDefinition.flags & Column.IDENT_COLUMNS) == 0)) || columnInfoIsPk)
+						{
+							// column is pk, but columninfo knows it as normal column, or column is not pk and columninfo knows it as pk
+							severity = getErrorSeverity(tableName);
+						}
+						else if (c.isDatabasePK() && ((dbiFileDefinition.flags & Column.USER_ROWID_COLUMN) != 0))
+						{
+							// columns is pk, column info says it's USER_ROWID_COLUMN - both ident columns, but not quite the same
+							severity = IMarker.SEVERITY_WARNING;
+						} // else no other case should be left
+					}
+				}
+			}
+			return severity;
 		}
 	}
 
