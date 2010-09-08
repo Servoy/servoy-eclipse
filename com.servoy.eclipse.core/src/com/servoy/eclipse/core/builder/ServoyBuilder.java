@@ -82,6 +82,7 @@ import com.servoy.eclipse.core.ServoyResourcesProject;
 import com.servoy.eclipse.core.repository.EclipseRepository;
 import com.servoy.eclipse.core.repository.SolutionDeserializer;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.eclipse.core.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.CoreUtils;
 import com.servoy.j2db.FlattenedSolution;
@@ -95,6 +96,7 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.ContentSpec;
+import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
@@ -956,6 +958,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			if (active && servoyProject.getSolution() != null)
 			{
 				addDeserializeProblemMarkers(servoyProject);
+				refreshDBIMarkers();
 				checkPersistDuplication();
 				servoyProject.getSolution().acceptVisitor(new IPersistVisitor()
 				{
@@ -1022,8 +1025,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														if (lst.size() == 1)
 														{
 															String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																other.getUUID(),
-																SolutionSerializer.getRelativePath(p, false) + SolutionSerializer.getFileName(p, false));
+																other.getUUID(), SolutionSerializer.getRelativePath(p, false) +
+																	SolutionSerializer.getFileName(p, false));
 															addMarker(project, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_HIGH, null,
 																other);
 														}
@@ -1069,18 +1072,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																	// for now only add it on both if there is 1, just skip the rest.
 																	if (lst.size() == 1)
 																	{
-																		String msg = MarkerMessages.getMessage(
-																			MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																			other.getUUID(),
-																			SolutionSerializer.getRelativePath(p, false) +
+																		String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
+																			other.getUUID(), SolutionSerializer.getRelativePath(p, false) +
 																				SolutionSerializer.getFileName(p, false));
 																		addMarker(moduleProject, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR,
 																			IMarker.PRIORITY_HIGH, null, other);
 																	}
-																	String msg = MarkerMessages.getMessage(
-																		MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																		p.getUUID(),
-																		SolutionSerializer.getRelativePath(other, false) +
+																	String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
+																		p.getUUID(), SolutionSerializer.getRelativePath(other, false) +
 																			SolutionSerializer.getFileName(other, false));
 																	addMarker(moduleProject, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR,
 																		IMarker.PRIORITY_HIGH, null, p);
@@ -2493,6 +2492,64 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			ServoyLog.logError("No solution in a servoy project that has no deserialize problems", null); //$NON-NLS-1$
 		}
 	}
+
+	public void refreshDBIMarkers()
+	{
+		// do not delete or add dbi marker here
+		DataSourceCollectorVisitor datasourceCollector = new DataSourceCollectorVisitor();
+		for (ServoyProject sp : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
+		{
+			sp.getSolution().acceptVisitor(datasourceCollector);
+		}
+
+		ServoyResourcesProject resourcesProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
+		if (resourcesProject != null && resourcesProject.getProject() != null)
+		{
+			try
+			{
+				IMarker[] markers = resourcesProject.getProject().findMarkers(DATABASE_INFORMATION_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+				if (markers != null && markers.length > 0)
+				{
+					for (IMarker marker : markers)
+					{
+						String serverName = marker.getAttribute(TableDifference.ATTRIBUTE_SERVERNAME, null);
+						String tableName = marker.getAttribute(TableDifference.ATTRIBUTE_TABLENAME, null);
+						if (serverName != null && tableName != null)
+						{
+							String datasource = DataSourceUtils.createDBTableDataSource(serverName, tableName);
+							if (!datasourceCollector.getDataSources().contains(datasource))
+							{
+								marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
+							}
+							else
+							{
+								String columnName = marker.getAttribute(TableDifference.ATTRIBUTE_COLUMNNAME, null);
+								if (ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager() != null)
+								{
+									TableDifference tableDifference = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager().getColumnDifference(
+										serverName, tableName, columnName);
+									if (tableDifference != null)
+									{
+										int severity = tableDifference.getSeverity();
+										if (severity >= 0)
+										{
+											marker.setAttribute(IMarker.SEVERITY, severity);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+
+	}
+
 
 	private void addDeserializeProblemMarker(IResource resource, String deserializeExceptionMessage, String solutionName)
 	{
