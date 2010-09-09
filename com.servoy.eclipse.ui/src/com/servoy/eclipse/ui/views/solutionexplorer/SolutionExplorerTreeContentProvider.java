@@ -1365,7 +1365,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						try
 						{
 							// refresh all affected form relation nodes
-							node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
+							node = (PlatformSimpleUserNode)findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Forms);
 							if (node != null && node.children != null)
 							{
 								PlatformSimpleUserNode relationsNode;
@@ -1373,7 +1373,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 								for (int i = node.children.length - 1; i >= 0; i--)
 								{
 									form = (Form)node.children[i].getRealObject();
-									if (form.getTable() != null && form.getTable().equals(((Relation)persist).getPrimaryTable()))
+									if (form.getTable() != null)
 									{
 										relationsNode = (PlatformSimpleUserNode)findChildNode(node.children[i], Messages.TreeStrings_relations);
 										if (relationsNode != null)
@@ -1389,7 +1389,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							// solution node
 							if (solutionOfCalculation != null)
 							{
-								node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Relations);
+								node = (PlatformSimpleUserNode)findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Relations);
 								if (node != null && tableOfCalculation.equals(((Relation)persist).getPrimaryTable()))
 								{
 									addRelationsNodeChildren(node, solutionOfCalculation, (Table)tableOfCalculation, UserNodeType.CALC_RELATION);
