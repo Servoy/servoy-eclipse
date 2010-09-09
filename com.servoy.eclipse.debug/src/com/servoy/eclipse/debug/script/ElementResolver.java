@@ -526,7 +526,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName("globals");
-			type.setKind(TypeKind.JAVASCRIPT);
+			type.setKind(TypeKind.JAVA);
 			type.setAttribute(IMAGE_DESCRIPTOR, GLOBALS);
 
 			EList<Member> members = type.getMembers();
