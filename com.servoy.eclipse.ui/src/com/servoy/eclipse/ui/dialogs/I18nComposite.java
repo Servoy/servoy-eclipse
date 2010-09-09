@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 import java.util.Collection;
@@ -400,6 +400,7 @@ public class I18nComposite extends Composite
 		selectedLanguage = new Locale(getAvailableLanguages().get(((IStructuredSelection)languageComboViewer.getSelection()).getFirstElement()),
 			getAvailableCountries().get(((IStructuredSelection)countryComboViewer.getSelection()).getFirstElement()));
 		messagesModel.setLanguage(selectedLanguage);
+		lastAutoSelectedKey = getSelectedKey();
 		handleFilterChanged();
 	}
 
@@ -408,6 +409,7 @@ public class I18nComposite extends Composite
 		selectedLanguage = new Locale(getAvailableLanguages().get(((IStructuredSelection)languageComboViewer.getSelection()).getFirstElement()),
 			getAvailableCountries().get(((IStructuredSelection)countryComboViewer.getSelection()).getFirstElement()));
 		messagesModel.setLanguage(selectedLanguage);
+		lastAutoSelectedKey = getSelectedKey();
 		handleFilterChanged();
 	}
 
@@ -425,7 +427,7 @@ public class I18nComposite extends Composite
 	public String getSelectedKey()
 	{
 		I18NMessagesModelEntry row = (I18NMessagesModelEntry)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
-		return row == null ? null : row.key;
+		return row == null ? null : "i18n:" + row.key;
 	}
 
 	public I18NMessagesModelEntry getSelectedRow()
@@ -449,7 +451,7 @@ public class I18nComposite extends Composite
 		}
 		String selection = getSelectedKey();
 		tableViewer.setInput(messagesModel.getMessages(filterText.getText(), filterColumn, filterValue));
-		if (selection != null) selectKey("i18n:" + selection);
+		if (selection != null) selectKey(selection);
 	}
 
 	public void selectKey(String value)

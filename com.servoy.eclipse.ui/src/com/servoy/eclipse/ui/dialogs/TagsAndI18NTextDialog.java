@@ -257,9 +257,9 @@ public class TagsAndI18NTextDialog extends Dialog
 	protected void handleI18nSelectionChanged(SelectionChangedEvent event)
 	{
 		String key = i18nComposite.getSelectedKey();
-		if (key != null && !text.getText().equals("i18n:" + key))
+		if (key != null && !text.getText().equals(key))
 		{
-			text.setText("i18n:" + key);
+			text.setText(key);
 		}
 	}
 
