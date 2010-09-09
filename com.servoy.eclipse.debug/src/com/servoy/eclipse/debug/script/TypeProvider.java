@@ -366,6 +366,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 		private Type getElementType(ITypeInfoContext context, Class< ? > cls)
 		{
+			if (cls == null) return null;
 			Type type = elementTypes.get(cls.getSimpleName());
 			if (type == null)
 			{
