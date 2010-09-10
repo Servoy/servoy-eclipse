@@ -183,19 +183,14 @@ public class RepositoryAccessPoint
 		return Utils.stringSafeEquals(serverAddress, srv) && Utils.stringSafeEquals(user, usr) && Utils.stringSafeEquals(passwordHash, pwdHash);
 	}
 
-	public ITeamRepository getRepository()
+	public ITeamRepository getRepository() throws ApplicationServerAccessException, RepositoryAccessException, RemoteException
 	{
 		if (repository == null)
 		{
-			try
-			{
-				repository = createRepository();
-			}
-			catch (Exception e)
-			{
-				Debug.error("Could not create repository", e);
-			}
+			repository = createRepository();
 		}
+		if (repository == null) throw new RepositoryAccessException("Cannot access team repository.");
+
 		return repository;
 	}
 
@@ -264,7 +259,7 @@ public class RepositoryAccessPoint
 	/*
 	 * Checks if the remote repository version is the same with the eclipse repository version
 	 */
-	public void checkRemoteRepositoryVersion() throws RemoteException, RepositoryAccessException
+	public void checkRemoteRepositoryVersion() throws RemoteException, RepositoryAccessException, ApplicationServerAccessException
 	{
 		int remoteRepositoryVersion = getRepository().getRepositoryVersion();
 		int localRepository = AbstractRepository.repository_version;
