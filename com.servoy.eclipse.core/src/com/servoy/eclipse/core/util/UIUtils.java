@@ -407,7 +407,7 @@ public class UIUtils
 			ImageIO.write(bufferedImage, "PNG", outBytes);
 			return new Image(device, inBytes);
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			ServoyLog.logWarning("Cannot convert swing icon into SWT image", e);
 			return null;
