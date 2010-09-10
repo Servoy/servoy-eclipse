@@ -39,6 +39,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AbstractScriptProvider;
 import com.servoy.j2db.persistence.ArgumentType;
+import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
@@ -514,7 +515,7 @@ public class SolutionSerializer
 					{
 						generateDefaultJSDoc(obj, sb);
 					}
-					int type = sv.getVariableType();
+					int type = Column.mapToDefaultType(sv.getVariableType());
 					// Add the "@type" tag.
 					String jsType = sv.getSerializableRuntimeProperty(IScriptProvider.TYPE);
 					String typeStr = ArgumentType.convertFromColumnType(type, jsType).getName();

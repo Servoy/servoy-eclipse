@@ -128,13 +128,12 @@ public class ColumnDetailsComposite extends Composite
 			{
 				if (column != null)
 				{
-					FormatDialog fd = new FormatDialog(getShell(), defaultFormat.getText(), column.getType());
+					FormatDialog fd = new FormatDialog(getShell(), defaultFormat.getText(), column.getDataProviderType());
 					fd.open();
 					if (fd.getReturnCode() != Window.CANCEL)
 					{
 						defaultFormat.setText(fd.getFormat());
 					}
-
 				}
 			}
 		});
@@ -188,46 +187,46 @@ public class ColumnDetailsComposite extends Composite
 		//add group
 		add(
 		//start group
-			GroupLayout.TRAILING, groupLayout.createSequentialGroup().
-			//add group with default format label, title label, foreign type label, flags label
-			add(groupLayout.createParallelGroup(GroupLayout.LEADING).
-			//add default format label;
-			add(titleLabel).
-			//add title label;
-			add(defaultFormatLabel).
-			//add foreign type label;
-			add(foreignTypeLabel).
-			//add flags label
-			add(flagsLabel)).add(10, 10, 10).
-			//add the group
-			add(
-			//start parallel group
-				groupLayout.createParallelGroup(GroupLayout.LEADING).
-				//add the title text-box;
-				add(GroupLayout.TRAILING, titleText, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
-				//add the default format combo-box;
-				add(formatComposite, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
-				//add the foreign-type combo-box
-				add(groupLayout.createSequentialGroup().add(foreignTypeControl, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
-				//
-				addPreferredGap(LayoutStyle.RELATED).
-				//add the suggest button for foreign type
-				add(suggestForeignTypeButton)).
-				//add other flags combo-box
-				add(
-				//add the flags
-					groupLayout.createSequentialGroup().
-					//
-					add(excludedCheckBox, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).
-					//
-					addPreferredGap(LayoutStyle.RELATED).
-					//
-					add(uuidCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+		GroupLayout.TRAILING, groupLayout.createSequentialGroup().
+		//add group with default format label, title label, foreign type label, flags label
+		add(groupLayout.createParallelGroup(GroupLayout.LEADING).
+		//add default format label;
+		add(titleLabel).
+		//add title label;
+		add(defaultFormatLabel).
+		//add foreign type label;
+		add(foreignTypeLabel).
+		//add flags label
+		add(flagsLabel)).add(10, 10, 10).
+		//add the group
+		add(
+		//start parallel group
+		groupLayout.createParallelGroup(GroupLayout.LEADING).
+		//add the title text-box;
+		add(GroupLayout.TRAILING, titleText, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
+		//add the default format combo-box;
+		add(formatComposite, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
+		//add the foreign-type combo-box
+		add(groupLayout.createSequentialGroup().add(foreignTypeControl, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
+		//
+		addPreferredGap(LayoutStyle.RELATED).
+		//add the suggest button for foreign type
+		add(suggestForeignTypeButton)).
+		//add other flags combo-box
+		add(
+		//add the flags
+		groupLayout.createSequentialGroup().
+		//
+		add(excludedCheckBox, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).
+		//
+		addPreferredGap(LayoutStyle.RELATED).
+		//
+		add(uuidCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
 
-				//end adding the flags
-				)
-			//-- end group layout
-			)
+		//end adding the flags
+		)
+		//-- end group layout
+		)
 		//-- end group
 		).add(
 		//create a sequential group
@@ -331,8 +330,8 @@ public class ColumnDetailsComposite extends Composite
 
 		bindingContext.bindValue(descriptionTextObserveWidget, getCIDescriptionObserveValue,
 			new UpdateValueStrategy().setAfterGetValidator(new NotSameValidator(getCIDescriptionObserveValue)), null);
-		bindingContext.bindValue(titleTextObserveWidget, getCITitleObserveValue, new UpdateValueStrategy().setAfterGetValidator(new NotSameValidator(
-			getCITitleObserveValue)), null);
+		bindingContext.bindValue(titleTextObserveWidget, getCITitleObserveValue,
+			new UpdateValueStrategy().setAfterGetValidator(new NotSameValidator(getCITitleObserveValue)), null);
 		bindingContext.bindValue(defaultFormatTextObserveWidget, getCIDefaultFormatObserveValue,
 			new UpdateValueStrategy().setAfterGetValidator(new NotSameValidator(getCIDefaultFormatObserveValue)), null);
 		bindingContext.bindValue(foreignTypeTextObserveWidget, getCIForeignTypeObserveValue,

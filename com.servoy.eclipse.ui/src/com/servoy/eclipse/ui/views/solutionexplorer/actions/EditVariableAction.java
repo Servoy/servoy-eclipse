@@ -33,6 +33,7 @@ import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewVariableAction.VariableEditDialog;
+import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IValidateName;
@@ -131,7 +132,7 @@ public class EditVariableAction extends Action implements ISelectionChangedListe
 							}
 							return message;
 						}
-					}, variable.getName(), variable.getDataProviderType(), variable.getDefaultValue());
+					}, variable.getName(), Column.mapToDefaultType(variable.getDataProviderType()), variable.getDefaultValue());
 				askUserDialog.open();
 				if (askUserDialog.getVariableName() != null &&
 					(variable.getName() != askUserDialog.getVariableName() || variable.getDataProviderType() != askUserDialog.getVariableType() || variable.getDefaultValue() != askUserDialog.getVariableDefaultValue()))

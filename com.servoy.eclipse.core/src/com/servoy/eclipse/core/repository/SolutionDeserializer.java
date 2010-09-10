@@ -78,6 +78,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AbstractScriptProvider;
 import com.servoy.j2db.persistence.ArgumentType;
+import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.Form;
@@ -990,7 +991,7 @@ public class SolutionDeserializer
 					}
 					if (code instanceof DecimalLiteral)
 					{
-						int variableType = json.optInt(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
+						int variableType = Column.mapToDefaultType(json.optInt(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT));
 						try
 						{
 							Integer.parseInt(value_part);
