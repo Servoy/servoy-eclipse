@@ -57,6 +57,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -111,6 +112,9 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	private PaletteRoot paletteModel;
 	private RulerComposite rulerComposite;
 
+	private Runnable selectionChangedHandler;
+	private ISelection currentSelection;
+
 	public VisualFormEditorDesignPage(VisualFormEditor editorPart)
 	{
 		this.editorPart = editorPart;
@@ -151,75 +155,101 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	};
 
 	@Override
-	public void selectionChanged(IWorkbenchPart part, ISelection selection)
+	public void selectionChanged(IWorkbenchPart part, ISelection newSelection)
 	{
-		final List<EditPart> editParts = new ArrayList<EditPart>();
-		boolean persistContext = !selection.isEmpty();
+		currentSelection = newSelection;
 
-		// set selection if persists are selected
-		if (selection instanceof IStructuredSelection)
+		// handle the selection when ui thread comes available, in case of may selection changed events, only the last one is handled, the others are skipped
+		Display.getCurrent().asyncExec(getSelectionChangedHandler());
+	}
+
+	protected Runnable getSelectionChangedHandler()
+	{
+		if (selectionChangedHandler == null)
 		{
-			Iterator<Object> iterator = ((IStructuredSelection)selection).iterator();
-			while (iterator.hasNext())
+			selectionChangedHandler = new Runnable()
 			{
-				Object sel = iterator.next();
-				if (!(sel instanceof PersistContext) || (((PersistContext)sel).getPersist() instanceof Part)) persistContext = false;
-				Object model = Platform.getAdapterManager().getAdapter(sel, IPersist.class);
-				if (model == null)
+				public void run()
 				{
-					model = Platform.getAdapterManager().getAdapter(sel, FormElementGroup.class);
-				}
-				if (model != null)
-				{
-					// if we have an editpart for the model, it is on the form
-					EditPart ep = (EditPart)getGraphicalViewer().getEditPartRegistry().get(model);
-					if (ep != null)
+					ISelection selection = currentSelection;
+					if (selection == null)
 					{
-						editParts.add(ep);
+						// already handled
+						return;
+					}
+					currentSelection = null;
+
+					final List<EditPart> editParts = new ArrayList<EditPart>();
+					boolean persistContext = !selection.isEmpty();
+
+					// set selection if persists are selected
+					if (selection instanceof IStructuredSelection)
+					{
+						Iterator<Object> iterator = ((IStructuredSelection)selection).iterator();
+						while (iterator.hasNext())
+						{
+							Object sel = iterator.next();
+							if (!(sel instanceof PersistContext) || (((PersistContext)sel).getPersist() instanceof Part)) persistContext = false;
+							Object model = Platform.getAdapterManager().getAdapter(sel, IPersist.class);
+							if (model == null)
+							{
+								model = Platform.getAdapterManager().getAdapter(sel, FormElementGroup.class);
+							}
+							if (model != null)
+							{
+								// if we have an editpart for the model, it is on the form
+								EditPart ep = (EditPart)getGraphicalViewer().getEditPartRegistry().get(model);
+								if (ep != null)
+								{
+									editParts.add(ep);
+								}
+							}
+						}
+					}
+
+					// If not the active editor, ignore selection changed.
+					if (editorPart.equals(getSite().getPage().getActiveEditor()))
+					{
+						List actions = getSelectionActions();
+						if (persistContext)
+						{
+							provider.setSelection(new StructuredSelection(editParts));
+							ActionRegistry registry = getActionRegistry();
+							Iterator iter = actions.iterator();
+							while (iter.hasNext())
+							{
+								IAction action = registry.getAction(iter.next());
+								if (action instanceof SelectionAction) ((SelectionAction)action).setSelectionProvider(provider);
+							}
+						}
+						updateActions(actions);
+						if (persistContext)
+						{
+							ActionRegistry registry = getActionRegistry();
+							Iterator iter = actions.iterator();
+							while (iter.hasNext())
+							{
+								IAction action = registry.getAction(iter.next());
+								if (action instanceof SelectionAction) ((SelectionAction)action).setSelectionProvider(null);
+							}
+						}
+					}
+
+					if (editParts.size() > 0)
+					{
+						StructuredSelection edtpartSelection = new StructuredSelection(editParts);
+						if (!edtpartSelection.equals(getGraphicalViewer().getSelection()))
+						{
+							getGraphicalViewer().setSelection(edtpartSelection);
+						}
+						// reveal the last element, otherwise you have jumpy behavior when in form designer via ctl-click element 2 is 
+						// selected whilst selected element 1 is not visible.
+						getGraphicalViewer().reveal(editParts.get(editParts.size() - 1));
 					}
 				}
-			}
+			};
 		}
-
-		// If not the active editor, ignore selection changed.
-		if (editorPart.equals(getSite().getPage().getActiveEditor()))
-		{
-			List actions = getSelectionActions();
-			if (persistContext)
-			{
-				provider.setSelection(new StructuredSelection(editParts));
-				ActionRegistry registry = getActionRegistry();
-				Iterator iter = actions.iterator();
-				while (iter.hasNext())
-				{
-					IAction action = registry.getAction(iter.next());
-					if (action instanceof SelectionAction) ((SelectionAction)action).setSelectionProvider(provider);
-				}
-			}
-			updateActions(actions);
-			if (persistContext)
-			{
-				ActionRegistry registry = getActionRegistry();
-				Iterator iter = actions.iterator();
-				while (iter.hasNext())
-				{
-					IAction action = registry.getAction(iter.next());
-					if (action instanceof SelectionAction) ((SelectionAction)action).setSelectionProvider(null);
-				}
-			}
-		}
-
-		if (editParts.size() > 0)
-		{
-			StructuredSelection newSelection = new StructuredSelection(editParts);
-			if (!newSelection.equals(getGraphicalViewer().getSelection()))
-			{
-				getGraphicalViewer().setSelection(newSelection);
-			}
-			// reveal the last element, otherwise you have jumpy behavior when in form designer via ctl-click element 2 is 
-			// selected whilst selected element 1 is not visible.
-			getGraphicalViewer().reveal(editParts.get(editParts.size() - 1));
-		}
+		return selectionChangedHandler;
 	}
 
 	@Override
