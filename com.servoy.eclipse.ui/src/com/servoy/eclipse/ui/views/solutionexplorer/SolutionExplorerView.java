@@ -1403,7 +1403,15 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						if (activeProjectNode != null)
 						{
 							tree.expandToLevel(activeProjectNode, 1);
-							tree.setSelection(new StructuredSelection(activeProjectNode), false);
+							ISelection newSelection = new StructuredSelection(activeProjectNode);
+							// force selection change, as it may have not been changed if import place holder project was active before
+							// causing solution properties view to be not updated
+							if (newSelection.equals(tree.getSelection()))
+							{
+								tree.setSelection(null);
+							}
+							tree.setSelection(newSelection, false);
+
 
 							// try to make the solution's contents visible (if they fit in the tree area);
 							// if they do not fit scroll to make the active solution the first visible node
@@ -2161,8 +2169,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
-		newActionInTreeSecondary.registerAction(UserNodeType.FORM, new OpenWizardAction(NewFormWizard.class,
-			Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form")); //$NON-NLS-1$ //$NON-NLS-2$
+		newActionInTreeSecondary.registerAction(UserNodeType.FORM,
+			new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form")); //$NON-NLS-1$ //$NON-NLS-2$
 		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION, newForm);
 
 		newActionInListPrimary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
