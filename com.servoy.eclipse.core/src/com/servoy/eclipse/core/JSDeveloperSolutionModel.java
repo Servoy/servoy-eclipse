@@ -25,6 +25,7 @@ import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Debug;
 
 /**
  * @author jcompagner
@@ -46,7 +47,7 @@ public class JSDeveloperSolutionModel
 		}
 		catch (RepositoryException e)
 		{
-			e.printStackTrace();
+			Debug.error(e);
 		}
 	}
 }
