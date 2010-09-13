@@ -262,7 +262,7 @@ import com.servoy.j2db.util.Utils;
 public class SolutionExplorerView extends ViewPart implements ISelectionChangedListener, FilteredEntity, IShowInSource, IShowInTarget
 {
 	private final Color yellow = new Color(null, 255, 255, 0);
-	private final Color light_grey = new Color(null, 211, 211, 211);
+	private final Color light_grey = new Color(null, 120, 120, 120);
 
 	public static final String PART_ID = "com.servoy.eclipse.ui.views.SolutionExplorerView"; //$NON-NLS-1$
 
@@ -490,6 +490,11 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		@Override
 		public Font getFont(Object element)
 		{
+			if (element instanceof SimpleUserNode &&
+				(((SimpleUserNode)element).getType() == UserNodeType.GRAYED_OUT || (((SimpleUserNode)element).getType() == UserNodeType.I18N_FILE_ITEM && !((SimpleUserNode)element).isEnabled())))
+			{
+				return JFaceResources.getFontRegistry().getItalic((JFaceResources.DIALOG_FONT));
+			}
 			if (treeFilter != null)
 			{
 				Set<Object> tmp = treeFilter.getMatchingNodes();
@@ -528,8 +533,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		@Override
 		public Color getForeground(Object element)
 		{
-			if (element instanceof SimpleUserNode && ((SimpleUserNode)element).getType() == UserNodeType.I18N_FILE_ITEM &&
-				!((SimpleUserNode)element).isEnabled())
+			if (element instanceof SimpleUserNode &&
+				(((SimpleUserNode)element).getType() == UserNodeType.GRAYED_OUT || (((SimpleUserNode)element).getType() == UserNodeType.I18N_FILE_ITEM && !((SimpleUserNode)element).isEnabled())))
 			{
 				return light_grey;
 			}
