@@ -17,9 +17,12 @@
 
 package com.servoy.eclipse.core;
 
+import java.util.List;
+
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 
@@ -35,7 +38,11 @@ public class JSDeveloperSolutionModel
 		Solution solutionCopy = Activator.getDefault().getDebugJ2DBClient().getFlattenedSolution().getSolutionCopy();
 		try
 		{
-			SolutionSerializer.writePersist(solutionCopy, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
+			List<IPersist> allObjectsAsList = solutionCopy.getAllObjectsAsList();
+			for (IPersist persist : allObjectsAsList)
+			{
+				SolutionSerializer.writePersist(persist, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
+			}
 		}
 		catch (RepositoryException e)
 		{
