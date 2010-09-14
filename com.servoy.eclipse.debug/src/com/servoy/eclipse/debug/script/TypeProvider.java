@@ -630,7 +630,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			else if (provider instanceof ScriptVariable)
 			{
 				image = FORM_VARIABLE_IMAGE;
-				variableType = "ScriptVariable";
+				variableType = getParsedComment(((ScriptVariable)provider).getComment());
 				property.setAttribute(RESOURCE, ((ScriptVariable)provider).getSerializableRuntimeProperty(IScriptProvider.FILENAME));
 			}
 			property.setAttribute(IMAGE_DESCRIPTOR, image);

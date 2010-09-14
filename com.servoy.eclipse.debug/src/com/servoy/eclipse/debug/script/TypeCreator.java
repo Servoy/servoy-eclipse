@@ -17,6 +17,8 @@
 package com.servoy.eclipse.debug.script;
 
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,6 +33,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Method;
@@ -43,9 +46,9 @@ import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.mozilla.javascript.JavaMembers;
+import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
-import org.mozilla.javascript.JavaMembers.BeanProperty;
 
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyLog;
@@ -666,16 +669,6 @@ public abstract class TypeCreator
 			}
 		}
 
-		String declaration = sm.getDeclaration();
-		int commentStart = declaration.indexOf("/**");
-		if (commentStart != -1)
-		{
-			int commentEnd = declaration.indexOf("*/", commentStart);
-			if (declaration.lastIndexOf("@deprecated", commentEnd) != -1)
-			{
-				method.setDeprecated(true);
-			}
-		}
 
 		String type = sm.getSerializableRuntimeProperty(IScriptProvider.TYPE);
 		if (type != null)
@@ -683,9 +676,24 @@ public abstract class TypeCreator
 			method.setType(context.getType(type));
 		}
 		String comment = sm.getRuntimeProperty(IScriptProvider.COMMENT);
+		if (comment == null)
+		{
+			String declaration = sm.getDeclaration();
+			int commentStart = declaration.indexOf("/**");
+			if (commentStart != -1)
+			{
+				int commentEnd = declaration.indexOf("*/", commentStart);
+				comment = declaration.substring(commentStart, commentEnd);
+			}
+		}
 		if (comment != null)
 		{
-			method.setDescription(comment);
+			if (comment.lastIndexOf("@deprecated") != -1)
+			{
+				method.setDeprecated(true);
+			}
+
+			method.setDescription(getParsedComment(comment));
 		}
 		if (image != null)
 		{
@@ -752,6 +760,52 @@ public abstract class TypeCreator
 			property.setAttribute(RESOURCE, resource);
 		}
 		return property;
+	}
+
+	public static String getParsedComment(String comment)
+	{
+		int currPos = 0;
+		int endPos = comment.length();
+		boolean newLine = true;
+		StringBuilder sb = new StringBuilder(comment.length());
+		outer : while (currPos < endPos)
+		{
+			char ch;
+			if (newLine)
+			{
+				do
+				{
+					ch = comment.charAt(currPos++);
+					if (currPos >= endPos) break outer;
+					if (ch == '\n' || ch == '\r') break;
+				}
+				while (Character.isWhitespace(ch) || ch == '*' || ch == '/');
+			}
+			else
+			{
+				ch = comment.charAt(currPos++);
+			}
+			newLine = ch == '\n' || ch == '\r';
+
+			if (newLine)
+			{
+				if (sb.length() != 0) sb.append("<br/>\n");
+			}
+			else
+			{
+				sb.append(ch);
+			}
+		}
+
+		JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(sb.toString()));
+		try
+		{
+			return reader.getString();
+		}
+		catch (IOException e)
+		{
+			return comment;
+		}
 	}
 
 	/**

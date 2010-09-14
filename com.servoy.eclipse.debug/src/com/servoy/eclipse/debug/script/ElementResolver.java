@@ -545,7 +545,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 				{
 					ScriptVariable sv = scriptVariables.next();
 
-					members.add(createProperty(sv.getName(), false, getDataPRoviderType(context, sv), sv.getComment(), GLOBAL_VAR_IMAGE,
+					members.add(createProperty(sv.getName(), false, getDataPRoviderType(context, sv), getParsedComment(sv.getComment()), GLOBAL_VAR_IMAGE,
 						sv.getSerializableRuntimeProperty(IScriptProvider.FILENAME)));
 				}
 
