@@ -57,6 +57,7 @@ import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.util.UUID;
@@ -233,6 +234,8 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 //		nameValidator = null;
 	}
 
+	private boolean loadingEditingSolution = false;
+
 	/**
 	 * Get a working copy of the solution. Changes to this solution will not affect the real solution.
 	 * 
@@ -240,19 +243,24 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 	 */
 	public Solution getEditingSolution()
 	{
-		if (editingSolution == null)
+		if (editingSolution == null && !loadingEditingSolution)
 		{
-			if (getSolution() != null)
+			loadingEditingSolution = true;
+			try
 			{
-				try
+				if (getSolution() != null)
 				{
 					editingSolution = ((AbstractRepository)getSolution().getRepository()).createSolutionCopy(getSolution());
 					copyNodeToEditingSolution(getSolution(), true);
 				}
-				catch (Exception e)
-				{
-					ServoyLog.logError("Could not create a working copy of solution " + getSolution().getName(), e); //$NON-NLS-1$
-				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError("Could not create a working copy of solution " + getSolution().getName(), e); //$NON-NLS-1$
+			}
+			finally
+			{
+				loadingEditingSolution = false;
 			}
 		}
 		return editingSolution;
@@ -319,6 +327,10 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 							((AbstractBase)src).getSerializableRuntimeProperty(IScriptProvider.TYPE));
 						((AbstractBase)dest).setRuntimeProperty(IScriptProvider.INITIALIZER,
 							((AbstractBase)src).getRuntimeProperty(IScriptProvider.INITIALIZER));
+					}
+					if (src instanceof ScriptVariable)
+					{
+						((ScriptVariable)dest).setComment(((ScriptVariable)src).getComment());
 					}
 					editingSolution.clearEditingState(dest);
 
