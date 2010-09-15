@@ -328,7 +328,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String SET_TAB_SEQUENCE_TEXT = "Set tab sequence";
 	public static final String SET_TAB_SEQUENCE_TOOLTIP = SET_TAB_SEQUENCE_TEXT;
-	public static final ImageDescriptor SET_TAB_SEQUENCE_IMAGE = null;// Activator.loadImageDescriptorFromOldLocations("tabseq.gif");
+	public static final ImageDescriptor SET_TAB_SEQUENCE_IMAGE = Activator.loadImageDescriptorFromBundle("th_horizontal.gif"); // TODO create proper icon
 	public static final ActionFactory SET_TAB_SEQUENCE = new ActionFactory("set-tab-sequence") {//$NON-NLS-1$
 
 		@Override
