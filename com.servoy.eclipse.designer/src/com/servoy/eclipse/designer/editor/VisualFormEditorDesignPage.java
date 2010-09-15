@@ -49,15 +49,20 @@ import org.eclipse.gef.ui.parts.ScrollingGraphicalViewer;
 import org.eclipse.gef.ui.rulers.RulerComposite;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -70,6 +75,8 @@ import org.eclipse.ui.views.properties.PropertySheetPage;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate;
+import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate.IActionAddedListener;
 import com.servoy.eclipse.designer.actions.AlignmentSortPartsAction;
 import com.servoy.eclipse.designer.actions.DistributeAction;
 import com.servoy.eclipse.designer.actions.DistributeRequest;
@@ -79,6 +86,7 @@ import com.servoy.eclipse.designer.dnd.FormElementTransferDropTarget;
 import com.servoy.eclipse.designer.editor.commands.BringToFrontAction;
 import com.servoy.eclipse.designer.editor.commands.CopyAction;
 import com.servoy.eclipse.designer.editor.commands.CutAction;
+import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
 import com.servoy.eclipse.designer.editor.commands.FixedSelectAllAction;
 import com.servoy.eclipse.designer.editor.commands.GroupAction;
 import com.servoy.eclipse.designer.editor.commands.PasteAction;
@@ -93,6 +101,7 @@ import com.servoy.eclipse.designer.property.UndoablePersistPropertySourceProvide
 import com.servoy.eclipse.designer.property.UndoablePropertySheetEntry;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
+import com.servoy.eclipse.ui.util.ActionToolItem;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
@@ -105,12 +114,13 @@ import com.servoy.j2db.util.Settings;
  * @author rgansevles
  */
 
-public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette implements PropertyChangeListener
+public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette implements PropertyChangeListener, IActionAddedListener
 {
 	protected GraphicalViewer graphicalViewer;
 	private final VisualFormEditor editorPart;
 	private PaletteRoot paletteModel;
 	private RulerComposite rulerComposite;
+	private ToolBarManager toolbarManager;
 
 	private Runnable selectionChangedHandler;
 	private ISelection currentSelection;
@@ -460,6 +470,43 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		return rulerComposite;
 	}
 
+	@Override
+	public void createPartControl(Composite parent)
+	{
+		Composite c = new Composite(parent, SWT.NONE);
+		c.setLayout(new GridLayout(1, true));
+		toolbarManager = new ToolBarManager(SWT.NONE);
+		ToolBar toolbar = toolbarManager.createControl(c);
+		toolbar.setLayoutData(new org.eclipse.swt.layout.GridData(org.eclipse.swt.layout.GridData.FILL_HORIZONTAL));
+
+		Composite composite = new Composite(c, SWT.NONE);
+		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		composite.setLayout(new FillLayout());
+
+		editorActionCreated(DesignerActionFactory.BRING_TO_FRONT.create(getSite().getWorkbenchWindow()));
+
+		editorActionCreated(DesignerActionFactory.SEND_TO_BACK.create(getSite().getWorkbenchWindow()));
+		editorActionCreated(DesignerActionFactory.SET_TAB_SEQUENCE.create(getSite().getWorkbenchWindow()));
+		editorActionCreated(DesignerActionFactory.GROUP.create(getSite().getWorkbenchWindow()));
+		editorActionCreated(DesignerActionFactory.UNGROUP.create(getSite().getWorkbenchWindow()));
+		editorActionCreated(DesignerActionFactory.SAVE_AS_TEMPLATE.create(getSite().getWorkbenchWindow()));
+
+		List<IAction> editPartActions = AbstractEditpartActionDelegate.getEditPartActions();
+		for (IAction action : editPartActions)
+		{
+			editorActionCreated(action);
+		}
+		AbstractEditpartActionDelegate.addActionAddedListener(this); // sometimes the VFE is created before the actions are created
+
+		super.createPartControl(composite);
+	}
+
+	public void editorActionCreated(final IAction action)
+	{
+		new ActionToolItem(toolbarManager.getControl(), action);
+		toolbarManager.getControl().getParent().layout();
+	}
+
 	/**
 	 * Creates the GraphicalViewer on the specified <code>Composite</code>.
 	 * 
@@ -515,6 +562,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		Settings settings = ServoyModel.getSettings();
 		settings.removePropertyChangeListener(this, DesignerPreferences.GUIDE_SIZE_SETTING);
 		settings.removePropertyChangeListener(this, DesignerPreferences.METRICS_SETTING);
+		AbstractEditpartActionDelegate.removeActionAddedListener(this);
 
 		super.dispose();
 	}

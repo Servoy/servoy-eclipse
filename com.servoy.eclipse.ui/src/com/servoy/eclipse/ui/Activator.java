@@ -58,6 +58,8 @@ public class Activator extends AbstractUIPlugin
 
 	private final Map<String, Image> grayCacheBundle = new HashMap<String, Image>();
 
+	private final Map<ImageDescriptor, Image> imageCacheDescriptor = new HashMap<ImageDescriptor, Image>();
+
 
 	/*
 	 * (non-Javadoc)
@@ -107,6 +109,13 @@ public class Activator extends AbstractUIPlugin
 		}
 		grayCacheBundle.clear();
 
+		it = imageCacheDescriptor.values().iterator();
+		while (it.hasNext())
+		{
+			it.next().dispose();
+		}
+		imageCacheDescriptor.clear();
+
 		sharedTextColors.dispose();
 		plugin = null;
 		super.stop(context);
@@ -150,6 +159,19 @@ public class Activator extends AbstractUIPlugin
 			}
 		}
 		return img;
+	}
+
+	public Image getImage(ImageDescriptor imageDescriptor)
+	{
+		if (imageDescriptor == null) return null;
+
+		Image image = imageCacheDescriptor.get(imageDescriptor);
+		if (image == null)
+		{
+			image = imageDescriptor.createImage();
+			imageCacheDescriptor.put(imageDescriptor, image);
+		}
+		return image;
 	}
 
 	public Image loadImageFromOldLocation(String name)

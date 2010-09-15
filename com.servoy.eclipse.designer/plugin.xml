@@ -132,7 +132,6 @@
                menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
                state="false"
                style="push"
-               toolbarPath="Normal/additions"
                tooltip="Place Template..."/>
          <action
                class="com.servoy.eclipse.designer.actions.AddTabActionDelegate"
@@ -143,7 +142,6 @@
                menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
                state="false"
                style="push"
-               toolbarPath="Normal/additions"
                tooltip="Place TabPanel..."/>
          <action
                class="com.servoy.eclipse.designer.actions.AddSplitPaneActionDelegate"
@@ -154,7 +152,6 @@
                menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
                state="false"
                style="push"
-               toolbarPath="Normal/additions"
                tooltip="Place SplitPane..."/>               
          <action
                class="com.servoy.eclipse.designer.actions.AddMediaActionDelegate"
@@ -165,7 +162,6 @@
                menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
                state="false"
                style="push"
-               toolbarPath="Normal/additions"
                tooltip="Place Image..."/>
          <action
                class="com.servoy.eclipse.designer.actions.AddBeanActionDelegate"
@@ -176,7 +172,6 @@
                menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
                state="false"
                style="push"
-               toolbarPath="Normal/additions"
                tooltip="Place Bean..."/>
          <action
                class="com.servoy.eclipse.designer.actions.AddPortalActionDelegate"
@@ -187,7 +182,6 @@
                menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
                state="false"
                style="push"
-               toolbarPath="Normal/additions"
                tooltip="Place Portal..."/>
          <action
                class="com.servoy.eclipse.designer.actions.AddButtonActionDelegate"
@@ -198,7 +192,6 @@
                menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
                state="false"
                style="push"
-               toolbarPath="Normal/additions"
                tooltip="Place Button"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddFieldActionDelegate"
@@ -209,7 +202,6 @@
                menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
                state="false"
                style="push"
-               toolbarPath="Normal/additions"
                tooltip="Place Field..."/>
          <action
                class="com.servoy.eclipse.designer.actions.AddLabelActionDelegate"
@@ -220,7 +212,6 @@
                menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
                state="false"
                style="push"
-               toolbarPath="Normal/additions"
                tooltip="Place Label"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddHorizontalLineActionDelegate"
@@ -230,7 +221,6 @@
                menubarPath="com.servoy.eclipse.designer.ElementsMenu/drawing"
                state="false"
                style="push"
-               toolbarPath="Normal/drawing"
                tooltip="Horizontal Line"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddVerticalLineActionDelegate"
@@ -240,7 +230,6 @@
                menubarPath="com.servoy.eclipse.designer.ElementsMenu/drawing"
                state="false"
                style="push"
-               toolbarPath="Normal/drawing"
                tooltip="Vertical Line"/>
       </actionSet>
       <actionSet
@@ -254,7 +243,6 @@
                label="Place Border panel"
                state="false"
                style="push"
-               toolbarPath="Normal/shapes"
                tooltip="Place Border Panel"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddRoundedRectangleActionDelegate"
@@ -263,7 +251,6 @@
                label="Place Rounded Rectangle"
                state="false"
                style="push"
-               toolbarPath="Normal/shapes"
                tooltip="Place Rounded Rectangle"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddRectangleActionDelegate"
@@ -272,7 +259,6 @@
                label="Place Rectangle"
                state="false"
                style="push"
-               toolbarPath="Normal/shapes"
                tooltip="Place Rectangle"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddCircleActionDelegate"
@@ -281,7 +267,6 @@
                label="Place Circle"
                state="false"
                style="push"
-               toolbarPath="Normal/shapes"
                tooltip="Place Circle"/>
       </actionSet>
        <actionSet

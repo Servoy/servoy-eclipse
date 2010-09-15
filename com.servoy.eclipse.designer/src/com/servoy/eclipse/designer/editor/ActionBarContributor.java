@@ -52,44 +52,38 @@ public class ActionBarContributor extends org.eclipse.gef.ui.actions.ActionBarCo
 	@Override
 	protected void buildActions()
 	{
-		myActions.add(ActionFactory.CUT.create(getPage().getWorkbenchWindow()));
-		myActions.add(ActionFactory.DELETE.create(getPage().getWorkbenchWindow()));
-		myActions.add(ActionFactory.UNDO.create(getPage().getWorkbenchWindow()));
-		myActions.add(ActionFactory.REDO.create(getPage().getWorkbenchWindow()));
-		myActions.add(ActionFactory.COPY.create(getPage().getWorkbenchWindow()));
-		myActions.add(ActionFactory.PASTE.create(getPage().getWorkbenchWindow()));
-		myActions.add(ActionFactory.SELECT_ALL.create(getPage().getWorkbenchWindow()));
-		notOnToolbar.add(ActionFactory.SELECT_ALL.getId());
-		myActions.add(DesignerActionFactory.BRING_TO_FRONT.create(getPage().getWorkbenchWindow()));
-		myActions.add(DesignerActionFactory.SEND_TO_BACK.create(getPage().getWorkbenchWindow()));
-		myActions.add(DesignerActionFactory.GROUP.create(getPage().getWorkbenchWindow()));
-		myActions.add(DesignerActionFactory.UNGROUP.create(getPage().getWorkbenchWindow()));
-		myActions.add(DesignerActionFactory.TOGGLE_SHOW_GRID.create(getPage().getWorkbenchWindow()));
-		myActions.add(DesignerActionFactory.TOGGLE_SNAPTO_GRID.create(getPage().getWorkbenchWindow()));
-		myActions.add(new AlignmentRetargetAction(PositionConstants.LEFT));
-		myActions.add(new AlignmentRetargetAction(PositionConstants.RIGHT));
-		myActions.add(new AlignmentRetargetAction(PositionConstants.TOP));
-		myActions.add(new AlignmentRetargetAction(PositionConstants.BOTTOM));
-		myActions.add(new AlignmentRetargetAction(PositionConstants.CENTER));
-		myActions.add(new AlignmentRetargetAction(PositionConstants.MIDDLE));
-		myActions.add(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_SPACING.create(getPage().getWorkbenchWindow()));
-		myActions.add(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_CENTER.create(getPage().getWorkbenchWindow()));
-		myActions.add(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_PACK.create(getPage().getWorkbenchWindow()));
-		myActions.add(DesignerActionFactory.DISTRIBUTE_VERTICAL_SPACING.create(getPage().getWorkbenchWindow()));
-		myActions.add(DesignerActionFactory.DISTRIBUTE_VERTICAL_CENTER.create(getPage().getWorkbenchWindow()));
-		myActions.add(DesignerActionFactory.DISTRIBUTE_VERTICAL_PACK.create(getPage().getWorkbenchWindow()));
-		myActions.add(DesignerActionFactory.ANCHOR_TOP_TOGGLE.create(getPage().getWorkbenchWindow()));
-		notOnToolbar.add(DesignerActionFactory.ANCHOR_TOP_TOGGLE.getId());
-		myActions.add(DesignerActionFactory.ANCHOR_RIGHT_TOGGLE.create(getPage().getWorkbenchWindow()));
-		notOnToolbar.add(DesignerActionFactory.ANCHOR_RIGHT_TOGGLE.getId());
-		myActions.add(DesignerActionFactory.ANCHOR_BOTTOM_TOGGLE.create(getPage().getWorkbenchWindow()));
-		notOnToolbar.add(DesignerActionFactory.ANCHOR_BOTTOM_TOGGLE.getId());
-		myActions.add(DesignerActionFactory.ANCHOR_LEFT_TOGGLE.create(getPage().getWorkbenchWindow()));
-		notOnToolbar.add(DesignerActionFactory.ANCHOR_LEFT_TOGGLE.getId());
-		myActions.add(DesignerActionFactory.SET_TAB_SEQUENCE.create(getPage().getWorkbenchWindow()));
-		notOnToolbar.add(DesignerActionFactory.SET_TAB_SEQUENCE.getId());
-		myActions.add(DesignerActionFactory.SAVE_AS_TEMPLATE.create(getPage().getWorkbenchWindow()));
-		notOnToolbar.add(DesignerActionFactory.SAVE_AS_TEMPLATE.getId());
+		addMyAction(ActionFactory.CUT.create(getPage().getWorkbenchWindow()), true);
+		addMyAction(ActionFactory.DELETE.create(getPage().getWorkbenchWindow()), true);
+		addMyAction(ActionFactory.UNDO.create(getPage().getWorkbenchWindow()), true);
+		addMyAction(ActionFactory.REDO.create(getPage().getWorkbenchWindow()), true);
+		addMyAction(ActionFactory.COPY.create(getPage().getWorkbenchWindow()), true);
+		addMyAction(ActionFactory.PASTE.create(getPage().getWorkbenchWindow()), true);
+
+		addMyAction(ActionFactory.SELECT_ALL.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.BRING_TO_FRONT.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.SEND_TO_BACK.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.GROUP.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.UNGROUP.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.TOGGLE_SHOW_GRID.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.TOGGLE_SNAPTO_GRID.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(new AlignmentRetargetAction(PositionConstants.LEFT), false);
+		addMyAction(new AlignmentRetargetAction(PositionConstants.RIGHT), false);
+		addMyAction(new AlignmentRetargetAction(PositionConstants.TOP), false);
+		addMyAction(new AlignmentRetargetAction(PositionConstants.BOTTOM), false);
+		addMyAction(new AlignmentRetargetAction(PositionConstants.CENTER), false);
+		addMyAction(new AlignmentRetargetAction(PositionConstants.MIDDLE), false);
+		addMyAction(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_SPACING.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_CENTER.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_PACK.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_SPACING.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_CENTER.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_PACK.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.ANCHOR_TOP_TOGGLE.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.ANCHOR_RIGHT_TOGGLE.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.ANCHOR_BOTTOM_TOGGLE.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.ANCHOR_LEFT_TOGGLE.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.SET_TAB_SEQUENCE.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.SAVE_AS_TEMPLATE.create(getPage().getWorkbenchWindow()), false);
 
 		for (IWorkbenchAction action : myActions)
 		{
@@ -102,6 +96,12 @@ public class ActionBarContributor extends org.eclipse.gef.ui.actions.ActionBarCo
 				addAction(action);
 			}
 		}
+	}
+
+	protected void addMyAction(IWorkbenchAction action, boolean onToolBar)
+	{
+		myActions.add(action);
+		if (!onToolBar) notOnToolbar.add(action.getId());
 	}
 
 	/**

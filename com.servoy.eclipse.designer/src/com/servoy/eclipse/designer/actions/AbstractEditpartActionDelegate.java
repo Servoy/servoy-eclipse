@@ -16,7 +16,9 @@
  */
 package com.servoy.eclipse.designer.actions;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.gef.EditPart;
@@ -25,7 +27,10 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IActionDelegate2;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.ide.ResourceUtil;
@@ -43,12 +48,18 @@ import com.servoy.j2db.persistence.IPersist;
  * @author rgansevles
  * 
  */
-public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindowActionDelegate
+public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindowActionDelegate, IActionDelegate2
 {
+
+	private static List<IActionAddedListener> actionListeners = new ArrayList<AbstractEditpartActionDelegate.IActionAddedListener>();
+	protected final static List<IAction> editPartActions = new ArrayList<IAction>();
+
 	private ISelection fSelection;
 	private Shell fCurrentShell;
+	protected IAction fAction;
 	protected final RequestType requestType;
 	protected final Map<Object, Object> extendedData = new HashMap<Object, Object>();
+
 
 	public AbstractEditpartActionDelegate(RequestType requestType)
 	{
@@ -57,6 +68,14 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 
 	public void dispose()
 	{
+		editPartActions.remove(fAction);
+	}
+
+	public void init(IAction action)
+	{
+		fAction = action;
+		editPartActions.add(action);
+		fireActionAdded(action);
 	}
 
 	public void init(IWorkbenchWindow window)
@@ -72,6 +91,11 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 	public Shell getShell()
 	{
 		return fCurrentShell;
+	}
+
+	public void runWithEvent(IAction action, Event event)
+	{
+		run(action);
 	}
 
 	public final void run(IAction action)
@@ -192,5 +216,63 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 			return null;
 		}
 		return persist.getAncestor(typeId);
+	}
+
+	public static List<IAction> getEditPartActions()
+	{
+		return new ArrayList<IAction>(editPartActions);
+	}
+
+	public static void addActionAddedListener(IActionAddedListener listener)
+	{
+		synchronized (actionListeners)
+		{
+			if (!actionListeners.contains(listener))
+			{
+				actionListeners.add(listener);
+			}
+		}
+	}
+
+	public static void removeActionAddedListener(IActionAddedListener listener)
+	{
+		synchronized (actionListeners)
+		{
+			actionListeners.remove(listener);
+		}
+	}
+
+	protected void fireActionAdded(final IAction action)
+	{
+		if (actionListeners.size() > 0)
+		{
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				// fire later, the action is not fully initialized
+				public void run()
+				{
+					IActionAddedListener[] array;
+					synchronized (actionListeners)
+					{
+						array = actionListeners.toArray(new IActionAddedListener[actionListeners.size()]);
+					}
+
+					for (IActionAddedListener element : array)
+					{
+						element.editorActionCreated(action);
+					}
+				}
+			});
+		}
+	}
+
+	/** Listener interface for actions added from plugin.xml
+	 * 
+	 * @author rgansevles
+	 *
+	 */
+	public interface IActionAddedListener
+	{
+		void editorActionCreated(IAction action);
 	}
 }
