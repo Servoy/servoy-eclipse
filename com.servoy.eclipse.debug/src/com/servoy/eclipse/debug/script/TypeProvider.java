@@ -73,7 +73,25 @@ import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
+import com.servoy.j2db.smart.dataui.DataButton;
+import com.servoy.j2db.smart.dataui.DataCalendar;
+import com.servoy.j2db.smart.dataui.DataCheckBox;
+import com.servoy.j2db.smart.dataui.DataChoice;
+import com.servoy.j2db.smart.dataui.DataComboBox;
+import com.servoy.j2db.smart.dataui.DataField;
+import com.servoy.j2db.smart.dataui.DataImgMediaField;
+import com.servoy.j2db.smart.dataui.DataLabel;
+import com.servoy.j2db.smart.dataui.DataLookupField;
+import com.servoy.j2db.smart.dataui.DataPassword;
+import com.servoy.j2db.smart.dataui.DataTextArea;
+import com.servoy.j2db.smart.dataui.DataTextEditor;
+import com.servoy.j2db.smart.dataui.PortalComponent;
+import com.servoy.j2db.smart.dataui.ScriptButton;
+import com.servoy.j2db.smart.dataui.ScriptLabel;
+import com.servoy.j2db.smart.dataui.SpecialSplitPane;
+import com.servoy.j2db.smart.dataui.SpecialTabPanel;
 import com.servoy.j2db.smart.dataui.SwingItemFactory;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Utils;
 
@@ -315,6 +333,30 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	{
 		private final ConcurrentHashMap<String, Type> elementTypes = new ConcurrentHashMap<String, Type>();
 
+		private final Map<String, String> typeNames = new HashMap<String, String>();
+
+		private ElementsScopeFiller()
+		{
+			typeNames.put(SpecialTabPanel.class.getSimpleName(), "TabPanel");
+			typeNames.put(SpecialSplitPane.class.getSimpleName(), "SplitPane");
+			typeNames.put(ScriptButton.class.getSimpleName(), "Button");
+			typeNames.put(DataButton.class.getSimpleName(), "Button");
+			typeNames.put(ScriptLabel.class.getSimpleName(), "Label");
+			typeNames.put(DataLabel.class.getSimpleName(), "Label");
+			typeNames.put(DataPassword.class.getSimpleName(), "Password");
+			typeNames.put(DataTextEditor.class.getSimpleName(), "HtmlArea");
+			typeNames.put(DataTextArea.class.getSimpleName(), "TextArea");
+			typeNames.put(DataChoice.class.getSimpleName(), "Checks");
+			typeNames.put(DataCheckBox.class.getSimpleName(), "CheckBox");
+			typeNames.put(DataComboBox.class.getSimpleName(), "ComboBox");
+			typeNames.put(DataCalendar.class.getSimpleName(), "Calendar");
+			typeNames.put(DataImgMediaField.class.getSimpleName(), "MediaField");
+			typeNames.put(DataLookupField.class.getSimpleName(), "TypeAhead");
+			typeNames.put(DataField.class.getSimpleName(), "TextField");
+			typeNames.put(PortalComponent.class.getSimpleName(), "Portal");
+
+		}
+
 		public void fillType(Type type, ITypeInfoContext context, String config)
 		{
 			FlattenedSolution fs = getFlattenedSolution(context);
@@ -366,11 +408,17 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		private Type getElementType(ITypeInfoContext context, Class< ? > cls)
 		{
 			if (cls == null) return null;
-			Type type = elementTypes.get(cls.getSimpleName());
+			String name = typeNames.get(cls.getSimpleName());
+			if (name == null)
+			{
+				Debug.error("no element name found for " + cls.getSimpleName());
+				name = cls.getSimpleName();
+			}
+			Type type = elementTypes.get(name);
 			if (type == null)
 			{
-				type = createType(context, cls.getSimpleName(), cls);
-				Type t = elementTypes.putIfAbsent(cls.getSimpleName(), type);
+				type = createType(context, name, cls);
+				Type t = elementTypes.putIfAbsent(name, type);
 				if (t != null) return t;
 			}
 			return type;
