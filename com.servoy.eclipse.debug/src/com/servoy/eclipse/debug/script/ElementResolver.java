@@ -60,7 +60,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController.JSForm;
-import com.servoy.j2db.FormManager.History;
+import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.persistence.AggregateVariable;
@@ -91,8 +91,6 @@ import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 @SuppressWarnings("nls")
 public class ElementResolver extends TypeCreator implements IElementResolver
 {
-	public static final String FOUNDSET_TABLE_CONFIG = "table:";
-
 	private static final List<String> noneConstantTypes = Arrays.asList(new String[] { "application", "security", "solutionModel", "databaseManager", "controller", "currentcontroller", "i18n", "history", "utils", "foundset", "forms", "elements", "globals" });
 
 	private final Map<String, ITypeNameCreator> typeNameCreators = new HashMap<String, ElementResolver.ITypeNameCreator>();
@@ -102,7 +100,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		addType("application", JSApplication.class);
 		addType("security", JSSecurity.class);
 		addType("i18n", JSI18N.class);
-		addType("history", History.class);
+		addType("history", HistoryProvider.class);
 		addType("utils", JSUtils.class);
 		addType("jsunit", JSUnitAssertFunctions.class);
 		addType("solutionModel", JSSolutionModel.class);
@@ -601,7 +599,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 				try
 				{
 					Table table = form.getTable();
-					if (table != null) return FoundSet.JS_FOUNDSET + '<' + FOUNDSET_TABLE_CONFIG + table.getServerName() + '.' + table.getName() + '>';
+					if (table != null) return FoundSet.JS_FOUNDSET + '<' + table.getServerName() + '.' + table.getName() + '>';
 				}
 				catch (RepositoryException e)
 				{

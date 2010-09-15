@@ -236,8 +236,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 							{
 								if (member.getName().equals("foundset"))
 								{
-									member.setType(context.getType(FoundSet.JS_FOUNDSET + '<' + ElementResolver.FOUNDSET_TABLE_CONFIG + table.getServerName() +
-										'.' + table.getName() + '>'));
+									member.setType(context.getType(FoundSet.JS_FOUNDSET + '<' + table.getServerName() + '.' + table.getName() + '>'));
 									break;
 								}
 							}
@@ -389,31 +388,28 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			Table table = null;
 			FlattenedSolution fs = getFlattenedSolution(context);
 
-			if (config.startsWith(ElementResolver.FOUNDSET_TABLE_CONFIG))
+			int index = config.indexOf('.');
+			if (index != -1)
 			{
 				// table foundset
-				int index = config.indexOf('.');
-				if (index > 0)
+				String serverName = config.substring(0, index);
+				String tableName = config.substring(index + 1);
+
+				if (fs != null)
 				{
-					String serverName = config.substring(ElementResolver.FOUNDSET_TABLE_CONFIG.length(), index);
-					String tableName = config.substring(index + 1);
-
-					if (fs != null)
+					try
 					{
-						try
+						IServer server = fs.getSolution().getRepository().getServer(serverName);
+						if (server != null)
 						{
-							IServer server = fs.getSolution().getRepository().getServer(serverName);
-							if (server != null)
-							{
-								table = (Table)server.getTable(tableName);
-							}
+							table = (Table)server.getTable(tableName);
 						}
-						catch (Exception e)
-						{
-							ServoyLog.logError(e);
-						}
-
 					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
+
 				}
 			}
 			else

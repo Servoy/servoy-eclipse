@@ -22,6 +22,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -487,7 +488,7 @@ public abstract class TypeCreator
 			{
 				if (memberName.equals("unrelated"))
 				{
-					if (!config.startsWith(ElementResolver.FOUNDSET_TABLE_CONFIG))
+					if (config.indexOf('.') == -1)
 					{
 						// its really a relation, unrelate it.
 						FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
@@ -496,8 +497,7 @@ public abstract class TypeCreator
 							Relation relation = fs.getRelation(config);
 							if (relation != null)
 							{
-								return FoundSet.JS_FOUNDSET + '<' + ElementResolver.FOUNDSET_TABLE_CONFIG + relation.getForeignServerName() + '.' +
-									relation.getForeignTableName() + '>';
+								return FoundSet.JS_FOUNDSET + '<' + relation.getForeignServerName() + '.' + relation.getForeignTableName() + '>';
 							}
 						}
 						return FoundSet.JS_FOUNDSET;
@@ -864,7 +864,7 @@ public abstract class TypeCreator
 		{
 			returnType = ((BeanProperty)object).getGetter().getReturnType();
 		}
-		if (returnType != null && returnType != Object.class)
+		if (returnType != null && !returnType.isAssignableFrom(Void.class) && !returnType.isAssignableFrom(void.class))
 		{
 			if (returnType.isAssignableFrom(Record.class))
 			{
@@ -873,6 +873,15 @@ public abstract class TypeCreator
 			else if (returnType.isAssignableFrom(FoundSet.class))
 			{
 				returnType = FoundSet.class;
+			}
+			else if (returnType.isPrimitive() || Number.class.isAssignableFrom(returnType))
+			{
+				if (returnType.isAssignableFrom(boolean.class)) return Boolean.class;
+				return Number.class;
+			}
+			else if (returnType == Object.class || returnType == String.class || Date.class.isAssignableFrom(returnType))
+			{
+				return returnType;
 			}
 			JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(returnType, null);
 			if (javaMembers != null)
