@@ -425,6 +425,11 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		});
 	}
 
+	public boolean isClosing()
+	{
+		return closing;
+	}
+
 	public void refreshGraphicalEditor()
 	{
 		if (!closing && graphicaleditor != null)

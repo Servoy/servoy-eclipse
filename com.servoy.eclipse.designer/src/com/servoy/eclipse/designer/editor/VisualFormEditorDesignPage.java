@@ -167,6 +167,11 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	@Override
 	public void selectionChanged(IWorkbenchPart part, ISelection newSelection)
 	{
+		if (editorPart.isClosing())
+		{
+			return;
+		}
+
 		currentSelection = newSelection;
 
 		// handle the selection when ui thread comes available, in case of may selection changed events, only the last one is handled, the others are skipped
