@@ -78,7 +78,7 @@ public class StyleClassesComboboxModel implements IComboboxPropertyModel<String>
 		List<String> styleClasses = new ArrayList<String>();
 
 		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
-		Style style = flattenedSolution.getStyleForForm(form);
+		Style style = flattenedSolution.getStyleForForm(form, null);
 		String[] classes = CoreUtils.getStyleClasses(style, lookupName);
 		if (classes != null && classes.length > 0)
 		{
