@@ -18,16 +18,18 @@ package com.servoy.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jface.viewers.ITreeContentProvider;
+
 import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Relation;
-import com.servoy.j2db.persistence.RelationList;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.Utils;
@@ -39,12 +41,14 @@ import com.servoy.j2db.util.Utils;
  * 
  */
 
-public class RelationContentProvider extends CachingContentProvider implements IMaxDepthTreeContentProvider
+public class RelationContentProvider extends CachingContentProvider implements ITreeContentProvider, ISearchKeyAdapter
 {
 	public static final Object NONE = new Object();
 
 	private final FlattenedSolution flattenedSolution;
 	private RelationListOptions options;
+
+	private final Map<Table, List<Relation>> relationCache = new HashMap<Table, List<Relation>>();
 
 	public RelationContentProvider(FlattenedSolution flattenedSolution)
 	{
@@ -59,6 +63,8 @@ public class RelationContentProvider extends CachingContentProvider implements I
 			try
 			{
 				options = (RelationListOptions)inputElement;
+
+				relationCache.clear();
 
 				List<Object> elements = new ArrayList<Object>();
 				if (options.includeNone)
@@ -163,7 +169,12 @@ public class RelationContentProvider extends CachingContentProvider implements I
 					return new Object[0];
 				}
 				RelationsWrapper wrapper = (RelationsWrapper)parentElement;
-				List<Relation> relations = getRelations(wrapper.relations[wrapper.relations.length - 1].getForeignTable(), options.foreignTable, true, true);
+				List<Relation> relations = relationCache.get(wrapper.relations[wrapper.relations.length - 1].getForeignTable());
+				if (relations == null)
+				{
+					relations = getRelations(wrapper.relations[wrapper.relations.length - 1].getForeignTable(), options.foreignTable, true, true);
+					relationCache.put(wrapper.relations[wrapper.relations.length - 1].getForeignTable(), relations);
+				}
 				Object[] children = new Object[relations.size()];
 
 				for (int i = 0; i < relations.size(); i++)
@@ -182,7 +193,7 @@ public class RelationContentProvider extends CachingContentProvider implements I
 
 	public Object getParent(Object element)
 	{
-		if (element instanceof RelationsWrapper && ((RelationsWrapper)element).relations.length > 0)
+		if (element instanceof RelationsWrapper && ((RelationsWrapper)element).relations.length > 1)
 		{
 			return new RelationsWrapper(Utils.arraySub(((RelationsWrapper)element).relations, 0, ((RelationsWrapper)element).relations.length - 1));
 		}
@@ -194,70 +205,15 @@ public class RelationContentProvider extends CachingContentProvider implements I
 		return options.includeNested && element instanceof RelationsWrapper;
 	}
 
-	public boolean searchLimitReached(Object element, int depth)
+	public Object getSearchKey(Object element)
 	{
-		return element instanceof RelationsWrapper && exceedsRelationsDepth(((RelationsWrapper)element).relations, depth);
+		if (element instanceof RelationsWrapper)
+		{
+			Relation[] relations = ((RelationsWrapper)element).relations;
+			if (relations != null && relations.length > 0) return relations[relations.length - 1];
+		}
+		return null;
 	}
-
-	/**
-	 * Check if depth limit in relations is exceeded. Allow unlimited depth if the relations are all different, limit to fixed length when a cycle is detected.
-	 * 
-	 * @param relations
-	 * @param depth 
-	 * @return
-	 */
-	public static boolean exceedsRelationsDepth(Relation[] relations, int depth)
-	{
-		if (relations == null) return false;
-		int size = relations.length;
-		if (depth != IMaxDepthTreeContentProvider.DEPTH_INFINITE && size > depth)
-		{
-			return true;
-		}
-		if (size > 2) // max limit when we are in a cycle of relations
-		{
-			Relation relation = relations[size - 1];
-			for (int i = 0; i < size - 1; i++)
-			{
-				if (relation.equals(relations[i]))
-				{
-					// cycle
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-
-	/**
-	 * @param relations
-	 * @param depth
-	 * @return
-	 */
-	public static boolean exceedsRelationsDepth(RelationList relations, int depth)
-	{
-		if (relations == null) return false;
-		int size = relations.getSize();
-		if (depth != IMaxDepthTreeContentProvider.DEPTH_INFINITE && relations != null && size > depth)
-		{
-			return true;
-		}
-		if (size > 2) // max limit when we are in a cycle of relations
-		{
-			Relation relation = relations.getRelation();
-			for (int i = 0; i < size - 1; i++)
-			{
-				if (relation.equals(relations.getRelation(i)))
-				{
-					// cycle
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 
 	public static class RelationsWrapper
 	{

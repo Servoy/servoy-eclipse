@@ -55,7 +55,6 @@ import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.IControlFactory;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
@@ -125,7 +124,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 
 		ScriptDialog(Shell shell, IPersist persist, IPersist context, Table table, ISelection selection, int treeStyle, String title)
 		{
-			super(shell, true, false, TreePatternFilter.FILTER_LEAFS, IMaxDepthTreeContentProvider.DEPTH_DEFAULT,
+			super(shell, true, false, TreePatternFilter.FILTER_LEAFS,
 			// content provider
 				new ScriptTreeContentProvider(table, persist),
 				// label provider

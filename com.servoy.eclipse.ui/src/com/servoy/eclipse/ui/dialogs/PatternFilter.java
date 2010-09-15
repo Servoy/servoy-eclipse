@@ -48,11 +48,6 @@ public class PatternFilter extends ViewerFilter
 	 */
 	private final Map<Object, Object[]> cache = new HashMap<Object, Object[]>();
 
-	/*
-	 * Maps parent elements to TRUE or FALSE
-	 */
-	private final Map<Object, Boolean> foundAnyCache = new HashMap<Object, Boolean>();
-
 	private boolean useCache = false;
 
 	private ITreeContentProvider contentProvider;
@@ -98,15 +93,7 @@ public class PatternFilter extends ViewerFilter
 		Object[] filtered = cache.get(parent);
 		if (filtered == null)
 		{
-			Boolean foundAny = foundAnyCache.get(parent);
-			if (foundAny != null && !foundAny.booleanValue())
-			{
-				filtered = EMPTY;
-			}
-			else
-			{
-				filtered = super.filter(viewer, parent, elements);
-			}
+			filtered = super.filter(viewer, parent, elements);
 			cache.put(parent, filtered);
 		}
 		return filtered;
@@ -139,13 +126,7 @@ public class PatternFilter extends ViewerFilter
 		{
 			return filtered.length > 0;
 		}
-		Boolean foundAny = foundAnyCache.get(parent);
-		if (foundAny == null)
-		{
-			foundAny = computeAnyVisible(viewer, elements) ? Boolean.TRUE : Boolean.FALSE;
-			foundAnyCache.put(parent, foundAny);
-		}
-		return foundAny.booleanValue();
+		return computeAnyVisible(viewer, elements);
 	}
 
 	/**
@@ -229,7 +210,6 @@ public class PatternFilter extends ViewerFilter
 	protected void clearCaches()
 	{
 		cache.clear();
-		foundAnyCache.clear();
 	}
 
 	/**

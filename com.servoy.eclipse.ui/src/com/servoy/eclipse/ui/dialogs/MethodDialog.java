@@ -45,7 +45,6 @@ import com.servoy.eclipse.ui.labelproviders.DelegateLabelProvider;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -84,7 +83,7 @@ public class MethodDialog extends TreeSelectDialog
 	public MethodDialog(Shell shell, ILabelProvider labelProvider, ITreeContentProvider contentProvider, ISelection selection,
 		Object /* MethodListOptions */input, int treeStyle, String title, IValueEditor valueEditor)
 	{
-		super(shell, true, true, TreePatternFilter.FILTER_LEAFS, IMaxDepthTreeContentProvider.DEPTH_DEFAULT,
+		super(shell, true, true, TreePatternFilter.FILTER_LEAFS,
 		// content provider
 			contentProvider,
 			// label provider

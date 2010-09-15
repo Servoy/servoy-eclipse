@@ -51,9 +51,9 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
-import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.layout.grouplayout.GroupLayout.ParallelGroup;
 import org.eclipse.swt.layout.grouplayout.GroupLayout.SequentialGroup;
+import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -101,7 +101,6 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 	private boolean showFilter = true;
 	private boolean showFilterMode = false;
 	private int defaultFilterMode = TreePatternFilter.FILTER_LEAFS;
-	private int defaultSearchDepth = IMaxDepthTreeContentProvider.DEPTH_DEFAULT;
 	private IFilter selectionFilter;
 	private TreeSelectContentProposalAdapter contentProposal;
 	private boolean valid = true;
@@ -374,16 +373,6 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 		this.defaultFilterMode = defaultFilterMode;
 	}
 
-	public int getDefaultSearchDepth()
-	{
-		return defaultSearchDepth;
-	}
-
-	public void setDefaultSearchDepth(int defaultSearchDepth)
-	{
-		this.defaultSearchDepth = defaultSearchDepth;
-	}
-
 	public IFilter getSelectionFilter()
 	{
 		if (selectionFilter == null)
@@ -401,8 +390,8 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 
 	protected TreeSelectDialog createDialog(Control control)
 	{
-		return new TreeSelectDialog(control.getShell(), isShowFilter(), isShowFilterMode(), getDefaultFilterMode(), getDefaultFilterMode(),
-			getContentProvider(), getLabelProvider(), getViewerComparator(), getSelectionFilter(), SWT.SINGLE, title, getInput(), getSelection(), name, null);
+		return new TreeSelectDialog(control.getShell(), isShowFilter(), isShowFilterMode(), getDefaultFilterMode(), getContentProvider(), getLabelProvider(),
+			getViewerComparator(), getSelectionFilter(), SWT.SINGLE, title, getInput(), getSelection(), name, null);
 	}
 
 	protected IStructuredSelection openDialogBox(Control control)

@@ -28,7 +28,6 @@ import com.servoy.eclipse.ui.dialogs.BeanClassContentProvider;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.property.BeanInfoLabelProvider;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 
 /**
  * Present the user available beans via a dialog.
@@ -48,9 +47,9 @@ public class AddBeanActionDelegate extends AbstractEditpartActionDelegate
 	@Override
 	protected Request createRequest(EditPart editPart)
 	{
-		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS, IMaxDepthTreeContentProvider.DEPTH_DEFAULT,
-			BeanClassContentProvider.DEFAULT, BeanInfoLabelProvider.INSTANCE_NAME, null, null, SWT.NONE, "Select bean",
-			BeanClassContentProvider.BEANS_DUMMY_INPUT, null, TreeSelectDialog.BEAN_DIALOG, null);
+		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS, BeanClassContentProvider.DEFAULT,
+			BeanInfoLabelProvider.INSTANCE_NAME, null, null, SWT.NONE, "Select bean", BeanClassContentProvider.BEANS_DUMMY_INPUT, null,
+			TreeSelectDialog.BEAN_DIALOG, null);
 		dialog.open();
 
 		if (dialog.getReturnCode() == Window.CANCEL)

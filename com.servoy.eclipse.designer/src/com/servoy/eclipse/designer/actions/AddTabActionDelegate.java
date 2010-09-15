@@ -31,7 +31,6 @@ import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.labelproviders.RelatedFormsLabelProvider;
 import com.servoy.eclipse.ui.property.RelatedFormsContentProvider;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
 
@@ -86,9 +85,9 @@ public class AddTabActionDelegate extends AbstractEditpartActionDelegate
 				return super.hasChildren(element) && !RelationContentProvider.NONE.equals(element);
 			}
 		};
-		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, true, TreePatternFilter.FILTER_LEAFS, IMaxDepthTreeContentProvider.DEPTH_DEFAULT,
-			contentProvider, RelatedFormsLabelProvider.INSTANCE, null, new LeafnodesSelectionFilter(contentProvider), SWT.MULTI, "Select tabpanel form", form,
-			null, TreeSelectDialog.TAB_DIALOG, null);
+		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, true, TreePatternFilter.FILTER_LEAFS, contentProvider,
+			RelatedFormsLabelProvider.INSTANCE, null, new LeafnodesSelectionFilter(contentProvider), SWT.MULTI, "Select tabpanel form", form, null,
+			TreeSelectDialog.TAB_DIALOG, null);
 		dialog.open();
 
 		if (dialog.getReturnCode() == Window.CANCEL)

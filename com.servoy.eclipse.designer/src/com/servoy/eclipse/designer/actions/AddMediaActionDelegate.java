@@ -34,7 +34,6 @@ import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.labelproviders.MediaLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.util.IControlFactory;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IPersist;
 
@@ -63,10 +62,9 @@ public class AddMediaActionDelegate extends AbstractEditpartActionDelegate
 
 		final FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(
 			(IPersist)editPart.getModel());
-		final TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS,
-			IMaxDepthTreeContentProvider.DEPTH_DEFAULT, new MediaContentProvider(flattenedSolution), new SolutionContextDelegateLabelProvider(
-				new MediaLabelProvider(flattenedSolution), flattenedSolution.getSolution()), null, null, SWT.NONE, "Select image",
-			new MediaContentProvider.MediaListOptions(false), null, TreeSelectDialog.MEDIA_DIALOG, null);
+		final TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS, new MediaContentProvider(
+			flattenedSolution), new SolutionContextDelegateLabelProvider(new MediaLabelProvider(flattenedSolution), flattenedSolution.getSolution()), null,
+			null, SWT.NONE, "Select image", new MediaContentProvider.MediaListOptions(false), null, TreeSelectDialog.MEDIA_DIALOG, null);
 		dialog.setOptionsAreaFactory(new IControlFactory()
 		{
 			public Control createControl(Composite composite)

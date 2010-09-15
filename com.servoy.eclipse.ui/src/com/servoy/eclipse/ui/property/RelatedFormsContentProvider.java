@@ -13,14 +13,17 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -29,9 +32,8 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory.RelatedForm;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.CachingContentProvider;
-import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
+import com.servoy.eclipse.ui.dialogs.ISearchKeyAdapter;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IServer;
@@ -47,7 +49,7 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  * 
  */
-public class RelatedFormsContentProvider extends CachingContentProvider implements IMaxDepthTreeContentProvider, IKeywordChecker
+public class RelatedFormsContentProvider extends CachingContentProvider implements ISearchKeyAdapter, IKeywordChecker
 {
 	private final Form rootForm;
 	private final FlattenedSolution flattenedSolution;
@@ -90,6 +92,73 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 		return super.getElements(inputElement);
 	}
 
+	private final Map<String, Map<String, List<Form>>> formsCache = new HashMap<String, Map<String, List<Form>>>(5);
+
+	private List<Form> getFormsOfTable(String serverName, String tableName) throws RemoteException, RepositoryException
+	{
+		if (formsCache.isEmpty())
+		{
+			Iterator<Form> forms = flattenedSolution.getForms(true);
+			while (forms.hasNext())
+			{
+				Form form = forms.next();
+				if (form == rootForm) continue; // is rootForm accessible via self
+
+				IServer formServer = flattenedSolution.getSolution().getServer(form.getServerName());
+				if (formServer == null) continue;
+				Map<String, List<Form>> map = formsCache.get(formServer.getName());
+				if (map == null)
+				{
+					map = new HashMap<String, List<Form>>(100);
+					formsCache.put(formServer.getName(), map);
+				}
+
+				List<Form> formsByTable = map.get(form.getTableName());
+				if (formsByTable == null)
+				{
+					formsByTable = new ArrayList<Form>();
+					map.put(form.getTableName(), formsByTable);
+				}
+				formsByTable.add(form);
+			}
+
+		}
+		Map<String, List<Form>> map = formsCache.get(serverName);
+		if (map == null) return Collections.emptyList();
+		List<Form> list = map.get(tableName);
+		if (list == null) return Collections.emptyList();
+		return list;
+	}
+
+	private final Map<Table, List<Relation>> relationCache = new HashMap<Table, List<Relation>>();
+
+	private List<Relation> getRelations(Table table) throws RepositoryException
+	{
+		List<Relation> list = relationCache.get(table);
+		if (list != null) return list;
+
+		Iterator<Relation> relations = flattenedSolution.getRelations(table, true, true);
+		if (relations.hasNext())
+		{
+			list = new ArrayList<Relation>();
+			Set<String> relationNames = new HashSet<String>();
+			while (relations.hasNext())
+			{
+				Relation relation = relations.next();
+				if (!relation.isGlobal() && relationNames.add(relation.getName()))
+				{
+					list.add(relation);
+				}
+			}
+		}
+
+		if (list == null) list = Collections.emptyList();
+		relationCache.put(table, list);
+		return list;
+
+	}
+
+
 	@Override
 	public Object[] getChildrenUncached(Object parentElement)
 	{
@@ -103,32 +172,18 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				List<RelatedForm> children = new ArrayList<RelatedForm>();
 
 				// add forms for this relation
-				String ft = lastRelation.getForeignTableName();
-				Iterator<Form> forms = flattenedSolution.getForms(true);
+
+				Iterator<Form> forms = getFormsOfTable(lastRelation.getForeignServer().getName(), lastRelation.getForeignTableName()).iterator();
 				while (forms.hasNext())
 				{
-					Form form = forms.next();
-					if (form == rootForm) continue; // is rootForm accessible via self
-					// ref relation
-					// compare via server objects, form or relation may refer to name of a duplicate server
-					IServer foreignServer = lastRelation.getForeignServer();
-					IServer formServer = flattenedSolution.getSolution().getServer(form.getServerName());
-					if (formServer != null && foreignServer != null && ft.equals(form.getTableName()) && foreignServer.getName().equals(formServer.getName()))
-					{
-						children.add(new RelatedForm(rf.relations, form));
-					}
+					children.add(new RelatedForm(rf.relations, forms.next()));
 				}
 
 				// add relations 1 level deeper
-				Iterator<Relation> relations = flattenedSolution.getRelations(lastRelation.getForeignTable(), true, true);
-				Set<String> relationNames = new HashSet<String>();
+				Iterator<Relation> relations = getRelations(lastRelation.getForeignTable()).iterator();
 				while (relations.hasNext())
 				{
-					Relation relation = relations.next();
-					if (!relation.isGlobal() && relationNames.add(relation.getName()))
-					{
-						children.add(new RelatedForm(Utils.arrayAdd(rf.relations, relation, true), null));
-					}
+					children.add(new RelatedForm(Utils.arrayAdd(rf.relations, relations.next(), true), null));
 				}
 
 				return children.toArray();
@@ -235,9 +290,24 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 		return !(element instanceof RelatedForm) || ((RelatedForm)element).form == null;
 	}
 
-	public boolean searchLimitReached(Object element, int depth)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.dialogs.ISearchKeyAdapter#getSearchKey(java.lang.Object)
+	 */
+	public Object getSearchKey(Object element)
 	{
-		return element instanceof RelatedForm && RelationContentProvider.exceedsRelationsDepth(((RelatedForm)element).relations, depth);
+		if (element instanceof RelatedForm)
+		{
+			// only return a real relation node, not a form node for that relation.
+			if (((RelatedForm)element).form == null)
+			{
+				Relation[] relations = ((RelatedForm)element).relations;
+				if (relations != null && relations.length > 0) return relations[relations.length - 1];
+			}
+		}
+		return null;
 	}
 
 	public boolean isKeyword(Object element)

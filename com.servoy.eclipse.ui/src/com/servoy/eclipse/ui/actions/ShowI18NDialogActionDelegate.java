@@ -53,13 +53,12 @@ import com.servoy.eclipse.ui.dialogs.I18NExternalizeDialog;
 import com.servoy.eclipse.ui.dialogs.I18NServerTableDialog;
 import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
+import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
-import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.IControlFactory;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
@@ -114,9 +113,8 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 			{
 				TableContentProvider tableContentProvider = new TableContentProvider();
 				final TreeSelectDialog dialog = new TreeSelectDialog(UIUtils.getActiveShell(), true, false, TreePatternFilter.FILTER_LEAFS,
-					IMaxDepthTreeContentProvider.DEPTH_DEFAULT, tableContentProvider, DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY, null,
-					new LeafnodesSelectionFilter(tableContentProvider), SWT.NONE, "Select I18N table", new TableContentProvider.TableListOptions(
-						TableListOptions.TableListType.I18N, true), null, "serverTableDialog", null);
+					tableContentProvider, DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY, null, new LeafnodesSelectionFilter(tableContentProvider), SWT.NONE,
+					"Select I18N table", new TableContentProvider.TableListOptions(TableListOptions.TableListType.I18N, true), null, "serverTableDialog", null);
 				dialog.setOptionsAreaFactory(new IControlFactory()
 				{
 					public Control createControl(Composite composite)

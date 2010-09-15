@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
-import com.servoy.eclipse.ui.views.IMaxDepthTreeContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Table;
@@ -53,8 +52,8 @@ public class DataProviderDialog extends TreeSelectDialog
 	public DataProviderDialog(Shell shell, ILabelProvider labelProvider, IPersist persist, FlattenedSolution flattenedSolution, Table table,
 		DataProviderOptions input, ISelection selection, int treeStyle, String title)
 	{
-		super(shell, true, true, TreePatternFilter.FILTER_LEAFS, IMaxDepthTreeContentProvider.DEPTH_DEFAULT, null, null, null, null, treeStyle, title, null,
-			selection, TreeSelectDialog.DATAPROVIDER_DIALOG, null);
+		super(shell, true, true, TreePatternFilter.FILTER_LEAFS, null, null, null, null, treeStyle, title, null, selection,
+			TreeSelectDialog.DATAPROVIDER_DIALOG, null);
 		this.labelProvider = labelProvider;
 		this.persist = persist;
 		this.flattenedSolution = flattenedSolution;

@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -363,57 +364,74 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 			 */
 			private boolean recursiveExpand(TreePath path, Object[] items, IProgressMonitor monitor, List<TreePath> lst)
 			{
-				if (path != null && path.getSegmentCount() > 5) return false;
-				boolean expanded = false;
-				ISearchKeyAdapter searchKeyAdapter = null;
-				if (getContentProvider() instanceof ISearchKeyAdapter)
-				{
-					searchKeyAdapter = (ISearchKeyAdapter)getContentProvider();
-				}
+//				if (path != null && path.getSegmentCount() > 5) return false;
+//				boolean expanded = false;
+//				ISearchKeyAdapter searchKeyAdapter = null;
+//				if (getContentProvider() instanceof ISearchKeyAdapter)
+//				{
+//					searchKeyAdapter = (ISearchKeyAdapter)getContentProvider();
+//				}
 				TreePatternFilter treePatternFilter = (TreePatternFilter)getPatternFilter();
-				outer : for (Object item : items)
+				List<Object> foundElements = treePatternFilter.getFoundElements();
+
+				for (Object object : foundElements)
 				{
-					if (!treePatternFilter.isElementVisible(treeViewer, item)) continue;
-					if (path != null && searchKeyAdapter != null)
+					ArrayList<Object> objectPath = new ArrayList<Object>();
+					objectPath.add(object);
+					Object p = getContentProvider().getParent(object);
+					while (p != null)
 					{
-						Object currentSearchKey = searchKeyAdapter.getSearchKey(item);
-						if (currentSearchKey != null)
-						{
-							for (int i = 0; i < path.getSegmentCount(); i++)
-							{
-								Object pathSearchKey = searchKeyAdapter.getSearchKey(path.getSegment(i));
-								if (currentSearchKey.equals(pathSearchKey)) continue outer;
-							}
-						}
+						objectPath.add(p);
+						p = getContentProvider().getParent(p);
 					}
-					TreePath itemPath = null;
-					if (path == null)
-					{
-						itemPath = new TreePath(new Object[] { item });
-					}
-					else
-					{
-						itemPath = path.createChildPath(item);
-					}
-					if (getContentProvider().hasChildren(item))
-					{
-						Object[] children = getContentProvider().getChildren(item);
-						if (children.length > 0)
-						{
-							expanded = recursiveExpand(itemPath, children, monitor, lst) || expanded;
-						}
-						if (!expanded && treePatternFilter.shouldExpandNodeForMatch(treeViewer, item))
-						{
-							lst.add(itemPath);
-							expanded = true;
-						}
-					}
-					if (lst.size() > 10)
-					{
-						return expanded;
-					}
+					Collections.reverse(objectPath);
+					lst.add(new TreePath(objectPath.toArray()));
+					if (lst.size() > 10) return true;
 				}
-				return expanded;
+				return lst.size() > 0;
+//				outer : for (Object item : items)
+//				{
+//					if (!treePatternFilter.isElementVisible(treeViewer, item)) continue;
+//					if (path != null && searchKeyAdapter != null)
+//					{
+//						Object currentSearchKey = searchKeyAdapter.getSearchKey(item);
+//						if (currentSearchKey != null)
+//						{
+//							for (int i = 0; i < path.getSegmentCount(); i++)
+//							{
+//								Object pathSearchKey = searchKeyAdapter.getSearchKey(path.getSegment(i));
+//								if (currentSearchKey.equals(pathSearchKey)) continue outer;
+//							}
+//						}
+//					}
+//					TreePath itemPath = null;
+//					if (path == null)
+//					{
+//						itemPath = new TreePath(new Object[] { item });
+//					}
+//					else
+//					{
+//						itemPath = path.createChildPath(item);
+//					}
+//					if (getContentProvider().hasChildren(item))
+//					{
+//						Object[] children = getContentProvider().getChildren(item);
+//						if (children.length > 0)
+//						{
+//							expanded = recursiveExpand(itemPath, children, monitor, lst) || expanded;
+//						}
+//						if (!expanded && treePatternFilter.shouldExpandNodeForMatch(treeViewer, item))
+//						{
+//							lst.add(itemPath);
+//							expanded = true;
+//						}
+//					}
+//					if (lst.size() > 10)
+//					{
+//						return expanded;
+//					}
+//				}
+//				return expanded;
 			}
 
 		};
