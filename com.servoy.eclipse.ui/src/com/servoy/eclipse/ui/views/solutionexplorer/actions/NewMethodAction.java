@@ -239,7 +239,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 
 					String declaration = template.getMethodDeclaration(met.getName(), null);
 
-					declaration = format(declaration, file);
+					declaration = format(declaration, file, 0);
 
 					met.setDeclaration(declaration);
 
@@ -370,7 +370,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		return null;
 	}
 
-	private static String format(String methodCode, IFile file)
+	public static String format(String methodCode, IFile file, int indent)
 	{
 		if (file != null && file.getType() == IResource.FILE && file.exists())
 		{
@@ -390,7 +390,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 						final IScriptFormatter formatter = formatterFactory.createFormatter(lineDelimiter, preferences);
 						if (formatter instanceof JavaScriptFormatter)
 						{
-							return ((JavaScriptFormatter)formatter).format(methodCode, 0);
+							return ((JavaScriptFormatter)formatter).format(methodCode, formatter.detectIndentationLevel(document, indent));
 						}
 					}
 					catch (Exception e)

@@ -13,9 +13,10 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
@@ -137,7 +138,7 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 
 		Form currentMethodForm = getFormForEditor(ed);
 
-		codeText = modifyCodeAccordingToUsedForms(currentMethodForm, sourceForm, codeText, replacePrefix);
+		String txt = modifyCodeAccordingToUsedForms(currentMethodForm, sourceForm, codeText, replacePrefix);
 
 		Point textSelection = st.getSelectionRange();
 		int caretOffset = st.getCaretOffset();
@@ -146,12 +147,16 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 			textSelection.x = caretOffset;
 			textSelection.y = 0;
 		}
-		if (caretOffset > 0 && codeText.startsWith(".") && st.getText(caretOffset - 1, caretOffset - 1).equals(".")) //$NON-NLS-1$ //$NON-NLS-2$
+		if (caretOffset > 0 && txt.startsWith(".") && st.getText(caretOffset - 1, caretOffset - 1).equals(".")) //$NON-NLS-1$ //$NON-NLS-2$
 		{
-			codeText = codeText.substring(1);
+			txt = txt.substring(1);
 		}
-		st.replaceTextRange(textSelection.x, textSelection.y, codeText);
-		st.setCaretOffset(textSelection.x + codeText.length());
+		else
+		{
+			txt = NewMethodAction.format(txt, (IFile)ed.getEditorInput().getAdapter(IFile.class), caretOffset).trim();
+		}
+		st.replaceTextRange(textSelection.x, textSelection.y, txt);
+		st.setCaretOffset(textSelection.x + txt.length());
 		st.showSelection();
 		st.forceFocus();
 	}
