@@ -56,7 +56,7 @@ public class StringResourceDeserializer
 	 */
 	public static final String STYLES_DIR_NAME = "styles";
 	public static final String TEMPLATES_DIR_NAME = "templates";
-	public static final String CSS1_PROFILE = "org.eclipse.wst.css.core.cssprofile.css1";
+	public static final String SERVOY_CSS_PROFILE = "com.servoy.eclipse.core.cssprofile.servoy";
 
 	/**
 	 * Deserialize string resource metadatas.
@@ -273,7 +273,7 @@ public class StringResourceDeserializer
 						{
 							try
 							{
-								CSSContentProperties.setProperty(CSSContentProperties.CSS_PROFILE, resource, CSS1_PROFILE);
+								CSSContentProperties.setProperty(CSSContentProperties.CSS_PROFILE, resource, SERVOY_CSS_PROFILE);
 							}
 							catch (CoreException e)
 							{
@@ -291,7 +291,7 @@ public class StringResourceDeserializer
 				}
 				else
 				{
-					CSSContentProperties.setProperty(CSSContentProperties.CSS_PROFILE, resource, CSS1_PROFILE);
+					CSSContentProperties.setProperty(CSSContentProperties.CSS_PROFILE, resource, SERVOY_CSS_PROFILE);
 				}
 			}
 		}

@@ -730,8 +730,13 @@
             type="com.servoy.eclipse.core.builderProblem">
       </super>
    </extension>   
-   
-   
+   <extension point="org.eclipse.wst.sse.core.cssprofile">
+		<profile
+			name="Servoy CSS Profile"
+			uri="cssprofile/servoycssprofile.xml"
+			id="com.servoy.eclipse.core.cssprofile.servoy">
+		</profile>
+	</extension>
    
    
 </plugin>

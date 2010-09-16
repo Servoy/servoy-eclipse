@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+/*******************************************************************************
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2010 Servoy BV
+
+ This program is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Affero General Public License as published by the Free
+ Software Foundation; either version 3 of the License, or (at your option) any
+ later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License along
+ with this program; if not, see http://www.gnu.org/licenses or write to the Free
+ Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+ *******************************************************************************/
+ -->
+<css-profile>
+        <profile-import name="cssprofile-css1.xml"/>
+        <stylesheet-def>
+                <description>Servoy CSS Profile</description>
+                <charset-rule/>
+                <import-rule/>
+                <media-rule/>
+                <style-rule/>
+        </stylesheet-def>
+
+        <!-- Which properties can style rule include ? -->
+        <!-- using "overwrite" method: only disabled properties are written. -->
+
+        <style-rule-def overwrite="true">
+			<selector-expression name="descendant" enabled="false"/>
+			<pseudo-element name="first-line" enabled="false"/>
+			<pseudo-element name="first-letter" enabled="false"/>
+			<pseudo-class name="link" enabled="false"/>
+			<pseudo-class name="visited" enabled="false"/>
+			<pseudo-class name="active" enabled="false"/>
+			<property name="background" enabled="false"/>
+			<property name="background-attachment" enabled="false"/>
+			<property name="background-position" enabled="false"/>
+			<property name="background-repeat" enabled="false" />
+			<property name="clear" enabled="false"/>
+			<property name="display" enabled="false"/>
+			<property name="float" enabled="false"/>
+			<property name="height" enabled="false"/>
+			<property name="letter-spacing" enabled="false"/>
+			<property name="line-height" enabled="false"/>
+			<property name="list-style" enabled="false"/>
+			<property name="list-style-image" enabled="false"/>
+			<property name="list-style-position" enabled="false"/>
+			<property name="list-style-type" enabled="false"/>
+			<property name="padding" enabled="false"/>
+			<property name="padding-bottom" enabled="false"/>
+			<property name="padding-left" enabled="false"/>
+			<property name="padding-right" enabled="false"/>
+			<property name="padding-top" enabled="false"/>
+			<property name="text-decoration" enabled="false"/>
+			<property name="text-indent" enabled="false"/>
+			<property name="text-transform" enabled="false"/>
+			<property name="white-space" enabled="false"/>
+			<property name="width" enabled="false"/>
+			<property name="word-spacing" enabled="false"/>
+        </style-rule-def>
+        
+        <property-def name="border-style" inherited="no" category="box">
+			<keyword name="none"/>
+			<keyword name="dotted"/>
+			<keyword name="dashed"/>
+			<keyword name="solid"/>
+			<keyword name="groove"/>
+			<keyword name="inset"/>
+			<keyword name="outset"/>
+		</property-def>
+		
+		<property-def name="background-image" inherited="no" category="colorandbackground">
+	        <function name="uri"/>
+	        <keyword name="mediaurl"/>
+	    </property-def>
+    	
+    	<property-def name="border-top-width" category="box">
+			<number name="pxunit"/>
+		</property-def>
+		<property-def name="border-right-width" category="box">
+			<number name="pxunit"/>
+		</property-def>
+		<property-def name="border-bottom-width" category="box">
+			<number name="pxunit"/>
+		</property-def>
+		<property-def name="border-left-width" category="box">
+			<number name="pxunit"/>
+		</property-def>
+		<property-def name="border-width" category="box">
+			<number name="pxunit"/>
+		</property-def>
+		<property-def name="margin" category="box">
+			<number name="pxunit"/>
+		</property-def>
+		<property-def name="margin-top" category="box">
+			<number name="pxunit"/>
+		</property-def>
+		<property-def name="margin-right" category="box">
+			<number name="pxunit"/>
+		</property-def>
+		<property-def name="margin-bottom" category="box">
+			<number name="pxunit"/>
+		</property-def>
+		<property-def name="margin-left" category="box">
+			<number name="pxunit"/>
+		</property-def>
+		
+		<property-def name="vertical-align" category="text">
+			<keyword name="top"/>
+			<keyword name="middle"/>
+			<keyword name="bottom"/>
+		</property-def>
+		
+		<container-def name="color">
+			<keyword name="aqua"/>
+			<keyword name="black"/>
+			<keyword name="blue"/>
+			<keyword name="fuchsia"/>
+			<keyword name="gray"/>
+			<keyword name="green"/>
+			<keyword name="lime"/>
+			<keyword name="maroon"/>
+			<keyword name="navy"/>
+			<keyword name="olive"/>
+			<keyword name="purple"/>
+			<keyword name="red"/>
+			<keyword name="silver"/>
+			<keyword name="teal"/>
+			<keyword name="white"/>
+			<keyword name="yellow"/>
+			<number name="hash"/>
+		</container-def>
+		
+		 <number-def name="pxunit">
+	        <unit name="px"/>
+	    </number-def>
+    
+        <category-def name="box">
+			<caption>Box model</caption>
+		</category-def>
+		<category-def name="colorandbackground">
+			<caption>Colors and Backgrounds</caption>
+		</category-def>
+		<category-def name="classification">
+			<caption>Classification</caption>
+		</category-def>
+		<category-def name="font">
+			<caption>Font</caption>
+		</category-def>
+		<category-def name="text">
+			<caption>Text</caption>
+		</category-def>
+		
+		<keyword-def name="mediaurl">
+	        <keyword-value>media:///test.jpg</keyword-value>
+	    </keyword-def>
+</css-profile>
