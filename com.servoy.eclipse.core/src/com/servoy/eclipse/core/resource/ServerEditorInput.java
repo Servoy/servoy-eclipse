@@ -58,6 +58,10 @@ public class ServerEditorInput implements IEditorInput
 	 */
 	public Object getAdapter(Class adapter)
 	{
+		if (ServerConfig.class.equals(adapter))
+		{
+			return serverConfig;
+		}
 		return Platform.getAdapterManager().getAdapter(this, adapter);
 	}
 
