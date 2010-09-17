@@ -68,6 +68,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.CoolBar;
 import org.eclipse.swt.widgets.CoolItem;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IWorkbenchPage;
@@ -504,6 +506,13 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		formData.right = new FormAttachment(100);
 		formData.top = new FormAttachment(0);
 		coolBar.setLayoutData(formData);
+		coolBar.addListener(SWT.Resize, new Listener()
+		{
+			public void handleEvent(Event event)
+			{
+				coolBar.getParent().layout();
+			}
+		});
 
 		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.BRING_TO_FRONT.getId()));
 		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.SEND_TO_BACK.getId()));
@@ -535,7 +544,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		composite.setLayoutData(formData);
 
 		composite.setLayout(new FillLayout());
-
 
 		List<IAction> editPartActions = AbstractEditpartActionDelegate.getEditPartActions();
 		for (IAction action : editPartActions)
