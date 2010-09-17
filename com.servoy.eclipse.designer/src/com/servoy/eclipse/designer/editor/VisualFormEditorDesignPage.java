@@ -499,7 +499,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		Composite c = new Composite(parent, SWT.NONE);
 		c.setLayout(new org.eclipse.swt.layout.FormLayout());
 
-		coolBar = new CoolBar(c, SWT.NONE);
+		coolBar = new CoolBar(c, SWT.FLAT);
 
 		FormData formData = new FormData();
 		formData.left = new FormAttachment(0);
@@ -581,6 +581,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 		Point preferred = item.computeSize(size.x, size.y);
 		item.setPreferredSize(preferred);
+		item.setMinimumSize(preferred);
 	}
 
 	public void editorActionCreated(final IAction action)
