@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -27,6 +27,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.util.IdentDocumentValidator;
 import com.servoy.j2db.util.LengthDocumentValidator;
@@ -57,6 +58,16 @@ public class ColumnNameEditingSupport extends EditingSupport
 			{
 				IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 				pi.updateName(nameValidator, value.toString());
+				if (isEmail(value.toString()))
+				{
+					pi.setType(IColumnTypes.TEXT);
+					pi.setLenght(254);
+				}
+				else if (isUrl(value.toString()))
+				{
+					pi.setType(IColumnTypes.TEXT);
+					pi.setLenght(2048);
+				}
 			}
 			catch (final Exception e)
 			{
@@ -100,5 +111,15 @@ public class ColumnNameEditingSupport extends EditingSupport
 			return !((Column)element).getExistInDB();
 		}
 		return false;
+	}
+
+	private boolean isEmail(String name)
+	{
+		return (name != null && name.toLowerCase().contains("email"));
+	}
+
+	private boolean isUrl(String name)
+	{
+		return (name != null && name.toLowerCase().contains("url"));
 	}
 }
