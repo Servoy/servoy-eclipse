@@ -496,6 +496,13 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	@Override
 	public void createPartControl(Composite parent)
 	{
+		if (!new DesignerPreferences(ServoyModel.getSettings()).getFormToolsOnMainToolbar())
+		{
+			super.createPartControl(parent);
+			return;
+		}
+
+
 		Composite c = new Composite(parent, SWT.NONE);
 		c.setLayout(new org.eclipse.swt.layout.FormLayout());
 
@@ -557,6 +564,12 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 	protected void addToolbarAction(String bar, IAction action)
 	{
+		if (coolBar == null)
+		{
+			// toolbars not in form editor
+			return;
+		}
+
 		ToolBarManager toolBarManager;
 		CoolItem item;
 		Pair<ToolBarManager, CoolItem> pair = toolbarManagers.get(bar);

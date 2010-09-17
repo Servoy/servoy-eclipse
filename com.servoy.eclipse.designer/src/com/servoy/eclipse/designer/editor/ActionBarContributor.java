@@ -28,7 +28,9 @@ import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.actions.RetargetAction;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 
 /**
  * ActionBarContributor, builds actions for form designer.
@@ -52,6 +54,8 @@ public class ActionBarContributor extends org.eclipse.gef.ui.actions.ActionBarCo
 	@Override
 	protected void buildActions()
 	{
+		boolean formToolsInFormWindow = !new DesignerPreferences(ServoyModel.getSettings()).getFormToolsOnMainToolbar();
+
 		addMyAction(ActionFactory.CUT.create(getPage().getWorkbenchWindow()), false);
 		addMyAction(ActionFactory.DELETE.create(getPage().getWorkbenchWindow()), false);
 		addMyAction(ActionFactory.UNDO.create(getPage().getWorkbenchWindow()), false);
@@ -60,24 +64,24 @@ public class ActionBarContributor extends org.eclipse.gef.ui.actions.ActionBarCo
 		addMyAction(ActionFactory.PASTE.create(getPage().getWorkbenchWindow()), false);
 
 		addMyAction(ActionFactory.SELECT_ALL.create(getPage().getWorkbenchWindow()), false);
-		addMyAction(DesignerActionFactory.BRING_TO_FRONT.create(getPage().getWorkbenchWindow()), false);
-		addMyAction(DesignerActionFactory.SEND_TO_BACK.create(getPage().getWorkbenchWindow()), false);
-		addMyAction(DesignerActionFactory.GROUP.create(getPage().getWorkbenchWindow()), false);
-		addMyAction(DesignerActionFactory.UNGROUP.create(getPage().getWorkbenchWindow()), false);
-		addMyAction(DesignerActionFactory.TOGGLE_SHOW_GRID.create(getPage().getWorkbenchWindow()), false);
-		addMyAction(DesignerActionFactory.TOGGLE_SNAPTO_GRID.create(getPage().getWorkbenchWindow()), false);
-		addMyAction(new AlignmentRetargetAction(PositionConstants.LEFT), false);
-		addMyAction(new AlignmentRetargetAction(PositionConstants.RIGHT), false);
-		addMyAction(new AlignmentRetargetAction(PositionConstants.TOP), false);
-		addMyAction(new AlignmentRetargetAction(PositionConstants.BOTTOM), false);
-		addMyAction(new AlignmentRetargetAction(PositionConstants.CENTER), false);
-		addMyAction(new AlignmentRetargetAction(PositionConstants.MIDDLE), false);
-		addMyAction(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_SPACING.create(getPage().getWorkbenchWindow()), false);
-		addMyAction(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_CENTER.create(getPage().getWorkbenchWindow()), false);
-		addMyAction(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_PACK.create(getPage().getWorkbenchWindow()), false);
-		addMyAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_SPACING.create(getPage().getWorkbenchWindow()), false);
-		addMyAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_CENTER.create(getPage().getWorkbenchWindow()), false);
-		addMyAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_PACK.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(DesignerActionFactory.BRING_TO_FRONT.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
+		addMyAction(DesignerActionFactory.SEND_TO_BACK.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
+		addMyAction(DesignerActionFactory.GROUP.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
+		addMyAction(DesignerActionFactory.UNGROUP.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
+		addMyAction(DesignerActionFactory.TOGGLE_SHOW_GRID.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
+		addMyAction(DesignerActionFactory.TOGGLE_SNAPTO_GRID.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
+		addMyAction(new AlignmentRetargetAction(PositionConstants.LEFT), formToolsInFormWindow);
+		addMyAction(new AlignmentRetargetAction(PositionConstants.RIGHT), formToolsInFormWindow);
+		addMyAction(new AlignmentRetargetAction(PositionConstants.TOP), formToolsInFormWindow);
+		addMyAction(new AlignmentRetargetAction(PositionConstants.BOTTOM), formToolsInFormWindow);
+		addMyAction(new AlignmentRetargetAction(PositionConstants.CENTER), formToolsInFormWindow);
+		addMyAction(new AlignmentRetargetAction(PositionConstants.MIDDLE), formToolsInFormWindow);
+		addMyAction(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_SPACING.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
+		addMyAction(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_CENTER.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
+		addMyAction(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_PACK.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
+		addMyAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_SPACING.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
+		addMyAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_CENTER.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
+		addMyAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_PACK.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
 		addMyAction(DesignerActionFactory.ANCHOR_TOP_TOGGLE.create(getPage().getWorkbenchWindow()), false);
 		addMyAction(DesignerActionFactory.ANCHOR_RIGHT_TOGGLE.create(getPage().getWorkbenchWindow()), false);
 		addMyAction(DesignerActionFactory.ANCHOR_BOTTOM_TOGGLE.create(getPage().getWorkbenchWindow()), false);

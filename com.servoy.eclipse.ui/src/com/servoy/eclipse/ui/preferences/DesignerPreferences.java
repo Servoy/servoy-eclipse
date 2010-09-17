@@ -46,6 +46,7 @@ public class DesignerPreferences
 	public static final String GRID_SHOW_SETTING = "showGrid";
 	public static final String GRID_SNAPTO_SETTING = "snapToGrid";
 	public static final String SAVE_EDITOR_STATE_SETTING = "saveEditorState";
+	public static final String FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING = "formToolsOnMainToolbar";
 
 	public static final int COPY_PASTE_OFFSET_DEFAULT = 10;
 	public static final int STEP_SIZE_DEFAULT = 10;
@@ -57,6 +58,7 @@ public class DesignerPreferences
 	public static final boolean GRID_SHOW_DEFAULT = true;
 	public static final boolean GRID_SNAPTO_DEFAULT = true;
 	public static final boolean SAVE_EDITOR_STATE_DEFAULT = true;
+	public static final boolean FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT = true;
 	public static final int METRICS_DEFAULT = PX;
 
 	private final Settings settings;
@@ -177,5 +179,15 @@ public class DesignerPreferences
 	public void setSaveEditorState(boolean saveEditorState)
 	{
 		settings.setProperty(SAVE_EDITOR_STATE_SETTING, String.valueOf(saveEditorState));
+	}
+
+	public boolean getFormToolsOnMainToolbar()
+	{
+		return Utils.getAsBoolean(settings.getProperty(FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING, String.valueOf(FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT)));
+	}
+
+	public void setFormToolsOnMainToolbar(boolean formToolsOnMainToolbar)
+	{
+		settings.setProperty(FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING, String.valueOf(formToolsOnMainToolbar));
 	}
 }
