@@ -19,8 +19,10 @@ package com.servoy.eclipse.designer.editor;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -38,6 +40,7 @@ import org.eclipse.gef.rulers.RulerProvider;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.actions.DeleteAction;
 import org.eclipse.gef.ui.actions.DirectEditAction;
+import org.eclipse.gef.ui.actions.GEFActionConstants;
 import org.eclipse.gef.ui.actions.PrintAction;
 import org.eclipse.gef.ui.actions.RedoAction;
 import org.eclipse.gef.ui.actions.SaveAction;
@@ -56,11 +59,14 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.CoolBar;
+import org.eclipse.swt.widgets.CoolItem;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IEditorSite;
@@ -106,6 +112,7 @@ import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
 
 /**
@@ -116,11 +123,18 @@ import com.servoy.j2db.util.Settings;
 
 public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette implements PropertyChangeListener, IActionAddedListener
 {
+	public static final String COOLBAR_REORGANIZE = "reorganize";
+	public static final String COOLBAR_ALIGN = "align";
+	public static final String COOLBAR_DISTRIBUTE = "distribute";
+	public static final String COOLBAR_TOGGLE = "toggle";
+	public static final String COOLBAR_ELEMENTS = "elements";
+
 	protected GraphicalViewer graphicalViewer;
 	private final VisualFormEditor editorPart;
 	private PaletteRoot paletteModel;
 	private RulerComposite rulerComposite;
-	private ToolBarManager toolbarManager;
+	private CoolBar coolBar;
+	private final Map<String, Pair<ToolBarManager, CoolItem>> toolbarManagers = new HashMap<String, Pair<ToolBarManager, CoolItem>>();
 
 	private Runnable selectionChangedHandler;
 	private ISelection currentSelection;
@@ -450,9 +464,11 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 		Action action = new ToggleShowGridAction(viewer);
 		getActionRegistry().registerAction(action);
+		addToolbarAction(COOLBAR_TOGGLE, action);
 
 		action = new ToggleSnapToGridAction(viewer);
 		getActionRegistry().registerAction(action);
+		addToolbarAction(COOLBAR_TOGGLE, action);
 	}
 
 	private void refreshRulers()
@@ -479,22 +495,47 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	public void createPartControl(Composite parent)
 	{
 		Composite c = new Composite(parent, SWT.NONE);
-		c.setLayout(new GridLayout(1, true));
-		toolbarManager = new ToolBarManager(SWT.NONE);
-		ToolBar toolbar = toolbarManager.createControl(c);
-		toolbar.setLayoutData(new org.eclipse.swt.layout.GridData(org.eclipse.swt.layout.GridData.FILL_HORIZONTAL));
+		c.setLayout(new org.eclipse.swt.layout.FormLayout());
+
+		coolBar = new CoolBar(c, SWT.NONE);
+
+		FormData formData = new FormData();
+		formData.left = new FormAttachment(0);
+		formData.right = new FormAttachment(100);
+		formData.top = new FormAttachment(0);
+		coolBar.setLayoutData(formData);
+
+		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.BRING_TO_FRONT.getId()));
+		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.SEND_TO_BACK.getId()));
+		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.SET_TAB_SEQUENCE.getId()));
+		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.GROUP.getId()));
+		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.UNGROUP.getId()));
+		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.SAVE_AS_TEMPLATE.getId()));
+
+		addToolbarAction(COOLBAR_ALIGN, getActionRegistry().getAction(GEFActionConstants.ALIGN_LEFT));
+		addToolbarAction(COOLBAR_ALIGN, getActionRegistry().getAction(GEFActionConstants.ALIGN_RIGHT));
+		addToolbarAction(COOLBAR_ALIGN, getActionRegistry().getAction(GEFActionConstants.ALIGN_TOP));
+		addToolbarAction(COOLBAR_ALIGN, getActionRegistry().getAction(GEFActionConstants.ALIGN_BOTTOM));
+		addToolbarAction(COOLBAR_ALIGN, getActionRegistry().getAction(GEFActionConstants.ALIGN_CENTER));
+		addToolbarAction(COOLBAR_ALIGN, getActionRegistry().getAction(GEFActionConstants.ALIGN_MIDDLE));
+
+		addToolbarAction(COOLBAR_DISTRIBUTE, getActionRegistry().getAction(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_SPACING.getId()));
+		addToolbarAction(COOLBAR_DISTRIBUTE, getActionRegistry().getAction(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_CENTER.getId()));
+		addToolbarAction(COOLBAR_DISTRIBUTE, getActionRegistry().getAction(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_PACK.getId()));
+		addToolbarAction(COOLBAR_DISTRIBUTE, getActionRegistry().getAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_SPACING.getId()));
+		addToolbarAction(COOLBAR_DISTRIBUTE, getActionRegistry().getAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_CENTER.getId()));
+		addToolbarAction(COOLBAR_DISTRIBUTE, getActionRegistry().getAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_PACK.getId()));
 
 		Composite composite = new Composite(c, SWT.NONE);
-		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		formData = new FormData();
+		formData.left = new FormAttachment(0);
+		formData.right = new FormAttachment(100);
+		formData.bottom = new FormAttachment(100);
+		formData.top = new FormAttachment(coolBar);
+		composite.setLayoutData(formData);
+
 		composite.setLayout(new FillLayout());
 
-		editorActionCreated(DesignerActionFactory.BRING_TO_FRONT.create(getSite().getWorkbenchWindow()));
-
-		editorActionCreated(DesignerActionFactory.SEND_TO_BACK.create(getSite().getWorkbenchWindow()));
-		editorActionCreated(DesignerActionFactory.SET_TAB_SEQUENCE.create(getSite().getWorkbenchWindow()));
-		editorActionCreated(DesignerActionFactory.GROUP.create(getSite().getWorkbenchWindow()));
-		editorActionCreated(DesignerActionFactory.UNGROUP.create(getSite().getWorkbenchWindow()));
-		editorActionCreated(DesignerActionFactory.SAVE_AS_TEMPLATE.create(getSite().getWorkbenchWindow()));
 
 		List<IAction> editPartActions = AbstractEditpartActionDelegate.getEditPartActions();
 		for (IAction action : editPartActions)
@@ -506,10 +547,37 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		super.createPartControl(composite);
 	}
 
+	protected void addToolbarAction(String bar, IAction action)
+	{
+		ToolBarManager toolBarManager;
+		CoolItem item;
+		Pair<ToolBarManager, CoolItem> pair = toolbarManagers.get(bar);
+		if (pair == null)
+		{
+			toolBarManager = new ToolBarManager(SWT.NONE);
+			item = new CoolItem(coolBar, SWT.NONE);
+			item.setControl(toolBarManager.createControl(coolBar));
+			toolbarManagers.put(bar, new Pair<ToolBarManager, CoolItem>(toolBarManager, item));
+		}
+		else
+		{
+			toolBarManager = pair.getLeft();
+			item = pair.getRight();
+		}
+		ToolBar toolBar = toolBarManager.getControl();
+
+		new ActionToolItem(toolBar, action);
+
+		toolBar.pack();
+		Point size = toolBar.getSize();
+
+		Point preferred = item.computeSize(size.x, size.y);
+		item.setPreferredSize(preferred);
+	}
+
 	public void editorActionCreated(final IAction action)
 	{
-		new ActionToolItem(toolbarManager.getControl(), action);
-		toolbarManager.getControl().getParent().layout();
+		addToolbarAction(COOLBAR_ELEMENTS, action);
 	}
 
 	/**

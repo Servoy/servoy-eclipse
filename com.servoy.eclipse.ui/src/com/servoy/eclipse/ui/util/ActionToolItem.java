@@ -42,8 +42,27 @@ public class ActionToolItem extends ToolItem implements IPropertyChangeListener
 	 */
 	public ActionToolItem(ToolBar parent, IAction action)
 	{
-		super(parent, SWT.PUSH);
+		super(parent, getToolItemStyle(action));
 		setAction(action);
+	}
+
+	/**
+	 * @param action
+	 * @return
+	 */
+	static int getToolItemStyle(IAction action)
+	{
+		switch (action.getStyle())
+		{
+			case IAction.AS_CHECK_BOX :
+				return SWT.CHECK;
+			case IAction.AS_RADIO_BUTTON :
+				return SWT.RADIO;
+			case IAction.AS_DROP_DOWN_MENU :
+				return SWT.DROP_DOWN;
+			default :
+				return SWT.PUSH;
+		}
 	}
 
 	/**
@@ -64,8 +83,8 @@ public class ActionToolItem extends ToolItem implements IPropertyChangeListener
 				ActionToolItem.this.action.run();
 			}
 		});
+		setSelection(action.getStyle() == IAction.AS_CHECK_BOX ? action.isChecked() : action.isEnabled());
 		action.addPropertyChangeListener(this);
-		setSelection(action.isEnabled());
 	}
 
 	/*
@@ -75,6 +94,10 @@ public class ActionToolItem extends ToolItem implements IPropertyChangeListener
 	 */
 	public void propertyChange(PropertyChangeEvent event)
 	{
+		if (isDisposed())
+		{
+			return; // strange, propertyChanage is still called, dispose has removed me as listener...
+		}
 		if (IAction.ENABLED.equals(event.getProperty()))
 		{
 			setEnabled(Boolean.TRUE.equals(event.getNewValue()));

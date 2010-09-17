@@ -52,12 +52,12 @@ public class ActionBarContributor extends org.eclipse.gef.ui.actions.ActionBarCo
 	@Override
 	protected void buildActions()
 	{
-		addMyAction(ActionFactory.CUT.create(getPage().getWorkbenchWindow()), true);
-		addMyAction(ActionFactory.DELETE.create(getPage().getWorkbenchWindow()), true);
-		addMyAction(ActionFactory.UNDO.create(getPage().getWorkbenchWindow()), true);
-		addMyAction(ActionFactory.REDO.create(getPage().getWorkbenchWindow()), true);
-		addMyAction(ActionFactory.COPY.create(getPage().getWorkbenchWindow()), true);
-		addMyAction(ActionFactory.PASTE.create(getPage().getWorkbenchWindow()), true);
+		addMyAction(ActionFactory.CUT.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(ActionFactory.DELETE.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(ActionFactory.UNDO.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(ActionFactory.REDO.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(ActionFactory.COPY.create(getPage().getWorkbenchWindow()), false);
+		addMyAction(ActionFactory.PASTE.create(getPage().getWorkbenchWindow()), false);
 
 		addMyAction(ActionFactory.SELECT_ALL.create(getPage().getWorkbenchWindow()), false);
 		addMyAction(DesignerActionFactory.BRING_TO_FRONT.create(getPage().getWorkbenchWindow()), false);
