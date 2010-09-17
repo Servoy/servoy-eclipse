@@ -108,6 +108,7 @@ import com.servoy.eclipse.designer.property.PersistContext;
 import com.servoy.eclipse.designer.property.UndoablePersistPropertySourceProvider;
 import com.servoy.eclipse.designer.property.UndoablePropertySheetEntry;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences.CoolbarLayout;
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
 import com.servoy.eclipse.ui.util.ActionToolItem;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
@@ -153,6 +154,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		Settings settings = ServoyModel.getSettings();
 		settings.addPropertyChangeListener(this, DesignerPreferences.GUIDE_SIZE_SETTING);
 		settings.addPropertyChangeListener(this, DesignerPreferences.METRICS_SETTING);
+		settings.addPropertyChangeListener(this, DesignerPreferences.FORM_COOLBAR_LAYOUT_SETTING);
 	}
 
 	private final ISelectionProvider provider = new ISelectionProvider()
@@ -481,6 +483,25 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		viewer.setProperty(RulerProvider.PROPERTY_RULER_VISIBILITY, Boolean.TRUE);
 	}
 
+	private void refreshToolBars()
+	{
+		if (coolBar != null)
+		{
+			CoolbarLayout coolbarLayout = new DesignerPreferences(ServoyModel.getSettings()).getCoolbarLayout();
+			if (coolbarLayout != null)
+			{
+				try
+				{
+					coolBar.setItemLayout(coolbarLayout.itemOrder, coolbarLayout.wrapIndices, coolbarLayout.sizes);
+				}
+				catch (IllegalArgumentException e)
+				{
+					// ignore, layout not applicable to current coolbar
+				}
+			}
+		}
+	}
+
 	@Override
 	protected void configureGraphicalViewer()
 	{
@@ -520,6 +541,14 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 				coolBar.getParent().layout();
 			}
 		});
+		coolBar.addListener(SWT.MouseUp, new Listener()
+		{
+			public void handleEvent(Event event)
+			{
+				new DesignerPreferences(Settings.getInstance()).saveCoolbarLayout(new CoolbarLayout(coolBar.getItemOrder(), coolBar.getWrapIndices(),
+					coolBar.getItemSizes()));
+			}
+		});
 
 		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.BRING_TO_FRONT.getId()));
 		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.SEND_TO_BACK.getId()));
@@ -542,6 +571,8 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		addToolbarAction(COOLBAR_DISTRIBUTE, getActionRegistry().getAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_CENTER.getId()));
 		addToolbarAction(COOLBAR_DISTRIBUTE, getActionRegistry().getAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_PACK.getId()));
 
+		addToolbarAction(COOLBAR_ELEMENTS, null);
+
 		Composite composite = new Composite(c, SWT.NONE);
 		formData = new FormData();
 		formData.left = new FormAttachment(0);
@@ -558,6 +589,8 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 			editorActionCreated(action);
 		}
 		AbstractEditpartActionDelegate.addActionAddedListener(this); // sometimes the VFE is created before the actions are created
+
+		refreshToolBars();
 
 		super.createPartControl(composite);
 	}
@@ -587,7 +620,11 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		}
 		ToolBar toolBar = toolBarManager.getControl();
 
-		new ActionToolItem(toolBar, action);
+		if (action != null)
+		{
+			new ActionToolItem(toolBar, action);
+		}
+		// else just create the toolbar with that name
 
 		toolBar.pack();
 		Point size = toolBar.getSize();
@@ -600,6 +637,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	public void editorActionCreated(final IAction action)
 	{
 		addToolbarAction(COOLBAR_ELEMENTS, action);
+		refreshToolBars();
 	}
 
 	/**
@@ -657,6 +695,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		Settings settings = ServoyModel.getSettings();
 		settings.removePropertyChangeListener(this, DesignerPreferences.GUIDE_SIZE_SETTING);
 		settings.removePropertyChangeListener(this, DesignerPreferences.METRICS_SETTING);
+		settings.removePropertyChangeListener(this, DesignerPreferences.FORM_COOLBAR_LAYOUT_SETTING);
 		AbstractEditpartActionDelegate.removeActionAddedListener(this);
 
 		super.dispose();
@@ -757,9 +796,13 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		{
 			applyGuidePreferences();
 		}
-		if (DesignerPreferences.METRICS_SETTING.equals(evt.getPropertyName()))
+		else if (DesignerPreferences.METRICS_SETTING.equals(evt.getPropertyName()))
 		{
 			refreshRulers();
+		}
+		else if (DesignerPreferences.FORM_COOLBAR_LAYOUT_SETTING.equals(evt.getPropertyName()))
+		{
+			refreshToolBars();
 		}
 	}
 

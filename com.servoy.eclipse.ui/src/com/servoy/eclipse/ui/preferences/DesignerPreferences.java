@@ -16,8 +16,11 @@
  */
 package com.servoy.eclipse.ui.preferences;
 
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.jabsorb.JSONSerializer;
 
+import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.ui.property.ColorPropertyController;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Settings;
@@ -47,6 +50,7 @@ public class DesignerPreferences
 	public static final String GRID_SNAPTO_SETTING = "snapToGrid";
 	public static final String SAVE_EDITOR_STATE_SETTING = "saveEditorState";
 	public static final String FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING = "formToolsOnMainToolbar";
+	public static final String FORM_COOLBAR_LAYOUT_SETTING = "formCoolBarLayout";
 
 	public static final int COPY_PASTE_OFFSET_DEFAULT = 10;
 	public static final int STEP_SIZE_DEFAULT = 10;
@@ -189,5 +193,85 @@ public class DesignerPreferences
 	public void setFormToolsOnMainToolbar(boolean formToolsOnMainToolbar)
 	{
 		settings.setProperty(FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING, String.valueOf(formToolsOnMainToolbar));
+	}
+
+	public void saveCoolbarLayout(CoolbarLayout coolbarLayout)
+	{
+		if (coolbarLayout == null)
+		{
+			settings.remove(FORM_COOLBAR_LAYOUT_SETTING);
+			return;
+		}
+
+		int[] sizesX = new int[coolbarLayout.sizes.length];
+		int[] sizesY = new int[coolbarLayout.sizes.length];
+		for (int i = 0; i < coolbarLayout.sizes.length; i++)
+		{
+			sizesX[i] = coolbarLayout.sizes[i].x;
+			sizesY[i] = coolbarLayout.sizes[i].y;
+		}
+		JSONSerializer serializer = new JSONSerializer();
+		try
+		{
+			serializer.registerDefaultSerializers();
+			settings.setProperty(FORM_COOLBAR_LAYOUT_SETTING,
+				serializer.toJSON(new int[][] { coolbarLayout.itemOrder, coolbarLayout.wrapIndices, sizesX, sizesY }));
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
+	}
+
+	public CoolbarLayout getCoolbarLayout()
+	{
+		String property = settings.getProperty(FORM_COOLBAR_LAYOUT_SETTING);
+		if (property != null)
+		{
+			JSONSerializer serializer = new JSONSerializer();
+			try
+			{
+				serializer.registerDefaultSerializers();
+				Integer[][] array = (Integer[][])serializer.fromJSON(property);
+
+				int[] itemOrder = new int[array[0].length];
+				for (int i = 0; i < itemOrder.length; i++)
+				{
+					itemOrder[i] = array[0][i].intValue();
+				}
+				int[] wrapIndices = new int[array[1].length];
+				for (int i = 0; i < wrapIndices.length; i++)
+				{
+					wrapIndices[i] = array[1][i].intValue();
+				}
+				Integer[] sizesX = array[2];
+				Integer[] sizesY = array[3];
+				Point[] sizes = new Point[sizesX.length];
+				for (int i = 0; i < sizesX.length; i++)
+				{
+					sizes[i] = new Point(sizesX[i].intValue(), sizesY[i].intValue());
+				}
+				return new CoolbarLayout(itemOrder, wrapIndices, sizes);
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+		return null;
+	}
+
+	public static class CoolbarLayout
+	{
+		public final int[] itemOrder;
+		public final int[] wrapIndices;
+		public final Point[] sizes;
+
+		public CoolbarLayout(int[] itemOrder, int[] wrapIndices, Point[] sizes)
+		{
+			this.itemOrder = itemOrder;
+			this.wrapIndices = wrapIndices;
+			this.sizes = sizes;
+		}
 	}
 }
