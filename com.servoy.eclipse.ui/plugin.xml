@@ -400,6 +400,7 @@
                  label="Font Chooser"
                  menubarPath="edit/Choosers"
                  style="push"
+                 toolbarPath="Normal/additions"
                  tooltip="Insert Font">
            </action>
            <menu
@@ -416,12 +417,13 @@
                  label="Color Chooser"
                  menubarPath="edit/Choosers"
                  style="push"
+                 toolbarPath="Normal/additions"
                  tooltip="Insert Color">
            </action>
         </editorContribution>
         <editorContribution
-              id="com.servoy.eclipse.ui.TextEditorContribution"
-              targetID="org.eclipse.ui.DefaultTextEditor">
+              id="com.servoy.eclipse.ui.CSSEditorContribution"
+              targetID="org.eclipse.wst.css.core.csssource.source">
            <action
                  class="com.servoy.eclipse.ui.actions.ShowFontChooserActionDelegate"
                  icon="icons/text.gif"
@@ -429,6 +431,7 @@
                  label="Font Chooser"
                  menubarPath="edit/Choosers"
                  style="push"
+                 toolbarPath="Normal/additions"
                  tooltip="Insert Font">
            </action>
            <menu
@@ -439,13 +442,14 @@
               </separator>
            </menu>
              <action
-                 class="com.servoy.eclipse.ui.actions.ShowColorChooserActionDelegate"
-                 icon="icons/colorchooser.gif"
-                 id="com.servoy.eclipse.ui.actions.OpenColorDialog"
-                 label="Color Chooser"
-                 menubarPath="edit/Choosers"
-                 style="push"
-                 tooltip="Insert Color">
+                   class="com.servoy.eclipse.ui.actions.ShowColorChooserActionDelegate"
+                   icon="icons/colorchooser.gif"
+                   id="com.servoy.eclipse.ui.actions.OpenColorDialog"
+                   label="Color Chooser"
+                   menubarPath="edit/Choosers"
+                   style="push"
+                   toolbarPath="Normal/additions"
+                   tooltip="Insert Color">
            </action>           
         </editorContribution>
      </extension>
