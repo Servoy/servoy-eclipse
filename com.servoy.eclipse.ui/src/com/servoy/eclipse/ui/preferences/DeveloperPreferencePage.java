@@ -18,19 +18,20 @@ package com.servoy.eclipse.ui.preferences;
 
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.j2db.debug.DeveloperPreferences;
-import com.servoy.j2db.util.Settings;
 
 /**
  * Preferences page for developer settings.
@@ -40,10 +41,12 @@ import com.servoy.j2db.util.Settings;
  */
 public class DeveloperPreferencePage extends PreferencePage implements IWorkbenchPreferencePage
 {
+	public DeveloperPreferencePage()
+	{
+	}
 
-	private Button enhancedSecurityButton;
-
-//	private Button useDummyAuthButton;
+	private Label enhancedSecurityLabel;
+	private Button changeButton;
 
 	public void init(IWorkbench workbench)
 	{
@@ -56,27 +59,9 @@ public class DeveloperPreferencePage extends PreferencePage implements IWorkbenc
 
 		Composite composite = new Composite(parent, SWT.NONE);
 
-		enhancedSecurityButton = new Button(composite, SWT.CHECK);
-		enhancedSecurityButton.setText("Run Servoy Application Server with Enhanced Security");
-
-//		useDummyAuthButton = new Button(composite, SWT.CHECK);
-//		useDummyAuthButton.setText("Use dummy authentication for debug smart client (when server is in Enhanced Security Mode)");
-
-		enhancedSecurityButton.addSelectionListener(new SelectionListener()
-		{
-			public void widgetSelected(SelectionEvent e)
-			{
-//				useDummyAuthButton.setEnabled(enhancedSecurityButton.getSelection());
-			}
-
-			public void widgetDefaultSelected(SelectionEvent e)
-			{
-			}
-		});
-
 		// GridLayout
 		GridLayout layout = new GridLayout();
-		layout.numColumns = 1;
+		layout.numColumns = 2;
 		composite.setLayout(layout);
 
 		// GridData
@@ -85,6 +70,21 @@ public class DeveloperPreferencePage extends PreferencePage implements IWorkbenc
 		data.horizontalAlignment = GridData.FILL;
 		composite.setLayoutData(data);
 
+		enhancedSecurityLabel = new Label(composite, SWT.NONE);
+		enhancedSecurityLabel.setText("loading...");
+
+		changeButton = new Button(composite, SWT.NONE);
+		changeButton.setText("Change");
+		changeButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				new DeveloperPreferences(ServoyModel.getSettings()).setEnhancedSecurity(true);
+				initializeFields();
+			}
+		});
+
 		initializeFields();
 
 		return composite;
@@ -92,30 +92,29 @@ public class DeveloperPreferencePage extends PreferencePage implements IWorkbenc
 
 	protected void initializeFields()
 	{
-		DeveloperPreferences prefs = new DeveloperPreferences(ServoyModel.getSettings());
-
-		enhancedSecurityButton.setSelection(prefs.getEnhancedSecurity());
-//		useDummyAuthButton.setSelection(prefs.getUseDummyAuth());
-//		useDummyAuthButton.setEnabled(enhancedSecurityButton.getSelection());
+		if (new DeveloperPreferences(ServoyModel.getSettings()).getEnhancedSecurity())
+		{
+			enhancedSecurityLabel.setText("Servoy Application Server is running with Enhanced Security");
+			enhancedSecurityLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+			changeButton.setVisible(false);
+		}
+		else
+		{
+			enhancedSecurityLabel.setText("Servoy Application Server NOT is running with Enhanced Security, this is strongly discouraged");
+			enhancedSecurityLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
+			changeButton.setVisible(true);
+		}
 	}
 
 	@Override
 	public boolean performOk()
 	{
-		DeveloperPreferences prefs = new DeveloperPreferences(ServoyModel.getSettings());
-		prefs.setEnhancedSecurity(enhancedSecurityButton.getSelection());
-//		prefs.setUseDummyAuth(useDummyAuthButton.getSelection());
-
 		return true;
 	}
 
 	@Override
 	protected void performDefaults()
 	{
-		enhancedSecurityButton.setSelection(Settings.ENHANCED_SECURITY_DEFAULT);
-//		useDummyAuthButton.setSelection(DeveloperPreferences.DUMMY_AUTHENTICATION_DEFAULT);
-//		useDummyAuthButton.setEnabled(enhancedSecurityButton.getSelection());
-
 		super.performDefaults();
 	}
 }
