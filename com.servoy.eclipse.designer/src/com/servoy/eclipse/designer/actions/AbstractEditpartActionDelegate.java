@@ -17,7 +17,9 @@
 package com.servoy.eclipse.designer.actions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -100,13 +102,16 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 
 	public final void run(IAction action)
 	{
-		EditPart editPart = getEditpart();
-		if (editPart == null)
+		List<EditPart> editParts = getEditparts();
+		if (editParts.size() == 0)
 		{
-			// no edit  part selected
+			// no edit part selected
 			return;
 		}
 
+		// run the action on the first one if multiple are selected (for example, multiple labels are selected, 
+		// add tab should be done once only because it actually works on the parent)
+		EditPart editPart = editParts.get(0);
 		Request request = getRequest(editPart);
 		if (request == null)
 		{
@@ -172,28 +177,41 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 	{
 		fSelection = selection;
 
-		boolean enabled = false;
+		List<EditPart> editParts = getEditparts();
+		boolean enabled = editParts.size() > 0;
 
-		EditPart editPart = getEditpart();
-		if (editPart != null)
+		for (int i = 0; enabled && i < editParts.size(); i++)
 		{
+			EditPart editPart = editParts.get(i);
 			enabled = editPart.understandsRequest(new Request(requestType)) && checkApplicable(editPart);
 		}
 		action.setEnabled(enabled);
 	}
 
 	/**
-	 * Get the currently selected edit part.
+	 * Get the currently selected edit parts.
 	 * 
 	 */
-	protected EditPart getEditpart()
+	protected List<EditPart> getEditparts()
 	{
-		if (fSelection instanceof IStructuredSelection && ((IStructuredSelection)fSelection).size() == 1)
+		if (!(fSelection instanceof IStructuredSelection) || fSelection.isEmpty())
 		{
-			return (EditPart)ResourceUtil.getAdapter(((IStructuredSelection)fSelection).getFirstElement(), EditPart.class, true);
+			return Collections.<EditPart> emptyList();
 		}
-		return null;
+
+		List<EditPart> editParts = new ArrayList<EditPart>(((IStructuredSelection)fSelection).size());
+		Iterator< ? > elements = ((IStructuredSelection)fSelection).iterator();
+		while (elements.hasNext())
+		{
+			EditPart editPart = (EditPart)ResourceUtil.getAdapter(elements.next(), EditPart.class, true);
+			if (editPart != null)
+			{
+				editParts.add(editPart);
+			}
+		}
+		return editParts;
 	}
+
 
 	/**
 	 * Get the model parent with the given class from the edit part. Return null if not found.
