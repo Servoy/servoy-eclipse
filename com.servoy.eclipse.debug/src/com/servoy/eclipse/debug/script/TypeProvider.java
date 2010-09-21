@@ -198,7 +198,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	{
 		// is it a 'generified' type
 		int index = typeNameClassName.indexOf('<');
-		if (index != -1)
+		int index2;
+		if (index != -1 && (index2 = typeNameClassName.indexOf('>', index)) != -1)
 		{
 			String classType = typeNameClassName.substring(0, index);
 			Type type = createType(context, classType, typeNameClassName);
@@ -206,7 +207,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			DynamicTypeFiller filler = dynamicTypeFillers.get(classType);
 			if (type != null && filler != null)
 			{
-				filler.fillType(type, context, typeNameClassName.substring(index + 1, typeNameClassName.length() - 1));
+				filler.fillType(type, context, typeNameClassName.substring(index + 1, index2));
 			}
 			if (type == null)
 			{
@@ -465,7 +466,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				// relation
 				try
 				{
-					table = fs.getRelation(config).getForeignTable();
+					Relation relation = fs.getRelation(config);
+					if (relation != null) table = relation.getForeignTable();
 				}
 				catch (RepositoryException e)
 				{

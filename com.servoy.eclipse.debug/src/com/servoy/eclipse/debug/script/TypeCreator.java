@@ -476,9 +476,10 @@ public abstract class TypeCreator
 	protected String getMemberTypeName(ITypeInfoContext context, String memberName, Class< ? > memberReturnType, String objectTypeName)
 	{
 		int index = objectTypeName.indexOf('<');
-		if (index != -1)
+		int index2;
+		if (index != -1 && (index2 = objectTypeName.indexOf('>', index)) != -1)
 		{
-			String config = objectTypeName.substring(index + 1, objectTypeName.length() - 1);
+			String config = objectTypeName.substring(index + 1, index2);
 
 			if (memberReturnType == Record.class)
 			{
