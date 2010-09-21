@@ -16,6 +16,9 @@
  */
 package com.servoy.eclipse.ui.preferences;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.jabsorb.JSONSerializer;
@@ -203,19 +206,28 @@ public class DesignerPreferences
 			return;
 		}
 
-		int[] sizesX = new int[coolbarLayout.sizes.length];
-		int[] sizesY = new int[coolbarLayout.sizes.length];
-		for (int i = 0; i < coolbarLayout.sizes.length; i++)
+		Map<String, Object> map = new HashMap<String, Object>();
+		if (coolbarLayout.itemOrder.length > 0) map.put("itemOrder", coolbarLayout.itemOrder);
+		if (coolbarLayout.wrapIndices.length > 0) map.put("wrapIndices", coolbarLayout.wrapIndices);
+		if (coolbarLayout.hiddenBars.length > 0) map.put("hiddenBars", coolbarLayout.hiddenBars);
+		if (coolbarLayout.sizes.length > 0)
 		{
-			sizesX[i] = coolbarLayout.sizes[i].x;
-			sizesY[i] = coolbarLayout.sizes[i].y;
+			int[] sizesX = new int[coolbarLayout.sizes.length];
+			int[] sizesY = new int[coolbarLayout.sizes.length];
+			for (int i = 0; i < coolbarLayout.sizes.length; i++)
+			{
+				sizesX[i] = coolbarLayout.sizes[i].x;
+				sizesY[i] = coolbarLayout.sizes[i].y;
+			}
+			map.put("sizesX", sizesX);
+			map.put("sizesY", sizesY);
 		}
+
 		JSONSerializer serializer = new JSONSerializer();
 		try
 		{
 			serializer.registerDefaultSerializers();
-			settings.setProperty(FORM_COOLBAR_LAYOUT_SETTING,
-				serializer.toJSON(new int[][] { coolbarLayout.itemOrder, coolbarLayout.wrapIndices, sizesX, sizesY }));
+			settings.setProperty(FORM_COOLBAR_LAYOUT_SETTING, serializer.toJSON(map));
 		}
 		catch (Exception e)
 		{
@@ -232,26 +244,31 @@ public class DesignerPreferences
 			try
 			{
 				serializer.registerDefaultSerializers();
-				Integer[][] array = (Integer[][])serializer.fromJSON(property);
+				Map map = (Map)serializer.fromJSON(property);
 
-				int[] itemOrder = new int[array[0].length];
+				Integer[] ints = (Integer[])map.get("itemOrder");
+
+				int[] itemOrder = new int[ints == null ? 0 : ints.length];
 				for (int i = 0; i < itemOrder.length; i++)
 				{
-					itemOrder[i] = array[0][i].intValue();
+					itemOrder[i] = ints[i].intValue();
 				}
-				int[] wrapIndices = new int[array[1].length];
+
+				ints = (Integer[])map.get("wrapIndices");
+				int[] wrapIndices = new int[ints == null ? 0 : ints.length];
 				for (int i = 0; i < wrapIndices.length; i++)
 				{
-					wrapIndices[i] = array[1][i].intValue();
+					wrapIndices[i] = ints[i].intValue();
 				}
-				Integer[] sizesX = array[2];
-				Integer[] sizesY = array[3];
-				Point[] sizes = new Point[sizesX.length];
+				Integer[] sizesX = (Integer[])map.get("sizesX");
+				Integer[] sizesY = (Integer[])map.get("sizesY");
+				Point[] sizes = new Point[sizesX == null ? 0 : sizesX.length];
 				for (int i = 0; i < sizesX.length; i++)
 				{
 					sizes[i] = new Point(sizesX[i].intValue(), sizesY[i].intValue());
 				}
-				return new CoolbarLayout(itemOrder, wrapIndices, sizes);
+				String[] hiddenBars = (String[])map.get("hiddenBars");
+				return new CoolbarLayout(itemOrder, wrapIndices, sizes, hiddenBars == null ? new String[0] : hiddenBars);
 			}
 			catch (Exception e)
 			{
@@ -266,12 +283,14 @@ public class DesignerPreferences
 		public final int[] itemOrder;
 		public final int[] wrapIndices;
 		public final Point[] sizes;
+		public final String[] hiddenBars;
 
-		public CoolbarLayout(int[] itemOrder, int[] wrapIndices, Point[] sizes)
+		public CoolbarLayout(int[] itemOrder, int[] wrapIndices, Point[] sizes, String[] hiddenBars)
 		{
 			this.itemOrder = itemOrder;
 			this.wrapIndices = wrapIndices;
 			this.sizes = sizes;
+			this.hiddenBars = hiddenBars;
 		}
 	}
 }

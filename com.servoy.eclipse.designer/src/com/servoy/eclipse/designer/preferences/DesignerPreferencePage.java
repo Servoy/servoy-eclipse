@@ -23,6 +23,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -187,6 +189,18 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		Label label = new Label(composite, SWT.NONE);
 		label.setBounds(10, 286, 59, 14);
 		label.setText("ToolBars");
+
+		Button resetToolbarsButton = new Button(composite, SWT.NONE);
+		resetToolbarsButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				new DesignerPreferences(ServoyModel.getSettings()).saveCoolbarLayout(null);
+			}
+		});
+		resetToolbarsButton.setBounds(350, 280, 75, 26);
+		resetToolbarsButton.setText("reset");
 
 		initializeFields();
 

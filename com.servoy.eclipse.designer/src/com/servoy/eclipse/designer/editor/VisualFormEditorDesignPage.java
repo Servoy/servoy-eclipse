@@ -19,10 +19,13 @@ package com.servoy.eclipse.designer.editor;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -51,7 +54,10 @@ import org.eclipse.gef.ui.parts.GraphicalViewerKeyHandler;
 import org.eclipse.gef.ui.parts.ScrollingGraphicalViewer;
 import org.eclipse.gef.ui.rulers.RulerComposite;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.CoolBarManager;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -115,7 +121,6 @@ import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
-import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
 
 /**
@@ -137,7 +142,11 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	private PaletteRoot paletteModel;
 	private RulerComposite rulerComposite;
 	private CoolBar coolBar;
-	private final Map<String, Pair<ToolBarManager, CoolItem>> toolbarManagers = new HashMap<String, Pair<ToolBarManager, CoolItem>>();
+	private List<String> hiddenBars;
+	private MenuManager toolbarMenuManager;
+	private final Map<String, List<IAction>> toolBarActions = new LinkedHashMap<String, List<IAction>>();
+	private final Map<String, CoolItem> toolbarCoolItems = new HashMap<String, CoolItem>();
+	private final Map<String, IAction> toolMenuBarActions = new HashMap<String, IAction>();
 
 	private Runnable selectionChangedHandler;
 	private ISelection currentSelection;
@@ -185,11 +194,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	@Override
 	public void selectionChanged(IWorkbenchPart part, ISelection newSelection)
 	{
-		if (editorPart.isClosing())
-		{
-			return;
-		}
-
 		currentSelection = newSelection;
 
 		// handle the selection when ui thread comes available, in case of may selection changed events, only the last one is handled, the others are skipped
@@ -204,6 +208,11 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 			{
 				public void run()
 				{
+					if (editorPart.isClosing())
+					{
+						return;
+					}
+
 					ISelection selection = currentSelection;
 					if (selection == null)
 					{
@@ -468,88 +477,19 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 		Action action = new ToggleShowGridAction(viewer);
 		getActionRegistry().registerAction(action);
-		addToolbarAction(COOLBAR_TOGGLE, action);
+
 
 		action = new ToggleSnapToGridAction(viewer);
 		getActionRegistry().registerAction(action);
-		addToolbarAction(COOLBAR_TOGGLE, action);
+
+		addToolbarAction(COOLBAR_TOGGLE, getActionRegistry().getAction(DesignerActionFactory.TOGGLE_SHOW_GRID.getId()));
+		addToolbarAction(COOLBAR_TOGGLE, getActionRegistry().getAction(DesignerActionFactory.TOGGLE_SNAPTO_GRID.getId()));
+
+		refreshToolBars();
 	}
 
-	private void refreshRulers()
+	protected void fillToolbar()
 	{
-		GraphicalViewer viewer = getGraphicalViewer();
-		viewer.setProperty(RulerProvider.PROPERTY_HORIZONTAL_RULER, new FormRulerProvider(viewer.getContents(), true));
-		viewer.setProperty(RulerProvider.PROPERTY_VERTICAL_RULER, new FormRulerProvider(viewer.getContents(), false));
-		viewer.setProperty(RulerProvider.PROPERTY_RULER_VISIBILITY, Boolean.TRUE);
-	}
-
-	private void refreshToolBars()
-	{
-		if (coolBar != null)
-		{
-			CoolbarLayout coolbarLayout = new DesignerPreferences(ServoyModel.getSettings()).getCoolbarLayout();
-			if (coolbarLayout != null)
-			{
-				try
-				{
-					coolBar.setItemLayout(coolbarLayout.itemOrder, coolbarLayout.wrapIndices, coolbarLayout.sizes);
-				}
-				catch (IllegalArgumentException e)
-				{
-					// ignore, layout not applicable to current coolbar
-				}
-			}
-		}
-	}
-
-	@Override
-	protected void configureGraphicalViewer()
-	{
-		getGraphicalViewer().getControl().setBackground(ColorConstants.lightGray);
-	}
-
-	@Override
-	protected Control getGraphicalControl()
-	{
-		return rulerComposite;
-	}
-
-	@Override
-	public void createPartControl(Composite parent)
-	{
-		if (!new DesignerPreferences(ServoyModel.getSettings()).getFormToolsOnMainToolbar())
-		{
-			super.createPartControl(parent);
-			return;
-		}
-
-
-		Composite c = new Composite(parent, SWT.NONE);
-		c.setLayout(new org.eclipse.swt.layout.FormLayout());
-
-		coolBar = new CoolBar(c, SWT.FLAT);
-
-		FormData formData = new FormData();
-		formData.left = new FormAttachment(0);
-		formData.right = new FormAttachment(100);
-		formData.top = new FormAttachment(0);
-		coolBar.setLayoutData(formData);
-		coolBar.addListener(SWT.Resize, new Listener()
-		{
-			public void handleEvent(Event event)
-			{
-				coolBar.getParent().layout();
-			}
-		});
-		coolBar.addListener(SWT.MouseUp, new Listener()
-		{
-			public void handleEvent(Event event)
-			{
-				new DesignerPreferences(Settings.getInstance()).saveCoolbarLayout(new CoolbarLayout(coolBar.getItemOrder(), coolBar.getWrapIndices(),
-					coolBar.getItemSizes()));
-			}
-		});
-
 		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.BRING_TO_FRONT.getId()));
 		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.SEND_TO_BACK.getId()));
 		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.SET_TAB_SEQUENCE.getId()));
@@ -573,6 +513,215 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 		addToolbarAction(COOLBAR_ELEMENTS, null);
 
+		List<IAction> editPartActions = AbstractEditpartActionDelegate.getEditPartActions();
+		for (IAction action : editPartActions)
+		{
+			addToolbarAction(COOLBAR_ELEMENTS, action);
+		}
+	}
+
+	private void refreshRulers()
+	{
+		GraphicalViewer viewer = getGraphicalViewer();
+		viewer.setProperty(RulerProvider.PROPERTY_HORIZONTAL_RULER, new FormRulerProvider(viewer.getContents(), true));
+		viewer.setProperty(RulerProvider.PROPERTY_VERTICAL_RULER, new FormRulerProvider(viewer.getContents(), false));
+		viewer.setProperty(RulerProvider.PROPERTY_RULER_VISIBILITY, Boolean.TRUE);
+	}
+
+	protected void saveCoolbarLayout()
+	{
+		new DesignerPreferences(Settings.getInstance()).saveCoolbarLayout(new CoolbarLayout(coolBar.getItemOrder(), coolBar.getWrapIndices(),
+			coolBar.getItemSizes(), hiddenBars.toArray(new String[hiddenBars.size()])));
+	}
+
+
+	@Override
+	protected void configureGraphicalViewer()
+	{
+		getGraphicalViewer().getControl().setBackground(ColorConstants.lightGray);
+	}
+
+	@Override
+	protected Control getGraphicalControl()
+	{
+		return rulerComposite;
+	}
+
+	protected MenuManager getToolbarMenuManager()
+	{
+		if (toolbarMenuManager == null)
+		{
+			toolbarMenuManager = createToolbarMenuManager();
+		}
+		return toolbarMenuManager;
+	}
+
+	protected MenuManager createToolbarMenuManager()
+	{
+		MenuManager menuManager = new MenuManager();
+		menuManager.add(new Action("reset")
+		{
+			@Override
+			public void run()
+			{
+				new DesignerPreferences(Settings.getInstance()).saveCoolbarLayout(null);
+			}
+		});
+		menuManager.add(new Separator("bars"));
+		return menuManager;
+	}
+
+	protected IAction createCheckBarAction(final String bar)
+	{
+		Action action = new Action(bar, IAction.AS_CHECK_BOX)
+		{
+			@Override
+			public void run()
+			{
+				if (!hiddenBars.remove(bar))
+				{
+					hiddenBars.add(bar);
+					createCoolItem(bar);
+				}
+				else
+				{
+					disposeCoolItem(bar);
+				}
+				saveCoolbarLayout();
+			}
+		};
+		toolMenuBarActions.put(bar, action);
+		return action;
+	}
+
+	private void createCoolItem(String bar)
+	{
+		if (!toolbarCoolItems.containsKey(bar))
+		{
+			ToolBarManager toolBarManager = new ToolBarManager(SWT.NONE);
+			CoolItem item = new CoolItem(coolBar, SWT.NONE);
+			ToolBar toolBar = toolBarManager.createControl(coolBar);
+			item.setControl(toolBar);
+
+			toolBarManager.setContextMenuManager(getToolbarMenuManager());
+			for (IAction action : toolBarActions.get(bar))
+			{
+				new ActionToolItem(toolBar, action);
+			}
+
+			toolBar.pack();
+			Point size = toolBar.getSize();
+
+			Point preferred = item.computeSize(size.x, size.y);
+			item.setPreferredSize(preferred);
+			item.setMinimumSize(preferred);
+
+			toolbarCoolItems.put(bar, item);
+		}
+	}
+
+	private void disposeCoolItem(String bar)
+	{
+		CoolItem item = toolbarCoolItems.remove(bar);
+		if (item != null)
+		{
+			item.dispose();
+		}
+	}
+
+	protected void refreshToolBars()
+	{
+		if (coolBar == null)
+		{
+			return;
+		}
+
+		CoolbarLayout coolbarLayout = new DesignerPreferences(ServoyModel.getSettings()).getCoolbarLayout();
+
+		hiddenBars = coolbarLayout == null ? new ArrayList<String>() : new ArrayList<String>(Arrays.asList(coolbarLayout.hiddenBars));
+
+		for (Entry<String, List<IAction>> entry : toolBarActions.entrySet())
+		{
+			String bar = entry.getKey();
+
+			boolean visible = !hiddenBars.contains(bar);
+			toolMenuBarActions.get(bar).setChecked(visible);
+
+			if (visible)
+			{
+				createCoolItem(bar);
+			}
+			else
+			{
+				disposeCoolItem(bar);
+			}
+		}
+
+		try
+		{
+			if (coolbarLayout == null)
+			{
+				// generate default layout:
+				int[] itemOrder = new int[toolBarActions.size()];
+				Point[] sizes = new Point[toolBarActions.size()];
+				int i = 0;
+				for (String bar : toolBarActions.keySet())
+				{
+					itemOrder[i] = i;
+					CoolItem item = toolbarCoolItems.get(bar);
+					sizes[i] = item == null ? new Point(0, 0) : item.getControl().getSize();
+					i++;
+				}
+				coolBar.setItemLayout(itemOrder, new int[0], sizes);
+			}
+			else
+			{
+				coolBar.setItemLayout(coolbarLayout.itemOrder, coolbarLayout.wrapIndices, coolbarLayout.sizes);
+			}
+		}
+		catch (IllegalArgumentException e)
+		{
+			// ignore, layout not applicable to current coolbar
+		}
+		coolBar.layout();
+	}
+
+	@Override
+	public void createPartControl(Composite parent)
+	{
+		if (!new DesignerPreferences(ServoyModel.getSettings()).getFormToolsOnMainToolbar())
+		{
+			super.createPartControl(parent);
+			return;
+		}
+
+		Composite c = new Composite(parent, SWT.NONE);
+		c.setLayout(new org.eclipse.swt.layout.FormLayout());
+
+		CoolBarManager coolBarManager = new CoolBarManager(SWT.WRAP);
+		coolBarManager.setContextMenuManager(getToolbarMenuManager());
+		coolBar = coolBarManager.createControl(c);
+
+		FormData formData = new FormData();
+		formData.left = new FormAttachment(0);
+		formData.right = new FormAttachment(100);
+		formData.top = new FormAttachment(0);
+		coolBar.setLayoutData(formData);
+		coolBar.addListener(SWT.Resize, new Listener()
+		{
+			public void handleEvent(Event event)
+			{
+				coolBar.getParent().layout();
+			}
+		});
+		coolBar.addListener(SWT.MouseUp, new Listener()
+		{
+			public void handleEvent(Event event)
+			{
+				saveCoolbarLayout();
+			}
+		});
+
 		Composite composite = new Composite(c, SWT.NONE);
 		formData = new FormData();
 		formData.left = new FormAttachment(0);
@@ -583,11 +732,8 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 		composite.setLayout(new FillLayout());
 
-		List<IAction> editPartActions = AbstractEditpartActionDelegate.getEditPartActions();
-		for (IAction action : editPartActions)
-		{
-			editorActionCreated(action);
-		}
+		fillToolbar();
+
 		AbstractEditpartActionDelegate.addActionAddedListener(this); // sometimes the VFE is created before the actions are created
 
 		refreshToolBars();
@@ -597,42 +743,19 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 	protected void addToolbarAction(String bar, IAction action)
 	{
-		if (coolBar == null)
+		List<IAction> list = toolBarActions.get(bar);
+		if (list == null)
 		{
-			// toolbars not in form editor
-			return;
+			list = new ArrayList<IAction>();
+			toolBarActions.put(bar, list);
+			getToolbarMenuManager().add(createCheckBarAction(bar));
 		}
-
-		ToolBarManager toolBarManager;
-		CoolItem item;
-		Pair<ToolBarManager, CoolItem> pair = toolbarManagers.get(bar);
-		if (pair == null)
-		{
-			toolBarManager = new ToolBarManager(SWT.NONE);
-			item = new CoolItem(coolBar, SWT.NONE);
-			item.setControl(toolBarManager.createControl(coolBar));
-			toolbarManagers.put(bar, new Pair<ToolBarManager, CoolItem>(toolBarManager, item));
-		}
-		else
-		{
-			toolBarManager = pair.getLeft();
-			item = pair.getRight();
-		}
-		ToolBar toolBar = toolBarManager.getControl();
-
 		if (action != null)
 		{
-			new ActionToolItem(toolBar, action);
+			list.add(action);
 		}
-		// else just create the toolbar with that name
-
-		toolBar.pack();
-		Point size = toolBar.getSize();
-
-		Point preferred = item.computeSize(size.x, size.y);
-		item.setPreferredSize(preferred);
-		item.setMinimumSize(preferred);
 	}
+
 
 	public void editorActionCreated(final IAction action)
 	{
@@ -835,4 +958,5 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		}
 		return paletteModel;
 	}
+
 }
