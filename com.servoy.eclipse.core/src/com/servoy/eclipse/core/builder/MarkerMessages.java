@@ -36,6 +36,7 @@ public class MarkerMessages
 	public static String Marker_Duplicate_UUIDDuplicateIn = "UUID duplicate found \"{0}\" in %s."; //$NON-NLS-1$
 	// Seems to be superseded by the Marker_Form_Solution_PropertyTargetNotFound family of messages.
 	public static String Marker_PropertyFormCannotBeInstantiated = "Property \"{0}\" refers to a form that cannot be instantiated."; //$NON-NLS-1$
+	public static String Marker_PropertyMultipleMethodOnSameElement = "Element \"{0}\" has the same method attached to multiple events/commands."; //$NON-NLS-1$
 	// Not sure in which conditions the valuelist returns an invalid type, because the type is calculated
 	// and not stored.
 	public static String Marker_Valuelist_TypeUnknown = "Valuelist \"{0}\" has unknown type: {1}."; //$NON-NLS-1$
