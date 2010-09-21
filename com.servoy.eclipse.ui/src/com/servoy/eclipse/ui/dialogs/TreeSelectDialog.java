@@ -81,6 +81,8 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 	private ISelection selection;
 
+	private boolean allowEmptySelection;
+
 	private IControlFactory optionsAreaFactory;
 	private final boolean showFilterMenu;
 	private final int defaultFilterMode;
@@ -89,16 +91,48 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	 * Constructs a new TreeSelectDialog.
 	 * 
 	 * @param shell
+	 * @param showFilter
+	 * @param showFilterMenu
+	 * @param defaultFilterMode
 	 * @param contentProvider
 	 * @param labelProvider
 	 * @param comparator
+	 * @param selectionFilter
 	 * @param treeStyle
 	 * @param title
 	 * @param input
+	 * @param selection
+	 * @param name
 	 */
 	public TreeSelectDialog(Shell shell, boolean showFilter, boolean showFilterMenu, int defaultFilterMode, ITreeContentProvider contentProvider,
 		IBaseLabelProvider labelProvider, ViewerComparator comparator, IFilter selectionFilter, int treeStyle, String title, Object input,
 		ISelection selection, String name)
+	{
+		this(shell, showFilter, showFilterMenu, defaultFilterMode, contentProvider, labelProvider, comparator, selectionFilter, treeStyle, title, input,
+			selection, true, name);
+	}
+
+	/**
+	 * Constructs a new TreeSelectDialog.
+	 * 
+	 * @param shell
+	 * @param showFilter
+	 * @param showFilterMenu
+	 * @param defaultFilterMode
+	 * @param contentProvider
+	 * @param labelProvider
+	 * @param comparator
+	 * @param selectionFilter
+	 * @param treeStyle
+	 * @param title
+	 * @param input
+	 * @param selection
+	 * @param allowEmptySelection
+	 * @param name
+	 */
+	public TreeSelectDialog(Shell shell, boolean showFilter, boolean showFilterMenu, int defaultFilterMode, ITreeContentProvider contentProvider,
+		IBaseLabelProvider labelProvider, ViewerComparator comparator, IFilter selectionFilter, int treeStyle, String title, Object input,
+		ISelection selection, boolean allowEmptySelection, String name)
 	{
 		super(shell);
 		this.showFilter = showFilter;
@@ -112,6 +146,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 		this.comparator = comparator;
 		this.input = input;
 		this.selection = selection;
+		this.allowEmptySelection = allowEmptySelection;
 		this.name = name;
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
@@ -288,9 +323,15 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	 */
 	protected void updateButtons()
 	{
+		boolean enabled = false;
+
+		// control the way we handle empty selections when we have multiselect enabled
+		if ((treeStyle & SWT.MULTI) != 0) enabled = (isAllowEmptySelection() || !getSelection().isEmpty());
+		else enabled = !getSelection().isEmpty();
+
 		if (okButton != null)
 		{
-			okButton.setEnabled((treeStyle & SWT.MULTI) != 0 || !getSelection().isEmpty());
+			okButton.setEnabled(enabled);
 		}
 	}
 
@@ -327,6 +368,26 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	public IDialogSettings getDialogBoundsSettings()
 	{
 		return EditorUtil.getDialogSettings(name);
+	}
+
+	/**
+	 * Returns whether an empty selection is allowed for this dialog.
+	 * 
+	 * @return the allowEmptySelection
+	 */
+	public boolean isAllowEmptySelection()
+	{
+		return allowEmptySelection;
+	}
+
+	/**
+	 * Set if an empty selection is allowed for this dialog.
+	 * 
+	 * @param allowEmptySelection the allowEmptySelection to set
+	 */
+	public void setAllowEmptySelection(boolean allowEmptySelection)
+	{
+		this.allowEmptySelection = allowEmptySelection;
 	}
 
 
