@@ -434,44 +434,47 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 					{
 						IValueReference functionType = (IValueReference)object;
 						String className = functionType.getName();
-						type = context.getType(className);
-						EList<Member> members = type.getMembers();
-						if (members.size() == 0)
+						if (className != null)
 						{
-							Set<String> directChildren = functionType.getDirectChildren();
-							for (String fieldName : directChildren)
+							type = context.getType(className);
+							EList<Member> members = type.getMembers();
+							if (members.size() == 0)
 							{
-								if (fieldName.equals(IValueReference.FUNCTION_OP)) continue;
-								IValueReference child = functionType.getChild(fieldName);
-								// test if it is a function.
-								if (child.hasChild(IValueReference.FUNCTION_OP))
+								Set<String> directChildren = functionType.getDirectChildren();
+								for (String fieldName : directChildren)
 								{
-									Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
-									method.setName(fieldName);
-									method.setType(JavaScriptValidations.typeOf(child));
-
-									JSMethod jsmethod = (JSMethod)child.getAttribute(IReferenceAttributes.PARAMETERS, true);
-									if (jsmethod != null && jsmethod.getParameterCount() > 0)
+									if (fieldName.equals(IValueReference.FUNCTION_OP)) continue;
+									IValueReference child = functionType.getChild(fieldName);
+									// test if it is a function.
+									if (child.hasChild(IValueReference.FUNCTION_OP))
 									{
-										EList<Parameter> parameters = method.getParameters();
-										List<IParameter> jsParameters = jsmethod.getParameters();
-										for (IParameter jsParameter : jsParameters)
+										Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+										method.setName(fieldName);
+										method.setType(JavaScriptValidations.typeOf(child));
+
+										JSMethod jsmethod = (JSMethod)child.getAttribute(IReferenceAttributes.PARAMETERS, true);
+										if (jsmethod != null && jsmethod.getParameterCount() > 0)
 										{
-											Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
-											parameter.setKind(ParameterKind.OPTIONAL);
-											parameter.setType(jsParameter.getType());
-											parameter.setName(jsParameter.getName());
-											parameters.add(parameter);
+											EList<Parameter> parameters = method.getParameters();
+											List<IParameter> jsParameters = jsmethod.getParameters();
+											for (IParameter jsParameter : jsParameters)
+											{
+												Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
+												parameter.setKind(ParameterKind.OPTIONAL);
+												parameter.setType(jsParameter.getType());
+												parameter.setName(jsParameter.getName());
+												parameters.add(parameter);
+											}
 										}
+										members.add(method);
 									}
-									members.add(method);
-								}
-								else
-								{
-									Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
-									property.setName(fieldName);
-									property.setType(JavaScriptValidations.typeOf(child));
-									members.add(property);
+									else
+									{
+										Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+										property.setName(fieldName);
+										property.setType(JavaScriptValidations.typeOf(child));
+										members.add(property);
+									}
 								}
 							}
 						}
