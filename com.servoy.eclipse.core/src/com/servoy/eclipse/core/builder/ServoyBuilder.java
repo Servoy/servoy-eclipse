@@ -975,6 +975,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						checkCancel();
 
 						Form parentForm = (Form)o.getAncestor(IRepository.FORMS);
+						Map<IPersist, Boolean> methodsReferences = new HashMap<IPersist, Boolean>();
 						try
 						{
 							final Map<String, Method> methods = ((EclipseRepository)ServoyModel.getDeveloperRepository()).getGettersViaIntrospection(o);
@@ -1157,6 +1158,27 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										{
 											methodsParsed.add(foundPersist.getUUID());
 											parseEventMethod(project, (ScriptMethod)foundPersist, element.getName());
+										}
+										if ((foundPersist instanceof ScriptMethod) &&
+											(BaseComponent.isEventProperty(element.getName()) || BaseComponent.isCommandProperty(element.getName())))
+										{
+											if (methodsReferences.containsKey(foundPersist))
+											{
+												if (methodsReferences.get(foundPersist))
+												{
+													String elementName = "";
+													if (o instanceof ISupportName && (((ISupportName)o).getName() != null)) elementName = ((ISupportName)o).getName();
+													methodsReferences.put(foundPersist, false);
+													String msg = MarkerMessages.getMessage(MarkerMessages.Marker_PropertyMultipleMethodOnSameElement,
+														elementName);
+													addMarker(project, SOLUTION_PROBLEM_MARKER_TYPE, msg, -1, IMarker.SEVERITY_INFO, IMarker.PRIORITY_LOW,
+														null, o);
+												}
+											}
+											else
+											{
+												methodsReferences.put(foundPersist, true);
+											}
 										}
 									}
 								}
