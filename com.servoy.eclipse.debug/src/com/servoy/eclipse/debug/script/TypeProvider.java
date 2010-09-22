@@ -113,6 +113,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addScopeType("Elements", new ElementsScopeCreator());
 		addScopeType("Plugins", new PluginsScopeCreator());
 		addScopeType("Super", new SuperScopeCreator());
+		addScopeType("Forms", new FormsScopeCreator());
+		addScopeType("Globals", new GlobalScopeCreator());
 
 		dynamicTypeFillers.put(FoundSet.JS_FOUNDSET, new DataProviderFiller());
 		dynamicTypeFillers.put(Record.JS_RECORD, new DataProviderFiller());
@@ -497,6 +499,100 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 		}
 	}
+
+	private class FormsScopeCreator implements IScopeTypeCreator
+	{
+		/**
+		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
+		 */
+		public Type createType(ITypeInfoContext context, String fullTypeName)
+		{
+			FlattenedSolution fs = getFlattenedSolution(context);
+
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			if (fs != null)
+			{
+				type.setName("Forms<" + fs.getMainSolutionMetaData().getName() + '>');
+			}
+			else
+			{
+				type.setName("Forms");
+			}
+			type.setKind(TypeKind.JAVA);
+			type.setAttribute(IMAGE_DESCRIPTOR, FORMS);
+
+			EList<Member> members = type.getMembers();
+			members.add(createProperty(context, "allnames", true, "Array", "All form names as an array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "length", true, "Number", "Number of forms", PROPERTY));
+
+			if (fs != null)
+			{
+				Iterator<Form> forms = fs.getForms(false);
+
+				while (forms.hasNext())
+				{
+					Form form = forms.next();
+					members.add(createProperty(context, form.getName(), true, "Form<" + form.getName() + '>',
+						"Form based on datasource: " + form.getDataSource(), FORM_IMAGE, form));
+				}
+			}
+			return type;
+		}
+
+	}
+
+	private class GlobalScopeCreator implements IScopeTypeCreator
+	{
+		/**
+		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
+		 */
+		public Type createType(ITypeInfoContext context, String fullTypeName)
+		{
+			FlattenedSolution fs = getFlattenedSolution(context);
+
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			if (fs != null)
+			{
+				type.setName("Globals<" + fs.getMainSolutionMetaData().getName() + '>');
+			}
+			else
+			{
+				type.setName("Globals");
+			}
+			type.setKind(TypeKind.JAVA);
+			type.setAttribute(IMAGE_DESCRIPTOR, GLOBALS);
+
+			EList<Member> members = type.getMembers();
+
+			members.add(createProperty(context, "allmethods", true, "Array", "Returns all global method names in an Array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "allvariables", true, "Array", "Returns all global variable names in an Array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "allrelations", true, "Array", "Returns all global relation names in an Array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "currentcontroller", true, "controller", "The current active main forms controller", PROPERTY));
+
+
+			if (fs != null)
+			{
+				Iterator<ScriptVariable> scriptVariables = fs.getScriptVariables(false);
+				while (scriptVariables.hasNext())
+				{
+					ScriptVariable sv = scriptVariables.next();
+
+					members.add(createProperty(sv.getName(), false, getDataPRoviderType(context, sv), getParsedComment(sv.getComment()), GLOBAL_VAR_IMAGE,
+						sv.getSerializableRuntimeProperty(IScriptProvider.FILENAME)));
+				}
+
+				Iterator<ScriptMethod> scriptMethods = fs.getScriptMethods(false);
+				while (scriptMethods.hasNext())
+				{
+					ScriptMethod sm = scriptMethods.next();
+					members.add(createMethod(context, sm, GLOBAL_METHOD_IMAGE, sm.getSerializableRuntimeProperty(IScriptProvider.FILENAME)));
+				}
+			}
+			return type;
+
+		}
+	}
+
 
 	private class FoundSetCreator implements IScopeTypeCreator
 	{

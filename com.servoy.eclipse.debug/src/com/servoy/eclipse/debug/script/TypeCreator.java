@@ -34,6 +34,25 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.ast.ASTNode;
+import org.eclipse.dltk.ast.ASTVisitor;
+import org.eclipse.dltk.ast.statements.Statement;
+import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
+import org.eclipse.dltk.internal.javascript.ti.IValueReference;
+import org.eclipse.dltk.internal.javascript.ti.JSMethod;
+import org.eclipse.dltk.internal.javascript.validation.JavaScriptValidations;
+import org.eclipse.dltk.javascript.ast.ArrayInitializer;
+import org.eclipse.dltk.javascript.ast.BooleanLiteral;
+import org.eclipse.dltk.javascript.ast.CallExpression;
+import org.eclipse.dltk.javascript.ast.DecimalLiteral;
+import org.eclipse.dltk.javascript.ast.Expression;
+import org.eclipse.dltk.javascript.ast.Identifier;
+import org.eclipse.dltk.javascript.ast.JSNode;
+import org.eclipse.dltk.javascript.ast.NewExpression;
+import org.eclipse.dltk.javascript.ast.ObjectInitializer;
+import org.eclipse.dltk.javascript.ast.ObjectInitializerPart;
+import org.eclipse.dltk.javascript.ast.Script;
+import org.eclipse.dltk.javascript.ast.StringLiteral;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
@@ -68,11 +87,14 @@ import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IColumnTypes;
+import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IDeprecated;
@@ -519,6 +541,207 @@ public abstract class TypeCreator
 	public void addScopeType(String name, IScopeTypeCreator creator)
 	{
 		scopeTypes.put(name, creator);
+	}
+
+
+	/**
+	 * @param context
+	 * @param type
+	 * @param provider
+	 * @return
+	 */
+	protected Type getDataPRoviderType(ITypeInfoContext context, IDataProvider provider)
+	{
+		Type type = null;
+		switch (provider.getDataProviderType())
+		{
+			case IColumnTypes.DATETIME :
+				type = context.getType("Date");
+				break;
+			case IColumnTypes.INTEGER :
+			case IColumnTypes.NUMBER :
+				type = context.getType("Number");
+				break;
+			case IColumnTypes.TEXT :
+				type = context.getType("String");
+				break;
+			case IColumnTypes.MEDIA :
+				if (provider instanceof ScriptVariable)
+				{
+					Object object = ((ScriptVariable)provider).getRuntimeProperty(IScriptProvider.INITIALIZER);
+					if (object instanceof ObjectInitializer)
+					{
+						String typeName = provider.getDataProviderID();
+						if (typeName.startsWith(ScriptVariable.GLOBAL_DOT_PREFIX)) typeName = typeName.substring(ScriptVariable.GLOBAL_DOT_PREFIX.length());
+						type = context.getType(typeName);
+						EList<Member> members = type.getMembers();
+						if (members.size() == 0)
+						{
+							List<ObjectInitializerPart> initializers = ((ObjectInitializer)object).getInitializers();
+							for (ObjectInitializerPart objectInitializer : initializers)
+							{
+								List childs = objectInitializer.getChilds();
+								if (childs.size() == 2) // identifier and value.
+								{
+									Object identifier = childs.get(0);
+									if (identifier instanceof Identifier)
+									{
+										Object value = childs.get(1);
+										Type t = null;
+										if (value instanceof DecimalLiteral)
+										{
+											t = context.getType("Number");
+										}
+										else if (value instanceof StringLiteral)
+										{
+											t = context.getType("String");
+										}
+										else if (value instanceof BooleanLiteral)
+										{
+											t = context.getType("Boolean");
+										}
+										else if (value instanceof CallExpression)
+										{
+											ASTNode callExpression = ((CallExpression)value).getExpression();
+											if (callExpression instanceof NewExpression)
+											{
+												String objectclass = null;
+												Expression objectClassExpression = ((NewExpression)callExpression).getObjectClass();
+												if (objectClassExpression instanceof Identifier)
+												{
+													objectclass = ((Identifier)objectClassExpression).getName();
+												}
+												if ("String".equals(objectclass)) //$NON-NLS-1$
+												{
+													t = context.getType("String");
+												}
+												else if ("Date".equals(objectclass)) //$NON-NLS-1$
+												{
+													t = context.getType("Date");
+												}
+											}
+										}
+
+										members.add(createProperty(((Identifier)identifier).getName(), true, t, null, null));
+									}
+								}
+								//members.add(cre)
+							}
+						}
+					}
+					else if (object instanceof ArrayInitializer)
+					{
+						type = context.getType("Array");
+					}
+					else if (object instanceof CallExpression)
+					{
+						ASTNode callExpression = ((CallExpression)object).getExpression();
+						if (callExpression instanceof NewExpression)
+						{
+							String objectclass = null;
+							Expression objectClassExpression = ((NewExpression)callExpression).getObjectClass();
+							if (objectClassExpression instanceof Identifier)
+							{
+								objectclass = ((Identifier)objectClassExpression).getName();
+							}
+							type = context.getType(objectclass);
+							EList<Member> members = type.getMembers();
+							if (members.size() == 0)
+							{
+								// find this node.
+								ASTNode parent = ((CallExpression)object).getParent();
+								while (parent instanceof JSNode && !(parent instanceof Script))
+								{
+									parent = ((JSNode)parent).getParent();
+								}
+								if (parent instanceof Script)
+								{
+									try
+									{
+										parent.traverse(new ASTVisitor()
+										{
+											@Override
+											public boolean visitGeneral(ASTNode node) throws Exception
+											{
+												return true;
+											}
+
+											@Override
+											public boolean visit(org.eclipse.dltk.ast.expressions.Expression s) throws Exception
+											{
+												return super.visit(s);
+											}
+
+											@Override
+											public boolean visit(Statement s) throws Exception
+											{
+												// TODO Auto-generated method stub
+												return super.visit(s);
+											}
+										});
+									}
+									catch (Exception e)
+									{
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}
+							}
+						}
+					}
+					else if (object instanceof IValueReference)
+					{
+						IValueReference functionType = (IValueReference)object;
+						String className = functionType.getName();
+						if (className != null)
+						{
+							type = context.getType(className);
+							EList<Member> members = type.getMembers();
+							if (members.size() == 0)
+							{
+								Set<String> directChildren = functionType.getDirectChildren();
+								for (String fieldName : directChildren)
+								{
+									if (fieldName.equals(IValueReference.FUNCTION_OP)) continue;
+									IValueReference child = functionType.getChild(fieldName);
+									// test if it is a function.
+									if (child.hasChild(IValueReference.FUNCTION_OP))
+									{
+										Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+										method.setName(fieldName);
+										method.setType(JavaScriptValidations.typeOf(child));
+
+										JSMethod jsmethod = (JSMethod)child.getAttribute(IReferenceAttributes.PARAMETERS, true);
+										if (jsmethod != null && jsmethod.getParameterCount() > 0)
+										{
+											EList<Parameter> parameters = method.getParameters();
+											List<org.eclipse.dltk.javascript.typeinfo.IModelBuilder.IParameter> jsParameters = jsmethod.getParameters();
+											for (org.eclipse.dltk.javascript.typeinfo.IModelBuilder.IParameter jsParameter : jsParameters)
+											{
+												Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
+												parameter.setKind(ParameterKind.OPTIONAL);
+												parameter.setType(jsParameter.getType());
+												parameter.setName(jsParameter.getName());
+												parameters.add(parameter);
+											}
+										}
+										members.add(method);
+									}
+									else
+									{
+										Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+										property.setName(fieldName);
+										property.setType(JavaScriptValidations.typeOf(child));
+										members.add(property);
+									}
+								}
+							}
+						}
+					}
+				}
+				break;
+		}
+		return type;
 	}
 
 
