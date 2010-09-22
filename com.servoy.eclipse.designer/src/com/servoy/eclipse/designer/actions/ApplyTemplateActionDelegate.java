@@ -51,7 +51,7 @@ public class ApplyTemplateActionDelegate extends AbstractEditpartActionDelegate
 	protected Request createRequest(EditPart editPart)
 	{
 		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS, TemplateContentProvider.DEFAULT,
-			new LabelProvider(), null, null, SWT.NONE, "Select template", TemplateContentProvider.TEMPLATES_DUMMY_INPUT, null,
+			new LabelProvider(), null, null, SWT.NONE, "Select template", TemplateContentProvider.TEMPLATES_DUMMY_INPUT, null, false,
 			TreeSelectDialog.TEMPLATE_DIALOG, null);
 		dialog.open();
 

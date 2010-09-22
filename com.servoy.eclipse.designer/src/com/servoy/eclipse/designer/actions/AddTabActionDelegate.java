@@ -86,7 +86,7 @@ public class AddTabActionDelegate extends AbstractEditpartActionDelegate
 			}
 		};
 		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, true, TreePatternFilter.FILTER_LEAFS, contentProvider,
-			RelatedFormsLabelProvider.INSTANCE, null, new LeafnodesSelectionFilter(contentProvider), SWT.MULTI, "Select tabpanel form", form, null,
+			RelatedFormsLabelProvider.INSTANCE, null, new LeafnodesSelectionFilter(contentProvider), SWT.MULTI, "Select tabpanel form", form, null, false,
 			TreeSelectDialog.TAB_DIALOG, null);
 		dialog.open();
 

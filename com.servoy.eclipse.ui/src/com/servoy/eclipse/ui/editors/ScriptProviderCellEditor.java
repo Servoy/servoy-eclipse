@@ -140,7 +140,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 				// input
 				new Object(),
 				// selection
-				selection, TreeSelectDialog.SCRIPT_DIALOG, null);
+				selection, false, TreeSelectDialog.SCRIPT_DIALOG, null);
 		}
 
 		public void expandCalculationNode()

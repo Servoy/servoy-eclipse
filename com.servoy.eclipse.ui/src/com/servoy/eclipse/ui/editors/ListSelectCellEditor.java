@@ -110,8 +110,11 @@ public class ListSelectCellEditor extends DialogCellEditor
 	{
 		boolean showFilter = (treeStyle & SWT.CHECK) == 0; // filter does not work correctly with CheckboxTreeViewer // TODO : fix
 
+		boolean allowEmptySelection = false;
+		if ((treeStyle & SWT.MULTI) != 0) allowEmptySelection = true;
+
 		TreeSelectDialog dialog = new TreeSelectDialog(cellEditorWindow.getShell(), showFilter, showFilterMenu, defaultFilterMode, contentProvider,
-			getLabelProvider(), null, getSelectionFilter(), treeStyle, title, input, getSelection(), name, null);
+			getLabelProvider(), null, getSelectionFilter(), treeStyle, title, input, getSelection(), allowEmptySelection, name, null);
 		if (controlFactory != null)
 		{
 			controlFactory.setTreeSelectDialog(dialog);

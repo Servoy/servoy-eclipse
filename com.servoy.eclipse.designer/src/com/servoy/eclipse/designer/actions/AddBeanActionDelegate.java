@@ -48,7 +48,7 @@ public class AddBeanActionDelegate extends AbstractEditpartActionDelegate
 	protected Request createRequest(EditPart editPart)
 	{
 		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS, BeanClassContentProvider.DEFAULT,
-			BeanInfoLabelProvider.INSTANCE_NAME, null, null, SWT.NONE, "Select bean", BeanClassContentProvider.BEANS_DUMMY_INPUT, null,
+			BeanInfoLabelProvider.INSTANCE_NAME, null, null, SWT.NONE, "Select bean", BeanClassContentProvider.BEANS_DUMMY_INPUT, null, false,
 			TreeSelectDialog.BEAN_DIALOG, null);
 		dialog.open();
 

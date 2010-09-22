@@ -99,7 +99,7 @@ public class MethodDialog extends TreeSelectDialog
 			// input: MethodListOptions
 			input,
 			// selection
-			selection, TreeSelectDialog.METHOD_DIALOG, valueEditor);
+			selection, false, TreeSelectDialog.METHOD_DIALOG, valueEditor);
 	}
 
 	@Override

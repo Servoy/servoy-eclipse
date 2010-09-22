@@ -64,7 +64,7 @@ public class AddMediaActionDelegate extends AbstractEditpartActionDelegate
 			(IPersist)editPart.getModel());
 		final TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS, new MediaContentProvider(
 			flattenedSolution), new SolutionContextDelegateLabelProvider(new MediaLabelProvider(flattenedSolution), flattenedSolution.getSolution()), null,
-			null, SWT.NONE, "Select image", new MediaContentProvider.MediaListOptions(false), null, TreeSelectDialog.MEDIA_DIALOG, null);
+			null, SWT.NONE, "Select image", new MediaContentProvider.MediaListOptions(false), null, false, TreeSelectDialog.MEDIA_DIALOG, null);
 		dialog.setOptionsAreaFactory(new IControlFactory()
 		{
 			public Control createControl(Composite composite)

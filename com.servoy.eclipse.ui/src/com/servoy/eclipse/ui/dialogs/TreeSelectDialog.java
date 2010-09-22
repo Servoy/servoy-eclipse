@@ -89,6 +89,8 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 	private List<Object> selection;
 
+	private final boolean allowEmptySelection;
+
 	private IControlFactory optionsAreaFactory;
 	private final boolean showFilterMenu;
 	private final int defaultFilterMode;
@@ -108,7 +110,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	 */
 	public TreeSelectDialog(Shell shell, boolean showFilter, boolean showFilterMenu, int defaultFilterMode, ITreeContentProvider contentProvider,
 		IBaseLabelProvider labelProvider, ViewerComparator comparator, IFilter selectionFilter, int treeStyle, String title, Object input,
-		ISelection selection, String name, IValueEditor valueEditor)
+		ISelection selection, boolean allowEmptySelection, String name, IValueEditor valueEditor)
 	{
 		super(shell);
 		this.showFilter = showFilter;
@@ -123,6 +125,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 		this.input = input;
 		this.name = name;
 		this.valueEditor = valueEditor;
+		this.allowEmptySelection = allowEmptySelection;
 		updateSelection(selection);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
@@ -301,9 +304,15 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	 */
 	protected void updateButtons()
 	{
+		boolean enabled = false;
+
+		// control the way we handle empty selections when we have multiselect enabled
+		if ((treeStyle & SWT.MULTI) != 0) enabled = (isAllowEmptySelection() || !getSelection().isEmpty());
+		else enabled = !getSelection().isEmpty();
+
 		if (okButton != null)
 		{
-			okButton.setEnabled((treeStyle & SWT.MULTI) != 0 || !getSelection().isEmpty());
+			okButton.setEnabled(enabled);
 		}
 
 		if (openButton != null)
@@ -413,5 +422,14 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 		okPressed();
 	}
 
+	/**
+	 * Returns whether an empty selection is allowed for this dialog.
+	 * 
+	 * @return the allowEmptySelection
+	 */
+	public boolean isAllowEmptySelection()
+	{
+		return allowEmptySelection;
+	}
 
 }

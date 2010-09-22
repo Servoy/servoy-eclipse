@@ -52,7 +52,7 @@ public class DataProviderDialog extends TreeSelectDialog
 	public DataProviderDialog(Shell shell, ILabelProvider labelProvider, IPersist persist, FlattenedSolution flattenedSolution, Table table,
 		DataProviderOptions input, ISelection selection, int treeStyle, String title)
 	{
-		super(shell, true, true, TreePatternFilter.FILTER_LEAFS, null, null, null, null, treeStyle, title, null, selection,
+		super(shell, true, true, TreePatternFilter.FILTER_LEAFS, null, null, null, null, treeStyle, title, null, selection, false,
 			TreeSelectDialog.DATAPROVIDER_DIALOG, null);
 		this.labelProvider = labelProvider;
 		this.persist = persist;
