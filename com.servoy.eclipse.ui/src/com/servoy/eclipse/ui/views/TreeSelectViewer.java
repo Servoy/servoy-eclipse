@@ -51,9 +51,9 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
+import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.layout.grouplayout.GroupLayout.ParallelGroup;
 import org.eclipse.swt.layout.grouplayout.GroupLayout.SequentialGroup;
-import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -364,7 +364,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 	protected TreeSelectDialog createDialog(Control control)
 	{
 		return new TreeSelectDialog(control.getShell(), isShowFilter(), isShowFilterMode(), getDefaultFilterMode(), getContentProvider(), getLabelProvider(),
-			getViewerComparator(), getSelectionFilter(), SWT.SINGLE, title, getInput(), getSelection(), name);
+			getViewerComparator(), getSelectionFilter(), SWT.SINGLE, title, getInput(), getSelection(), false, name);
 	}
 
 	protected IStructuredSelection openDialogBox(Control control)

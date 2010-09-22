@@ -102,31 +102,6 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	 * @param title
 	 * @param input
 	 * @param selection
-	 * @param name
-	 */
-	public TreeSelectDialog(Shell shell, boolean showFilter, boolean showFilterMenu, int defaultFilterMode, ITreeContentProvider contentProvider,
-		IBaseLabelProvider labelProvider, ViewerComparator comparator, IFilter selectionFilter, int treeStyle, String title, Object input,
-		ISelection selection, String name)
-	{
-		this(shell, showFilter, showFilterMenu, defaultFilterMode, contentProvider, labelProvider, comparator, selectionFilter, treeStyle, title, input,
-			selection, true, name);
-	}
-
-	/**
-	 * Constructs a new TreeSelectDialog.
-	 * 
-	 * @param shell
-	 * @param showFilter
-	 * @param showFilterMenu
-	 * @param defaultFilterMode
-	 * @param contentProvider
-	 * @param labelProvider
-	 * @param comparator
-	 * @param selectionFilter
-	 * @param treeStyle
-	 * @param title
-	 * @param input
-	 * @param selection
 	 * @param allowEmptySelection
 	 * @param name
 	 */

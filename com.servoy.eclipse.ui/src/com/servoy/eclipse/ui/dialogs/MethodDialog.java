@@ -98,7 +98,7 @@ public class MethodDialog extends TreeSelectDialog
 			// input: MethodListOptions
 			input,
 			// selection
-			selection, TreeSelectDialog.METHOD_DIALOG);
+			selection, false, TreeSelectDialog.METHOD_DIALOG);
 	}
 
 	@Override

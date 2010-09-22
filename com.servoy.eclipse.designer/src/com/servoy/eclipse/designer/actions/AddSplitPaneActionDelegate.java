@@ -84,7 +84,7 @@ public class AddSplitPaneActionDelegate extends AbstractEditpartActionDelegate
 			}
 		};
 		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, true, TreePatternFilter.FILTER_LEAFS, contentProvider,
-			RelatedFormsLabelProvider.INSTANCE, null, new LeafnodesSelectionFilter(contentProvider), SWT.MULTI, "Select split pane form", form, null,
+			RelatedFormsLabelProvider.INSTANCE, null, new LeafnodesSelectionFilter(contentProvider), SWT.MULTI, "Select split pane form", form, null, false,
 			TreeSelectDialog.TAB_DIALOG);
 		dialog.open();
 
