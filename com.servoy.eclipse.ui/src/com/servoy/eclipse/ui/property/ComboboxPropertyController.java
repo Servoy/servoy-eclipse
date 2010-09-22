@@ -32,10 +32,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.editors.DialogCellEditor;
-import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.editors.DialogCellEditor.ValueEditorCellLayout;
+import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.labelproviders.ComboBoxLabelProvider;
 import com.servoy.eclipse.ui.util.ModifiedComboBoxCellEditor;
 import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
@@ -84,6 +83,8 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 	{
 		ModifiedComboBoxCellEditor editor = new ModifiedComboBoxCellEditor(parent, EMPTY_STRING_ARRAY, SWT.READ_ONLY)
 		{
+			private Button editorButton;
+
 			@Override
 			public void activate()
 			{
@@ -91,6 +92,10 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 				Object value = doGetValue();
 				setItems(model.getDisplayValues());
 				doSetValue(value);
+				if (valueEditor != null)
+				{
+					editorButton.setEnabled(valueEditor.canEdit(value));
+				}
 
 				super.activate();
 			}
@@ -115,27 +120,15 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 				{
 					composite = new Composite(parent, SWT.None);
 					combo = (CCombo)super.createControl(composite);
-					Button editorButton = new Button(composite, SWT.FLAT);
+					editorButton = new Button(composite, SWT.FLAT);
 					editorButton.setImage(DialogCellEditor.OPEN_IMAGE);
 					editorButton.addMouseListener(new MouseAdapter()
 					{
 						@Override
 						public void mouseDown(org.eclipse.swt.events.MouseEvent e)
 						{
-							Integer selected = (Integer)doGetValue();
-							if (selected > 0 && !Messages.LabelUnresolved.equals(getItems()[selected]))
-							{
-								if (model instanceof StyleClassesComboboxModel)
-								{
-									valueEditor.openEditor(new String[] { ((StyleClassesComboboxModel)model).getStyleName(), ((StyleClassesComboboxModel)model).getLookupName() +
-										"." + getItems()[selected] });
-								}
-								else
-								{
-									valueEditor.openEditor(getItems()[selected]);
-								}
-							}
-						};
+							valueEditor.openEditor(doGetValue());
+						}
 					});
 					ValueEditorCellLayout layout = new ValueEditorCellLayout();
 					layout.setValueEditor(valueEditor);
@@ -152,6 +145,10 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 					public void widgetSelected(SelectionEvent event)
 					{
 						// the selection is already updated at this point using the SelectionAdapter created in super.createControl()
+						if (valueEditor != null)
+						{
+							editorButton.setEnabled(valueEditor.canEdit(doGetValue()));
+						}
 						fireApplyEditorValue();
 					}
 				});

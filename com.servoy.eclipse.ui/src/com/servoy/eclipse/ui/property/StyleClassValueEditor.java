@@ -20,30 +20,35 @@ package com.servoy.eclipse.ui.property;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Style;
 
 /**
- *  Value editor for styles, opens the style editor.
+ * Value editor for style classes, opens the style for a form and selects the style class.
  * 
- * @author lvostinar
+ * @author rgansevles
  *
  */
-public class StyleValueEditor implements IValueEditor<String>
+public class StyleClassValueEditor implements IValueEditor<String>
 {
-	public static final StyleValueEditor INSTANCE = new StyleValueEditor();
+	private final Form form;
+
+	public StyleClassValueEditor(Form form)
+	{
+		this.form = form;
+	}
 
 	public void openEditor(String value)
 	{
-		Style style = (Style)ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObject(value, IRepository.STYLES);
+		Style style = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form).getStyleForForm(form, null);
 		if (style != null)
 		{
-			EditorUtil.openStyleEditor(style, null);
+			EditorUtil.openStyleEditor(style, value);
 		}
 	}
 
 	public boolean canEdit(String value)
 	{
-		return ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObject(value, IRepository.STYLES) != null;
+		return ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form).getStyleForForm(form, null) != null;
 	}
 }

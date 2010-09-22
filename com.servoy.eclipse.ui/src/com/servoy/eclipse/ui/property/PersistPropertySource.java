@@ -1048,7 +1048,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 					Object option = propertyEditorHint.getOption(PropertyEditorOption.styleLookupName);
 					if (option instanceof String)
 					{
-						return new StyleclassPropertyController(id, displayName, persist, (String)option);
+						return createStyleClassPropertyController(id, displayName, (String)option);
 					}
 				}
 			}
@@ -1269,6 +1269,39 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		}
 
 		return null;
+	}
+
+	/**
+	 * Create a property controller for selecting a style class in Properties view.
+	 * 
+	 * @param id
+	 * @param displayName
+	 * @param styleLookupname
+	 * @return
+	 */
+	public ComboboxPropertyController<String> createStyleClassPropertyController(String id, String displayName, final String styleLookupname)
+	{
+		StyleClassesComboboxModel model = new StyleClassesComboboxModel((Form)persist.getAncestor(IRepository.FORMS), styleLookupname);
+		return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved, getFormInheritanceValueEditor(persist,
+			new ComboboxDelegateValueEditor<String>(new StyleClassValueEditor((Form)persist.getAncestor(IRepository.FORMS)), model), id))
+		{
+			@Override
+			public ILabelProvider getLabelProvider()
+			{
+				return PersistPropertySource.getFormInheritanceLabelProvider(persist, super.getLabelProvider(), getId());
+			}
+
+			@Override
+			protected String getWarningMessage()
+			{
+				if (getModel().getRealValues().length == 1)
+				{
+					// only 1 value (DEFAULT)
+					return "No style classes available for lookup '" + styleLookupname + "'";
+				}
+				return null;
+			}
+		};
 	}
 
 	/**
@@ -2762,13 +2795,14 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 
 		if (name.equals("styleClass"))
 		{
-			return new StyleclassPropertyController(id, displayName, persist, StyleClassesComboboxModel.getStyleLookupname(persist));
+			return createStyleClassPropertyController(id, displayName, StyleClassesComboboxModel.getStyleLookupname(persist));
 		}
 
 		if (name.equals("styleName"))
 		{
-			return new ComboboxPropertyController<String>(id, displayName, new ComboboxPropertyModel<String>(getStyleNames(),
-				NullDefaultLabelProvider.LABEL_DEFAULT), Messages.LabelUnresolved, StyleValueEditor.INSTANCE)
+			ComboboxPropertyModel<String> model = new ComboboxPropertyModel<String>(getStyleNames(), NullDefaultLabelProvider.LABEL_DEFAULT);
+			return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved, getFormInheritanceValueEditor(persist,
+				new ComboboxDelegateValueEditor<String>(StyleValueEditor.INSTANCE, model), id))
 			{
 				@Override
 				public ILabelProvider getLabelProvider()
