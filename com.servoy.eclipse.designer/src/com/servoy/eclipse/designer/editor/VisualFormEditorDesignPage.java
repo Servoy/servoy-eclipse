@@ -698,7 +698,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		Composite c = new Composite(parent, SWT.NONE);
 		c.setLayout(new org.eclipse.swt.layout.FormLayout());
 
-		CoolBarManager coolBarManager = new CoolBarManager(SWT.WRAP);
+		CoolBarManager coolBarManager = new CoolBarManager(SWT.WRAP | SWT.FLAT);
 		coolBarManager.setContextMenuManager(getToolbarMenuManager());
 		coolBar = coolBarManager.createControl(c);
 
