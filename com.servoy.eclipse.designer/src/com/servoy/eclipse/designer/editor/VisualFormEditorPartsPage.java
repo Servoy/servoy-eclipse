@@ -530,7 +530,11 @@ public class VisualFormEditorPartsPage extends Composite
 
 	public void refresh()
 	{
-		if (isVisible() && !isDisposed())
+		if (isDisposed())
+		{
+			return;
+		}
+		if (isVisible())
 		{
 			doRefresh();
 		}
