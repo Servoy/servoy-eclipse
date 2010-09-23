@@ -35,13 +35,9 @@ import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.ast.ASTNode;
-import org.eclipse.dltk.ast.parser.ISourceParser;
-import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.internal.javascript.parser.JavaScriptSourceParser;
 import org.eclipse.dltk.internal.javascript.ti.IValueReference;
 import org.eclipse.dltk.internal.javascript.ti.TypeInferencer2;
 import org.eclipse.dltk.javascript.ast.Argument;
@@ -838,57 +834,62 @@ public class SolutionDeserializer
 			Script script = parser.parse(fileContent, reporter);
 			if (problems.size() > 0)
 			{
-				// if there are problems with this parser, try the rhino parser
-				IProblem[] problemsArray = new IProblem[problems.size()];
-				problems.toArray(problemsArray);
-				problems.clear();
-				ISourceParser p = new JavaScriptSourceParser();
-				final String content = fileContent;
-				p.parse(new IModuleSource()
-				{
-
-					public String getFileName()
-					{
-						return null;
-					}
-
-					public String getSourceContents()
-					{
-						return content;
-					}
-
-					public IModelElement getModelElement()
-					{
-						return null;
-					}
-
-					public char[] getContentsAsCharArray()
-					{
-						return content.toCharArray();
-					}
-				}, reporter);
-				if (problems.size() == 0)
-				{
-					// rhino didn't have problems, report this!
-					StringBuilder sb = new StringBuilder();
-					sb.append("AST Parser found problems in the file: " + file.getAbsolutePath()); //$NON-NLS-1$
-					for (IProblem problem : problemsArray)
-					{
-						sb.append(", message: "); //$NON-NLS-1$
-						sb.append(problem.getMessage());
-						sb.append(", linenumber: "); //$NON-NLS-1$
-						sb.append(problem.getSourceLineNumber());
-						sb.append(" position( "); //$NON-NLS-1$
-						sb.append(problem.getSourceStart());
-						sb.append(","); //$NON-NLS-1$
-						sb.append(problem.getSourceEnd());
-						sb.append(")"); //$NON-NLS-1$
-					}
-
-					Debug.error(sb.toString());
-				}
-				return null;
+				if (Debug.tracing()) Debug.trace("Didn't update the Persist model Script and Variables objects because of problems " + problems);
+				return Collections.<JSONObject> emptyList();
 			}
+//			if (problems.size() > 0)
+//			{
+//				// if there are problems with this parser, try the rhino parser
+//				IProblem[] problemsArray = new IProblem[problems.size()];
+//				problems.toArray(problemsArray);
+//				problems.clear();
+//				ISourceParser p = new JavaScriptSourceParser();
+//				final String content = fileContent;
+//				p.parse(new IModuleSource()
+//				{
+//
+//					public String getFileName()
+//					{
+//						return null;
+//					}
+//
+//					public String getSourceContents()
+//					{
+//						return content;
+//					}
+//
+//					public IModelElement getModelElement()
+//					{
+//						return null;
+//					}
+//
+//					public char[] getContentsAsCharArray()
+//					{
+//						return content.toCharArray();
+//					}
+//				}, reporter);
+//				if (problems.size() == 0)
+//				{
+//					// rhino didn't have problems, report this!
+//					StringBuilder sb = new StringBuilder();
+//					sb.append("AST Parser found problems in the file: " + file.getAbsolutePath()); //$NON-NLS-1$
+//					for (IProblem problem : problemsArray)
+//					{
+//						sb.append(", message: "); //$NON-NLS-1$
+//						sb.append(problem.getMessage());
+//						sb.append(", linenumber: "); //$NON-NLS-1$
+//						sb.append(problem.getSourceLineNumber());
+//						sb.append(" position( "); //$NON-NLS-1$
+//						sb.append(problem.getSourceStart());
+//						sb.append(","); //$NON-NLS-1$
+//						sb.append(problem.getSourceEnd());
+//						sb.append(")"); //$NON-NLS-1$
+//					}
+//
+//					Debug.error(sb.toString());
+//				}
+//				return null;
+//			}
 			if (script == null)
 			{
 				Debug.error("No script returned when parsing " + file.getAbsolutePath()); //$NON-NLS-1$
