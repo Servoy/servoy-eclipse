@@ -21,6 +21,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Style;
 
 /**
@@ -32,10 +33,12 @@ import com.servoy.j2db.persistence.Style;
 public class StyleClassValueEditor implements IValueEditor<String>
 {
 	private final Form form;
+	private final IPersist persist;
 
-	public StyleClassValueEditor(Form form)
+	public StyleClassValueEditor(Form form, IPersist persist)
 	{
 		this.form = form;
+		this.persist = persist;
 	}
 
 	public void openEditor(String value)
@@ -43,6 +46,9 @@ public class StyleClassValueEditor implements IValueEditor<String>
 		Style style = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form).getStyleForForm(form, null);
 		if (style != null)
 		{
+			String lookup = StyleClassesComboboxModel.getStyleLookupname(persist);
+			if (value == null) value = lookup;
+			else value = lookup + "." + value;
 			EditorUtil.openStyleEditor(style, value);
 		}
 	}
