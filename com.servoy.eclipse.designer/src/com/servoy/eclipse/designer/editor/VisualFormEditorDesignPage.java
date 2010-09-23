@@ -90,12 +90,12 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate;
-import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate.IActionAddedListener;
 import com.servoy.eclipse.designer.actions.AlignmentSortPartsAction;
 import com.servoy.eclipse.designer.actions.DistributeAction;
 import com.servoy.eclipse.designer.actions.DistributeRequest;
 import com.servoy.eclipse.designer.actions.ToggleShowGridAction;
 import com.servoy.eclipse.designer.actions.ToggleSnapToGridAction;
+import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate.IActionAddedListener;
 import com.servoy.eclipse.designer.dnd.FormElementTransferDropTarget;
 import com.servoy.eclipse.designer.editor.commands.BringToFrontAction;
 import com.servoy.eclipse.designer.editor.commands.CopyAction;
@@ -279,14 +279,15 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 					if (editParts.size() > 0)
 					{
-						StructuredSelection edtpartSelection = new StructuredSelection(editParts);
-						if (!edtpartSelection.equals(getGraphicalViewer().getSelection()))
+						StructuredSelection editpartSelection = new StructuredSelection(editParts);
+						if (!editpartSelection.equals(getGraphicalViewer().getSelection()))
 						{
-							getGraphicalViewer().setSelection(edtpartSelection);
+							getGraphicalViewer().setSelection(editpartSelection);
 						}
 						// reveal the last element, otherwise you have jumpy behavior when in form designer via ctl-click element 2 is 
 						// selected whilst selected element 1 is not visible.
-						getGraphicalViewer().reveal(editParts.get(editParts.size() - 1));
+						if (getGraphicalViewer().getControl() != null && !getGraphicalViewer().getControl().isDisposed()) getGraphicalViewer().reveal(
+							editParts.get(editParts.size() - 1));
 					}
 				}
 			};
