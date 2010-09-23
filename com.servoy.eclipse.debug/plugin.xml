@@ -9,34 +9,27 @@
             id="com.servoy.eclipse.ui.start_actions"
             label="Start Servoy Clients"
             visible="true">
-        <menu
-               id="com.servoy.eclipse.ui.actionsMenu"
-               label="&amp;Actions">
-            <separator
-                  name="start">
-            </separator>
-         </menu>
          <action
                class="com.servoy.eclipse.debug.actions.StartWebClientActionDelegate"
                definitionId="com.servoy.eclipse.ui.StartWebClient"
                icon="icons/launch_web.gif"
                id="com.servoy.eclipse.ui.startWebClient"
-               label="Start WebClient"
-               menubarPath="com.servoy.eclipse.ui.actionsMenu/start"
+               label="Start Web Client"
+               menubarPath="org.eclipse.ui.run/start"
                style="push"
                toolbarPath="Normal/additions"
-               tooltip="Start WebClient">
+               tooltip="Start Web Client">
          </action>
          <action
                class="com.servoy.eclipse.debug.actions.StartSmartClientActionDelegate"
                definitionId="com.servoy.eclipse.ui.StartSmartClient"
                icon="icons/launch.gif"
                id="com.servoy.eclipse.ui.startSmartClient"
-               label="Start SmartClient"
-               menubarPath="com.servoy.eclipse.ui.actionsMenu/start"
+               label="Start Smart Client"
+               menubarPath="org.eclipse.ui.run/start"
                style="push"
                toolbarPath="Normal/additions"
-               tooltip="Start SmartClient">
+               tooltip="Start Smart Client">
          </action>
       </actionSet>
    </extension>

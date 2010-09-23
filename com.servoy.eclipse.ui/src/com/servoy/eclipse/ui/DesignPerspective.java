@@ -31,6 +31,12 @@ import org.eclipse.ui.internal.registry.ActionSetRegistry;
 import org.eclipse.ui.internal.registry.IActionSetDescriptor;
 
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.eclipse.ui.wizards.NewFormWizard;
+import com.servoy.eclipse.ui.wizards.NewMethodWizard;
+import com.servoy.eclipse.ui.wizards.NewRelationWizard;
+import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
+import com.servoy.eclipse.ui.wizards.NewStyleWizard;
+import com.servoy.eclipse.ui.wizards.NewValueListWizard;
 import com.servoy.j2db.util.Utils;
 
 public class DesignPerspective implements IPerspectiveFactory
@@ -80,6 +86,7 @@ public class DesignPerspective implements IPerspectiveFactory
 		}
 
 		setContentsOfShowViewMenu(layout);
+		addNewWizards(layout);
 	}
 
 	protected void setContentsOfShowViewMenu(IPageLayout layout)
@@ -88,5 +95,15 @@ public class DesignPerspective implements IPerspectiveFactory
 		layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
 		layout.addShowViewShortcut(IConsoleConstants.ID_CONSOLE_VIEW);
 		layout.addShowViewShortcut(IPageLayout.ID_PROP_SHEET);
+	}
+
+	protected void addNewWizards(IPageLayout layout)
+	{
+		layout.addNewWizardShortcut(NewFormWizard.ID);
+		layout.addNewWizardShortcut(NewMethodWizard.ID);
+		layout.addNewWizardShortcut(NewRelationWizard.ID);
+		layout.addNewWizardShortcut(NewSolutionWizard.ID);
+		layout.addNewWizardShortcut(NewStyleWizard.ID);
+		layout.addNewWizardShortcut(NewValueListWizard.ID);
 	}
 }

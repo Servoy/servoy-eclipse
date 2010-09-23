@@ -76,6 +76,7 @@ import com.servoy.j2db.util.IdentDocumentValidator;
  */
 public class NewSolutionWizard extends Wizard implements INewWizard
 {
+	public static final String ID = "com.servoy.eclipse.ui.NewSolutionWizard"; //$NON-NLS-1$
 
 	private NewSolutionWizardPage page1;
 

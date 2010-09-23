@@ -95,7 +95,7 @@
             class="com.servoy.eclipse.ui.wizards.NewSolutionWizard"
             icon="icons/solution_icon.gif"
             id="com.servoy.eclipse.ui.NewSolutionWizard"
-            name="New Solution"
+            name="New Servoy Solution"
             project="true">
       </wizard>
       <wizard
@@ -113,7 +113,7 @@
             class="com.servoy.eclipse.ui.wizards.NewRelationWizard"
             icon="icons/newrelation.gif"
             id="com.servoy.eclipse.ui.NewRelationWizard"
-            name="New Relations"
+            name="New Relation"
             project="false">
       </wizard>
       <wizard

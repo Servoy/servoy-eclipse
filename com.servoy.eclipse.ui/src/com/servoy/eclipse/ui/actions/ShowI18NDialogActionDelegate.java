@@ -220,6 +220,9 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 
 	public void selectionChanged(IAction action, ISelection selection)
 	{
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		final ServoyProject activeProject = servoyModel.getActiveProject();
+		action.setEnabled(activeProject != null && activeProject.getSolution() != null);
 	}
 
 	public static String[] hasI18NTable()
