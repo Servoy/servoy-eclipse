@@ -165,7 +165,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 
 	public Element resolveElement(ITypeInfoContext context, String name)
 	{
-		if (name.equals("Number") || name.equals("Array") || name.equals("String") || name.equals("Date") || name.equals("Object") || name.equals("Function*")) return null;
+		if (name.equals("Number") || name.equals("Array") || name.equals("String") || name.equals("Date") || name.equals("Object") || name.equals("Function")) return null;
 		Type type = null;
 		String typeName = getTypeName(context, name);
 		if (typeName != null)
