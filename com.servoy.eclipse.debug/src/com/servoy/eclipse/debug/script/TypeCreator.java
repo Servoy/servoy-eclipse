@@ -241,7 +241,8 @@ public abstract class TypeCreator
 
 	public Type getType(ITypeInfoContext context, String typeName)
 	{
-		if (typeName.equals("Number") || typeName.equals("Array") || typeName.equals("String") || typeName.equals("Date")) return null;
+		if (typeName.equals("Number") || typeName.equals("Array") || typeName.equals("String") || typeName.equals("Date") || typeName.equals("Object") ||
+			typeName.equals("Function")) return null;
 		if (!initialized) initalize();
 		Type type = types.get(typeName);
 		if (type == null)
