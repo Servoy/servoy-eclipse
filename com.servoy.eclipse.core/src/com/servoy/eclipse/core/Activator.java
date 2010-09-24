@@ -299,30 +299,27 @@ public class Activator extends Plugin
 		{
 			designerCallback = new IDesignerCallback()
 			{
-				public void showFormInDesigner(final Form form)
+				public void showFormInDesigner(Form form)
 				{
 					FlattenedSolution editingSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingFlattenedSolution();
-					Form testForm = editingSolution.getForm(form.getID());
+					final Form testForm = editingSolution.getForm(form.getName());
 					if (testForm == null) return;
 					Display.getDefault().asyncExec(new Runnable()
 					{
 						public void run()
 						{
-							if (form != null)
+							try
 							{
-								try
-								{
-									PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-										new PersistEditorInput(form.getName(), form.getSolution().getName(), form.getUUID()),
-										PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-											Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
-									PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().forceActive();
+								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
+									new PersistEditorInput(testForm.getName(), testForm.getSolution().getName(), testForm.getUUID()),
+									PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+										Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
+								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().forceActive();
 
-								}
-								catch (PartInitException ex)
-								{
-									ServoyLog.logError(ex);
-								}
+							}
+							catch (PartInitException ex)
+							{
+								ServoyLog.logError(ex);
 							}
 						}
 					});
