@@ -167,6 +167,22 @@ public abstract class TypeCreator
 	public static final String IMAGE_DESCRIPTOR = "ImageDescriptor";
 	public static final String RESOURCE = "RESOURCE";
 
+	protected final static Set<String> BASE_TYPES = new HashSet<String>(128);
+
+	static
+	{
+		BASE_TYPES.add("Object");
+		BASE_TYPES.add("Number");
+		BASE_TYPES.add("Array");
+		BASE_TYPES.add("String");
+		BASE_TYPES.add("Date");
+		BASE_TYPES.add("Function");
+		BASE_TYPES.add("Boolean");
+		BASE_TYPES.add("RegExp");
+		BASE_TYPES.add("Error");
+		BASE_TYPES.add("Math");
+	}
+
 	private final ConcurrentMap<String, Type> types = new ConcurrentHashMap<String, Type>();
 	private final ConcurrentMap<String, Type> dynamicTypes = new ConcurrentHashMap<String, Type>();
 	private final ConcurrentMap<String, Class< ? >> classTypes = new ConcurrentHashMap<String, Class< ? >>();
@@ -239,10 +255,10 @@ public abstract class TypeCreator
 		return names;
 	}
 
+
 	public Type getType(ITypeInfoContext context, String typeName)
 	{
-		if (typeName.equals("Number") || typeName.equals("Array") || typeName.equals("String") || typeName.equals("Date") || typeName.equals("Object") ||
-			typeName.equals("Function")) return null;
+		if (BASE_TYPES.contains(typeName)) return null;
 		if (!initialized) initalize();
 		Type type = types.get(typeName);
 		if (type == null)
