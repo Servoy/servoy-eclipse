@@ -244,7 +244,7 @@ public class DesignApplication implements IApplication, IMessagesCallback
 			{
 				if (foundSetManager == null)
 				{
-					foundSetManager = new FoundSetManager(this, null, new SwingFoundSetFactory())
+					foundSetManager = new FoundSetManager(this, new SwingFoundSetFactory())
 					{
 						/**
 						 * @see com.servoy.j2db.dataprocessing.FoundSetManager#getGlobalScopeProvider()
