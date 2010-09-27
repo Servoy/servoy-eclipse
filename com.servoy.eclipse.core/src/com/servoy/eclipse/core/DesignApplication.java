@@ -26,6 +26,7 @@ import java.net.URLStreamHandler;
 import java.rmi.Remote;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -52,14 +53,19 @@ import com.servoy.j2db.Messages;
 import com.servoy.j2db.cmd.ICmdManager;
 import com.servoy.j2db.dataprocessing.ClientInfo;
 import com.servoy.j2db.dataprocessing.DataServerProxy;
+import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.FoundSetManager;
 import com.servoy.j2db.dataprocessing.IClientHost;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.dataprocessing.IDisplay;
+import com.servoy.j2db.dataprocessing.IFoundSet;
+import com.servoy.j2db.dataprocessing.IFoundSetInternal;
+import com.servoy.j2db.dataprocessing.IFoundSetListener;
 import com.servoy.j2db.dataprocessing.IFoundSetManagerInternal;
 import com.servoy.j2db.dataprocessing.IGlobalValueEntry;
 import com.servoy.j2db.dataprocessing.SwingFoundSetFactory;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.plugins.ClientPluginAccessProvider;
@@ -75,6 +81,7 @@ import com.servoy.j2db.smart.dataui.SwingItemFactory;
 import com.servoy.j2db.ui.ItemFactory;
 import com.servoy.j2db.util.ITaskExecuter;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.toolbar.IToolbarPanel;
@@ -264,7 +271,64 @@ public class DesignApplication implements IApplication, IMessagesCallback
 								}
 							};
 						}
+
+						@Override
+						public FoundSet getEmptyFoundSet(IFoundSetListener panel) throws ServoyException
+						{
+							// no foundsets in designer
+							return null;
+						}
+
+						@Override
+						public IFoundSetInternal getGlobalRelatedFoundSet(String name) throws RepositoryException, ServoyException
+						{
+							// no foundsets in designer
+							return null;
+						}
+
+						@Override
+						public IFoundSetInternal getNewFoundSet(ITable table, List defaultSortColumns) throws ServoyException
+						{
+							// no foundsets in designer
+							return null;
+						}
+
+						@Override
+						public IFoundSet getNewFoundSet(String dataSource) throws ServoyException
+						{
+							// no foundsets in designer
+							return null;
+						}
+
+						@Override
+						public IFoundSetInternal getNewFoundSet(String dataSource, List defaultSortColumns) throws ServoyException
+						{
+							// no foundsets in designer
+							return null;
+						}
+
+						@Override
+						public IFoundSetInternal getSeparateFoundSet(IFoundSetListener l, List defaultSortColumns) throws ServoyException
+						{
+							// no foundsets in designer
+							return null;
+						}
+
+						@Override
+						public IFoundSet getSharedFoundSet(String dataSource) throws ServoyException
+						{
+							// no foundsets in designer
+							return null;
+						}
+
+						@Override
+						public IFoundSetInternal getSharedFoundSet(String dataSource, List defaultSortColumns) throws ServoyException
+						{
+							// no foundsets in designer
+							return null;
+						}
 					};
+
 					//((FoundSetManager)foundSetManager).setInfoListener(this);
 					foundSetManager.init();
 					// get the plugin manager so that converters/validators are initialized
@@ -274,7 +338,6 @@ public class DesignApplication implements IApplication, IMessagesCallback
 		}
 		return foundSetManager;
 	}
-
 
 	public synchronized String getI18NMessage(String key, Object[] args)
 	{
