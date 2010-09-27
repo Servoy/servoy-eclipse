@@ -113,11 +113,6 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 						pasteParent = parent.getAncestor(IRepository.FORMS);
 						break;
 					}
-					if (!(parent instanceof TabPanel) && o instanceof PersistDragData && ((PersistDragData)o).type == IRepository.TABS)
-					{
-						// paste tab into non-tabpanel
-						return null;
-					}
 				}
 			}
 
