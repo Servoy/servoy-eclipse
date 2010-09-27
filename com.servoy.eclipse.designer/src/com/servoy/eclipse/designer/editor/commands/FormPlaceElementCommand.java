@@ -391,13 +391,21 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 			IPersist persist;
 			if (draggedPersist instanceof Tab)
 			{
-				if (!(parent instanceof TabPanel) && alternativeParent instanceof TabPanel)
+				if (parent instanceof TabPanel)
 				{
-					persist = ElementFactory.copyComponent((ISupportChilds)alternativeParent, (Tab)draggedPersist, x, y, IRepository.TABS, groupMap);
+					persist = ElementFactory.copyComponent(parent, (Tab)draggedPersist, x, y, IRepository.TABS, groupMap);
 				}
 				else
 				{
-					persist = ElementFactory.copyComponent(parent, (Tab)draggedPersist, x, y, IRepository.TABS, groupMap);
+					if (alternativeParent instanceof TabPanel)
+					{
+						persist = ElementFactory.copyComponent((ISupportChilds)alternativeParent, (Tab)draggedPersist, x, y, IRepository.TABS, groupMap);
+					}
+					else
+					{
+						ServoyLog.logWarning("paste object: cannot paste tab to non-tabpanel", null);
+						return null;
+					}
 				}
 			}
 			else if (draggedPersist instanceof Field && !(parent instanceof Portal) && alternativeParent instanceof Portal)
