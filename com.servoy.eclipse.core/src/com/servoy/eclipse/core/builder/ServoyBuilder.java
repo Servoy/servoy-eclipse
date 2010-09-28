@@ -1277,6 +1277,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 															editFormat = null;
 														}
 														int dataType = dataProvider.getDataProviderType();
+														boolean addMarker = false;
 														try
 														{
 															if (dataType == IColumnTypes.DATETIME)
@@ -1289,10 +1290,23 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																new RoundHalfUpDecimalFormat(displayFormat, Locale.getDefault());
 																if (editFormat != null) new RoundHalfUpDecimalFormat(editFormat, Locale.getDefault());
 															}
+															else if (dataType == IColumnTypes.TEXT)
+															{
+																if (displayFormat.contains("0") || displayFormat.contains(".") || displayFormat.contains(",") ||
+																	displayFormat.contains("#"))
+																{
+																	// this is probably a number or date format
+																	addMarker = true;
+																}
+															}
 														}
 														catch (Exception ex)
 														{
+															addMarker = true;
 															Debug.trace(ex);
+														}
+														if (addMarker)
+														{
 															String msg;
 															if (elementName == null)
 															{
