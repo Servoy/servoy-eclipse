@@ -30,6 +30,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.IInternalDebugUIConstants;
 import org.eclipse.debug.ui.DebugUITools;
@@ -37,6 +38,7 @@ import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.DLTKDebugPreferenceConstants;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
+import org.eclipse.dltk.internal.debug.core.model.ScriptDebugTarget;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.javascript.core.JavaScriptNature;
 import org.eclipse.dltk.javascript.launching.JavaScriptLaunchConfigurationConstants;
@@ -188,7 +190,7 @@ public abstract class StartDebugAction implements IWorkbenchWindowActionDelegate
 		}
 		DLTKDebugPlugin.getDefault().getPluginPreferences().setValue(DLTKDebugPreferenceConstants.PREF_DBGP_REMOTE_PORT, port);
 
-		if (!RemoteDebugScriptEngine.isConnected())
+		if (!RemoteDebugScriptEngine.isConnected() || !isScriptDebugTargetLaunched())
 		{
 			if (lastTimeStarted != 0 && (System.currentTimeMillis() - lastTimeStarted) < 2000)
 			{
@@ -232,6 +234,22 @@ public abstract class StartDebugAction implements IWorkbenchWindowActionDelegate
 		return true;
 	}
 
+
+	private static boolean isScriptDebugTargetLaunched()
+	{
+		boolean isScriptDebugTargetLaunched = false;
+		IDebugTarget[] launchedDebugTargats = DebugPlugin.getDefault().getLaunchManager().getDebugTargets();
+		if (launchedDebugTargats != null)
+		{
+			for (IDebugTarget dt : launchedDebugTargats)
+			{
+				isScriptDebugTargetLaunched = dt instanceof ScriptDebugTarget;
+				if (isScriptDebugTargetLaunched) break;
+			}
+		}
+
+		return isScriptDebugTargetLaunched;
+	}
 
 	protected void aboutToStartDebugClient()
 	{
