@@ -186,6 +186,7 @@ public abstract class TypeCreator
 	private final ConcurrentMap<String, Type> types = new ConcurrentHashMap<String, Type>();
 	private final ConcurrentMap<String, Type> dynamicTypes = new ConcurrentHashMap<String, Type>();
 	private final ConcurrentMap<String, Class< ? >> classTypes = new ConcurrentHashMap<String, Class< ? >>();
+	private final ConcurrentMap<String, Class< ? >> anonymousClassTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, IScopeTypeCreator> scopeTypes = new ConcurrentHashMap<String, IScopeTypeCreator>();
 	private volatile boolean initialized;
 	protected static final List<String> objectMethods = Arrays.asList(new String[] { "wait", "toString", "hashCode", "equals", "notify", "notifyAll", "getClass" });
@@ -233,13 +234,18 @@ public abstract class TypeCreator
 		dynamicTypes.clear();
 	}
 
-	protected Class< ? > getTypeClass(String name)
+	protected final Class< ? > getTypeClass(String name)
 	{
-		return classTypes.get(name);
+		Class< ? > clz = classTypes.get(name);
+		if (clz == null)
+		{
+			clz = anonymousClassTypes.get(name);
+		}
+		return clz;
 	}
 
 
-	public Set<String> getTypeNames(String prefix)
+	public final Set<String> getTypeNames(String prefix)
 	{
 		Set<String> names = new HashSet<String>(classTypes.keySet());
 		names.addAll(scopeTypes.keySet());
@@ -289,7 +295,7 @@ public abstract class TypeCreator
 	protected abstract boolean constantsOnly(String name);
 
 
-	protected void registerConstantsForScriptObject(IReturnedTypesProvider scriptObject)
+	protected final void registerConstantsForScriptObject(IReturnedTypesProvider scriptObject)
 	{
 		if (scriptObject == null) return;
 		Class< ? >[] allReturnedTypes = scriptObject.getAllReturnedTypes();
@@ -337,9 +343,9 @@ public abstract class TypeCreator
 	 * @param typeNameClassName
 	 * @return
 	 */
-	protected Type createType(ITypeInfoContext context, String typeNameClassName, String fullTypeName)
+	protected final Type createType(ITypeInfoContext context, String typeNameClassName, String fullTypeName)
 	{
-		Class< ? > cls = classTypes.get(typeNameClassName);
+		Class< ? > cls = getTypeClass(typeNameClassName);
 		if (cls != null)
 		{
 			return createType(context, fullTypeName, cls);
@@ -353,7 +359,7 @@ public abstract class TypeCreator
 	 * @param cls
 	 * @return
 	 */
-	protected Type createType(ITypeInfoContext context, String typeName, Class< ? > cls)
+	protected final Type createType(ITypeInfoContext context, String typeName, Class< ? > cls)
 	{
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(typeName);
@@ -377,7 +383,7 @@ public abstract class TypeCreator
 	 * @param members
 	 * @param class1
 	 */
-	private void fill(ITypeInfoContext context, EList<Member> membersList, Class< ? > scriptObjectClass, String typeName)
+	private final void fill(ITypeInfoContext context, EList<Member> membersList, Class< ? > scriptObjectClass, String typeName)
 	{
 		ArrayList<String> al = new ArrayList<String>();
 		JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(scriptObjectClass, null);
@@ -512,7 +518,7 @@ public abstract class TypeCreator
 	}
 
 	@SuppressWarnings("unused")
-	protected String getMemberTypeName(ITypeInfoContext context, String memberName, Class< ? > memberReturnType, String objectTypeName)
+	protected final String getMemberTypeName(ITypeInfoContext context, String memberName, Class< ? > memberReturnType, String objectTypeName)
 	{
 		int index = objectTypeName.indexOf('<');
 		int index2;
@@ -537,7 +543,7 @@ public abstract class TypeCreator
 							Relation relation = fs.getRelation(config);
 							if (relation != null)
 							{
-								return FoundSet.JS_FOUNDSET + '<' + relation.getForeignServerName() + '.' + relation.getForeignTableName() + '>';
+								return FoundSet.JS_FOUNDSET + '<' + relation.getForeignDataSource() + '>';
 							}
 						}
 						return FoundSet.JS_FOUNDSET;
@@ -546,16 +552,26 @@ public abstract class TypeCreator
 				return FoundSet.JS_FOUNDSET + '<' + config + '>';
 			}
 		}
-		return memberReturnType.getSimpleName();
+		String typeName = memberReturnType.getSimpleName();
+		addAnonymousClassType(typeName, memberReturnType);
+		return typeName;
 	}
 
 
-	public void addType(String name, Class< ? > cls)
+	public final void addType(String name, Class< ? > cls)
 	{
 		classTypes.put(name, cls);
 	}
 
-	public void addScopeType(String name, IScopeTypeCreator creator)
+	protected final void addAnonymousClassType(String name, Class< ? > cls)
+	{
+		if (!classTypes.containsKey(name) && !scopeTypes.containsKey(name) && !BASE_TYPES.contains(name))
+		{
+			anonymousClassTypes.put(name, cls);
+		}
+	}
+
+	public final void addScopeType(String name, IScopeTypeCreator creator)
 	{
 		scopeTypes.put(name, creator);
 	}
@@ -567,7 +583,7 @@ public abstract class TypeCreator
 	 * @param provider
 	 * @return
 	 */
-	protected Type getDataPRoviderType(ITypeInfoContext context, IDataProvider provider)
+	protected final Type getDataPRoviderType(ITypeInfoContext context, IDataProvider provider)
 	{
 		Type type = null;
 		switch (provider.getDataProviderType())
@@ -650,9 +666,13 @@ public abstract class TypeCreator
 					{
 						type = context.getType("Array");
 					}
-					else if (object instanceof CallExpression)
+					else if (object instanceof CallExpression || object instanceof NewExpression)
 					{
-						ASTNode callExpression = ((CallExpression)object).getExpression();
+						ASTNode callExpression = (ASTNode)object;
+						if (callExpression instanceof CallExpression)
+						{
+							callExpression = ((CallExpression)object).getExpression();
+						}
 						if (callExpression instanceof NewExpression)
 						{
 							String objectclass = null;
@@ -662,6 +682,10 @@ public abstract class TypeCreator
 								objectclass = ((Identifier)objectClassExpression).getName();
 							}
 							type = context.getType(objectclass);
+							if (type == null)
+							{
+								return null;
+							}
 							EList<Member> members = type.getMembers();
 							if (members.size() == 0)
 							{

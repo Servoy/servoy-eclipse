@@ -91,6 +91,7 @@ import com.servoy.j2db.smart.dataui.ScriptLabel;
 import com.servoy.j2db.smart.dataui.SpecialSplitPane;
 import com.servoy.j2db.smart.dataui.SpecialTabPanel;
 import com.servoy.j2db.smart.dataui.SwingItemFactory;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Utils;
@@ -106,7 +107,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addType(Record.JS_RECORD, Record.class);
 		addType("JSDataSet", JSDataSet.class);
 		addType(IExecutingEnviroment.TOPLEVEL_SERVOY_EXCEPTION, ServoyException.class);
-		addType("controller", JSForm.class);
+		addAnonymousClassType("controller", JSForm.class);
 
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
 		addScopeType("Form", new FormScopeCreator());
@@ -170,7 +171,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	{
 		Set<String> names = getTypeNames(prefix);
 		names.remove("Elements");
-		names.remove("controller");
 		names.removeAll(constantOnly);
 		return names;
 	}
@@ -249,15 +249,15 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 								members.add(createProperty(context, "_super", true, "Super<" + superForm.getName() + '>', FORM_IMAGE));
 							}
 						}
-						Table table = formToUse.getTable();
-						if (table != null)
+						String ds = formToUse.getDataSource();
+						if (ds != null)
 						{
 							// first adjust the foundset member.
 							for (Member member : members)
 							{
 								if (member.getName().equals("foundset"))
 								{
-									member.setType(context.getType(FoundSet.JS_FOUNDSET + '<' + table.getServerName() + '.' + table.getName() + '>'));
+									member.setType(context.getType(FoundSet.JS_FOUNDSET + '<' + ds + '>'));
 									break;
 								}
 							}
@@ -334,8 +334,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 	private class ElementsScopeFiller implements DynamicTypeFiller
 	{
-		private final ConcurrentHashMap<String, Type> elementTypes = new ConcurrentHashMap<String, Type>();
-
 		private final Map<String, String> typeNames = new HashMap<String, String>();
 
 		private ElementsScopeFiller()
@@ -414,17 +412,11 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			String name = typeNames.get(cls.getSimpleName());
 			if (name == null)
 			{
-				Debug.error("no element name found for " + cls.getSimpleName());
+				Debug.log("no element name found for " + cls.getSimpleName()); // TODO make trace, this will always be hit by beans.
 				name = cls.getSimpleName();
 			}
-			Type type = elementTypes.get(name);
-			if (type == null)
-			{
-				type = createType(context, name, cls);
-				Type t = elementTypes.putIfAbsent(name, type);
-				if (t != null) return t;
-			}
-			return type;
+			addAnonymousClassType(name, cls);
+			return context.getType(name);
 		}
 
 	}
@@ -436,32 +428,44 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		 */
 		public void fillType(Type type, ITypeInfoContext context, String config)
 		{
-			Table table = null;
 			FlattenedSolution fs = getFlattenedSolution(context);
+			if (fs == null) return;
 
-			int index = config.indexOf('.');
-			if (index != -1)
+			Table table = null;
+
+			String serverName = null;
+			String tableName = null;
+			String[] serverAndTableName = DataSourceUtils.getDBServernameTablename(config);
+			if (serverAndTableName != null)
 			{
-				// table foundset
-				String serverName = config.substring(0, index);
-				String tableName = config.substring(index + 1);
-
-				if (fs != null)
+				serverName = serverAndTableName[0];
+				tableName = serverAndTableName[1];
+			}
+			else
+			{
+				int index = config.indexOf('.');
+				if (index != -1)
 				{
-					try
-					{
-						IServer server = fs.getSolution().getRepository().getServer(serverName);
-						if (server != null)
-						{
-							table = (Table)server.getTable(tableName);
-						}
-					}
-					catch (Exception e)
-					{
-						ServoyLog.logError(e);
-					}
-
+					// table foundset
+					serverName = config.substring(0, index);
+					tableName = config.substring(index + 1);
 				}
+			}
+			if (serverName != null)
+			{
+				try
+				{
+					IServer server = fs.getSolution().getRepository().getServer(serverName);
+					if (server != null)
+					{
+						table = (Table)server.getTable(tableName);
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+
 			}
 			else
 			{

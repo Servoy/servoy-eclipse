@@ -42,7 +42,6 @@ import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSSecurity;
@@ -322,17 +321,21 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		public String getTypeName(ITypeInfoContext context, String fullTypeName)
 		{
 			Form form = getForm(context);
-			if (form != null)
+			if (form != null && form.getDataSource() != null)
 			{
-				try
-				{
-					Table table = form.getTable();
-					if (table != null) return FoundSet.JS_FOUNDSET + '<' + table.getServerName() + '.' + table.getName() + '>';
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-				}
+				return FoundSet.JS_FOUNDSET + '<' + form.getDataSource() + '>';
+//				try
+//				{
+//					Table table = form.getTable();
+//					if (table != null)
+//					{
+//						return FoundSet.JS_FOUNDSET + '<' + table.getServerName() + '.' + table.getName() + '>';
+//					}
+//				}
+//				catch (RepositoryException e)
+//				{
+//					ServoyLog.logError(e);
+//				}
 
 			}
 			return FoundSet.JS_FOUNDSET;
