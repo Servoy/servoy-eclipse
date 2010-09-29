@@ -16,6 +16,11 @@
  */
 package com.servoy.eclipse.ui;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.jface.action.ICoolBarManager;
 import org.eclipse.jface.window.ApplicationWindow;
@@ -25,6 +30,8 @@ import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.activities.IActivityManager;
+import org.eclipse.ui.activities.IWorkbenchActivitySupport;
 import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.registry.ActionSetRegistry;
@@ -43,6 +50,7 @@ public class DesignPerspective implements IPerspectiveFactory
 {
 
 	protected static final String[] actionIds = { "org.eclipse.debug.ui.debugActionSet", "org.eclipse.dltk.debug.ui.ScriptDebugActionSet", "org.eclipse.debug.ui.launchActionSet", "org.eclipse.ui.externaltools.ExternalToolsSet" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	protected static final String[] activityIds = { "org.eclipse.team.cvs", "org.eclipse.antDevelopment", "org.eclipse.javaDevelopment", "org.eclipse.plugInDevelopment", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ 
 
 	@SuppressWarnings("restriction")
 	public void createInitialLayout(IPageLayout layout)
@@ -63,6 +71,18 @@ public class DesignPerspective implements IPerspectiveFactory
 		bottom.addView(SearchUI.SEARCH_RESULT_VIEW_ID);
 		bottom.addView(NewSearchUI.SEARCH_VIEW_ID);
 		bottom.addView(IPageLayout.ID_TASK_LIST);
+
+		/* Remove redundant activities (including fake ones created by us) to reduce UI clutter. */
+		IWorkbenchActivitySupport was = PlatformUI.getWorkbench().getActivitySupport();
+		IActivityManager wasAM = was.getActivityManager();
+		List<String> activitiesToDisable = Arrays.asList(activityIds);
+		Set<String> keepEnabled = new HashSet<String>();
+		for (Object o : wasAM.getDefinedActivityIds())
+		{
+			String id = (String)o;
+			if (!activitiesToDisable.contains(id)) keepEnabled.add(id);
+		}
+		was.setEnabledActivityIds(keepEnabled);
 
 		/* remove the launch tool bar (run / debug) from the main tool bar and also the related + some similar actions */
 		ApplicationWindow window = (ApplicationWindow)PlatformUI.getWorkbench().getActiveWorkbenchWindow();

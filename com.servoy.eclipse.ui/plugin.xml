@@ -702,5 +702,66 @@
      		listener="com.servoy.eclipse.cheatsheets.FirstContactCheatSheetListener">
       </cheatsheet>
    </extension>
+   <extension
+         id="com.servoy.eclipse.activities.dltk"
+         name="DLTK"
+         point="org.eclipse.ui.activities">
+      <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.dltk"
+            pattern="org\.eclipse\.dltk\..*/.*Perspective.*">
+      </activityPatternBinding>
+      <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.dltk"
+            pattern="org\.eclipse\.dltk\..*/.*perspective.*">
+      </activityPatternBinding>
+      <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.dltk"
+            pattern="org\.eclipse\.dltk\..*/.*Wizard.*">
+      </activityPatternBinding>
+      <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.dltk"
+            pattern="org\.eclipse\.dltk\..*/.*wizard.*">
+      </activityPatternBinding>
+      <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.xml"
+            pattern="org\.eclipse\.wst\.xml\..*/.*">
+      </activityPatternBinding>
+      <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.html"
+            pattern="org\.eclipse\.wst\.html\..*/.*">
+      </activityPatternBinding>
+      <activity
+            id="com.servoy.eclipse.activities.dltk"
+            name="DLTK Perspectives and Wizards">
+      </activity>
+      <activity
+            id="com.servoy.eclipse.activities.xml"
+            name="XML">
+      </activity>
+      <activity
+            id="com.servoy.eclipse.activities.html"
+            name="HTML">
+      </activity>
+      <category
+            id="com.servoy.eclipse.activities.categories.dltk"
+            name="DLTK">
+      </category>
+      <category
+            id="com.servoy.eclipse.activities.categories.wst"
+            name="WST">
+      </category>
+      <categoryActivityBinding
+            activityId="com.servoy.eclipse.activities.dltk"
+            categoryId="com.servoy.eclipse.activities.categories.dltk">
+      </categoryActivityBinding>
+      <categoryActivityBinding
+            activityId="com.servoy.eclipse.activities.xml"
+            categoryId="com.servoy.eclipse.activities.categories.wst">
+      </categoryActivityBinding>
+      <categoryActivityBinding
+            activityId="com.servoy.eclipse.activities.html"
+            categoryId="com.servoy.eclipse.activities.categories.wst">
+      </categoryActivityBinding>
+   </extension>
    
 </plugin>
