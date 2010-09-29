@@ -2777,17 +2777,30 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					if (server.isTableLoaded(tableName))
 					{
 						Table table = server.getTable(tableName);
+						IResource res = project;
+						if (servoyModel.getDataModelManager() != null && servoyModel.getDataModelManager().getDBIFile(server_name, tableName).exists())
+						{
+							res = servoyModel.getDataModelManager().getDBIFile(server_name, tableName);
+						}
 						for (Column column : table.getColumns())
 						{
 							if (column.getColumnInfo() != null && column.getSequenceType() == ColumnInfo.UUID_GENERATOR &&
 								!column.getColumnInfo().hasFlag(Column.UUID_COLUMN))
 							{
 								String message = MarkerMessages.getMessage(MarkerMessages.Marker_Column_UUIDFlagNotSet, tableName, column.getName());
-								IResource res = project;
-								if (servoyModel.getDataModelManager() != null && servoyModel.getDataModelManager().getDBIFile(server_name, tableName).exists())
-								{
-									res = servoyModel.getDataModelManager().getDBIFile(server_name, tableName);
-								}
+								addMarker(res, COLUMN_MARKER_TYPE, message, -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, null);
+							}
+							if ((column.getSequenceType() == ColumnInfo.UUID_GENERATOR && (Column.mapToDefaultType(column.getType()) != IColumnTypes.TEXT && Column.mapToDefaultType(column.getType()) != IColumnTypes.MEDIA)) ||
+								(column.getSequenceType() == ColumnInfo.SERVOY_SEQUENCE && (Column.mapToDefaultType(column.getType()) != IColumnTypes.INTEGER && Column.mapToDefaultType(column.getType()) != IColumnTypes.NUMBER)))
+							{
+								String message = MarkerMessages.getMessage(MarkerMessages.Marker_Column_IncompatibleTypeForSequence, tableName,
+									column.getName());
+								addMarker(res, COLUMN_MARKER_TYPE, message, -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, null);
+							}
+							else if (column.getSequenceType() == ColumnInfo.UUID_GENERATOR && column.getLength() > 0 && column.getLength() < 36)
+							{
+								String message = MarkerMessages.getMessage(MarkerMessages.Marker_Column_InsufficientLengthForSequence, tableName,
+									column.getName());
 								addMarker(res, COLUMN_MARKER_TYPE, message, -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, null);
 							}
 							if (column.getColumnInfo() != null && column.getColumnInfo().getAutoEnterType() == ColumnInfo.LOOKUP_VALUE_AUTO_ENTER)
@@ -2831,12 +2844,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									if (invalid)
 									{
 										String message = MarkerMessages.getMessage(MarkerMessages.Marker_Column_LookupInvalid, tableName, column.getName());
-										IResource res = project;
-										if (servoyModel.getDataModelManager() != null &&
-											servoyModel.getDataModelManager().getDBIFile(server_name, tableName).exists())
-										{
-											res = servoyModel.getDataModelManager().getDBIFile(server_name, tableName);
-										}
 										addMarker(res, COLUMN_MARKER_TYPE, message, -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, null);
 									}
 								}

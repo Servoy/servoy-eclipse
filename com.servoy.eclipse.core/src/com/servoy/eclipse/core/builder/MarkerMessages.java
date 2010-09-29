@@ -251,6 +251,8 @@ public class MarkerMessages
 	public static String Marker_Form_DataproviderOnElementNotFound = "Element \"{0}\" in form \"{1}\" has dataprovider \"{2}\" that does not exist."; //$NON-NLS-1$
 
 	public static String Marker_Column_UUIDFlagNotSet = "Table \"{0}\" has column \"{1}\" which is an UUID generator but does not have the UUID flag set."; //$NON-NLS-1$
+	public static String Marker_Column_IncompatibleTypeForSequence = "Table \"{0}\" has column \"{1}\" which an incompatible type for its sequence."; //$NON-NLS-1$
+	public static String Marker_Column_InsufficientLengthForSequence = "Table \"{0}\" has column \"{1}\" whose length is insufficient for its sequence."; //$NON-NLS-1$
 
 	/**
 	 * The lookup value used for a column is invalid. This can happen when the lookup points to a global identifier that does not exist,

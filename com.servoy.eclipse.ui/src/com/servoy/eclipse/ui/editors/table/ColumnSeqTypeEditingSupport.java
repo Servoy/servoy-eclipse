@@ -36,6 +36,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.Table;
 
@@ -176,6 +177,23 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 					{
 						MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
 							"Servoy won't alter the table for you, so you must be sure that it is a identity/auto-increment column!");
+					}
+					if (i == ColumnInfo.SERVOY_SEQUENCE &&
+						(Column.mapToDefaultType(pi.getType()) != IColumnTypes.INTEGER && Column.mapToDefaultType(pi.getType()) != IColumnTypes.NUMBER))
+					{
+						MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
+							"Servoy sequence is only supported for numeric column types.");
+					}
+					if (i == ColumnInfo.UUID_GENERATOR &&
+						(Column.mapToDefaultType(pi.getType()) != IColumnTypes.TEXT && Column.mapToDefaultType(pi.getType()) != IColumnTypes.MEDIA))
+					{
+						MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
+							"UUID generator sequence is only supported for text and media column types.");
+					}
+					else if (i == ColumnInfo.UUID_GENERATOR && pi.getLength() > 0 && pi.getLength() < 36)
+					{
+						MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
+							"UUID generator column has too small length.");
 					}
 					break;
 				}
