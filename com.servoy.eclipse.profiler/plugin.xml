@@ -10,7 +10,7 @@
             class="com.servoy.eclipse.profiler.views.ProfilerView"
             icon="icons/viewicon.gif"
             id="com.servoy.eclipse.uicom.servoy.eclipse.profiler.views.ProfilerView"
-            name="Profiler View">
+            name="Profiler">
       </view>
    </extension>
    <extension
