@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 
@@ -36,7 +36,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Point;
 
-import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -192,28 +192,32 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 			{
 				// The GEF implementation of SnapToGrid adds one extra pixel when the components are snapped to EAST or SOUTH.
 				// We do a correction in order to remove that extra 1px.
-				return new SnapToGrid(this)
+				if (false)
 				{
-					@Override
-					public int snapRectangle(Request request, int snapLocations, org.eclipse.draw2d.geometry.PrecisionRectangle rect,
-						org.eclipse.draw2d.geometry.PrecisionRectangle result)
+					return new SnapToGrid(this)
 					{
-						int alteredSnapLocations = super.snapRectangle(request, snapLocations, rect, result);
-						boolean changed = false;
-						if ((gridX > 0) && ((snapLocations & EAST) != 0) && ((alteredSnapLocations & EAST) == 0))
+						@Override
+						public int snapRectangle(Request request, int snapLocations, org.eclipse.draw2d.geometry.PrecisionRectangle rect,
+							org.eclipse.draw2d.geometry.PrecisionRectangle result)
 						{
-							result.preciseWidth -= Math.IEEEremainder(rect.preciseWidth + result.preciseWidth, gridX);
-							changed = true;
+							int alteredSnapLocations = super.snapRectangle(request, snapLocations, rect, result);
+							boolean changed = false;
+							if ((gridX > 0) && ((snapLocations & EAST) != 0) && ((alteredSnapLocations & EAST) == 0))
+							{
+								result.preciseWidth -= Math.IEEEremainder(rect.preciseWidth + result.preciseWidth, gridX);
+								changed = true;
+							}
+							if ((gridY > 0) && ((snapLocations & SOUTH) != 0) && ((alteredSnapLocations & SOUTH) == 0))
+							{
+								result.preciseHeight -= Math.IEEEremainder(rect.preciseHeight + result.preciseHeight, gridY);
+								changed = true;
+							}
+							if (changed) result.updateInts();
+							return alteredSnapLocations;
 						}
-						if ((gridY > 0) && ((snapLocations & SOUTH) != 0) && ((alteredSnapLocations & SOUTH) == 0))
-						{
-							result.preciseHeight -= Math.IEEEremainder(rect.preciseHeight + result.preciseHeight, gridY);
-							changed = true;
-						}
-						if (changed) result.updateInts();
-						return alteredSnapLocations;
-					}
-				};
+					};
+				}
+				return new SnapToElementAlignment(this);
 			}
 		}
 		return super.getAdapter(key);
@@ -223,7 +227,7 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 	{
 		if (snapToGridIFieldPositioner == null)
 		{
-			DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModelManager.getServoyModelManager().getServoyModel().getSettings());
+			DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
 			snapToGridIFieldPositioner = new SnapToGridFieldPositioner(designerPreferences)
 			{
 				@Override

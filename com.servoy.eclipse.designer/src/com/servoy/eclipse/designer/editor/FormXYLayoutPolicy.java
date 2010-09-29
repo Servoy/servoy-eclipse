@@ -16,38 +16,33 @@
  */
 package com.servoy.eclipse.designer.editor;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.gef.DragTracker;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.GraphicalEditPart;
-import org.eclipse.gef.Handle;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
-import org.eclipse.gef.editpolicies.ResizableEditPolicy;
 import org.eclipse.gef.editpolicies.XYLayoutEditPolicy;
-import org.eclipse.gef.handles.MoveHandle;
-import org.eclipse.gef.handles.ResizeHandle;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.requests.CreateRequest;
-import org.eclipse.gef.tools.ResizeTracker;
 
 import com.servoy.eclipse.designer.actions.DistributeRequest;
 import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.commands.ChangeBoundsCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
+import com.servoy.eclipse.designer.property.SetValueCommand;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.Part;
 
@@ -60,6 +55,7 @@ import com.servoy.j2db.persistence.Part;
 public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 {
 	private final FormGraphicalEditPart parent;
+	public static final String REQUEST_PROPERTY_PREFIX = "property:";
 
 	public FormXYLayoutPolicy(FormGraphicalEditPart parent)
 	{
@@ -77,7 +73,30 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 		{
 			if (childEditPart.getModel() instanceof ISupportBounds && constraint instanceof Rectangle)
 			{
-				return new ChangeBoundsCommand((ISupportBounds)childEditPart.getModel(), (Rectangle)constraint);
+				CompoundCommand compoundCommand = new CompoundCommand();
+
+				compoundCommand.add(new ChangeBoundsCommand((ISupportBounds)childEditPart.getModel(), (Rectangle)constraint));
+
+				// set properties via request.extendedData
+				Map<Object, Object> objectProperties = request.getExtendedData();
+				if (childEditPart.getModel() instanceof IPersist && objectProperties != null && objectProperties.size() > 0)
+				{
+					IPersist persist = (IPersist)childEditPart.getModel();
+					PersistPropertySource persistPropertySource = new PersistPropertySource(persist, persist, false);
+					for (Map.Entry<Object, Object> entry : objectProperties.entrySet())
+					{
+						Object key = entry.getKey();
+						if (key instanceof String && ((String)key).startsWith(REQUEST_PROPERTY_PREFIX))
+						{
+							SetValueCommand setCommand = new SetValueCommand();
+							setCommand.setTarget(persistPropertySource);
+							setCommand.setPropertyId(((String)key).substring(REQUEST_PROPERTY_PREFIX.length()));
+							setCommand.setPropertyValue(entry.getValue());
+							compoundCommand.add(setCommand);
+						}
+					}
+				}
+				return compoundCommand.unwrap();
 			}
 		}
 		return super.createChangeConstraintCommand(request, childEditPart, constraint);
@@ -275,45 +294,6 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 		{
 			return new DragFormPartPolicy();
 		}
-		return new ResizableEditPolicy()
-		{
-			@Override
-			protected List<Handle> createSelectionHandles()
-			{
-				List<Handle> list = new ArrayList<Handle>();
-				GraphicalEditPart part = (GraphicalEditPart)getHost();
-				list.add(new MoveHandle(part));
-				list.add(createResizeHandle(part, PositionConstants.EAST));
-				list.add(createResizeHandle(part, PositionConstants.SOUTH_EAST));
-				list.add(createResizeHandle(part, PositionConstants.SOUTH));
-				list.add(createResizeHandle(part, PositionConstants.SOUTH_WEST));
-				list.add(createResizeHandle(part, PositionConstants.WEST));
-				list.add(createResizeHandle(part, PositionConstants.NORTH_WEST));
-				list.add(createResizeHandle(part, PositionConstants.NORTH));
-				list.add(createResizeHandle(part, PositionConstants.NORTH_EAST));
-
-				return list;
-			}
-
-			protected Handle createResizeHandle(GraphicalEditPart owner, final int direction)
-			{
-				return new ResizeHandle(owner, direction)
-				{
-					@Override
-					protected DragTracker createDragTracker()
-					{
-						return new ResizeTracker(getOwner(), direction)
-						{
-							@Override
-							protected void updateSourceRequest()
-							{
-								super.updateSourceRequest();
-								BasePersistGraphicalEditPart.limitChangeBoundsRequest((ChangeBoundsRequest)getSourceRequest());
-							}
-						};
-					}
-				};
-			}
-		};
+		return new AlignmentfeedbackEditPolicy();
 	}
 }
