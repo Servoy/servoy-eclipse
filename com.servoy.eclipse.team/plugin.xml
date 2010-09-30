@@ -16,7 +16,7 @@
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.team.ui.NewSolutionWizard"
             hasPages="true"
-            icon="icons/server.gif"
+            icon="icons/new_team_project.gif"
             id="com.servoy.eclipse.team.ui.NewSolutionWizard"
             name="Project from Servoy repository"
             project="true">
