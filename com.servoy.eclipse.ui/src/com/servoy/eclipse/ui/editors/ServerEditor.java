@@ -68,9 +68,6 @@ import com.servoy.j2db.util.Settings;
 
 public class ServerEditor extends EditorPart
 {
-	public static final String SELECTION_NONE = "<none>";
-	public static final String SELECTION_EMPTY = "<empty>";
-
 	private DataBindingContext m_bindingContext;
 	private boolean modified = false;
 	private ImmutableObjectObservable<ServerConfig> serverConfigObservable;
@@ -485,12 +482,12 @@ public class ServerEditor extends EditorPart
 		driverField.add("sun.jdbc.odbc.JdbcOdbcDriver"); //$NON-NLS-1$
 
 		catalogField.removeAll();
-		catalogField.add(SELECTION_NONE);
-		catalogField.add(SELECTION_EMPTY);
+		catalogField.add(ServerConfig.NONE);
+		catalogField.add(ServerConfig.EMPTY);
 
 		schemaField.removeAll();
-		schemaField.add(SELECTION_NONE);
-		schemaField.add(SELECTION_EMPTY);
+		schemaField.add(ServerConfig.NONE);
+		schemaField.add(ServerConfig.EMPTY);
 
 		maxActiveField.addVerifyListener(DocumentValidatorVerifyListener.NUMBER_VERIFIER);
 		maxIdleField.addVerifyListener(DocumentValidatorVerifyListener.NUMBER_VERIFIER);
@@ -502,7 +499,7 @@ public class ServerEditor extends EditorPart
 		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION));
 
 		dataModel_cloneFromField.removeAll();
-		dataModel_cloneFromField.add(SELECTION_NONE);
+		dataModel_cloneFromField.add(ServerConfig.NONE);
 		for (ServerConfig sc : ServoyModel.getServerManager().getServerConfigs())
 		{
 			dataModel_cloneFromField.add(sc.getServerName());
@@ -527,7 +524,7 @@ public class ServerEditor extends EditorPart
 			{
 				String dataModelCloneFrom = serverConfigObservable.getObject().getDataModelCloneFrom();
 				if (Arrays.asList(dataModel_cloneFromField.getItems()).contains(dataModelCloneFrom)) return dataModelCloneFrom;
-				else return SELECTION_NONE;
+				else return ServerConfig.NONE;
 			}
 
 			public Object getValueType()
@@ -538,7 +535,7 @@ public class ServerEditor extends EditorPart
 			@Override
 			protected void doSetValue(Object value)
 			{
-				serverConfigObservable.setPropertyValue("dataModelCloneFrom", value.equals(SELECTION_NONE) ? null : value);
+				serverConfigObservable.setPropertyValue("dataModelCloneFrom", value.equals(ServerConfig.NONE) ? null : value);
 			}
 		};
 		IObservableValue dataModel_cloneFromTextObserveWidget = SWTObservables.observeSelection(dataModel_cloneFromField);
@@ -558,8 +555,8 @@ public class ServerEditor extends EditorPart
 			protected Object doGetValue()
 			{
 				String catalog = serverConfigObservable.getObject().getCatalog();
-				if (catalog == null) catalog = SELECTION_NONE;
-				else if (catalog.length() == 0) catalog = SELECTION_EMPTY;
+				if (catalog == null) catalog = ServerConfig.NONE;
+				else if (catalog.length() == 0) catalog = ServerConfig.EMPTY;
 				return catalog;
 			}
 
@@ -581,8 +578,8 @@ public class ServerEditor extends EditorPart
 			protected Object doGetValue()
 			{
 				String schema = serverConfigObservable.getObject().getSchema();
-				if (schema == null) schema = SELECTION_NONE;
-				else if (schema.length() == 0) schema = SELECTION_EMPTY;
+				if (schema == null) schema = ServerConfig.NONE;
+				else if (schema.length() == 0) schema = ServerConfig.EMPTY;
 				return schema;
 			}
 
