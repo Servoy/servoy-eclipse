@@ -688,21 +688,31 @@
       </cheatsheet>
       <cheatsheet
             category="com.servoy.eclipse.ui.CheatSheetCategory"
-            composite="false"
-            contentFile="cheatsheets/WriteUnitTests.xml"
-            id="com.servoy.eclipse.ui.cheatsheet.unittests"
-            name="Write Unit Tests">
-         <description>
-            Shows you how to write unit tests for your code.
-         </description>
-      </cheatsheet>
-      <cheatsheet
-            category="com.servoy.eclipse.ui.CheatSheetCategory"
             composite="true"
             contentFile="cheatsheets/FirstContact.xml"
             id="com.servoy.eclipse.ui.cheatsheet.firstcontact"
             name="Getting Started with Servoy"
      		listener="com.servoy.eclipse.cheatsheets.FirstContactCheatSheetListener">
+      </cheatsheet>
+      <cheatsheet
+            category="com.servoy.eclipse.ui.CheatSheetCategory"
+            composite="false"
+            contentFile="cheatsheets/InstallSVN.xml"
+            id="com.servoy.eclipse.ui.cheatsheet.installsvn"
+            name="Install the SVN Plugin">
+         <description>
+            Shows you how to install the SVN plugin.
+         </description>
+      </cheatsheet>
+      <cheatsheet
+            category="com.servoy.eclipse.ui.CheatSheetCategory"
+            composite="false"
+            contentFile="cheatsheets/InstallSQLExplorer.xml"
+            id="com.servoy.eclipse.ui.cheatsheet.installsql"
+            name="Install the SQL Explorer Plugin">
+         <description>
+            Shows you how to install the SQL Explorer plugin.
+         </description>
       </cheatsheet>
    </extension>
    <extension

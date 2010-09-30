@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet
+      title="Install the SQL Explorer Plugin">
+   <intro>
+      <description>
+         This cheat sheet shows you how to install the SQL Explorer plugin.
+      </description>
+   </intro>
+   <item
+         title="Item">
+      <description>
+         <b>Body</b>
+      </description>
+   </item>
+   <item
+         title="Item (1)">
+      <description>
+         <b>Body</b>
+      </description>
+   </item>
+</cheatsheet>

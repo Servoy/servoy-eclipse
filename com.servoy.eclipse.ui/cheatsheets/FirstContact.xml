@@ -17,6 +17,16 @@
          <param name="path" value="CreateSolution.xml">
          </param>
       </task>
+      <task kind="cheatsheet" name="Install the SQL Explorer Plugin" skip="true">
+         <intro>
+            <b>Introduction</b>
+         </intro>
+         <onCompletion>
+            <b>Conclusion</b>
+         </onCompletion>
+         <param name="path" value="InstallSQLExplorer.xml">
+         </param>
+      </task>
       <task kind="cheatsheet" name="Define the Data Model" skip="false">
          <intro>
             <b>Introduction</b>
@@ -37,14 +47,14 @@
          <param name="path" value="CreateForms.xml">
          </param>
       </task>
-      <task kind="cheatsheet" name="Write Unit Tests" skip="false">
+      <task kind="cheatsheet" name="Share the Solution through SVN" skip="false">
          <intro>
             <b>Introduction</b>
          </intro>
          <onCompletion>
             <b>Conclusion</b>
          </onCompletion>
-         <param name="path" value="WriteUnitTests.xml">
+         <param name="path" value="InstallSVN.xml">
          </param>
       </task>
    </taskGroup>

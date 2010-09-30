@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet
+      title="Install the SVN Plugin">
+   <intro>
+      <description>
+         This cheat sheet shows you how to install the SVN plugin, so that you can share your Servoy solutions through SVN repositories.
+      </description>
+   </intro>
+   <item
+         title="Item">
+      <description>
+         <b>Body</b>
+      </description>
+   </item>
+   <item
+         title="Item (1)">
+      <description>
+         <b>Body</b>
+      </description>
+   </item>
+</cheatsheet>
