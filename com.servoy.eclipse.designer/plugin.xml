@@ -443,7 +443,7 @@
             category="com.servoy.eclipse.ui.preference"
             class="com.servoy.eclipse.designer.preferences.DesignerPreferencePage"
             id="com.servoy.eclipse.ui.designer"
-            name="Form Designer">
+            name="Form Editor">
       </page>
    </extension>
       <extension

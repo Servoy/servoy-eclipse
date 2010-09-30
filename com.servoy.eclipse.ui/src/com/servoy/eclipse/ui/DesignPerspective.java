@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.jface.action.ICoolBarManager;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.search.ui.NewSearchUI;
-import org.eclipse.search.ui.SearchUI;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
@@ -49,8 +48,8 @@ import com.servoy.j2db.util.Utils;
 public class DesignPerspective implements IPerspectiveFactory
 {
 
-	protected static final String[] actionIds = { "org.eclipse.debug.ui.debugActionSet", "org.eclipse.dltk.debug.ui.ScriptDebugActionSet", "org.eclipse.debug.ui.launchActionSet", "org.eclipse.ui.externaltools.ExternalToolsSet", "org.eclipse.ui.edit.text.actionSet.convertLineDelimitersTo" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-	protected static final String[] activityIds = { "org.eclipse.team.cvs", "org.eclipse.antDevelopment", "org.eclipse.javaDevelopment", "org.eclipse.plugInDevelopment", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ 
+	protected static final String[] actionIds = { "org.eclipse.debug.ui.debugActionSet", "org.eclipse.dltk.debug.ui.ScriptDebugActionSet", "org.eclipse.debug.ui.launchActionSet", "org.eclipse.ui.externaltools.ExternalToolsSet" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+	protected static final String[] activityIds = { "org.eclipse.team.cvs", "org.eclipse.antDevelopment", "org.eclipse.javaDevelopment", "org.eclipse.plugInDevelopment", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk", "org.eclipse.equinox.p2.ui.sdk.classicUpdate" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ 
 
 	@SuppressWarnings("restriction")
 	public void createInitialLayout(IPageLayout layout)
@@ -67,10 +66,9 @@ public class DesignPerspective implements IPerspectiveFactory
 		IFolderLayout bottom = layout.createFolder("bottom", IPageLayout.BOTTOM, 0.8f, editorArea);
 		bottom.addView(IPageLayout.ID_PROBLEM_VIEW);
 		bottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);//move to debug perspective only
-		bottom.addView(IPageLayout.ID_BOOKMARKS);
-		bottom.addView(SearchUI.SEARCH_RESULT_VIEW_ID);
-		bottom.addView(NewSearchUI.SEARCH_VIEW_ID);
 		bottom.addView(IPageLayout.ID_TASK_LIST);
+		bottom.addView(IPageLayout.ID_BOOKMARKS);
+		bottom.addView(NewSearchUI.SEARCH_VIEW_ID);
 
 		/* Remove redundant activities (including fake ones created by us) to reduce UI clutter. */
 		IWorkbenchActivitySupport was = PlatformUI.getWorkbench().getActivitySupport();

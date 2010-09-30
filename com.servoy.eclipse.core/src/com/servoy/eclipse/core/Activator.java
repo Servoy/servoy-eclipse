@@ -50,6 +50,9 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
+import org.eclipse.ui.internal.WorkbenchPlugin;
+import org.eclipse.ui.internal.registry.ActionSetRegistry;
+import org.eclipse.ui.internal.registry.IActionSetDescriptor;
 import org.eclipse.ui.progress.WorkbenchJob;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.NativeJavaObject;
@@ -84,6 +87,7 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
 import com.servoy.j2db.smart.J2DBClient;
 import com.servoy.j2db.util.Settings;
+import com.servoy.j2db.util.Utils;
 
 
 /**
@@ -436,6 +440,7 @@ public class Activator extends Plugin
 		return plugin;
 	}
 
+	@SuppressWarnings("restriction")
 	private void initialize()
 	{
 		defaultAccessed = true;
@@ -615,6 +620,17 @@ public class Activator extends Plugin
 			{
 				Map<String, IMethodTemplate> templs = ((IMethodTemplatesProvider)val).getMethodTemplates(MethodTemplatesFactory.getInstance());
 				processMethodTemplates(templs);
+			}
+		}
+
+		String[] actionIds = { "org.eclipse.ui.edit.text.actionSet.convertLineDelimitersTo" }; //$NON-NLS-1$
+		ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
+		IActionSetDescriptor[] actionSets = reg.getActionSets();
+		for (IActionSetDescriptor element : actionSets)
+		{
+			for (String actionSetId : actionIds)
+			{
+				if (Utils.stringSafeEquals(element.getId(), actionSetId)) element.setInitiallyVisible(false);
 			}
 		}
 	}
