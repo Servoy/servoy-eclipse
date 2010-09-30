@@ -105,7 +105,6 @@ public class DesignPerspective implements IPerspectiveFactory
 		setContentsOfShowViewMenu(layout);
 		addNewWizards(layout);
 
-		layout.addPerspectiveShortcut("com.servoy.eclipse.ui.DesignPerspective"); //$NON-NLS-1$
 		layout.addPerspectiveShortcut("org.eclipse.debug.ui.DebugPerspective"); //$NON-NLS-1$
 	}
 

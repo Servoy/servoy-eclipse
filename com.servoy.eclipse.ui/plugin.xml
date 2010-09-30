@@ -62,6 +62,9 @@
          <actionSet
                id="com.servoy.eclipse.ui.servoySearchActionSet">
          </actionSet>
+         <perspectiveShortcut
+               id="com.servoy.eclipse.ui.DesignPerspective">
+         </perspectiveShortcut>
       </perspectiveExtension>
    </extension>
    <extension
