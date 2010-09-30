@@ -18,7 +18,7 @@
                menubarPath="org.eclipse.ui.run/start"
                style="push"
                toolbarPath="Normal/additions"
-               tooltip="Start Web Client">
+               tooltip="Start Debug Web Client">
          </action>
          <action
                class="com.servoy.eclipse.debug.actions.StartSmartClientActionDelegate"
@@ -29,7 +29,7 @@
                menubarPath="org.eclipse.ui.run/start"
                style="push"
                toolbarPath="Normal/additions"
-               tooltip="Start Smart Client">
+               tooltip="Start Debug Smart Client">
          </action>
       </actionSet>
    </extension>
