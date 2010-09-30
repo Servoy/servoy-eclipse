@@ -117,8 +117,8 @@
             label="Place Elements"
             visible="true">
          <menu
-               id="com.servoy.eclipse.designer.ElementsMenu"
-               label="&amp;Elements">
+               id="com.servoy.eclipse.ui.actionsMenu"
+               label="&amp;Actions">
             <separator
                   name="elements">
             </separator>
@@ -129,7 +129,7 @@
                icon="icons/template.gif"
                id="com.servoy.eclipse.designer.action.applyTemplateAction"
                label="Place Template..."
-               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
                tooltip="Place Template..."/>
@@ -139,7 +139,7 @@
                icon="icons/tabs.gif"
                id="com.servoy.eclipse.designer.action.addTabAction"
                label="Place TabPanel..."
-               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
                tooltip="Place TabPanel..."/>
@@ -149,7 +149,7 @@
                icon="icons/split.gif"
                id="com.servoy.eclipse.designer.action.addSplitPaneAction"
                label="Place SplitPane..."
-               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
                tooltip="Place SplitPane..."/>               
@@ -159,7 +159,7 @@
                icon="icons/image.gif"
                id="com.servoy.eclipse.designer.action.addMedaAction"
                label="Place Image..."
-               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
                tooltip="Place Image..."/>
@@ -169,7 +169,7 @@
                icon="icons/bean.gif"
                id="com.servoy.eclipse.designer.action.addBeanAction"
                label="Place Bean..."
-               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
                tooltip="Place Bean..."/>
@@ -179,7 +179,7 @@
                icon="icons/portal.gif"
                id="com.servoy.eclipse.designer.action.addPortalAction"
                label="Place Portal..."
-               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
                tooltip="Place Portal..."/>
@@ -189,7 +189,7 @@
                id="com.servoy.eclipse.designer.action.addButtonAction"
                definitionId="com.servoy.eclipse.designer.action.addButtonAction"
                label="Place Button"
-               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
                tooltip="Place Button"/>
@@ -199,7 +199,7 @@
                icon="icons/field.gif"
                id="com.servoy.eclipse.designer.action.addFieldAction"
                label="Place Field..."
-               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
                tooltip="Place Field..."/>
@@ -209,7 +209,7 @@
                icon="icons/text.gif"
                id="com.servoy.eclipse.designer.action.addLabelAction"
                label="Place Label"
-               menubarPath="com.servoy.eclipse.designer.ElementsMenu/elements"
+               menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
                tooltip="Place Label"/>
@@ -217,8 +217,8 @@
                class="com.servoy.eclipse.designer.actions.AddHorizontalLineActionDelegate"
                icon="icons/hline.gif"
                id="com.servoy.eclipse.designer.action.addHLineAction"
-               label="Horizontal Line"
-               menubarPath="com.servoy.eclipse.designer.ElementsMenu/drawing"
+               label="Place Horizontal Line"
+               menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
                tooltip="Horizontal Line"/>
@@ -226,8 +226,8 @@
                class="com.servoy.eclipse.designer.actions.AddVerticalLineActionDelegate"
                icon="icons/vline.gif"
                id="com.servoy.eclipse.designer.action.addVLineAction"
-               label="Vertical Line"
-               menubarPath="com.servoy.eclipse.designer.ElementsMenu/drawing"
+               label="Place Vertical Line"
+               menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
                tooltip="Vertical Line"/>
