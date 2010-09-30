@@ -84,54 +84,54 @@
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewFormWizard"
             hasPages="true"
-            icon="icons/designer.gif"
+            icon="icons/new_form_wizard.gif"
             id="com.servoy.eclipse.ui.NewFormWizard"
-            name="New Form"
+            name="Form"
             project="false">
       </wizard>
       <wizard
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewSolutionWizard"
-            icon="icons/solution_icon.gif"
+            icon="icons/new_solution_wizard.gif"
             id="com.servoy.eclipse.ui.NewSolutionWizard"
-            name="New Servoy Solution"
+            name="Servoy Solution"
             project="true">
       </wizard>
       <wizard
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewStyleWizard"
-            icon="icons/styles.gif"
+            icon="icons/new_style_wizard.gif"
             id="com.servoy.eclipse.ui.NewStyleWizard"
-            name="New Style"
+            name="Style"
             project="false">
       </wizard>
       <wizard
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewRelationWizard"
-            icon="icons/newrelation.gif"
+            icon="icons/new_relation_wizard.gif"
             id="com.servoy.eclipse.ui.NewRelationWizard"
-            name="New Relation"
+            name="Relation"
             project="false">
       </wizard>
       <wizard
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewValueListWizard"
-            icon="icons/newvaluelist.gif"
+            icon="icons/new_valuelist_wizard.gif"
             id="com.servoy.eclipse.ui.NewValueListWizard"
-            name="New Valuelist"
+            name="Valuelist"
             project="false">
       </wizard>
       <wizard
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewMethodWizard"
-            icon="icons/new_form_method.gif"
+            icon="icons/new_method_wizard.gif"
             id="com.servoy.eclipse.ui.NewMethodWizard"
-            name="New Method"
+            name="Method"
             project="false">
       </wizard>
    </extension>
