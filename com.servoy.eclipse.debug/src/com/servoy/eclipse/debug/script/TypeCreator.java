@@ -196,37 +196,43 @@ public abstract class TypeCreator
 		super();
 	}
 
-	protected synchronized void initalize()
+	protected void initalize()
 	{
 		if (initialized) return;
-		registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class));
-		registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class));
-		registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class));
-		registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class));
-		registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(ServoyException.class));
-
-		List<IClientPlugin> lst = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getPluginManager().getPlugins(IClientPlugin.class);
-		for (IClientPlugin clientPlugin : lst)
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel(); // make sure servoy model is created before take sync lock
+		synchronized (this)
 		{
-			try
+			if (initialized) return;
+
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class));
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class));
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class));
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class));
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(ServoyException.class));
+
+			List<IClientPlugin> lst = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getPluginManager().getPlugins(IClientPlugin.class);
+			for (IClientPlugin clientPlugin : lst)
 			{
-				registerConstantsForScriptObject(clientPlugin.getScriptObject());
+				try
+				{
+					registerConstantsForScriptObject(clientPlugin.getScriptObject());
+				}
+				catch (Throwable e)
+				{
+					Debug.error("error registering constants for client plugin ", e); //$NON-NLS-1$
+				}
 			}
-			catch (Throwable e)
+
+			servoyModel.addPersistChangeListener(true, new IPersistChangeListener()
 			{
-				Debug.error("error registering constants for client plugin ", e); //$NON-NLS-1$
-			}
+				public void persistChanges(Collection<IPersist> changes)
+				{
+					// TODO see if this will become a performance issue..
+					clearDynamicTypes();
+				}
+			});
+			initialized = true;
 		}
-
-		ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(true, new IPersistChangeListener()
-		{
-			public void persistChanges(Collection<IPersist> changes)
-			{
-				// TODO see if this will become a performance issue..
-				clearDynamicTypes();
-			}
-		});
-		initialized = true;
 	}
 
 	private void clearDynamicTypes()
