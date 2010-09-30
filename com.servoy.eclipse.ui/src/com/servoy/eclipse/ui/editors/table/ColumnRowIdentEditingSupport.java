@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
 
 import org.eclipse.jface.viewers.CellEditor;
@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.Table;
@@ -109,33 +110,38 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 	@Override
 	protected boolean canEdit(Object element)
 	{
-		if (element instanceof Column && editor != null)
+		// only if we have active solution
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
 		{
-			Column c = (Column)element;
-			if (c.getExistInDB())
+			if (element instanceof Column && editor != null)
 			{
-				if (c.getRowIdentType() == Column.PK_COLUMN)
+				Column c = (Column)element;
+				if (c.getExistInDB())
 				{
-					return false;// pk not never allowed to change, we do allow or user_ident on null column for views
+					if (c.getRowIdentType() == Column.PK_COLUMN)
+					{
+						return false;// pk not never allowed to change, we do allow or user_ident on null column for views
+					}
+					else
+					{
+						return true;
+					}
 				}
 				else
 				{
-					return true;
-				}
-			}
-			else
-			{
-				if (c.getTable().getExistInDB())
-				{
-					return false;// not possible to add non null columns and
-					// null column does not allow user_ident
-				}
-				else
-				{
-					return true;
+					if (c.getTable().getExistInDB())
+					{
+						return false;// not possible to add non null columns and
+						// null column does not allow user_ident
+					}
+					else
+					{
+						return true;
+					}
 				}
 			}
 		}
+
 		return false;
 	}
 }

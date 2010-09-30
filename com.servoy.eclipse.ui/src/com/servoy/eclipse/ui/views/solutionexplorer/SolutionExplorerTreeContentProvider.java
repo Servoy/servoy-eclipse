@@ -60,8 +60,8 @@ import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EnableServerAction;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.IApplication;
 import com.servoy.j2db.FormManager.HistoryProvider;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
@@ -143,6 +143,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	private PlatformSimpleUserNode valuelists;
 
 	private PlatformSimpleUserNode media;
+
+	private PlatformSimpleUserNode[] scriptingNodes;
+
+	private PlatformSimpleUserNode[] resourceNodes;
 
 	private final SolutionExplorerView view;
 
@@ -287,6 +291,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		plugins.parent = invisibleRootNode;
 		modulesOfActiveSolution.parent = activeSolutionNode;
 
+		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, utils, history, security, i18n, exceptions, jsunit, plugins };
+		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode };
+
 		// we want to load the plugins node in a background low prio job so that it will expand fast
 		// when used...
 		Job job = new Job("Background loading of plugins node")
@@ -333,6 +340,26 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		activeSolutionNode.children = null;
 		allSolutionsNode.children = null;
 		servers.children = null;
+	}
+
+	public void setScriptingNodesEnabled(boolean isEnabled)
+	{
+		setNodesEnabled(scriptingNodes, isEnabled);
+	}
+
+	public void setResourceNodesEnabled(boolean isEnabled)
+	{
+		setNodesEnabled(resourceNodes, isEnabled);
+	}
+
+	private void setNodesEnabled(PlatformSimpleUserNode[] nodes, boolean isEnabled)
+	{
+		for (PlatformSimpleUserNode n : nodes)
+		{
+			if (isEnabled) n.unhide();
+			else n.hide();
+			view.refreshTreeNodeFromModel(n);
+		}
 	}
 
 	// called by setInput & other SWT tree related behaviors (for example during

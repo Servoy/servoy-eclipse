@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
@@ -68,5 +69,16 @@ public class SuggestForeignTypesAction extends Action implements ISelectionChang
 			dialog.create();
 			dialog.open();
 		}
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		// if not active solution then it is not enabled
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() == null)
+		{
+			return false;
+		}
+		else return super.isEnabled();
 	}
 }

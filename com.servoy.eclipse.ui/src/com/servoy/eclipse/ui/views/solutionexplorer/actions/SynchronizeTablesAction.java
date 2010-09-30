@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -83,4 +84,14 @@ public class SynchronizeTablesAction extends OpenWizardAction implements ISelect
 		setEnabled(state);
 	}
 
+	@Override
+	public boolean isEnabled()
+	{
+		// if not active solution then it is not enabled
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() == null)
+		{
+			return false;
+		}
+		else return super.isEnabled();
+	}
 }

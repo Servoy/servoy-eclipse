@@ -670,6 +670,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						tree.setExpandedState(activeProjectNode, true);
 					}
 				}
+				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setScriptingNodesEnabled(servoyProject != null);
+				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setResourceNodesEnabled(servoyProject != null);
 
 				return Status.OK_STATUS;
 			}
@@ -1433,6 +1435,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 							Object AllSolutionsNode = ((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getAllSolutionsNode();
 							tree.collapseToLevel(AllSolutionsNode, 1);
 						}
+						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setScriptingNodesEnabled(activeProject != null);
+						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setResourceNodesEnabled(activeProject != null);
 					}
 				};
 				if (Display.getCurrent() != null)
@@ -1899,7 +1903,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			manager.add(i18nWriteToDBAction);
 		}
 
-		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.SOLUTION)
+		if (selectedTreeNode != null && selectedTreeNode.isEnabled() && selectedTreeNode.getType() == UserNodeType.SOLUTION)
 		{
 			manager.add(new Separator());
 			manager.add(i18nExternalizeAction);

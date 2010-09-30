@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -46,9 +47,19 @@ public class OpenNewFormWizardAction extends OpenWizardAction implements ISelect
 		if (state)
 		{
 			UserNodeType type = ((SimpleUserNode)sel.getFirstElement()).getType();
-			state = (type == UserNodeType.FORMS || type == UserNodeType.TABLE || type == UserNodeType.VIEW || (type == UserNodeType.SOLUTION && ((SimpleUserNode)sel.getFirstElement()).getRealObject() != null));
+			state = (type == UserNodeType.FORMS || type == UserNodeType.TABLE || type == UserNodeType.VIEW || type == UserNodeType.SOLUTION);
 		}
 		setEnabled(state);
 	}
 
+	@Override
+	public boolean isEnabled()
+	{
+		// if not active solution then it is not enabled
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() == null)
+		{
+			return false;
+		}
+		else return super.isEnabled();
+	}
 }

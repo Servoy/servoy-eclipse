@@ -33,6 +33,7 @@ import org.eclipse.swt.SWT;
 
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -117,7 +118,8 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 	@Override
 	protected boolean canEdit(Object element)
 	{
-		return true;
+		// only if we have active solution
+		return ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null;
 	}
 
 	@Override
