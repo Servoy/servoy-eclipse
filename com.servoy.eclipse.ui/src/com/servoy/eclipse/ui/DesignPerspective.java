@@ -65,7 +65,6 @@ public class DesignPerspective implements IPerspectiveFactory
 
 		IFolderLayout bottom = layout.createFolder("bottom", IPageLayout.BOTTOM, 0.8f, editorArea);
 		bottom.addView(IPageLayout.ID_PROBLEM_VIEW);
-		bottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);//move to debug perspective only
 		bottom.addView(IPageLayout.ID_TASK_LIST);
 		bottom.addView(IPageLayout.ID_BOOKMARKS);
 		bottom.addView(NewSearchUI.SEARCH_VIEW_ID);
