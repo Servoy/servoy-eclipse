@@ -2413,6 +2413,12 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				{
 					EditorUtil.openScriptEditor((Form)doubleClickedItem.getRealObject(), true);
 				}
+				else if (doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE)
+				{
+					Object clickedRealObject = doubleClickedItem.getRealObject();
+					if (clickedRealObject instanceof ServoyProject) ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(
+						(ServoyProject)clickedRealObject);
+				}
 				else if ((!expandable || ctrlPressed) && openActionInTree.isEnabled())
 				{
 					// execute open option
