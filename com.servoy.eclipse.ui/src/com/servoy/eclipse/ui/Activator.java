@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.swt.SWT;
@@ -28,7 +27,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import com.servoy.eclipse.ui.preferences.TeamPreferences;
 import com.servoy.j2db.IApplication;
 
 /**
@@ -71,10 +69,6 @@ public class Activator extends AbstractUIPlugin
 	{
 		super.start(context);
 		plugin = this;
-
-		Preferences store = Activator.getDefault().getPluginPreferences();
-		store.setDefault(TeamPreferences.AUTOMATIC_RESOURCE_SYNCH_PROPERTY, true);
-		store.setDefault(TeamPreferences.AUTOMATIC_MODULES_SYNCH_PROPERTY, true);
 
 		// make sure that core is fully initialized.
 		com.servoy.eclipse.core.Activator.getDefault();
