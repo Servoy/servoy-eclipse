@@ -68,14 +68,15 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.ServoyResourcesProject;
 import com.servoy.eclipse.core.TeamShareMonitor;
-import com.servoy.eclipse.core.WorkspaceFileAccess;
 import com.servoy.eclipse.core.TeamShareMonitor.TeamShareMonitorExtension;
+import com.servoy.eclipse.core.WorkspaceFileAccess;
 import com.servoy.eclipse.core.repository.DataModelManager;
 import com.servoy.eclipse.core.repository.EclipseMessages;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.core.repository.RepositoryAccessPoint;
 import com.servoy.eclipse.core.repository.RepositorySettingsDeserializer;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.eclipse.core.util.IServoyTeamProvider;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.team.subscriber.SolutionMergeContext;
 import com.servoy.eclipse.team.subscriber.SolutionResourceVariant;
@@ -100,7 +101,7 @@ import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
-public class ServoyTeamProvider extends RepositoryProvider
+public class ServoyTeamProvider extends RepositoryProvider implements IServoyTeamProvider
 {
 	private static File temporaryDirectory = null;
 
@@ -617,6 +618,8 @@ public class ServoyTeamProvider extends RepositoryProvider
 	{
 		Preferences store = Activator.getDefault().getPluginPreferences();
 		store.setDefault(PreferencesPage.AUTOMATIC_RESOURCE_UPDATE_ON_CHECKOUT_PROPERTY, true);
+		store.setDefault(PreferencesPage.AUTOMATIC_RESOURCE_SYNCH_PROPERTY, true);
+		store.setDefault(PreferencesPage.AUTOMATIC_MODULES_SYNCH_PROPERTY, true);
 		store.setDefault(PreferencesPage.TEMP_TEAM_DIRECTORY_PROPERTY, new File(System.getProperty("user.home"), ".tpdir").getPath());
 
 		IIgnoreInfo[] ignores = Team.getAllIgnores();
@@ -1070,5 +1073,15 @@ public class ServoyTeamProvider extends RepositoryProvider
 		sb.append(ServoyTeamProvider.RESOURCE_SUFFIX);
 
 		return sb.toString();
+	}
+
+	public boolean isAutomaticResourceSynch()
+	{
+		return PreferencesPage.isAutomaticResourceSynch();
+	}
+
+	public boolean isAutomaticModulesSynch()
+	{
+		return PreferencesPage.isAutomaticModulesSynch();
 	}
 }

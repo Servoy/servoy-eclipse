@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.util.ArrayList;
@@ -38,10 +38,10 @@ import com.servoy.eclipse.core.repository.EclipseMessages;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.core.repository.StringResourceDeserializer;
+import com.servoy.eclipse.core.util.IServoyTeamProvider;
 import com.servoy.eclipse.ui.actions.Openable;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.eclipse.ui.preferences.TeamPreferences;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Solution;
@@ -74,9 +74,9 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 					{
 						RepositoryProvider solutionRP = RepositoryProvider.getProvider(projectNature.getProject());
 
-						if (solutionRP != null)
+						if (solutionRP instanceof IServoyTeamProvider)
 						{
-							if (TeamPreferences.isAutomaticResourceSynch())
+							if (((IServoyTeamProvider)solutionRP).isAutomaticResourceSynch())
 							{
 								ServoyResourcesProject servoyResourcesProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 
@@ -88,7 +88,7 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 								}
 							}
 
-							if (TeamPreferences.isAutomaticModulesSynch())
+							if (((IServoyTeamProvider)solutionRP).isAutomaticModulesSynch())
 							{
 								ServoyProject[] servoyModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 
