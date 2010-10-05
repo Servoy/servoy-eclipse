@@ -30,6 +30,7 @@ import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.SnapToHelper;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -37,6 +38,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportAnchors;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.util.IAnchorConstants;
+import com.servoy.j2db.util.Settings;
 
 /**
  * Snap elements according to alignment with other elements or container borders.
@@ -46,16 +48,64 @@ import com.servoy.j2db.util.IAnchorConstants;
  */
 public class SnapToElementAlignment extends SnapToHelper
 {
-	public static final String ELEMENT_ALIGNMENT = "Element alignment";
+	/**
+	 * A viewer property indicating whether the snap function is enabled. The
+	 * value must  be a Boolean.
+	 */
+	public static final String PROPERTY_ALIGNMENT_ENABLED = "SnapToAlignment.isEnabled"; //$NON-NLS-1$
+
+	/**
+	 * Property set in the request extended data by the snap class, type will be  {@link ElementAlignmentItem[]}.
+	 */
+	public static final String ELEMENT_ALIGNMENT_REQUEST_DATA = "ElementAlignment.requestData"; //$NON-NLS-1$
+
 
 	private final GraphicalEditPart container;
+
+	private DesignerPreferences preferences;
+	private int snapThreshhold;
+	private int[] distances;
 
 	public SnapToElementAlignment(GraphicalEditPart container)
 	{
 		this.container = container;
 	}
 
-	public static ElementAlignmentItem[] getElementAlignment(GraphicalEditPart container, ChangeBoundsRequest request)
+	protected void readPreferences()
+	{
+		if (preferences == null)
+		{
+			preferences = new DesignerPreferences(Settings.getInstance());
+			snapThreshhold = preferences.getAlignmentThreshold();
+			distances = preferences.getAlignmentDistances();
+		}
+	}
+
+	protected int getSnapThreshold()
+	{
+		readPreferences();
+		return snapThreshhold;
+	}
+
+	protected int getSmallDistance()
+	{
+		readPreferences();
+		return distances[0];
+	}
+
+	protected int getMediumDistance()
+	{
+		readPreferences();
+		return distances[1];
+	}
+
+	protected int getLargeDistance()
+	{
+		readPreferences();
+		return distances[2];
+	}
+
+	protected ElementAlignmentItem[] getElementAlignment(GraphicalEditPart container, ChangeBoundsRequest request)
 	{
 		List<EditPart> editParts = request.getEditParts();
 		if (editParts.size() != 1 || !(editParts.get(0) instanceof GraphicalEditPart))
@@ -184,14 +234,14 @@ public class SnapToElementAlignment extends SnapToHelper
 		return new ElementAlignmentItem[] { horizontal, vertical };
 	}
 
-	private static ElementAlignmentItem getDistanceAlignmentItem(String alignDirection, ElementAlignmentItem item, int dragOffset, int offset, int start,
-		int end, boolean anchor)
+	protected ElementAlignmentItem getDistanceAlignmentItem(String alignDirection, ElementAlignmentItem item, int dragOffset, int offset, int start, int end,
+		boolean anchor)
 	{
 		int sign = (ElementAlignmentItem.ALIGN_DIRECTION_NORTH.equals(alignDirection) || ElementAlignmentItem.ALIGN_DIRECTION_WEST.equals(alignDirection)) ? 1
 			: -1;
-		int largeOffset = offset + (sign * 15);
-		int mediumOffset = offset + (sign * 10);
-		int smallOffset = offset + (sign * 5); // TODO: configurable in preferences
+		int largeOffset = offset + (sign * getLargeDistance());
+		int mediumOffset = offset + (sign * getMediumDistance());
+		int smallOffset = offset + (sign * getSmallDistance());
 
 
 		int largeDif = Math.abs(largeOffset - dragOffset);
@@ -220,7 +270,7 @@ public class SnapToElementAlignment extends SnapToHelper
 			alignType = ElementAlignmentItem.ALIGN_TYPE_DISTANCE_MEDIUM;
 		}
 
-		if (dif < (item == null ? 14 : item.distance)) // TODO: configurable in preferences
+		if (dif < (item == null ? getSnapThreshold() : item.distance))
 		{
 			// closer match
 			return new ElementAlignmentItem(alignDirection, alignType, alignOffset, dif, start, end, anchor);
@@ -237,11 +287,11 @@ public class SnapToElementAlignment extends SnapToHelper
 		return item;
 	}
 
-	private static ElementAlignmentItem getSideAlignmentItem(String alignDirection, ElementAlignmentItem item, int dragOffset, int offset, int start, int end,
+	protected ElementAlignmentItem getSideAlignmentItem(String alignDirection, ElementAlignmentItem item, int dragOffset, int offset, int start, int end,
 		boolean anchor)
 	{
 		int dif = Math.abs(offset - dragOffset);
-		if (dif < (item == null ? 14 : item.distance)) // TODO: configurable in preferences
+		if (dif < (item == null ? getSnapThreshold() : item.distance))
 		{
 			// closer match
 			return new ElementAlignmentItem(alignDirection, ElementAlignmentItem.ALIGN_TYPE_SIDE, offset, dif, start, end, anchor);
@@ -269,7 +319,7 @@ public class SnapToElementAlignment extends SnapToHelper
 		}
 
 		// store alignment info for feedback
-		request.getExtendedData().put(ELEMENT_ALIGNMENT, elementAlignment);
+		request.getExtendedData().put(ELEMENT_ALIGNMENT_REQUEST_DATA, elementAlignment);
 
 		PrecisionRectangle baseRectCopy = baseRect.getPreciseCopy();
 		container.getContentPane().translateToRelative(baseRectCopy);

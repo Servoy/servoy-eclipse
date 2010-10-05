@@ -23,6 +23,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
@@ -80,7 +81,9 @@ public class ActionToolItem extends ToolItem implements IPropertyChangeListener
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				ActionToolItem.this.action.run();
+				Event event = new Event();
+				event.widget = ActionToolItem.this;
+				ActionToolItem.this.action.runWithEvent(event);
 			}
 		});
 		setSelection(action.getStyle() == IAction.AS_CHECK_BOX ? action.isChecked() : action.isEnabled());

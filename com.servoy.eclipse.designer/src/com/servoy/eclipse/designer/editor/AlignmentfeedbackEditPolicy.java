@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.DragTracker;
@@ -32,6 +31,10 @@ import org.eclipse.gef.editpolicies.ResizableEditPolicy;
 import org.eclipse.gef.handles.ResizeHandle;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.tools.ResizeTracker;
+
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.resource.ColorResource;
+import com.servoy.j2db.util.Settings;
 
 /**
  * Edit policy for moving/resizing elements.
@@ -80,7 +83,7 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 
 	protected void showElementAlignmentFeedback(ChangeBoundsRequest request)
 	{
-		ElementAlignmentItem[] feedbackItems = (ElementAlignmentItem[])request.getExtendedData().get(SnapToElementAlignment.ELEMENT_ALIGNMENT);
+		ElementAlignmentItem[] feedbackItems = (ElementAlignmentItem[])request.getExtendedData().get(SnapToElementAlignment.ELEMENT_ALIGNMENT_REQUEST_DATA);
 
 		// remove old feedbacks
 		Iterator<Entry<ElementAlignmentItem, IFigure>> iterator = alignmentFeedbackFigures.entrySet().iterator();
@@ -132,7 +135,7 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 
 	protected IFigure createAlignmentFeedbackFigure(ElementAlignmentItem item)
 	{
-		IFigure figure = null;
+		AlignmentFeedbackFigure figure = null;
 		if (ElementAlignmentItem.ALIGN_TYPE_SIDE.equals(item.alignType))
 		{
 			figure = createSideAlignmentFeedbackFigure(item);
@@ -145,24 +148,26 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 
 		if (figure != null)
 		{
+			figure.setLineStyle(Graphics.LINE_CUSTOM);
+			figure.setLineDash(new float[] { 5, 2 });
+			figure.setForegroundColor(ColorResource.INSTANCE.getColor(new DesignerPreferences(Settings.getInstance()).getAlignmentGuideColor()));
 			addFeedback(figure);
 		}
 		return figure;
 	}
 
-	protected IFigure createSideAlignmentFeedbackFigure(ElementAlignmentItem item)
+	protected AlignmentFeedbackFigure createSideAlignmentFeedbackFigure(ElementAlignmentItem item)
 	{
 		AlignmentFeedbackFigure line = new AlignmentFeedbackFigure();
 
 		boolean horiozontal = ElementAlignmentItem.ALIGN_DIRECTION_NORTH.equals(item.alignDirection) ||
 			ElementAlignmentItem.ALIGN_DIRECTION_SOUTH.equals(item.alignDirection);
 		line.addLine(horiozontal, item.target, item.start - 5, item.end + 5);
-		line.setLineStyle(Graphics.LINE_SOLID);
-		line.setForegroundColor(ColorConstants.red);
+
 		return line;
 	}
 
-	protected IFigure createDistanceAlignmentFeedbackFigure(ElementAlignmentItem item)
+	protected AlignmentFeedbackFigure createDistanceAlignmentFeedbackFigure(ElementAlignmentItem item)
 	{
 		AlignmentFeedbackFigure figure = new AlignmentFeedbackFigure();
 
@@ -181,8 +186,6 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 			}
 		}
 
-		figure.setLineStyle(Graphics.LINE_SOLID);
-		figure.setForegroundColor(ColorConstants.red); // TODO: configurable in preferences
 		return figure;
 	}
 }

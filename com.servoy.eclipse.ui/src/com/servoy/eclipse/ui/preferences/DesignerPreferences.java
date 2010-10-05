@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.preferences;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,25 +46,35 @@ public class DesignerPreferences
 	public static final String METRICS_SETTING = "designer.preferdMetrics";
 	public static final String STEP_SIZE_SETTING = "designer.stepSize";
 	public static final String COPY_PASTE_OFFSET_SETTING = "copyPasteOffset";
+	public static final String ALIGNMENT_THRESHOLD_SETTING = "alignmentThreshold";
+	public static final String ALIGNMENT_DISTANCES_SETTING = "alignmentDistances";
 	public static final String GUIDE_SIZE_SETTING = "guidesize";
 	public static final String GRID_COLOR_SETTING = "gridcolor";
+	public static final String ALIGNMENT_GUIDE_COLOR_SETTING = "alignmentguidecolor";
 	public static final String GRID_SIZE_SETTING = "gridsize";
 	public static final String GRID_POINTSIZE_SETTING = "pointsize";
 	public static final String GRID_SHOW_SETTING = "showGrid";
-	public static final String GRID_SNAPTO_SETTING = "snapToGrid";
+	public static final String SNAPTO_SETTING = "snapTo";
 	public static final String SAVE_EDITOR_STATE_SETTING = "saveEditorState";
 	public static final String FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING = "formToolsOnMainToolbar";
 	public static final String FORM_COOLBAR_LAYOUT_SETTING = "formCoolBarLayout";
 
+	public static final String SNAP_TO_ALIGMNENT = "alignment";
+	public static final String SNAP_TO_GRID = "grid";
+	public static final String SNAP_TO_NONE = "none";
+
 	public static final int COPY_PASTE_OFFSET_DEFAULT = 10;
+	public static final int ALIGNMENT_THRESHOLD_DEFAULT = 24;
+	public static final int[] ALIGNMENT_DISTANCES_DEFAULT = { 6, 12, 18 }; // small, medium, large
 	public static final int STEP_SIZE_DEFAULT = 10;
 	public static final int LARGE_STEP_SIZE_DEFAULT = 20;
 	public static final int GUIDE_SIZE_DEFAULT = 10;
 	public static final int GRID_SIZE_DEFAULT = 10;
 	public static final String GRID_COLOR_DEFAULT = "#b4b4b4";
+	public static final String ALIGNMENT_GUIDE_COLOR_DEFAULT = "#8eacc3";
 	public static final int GRID_POINTSIZE_DEFAULT = 2;
-	public static final boolean GRID_SHOW_DEFAULT = true;
-	public static final boolean GRID_SNAPTO_DEFAULT = true;
+	public static final boolean GRID_SHOW_DEFAULT = false;
+	public static final String SNAPTO_DEFAULT = SNAP_TO_ALIGMNENT;
 	public static final boolean SAVE_EDITOR_STATE_DEFAULT = true;
 	public static final boolean FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT = true;
 	public static final int METRICS_DEFAULT = PX;
@@ -116,6 +127,42 @@ public class DesignerPreferences
 		settings.setProperty(COPY_PASTE_OFFSET_SETTING, String.valueOf(copyPasteOffset));
 	}
 
+	public int getAlignmentThreshold()
+	{
+		return Utils.getAsInteger(settings.getProperty(ALIGNMENT_THRESHOLD_SETTING, String.valueOf(ALIGNMENT_THRESHOLD_DEFAULT)));
+	}
+
+	public void setAlignmentThreshold(int alignmentThreshold)
+	{
+		settings.setProperty(ALIGNMENT_THRESHOLD_SETTING, String.valueOf(alignmentThreshold));
+	}
+
+	public int[] getAlignmentDistances()
+	{
+		String property = settings.getProperty(ALIGNMENT_DISTANCES_SETTING);
+		if (property == null)
+		{
+			return ALIGNMENT_DISTANCES_DEFAULT;
+		}
+		int[] distances = new int[3];
+		String[] nrs = property.split(":"); //$NON-NLS-1$
+		if (nrs.length != 3)
+		{
+			return ALIGNMENT_DISTANCES_DEFAULT;
+		}
+		distances[0] = Utils.getAsInteger(nrs[0]);
+		distances[1] = Utils.getAsInteger(nrs[1]);
+		distances[2] = Utils.getAsInteger(nrs[2]);
+		Arrays.sort(distances);
+		return distances;
+	}
+
+	public void setAlignmentDistances(int smallDistance, int mediumDistance, int largeDistance)
+	{
+		settings.setProperty(ALIGNMENT_DISTANCES_SETTING,
+			String.valueOf(smallDistance) + ':' + String.valueOf(mediumDistance) + ':' + String.valueOf(largeDistance));
+	}
+
 	public int getGuideSize()
 	{
 		return Utils.getAsInteger(settings.getProperty(GUIDE_SIZE_SETTING, String.valueOf(GUIDE_SIZE_DEFAULT)));
@@ -136,6 +183,18 @@ public class DesignerPreferences
 	{
 		settings.setProperty(GRID_COLOR_SETTING,
 			PersistHelper.createColorString(ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue("gridColor", rgb)));
+	}
+
+	public RGB getAlignmentGuideColor()
+	{
+		return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty("alignmentGuideColor",
+			PersistHelper.createColor(settings.getProperty(ALIGNMENT_GUIDE_COLOR_SETTING, ALIGNMENT_GUIDE_COLOR_DEFAULT)));
+	}
+
+	public void setAlignmentGuideColor(RGB rgb)
+	{
+		settings.setProperty(ALIGNMENT_GUIDE_COLOR_SETTING,
+			PersistHelper.createColorString(ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue("alignmentGuideColor", rgb)));
 	}
 
 	public int getGridSize()
@@ -170,12 +229,17 @@ public class DesignerPreferences
 
 	public boolean getGridSnapTo()
 	{
-		return Utils.getAsBoolean(settings.getProperty(GRID_SNAPTO_SETTING, String.valueOf(GRID_SNAPTO_DEFAULT)));
+		return SNAP_TO_GRID.equals(settings.getProperty(SNAPTO_SETTING, SNAPTO_DEFAULT));
 	}
 
-	public void setGridSnapTo(boolean gridSnapTo)
+	public boolean getAlignmentSnapTo()
 	{
-		settings.setProperty(GRID_SNAPTO_SETTING, String.valueOf(gridSnapTo));
+		return SNAP_TO_ALIGMNENT.equals(settings.getProperty(SNAPTO_SETTING, SNAPTO_DEFAULT));
+	}
+
+	public void setSnapTo(boolean grid, boolean alignment)
+	{
+		settings.setProperty(SNAPTO_SETTING, grid ? SNAP_TO_GRID : alignment ? SNAP_TO_ALIGMNENT : SNAP_TO_NONE);
 	}
 
 	public boolean getSaveEditorState()

@@ -192,31 +192,31 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 			{
 				// The GEF implementation of SnapToGrid adds one extra pixel when the components are snapped to EAST or SOUTH.
 				// We do a correction in order to remove that extra 1px.
-				if (false)
+				return new SnapToGrid(this)
 				{
-					return new SnapToGrid(this)
+					@Override
+					public int snapRectangle(Request request, int snapLocations, org.eclipse.draw2d.geometry.PrecisionRectangle rect,
+						org.eclipse.draw2d.geometry.PrecisionRectangle result)
 					{
-						@Override
-						public int snapRectangle(Request request, int snapLocations, org.eclipse.draw2d.geometry.PrecisionRectangle rect,
-							org.eclipse.draw2d.geometry.PrecisionRectangle result)
+						int alteredSnapLocations = super.snapRectangle(request, snapLocations, rect, result);
+						boolean changed = false;
+						if ((gridX > 0) && ((snapLocations & EAST) != 0) && ((alteredSnapLocations & EAST) == 0))
 						{
-							int alteredSnapLocations = super.snapRectangle(request, snapLocations, rect, result);
-							boolean changed = false;
-							if ((gridX > 0) && ((snapLocations & EAST) != 0) && ((alteredSnapLocations & EAST) == 0))
-							{
-								result.preciseWidth -= Math.IEEEremainder(rect.preciseWidth + result.preciseWidth, gridX);
-								changed = true;
-							}
-							if ((gridY > 0) && ((snapLocations & SOUTH) != 0) && ((alteredSnapLocations & SOUTH) == 0))
-							{
-								result.preciseHeight -= Math.IEEEremainder(rect.preciseHeight + result.preciseHeight, gridY);
-								changed = true;
-							}
-							if (changed) result.updateInts();
-							return alteredSnapLocations;
+							result.preciseWidth -= Math.IEEEremainder(rect.preciseWidth + result.preciseWidth, gridX);
+							changed = true;
 						}
-					};
-				}
+						if ((gridY > 0) && ((snapLocations & SOUTH) != 0) && ((alteredSnapLocations & SOUTH) == 0))
+						{
+							result.preciseHeight -= Math.IEEEremainder(rect.preciseHeight + result.preciseHeight, gridY);
+							changed = true;
+						}
+						if (changed) result.updateInts();
+						return alteredSnapLocations;
+					}
+				};
+			}
+			if (Boolean.TRUE.equals(getViewer().getProperty(SnapToElementAlignment.PROPERTY_ALIGNMENT_ENABLED)))
+			{
 				return new SnapToElementAlignment(this);
 			}
 		}

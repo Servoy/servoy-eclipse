@@ -90,12 +90,12 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate;
+import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate.IActionAddedListener;
 import com.servoy.eclipse.designer.actions.AlignmentSortPartsAction;
 import com.servoy.eclipse.designer.actions.DistributeAction;
 import com.servoy.eclipse.designer.actions.DistributeRequest;
+import com.servoy.eclipse.designer.actions.SelectSnapmodeAction;
 import com.servoy.eclipse.designer.actions.ToggleShowGridAction;
-import com.servoy.eclipse.designer.actions.ToggleSnapToGridAction;
-import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate.IActionAddedListener;
 import com.servoy.eclipse.designer.dnd.FormElementTransferDropTarget;
 import com.servoy.eclipse.designer.editor.commands.BringToFrontAction;
 import com.servoy.eclipse.designer.editor.commands.CopyAction;
@@ -469,9 +469,10 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		viewer.setContextMenu(cmProvider);
 		getSite().registerContextMenu(cmProvider, viewer);
 
-		DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
+		DesignerPreferences designerPreferences = new DesignerPreferences(Settings.getInstance());
 		viewer.setProperty(SnapToGrid.PROPERTY_GRID_VISIBLE, Boolean.valueOf(designerPreferences.getGridShow()));
 		viewer.setProperty(SnapToGrid.PROPERTY_GRID_ENABLED, Boolean.valueOf(designerPreferences.getGridSnapTo()));
+		viewer.setProperty(SnapToElementAlignment.PROPERTY_ALIGNMENT_ENABLED, Boolean.valueOf(designerPreferences.getAlignmentSnapTo()));
 
 		// Show rulers
 		refreshRulers();
@@ -479,12 +480,11 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		Action action = new ToggleShowGridAction(viewer);
 		getActionRegistry().registerAction(action);
 
-
-		action = new ToggleSnapToGridAction(viewer);
+		action = new SelectSnapmodeAction(viewer);
 		getActionRegistry().registerAction(action);
 
 		addToolbarAction(COOLBAR_TOGGLE, getActionRegistry().getAction(DesignerActionFactory.TOGGLE_SHOW_GRID.getId()));
-		addToolbarAction(COOLBAR_TOGGLE, getActionRegistry().getAction(DesignerActionFactory.TOGGLE_SNAPTO_GRID.getId()));
+		addToolbarAction(COOLBAR_TOGGLE, getActionRegistry().getAction(DesignerActionFactory.SELECT_SNAPMODE.getId()));
 
 		refreshToolBars();
 	}

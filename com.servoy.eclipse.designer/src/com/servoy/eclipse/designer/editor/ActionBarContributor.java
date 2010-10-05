@@ -69,7 +69,7 @@ public class ActionBarContributor extends org.eclipse.gef.ui.actions.ActionBarCo
 		addMyAction(DesignerActionFactory.GROUP.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
 		addMyAction(DesignerActionFactory.UNGROUP.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
 		addMyAction(DesignerActionFactory.TOGGLE_SHOW_GRID.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
-		addMyAction(DesignerActionFactory.TOGGLE_SNAPTO_GRID.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
+		addMyAction(DesignerActionFactory.SELECT_SNAPMODE.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
 		addMyAction(new AlignmentRetargetAction(PositionConstants.LEFT), formToolsInFormWindow);
 		addMyAction(new AlignmentRetargetAction(PositionConstants.RIGHT), formToolsInFormWindow);
 		addMyAction(new AlignmentRetargetAction(PositionConstants.TOP), formToolsInFormWindow);

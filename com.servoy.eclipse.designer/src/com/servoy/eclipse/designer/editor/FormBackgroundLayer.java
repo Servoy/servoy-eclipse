@@ -29,12 +29,12 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.property.ColorPropertyController;
+import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.Form;
@@ -106,14 +106,14 @@ public class FormBackgroundLayer extends FreeformLayer
 					}
 					else
 					{
-						formBg = new Color(Display.getDefault(), ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty("background", awtBg));
+						formBg = ColorResource.INSTANCE.getColor(ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty("background", awtBg));
 					}
 				}
 				bg = formBg;
 			}
 			else
 			{
-				bg = new Color(Display.getDefault(), ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty("background", part.getBackground()));
+				bg = ColorResource.INSTANCE.getColor(ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty("background", part.getBackground()));
 			}
 
 			graphics.setBackgroundColor(bg);

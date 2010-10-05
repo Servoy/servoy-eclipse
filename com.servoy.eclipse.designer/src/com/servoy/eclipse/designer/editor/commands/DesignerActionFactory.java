@@ -103,10 +103,10 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
-	public static final String TOGGLE_SNAPTO_GRID_TEXT = "Toggle snap-to-grid";
-	public static final String TOGGLE_SNAPTO_GRID_TOOLTIP = "Snap to grid";
-	public static final ImageDescriptor TOGGLE_SNAPTO_GRID_IMAGE = Activator.loadImageDescriptorFromOldLocations("snaptogrid.gif");//$NON-NLS-1$
-	public static final ActionFactory TOGGLE_SNAPTO_GRID = new ActionFactory("toggle-snapto-grid") {//$NON-NLS-1$
+	public static final String SELECT_SNAPMODE_TEXT = "Select snap mode";
+	public static final String SELECT_SNAPMODE_TOOLTIP = SELECT_SNAPMODE_TEXT;
+	public static final ImageDescriptor SELECT_SNAPTMODE_IMAGE = Activator.loadImageDescriptorFromOldLocations("snaptogrid.gif");//$NON-NLS-1$
+	public static final ActionFactory SELECT_SNAPMODE = new ActionFactory("select-snapmode") {//$NON-NLS-1$
 
 		@Override
 		public IWorkbenchAction create(IWorkbenchWindow window)
@@ -115,11 +115,11 @@ public abstract class DesignerActionFactory extends ActionFactory
 			{
 				throw new IllegalArgumentException();
 			}
-			RetargetAction action = new RetargetAction(getId(), TOGGLE_SNAPTO_GRID_TEXT, IAction.AS_CHECK_BOX);
-			action.setToolTipText(TOGGLE_SNAPTO_GRID_TOOLTIP);
+			RetargetAction action = new RetargetAction(getId(), SELECT_SNAPMODE_TEXT, IAction.AS_DROP_DOWN_MENU);
+			action.setToolTipText(SELECT_SNAPMODE_TOOLTIP);
 			window.getPartService().addPartListener(action);
 //			action.setActionDefinitionId("org.eclipse.ui.edit." + getId()); //$NON-NLS-1$
-			action.setImageDescriptor(TOGGLE_SNAPTO_GRID_IMAGE);
+			action.setImageDescriptor(SELECT_SNAPTMODE_IMAGE);
 			return action;
 		}
 	};

@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 
@@ -21,10 +21,10 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.editparts.GridLayer;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.persistence.Form;
 
 /**
@@ -51,12 +51,12 @@ public class DottedGridLayer extends GridLayer
 		java.awt.Dimension size = flattenedForm.getSize();
 		if (size == null) return;
 
-		DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModelManager.getServoyModelManager().getServoyModel().getSettings());
+		DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
 		g.pushState();
 		try
 		{
 			g.setClip(new Rectangle(origin.x, origin.y, size.width, size.height));
-			Color color = new Color(Display.getCurrent(), designerPreferences.getGridColor());
+			Color color = ColorResource.INSTANCE.getColor(designerPreferences.getGridColor());
 			g.setForegroundColor(color);
 			g.setBackgroundColor(color);
 			int gridSize = designerPreferences.getGridSize();
