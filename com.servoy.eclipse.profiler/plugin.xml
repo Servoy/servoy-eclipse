@@ -24,16 +24,6 @@
                relative="org.eclipse.ui.console.ConsoleView"
                visible="true">
          </view>
-      </perspectiveExtension>
-      <perspectiveExtension
-            targetID="com.servoy.eclipse.ui.DesignPerspective">
-         <view
-               id="com.servoy.eclipse.uicom.servoy.eclipse.profiler.views.ProfilerView"
-               minimized="false"
-               relationship="stack"
-               relative="org.eclipse.ui.console.ConsoleView"
-               visible="true">
-         </view>
          <viewShortcut
                id="com.servoy.eclipse.uicom.servoy.eclipse.profiler.views.ProfilerView">
          </viewShortcut>
