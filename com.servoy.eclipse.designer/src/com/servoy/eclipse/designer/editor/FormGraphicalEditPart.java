@@ -18,6 +18,7 @@ package com.servoy.eclipse.designer.editor;
 
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -106,7 +107,17 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 						}
 						else if (o instanceof Portal)
 						{
-							subElements = ((Portal)o).getAllObjects();
+							subElements = ((Portal)o).getAllObjects(new Comparator<IPersist>()
+							{
+								public int compare(IPersist persist1, IPersist persist2)
+								{
+									if (persist1 instanceof IFormElement && persist2 instanceof IFormElement)
+									{
+										return ((IFormElement)persist1).getFormIndex() - ((IFormElement)persist2).getFormIndex();
+									}
+									return 0;
+								}
+							});
 						}
 						while (subElements != null && subElements.hasNext())
 						{
