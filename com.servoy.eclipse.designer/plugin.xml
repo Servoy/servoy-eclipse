@@ -271,15 +271,15 @@
       </actionSet>
        <actionSet
             id="com.servoy.eclipse.designer.open_actions"
-            label="Open Form Designer"
+            label="Open Form Editor"
             visible="true">
          <action
                class="com.servoy.eclipse.designer.actions.OpenFormInDesignerActionDelegate"
                id="com.servoy.eclipse.designer.command.showDesigner"
                definitionId="com.servoy.eclipse.designer.command.showDesigner"
-               label="Open form in designer"
+               label="Open in Form Editor"
                style="push"
-               tooltip="Open form in designer">
+               tooltip="Open in Form Editor">
          </action>
       </actionSet>
    </extension>
@@ -432,9 +432,9 @@
             name="Servoy">
       </category>
       <command
-          description="Show Form in Designer"
+          description="Show form in Form Editor"
           id="com.servoy.eclipse.designer.command.showDesigner"
-          name="Show Form in Designer">
+          name="Show form in Form Editor">
        </command>
    </extension>
       <extension
@@ -458,11 +458,11 @@
                enablesFor="1"
                icon="icons/designer.gif"
                id="com.servoy.eclipse.designer.OpenFormDesignerAction"
-               label="Open in form designer"
+               label="Open in Form Editor"
                menubarPath="open.ext"
                state="false"
                style="push"
-               tooltip="Open in form designer">
+               tooltip="Open in Form Editor">
          </action>
          <visibility>
             <objectClass

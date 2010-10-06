@@ -348,9 +348,9 @@
                class="com.servoy.eclipse.ui.actions.OpenFormInScripteditorActionDelegate"
                id="com.servoy.eclipse.ui.openFormInJs"
                definitionId="com.servoy.eclipse.ui.OpenFormJsAction"
-               label="Open form in script editor"
+               label="Open form in Script Editor"
                style="radio"
-               tooltip="Open form in script editor">
+               tooltip="Open form in Script Editor">
          </action>
          <action
                class="com.servoy.eclipse.ui.actions.OpenFormInClientActionDelegate"
@@ -486,9 +486,9 @@
         </command>
         <command
               categoryId="com.servoy.eclipse.ui"
-              description="Open form in script editor"
+              description="Open form in Script Editor"
               id="com.servoy.eclipse.ui.OpenFormJsAction"
-              name="Open form in script editor">
+              name="Open form in Script Editor">
         </command>
         <command
               categoryId="com.servoy.eclipse.ui"
@@ -576,9 +576,11 @@
          <action
                class="com.servoy.eclipse.ui.actions.ShowDesignerAction"
                definitionId="com.servoy.eclipse.designer.command.showDesigner"
+               icon="icons/designer.gif"
                id="com.servoy.eclipse.ui.javascript.showDesigner"
-               label="Open form in designer"
-               menubarPath="additions">
+               label="Open in Form Editor"
+               menubarPath="open.ext"
+               tooltip="Open in Form Editor">
          </action>
       </viewerContribution>
        <objectContribution
@@ -591,11 +593,11 @@
                enablesFor="1"
                icon="icons/js.gif"
                id="com.servoy.eclipse.ui.OpenFormJsAction"
-               label="Open in script editor"
+               label="Open in Script Editor"
                menubarPath="open.ext"
                state="false"
                style="push"
-               tooltip="Open form in script editor">
+               tooltip="Open form in Script Editor">
          </action>
          <visibility>
             <or>

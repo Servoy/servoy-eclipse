@@ -34,6 +34,8 @@ import com.servoy.eclipse.ui.Activator;
 public abstract class DesignerActionFactory extends ActionFactory
 {
 	public static final String GROUP_ANCHORING = "group.anchoring";
+	public static final String GROUP_Z_ORDER = "group.z.order";
+	public static final String GROUP_GROUPING = "group.grouping";
 
 	protected DesignerActionFactory(String actionId)
 	{

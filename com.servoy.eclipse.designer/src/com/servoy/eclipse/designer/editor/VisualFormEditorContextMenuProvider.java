@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 import org.eclipse.gef.ContextMenuProvider;
@@ -62,32 +62,35 @@ class VisualFormEditorContextMenuProvider extends ContextMenuProvider
 	@Override
 	public void buildContextMenu(IMenuManager menu)
 	{
-		// Add standard action groups to the menu
-		GEFActionConstants.addStandardActionGroups(menu);
-		menu.add(new Separator(IWorkbenchActionConstants.GROUP_REORGANIZE));
+		// Add standard action groups to the menu, but in the order we want to.
+		menu.add(new Separator(GEFActionConstants.GROUP_UNDO));
+		menu.add(new Separator(GEFActionConstants.GROUP_COPY));
+		menu.add(new Separator(DesignerActionFactory.GROUP_Z_ORDER));
+		menu.add(new Separator(DesignerActionFactory.GROUP_GROUPING));
 		menu.add(new Separator(DesignerActionFactory.GROUP_ANCHORING));
+		menu.add(new Separator(GEFActionConstants.GROUP_REST));
+		menu.add(new Separator(IWorkbenchActionConstants.SAVE_EXT));
 		// Placeholder for contributions from other plugins
-		menu.add(new Separator(IWorkbenchActionConstants.OPEN_EXT));
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+		menu.add(new Separator(IWorkbenchActionConstants.OPEN_EXT));
 
 		// Add actions to the menu
-		menu.appendToGroup(GEFActionConstants.GROUP_UNDO, // target group id
-			actionRegistry.getAction(ActionFactory.UNDO.getId())); // action to add
+		menu.appendToGroup(GEFActionConstants.GROUP_UNDO, actionRegistry.getAction(ActionFactory.UNDO.getId()));
 		menu.appendToGroup(GEFActionConstants.GROUP_UNDO, actionRegistry.getAction(ActionFactory.REDO.getId()));
 		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.CUT.getId()));
 		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.COPY.getId()));
 		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.PASTE.getId()));
-		menu.appendToGroup(GEFActionConstants.GROUP_EDIT, actionRegistry.getAction(ActionFactory.DELETE.getId()));
-		menu.appendToGroup(IWorkbenchActionConstants.GROUP_REORGANIZE, actionRegistry.getAction(DesignerActionFactory.BRING_TO_FRONT.getId()));
-		menu.appendToGroup(IWorkbenchActionConstants.GROUP_REORGANIZE, actionRegistry.getAction(DesignerActionFactory.SEND_TO_BACK.getId()));
-		menu.appendToGroup(IWorkbenchActionConstants.GROUP_REORGANIZE, actionRegistry.getAction(DesignerActionFactory.SET_TAB_SEQUENCE.getId()));
-		menu.appendToGroup(IWorkbenchActionConstants.GROUP_REORGANIZE, actionRegistry.getAction(DesignerActionFactory.GROUP.getId()));
-		menu.appendToGroup(IWorkbenchActionConstants.GROUP_REORGANIZE, actionRegistry.getAction(DesignerActionFactory.UNGROUP.getId()));
-		menu.appendToGroup(IWorkbenchActionConstants.GROUP_REORGANIZE, actionRegistry.getAction(DesignerActionFactory.SAVE_AS_TEMPLATE.getId()));
+		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.DELETE.getId()));
+		menu.appendToGroup(DesignerActionFactory.GROUP_Z_ORDER, actionRegistry.getAction(DesignerActionFactory.BRING_TO_FRONT.getId()));
+		menu.appendToGroup(DesignerActionFactory.GROUP_Z_ORDER, actionRegistry.getAction(DesignerActionFactory.SEND_TO_BACK.getId()));
+		menu.appendToGroup(DesignerActionFactory.GROUP_GROUPING, actionRegistry.getAction(DesignerActionFactory.GROUP.getId()));
+		menu.appendToGroup(DesignerActionFactory.GROUP_GROUPING, actionRegistry.getAction(DesignerActionFactory.UNGROUP.getId()));
 		menu.appendToGroup(DesignerActionFactory.GROUP_ANCHORING, actionRegistry.getAction(DesignerActionFactory.ANCHOR_TOP_TOGGLE.getId()));
 		menu.appendToGroup(DesignerActionFactory.GROUP_ANCHORING, actionRegistry.getAction(DesignerActionFactory.ANCHOR_RIGHT_TOGGLE.getId()));
 		menu.appendToGroup(DesignerActionFactory.GROUP_ANCHORING, actionRegistry.getAction(DesignerActionFactory.ANCHOR_BOTTOM_TOGGLE.getId()));
 		menu.appendToGroup(DesignerActionFactory.GROUP_ANCHORING, actionRegistry.getAction(DesignerActionFactory.ANCHOR_LEFT_TOGGLE.getId()));
+		menu.appendToGroup(IWorkbenchActionConstants.SAVE_EXT, actionRegistry.getAction(DesignerActionFactory.SAVE_AS_TEMPLATE.getId()));
+		menu.appendToGroup(GEFActionConstants.GROUP_REST, actionRegistry.getAction(DesignerActionFactory.SET_TAB_SEQUENCE.getId()));
 	}
 
 }

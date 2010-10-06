@@ -53,7 +53,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	{
 	}
 
-	private static final String STEP_SIZE_TOOLTIPTEXT = "Shortcuts for moving elements in form designer:\n" + //
+	private static final String STEP_SIZE_TOOLTIPTEXT = "Shortcuts for moving elements in Form Editor:\n" + //
 		"\tMove:\n" + //
 		"\t\t* 1px: Just Arrow\n" + //
 		"\t\t* Small step: Ctrl-Arrows\n" + //
