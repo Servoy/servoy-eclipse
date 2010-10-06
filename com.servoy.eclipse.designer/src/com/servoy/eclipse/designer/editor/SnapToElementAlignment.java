@@ -65,6 +65,7 @@ public class SnapToElementAlignment extends SnapToHelper
 	private DesignerPreferences preferences;
 	private int snapThreshhold;
 	private int[] distances;
+	private boolean setAnchor;
 
 	public SnapToElementAlignment(GraphicalEditPart container)
 	{
@@ -78,6 +79,7 @@ public class SnapToElementAlignment extends SnapToHelper
 			preferences = new DesignerPreferences(Settings.getInstance());
 			snapThreshhold = preferences.getAlignmentThreshold();
 			distances = preferences.getAlignmentDistances();
+			setAnchor = preferences.getAnchor();
 		}
 	}
 
@@ -105,6 +107,12 @@ public class SnapToElementAlignment extends SnapToHelper
 		return distances[2];
 	}
 
+	protected boolean setAnchor()
+	{
+		readPreferences();
+		return setAnchor;
+	}
+
 	protected ElementAlignmentItem[] getElementAlignment(GraphicalEditPart container, ChangeBoundsRequest request)
 	{
 		List<EditPart> editParts = request.getEditParts();
@@ -130,14 +138,14 @@ public class SnapToElementAlignment extends SnapToHelper
 			if (RequestConstants.REQ_MOVE.equals(request.getType()) ||
 				(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.NORTH) != 0))
 			{
-				vertical = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, vertical, rect.y, 0, 10, form.getWidth() - 10, true);
+				vertical = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, vertical, rect.y, 0, 10, form.getWidth() - 10, setAnchor());
 			}
 
 			// Alignment: West to container
 			if (RequestConstants.REQ_MOVE.equals(request.getType()) ||
 				(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.WEST) != 0))
 			{
-				horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x, 0, 10, form.getWidth() - 10, true);
+				horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x, 0, 10, form.getWidth() - 10, setAnchor());
 			}
 
 			// Alignment: East to container
@@ -145,7 +153,7 @@ public class SnapToElementAlignment extends SnapToHelper
 				(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.EAST) != 0))
 			{
 				horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, horizontal, rect.x + rect.width, form.getWidth(), 10,
-					form.getSize().height - 10, true);
+					form.getSize().height - 10, setAnchor());
 			}
 		}
 
@@ -159,14 +167,16 @@ public class SnapToElementAlignment extends SnapToHelper
 
 			Object elementModel = child.getModel();
 			int anchors = 0;
-			if ((elementModel instanceof ISupportAnchors))
+			if (setAnchor() && elementModel instanceof ISupportAnchors)
 			{
 				anchors = ((ISupportAnchors)elementModel).getAnchors();
 				if (anchors == 0) anchors = IAnchorConstants.DEFAULT;
 				else if (anchors == -1) anchors = 0;
 			}
 
-			Rectangle childBounds = ((GraphicalEditPart)child).getFigure().getBounds();
+			// align against bounds of child figure or part line
+			Rectangle childBounds = (elementModel instanceof Part) ? new Rectangle(10, ((Part)elementModel).getHeight(), form.getWidth() - 20, 0)
+				: ((GraphicalEditPart)child).getFigure().getBounds();
 
 			// Alignment: North to element
 			if (RequestConstants.REQ_MOVE.equals(request.getType()) ||

@@ -55,6 +55,7 @@ public class DesignerPreferences
 	public static final String GRID_POINTSIZE_SETTING = "pointsize";
 	public static final String GRID_SHOW_SETTING = "showGrid";
 	public static final String SNAPTO_SETTING = "snapTo";
+	public static final String ANCHOR_SETTING = "anchor";
 	public static final String SAVE_EDITOR_STATE_SETTING = "saveEditorState";
 	public static final String FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING = "formToolsOnMainToolbar";
 	public static final String FORM_COOLBAR_LAYOUT_SETTING = "formCoolBarLayout";
@@ -64,8 +65,8 @@ public class DesignerPreferences
 	public static final String SNAP_TO_NONE = "none";
 
 	public static final int COPY_PASTE_OFFSET_DEFAULT = 10;
-	public static final int ALIGNMENT_THRESHOLD_DEFAULT = 24;
-	public static final int[] ALIGNMENT_DISTANCES_DEFAULT = { 6, 12, 18 }; // small, medium, large
+	public static final int ALIGNMENT_THRESHOLD_DEFAULT = 12;
+	public static final int[] ALIGNMENT_DISTANCES_DEFAULT = { 5, 10, 15 }; // small, medium, large
 	public static final int STEP_SIZE_DEFAULT = 10;
 	public static final int LARGE_STEP_SIZE_DEFAULT = 20;
 	public static final int GUIDE_SIZE_DEFAULT = 10;
@@ -75,6 +76,7 @@ public class DesignerPreferences
 	public static final int GRID_POINTSIZE_DEFAULT = 2;
 	public static final boolean GRID_SHOW_DEFAULT = false;
 	public static final String SNAPTO_DEFAULT = SNAP_TO_ALIGMNENT;
+	public static final boolean ANCHOR_DEFAULT = false;
 	public static final boolean SAVE_EDITOR_STATE_DEFAULT = true;
 	public static final boolean FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT = true;
 	public static final int METRICS_DEFAULT = PX;
@@ -161,6 +163,16 @@ public class DesignerPreferences
 	{
 		settings.setProperty(ALIGNMENT_DISTANCES_SETTING,
 			String.valueOf(smallDistance) + ':' + String.valueOf(mediumDistance) + ':' + String.valueOf(largeDistance));
+	}
+
+	public boolean getAnchor()
+	{
+		return Utils.getAsBoolean(settings.getProperty(ANCHOR_SETTING, String.valueOf(ANCHOR_DEFAULT)));
+	}
+
+	public void setAnchor(boolean anchor)
+	{
+		settings.setProperty(ANCHOR_SETTING, String.valueOf(anchor));
 	}
 
 	public int getGuideSize()

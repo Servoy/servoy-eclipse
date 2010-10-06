@@ -74,6 +74,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	private ComboViewer metricsCombo;
 	private Button gridShowButton;
 	private Button snapToGridCheck;
+	private Button anchorCheck;
 	private Button saveEditorStateButton;
 	private Button toolbarsInFormWindowButton;
 	private Button snapToAlignmentCheck;
@@ -228,14 +229,14 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		alignmentGuidecolorSelectViewer = new ColorSelectViewer(composite, 0);
 		Control control = alignmentGuidecolorSelectViewer.getControl();
-		control.setBounds(335, 85, 59, 20);
+		control.setBounds(434, 85, 59, 20);
 
 		Label lblGuideColor = new Label(composite, SWT.NONE);
 		lblGuideColor.setText("guide color");
-		lblGuideColor.setBounds(408, 85, 67, 20);
+		lblGuideColor.setBounds(507, 85, 67, 20);
 
 		alignmentThresholdSpinner = new Spinner(composite, SWT.BORDER);
-		alignmentThresholdSpinner.setBounds(204, 82, 60, 20);
+		alignmentThresholdSpinner.setBounds(303, 82, 60, 20);
 
 		alignmentSmallDistanceSpinner = new Spinner(composite, SWT.BORDER);
 		alignmentSmallDistanceSpinner.setBounds(109, 111, 60, 20);
@@ -247,7 +248,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		alignmentLargeDistanceSpinner.setBounds(303, 111, 60, 20);
 
 		Label lblThreshold = new Label(composite, SWT.NONE);
-		lblThreshold.setBounds(270, 85, 59, 14);
+		lblThreshold.setBounds(369, 85, 59, 14);
 		lblThreshold.setText("threshold");
 
 		Label lblOffsets = new Label(composite, SWT.NONE);
@@ -260,6 +261,10 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		copyPasteOffsetSpinner = new Spinner(composite, SWT.BORDER);
 		copyPasteOffsetSpinner.setValues(0, 0, 100, 0, 1, 5);
 		copyPasteOffsetSpinner.setBounds(109, 182, 60, 20);
+
+		anchorCheck = new Button(composite, SWT.CHECK);
+		anchorCheck.setBounds(200, 79, 80, 26);
+		anchorCheck.setText("anchor");
 
 		initializeFields();
 
@@ -282,6 +287,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		guideSizeSpinner.setSelection(prefs.getGuideSize());
 		copyPasteOffsetSpinner.setSelection(prefs.getCopyPasteOffset());
 		alignmentThresholdSpinner.setSelection(prefs.getAlignmentThreshold());
+		anchorCheck.setSelection(prefs.getAnchor());
 		int[] distances = prefs.getAlignmentDistances();
 		alignmentSmallDistanceSpinner.setSelection(distances[0]);
 		alignmentMediumDistanceSpinner.setSelection(distances[1]);
@@ -302,6 +308,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		prefs.setAlignmentGuideColor((RGB)((IStructuredSelection)alignmentGuidecolorSelectViewer.getSelection()).getFirstElement());
 		prefs.setGridShow(gridShowButton.getSelection());
 		prefs.setSnapTo(snapToGridCheck.getSelection(), snapToAlignmentCheck.getSelection());
+		prefs.setAnchor(anchorCheck.getSelection());
 		prefs.setSaveEditorState(saveEditorStateButton.getSelection());
 		prefs.setFormToolsOnMainToolbar(toolbarsInFormWindowButton.getSelection());
 		prefs.setGuideSize(guideSizeSpinner.getSelection());
@@ -327,6 +334,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		guideSizeSpinner.setSelection(DesignerPreferences.GUIDE_SIZE_DEFAULT);
 		gridShowButton.setSelection(DesignerPreferences.GRID_SHOW_DEFAULT);
 		snapToGridCheck.setSelection(DesignerPreferences.SNAPTO_DEFAULT.equals(DesignerPreferences.SNAP_TO_GRID));
+		anchorCheck.setSelection(DesignerPreferences.ANCHOR_DEFAULT);
 		snapToAlignmentCheck.setSelection(DesignerPreferences.SNAPTO_DEFAULT.equals(DesignerPreferences.SNAP_TO_ALIGMNENT));
 		saveEditorStateButton.setSelection(DesignerPreferences.SAVE_EDITOR_STATE_DEFAULT);
 		toolbarsInFormWindowButton.setSelection(DesignerPreferences.FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT);

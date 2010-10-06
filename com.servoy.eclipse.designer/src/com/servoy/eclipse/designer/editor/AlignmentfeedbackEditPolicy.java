@@ -176,14 +176,31 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 		int sign = ElementAlignmentItem.ALIGN_DIRECTION_NORTH.equals(item.alignDirection) ||
 			ElementAlignmentItem.ALIGN_DIRECTION_WEST.equals(item.alignDirection) ? -1 : 1;
 
+		// snapped-to line
 		figure.addLine(horiozontal, item.target, item.start - 5, item.end + 5);
-		if (ElementAlignmentItem.ALIGN_TYPE_DISTANCE_LARGE.equals(item.alignType) || ElementAlignmentItem.ALIGN_TYPE_DISTANCE_MEDIUM.equals(item.alignType))
+
+		int[] alignmentDistances = new DesignerPreferences(Settings.getInstance()).getAlignmentDistances();
+		int mediumDiff = 0;
+		int smallDiff = 0;
+		if (ElementAlignmentItem.ALIGN_TYPE_DISTANCE_LARGE.equals(item.alignType))
 		{
-			figure.addLine(horiozontal, item.target + (sign * 5), item.start - 5, item.end + 5); // TODO: configurabe in preferences
-			if (ElementAlignmentItem.ALIGN_TYPE_DISTANCE_LARGE.equals(item.alignType))
-			{
-				figure.addLine(horiozontal, item.target + (sign * 10), item.start - 5, item.end + 5);
-			}
+			mediumDiff = alignmentDistances[2 /* large */] - alignmentDistances[1/* medium */];
+			smallDiff = alignmentDistances[2/* large */] - alignmentDistances[0/* small */];
+		}
+		else if (ElementAlignmentItem.ALIGN_TYPE_DISTANCE_MEDIUM.equals(item.alignType))
+		{
+			smallDiff = alignmentDistances[1/* medium */] - alignmentDistances[0/* small */];
+		}
+
+		if (mediumDiff > 0)
+		{
+			// add line for medium distance
+			figure.addLine(horiozontal, item.target + sign * mediumDiff, item.start - 5, item.end + 5);
+		}
+		if (smallDiff > 0)
+		{
+			// add line for small distance
+			figure.addLine(horiozontal, item.target + sign * smallDiff, item.start - 5, item.end + 5);
 		}
 
 		return figure;
