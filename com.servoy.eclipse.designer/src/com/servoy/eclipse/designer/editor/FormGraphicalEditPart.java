@@ -13,11 +13,12 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Point;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -106,7 +108,17 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 						}
 						else if (o instanceof Portal)
 						{
-							subElements = ((Portal)o).getAllObjects();
+							subElements = ((Portal)o).getAllObjects(new Comparator<IPersist>()
+							{
+								public int compare(IPersist persist1, IPersist persist2)
+								{
+									if (persist1 instanceof IFormElement && persist2 instanceof IFormElement)
+									{
+										return ((IFormElement)persist1).getFormIndex() - ((IFormElement)persist2).getFormIndex();
+									}
+									return 0;
+								}
+							});
 						}
 						while (subElements != null && subElements.hasNext())
 						{
@@ -223,7 +235,8 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 	{
 		if (snapToGridIFieldPositioner == null)
 		{
-			DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModelManager.getServoyModelManager().getServoyModel().getSettings());
+			ServoyModelManager.getServoyModelManager().getServoyModel();
+			DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
 			snapToGridIFieldPositioner = new SnapToGridFieldPositioner(designerPreferences)
 			{
 				@Override
