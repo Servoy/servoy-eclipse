@@ -37,6 +37,8 @@ public class MarkerMessages
 	// Seems to be superseded by the Marker_Form_Solution_PropertyTargetNotFound family of messages.
 	public static String Marker_PropertyFormCannotBeInstantiated = "Property \"{0}\" refers to a form that cannot be instantiated."; //$NON-NLS-1$
 	public static String Marker_PropertyMultipleMethodOnSameElement = "Element \"{0}\" has the same method attached to multiple events/commands."; //$NON-NLS-1$
+	public static String Marker_PropertyMultipleMethodOnSameTable = "Table \"{0}\" has the same method attached to multiple events."; //$NON-NLS-1$
+
 	// Not sure in which conditions the valuelist returns an invalid type, because the type is calculated
 	// and not stored.
 	public static String Marker_Valuelist_TypeUnknown = "Valuelist \"{0}\" has unknown type: {1}."; //$NON-NLS-1$
@@ -229,6 +231,9 @@ public class MarkerMessages
 
 	public static String Marker_Form_FormatInvalid = "Element in form \"{0}\" has invalid format: \"{1}\"."; //$NON-NLS-1$
 	public static String Marker_Form_FormatOnElementInvalid = "Element \"{0}\" in form \"{1}\" has invalid format: \"{2}\"."; //$NON-NLS-1$
+
+	public static String Marker_Form_FormatIncompatible = "Element in form \"{0}\" has incompatible format with its data type (Text) : \"{1}\"."; //$NON-NLS-1$
+	public static String Marker_Form_FormatOnElementIncompatible = "Element \"{0}\" in form \"{1}\" has incompatible format with its data type (Text): \"{2}\"."; //$NON-NLS-1$
 
 	/**
 	 * The dataprovider used by an element cannot be found. This can happen for example if the structure of a database is changed and columns are deleted or renamed.

@@ -737,6 +737,17 @@
 			id="com.servoy.eclipse.core.cssprofile.servoy">
 		</profile>
 	</extension>
+   <extension
+         id="com.servoy.eclipse.core.multipleMethodsInfo"
+         name="Multiple Methods Info"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+   </extension>
    
    
 </plugin>

@@ -267,9 +267,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String MISSING_STYLE = Activator.PLUGIN_ID + ".missingStyle"; //$NON-NLS-1$
 	public static final String I18N_MARKER_TYPE = Activator.PLUGIN_ID + ".i18nProblem"; //$NON-NLS-1$
 	public static final String COLUMN_MARKER_TYPE = Activator.PLUGIN_ID + ".columnProblem"; //$NON-NLS-1$
-	public static final String INVALID_EVENT_METHOD = Activator.PLUGIN_ID + ".invalidEventMethod";
+	public static final String INVALID_EVENT_METHOD = Activator.PLUGIN_ID + ".invalidEventMethod"; //$NON-NLS-1$
 	public static final String DEPRECATED_PROPERTY_USAGE = Activator.PLUGIN_ID + ".deprecatedPropertyUsage"; //$NON-NLS-1$
 	public static final String FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION = Activator.PLUGIN_ID + ".formWithDatasourceInLoginSolution"; //$NON-NLS-1$
+	public static final String MULTIPLE_METHODS_ON_SAME_ELEMENT = Activator.PLUGIN_ID + ".multipleMethodsInfo"; //$NON-NLS-1$
 
 	private SAXParserFactory parserFactory;
 	private final HashSet<String> referencedProjectsSet = new HashSet<String>();
@@ -947,6 +948,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE);
 		deleteMarkers(project, INVALID_EVENT_METHOD);
 		deleteMarkers(project, DEPRECATED_PROPERTY_USAGE);
+		deleteMarkers(project, MULTIPLE_METHODS_ON_SAME_ELEMENT);
 
 		final ServoyProject servoyProject = getServoyProject(project);
 		boolean active = isActiveSolutionOrModule(servoyProject);
@@ -1164,14 +1166,22 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										{
 											if (methodsReferences.containsKey(foundPersist))
 											{
-												if (methodsReferences.get(foundPersist))
+												if (methodsReferences.get(foundPersist).booleanValue())
 												{
 													String elementName = "";
-													if (o instanceof ISupportName && (((ISupportName)o).getName() != null)) elementName = ((ISupportName)o).getName();
-													methodsReferences.put(foundPersist, false);
-													String msg = MarkerMessages.getMessage(MarkerMessages.Marker_PropertyMultipleMethodOnSameElement,
-														elementName);
-													addMarker(project, SOLUTION_PROBLEM_MARKER_TYPE, msg, -1, IMarker.SEVERITY_INFO, IMarker.PRIORITY_LOW,
+													String msg = null;
+													if (o instanceof ISupportName && (((ISupportName)o).getName() != null))
+													{
+														elementName = ((ISupportName)o).getName();
+														msg = MarkerMessages.getMessage(MarkerMessages.Marker_PropertyMultipleMethodOnSameElement, elementName);
+													}
+													else if (o instanceof TableNode)
+													{
+														elementName = ((TableNode)o).getTableName();
+														msg = MarkerMessages.getMessage(MarkerMessages.Marker_PropertyMultipleMethodOnSameTable, elementName);
+													}
+													methodsReferences.put(foundPersist, Boolean.FALSE);
+													addMarker(project, MULTIPLE_METHODS_ON_SAME_ELEMENT, msg, -1, IMarker.SEVERITY_INFO, IMarker.PRIORITY_LOW,
 														null, o);
 												}
 											}
@@ -1292,11 +1302,22 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 															}
 															else if (dataType == IColumnTypes.TEXT)
 															{
-																if (displayFormat.contains("0") || displayFormat.contains(".") || displayFormat.contains(",") ||
-																	displayFormat.contains("#"))
+																if (displayFormat.contains("0") || displayFormat.contains(".") || displayFormat.contains(",")) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 																{
 																	// this is probably a number or date format
-																	addMarker = true;
+																	String msg = null;
+																	if (elementName == null)
+																	{
+																		msg = MarkerMessages.getMessage(MarkerMessages.Marker_Form_FormatIncompatible, inForm,
+																			field.getFormat());
+																	}
+																	else
+																	{
+																		msg = MarkerMessages.getMessage(MarkerMessages.Marker_Form_FormatOnElementIncompatible,
+																			elementName, inForm, field.getFormat());
+																	}
+																	addMarker(project, PROJECT_FORM_MARKER_TYPE, msg, -1, IMarker.SEVERITY_WARNING,
+																		IMarker.PRIORITY_NORMAL, null, o);
 																}
 															}
 														}
