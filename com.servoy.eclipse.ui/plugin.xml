@@ -15,6 +15,13 @@
             class="com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView"
             id="com.servoy.eclipse.ui.views.SolutionExplorerView">
       </view>
+      <view
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.views.ServoyWebBrowserView"
+            icon="icons/globe.gif"
+            id="com.servoy.eclipse.ui.browser.view"
+            name="Servoy News">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -772,5 +779,11 @@
             categoryId="com.servoy.eclipse.activities.categories.wst">
       </categoryActivityBinding>
    </extension>
-   
+   <extension point="org.eclipse.help.base.browser">
+      <browser 
+      		id="org.eclipse.myPlugin.myBrowserID" 
+      		factoryClass="org.eclipse.help.ui.internal.browser.embedded.EmbeddedBrowserFactory" 
+      		name="My Browser">
+      </browser>
+   </extension>
 </plugin>

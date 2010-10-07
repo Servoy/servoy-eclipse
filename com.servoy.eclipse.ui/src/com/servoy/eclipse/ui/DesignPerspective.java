@@ -36,6 +36,7 @@ import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.registry.ActionSetRegistry;
 import org.eclipse.ui.internal.registry.IActionSetDescriptor;
 
+import com.servoy.eclipse.ui.views.ServoyWebBrowserView;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.wizards.NewFormWizard;
 import com.servoy.eclipse.ui.wizards.NewMethodWizard;
@@ -57,6 +58,7 @@ public class DesignPerspective implements IPerspectiveFactory
 		String editorArea = layout.getEditorArea();
 		IFolderLayout left = layout.createFolder("left", IPageLayout.LEFT, 0.21f, editorArea);
 		left.addView(SolutionExplorerView.PART_ID);
+		left.addView(ServoyWebBrowserView.ID);
 //		left.addView(IPageLayout.ID_RES_NAV);//move to synchronize perspective only
 
 		IFolderLayout right = layout.createFolder("right", IPageLayout.RIGHT, 0.8f, editorArea);

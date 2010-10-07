@@ -36,10 +36,13 @@ public class FirstContactCheatSheetListener extends CheatSheetListener
 		if (event.getEventType() == ICheatSheetEvent.CHEATSHEET_CLOSED)
 		{
 			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-			for (IViewReference vw : page.getViewReferences())
-				page.setPartState(vw, IWorkbenchPage.STATE_RESTORED);
-			for (IEditorReference ed : page.getEditorReferences())
-				page.setPartState(ed, IWorkbenchPage.STATE_RESTORED);
+			if (page != null)
+			{
+				for (IViewReference vw : page.getViewReferences())
+					page.setPartState(vw, IWorkbenchPage.STATE_RESTORED);
+				for (IEditorReference ed : page.getEditorReferences())
+					page.setPartState(ed, IWorkbenchPage.STATE_RESTORED);
+			}
 		}
 	}
 }
