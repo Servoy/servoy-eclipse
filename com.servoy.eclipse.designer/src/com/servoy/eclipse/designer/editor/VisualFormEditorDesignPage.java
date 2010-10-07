@@ -599,7 +599,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	{
 		if (!toolbarCoolItems.containsKey(bar))
 		{
-			ToolBarManager toolBarManager = new ToolBarManager(SWT.NONE);
+			ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
 			CoolItem item = new CoolItem(coolBar, SWT.NONE);
 			ToolBar toolBar = toolBarManager.createControl(coolBar);
 			item.setControl(toolBar);
