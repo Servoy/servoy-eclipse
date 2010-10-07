@@ -33,8 +33,6 @@ import org.eclipse.gef.requests.ChangeBoundsRequest;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportAnchors;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.util.IAnchorConstants;
@@ -130,8 +128,8 @@ public class SnapToElementAlignment extends SnapToHelper
 		ElementAlignmentItem vertical = null;
 		ElementAlignmentItem horizontal = null;
 
-		Object model = editPart.getModel();
-		Form form = (Form)((model instanceof IPersist) ? ((IPersist)model).getAncestor(IRepository.FORMS) : null);
+		EditPart parentEditPart = editPart.getParent();
+		Form form = (Form)((parentEditPart.getModel() instanceof Form) ? parentEditPart.getModel() : null);
 		if (form != null)
 		{
 			// Alignment: North to container
@@ -187,8 +185,8 @@ public class SnapToElementAlignment extends SnapToHelper
 					childBounds.width, (anchors & IAnchorConstants.NORTH) != 0);
 				// distance to bottom-top
 				vertical = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, vertical, rect.y, childBounds.y + childBounds.height,
-					childBounds.x, childBounds.x + childBounds.width, elementModel instanceof Part ||
-						((anchors & IAnchorConstants.NORTH) != 0 && (anchors & IAnchorConstants.SOUTH) == 0));
+					childBounds.x, childBounds.x + childBounds.width, setAnchor() &&
+						(elementModel instanceof Part || ((anchors & IAnchorConstants.NORTH) != 0 && (anchors & IAnchorConstants.SOUTH) == 0)));
 			}
 
 			// Alignment: South to element
@@ -200,8 +198,8 @@ public class SnapToElementAlignment extends SnapToHelper
 					childBounds.x, childBounds.x + childBounds.width, (anchors & IAnchorConstants.SOUTH) != 0);
 				// distance to top-bottom
 				vertical = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, vertical, rect.y + rect.height, childBounds.y, childBounds.x,
-					childBounds.x + childBounds.width, elementModel instanceof Part ||
-						((anchors & IAnchorConstants.SOUTH) != 0 && (anchors & IAnchorConstants.NORTH) == 0));
+					childBounds.x + childBounds.width, setAnchor() &&
+						(elementModel instanceof Part || ((anchors & IAnchorConstants.SOUTH) != 0 && (anchors & IAnchorConstants.NORTH) == 0)));
 			}
 
 			// Alignment: West to element
