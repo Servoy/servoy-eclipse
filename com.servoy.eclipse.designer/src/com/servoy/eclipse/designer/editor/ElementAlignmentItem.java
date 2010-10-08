@@ -40,15 +40,15 @@ public class ElementAlignmentItem
 	public final int start;
 	public final int end;
 	public final int target;
-	public final int distance;
+	public final int delta;
 	public final boolean anchor;
 
-	public ElementAlignmentItem(String alignDirection, String alignType, int target, int distance, int start, int end, boolean anchor)
+	public ElementAlignmentItem(String alignDirection, String alignType, int target, int delta, int start, int end, boolean anchor)
 	{
 		this.alignDirection = alignDirection;
 		this.alignType = alignType;
 		this.target = target;
-		this.distance = distance;
+		this.delta = delta;
 		this.start = start;
 		this.end = end;
 		this.anchor = anchor;
@@ -62,7 +62,7 @@ public class ElementAlignmentItem
 		result = prime * result + ((alignDirection == null) ? 0 : alignDirection.hashCode());
 		result = prime * result + ((alignType == null) ? 0 : alignType.hashCode());
 		result = prime * result + (anchor ? 1231 : 1237);
-		result = prime * result + distance;
+		result = prime * result + delta;
 		result = prime * result + end;
 		result = prime * result + start;
 		result = prime * result + target;
@@ -87,7 +87,7 @@ public class ElementAlignmentItem
 		}
 		else if (!alignType.equals(other.alignType)) return false;
 		if (anchor != other.anchor) return false;
-		if (distance != other.distance) return false;
+		if (delta != other.delta) return false;
 		if (end != other.end) return false;
 		if (start != other.start) return false;
 		if (target != other.target) return false;
@@ -98,7 +98,8 @@ public class ElementAlignmentItem
 	public String toString()
 	{
 		return "ElementAlignmentItem [alignDirection=" + alignDirection + ", alignType=" + alignType + ", start=" + start + ", end=" + end + ", target=" +
-			target + ", distance=" + distance + ", anchor=" + anchor + "]";
+			target + ", delta=" + delta + ", anchor=" + anchor + "]";
 	}
+
 
 }
