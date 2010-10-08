@@ -278,12 +278,6 @@
       </page>
       <page
             category="com.servoy.eclipse.ui.preference"
-            class="com.servoy.eclipse.ui.preferences.DeveloperPreferencePage"
-            id="com.servoy.eclipse.ui.developer"
-            name="Developer">
-      </page>
-      <page
-            category="com.servoy.eclipse.ui.preference"
             class="com.servoy.eclipse.ui.preferences.SolutionExplorerPreferences"
             id="com.servoy.eclipse.ui.solutionExplorer"
             name="Solution Explorer">

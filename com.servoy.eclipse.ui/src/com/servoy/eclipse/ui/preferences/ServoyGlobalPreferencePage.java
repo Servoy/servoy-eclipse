@@ -13,54 +13,107 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.preferences;
 
-import org.eclipse.dltk.ui.preferences.AbstractConfigurationBlockPreferencePage;
-import org.eclipse.dltk.ui.preferences.IPreferenceConfigurationBlock;
-import org.eclipse.dltk.ui.preferences.OverlayPreferenceStore;
+import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPreferencePage;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.j2db.debug.DeveloperPreferences;
 
-public class ServoyGlobalPreferencePage extends AbstractConfigurationBlockPreferencePage
+/**
+ * Main preference page for Servoy settings.
+ * 
+ * @author rgansevles
+ *
+ */
+public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkbenchPreferencePage
 {
+	private Label enhancedSecurityLabel;
+	private Button changeButton;
 
 	public ServoyGlobalPreferencePage()
 	{
 	}
 
-	@Override
-	protected IPreferenceConfigurationBlock createConfigurationBlock(OverlayPreferenceStore overlayPreferenceStore)
-	{
-		return new ServoyGlobalConfigurationBlock(overlayPreferenceStore, this);
-	}
-
-	/**
-	 * @see org.eclipse.dltk.ui.preferences.AbstractConfigurationBlockPreferencePage#getHelpId()
+	/*
+	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */
-	@Override
-	protected String getHelpId()
+	public void init(IWorkbench workbench)
 	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * @see org.eclipse.dltk.ui.preferences.AbstractConfigurationBlockPreferencePage#setDescription()
-	 */
-	@Override
-	protected void setDescription()
-	{
+		/*
+		 * delay setup until here so sub-classes implementing the IExecutableExtension can look up the plugin specific preference store
+		 */
 		setDescription("Servoy Preferences");
-
+		setPreferenceStore(Activator.getDefault().getPreferenceStore());
 	}
 
-	/**
-	 * @see org.eclipse.dltk.ui.preferences.AbstractConfigurationBlockPreferencePage#setPreferenceStore()
-	 */
 	@Override
-	protected void setPreferenceStore()
+	protected Control createContents(Composite parent)
 	{
-		setPreferenceStore(Activator.getDefault().getPreferenceStore());
+		initializeDialogUnits(parent);
+
+		Composite composite = new Composite(parent, SWT.NONE);
+
+		// GridLayout
+		GridLayout layout = new GridLayout();
+		layout.numColumns = 2;
+		composite.setLayout(layout);
+
+		// GridData
+		GridData data = new GridData();
+		data.verticalAlignment = GridData.FILL;
+		data.horizontalAlignment = GridData.FILL;
+		composite.setLayoutData(data);
+
+		enhancedSecurityLabel = new Label(composite, SWT.NONE);
+		enhancedSecurityLabel.setText("loading...");
+
+		changeButton = new Button(composite, SWT.NONE);
+		changeButton.setText("Change");
+		changeButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				new DeveloperPreferences(ServoyModel.getSettings()).setEnhancedSecurity(true);
+				initializeFields();
+			}
+		});
+
+		initializeFields();
+
+		noDefaultAndApplyButton();
+
+		return composite;
+	}
+
+	protected void initializeFields()
+	{
+		if (new DeveloperPreferences(ServoyModel.getSettings()).getEnhancedSecurity())
+		{
+			enhancedSecurityLabel.setText("Servoy Application Server is running with Enhanced Security");
+			enhancedSecurityLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+			changeButton.setVisible(false);
+		}
+		else
+		{
+			enhancedSecurityLabel.setText("Servoy Application Server NOT is running with Enhanced Security, this is strongly discouraged");
+			enhancedSecurityLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
+			changeButton.setVisible(true);
+		}
 	}
 }
