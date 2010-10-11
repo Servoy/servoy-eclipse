@@ -200,8 +200,8 @@ public class SnapToElementAlignment extends SnapToHelper
 				(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.NORTH) != 0))
 			{
 				// align on top
-				vertical = getSideAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, vertical, rect.y, childBounds.y, childBounds.x, childBounds.x +
-					childBounds.width, (anchors & IAnchorConstants.NORTH) != 0);
+				vertical = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_NORTH, vertical, rect.y,
+					childBounds.y, childBounds.x, childBounds.x + childBounds.width, (anchors & IAnchorConstants.NORTH) != 0);
 				// distance to bottom-top
 				vertical = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, vertical, rect.y, childBounds.y + childBounds.height,
 					childBounds.x, childBounds.x + childBounds.width, getSetAnchor() &&
@@ -213,8 +213,8 @@ public class SnapToElementAlignment extends SnapToHelper
 				(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.SOUTH) != 0))
 			{
 				// align on bottom
-				vertical = getSideAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, vertical, rect.y + rect.height, childBounds.y + childBounds.height,
-					childBounds.x, childBounds.x + childBounds.width, (anchors & IAnchorConstants.SOUTH) != 0);
+				vertical = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, vertical, rect.y +
+					rect.height, childBounds.y + childBounds.height, childBounds.x, childBounds.x + childBounds.width, (anchors & IAnchorConstants.SOUTH) != 0);
 				// distance to top-bottom
 				vertical = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, vertical, rect.y + rect.height, childBounds.y, childBounds.x,
 					childBounds.x + childBounds.width, getSetAnchor() &&
@@ -228,13 +228,13 @@ public class SnapToElementAlignment extends SnapToHelper
 				// indent to element, only on left side and below element
 				if (rect.y > childBounds.y)
 				{
-					horizontal = getSideAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x, childBounds.x + getIndent(),
-						childBounds.y + childBounds.height + 5, rect.y + rect.height - 5, (anchors & IAnchorConstants.WEST) != 0);
+					horizontal = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_INDENT, ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x,
+						childBounds.x + getIndent(), childBounds.y + childBounds.height, rect.y, (anchors & IAnchorConstants.WEST) != 0);
 				}
 
 				// align left
-				horizontal = getSideAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x, childBounds.x, childBounds.y, childBounds.y +
-					childBounds.height, (anchors & IAnchorConstants.WEST) != 0);
+				horizontal = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x,
+					childBounds.x, childBounds.y, childBounds.y + childBounds.height, (anchors & IAnchorConstants.WEST) != 0);
 				// distance to right-left
 				horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x, childBounds.x + childBounds.width,
 					childBounds.y, childBounds.y + childBounds.height, (anchors & IAnchorConstants.WEST) != 0 && (anchors & IAnchorConstants.EAST) == 0);
@@ -245,8 +245,8 @@ public class SnapToElementAlignment extends SnapToHelper
 				(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.EAST) != 0))
 			{
 				// align on right
-				horizontal = getSideAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, horizontal, rect.x + rect.width,
-					childBounds.x + childBounds.width, childBounds.y, childBounds.y + childBounds.height, (anchors & IAnchorConstants.EAST) != 0);
+				horizontal = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_EAST, horizontal, rect.x +
+					rect.width, childBounds.x + childBounds.width, childBounds.y, childBounds.y + childBounds.height, (anchors & IAnchorConstants.EAST) != 0);
 				// distance to left-right
 				horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, horizontal, rect.x + rect.width, childBounds.x, childBounds.y,
 					childBounds.y + childBounds.height, (anchors & IAnchorConstants.EAST) != 0 && (anchors & IAnchorConstants.WEST) == 0);
@@ -324,21 +324,21 @@ public class SnapToElementAlignment extends SnapToHelper
 		return item;
 	}
 
-	protected ElementAlignmentItem getSideAlignmentItem(String alignDirection, ElementAlignmentItem item, int dragOffset, int offset, int start, int end,
-		boolean anchor)
+	protected ElementAlignmentItem getSideAlignmentItem(String alignType, String alignDirection, ElementAlignmentItem item, int dragOffset, int offset,
+		int start, int end, boolean anchor)
 	{
 		int delta = offset - dragOffset;
 		if (Math.abs(delta) < (item == null ? getSnapThreshold() : Math.abs(item.delta)))
 		{
 			// closer match
-			return new ElementAlignmentItem(alignDirection, ElementAlignmentItem.ALIGN_TYPE_SIDE, offset, delta, start, end, anchor);
+			return new ElementAlignmentItem(alignDirection, alignType, offset, delta, start, end, anchor);
 		}
 
-		if (item != null && offset == item.target && delta == item.delta && ElementAlignmentItem.ALIGN_TYPE_SIDE.equals(item.alignType))
+		if (item != null && offset == item.target && delta == item.delta && alignType.equals(item.alignType))
 		{
 			// same match, extend start+end
-			return new ElementAlignmentItem(alignDirection, ElementAlignmentItem.ALIGN_TYPE_SIDE, offset, delta, Math.min(item.start, start), Math.max(
-				item.end, end), anchor || item.anchor);
+			return new ElementAlignmentItem(alignDirection, alignType, offset, delta, Math.min(item.start, start), Math.max(item.end, end), anchor ||
+				item.anchor);
 		}
 
 		// no better match, keep existing

@@ -31,6 +31,7 @@ public class ElementAlignmentItem
 	public static final String ALIGN_DIRECTION_SOUTH = "south";
 
 	public static final String ALIGN_TYPE_SIDE = "side";
+	public static final String ALIGN_TYPE_INDENT = "indent";
 	public static final String ALIGN_TYPE_DISTANCE_LARGE = "large distance";
 	public static final String ALIGN_TYPE_DISTANCE_MEDIUM = "medium distance";
 	public static final String ALIGN_TYPE_DISTANCE_SMALL = "small distance";

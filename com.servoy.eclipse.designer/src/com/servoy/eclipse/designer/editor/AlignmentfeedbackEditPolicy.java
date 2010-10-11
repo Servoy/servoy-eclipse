@@ -140,6 +140,10 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 		{
 			figure = createSideAlignmentFeedbackFigure(item);
 		}
+		else if (ElementAlignmentItem.ALIGN_TYPE_INDENT.equals(item.alignType))
+		{
+			figure = createIndentAlignmentFeedbackFigure(item);
+		}
 		else if (ElementAlignmentItem.ALIGN_TYPE_DISTANCE_LARGE.equals(item.alignType) ||
 			ElementAlignmentItem.ALIGN_TYPE_DISTANCE_MEDIUM.equals(item.alignType) || ElementAlignmentItem.ALIGN_TYPE_DISTANCE_SMALL.equals(item.alignType))
 		{
@@ -163,6 +167,19 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 		boolean horiozontal = ElementAlignmentItem.ALIGN_DIRECTION_NORTH.equals(item.alignDirection) ||
 			ElementAlignmentItem.ALIGN_DIRECTION_SOUTH.equals(item.alignDirection);
 		line.addLine(horiozontal, item.target, item.start - 5, item.end + 5);
+
+		return line;
+	}
+
+	protected AlignmentFeedbackFigure createIndentAlignmentFeedbackFigure(ElementAlignmentItem item)
+	{
+		AlignmentFeedbackFigure line = new AlignmentFeedbackFigure();
+
+		int indent = new DesignerPreferences(Settings.getInstance()).getAlignmentIndent();
+
+		line.addLine(false, item.target, item.start - 5, item.end + 50);
+		line.addLine(false, item.target - indent, item.start - 50, item.end + 5);
+		// horizontal line confuses with other horizontal feedback // 	line.addLine(true, item.end, item.target - indent - 10, item.target + 50);
 
 		return line;
 	}
