@@ -80,6 +80,7 @@ import com.servoy.j2db.smart.J2DBClient;
 import com.servoy.j2db.smart.dataui.SwingItemFactory;
 import com.servoy.j2db.ui.ItemFactory;
 import com.servoy.j2db.util.ITaskExecuter;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Settings;
@@ -104,6 +105,7 @@ public class DesignApplication implements IApplication, IMessagesCallback
 	private PageFormat pageFormat;
 	private IBeanManager beanManager;
 	private ClientPluginAccessProvider pluginAccess;
+	private Pair<String, String> trackingInfo;
 
 	DesignApplication()
 	{
@@ -881,6 +883,22 @@ public class DesignApplication implements IApplication, IMessagesCallback
 	public JSWindowManager getJSWindowManager()
 	{
 		return getClient().getJSWindowManager();
+	}
+
+	/**
+	 * @see com.servoy.j2db.IServiceProvider#setTrackingInfo(com.servoy.j2db.util.Pair)
+	 */
+	public void setTrackingInfo(Pair<String, String> trackingInfo)
+	{
+		this.trackingInfo = trackingInfo;
+	}
+
+	/**
+	 * @see com.servoy.j2db.IServiceProvider#getTrackingInfo()
+	 */
+	public Pair<String, String> getTrackingInfo()
+	{
+		return trackingInfo;
 	}
 
 }
