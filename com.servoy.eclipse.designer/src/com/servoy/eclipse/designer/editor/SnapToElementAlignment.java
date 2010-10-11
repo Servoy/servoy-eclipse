@@ -229,7 +229,7 @@ public class SnapToElementAlignment extends SnapToHelper
 			if (RequestConstants.REQ_MOVE.equals(request.getType()) ||
 				(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.EAST) != 0))
 			{
-				// align on left
+				// align on right
 				horizontal = getSideAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, horizontal, rect.x + rect.width,
 					childBounds.x + childBounds.width, childBounds.y, childBounds.y + childBounds.height, (anchors & IAnchorConstants.EAST) != 0);
 				// distance to left-right
@@ -319,7 +319,7 @@ public class SnapToElementAlignment extends SnapToHelper
 			return new ElementAlignmentItem(alignDirection, ElementAlignmentItem.ALIGN_TYPE_SIDE, offset, delta, start, end, anchor);
 		}
 
-		if (item != null && delta == item.delta && ElementAlignmentItem.ALIGN_TYPE_SIDE.equals(item.alignType))
+		if (item != null && offset == item.target && delta == item.delta && ElementAlignmentItem.ALIGN_TYPE_SIDE.equals(item.alignType))
 		{
 			// same match, extend start+end
 			return new ElementAlignmentItem(alignDirection, ElementAlignmentItem.ALIGN_TYPE_SIDE, offset, delta, Math.min(item.start, start), Math.max(
@@ -329,7 +329,6 @@ public class SnapToElementAlignment extends SnapToHelper
 		// no better match, keep existing
 		return item;
 	}
-
 
 	@Override
 	public int snapRectangle(Request request, int snapOrientation, PrecisionRectangle baseRect, PrecisionRectangle result)
