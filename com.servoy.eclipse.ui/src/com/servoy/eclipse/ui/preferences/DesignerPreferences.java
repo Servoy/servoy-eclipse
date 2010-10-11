@@ -251,6 +251,11 @@ public class DesignerPreferences
 		settings.setProperty(GRID_SHOW_SETTING, String.valueOf(gridShow));
 	}
 
+	public boolean getNoneSnapTo()
+	{
+		return !getGridSnapTo() && !getAlignmentSnapTo();
+	}
+
 	public boolean getGridSnapTo()
 	{
 		return SNAP_TO_GRID.equals(settings.getProperty(SNAPTO_SETTING, SNAPTO_DEFAULT));

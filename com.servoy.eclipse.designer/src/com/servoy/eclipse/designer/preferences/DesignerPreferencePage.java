@@ -27,8 +27,10 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.ui.IWorkbench;
@@ -53,16 +55,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	{
 	}
 
-	private static final String STEP_SIZE_TOOLTIPTEXT = "Shortcuts for moving elements in Form Editor:\n" + //
-		"\tMove:\n" + //
-		"\t\t* 1px: Just Arrow\n" + //
-		"\t\t* Small step: Ctrl-Arrows\n" + //
-		"\t\t* Large step: Ctrl-Alt-Arrows\n" + //
-		"\tResize:\n" + //
-		"\t\t* 1px: Shift-Arrows\n" + //
-		"\t\t* Small step: Ctrl-Shift-Arrows\n" + //
-		"\t\t* Large step: Alt-Shift-Arrows";
-
 	private Spinner gridSizeSpinner;
 	private Spinner gridPointsizeSpinner;
 	private ColorSelectViewer gridColorViewer;
@@ -73,16 +65,17 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	private Spinner largeStepSizeSpinner;
 	private ComboViewer metricsCombo;
 	private Button gridShowButton;
-	private Button snapToGridCheck;
+	private Button snapToGridRadio;
 	private Button anchorCheck;
 	private Button saveEditorStateButton;
 	private Button toolbarsInFormWindowButton;
-	private Button snapToAlignmentCheck;
+	private Button snapToAlignmentRadio;
 	private Spinner alignmentThresholdSpinner;
 	private Spinner alignmentIndentSpinner;
 	private Spinner alignmentSmallDistanceSpinner;
 	private Spinner alignmentMediumDistanceSpinner;
 	private Spinner alignmentLargeDistanceSpinner;
+	private Button snapToNoneRadio;
 
 
 	public void init(IWorkbench workbench)
@@ -99,103 +92,42 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 
 		metricsCombo = new ComboViewer(composite);
+		Combo combo = metricsCombo.getCombo();
+		combo.setBounds(109, 72, 125, 23);
 		metricsCombo.setContentProvider(new ArrayContentProvider());
 		metricsCombo.setLabelProvider(new LabelProvider());
 		metricsCombo.setInput(new ObjectWrapper[] { new ObjectWrapper("pixels", new Integer(DesignerPreferences.PX)), new ObjectWrapper("centimeters",
 			new Integer(DesignerPreferences.CM)), new ObjectWrapper("inches", new Integer(DesignerPreferences.IN)) });
-		Control metricsControl;
-		metricsControl = metricsCombo.getControl();
-		metricsControl.setBounds(109, 243, 100, 21);
-
-		Label gridSizeLabel = new Label(composite, SWT.NONE);
-		gridSizeLabel.setText("Grid");
-		gridSizeLabel.setBounds(0, 13, 80, 20);
-
-		Label gridPointSizeLabel = new Label(composite, SWT.NONE);
-		gridPointSizeLabel.setText("point size");
-		gridPointSizeLabel.setBounds(303, 48, 59, 20);
-
-		Label guideSizeLabel = new Label(composite, SWT.NONE);
-		guideSizeLabel.setText("Guide size");
-		guideSizeLabel.setBounds(0, 156, 88, 20);
 
 		Label copypasteOffsetLabel = new Label(composite, SWT.NONE);
 		copypasteOffsetLabel.setText("Copy/Paste offset");
-		copypasteOffsetLabel.setBounds(0, 182, 107, 20);
-
-		Label stepsizeLabel = new Label(composite, SWT.NONE);
-		stepsizeLabel.setText("Stepsize");
-		stepsizeLabel.setToolTipText(STEP_SIZE_TOOLTIPTEXT);
-		stepsizeLabel.setBounds(0, 208, 88, 20);
-
-		Label gridColorLabel = new Label(composite, SWT.NONE);
-		gridColorLabel.setText("color");
-		gridColorLabel.setBounds(336, 13, 59, 20);
+		copypasteOffsetLabel.setBounds(0, 51, 107, 20);
 
 		Label metricsLabel = new Label(composite, SWT.NONE);
-		metricsLabel.setText("Metrics");
-		metricsLabel.setBounds(0, 245, 80, 20);
+		metricsLabel.setText("Ruler Metrics");
+		metricsLabel.setBounds(0, 75, 80, 20);
 
-		stepSizeSpinner = new Spinner(composite, SWT.BORDER);
-		stepSizeSpinner.setValues(0, 1, 100, 0, 1, 5);
-		stepSizeSpinner.setToolTipText(STEP_SIZE_TOOLTIPTEXT);
-		stepSizeSpinner.setBounds(109, 208, 60, 20);
-
-		largeStepSizeSpinner = new Spinner(composite, SWT.BORDER);
-		largeStepSizeSpinner.setValues(0, 1, 100, 0, 1, 5);
-		largeStepSizeSpinner.setToolTipText(STEP_SIZE_TOOLTIPTEXT);
-		largeStepSizeSpinner.setBounds(204, 205, 60, 20);
-
-		guideSizeSpinner = new Spinner(composite, SWT.BORDER);
-		guideSizeSpinner.setValues(0, 3, 100, 0, 5, 20);
-		guideSizeSpinner.setBounds(109, 153, 60, 20);
-
-		gridColorViewer = new ColorSelectViewer(composite, SWT.NONE);
-		Control gridColorControl = gridColorViewer.getControl();
-		gridColorControl.setBounds(270, 13, 60, 20);
-
-		gridSizeSpinner = new Spinner(composite, SWT.BORDER);
-		gridSizeSpinner.setValues(0, 3, 100, 0, 5, 20);
-		gridSizeSpinner.setBounds(109, 45, 60, 20);
-
-		gridShowButton = new Button(composite, SWT.CHECK);
-		gridShowButton.setText("show");
-		gridShowButton.setBounds(194, 7, 80, 26);
-
-		Label gridDefaultLabel = new Label(composite, SWT.NONE);
-		gridDefaultLabel.setText("size");
-		gridDefaultLabel.setBounds(175, 48, 67, 14);
-
-		snapToGridCheck = new Button(composite, SWT.CHECK);
-		snapToGridCheck.setText("snap-to");
-		snapToGridCheck.setBounds(109, 7, 79, 26);
-		snapToGridCheck.addSelectionListener(new SelectionAdapter()
+		saveEditorStateButton = new Button(composite, SWT.CHECK);
+		saveEditorStateButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				if (snapToGridCheck.getSelection())
-				{
-					snapToAlignmentCheck.setSelection(false);
-				}
 			}
 		});
-
-		saveEditorStateButton = new Button(composite, SWT.CHECK);
-		saveEditorStateButton.setText("re-open at startup");
-		saveEditorStateButton.setBounds(109, 265, 225, 26);
-
-		Label editorsLabel = new Label(composite, SWT.NONE);
-		editorsLabel.setText("Editors");
-		editorsLabel.setBounds(0, 271, 95, 14);
+		saveEditorStateButton.setText("Re-open Form Editors at startup");
+		saveEditorStateButton.setBounds(0, 0, 225, 20);
 
 		toolbarsInFormWindowButton = new Button(composite, SWT.CHECK);
-		toolbarsInFormWindowButton.setBounds(109, 297, 111, 26);
-		toolbarsInFormWindowButton.setText("in form window");
-
-		Label label = new Label(composite, SWT.NONE);
-		label.setBounds(0, 303, 59, 14);
-		label.setText("ToolBars");
+		toolbarsInFormWindowButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+			}
+		});
+		toolbarsInFormWindowButton.setBounds(0, 19, 343, 26);
+		toolbarsInFormWindowButton.setText("Show Form Editing Toolbars inside Form Editor");
 
 		Button resetToolbarsButton = new Button(composite, SWT.NONE);
 		resetToolbarsButton.addSelectionListener(new SelectionAdapter()
@@ -206,77 +138,200 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 				new DesignerPreferences(ServoyModel.getSettings()).saveCoolbarLayout(null);
 			}
 		});
-		resetToolbarsButton.setBounds(226, 297, 75, 26);
-		resetToolbarsButton.setText("reset");
+		resetToolbarsButton.setBounds(349, 21, 68, 23);
+		resetToolbarsButton.setText("Show all");
 
-		snapToAlignmentCheck = new Button(composite, SWT.CHECK);
-		snapToAlignmentCheck.addSelectionListener(new SelectionAdapter()
+		copyPasteOffsetSpinner = new Spinner(composite, SWT.BORDER);
+		copyPasteOffsetSpinner.setValues(0, 0, 100, 0, 1, 5);
+		copyPasteOffsetSpinner.setBounds(109, 48, 125, 20);
+
+		Group grpAlignmentSettings = new Group(composite, SWT.NONE);
+		grpAlignmentSettings.setText("Guide Settings");
+		grpAlignmentSettings.setBounds(0, 239, 431, 235);
+
+		snapToGridRadio = new Button(grpAlignmentSettings, SWT.RADIO);
+		snapToGridRadio.setBounds(10, 43, 108, 26);
+		snapToGridRadio.setText("Grid Guides");
+
+		snapToAlignmentRadio = new Button(grpAlignmentSettings, SWT.RADIO);
+		snapToAlignmentRadio.setBounds(10, 102, 137, 26);
+		snapToAlignmentRadio.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				if (snapToAlignmentCheck.getSelection())
-				{
-					snapToGridCheck.setSelection(false);
-				}
+				setEnabledState();
 			}
 		});
-		snapToAlignmentCheck.setBounds(109, 79, 85, 26);
-		snapToAlignmentCheck.setText("snap-to");
+		snapToAlignmentRadio.setText("Alignment Guides");
 
-		Label lblAlignment = new Label(composite, SWT.NONE);
-		lblAlignment.setBounds(0, 85, 88, 14);
-		lblAlignment.setText("Alignment");
+		anchorCheck = new Button(grpAlignmentSettings, SWT.CHECK);
+		anchorCheck.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+			}
+		});
+		anchorCheck.setBounds(19, 203, 175, 26);
+		anchorCheck.setText("Enable Smart Anchoring");
 
-		alignmentGuidecolorSelectViewer = new ColorSelectViewer(composite, 0);
+		alignmentGuidecolorSelectViewer = new ColorSelectViewer(grpAlignmentSettings, 0);
 		Control control = alignmentGuidecolorSelectViewer.getControl();
-		control.setBounds(434, 85, 59, 20);
+		control.setBounds(186, 177, 60, 20);
 
-		Label lblGuideColor = new Label(composite, SWT.NONE);
-		lblGuideColor.setText("guide color");
-		lblGuideColor.setBounds(507, 85, 67, 20);
+		Label lblGuideColor = new Label(grpAlignmentSettings, SWT.NONE);
+		lblGuideColor.setBounds(252, 180, 88, 20);
+		lblGuideColor.setText("Guide color");
 
-		alignmentThresholdSpinner = new Spinner(composite, SWT.BORDER);
-		alignmentThresholdSpinner.setBounds(303, 82, 60, 20);
+		Label lblOffsets = new Label(grpAlignmentSettings, SWT.NONE);
+		lblOffsets.setBounds(86, 137, 88, 20);
+		lblOffsets.setText("Small offset");
 
-		alignmentSmallDistanceSpinner = new Spinner(composite, SWT.BORDER);
-		alignmentSmallDistanceSpinner.setBounds(109, 111, 60, 20);
+		alignmentSmallDistanceSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
+		alignmentSmallDistanceSpinner.setBounds(20, 134, 60, 20);
 
-		alignmentMediumDistanceSpinner = new Spinner(composite, SWT.BORDER);
-		alignmentMediumDistanceSpinner.setBounds(203, 111, 60, 20);
+		alignmentMediumDistanceSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
+		alignmentMediumDistanceSpinner.setBounds(20, 155, 60, 20);
 
-		alignmentLargeDistanceSpinner = new Spinner(composite, SWT.BORDER);
-		alignmentLargeDistanceSpinner.setBounds(303, 111, 60, 20);
+		alignmentLargeDistanceSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
+		alignmentLargeDistanceSpinner.setBounds(20, 177, 60, 20);
 
-		Label lblThreshold = new Label(composite, SWT.NONE);
-		lblThreshold.setBounds(369, 85, 59, 14);
-		lblThreshold.setText("threshold");
+		Label lblMediumOffset = new Label(grpAlignmentSettings, SWT.NONE);
+		lblMediumOffset.setText("Medium offset");
+		lblMediumOffset.setBounds(86, 158, 94, 20);
 
-		Label lblOffsets = new Label(composite, SWT.NONE);
-		lblOffsets.setBounds(10, 114, 95, 14);
-		lblOffsets.setText("Offsets");
+		Label lblLargeOffset = new Label(grpAlignmentSettings, SWT.NONE);
+		lblLargeOffset.setText("Large offset");
+		lblLargeOffset.setBounds(86, 180, 108, 20);
 
-		gridPointsizeSpinner = new Spinner(composite, SWT.BORDER);
-		gridPointsizeSpinner.setBounds(248, 45, 49, 20);
+		guideSizeSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
+		guideSizeSpinner.setBounds(20, 75, 60, 20);
 
-		copyPasteOffsetSpinner = new Spinner(composite, SWT.BORDER);
-		copyPasteOffsetSpinner.setValues(0, 0, 100, 0, 1, 5);
-		copyPasteOffsetSpinner.setBounds(109, 182, 60, 20);
+		Label guideSizeLabel = new Label(grpAlignmentSettings, SWT.NONE);
+		guideSizeLabel.setBounds(86, 78, 88, 20);
+		guideSizeLabel.setText("Guide size");
 
-		anchorCheck = new Button(composite, SWT.CHECK);
-		anchorCheck.setBounds(200, 79, 80, 26);
-		anchorCheck.setText("anchor");
+		alignmentThresholdSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
+		alignmentThresholdSpinner.setBounds(186, 155, 60, 20);
 
-		alignmentIndentSpinner = new Spinner(composite, SWT.BORDER);
-		alignmentIndentSpinner.setBounds(434, 111, 49, 20);
+		Label lblThreshold = new Label(grpAlignmentSettings, SWT.NONE);
+		lblThreshold.setBounds(252, 157, 169, 20);
+		lblThreshold.setText("Snap to Guide Threshold");
 
-		Label indentLabel = new Label(composite, SWT.NONE);
-		indentLabel.setBounds(379, 117, 49, 14);
-		indentLabel.setText("indent");
+		snapToNoneRadio = new Button(grpAlignmentSettings, SWT.RADIO);
+		snapToNoneRadio.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				setEnabledState();
+			}
+		});
+		snapToNoneRadio.setBounds(10, 21, 90, 16);
+		snapToNoneRadio.setText("None");
+
+		alignmentIndentSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
+		alignmentIndentSpinner.setBounds(186, 134, 60, 20);
+
+		Label indentLabel = new Label(grpAlignmentSettings, SWT.NONE);
+		indentLabel.setBounds(252, 137, 128, 14);
+		indentLabel.setText("Indent offset");
+		guideSizeSpinner.setValues(0, 3, 100, 0, 5, 20);
+
+		Group grpResizing = new Group(composite, SWT.NONE);
+		grpResizing.setText("Keyboard resize/move step sizes");
+		grpResizing.setBounds(0, 480, 431, 73);
+
+		Label stepsizeLabel = new Label(grpResizing, SWT.NONE);
+		stepsizeLabel.setBounds(10, 24, 60, 20);
+		stepsizeLabel.setText("Small step");
+		stepsizeLabel.setToolTipText("Move: Ctrl-Arrows\r\nResize : Ctrl-Shift-Arrows");
+
+		stepSizeSpinner = new Spinner(grpResizing, SWT.BORDER);
+		stepSizeSpinner.setBounds(70, 21, 60, 20);
+		stepSizeSpinner.setValues(0, 1, 100, 0, 1, 5);
+
+		Label lblLargeStep = new Label(grpResizing, SWT.NONE);
+		lblLargeStep.setToolTipText("Move: Ctrl-Alt-Arrows\r\nResize: Alt-Shift-Arrows");
+		lblLargeStep.setText("Large step");
+		lblLargeStep.setBounds(10, 46, 60, 20);
+
+		largeStepSizeSpinner = new Spinner(grpResizing, SWT.BORDER);
+		largeStepSizeSpinner.setBounds(70, 43, 60, 20);
+		largeStepSizeSpinner.setValues(0, 1, 100, 0, 1, 5);
+
+		Group grpGridSettings = new Group(composite, SWT.NONE);
+		grpGridSettings.setText("Grid Settings");
+		grpGridSettings.setBounds(0, 101, 430, 132);
+
+		gridShowButton = new Button(grpGridSettings, SWT.CHECK);
+		gridShowButton.setBounds(10, 21, 133, 26);
+		gridShowButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				setEnabledState();
+			}
+		});
+		gridShowButton.setText("Show grid");
+
+		gridColorViewer = new ColorSelectViewer(grpGridSettings, SWT.NONE);
+		Control gridColorControl = gridColorViewer.getControl();
+		gridColorControl.setBounds(20, 57, 60, 20);
+
+		Label gridColorLabel = new Label(grpGridSettings, SWT.NONE);
+		gridColorLabel.setBounds(84, 57, 85, 20);
+		gridColorLabel.setText("Grid color");
+
+		gridPointsizeSpinner = new Spinner(grpGridSettings, SWT.BORDER);
+		gridPointsizeSpinner.setBounds(20, 79, 60, 20);
+
+		Label gridPointSizeLabel = new Label(grpGridSettings, SWT.NONE);
+		gridPointSizeLabel.setBounds(84, 83, 124, 20);
+		gridPointSizeLabel.setText("Grid point size");
+
+		gridSizeSpinner = new Spinner(grpGridSettings, SWT.BORDER);
+		gridSizeSpinner.setBounds(20, 102, 60, 20);
+
+		Label gridDefaultLabel = new Label(grpGridSettings, SWT.NONE);
+		gridDefaultLabel.setBounds(84, 105, 155, 14);
+		gridDefaultLabel.setText("Point distance");
+		gridSizeSpinner.setValues(0, 3, 100, 0, 5, 20);
+		snapToGridRadio.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				setEnabledState();
+			}
+		});
 
 		initializeFields();
+		setEnabledState();
 
 		return composite;
+	}
+
+	private void setEnabledState()
+	{
+		boolean state = snapToGridRadio.getSelection();
+		guideSizeSpinner.setEnabled(state);
+
+		state = snapToAlignmentRadio.getSelection();
+		alignmentSmallDistanceSpinner.setEnabled(state);
+		alignmentMediumDistanceSpinner.setEnabled(state);
+		alignmentLargeDistanceSpinner.setEnabled(state);
+		alignmentGuidecolorSelectViewer.setEnabled(state);
+		alignmentThresholdSpinner.setEnabled(state);
+		alignmentIndentSpinner.setEnabled(state);
+		anchorCheck.setEnabled(state);
+
+		state = gridShowButton.getSelection();
+		gridColorViewer.setEnabled(state);
+		gridPointsizeSpinner.setEnabled(state);
+		gridSizeSpinner.setEnabled(state);
 	}
 
 	protected void initializeFields()
@@ -287,8 +342,9 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		gridSizeSpinner.setSelection(prefs.getGridSize());
 		gridColorViewer.setSelection(new StructuredSelection(prefs.getGridColor()));
 		alignmentGuidecolorSelectViewer.setSelection(new StructuredSelection(prefs.getAlignmentGuideColor()));
-		snapToGridCheck.setSelection(prefs.getGridSnapTo());
-		snapToAlignmentCheck.setSelection(prefs.getAlignmentSnapTo());
+		snapToGridRadio.setSelection(prefs.getGridSnapTo());
+		snapToAlignmentRadio.setSelection(prefs.getAlignmentSnapTo());
+		snapToNoneRadio.setSelection(prefs.getNoneSnapTo());
 		gridShowButton.setSelection(prefs.getGridShow());
 		saveEditorStateButton.setSelection(prefs.getSaveEditorState());
 		toolbarsInFormWindowButton.setSelection(prefs.getFormToolsOnMainToolbar());
@@ -316,7 +372,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		prefs.setGridColor((RGB)((IStructuredSelection)gridColorViewer.getSelection()).getFirstElement());
 		prefs.setAlignmentGuideColor((RGB)((IStructuredSelection)alignmentGuidecolorSelectViewer.getSelection()).getFirstElement());
 		prefs.setGridShow(gridShowButton.getSelection());
-		prefs.setSnapTo(snapToGridCheck.getSelection(), snapToAlignmentCheck.getSelection());
+		prefs.setSnapTo(snapToGridRadio.getSelection(), snapToAlignmentRadio.getSelection());
 		prefs.setAnchor(anchorCheck.getSelection());
 		prefs.setSaveEditorState(saveEditorStateButton.getSelection());
 		prefs.setFormToolsOnMainToolbar(toolbarsInFormWindowButton.getSelection());
@@ -343,9 +399,11 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 			"alignmentGuideColor", PersistHelper.createColor(DesignerPreferences.ALIGNMENT_GUIDE_COLOR_DEFAULT))));
 		guideSizeSpinner.setSelection(DesignerPreferences.GUIDE_SIZE_DEFAULT);
 		gridShowButton.setSelection(DesignerPreferences.GRID_SHOW_DEFAULT);
-		snapToGridCheck.setSelection(DesignerPreferences.SNAPTO_DEFAULT.equals(DesignerPreferences.SNAP_TO_GRID));
+		snapToGridRadio.setSelection(DesignerPreferences.SNAPTO_DEFAULT.equals(DesignerPreferences.SNAP_TO_GRID));
+		snapToNoneRadio.setSelection(DesignerPreferences.SNAPTO_DEFAULT.equals(DesignerPreferences.SNAP_TO_NONE));
 		anchorCheck.setSelection(DesignerPreferences.ANCHOR_DEFAULT);
-		snapToAlignmentCheck.setSelection(DesignerPreferences.SNAPTO_DEFAULT.equals(DesignerPreferences.SNAP_TO_ALIGMNENT));
+		snapToAlignmentRadio.setSelection(DesignerPreferences.SNAPTO_DEFAULT.equals(DesignerPreferences.SNAP_TO_ALIGMNENT));
+		snapToNoneRadio.setSelection(DesignerPreferences.SNAPTO_DEFAULT.equals(DesignerPreferences.SNAP_TO_NONE));
 		saveEditorStateButton.setSelection(DesignerPreferences.SAVE_EDITOR_STATE_DEFAULT);
 		toolbarsInFormWindowButton.setSelection(DesignerPreferences.FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT);
 		copyPasteOffsetSpinner.setSelection(DesignerPreferences.COPY_PASTE_OFFSET_DEFAULT);
@@ -358,6 +416,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		largeStepSizeSpinner.setSelection(DesignerPreferences.LARGE_STEP_SIZE_DEFAULT);
 		setMetricsComboValue(DesignerPreferences.METRICS_DEFAULT);
 
+		setEnabledState();
 		super.performDefaults();
 	}
 
