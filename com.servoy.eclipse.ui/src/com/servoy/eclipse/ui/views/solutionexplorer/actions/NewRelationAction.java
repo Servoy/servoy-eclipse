@@ -37,6 +37,7 @@ import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.query.ISQLJoin;
 
 /**
  * Action to create a new form/global method depending on the selection of a solution view.
@@ -115,7 +116,7 @@ public class NewRelationAction extends Action implements ISelectionChangedListen
 			Relation relation = editingSolution.getRelation(relationName);
 			if (relation == null)
 			{
-				relation = editingSolution.createNewRelation(validator, relationName);
+				relation = editingSolution.createNewRelation(validator, relationName, ISQLJoin.LEFT_OUTER_JOIN);
 				// this should be probably changed in content spec
 				relation.setAllowCreationRelatedRecords(true);
 			}
