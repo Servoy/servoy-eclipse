@@ -171,7 +171,7 @@ public class SnapToElementAlignment extends SnapToHelper
 		if (RequestConstants.REQ_MOVE.equals(request.getType()) ||
 			(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.EAST) != 0))
 		{
-			horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, horizontal, rect.x + rect.width, form.getSize().height, 10,
+			horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, horizontal, rect.x + rect.width, form.getWidth(), 10,
 				form.getSize().height - 10, getSetAnchor());
 		}
 
@@ -202,10 +202,11 @@ public class SnapToElementAlignment extends SnapToHelper
 			{
 				// align on top
 				vertical = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_NORTH, vertical, rect.y,
-					childBounds.y, childBounds.x, childBounds.x + childBounds.width, (anchors & IAnchorConstants.NORTH) != 0);
+					childBounds.y, Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width),
+					(anchors & IAnchorConstants.NORTH) != 0);
 				// distance to bottom-top
 				vertical = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, vertical, rect.y, childBounds.y + childBounds.height,
-					childBounds.x, childBounds.x + childBounds.width, getSetAnchor() &&
+					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), getSetAnchor() &&
 						(elementModel instanceof Part || ((anchors & IAnchorConstants.NORTH) != 0 && (anchors & IAnchorConstants.SOUTH) == 0)));
 			}
 
@@ -215,10 +216,11 @@ public class SnapToElementAlignment extends SnapToHelper
 			{
 				// align on bottom
 				vertical = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, vertical, rect.y +
-					rect.height, childBounds.y + childBounds.height, childBounds.x, childBounds.x + childBounds.width, (anchors & IAnchorConstants.SOUTH) != 0);
+					rect.height, childBounds.y + childBounds.height, Math.min(rect.x, childBounds.x),
+					Math.max(rect.x + rect.width, childBounds.x + childBounds.width), (anchors & IAnchorConstants.SOUTH) != 0);
 				// distance to top-bottom
-				vertical = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, vertical, rect.y + rect.height, childBounds.y, childBounds.x,
-					childBounds.x + childBounds.width, getSetAnchor() &&
+				vertical = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, vertical, rect.y + rect.height, childBounds.y,
+					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), getSetAnchor() &&
 						(elementModel instanceof Part || ((anchors & IAnchorConstants.SOUTH) != 0 && (anchors & IAnchorConstants.NORTH) == 0)));
 			}
 
@@ -235,10 +237,12 @@ public class SnapToElementAlignment extends SnapToHelper
 
 				// align left
 				horizontal = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x,
-					childBounds.x, childBounds.y, childBounds.y + childBounds.height, (anchors & IAnchorConstants.WEST) != 0);
+					childBounds.x, Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height),
+					(anchors & IAnchorConstants.WEST) != 0);
 				// distance to right-left
 				horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x, childBounds.x + childBounds.width,
-					childBounds.y, childBounds.y + childBounds.height, (anchors & IAnchorConstants.WEST) != 0 && (anchors & IAnchorConstants.EAST) == 0);
+					Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height),
+					(anchors & IAnchorConstants.WEST) != 0 && (anchors & IAnchorConstants.EAST) == 0);
 			}
 
 			// Alignment: East to element
@@ -247,10 +251,12 @@ public class SnapToElementAlignment extends SnapToHelper
 			{
 				// align on right
 				horizontal = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_EAST, horizontal, rect.x +
-					rect.width, childBounds.x + childBounds.width, childBounds.y, childBounds.y + childBounds.height, (anchors & IAnchorConstants.EAST) != 0);
+					rect.width, childBounds.x + childBounds.width, Math.min(rect.y, childBounds.y),
+					Math.max(rect.y + rect.height, childBounds.y + childBounds.height), (anchors & IAnchorConstants.EAST) != 0);
 				// distance to left-right
-				horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, horizontal, rect.x + rect.width, childBounds.x, childBounds.y,
-					childBounds.y + childBounds.height, (anchors & IAnchorConstants.EAST) != 0 && (anchors & IAnchorConstants.WEST) == 0);
+				horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, horizontal, rect.x + rect.width, childBounds.x,
+					Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height),
+					(anchors & IAnchorConstants.EAST) != 0 && (anchors & IAnchorConstants.WEST) == 0);
 			}
 		}
 
