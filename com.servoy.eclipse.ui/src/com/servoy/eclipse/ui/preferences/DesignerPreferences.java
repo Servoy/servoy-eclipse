@@ -47,6 +47,7 @@ public class DesignerPreferences
 	public static final String STEP_SIZE_SETTING = "designer.stepSize";
 	public static final String COPY_PASTE_OFFSET_SETTING = "copyPasteOffset";
 	public static final String ALIGNMENT_THRESHOLD_SETTING = "alignmentThreshold";
+	public static final String ALIGNMENT_INDENT_SETTING = "alignmentIndent";
 	public static final String ALIGNMENT_DISTANCES_SETTING = "alignmentDistances";
 	public static final String GUIDE_SIZE_SETTING = "guidesize";
 	public static final String GRID_COLOR_SETTING = "gridcolor";
@@ -66,6 +67,7 @@ public class DesignerPreferences
 
 	public static final int COPY_PASTE_OFFSET_DEFAULT = 10;
 	public static final int ALIGNMENT_THRESHOLD_DEFAULT = 12;
+	public static final int ALIGNMENT_INDENT_DEFAULT = 5;
 	public static final int[] ALIGNMENT_DISTANCES_DEFAULT = { 5, 10, 15 }; // small, medium, large
 	public static final int STEP_SIZE_DEFAULT = 10;
 	public static final int LARGE_STEP_SIZE_DEFAULT = 20;
@@ -137,6 +139,16 @@ public class DesignerPreferences
 	public void setAlignmentThreshold(int alignmentThreshold)
 	{
 		settings.setProperty(ALIGNMENT_THRESHOLD_SETTING, String.valueOf(alignmentThreshold));
+	}
+
+	public int getAlignmentIndent()
+	{
+		return Utils.getAsInteger(settings.getProperty(ALIGNMENT_INDENT_SETTING, String.valueOf(ALIGNMENT_INDENT_DEFAULT)));
+	}
+
+	public void setAlignmentIndent(int indent)
+	{
+		settings.setProperty(ALIGNMENT_INDENT_SETTING, String.valueOf(indent));
 	}
 
 	public int[] getAlignmentDistances()

@@ -60,7 +60,8 @@ public class SnapToElementAlignment extends SnapToHelper
 	private final GraphicalEditPart container;
 
 	private DesignerPreferences preferences;
-	private int snapThreshhold;
+	private int snapThreshold;
+	private int indent;
 	private int[] distances;
 	private boolean setAnchor;
 
@@ -74,7 +75,8 @@ public class SnapToElementAlignment extends SnapToHelper
 		if (preferences == null)
 		{
 			preferences = new DesignerPreferences(Settings.getInstance());
-			snapThreshhold = preferences.getAlignmentThreshold();
+			snapThreshold = preferences.getAlignmentThreshold();
+			indent = preferences.getAlignmentIndent();
 			distances = preferences.getAlignmentDistances();
 			setAnchor = preferences.getAnchor();
 		}
@@ -83,7 +85,13 @@ public class SnapToElementAlignment extends SnapToHelper
 	protected int getSnapThreshold()
 	{
 		readPreferences();
-		return snapThreshhold;
+		return snapThreshold;
+	}
+
+	protected int getIndent()
+	{
+		readPreferences();
+		return indent;
 	}
 
 	protected int getSmallDistance()
@@ -104,7 +112,7 @@ public class SnapToElementAlignment extends SnapToHelper
 		return distances[2];
 	}
 
-	protected boolean setAnchor()
+	protected boolean getSetAnchor()
 	{
 		readPreferences();
 		return setAnchor;
@@ -148,14 +156,14 @@ public class SnapToElementAlignment extends SnapToHelper
 		if (RequestConstants.REQ_MOVE.equals(request.getType()) ||
 			(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.NORTH) != 0))
 		{
-			vertical = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, vertical, rect.y, 0, 10, form.getWidth() - 10, setAnchor());
+			vertical = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, vertical, rect.y, 0, 10, form.getWidth() - 10, getSetAnchor());
 		}
 
 		// Alignment: West to container
 		if (RequestConstants.REQ_MOVE.equals(request.getType()) ||
 			(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.WEST) != 0))
 		{
-			horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x, 0, 10, form.getWidth() - 10, setAnchor());
+			horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x, 0, 10, form.getWidth() - 10, getSetAnchor());
 		}
 
 		// Alignment: East to container
@@ -163,7 +171,7 @@ public class SnapToElementAlignment extends SnapToHelper
 			(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.EAST) != 0))
 		{
 			horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, horizontal, rect.x + rect.width, form.getWidth(), 10,
-				form.getSize().height - 10, setAnchor());
+				form.getSize().height - 10, getSetAnchor());
 		}
 
 		List<EditPart> children = container.getChildren();
@@ -176,7 +184,7 @@ public class SnapToElementAlignment extends SnapToHelper
 
 			Object elementModel = child.getModel();
 			int anchors = 0;
-			if (setAnchor() && elementModel instanceof ISupportAnchors)
+			if (getSetAnchor() && elementModel instanceof ISupportAnchors)
 			{
 				anchors = ((ISupportAnchors)elementModel).getAnchors();
 				if (anchors == 0) anchors = IAnchorConstants.DEFAULT;
@@ -196,7 +204,7 @@ public class SnapToElementAlignment extends SnapToHelper
 					childBounds.width, (anchors & IAnchorConstants.NORTH) != 0);
 				// distance to bottom-top
 				vertical = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, vertical, rect.y, childBounds.y + childBounds.height,
-					childBounds.x, childBounds.x + childBounds.width, setAnchor() &&
+					childBounds.x, childBounds.x + childBounds.width, getSetAnchor() &&
 						(elementModel instanceof Part || ((anchors & IAnchorConstants.NORTH) != 0 && (anchors & IAnchorConstants.SOUTH) == 0)));
 			}
 
@@ -209,7 +217,7 @@ public class SnapToElementAlignment extends SnapToHelper
 					childBounds.x, childBounds.x + childBounds.width, (anchors & IAnchorConstants.SOUTH) != 0);
 				// distance to top-bottom
 				vertical = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, vertical, rect.y + rect.height, childBounds.y, childBounds.x,
-					childBounds.x + childBounds.width, setAnchor() &&
+					childBounds.x + childBounds.width, getSetAnchor() &&
 						(elementModel instanceof Part || ((anchors & IAnchorConstants.SOUTH) != 0 && (anchors & IAnchorConstants.NORTH) == 0)));
 			}
 
@@ -217,6 +225,13 @@ public class SnapToElementAlignment extends SnapToHelper
 			if (RequestConstants.REQ_MOVE.equals(request.getType()) ||
 				(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.WEST) != 0))
 			{
+				// indent to element, only on left side and below element
+				if (rect.y > childBounds.y)
+				{
+					horizontal = getSideAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x, childBounds.x + getIndent(),
+						childBounds.y + childBounds.height + 5, rect.y + rect.height - 5, (anchors & IAnchorConstants.WEST) != 0);
+				}
+
 				// align left
 				horizontal = getSideAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x, childBounds.x, childBounds.y, childBounds.y +
 					childBounds.height, (anchors & IAnchorConstants.WEST) != 0);

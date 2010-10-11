@@ -79,6 +79,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	private Button toolbarsInFormWindowButton;
 	private Button snapToAlignmentCheck;
 	private Spinner alignmentThresholdSpinner;
+	private Spinner alignmentIndentSpinner;
 	private Spinner alignmentSmallDistanceSpinner;
 	private Spinner alignmentMediumDistanceSpinner;
 	private Spinner alignmentLargeDistanceSpinner;
@@ -266,6 +267,13 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		anchorCheck.setBounds(200, 79, 80, 26);
 		anchorCheck.setText("anchor");
 
+		alignmentIndentSpinner = new Spinner(composite, SWT.BORDER);
+		alignmentIndentSpinner.setBounds(434, 111, 49, 20);
+
+		Label indentLabel = new Label(composite, SWT.NONE);
+		indentLabel.setBounds(379, 117, 49, 14);
+		indentLabel.setText("indent");
+
 		initializeFields();
 
 		return composite;
@@ -287,6 +295,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		guideSizeSpinner.setSelection(prefs.getGuideSize());
 		copyPasteOffsetSpinner.setSelection(prefs.getCopyPasteOffset());
 		alignmentThresholdSpinner.setSelection(prefs.getAlignmentThreshold());
+		alignmentIndentSpinner.setSelection(prefs.getAlignmentIndent());
 		anchorCheck.setSelection(prefs.getAnchor());
 		int[] distances = prefs.getAlignmentDistances();
 		alignmentSmallDistanceSpinner.setSelection(distances[0]);
@@ -314,6 +323,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		prefs.setGuideSize(guideSizeSpinner.getSelection());
 		prefs.setCopyPasteOffset(copyPasteOffsetSpinner.getSelection());
 		prefs.setAlignmentThreshold(alignmentThresholdSpinner.getSelection());
+		prefs.setAlignmentIndent(alignmentIndentSpinner.getSelection());
 		prefs.setAlignmentDistances(alignmentSmallDistanceSpinner.getSelection(), alignmentMediumDistanceSpinner.getSelection(),
 			alignmentLargeDistanceSpinner.getSelection());
 		prefs.setStepSize(stepSizeSpinner.getSelection(), largeStepSizeSpinner.getSelection());
@@ -340,6 +350,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		toolbarsInFormWindowButton.setSelection(DesignerPreferences.FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT);
 		copyPasteOffsetSpinner.setSelection(DesignerPreferences.COPY_PASTE_OFFSET_DEFAULT);
 		alignmentThresholdSpinner.setSelection(DesignerPreferences.ALIGNMENT_THRESHOLD_DEFAULT);
+		alignmentIndentSpinner.setSelection(DesignerPreferences.ALIGNMENT_INDENT_DEFAULT);
 		alignmentSmallDistanceSpinner.setSelection(DesignerPreferences.ALIGNMENT_DISTANCES_DEFAULT[0]);
 		alignmentMediumDistanceSpinner.setSelection(DesignerPreferences.ALIGNMENT_DISTANCES_DEFAULT[1]);
 		alignmentLargeDistanceSpinner.setSelection(DesignerPreferences.ALIGNMENT_DISTANCES_DEFAULT[2]);
