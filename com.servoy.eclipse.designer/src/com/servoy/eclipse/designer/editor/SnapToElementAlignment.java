@@ -163,14 +163,15 @@ public class SnapToElementAlignment extends SnapToHelper
 		if (RequestConstants.REQ_MOVE.equals(request.getType()) ||
 			(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.WEST) != 0))
 		{
-			horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x, 0, 10, form.getWidth() - 10, getSetAnchor());
+			horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x, 0, 10, form.getSize().height - 10,
+				getSetAnchor());
 		}
 
 		// Alignment: East to container
 		if (RequestConstants.REQ_MOVE.equals(request.getType()) ||
 			(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.EAST) != 0))
 		{
-			horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, horizontal, rect.x + rect.width, form.getWidth(), 10,
+			horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, horizontal, rect.x + rect.width, form.getSize().height, 10,
 				form.getSize().height - 10, getSetAnchor());
 		}
 
