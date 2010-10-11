@@ -851,11 +851,17 @@ public class ServoyModel implements IWorkspaceSaveListener
 						progressMonitor.subTask("Loading modules...");
 						EclipseRepository.ActivityMonitor moduleMonitor = new EclipseRepository.ActivityMonitor()
 						{
-							public void loadingRootObject(RootObjectMetaData rootObject)
+							public void loadingRootObject(final RootObjectMetaData rootObject)
 							{
 								if (rootObject.getObjectTypeId() == IRepository.SOLUTIONS)
 								{
-									progressMonitor.subTask("Loading modules... Module '" + rootObject.getName() + "'");
+									Display.getDefault().asyncExec(new Runnable()
+									{
+										public void run()
+										{
+											progressMonitor.subTask("Loading modules... Module '" + rootObject.getName() + "'");
+										}
+									});
 								}
 							}
 						};
