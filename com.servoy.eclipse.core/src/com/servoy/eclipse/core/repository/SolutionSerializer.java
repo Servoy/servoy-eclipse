@@ -481,7 +481,7 @@ public class SolutionSerializer
 				obj.remove("declaration"); //$NON-NLS-1$
 				obj.remove(PROP_NAME);
 				obj.remove("defaultValue"); //$NON-NLS-1$
-				obj.remove("comment"); //$NON-NLS-1$
+				obj.remove(SolutionDeserializer.COMMENT_JSON_ATTRIBUTE);
 				obj.remove(SolutionDeserializer.LINE_NUMBER_OFFSET_JSON_ATTRIBUTE);
 
 				if (persist instanceof AbstractScriptProvider)

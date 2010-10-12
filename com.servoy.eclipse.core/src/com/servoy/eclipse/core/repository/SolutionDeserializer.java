@@ -28,8 +28,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
@@ -117,7 +117,7 @@ public class SolutionDeserializer
 	private static final String JS_TYPE_JSON_ATTRIBUTE = "jsType"; //$NON-NLS-1$
 	private static final String ARGUMENTS_JSON_ATTRIBUTE = "arguments"; //$NON-NLS-1$
 	static final String LINE_NUMBER_OFFSET_JSON_ATTRIBUTE = "lineNumberOffset"; //$NON-NLS-1$
-	private static final String COMMENT_JSON_ATTRIBUTE = "comment"; //$NON-NLS-1$
+	static final String COMMENT_JSON_ATTRIBUTE = "comment"; //$NON-NLS-1$
 	private static final String CHANGED_JSON_ATTRIBUTE = "changed"; //$NON-NLS-1$
 
 	public static final RuntimeProperty<Boolean> POSSIBLE_DUPLICATE_UUID = new RuntimeProperty<Boolean>()
@@ -440,8 +440,8 @@ public class SolutionDeserializer
 					else
 					{
 						// tablenode
-						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0,
-							jsFileName.length() - SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length()) +
+						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0, jsFileName.length() -
+							SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length()) +
 							SolutionSerializer.TABLENODE_FILE_EXTENSION);
 					}
 
