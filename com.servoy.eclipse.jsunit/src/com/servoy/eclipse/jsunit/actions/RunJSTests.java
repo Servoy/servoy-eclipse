@@ -38,9 +38,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaProject;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.internal.junit.ui.JUnitPreferencesConstants;
 import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.jface.action.IAction;
@@ -127,13 +128,13 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 				{
 					// clear history if needed to obey JUnitPreferencesConstants.MAX_TEST_RUNS
 					int maxCount = JUnitPlugin.getDefault().getPreferenceStore().getInt(JUnitPreferencesConstants.MAX_TEST_RUNS);
-					List<TestRunSession> testRunSessions = JUnitPlugin.getModel().getTestRunSessions();
+					List<TestRunSession> testRunSessions = JUnitCorePlugin.getModel().getTestRunSessions();
 					int toDelete = testRunSessions.size() - maxCount;
 					while (toDelete > 0)
 					{
 						toDelete--;
 						TestRunSession session = testRunSessions.remove(testRunSessions.size() - 1);
-						JUnitPlugin.getModel().removeTestRunSession(session);
+						JUnitCorePlugin.getModel().removeTestRunSession(session);
 					}
 
 					// show the JUnit test view part
@@ -145,7 +146,7 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 					{
 						// start junit test run session
 						DebugPlugin.getDefault().getLaunchManager().addLaunch(launch);
-						JUnitPlugin.getModel().addTestRunSession(new TestRunSession(launch, new JavaProject(sp.getProject(), null)
+						JUnitCorePlugin.getModel().addTestRunSession(new TestRunSession(launch, new JavaProject(sp.getProject(), null)
 						{
 							@Override
 							public IType findType(String fullyQualifiedName, IProgressMonitor progressMonitor) throws JavaModelException
@@ -443,7 +444,11 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 		{
 			// TODO: have to force the creation of view part contents 
 			// otherwise the UI will not be updated
-			if (testRunner != null && testRunner.isCreated()) return testRunner;
+			if (testRunner != null) // TODO disabled this in 3.6.1: && testRunner.isCreated()
+			{
+				testRunner.showTestResultsView(); // TODO check: added this for 3.6.1
+				return testRunner;
+			}
 			page = JUnitPlugin.getActivePage();
 			if (page == null) return null;
 			activePart = page.getActivePart();
