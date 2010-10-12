@@ -325,8 +325,6 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 							((AbstractBase)src).getSerializableRuntimeProperty(IScriptProvider.FILENAME));
 						((AbstractBase)dest).setSerializableRuntimeProperty(IScriptProvider.TYPE,
 							((AbstractBase)src).getSerializableRuntimeProperty(IScriptProvider.TYPE));
-						((AbstractBase)dest).setRuntimeProperty(IScriptProvider.INITIALIZER,
-							((AbstractBase)src).getRuntimeProperty(IScriptProvider.INITIALIZER));
 					}
 					if (src instanceof ScriptVariable)
 					{

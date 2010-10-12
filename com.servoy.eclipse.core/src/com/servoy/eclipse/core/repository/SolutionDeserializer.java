@@ -33,13 +33,9 @@ import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
-import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.internal.javascript.ti.IValueReference;
-import org.eclipse.dltk.internal.javascript.ti.TypeInferencer2;
 import org.eclipse.dltk.javascript.ast.Argument;
 import org.eclipse.dltk.javascript.ast.ArrayInitializer;
 import org.eclipse.dltk.javascript.ast.CallExpression;
@@ -66,8 +62,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.builder.ErrorKeeper;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -112,7 +106,6 @@ import com.servoy.j2db.util.Utils;
  */
 public class SolutionDeserializer
 {
-	private static final String INITIALIZER_JSON_ATTRIBUTE = "INITIALIZER";
 	private static final String VARIABLE_TYPE_JSON_ATTRIBUTE = "variableType"; //$NON-NLS-1$
 	private static final String JS_TYPE_JSON_ATTRIBUTE = "jsType"; //$NON-NLS-1$
 	private static final String ARGUMENTS_JSON_ATTRIBUTE = "arguments"; //$NON-NLS-1$
@@ -837,59 +830,6 @@ public class SolutionDeserializer
 				if (Debug.tracing()) Debug.trace("Didn't update the Persist model Script and Variables objects because of problems " + problems);
 				return Collections.<JSONObject> emptyList();
 			}
-//			if (problems.size() > 0)
-//			{
-//				// if there are problems with this parser, try the rhino parser
-//				IProblem[] problemsArray = new IProblem[problems.size()];
-//				problems.toArray(problemsArray);
-//				problems.clear();
-//				ISourceParser p = new JavaScriptSourceParser();
-//				final String content = fileContent;
-//				p.parse(new IModuleSource()
-//				{
-//
-//					public String getFileName()
-//					{
-//						return null;
-//					}
-//
-//					public String getSourceContents()
-//					{
-//						return content;
-//					}
-//
-//					public IModelElement getModelElement()
-//					{
-//						return null;
-//					}
-//
-//					public char[] getContentsAsCharArray()
-//					{
-//						return content.toCharArray();
-//					}
-//				}, reporter);
-//				if (problems.size() == 0)
-//				{
-//					// rhino didn't have problems, report this!
-//					StringBuilder sb = new StringBuilder();
-//					sb.append("AST Parser found problems in the file: " + file.getAbsolutePath()); //$NON-NLS-1$
-//					for (IProblem problem : problemsArray)
-//					{
-//						sb.append(", message: "); //$NON-NLS-1$
-//						sb.append(problem.getMessage());
-//						sb.append(", linenumber: "); //$NON-NLS-1$
-//						sb.append(problem.getSourceLineNumber());
-//						sb.append(" position( "); //$NON-NLS-1$
-//						sb.append(problem.getSourceStart());
-//						sb.append(","); //$NON-NLS-1$
-//						sb.append(problem.getSourceEnd());
-//						sb.append(")"); //$NON-NLS-1$
-//					}
-//
-//					Debug.error(sb.toString());
-//				}
-//				return null;
-//			}
 			if (script == null)
 			{
 				Debug.error("No script returned when parsing " + file.getAbsolutePath()); //$NON-NLS-1$
@@ -934,6 +874,8 @@ public class SolutionDeserializer
 			}
 			//add an extra last line.
 			lines.add(new Line(currentLine.line + 1, counter + 1));
+
+
 			for (VariableDeclaration field : variables)
 			{
 				String comment = null;
@@ -1033,49 +975,46 @@ public class SolutionDeserializer
 							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
 						}
 					}
-					else if (code instanceof CallExpression)
+					else if (code instanceof CallExpression || code instanceof NewExpression || code instanceof FunctionStatement)
 					{
-						ASTNode callExpression = ((CallExpression)code).getExpression();
+						ASTNode callExpression = code;
+						if (callExpression instanceof CallExpression)
+						{
+							callExpression = ((CallExpression)callExpression).getExpression();
+						}
+						String objectclass = null;
 						if (callExpression instanceof NewExpression)
 						{
-							String objectclass = null;
 							Expression objectClassExpression = ((NewExpression)callExpression).getObjectClass();
 							if (objectClassExpression instanceof Identifier)
 							{
 								objectclass = ((Identifier)objectClassExpression).getName();
 							}
-							if ("String".equals(objectclass)) //$NON-NLS-1$
+							else if (objectClassExpression instanceof FunctionStatement)
 							{
-								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
-							}
-							else if ("Date".equals(objectclass)) //$NON-NLS-1$
-							{
-								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.DATETIME);
-							}
-							else
-							{
-								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-								TypeInferencer2 inferencer = new TypeInferencer2();
-								ServoyModelManager.getServoyModelManager().getServoyModel();
-								inferencer.setModelElement(DLTKCore.createSourceModuleFrom(ServoyModel.getWorkspace().getRoot().getFileForLocation(
-									Path.fromOSString(file.getAbsolutePath()))));
-								inferencer.doInferencing(script);
-								IValueReference child = inferencer.getCollection().getChild(objectclass);
-								if (child != null)
-								{
-									json.put(INITIALIZER_JSON_ATTRIBUTE, child);
-								}
-								else
-								{
-									json.put(INITIALIZER_JSON_ATTRIBUTE, code);
-								}
+								objectclass = ((FunctionStatement)objectClassExpression).getName().getName();
 							}
 						}
+						if ("String".equals(objectclass)) //$NON-NLS-1$
+						{
+							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
+						}
+						else if ("Date".equals(objectclass)) //$NON-NLS-1$
+						{
+							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.DATETIME);
+						}
+						else
+						{
+							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+						}
 					}
-					else if (code instanceof FunctionStatement || code instanceof ObjectInitializer || code instanceof ArrayInitializer)
+					else if (code instanceof ObjectInitializer)
 					{
 						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-						json.put(INITIALIZER_JSON_ATTRIBUTE, code);
+					}
+					else if (code instanceof ArrayInitializer)
+					{
+						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
 					}
 					else
 					{
@@ -1474,15 +1413,6 @@ public class SolutionDeserializer
 				{
 					String type = obj.getString(JS_TYPE_JSON_ATTRIBUTE);
 					((ScriptVariable)retval).setSerializableRuntimeProperty(IScriptProvider.TYPE, type);
-				}
-				if (obj.has(INITIALIZER_JSON_ATTRIBUTE))
-				{
-					Object type = obj.get(INITIALIZER_JSON_ATTRIBUTE);
-					((ScriptVariable)retval).setRuntimeProperty(IScriptProvider.INITIALIZER, type);
-				}
-				else
-				{
-					((ScriptVariable)retval).setRuntimeProperty(IScriptProvider.INITIALIZER, null);
 				}
 			}
 			else if (retval instanceof AbstractScriptProvider)
