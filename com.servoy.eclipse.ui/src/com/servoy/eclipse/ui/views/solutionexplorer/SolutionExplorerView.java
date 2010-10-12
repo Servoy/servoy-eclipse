@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -1479,7 +1481,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		{
 			public void resourceChanged(IResourceChangeEvent event)
 			{
-				if (event.getType() == IResourceChangeEvent.POST_CHANGE)
+				if ((event.getType() & IResourceChangeEvent.POST_CHANGE) != 0)
 				{
 					boolean mustRefresh = false;
 					IResourceDelta[] affectedChildren = event.getDelta().getAffectedChildren();
@@ -1548,10 +1550,31 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						});
 					}
 				}
-			}
+				else if ((event.getType() & IResourceChangeEvent.POST_BUILD) != 0)
+				{
+					ProblemDecorator problemDecorator = (ProblemDecorator)PlatformUI.getWorkbench().getDecoratorManager().getBaseLabelProvider(
+						ProblemDecorator.ID);
+					if (problemDecorator != null)
+					{
+						IMarkerDelta[] markersDelta = event.findMarkerDeltas(IMarker.PROBLEM, true);
+						ArrayList<IResource> changedProblemResources = new ArrayList<IResource>();
+						for (IMarkerDelta md : markersDelta)
+						{
+							IResource r = md.getResource();
+							do
+							{
+								if (changedProblemResources.indexOf(r) == -1) changedProblemResources.add(r);
+								r = r.getParent();
+							}
+							while (r.getType() != IResource.ROOT);
+						}
 
+						problemDecorator.fireChanged(changedProblemResources.toArray(new IResource[changedProblemResources.size()]));
+					}
+				}
+			}
 		};
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
 	}
 
 	private void addServerAndTableListeners()
@@ -2784,6 +2807,11 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 									segments.length == 3) return un;
 							}
 						}
+					}
+					else if (segments[1].equals(SolutionSerializer.GLOBALS_FILE))
+					{
+						PlatformSimpleUserNode globalsFolder = cp.getGlobalsFolder();
+						if (globalsFolder.getType() == UserNodeType.GLOBALS_ITEM) return globalsFolder;
 					}
 				}
 				break;

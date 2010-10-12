@@ -138,6 +138,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private PlatformSimpleUserNode forms;
 
+	private PlatformSimpleUserNode globalsFolder;
+
 	private PlatformSimpleUserNode allRelations;
 
 	private PlatformSimpleUserNode valuelists;
@@ -844,7 +846,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		Solution solution = servoyProject.getSolution();
 		if (solution != null)
 		{
-			PlatformSimpleUserNode globalsFolder;
 			if (solutionOfCalculation == null)
 			{
 				globalsFolder = new PlatformSimpleUserNode(Messages.TreeStrings_Globals, UserNodeType.GLOBALS_ITEM, solution,
@@ -1644,6 +1645,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	public PlatformSimpleUserNode getForms()
 	{
 		return forms;
+	}
+
+	public PlatformSimpleUserNode getGlobalsFolder()
+	{
+		return globalsFolder;
 	}
 
 	public PlatformSimpleUserNode getRelations()

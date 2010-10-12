@@ -773,6 +773,23 @@
             categoryId="com.servoy.eclipse.activities.categories.wst">
       </categoryActivityBinding>
    </extension>
+  <extension
+     point="org.eclipse.ui.decorators">
+  	<decorator  	
+         class="com.servoy.eclipse.ui.views.solutionexplorer.ProblemDecorator"
+         id="com.servoy.eclipse.ui.views.solutionexplorer.ProblemDecorator"
+         label="Servoy solution explorer problem decorator"
+         lightweight="true"
+         adaptable="true"
+         state="true">
+	<enablement>
+		<objectClass name= "com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode"/>
+	</enablement>	
+     <description>
+        Servoy solution explorer problem decorator
+     </description>
+  	</decorator>  	  	
+   </extension>
    <extension point="org.eclipse.help.base.browser">
       <browser 
       		id="org.eclipse.myPlugin.myBrowserID" 

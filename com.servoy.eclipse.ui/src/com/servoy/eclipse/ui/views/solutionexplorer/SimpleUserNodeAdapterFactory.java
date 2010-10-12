@@ -325,6 +325,14 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 						if (forms != null) return forms.getModelObject();
 					}
 				}
+				else if (type == UserNodeType.GLOBALS_ITEM)
+				{
+					SimpleUserNode project = userNode.getAncestorOfType(IProjectNature.class);
+					if (project != null)
+					{
+						return (((IProjectNature)project.getRealObject()).getProject()).findMember(SolutionSerializer.GLOBALS_FILE);
+					}
+				}
 			}
 		}
 		else if (adapterType == Openable.class)
