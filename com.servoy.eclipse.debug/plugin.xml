@@ -143,6 +143,9 @@
       <resolver
             class="com.servoy.eclipse.debug.script.ElementResolver">
       </resolver>
+      <evaluator
+            class="com.servoy.eclipse.debug.script.ValueCollectionProvider">
+      </evaluator>
    </extension>
    <extension
          point="org.eclipse.dltk.javascript.ui.typeInfoLabelProvider">

@@ -115,7 +115,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addScopeType("Plugins", new PluginsScopeCreator());
 		addScopeType("Super", new SuperScopeCreator());
 		addScopeType("Forms", new FormsScopeCreator());
-		addScopeType("Globals", new GlobalScopeCreator());
+//		addScopeType("Globals", new GlobalScopeCreator());
 
 		dynamicTypeFillers.put(FoundSet.JS_FOUNDSET, new DataProviderFiller());
 		dynamicTypeFillers.put(Record.JS_RECORD, new DataProviderFiller());
@@ -263,15 +263,15 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 							}
 						}
 
-						Iterator<ScriptMethod> scriptMethods = formToUse.getScriptMethods(false);
-						while (scriptMethods.hasNext())
-						{
-							ScriptMethod sm = scriptMethods.next();
-							members.add(createMethod(context, sm, FORM_METHOD_IMAGE, sm.getSerializableRuntimeProperty(IScriptProvider.FILENAME)));
-						}
-
-						// form variables
-						addDataProviders(formToUse.getScriptVariables(false), members, context);
+//						Iterator<ScriptMethod> scriptMethods = formToUse.getScriptMethods(false);
+//						while (scriptMethods.hasNext())
+//						{
+//							ScriptMethod sm = scriptMethods.next();
+//							members.add(createMethod(context, sm, FORM_METHOD_IMAGE, sm.getSerializableRuntimeProperty(IScriptProvider.FILENAME)));
+//						}
+//
+//						// form variables
+//						addDataProviders(formToUse.getScriptVariables(false), members, context);
 
 						// data providers
 						Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(formToUse.getTable());
@@ -536,8 +536,10 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					members.add(createProperty(context, form.getName(), true, "Form<" + form.getName() + '>',
-						"Form based on datasource: " + form.getDataSource(), FORM_IMAGE, form));
+					Property formProperty = createProperty(form.getName(), true, context.getType("Form<" + form.getName() + '>'), "Form based on datasource: " +
+						form.getDataSource(), FORM_IMAGE);
+					formProperty.setAttribute(LAZY_VALUECOLLECTION, form);
+					members.add(formProperty);
 				}
 			}
 			return type;
@@ -545,57 +547,90 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 	}
 
-	private class GlobalScopeCreator implements IScopeTypeCreator
-	{
-		/**
-		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
-		 */
-		public Type createType(ITypeInfoContext context, String fullTypeName)
-		{
-			FlattenedSolution fs = getFlattenedSolution(context);
-
-			Type type = TypeInfoModelFactory.eINSTANCE.createType();
-			if (fs != null)
-			{
-				type.setName("Globals<" + fs.getMainSolutionMetaData().getName() + '>');
-			}
-			else
-			{
-				type.setName("Globals");
-			}
-			type.setKind(TypeKind.JAVA);
-			type.setAttribute(IMAGE_DESCRIPTOR, GLOBALS);
-
-			EList<Member> members = type.getMembers();
-
-			members.add(createProperty(context, "allmethods", true, "Array", "Returns all global method names in an Array", SPECIAL_PROPERTY));
-			members.add(createProperty(context, "allvariables", true, "Array", "Returns all global variable names in an Array", SPECIAL_PROPERTY));
-			members.add(createProperty(context, "allrelations", true, "Array", "Returns all global relation names in an Array", SPECIAL_PROPERTY));
-			members.add(createProperty(context, "currentcontroller", true, "controller", "The current active main forms controller", PROPERTY));
-
-
-			if (fs != null)
-			{
-				Iterator<ScriptVariable> scriptVariables = fs.getScriptVariables(false);
-				while (scriptVariables.hasNext())
-				{
-					ScriptVariable sv = scriptVariables.next();
-
-					members.add(createProperty(sv.getName(), false, getDataPRoviderType(context, sv), getParsedComment(sv.getComment()), GLOBAL_VAR_IMAGE,
-						sv.getSerializableRuntimeProperty(IScriptProvider.FILENAME)));
-				}
-
-				Iterator<ScriptMethod> scriptMethods = fs.getScriptMethods(false);
-				while (scriptMethods.hasNext())
-				{
-					ScriptMethod sm = scriptMethods.next();
-					members.add(createMethod(context, sm, GLOBAL_METHOD_IMAGE, sm.getSerializableRuntimeProperty(IScriptProvider.FILENAME)));
-				}
-			}
-			return type;
-
-		}
-	}
+//	private class GlobalScopeCreator implements IScopeTypeCreator
+//	{
+//		/**
+//		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
+//		 */
+//		public Type createType(ITypeInfoContext context, String fullTypeName)
+//		{
+//			FlattenedSolution fs = getFlattenedSolution(context);
+//
+//			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+//			if (fs != null)
+//			{
+//				type.setName("Globals<" + fs.getMainSolutionMetaData().getName() + '>');
+//			}
+//			else
+//			{
+//				type.setName("Globals");
+//			}
+//			type.setKind(TypeKind.JAVA);
+//			type.setAttribute(IMAGE_DESCRIPTOR, GLOBALS);
+//
+//			EList<Member> members = type.getMembers();
+//
+//			members.add(createProperty(context, "allmethods", true, "Array", "Returns all global method names in an Array", SPECIAL_PROPERTY));
+//			members.add(createProperty(context, "allvariables", true, "Array", "Returns all global variable names in an Array", SPECIAL_PROPERTY));
+//			members.add(createProperty(context, "allrelations", true, "Array", "Returns all global relation names in an Array", SPECIAL_PROPERTY));
+//			members.add(createProperty(context, "currentcontroller", true, "controller", "The current active main forms controller", PROPERTY));
+//
+//
+//			if (fs != null)
+//			{
+//				Iterator<ScriptVariable> scriptVariables = fs.getScriptVariables(false);
+//				while (scriptVariables.hasNext())
+//				{
+//					ScriptVariable sv = scriptVariables.next();
+//
+//					IValue functionChild = null;
+//					if (value != null && (functionChild = value.getChild(IValueReference.FUNCTION_OP, true)) != null)
+//					{
+//						Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+//						method.setName(sv.getName());
+//						method.setDescription(getParsedComment(sv.getComment()));
+//						method.setAttribute(IMAGE_DESCRIPTOR, GLOBAL_METHOD_IMAGE);
+//						method.setAttribute(RESOURCE, sv.getSerializableRuntimeProperty(IScriptProvider.FILENAME));
+//
+//						JSMethod jsMethod = (JSMethod)value.getAttribute(IReferenceAttributes.PARAMETERS, true);
+//						for (IParameter parameter : jsMethod.getParameters())
+//						{
+//							Parameter p = TypeInfoModelFactory.eINSTANCE.createParameter();
+//							p.setName(parameter.getName());
+//							p.setType(parameter.getType());
+//							if (parameter.isOptional())
+//							{
+//								p.setKind(ParameterKind.OPTIONAL);
+//							}
+//							else
+//							{
+//								p.setKind(ParameterKind.NORMAL);
+//							}
+//							method.getParameters().add(p);
+//						}
+//
+//						Type returnType = functionChild.getDeclaredType();
+//						method.setType(returnType);
+//						members.add(method);
+//					}
+//					else
+//					{
+//						members.add(createProperty(sv.getName(), false, getDataProviderType(context, sv), getParsedComment(sv.getComment()), GLOBAL_VAR_IMAGE,
+//							sv.getSerializableRuntimeProperty(IScriptProvider.FILENAME)));
+//					}
+//				}
+//
+//				Iterator<ScriptMethod> scriptMethods = fs.getScriptMethods(false);
+//				while (scriptMethods.hasNext())
+//				{
+//					ScriptMethod sm = scriptMethods.next();
+//					members.add(createMethod(context, sm, GLOBAL_METHOD_IMAGE, sm.getSerializableRuntimeProperty(IScriptProvider.FILENAME)));
+//				}
+//			}
+//			return type;
+//
+//		}
+//	}
 
 
 	private class FoundSetCreator implements IScopeTypeCreator
@@ -762,25 +797,25 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 					break;
 			}
 			ImageDescriptor image = COLUMN_IMAGE;
-			String variableType = "Column";
+			String description = "Column";
 			if (provider instanceof AggregateVariable)
 			{
 				image = COLUMN_AGGR_IMAGE;
-				variableType = "Aggregate (" + ((AggregateVariable)provider).getRootObject().getName() + ")";
+				description = "Aggregate (" + ((AggregateVariable)provider).getRootObject().getName() + ")";
 			}
 			else if (provider instanceof ScriptCalculation)
 			{
 				image = COLUMN_CALC_IMAGE;
-				variableType = "Calculation (" + ((ScriptCalculation)provider).getRootObject().getName() + ")";
+				description = "Calculation (" + ((ScriptCalculation)provider).getRootObject().getName() + ")";
 			}
 			else if (provider instanceof ScriptVariable)
 			{
 				image = FORM_VARIABLE_IMAGE;
-				variableType = getParsedComment(((ScriptVariable)provider).getComment());
+				description = getParsedComment(((ScriptVariable)provider).getComment());
 				property.setAttribute(RESOURCE, ((ScriptVariable)provider).getSerializableRuntimeProperty(IScriptProvider.FILENAME));
 			}
 			property.setAttribute(IMAGE_DESCRIPTOR, image);
-			property.setDescription(variableType);
+			property.setDescription(description);
 			members.add(property);
 		}
 	}
