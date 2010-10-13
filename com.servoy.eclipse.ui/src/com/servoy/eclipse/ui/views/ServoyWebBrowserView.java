@@ -17,13 +17,26 @@
 
 package com.servoy.eclipse.ui.views;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.browser.BrowserViewer;
+import org.eclipse.ui.internal.browser.BusyIndicator;
 import org.eclipse.ui.internal.browser.WebBrowserView;
+
+import com.servoy.eclipse.ui.Activator;
 
 /**
  * Shows a page from the Servoy web site. The intention is to provide the Servoy developer with latest info related to Servoy.
@@ -33,7 +46,7 @@ import org.eclipse.ui.internal.browser.WebBrowserView;
 public class ServoyWebBrowserView extends WebBrowserView
 {
 	public static final String ID = "com.servoy.eclipse.ui.browser.view"; //$NON-NLS-1$
-	private static final String SERVOY_URL = "http://www.servoy.com/i";
+	private static final String SERVOY_URL = "http://www.servoy.com/i"; //$NON-NLS-1$
 
 	@Override
 	public void init(IViewSite site) throws PartInitException
@@ -59,7 +72,7 @@ public class ServoyWebBrowserView extends WebBrowserView
 
 			public void partOpened(IWorkbenchPart part)
 			{
-				setURL(SERVOY_URL);
+				if (part.getClass().equals(ServoyWebBrowserView.class)) setURL(SERVOY_URL);
 			}
 		});
 	}
@@ -70,9 +83,83 @@ public class ServoyWebBrowserView extends WebBrowserView
 	@Override
 	public void createPartControl(Composite parent)
 	{
-		viewer = new BrowserViewer(parent, 0);
+		viewer = new ServoyBrowserViewer(parent);
 		viewer.setContainer(this);
 		initDragAndDrop();
 	}
 
+	public static class ServoyBrowserViewer extends BrowserViewer
+	{
+		public ServoyBrowserViewer(Composite parent)
+		{
+			super(parent, BrowserViewer.BUTTON_BAR);
+			// Locate the toolbar and the busy indicator. The toolbar gets extended 
+			// and the indicator is dropped.
+			if (this.getChildren().length > 0)
+			{
+				Control firstChild = this.getChildren()[0]; // this one holds the toolbar and the indicator
+				if (firstChild instanceof Composite)
+				{
+					Composite holder = (Composite)firstChild;
+					if (holder.getChildren().length == 2)
+					{
+						Control toolbarRaw = holder.getChildren()[0];
+						Control indicatorRaw = holder.getChildren()[1];
+						if (toolbarRaw instanceof ToolBar)
+						{
+							ToolBar toolbar = (ToolBar)toolbarRaw;
+
+							final ToolItem maximizeRestore = new ToolItem(toolbar, SWT.NONE);
+							final Image maximize = Activator.loadImageDescriptorFromBundle("maximize.gif").createImage(); //$NON-NLS-1$
+							final Image restore = Activator.loadImageDescriptorFromBundle("restore.gif").createImage(); //$NON-NLS-1$
+							maximizeRestore.setImage(maximize);
+							maximizeRestore.setToolTipText("Maximize");
+							maximizeRestore.addSelectionListener(new SelectionAdapter()
+							{
+								@Override
+								public void widgetSelected(SelectionEvent event)
+								{
+									IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+									if (page != null)
+									{
+										for (IViewReference view : page.getViewReferences())
+										{
+											if (view.getId().equals(ID))
+											{
+												int currentState = page.getPartState(view);
+												int newState;
+												String newTooltip;
+												Image newImage;
+												if (currentState == IWorkbenchPage.STATE_MAXIMIZED)
+												{
+													newState = IWorkbenchPage.STATE_RESTORED;
+													newTooltip = "Maximize"; //$NON-NLS-1$
+													newImage = maximize;
+												}
+												else
+												{
+													newState = IWorkbenchPage.STATE_MAXIMIZED;
+													newTooltip = "Restore"; //$NON-NLS-1$
+													newImage = restore;
+												}
+												page.setPartState(view, newState);
+												maximizeRestore.setImage(newImage);
+												maximizeRestore.setToolTipText(newTooltip);
+											}
+										}
+									}
+								}
+							});
+
+						}
+						if (indicatorRaw instanceof BusyIndicator)
+						{
+							indicatorRaw.setVisible(false);
+						}
+					}
+				}
+				this.layout();
+			}
+		}
+	}
 }

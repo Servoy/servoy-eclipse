@@ -45,12 +45,22 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IViewReference;
+import org.eclipse.ui.IWindowListener;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
+import org.eclipse.ui.cheatsheets.OpenCheatSheetAction;
+import org.eclipse.ui.internal.ViewIntroAdapterPart;
 import org.eclipse.ui.internal.WorkbenchPlugin;
+import org.eclipse.ui.internal.cheatsheets.ICheatSheetResource;
 import org.eclipse.ui.internal.registry.ActionSetRegistry;
 import org.eclipse.ui.internal.registry.IActionSetDescriptor;
 import org.eclipse.ui.progress.WorkbenchJob;
@@ -230,6 +240,52 @@ public class Activator extends Plugin
 		String serviceClass = URLStreamHandlerService.class.getName();
 		context.registerService(serviceClass, new MediaURLStreamHandlerService(), properties);
 
+		// We need to hook a listener and detect when the Welcome page is closed.
+		// (And for that we need to hook another listener to detect when the workbench window is opened).
+		PlatformUI.getWorkbench().addWindowListener(new IWindowListener()
+		{
+			public void windowActivated(IWorkbenchWindow window)
+			{
+			}
+
+			public void windowClosed(IWorkbenchWindow window)
+			{
+			}
+
+			public void windowDeactivated(IWorkbenchWindow window)
+			{
+			}
+
+			public void windowOpened(IWorkbenchWindow window)
+			{
+				window.getPartService().addPartListener(new IPartListener()
+				{
+					public void partActivated(IWorkbenchPart part)
+					{
+					}
+
+					public void partBroughtToTop(IWorkbenchPart part)
+					{
+					}
+
+					public void partClosed(IWorkbenchPart part)
+					{
+						if (part instanceof ViewIntroAdapterPart)
+						{
+							showFirstCheatSheet();
+						}
+					}
+
+					public void partDeactivated(IWorkbenchPart part)
+					{
+					}
+
+					public void partOpened(IWorkbenchPart part)
+					{
+					}
+				});
+			}
+		});
 	}
 
 	public boolean isSqlExplorerLoaded()
@@ -692,5 +748,32 @@ public class Activator extends Plugin
 			}
 		}
 		return docManagerpProvider;
+	}
+
+	private void showFirstCheatSheet()
+	{
+//		final String cheatSheetId = params.getProperty("cheatSheetId", "com.servoy.eclipse.ui.cheatsheet.firstcontact");
+		final String cheatSheetId = "com.servoy.eclipse.ui.cheatsheet.firstcontact"; //$NON-NLS-1$
+		Display.getDefault().syncExec(new Runnable()
+		{
+			public void run()
+			{
+				IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+				if (page != null)
+				{
+					for (IViewReference vw : page.getViewReferences())
+						page.setPartState(vw, IWorkbenchPage.STATE_MINIMIZED);
+					for (IEditorReference ed : page.getEditorReferences())
+						page.setPartState(ed, IWorkbenchPage.STATE_MINIMIZED);
+
+					new OpenCheatSheetAction(cheatSheetId).run();
+
+					// Make the cheat sheet view not-maximized, so that it does not fill up the entire window.
+					IViewReference vw = page.findViewReference(ICheatSheetResource.CHEAT_SHEET_VIEW_ID);
+					if (vw != null) page.setPartState(vw, IWorkbenchPage.STATE_RESTORED);
+				}
+			}
+		});
+
 	}
 }

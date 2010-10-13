@@ -19,12 +19,7 @@ package com.servoy.eclipse.core.util;
 import java.util.Properties;
 
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.IViewReference;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.cheatsheets.OpenCheatSheetAction;
-import org.eclipse.ui.internal.cheatsheets.ICheatSheetResource;
 import org.eclipse.ui.intro.IIntroSite;
 import org.eclipse.ui.intro.config.IIntroAction;
 
@@ -32,31 +27,13 @@ public class IntroCheatSheetBridge implements IIntroAction
 {
 	public void run(IIntroSite site, Properties params)
 	{
-//		final String cheatSheetId = params.getProperty("cheatSheetId", "com.servoy.eclipse.ui.cheatsheet.firstcontact");
-		final String cheatSheetId = "com.servoy.eclipse.ui.cheatsheet.firstcontact"; //$NON-NLS-1$
-		Display.getDefault().syncExec(new Runnable()
+		Display.getDefault().asyncExec(new Runnable()
 		{
 			public void run()
 			{
-				IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-				for (IViewReference vw : page.getViewReferences())
-					page.setPartState(vw, IWorkbenchPage.STATE_MINIMIZED);
-				for (IEditorReference ed : page.getEditorReferences())
-					page.setPartState(ed, IWorkbenchPage.STATE_MINIMIZED);
-
-				new OpenCheatSheetAction(cheatSheetId).run();
-				Display.getDefault().asyncExec(new Runnable()
-				{
-					public void run()
-					{
-						PlatformUI.getWorkbench().getIntroManager().closeIntro(PlatformUI.getWorkbench().getIntroManager().getIntro());
-					}
-				});
-
-				// Make the cheat sheet view not-maximized, so that it does not fill up the entire window.
-				IViewReference vw = page.findViewReference(ICheatSheetResource.CHEAT_SHEET_VIEW_ID);
-				if (vw != null) page.setPartState(vw, IWorkbenchPage.STATE_RESTORED);
+				PlatformUI.getWorkbench().getIntroManager().closeIntro(PlatformUI.getWorkbench().getIntroManager().getIntro());
 			}
 		});
 	}
+
 }
