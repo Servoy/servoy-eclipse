@@ -32,6 +32,7 @@ import org.eclipse.gef.requests.ChangeBoundsRequest;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportAnchors;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.util.IAnchorConstants;
@@ -118,10 +119,25 @@ public class SnapToElementAlignment extends SnapToHelper
 		return setAnchor;
 	}
 
-	protected ElementAlignmentItem[] getElementAlignment(GraphicalEditPart container, ChangeBoundsRequest request)
+	boolean isAligmenttEditPart(EditPart editPart)
+	{
+		if (!(editPart instanceof GraphicalEditPart))
+		{
+			return false;
+		}
+		Object model = editPart.getModel();
+		if (model instanceof Part || !(model instanceof IPersist) || !(((IPersist)model).getParent() == container.getModel()))
+		{
+			// do not align parts, tabs or portal fields
+			return false;
+		}
+		return true;
+	}
+
+	protected ElementAlignmentItem[] getElementAlignment(ChangeBoundsRequest request)
 	{
 		List<EditPart> editParts = request.getEditParts();
-		if (editParts.size() == 0 || !(editParts.get(0) instanceof GraphicalEditPart) || !(editParts.get(0).getParent().getModel() instanceof Form))
+		if (editParts.size() == 0)
 		{
 			return null;
 		}
@@ -130,7 +146,7 @@ public class SnapToElementAlignment extends SnapToHelper
 		PrecisionRectangle rect = null;
 		for (EditPart ep : editParts)
 		{
-			if (ep instanceof GraphicalEditPart)
+			if (isAligmenttEditPart(ep))
 			{
 				Rectangle bounds = ((GraphicalEditPart)ep).getFigure().getBounds();
 				if (rect == null)
@@ -144,13 +160,19 @@ public class SnapToElementAlignment extends SnapToHelper
 			}
 		}
 
+		if (rect == null)
+		{
+			// no applicable elements
+			return null;
+		}
+
 		rect.translate(request.getMoveDelta());
 		rect.resize(request.getSizeDelta());
 
 		ElementAlignmentItem vertical = null;
 		ElementAlignmentItem horizontal = null;
 
-		Form form = (Form)editParts.get(0).getParent().getModel();
+		Form form = (Form)container.getModel();
 
 		// Alignment: North to container
 		if (RequestConstants.REQ_MOVE.equals(request.getType()) ||
@@ -178,7 +200,7 @@ public class SnapToElementAlignment extends SnapToHelper
 		List<EditPart> children = container.getChildren();
 		for (EditPart child : children)
 		{
-			if (!(child instanceof GraphicalEditPart) || editParts.contains(child))
+			if ((!(child.getModel() instanceof Part) && !isAligmenttEditPart(child)) || editParts.contains(child))
 			{
 				continue;
 			}
@@ -355,7 +377,7 @@ public class SnapToElementAlignment extends SnapToHelper
 	@Override
 	public int snapRectangle(Request request, int snapOrientation, PrecisionRectangle baseRect, PrecisionRectangle result)
 	{
-		ElementAlignmentItem[] elementAlignment = getElementAlignment(container, (ChangeBoundsRequest)request);
+		ElementAlignmentItem[] elementAlignment = getElementAlignment((ChangeBoundsRequest)request);
 		if (elementAlignment == null)
 		{
 			return snapOrientation;
