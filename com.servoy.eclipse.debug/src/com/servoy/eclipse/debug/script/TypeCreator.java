@@ -310,7 +310,18 @@ public abstract class TypeCreator
 				}
 				else if (IConstantsObject.class.isAssignableFrom(element))
 				{
-					addType(element.getSimpleName(), element);
+					if (constantsOnly(element.getSimpleName()))
+					{
+						JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(element, null);
+						if (javaMembers != null && javaMembers.getMethodIds(false).size() == 0)
+						{
+							addType(element.getSimpleName(), element);
+						}
+					}
+					else
+					{
+						addType(element.getSimpleName(), element);
+					}
 				}
 				else if (!constantsOnly(element.getSimpleName()) && IJavaScriptType.class.isAssignableFrom(element))
 				{
@@ -363,7 +374,7 @@ public abstract class TypeCreator
 		if (desc == null)
 		{
 			if (constantsOnly(typeName)) desc = CONSTANT;
-			else desc = PROPERTY;
+			//else desc = PROPERTY;
 		}
 		type.setAttribute(IMAGE_DESCRIPTOR, desc);
 		return type;
@@ -828,6 +839,10 @@ public abstract class TypeCreator
 		if (image != null)
 		{
 			property.setAttribute(IMAGE_DESCRIPTOR, image);
+		}
+		else if (type != null && type.getAttribute(IMAGE_DESCRIPTOR) != null)
+		{
+			property.setAttribute(IMAGE_DESCRIPTOR, type.getAttribute(IMAGE_DESCRIPTOR));
 		}
 		if (resource != null)
 		{

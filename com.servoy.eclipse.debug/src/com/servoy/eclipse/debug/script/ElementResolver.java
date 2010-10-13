@@ -16,10 +16,8 @@
  */
 package com.servoy.eclipse.debug.script;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -65,8 +63,6 @@ import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 @SuppressWarnings("nls")
 public class ElementResolver extends TypeCreator implements IElementResolver
 {
-	private static final List<String> noneConstantTypes = Arrays.asList(new String[] { "application", "security", "solutionModel", "databaseManager", "controller", "currentcontroller", "i18n", "history", "utils", "foundset", "forms", "elements", "globals" });
-
 	private final Map<String, ITypeNameCreator> typeNameCreators = new HashMap<String, ElementResolver.ITypeNameCreator>();
 
 	public ElementResolver()
@@ -94,7 +90,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 	@Override
 	protected boolean constantsOnly(String name)
 	{
-		return !noneConstantTypes.contains(name);
+		return true;
 	}
 
 	public Set<String> listGlobals(ITypeInfoContext context, String prefix)
@@ -166,6 +162,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 			typeNames.remove("controller");
 
 			typeNames.add("forms");
+			typeNames.add("plugins");
 
 			// or calculation???
 		}
@@ -197,46 +194,12 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 					property.setName(name);
 					property.setReadOnly(true);
 					property.setAttribute(VALUECOLLECTION, collection);
+					property.setAttribute(IMAGE_DESCRIPTOR, GLOBALS);
 					return property;
 				}
 			}
 			return null;
 		}
-//		else if (name.equals("forms"))
-//		{
-//			FlattenedSolution fs = getFlattenedSolution(context);
-//			if (fs == null || fs.getSolution() == null)
-//			{
-//				return null;
-//			}
-//
-//			IValueCollection valueCollection = ValueCollectionFactory.createScopeValueCollection();
-//
-//
-//			IValueReference child = valueCollection.createChild("allnames");
-//			child.setDeclaredType(context.getKnownType("Array"));
-//			child.setKind(ReferenceKind.PROPERTY);
-//
-//			child = valueCollection.createChild("length");
-//			child.setDeclaredType(context.getKnownType("Number"));
-//			child.setKind(ReferenceKind.PROPERTY);
-//
-//			Iterator<Form> forms = fs.getForms(false);
-//
-//			while (forms.hasNext())
-//			{
-//				Form form = forms.next();
-//				IValueReference lazyChild = ValueCollectionFactory.createLazyChild(valueCollection, form.getName(), new FormValue(form, context, fs));
-//				lazyChild.setKind(ReferenceKind.PROPERTY);
-//				lazyChild.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
-//			}
-//			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
-//			property.setName(name);
-//			property.setReadOnly(true);
-//			property.setAttribute(VALUECOLLECTION, valueCollection);
-//			property.setAttribute(IMAGE_DESCRIPTOR, FORMS);
-//			return property;
-//		}
 		Type type = null;
 		String typeName = getTypeName(context, name);
 		if (typeName != null)
@@ -363,22 +326,6 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 			return "Forms";
 		}
 	}
-//
-//	private class GlobalsNameCreator implements ITypeNameCreator
-//	{
-//		/**
-//		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
-//		 */
-//		public String getTypeName(ITypeInfoContext context, String fullTypeName)
-//		{
-//			FlattenedSolution fs = getFlattenedSolution(context);
-//			if (fs != null)
-//			{
-//				return "Globals<" + fs.getMainSolutionMetaData().getName() + '>';
-//			}
-//			return "Globals";
-//		}
-//	}
 
 	private class PluginsTypeNameCreator implements ITypeNameCreator
 	{

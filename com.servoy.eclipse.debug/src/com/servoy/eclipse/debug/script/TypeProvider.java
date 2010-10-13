@@ -44,6 +44,7 @@ import org.mozilla.javascript.JavaMembers;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.IApplication;
@@ -171,6 +172,9 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	{
 		Set<String> names = getTypeNames(prefix);
 		names.remove("Elements");
+		names.remove("Super");
+		names.remove("Forms");
+		names.remove("Plugins");
 		names.removeAll(constantOnly);
 		return names;
 	}
@@ -263,16 +267,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 							}
 						}
 
-//						Iterator<ScriptMethod> scriptMethods = formToUse.getScriptMethods(false);
-//						while (scriptMethods.hasNext())
-//						{
-//							ScriptMethod sm = scriptMethods.next();
-//							members.add(createMethod(context, sm, FORM_METHOD_IMAGE, sm.getSerializableRuntimeProperty(IScriptProvider.FILENAME)));
-//						}
-//
-//						// form variables
-//						addDataProviders(formToUse.getScriptVariables(false), members, context);
-
 						// data providers
 						Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(formToUse.getTable());
 
@@ -285,7 +279,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						addRelations(context, fs, members, fs.getRelations(formToUse.getTable(), true, false));
 
 						// element scope
-						members.add(createProperty(context, "elements", true, "Elements<" + formToUse.getName() + '>', PROPERTY));
+						members.add(createProperty(context, "elements", true, "Elements<" + formToUse.getName() + '>', ELEMENTS));
 					}
 					catch (Exception e)
 					{
@@ -735,7 +729,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			members.add(createProperty(context, "allvariables", true, "Array", SPECIAL_PROPERTY));
 
 			// controller and foundset
-			members.add(createProperty(context, "controller", true, "controller", PROPERTY));
+			members.add(createProperty(context, "controller", true, "controller", IconProvider.instance().descriptor(JSForm.class)));
 			members.add(createProperty(context, "foundset", true, FoundSet.JS_FOUNDSET, FOUNDSET_IMAGE));
 			type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
 			return type;
@@ -770,7 +764,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			members.add(createProperty(context, "allnames", true, "Array", SPECIAL_PROPERTY));
 			members.add(createProperty(context, "length", true, "Number", PROPERTY));
 
-			type.setAttribute(IMAGE_DESCRIPTOR, PROPERTY);
+			type.setAttribute(IMAGE_DESCRIPTOR, ELEMENTS);
 			return type;
 		}
 	}
