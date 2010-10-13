@@ -105,7 +105,6 @@ public class DesignApplication implements IApplication, IMessagesCallback
 	private PageFormat pageFormat;
 	private IBeanManager beanManager;
 	private ClientPluginAccessProvider pluginAccess;
-	private Pair<String, String> trackingInfo;
 
 	DesignApplication()
 	{
@@ -884,21 +883,4 @@ public class DesignApplication implements IApplication, IMessagesCallback
 	{
 		return getClient().getJSWindowManager();
 	}
-
-	/**
-	 * @see com.servoy.j2db.IServiceProvider#setTrackingInfo(com.servoy.j2db.util.Pair)
-	 */
-	public void setTrackingInfo(Pair<String, String> trackingInfo)
-	{
-		this.trackingInfo = trackingInfo;
-	}
-
-	/**
-	 * @see com.servoy.j2db.IServiceProvider#getTrackingInfo()
-	 */
-	public Pair<String, String> getTrackingInfo()
-	{
-		return trackingInfo;
-	}
-
 }
