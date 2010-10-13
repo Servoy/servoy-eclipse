@@ -25,6 +25,7 @@ import java.util.Set;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 
+import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.scripting.JSApplication;
@@ -80,6 +81,7 @@ public class IconProvider
 		c2i.put(JSSolutionModel.class, "blueprint.gif"); //$NON-NLS-1$
 		c2i.put(JSUnitAssertFunctions.class, "jsunit.png"); //$NON-NLS-1$
 		c2i.put(ServoyException.class, "exception.gif"); //$NON-NLS-1$
+		c2i.put(JSForm.class, "formula.gif"); //$NON-NLS-1$
 
 		oldLocation.add(JSUtils.class);
 	}
