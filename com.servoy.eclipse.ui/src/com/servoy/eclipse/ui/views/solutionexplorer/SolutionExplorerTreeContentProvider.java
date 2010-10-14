@@ -108,6 +108,19 @@ import com.servoy.j2db.util.UUID;
  */
 public class SolutionExplorerTreeContentProvider implements IStructuredContentProvider, ITreeContentProvider
 {
+	private static final String IMG_SOLUTION = "solution.gif"; //$NON-NLS-1$
+	private static final String IMG_SOLUTION_M = "module.gif"; //$NON-NLS-1$
+	private static final String IMG_SOLUTION_MODULE = "solution_module.gif"; //$NON-NLS-1$
+	private static final String IMG_SOLUTION_MODULE_M = "solution_module_m.gif"; //$NON-NLS-1$
+	private static final String IMG_SOLUTION_LOGIN = "solution_login.gif"; //$NON-NLS-1$
+	private static final String IMG_SOLUTION_LOGIN_M = "solution_login_m.gif"; //$NON-NLS-1$
+	private static final String IMG_SOLUTION_AUTHENTICATOR = "solution_auth.gif"; //$NON-NLS-1$
+	private static final String IMG_SOLUTION_AUTHENTICATOR_M = "solution_auth_m.gif"; //$NON-NLS-1$
+	private static final String IMG_SOLUTION_SMART_ONLY = "solution_smart_only.gif"; //$NON-NLS-1$
+	private static final String IMG_SOLUTION_SMART_ONLY_M = "solution_smart_only_m.gif"; //$NON-NLS-1$
+	private static final String IMG_SOLUTION_WEB_ONLY = "solution_web_only.gif"; //$NON-NLS-1$
+	private static final String IMG_SOLUTION_WEB_ONLY_M = "solution_web_only_m.gif"; //$NON-NLS-1$
+
 	private PlatformSimpleUserNode invisibleRootNode;
 
 	private PlatformSimpleUserNode activeSolutionNode;
@@ -389,14 +402,40 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return result;
 	}
 
+	private Image getServoyProjectImage(ServoyProject p, boolean isModule, boolean disabled)
+	{
+		Solution s = p.getSolution();
+		String imgName = isModule ? IMG_SOLUTION_M : IMG_SOLUTION; // default is solution
+		if (s != null)
+		{
+			switch (s.getSolutionType())
+			{
+				case SolutionMetaData.MODULE :
+					imgName = isModule ? IMG_SOLUTION_MODULE_M : IMG_SOLUTION_MODULE;
+					break;
+				case SolutionMetaData.LOGIN_SOLUTION :
+					imgName = isModule ? IMG_SOLUTION_LOGIN_M : IMG_SOLUTION_LOGIN;
+					break;
+				case SolutionMetaData.AUTHENTICATOR :
+					imgName = isModule ? IMG_SOLUTION_AUTHENTICATOR_M : IMG_SOLUTION_AUTHENTICATOR;
+					break;
+				case SolutionMetaData.SMART_CLIENT_ONLY :
+					imgName = isModule ? IMG_SOLUTION_SMART_ONLY_M : IMG_SOLUTION_SMART_ONLY;
+					break;
+				case SolutionMetaData.WEB_CLIENT_ONLY :
+					imgName = isModule ? IMG_SOLUTION_WEB_ONLY_M : IMG_SOLUTION_WEB_ONLY;
+			}
+		}
+
+		return uiActivator.loadImageFromBundle(imgName, disabled);
+	}
+
 	private void addSolutionProjects(ServoyProject[] projects)
 	{
-		Image imgActive = uiActivator.loadImageFromBundle("solution.gif");
-		Image imgActiveGrayedOut = uiActivator.loadImageFromBundle("solution.gif", true);
 		if (projects.length == 0)
 		{
 			activeSolutionNode.children = new PlatformSimpleUserNode[0];
-			activeSolutionNode.setIcon(imgActiveGrayedOut);
+			activeSolutionNode.setIcon(uiActivator.loadImageFromBundle(IMG_SOLUTION, true));
 			activeSolutionNode.setDisplayName(Messages.TreeStrings_NoActiveSolution);
 			activeSolutionNode.setRealObject(null);
 			allSolutionsNode.children = new PlatformSimpleUserNode[0];
@@ -428,9 +467,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 		List<PlatformSimpleUserNode> modulesNodeChildren = new ArrayList<PlatformSimpleUserNode>();
 		List<PlatformSimpleUserNode> allSolutionChildren = new ArrayList<PlatformSimpleUserNode>();
-		Image imgOpen = uiActivator.loadImageFromBundle("module.gif");
-		Image imgOpenGrayedOut = uiActivator.loadImageFromBundle("module.gif", true);
-		Image imgClosed = uiActivator.loadImageFromBundle("closed_project.gif", true);
 
 		activeSolutionNode.children = null;
 		activeSolutionNode.setEnabled(false); // this node will be accessible even if it is not enabled;
@@ -486,16 +522,19 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					if (servoyProject.isActive())
 					{
 						activeSolutionNode.setEnabled(expandable);
-						node = new PlatformSimpleUserNode(displayValue, UserNodeType.SOLUTION_ITEM, servoyProject, imgActiveGrayedOut);
+						node = new PlatformSimpleUserNode(displayValue, UserNodeType.SOLUTION_ITEM, servoyProject, getServoyProjectImage(servoyProject, false,
+							false));
 					}
 					else
 					{
-						node = new PlatformSimpleUserNode(displayValue, UserNodeType.SOLUTION_ITEM, servoyProject, expandable ? imgOpen : imgOpenGrayedOut);
+						node = new PlatformSimpleUserNode(displayValue, UserNodeType.SOLUTION_ITEM, servoyProject, getServoyProjectImage(servoyProject, true,
+							!expandable));
 						node.setEnabled(expandable);
 						modulesNodeChildren.add(node);
 						node.parent = modulesOfActiveSolution;
 
-						node = new PlatformSimpleUserNode(displayValue, UserNodeType.SOLUTION_ITEM, servoyProject, imgOpenGrayedOut);
+						node = new PlatformSimpleUserNode(displayValue, UserNodeType.SOLUTION_ITEM, servoyProject, getServoyProjectImage(servoyProject, true,
+							false));
 					}
 
 					node.setEnabled(false);
@@ -505,7 +544,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				else
 				{
 					PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayValue, UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE, servoyProject,
-						imgClosed);
+						getServoyProjectImage(servoyProject, false, true));
 					node.setEnabled(false);
 					allSolutionChildren.add(node);
 					node.parent = allSolutionsNode;
@@ -517,10 +556,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		activeSolutionNode.setRealObject(servoyModel.getActiveProject());
 		if (activeSolutionNode.getRealObject() != null)
 		{
-			boolean isLoginSolution = ((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION;
-
-			if (isLoginSolution) imgActive = uiActivator.loadImageFromBundle("login_solution.gif");
-			activeSolutionNode.setIcon(imgActive);
+			activeSolutionNode.setIcon(getServoyProjectImage(((ServoyProject)activeSolutionNode.getRealObject()), false, false));
 			String name = ((ServoyProject)activeSolutionNode.getRealObject()).getProject().getName();
 			if (solutionOfCalculation != null)
 			{
@@ -529,14 +565,14 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			else
 			{
 				// databaseManager not allowed in login solution
-				if (isLoginSolution) databaseManager.hide();
+				if (((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION) databaseManager.hide();
 				else databaseManager.unhide();
 			}
 			activeSolutionNode.setDisplayName(name);
 		}
 		else
 		{
-			activeSolutionNode.setIcon(imgActiveGrayedOut);
+			activeSolutionNode.setIcon(getServoyProjectImage(((ServoyProject)activeSolutionNode.getRealObject()), false, true));
 			activeSolutionNode.setDisplayName(Messages.TreeStrings_NoActiveSolution);
 		}
 
