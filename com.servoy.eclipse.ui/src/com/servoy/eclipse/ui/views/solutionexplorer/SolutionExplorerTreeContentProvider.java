@@ -60,8 +60,8 @@ import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EnableServerAction;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
@@ -146,9 +146,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private PlatformSimpleUserNode media;
 
-	private PlatformSimpleUserNode[] scriptingNodes;
+	private final PlatformSimpleUserNode[] scriptingNodes;
 
-	private PlatformSimpleUserNode[] resourceNodes;
+	private final PlatformSimpleUserNode[] resourceNodes;
 
 	private final SolutionExplorerView view;
 
@@ -784,6 +784,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 			}
 			pluginNode.children = plugins.toArray(new PlatformSimpleUserNode[plugins.size()]);
+			// It may happen that the Plugins node was disabled before its children were added.
+			if (pluginNode.isHidden()) pluginNode.hide();
+			else pluginNode.unhide();
+			view.refreshTreeNodeFromModel(pluginNode);
 		}
 	}
 

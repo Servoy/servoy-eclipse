@@ -152,6 +152,11 @@ public class SimpleUserNode
 		return enabled;
 	}
 
+	public boolean isHidden()
+	{
+		return hidden;
+	}
+
 	public void hide()
 	{
 		hidden = true;
