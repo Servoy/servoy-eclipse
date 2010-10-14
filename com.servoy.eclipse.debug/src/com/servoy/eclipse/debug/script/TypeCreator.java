@@ -505,8 +505,12 @@ public abstract class TypeCreator
 						{
 							returnType = context.getType(getMemberTypeName(context, name, returnTypeClz, typeName));
 						}
-						Property property = createProperty(name, false, returnType, getDoc(name, scriptObjectClass, name, null), type == 3 ? CONSTANT
-							: PROPERTY);
+						ImageDescriptor descriptor = IconProvider.instance().descriptor(returnTypeClz);
+						if (descriptor == null)
+						{
+							descriptor = type == 3 ? CONSTANT : PROPERTY;
+						}
+						Property property = createProperty(name, false, returnType, getDoc(name, scriptObjectClass, name, null), descriptor);
 						if (scriptObject != null && scriptObject.isDeprecated(name))
 						{
 							property.setDeprecated(true);
@@ -554,7 +558,15 @@ public abstract class TypeCreator
 				return FoundSet.JS_FOUNDSET + '<' + config + '>';
 			}
 		}
-		if (memberReturnType.isArray()) return "Array";
+		if (memberReturnType.isArray())
+		{
+			Class< ? > returnType = getReturnType(memberReturnType.getComponentType());
+			if (returnType != null)
+			{
+				return "Array<" + getMemberTypeName(context, memberName, returnType, objectTypeName) + '>';
+			}
+			return "Array";
+		}
 		String typeName = memberReturnType.getSimpleName();
 		addAnonymousClassType(typeName, memberReturnType);
 		return typeName;
@@ -953,16 +965,24 @@ public abstract class TypeCreator
 		{
 			returnType = ((BeanProperty)object).getGetter().getReturnType();
 		}
-		if (returnType != null && returnType.isArray()) return returnType;
-		if (returnType != null && !returnType.isAssignableFrom(Void.class) && !returnType.isAssignableFrom(void.class))
+		return getReturnType(returnType);
+	}
+
+	/**
+	 * @param returnType
+	 */
+	private static Class< ? > getReturnType(Class< ? > returnType)
+	{
+		if (returnType == null || returnType.isArray()) return returnType;
+		if (!returnType.isAssignableFrom(Void.class) && !returnType.isAssignableFrom(void.class))
 		{
 			if (returnType.isAssignableFrom(Record.class))
 			{
-				returnType = Record.class;
+				return Record.class;
 			}
 			else if (returnType.isAssignableFrom(FoundSet.class))
 			{
-				returnType = FoundSet.class;
+				return FoundSet.class;
 			}
 			else if (returnType.isPrimitive() || Number.class.isAssignableFrom(returnType))
 			{
