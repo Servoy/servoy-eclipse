@@ -144,6 +144,15 @@
             name="Method"
             project="false">
       </wizard>
+      <wizard
+            canFinishEarly="false"
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.wizards.NewServerWizard"
+            icon="icons/new_server.gif"
+            id="com.servoy.eclipse.ui.NewServerWizard"
+            name="Database Server"
+            project="false">
+      </wizard>
    </extension>
    <extension 
    		point="org.eclipse.ui.exportWizards">

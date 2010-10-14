@@ -41,6 +41,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.wizards.NewFormWizard;
 import com.servoy.eclipse.ui.wizards.NewMethodWizard;
 import com.servoy.eclipse.ui.wizards.NewRelationWizard;
+import com.servoy.eclipse.ui.wizards.NewServerWizard;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
 import com.servoy.eclipse.ui.wizards.NewStyleWizard;
 import com.servoy.eclipse.ui.wizards.NewValueListWizard;
@@ -121,6 +122,7 @@ public class DesignPerspective implements IPerspectiveFactory
 
 	protected void addNewWizards(IPageLayout layout)
 	{
+		layout.addNewWizardShortcut(NewServerWizard.ID);
 		layout.addNewWizardShortcut(NewFormWizard.ID);
 		layout.addNewWizardShortcut(NewMethodWizard.ID);
 		layout.addNewWizardShortcut(NewRelationWizard.ID);
