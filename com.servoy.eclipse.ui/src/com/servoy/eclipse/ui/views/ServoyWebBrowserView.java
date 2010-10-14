@@ -72,7 +72,10 @@ public class ServoyWebBrowserView extends WebBrowserView
 
 			public void partOpened(IWorkbenchPart part)
 			{
-				if (part.getClass().equals(ServoyWebBrowserView.class)) setURL(SERVOY_URL);
+				if (ServoyWebBrowserView.this == part)
+				{
+					setURL(SERVOY_URL);
+				}
 			}
 		});
 	}
