@@ -79,7 +79,9 @@ public class SelectedElementFeedbackFigure extends Figure implements AncestorLis
 		// create a fake request: move(0.0)
 		ChangeBoundsRequest changeBoundsRequest = new ChangeBoundsRequest(RequestConstants.REQ_MOVE);
 		changeBoundsRequest.setEditParts(editPart);
-		ElementAlignmentItem[] elementAlignment = new SnapToElementAlignment(container).getElementAlignment(changeBoundsRequest);
+		SnapToElementAlignment snapToElementAlignment = new SnapToElementAlignment(container);
+		snapToElementAlignment.setSnapThreshold(0);
+		ElementAlignmentItem[] elementAlignment = snapToElementAlignment.getElementAlignment(changeBoundsRequest);
 		if (elementAlignment != null)
 		{
 			for (ElementAlignmentItem item : elementAlignment)

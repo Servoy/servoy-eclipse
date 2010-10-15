@@ -83,6 +83,12 @@ public class SnapToElementAlignment extends SnapToHelper
 		}
 	}
 
+	protected void setSnapThreshold(int snapThreshold)
+	{
+		readPreferences();
+		this.snapThreshold = snapThreshold;
+	}
+
 	protected int getSnapThreshold()
 	{
 		readPreferences();
@@ -336,7 +342,7 @@ public class SnapToElementAlignment extends SnapToHelper
 			alignType = ElementAlignmentItem.ALIGN_TYPE_DISTANCE_MEDIUM;
 		}
 
-		if (Math.abs(delta) < (item == null ? getSnapThreshold() : Math.abs(item.delta)))
+		if (Math.abs(delta) < (item == null ? getSnapThreshold() + 1 : Math.abs(item.delta)))
 		{
 			// closer match
 			return new ElementAlignmentItem(alignDirection, alignType, alignOffset, delta, start, end, anchor);
@@ -357,7 +363,7 @@ public class SnapToElementAlignment extends SnapToHelper
 		int start, int end, boolean anchor)
 	{
 		int delta = offset - dragOffset;
-		if (Math.abs(delta) < (item == null ? getSnapThreshold() : Math.abs(item.delta)))
+		if (Math.abs(delta) < (item == null ? getSnapThreshold() + 1 : Math.abs(item.delta)))
 		{
 			// closer match
 			return new ElementAlignmentItem(alignDirection, alignType, offset, delta, start, end, anchor);
