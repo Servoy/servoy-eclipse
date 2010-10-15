@@ -294,6 +294,6 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 		{
 			return new DragFormPartPolicy();
 		}
-		return new AlignmentfeedbackEditPolicy();
+		return new AlignmentfeedbackEditPolicy(parent);
 	}
 }

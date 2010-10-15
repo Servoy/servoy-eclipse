@@ -22,19 +22,15 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.DragTracker;
 import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.Handle;
+import org.eclipse.gef.LayerConstants;
 import org.eclipse.gef.editpolicies.ResizableEditPolicy;
 import org.eclipse.gef.handles.ResizeHandle;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.tools.ResizeTracker;
-
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
-import com.servoy.eclipse.ui.resource.ColorResource;
-import com.servoy.j2db.util.Settings;
 
 /**
  * Edit policy for moving/resizing elements.
@@ -46,6 +42,24 @@ import com.servoy.j2db.util.Settings;
 final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 {
 	private final Map<ElementAlignmentItem, IFigure> alignmentFeedbackFigures = new HashMap<ElementAlignmentItem, IFigure>();
+
+	/**
+	 * the feedback figure for the selected element.
+	 */
+	protected IFigure selectedElementFeedbackFigure;
+
+	private final FormGraphicalEditPart container;
+
+	public AlignmentfeedbackEditPolicy(FormGraphicalEditPart container)
+	{
+		this.container = container;
+	}
+
+	@Override
+	public GraphicalEditPart getHost()
+	{
+		return (GraphicalEditPart)super.getHost();
+	}
 
 	protected Handle createResizeHandle(GraphicalEditPart owner, final int direction)
 	{
@@ -71,6 +85,7 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	protected void showChangeBoundsFeedback(ChangeBoundsRequest request)
 	{
 		super.showChangeBoundsFeedback(request);
+		removeSelectedElementFeedbackFigure();
 		showElementAlignmentFeedback(request);
 	}
 
@@ -79,6 +94,7 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	{
 		super.eraseChangeBoundsFeedback(request);
 		eraseElementAlignmentFeedback();
+		addSelectedElementFeedbackFigure();
 	}
 
 	protected void showElementAlignmentFeedback(ChangeBoundsRequest request)
@@ -115,11 +131,9 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 		{
 			if (alignmentFeedbackFigures.get(item) == null)
 			{
-				IFigure figure = createAlignmentFeedbackFigure(item);
-				if (figure != null)
-				{
-					alignmentFeedbackFigures.put(item, figure);
-				}
+				AlignmentFeedbackFigure figure = new AlignmentFeedbackFigure(item);
+				alignmentFeedbackFigures.put(item, figure);
+				addFeedback(figure);
 			}
 		}
 	}
@@ -133,93 +147,38 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 		alignmentFeedbackFigures.clear();
 	}
 
-	protected IFigure createAlignmentFeedbackFigure(ElementAlignmentItem item)
+	@Override
+	protected void hideSelection()
 	{
-		AlignmentFeedbackFigure figure = null;
-		if (ElementAlignmentItem.ALIGN_TYPE_SIDE.equals(item.alignType))
-		{
-			figure = createSideAlignmentFeedbackFigure(item);
-		}
-		else if (ElementAlignmentItem.ALIGN_TYPE_INDENT.equals(item.alignType))
-		{
-			figure = createIndentAlignmentFeedbackFigure(item);
-		}
-		else if (ElementAlignmentItem.ALIGN_TYPE_DISTANCE_LARGE.equals(item.alignType) ||
-			ElementAlignmentItem.ALIGN_TYPE_DISTANCE_MEDIUM.equals(item.alignType) || ElementAlignmentItem.ALIGN_TYPE_DISTANCE_SMALL.equals(item.alignType))
-		{
-			figure = createDistanceAlignmentFeedbackFigure(item);
-		}
-
-		if (figure != null)
-		{
-			figure.setLineStyle(Graphics.LINE_CUSTOM);
-			figure.setLineDash(new float[] { 5, 2 });
-			figure.setForegroundColor(ColorResource.INSTANCE.getColor(new DesignerPreferences(Settings.getInstance()).getAlignmentGuideColor()));
-			addFeedback(figure);
-		}
-		return figure;
+		super.hideSelection();
+		removeSelectedElementFeedbackFigure();
 	}
 
-	protected AlignmentFeedbackFigure createSideAlignmentFeedbackFigure(ElementAlignmentItem item)
+	@Override
+	protected void addSelectionHandles()
 	{
-		AlignmentFeedbackFigure line = new AlignmentFeedbackFigure();
-
-		boolean horiozontal = ElementAlignmentItem.ALIGN_DIRECTION_NORTH.equals(item.alignDirection) ||
-			ElementAlignmentItem.ALIGN_DIRECTION_SOUTH.equals(item.alignDirection);
-		line.addLine(horiozontal, item.target, item.start - 5, item.end + 5);
-
-		return line;
+		super.addSelectionHandles();
+		addSelectedElementFeedbackFigure();
 	}
 
-	protected AlignmentFeedbackFigure createIndentAlignmentFeedbackFigure(ElementAlignmentItem item)
+	protected void removeSelectedElementFeedbackFigure()
 	{
-		AlignmentFeedbackFigure line = new AlignmentFeedbackFigure();
-
-		int indent = new DesignerPreferences(Settings.getInstance()).getAlignmentIndent();
-
-		line.addLine(false, item.target, item.start - 5, item.end + 50);
-		line.addLine(false, item.target - indent, item.start - 50, item.end + 5);
-		// horizontal line confuses with other horizontal feedback // 	line.addLine(true, item.end, item.target - indent - 10, item.target + 50);
-
-		return line;
+		if (selectedElementFeedbackFigure != null)
+		{
+			IFigure layer = getLayer(LayerConstants.FEEDBACK_LAYER);
+			layer.remove(selectedElementFeedbackFigure);
+			selectedElementFeedbackFigure = null;
+		}
 	}
 
-	protected AlignmentFeedbackFigure createDistanceAlignmentFeedbackFigure(ElementAlignmentItem item)
+	/**
+	 * Adds the alignment to the feedback layer.
+	 */
+	protected void addSelectedElementFeedbackFigure()
 	{
-		AlignmentFeedbackFigure figure = new AlignmentFeedbackFigure();
-
-		boolean horiozontal = ElementAlignmentItem.ALIGN_DIRECTION_NORTH.equals(item.alignDirection) ||
-			ElementAlignmentItem.ALIGN_DIRECTION_SOUTH.equals(item.alignDirection);
-		int sign = ElementAlignmentItem.ALIGN_DIRECTION_NORTH.equals(item.alignDirection) ||
-			ElementAlignmentItem.ALIGN_DIRECTION_WEST.equals(item.alignDirection) ? -1 : 1;
-
-		// snapped-to line
-		figure.addLine(horiozontal, item.target, item.start - 5, item.end + 5);
-
-		int[] alignmentDistances = new DesignerPreferences(Settings.getInstance()).getAlignmentDistances();
-		int mediumDiff = 0;
-		int smallDiff = 0;
-		if (ElementAlignmentItem.ALIGN_TYPE_DISTANCE_LARGE.equals(item.alignType))
-		{
-			mediumDiff = alignmentDistances[2 /* large */] - alignmentDistances[1/* medium */];
-			smallDiff = alignmentDistances[2/* large */] - alignmentDistances[0/* small */];
-		}
-		else if (ElementAlignmentItem.ALIGN_TYPE_DISTANCE_MEDIUM.equals(item.alignType))
-		{
-			smallDiff = alignmentDistances[1/* medium */] - alignmentDistances[0/* small */];
-		}
-
-		if (mediumDiff > 0)
-		{
-			// add line for medium distance
-			figure.addLine(horiozontal, item.target + sign * mediumDiff, item.start - 5, item.end + 5);
-		}
-		if (smallDiff > 0)
-		{
-			// add line for small distance
-			figure.addLine(horiozontal, item.target + sign * smallDiff, item.start - 5, item.end + 5);
-		}
-
-		return figure;
+		removeSelectedElementFeedbackFigure();
+		IFigure layer = getLayer(LayerConstants.FEEDBACK_LAYER);
+		selectedElementFeedbackFigure = new SelectedElementFeedbackFigure(container, getHost());
+		layer.add(selectedElementFeedbackFigure);
 	}
 }
