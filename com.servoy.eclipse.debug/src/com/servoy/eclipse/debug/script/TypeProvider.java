@@ -116,7 +116,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addScopeType("Plugins", new PluginsScopeCreator());
 		addScopeType("Super", new SuperScopeCreator());
 		addScopeType("Forms", new FormsScopeCreator());
-//		addScopeType("Globals", new GlobalScopeCreator());
+		addScopeType("Globals", new GlobalScopeCreator());
 
 		dynamicTypeFillers.put(FoundSet.JS_FOUNDSET, new DataProviderFiller());
 		dynamicTypeFillers.put(Record.JS_RECORD, new DataProviderFiller());
@@ -498,6 +498,52 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		}
 	}
 
+	private class GlobalScopeCreator implements IScopeTypeCreator
+	{
+		/**
+		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
+		 */
+		public Type createType(ITypeInfoContext context, String fullTypeName)
+		{
+			FlattenedSolution fs = getFlattenedSolution(context);
+
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			if (fs != null)
+			{
+				type.setName("Globals<" + fs.getMainSolutionMetaData().getName() + '>');
+			}
+			else
+			{
+				type.setName("Globals");
+			}
+			type.setKind(TypeKind.JAVA);
+			type.setAttribute(IMAGE_DESCRIPTOR, GLOBALS);
+
+			EList<Member> members = type.getMembers();
+
+			members.add(createProperty(context, "allmethods", true, "Array", "Returns all global method names in an Array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "allvariables", true, "Array", "Returns all global variable names in an Array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "allrelations", true, "Array", "Returns all global relation names in an Array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "currentcontroller", true, "controller", "The current active main forms controller", PROPERTY));
+
+
+			if (fs != null)
+			{
+				try
+				{
+					addRelations(context, fs, members, fs.getRelations(null, true, false));
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+			return type;
+
+		}
+	}
+
+
 	private class FormsScopeCreator implements IScopeTypeCreator
 	{
 		/**
@@ -522,6 +568,11 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			EList<Member> members = type.getMembers();
 			members.add(createProperty(context, "allnames", true, "Array", "All form names as an array", SPECIAL_PROPERTY));
 			members.add(createProperty(context, "length", true, "Number", "Number of forms", PROPERTY));
+
+			// special array lookup property so that forms[xxx]. does code complete.
+			Property arrayProp = createProperty(context, "[]", true, "Form", PROPERTY);
+			arrayProp.setVisible(false);
+			members.add(arrayProp);
 
 			if (fs != null)
 			{

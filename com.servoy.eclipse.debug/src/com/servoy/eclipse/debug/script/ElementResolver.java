@@ -100,6 +100,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 	public Set<String> listGlobals(ITypeInfoContext context, String prefix)
 	{
 		Set<String> typeNames = getTypeNames(prefix);
+		FlattenedSolution fs = getFlattenedSolution(context);
 		Form form = getForm(context);
 		if (form != null)
 		{
@@ -109,7 +110,6 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 			typeNames.add("forms");
 			typeNames.add("globals");
 			typeNames.addAll(typeNameCreators.keySet());
-			FlattenedSolution fs = getFlattenedSolution(context);
 			Form formToUse = form;
 			if (form.getExtendsFormID() > 0)
 			{
@@ -160,6 +160,20 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 			typeNames.add("forms");
 			typeNames.add("plugins");
 
+			try
+			{
+				Iterator<Relation> relations = fs.getRelations(null, true, false);
+				while (relations.hasNext())
+				{
+					typeNames.add(relations.next().getName());
+				}
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError("Cant get relations of " + form, e);
+			}
+
+
 			// or calculation???
 		}
 		return typeNames;
@@ -191,6 +205,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 					property.setReadOnly(true);
 					property.setAttribute(VALUECOLLECTION, collection);
 					property.setAttribute(IMAGE_DESCRIPTOR, GLOBALS);
+					property.setType(context.getType("Globals<" + fs.getSolution().getName() + '>'));
 					return property;
 				}
 			}
