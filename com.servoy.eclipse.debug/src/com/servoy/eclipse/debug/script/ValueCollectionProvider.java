@@ -83,34 +83,20 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		return collection;
 	}
 
-	private static ThreadLocal<Boolean> resolving = new ThreadLocal<Boolean>()
-	{
-		@Override
-		protected Boolean initialValue()
-		{
-			return Boolean.FALSE;
-		}
-	};
-
 	public static IValueCollection getValueCollection(ITypeInfoContext context, IFile file)
 	{
 		if (context.getModelElement().getResource().equals(file))
 		{
 			return null;
 		}
-		Boolean isResolving = resolving.get();
 		IValueCollection collection = null;
 		try
 		{
-			resolving.set(Boolean.TRUE);
 			Pair<Long, IValueCollection> pair = scriptCache.get(file);
 			if (pair == null || pair.getLeft().longValue() != file.getModificationStamp())
 			{
-				collection = ValueCollectionFactory.createValueCollection(file, !isResolving.booleanValue());
-				if (!isResolving.booleanValue())
-				{
-					scriptCache.put(file, new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()), collection));
-				}
+				collection = ValueCollectionFactory.createValueCollection(file, false);
+				scriptCache.put(file, new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()), collection));
 			}
 			else
 			{
@@ -121,10 +107,6 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		catch (Exception e)
 		{
 			ServoyLog.logError(e);
-		}
-		finally
-		{
-			resolving.set(isResolving);
 		}
 		return collection;
 	}
