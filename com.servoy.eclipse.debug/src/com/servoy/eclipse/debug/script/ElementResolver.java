@@ -104,9 +104,6 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		Form form = getForm(context);
 		if (form != null)
 		{
-			// remove the global only thing.
-			typeNames.remove("currentcontroller");
-
 			typeNames.add("forms");
 			typeNames.add("globals");
 			typeNames.addAll(typeNameCreators.keySet());
