@@ -2221,6 +2221,15 @@ public class ServoyModel implements IWorkspaceSaveListener
 		}
 	}
 
+	public boolean isActiveProject(String name)
+	{
+		if (name != null && getActiveProject() != null)
+		{
+			return name.equals(getActiveProject().getProject().getName()) || isModuleActive(name);
+		}
+		return false;
+	}
+
 	public boolean isModuleActive(String name)
 	{
 		ServoyProject[] activeModules = getModulesOfActiveProject();

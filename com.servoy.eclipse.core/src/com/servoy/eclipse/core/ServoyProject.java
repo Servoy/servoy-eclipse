@@ -663,4 +663,21 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 
 		return false;
 	}
+
+	/**
+	 * @return
+	 */
+	public SolutionMetaData getSolutionMetaData()
+	{
+		IDeveloperRepository repository = ServoyModel.getDeveloperRepository();
+		try
+		{
+			return (SolutionMetaData)repository.getRootObjectMetaData(project.getName(), IRepository.SOLUTIONS);
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
+		return null;
+	}
 }

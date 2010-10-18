@@ -708,9 +708,13 @@ public abstract class TypeCreator
 		if (resource != null)
 		{
 			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-			ServoyProject servoyProject = servoyModel.getServoyProject(resource.getProject().getName());
 
-			return servoyProject.getEditingFlattenedSolution();
+			String name = resource.getProject().getName();
+			if (servoyModel.isActiveProject(name))
+			{
+				ServoyProject servoyProject = servoyModel.getServoyProject(name);
+				return servoyProject.getEditingFlattenedSolution();
+			}
 		}
 		return null;
 	}
