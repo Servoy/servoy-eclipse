@@ -28,8 +28,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
@@ -433,8 +433,8 @@ public class SolutionDeserializer
 					else
 					{
 						// tablenode
-						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0, jsFileName.length() -
-							SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length()) +
+						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0,
+							jsFileName.length() - SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length()) +
 							SolutionSerializer.TABLENODE_FILE_EXTENSION);
 					}
 
@@ -989,10 +989,6 @@ public class SolutionDeserializer
 							if (objectClassExpression instanceof Identifier)
 							{
 								objectclass = ((Identifier)objectClassExpression).getName();
-							}
-							else if (objectClassExpression instanceof FunctionStatement)
-							{
-								objectclass = ((FunctionStatement)objectClassExpression).getName().getName();
 							}
 						}
 						if ("String".equals(objectclass)) //$NON-NLS-1$
