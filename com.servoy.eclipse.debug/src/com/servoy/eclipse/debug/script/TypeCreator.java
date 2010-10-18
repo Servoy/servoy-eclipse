@@ -255,7 +255,7 @@ public abstract class TypeCreator
 
 	public Type getType(ITypeInfoContext context, String typeName)
 	{
-		if (BASE_TYPES.contains(typeName)) return null;
+		if (BASE_TYPES.contains(typeName) || typeName.startsWith("Array<")) return null;
 		if (!initialized) initalize();
 		Type type = types.get(typeName);
 		if (type == null)
