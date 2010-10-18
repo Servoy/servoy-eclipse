@@ -201,6 +201,7 @@ public class ActiveEditorTracker implements IPartListener
 
 	private boolean isSpecialDelimiterRegion(ITextRegion region)
 	{
+		if (region == null) return true;
 		String type = region.getType();
 		return (type == CSSRegionContexts.CSS_LBRACE || type == CSSRegionContexts.CSS_RBRACE || type == CSSRegionContexts.CSS_DELIMITER ||
 			type == CSSRegionContexts.CSS_DECLARATION_SEPARATOR || type == CSSRegionContexts.CSS_DECLARATION_DELIMITER ||
