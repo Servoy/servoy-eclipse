@@ -215,11 +215,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			{
 				filler.fillType(type, context, typeNameClassName.substring(index + 1, index2));
 			}
-			if (type == null)
-			{
-				// TODO better support for Array<Object> or Array<byte>
-				type = context.getType(classType);
-			}
 			return type;
 		}
 		return super.createDynamicType(context, typeNameClassName, fullTypeName);
@@ -642,7 +637,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 					property.setName(clientPlugin.getName());
 					property.setReadOnly(true);
-					property.setType(TypeProvider.this.createType(context, clientPlugin.getName(), scriptObject.getClass()));
+					addAnonymousClassType("Plugin<" + clientPlugin.getName() + '>', scriptObject.getClass());
+					property.setType(context.getType("Plugin<" + clientPlugin.getName() + '>'));
 
 					Image clientImage = null;
 					Icon icon = clientPlugin.getImage();
