@@ -70,6 +70,14 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		setModel(editorPart.getForm());
 	}
 
+	/**
+	 * @return the editorPart
+	 */
+	public VisualFormEditor getEditorPart()
+	{
+		return editorPart;
+	}
+
 	@Override
 	protected List<Object> getModelChildren()
 	{

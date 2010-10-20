@@ -17,20 +17,45 @@
 
 package com.servoy.eclipse.designer.editor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.draw2d.ActionEvent;
+import org.eclipse.draw2d.ActionListener;
+import org.eclipse.draw2d.Clickable;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.PositionConstants;
+import org.eclipse.draw2d.RelativeLocator;
+import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.DragTracker;
 import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.Handle;
 import org.eclipse.gef.LayerConstants;
 import org.eclipse.gef.editpolicies.ResizableEditPolicy;
+import org.eclipse.gef.handles.MoveHandle;
 import org.eclipse.gef.handles.ResizeHandle;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
+import org.eclipse.gef.tools.DragEditPartsTracker;
 import org.eclipse.gef.tools.ResizeTracker;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Menu;
+
+import com.servoy.eclipse.designer.actions.ModifyAnchoringAction;
+import com.servoy.eclipse.designer.actions.SetAnchoringAction;
+import com.servoy.eclipse.designer.util.AnchoringFigure;
+import com.servoy.eclipse.designer.util.FigureMovedTracker;
+import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
+import com.servoy.j2db.persistence.ISupportAnchors;
+import com.servoy.j2db.util.IAnchorConstants;
 
 /**
  * Edit policy for moving/resizing elements.
@@ -48,7 +73,14 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	 */
 	protected IFigure selectedElementFeedbackFigure;
 
+	/**
+	 * the figure for anchoring.
+	 */
+	protected Clickable anchoringFigure;
+
 	private final FormGraphicalEditPart container;
+
+	private MenuManager menuManager;
 
 	public AlignmentfeedbackEditPolicy(FormGraphicalEditPart container)
 	{
@@ -61,24 +93,57 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 		return (GraphicalEditPart)super.getHost();
 	}
 
-	protected Handle createResizeHandle(GraphicalEditPart owner, final int direction)
+	@Override
+	protected List<Handle> createSelectionHandles()
 	{
-		return new ResizeHandle(owner, direction)
+		List<Handle> list = new ArrayList<Handle>();
+		GraphicalEditPart part = getHost();
+
+		MoveHandle moveHandler = new MoveHandle(part)
 		{
 			@Override
 			protected DragTracker createDragTracker()
 			{
-				return new ResizeTracker(getOwner(), direction)
+				DragEditPartsTracker tracker = new DragEditPartsTracker(getOwner())
 				{
+					/*
+					 * No direct edit from move handle
+					 */
 					@Override
-					protected void updateSourceRequest()
+					protected void performDirectEdit()
 					{
-						super.updateSourceRequest();
-						BasePersistGraphicalEditPart.limitChangeBoundsRequest((ChangeBoundsRequest)getSourceRequest());
 					}
 				};
+				tracker.setDefaultCursor(getCursor());
+				return tracker;
 			}
 		};
+		list.add(moveHandler);
+		list.add(createResizeHandle(part, PositionConstants.EAST));
+		list.add(createResizeHandle(part, PositionConstants.SOUTH_EAST));
+		list.add(createResizeHandle(part, PositionConstants.SOUTH));
+		list.add(createResizeHandle(part, PositionConstants.SOUTH_WEST));
+		list.add(createResizeHandle(part, PositionConstants.WEST));
+		list.add(createResizeHandle(part, PositionConstants.NORTH_WEST));
+		list.add(createResizeHandle(part, PositionConstants.NORTH));
+		list.add(createResizeHandle(part, PositionConstants.NORTH_EAST));
+
+		return list;
+	}
+
+	protected Handle createResizeHandle(GraphicalEditPart owner, final int direction)
+	{
+		ResizeHandle resizeHandle = new ResizeHandle(owner, direction);
+		resizeHandle.setDragTracker(new ResizeTracker(owner, direction)
+		{
+			@Override
+			protected void updateSourceRequest()
+			{
+				super.updateSourceRequest();
+				BasePersistGraphicalEditPart.limitChangeBoundsRequest((ChangeBoundsRequest)getSourceRequest());
+			}
+		});
+		return resizeHandle;
 	}
 
 	@Override
@@ -86,6 +151,7 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	{
 		super.showChangeBoundsFeedback(request);
 		removeSelectedElementFeedbackFigure();
+		removeAnchoringFigure();
 		showElementAlignmentFeedback(request);
 	}
 
@@ -95,6 +161,7 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 		super.eraseChangeBoundsFeedback(request);
 		eraseElementAlignmentFeedback();
 		addSelectedElementFeedbackFigure();
+		addAnchoringFigure();
 	}
 
 	protected void showElementAlignmentFeedback(ChangeBoundsRequest request)
@@ -152,13 +219,15 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	{
 		super.hideSelection();
 		removeSelectedElementFeedbackFigure();
+		removeAnchoringFigure();
 	}
 
 	@Override
-	protected void addSelectionHandles()
+	protected void showSelection()
 	{
-		super.addSelectionHandles();
+		super.showSelection();
 		addSelectedElementFeedbackFigure();
+		addAnchoringFigure();
 	}
 
 	protected void removeSelectedElementFeedbackFigure()
@@ -177,8 +246,80 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	protected void addSelectedElementFeedbackFigure()
 	{
 		removeSelectedElementFeedbackFigure();
-		IFigure layer = getLayer(LayerConstants.FEEDBACK_LAYER);
-		selectedElementFeedbackFigure = new SelectedElementFeedbackFigure(container, getHost());
-		layer.add(selectedElementFeedbackFigure);
+		getLayer(LayerConstants.FEEDBACK_LAYER).add(selectedElementFeedbackFigure = new SelectedElementFeedbackFigure(container, getHost()));
+	}
+
+	protected void removeAnchoringFigure()
+	{
+		if (anchoringFigure != null)
+		{
+			getLayer(LayerConstants.HANDLE_LAYER).remove(anchoringFigure);
+			anchoringFigure = null;
+		}
+	}
+
+	/**
+	 * Adds the an anchoring figure to the feedback layer.
+	 */
+	protected void addAnchoringFigure()
+	{
+		if (anchoringFigure == null && getHost().getModel() instanceof ISupportAnchors)
+		{
+			getLayer(LayerConstants.HANDLE_LAYER).add(anchoringFigure = new Clickable(new AnchoringFigure((ISupportAnchors)getHost().getModel()), SWT.NONE));
+			anchoringFigure.addAncestorListener(new FigureMovedTracker(anchoringFigure, new RelativeLocator(getHost().getFigure(), 0.75, 0)));
+			anchoringFigure.addActionListener(new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					showAnchoringmenu();
+				}
+			});
+		}
+	}
+
+	protected void showAnchoringmenu()
+	{
+		if (menuManager == null)
+		{
+			menuManager = new MenuManager();
+			menuManager.setRemoveAllWhenShown(true);
+			menuManager.addMenuListener(new IMenuListener()
+			{
+				public void menuAboutToShow(IMenuManager mgr)
+				{
+					fillAnchoringMenu();
+				}
+
+			});
+			menuManager.setVisible(true);
+		}
+		Menu popup = menuManager.createContextMenu(container.getViewer().getControl());
+		Rectangle clickableBounds = anchoringFigure.getBounds().getCopy();
+		anchoringFigure.translateToAbsolute(clickableBounds);
+		Point location = container.getViewer().getControl().toDisplay(clickableBounds.x, clickableBounds.y + clickableBounds.height);
+		popup.setLocation(location);
+		popup.setVisible(true);
+	}
+
+	protected void fillAnchoringMenu()
+	{
+		menuManager.add(new ModifyAnchoringAction(container.getEditorPart(), getHost(), AnchorPropertySource.TOP));
+		menuManager.add(new ModifyAnchoringAction(container.getEditorPart(), getHost(), AnchorPropertySource.RIGHT));
+		menuManager.add(new ModifyAnchoringAction(container.getEditorPart(), getHost(), AnchorPropertySource.BOTTOM));
+		menuManager.add(new ModifyAnchoringAction(container.getEditorPart(), getHost(), AnchorPropertySource.LEFT));
+
+		menuManager.add(new Separator());
+
+		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.NORTH | IAnchorConstants.EAST));
+		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.SOUTH | IAnchorConstants.EAST));
+		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.SOUTH | IAnchorConstants.WEST));
+		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.NORTH | IAnchorConstants.WEST));
+
+		menuManager.add(new Separator());
+
+		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.NORTH));
+		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.EAST));
+		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.SOUTH));
+		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.WEST));
 	}
 }
