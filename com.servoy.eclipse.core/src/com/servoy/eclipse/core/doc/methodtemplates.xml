@@ -363,6 +363,14 @@ return true]]></code>
       </arguments>
     </methodtemplate>
   </event>
+  <event name="onRenderMethodID">
+    <methodtemplate name="onRender" addtodo="true">
+      <description><![CDATA[Called before the form component is rendered]]></description>
+      <arguments>
+        <methodargument name="event" type="JSRenderEvent"><![CDATA[the render event]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
   <event name="onResizeMethodID">
     <methodtemplate name="onResize" addtodo="true">
       <description><![CDATA[Callback method when form is resized]]></description>
