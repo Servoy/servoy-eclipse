@@ -23,7 +23,6 @@ import net.sourceforge.sqlexplorer.plugin.editors.SQLEditorInput;
 
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -125,28 +124,7 @@ public class OpenSqlEditorAction extends Action implements ISelectionChangedList
 			{
 				Preferences store = Activator.getDefault().getPluginPreferences();
 				String option = store.getString(AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY);
-				boolean answer = false;
-				if (option == null || MessageDialogWithToggle.PROMPT.equals(option))
-				{
-					MessageDialogWithToggle dialog = MessageDialogWithToggle.openYesNoQuestion(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-						"Confirm Perspective Switch",
-						"Using SQL Explorer perspective gives more options about SQL Editor.\n\n Do you want to open this perspective now ?", null, false,
-						null, null);
-					answer = (dialog.getReturnCode() == IDialogConstants.YES_ID);
-					if (dialog.getToggleState())
-					{
-						if (answer)
-						{
-							store.setValue(AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY, MessageDialogWithToggle.ALWAYS);
-						}
-						else
-						{
-							store.setValue(AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY, MessageDialogWithToggle.NEVER);
-						}
-						Activator.getDefault().savePluginPreferences();
-					}
-				}
-				if (answer || MessageDialogWithToggle.ALWAYS.equals(option))
+				if (MessageDialogWithToggle.ALWAYS.equals(option))
 				{
 					Display.getCurrent().asyncExec(new Runnable()
 					{

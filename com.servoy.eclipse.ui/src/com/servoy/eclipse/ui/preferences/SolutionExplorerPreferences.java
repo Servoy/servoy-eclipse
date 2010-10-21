@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.preferences;
 
 import org.eclipse.core.runtime.Preferences;
@@ -63,7 +63,7 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 
 
 		chAutomaticPerspectiveSwitch = new Button(cp, SWT.CHECK);
-		chAutomaticPerspectiveSwitch.setText("Prompt about perspective switch when opening SQL Editor");
+		chAutomaticPerspectiveSwitch.setText("Activate SQL Explorer perspective on 'Open SQL Editor'");
 
 		chOpenFormEditor = new Button(cp, SWT.CHECK);
 		chOpenFormEditor.setText("Double click on form in Solution Explorer View opens Form Editor");
@@ -73,7 +73,7 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 
 		Preferences store = Activator.getDefault().getPluginPreferences();
 		String option = store.getString(OpenSqlEditorAction.AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY);
-		chAutomaticPerspectiveSwitch.setSelection(MessageDialogWithToggle.ALWAYS.equals(option) || MessageDialogWithToggle.NEVER.equals(option) ? false : true);
+		chAutomaticPerspectiveSwitch.setSelection(MessageDialogWithToggle.ALWAYS.equals(option) ? true : false);
 
 		option = store.getString(DOUBLE_CLICK_ACTION);
 		if (DOUBLE_CLICK_OPEN_FORM.equals(option))
@@ -114,7 +114,7 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 		Preferences store = Activator.getDefault().getPluginPreferences();
 		if (chAutomaticPerspectiveSwitch.getSelection())
 		{
-			store.setValue(OpenSqlEditorAction.AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY, MessageDialogWithToggle.PROMPT);
+			store.setValue(OpenSqlEditorAction.AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY, MessageDialogWithToggle.ALWAYS);
 		}
 		else
 		{
@@ -145,7 +145,7 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 	protected void performDefaults()
 	{
 		super.performDefaults();
-		chAutomaticPerspectiveSwitch.setSelection(true);
+		chAutomaticPerspectiveSwitch.setSelection(false);
 		chOpenFormEditor.setSelection(false);
 		chOpenScriptEditor.setSelection(false);
 	}
