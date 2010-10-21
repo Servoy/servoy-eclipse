@@ -806,4 +806,13 @@
       		name="My Browser">
       </browser>
    </extension>
+   <extension
+         point="org.eclipse.ui.actionSetPartAssociations">
+      <actionSetPartAssociation
+            targetID="org.eclipse.ui.edit.text.actionSet.presentation">
+         <part
+               id="org.eclipse.wst.css.core.csssource.source">
+         </part>
+      </actionSetPartAssociation>
+   </extension>
 </plugin>
