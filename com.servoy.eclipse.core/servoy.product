@@ -717,7 +717,6 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
       <feature id="org.eclipse.equinox.p2.user.ui"/>
       <feature id="org.eclipse.platform"/>
       <feature id="org.eclipse.jdt"/>
-      <feature id="org.eclipse.cvs"/>
       <feature id="org.eclipse.help"/>
    </features>
    

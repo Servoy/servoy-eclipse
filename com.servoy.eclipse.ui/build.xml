@@ -467,6 +467,7 @@
 				<include name="icons/"/>
 				<include name="swt-grouplayout.jar"/>
 				<include name="baseline.jar"/>
+				<include name="cheatsheets/"/>
 			</fileset>
 		</copy>
 		<antcall target="apitools.generation">
