@@ -47,25 +47,25 @@ public class ModifyAnchoringAction extends SetPropertyAction
 	{
 		if (AnchorPropertySource.TOP.equals(anchoringProperty))
 		{
-			setText(DesignerActionFactory.ANCHOR_TOP_TOGGLE_TEXT);
+			setText("Top");
 			setToolTipText(DesignerActionFactory.ANCHOR_TOP_TOGGLE_TOOLTIP);
 			setId(DesignerActionFactory.ANCHOR_TOP_TOGGLE.getId());
 		}
 		if (AnchorPropertySource.RIGHT.equals(anchoringProperty))
 		{
-			setText(DesignerActionFactory.ANCHOR_RIGHT_TOGGLE_TEXT);
+			setText("Right");
 			setToolTipText(DesignerActionFactory.ANCHOR_RIGHT_TOGGLE_TOOLTIP);
 			setId(DesignerActionFactory.ANCHOR_RIGHT_TOGGLE.getId());
 		}
 		if (AnchorPropertySource.BOTTOM.equals(anchoringProperty))
 		{
-			setText(DesignerActionFactory.ANCHOR_BOTTOM_TOGGLE_TEXT);
+			setText("Bottom");
 			setToolTipText(DesignerActionFactory.ANCHOR_BOTTOM_TOGGLE_TOOLTIP);
 			setId(DesignerActionFactory.ANCHOR_BOTTOM_TOGGLE.getId());
 		}
 		if (AnchorPropertySource.LEFT.equals(anchoringProperty))
 		{
-			setText(DesignerActionFactory.ANCHOR_LEFT_TOGGLE_TEXT);
+			setText("Left");
 			setToolTipText(DesignerActionFactory.ANCHOR_LEFT_TOGGLE_TOOLTIP);
 			setId(DesignerActionFactory.ANCHOR_LEFT_TOGGLE.getId());
 		}

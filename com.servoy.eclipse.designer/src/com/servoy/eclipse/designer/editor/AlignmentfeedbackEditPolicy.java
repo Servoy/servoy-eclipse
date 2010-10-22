@@ -41,6 +41,7 @@ import org.eclipse.gef.handles.ResizeHandle;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.tools.DragEditPartsTracker;
 import org.eclipse.gef.tools.ResizeTracker;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -303,6 +304,9 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 
 	protected void fillAnchoringMenu()
 	{
+		menuManager.add(new Action("Anchoring")
+		{
+		});
 		menuManager.add(new ModifyAnchoringAction(container.getEditorPart(), getHost(), AnchorPropertySource.TOP));
 		menuManager.add(new ModifyAnchoringAction(container.getEditorPart(), getHost(), AnchorPropertySource.RIGHT));
 		menuManager.add(new ModifyAnchoringAction(container.getEditorPart(), getHost(), AnchorPropertySource.BOTTOM));
@@ -314,12 +318,7 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.SOUTH | IAnchorConstants.EAST));
 		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.SOUTH | IAnchorConstants.WEST));
 		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.NORTH | IAnchorConstants.WEST));
-
-		menuManager.add(new Separator());
-
-		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.NORTH));
-		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.EAST));
-		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.SOUTH));
-		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.WEST));
+		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.NORTH | IAnchorConstants.WEST | IAnchorConstants.SOUTH |
+			IAnchorConstants.EAST));
 	}
 }

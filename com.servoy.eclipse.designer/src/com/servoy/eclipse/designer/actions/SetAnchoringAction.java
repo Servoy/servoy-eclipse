@@ -38,7 +38,7 @@ public class SetAnchoringAction extends SetPropertyAction
 
 	protected void init(int anchors)
 	{
-		String text = "Anchor ";
+		String text = null;
 		if ((anchors & IAnchorConstants.NORTH) != 0)
 		{
 			text = extendText(text, "Top");
@@ -61,9 +61,9 @@ public class SetAnchoringAction extends SetPropertyAction
 
 	private static String extendText(String text, String string)
 	{
-		if (text.endsWith(" "))
+		if (text == null)
 		{
-			return text + string;
+			return string;
 		}
 		return text + "," + string;
 	}
