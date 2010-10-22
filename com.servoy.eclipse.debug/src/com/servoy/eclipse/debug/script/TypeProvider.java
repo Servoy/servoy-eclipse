@@ -628,7 +628,15 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			List<IClientPlugin> clientPlugins = pluginManager.getPlugins(IClientPlugin.class);
 			for (IClientPlugin clientPlugin : clientPlugins)
 			{
-				IScriptObject scriptObject = clientPlugin.getScriptObject();
+				IScriptObject scriptObject = null;
+				try
+				{
+					scriptObject = clientPlugin.getScriptObject();
+				}
+				catch (Throwable t)
+				{
+					Debug.error("Could not get scriptobject from plugin " + clientPlugin.getName());
+				}
 				if (scriptObject != null)
 				{
 					ScriptObjectRegistry.registerScriptObjectForClass(scriptObject.getClass(), scriptObject);
