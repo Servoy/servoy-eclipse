@@ -64,29 +64,47 @@ public class AnchoringFigure extends Figure
 		Rectangle r = getBounds();
 		g.setBackgroundColor(ColorConstants.gray);
 		g.fillRectangle(r.x, r.y, r.width, r.height);
-		g.setForegroundColor(ColorConstants.yellow);
-		g.setLineWidth(2);
+
+		g.setBackgroundColor(ColorConstants.yellow);
+		g.fillRectangle(r.x + 1, r.y + 1, r.width - 2, r.height - 2);
 
 		int anchors = anchored.getAnchors();
-		if (anchors == 0) anchors = IAnchorConstants.DEFAULT;
-		else if (anchors == -1) anchors = 0;
+		if (anchors == 0)
+		{
+			anchors = IAnchorConstants.DEFAULT;
+		}
+		else if (anchors == -1)
+		{
+			anchors = 0;
+		}
 
-		// draw the lines for the anchoring
-		if ((anchors & IAnchorConstants.NORTH) != 0)
+		Rectangle a = new Rectangle();
+		a.x = r.x + 1;
+		a.y = r.y + 1;
+		a.width = r.width - 2;
+		a.height = r.height - 2;
+
+		int offSet = 2;
+		if ((anchors & IAnchorConstants.NORTH) == 0) //&& (anchors & IAnchorConstants.SOUTH) != 0)
 		{
-			g.drawLine(r.x + 1, r.y + 2, r.x + r.width - 1, r.y + 2);
+			a.y += offSet;
+			a.height -= offSet;
 		}
-		if ((anchors & IAnchorConstants.EAST) != 0)
+		if ((anchors & IAnchorConstants.WEST) == 0) // && (anchors & IAnchorConstants.EAST) != 0)
 		{
-			g.drawLine(r.x + r.width - 2, r.y + 1, r.x + r.width - 2, r.y + r.height - 1);
+			a.x += offSet;
+			a.width -= offSet;
 		}
-		if ((anchors & IAnchorConstants.SOUTH) != 0)
+		if ((anchors & IAnchorConstants.SOUTH) == 0)
 		{
-			g.drawLine(r.x + 1, r.y + r.height - 2, r.x + r.width - 1, r.y + r.height - 2);
+			a.height -= offSet;
 		}
-		if ((anchors & IAnchorConstants.WEST) != 0)
+		if ((anchors & IAnchorConstants.EAST) == 0)
 		{
-			g.drawLine(r.x + 2, r.y + 1, r.x + 2, r.y + r.height - 1);
+			a.width -= offSet;
 		}
+
+		g.setBackgroundColor(ColorConstants.gray);
+		g.fillRectangle(a);
 	}
 }
