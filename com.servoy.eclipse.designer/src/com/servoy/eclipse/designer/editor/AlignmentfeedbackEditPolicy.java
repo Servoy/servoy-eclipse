@@ -41,7 +41,6 @@ import org.eclipse.gef.handles.ResizeHandle;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.tools.DragEditPartsTracker;
 import org.eclipse.gef.tools.ResizeTracker;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -304,9 +303,6 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 
 	protected void fillAnchoringMenu()
 	{
-		menuManager.add(new Action("Anchoring")
-		{
-		});
 		menuManager.add(new ModifyAnchoringAction(container.getEditorPart(), getHost(), AnchorPropertySource.TOP));
 		menuManager.add(new ModifyAnchoringAction(container.getEditorPart(), getHost(), AnchorPropertySource.RIGHT));
 		menuManager.add(new ModifyAnchoringAction(container.getEditorPart(), getHost(), AnchorPropertySource.BOTTOM));

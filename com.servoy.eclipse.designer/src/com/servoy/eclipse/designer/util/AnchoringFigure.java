@@ -17,9 +17,12 @@
 
 package com.servoy.eclipse.designer.util;
 
+import org.eclipse.draw2d.Border;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
 
@@ -36,6 +39,8 @@ public class AnchoringFigure extends Figure
 {
 	private final ISupportAnchors anchored;
 
+	protected static final Border TOOL_TIP_BORDER = new MarginBorder(0, 2, 0, 2);
+
 	public AnchoringFigure(ISupportAnchors anchored)
 	{
 		this.anchored = anchored;
@@ -48,6 +53,9 @@ public class AnchoringFigure extends Figure
 	protected void init()
 	{
 		setPreferredSize(new Dimension(10, 10));
+		Label tooltip = new Label("Anchoring");
+		tooltip.setBorder(TOOL_TIP_BORDER);
+		setToolTip(tooltip);
 	}
 
 	@Override
