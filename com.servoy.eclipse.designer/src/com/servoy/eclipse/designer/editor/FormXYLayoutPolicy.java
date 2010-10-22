@@ -38,6 +38,8 @@ import com.servoy.eclipse.designer.actions.DistributeRequest;
 import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.commands.ChangeBoundsCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
+import com.servoy.eclipse.designer.editor.commands.ISupportModels;
+import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -109,8 +111,9 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 	}
 
 	@Override
-	protected Command getCreateCommand(CreateRequest request)
+	protected Command getCreateCommand(final CreateRequest request)
 	{
+		Command command = null;
 		if (request.getNewObjectType() instanceof RequestType)
 		{
 			RequestType requestType = (RequestType)request.getNewObjectType();
@@ -123,12 +126,31 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 
 			if (requestType.type == RequestType.TYPE_BUTTON)
 			{
-				return new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), "button", requestType, extendedData, null,
+				command = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), "button", requestType, extendedData, null,
 					request.getLocation().getSWTPoint());
 			}
 			// TODO: add more
+
+			// set the created object in the CreateRequest
+			if (command instanceof ISupportModels && request instanceof CreateElementRequest &&
+				((CreateElementRequest)request).getFactory() instanceof RequestTypeCreationFactory)
+			{
+				final ISupportModels createCommand = (ISupportModels)command;
+				command = command.chain(new Command()
+				{
+					@Override
+					public void execute()
+					{
+						Object[] models = createCommand.getModels();
+						if (models != null && models.length > 0)
+						{
+							((RequestTypeCreationFactory)((CreateElementRequest)request).getFactory()).setNewObject(models[0]);
+						}
+					}
+				});
+			}
 		}
-		return null;
+		return command;
 	}
 
 	@Override

@@ -15,42 +15,32 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.designer.editor.palette;
+package com.servoy.eclipse.designer.editor;
 
+import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.gef.requests.CreationFactory;
 
-import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
-
 /**
- * Creation factory for GEF palette.
- * Does not create new objects, just simply holds the RequestType.
+ * CreateRequest for elements from form editor palette.
  * 
  * @author rgansevles
  *
  */
-public class RequestTypeCreationFactory implements CreationFactory
+public class CreateElementRequest extends CreateRequest
 {
-	private final RequestType requestType;
-	private Object newObject;
 
-	public RequestTypeCreationFactory(RequestType requestType)
+	/**
+	 * @param factory
+	 */
+	public CreateElementRequest(CreationFactory factory)
 	{
-		this.requestType = requestType;
+		setFactory(factory);
 	}
 
-	public Object getNewObject()
+	@Override
+	public CreationFactory getFactory()
 	{
-		return newObject;
-	}
-
-	public void setNewObject(Object newObject)
-	{
-		this.newObject = newObject;
-	}
-
-	public Object getObjectType()
-	{
-		return requestType;
+		return super.getFactory();
 	}
 
 }
