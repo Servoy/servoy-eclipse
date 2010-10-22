@@ -198,14 +198,22 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				{
 					Form form = forms.next();
 					if (form == rootForm) continue; //is rootForm accessible via self ref relation
-					Table table = form.getTable();
-					if (table == null)
+					try
 					{
-						includeNoTable = true;
+						Table table = form.getTable();
+						if (table == null)
+						{
+							includeNoTable = true;
+						}
+						else
+						{
+							tableSet.add(table);
+						}
 					}
-					else
+					catch (RepositoryException e)
 					{
-						tableSet.add(table);
+						// cannot get table of one form, log and continue to the next
+						ServoyLog.logError(e);
 					}
 				}
 				if (includeNoTable)
@@ -226,9 +234,17 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				{
 					Form form = forms.next();
 					if (form == rootForm) continue; //is rootForm accessible via self ref relation
-					if (form.getTable() == parentElement || (form.getDataSource() == null && Messages.LabelNoTable == parentElement))
+					try
 					{
-						children.add(new RelatedForm(null, form));
+						if (form.getTable() == parentElement || (form.getDataSource() == null && Messages.LabelNoTable == parentElement))
+						{
+							children.add(new RelatedForm(null, form));
+						}
+					}
+					catch (RepositoryException e)
+					{
+						// cannot get table of one form, log and continue to the next
+						ServoyLog.logError(e);
 					}
 				}
 				return children.toArray();
