@@ -87,6 +87,7 @@ import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.ui.IScriptRenderMethods;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.ServoyException;
@@ -567,7 +568,17 @@ public abstract class TypeCreator
 			}
 			return "Array";
 		}
-		String typeName = memberReturnType.getSimpleName();
+
+		String typeName;
+		if (memberReturnType == IScriptRenderMethods.class)
+		{
+			typeName = IScriptRenderMethods.JS_RENDERABLE;
+		}
+		else
+		{
+			typeName = memberReturnType.getSimpleName();
+		}
+
 		addAnonymousClassType(typeName, memberReturnType);
 		return typeName;
 	}
