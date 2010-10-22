@@ -15,14 +15,16 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.designer.editor;
+package com.servoy.eclipse.designer.editor.palette;
 
-import org.eclipse.gef.palette.CombinedTemplateCreationEntry;
 import org.eclipse.gef.palette.PaletteContainer;
 import org.eclipse.gef.palette.PaletteDrawer;
 import org.eclipse.gef.palette.PaletteRoot;
+import org.eclipse.gef.palette.ToolEntry;
 
 import com.servoy.eclipse.designer.Activator;
+import com.servoy.eclipse.designer.editor.VisualFormEditor;
+
 
 /**
  * Utility class that can create a GEF Palette for the Visual Form Editor.
@@ -32,12 +34,13 @@ import com.servoy.eclipse.designer.Activator;
  */
 public class VisualFormEditorPaletteFactory
 {
+
 	private static PaletteContainer createElementsDrawer()
 	{
 		PaletteDrawer componentsDrawer = new PaletteDrawer("Elements");
 
-		CombinedTemplateCreationEntry component = new CombinedTemplateCreationEntry("Button", "Create a button", null, new RequestTypeCreationFactory(
-			VisualFormEditor.REQ_PLACE_BUTTON), Activator.getImageDescriptor("icons/button.gif"), Activator.getImageDescriptor("icons/button.gif"));
+		ToolEntry component = new ElementCreationToolEntry("Button", "Create a button", new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_BUTTON),
+			Activator.getImageDescriptor("icons/button.gif"), Activator.getImageDescriptor("icons/button.gif"));
 		componentsDrawer.add(component);
 
 		// TODO: Add more
@@ -51,11 +54,12 @@ public class VisualFormEditorPaletteFactory
 	 * 
 	 * @return a new PaletteRoot
 	 */
-	static PaletteRoot createPalette()
+	static public PaletteRoot createPalette()
 	{
 		PaletteRoot palette = new PaletteRoot();
 //		palette.add(createToolsGroup(palette));
 		palette.add(createElementsDrawer());
 		return palette;
 	}
+
 }

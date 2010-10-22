@@ -109,6 +109,7 @@ import com.servoy.eclipse.designer.editor.commands.SendToBackAction;
 import com.servoy.eclipse.designer.editor.commands.SetTabSequenceAction;
 import com.servoy.eclipse.designer.editor.commands.ToggleAnchoringAction;
 import com.servoy.eclipse.designer.editor.commands.UngroupAction;
+import com.servoy.eclipse.designer.editor.palette.VisualFormEditorPaletteFactory;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.property.PersistContext;
 import com.servoy.eclipse.designer.property.UndoablePersistPropertySourceProvider;

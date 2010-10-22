@@ -17,9 +17,9 @@
 
 package com.servoy.eclipse.designer.editor;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.PrecisionRectangle;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
@@ -28,6 +28,7 @@ import org.eclipse.gef.Request;
 import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.SnapToHelper;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
+import org.eclipse.gef.requests.CreateRequest;
 
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
@@ -140,7 +141,7 @@ public class SnapToElementAlignment extends SnapToHelper
 		return true;
 	}
 
-	protected ElementAlignmentItem[] getElementAlignment(ChangeBoundsRequest request)
+	protected ElementAlignmentItem[] getElementAlignmentForMoveOrResize(ChangeBoundsRequest request, int snapOrientation)
 	{
 		List<EditPart> editParts = request.getEditParts();
 		if (editParts.size() == 0)
@@ -175,38 +176,52 @@ public class SnapToElementAlignment extends SnapToHelper
 		rect.translate(request.getMoveDelta());
 		rect.resize(request.getSizeDelta());
 
-		ElementAlignmentItem vertical = null;
-		ElementAlignmentItem horizontal = null;
+		return getElementAlignment(rect, snapOrientation, editParts);
+	}
+
+	protected ElementAlignmentItem[] getElementAlignmentForCreate(CreateRequest request, int snapOrientation)
+	{
+		return getElementAlignment(new Rectangle(request.getLocation(), request.getSize()), snapOrientation, null);
+	}
+
+
+	protected ElementAlignmentItem[] getElementAlignment(Rectangle rect, int snapOrientation, List<EditPart> skipEditparts)
+	{
+		if (snapOrientation == 0)
+		{
+			return null;
+		}
+
+		ElementAlignmentItem north = null;
+		ElementAlignmentItem east = null;
+		ElementAlignmentItem south = null;
+		ElementAlignmentItem west = null;
 
 		Form form = (Form)container.getModel();
 
 		// Alignment: North to container
-		if (RequestConstants.REQ_MOVE.equals(request.getType()) ||
-			(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.NORTH) != 0))
+		if ((snapOrientation & (NORTH | VERTICAL)) != 0)
 		{
-			vertical = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, vertical, rect.y, 0, 10, form.getWidth() - 10, getSetAnchor());
+			north = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, north, rect.y, 0, 10, form.getWidth() - 10, getSetAnchor());
 		}
 
 		// Alignment: West to container
-		if (RequestConstants.REQ_MOVE.equals(request.getType()) ||
-			(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.WEST) != 0))
+		if ((snapOrientation & (WEST | HORIZONTAL)) != 0)
 		{
-			horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x, 0, 10, form.getSize().height - 10,
-				getSetAnchor());
+			west = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, west, rect.x, 0, 10, form.getSize().height - 10, getSetAnchor());
 		}
 
 		// Alignment: East to container
-		if (RequestConstants.REQ_MOVE.equals(request.getType()) ||
-			(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.EAST) != 0))
+		if ((snapOrientation & (EAST | HORIZONTAL)) != 0)
 		{
-			horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, horizontal, rect.x + rect.width, form.getWidth(), 10,
+			east = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, east, rect.x + rect.width, form.getWidth(), 10,
 				form.getSize().height - 10, getSetAnchor());
 		}
 
 		List<EditPart> children = container.getChildren();
 		for (EditPart child : children)
 		{
-			if ((!(child.getModel() instanceof Part) && !isAligmenttEditPart(child)) || editParts.contains(child))
+			if ((!(child.getModel() instanceof Part) && !isAligmenttEditPart(child)) || (skipEditparts != null && skipEditparts.contains(child)))
 			{
 				continue;
 			}
@@ -225,82 +240,73 @@ public class SnapToElementAlignment extends SnapToHelper
 				: ((GraphicalEditPart)child).getFigure().getBounds();
 
 			// Alignment: North to element
-			if (RequestConstants.REQ_MOVE.equals(request.getType()) ||
-				(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.NORTH) != 0))
+			if ((snapOrientation & (NORTH | VERTICAL)) != 0)
 			{
 				// align on top
-				vertical = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_NORTH, vertical, rect.y,
-					childBounds.y, Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width),
-					(anchors & IAnchorConstants.NORTH) != 0);
+				north = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_NORTH, north, rect.y, childBounds.y,
+					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), (anchors & IAnchorConstants.NORTH) != 0);
 				// distance to bottom-top
-				vertical = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, vertical, rect.y, childBounds.y + childBounds.height,
+				north = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, north, rect.y, childBounds.y + childBounds.height,
 					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), getSetAnchor() &&
 						(elementModel instanceof Part || ((anchors & IAnchorConstants.NORTH) != 0 && (anchors & IAnchorConstants.SOUTH) == 0)));
 			}
 
 			// Alignment: South to element
-			if (RequestConstants.REQ_MOVE.equals(request.getType()) ||
-				(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.SOUTH) != 0))
+			if ((snapOrientation & (SOUTH | VERTICAL)) != 0)
 			{
 				// align on bottom
-				vertical = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, vertical, rect.y +
-					rect.height, childBounds.y + childBounds.height, Math.min(rect.x, childBounds.x),
-					Math.max(rect.x + rect.width, childBounds.x + childBounds.width), (anchors & IAnchorConstants.SOUTH) != 0);
+				south = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, south, rect.y + rect.height,
+					childBounds.y + childBounds.height, Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width),
+					(anchors & IAnchorConstants.SOUTH) != 0);
 				// distance to top-bottom
-				vertical = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, vertical, rect.y + rect.height, childBounds.y,
+				south = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, south, rect.y + rect.height, childBounds.y,
 					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), getSetAnchor() &&
 						(elementModel instanceof Part || ((anchors & IAnchorConstants.SOUTH) != 0 && (anchors & IAnchorConstants.NORTH) == 0)));
 			}
 
 			// Alignment: West to element
-			if (RequestConstants.REQ_MOVE.equals(request.getType()) ||
-				(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.WEST) != 0))
+			if ((snapOrientation & (WEST | HORIZONTAL)) != 0)
 			{
 				// indent to element, only on left side and below element
 				if (rect.y > childBounds.y)
 				{
-					horizontal = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_INDENT, ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x,
-						childBounds.x + getIndent(), childBounds.y + childBounds.height, rect.y, (anchors & IAnchorConstants.WEST) != 0);
+					west = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_INDENT, ElementAlignmentItem.ALIGN_DIRECTION_WEST, west, rect.x, childBounds.x +
+						getIndent(), childBounds.y + childBounds.height, rect.y, (anchors & IAnchorConstants.WEST) != 0);
 				}
 
 				// align left
-				horizontal = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x,
-					childBounds.x, Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height),
-					(anchors & IAnchorConstants.WEST) != 0);
+				west = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_WEST, west, rect.x, childBounds.x,
+					Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height), (anchors & IAnchorConstants.WEST) != 0);
 				// distance to right-left
-				horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, horizontal, rect.x, childBounds.x + childBounds.width,
+				west = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, west, rect.x, childBounds.x + childBounds.width,
 					Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height),
 					(anchors & IAnchorConstants.WEST) != 0 && (anchors & IAnchorConstants.EAST) == 0);
 			}
 
 			// Alignment: East to element
-			if (RequestConstants.REQ_MOVE.equals(request.getType()) ||
-				(RequestConstants.REQ_RESIZE.equals(request.getType()) && (request.getResizeDirection() & PositionConstants.EAST) != 0))
+			if ((snapOrientation & (EAST | HORIZONTAL)) != 0)
 			{
 				// align on right
-				horizontal = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_EAST, horizontal, rect.x +
-					rect.width, childBounds.x + childBounds.width, Math.min(rect.y, childBounds.y),
-					Math.max(rect.y + rect.height, childBounds.y + childBounds.height), (anchors & IAnchorConstants.EAST) != 0);
+				east = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_EAST, east, rect.x + rect.width,
+					childBounds.x + childBounds.width, Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height),
+					(anchors & IAnchorConstants.EAST) != 0);
 				// distance to left-right
-				horizontal = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, horizontal, rect.x + rect.width, childBounds.x,
+				east = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, east, rect.x + rect.width, childBounds.x,
 					Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height),
 					(anchors & IAnchorConstants.EAST) != 0 && (anchors & IAnchorConstants.WEST) == 0);
 			}
 		}
 
-		if (horizontal == null && vertical == null)
+		if (north == null && east == null && south == null && west == null)
 		{
 			return null;
 		}
-		if (horizontal == null)
-		{
-			return new ElementAlignmentItem[] { vertical };
-		}
-		if (vertical == null)
-		{
-			return new ElementAlignmentItem[] { horizontal };
-		}
-		return new ElementAlignmentItem[] { horizontal, vertical };
+		List<ElementAlignmentItem> alignment = new ArrayList<ElementAlignmentItem>(4);
+		if (north != null) alignment.add(north);
+		if (east != null) alignment.add(east);
+		if (south != null) alignment.add(south);
+		if (west != null) alignment.add(west);
+		return alignment.toArray(new ElementAlignmentItem[alignment.size()]);
 	}
 
 	protected ElementAlignmentItem getDistanceAlignmentItem(String alignDirection, ElementAlignmentItem item, int dragOffset, int offset, int start, int end,
@@ -383,7 +389,16 @@ public class SnapToElementAlignment extends SnapToHelper
 	@Override
 	public int snapRectangle(Request request, int snapOrientation, PrecisionRectangle baseRect, PrecisionRectangle result)
 	{
-		ElementAlignmentItem[] elementAlignment = getElementAlignment((ChangeBoundsRequest)request);
+		ElementAlignmentItem[] elementAlignment = null;
+		if (request instanceof ChangeBoundsRequest)
+		{
+			elementAlignment = getElementAlignmentForMoveOrResize((ChangeBoundsRequest)request, snapOrientation);
+		}
+		else if (request instanceof CreateRequest)
+		{
+			elementAlignment = getElementAlignmentForCreate((CreateRequest)request, snapOrientation);
+		}
+
 		if (elementAlignment == null)
 		{
 			return snapOrientation;
@@ -391,6 +406,8 @@ public class SnapToElementAlignment extends SnapToHelper
 
 		// store alignment info for feedback
 		request.getExtendedData().put(ELEMENT_ALIGNMENT_REQUEST_DATA, elementAlignment);
+
+		boolean isResize = RequestConstants.REQ_RESIZE.equals(request.getType()) || RequestConstants.REQ_CREATE.equals(request.getType());
 
 		PrecisionRectangle correction = new PrecisionRectangle();
 		container.getContentPane().translateToRelative(correction);
@@ -404,7 +421,7 @@ public class SnapToElementAlignment extends SnapToHelper
 			if (ElementAlignmentItem.ALIGN_DIRECTION_NORTH.equals(item.alignDirection) && (resultSnapOrientation & (NORTH | VERTICAL)) != 0)
 			{
 				correction.preciseY += item.delta;
-				if (RequestConstants.REQ_RESIZE.equals(request.getType()))
+				if (isResize)
 				{
 					correction.preciseHeight -= item.delta;
 				}
@@ -415,7 +432,7 @@ public class SnapToElementAlignment extends SnapToHelper
 			// Snap south
 			else if (ElementAlignmentItem.ALIGN_DIRECTION_SOUTH.equals(item.alignDirection) && (resultSnapOrientation & (SOUTH | VERTICAL)) != 0)
 			{
-				if (RequestConstants.REQ_RESIZE.equals(request.getType()))
+				if (isResize)
 				{
 					correction.preciseHeight += item.delta;
 				}
@@ -424,14 +441,14 @@ public class SnapToElementAlignment extends SnapToHelper
 					correction.preciseY += item.delta;
 				}
 				anchorProperty = AnchorPropertySource.BOTTOM;
-				resultSnapOrientation &= ~(NORTH | VERTICAL);
+				resultSnapOrientation &= ~(SOUTH | VERTICAL);
 			}
 
 			// Snap west
 			if (ElementAlignmentItem.ALIGN_DIRECTION_WEST.equals(item.alignDirection) && (resultSnapOrientation & (WEST | HORIZONTAL)) != 0)
 			{
 				correction.preciseX += item.delta;
-				if (RequestConstants.REQ_RESIZE.equals(request.getType()))
+				if (isResize)
 				{
 					correction.preciseWidth -= item.delta;
 				}
@@ -442,7 +459,7 @@ public class SnapToElementAlignment extends SnapToHelper
 			// Snap east
 			else if (ElementAlignmentItem.ALIGN_DIRECTION_EAST.equals(item.alignDirection) && (resultSnapOrientation & (EAST | HORIZONTAL)) != 0)
 			{
-				if (RequestConstants.REQ_RESIZE.equals(request.getType()))
+				if (isResize)
 				{
 					correction.preciseWidth += item.delta;
 				}

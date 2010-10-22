@@ -17,15 +17,16 @@
 
 package com.servoy.eclipse.designer.editor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.draw2d.AncestorListener;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalEditPart;
-import org.eclipse.gef.RequestConstants;
-import org.eclipse.gef.requests.ChangeBoundsRequest;
 
 /**
  * Feedback figure for a selected edit part.
@@ -76,12 +77,12 @@ public class SelectedElementFeedbackFigure extends Figure implements AncestorLis
 
 	protected void addFeedbackChildren()
 	{
-		// create a fake request: move(0.0)
-		ChangeBoundsRequest changeBoundsRequest = new ChangeBoundsRequest(RequestConstants.REQ_MOVE);
-		changeBoundsRequest.setEditParts(editPart);
+		List<EditPart> editParts = new ArrayList<EditPart>(1);
+		editParts.add(editPart);
 		SnapToElementAlignment snapToElementAlignment = new SnapToElementAlignment(container);
 		snapToElementAlignment.setSnapThreshold(0);
-		ElementAlignmentItem[] elementAlignment = snapToElementAlignment.getElementAlignment(changeBoundsRequest);
+		ElementAlignmentItem[] elementAlignment = snapToElementAlignment.getElementAlignment(editPart.getFigure().getBounds(), PositionConstants.NSEW,
+			editParts);
 		if (elementAlignment != null)
 		{
 			for (ElementAlignmentItem item : elementAlignment)

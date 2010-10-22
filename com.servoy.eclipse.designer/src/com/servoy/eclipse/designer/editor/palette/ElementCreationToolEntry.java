@@ -15,38 +15,26 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.designer.editor;
+package com.servoy.eclipse.designer.editor.palette;
 
+import org.eclipse.gef.palette.ToolEntry;
 import org.eclipse.gef.requests.CreationFactory;
-
-import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
+import org.eclipse.gef.tools.CreationTool;
+import org.eclipse.jface.resource.ImageDescriptor;
 
 /**
- * Creation factory for GEF palette.
- * Does not create new objects, just simply holds the RequestType.
+ * Tool entry for creating elements from the form editor palette.
  * 
  * @author rgansevles
  *
  */
-public class RequestTypeCreationFactory implements CreationFactory
+public class ElementCreationToolEntry extends ToolEntry
 {
 
-	private final RequestType requestType;
-
-	public RequestTypeCreationFactory(RequestType requestType)
+	public ElementCreationToolEntry(String label, String shortDesc, CreationFactory factory, ImageDescriptor iconSmall, ImageDescriptor iconLarge)
 	{
-		this.requestType = requestType;
-	}
-
-	public Object getNewObject()
-	{
-		// Does not crate new objects, just use getObjectType()
-		return null;
-	}
-
-	public Object getObjectType()
-	{
-		return requestType;
+		super(label, shortDesc, iconSmall, iconLarge, ElementCreationTool.class);
+		setToolProperty(CreationTool.PROPERTY_CREATION_FACTORY, factory);
 	}
 
 }

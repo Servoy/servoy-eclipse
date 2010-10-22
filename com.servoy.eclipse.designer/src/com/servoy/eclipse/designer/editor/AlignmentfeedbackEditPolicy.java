@@ -18,11 +18,7 @@
 package com.servoy.eclipse.designer.editor;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.draw2d.ActionEvent;
 import org.eclipse.draw2d.ActionListener;
@@ -66,7 +62,7 @@ import com.servoy.j2db.util.IAnchorConstants;
  */
 final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 {
-	private final Map<ElementAlignmentItem, IFigure> alignmentFeedbackFigures = new HashMap<ElementAlignmentItem, IFigure>();
+	private AlignmentFeedbackHelper alignmentFeedbackHelper;
 
 	/**
 	 * the feedback figure for the selected element.
@@ -85,6 +81,18 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	public AlignmentfeedbackEditPolicy(FormGraphicalEditPart container)
 	{
 		this.container = container;
+	}
+
+	/**
+	 * @return the alignmentFeedbackHelper
+	 */
+	public AlignmentFeedbackHelper getAlignmentFeedbackHelper()
+	{
+		if (alignmentFeedbackHelper == null)
+		{
+			alignmentFeedbackHelper = new AlignmentFeedbackHelper(getHost());
+		}
+		return alignmentFeedbackHelper;
 	}
 
 	@Override
@@ -152,66 +160,16 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 		super.showChangeBoundsFeedback(request);
 		removeSelectedElementFeedbackFigure();
 		removeAnchoringFigure();
-		showElementAlignmentFeedback(request);
+		getAlignmentFeedbackHelper().showElementAlignmentFeedback(request);
 	}
 
 	@Override
 	protected void eraseChangeBoundsFeedback(ChangeBoundsRequest request)
 	{
 		super.eraseChangeBoundsFeedback(request);
-		eraseElementAlignmentFeedback();
+		getAlignmentFeedbackHelper().eraseElementAlignmentFeedback();
 		addSelectedElementFeedbackFigure();
 		addAnchoringFigure();
-	}
-
-	protected void showElementAlignmentFeedback(ChangeBoundsRequest request)
-	{
-		ElementAlignmentItem[] feedbackItems = (ElementAlignmentItem[])request.getExtendedData().get(SnapToElementAlignment.ELEMENT_ALIGNMENT_REQUEST_DATA);
-
-		// remove old feedbacks
-		Iterator<Entry<ElementAlignmentItem, IFigure>> iterator = alignmentFeedbackFigures.entrySet().iterator();
-		while (iterator.hasNext())
-		{
-			Entry<ElementAlignmentItem, IFigure> next = iterator.next();
-			boolean remove = true;
-			if (feedbackItems != null)
-			{
-				for (int i = 0; remove && i < feedbackItems.length; i++)
-				{
-					remove = !next.equals(feedbackItems[i]);
-				}
-			}
-			if (remove)
-			{
-				iterator.remove();
-				removeFeedback(next.getValue());
-			}
-		}
-
-		if (feedbackItems == null)
-		{
-			return;
-		}
-
-		// create figures for new feedbackItems
-		for (ElementAlignmentItem item : feedbackItems)
-		{
-			if (alignmentFeedbackFigures.get(item) == null)
-			{
-				AlignmentFeedbackFigure figure = new AlignmentFeedbackFigure(item);
-				alignmentFeedbackFigures.put(item, figure);
-				addFeedback(figure);
-			}
-		}
-	}
-
-	protected void eraseElementAlignmentFeedback()
-	{
-		for (IFigure figure : alignmentFeedbackFigures.values())
-		{
-			removeFeedback(figure);
-		}
-		alignmentFeedbackFigures.clear();
 	}
 
 	@Override
