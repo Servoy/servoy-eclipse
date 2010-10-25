@@ -258,24 +258,25 @@ public abstract class TypeCreator
 	{
 		if (BASE_TYPES.contains(typeName) || typeName.startsWith("Array<")) return null;
 		if (!initialized) initalize();
-		Type type = types.get(typeName);
+		String realTypeName = typeName;
+		Type type = types.get(realTypeName);
 		if (type == null)
 		{
-			type = dynamicTypes.get(typeName);
+			type = dynamicTypes.get(realTypeName);
 			if (type == null)
 			{
-				type = createType(context, typeName, typeName);
+				type = createType(context, realTypeName, realTypeName);
 				if (type != null)
 				{
-					Type previous = types.putIfAbsent(typeName, type);
+					Type previous = types.putIfAbsent(realTypeName, type);
 					if (previous != null) return previous;
 				}
 				else
 				{
-					type = createDynamicType(context, typeName, typeName);
+					type = createDynamicType(context, realTypeName, realTypeName);
 					if (type != null)
 					{
-						Type previous = dynamicTypes.putIfAbsent(typeName, type);
+						Type previous = dynamicTypes.putIfAbsent(realTypeName, type);
 						if (previous != null) return previous;
 					}
 				}
@@ -283,6 +284,19 @@ public abstract class TypeCreator
 		}
 		return type;
 	}
+
+	/**
+	 * @param typeName
+	 * @return
+	 */
+	private String getRealName(String typeName)
+	{
+		if ("Record".equals(typeName)) return Record.JS_RECORD;
+		if ("FoundSet".equals(typeName)) return FoundSet.JS_FOUNDSET;
+		if (IScriptRenderMethods.class.getSimpleName().equals(typeName)) return IScriptRenderMethods.JS_RENDERABLE;
+		return typeName;
+	}
+
 
 	protected abstract boolean constantsOnly(String name);
 
@@ -569,16 +583,7 @@ public abstract class TypeCreator
 			return "Array";
 		}
 
-		String typeName;
-		if (memberReturnType == IScriptRenderMethods.class)
-		{
-			typeName = IScriptRenderMethods.JS_RENDERABLE;
-		}
-		else
-		{
-			typeName = memberReturnType.getSimpleName();
-		}
-
+		String typeName = getRealName(memberReturnType.getSimpleName());
 		addAnonymousClassType(typeName, memberReturnType);
 		return typeName;
 	}

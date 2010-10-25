@@ -179,26 +179,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		return names;
 	}
 
-	/**
-	 * @see org.eclipse.dltk.javascript.typeinfo.ITypeProvider#getType(org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext, java.lang.String)
-	 */
-	@Override
-	public Type getType(ITypeInfoContext context, String typeName)
-	{
-		return super.getType(context, getRealName(typeName));
-	}
-
-	/**
-	 * @param typeName
-	 * @return
-	 */
-	private String getRealName(String typeName)
-	{
-		if ("Record".equals(typeName)) return Record.JS_RECORD;
-		if ("FoundSet".equals(typeName)) return FoundSet.JS_FOUNDSET;
-		return typeName;
-	}
-
 	@Override
 	protected Type createDynamicType(ITypeInfoContext context, String typeNameClassName, String fullTypeName)
 	{
