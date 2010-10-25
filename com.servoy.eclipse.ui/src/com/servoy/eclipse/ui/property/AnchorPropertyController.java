@@ -34,7 +34,7 @@ public class AnchorPropertyController extends PropertyController<Integer, Object
 {
 	public AnchorPropertyController(String id, String displayName)
 	{
-		super(id, displayName, null, AnchorLabelProvider.LABEL_INSTANCE, null);
+		super(id, displayName, null, AnchorLabelProvider.LABEL_INSTANCE, new DummyCellEditorFactory(AnchorLabelProvider.LABEL_INSTANCE));
 	}
 
 	@Override
