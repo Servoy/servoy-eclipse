@@ -37,6 +37,7 @@ public class FigureMovedTracker implements AncestorListener
 	{
 		this.figure = figure;
 		this.locator = locator;
+		ancestorMoved(null);
 	}
 
 	/**
