@@ -36,6 +36,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 	public static final String GROUP_ANCHORING = "group.anchoring";
 	public static final String GROUP_Z_ORDER = "group.z.order";
 	public static final String GROUP_GROUPING = "group.grouping";
+	public static final String GROUP_SAMESIZE = "group.samesize";
 
 	protected DesignerActionFactory(String actionId)
 	{
@@ -408,6 +409,46 @@ public abstract class DesignerActionFactory extends ActionFactory
 			window.getPartService().addPartListener(action);
 //			action.setActionDefinitionId("org.eclipse.ui.edit." + getId()); //$NON-NLS-1$
 			action.setImageDescriptor(SAVE_AS_TEMPLATE_IMAGE);
+			return action;
+		}
+	};
+
+	public static final String SAME_WIDTH_TEXT = "Set same width";
+	public static final String SAME_WIDTH_TOOLTIP = SAME_WIDTH_TEXT;
+	public static final ImageDescriptor SAME_WIDTH_IMAGE = Activator.loadImageDescriptorFromBundle("same_width.gif");
+	public static final ActionFactory SAME_WIDTH = new ActionFactory("same-width") {//$NON-NLS-1$
+
+		@Override
+		public IWorkbenchAction create(IWorkbenchWindow window)
+		{
+			if (window == null)
+			{
+				throw new IllegalArgumentException();
+			}
+			RetargetAction action = new RetargetAction(getId(), SAME_WIDTH_TEXT);
+			action.setToolTipText(SAME_WIDTH_TOOLTIP);
+			window.getPartService().addPartListener(action);
+			action.setImageDescriptor(SAME_WIDTH_IMAGE);
+			return action;
+		}
+	};
+
+	public static final String SAME_HEIGHT_TEXT = "Set same height";
+	public static final String SAME_HEIGHT_TOOLTIP = SAME_HEIGHT_TEXT;
+	public static final ImageDescriptor SAME_HEIGHT_IMAGE = Activator.loadImageDescriptorFromBundle("same_height.gif");
+	public static final ActionFactory SAME_HEIGHT = new ActionFactory("same-height") {//$NON-NLS-1$
+
+		@Override
+		public IWorkbenchAction create(IWorkbenchWindow window)
+		{
+			if (window == null)
+			{
+				throw new IllegalArgumentException();
+			}
+			RetargetAction action = new RetargetAction(getId(), SAME_HEIGHT_TEXT);
+			action.setToolTipText(SAME_HEIGHT_TOOLTIP);
+			window.getPartService().addPartListener(action);
+			action.setImageDescriptor(SAME_HEIGHT_IMAGE);
 			return action;
 		}
 	};

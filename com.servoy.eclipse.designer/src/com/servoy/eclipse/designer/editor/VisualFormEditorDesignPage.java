@@ -104,6 +104,8 @@ import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
 import com.servoy.eclipse.designer.editor.commands.FixedSelectAllAction;
 import com.servoy.eclipse.designer.editor.commands.GroupAction;
 import com.servoy.eclipse.designer.editor.commands.PasteAction;
+import com.servoy.eclipse.designer.editor.commands.SameHeightAction;
+import com.servoy.eclipse.designer.editor.commands.SameWidthAction;
 import com.servoy.eclipse.designer.editor.commands.SaveAsTemplateAction;
 import com.servoy.eclipse.designer.editor.commands.SendToBackAction;
 import com.servoy.eclipse.designer.editor.commands.SetTabSequenceAction;
@@ -135,6 +137,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	public static final String COOLBAR_REORGANIZE = "reorganize";
 	public static final String COOLBAR_ALIGN = "align";
 	public static final String COOLBAR_DISTRIBUTE = "distribute";
+	public static final String COOLBAR_SAMESIZE = "same size";
 	public static final String COOLBAR_TOGGLE = "toggle";
 	public static final String COOLBAR_ELEMENTS = "elements";
 
@@ -411,6 +414,14 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
 
+		action = new SameWidthAction(editorPart);
+		getActionRegistry().registerAction(action);
+		getSelectionActions().add(action.getId());
+
+		action = new SameHeightAction(editorPart);
+		getActionRegistry().registerAction(action);
+		getSelectionActions().add(action.getId());
+
 		action = new SetTabSequenceAction(editorPart);
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
@@ -512,6 +523,9 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		addToolbarAction(COOLBAR_DISTRIBUTE, getActionRegistry().getAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_SPACING.getId()));
 		addToolbarAction(COOLBAR_DISTRIBUTE, getActionRegistry().getAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_CENTER.getId()));
 		addToolbarAction(COOLBAR_DISTRIBUTE, getActionRegistry().getAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_PACK.getId()));
+
+		addToolbarAction(COOLBAR_SAMESIZE, getActionRegistry().getAction(DesignerActionFactory.SAME_WIDTH.getId()));
+		addToolbarAction(COOLBAR_SAMESIZE, getActionRegistry().getAction(DesignerActionFactory.SAME_HEIGHT.getId()));
 
 		addToolbarAction(COOLBAR_ELEMENTS, null);
 
