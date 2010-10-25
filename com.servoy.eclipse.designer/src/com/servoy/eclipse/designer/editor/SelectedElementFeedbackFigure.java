@@ -28,6 +28,8 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalEditPart;
 
+import com.servoy.j2db.persistence.Part;
+
 /**
  * Feedback figure for a selected edit part.
  * 
@@ -77,6 +79,12 @@ public class SelectedElementFeedbackFigure extends Figure implements AncestorLis
 
 	protected void addFeedbackChildren()
 	{
+		addElementAlignmentFeedback();
+		addSameSizeFeedback();
+	}
+
+	protected void addElementAlignmentFeedback()
+	{
 		List<EditPart> editParts = new ArrayList<EditPart>(1);
 		editParts.add(editPart);
 		SnapToElementAlignment snapToElementAlignment = new SnapToElementAlignment(container);
@@ -89,6 +97,44 @@ public class SelectedElementFeedbackFigure extends Figure implements AncestorLis
 			{
 				add(new AlignmentFeedbackFigure(item));
 			}
+		}
+	}
+
+	protected void addSameSizeFeedback()
+	{
+		Rectangle myBounds = editPart.getFigure().getBounds();
+		boolean addedSameWidth = false;
+		boolean addedSameHeight = false;
+
+		List<EditPart> children = container.getChildren();
+		for (EditPart child : children)
+		{
+			if (child.getModel() instanceof Part || child == editPart || !(child instanceof GraphicalEditPart))
+			{
+				continue;
+			}
+
+			IFigure childFigure = ((GraphicalEditPart)child).getFigure();
+			Rectangle childBounds = childFigure.getBounds();
+			if (myBounds.width == childBounds.width)
+			{
+				add(new SameSizeFeedbackFigure(SameSizeFeedbackFigure.SAME_WIDTH, childFigure));
+				addedSameWidth = true;
+			}
+			if (myBounds.height == childBounds.height)
+			{
+				add(new SameSizeFeedbackFigure(SameSizeFeedbackFigure.SAME_HEIGHT, childFigure));
+				addedSameHeight = true;
+			}
+		}
+
+		if (addedSameWidth)
+		{
+			add(new SameSizeFeedbackFigure(SameSizeFeedbackFigure.SAME_WIDTH, editPart.getFigure()));
+		}
+		if (addedSameHeight)
+		{
+			add(new SameSizeFeedbackFigure(SameSizeFeedbackFigure.SAME_HEIGHT, editPart.getFigure()));
 		}
 	}
 
