@@ -74,6 +74,13 @@ public class AnchorPropertyController extends PropertyController<Integer, Object
 		}
 
 		@Override
+		public Object resetComplexPropertyValue(Object id)
+		{
+			return Integer.valueOf(IAnchorConstants.DEFAULT);
+		}
+
+
+		@Override
 		public IPropertyDescriptor[] createPropertyDescriptors()
 		{
 			// make sure sub-properties are sorted in defined order

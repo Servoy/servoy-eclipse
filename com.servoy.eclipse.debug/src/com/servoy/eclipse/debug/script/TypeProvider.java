@@ -55,6 +55,7 @@ import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.FormEncapsulation;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
@@ -108,7 +109,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addType(Record.JS_RECORD, Record.class);
 		addType("JSDataSet", JSDataSet.class);
 		addType(IExecutingEnviroment.TOPLEVEL_SERVOY_EXCEPTION, ServoyException.class);
-		addAnonymousClassType("controller", JSForm.class);
+		addAnonymousClassType("Controller", JSForm.class);
 
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
 		addScopeType("Form", new FormScopeCreator());
@@ -236,8 +237,25 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 							{
 								if (member.getName().equals("foundset"))
 								{
+									member.setVisible(!FormEncapsulation.hideFoundset(formToUse));
 									member.setType(context.getType(FoundSet.JS_FOUNDSET + '<' + ds + '>'));
-									break;
+								}
+								else if (member.getName().equals("controller"))
+								{
+									member.setVisible(!FormEncapsulation.hideController(formToUse));
+								}
+								else if (member.getName().equals("alldataproviders"))
+								{
+									member.setVisible(!FormEncapsulation.hideDataproviders(formToUse));
+								}
+								else if (member.getName().equals("allrelations"))
+								{
+									member.setVisible(!FormEncapsulation.hideDataproviders(formToUse));
+								}
+								else if (member.getName().equals("elements"))
+								{
+									member.setVisible(!FormEncapsulation.hideElements(formToUse));
+									member.setType(context.getType("Elements<" + ds + '>'));
 								}
 							}
 						}
@@ -245,16 +263,14 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						// data providers
 						Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(formToUse.getTable());
 
+						boolean dataprovidersVisible = !FormEncapsulation.hideDataproviders(formToUse);
 						if (allDataProvidersForTable != null)
 						{
-							addDataProviders(allDataProvidersForTable.values().iterator(), members, context);
+							addDataProviders(allDataProvidersForTable.values().iterator(), members, context, dataprovidersVisible);
 						}
 
 						// relations
-						addRelations(context, fs, members, fs.getRelations(formToUse.getTable(), true, false));
-
-						// element scope
-						members.add(createProperty(context, "elements", true, "Elements<" + formToUse.getName() + '>', ELEMENTS));
+						addRelations(context, fs, members, fs.getRelations(formToUse.getTable(), true, false), dataprovidersVisible);
 					}
 					catch (Exception e)
 					{
@@ -458,11 +474,11 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 					Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(table);
 					if (allDataProvidersForTable != null)
 					{
-						addDataProviders(allDataProvidersForTable.values().iterator(), members, context);
+						addDataProviders(allDataProvidersForTable.values().iterator(), members, context, true);
 					}
 
 					// relations
-					addRelations(context, fs, members, fs.getRelations(table, true, false));
+					addRelations(context, fs, members, fs.getRelations(table, true, false), true);
 				}
 				catch (RepositoryException e)
 				{
@@ -504,7 +520,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			{
 				try
 				{
-					addRelations(context, fs, members, fs.getRelations(null, true, false));
+					addRelations(context, fs, members, fs.getRelations(null, true, false), true);
 				}
 				catch (RepositoryException e)
 				{
@@ -557,6 +573,10 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 					Property formProperty = createProperty(form.getName(), true, context.getType("Form<" + form.getName() + '>'), "Form based on datasource: " +
 						form.getDataSource(), FORM_IMAGE);
 					formProperty.setAttribute(LAZY_VALUECOLLECTION, form);
+					if (FormEncapsulation.isPrivate(form, fs))
+					{
+						formProperty.setVisible(false);
+					}
 					members.add(formProperty);
 				}
 			}
@@ -675,9 +695,11 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			members.add(createProperty(context, "allrelations", true, "Array", SPECIAL_PROPERTY));
 			members.add(createProperty(context, "allvariables", true, "Array", SPECIAL_PROPERTY));
 
-			// controller and foundset
-			members.add(createProperty(context, "controller", true, "controller", IconProvider.instance().descriptor(JSForm.class)));
+			// controller and foundset and elements
+			members.add(createProperty(context, "controller", true, "Controller", IconProvider.instance().descriptor(JSForm.class)));
 			members.add(createProperty(context, "foundset", true, FoundSet.JS_FOUNDSET, FOUNDSET_IMAGE));
+			members.add(createProperty(context, "elements", true, "Elements", ELEMENTS));
+
 			type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
 			return type;
 		}
@@ -716,7 +738,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		}
 	}
 
-	private static void addDataProviders(Iterator< ? extends IDataProvider> dataproviders, EList<Member> members, ITypeInfoContext context)
+	private static void addDataProviders(Iterator< ? extends IDataProvider> dataproviders, EList<Member> members, ITypeInfoContext context, boolean visible)
 	{
 		while (dataproviders.hasNext())
 		{
@@ -724,6 +746,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 			property.setName(provider.getDataProviderID());
 			property.setAttribute(RESOURCE, provider);
+			property.setVisible(visible);
 			switch (provider.getDataProviderType())
 			{
 				case IColumnTypes.DATETIME :
@@ -766,17 +789,25 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	 * @param fs
 	 * @param members
 	 * @param relations
+	 * @param visible 
 	 * @throws RepositoryException
 	 */
-	private static void addRelations(ITypeInfoContext context, FlattenedSolution fs, EList<Member> members, Iterator<Relation> relations)
-		throws RepositoryException
+	private static void addRelations(ITypeInfoContext context, FlattenedSolution fs, EList<Member> members, Iterator<Relation> relations, boolean visible)
 	{
 		while (relations.hasNext())
 		{
-			Relation relation = relations.next();
-			Property property = createProperty(relation.getName(), true, context.getType(FoundSet.JS_FOUNDSET + "<" + relation.getName() + ">"),
-				getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE, relation);
-			members.add(property);
+			try
+			{
+				Relation relation = relations.next();
+				Property property = createProperty(relation.getName(), true, context.getType(FoundSet.JS_FOUNDSET + "<" + relation.getName() + ">"),
+					getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE, relation);
+				property.setVisible(visible);
+				members.add(property);
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
 		}
 	}
 

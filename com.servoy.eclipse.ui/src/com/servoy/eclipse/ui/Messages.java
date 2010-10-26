@@ -75,6 +75,14 @@ public class Messages extends NLS
 	public static String AlignBottom;
 	public static String AlignCenter;
 
+	public static String Public;
+	public static String Private;
+	public static String ModulePrivate;
+	public static String HideDataproviders;
+	public static String HideFoundset;
+	public static String HideController;
+	public static String HideElements;
+
 	public static String JustifyLeading;
 	public static String JustifyTrailing;
 
