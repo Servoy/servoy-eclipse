@@ -65,7 +65,7 @@ import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 @SuppressWarnings("nls")
 public class ElementResolver extends TypeCreator implements IElementResolver
 {
-	private static final List<String> noneConstantTypes = Arrays.asList(new String[] { "application", "security", "solutionModel", "databaseManager", "controller", "currentcontroller", "i18n", "history", "utils", "foundset", "forms", "elements" });
+	private static final List<String> noneConstantTypes = Arrays.asList(new String[] { "application", "security", "jsunit", "solutionModel", "databaseManager", "controller", "currentcontroller", "i18n", "history", "utils", "foundset", "forms", "elements" });
 
 	private final Map<String, ITypeNameCreator> typeNameCreators = new HashMap<String, ElementResolver.ITypeNameCreator>();
 
@@ -221,7 +221,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		boolean readOnly = true;
 		ImageDescriptor image = null;
 		Object resource = null;
-		if (type == null)
+		if (type == null && name.indexOf('.') == -1)
 		{
 			FlattenedSolution fs = getFlattenedSolution(context);
 			if (fs != null)
@@ -263,10 +263,6 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 								ServoyLog.logError(e);
 							}
 						}
-//						else
-//						{
-//							image = FORM_VARIABLE_IMAGE;
-//						}
 						if (provider != null)
 						{
 							readOnly = false;
@@ -278,7 +274,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 
 			}
 		}
-		else
+		else if (type != null)
 		{
 			image = (ImageDescriptor)type.getAttribute(IMAGE_DESCRIPTOR);
 		}
