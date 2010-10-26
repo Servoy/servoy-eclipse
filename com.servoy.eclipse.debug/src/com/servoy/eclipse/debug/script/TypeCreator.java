@@ -243,11 +243,12 @@ public abstract class TypeCreator
 		names.addAll(scopeTypes.keySet());
 		if (prefix != null && !"".equals(prefix.trim()))
 		{
+			String lowerCasePrefix = prefix.toLowerCase();
 			Iterator<String> iterator = names.iterator();
 			while (iterator.hasNext())
 			{
 				String name = iterator.next();
-				if (!name.startsWith(prefix)) iterator.remove();
+				if (!name.toLowerCase().startsWith(lowerCasePrefix)) iterator.remove();
 			}
 		}
 		return names;
@@ -325,18 +326,7 @@ public abstract class TypeCreator
 				}
 				else if (IConstantsObject.class.isAssignableFrom(element))
 				{
-					if (constantsOnly(element.getSimpleName()))
-					{
-						JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(element, null);
-						if (javaMembers != null && javaMembers.getMethodIds(false).size() == 0)
-						{
-							addType(element.getSimpleName(), element);
-						}
-					}
-					else
-					{
-						addType(element.getSimpleName(), element);
-					}
+					addType(element.getSimpleName(), element);
 				}
 				else if (!constantsOnly(element.getSimpleName()) && IJavaScriptType.class.isAssignableFrom(element))
 				{
