@@ -394,72 +394,40 @@
                tooltip="Open Servoy Forum">
          </action>
       </actionSet>
+      <actionSet
+            id="com.servoy.eclipse.ui.choosers"
+            label="Choosers"
+            visible="true">
+         <action
+               class="com.servoy.eclipse.ui.actions.ShowFontChooserActionDelegate"
+               icon="icons/text.gif"
+               id="com.servoy.eclipse.ui.actions.OpenFontDialog"
+               label="Font Chooser"
+               menubarPath="edit/Choosers"
+               state="false"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Insert Font">
+         </action>
+         <action
+               class="com.servoy.eclipse.ui.actions.ShowColorChooserActionDelegate"
+               icon="icons/colorchooser.gif"
+               id="com.servoy.eclipse.ui.actions.OpenColorDialog"
+               label="Color Chooser"
+               menubarPath="edit/Choosers"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Insert Color">
+         </action>
+         <menu
+               id="edit"
+               label="&amp;Edit">
+            <separator
+                  name="Choosers">
+            </separator>
+         </menu>
+      </actionSet>
    </extension>
-     <extension
-           point="org.eclipse.ui.editorActions">
-        <editorContribution
-              id="com.servoy.eclipse.ui.ScriptEditorContribution"
-              targetID="org.eclipse.dltk.javascript.ui.editor.JavascriptEditor">
-           <action
-                 class="com.servoy.eclipse.ui.actions.ShowFontChooserActionDelegate"
-                 icon="icons/text.gif"
-                 id="com.servoy.eclipse.ui.actions.OpenFontDialog"
-                 label="Font Chooser"
-                 menubarPath="edit/Choosers"
-                 style="push"
-                 toolbarPath="Normal/additions"
-                 tooltip="Insert Font">
-           </action>
-           <menu
-                 id="edit"
-                 label="&amp;Edit">
-              <separator
-                    name="Choosers">
-              </separator>
-           </menu>
-           <action
-                 class="com.servoy.eclipse.ui.actions.ShowColorChooserActionDelegate"
-                 icon="icons/colorchooser.gif"
-                 id="com.servoy.eclipse.ui.actions.OpenColorDialog"
-                 label="Color Chooser"
-                 menubarPath="edit/Choosers"
-                 style="push"
-                 toolbarPath="Normal/additions"
-                 tooltip="Insert Color">
-           </action>
-        </editorContribution>
-        <editorContribution
-              id="com.servoy.eclipse.ui.CSSEditorContribution"
-              targetID="org.eclipse.wst.css.core.csssource.source">
-           <action
-                 class="com.servoy.eclipse.ui.actions.ShowFontChooserActionDelegate"
-                 icon="icons/text.gif"
-                 id="com.servoy.eclipse.ui.actions.OpenFontDialog"
-                 label="Font Chooser"
-                 menubarPath="edit/Choosers"
-                 style="push"
-                 toolbarPath="Normal/additions"
-                 tooltip="Insert Font">
-           </action>
-           <menu
-                 id="edit"
-                 label="&amp;Edit">
-              <separator
-                    name="Choosers">
-              </separator>
-           </menu>
-             <action
-                   class="com.servoy.eclipse.ui.actions.ShowColorChooserActionDelegate"
-                   icon="icons/colorchooser.gif"
-                   id="com.servoy.eclipse.ui.actions.OpenColorDialog"
-                   label="Color Chooser"
-                   menubarPath="edit/Choosers"
-                   style="push"
-                   toolbarPath="Normal/additions"
-                   tooltip="Insert Color">
-           </action>           
-        </editorContribution>
-     </extension>
      <extension
            point="org.eclipse.ui.ide.markerResolution">
         <markerResolutionGenerator
