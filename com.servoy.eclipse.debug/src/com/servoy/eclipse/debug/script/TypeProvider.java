@@ -799,10 +799,13 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			try
 			{
 				Relation relation = relations.next();
-				Property property = createProperty(relation.getName(), true, context.getType(FoundSet.JS_FOUNDSET + "<" + relation.getName() + ">"),
-					getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE, relation);
-				property.setVisible(visible);
-				members.add(property);
+				if (relation.isValid())
+				{
+					Property property = createProperty(relation.getName(), true, context.getType(FoundSet.JS_FOUNDSET + "<" + relation.getName() + ">"),
+						getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE, relation);
+					property.setVisible(visible);
+					members.add(property);
+				}
 			}
 			catch (Exception e)
 			{
