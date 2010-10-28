@@ -43,6 +43,7 @@ import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.dnd.IDragData;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IFormElement;
@@ -79,7 +80,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 			((DataRequest)request).getData() instanceof IDragData[] && ((IDragData[])(((DataRequest)request).getData())).length > 0)
 		{
 			if (((IDragData[])(((DataRequest)request).getData()))[0] instanceof PersistDragData &&
-				(persist instanceof GraphicalComponent || persist instanceof ISupportMedia))
+				(persist instanceof Field || persist instanceof GraphicalComponent || persist instanceof ISupportMedia))
 			{
 				return createDropPersistCommand((DataRequest)request);
 			}
@@ -180,7 +181,8 @@ class PersistEditPolicy extends ComponentEditPolicy
 			((DataRequest)request).getData() instanceof IDragData[])
 		{
 			IDragData[] dragData = (IDragData[])((DataRequest)request).getData();
-			if (dragData.length > 0 && dragData[0] instanceof PersistDragData && (model instanceof GraphicalComponent || model instanceof ISupportMedia))
+			if (dragData.length > 0 && dragData[0] instanceof PersistDragData &&
+				(model instanceof Field || model instanceof GraphicalComponent || model instanceof ISupportMedia))
 			{
 				return true;
 			}
@@ -241,9 +243,9 @@ class PersistEditPolicy extends ComponentEditPolicy
 			try
 			{
 				IPersist persist = servoyProject.getEditingPersist(dragData.uuid);
-				if (persist instanceof ScriptMethod && child instanceof GraphicalComponent)
+				if (persist instanceof ScriptMethod && (child instanceof Field || child instanceof GraphicalComponent))
 				{
-					IPropertySource propertySource = new PersistPropertySource((GraphicalComponent)child, (IPersist)(formEditPart == null ? null
+					IPropertySource propertySource = new PersistPropertySource((IPersist)child, (IPersist)(formEditPart == null ? null
 						: formEditPart.getModel()), false);
 					SetValueCommand setCommand = new SetValueCommand("Drag-n-drop script method");
 					setCommand.setTarget(propertySource);
