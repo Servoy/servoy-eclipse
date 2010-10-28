@@ -51,22 +51,22 @@ public class DesignPerspective implements IPerspectiveFactory
 {
 
 	protected static final String[] actionIds = { "org.eclipse.debug.ui.debugActionSet", "org.eclipse.dltk.debug.ui.ScriptDebugActionSet", "org.eclipse.debug.ui.launchActionSet", "org.eclipse.ui.externaltools.ExternalToolsSet" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
-	protected static final String[] activityIds = { "org.eclipse.team.cvs", "org.eclipse.antDevelopment", "org.eclipse.javaDevelopment", "org.eclipse.plugInDevelopment", "org.eclipse.debugSupport", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk", "org.eclipse.equinox.p2.ui.sdk.classicUpdate" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ 
+	protected static final String[] activityIds = { "com.servoy.eclipse.activities.javaDevelopment", "com.servoy.eclipse.activities.antDevelopment", "org.eclipse.debugSupport", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk", "org.eclipse.equinox.p2.ui.sdk.classicUpdate" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ 
 
 	@SuppressWarnings("restriction")
 	public void createInitialLayout(IPageLayout layout)
 	{
 		String editorArea = layout.getEditorArea();
-		IFolderLayout left = layout.createFolder("left", IPageLayout.LEFT, 0.21f, editorArea);
+		IFolderLayout left = layout.createFolder("left", IPageLayout.LEFT, 0.21f, editorArea); //$NON-NLS-1$
 		left.addView(SolutionExplorerView.PART_ID);
 		left.addView(ServoyWebBrowserView.ID);
 //		left.addView(IPageLayout.ID_RES_NAV);//move to synchronize perspective only
 
-		IFolderLayout right = layout.createFolder("right", IPageLayout.RIGHT, 0.8f, editorArea);
+		IFolderLayout right = layout.createFolder("right", IPageLayout.RIGHT, 0.8f, editorArea); //$NON-NLS-1$
 		right.addView(IPageLayout.ID_OUTLINE);
 		right.addView(IPageLayout.ID_PROP_SHEET);
 
-		IFolderLayout bottom = layout.createFolder("bottom", IPageLayout.BOTTOM, 0.8f, editorArea);
+		IFolderLayout bottom = layout.createFolder("bottom", IPageLayout.BOTTOM, 0.8f, editorArea); //$NON-NLS-1$
 		bottom.addView(IPageLayout.ID_PROBLEM_VIEW);
 		bottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);//move to debug perspective only
 		bottom.addView(IPageLayout.ID_TASK_LIST);

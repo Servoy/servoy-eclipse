@@ -690,8 +690,6 @@
       </cheatsheet>
    </extension>
    <extension
-         id="com.servoy.eclipse.activities.dltk"
-         name="DLTK"
          point="org.eclipse.ui.activities">
       <activityPatternBinding
             activityId="com.servoy.eclipse.activities.dltk"
@@ -717,6 +715,34 @@
             activityId="com.servoy.eclipse.activities.html"
             pattern="org\.eclipse\.wst\.html\..*/.*">
       </activityPatternBinding>
+      <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.javaDevelopment"
+            pattern="org\.eclipse\.jdt\.debug/debugModel">
+      </activityPatternBinding>
+      <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.javaDevelopment"
+            pattern="org\.eclipse\.jdt\..*/.*">
+      </activityPatternBinding>
+      <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.javaDevelopment"
+            pattern="org\.eclipse\.jdt/.*">
+      </activityPatternBinding>
+      <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.javaDevelopment"
+            pattern="org\.eclipse\.jdt\.core/javanature">
+      </activityPatternBinding>
+      <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.javaDevelopment"
+            pattern="org\.eclipse\.debug\.ui/.*">
+      </activityPatternBinding>
+      <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.antDevelopment"
+            pattern="org\.eclipse\.ant\.ui/.*">
+      </activityPatternBinding>
+      <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.antDevelopment"
+            pattern="org\.eclipse\.ui\.externaltools/.*">
+      </activityPatternBinding>
       <activity
             id="com.servoy.eclipse.activities.dltk"
             name="DLTK Perspectives and Wizards">
@@ -729,6 +755,14 @@
             id="com.servoy.eclipse.activities.html"
             name="HTML">
       </activity>
+      <activity
+            name="Java Development"
+            id="com.servoy.eclipse.activities.javaDevelopment">
+      </activity>
+      <activity
+            id="com.servoy.eclipse.activities.antDevelopment"
+            name="ANT Development">
+      </activity>
       <category
             id="com.servoy.eclipse.activities.categories.dltk"
             name="DLTK">
@@ -736,6 +770,14 @@
       <category
             id="com.servoy.eclipse.activities.categories.wst"
             name="WST">
+      </category>
+      <category
+            id="com.servoy.eclipse.activities.categories.java"
+            name="Java">
+      </category>
+      <category
+            id="com.servoy.eclipse.activities.categories.ant"
+            name="ANT">
       </category>
       <categoryActivityBinding
             activityId="com.servoy.eclipse.activities.dltk"
@@ -749,6 +791,14 @@
             activityId="com.servoy.eclipse.activities.html"
             categoryId="com.servoy.eclipse.activities.categories.wst">
       </categoryActivityBinding>
+      <categoryActivityBinding
+            activityId="com.servoy.eclipse.activities.javaDevelopment"
+            categoryId="com.servoy.eclipse.activities.categories.java">
+      </categoryActivityBinding>      
+      <categoryActivityBinding
+            activityId="com.servoy.eclipse.activities.antDevelopment"
+            categoryId="com.servoy.eclipse.activities.categories.ant">
+      </categoryActivityBinding>            
    </extension>
   <extension
      point="org.eclipse.ui.decorators">
