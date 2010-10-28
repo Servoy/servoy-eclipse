@@ -404,26 +404,29 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private Image getServoyProjectImage(ServoyProject p, boolean isModule, boolean disabled)
 	{
-		SolutionMetaData s = p.getSolutionMetaData();
 		String imgName = isModule ? IMG_SOLUTION_M : IMG_SOLUTION; // default is solution
-		if (s != null)
+		if (p != null)
 		{
-			switch (s.getSolutionType())
+			SolutionMetaData s = p.getSolutionMetaData();
+			if (s != null)
 			{
-				case SolutionMetaData.MODULE :
-					imgName = isModule ? IMG_SOLUTION_MODULE_M : IMG_SOLUTION_MODULE;
-					break;
-				case SolutionMetaData.LOGIN_SOLUTION :
-					imgName = isModule ? IMG_SOLUTION_LOGIN_M : IMG_SOLUTION_LOGIN;
-					break;
-				case SolutionMetaData.AUTHENTICATOR :
-					imgName = isModule ? IMG_SOLUTION_AUTHENTICATOR_M : IMG_SOLUTION_AUTHENTICATOR;
-					break;
-				case SolutionMetaData.SMART_CLIENT_ONLY :
-					imgName = isModule ? IMG_SOLUTION_SMART_ONLY_M : IMG_SOLUTION_SMART_ONLY;
-					break;
-				case SolutionMetaData.WEB_CLIENT_ONLY :
-					imgName = isModule ? IMG_SOLUTION_WEB_ONLY_M : IMG_SOLUTION_WEB_ONLY;
+				switch (s.getSolutionType())
+				{
+					case SolutionMetaData.MODULE :
+						imgName = isModule ? IMG_SOLUTION_MODULE_M : IMG_SOLUTION_MODULE;
+						break;
+					case SolutionMetaData.LOGIN_SOLUTION :
+						imgName = isModule ? IMG_SOLUTION_LOGIN_M : IMG_SOLUTION_LOGIN;
+						break;
+					case SolutionMetaData.AUTHENTICATOR :
+						imgName = isModule ? IMG_SOLUTION_AUTHENTICATOR_M : IMG_SOLUTION_AUTHENTICATOR;
+						break;
+					case SolutionMetaData.SMART_CLIENT_ONLY :
+						imgName = isModule ? IMG_SOLUTION_SMART_ONLY_M : IMG_SOLUTION_SMART_ONLY;
+						break;
+					case SolutionMetaData.WEB_CLIENT_ONLY :
+						imgName = isModule ? IMG_SOLUTION_WEB_ONLY_M : IMG_SOLUTION_WEB_ONLY;
+				}
 			}
 		}
 
