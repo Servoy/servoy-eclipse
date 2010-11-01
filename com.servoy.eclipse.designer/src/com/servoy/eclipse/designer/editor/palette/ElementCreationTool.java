@@ -47,28 +47,45 @@ public class ElementCreationTool extends CreationTool
 	{
 		if (alignmentFeedbackHelper == null)
 		{
-			alignmentFeedbackHelper = new AlignmentFeedbackHelper(getFeedbackLayer());
+			IFigure feedbackLayer = getFeedbackLayer();
+			if (feedbackLayer != null)
+			{
+				alignmentFeedbackHelper = new AlignmentFeedbackHelper(feedbackLayer);
+			}
 		}
 		return alignmentFeedbackHelper;
 	}
 
 	protected IFigure getFeedbackLayer()
 	{
-		return LayerManager.Helper.find(getTargetEditPart()).getLayer(LayerConstants.FEEDBACK_LAYER);
+		EditPart targetEditPart = getTargetEditPart();
+		if (targetEditPart == null || targetEditPart.getViewer() == null)
+		{
+			return null;
+		}
+		return LayerManager.Helper.find(targetEditPart).getLayer(LayerConstants.FEEDBACK_LAYER);
 	}
 
 	@Override
 	protected void showTargetFeedback()
 	{
 		super.showTargetFeedback();
-		getAlignmentFeedbackHelper().showElementAlignmentFeedback(getTargetRequest());
+		AlignmentFeedbackHelper helper = getAlignmentFeedbackHelper();
+		if (helper != null)
+		{
+			helper.showElementAlignmentFeedback(getTargetRequest());
+		}
 	}
 
 	@Override
 	protected void eraseTargetFeedback()
 	{
 		super.eraseTargetFeedback();
-		getAlignmentFeedbackHelper().eraseElementAlignmentFeedback();
+		AlignmentFeedbackHelper helper = getAlignmentFeedbackHelper();
+		if (helper != null)
+		{
+			helper.eraseElementAlignmentFeedback();
+		}
 	}
 
 	/**
