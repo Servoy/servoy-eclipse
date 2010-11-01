@@ -70,6 +70,15 @@ class PersistEditPolicy extends ComponentEditPolicy
 		this.fieldPositioner = fieldPositioner;
 	}
 
+	@Override
+	public EditPart getTargetEditPart(Request request)
+	{
+		if (understandsRequest(request))
+		{
+			return getHost();
+		}
+		return super.getTargetEditPart(request);
+	}
 
 	@Override
 	public Command getCommand(Request request)

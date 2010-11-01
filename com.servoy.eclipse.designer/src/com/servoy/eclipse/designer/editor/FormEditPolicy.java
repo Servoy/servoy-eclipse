@@ -33,6 +33,7 @@ import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.elements.IFieldPositioner;
+import com.servoy.eclipse.designer.editor.commands.CreateDropRequest;
 import com.servoy.eclipse.designer.editor.commands.DataFieldRequest;
 import com.servoy.eclipse.designer.editor.commands.DataRequest;
 import com.servoy.eclipse.designer.editor.commands.FormElementCopyCommand;
@@ -75,10 +76,10 @@ public class FormEditPolicy extends ComponentEditPolicy
 			command = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), data, request.getType(), request.getExtendedData(),
 				fieldPositioner, location == null ? null : location.getSWTPoint());
 		}
-		else if (VisualFormEditor.REQ_DROP_COPY.equals(request.getType()) && request instanceof DataRequest &&
-			((DataRequest)request).getData() instanceof Object[])
+		else if (VisualFormEditor.REQ_DROP_COPY.equals(request.getType()) && request instanceof CreateDropRequest &&
+			((CreateDropRequest)request).getData() instanceof Object[])
 		{
-			final org.eclipse.draw2d.geometry.Point location = ((DataRequest)request).getlocation();
+			final org.eclipse.draw2d.geometry.Point location = ((CreateDropRequest)request).getLocation();
 			command = new CompoundCommand();
 			if (location != null)
 			{
@@ -91,10 +92,11 @@ public class FormEditPolicy extends ComponentEditPolicy
 					}
 				});
 			}
-			for (Object o : ((Object[])((DataRequest)request).getData()))
+			for (Object o : (((CreateDropRequest)request).getData()))
 			{
-				((CompoundCommand)command).add(new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), new Object[] { o },
-					request.getType(), request.getExtendedData(), fieldPositioner, null));
+				FormPlaceElementCommand placeElementCommand = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), new Object[] { o },
+					request.getType(), request.getExtendedData(), fieldPositioner, null);
+				((CompoundCommand)command).add(((CreateDropRequest)request).chainSetFactoryObjectCommand(placeElementCommand));
 			}
 		}
 		else if (VisualFormEditor.REQ_PLACE_PORTAL.equals(request.getType()) && request instanceof DataFieldRequest)

@@ -90,7 +90,7 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	{
 		if (alignmentFeedbackHelper == null)
 		{
-			alignmentFeedbackHelper = new AlignmentFeedbackHelper(getHost());
+			alignmentFeedbackHelper = new AlignmentFeedbackHelper(getFeedbackLayer());
 		}
 		return alignmentFeedbackHelper;
 	}

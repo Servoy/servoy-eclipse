@@ -17,9 +17,12 @@
 
 package com.servoy.eclipse.designer.editor.palette;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartViewer;
+import org.eclipse.gef.LayerConstants;
 import org.eclipse.gef.Request;
+import org.eclipse.gef.editparts.LayerManager;
 import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.gef.tools.CreationTool;
 import org.eclipse.swt.widgets.Display;
@@ -44,9 +47,14 @@ public class ElementCreationTool extends CreationTool
 	{
 		if (alignmentFeedbackHelper == null)
 		{
-			alignmentFeedbackHelper = new AlignmentFeedbackHelper(getTargetEditPart());
+			alignmentFeedbackHelper = new AlignmentFeedbackHelper(getFeedbackLayer());
 		}
 		return alignmentFeedbackHelper;
+	}
+
+	protected IFigure getFeedbackLayer()
+	{
+		return LayerManager.Helper.find(getTargetEditPart()).getLayer(LayerConstants.FEEDBACK_LAYER);
 	}
 
 	@Override

@@ -17,17 +17,27 @@
 
 package com.servoy.eclipse.designer.editor;
 
+import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.gef.requests.CreationFactory;
 
+import com.servoy.eclipse.designer.editor.commands.ICommandWrapper;
+import com.servoy.eclipse.designer.editor.commands.ISupportModels;
+import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
+
 /**
- * CreateRequest for elements from form editor palette.
+ * CreateRequest for elements from form editor palette or drag-and-drop.
  * 
  * @author rgansevles
  *
  */
 public class CreateElementRequest extends CreateRequest
 {
+
+	public CreateElementRequest(Object type)
+	{
+		super(type);
+	}
 
 	/**
 	 * @param factory
@@ -41,6 +51,32 @@ public class CreateElementRequest extends CreateRequest
 	public CreationFactory getFactory()
 	{
 		return super.getFactory();
+	}
+
+	public Command chainSetFactoryObjectCommand(Command command)
+	{
+		Command innerCommand = command;
+		while (!(innerCommand instanceof ISupportModels) && innerCommand instanceof ICommandWrapper)
+		{
+			innerCommand = ((ICommandWrapper)innerCommand).getCommand();
+		}
+		if (innerCommand instanceof ISupportModels && getFactory() instanceof RequestTypeCreationFactory)
+		{
+			final ISupportModels createCommand = (ISupportModels)innerCommand;
+			return command.chain(new Command()
+			{
+				@Override
+				public void execute()
+				{
+					Object[] models = createCommand.getModels();
+					if (models != null && models.length > 0)
+					{
+						((RequestTypeCreationFactory)getFactory()).setNewObject(models[0]);
+					}
+				}
+			});
+		}
+		return command;
 	}
 
 }

@@ -82,7 +82,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	public static final String REQ_BRING_TO_FRONT = "VFE_BRING_TO_FRONT"; //$NON-NLS-1$
 	public static final String REQ_SEND_TO_BACK = "VFE_SEND_TO_BACK"; //$NON-NLS-1$
 	public static final String REQ_PASTE = "VFE_PASTE"; //$NON-NLS-1$
-	public static final String REQ_DROP_COPY = "VFE_DROP_COPY"; //$NON-NLS-1$
+	public static final RequestType REQ_DROP_COPY = new RequestType();
 	public static final String REQ_DROP_LINK = "VFE_DROP_LINK"; //$NON-NLS-1$
 	public static final RequestType REQ_PLACE_TAB = new RequestType(RequestType.TYPE_TAB);
 	public static final RequestType REQ_PLACE_SPLIT_PANE = new RequestType(RequestType.TYPE_SPLIT_PANE);
@@ -774,7 +774,9 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		}
 	}
 
-	/** Request type for actions in Visual Form Editor.
+	/**
+	 *  Request type for actions in Visual Form Editor.]
+	 * 
 	 * @author rgansevles
 	 *
 	 */
@@ -791,7 +793,14 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		public static final int TYPE_BUTTON = 9;
 		public static final int TYPE_TAB = 10;
 
+		private static final int UNSPECIFIED = -1;
+
 		public final int type;
+
+		public RequestType()
+		{
+			type = UNSPECIFIED;
+		}
 
 		public RequestType(int type)
 		{

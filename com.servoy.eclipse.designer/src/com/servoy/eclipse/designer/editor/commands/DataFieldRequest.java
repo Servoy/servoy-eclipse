@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor.commands;
 
 
@@ -31,7 +31,7 @@ public class DataFieldRequest extends DataRequest
 	public final boolean fillText;
 	public final boolean fillName;
 
-	public DataFieldRequest(Object type, Object data, boolean placeAsLabels, boolean placeWithLabels, boolean placeHorizontal, boolean fillText,
+	public DataFieldRequest(Object type, Object[] data, boolean placeAsLabels, boolean placeWithLabels, boolean placeHorizontal, boolean fillText,
 		boolean fillName)
 	{
 		super(type, data);

@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.node;
 
 import java.util.ArrayList;
@@ -93,6 +93,7 @@ public class UserNodeListDragSourceListener implements DragSourceListener
 		if (lst.size() > 0)
 		{
 			dragObjects = lst.toArray(new IDragData[lst.size()]);
+			event.image = com.servoy.eclipse.ui.Activator.getDefault().loadImageFromOldLocation("button.gif"); // TODO: better drag image
 		}
 
 		event.doit = dragObjects != null;

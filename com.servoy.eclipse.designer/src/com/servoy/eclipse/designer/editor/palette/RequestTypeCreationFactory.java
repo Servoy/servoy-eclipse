@@ -17,9 +17,13 @@
 
 package com.servoy.eclipse.designer.editor.palette;
 
+import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.gef.requests.CreationFactory;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
+import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
+import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
+import com.servoy.eclipse.dnd.IDragData;
 
 /**
  * Creation factory for GEF palette.
@@ -51,6 +55,24 @@ public class RequestTypeCreationFactory implements CreationFactory
 	public Object getObjectType()
 	{
 		return requestType;
+	}
+
+	/**
+	 * @param dragData
+	 * @return
+	 */
+	public Dimension getDefaultElementSize(IDragData dragData)
+	{
+		if (dragData instanceof PersistDragData)
+		{
+			return new Dimension(80, 20);
+		}
+		if (dragData instanceof DataProviderDragData)
+		{
+			return new Dimension(140, 20);
+		}
+		// some default, should not happen
+		return new Dimension(100, 100);
 	}
 
 }

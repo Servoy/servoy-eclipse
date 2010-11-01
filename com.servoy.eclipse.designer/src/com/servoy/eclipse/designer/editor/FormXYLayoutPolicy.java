@@ -38,8 +38,6 @@ import com.servoy.eclipse.designer.actions.DistributeRequest;
 import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.commands.ChangeBoundsCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
-import com.servoy.eclipse.designer.editor.commands.ISupportModels;
-import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -131,23 +129,10 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			}
 			// TODO: add more
 
-			// set the created object in the CreateRequest
-			if (command instanceof ISupportModels && request instanceof CreateElementRequest &&
-				((CreateElementRequest)request).getFactory() instanceof RequestTypeCreationFactory)
+			// set the created object in the CreateRequest, so it can be selected afterwards
+			if (request instanceof CreateElementRequest)
 			{
-				final ISupportModels createCommand = (ISupportModels)command;
-				command = command.chain(new Command()
-				{
-					@Override
-					public void execute()
-					{
-						Object[] models = createCommand.getModels();
-						if (models != null && models.length > 0)
-						{
-							((RequestTypeCreationFactory)((CreateElementRequest)request).getFactory()).setNewObject(models[0]);
-						}
-					}
-				});
+				command = ((CreateElementRequest)request).chainSetFactoryObjectCommand(command);
 			}
 		}
 		return command;

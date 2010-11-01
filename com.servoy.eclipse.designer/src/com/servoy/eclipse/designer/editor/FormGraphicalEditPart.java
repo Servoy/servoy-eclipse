@@ -171,6 +171,7 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		installEditPolicy(PasteToSupportChildsEditPolicy.PASTE_ROLE, new PasteToSupportChildsEditPolicy(getFieldPositioner()));
 		installEditPolicy(EditPolicy.LAYOUT_ROLE, new FormXYLayoutPolicy(this));
 		installEditPolicy(EditPolicy.COMPONENT_ROLE, new FormEditPolicy(getFieldPositioner()));
+		installEditPolicy(EditPolicy.CONTAINER_ROLE, new DropFeedbackEditPolicy());
 	}
 
 	/**

@@ -23,10 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.gef.EditPart;
-import org.eclipse.gef.LayerConstants;
 import org.eclipse.gef.Request;
-import org.eclipse.gef.editparts.LayerManager;
 
 /**
  * Helper for adding/removing of alignment feedback figures from the feedback layer.
@@ -38,14 +35,14 @@ public class AlignmentFeedbackHelper
 {
 	private final Map<ElementAlignmentItem, IFigure> alignmentFeedbackFigures = new HashMap<ElementAlignmentItem, IFigure>();
 
-	private final EditPart editPart;
+	private final IFigure feedbackLayer;
 
 	/**
 	 * @param host
 	 */
-	public AlignmentFeedbackHelper(EditPart editPart)
+	public AlignmentFeedbackHelper(IFigure feedbackLayer)
 	{
-		this.editPart = editPart;
+		this.feedbackLayer = feedbackLayer;
 	}
 
 	public void showElementAlignmentFeedback(Request request)
@@ -68,7 +65,7 @@ public class AlignmentFeedbackHelper
 			if (remove)
 			{
 				iterator.remove();
-				getFeedbackLayer().remove(next.getValue());
+				feedbackLayer.remove(next.getValue());
 			}
 		}
 
@@ -84,7 +81,7 @@ public class AlignmentFeedbackHelper
 			{
 				AlignmentFeedbackFigure figure = new AlignmentFeedbackFigure(item);
 				alignmentFeedbackFigures.put(item, figure);
-				getFeedbackLayer().add(figure);
+				feedbackLayer.add(figure);
 			}
 		}
 	}
@@ -93,31 +90,8 @@ public class AlignmentFeedbackHelper
 	{
 		for (IFigure figure : alignmentFeedbackFigures.values())
 		{
-			getFeedbackLayer().remove(figure);
+			feedbackLayer.remove(figure);
 		}
 		alignmentFeedbackFigures.clear();
 	}
-
-	/**
-	 * Returns the layer used for displaying feedback.
-	 * 
-	 * @return the feedback layer
-	 */
-	protected IFigure getFeedbackLayer()
-	{
-		return getLayer(LayerConstants.FEEDBACK_LAYER);
-	}
-
-	/**
-	 * Obtains the specified layer.
-	 * 
-	 * @param layer
-	 *            the key identifying the layer
-	 * @return the requested layer
-	 */
-	protected IFigure getLayer(Object layer)
-	{
-		return LayerManager.Helper.find(editPart).getLayer(layer);
-	}
-
 }

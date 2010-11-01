@@ -176,16 +176,16 @@ public class SnapToElementAlignment extends SnapToHelper
 		rect.translate(request.getMoveDelta());
 		rect.resize(request.getSizeDelta());
 
-		return getElementAlignment(rect, snapOrientation, editParts);
+		return getElementAlignment(rect, snapOrientation, editParts, false);
 	}
 
 	protected ElementAlignmentItem[] getElementAlignmentForCreate(CreateRequest request, int snapOrientation)
 	{
-		return getElementAlignment(new Rectangle(request.getLocation(), request.getSize()), snapOrientation, null);
+		return getElementAlignment(new Rectangle(request.getLocation(), request.getSize()), snapOrientation, null,
+			VisualFormEditor.REQ_DROP_COPY.equals(request.getType()));
 	}
 
-
-	protected ElementAlignmentItem[] getElementAlignment(Rectangle rect, int snapOrientation, List<EditPart> skipEditparts)
+	protected ElementAlignmentItem[] getElementAlignment(Rectangle rect, int snapOrientation, List<EditPart> skipEditparts, boolean singleAlignmentPerDimension)
 	{
 		if (snapOrientation == 0)
 		{
@@ -214,8 +214,12 @@ public class SnapToElementAlignment extends SnapToHelper
 		// Alignment: East to container
 		if ((snapOrientation & (EAST | HORIZONTAL)) != 0)
 		{
+			if (singleAlignmentPerDimension) east = west;
+
 			east = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, east, rect.x + rect.width, form.getWidth(), 10,
 				form.getSize().height - 10, getSetAnchor());
+
+			if (singleAlignmentPerDimension) west = east;
 		}
 
 		List<EditPart> children = container.getChildren();
@@ -251,9 +255,12 @@ public class SnapToElementAlignment extends SnapToHelper
 						(elementModel instanceof Part || ((anchors & IAnchorConstants.NORTH) != 0 && (anchors & IAnchorConstants.SOUTH) == 0)));
 			}
 
+
 			// Alignment: South to element
 			if ((snapOrientation & (SOUTH | VERTICAL)) != 0)
 			{
+				if (singleAlignmentPerDimension) south = north;
+
 				// align on bottom
 				south = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, south, rect.y + rect.height,
 					childBounds.y + childBounds.height, Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width),
@@ -262,6 +269,8 @@ public class SnapToElementAlignment extends SnapToHelper
 				south = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, south, rect.y + rect.height, childBounds.y,
 					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), getSetAnchor() &&
 						(elementModel instanceof Part || ((anchors & IAnchorConstants.SOUTH) != 0 && (anchors & IAnchorConstants.NORTH) == 0)));
+
+				if (singleAlignmentPerDimension) north = south;
 			}
 
 			// Alignment: West to element
@@ -286,6 +295,8 @@ public class SnapToElementAlignment extends SnapToHelper
 			// Alignment: East to element
 			if ((snapOrientation & (EAST | HORIZONTAL)) != 0)
 			{
+				if (singleAlignmentPerDimension) east = west;
+
 				// align on right
 				east = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_EAST, east, rect.x + rect.width,
 					childBounds.x + childBounds.width, Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height),
@@ -294,6 +305,8 @@ public class SnapToElementAlignment extends SnapToHelper
 				east = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, east, rect.x + rect.width, childBounds.x,
 					Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height),
 					(anchors & IAnchorConstants.EAST) != 0 && (anchors & IAnchorConstants.WEST) == 0);
+
+				if (singleAlignmentPerDimension) west = east;
 			}
 		}
 
@@ -303,8 +316,8 @@ public class SnapToElementAlignment extends SnapToHelper
 		}
 		List<ElementAlignmentItem> alignment = new ArrayList<ElementAlignmentItem>(4);
 		if (north != null) alignment.add(north);
-		if (east != null) alignment.add(east);
-		if (south != null) alignment.add(south);
+		if (!singleAlignmentPerDimension && east != null) alignment.add(east);
+		if (!singleAlignmentPerDimension && south != null) alignment.add(south);
 		if (west != null) alignment.add(west);
 		return alignment.toArray(new ElementAlignmentItem[alignment.size()]);
 	}
