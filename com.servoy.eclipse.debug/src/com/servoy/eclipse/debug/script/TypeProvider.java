@@ -52,6 +52,7 @@ import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.persistence.AggregateVariable;
+import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -370,6 +371,14 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 								if (!Utils.stringIsEmpty(formElement.getName()))
 								{
 									Class< ? > persistClass = SwingItemFactory.getPersistClass(application, persist);
+									if (persistClass != null && formElement instanceof Bean && ((Bean)formElement).getBeanClassName() != null)
+									{
+										int index = ((Bean)formElement).getBeanClassName().lastIndexOf('.');
+										if (index != -1)
+										{
+											typeNames.put(persistClass.getSimpleName(), ((Bean)formElement).getBeanClassName().substring(index + 1));
+										}
+									}
 									members.add(createProperty(formElement.getName(), true, getElementType(context, persistClass), null, PROPERTY));
 								}
 								else if (formElement.getGroupID() != null)
