@@ -40,21 +40,23 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 
 	public IMarkerResolution[] getResolutions(IMarker marker)
 	{
-		IMarkerResolution[] fixes;
 		try
 		{
 			String type = marker.getType();
+
 			if (type.equals(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE))
 			{
-				fixes = getDatabaseInformationQuickFixes(marker);
+				return getDatabaseInformationQuickFixes(marker);
 			}
-			else if (type.equals(ServoyBuilder.INVALID_SORT_OPTION))
+
+			if (type.equals(ServoyBuilder.INVALID_SORT_OPTION))
 			{
 				String solName = (String)marker.getAttribute("SolutionName");
 				String uuid = (String)marker.getAttribute("Uuid");
-				fixes = new IMarkerResolution[] { new RemoveInvalidSortColumnsQuickFix(uuid, solName) };
+				return new IMarkerResolution[] { new RemoveInvalidSortColumnsQuickFix(uuid, solName) };
 			}
-			else if (type.equals(ServoyBuilder.DEPRECATED_PROPERTY_USAGE) || type.equals(ServoyBuilder.FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION))
+
+			if (type.equals(ServoyBuilder.DEPRECATED_PROPERTY_USAGE) || type.equals(ServoyBuilder.FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION))
 			{
 				String propertyName = (String)marker.getAttribute("PropertyName");
 				String displayName = (String)marker.getAttribute("DisplayName");
@@ -72,19 +74,25 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 					resolutions.add(new TurnEnhancedSecurityOffQuickFix());
 				}
 
-				fixes = resolutions.toArray(new IMarkerResolution[resolutions.size()]);
+				return resolutions.toArray(new IMarkerResolution[resolutions.size()]);
 			}
-			else
+
+			if (type.equals(ServoyBuilder.UNRESOLVED_RELATION_UUID))
 			{
-				fixes = new IMarkerResolution[0];
+				String propertyName = (String)marker.getAttribute("PropertyName");
+				String displayName = (String)marker.getAttribute("DisplayName");
+				String solName = (String)marker.getAttribute("SolutionName");
+				String uuid = (String)marker.getAttribute("Uuid");
+
+				return new IMarkerResolution[] { new ResolveUuidRelationNameQuickFix(solName, uuid, propertyName, displayName), new ClearPropertyQuickFix(
+					solName, uuid, propertyName, displayName) };
 			}
 		}
 		catch (CoreException e)
 		{
 			ServoyLog.logWarning("Can't get quick fixes for a marker", e);
-			fixes = new IMarkerResolution[0];
 		}
-		return fixes;
+		return new IMarkerResolution[0];
 	}
 
 	private IMarkerResolution[] getDatabaseInformationQuickFixes(IMarker marker) throws CoreException

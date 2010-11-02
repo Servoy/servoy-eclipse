@@ -448,6 +448,10 @@
         </markerResolutionGenerator>
         <markerResolutionGenerator
               class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+              markerType="com.servoy.eclipse.core.unresolvedRelationUuid">
+        </markerResolutionGenerator>
+        <markerResolutionGenerator
+              class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
               markerType="com.servoy.eclipse.core.deprecatedPropertyUsage">
         </markerResolutionGenerator>
         <markerResolutionGenerator

@@ -79,10 +79,10 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.ServoyResourcesProject;
+import com.servoy.eclipse.core.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.core.repository.EclipseRepository;
 import com.servoy.eclipse.core.repository.SolutionDeserializer;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
-import com.servoy.eclipse.core.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.CoreUtils;
 import com.servoy.j2db.FlattenedSolution;
@@ -271,6 +271,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String DEPRECATED_METHOD_USAGE = Activator.PLUGIN_ID + ".deprecatedMethodUsage"; //$NON-NLS-1$
 	public static final String DEPRECATED_PROPERTY_USAGE = Activator.PLUGIN_ID + ".deprecatedPropertyUsage"; //$NON-NLS-1$
 	public static final String FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION = Activator.PLUGIN_ID + ".formWithDatasourceInLoginSolution"; //$NON-NLS-1$
+	public static final String UNRESOLVED_RELATION_UUID = Activator.PLUGIN_ID + ".unresolvedRelationUuid"; //$NON-NLS-1$
 
 	private SAXParserFactory parserFactory;
 	private final HashSet<String> referencedProjectsSet = new HashSet<String>();
@@ -946,6 +947,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, INVALID_EVENT_METHOD);
 		deleteMarkers(project, DEPRECATED_METHOD_USAGE);
 		deleteMarkers(project, DEPRECATED_PROPERTY_USAGE);
+		deleteMarkers(project, UNRESOLVED_RELATION_UUID);
 
 		final ServoyProject servoyProject = getServoyProject(project);
 		boolean active = isActiveSolutionOrModule(servoyProject);
@@ -1073,9 +1075,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																			SolutionSerializer.getFileName(p, false) + ".", -1, IMarker.SEVERITY_ERROR, //$NON-NLS-1$
 																			IMarker.PRIORITY_HIGH, null, other);
 																	}
-																	addMarker(moduleProject, DUPLICATE_UUID, "UUID duplicate found " + p.getUUID() + " in " + //$NON-NLS-1$ //$NON-NLS-2$
-																		SolutionSerializer.getRelativePath(other, false) +
-																		SolutionSerializer.getFileName(other, false) + ".", -1, IMarker.SEVERITY_ERROR, //$NON-NLS-1$
+																	addMarker(
+																		moduleProject,
+																		DUPLICATE_UUID,
+																		"UUID duplicate found " + p.getUUID() + " in " + //$NON-NLS-1$ //$NON-NLS-2$
+																			SolutionSerializer.getRelativePath(other, false) +
+																			SolutionSerializer.getFileName(other, false) + ".", -1, IMarker.SEVERITY_ERROR, //$NON-NLS-1$
 																		IMarker.PRIORITY_HIGH, null, p);
 																}
 																return IPersistVisitor.CONTINUE_TRAVERSAL;
@@ -1262,8 +1267,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														catch (Exception ex)
 														{
 															Debug.trace(ex);
-															addMarker(project, PROJECT_FORM_MARKER_TYPE, messagePrefix +
-																" has invalid format:" + field.getFormat(), -1, //$NON-NLS-1$
+															addMarker(project, PROJECT_FORM_MARKER_TYPE,
+																messagePrefix + " has invalid format:" + field.getFormat(), -1, //$NON-NLS-1$
 																IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, o);
 														}
 													}
@@ -1727,6 +1732,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									}
 									catch (Exception ex)
 									{
+										Debug.trace(ex);
 									}
 								}
 							}
@@ -1775,8 +1781,32 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								Relation[] relations = servoyModel.getFlattenedSolution().getRelationSequence(tab.getRelationName());
 								if (relations == null)
 								{
-									addMarker(project, PROJECT_FORM_MARKER_TYPE, "Related tab error: cannot resolve relation sequence '" + //$NON-NLS-1$
-										tab.getRelationName() + "'", -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, tab); //$NON-NLS-1$
+									if (Utils.getAsUUID(tab.getRelationName(), false) != null)
+									{
+										// relation name was not resolved from uuid to relation name during import
+										IMarker marker = addMarker(project, UNRESOLVED_RELATION_UUID,
+											"Related tab error: relation uuid was not resolved to relation name '" + //$NON-NLS-1$
+												tab.getRelationName() + "'", -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, tab); //$NON-NLS-1$
+										if (marker != null)
+										{
+											try
+											{
+												marker.setAttribute("Uuid", o.getUUID().toString()); //$NON-NLS-1$
+												marker.setAttribute("SolutionName", ((Solution)tab.getAncestor(IRepository.SOLUTIONS)).getName()); //$NON-NLS-1$
+												marker.setAttribute("PropertyName", "relationName"); //$NON-NLS-1$ //$NON-NLS-2$
+												marker.setAttribute("DisplayName", RepositoryHelper.getDisplayName("relationName", o.getClass())); //$NON-NLS-1$ //$NON-NLS-2$
+											}
+											catch (Exception e)
+											{
+												ServoyLog.logError(e);
+											}
+										}
+									}
+									else
+									{
+										addMarker(project, PROJECT_FORM_MARKER_TYPE, "Related tab error: cannot resolve relation sequence '" + //$NON-NLS-1$
+											tab.getRelationName() + "'", -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, tab); //$NON-NLS-1$
+									}
 								}
 								else
 								{
@@ -3220,29 +3250,33 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				marker.setAttribute(IMarker.LOCATION, location);
 			}
-			if (type.equals(PROJECT_RELATION_MARKER_TYPE))
+
+			if (persist != null)
 			{
-				String id = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType(PersistEditorInput.RELATION_RESOURCE_ID)).getId();
-				marker.setAttribute(IDE.EDITOR_ID_ATTR, id);
-			}
-			else if (type.equals(PROJECT_FORM_MARKER_TYPE))
-			{
-				String id = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId();
-				marker.setAttribute(IDE.EDITOR_ID_ATTR, id);
-				if (persist != null)
+				String contentTypeIdentifier = null;
+				if (persist.getAncestor(IRepository.FORMS) != null)
 				{
+					contentTypeIdentifier = PersistEditorInput.FORM_RESOURCE_ID;
+				}
+				else if (persist.getAncestor(IRepository.RELATIONS) != null)
+				{
+					contentTypeIdentifier = PersistEditorInput.RELATION_RESOURCE_ID;
+				}
+				else if (persist.getAncestor(IRepository.VALUELISTS) != null)
+				{
+					contentTypeIdentifier = PersistEditorInput.VALUELIST_RESOURCE_ID;
+				}
+				if (contentTypeIdentifier != null)
+				{
+					marker.setAttribute(
+						IDE.EDITOR_ID_ATTR,
+						PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+							Platform.getContentTypeManager().getContentType(contentTypeIdentifier)).getId());
 					marker.setAttribute("elementUuid", persist.getUUID().toString()); //$NON-NLS-1$
 				}
 			}
-			else if (type.equals(PROJECT_VALUELIST_MARKER_TYPE))
-			{
-				String id = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType(PersistEditorInput.VALUELIST_RESOURCE_ID)).getId();
-				marker.setAttribute(IDE.EDITOR_ID_ATTR, id);
-			}
-			else if (type.equals(INVALID_TABLE_NODE_PROBLEM))
+
+			if (type.equals(INVALID_TABLE_NODE_PROBLEM))
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString()); //$NON-NLS-1$
 				marker.setAttribute("Name", ((ISupportName)persist).getName()); //$NON-NLS-1$
