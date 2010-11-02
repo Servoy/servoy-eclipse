@@ -79,10 +79,10 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.ServoyResourcesProject;
+import com.servoy.eclipse.core.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.core.repository.EclipseRepository;
 import com.servoy.eclipse.core.repository.SolutionDeserializer;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
-import com.servoy.eclipse.core.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.CoreUtils;
 import com.servoy.j2db.FlattenedSolution;
@@ -271,6 +271,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String DEPRECATED_PROPERTY_USAGE = Activator.PLUGIN_ID + ".deprecatedPropertyUsage"; //$NON-NLS-1$
 	public static final String FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION = Activator.PLUGIN_ID + ".formWithDatasourceInLoginSolution"; //$NON-NLS-1$
 	public static final String MULTIPLE_METHODS_ON_SAME_ELEMENT = Activator.PLUGIN_ID + ".multipleMethodsInfo"; //$NON-NLS-1$
+	public static final String UNRESOLVED_RELATION_UUID = Activator.PLUGIN_ID + ".unresolvedRelationUuid"; //$NON-NLS-1$
 
 	private SAXParserFactory parserFactory;
 	private final HashSet<String> referencedProjectsSet = new HashSet<String>();
@@ -949,6 +950,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, INVALID_EVENT_METHOD);
 		deleteMarkers(project, DEPRECATED_PROPERTY_USAGE);
 		deleteMarkers(project, MULTIPLE_METHODS_ON_SAME_ELEMENT);
+		deleteMarkers(project, UNRESOLVED_RELATION_UUID);
 
 		final ServoyProject servoyProject = getServoyProject(project);
 		boolean active = isActiveSolutionOrModule(servoyProject);
@@ -1028,8 +1030,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														if (lst.size() == 1)
 														{
 															String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																other.getUUID(), SolutionSerializer.getRelativePath(p, false) +
-																	SolutionSerializer.getFileName(p, false));
+																other.getUUID(),
+																SolutionSerializer.getRelativePath(p, false) + SolutionSerializer.getFileName(p, false));
 															addMarker(project, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_HIGH, null,
 																other);
 														}
@@ -1075,14 +1077,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																	// for now only add it on both if there is 1, just skip the rest.
 																	if (lst.size() == 1)
 																	{
-																		String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																			other.getUUID(), SolutionSerializer.getRelativePath(p, false) +
+																		String msg = MarkerMessages.getMessage(
+																			MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
+																			other.getUUID(),
+																			SolutionSerializer.getRelativePath(p, false) +
 																				SolutionSerializer.getFileName(p, false));
 																		addMarker(moduleProject, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR,
 																			IMarker.PRIORITY_HIGH, null, other);
 																	}
-																	String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																		p.getUUID(), SolutionSerializer.getRelativePath(other, false) +
+																	String msg = MarkerMessages.getMessage(
+																		MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
+																		p.getUUID(),
+																		SolutionSerializer.getRelativePath(other, false) +
 																			SolutionSerializer.getFileName(other, false));
 																	addMarker(moduleProject, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR,
 																		IMarker.PRIORITY_HIGH, null, p);
@@ -1886,6 +1892,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									}
 									catch (Exception ex)
 									{
+										Debug.trace(ex);
 									}
 								}
 							}
@@ -1900,8 +1907,32 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								Relation[] relations = servoyModel.getFlattenedSolution().getRelationSequence(tab.getRelationName());
 								if (relations == null)
 								{
-									String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Form_RelatedTabUnsolvedRelation, tab.getRelationName());
-									addMarker(project, PROJECT_FORM_MARKER_TYPE, msg, -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, tab);
+									if (Utils.getAsUUID(tab.getRelationName(), false) != null)
+									{
+										// relation name was not resolved from uuid to relation name during import
+										IMarker marker = addMarker(project, UNRESOLVED_RELATION_UUID,
+											MarkerMessages.getMessage(MarkerMessages.Marker_Form_RelatedTabUnsolvedUuid, tab.getRelationName()), -1,
+											IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, tab);
+										if (marker != null)
+										{
+											try
+											{
+												marker.setAttribute("Uuid", o.getUUID().toString()); //$NON-NLS-1$
+												marker.setAttribute("SolutionName", ((Solution)tab.getAncestor(IRepository.SOLUTIONS)).getName()); //$NON-NLS-1$
+												marker.setAttribute("PropertyName", "relationName"); //$NON-NLS-1$ //$NON-NLS-2$
+												marker.setAttribute("DisplayName", RepositoryHelper.getDisplayName("relationName", o.getClass())); //$NON-NLS-1$ //$NON-NLS-2$
+											}
+											catch (Exception e)
+											{
+												ServoyLog.logError(e);
+											}
+										}
+									}
+									else
+									{
+										String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Form_RelatedTabUnsolvedRelation, tab.getRelationName());
+										addMarker(project, PROJECT_FORM_MARKER_TYPE, msg, -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, tab);
+									}
 								}
 								else
 								{
@@ -3448,29 +3479,33 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				marker.setAttribute(IMarker.LOCATION, location);
 			}
-			if (type.equals(PROJECT_RELATION_MARKER_TYPE))
+
+			if (persist != null)
 			{
-				String id = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType(PersistEditorInput.RELATION_RESOURCE_ID)).getId();
-				marker.setAttribute(IDE.EDITOR_ID_ATTR, id);
-			}
-			else if (type.equals(PROJECT_FORM_MARKER_TYPE))
-			{
-				String id = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId();
-				marker.setAttribute(IDE.EDITOR_ID_ATTR, id);
-				if (persist != null)
+				String contentTypeIdentifier = null;
+				if (persist.getAncestor(IRepository.FORMS) != null)
 				{
+					contentTypeIdentifier = PersistEditorInput.FORM_RESOURCE_ID;
+				}
+				else if (persist.getAncestor(IRepository.RELATIONS) != null)
+				{
+					contentTypeIdentifier = PersistEditorInput.RELATION_RESOURCE_ID;
+				}
+				else if (persist.getAncestor(IRepository.VALUELISTS) != null)
+				{
+					contentTypeIdentifier = PersistEditorInput.VALUELIST_RESOURCE_ID;
+				}
+				if (contentTypeIdentifier != null)
+				{
+					marker.setAttribute(
+						IDE.EDITOR_ID_ATTR,
+						PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+							Platform.getContentTypeManager().getContentType(contentTypeIdentifier)).getId());
 					marker.setAttribute("elementUuid", persist.getUUID().toString()); //$NON-NLS-1$
 				}
 			}
-			else if (type.equals(PROJECT_VALUELIST_MARKER_TYPE))
-			{
-				String id = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType(PersistEditorInput.VALUELIST_RESOURCE_ID)).getId();
-				marker.setAttribute(IDE.EDITOR_ID_ATTR, id);
-			}
-			else if (type.equals(INVALID_TABLE_NODE_PROBLEM))
+
+			if (type.equals(INVALID_TABLE_NODE_PROBLEM))
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString()); //$NON-NLS-1$
 				marker.setAttribute("Name", ((ISupportName)persist).getName()); //$NON-NLS-1$

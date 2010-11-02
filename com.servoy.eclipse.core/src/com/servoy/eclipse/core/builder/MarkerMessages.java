@@ -214,6 +214,12 @@ public class MarkerMessages
 	 */
 	public static String Marker_Form_RelatedTabUnsolvedRelation = "Related tab error: cannot resolve relation sequence \"{0}\"."; //$NON-NLS-1$
 
+	/**
+	 * When solutions are imported from older Servoy versions, the relation which was stored as uuid, is converted to relation name.
+	 * When this fails this problem marker has an attached quickfix to correct the unresolved relation name.
+	 */
+	public static String Marker_Form_RelatedTabUnsolvedUuid = "Related tab error: relation uuid was not resolved to relation name \"{0}\"."; //$NON-NLS-1$
+
 	public static String Marker_Form_PropertyMethodNotAccessible = "Property \"{0}\" in form \"{1}\" is linked to a non accessible method (method belongs to form \"{2}\")."; //$NON-NLS-1$
 	public static String Marker_Form_PropertyOnElementMethodNotAccessible = "Property \"{0}\" from element \"{1}\" in form \"{2}\" is linked to a non accessible method (method belongs to form \"{3}\")."; //$NON-NLS-1$
 	public static String Marker_Form_DataproviderNotBasedOnFormTable = "Element in form \"{0}\" has dataprovider \"{1}\" that is not based on form table."; //$NON-NLS-1$
