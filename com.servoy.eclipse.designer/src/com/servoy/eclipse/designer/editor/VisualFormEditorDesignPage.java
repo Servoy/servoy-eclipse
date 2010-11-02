@@ -38,6 +38,7 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.SnapToGrid;
+import org.eclipse.gef.dnd.TemplateTransferDragSourceListener;
 import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.gef.rulers.RulerProvider;
 import org.eclipse.gef.ui.actions.ActionRegistry;
@@ -49,6 +50,8 @@ import org.eclipse.gef.ui.actions.RedoAction;
 import org.eclipse.gef.ui.actions.SaveAction;
 import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.gef.ui.actions.UndoAction;
+import org.eclipse.gef.ui.palette.PaletteViewer;
+import org.eclipse.gef.ui.palette.PaletteViewerProvider;
 import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
 import org.eclipse.gef.ui.parts.GraphicalViewerKeyHandler;
 import org.eclipse.gef.ui.parts.ScrollingGraphicalViewer;
@@ -111,6 +114,7 @@ import com.servoy.eclipse.designer.editor.commands.SendToBackAction;
 import com.servoy.eclipse.designer.editor.commands.SetTabSequenceAction;
 import com.servoy.eclipse.designer.editor.commands.ToggleAnchoringAction;
 import com.servoy.eclipse.designer.editor.commands.UngroupAction;
+import com.servoy.eclipse.designer.editor.palette.PaletteItemTransferDropTargetListener;
 import com.servoy.eclipse.designer.editor.palette.VisualFormEditorPaletteFactory;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.property.PersistContext;
@@ -450,6 +454,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		if (editorPart.getFlattenedForm() != null)
 		{
 			viewer.addDropTargetListener(new FormElementTransferDropTarget(getGraphicalViewer()));
+			viewer.addDropTargetListener(new PaletteItemTransferDropTargetListener(getGraphicalViewer()));
 
 			getEditorSite().getShell().getDisplay().asyncExec(new Runnable()
 			{
@@ -975,4 +980,17 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		return paletteModel;
 	}
 
+	@Override
+	protected PaletteViewerProvider createPaletteViewerProvider()
+	{
+		return new PaletteViewerProvider(getEditDomain())
+		{
+			@Override
+			protected void configurePaletteViewer(PaletteViewer viewer)
+			{
+				super.configurePaletteViewer(viewer);
+				viewer.addDragSourceListener(new TemplateTransferDragSourceListener(viewer));
+			}
+		};
+	}
 }

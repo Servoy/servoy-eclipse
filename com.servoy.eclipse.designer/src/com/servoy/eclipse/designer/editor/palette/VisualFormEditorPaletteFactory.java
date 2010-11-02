@@ -22,8 +22,8 @@ import org.eclipse.gef.palette.PaletteDrawer;
 import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.gef.palette.ToolEntry;
 
-import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.ui.Activator;
 
 
 /**
@@ -38,9 +38,14 @@ public class VisualFormEditorPaletteFactory
 	private static PaletteContainer createElementsDrawer()
 	{
 		PaletteDrawer componentsDrawer = new PaletteDrawer("Elements");
+		ToolEntry component;
 
-		ToolEntry component = new ElementCreationToolEntry("Button", "Create a button", new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_BUTTON),
-			Activator.getImageDescriptor("icons/button.gif"), Activator.getImageDescriptor("icons/button.gif"));
+		component = new ElementCreationToolEntry("Button", "Create a button", new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_BUTTON),
+			Activator.loadImageDescriptorFromBundle("button.gif"), Activator.loadImageDescriptorFromBundle("button.gif"));
+		componentsDrawer.add(component);
+
+		component = new ElementCreationToolEntry("Label", "Create a label", new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_LABEL),
+			Activator.loadImageDescriptorFromBundle("text.gif"), Activator.loadImageDescriptorFromBundle("text.gif"));
 		componentsDrawer.add(component);
 
 		// TODO: Add more

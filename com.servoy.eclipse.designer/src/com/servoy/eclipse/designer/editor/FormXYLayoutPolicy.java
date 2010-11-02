@@ -37,6 +37,7 @@ import org.eclipse.gef.requests.CreateRequest;
 import com.servoy.eclipse.designer.actions.DistributeRequest;
 import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.commands.ChangeBoundsCommand;
+import com.servoy.eclipse.designer.editor.commands.CreateDropRequest;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
@@ -54,8 +55,11 @@ import com.servoy.j2db.persistence.Part;
 
 public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 {
-	private final FormGraphicalEditPart parent;
 	public static final String REQUEST_PROPERTY_PREFIX = "property:";
+
+	private final FormGraphicalEditPart parent;
+
+	private AlignmentFeedbackHelper alignmentFeedbackHelper;
 
 	public FormXYLayoutPolicy(FormGraphicalEditPart parent)
 	{
@@ -122,11 +126,12 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 				extendedData.put("size", new java.awt.Dimension(request.getSize().width, request.getSize().height));
 			}
 
-			if (requestType.type == RequestType.TYPE_BUTTON)
+			if (requestType.type == RequestType.TYPE_BUTTON || requestType.type == RequestType.TYPE_LABEL)
 			{
-				command = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), "button", requestType, extendedData, null,
+				command = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), null, requestType, extendedData, null,
 					request.getLocation().getSWTPoint());
 			}
+
 			// TODO: add more
 
 			// set the created object in the CreateRequest, so it can be selected afterwards
@@ -145,6 +150,20 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 		{
 			return getDistributeChildrenCommand((DistributeRequest)request);
 		}
+
+		if (VisualFormEditor.REQ_DROP_COPY.equals(request.getType()) && request instanceof CreateDropRequest &&
+			((CreateRequest)request).getLocation() != null && ((CreateDropRequest)request).getData() instanceof Object[])
+		{
+			Command command = new CompoundCommand();
+			for (Object o : (((CreateDropRequest)request).getData()))
+			{
+				FormPlaceElementCommand placeElementCommand = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), new Object[] { o },
+					request.getType(), request.getExtendedData(), null, ((CreateRequest)request).getLocation().getSWTPoint());
+				((CompoundCommand)command).add(((CreateDropRequest)request).chainSetFactoryObjectCommand(placeElementCommand));
+			}
+			return command;
+		}
+
 		return super.getCommand(request);
 	}
 
@@ -302,5 +321,71 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			return new DragFormPartPolicy();
 		}
 		return new AlignmentfeedbackEditPolicy(parent);
+	}
+
+	/**
+	 * @return the alignmentFeedbackHelper
+	 */
+	public AlignmentFeedbackHelper getAlignmentFeedbackHelper()
+	{
+		if (alignmentFeedbackHelper == null)
+		{
+			alignmentFeedbackHelper = new AlignmentFeedbackHelper(getFeedbackLayer());
+		}
+		return alignmentFeedbackHelper;
+	}
+
+	@Override
+	public EditPart getTargetEditPart(Request request)
+	{
+		if (understandsRequest(request))
+		{
+			return getHost();
+		}
+		return super.getTargetEditPart(request);
+	}
+
+	@Override
+	public boolean understandsRequest(Request request)
+	{
+		return VisualFormEditor.REQ_DROP_COPY.equals(request.getType());
+	}
+
+	@Override
+	public void showTargetFeedback(Request request)
+	{
+		super.showTargetFeedback(request);
+		if (VisualFormEditor.REQ_DROP_COPY.equals(request.getType()))
+		{
+			CreateRequest createReq = (CreateRequest)request;
+			if (createReq.getSize() != null)
+			{
+				showSizeOnDropFeedback(createReq);
+			}
+		}
+	}
+
+	@Override
+	public void eraseTargetFeedback(Request request)
+	{
+		super.eraseTargetFeedback(request);
+		if (VisualFormEditor.REQ_DROP_COPY.equals(request.getType()))
+		{
+			eraseSizeOnDropFeedback(request);
+		}
+	}
+
+	@Override
+	protected void showSizeOnDropFeedback(CreateRequest request)
+	{
+		super.showSizeOnDropFeedback(request);
+		getAlignmentFeedbackHelper().showElementAlignmentFeedback(request);
+	}
+
+	@Override
+	protected void eraseSizeOnDropFeedback(Request request)
+	{
+		getAlignmentFeedbackHelper().eraseElementAlignmentFeedback();
+		super.eraseSizeOnDropFeedback(request);
 	}
 }

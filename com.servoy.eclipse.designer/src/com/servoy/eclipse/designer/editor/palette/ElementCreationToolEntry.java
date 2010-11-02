@@ -17,9 +17,8 @@
 
 package com.servoy.eclipse.designer.editor.palette;
 
-import org.eclipse.gef.palette.ToolEntry;
+import org.eclipse.gef.palette.CombinedTemplateCreationEntry;
 import org.eclipse.gef.requests.CreationFactory;
-import org.eclipse.gef.tools.CreationTool;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 /**
@@ -28,13 +27,11 @@ import org.eclipse.jface.resource.ImageDescriptor;
  * @author rgansevles
  *
  */
-public class ElementCreationToolEntry extends ToolEntry
+public class ElementCreationToolEntry extends CombinedTemplateCreationEntry
 {
 
 	public ElementCreationToolEntry(String label, String shortDesc, CreationFactory factory, ImageDescriptor iconSmall, ImageDescriptor iconLarge)
 	{
-		super(label, shortDesc, iconSmall, iconLarge, ElementCreationTool.class);
-		setToolProperty(CreationTool.PROPERTY_CREATION_FACTORY, factory);
+		super(label, shortDesc, factory, iconSmall, iconLarge);
 	}
-
 }

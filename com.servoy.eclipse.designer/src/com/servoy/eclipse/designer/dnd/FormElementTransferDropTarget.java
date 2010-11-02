@@ -16,17 +16,10 @@
  */
 package com.servoy.eclipse.designer.dnd;
 
-import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Point;
-import org.eclipse.draw2d.geometry.PrecisionRectangle;
-import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.Request;
-import org.eclipse.gef.SnapToHelper;
-import org.eclipse.gef.dnd.AbstractTransferDropTargetListener;
-import org.eclipse.gef.requests.CreateRequest;
-import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
@@ -42,136 +35,17 @@ import com.servoy.eclipse.ui.node.UserNodeListDragSourceListener;
  * @author jcompagner, rgansevles
  * 
  */
-public class FormElementTransferDropTarget extends AbstractTransferDropTargetListener
+public class FormElementTransferDropTarget extends ElementTransferDropTarget
 {
-	private SnapToHelper helper;
-
 	public FormElementTransferDropTarget(EditPartViewer viewer)
 	{
 		super(viewer, FormElementTransfer.getInstance());
 	}
 
 	@Override
-	protected void unload()
-	{
-		helper = null;
-		super.unload();
-	}
-
-	@Override
-	protected void handleDragOver()
-	{
-		getCurrentEvent().detail = DND.DROP_COPY;
-		super.handleDragOver();
-	}
-
-	@Override
-	protected void handleDrop()
-	{
-		super.handleDrop();
-		selectAddedObject(getViewer());
-	}
-
-	/*
-	 * Add the newly created object to the viewer's selected objects.
-	 */
-	protected void selectAddedObject(EditPartViewer viewer)
-	{
-		Request targetRequest = getTargetRequest();
-		if (targetRequest instanceof CreateRequest)
-		{
-			Object model = ((CreateRequest)targetRequest).getNewObject();
-			if (model == null || viewer == null)
-			{
-				return;
-			}
-			Object editpart = viewer.getEditPartRegistry().get(model);
-			if (editpart instanceof EditPart)
-			{
-				// Force the new object to get positioned in the viewer.
-				viewer.flush();
-				viewer.select((EditPart)editpart);
-			}
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.dnd.AbstractTransferDropTargetListener#dragLeave(org.eclipse.swt.dnd.DropTargetEvent)
-	 */
-	@Override
-	public void dragLeave(DropTargetEvent event)
-	{
-		setCurrentEvent(event);
-		// do not call unload() here because dragLeave is also called when the drop is done
-	}
-
-	/**
-	 * @see org.eclipse.jface.util.TransferDropTargetListener#isEnabled(org.eclipse.swt.dnd.DropTargetEvent)
-	 */
-	@Override
 	public boolean isEnabled(DropTargetEvent event)
 	{
 		return UserNodeListDragSourceListener.dragObjects != null && super.isEnabled(event);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.dnd.AbstractTransferDropTargetListener#updateTargetRequest()
-	 */
-	@Override
-	protected void updateTargetRequest()
-	{
-		Request targetRequest = getTargetRequest();
-		if (targetRequest instanceof CreateRequest)
-		{
-			CreateRequest request = (CreateRequest)targetRequest;
-			Point loq = getDropLocation();
-			Rectangle bounds = new Rectangle(loq, request.getSize());
-			request.setLocation(loq);
-			request.getExtendedData().clear();
-			if (!isAltKeyDown() && getSnapToHelper() != null)
-			{
-				PrecisionRectangle baseRect = new PrecisionRectangle(bounds);
-				PrecisionRectangle result = baseRect.getPreciseCopy();
-				getSnapToHelper().snapRectangle(request, PositionConstants.NSEW, baseRect, result);
-				request.setLocation(result.getLocation());
-				request.setSize(result.getSize());
-			}
-			if (request.getSize() != null)
-			{
-				request.getExtendedData().put("size", new java.awt.Dimension(request.getSize().width, request.getSize().height));
-			}
-
-		}
-	}
-
-	/**
-	 * @return
-	 */
-	protected SnapToHelper getSnapToHelper()
-	{
-		if (helper == null && getTargetEditPart() != null)
-		{
-			EditPart editPart = getTargetEditPart();
-			while (helper == null)
-			{
-				helper = (SnapToHelper)editPart.getAdapter(SnapToHelper.class);
-				if (helper == null)
-				{
-					editPart = editPart.getParent();
-				}
-			}
-
-		}
-		return helper;
-	}
-
-	public boolean isAltKeyDown()
-	{
-		return false; // TODO: investigate how alt-key down can be detected
 	}
 
 	@Override
