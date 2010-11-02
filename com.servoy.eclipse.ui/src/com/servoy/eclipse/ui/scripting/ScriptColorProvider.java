@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.scripting;
 
 import java.util.HashMap;
@@ -130,6 +130,7 @@ public class ScriptColorProvider implements IScriptColorProvider, IScriptColorPr
 
 		initKey(SERVOY_COMPARE_OPERATORS, new RGB(0, 0, 255), true, false, false, false, servoy_main);
 
+		initKey("_super", new RGB(85, 0, 127), true, false, false, false, servoy_aux);
 		/*
 		 * initKey("[", new RGB(0, 0, 255), true, false, false, false, servoy_aux);
 		 * 
@@ -152,6 +153,8 @@ public class ScriptColorProvider implements IScriptColorProvider, IScriptColorPr
 
 		servoy_main.addItem(servoy_cat);
 		servoy_main.addItem(servoy_aux);
+
+
 	}
 
 	void initKey(String key, RGB defRgbValue, boolean defIsBold, boolean defIsItalic, boolean defIsStrikeThrough, boolean defIsUnderline,
@@ -229,6 +232,7 @@ public class ScriptColorProvider implements IScriptColorProvider, IScriptColorPr
 
 		createKeyword("null"); //$NON-NLS-1$
 		createKeyword("undefined"); //$NON-NLS-1$
+		createKeyword("_super"); //$NON-NLS-1$
 
 		createKeyword("FIXME"); //$NON-NLS-1$
 		createKeyword("CHECKME"); //$NON-NLS-1$
