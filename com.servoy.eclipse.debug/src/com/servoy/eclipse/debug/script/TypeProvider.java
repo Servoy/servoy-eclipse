@@ -66,7 +66,6 @@ import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
-import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IClientPlugin;
@@ -116,14 +115,12 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addScopeType("Form", new FormScopeCreator());
 		addScopeType("Elements", new ElementsScopeCreator());
 		addScopeType("Plugins", new PluginsScopeCreator());
-		addScopeType("Super", new SuperScopeCreator());
 		addScopeType("Forms", new FormsScopeCreator());
 		addScopeType("Globals", new GlobalScopeCreator());
 
 		dynamicTypeFillers.put(FoundSet.JS_FOUNDSET, new DataProviderFiller());
 		dynamicTypeFillers.put(Record.JS_RECORD, new DataProviderFiller());
 		dynamicTypeFillers.put("Form", new FormScopeFiller());
-		dynamicTypeFillers.put("Super", new SuperScopeFiller());
 		dynamicTypeFillers.put("Elements", new ElementsScopeFiller());
 
 	}
@@ -224,11 +221,14 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						if (form.getExtendsFormID() > 0)
 						{
 							formToUse = fs.getFlattenedForm(form);
-							Form superForm = fs.getForm(form.getExtendsFormID());
-							if (superForm != null)
-							{
-								members.add(createProperty(context, "_super", true, "Super<" + superForm.getName() + '>', FORM_IMAGE));
-							}
+//							Form superForm = fs.getForm(form.getExtendsFormID());
+//							if (superForm != null)
+//							{
+//								Property property = createProperty(context, "_super", true, null, FORM_IMAGE);
+//								property.setDescription(getDoc("_super", com.servoy.j2db.documentation.scripting.docs.Form.class, "", null));
+//								property.setAttribute(LAZY_VALUECOLLECTION, superForm);
+//								members.add(property);
+//							}
 						}
 						String ds = formToUse.getDataSource();
 						if (ds != null)
@@ -282,41 +282,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		}
 	}
 
-
-	private class SuperScopeFiller implements DynamicTypeFiller
-	{
-		public void fillType(Type type, ITypeInfoContext context, String config)
-		{
-			FlattenedSolution fs = getFlattenedSolution(context);
-			if (fs != null)
-			{
-				Form form = fs.getForm(config);
-				if (form != null)
-				{
-					try
-					{
-						EList<Member> members = type.getMembers();
-						Form formToUse = form;
-						if (form.getExtendsFormID() > 0)
-						{
-							formToUse = fs.getFlattenedForm(form);
-						}
-
-						Iterator<ScriptMethod> scriptMethods = formToUse.getScriptMethods(false);
-						while (scriptMethods.hasNext())
-						{
-							ScriptMethod sm = scriptMethods.next();
-							members.add(createMethod(context, sm, FORM_METHOD_IMAGE, sm.getSerializableRuntimeProperty(IScriptProvider.FILENAME)));
-						}
-					}
-					catch (Exception e)
-					{
-						ServoyLog.logError(e);
-					}
-				}
-			}
-		}
-	}
 
 	private class ElementsScopeFiller implements DynamicTypeFiller
 	{
@@ -709,20 +674,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			members.add(createProperty(context, "foundset", true, FoundSet.JS_FOUNDSET, FOUNDSET_IMAGE));
 			members.add(createProperty(context, "elements", true, "Elements", ELEMENTS));
 
-			type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
-			return type;
-		}
-	}
-
-	private static class SuperScopeCreator implements IScopeTypeCreator
-	{
-
-		public Type createType(ITypeInfoContext context, String typeName)
-		{
-			Type type = TypeInfoModelFactory.eINSTANCE.createType();
-			type.setName(typeName);
-			type.setKind(TypeKind.JAVA);
-			type.setDescription(getDoc("_super", com.servoy.j2db.documentation.scripting.docs.Form.class, "", null));
 			type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
 			return type;
 		}

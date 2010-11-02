@@ -35,9 +35,37 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		{
 			String scriptPath = SolutionSerializer.getScriptPath(form, false);
 			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
-			return getValueCollection(context, file);
+			return getSuperFormContext(context, form, getValueCollection(context, file));
 		}
 		return null;
+	}
+
+	/**
+	 * @param context
+	 * @param form
+	 * @param formCollection
+	 */
+	private IValueCollection getSuperFormContext(ITypeInfoContext context, Form form, IValueCollection formCollection)
+	{
+		if (form.getExtendsFormID() > 0)
+		{
+			FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
+			if (fs != null)
+			{
+				IValueCollection superForms = ValueCollectionFactory.createScopeValueCollection();
+				Form superForm = fs.getForm(form.getExtendsFormID());
+				while (superForm != null)
+				{
+					String scriptPath = SolutionSerializer.getScriptPath(superForm, false);
+					IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
+					ValueCollectionFactory.copyInto(superForms, getValueCollection(context, file));
+					superForm = fs.getForm(superForm.getExtendsFormID());
+				}
+				if (formCollection != null) ValueCollectionFactory.copyInto(superForms, formCollection);
+				return superForms;
+			}
+		}
+		return formCollection;
 	}
 
 	/*
@@ -47,17 +75,27 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	 */
 	public IValueCollection getTopValueCollection(ITypeInfoContext context)
 	{
-		if (context.getModelElement() != null && context.getModelElement().getResource().getName().endsWith("globals.js")) //$NON-NLS-1$
+		if (context.getModelElement() != null)
 		{
-			FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
-			if (fs != null)
+			if (context.getModelElement().getResource().getName().endsWith("globals.js"))
 			{
-				return getGlobalModulesValueCollection(context, fs, ValueCollectionFactory.createValueCollection());
+				FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
+				if (fs != null)
+				{
+					return getGlobalModulesValueCollection(context, fs, ValueCollectionFactory.createValueCollection());
+				}
+			}
+			else
+			{
+				Form form = TypeCreator.getForm(context);
+				if (form != null)
+				{
+					return getSuperFormContext(context, form, null);
+				}
 			}
 		}
 		return null;
 	}
-
 
 	/**
 	 * @param context

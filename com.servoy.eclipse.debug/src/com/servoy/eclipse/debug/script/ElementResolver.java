@@ -85,9 +85,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		typeNameCreators.put("foundset", new FoundsetTypeNameCreator());
 		typeNameCreators.put("plugins", new PluginsTypeNameCreator());
 		typeNameCreators.put("elements", new ElementsTypeNameCreator());
-		typeNameCreators.put("_super", new SuperTypeNameCreator());
 		typeNameCreators.put("forms", new FormsNameCreator());
-//		typeNameCreators.put("globals", new GlobalsNameCreator());
 
 	}
 
@@ -203,6 +201,23 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 					property.setAttribute(VALUECOLLECTION, collection);
 					property.setAttribute(IMAGE_DESCRIPTOR, GLOBALS);
 					property.setType(context.getType("Globals<" + fs.getSolution().getName() + '>'));
+					return property;
+				}
+			}
+			return null;
+		}
+		else if ("_super".equals(name))
+		{
+			Form form = getForm(context);
+			if (form != null && form.getExtendsFormID() > 0)
+			{
+				FlattenedSolution fs = getFlattenedSolution(context);
+				if (fs != null)
+				{
+					Form superForm = fs.getForm(form.getExtendsFormID());
+					Property property = createProperty(context, "_super", true, null, FORM_IMAGE);
+					property.setDescription(getDoc("_super", com.servoy.j2db.documentation.scripting.docs.Form.class, "", null));
+					property.setAttribute(LAZY_VALUECOLLECTION, superForm);
 					return property;
 				}
 			}
@@ -355,27 +370,6 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 				return FoundSet.JS_FOUNDSET + '<' + form.getDataSource() + '>';
 			}
 			return FoundSet.JS_FOUNDSET;
-		}
-	}
-
-	private class SuperTypeNameCreator implements ITypeNameCreator
-	{
-		/**
-		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
-		 */
-		public String getTypeName(ITypeInfoContext context, String fullTypeName)
-		{
-			Form form = getForm(context);
-			if (form != null)
-			{
-				if (form.getExtendsFormID() > 0)
-				{
-					FlattenedSolution fs = getFlattenedSolution(context);
-					Form superForm = fs.getForm(form.getExtendsFormID());
-					if (superForm != null) return "Super<" + superForm.getName() + '>';
-				}
-			}
-			return "Super";
 		}
 	}
 
