@@ -736,10 +736,6 @@
             pattern="org\.eclipse\.jdt\.core/javanature">
       </activityPatternBinding>
       <activityPatternBinding
-            activityId="com.servoy.eclipse.activities.javaDevelopment"
-            pattern="org\.eclipse\.debug\.ui/.*">
-      </activityPatternBinding>
-      <activityPatternBinding
             activityId="com.servoy.eclipse.activities.antDevelopment"
             pattern="org\.eclipse\.ant\.ui/.*">
       </activityPatternBinding>
