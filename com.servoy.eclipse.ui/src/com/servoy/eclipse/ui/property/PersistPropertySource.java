@@ -400,7 +400,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			((IPropertyController)pd).setReadonly(readOnly);
 
 			if (propertyDescriptor.valueObject == persist &&
-				RepositoryHelper.hideForProperties(propertyDescriptor.propertyDescriptor.getName(), persist.getClass()))
+				RepositoryHelper.hideForProperties(propertyDescriptor.propertyDescriptor.getName(), persist.getClass(), persist))
 			{
 				hiddenPropertyDescriptors.put(pd.getId(), pd);
 			}
