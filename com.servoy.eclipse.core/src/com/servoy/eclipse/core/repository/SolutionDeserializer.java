@@ -28,8 +28,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
@@ -55,6 +55,8 @@ import org.eclipse.dltk.javascript.ast.UnaryOperation;
 import org.eclipse.dltk.javascript.ast.VariableDeclaration;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.part.FileEditorInput;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -429,8 +431,8 @@ public class SolutionDeserializer
 					else
 					{
 						// tablenode
-						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0, jsFileName.length() -
-							SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length()) +
+						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0,
+							jsFileName.length() - SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length()) +
 							SolutionSerializer.TABLENODE_FILE_EXTENSION);
 					}
 
@@ -846,6 +848,16 @@ public class SolutionDeserializer
 					}
 
 					Debug.error(sb.toString());
+
+					final String fileName = file.getName();
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						public void run()
+						{
+							MessageDialog.openWarning(Display.getDefault().getActiveShell(), "File " + fileName + " couldn't be parsed",
+								"In memory Solution Objects are not updated!, please fix the problem first");
+						}
+					});
 				}
 				return null;
 			}
