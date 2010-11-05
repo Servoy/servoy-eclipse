@@ -774,7 +774,7 @@ public class SolutionDeserializer
 		}
 	}
 
-	private List<JSONObject> parseJSFile(File file, boolean markAsChanged) throws JSONException
+	private List<JSONObject> parseJSFile(final File file, boolean markAsChanged) throws JSONException
 	{
 		String fileContent = Utils.getTXTFileContent(file, Charset.forName("UTF8")); //$NON-NLS-1$
 		if (fileContent == null) return Collections.<JSONObject> emptyList();
@@ -849,13 +849,13 @@ public class SolutionDeserializer
 
 					Debug.error(sb.toString());
 
-					final String fileName = file.getName();
 					Display.getDefault().asyncExec(new Runnable()
 					{
 						public void run()
 						{
-							MessageDialog.openWarning(Display.getDefault().getActiveShell(), "File " + fileName + " couldn't be parsed",
-								"In memory Solution Objects are not updated!, please fix the problem first");
+							MessageDialog.openWarning(Display.getDefault().getActiveShell(), "In memory solution objects are not updated.",
+								"Please fix the problem first in the file\n" + file.getAbsolutePath() +
+									".\nThe log file has some more information starting with 'AST Parser found problems..' for this parsing problem.");
 						}
 					});
 				}
