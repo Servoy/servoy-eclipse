@@ -65,6 +65,9 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IBreakpointManager;
 import org.eclipse.debug.core.model.IBreakpoint;
+import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.debug.ui.breakpoints.BreakpointUtils;
 import org.eclipse.dltk.internal.debug.core.model.AbstractScriptBreakpoint;
 import org.eclipse.dltk.internal.debug.core.model.ScriptMarkerFactory;
@@ -928,6 +931,8 @@ public class ServoyModel implements IWorkspaceSaveListener
 						{
 							public void run()
 							{
+								testBuildPaths(activeProject, new HashSet<ServoyProject>());
+
 								ServoyProject[] modulesOfActiveProject = getModulesOfActiveProject();
 								IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
 								for (IWorkbenchWindow workbenchWindow : workbenchWindows)
@@ -1287,6 +1292,47 @@ public class ServoyModel implements IWorkspaceSaveListener
 		for (ServoyProject p : getModulesOfActiveProject())
 		{
 			p.resetEditingFlattenedSolution();
+		}
+		testBuildPaths(activeProject, new HashSet<ServoyProject>());
+	}
+
+	private void testBuildPaths(ServoyProject sp, Set<ServoyProject> processed)
+	{
+		if (sp == null) return;
+		if (processed.add(sp))
+		{
+			IScriptProject scriptProject = DLTKCore.create(sp.getProject());
+			if (scriptProject == null) return;
+			try
+			{
+				List<IBuildpathEntry> buildPaths = new ArrayList<IBuildpathEntry>();
+				buildPaths.add(DLTKCore.newSourceEntry(sp.getProject().getFullPath()));
+				String[] moduleNames = CoreUtils.getTokenElements(sp.getSolution().getModulesNames(), ",", true);
+				Arrays.sort(moduleNames);
+				// test all build paths
+				for (String moduleName : moduleNames)
+				{
+					try
+					{
+						IProject moduleProject = ServoyModel.getWorkspace().getRoot().getProject(moduleName);
+						if (moduleProject.isAccessible())
+						{
+							ServoyProject servoyModuleProject = (ServoyProject)moduleProject.getNature(ServoyProject.NATURE_ID);
+							testBuildPaths(servoyModuleProject, processed);
+							buildPaths.add(DLTKCore.newProjectEntry(moduleProject.getFullPath(), true));
+						}
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+				scriptProject.setRawBuildpath(buildPaths.toArray(new IBuildpathEntry[buildPaths.size()]), null);
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
 		}
 	}
 
