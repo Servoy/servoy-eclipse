@@ -432,7 +432,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				try
 				{
 					Relation relation = fs.getRelation(config);
-					if (relation != null) table = relation.getForeignTable();
+					if (relation != null && relation.isValid()) table = relation.getForeignTable();
 				}
 				catch (RepositoryException e)
 				{
