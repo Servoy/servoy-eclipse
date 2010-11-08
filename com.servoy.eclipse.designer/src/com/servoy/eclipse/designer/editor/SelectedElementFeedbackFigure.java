@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.designer.editor;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +32,7 @@ import org.eclipse.gef.GraphicalEditPart;
 
 import com.servoy.j2db.persistence.Part;
 
+
 /**
  * Feedback figure for a selected edit part.
  * 
@@ -40,6 +43,18 @@ public class SelectedElementFeedbackFigure extends Figure implements AncestorLis
 {
 	private final GraphicalEditPart container;
 	private final GraphicalEditPart editPart;
+
+	private final PropertyChangeListener viewerPropertyListener = new PropertyChangeListener()
+	{
+		public void propertyChange(PropertyChangeEvent evt)
+		{
+			String property = evt.getPropertyName();
+			if (property.equals(AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_ENABLED))
+			{
+				refresh();
+			}
+		}
+	};
 
 	boolean addedFeedbackChildren = false;
 
@@ -68,6 +83,7 @@ public class SelectedElementFeedbackFigure extends Figure implements AncestorLis
 		// Listen to the owner figure so the handle moves when the
 		// figure moves.
 		editPart.getFigure().addAncestorListener(this);
+		editPart.getViewer().addPropertyChangeListener(viewerPropertyListener);
 	}
 
 	@Override
@@ -75,6 +91,7 @@ public class SelectedElementFeedbackFigure extends Figure implements AncestorLis
 	{
 		super.removeNotify();
 		editPart.getFigure().removeAncestorListener(this);
+		editPart.getViewer().removePropertyChangeListener(viewerPropertyListener);
 	}
 
 	protected void addFeedbackChildren()
@@ -102,6 +119,11 @@ public class SelectedElementFeedbackFigure extends Figure implements AncestorLis
 
 	protected void addSameSizeFeedback()
 	{
+		if (!Boolean.TRUE.equals(editPart.getViewer().getProperty(AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_ENABLED)))
+		{
+			return;
+		}
+
 		Rectangle myBounds = editPart.getFigure().getBounds();
 		boolean addedSameWidth = false;
 		boolean addedSameHeight = false;
@@ -116,12 +138,12 @@ public class SelectedElementFeedbackFigure extends Figure implements AncestorLis
 
 			IFigure childFigure = ((GraphicalEditPart)child).getFigure();
 			Rectangle childBounds = childFigure.getBounds();
-			if (myBounds.width == childBounds.width)
+			if (myBounds.width >= 5 && myBounds.width == childBounds.width)
 			{
 				add(new SameSizeFeedbackFigure(SameSizeFeedbackFigure.SAME_WIDTH, childFigure));
 				addedSameWidth = true;
 			}
-			if (myBounds.height == childBounds.height)
+			if (myBounds.height >= 5 && myBounds.height == childBounds.height)
 			{
 				add(new SameSizeFeedbackFigure(SameSizeFeedbackFigure.SAME_HEIGHT, childFigure));
 				addedSameHeight = true;
@@ -162,6 +184,14 @@ public class SelectedElementFeedbackFigure extends Figure implements AncestorLis
 		return bounds;
 	}
 
+	protected void refresh()
+	{
+		// recreate the feedback child figures
+		removeAll();
+		bounds = null;
+		addFeedbackChildren();
+	}
+
 
 	public void ancestorAdded(IFigure ancestor)
 	{
@@ -169,10 +199,7 @@ public class SelectedElementFeedbackFigure extends Figure implements AncestorLis
 
 	public void ancestorMoved(IFigure ancestor)
 	{
-		// recreate the feedback child figures
-		removeAll();
-		bounds = null;
-		addFeedbackChildren();
+		refresh();
 	}
 
 	public void ancestorRemoved(IFigure ancestor)

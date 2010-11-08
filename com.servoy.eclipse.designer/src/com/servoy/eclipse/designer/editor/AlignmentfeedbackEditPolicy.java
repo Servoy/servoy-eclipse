@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.designer.editor;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +27,6 @@ import org.eclipse.draw2d.ActionListener;
 import org.eclipse.draw2d.Clickable;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.PositionConstants;
-import org.eclipse.draw2d.RelativeLocator;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.DragTracker;
 import org.eclipse.gef.GraphicalEditPart;
@@ -47,6 +48,7 @@ import org.eclipse.swt.widgets.Menu;
 
 import com.servoy.eclipse.designer.actions.ModifyAnchoringAction;
 import com.servoy.eclipse.designer.actions.SetAnchoringAction;
+import com.servoy.eclipse.designer.util.AbsoluteLocator;
 import com.servoy.eclipse.designer.util.AnchoringFigure;
 import com.servoy.eclipse.designer.util.FigureMovedTracker;
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
@@ -60,8 +62,18 @@ import com.servoy.j2db.util.IAnchorConstants;
  * @author rgansevles
  *
  */
-final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
+final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 {
+	/**
+	 * A viewer property indicating whether the anchor feedback is enabled. The value must  be a Boolean.
+	 */
+	public static final String PROPERTY_ANCHOR_FEEDBACK_ENABLED = "AlignmentfeedbackEditPolicy.anchorFeedbackEnabled"; //$NON-NLS-1$
+
+	/**
+	 * A viewer property indicating whether the same size feedback is enabled. The value must  be a Boolean.
+	 */
+	public static final String PROPERTY_SAME_SIZE_FEEDBACK_ENABLED = "AlignmentfeedbackEditPolicy.sameSizeFeedbackEnabled"; //$NON-NLS-1$
+
 	private AlignmentFeedbackHelper alignmentFeedbackHelper;
 
 	/**
@@ -78,9 +90,38 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 
 	private MenuManager menuManager;
 
+	private boolean isSelected;
+
+	private final PropertyChangeListener viewerPropertyListener = new PropertyChangeListener()
+	{
+
+		public void propertyChange(PropertyChangeEvent evt)
+		{
+			String property = evt.getPropertyName();
+			if (isSelected && property.equals(AlignmentfeedbackEditPolicy.PROPERTY_ANCHOR_FEEDBACK_ENABLED))
+			{
+				addAnchoringFigure();
+			}
+		}
+	};
+
 	public AlignmentfeedbackEditPolicy(FormGraphicalEditPart container)
 	{
 		this.container = container;
+	}
+
+	@Override
+	public void activate()
+	{
+		super.activate();
+		getHost().getViewer().addPropertyChangeListener(viewerPropertyListener);
+	}
+
+	@Override
+	public void deactivate()
+	{
+		super.deactivate();
+		getHost().getViewer().removePropertyChangeListener(viewerPropertyListener);
 	}
 
 	/**
@@ -178,6 +219,7 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 		super.hideSelection();
 		removeSelectedElementFeedbackFigure();
 		removeAnchoringFigure();
+		isSelected = false;
 	}
 
 	@Override
@@ -186,6 +228,7 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 		super.showSelection();
 		addSelectedElementFeedbackFigure();
 		addAnchoringFigure();
+		isSelected = true;
 	}
 
 	protected void removeSelectedElementFeedbackFigure()
@@ -221,12 +264,18 @@ final class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	 */
 	protected void addAnchoringFigure()
 	{
+		if (!Boolean.TRUE.equals(getHost().getViewer().getProperty(AlignmentfeedbackEditPolicy.PROPERTY_ANCHOR_FEEDBACK_ENABLED)))
+		{
+			removeAnchoringFigure();
+			return;
+		}
+
 		if (anchoringFigure == null && getHost().getModel() instanceof ISupportAnchors)
 		{
 			anchoringFigure = new Clickable(new AnchoringFigure((ISupportAnchors)getHost().getModel()), SWT.NONE);
 			getLayer(LayerConstants.HANDLE_LAYER).add(anchoringFigure);
 
-			getHost().getFigure().addAncestorListener(new FigureMovedTracker(anchoringFigure, new RelativeLocator(getHost().getFigure(), 0.75, 0)));
+			getHost().getFigure().addAncestorListener(new FigureMovedTracker(anchoringFigure, new AbsoluteLocator(getHost().getFigure(), false, 2, true, 1)));
 			anchoringFigure.addActionListener(new ActionListener()
 			{
 				public void actionPerformed(ActionEvent e)

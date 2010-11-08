@@ -76,6 +76,8 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	private Spinner alignmentMediumDistanceSpinner;
 	private Spinner alignmentLargeDistanceSpinner;
 	private Button snapToNoneRadio;
+	private Button sameSizeFeedbackCheck;
+	private Button anchorFeedbackCheck;
 
 
 	public void init(IWorkbench workbench)
@@ -108,24 +110,10 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		metricsLabel.setBounds(0, 75, 80, 20);
 
 		saveEditorStateButton = new Button(composite, SWT.CHECK);
-		saveEditorStateButton.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-			}
-		});
 		saveEditorStateButton.setText("Re-open Form Editors at startup");
 		saveEditorStateButton.setBounds(0, 0, 225, 20);
 
 		toolbarsInFormWindowButton = new Button(composite, SWT.CHECK);
-		toolbarsInFormWindowButton.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-			}
-		});
 		toolbarsInFormWindowButton.setBounds(0, 19, 343, 26);
 		toolbarsInFormWindowButton.setText("Show Form Editing Toolbars inside Form Editor");
 
@@ -166,13 +154,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		snapToAlignmentRadio.setText("Alignment Guides");
 
 		anchorCheck = new Button(grpAlignmentSettings, SWT.CHECK);
-		anchorCheck.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-			}
-		});
 		anchorCheck.setBounds(19, 203, 175, 26);
 		anchorCheck.setText("Enable Smart Anchoring");
 
@@ -241,7 +222,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		Group grpResizing = new Group(composite, SWT.NONE);
 		grpResizing.setText("Keyboard resize/move step sizes");
-		grpResizing.setBounds(0, 480, 431, 73);
+		grpResizing.setBounds(0, 583, 431, 73);
 
 		Label stepsizeLabel = new Label(grpResizing, SWT.NONE);
 		stepsizeLabel.setBounds(10, 24, 60, 20);
@@ -294,10 +275,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		gridSizeSpinner = new Spinner(grpGridSettings, SWT.BORDER);
 		gridSizeSpinner.setBounds(20, 102, 60, 20);
-
-		Label gridDefaultLabel = new Label(grpGridSettings, SWT.NONE);
-		gridDefaultLabel.setBounds(84, 105, 155, 14);
-		gridDefaultLabel.setText("Point distance");
 		gridSizeSpinner.setValues(0, 3, 100, 0, 5, 20);
 		snapToGridRadio.addSelectionListener(new SelectionAdapter()
 		{
@@ -307,6 +284,24 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 				setEnabledState();
 			}
 		});
+
+		Label gridDefaultLabel = new Label(grpGridSettings, SWT.NONE);
+		gridDefaultLabel.setBounds(84, 105, 155, 14);
+		gridDefaultLabel.setText("Point distance");
+
+		Group feedbackGroup = new Group(composite, SWT.NONE);
+		feedbackGroup.setText("feedback");
+		feedbackGroup.setBounds(0, 480, 431, 97);
+
+		sameSizeFeedbackCheck = new Button(feedbackGroup, SWT.CHECK);
+		sameSizeFeedbackCheck.setLocation(10, 54);
+		sameSizeFeedbackCheck.setSize(324, 26);
+		sameSizeFeedbackCheck.setText("Show same-size feedback");
+
+		anchorFeedbackCheck = new Button(feedbackGroup, SWT.CHECK);
+		anchorFeedbackCheck.setLocation(10, 21);
+		anchorFeedbackCheck.setSize(324, 26);
+		anchorFeedbackCheck.setText("Show anchoring-feedback");
 
 		initializeFields();
 		setEnabledState();
@@ -360,6 +355,8 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		stepSizeSpinner.setSelection(prefs.getStepSize());
 		largeStepSizeSpinner.setSelection(prefs.getLargeStepSize());
 		setMetricsComboValue(prefs.getMetrics());
+		sameSizeFeedbackCheck.setSelection(prefs.getShowSameSizeFeedback());
+		anchorFeedbackCheck.setSelection(prefs.getShowAnchorFeedback());
 	}
 
 	@Override
@@ -384,6 +381,8 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 			alignmentLargeDistanceSpinner.getSelection());
 		prefs.setStepSize(stepSizeSpinner.getSelection(), largeStepSizeSpinner.getSelection());
 		prefs.setMetrics(((Integer)((ObjectWrapper)((IStructuredSelection)metricsCombo.getSelection()).getFirstElement()).getType()).intValue());
+		prefs.setShowSameSizeFeedback(sameSizeFeedbackCheck.getSelection());
+		prefs.setShowAnchorFeedback(anchorFeedbackCheck.getSelection());
 
 		return true;
 	}
@@ -415,6 +414,8 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		stepSizeSpinner.setSelection(DesignerPreferences.STEP_SIZE_DEFAULT);
 		largeStepSizeSpinner.setSelection(DesignerPreferences.LARGE_STEP_SIZE_DEFAULT);
 		setMetricsComboValue(DesignerPreferences.METRICS_DEFAULT);
+		sameSizeFeedbackCheck.setSelection(DesignerPreferences.SHOW_SAME_SIZE_DEFAULT);
+		anchorFeedbackCheck.setSelection(DesignerPreferences.SHOW_ANCHORING_DEFAULT);
 
 		setEnabledState();
 		super.performDefaults();

@@ -24,8 +24,9 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Locator;
 import org.eclipse.draw2d.MarginBorder;
-import org.eclipse.draw2d.RelativeLocator;
 import org.eclipse.draw2d.geometry.Rectangle;
+
+import com.servoy.eclipse.designer.util.AbsoluteLocator;
 
 /**
  * Feedback figure for elements that have the same width or height
@@ -59,16 +60,16 @@ public class SameSizeFeedbackFigure extends Figure
 	 */
 	protected void init()
 	{
-		setPreferredSize(10, 10);
-
 		Locator locator;
 		if (SAME_WIDTH.equals(type))
 		{
-			locator = new RelativeLocator(referenceFigure, 0, 0.2);
+			locator = new AbsoluteLocator(referenceFigure, true, 0, true, 3);
+			setPreferredSize(5, 10);
 		}
 		else if (SAME_HEIGHT.equals(type))
 		{
-			locator = new RelativeLocator(referenceFigure, 0.9, 0);
+			setPreferredSize(10, 5);
+			locator = new AbsoluteLocator(referenceFigure, false, -3, true, 0);
 		}
 		else
 		{
@@ -87,12 +88,10 @@ public class SameSizeFeedbackFigure extends Figure
 
 		if (SAME_WIDTH.equals(type))
 		{
-			g.drawLine(r.x + 2, r.y, r.x + 2, r.y + r.height - 2);
 			g.drawLine(r.x + r.width - 2, r.y, r.x + r.width - 2, r.y + r.height - 2);
 		}
 		else if (SAME_HEIGHT.equals(type))
 		{
-			g.drawLine(r.x, r.y + 2, r.x + r.width, r.y + 2);
 			g.drawLine(r.x, r.y + r.height - 2, r.x + r.width, r.y + r.height - 2);
 		}
 

@@ -98,7 +98,9 @@ import com.servoy.eclipse.designer.actions.AlignmentSortPartsAction;
 import com.servoy.eclipse.designer.actions.DistributeAction;
 import com.servoy.eclipse.designer.actions.DistributeRequest;
 import com.servoy.eclipse.designer.actions.SelectSnapmodeAction;
+import com.servoy.eclipse.designer.actions.ToggleShowAnchorFeedbackAction;
 import com.servoy.eclipse.designer.actions.ToggleShowGridAction;
+import com.servoy.eclipse.designer.actions.ToggleShowSameSizeFeedbackAction;
 import com.servoy.eclipse.designer.dnd.FormElementTransferDropTarget;
 import com.servoy.eclipse.designer.editor.commands.BringToFrontAction;
 import com.servoy.eclipse.designer.editor.commands.CopyAction;
@@ -490,6 +492,8 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		viewer.setProperty(SnapToGrid.PROPERTY_GRID_VISIBLE, Boolean.valueOf(designerPreferences.getGridShow()));
 		viewer.setProperty(SnapToGrid.PROPERTY_GRID_ENABLED, Boolean.valueOf(designerPreferences.getGridSnapTo()));
 		viewer.setProperty(SnapToElementAlignment.PROPERTY_ALIGNMENT_ENABLED, Boolean.valueOf(designerPreferences.getAlignmentSnapTo()));
+		viewer.setProperty(AlignmentfeedbackEditPolicy.PROPERTY_ANCHOR_FEEDBACK_ENABLED, Boolean.valueOf(designerPreferences.getShowAnchorFeedback()));
+		viewer.setProperty(AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_ENABLED, Boolean.valueOf(designerPreferences.getShowSameSizeFeedback()));
 
 		// Show rulers
 		refreshRulers();
@@ -500,10 +504,20 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		action = new SelectSnapmodeAction(viewer);
 		getActionRegistry().registerAction(action);
 
+		action = new ToggleShowAnchorFeedbackAction(viewer);
+		getActionRegistry().registerAction(action);
+
+		action = new ToggleShowSameSizeFeedbackAction(viewer);
+		getActionRegistry().registerAction(action);
+
 		addToolbarAction(COOLBAR_TOGGLE, getActionRegistry().getAction(DesignerActionFactory.TOGGLE_SHOW_GRID.getId()));
 		addToolbarAction(COOLBAR_TOGGLE, getActionRegistry().getAction(DesignerActionFactory.SELECT_SNAPMODE.getId()));
+		addToolbarAction(COOLBAR_TOGGLE, getActionRegistry().getAction(DesignerActionFactory.TOGGLE_SHOW_ANCHOR_FEEDBACK.getId()));
+		addToolbarAction(COOLBAR_TOGGLE, getActionRegistry().getAction(DesignerActionFactory.TOGGLE_SHOW_SAME_SIZE_FEEDBACK.getId()));
 
 		refreshToolBars();
+
+
 	}
 
 	protected void fillToolbar()

@@ -65,7 +65,7 @@ public class AnchoringFigure extends Figure
 		g.setBackgroundColor(ColorConstants.gray);
 		g.fillRectangle(r.x, r.y, r.width, r.height);
 
-		g.setBackgroundColor(ColorConstants.yellow);
+		g.setBackgroundColor(ColorConstants.white);
 		g.fillRectangle(r.x + 1, r.y + 1, r.width - 2, r.height - 2);
 
 		int anchors = anchored.getAnchors();

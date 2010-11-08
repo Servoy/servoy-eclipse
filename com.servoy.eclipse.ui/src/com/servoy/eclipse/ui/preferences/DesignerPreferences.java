@@ -60,6 +60,8 @@ public class DesignerPreferences
 	public static final String SAVE_EDITOR_STATE_SETTING = "saveEditorState";
 	public static final String FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING = "formToolsOnMainToolbar";
 	public static final String FORM_COOLBAR_LAYOUT_SETTING = "formCoolBarLayout";
+	public static final String SHOW_SAME_SIZE_SETTING = "showSameSizeFeedback";
+	public static final String SHOW_ANCHORING_SETTING = "showAnchoringFeedback";
 
 	public static final String SNAP_TO_ALIGMNENT = "alignment";
 	public static final String SNAP_TO_GRID = "grid";
@@ -80,6 +82,8 @@ public class DesignerPreferences
 	public static final String SNAPTO_DEFAULT = SNAP_TO_ALIGMNENT;
 	public static final boolean ANCHOR_DEFAULT = false;
 	public static final boolean SAVE_EDITOR_STATE_DEFAULT = true;
+	public static final boolean SHOW_SAME_SIZE_DEFAULT = true;
+	public static final boolean SHOW_ANCHORING_DEFAULT = true;
 	public static final boolean FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT = true;
 	public static final int METRICS_DEFAULT = PX;
 
@@ -281,6 +285,26 @@ public class DesignerPreferences
 		settings.setProperty(SAVE_EDITOR_STATE_SETTING, String.valueOf(saveEditorState));
 	}
 
+	public boolean getShowSameSizeFeedback()
+	{
+		return Utils.getAsBoolean(settings.getProperty(SHOW_SAME_SIZE_SETTING, String.valueOf(SHOW_SAME_SIZE_DEFAULT)));
+	}
+
+	public void setShowSameSizeFeedback(boolean showSameSize)
+	{
+		settings.setProperty(SHOW_SAME_SIZE_SETTING, String.valueOf(showSameSize));
+	}
+
+	public boolean getShowAnchorFeedback()
+	{
+		return Utils.getAsBoolean(settings.getProperty(SHOW_ANCHORING_SETTING, String.valueOf(SHOW_ANCHORING_DEFAULT)));
+	}
+
+	public void setShowAnchorFeedback(boolean showAnchoring)
+	{
+		settings.setProperty(SHOW_ANCHORING_SETTING, String.valueOf(showAnchoring));
+	}
+
 	public boolean getFormToolsOnMainToolbar()
 	{
 		return Utils.getAsBoolean(settings.getProperty(FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING, String.valueOf(FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT)));
@@ -386,4 +410,5 @@ public class DesignerPreferences
 			this.hiddenBars = hiddenBars;
 		}
 	}
+
 }
