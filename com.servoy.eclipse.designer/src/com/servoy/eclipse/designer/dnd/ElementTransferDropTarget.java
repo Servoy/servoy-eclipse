@@ -102,6 +102,7 @@ public class ElementTransferDropTarget extends AbstractTransferDropTargetListene
 	{
 		setCurrentEvent(event);
 		// do not call unload() here because dragLeave is also called when the drop is done
+		eraseTargetFeedback();
 	}
 
 	@Override
