@@ -107,7 +107,9 @@ public class ElementCreationTool extends CreationTool
 	@Override
 	protected Request createTargetRequest()
 	{
-		return new CreateElementRequest(getFactory());
+		CreateElementRequest request = new CreateElementRequest(getFactory());
+		request.setResizable(true);
+		return request;
 	}
 
 	/**

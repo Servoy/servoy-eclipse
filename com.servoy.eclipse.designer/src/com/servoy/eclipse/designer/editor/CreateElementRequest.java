@@ -33,6 +33,7 @@ import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
  */
 public class CreateElementRequest extends CreateRequest
 {
+	private boolean resizable = false;
 
 	public CreateElementRequest(Object type)
 	{
@@ -79,4 +80,19 @@ public class CreateElementRequest extends CreateRequest
 		return command;
 	}
 
+	/**
+	 * @param resizable
+	 */
+	public void setResizable(boolean resizable)
+	{
+		this.resizable = resizable;
+	}
+
+	/**
+	 * @return the resizable
+	 */
+	public boolean isResizable()
+	{
+		return resizable;
+	}
 }

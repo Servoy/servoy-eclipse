@@ -33,5 +33,6 @@ public class ElementCreationToolEntry extends CombinedTemplateCreationEntry
 	public ElementCreationToolEntry(String label, String shortDesc, CreationFactory factory, ImageDescriptor iconSmall, ImageDescriptor iconLarge)
 	{
 		super(label, shortDesc, factory, iconSmall, iconLarge);
+		setToolClass(ElementCreationTool.class);
 	}
 }

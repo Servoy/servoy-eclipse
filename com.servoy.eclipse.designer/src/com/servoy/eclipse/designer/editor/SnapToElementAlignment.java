@@ -141,7 +141,7 @@ public class SnapToElementAlignment extends SnapToHelper
 		return true;
 	}
 
-	protected ElementAlignmentItem[] getElementAlignmentForMoveOrResize(ChangeBoundsRequest request, int snapOrientation)
+	protected ElementAlignmentItem[] getElementAlignmentForMoveOrResize(ChangeBoundsRequest request, int snapOrientation, boolean singleAlignmentPerDimension)
 	{
 		List<EditPart> editParts = request.getEditParts();
 		if (editParts.size() == 0)
@@ -176,13 +176,12 @@ public class SnapToElementAlignment extends SnapToHelper
 		rect.translate(request.getMoveDelta());
 		rect.resize(request.getSizeDelta());
 
-		return getElementAlignment(rect, snapOrientation, editParts, false);
+		return getElementAlignment(rect, snapOrientation, editParts, singleAlignmentPerDimension);
 	}
 
-	protected ElementAlignmentItem[] getElementAlignmentForCreate(CreateRequest request, int snapOrientation)
+	protected ElementAlignmentItem[] getElementAlignmentForCreate(CreateRequest request, int snapOrientation, boolean singleAlignmentPerDimension)
 	{
-		return getElementAlignment(new Rectangle(request.getLocation(), request.getSize()), snapOrientation, null,
-			VisualFormEditor.REQ_DROP_COPY.equals(request.getType()));
+		return getElementAlignment(new Rectangle(request.getLocation(), request.getSize()), snapOrientation, null, singleAlignmentPerDimension);
 	}
 
 	protected ElementAlignmentItem[] getElementAlignment(Rectangle rect, int snapOrientation, List<EditPart> skipEditparts, boolean singleAlignmentPerDimension)
@@ -402,14 +401,18 @@ public class SnapToElementAlignment extends SnapToHelper
 	@Override
 	public int snapRectangle(Request request, int snapOrientation, PrecisionRectangle baseRect, PrecisionRectangle result)
 	{
+		boolean isResize = RequestConstants.REQ_RESIZE.equals(request.getType()) ||
+			(request instanceof CreateElementRequest && ((CreateElementRequest)request).isResizable());
+		// when it is a resizing request, create separate alignment for n/e/s/w
+
 		ElementAlignmentItem[] elementAlignment = null;
 		if (request instanceof ChangeBoundsRequest)
 		{
-			elementAlignment = getElementAlignmentForMoveOrResize((ChangeBoundsRequest)request, snapOrientation);
+			elementAlignment = getElementAlignmentForMoveOrResize((ChangeBoundsRequest)request, snapOrientation, !isResize);
 		}
 		else if (request instanceof CreateRequest)
 		{
-			elementAlignment = getElementAlignmentForCreate((CreateRequest)request, snapOrientation);
+			elementAlignment = getElementAlignmentForCreate((CreateRequest)request, snapOrientation, !isResize);
 		}
 
 		if (elementAlignment == null)
@@ -419,8 +422,6 @@ public class SnapToElementAlignment extends SnapToHelper
 
 		// store alignment info for feedback
 		request.getExtendedData().put(ELEMENT_ALIGNMENT_REQUEST_DATA, elementAlignment);
-
-		boolean isResize = RequestConstants.REQ_RESIZE.equals(request.getType()) || RequestConstants.REQ_CREATE.equals(request.getType());
 
 		PrecisionRectangle correction = new PrecisionRectangle();
 		container.getContentPane().translateToRelative(correction);
