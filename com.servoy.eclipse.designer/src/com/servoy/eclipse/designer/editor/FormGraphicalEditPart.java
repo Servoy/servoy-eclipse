@@ -38,6 +38,7 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Point;
 
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
