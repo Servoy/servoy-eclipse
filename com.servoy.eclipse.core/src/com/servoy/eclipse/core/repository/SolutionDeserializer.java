@@ -827,7 +827,8 @@ public class SolutionDeserializer
 			Script script = parser.parse(fileContent, reporter);
 			if (problems.size() > 0)
 			{
-				if (Debug.tracing()) Debug.trace("Didn't update the Persist model Script and Variables objects because of problems " + problems);
+				if (Debug.tracing()) Debug.trace("Didn't update the Persist model Script and Variables objects because of problems " + problems + " in file: " +
+					file.getAbsolutePath());
 				return Collections.<JSONObject> emptyList();
 			}
 			if (script == null)
@@ -919,9 +920,15 @@ public class SolutionDeserializer
 				json.put(SolutionSerializer.PROP_NAME, ident.getName());
 				Expression code = field.getInitializer();
 				Type type = field.getType();
-				if (type != null)
+				if (type == null && comment != null && comment.length() > 0)
 				{
-					json.putOpt(JS_TYPE_JSON_ATTRIBUTE, type.getName());
+					int typeIndex = comment.indexOf(SolutionSerializer.TYPEKEY);
+					if (typeIndex != -1)
+					{
+						int newLine = comment.indexOf('\n', typeIndex);
+						String typeName = comment.substring(typeIndex + SolutionSerializer.TYPEKEY.length(), newLine);
+						json.putOpt(JS_TYPE_JSON_ATTRIBUTE, typeName.trim());
+					}
 				}
 
 				if (code != null)
@@ -935,6 +942,7 @@ public class SolutionDeserializer
 					if (code instanceof DecimalLiteral)
 					{
 						int variableType = Column.mapToDefaultType(json.optInt(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT));
+						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, variableType);
 						try
 						{
 							Integer.parseInt(value_part);
@@ -1011,6 +1019,7 @@ public class SolutionDeserializer
 					else if (code instanceof ArrayInitializer)
 					{
 						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+						json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array");
 					}
 					else
 					{
@@ -1022,6 +1031,7 @@ public class SolutionDeserializer
 				else if (type != null)
 				{
 					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(type.getName()));
+					json.putOpt(JS_TYPE_JSON_ATTRIBUTE, type.getName());
 				}
 
 				int linenr = 1;
@@ -1081,13 +1091,29 @@ public class SolutionDeserializer
 
 				json.put(SolutionSerializer.PROP_NAME, function.getName().getName());
 
+				String source = fileContent.substring(function.sourceStart(), function.sourceEnd());
 				if ("".equals(comment)) //$NON-NLS-1$
 				{
-					json.put("declaration", fileContent.substring(function.sourceStart(), function.sourceEnd()) + '\n'); //$NON-NLS-1$
+					if (source.indexOf(".search") != -1 || source.indexOf("controller.loadAllRecords") != -1)
+					{
+						comment = "/**\n * @AllowToRunInFind\n */\n";
+						json.put("declaration", comment + source + '\n'); //$NON-NLS-1$
+					}
+					else
+					{
+						json.put("declaration", source + '\n'); //$NON-NLS-1$
+					}
 				}
 				else
 				{
-					json.put("declaration", comment.trim() + '\n' + fileContent.substring(function.sourceStart(), function.sourceEnd()) + '\n'); //$NON-NLS-1$
+					if (comment.indexOf("@AllowToRunInFind") == -1 && (source.indexOf(".search") != -1 || source.indexOf("controller.loadAllRecords") != -1))
+					{
+						int endComment = comment.lastIndexOf("*/");
+						int lastNewLine = comment.lastIndexOf("\n", endComment);
+						comment = comment.substring(0, lastNewLine + 1) + comment.substring(lastNewLine + 1, endComment) + "* @AllowToRunInFind\n" +
+							comment.substring(lastNewLine + 1);
+					}
+					json.put("declaration", comment.trim() + '\n' + source + '\n'); //$NON-NLS-1$
 				}
 //				json.put("filename", file.getAbsolutePath()); //$NON-NLS-1$
 
