@@ -47,7 +47,6 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Tab;
@@ -99,7 +98,8 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 				{
 					if (((IFormElement)o).getGroupID() != null)
 					{
-						FormElementGroup group = new FormElementGroup(((IFormElement)o).getGroupID(), (ISupportChilds)getModel());
+						FormElementGroup group = new FormElementGroup(((IFormElement)o).getGroupID(),
+							ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(getPersist()), getPersist());
 						if (groups.add(group))
 						{
 							list.add(group);

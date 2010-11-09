@@ -16,10 +16,14 @@
  */
 package com.servoy.eclipse.ui.util;
 
+import java.util.Iterator;
+
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Media;
@@ -126,10 +130,24 @@ public class ElementUtil
 
 	public static boolean isReadOnlyFormElement(IPersist context, Object element)
 	{
-		if (context instanceof Form && element instanceof IPersist && (((IPersist)element).getAncestor(IRepository.FORMS) != context))
+		if (context instanceof Form)
 		{
-			// child of super-form, readonly
-			return true;
+			if (element instanceof IPersist && (((IPersist)element).getAncestor(IRepository.FORMS) != context))
+			{
+				// child of super-form, readonly
+				return true;
+			}
+			if (element instanceof FormElementGroup)
+			{
+				Iterator<IFormElement> elements = ((FormElementGroup)element).getElements();
+				while (elements.hasNext())
+				{
+					if (isReadOnlyFormElement(context, elements.next()))
+					{
+						return true;
+					}
+				}
+			}
 		}
 		// child of this form, not of a inherited form
 		return false;

@@ -70,7 +70,6 @@ public abstract class BasePersistGraphicalEditPart extends AbstractGraphicalEdit
 			{
 				return parentEditPart.getCommand(request);
 			}
-			return getParent().getCommand(request);
 		}
 		return command;
 	}
@@ -86,11 +85,7 @@ public abstract class BasePersistGraphicalEditPart extends AbstractGraphicalEdit
 		// note: do not use getHost().getParent().getCommand(request) here, the editpart
 		// parent of a Tab or Portal field edit part is not the TabPanel/Portal edit part, but the Form edit part
 		EditPart parentEditPart = (EditPart)getViewer().getEditPartRegistry().get(getPersist().getParent());
-		if (parentEditPart != null)
-		{
-			return parentEditPart.understandsRequest(req);
-		}
-		return getParent().understandsRequest(req);
+		return parentEditPart != null && parentEditPart.understandsRequest(req);
 	}
 
 	/**
