@@ -927,12 +927,21 @@ public class ServoyModel implements IWorkspaceSaveListener
 
 						buildActiveProject();
 
+						WorkspaceJob testBuildPaths = new WorkspaceJob("Test Build Paths")
+						{
+							@Override
+							public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+							{
+								testBuildPaths(project, new HashSet<ServoyProject>());
+								return Status.OK_STATUS;
+							}
+						};
+						testBuildPaths.schedule();
+
 						Display.getDefault().syncExec(new Runnable()
 						{
 							public void run()
 							{
-								testBuildPaths(activeProject, new HashSet<ServoyProject>());
-
 								ServoyProject[] modulesOfActiveProject = getModulesOfActiveProject();
 								IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
 								for (IWorkbenchWindow workbenchWindow : workbenchWindows)
