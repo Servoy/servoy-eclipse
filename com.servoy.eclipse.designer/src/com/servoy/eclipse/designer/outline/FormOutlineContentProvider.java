@@ -76,7 +76,8 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 						}
 						if (parentElement == ELEMENTS && persist instanceof IFormElement && ((IFormElement)persist).getGroupID() != null)
 						{
-							FormElementGroup group = new FormElementGroup(((IFormElement)persist).getGroupID(), flattenedForm);
+							FormElementGroup group = new FormElementGroup(((IFormElement)persist).getGroupID(),
+								ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form), form);
 							if (groups.add(group))
 							{
 								nodes.add(group);
@@ -115,7 +116,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 				IFormElement element = elements.next();
 				if (element instanceof IPersist)
 				{
-					list.add(new PersistContext((IPersist)element, null));
+					list.add(new PersistContext((IPersist)element, form));
 				}
 			}
 			return list.toArray();
@@ -132,7 +133,8 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			{
 				if (persist instanceof IFormElement && ((IFormElement)persist).getGroupID() != null)
 				{
-					return new FormElementGroup(((IFormElement)persist).getGroupID(), persist.getParent());
+					return new FormElementGroup(((IFormElement)persist).getGroupID(),
+						ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist), (Form)persist.getParent());
 				}
 
 				if (persist.getParent() == form)

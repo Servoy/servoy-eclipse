@@ -1066,8 +1066,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					}
 					if (node == null)
 					{
-						node = new PlatformSimpleUserNode(groupLabel, UserNodeType.FORM_ELEMENTS_GROUP, new Object[] { new FormElementGroup(
-							element.getGroupID(), persist.getParent()), null }, originalForm, uiActivator.loadImageFromBundle("group.gif")); //$NON-NLS-1$
+						node = new PlatformSimpleUserNode(groupLabel, UserNodeType.FORM_ELEMENTS_GROUP,
+							new Object[] { new FormElementGroup(element.getGroupID(),
+								ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(), (Form)persist.getParent()), null },
+							originalForm, uiActivator.loadImageFromBundle("group.gif")); //$NON-NLS-1$
 						node.setDeveloperFeedback(new SimpleDeveloperFeedback(element.getName() + ".", null, null)); //$NON-NLS-1$
 						elements.add(node);
 						node.parent = parentNode;
