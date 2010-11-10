@@ -235,8 +235,7 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	{
 		if (selectedElementFeedbackFigure != null)
 		{
-			IFigure layer = getLayer(LayerConstants.FEEDBACK_LAYER);
-			layer.remove(selectedElementFeedbackFigure);
+			getLayer(FormGraphicalRootEditPart.SELECTED_ELEMENT_FEEDBACK_LAYER).remove(selectedElementFeedbackFigure);
 			selectedElementFeedbackFigure = null;
 		}
 	}
@@ -247,7 +246,8 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	protected void addSelectedElementFeedbackFigure()
 	{
 		removeSelectedElementFeedbackFigure();
-		getLayer(LayerConstants.FEEDBACK_LAYER).add(selectedElementFeedbackFigure = new SelectedElementFeedbackFigure(container, getHost()));
+		getLayer(FormGraphicalRootEditPart.SELECTED_ELEMENT_FEEDBACK_LAYER).add(
+			selectedElementFeedbackFigure = new SelectedElementFeedbackFigure(container, getHost()));
 	}
 
 	protected void removeAnchoringFigure()

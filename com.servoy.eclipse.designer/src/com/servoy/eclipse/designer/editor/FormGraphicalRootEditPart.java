@@ -13,12 +13,13 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import org.eclipse.draw2d.FreeformLayer;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.LayeredPane;
 import org.eclipse.draw2d.geometry.Insets;
@@ -28,8 +29,9 @@ import org.eclipse.gef.LayerConstants;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.editparts.FreeformGraphicalRootEditPart;
 import org.eclipse.gef.editparts.GridLayer;
+import org.eclipse.gef.editparts.GuideLayer;
 
-import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.designer.internal.MarqueeDragTracker;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.j2db.util.Settings;
@@ -42,14 +44,18 @@ import com.servoy.j2db.util.Settings;
  */
 public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart implements PropertyChangeListener
 {
+	/**
+	 * The layer containing feedback for the selected element, this layer is below the handle layer and above the layers with the elements.
+	 */
+	public static final String SELECTED_ELEMENT_FEEDBACK_LAYER = "Feedback Layer for selected element"; //$NON-NLS-1$
+
 	private final VisualFormEditor editorPart;
-	private DottedGridLayer dottedGridLayer;
 
 	public FormGraphicalRootEditPart(VisualFormEditor editorPart)
 	{
 		this.editorPart = editorPart;
 
-		Settings settings = ServoyModelManager.getServoyModelManager().getServoyModel().getSettings();
+		Settings settings = ServoyModel.getSettings();
 		settings.addPropertyChangeListener(this, DesignerPreferences.GRID_POINTSIZE_SETTING);
 		settings.addPropertyChangeListener(this, DesignerPreferences.GRID_SIZE_SETTING);
 		settings.addPropertyChangeListener(this, DesignerPreferences.GRID_COLOR_SETTING);
@@ -59,7 +65,20 @@ public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart imp
 	protected void createLayers(LayeredPane layeredPane)
 	{
 		layeredPane.add(new FormBackgroundLayer(editorPart));
-		super.createLayers(layeredPane);
+		layeredPane.add(createGridLayer(), GRID_LAYER);
+		layeredPane.add(getPrintableLayers(), PRINTABLE_LAYERS);
+
+		FreeformLayer layer = new FreeformLayer();
+		layer.setEnabled(false);
+		layeredPane.add(layer, SELECTED_ELEMENT_FEEDBACK_LAYER);
+
+		layeredPane.add(new FreeformLayer(), HANDLE_LAYER);
+
+		layer = new FreeformLayer();
+		layer.setEnabled(false);
+		layeredPane.add(layer, FEEDBACK_LAYER);
+
+		layeredPane.add(new GuideLayer(), GUIDE_LAYER);
 	}
 
 	@Override
@@ -101,7 +120,7 @@ public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart imp
 	@Override
 	public void deactivate()
 	{
-		Settings settings = ServoyModelManager.getServoyModelManager().getServoyModel().getSettings();
+		Settings settings = ServoyModel.getSettings();
 		settings.removePropertyChangeListener(this, DesignerPreferences.GRID_POINTSIZE_SETTING);
 		settings.removePropertyChangeListener(this, DesignerPreferences.GRID_SIZE_SETTING);
 		settings.removePropertyChangeListener(this, DesignerPreferences.GRID_COLOR_SETTING);
