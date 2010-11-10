@@ -207,6 +207,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		private static final long serialVersionUID = 1L;
 	};
 
+	// remember the background set for the object when painted
+	public static final RuntimeProperty<java.awt.Color> LastPaintedBackgroundProperty = new RuntimeProperty<java.awt.Color>()
+	{
+		private static final long serialVersionUID = 1L;
+	};
+
 	private final IPersist persist;
 	private final boolean readOnly;
 

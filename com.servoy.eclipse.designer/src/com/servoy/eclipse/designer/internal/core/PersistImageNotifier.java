@@ -16,8 +16,10 @@
  */
 package com.servoy.eclipse.designer.internal.core;
 
+import java.awt.Color;
 import java.awt.Component;
 
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
@@ -131,6 +133,12 @@ public class PersistImageNotifier implements IImageNotifier, IImageListener
 
 						if (persist instanceof AbstractBase)
 						{
+							Color background = null;
+							if (comp instanceof JComponent && ((JComponent)comp).isOpaque() && comp.isBackgroundSet())
+							{
+								background = comp.getBackground();
+							}
+							((AbstractBase)persist).setRuntimeProperty(PersistPropertySource.LastPaintedBackgroundProperty, background);
 							((AbstractBase)persist).setRuntimeProperty(PersistPropertySource.LastPaintedFontProperty, comp.getFont());
 						}
 						new ImageDataCollector(imSupport).start(label, comp.getWidth(), comp.getHeight());

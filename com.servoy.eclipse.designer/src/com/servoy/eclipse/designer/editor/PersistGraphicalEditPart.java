@@ -16,13 +16,17 @@
  */
 package com.servoy.eclipse.designer.editor;
 
+import java.awt.Color;
 import java.util.Collections;
 import java.util.List;
+
+import javax.swing.border.EmptyBorder;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.FigureUtilities;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.IImageFigure.ImageChangedListener;
 import org.eclipse.draw2d.ImageFigure;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
@@ -42,13 +46,16 @@ import com.servoy.eclipse.designer.internal.core.PersistImageNotifier;
 import com.servoy.eclipse.designer.property.PropertyDirectEditManager;
 import com.servoy.eclipse.designer.property.PropertyDirectEditManager.PropertyCellEditorLocator;
 import com.servoy.eclipse.designer.property.PropertyDirectEditPolicy;
+import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
+import com.servoy.j2db.persistence.Part;
 
 /**
  * Graphical editpart for a IPersist.
@@ -123,6 +130,16 @@ public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 		return persistProperties;
 	}
 
+	protected Object getPersistPropertyValue(String id)
+	{
+		Object value = getPersistProperties().getPropertyValue(id);
+		if (value instanceof ComplexProperty< ? >)
+		{
+			value = ((ComplexProperty< ? >)value).getValue();
+		}
+		return value;
+	}
+
 	@Override
 	protected IFigure createFigure()
 	{
@@ -140,7 +157,52 @@ public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 				}
 			}
 		};
+
 		fig.setBorder(new OutlineBorder(125, isReadOnly() ? ColorConstants.red : ColorConstants.gray, null, Graphics.LINE_DOT));
+
+		// show the border only when you cannot see the elment from its background
+		fig.addImageChangedListener(new ImageChangedListener()
+		{
+			public void imageChanged()
+			{
+				Color paintedBackground = null;
+				if (getPersist() instanceof AbstractBase)
+				{
+					paintedBackground = ((AbstractBase)getPersist()).getRuntimeProperty(PersistPropertySource.LastPaintedBackgroundProperty);
+				}
+
+				boolean borderDisabled;
+				if (paintedBackground == null)
+				{
+					// element is transparent
+					borderDisabled = false;
+				}
+				else
+				{
+					// is there a border?
+					Object border = getPersistPropertyValue("borderType");
+					if (border != null && !(border instanceof EmptyBorder))
+					{
+						borderDisabled = true;
+					}
+					else
+					{
+						// compare colors form and painted
+						Part part = form.getPartAt(getFigure().getBounds().y);
+						if (part == null)
+						{
+							borderDisabled = false;
+						}
+						else
+						{
+							java.awt.Color formBackground = part.getBackground() == null ? FormBackgroundLayer.getFormBackground(form) : part.getBackground();
+							borderDisabled = !paintedBackground.equals(formBackground);
+						}
+					}
+				}
+				((OutlineBorder)getFigure().getBorder()).setBorderDisabled(borderDisabled);
+			}
+		});
 		imageFigureController = new ImageFigureController();
 		imageFigureController.setImageFigure(fig);
 		applyBounds(model, fig);
@@ -172,6 +234,7 @@ public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 			fig.setBounds(new Rectangle(x, y, width, height));
 		}
 	}
+
 
 	/**
 	 * @param drawName

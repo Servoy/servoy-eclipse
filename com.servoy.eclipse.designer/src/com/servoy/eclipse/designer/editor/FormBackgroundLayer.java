@@ -99,15 +99,8 @@ public class FormBackgroundLayer extends FreeformLayer
 			{
 				if (formBg == null)
 				{
-					java.awt.Color awtBg = getFormBackground(flattenedForm);
-					if (awtBg == null)
-					{
-						formBg = ColorConstants.white;
-					}
-					else
-					{
-						formBg = ColorResource.INSTANCE.getColor(ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty("background", awtBg));
-					}
+					formBg = ColorResource.INSTANCE.getColor(ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty("background",
+						getFormBackground(flattenedForm)));
 				}
 				bg = formBg;
 			}
@@ -132,6 +125,7 @@ public class FormBackgroundLayer extends FreeformLayer
 	{
 		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
 		FixedStyleSheet styleSheet = ComponentFactory.getCSSStyle(flattenedSolution.getStyleForForm(form, null));
+		java.awt.Color background = null;
 		if (styleSheet != null)
 		{
 			String lookupname = "form";
@@ -142,11 +136,15 @@ public class FormBackgroundLayer extends FreeformLayer
 			Style style = styleSheet.getStyle(lookupname);
 			if (style != null)
 			{
-				return styleSheet.getBackground(style);
+				background = styleSheet.getBackground(style);
 			}
 		}
 
-		return null;
+		if (background == null)
+		{
+			return java.awt.Color.white;
+		}
+		return background;
 	}
 
 	/**
