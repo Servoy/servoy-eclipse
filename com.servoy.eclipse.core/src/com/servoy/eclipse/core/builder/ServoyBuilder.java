@@ -152,7 +152,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static int MAX_EXCEPTIONS = 25;
 	public static int MIN_FIELD_LENGTH = 1000;
 	public static int exceptionCount = 0;
-	private final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+	private ServoyModel servoyModel;
 	private final JavaScriptParser javascriptParser = new JavaScriptParser();
 	private final IProblemReporter dummyReporter = new IProblemReporter()
 	{
@@ -483,7 +483,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					while (st.hasMoreTokens())
 					{
 						String name = st.nextToken().trim();
-						ServoyProject module = servoyModel.getServoyProject(name);
+						ServoyProject module = getServoyModel().getServoyProject(name);
 						if (module != null)
 						{
 							moduleResourcesProject = module.getResourcesProject();
@@ -517,7 +517,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				for (String name : modulesNames)
 				{
-					ServoyProject module = servoyModel.getServoyProject(name);
+					ServoyProject module = getServoyModel().getServoyProject(name);
 					if (module == null)
 					{
 						String message = MarkerMessages.getMessage(MarkerMessages.Marker_Module_ModuleNotFound, name, servoyProject.getSolution().getName());
@@ -540,7 +540,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private boolean isActiveSolutionOrModule(ServoyProject servoyProject)
 	{
 		boolean found = false;
-		ServoyProject activeProject = servoyModel.getActiveProject();
+		ServoyProject activeProject = getServoyModel().getActiveProject();
 		if (activeProject != null)
 		{
 			ArrayList<String> projectNames = new ArrayList<String>();
@@ -548,7 +548,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			if (activeProject.equals(servoyProject)) found = true;
 			if (!found)
 			{
-				ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+				ServoyProject[] modules = getServoyModel().getModulesOfActiveProject();
 				if (modules != null)
 				{
 					for (ServoyProject module : modules)
@@ -765,7 +765,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private void checkPersistDuplication()
 	{
 		// this is a special case
-		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+		ServoyProject[] modules = getServoyModel().getModulesOfActiveProject();
 		final Map<String, Map<Integer, Set<ISupportChilds>>> duplicationMap = new HashMap<String, Map<Integer, Set<ISupportChilds>>>();
 		if (modules != null)
 		{
@@ -967,7 +967,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				servoyProject.getSolution().acceptVisitor(new IPersistVisitor()
 				{
 					private final ServoyProject[] modules = getSolutionModules(servoyProject);
-					private final FlattenedSolution flattenedSolution = servoyModel.getFlattenedSolution();
+					private final FlattenedSolution flattenedSolution = getServoyModel().getFlattenedSolution();
 					private final Solution solution = servoyProject.getSolution();
 					private IntHashMap<IPersist> elementIdPersistMap = null;
 					private final Map<UUID, List<IPersist>> theMakeSureNoDuplicateUUIDsAreFound = new HashMap<UUID, List<IPersist>>();
@@ -1904,7 +1904,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							Tab tab = (Tab)o;
 							if (tab.getRelationName() != null)
 							{
-								Relation[] relations = servoyModel.getFlattenedSolution().getRelationSequence(tab.getRelationName());
+								Relation[] relations = getServoyModel().getFlattenedSolution().getRelationSequence(tab.getRelationName());
 								if (relations == null)
 								{
 									if (Utils.getAsUUID(tab.getRelationName(), false) != null)
@@ -1950,7 +1950,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									relation = relations[relations.length - 1];
 									if (!relation.isGlobal() && relation.getPrimaryServerName() != null && relation.getPrimaryTableName() != null)
 									{
-										Form form = servoyModel.getFlattenedSolution().getForm(tab.getContainsFormID());
+										Form form = getServoyModel().getFlattenedSolution().getForm(tab.getContainsFormID());
 										if (form != null &&
 											(!relation.getForeignServerName().equals(form.getServerName()) || !relation.getForeignTableName().equals(
 												form.getTableName())))
@@ -2775,7 +2775,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	private void checkI18n(IProject project)
 	{
-		ServoyProject servoyProject = servoyModel.getServoyProject(project.getName());
+		ServoyProject servoyProject = getServoyModel().getServoyProject(project.getName());
 		Solution solution = servoyProject.getSolution();
 		if (solution.getI18nTableName() != null && solution.getI18nServerName() != null)
 		{
@@ -2830,9 +2830,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						Table table = server.getTable(tableName);
 						IResource res = project;
-						if (servoyModel.getDataModelManager() != null && servoyModel.getDataModelManager().getDBIFile(server_name, tableName).exists())
+						if (getServoyModel().getDataModelManager() != null &&
+							getServoyModel().getDataModelManager().getDBIFile(server_name, tableName).exists())
 						{
-							res = servoyModel.getDataModelManager().getDBIFile(server_name, tableName);
+							res = getServoyModel().getDataModelManager().getDBIFile(server_name, tableName);
 						}
 						for (Column column : table.getColumns())
 						{
@@ -2863,7 +2864,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									boolean invalid = false;
 									if (lookup.startsWith(ScriptVariable.GLOBAL_DOT_PREFIX))
 									{
-										IDataProvider dataProvider = servoyModel.getFlattenedSolution().getGlobalDataProvider(lookup);
+										IDataProvider dataProvider = getServoyModel().getFlattenedSolution().getGlobalDataProvider(lookup);
 										if (dataProvider == null)
 										{
 											invalid = true;
@@ -2876,7 +2877,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										if (indx > 0)
 										{
 											String rel_name = lookup.substring(0, indx);
-											Relation[] relations = servoyModel.getFlattenedSolution().getRelationSequence(rel_name);
+											Relation[] relations = getServoyModel().getFlattenedSolution().getRelationSequence(rel_name);
 											if (relations == null)
 											{
 												invalid = true;
@@ -2914,8 +2915,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private void checkStyles(final IProject project)
 	{
 		deleteMarkers(project, MISSING_STYLE);
-		ServoyProject servoyProject = servoyModel.getServoyProject(project.getName());
-		FlattenedSolution flattenedSolution = servoyModel.getFlattenedSolution();
+		ServoyProject servoyProject = getServoyModel().getServoyProject(project.getName());
+		FlattenedSolution flattenedSolution = getServoyModel().getFlattenedSolution();
 		if (servoyProject != null)
 		{
 			Iterator<Form> it = servoyProject.getSolution().getForms(null, false);
@@ -3031,7 +3032,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	private void checkLoginSolution(IProject project)
 	{
-		ServoyProject servoyProject = servoyModel.getServoyProject(project.getName());
+		ServoyProject servoyProject = getServoyModel().getServoyProject(project.getName());
 		if (servoyProject != null)
 		{
 			boolean isLoginSolution = servoyProject.getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION;
@@ -3170,7 +3171,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	private void checkRelations(IProject project, Map<String, IPersist> missingServers)
 	{
-		ServoyProject servoyProject = servoyModel.getServoyProject(project.getName());
+		ServoyProject servoyProject = getServoyModel().getServoyProject(project.getName());
 		if (servoyProject != null)
 		{
 			String message = null;
@@ -3265,7 +3266,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						if (element.getInitialSort() != null)
 						{
-							addMarkers(project, checkSortOptions((Table)ftable, element.getInitialSort(), element, servoyModel.getFlattenedSolution()), element);
+							addMarkers(project, checkSortOptions((Table)ftable, element.getInitialSort(), element, getServoyModel().getFlattenedSolution()),
+								element);
 						}
 						Iterator<RelationItem> items = element.getObjects(IRepository.RELATION_ITEMS);
 						boolean errorsFound = false;
@@ -3286,11 +3288,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							{
 								if (primaryDataProvider.startsWith(ScriptVariable.GLOBAL_DOT_PREFIX))
 								{
-									dataProvider = servoyModel.getFlattenedSolution().getGlobalDataProvider(primaryDataProvider);
+									dataProvider = getServoyModel().getFlattenedSolution().getGlobalDataProvider(primaryDataProvider);
 								}
 								else
 								{
-									dataProvider = servoyModel.getFlattenedSolution().getDataProviderForTable((Table)ptable, primaryDataProvider);
+									dataProvider = getServoyModel().getFlattenedSolution().getDataProviderForTable((Table)ptable, primaryDataProvider);
 								}
 								if (dataProvider == null)
 								{
@@ -3309,7 +3311,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 							else
 							{
-								column = servoyModel.getFlattenedSolution().getDataProviderForTable((Table)ftable, foreignColumn);
+								column = getServoyModel().getFlattenedSolution().getDataProviderForTable((Table)ftable, foreignColumn);
 								if (column == null)
 								{
 									message = MarkerMessages.getMessage(MarkerMessages.Marker_Relation_ItemForeignDataproviderNotFound, element.getName(),
@@ -3339,9 +3341,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							element.setValid(false);
 							continue;
 						}
-						if (servoyModel.getActiveProject() == servoyProject)
+						if (getServoyModel().getActiveProject() == servoyProject)
 						{
-							String typeMismatchWarning = element.checkKeyTypes(servoyModel.getFlattenedSolution());
+							String typeMismatchWarning = element.checkKeyTypes(getServoyModel().getFlattenedSolution());
 							if (typeMismatchWarning != null)
 							{
 								message = MarkerMessages.getMessage(MarkerMessages.Marker_Relation_ItemTypeProblem, element.getName(), typeMismatchWarning);
@@ -3640,6 +3642,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			forgetLastBuiltState();
 			throw new OperationCanceledException();
 		}
+	}
+
+	/**
+	 * @return the servoyModel
+	 */
+	private ServoyModel getServoyModel()
+	{
+		if (servoyModel == null)
+		{
+			servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		}
+		return servoyModel;
 	}
 
 	/**
