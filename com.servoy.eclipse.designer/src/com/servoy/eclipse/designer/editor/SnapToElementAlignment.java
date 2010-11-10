@@ -33,6 +33,7 @@ import org.eclipse.gef.requests.CreateRequest;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportAnchors;
 import com.servoy.j2db.persistence.Part;
@@ -133,6 +134,10 @@ public class SnapToElementAlignment extends SnapToHelper
 			return false;
 		}
 		Object model = editPart.getModel();
+		if (model instanceof FormElementGroup && ((FormElementGroup)model).getParent() == container.getModel())
+		{
+			return true;
+		}
 		if (model instanceof Part || !(model instanceof IPersist) || !(((IPersist)model).getParent() == container.getModel()))
 		{
 			// do not align parts, tabs or portal fields
