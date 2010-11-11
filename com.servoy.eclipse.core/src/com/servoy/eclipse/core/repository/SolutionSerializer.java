@@ -535,11 +535,11 @@ public class SolutionSerializer
 					sb.append(VAR_KEYWORD);
 					sb.append(' ');
 					sb.append(sv.getName());
-					if (jsType != null)
-					{
-						sb.append(':');
-						sb.append(jsType);
-					}
+//					if (jsType != null)
+//					{
+//						sb.append(':');
+//						sb.append(jsType);
+//					}
 					String val = sv.getDefaultValue();
 					if (type == IColumnTypes.TEXT)
 					{
