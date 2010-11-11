@@ -36,6 +36,7 @@ import com.servoy.eclipse.ui.dialogs.ISearchKeyAdapter;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormEncapsulation;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -102,7 +103,7 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 			while (forms.hasNext())
 			{
 				Form form = forms.next();
-				if (form == rootForm) continue; // is rootForm accessible via self
+				if (form == rootForm || FormEncapsulation.isPrivate(form, flattenedSolution)) continue; //is rootForm accessible via self ref relation
 
 				IServer formServer = flattenedSolution.getSolution().getServer(form.getServerName());
 				if (formServer == null) continue;
@@ -176,7 +177,8 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				Iterator<Form> forms = getFormsOfTable(lastRelation.getForeignServer().getName(), lastRelation.getForeignTableName()).iterator();
 				while (forms.hasNext())
 				{
-					children.add(new RelatedForm(rf.relations, forms.next()));
+					Form form = forms.next();
+					if (!FormEncapsulation.isPrivate(form, flattenedSolution)) children.add(new RelatedForm(rf.relations, form));
 				}
 
 				// add relations 1 level deeper
@@ -197,7 +199,7 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					if (form == rootForm) continue; //is rootForm accessible via self ref relation
+					if (form == rootForm || FormEncapsulation.isPrivate(form, flattenedSolution)) continue; //is rootForm accessible via self ref relation
 					try
 					{
 						Table table = form.getTable();
@@ -233,7 +235,7 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					if (form == rootForm) continue; //is rootForm accessible via self ref relation
+					if (form == rootForm || FormEncapsulation.isPrivate(form, flattenedSolution)) continue; //is rootForm accessible via self ref relation
 					try
 					{
 						if (form.getTable() == parentElement || (form.getDataSource() == null && Messages.LabelNoTable == parentElement))
