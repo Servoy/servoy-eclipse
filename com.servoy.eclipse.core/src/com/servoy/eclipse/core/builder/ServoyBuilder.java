@@ -79,10 +79,10 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.ServoyResourcesProject;
-import com.servoy.eclipse.core.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.core.repository.EclipseRepository;
 import com.servoy.eclipse.core.repository.SolutionDeserializer;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.eclipse.core.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.CoreUtils;
 import com.servoy.j2db.FlattenedSolution;
@@ -245,6 +245,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String SOLUTION_PROBLEM_MARKER_TYPE = Activator.PLUGIN_ID + ".solutionProblem"; //$NON-NLS-1$
 	public static final String BAD_STRUCTURE_MARKER_TYPE = Activator.PLUGIN_ID + ".badStructure"; //$NON-NLS-1$
 	public static final String MISSING_MODULES_MARKER_TYPE = Activator.PLUGIN_ID + ".missingModulesProblem"; //$NON-NLS-1$
+	public static final String MISPLACED_MODULES_MARKER_TYPE = Activator.PLUGIN_ID + ".misplacedModulesProblem"; //$NON-NLS-1$
 	public static final String MULTIPLE_RESOURCES_PROJECTS_MARKER_TYPE = Activator.PLUGIN_ID + ".multipleResourcesProblem"; //$NON-NLS-1$
 	public static final String NO_RESOURCES_PROJECTS_MARKER_TYPE = Activator.PLUGIN_ID + ".noResourcesProblem"; //$NON-NLS-1$
 	public static final String DIFFERENT_RESOURCES_PROJECTS_MARKER_TYPE = Activator.PLUGIN_ID + ".differentResourcesProblem"; //$NON-NLS-1$
@@ -505,6 +506,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private void checkModules(IProject project)
 	{
 		deleteMarkers(project, MISSING_MODULES_MARKER_TYPE);
+		deleteMarkers(project, MISPLACED_MODULES_MARKER_TYPE);
 
 		final ServoyProject servoyProject = getServoyProject(project);
 		boolean active = isActiveSolutionOrModule(servoyProject);
@@ -532,6 +534,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							ServoyLog.logError(e);
 						}
 					}
+				}
+
+				// import hook modules should not contain other modules
+				if (servoyProject.getSolution().getSolutionType() == SolutionMetaData.MODULE &&
+					SolutionMetaData.isImportHook(servoyProject.getSolution().getSolutionMetaData()) && modulesNames.length > 0)
+				{
+					String message = "Module " + servoyProject.getSolution().getName() + " is a solution import hook, so it should not contain any modules."; //$NON-NLS-1$//$NON-NLS-2$
+					addMarker(project, MISPLACED_MODULES_MARKER_TYPE, message, -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, null);
 				}
 			}
 		}
@@ -1030,8 +1040,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														if (lst.size() == 1)
 														{
 															String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																other.getUUID(),
-																SolutionSerializer.getRelativePath(p, false) + SolutionSerializer.getFileName(p, false));
+																other.getUUID(), SolutionSerializer.getRelativePath(p, false) +
+																	SolutionSerializer.getFileName(p, false));
 															addMarker(project, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_HIGH, null,
 																other);
 														}
@@ -1077,18 +1087,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																	// for now only add it on both if there is 1, just skip the rest.
 																	if (lst.size() == 1)
 																	{
-																		String msg = MarkerMessages.getMessage(
-																			MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																			other.getUUID(),
-																			SolutionSerializer.getRelativePath(p, false) +
+																		String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
+																			other.getUUID(), SolutionSerializer.getRelativePath(p, false) +
 																				SolutionSerializer.getFileName(p, false));
 																		addMarker(moduleProject, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR,
 																			IMarker.PRIORITY_HIGH, null, other);
 																	}
-																	String msg = MarkerMessages.getMessage(
-																		MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																		p.getUUID(),
-																		SolutionSerializer.getRelativePath(other, false) +
+																	String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
+																		p.getUUID(), SolutionSerializer.getRelativePath(other, false) +
 																			SolutionSerializer.getFileName(other, false));
 																	addMarker(moduleProject, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR,
 																		IMarker.PRIORITY_HIGH, null, p);
@@ -1910,9 +1916,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									if (Utils.getAsUUID(tab.getRelationName(), false) != null)
 									{
 										// relation name was not resolved from uuid to relation name during import
-										IMarker marker = addMarker(project, UNRESOLVED_RELATION_UUID,
-											MarkerMessages.getMessage(MarkerMessages.Marker_Form_RelatedTabUnsolvedUuid, tab.getRelationName()), -1,
-											IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, tab);
+										IMarker marker = addMarker(project, UNRESOLVED_RELATION_UUID, MarkerMessages.getMessage(
+											MarkerMessages.Marker_Form_RelatedTabUnsolvedUuid, tab.getRelationName()), -1, IMarker.SEVERITY_ERROR,
+											IMarker.PRIORITY_NORMAL, null, tab);
 										if (marker != null)
 										{
 											try
@@ -3499,10 +3505,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				if (contentTypeIdentifier != null)
 				{
-					marker.setAttribute(
-						IDE.EDITOR_ID_ATTR,
-						PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-							Platform.getContentTypeManager().getContentType(contentTypeIdentifier)).getId());
+					marker.setAttribute(IDE.EDITOR_ID_ATTR, PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+						Platform.getContentTypeManager().getContentType(contentTypeIdentifier)).getId());
 					marker.setAttribute("elementUuid", persist.getUUID().toString()); //$NON-NLS-1$
 				}
 			}

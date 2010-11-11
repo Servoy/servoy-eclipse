@@ -327,6 +327,17 @@
       </attribute>
    </extension>
    <extension
+         id="com.servoy.eclipse.core.misplacedModulesProblem"
+         name="Misplaced modules"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   <extension
          id="com.servoy.eclipse.core.databaseInformationProblem"
          name="Database information inconsistency"
          point="org.eclipse.core.resources.markers">
@@ -394,6 +405,10 @@
       <markerResolutionGenerator
             class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.missingModulesProblem">
+      </markerResolutionGenerator>
+      <markerResolutionGenerator
+            class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.misplacedModulesProblem">
       </markerResolutionGenerator>
       <markerResolutionGenerator
             class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
