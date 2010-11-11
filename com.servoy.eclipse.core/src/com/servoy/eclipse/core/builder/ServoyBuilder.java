@@ -79,10 +79,10 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.ServoyResourcesProject;
-import com.servoy.eclipse.core.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.core.repository.EclipseRepository;
 import com.servoy.eclipse.core.repository.SolutionDeserializer;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.eclipse.core.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.CoreUtils;
 import com.servoy.j2db.FlattenedSolution;
@@ -245,6 +245,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String SOLUTION_PROBLEM_MARKER_TYPE = Activator.PLUGIN_ID + ".solutionProblem"; //$NON-NLS-1$
 	public static final String BAD_STRUCTURE_MARKER_TYPE = Activator.PLUGIN_ID + ".badStructure"; //$NON-NLS-1$
 	public static final String MISSING_MODULES_MARKER_TYPE = Activator.PLUGIN_ID + ".missingModulesProblem"; //$NON-NLS-1$
+	public static final String MISPLACED_MODULES_MARKER_TYPE = Activator.PLUGIN_ID + ".misplacedModulesProblem"; //$NON-NLS-1$
 	public static final String MULTIPLE_RESOURCES_PROJECTS_MARKER_TYPE = Activator.PLUGIN_ID + ".multipleResourcesProblem"; //$NON-NLS-1$
 	public static final String NO_RESOURCES_PROJECTS_MARKER_TYPE = Activator.PLUGIN_ID + ".noResourcesProblem"; //$NON-NLS-1$
 	public static final String DIFFERENT_RESOURCES_PROJECTS_MARKER_TYPE = Activator.PLUGIN_ID + ".differentResourcesProblem"; //$NON-NLS-1$
@@ -505,6 +506,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private void checkModules(IProject project)
 	{
 		deleteMarkers(project, MISSING_MODULES_MARKER_TYPE);
+		deleteMarkers(project, MISPLACED_MODULES_MARKER_TYPE);
 
 		final ServoyProject servoyProject = getServoyProject(project);
 		boolean active = isActiveSolutionOrModule(servoyProject);
@@ -532,6 +534,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							ServoyLog.logError(e);
 						}
 					}
+				}
+
+				// import hook modules should not contain other modules
+				if (servoyProject.getSolution().getSolutionType() == SolutionMetaData.MODULE &&
+					SolutionMetaData.isImportHook(servoyProject.getSolution().getName()) && modulesNames.length > 0)
+				{
+					String message = "Module " + servoyProject.getSolution().getName() + " is a solution import hook, so it should not contain any modules."; //$NON-NLS-1$//$NON-NLS-2$
+					addMarker(project, MISPLACED_MODULES_MARKER_TYPE, message, -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, null);
 				}
 			}
 		}
@@ -1075,12 +1085,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																			SolutionSerializer.getFileName(p, false) + ".", -1, IMarker.SEVERITY_ERROR, //$NON-NLS-1$
 																			IMarker.PRIORITY_HIGH, null, other);
 																	}
-																	addMarker(
-																		moduleProject,
-																		DUPLICATE_UUID,
-																		"UUID duplicate found " + p.getUUID() + " in " + //$NON-NLS-1$ //$NON-NLS-2$
-																			SolutionSerializer.getRelativePath(other, false) +
-																			SolutionSerializer.getFileName(other, false) + ".", -1, IMarker.SEVERITY_ERROR, //$NON-NLS-1$
+																	addMarker(moduleProject, DUPLICATE_UUID, "UUID duplicate found " + p.getUUID() + " in " + //$NON-NLS-1$ //$NON-NLS-2$
+																		SolutionSerializer.getRelativePath(other, false) +
+																		SolutionSerializer.getFileName(other, false) + ".", -1, IMarker.SEVERITY_ERROR, //$NON-NLS-1$
 																		IMarker.PRIORITY_HIGH, null, p);
 																}
 																return IPersistVisitor.CONTINUE_TRAVERSAL;
@@ -1267,8 +1274,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														catch (Exception ex)
 														{
 															Debug.trace(ex);
-															addMarker(project, PROJECT_FORM_MARKER_TYPE,
-																messagePrefix + " has invalid format:" + field.getFormat(), -1, //$NON-NLS-1$
+															addMarker(project, PROJECT_FORM_MARKER_TYPE, messagePrefix +
+																" has invalid format:" + field.getFormat(), -1, //$NON-NLS-1$
 																IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, o);
 														}
 													}
@@ -3268,10 +3275,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				if (contentTypeIdentifier != null)
 				{
-					marker.setAttribute(
-						IDE.EDITOR_ID_ATTR,
-						PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-							Platform.getContentTypeManager().getContentType(contentTypeIdentifier)).getId());
+					marker.setAttribute(IDE.EDITOR_ID_ATTR, PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+						Platform.getContentTypeManager().getContentType(contentTypeIdentifier)).getId());
 					marker.setAttribute("elementUuid", persist.getUUID().toString()); //$NON-NLS-1$
 				}
 			}
