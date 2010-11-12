@@ -132,15 +132,18 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 		{
 			models = placeElements(getNextLocation());
 			// set data in request.getExtendedData map as properties in the created persists
-			if (models != null && objectProperties != null && objectProperties.size() > 0)
+			if (models != null)
 			{
 				for (Object model : models)
 				{
-					CompoundCommand setPropertiesCommand = SetValueCommand.createSetPropertiesComnmand(
-						(IPropertySource)Platform.getAdapterManager().getAdapter(model, IPropertySource.class), objectProperties);
-					if (setPropertiesCommand != null)
+					if (objectProperties != null && objectProperties.size() > 0)
 					{
-						setPropertiesCommand.execute();
+						CompoundCommand setPropertiesCommand = SetValueCommand.createSetPropertiesComnmand(
+							(IPropertySource)Platform.getAdapterManager().getAdapter(model, IPropertySource.class), objectProperties);
+						if (setPropertiesCommand != null)
+						{
+							setPropertiesCommand.execute();
+						}
 					}
 					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, model, true);
 				}
