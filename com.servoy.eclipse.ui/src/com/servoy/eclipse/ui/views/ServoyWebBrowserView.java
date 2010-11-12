@@ -74,7 +74,7 @@ public class ServoyWebBrowserView extends WebBrowserView
 			{
 				if (ServoyWebBrowserView.this == part)
 				{
-					setURL(SERVOY_URL);
+					setURL(getViewURL());
 				}
 			}
 		});
@@ -86,14 +86,14 @@ public class ServoyWebBrowserView extends WebBrowserView
 	@Override
 	public void createPartControl(Composite parent)
 	{
-		viewer = new ServoyBrowserViewer(parent);
+		viewer = new ServoyBrowserViewer(parent, getViewID());
 		viewer.setContainer(this);
 		initDragAndDrop();
 	}
 
 	public static class ServoyBrowserViewer extends BrowserViewer
 	{
-		public ServoyBrowserViewer(Composite parent)
+		public ServoyBrowserViewer(Composite parent, final String parentBrowserViewId)
 		{
 			super(parent, BrowserViewer.BUTTON_BAR);
 			// Locate the toolbar and the busy indicator. The toolbar gets extended 
@@ -127,7 +127,7 @@ public class ServoyWebBrowserView extends WebBrowserView
 									{
 										for (IViewReference view : page.getViewReferences())
 										{
-											if (view.getId().equals(ID))
+											if (view.getId().equals(parentBrowserViewId))
 											{
 												int currentState = page.getPartState(view);
 												int newState;
@@ -164,5 +164,15 @@ public class ServoyWebBrowserView extends WebBrowserView
 				this.layout();
 			}
 		}
+	}
+
+	protected String getViewID()
+	{
+		return ID;
+	}
+
+	protected String getViewURL()
+	{
+		return SERVOY_URL;
 	}
 }

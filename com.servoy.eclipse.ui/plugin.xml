@@ -22,6 +22,13 @@
             id="com.servoy.eclipse.ui.browser.view"
             name="Servoy News">
       </view>
+      <view
+      		name="Servoy Marketplace"
+      		icon="icons/marketplace.gif"
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.views.ServoyMarketplaceView"
+            id="com.servoy.eclipse.ui.views.ServoyMarketplaceView">
+      </view>      
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -392,7 +399,20 @@
                menubarPath="help/intro"
                style="push"
                tooltip="Open Servoy Forum">
-         </action>
+         </action>         
+      </actionSet>
+      <actionSet id="com.servoy.eclipse.ui.marketplace"
+            label="Marketplace"
+            visible="true">
+		 <action
+               class="com.servoy.eclipse.ui.actions.OpenMarketplace"
+               definitionId="com.servoy.eclipse.ui.OpenMarketplaceAction"
+               id="com.servoy.eclipse.ui.openMarketplace"
+               label="Servoy Marketplace"
+               menubarPath="help/updates"
+               style="push"
+               tooltip="Open Servoy Marketplace">
+         </action>      
       </actionSet>
       <actionSet
             id="com.servoy.eclipse.ui.choosers"
