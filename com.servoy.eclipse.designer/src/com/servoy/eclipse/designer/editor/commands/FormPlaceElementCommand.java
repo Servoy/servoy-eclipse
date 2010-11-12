@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.commands.CompoundCommand;
@@ -32,6 +33,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
@@ -41,10 +43,10 @@ import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
+import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
-import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -130,18 +132,15 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 		{
 			models = placeElements(getNextLocation());
 			// set data in request.getExtendedData map as properties in the created persists
-			if (models != null)
+			if (models != null && objectProperties != null && objectProperties.size() > 0)
 			{
 				for (Object model : models)
 				{
-					if (model instanceof IPersist && objectProperties != null && objectProperties.size() > 0)
+					CompoundCommand setPropertiesCommand = SetValueCommand.createSetPropertiesComnmand(
+						(IPropertySource)Platform.getAdapterManager().getAdapter(model, IPropertySource.class), objectProperties);
+					if (setPropertiesCommand != null)
 					{
-						IPersist persist = (IPersist)model;
-						PersistPropertySource persistProperties = new PersistPropertySource(persist, persist, false);
-						for (Map.Entry<Object, Object> entry : objectProperties.entrySet())
-						{
-							persistProperties.setPersistPropertyValue(entry.getKey(), entry.getValue());
-						}
+						setPropertiesCommand.execute();
 					}
 					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, model, true);
 				}
@@ -162,7 +161,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 		return fieldPositioner.getNextLocation(null);
 	}
 
-	protected IPersist[] placeElements(Point location) throws RepositoryException
+	protected Object[] placeElements(Point location) throws RepositoryException
 	{
 		if (requestType instanceof RequestType)
 		{
@@ -225,7 +224,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 		if (object instanceof Object[] && ((Object[])object).length > 0)
 		{
 			// drag-n-drop or paste
-			List<IPersist> res = new ArrayList<IPersist>(((Object[])object).length);
+			List<Object> res = new ArrayList<Object>(((Object[])object).length);
 
 			Map<ISupportBounds, java.awt.Point> origLocations = new HashMap<ISupportBounds, java.awt.Point>();
 			Point loc = location;
@@ -243,18 +242,19 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 				}
 				else if (o instanceof PersistDragData)
 				{
-					IPersist[] persists = pastePersist((PersistDragData)o, loc, origLocations, groupMap);
-					if (persists != null &&
-						persists.length > 0 &&
+					Object[] pasted = pastePersist((PersistDragData)o, loc, origLocations, groupMap);
+					if (pasted != null &&
+						pasted.length > 0 &&
+						pasted[0] instanceof IPersist &&
 						((!(parent instanceof TabPanel) && ((PersistDragData)o).type == IRepository.TABPANELS) || (!(parent instanceof Portal) && ((PersistDragData)o).type == IRepository.PORTALS)))
 					{
-						alternativeParent = persists[0];
+						alternativeParent = (IPersist)pasted[0];
 					}
-					if (persists != null)
+					if (pasted != null)
 					{
-						for (IPersist persist : persists)
+						for (Object obj : pasted)
 						{
-							res.add(persist);
+							res.add(obj);
 						}
 					}
 				}
@@ -282,14 +282,14 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 					entry.getKey().setLocation(new java.awt.Point(location.x + entry.getValue().x - minx, location.y + entry.getValue().y - miny));
 				}
 			}
-			return res.toArray(new IPersist[res.size()]);
+			return res.toArray();
 		}
 
 		ServoyLog.logWarning("command not supported: " + requestType, null);
 		return null;
 	}
 
-	protected IPersist[] pastePersist(PersistDragData dragData, Point location, Map<ISupportBounds, java.awt.Point> origLocations, Map<String, String> groupMap)
+	protected Object[] pastePersist(PersistDragData dragData, Point location, Map<ISupportBounds, java.awt.Point> origLocations, Map<String, String> groupMap)
 		throws RepositoryException
 	{
 		if (dragData.type == IRepository.TEMPLATES)

@@ -65,7 +65,7 @@ public class RequestTypeCreationFactory implements CreationFactory
 	{
 		if (dragData instanceof PersistDragData)
 		{
-			return new Dimension(80, 20);
+			return new Dimension(((PersistDragData)dragData).width, ((PersistDragData)dragData).height);
 		}
 		if (dragData instanceof DataProviderDragData)
 		{

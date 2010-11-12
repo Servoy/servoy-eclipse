@@ -13,10 +13,11 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.actions;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.RectShape;
 
 /**
@@ -32,7 +33,8 @@ public class AddRoundedRectangleActionDelegate extends AbstractEditpartActionDel
 	public AddRoundedRectangleActionDelegate()
 	{
 		super(VisualFormEditor.REQ_PLACE_RECT_SHAPE);
-		addExtendedData("shapeType", new Integer(RectShape.ROUNDED_RECTANGLE));
-		addExtendedData("roundedRadius", new Integer(35));
+		addSetPropertyValue("shapeType",
+			PersistPropertySource.SHAPE_TYPE_CONTOLLER.getConverter().convertProperty("shapeType", Integer.valueOf(RectShape.ROUNDED_RECTANGLE)));
+		addSetPropertyValue("roundedRadius", new Integer(35));
 	}
 }

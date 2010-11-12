@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.actions;
 
 import java.awt.Color;
@@ -21,7 +21,7 @@ import java.awt.Dimension;
 
 import javax.swing.SwingConstants;
 
-import com.servoy.j2db.util.ComponentFactoryHelper;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.util.gui.SpecialMatteBorder;
 
 /**
@@ -36,11 +36,11 @@ public class AddHorizontalLineActionDelegate extends AddLabelActionDelegate
 
 	public AddHorizontalLineActionDelegate()
 	{
-		addExtendedData("text", "");
-		addExtendedData("borderType", ComponentFactoryHelper.createBorderString(new SpecialMatteBorder(1, 0, 0, 0, Color.black, Color.black, Color.black,
-			Color.black)));
-		addExtendedData("horizontalAlignment", SwingConstants.RIGHT);
-		addExtendedData("transparent", Boolean.TRUE);
-		addExtendedData("size", new Dimension(40, 1));
+		addSetPropertyValue("text", "");
+		addSetPropertyValue("borderType", new SpecialMatteBorder(1, 0, 0, 0, Color.black, Color.black, Color.black, Color.black));
+		addSetPropertyValue("horizontalAlignment",
+			PersistPropertySource.HORIZONTAL_ALIGNMENT_CONTROLLER.getConverter().convertProperty("horizontalAlignment", Integer.valueOf(SwingConstants.RIGHT)));
+		addSetPropertyValue("transparent", Boolean.TRUE);
+		addSetPropertyValue("size", new Dimension(40, 1));
 	}
 }

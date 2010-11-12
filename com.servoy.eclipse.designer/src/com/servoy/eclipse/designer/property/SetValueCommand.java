@@ -16,7 +16,10 @@
  */
 package com.servoy.eclipse.designer.property;
 
+import java.util.Map;
+
 import org.eclipse.gef.commands.Command;
+import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.IPropertySource2;
 
@@ -27,9 +30,9 @@ import org.eclipse.ui.views.properties.IPropertySource2;
  * @author rgansevles
  */
 
-
 public class SetValueCommand extends Command
 {
+	public static final String REQUEST_PROPERTY_PREFIX = "property:";
 
 	protected Object propertyValue;
 	protected Object propertyName;
@@ -106,5 +109,32 @@ public class SetValueCommand extends Command
 	{
 		if (resetOnUndo) getTarget().resetPropertyValue(propertyName);
 		else getTarget().setPropertyValue(propertyName, undoValue);
+	}
+
+	public static CompoundCommand createSetPropertiesComnmand(IPropertySource propertySource, Map<Object, Object> extendedData)
+	{
+		if (propertySource == null || extendedData == null)
+		{
+			return null;
+		}
+		CompoundCommand command = null;
+
+		for (Map.Entry<Object, Object> entry : extendedData.entrySet())
+		{
+			Object key = entry.getKey();
+			if (key instanceof String && ((String)key).startsWith(SetValueCommand.REQUEST_PROPERTY_PREFIX))
+			{
+				SetValueCommand setCommand = new SetValueCommand();
+				setCommand.setTarget(propertySource);
+				setCommand.setPropertyId(((String)key).substring(SetValueCommand.REQUEST_PROPERTY_PREFIX.length()));
+				setCommand.setPropertyValue(entry.getValue());
+				if (command == null)
+				{
+					command = new CompoundCommand();
+				}
+				command.add(setCommand);
+			}
+		}
+		return command;
 	}
 }

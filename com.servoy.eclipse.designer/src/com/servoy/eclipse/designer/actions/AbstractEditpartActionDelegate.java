@@ -39,6 +39,7 @@ import org.eclipse.ui.ide.ResourceUtil;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
+import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.j2db.persistence.IPersist;
 
 /**
@@ -154,9 +155,9 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 	 * @param key
 	 * @param value
 	 */
-	protected void addExtendedData(Object key, Object value)
+	protected void addSetPropertyValue(String key, Object value)
 	{
-		extendedData.put(key, value);
+		extendedData.put(SetValueCommand.REQUEST_PROPERTY_PREFIX + key, value);
 	}
 
 	/**

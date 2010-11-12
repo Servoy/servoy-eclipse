@@ -13,12 +13,15 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.dnd;
+
+import java.awt.Dimension;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 
 import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
@@ -29,6 +32,7 @@ import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.persistence.Template;
 
 /**
  * Factory for adapters for the IDragData.
@@ -63,7 +67,17 @@ public class DragDataAdapterFactory implements IAdapterFactory
 			if (obj instanceof IPersist)
 			{
 				IPersist persist = (IPersist)obj;
-				return new PersistDragData(persist.getRootObject().getName(), persist.getUUID(), persist.getTypeID());
+				int width = 80, height = 20;
+				if (persist instanceof Template)
+				{
+					Dimension size = ElementFactory.getTemplateBoundsize((Template)persist);
+					if (size != null)
+					{
+						width = size.width;
+						height = size.height;
+					}
+				}
+				return new PersistDragData(persist.getRootObject().getName(), persist.getUUID(), persist.getTypeID(), width, height);
 			}
 
 			if (obj instanceof IDataProvider)

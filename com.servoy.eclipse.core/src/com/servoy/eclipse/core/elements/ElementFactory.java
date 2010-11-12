@@ -18,6 +18,7 @@ package com.servoy.eclipse.core.elements;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.beans.BeanInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -680,8 +681,7 @@ public class ElementFactory
 		return object;
 	}
 
-	public static IPersist[] applyTemplate(ISupportFormElements parent, Template template, Point location, boolean setFormProperties)
-		throws RepositoryException
+	public static Object[] applyTemplate(ISupportFormElements parent, Template template, Point location, boolean setFormProperties) throws RepositoryException
 	{
 		IDeveloperRepository repository = (IDeveloperRepository)parent.getRootObject().getRepository();
 		Map<IPersist, String> persists = new HashMap<IPersist, String>(); // created persist -> name
@@ -797,7 +797,7 @@ public class ElementFactory
 			}
 			else
 			{ // add elements to existing form
-				if (persists.size() > 1) // group the elements if there is more than 1 and we are not setting up an entire form
+				if (persists.size() > 1 && parent instanceof Form) // group the elements if there is more than 1 and we are not setting up an entire form
 				{
 					// clear the groupID first, to make it not clash with the current template
 					for (IPersist persist : persists.keySet())
@@ -833,6 +833,9 @@ public class ElementFactory
 							((IFormElement)persist).setGroupID(groupName);
 						}
 					}
+
+					return new Object[] { new FormElementGroup(groupName,
+						ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(parent), (Form)parent) };
 				}
 			}
 		}
@@ -841,7 +844,69 @@ public class ElementFactory
 			throw new RepositoryException(e);
 		}
 
-		return persists.keySet().toArray(new IPersist[persists.size()]);
+		return persists.keySet().toArray();
+	}
+
+	public static Dimension getTemplateBoundsize(Template template)
+	{
+		if (template == null)
+		{
+			return null;
+		}
+
+		Rectangle box = null;
+		try
+		{
+			JSONObject json = new ServoyJSONObject(template.getContent(), false);
+
+			// elements
+			JSONArray elements = (JSONArray)json.opt(Template.PROP_ELEMENTS);
+			for (int i = 0; elements != null && i < elements.length(); i++)
+			{
+				JSONObject object = elements.getJSONObject(i);
+
+				if (object.has(SolutionSerializer.PROP_TYPEID) && object.getInt(SolutionSerializer.PROP_TYPEID) == IRepository.PARTS)
+				{
+					// ignore parts
+					continue;
+				}
+
+				java.awt.Dimension size = null;
+				if (object.has(Template.PROP_SIZE))
+				{
+					size = PersistHelper.createDimension((String)object.get(Template.PROP_SIZE));
+				}
+				if (size == null || size.height == 0 || size.height == 0)
+				{
+					continue;
+				}
+
+				java.awt.Point location = null;
+				if (object.has(Template.PROP_LOCATION))
+				{
+					location = PersistHelper.createPoint((String)object.get(Template.PROP_LOCATION));
+				}
+				if (location == null)
+				{
+					location = new java.awt.Point(0, 0);
+				}
+
+				Rectangle rectangle = new Rectangle(location, size);
+				if (box == null)
+				{
+					box = rectangle;
+				}
+				else
+				{
+					box.add(rectangle);
+				}
+			}
+		}
+		catch (JSONException e)
+		{
+			ServoyLog.logError("Error processing template " + template.getName(), e);
+		}
+		return box == null ? null : box.getSize();
 	}
 
 	/**

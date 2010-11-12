@@ -30,6 +30,7 @@ import org.eclipse.gef.SnapToHelper;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.requests.CreateRequest;
 
+import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
 import com.servoy.j2db.persistence.Form;
@@ -492,7 +493,7 @@ public class SnapToElementAlignment extends SnapToHelper
 
 			if (item.anchor && anchorProperty != null)
 			{
-				request.getExtendedData().put(FormXYLayoutPolicy.REQUEST_PROPERTY_PREFIX + "anchors." + anchorProperty, Boolean.TRUE);
+				request.getExtendedData().put(SetValueCommand.REQUEST_PROPERTY_PREFIX + "anchors." + anchorProperty, Boolean.TRUE);
 			}
 		}
 

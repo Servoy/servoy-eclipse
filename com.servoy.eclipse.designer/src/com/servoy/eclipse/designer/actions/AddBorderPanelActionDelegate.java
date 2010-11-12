@@ -13,14 +13,14 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.actions;
 
 import javax.swing.BorderFactory;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.RectShape;
-import com.servoy.j2db.util.ComponentFactoryHelper;
 
 /**
  * Add a shape.
@@ -35,7 +35,8 @@ public class AddBorderPanelActionDelegate extends AbstractEditpartActionDelegate
 	public AddBorderPanelActionDelegate()
 	{
 		super(VisualFormEditor.REQ_PLACE_RECT_SHAPE);
-		addExtendedData("shapeType", new Integer(RectShape.BORDER_PANEL));
-		addExtendedData("borderType", ComponentFactoryHelper.createBorderString(BorderFactory.createTitledBorder("xy")));
+		addSetPropertyValue("shapeType",
+			PersistPropertySource.SHAPE_TYPE_CONTOLLER.getConverter().convertProperty("shapeType", Integer.valueOf(RectShape.BORDER_PANEL)));
+		addSetPropertyValue("borderType", BorderFactory.createTitledBorder("xy"));
 	}
 }

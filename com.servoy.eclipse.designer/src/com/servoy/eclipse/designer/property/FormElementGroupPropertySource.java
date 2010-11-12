@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.property;
 
 import java.awt.Dimension;
@@ -34,13 +34,13 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.property.ComplexProperty;
+import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.DimensionPropertySource;
 import com.servoy.eclipse.ui.property.ICellEditorFactory;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PointPropertySource;
 import com.servoy.eclipse.ui.property.PropertyCategory;
 import com.servoy.eclipse.ui.property.PropertyController;
-import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -204,8 +204,8 @@ public class FormElementGroupPropertySource implements IPropertySource
 	public void setPropertyValue(Object id, Object value)
 	{
 		if ("size".equals(id)) group.setSize((Dimension)value);
-		if ("location".equals(id)) group.setLocation((Point)value);
-		if (SolutionSerializer.PROP_NAME.equals(id))
+		else if ("location".equals(id)) group.setLocation((Point)value);
+		else if (SolutionSerializer.PROP_NAME.equals(id))
 		{
 			try
 			{
@@ -218,6 +218,7 @@ public class FormElementGroupPropertySource implements IPropertySource
 				return;
 			}
 		}
+		else return;
 
 		// fire persist changes
 		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, group, true);

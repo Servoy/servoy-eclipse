@@ -166,12 +166,12 @@ import com.servoy.j2db.util.Utils;
 @SuppressWarnings("nls")
 public class PersistPropertySource implements IPropertySource, IAdaptable
 {
-	private static IPropertyController<Integer, Integer> HORIZONTAL_ALIGNMENT_CONTROLLER = null;
+	public static final IPropertyController<Integer, Integer> HORIZONTAL_ALIGNMENT_CONTROLLER;
 	private static IPropertyController<Integer, Integer> VERTICAL_ALIGNMENT_CONTROLLER = null;
 	private static IPropertyController<Integer, Integer> VARIABLE_TYPE_CONTROLLER = null;
 	private static IPropertyController<Integer, Integer> ROLLOVER_CURSOR_CONTROLLER = null;
 	private static IPropertyController<Integer, Integer> ROTATION_CONTROLLER = null;
-	private static IPropertyController<Integer, Integer> SHAPE_TYPE_CONTOLLER = null;
+	public static final IPropertyController<Integer, Integer> SHAPE_TYPE_CONTOLLER;
 	private static IPropertyController<Integer, Integer> VIEW_TYPE_CONTOLLER = null;
 	private static IPropertyController<Integer, Integer> DISPLAY_TYPE_CONTOLLER = null;
 	private static IPropertyController<String, Integer> NAMEDFOUNDSET_CONTOLLER = null;
@@ -180,6 +180,18 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 	private static IPropertyController<Integer, Integer> TEXT_ORIENTATION_CONTROLLER = null;
 	private static IPropertyController<Integer, Integer> SOLUTION_TYPE_CONTROLLER = null;
 	private static IPropertyController<Integer, Integer> JOIN_TYPE_CONTROLLER = null;
+
+	static
+	{
+		HORIZONTAL_ALIGNMENT_CONTROLLER = new ComboboxPropertyController<Integer>("horizontalAlignment", RepositoryHelper.getDisplayName("horizontalAlignment",
+			Field.class), new ComboboxPropertyModel<Integer>(new Integer[] { new Integer(-1), new Integer(SwingConstants.LEFT), new Integer(
+			SwingConstants.CENTER), new Integer(SwingConstants.RIGHT) },
+			new String[] { Messages.LabelDefault, Messages.AlignLeft, Messages.AlignCenter, Messages.AlignRight }), Messages.LabelUnresolved);
+		SHAPE_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>("shapeType", RepositoryHelper.getDisplayName("shapeType", RectShape.class),
+			new ComboboxPropertyModel<Integer>(new Integer[] { new Integer(RectShape.BORDER_PANEL), new Integer(RectShape.RECTANGLE), new Integer(
+				RectShape.ROUNDED_RECTANGLE), new Integer(RectShape.OVAL) }, new String[] { "BORDER_PANEL", "RECTANGLE", "ROUNDED_RECTANGLE", "OVAL" }),
+			Messages.LabelUnresolved);
+	}
 
 	private static final String BEAN_PROPERTY_PREFIX_DOT = "bean.";
 
@@ -2178,12 +2190,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 
 		if ("horizontalAlignment".equals(name))
 		{
-			if (HORIZONTAL_ALIGNMENT_CONTROLLER == null)
-			{
-				HORIZONTAL_ALIGNMENT_CONTROLLER = new ComboboxPropertyController<Integer>(id, displayName, new ComboboxPropertyModel<Integer>(
-					new Integer[] { new Integer(-1), new Integer(SwingConstants.LEFT), new Integer(SwingConstants.CENTER), new Integer(SwingConstants.RIGHT) },
-					new String[] { Messages.LabelDefault, Messages.AlignLeft, Messages.AlignCenter, Messages.AlignRight }), Messages.LabelUnresolved);
-			}
 			return HORIZONTAL_ALIGNMENT_CONTROLLER;
 		}
 
@@ -2526,12 +2532,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 
 		if (name.endsWith("shapeType"))
 		{
-			if (SHAPE_TYPE_CONTOLLER == null)
-			{
-				SHAPE_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>(id, displayName, new ComboboxPropertyModel<Integer>(new Integer[] { new Integer(
-					RectShape.BORDER_PANEL), new Integer(RectShape.RECTANGLE), new Integer(RectShape.ROUNDED_RECTANGLE), new Integer(RectShape.OVAL) },
-					new String[] { "BORDER_PANEL", "RECTANGLE", "ROUNDED_RECTANGLE", "OVAL" }), Messages.LabelUnresolved);
-			}
 			return SHAPE_TYPE_CONTOLLER;
 		}
 

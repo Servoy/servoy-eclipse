@@ -31,6 +31,8 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Display;
 
+import com.servoy.eclipse.designer.property.SetValueCommand;
+
 /**
  * Base drop target for elements in the form editor.
  *  
@@ -126,7 +128,8 @@ public class ElementTransferDropTarget extends AbstractTransferDropTargetListene
 			}
 			if (request.getSize() != null)
 			{
-				request.getExtendedData().put("size", new java.awt.Dimension(request.getSize().width, request.getSize().height));
+				request.getExtendedData().put(SetValueCommand.REQUEST_PROPERTY_PREFIX + "size",
+					new java.awt.Dimension(request.getSize().width, request.getSize().height));
 			}
 		}
 	}

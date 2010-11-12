@@ -55,8 +55,6 @@ import com.servoy.j2db.persistence.Part;
 
 public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 {
-	public static final String REQUEST_PROPERTY_PREFIX = "property:";
-
 	private final FormGraphicalEditPart parent;
 
 	private AlignmentFeedbackHelper alignmentFeedbackHelper;
@@ -86,19 +84,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 				if (childEditPart.getModel() instanceof IPersist && objectProperties != null && objectProperties.size() > 0)
 				{
 					IPersist persist = (IPersist)childEditPart.getModel();
-					PersistPropertySource persistPropertySource = new PersistPropertySource(persist, persist, false);
-					for (Map.Entry<Object, Object> entry : objectProperties.entrySet())
-					{
-						Object key = entry.getKey();
-						if (key instanceof String && ((String)key).startsWith(REQUEST_PROPERTY_PREFIX))
-						{
-							SetValueCommand setCommand = new SetValueCommand();
-							setCommand.setTarget(persistPropertySource);
-							setCommand.setPropertyId(((String)key).substring(REQUEST_PROPERTY_PREFIX.length()));
-							setCommand.setPropertyValue(entry.getValue());
-							compoundCommand.add(setCommand);
-						}
-					}
+					compoundCommand.add(SetValueCommand.createSetPropertiesComnmand(new PersistPropertySource(persist, persist, false), objectProperties));
 				}
 				return compoundCommand.unwrap();
 			}
