@@ -419,7 +419,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 		if (!project.exists()) return null;
 		try
 		{
-			final IProject[] referencedProjects = project.getReferencedProjects();
+			final IProject[] referencedProjects = project.getDescription().getReferencedProjects();
 			final ArrayList<ServoyResourcesProject> resourcesProjects = new ArrayList<ServoyResourcesProject>();
 			for (IProject p : referencedProjects)
 			{

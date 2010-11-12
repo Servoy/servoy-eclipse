@@ -79,10 +79,10 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.ServoyResourcesProject;
+import com.servoy.eclipse.core.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.core.repository.EclipseRepository;
 import com.servoy.eclipse.core.repository.SolutionDeserializer;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
-import com.servoy.eclipse.core.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.CoreUtils;
 import com.servoy.j2db.FlattenedSolution;
@@ -1039,8 +1039,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														if (lst.size() == 1)
 														{
 															String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																other.getUUID(), SolutionSerializer.getRelativePath(p, false) +
-																	SolutionSerializer.getFileName(p, false));
+																other.getUUID(),
+																SolutionSerializer.getRelativePath(p, false) + SolutionSerializer.getFileName(p, false));
 															addMarker(project, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_HIGH, null,
 																other);
 														}
@@ -1086,14 +1086,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																	// for now only add it on both if there is 1, just skip the rest.
 																	if (lst.size() == 1)
 																	{
-																		String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																			other.getUUID(), SolutionSerializer.getRelativePath(p, false) +
+																		String msg = MarkerMessages.getMessage(
+																			MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
+																			other.getUUID(),
+																			SolutionSerializer.getRelativePath(p, false) +
 																				SolutionSerializer.getFileName(p, false));
 																		addMarker(moduleProject, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR,
 																			IMarker.PRIORITY_HIGH, null, other);
 																	}
-																	String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
-																		p.getUUID(), SolutionSerializer.getRelativePath(other, false) +
+																	String msg = MarkerMessages.getMessage(
+																		MarkerMessages.Marker_Duplicate_UUIDDuplicateIn,
+																		p.getUUID(),
+																		SolutionSerializer.getRelativePath(other, false) +
 																			SolutionSerializer.getFileName(other, false));
 																	addMarker(moduleProject, DUPLICATE_UUID, msg, -1, IMarker.SEVERITY_ERROR,
 																		IMarker.PRIORITY_HIGH, null, p);
@@ -1915,9 +1919,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									if (Utils.getAsUUID(tab.getRelationName(), false) != null)
 									{
 										// relation name was not resolved from uuid to relation name during import
-										IMarker marker = addMarker(project, UNRESOLVED_RELATION_UUID, MarkerMessages.getMessage(
-											MarkerMessages.Marker_Form_RelatedTabUnsolvedUuid, tab.getRelationName()), -1, IMarker.SEVERITY_ERROR,
-											IMarker.PRIORITY_NORMAL, null, tab);
+										IMarker marker = addMarker(project, UNRESOLVED_RELATION_UUID,
+											MarkerMessages.getMessage(MarkerMessages.Marker_Form_RelatedTabUnsolvedUuid, tab.getRelationName()), -1,
+											IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, tab);
 										if (marker != null)
 										{
 											try
@@ -3377,7 +3381,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		try
 		{
 			// check if this project references more than one or no resources projects
-			final IProject[] referencedProjects = project.getReferencedProjects();
+			final IProject[] referencedProjects = project.getDescription().getReferencedProjects();
 			int count = 0;
 			for (IProject p : referencedProjects)
 			{
@@ -3504,8 +3508,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				if (contentTypeIdentifier != null)
 				{
-					marker.setAttribute(IDE.EDITOR_ID_ATTR, PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-						Platform.getContentTypeManager().getContentType(contentTypeIdentifier)).getId());
+					marker.setAttribute(
+						IDE.EDITOR_ID_ATTR,
+						PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+							Platform.getContentTypeManager().getContentType(contentTypeIdentifier)).getId());
 					marker.setAttribute("elementUuid", persist.getUUID().toString()); //$NON-NLS-1$
 				}
 			}
