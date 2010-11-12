@@ -273,7 +273,7 @@ public class ElementFactory
 				{
 					initSize = ((Component)beanInstance).getMinimumSize();
 				}
-				if (initSize != null)
+				if (initSize != null && initSize.width > 0 && initSize.height > 0)
 				{
 					bean.setSize(initSize);
 				}
