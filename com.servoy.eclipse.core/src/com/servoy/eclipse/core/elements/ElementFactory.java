@@ -86,6 +86,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.util.ComponentFactoryHelper;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -265,14 +266,21 @@ public class ElementFactory
 		if (beanInstance instanceof Component)
 		{
 			// check preferredSize and minimumSize
-			Dimension initSize = ((Component)beanInstance).getPreferredSize();
-			if (initSize == null)
+			try
 			{
-				initSize = ((Component)beanInstance).getMinimumSize();
+				Dimension initSize = ((Component)beanInstance).getPreferredSize();
+				if (initSize == null)
+				{
+					initSize = ((Component)beanInstance).getMinimumSize();
+				}
+				if (initSize != null)
+				{
+					bean.setSize(initSize);
+				}
 			}
-			if (initSize != null)
+			catch (Exception e)
 			{
-				bean.setSize(initSize);
+				Debug.error("Could not get preferred size from bean instance " + bean.getBeanClassName(), e);
 			}
 		}
 
