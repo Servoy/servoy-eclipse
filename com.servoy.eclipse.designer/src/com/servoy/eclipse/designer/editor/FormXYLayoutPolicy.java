@@ -33,12 +33,13 @@ import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.editpolicies.XYLayoutEditPolicy;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.requests.CreateRequest;
+import org.eclipse.gef.requests.CreationFactory;
 
 import com.servoy.eclipse.designer.actions.DistributeRequest;
 import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.commands.ChangeBoundsCommand;
-import com.servoy.eclipse.designer.editor.commands.CreateDropRequest;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
+import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -109,12 +110,21 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			Map<Object, Object> extendedData = request.getExtendedData();
 			if (request.getSize() != null)
 			{
-				extendedData.put("size", new java.awt.Dimension(request.getSize().width, request.getSize().height));
+				extendedData.put(SetValueCommand.REQUEST_PROPERTY_PREFIX + "size", new java.awt.Dimension(request.getSize().width, request.getSize().height));
 			}
 
-			if (requestType.type == RequestType.TYPE_BUTTON || requestType.type == RequestType.TYPE_LABEL)
+			if (requestType.type == RequestType.TYPE_BUTTON || requestType.type == RequestType.TYPE_LABEL || requestType.type == RequestType.TYPE_TEMPLATE)
 			{
-				command = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), null, requestType, extendedData, null,
+				Object data = null;
+				if (request instanceof CreateElementRequest)
+				{
+					CreationFactory factory = ((CreateElementRequest)request).getFactory();
+					if (factory instanceof RequestTypeCreationFactory)
+					{
+						data = ((RequestTypeCreationFactory)factory).getData();
+					}
+				}
+				command = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), data, requestType, extendedData, null,
 					request.getLocation().getSWTPoint());
 			}
 
@@ -137,17 +147,21 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			return getDistributeChildrenCommand((DistributeRequest)request);
 		}
 
-		if (VisualFormEditor.REQ_DROP_COPY.equals(request.getType()) && request instanceof CreateDropRequest &&
-			((CreateRequest)request).getLocation() != null && ((CreateDropRequest)request).getData() instanceof Object[])
+		if (VisualFormEditor.REQ_DROP_COPY.equals(request.getType()) && request instanceof CreateElementRequest &&
+			((CreateRequest)request).getLocation() != null)
 		{
-			Command command = new CompoundCommand();
-			for (Object o : (((CreateDropRequest)request).getData()))
+			RequestTypeCreationFactory factory = (RequestTypeCreationFactory)((CreateElementRequest)request).getFactory();
+			if (factory.getData() instanceof Object[])
 			{
-				FormPlaceElementCommand placeElementCommand = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), new Object[] { o },
-					request.getType(), request.getExtendedData(), null, ((CreateRequest)request).getLocation().getSWTPoint());
-				((CompoundCommand)command).add(((CreateDropRequest)request).chainSetFactoryObjectCommand(placeElementCommand));
+				Command command = new CompoundCommand();
+				for (Object o : (Object[])factory.getData())
+				{
+					FormPlaceElementCommand placeElementCommand = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(),
+						new Object[] { o }, request.getType(), request.getExtendedData(), null, ((CreateRequest)request).getLocation().getSWTPoint());
+					((CompoundCommand)command).add(((CreateElementRequest)request).chainSetFactoryObjectCommand(placeElementCommand));
+				}
+				return command;
 			}
-			return command;
 		}
 
 		return super.getCommand(request);

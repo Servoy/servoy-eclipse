@@ -17,13 +17,21 @@
 
 package com.servoy.eclipse.designer.editor.palette;
 
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.gef.palette.PaletteContainer;
 import org.eclipse.gef.palette.PaletteDrawer;
 import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.gef.palette.ToolEntry;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.NameComparator;
 
 
 /**
@@ -53,6 +61,30 @@ public class VisualFormEditorPaletteFactory
 		return componentsDrawer;
 	}
 
+	private static PaletteContainer createTemplatesDrawer()
+	{
+		PaletteDrawer componentsDrawer = new PaletteDrawer("Templates");
+		ToolEntry component;
+
+		// TODO: listen for new templates
+
+		List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
+		Collections.sort(templates, NameComparator.INSTANCE);
+
+		Iterator<IRootObject> templatesIterator = templates.iterator();
+		while (templatesIterator.hasNext())
+		{
+			IRootObject template = templatesIterator.next();
+			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TEMPLATE);
+			factory.setData(template);
+			component = new ElementCreationToolEntry(template.getName(), "Create/apply template " + template.getName(), factory,
+				Activator.loadImageDescriptorFromBundle("template.gif"), Activator.loadImageDescriptorFromBundle("template.gif"));
+			componentsDrawer.add(component);
+		}
+
+		return componentsDrawer;
+	}
+
 	/**
 	 * Creates the PaletteRoot and adds all palette elements. Use this factory
 	 * method to create a new palette for your graphical editor.
@@ -64,6 +96,7 @@ public class VisualFormEditorPaletteFactory
 		PaletteRoot palette = new PaletteRoot();
 //		palette.add(createToolsGroup(palette));
 		palette.add(createElementsDrawer());
+		palette.add(createTemplatesDrawer());
 		return palette;
 	}
 

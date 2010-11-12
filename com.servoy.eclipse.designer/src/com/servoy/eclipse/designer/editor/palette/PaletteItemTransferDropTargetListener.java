@@ -23,8 +23,10 @@ import org.eclipse.gef.Request;
 import org.eclipse.gef.dnd.TemplateTransfer;
 import org.eclipse.gef.requests.CreationFactory;
 
+import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.designer.dnd.ElementTransferDropTarget;
 import com.servoy.eclipse.designer.editor.CreateElementRequest;
+import com.servoy.j2db.persistence.Template;
 
 /**
  * Drop target for elements from the palette.
@@ -46,8 +48,28 @@ public class PaletteItemTransferDropTargetListener extends ElementTransferDropTa
 	@Override
 	protected Request createTargetRequest()
 	{
-		CreateElementRequest request = new CreateElementRequest(getFactory(TemplateTransfer.getInstance().getTemplate()));
-		request.setSize(new Dimension(80, 20));// TODO: get size from palette item
+		CreationFactory factory = getFactory(TemplateTransfer.getInstance().getTemplate());
+		CreateElementRequest request = new CreateElementRequest(factory);
+
+		Dimension d2size = null;
+		if (factory instanceof RequestTypeCreationFactory)
+		{
+			Object data = ((RequestTypeCreationFactory)factory).getData();
+			if (data instanceof Template)
+			{
+				java.awt.Dimension size = ElementFactory.getTemplateBoundsize((Template)data);
+				if (size != null)
+				{
+					d2size = new Dimension(size.width, size.height);
+				}
+			}
+		}
+
+		if (d2size == null)
+		{
+			d2size = new Dimension(80, 20);
+		}
+		request.setSize(d2size);
 		return request;
 	}
 

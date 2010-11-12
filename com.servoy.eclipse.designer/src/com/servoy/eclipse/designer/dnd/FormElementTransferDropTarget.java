@@ -22,8 +22,8 @@ import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.Request;
 import org.eclipse.swt.dnd.DropTargetEvent;
 
+import com.servoy.eclipse.designer.editor.CreateElementRequest;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
-import com.servoy.eclipse.designer.editor.commands.CreateDropRequest;
 import com.servoy.eclipse.designer.editor.commands.DataRequest;
 import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.eclipse.dnd.FormElementTransfer;
@@ -68,7 +68,9 @@ public class FormElementTransferDropTarget extends ElementTransferDropTarget
 			}
 
 			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_DROP_COPY);
-			CreateDropRequest createRequest = new CreateDropRequest(VisualFormEditor.REQ_DROP_COPY, factory, UserNodeListDragSourceListener.dragObjects);
+			factory.setData(UserNodeListDragSourceListener.dragObjects);
+			CreateElementRequest createRequest = new CreateElementRequest(factory);
+			createRequest.setType(VisualFormEditor.REQ_DROP_COPY);
 			createRequest.setLocation(point);
 			createRequest.setSize(factory.getDefaultElementSize(UserNodeListDragSourceListener.dragObjects[0]));
 			return createRequest;

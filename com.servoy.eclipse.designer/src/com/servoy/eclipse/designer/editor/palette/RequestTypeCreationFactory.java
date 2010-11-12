@@ -36,6 +36,7 @@ public class RequestTypeCreationFactory implements CreationFactory
 {
 	private final RequestType requestType;
 	private Object newObject;
+	private Object data;
 
 	public RequestTypeCreationFactory(RequestType requestType)
 	{
@@ -55,6 +56,22 @@ public class RequestTypeCreationFactory implements CreationFactory
 	public Object getObjectType()
 	{
 		return requestType;
+	}
+
+	/**
+	 * @param data the data to set
+	 */
+	public void setData(Object data)
+	{
+		this.data = data;
+	}
+
+	/**
+	 * @return the data
+	 */
+	public Object getData()
+	{
+		return data;
 	}
 
 	/**
