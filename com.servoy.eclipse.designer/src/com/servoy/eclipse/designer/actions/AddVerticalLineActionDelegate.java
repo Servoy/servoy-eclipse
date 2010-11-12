@@ -36,7 +36,6 @@ public class AddVerticalLineActionDelegate extends AddLabelActionDelegate
 
 	public AddVerticalLineActionDelegate()
 	{
-		// RAGTEST OK?
 		addSetPropertyValue("text", "");
 		addSetPropertyValue("borderType", new SpecialMatteBorder(0, 1, 0, 0, Color.black, Color.black, Color.black, Color.black));
 		addSetPropertyValue("horizontalAlignment",
