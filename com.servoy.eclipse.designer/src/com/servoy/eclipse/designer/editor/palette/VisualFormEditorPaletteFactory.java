@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.palette;
 
+import java.awt.Rectangle;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -25,13 +26,23 @@ import org.eclipse.gef.palette.PaletteContainer;
 import org.eclipse.gef.palette.PaletteDrawer;
 import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.gef.palette.ToolEntry;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.NameComparator;
+import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.persistence.Template;
+import com.servoy.j2db.util.ServoyJSONObject;
 
 
 /**
@@ -74,16 +85,108 @@ public class VisualFormEditorPaletteFactory
 		Iterator<IRootObject> templatesIterator = templates.iterator();
 		while (templatesIterator.hasNext())
 		{
-			IRootObject template = templatesIterator.next();
+			Template template = (Template)templatesIterator.next();
 			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TEMPLATE);
 			factory.setData(template);
-			component = new ElementCreationToolEntry(template.getName(), "Create/apply template " + template.getName(), factory,
-				Activator.loadImageDescriptorFromBundle("template.gif"), Activator.loadImageDescriptorFromBundle("template.gif"));
+			ImageDescriptor icon = getTemplateIcon(template);
+			if (icon == null)
+			{
+				// default icon
+				icon = Activator.loadImageDescriptorFromBundle("template.gif");
+			}
+			component = new ElementCreationToolEntry(template.getName(), "Create/apply template " + template.getName(), factory, icon, icon);
 			componentsDrawer.add(component);
 		}
 
 		return componentsDrawer;
 	}
+
+	static ImageDescriptor getTemplateIcon(Template template)
+	{
+		Rectangle box = null;
+		try
+		{
+			JSONObject json = new ServoyJSONObject(template.getContent(), false);
+
+			// elements
+			JSONArray elements = (JSONArray)json.opt(Template.PROP_ELEMENTS);
+			if (elements == null || elements.length() == 0)
+			{
+				return null;
+			}
+
+			if (elements.length() > 1)
+			{
+				return Activator.loadImageDescriptorFromBundle("group.gif");
+			}
+
+			JSONObject object = elements.getJSONObject(0);
+			switch (object.optInt(SolutionSerializer.PROP_TYPEID))
+			{
+				case IRepository.FIELDS :
+
+					switch (object.optInt("displayType"))
+					{
+						case Field.CHECKS :
+							return Activator.loadImageDescriptorFromBundle("chk_on_icon.gif");
+
+						case Field.RADIOS :
+							return Activator.loadImageDescriptorFromBundle("radio_on.gif");
+
+						case Field.COMBOBOX :
+							return Activator.loadImageDescriptorFromBundle("dropdown_icon.gif");
+
+						case Field.CALENDAR :
+							return Activator.loadImageDescriptorFromBundle("calendar_icon.gif");
+
+					}
+
+					return Activator.loadImageDescriptorFromBundle("field.gif");
+
+				case IRepository.GRAPHICALCOMPONENTS :
+					if (object.optInt("onActionMethodID") == 0 || !object.optBoolean("showClick", true))
+					{
+						if (object.has("imageMediaID"))
+						{
+							return Activator.loadImageDescriptorFromBundle("image.gif");
+						}
+						return Activator.loadImageDescriptorFromBundle("text.gif");
+					}
+
+					return Activator.loadImageDescriptorFromBundle("button.gif");
+
+				case IRepository.RECTSHAPES :
+				case IRepository.SHAPES :
+					return Activator.loadImageDescriptorFromBundle("rectangle.gif");
+
+				case IRepository.PORTALS :
+					return Activator.loadImageDescriptorFromBundle("portal.gif");
+
+
+				case IRepository.TABPANELS :
+					int orient = object.optInt("tabOrientation");
+					if (orient == TabPanel.SPLIT_HORIZONTAL || orient == TabPanel.SPLIT_VERTICAL)
+					{
+						return Activator.loadImageDescriptorFromBundle("split.gif");
+					}
+					return Activator.loadImageDescriptorFromBundle("tabs.gif");
+
+				case IRepository.TABS :
+					return Activator.loadImageDescriptorFromBundle("tabs.gif");
+
+				case IRepository.BEANS :
+					return Activator.loadImageDescriptorFromBundle("bean.gif");
+			}
+
+		}
+		catch (JSONException e)
+		{
+			ServoyLog.logError("Error reading template " + template.getName(), e);
+		}
+
+		return null;
+	}
+
 
 	/**
 	 * Creates the PaletteRoot and adds all palette elements. Use this factory
