@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
@@ -81,17 +81,18 @@ public class RenameMediaAction extends Action implements ISelectionChangedListen
 	public void run()
 	{
 		if (solution == null) return;
-		InputDialog nameDialog = new InputDialog(viewer.getViewSite().getShell(), "Rename media item", "Supply a new media name", "", new IInputValidator()
-		{
-			public String isValid(String newText)
+		InputDialog nameDialog = new InputDialog(viewer.getViewSite().getShell(), "Rename media item", "Supply a new media name", selectedMediaName, new IInputValidator()
 			{
-				if (newText.length() == 0)
+
+				public String isValid(String newText)
 				{
-					return "Invalid new media name";
+					if (newText.length() == 0)
+					{
+						return "Invalid new media name";
+					}
+					return null;
 				}
-				return null;
-			}
-		});
+			});
 		int res = nameDialog.open();
 		if (res == Window.OK)
 		{
