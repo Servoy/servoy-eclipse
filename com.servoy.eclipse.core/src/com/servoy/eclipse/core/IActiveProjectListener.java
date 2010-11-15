@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core;
 
 /**
@@ -82,5 +82,28 @@ public interface IActiveProjectListener
 	 * @param updateInfo one of the constants declared in this interface identifying the event type.
 	 */
 	void activeProjectUpdated(ServoyProject activeProject, int updateInfo);
+
+	/**
+	 * Abstract base implementation.
+	 * 
+	 * @author rgansevles
+	 *
+	 */
+	public static abstract class ActiveProjectListener implements IActiveProjectListener
+	{
+
+		public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+		{
+			return true;
+		}
+
+		public void activeProjectChanged(ServoyProject activeProject)
+		{
+		}
+
+		public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+		{
+		}
+	}
 
 }

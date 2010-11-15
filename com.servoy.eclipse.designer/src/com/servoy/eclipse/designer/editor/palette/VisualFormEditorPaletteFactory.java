@@ -17,7 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.palette;
 
-import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +36,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
@@ -56,7 +57,7 @@ public class VisualFormEditorPaletteFactory
 
 	private static PaletteContainer createElementsDrawer()
 	{
-		PaletteDrawer componentsDrawer = new PaletteDrawer("Elements");
+		PaletteDrawer componentsDrawer = new PaletteDrawer(Messages.LabelElementsPalette);
 		ToolEntry component;
 
 		component = new ElementCreationToolEntry("Button", "Create a button", new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_BUTTON),
@@ -74,10 +75,15 @@ public class VisualFormEditorPaletteFactory
 
 	private static PaletteContainer createTemplatesDrawer()
 	{
-		PaletteDrawer componentsDrawer = new PaletteDrawer("Templates");
-		ToolEntry component;
+		PaletteDrawer componentsDrawer = new PaletteDrawer(Messages.LabelTemplatesPalette);
+		componentsDrawer.setChildren(getTemplatesEntries());
 
-		// TODO: listen for new templates
+		return componentsDrawer;
+	}
+
+	private static List<ToolEntry> getTemplatesEntries()
+	{
+		List<ToolEntry> templatesEntries = new ArrayList<ToolEntry>();
 
 		List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
 		Collections.sort(templates, NameComparator.INSTANCE);
@@ -94,16 +100,14 @@ public class VisualFormEditorPaletteFactory
 				// default icon
 				icon = Activator.loadImageDescriptorFromBundle("template.gif");
 			}
-			component = new ElementCreationToolEntry(template.getName(), "Create/apply template " + template.getName(), factory, icon, icon);
-			componentsDrawer.add(component);
+			templatesEntries.add(new ElementCreationToolEntry(template.getName(), "Create/apply template " + template.getName(), factory, icon, icon));
 		}
 
-		return componentsDrawer;
+		return templatesEntries;
 	}
 
 	static ImageDescriptor getTemplateIcon(Template template)
 	{
-		Rectangle box = null;
 		try
 		{
 			JSONObject json = new ServoyJSONObject(template.getContent(), false);
@@ -203,4 +207,14 @@ public class VisualFormEditorPaletteFactory
 		return palette;
 	}
 
+	public static void refreshPalette(PaletteRoot palette)
+	{
+		for (Object drawer : palette.getChildren())
+		{
+			if (drawer instanceof PaletteDrawer && Messages.LabelTemplatesPalette.equals(((PaletteDrawer)drawer).getLabel()))
+			{
+				((PaletteDrawer)drawer).setChildren(getTemplatesEntries());
+			}
+		}
+	}
 }

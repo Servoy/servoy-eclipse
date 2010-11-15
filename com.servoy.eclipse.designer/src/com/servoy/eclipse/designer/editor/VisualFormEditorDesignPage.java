@@ -68,6 +68,8 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
@@ -90,8 +92,11 @@ import org.eclipse.ui.views.properties.IPropertySourceProvider;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate;
 import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate.IActionAddedListener;
 import com.servoy.eclipse.designer.actions.AlignmentSortPartsAction;
@@ -1000,10 +1005,35 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		return new PaletteViewerProvider(getEditDomain())
 		{
 			@Override
-			protected void configurePaletteViewer(PaletteViewer viewer)
+			protected void configurePaletteViewer(final PaletteViewer viewer)
 			{
 				super.configurePaletteViewer(viewer);
+
+				// native drag-and-drop from 
 				viewer.addDragSourceListener(new TemplateTransferDragSourceListener(viewer));
+
+				// refresh templates when templates are added or removed
+				final IActiveProjectListener activeProjectListener = new IActiveProjectListener.ActiveProjectListener()
+				{
+					@Override
+					public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+					{
+						if (updateInfo == IActiveProjectListener.TEMPLATES_ADDED_OR_REMOVED && paletteModel != null)
+						{
+							VisualFormEditorPaletteFactory.refreshPalette(paletteModel);
+						}
+					}
+				};
+				ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(activeProjectListener);
+
+				viewer.getControl().addDisposeListener(new DisposeListener()
+				{
+
+					public void widgetDisposed(DisposeEvent e)
+					{
+						ServoyModelManager.getServoyModelManager().getServoyModel().removeActiveProjectListener(activeProjectListener);
+					}
+				});
 			}
 		};
 	}
