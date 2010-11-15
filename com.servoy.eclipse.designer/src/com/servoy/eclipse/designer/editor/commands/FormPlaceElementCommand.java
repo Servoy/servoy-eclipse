@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.editor.commands;
 import java.beans.BeanInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -53,6 +54,7 @@ import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDeveloperRepository;
@@ -573,22 +575,40 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 	@Override
 	public void undo()
 	{
+		List<IPersist> toDelete = new ArrayList<IPersist>(); // put in toDelete list first, group iterator misses elements otherwise.
 		for (Object model : models)
 		{
 			if (model instanceof IPersist)
 			{
-				IPersist persist = (IPersist)model;
-				try
+				toDelete.add((IPersist)model);
+			}
+			else if (model instanceof FormElementGroup)
+			{
+				Iterator<IFormElement> elements = ((FormElementGroup)model).getElements();
+				while (elements.hasNext())
 				{
-					((IDeveloperRepository)persist.getRootObject().getRepository()).deleteObject(persist);
-					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, model, true);
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError("Could not undo create element " + model, e);
+					IFormElement element = elements.next();
+					if (element instanceof IPersist)
+					{
+						toDelete.add((IPersist)element);
+					}
 				}
 			}
 		}
+
+		try
+		{
+			for (IPersist del : toDelete)
+			{
+				((IDeveloperRepository)del.getRootObject().getRepository()).deleteObject(del);
+				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, del, true);
+			}
+		}
+		catch (RepositoryException e)
+		{
+			ServoyLog.logError("Could not undo create elements", e);
+		}
+
 		models = null;
 	}
 }
