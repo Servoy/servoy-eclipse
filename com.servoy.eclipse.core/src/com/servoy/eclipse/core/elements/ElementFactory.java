@@ -26,8 +26,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -38,6 +38,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.DesignComponentFactory;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.EclipseRepository;
@@ -262,7 +263,7 @@ public class ElementFactory
 		bean.setLocation(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
 
 		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
-		Object beanInstance = ComponentFactory.getBeanDesignInstance(Activator.getDefault().getDesignClient(), flattenedSolution, bean, form);
+		Object beanInstance = DesignComponentFactory.getBeanDesignInstance(Activator.getDefault().getDesignClient(), flattenedSolution, bean, form);
 		if (beanInstance instanceof Component)
 		{
 			// check preferredSize and minimumSize
@@ -592,8 +593,8 @@ public class ElementFactory
 		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
 
 		JSONObject json = new JSONObject();
-		json.put(Template.PROP_FORM,
-			cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, repository), null));
+		json.put(Template.PROP_FORM, cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, repository),
+			null));
 		json.put(Template.PROP_LOCATION, PersistHelper.createPointString(location));
 		JSONArray elements = new JSONArray();
 

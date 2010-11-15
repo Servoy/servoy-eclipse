@@ -26,12 +26,12 @@ import javax.swing.SwingUtilities;
 import org.eclipse.swt.graphics.ImageData;
 
 import com.servoy.eclipse.core.DesignApplication;
+import com.servoy.eclipse.core.DesignComponentFactory;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
@@ -115,7 +115,7 @@ public class PersistImageNotifier implements IImageNotifier, IImageListener
 						Component comp = null;
 						if (persist instanceof Bean)
 						{
-							Object beanInstance = ComponentFactory.getBeanDesignInstance(application, editingFlattenedSolution, (Bean)persist, form);
+							Object beanInstance = DesignComponentFactory.getBeanDesignInstance(application, editingFlattenedSolution, (Bean)persist, form);
 							if (beanInstance instanceof Component)
 							{
 								comp = (Component)beanInstance;
@@ -123,7 +123,7 @@ public class PersistImageNotifier implements IImageNotifier, IImageListener
 						}
 						if (comp == null)
 						{
-							comp = ComponentFactory.createDesignComponent(application, editingFlattenedSolution, persist, form);
+							comp = DesignComponentFactory.createDesignComponent(application, editingFlattenedSolution, persist, form);
 						}
 
 						label.add(comp);
