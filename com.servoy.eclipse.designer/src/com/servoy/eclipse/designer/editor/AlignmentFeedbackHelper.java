@@ -79,7 +79,7 @@ public class AlignmentFeedbackHelper
 		{
 			if (alignmentFeedbackFigures.get(item) == null)
 			{
-				AlignmentFeedbackFigure figure = new AlignmentFeedbackFigure(item);
+				AlignmentFeedbackFigure figure = new AlignmentFeedbackFigure(item, null);
 				alignmentFeedbackFigures.put(item, figure);
 				feedbackLayer.add(figure);
 			}

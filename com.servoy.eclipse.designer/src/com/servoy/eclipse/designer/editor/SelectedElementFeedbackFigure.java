@@ -106,13 +106,13 @@ public class SelectedElementFeedbackFigure extends Figure implements AncestorLis
 		editParts.add(editPart);
 		SnapToElementAlignment snapToElementAlignment = new SnapToElementAlignment(container);
 		snapToElementAlignment.setSnapThreshold(0);
-		ElementAlignmentItem[] elementAlignment = snapToElementAlignment.getElementAlignment(editPart.getFigure().getBounds(), PositionConstants.NSEW,
-			editParts, false);
+		Rectangle figureBounds = editPart.getFigure().getBounds();
+		ElementAlignmentItem[] elementAlignment = snapToElementAlignment.getElementAlignment(figureBounds, PositionConstants.NSEW, editParts, false);
 		if (elementAlignment != null)
 		{
 			for (ElementAlignmentItem item : elementAlignment)
 			{
-				add(new AlignmentFeedbackFigure(item));
+				add(new AlignmentFeedbackFigure(item, figureBounds));
 			}
 		}
 	}

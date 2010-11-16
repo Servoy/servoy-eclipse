@@ -275,7 +275,7 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 			anchoringFigure = new Clickable(new AnchoringFigure((ISupportAnchors)getHost().getModel()), SWT.NONE);
 			getLayer(LayerConstants.HANDLE_LAYER).add(anchoringFigure);
 
-			getHost().getFigure().addAncestorListener(new FigureMovedTracker(anchoringFigure, new AbsoluteLocator(getHost().getFigure(), false, 2, true, 1)));
+			getHost().getFigure().addAncestorListener(new FigureMovedTracker(anchoringFigure, new AbsoluteLocator(getHost().getFigure(), false, 4, true, 2)));
 			anchoringFigure.addActionListener(new ActionListener()
 			{
 				public void actionPerformed(ActionEvent e)

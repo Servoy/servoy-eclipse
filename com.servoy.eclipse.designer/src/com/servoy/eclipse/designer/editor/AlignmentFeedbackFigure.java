@@ -20,6 +20,7 @@ package com.servoy.eclipse.designer.editor;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.Polygon;
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.Rectangle;
 
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.ColorResource;
@@ -37,10 +38,12 @@ public class AlignmentFeedbackFigure extends Polygon
 {
 	protected final ElementAlignmentItem elementAlignmentItem;
 	private final DesignerPreferences designerPreferences;
+	private final Rectangle referenceBounds;
 
-	public AlignmentFeedbackFigure(ElementAlignmentItem item)
+	public AlignmentFeedbackFigure(ElementAlignmentItem item, Rectangle referenceBounds)
 	{
 		this.elementAlignmentItem = item;
+		this.referenceBounds = referenceBounds;
 		designerPreferences = new DesignerPreferences(Settings.getInstance());
 		setLineStyle(Graphics.LINE_CUSTOM);
 		setLineDash(new float[] { 5, 2 });
@@ -53,15 +56,28 @@ public class AlignmentFeedbackFigure extends Polygon
 		if (horizontal)
 		{
 			addPoint(new Point(start, target));
+			if (referenceBounds != null && (target == referenceBounds.y || target == referenceBounds.y + referenceBounds.height) && start < referenceBounds.x &&
+				end > referenceBounds.x + referenceBounds.width)
+			{
+				// do not draw over reference box
+				addPoint(new Point(referenceBounds.x, target));
+				addPoint(new Point(referenceBounds.x + referenceBounds.width, target));
+			}
 			addPoint(new Point(end, target));
 		}
 		else
 		{
 			addPoint(new Point(target, start));
+			if (referenceBounds != null && (target == referenceBounds.x || target == referenceBounds.x + referenceBounds.width) && start < referenceBounds.y &&
+				end > referenceBounds.y + referenceBounds.height)
+			{
+				// do not draw over reference box
+				addPoint(new Point(target, referenceBounds.y));
+				addPoint(new Point(target, referenceBounds.y + referenceBounds.height));
+			}
 			addPoint(new Point(target, end));
 		}
 	}
-
 
 	@Override
 	protected void fillShape(Graphics graphics)

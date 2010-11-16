@@ -63,13 +63,13 @@ public class SameSizeFeedbackFigure extends Figure
 		Locator locator;
 		if (SAME_WIDTH.equals(type))
 		{
-			locator = new AbsoluteLocator(referenceFigure, true, 0, true, 3);
+			locator = new AbsoluteLocator(referenceFigure, true, 2, true, 3);
 			setPreferredSize(5, 10);
 		}
 		else if (SAME_HEIGHT.equals(type))
 		{
 			setPreferredSize(10, 5);
-			locator = new AbsoluteLocator(referenceFigure, false, -3, true, 0);
+			locator = new AbsoluteLocator(referenceFigure, false, -4, true, 1);
 		}
 		else
 		{
