@@ -366,10 +366,13 @@ public class ElementFactory
 				}
 
 				String cutofDPID = dataProvider.getDataProviderID();
-				int indx = cutofDPID.lastIndexOf('.');
-				if (indx != -1)
+				if (cutofDPID != null)
 				{
-					cutofDPID = cutofDPID.substring(indx + 1);
+					int indx = cutofDPID.lastIndexOf('.');
+					if (indx != -1)
+					{
+						cutofDPID = cutofDPID.substring(indx + 1);
+					}
 				}
 				String labelText = Utils.stringInitCap(Utils.stringReplace(cutofDPID, "_", " ")); //$NON-NLS-1$ //$NON-NLS-2$
 				if (dataProvider.getColumnWrapper() != null)

@@ -79,7 +79,7 @@ public class AddFieldActionDelegate extends AbstractEditpartActionDelegate
 			{
 				return null;
 			}
-			input = new DataProviderTreeViewer.DataProviderOptions(false, false, false, true /* related calcs */, false, false, false, false,
+			input = new DataProviderTreeViewer.DataProviderOptions(true, false, false, true /* related calcs */, false, false, false, false,
 				INCLUDE_RELATIONS.NESTED, false, true, relations);
 		}
 		else
@@ -95,7 +95,7 @@ public class AddFieldActionDelegate extends AbstractEditpartActionDelegate
 			{
 				ServoyLog.logError("Could not get table for form " + form, e);
 			}
-			input = new DataProviderTreeViewer.DataProviderOptions(false, table != null, table != null, true, true, true, table != null, true,
+			input = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, true, true, true, table != null, true,
 				INCLUDE_RELATIONS.NESTED, true, true, null);
 		}
 
