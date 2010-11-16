@@ -28,6 +28,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
+import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.actions.SetPropertyRequest;
 import com.servoy.eclipse.designer.editor.commands.DataFieldRequest;
@@ -56,9 +57,12 @@ import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.persistence.Template;
 
 /**
  * This edit policy enables the removal and copy of a Form elements
+ * 
+ * @author rgansevles
  */
 class PersistEditPolicy extends ComponentEditPolicy
 {
@@ -85,17 +89,24 @@ class PersistEditPolicy extends ComponentEditPolicy
 	{
 		IPersist persist = (IPersist)getHost().getModel();
 
-		if (VisualFormEditor.REQ_DROP_LINK.equals(request.getType()) && request instanceof DataRequest &&
-			((DataRequest)request).getData() instanceof IDragData[] && ((IDragData[])(((DataRequest)request).getData())).length > 0)
+		if (VisualFormEditor.REQ_DROP_LINK.equals(request.getType()) && request instanceof DataRequest)
 		{
-			if (((IDragData[])(((DataRequest)request).getData()))[0] instanceof PersistDragData &&
-				(persist instanceof Field || persist instanceof GraphicalComponent || persist instanceof ISupportMedia))
+
+			if (((DataRequest)request).getData() instanceof IDragData[] && ((IDragData[])(((DataRequest)request).getData())).length > 0)
 			{
-				return createDropPersistCommand((DataRequest)request);
+				if (((IDragData[])(((DataRequest)request).getData()))[0] instanceof PersistDragData &&
+					(persist instanceof Field || persist instanceof GraphicalComponent || persist instanceof ISupportMedia))
+				{
+					return createDropPersistCommand((DataRequest)request);
+				}
+				if (((IDragData[])(((DataRequest)request).getData()))[0] instanceof DataProviderDragData && persist instanceof ISupportDataProviderID)
+				{
+					return createDropColumnCommand((DataRequest)request);
+				}
 			}
-			if (((IDragData[])(((DataRequest)request).getData()))[0] instanceof DataProviderDragData && persist instanceof ISupportDataProviderID)
+			else if (((DataRequest)request).getData() instanceof Template)
 			{
-				return createDropColumnCommand((DataRequest)request);
+				return createDropTemplateCommand((DataRequest)request);
 			}
 		}
 
@@ -186,18 +197,24 @@ class PersistEditPolicy extends ComponentEditPolicy
 	public boolean understandsRequest(Request request)
 	{
 		Object model = getHost().getModel();
-		if (VisualFormEditor.REQ_DROP_LINK.equals(request.getType()) && request instanceof DataRequest &&
-			((DataRequest)request).getData() instanceof IDragData[])
+		if (VisualFormEditor.REQ_DROP_LINK.equals(request.getType()) && request instanceof DataRequest)
 		{
-			IDragData[] dragData = (IDragData[])((DataRequest)request).getData();
-			if (dragData.length > 0 && dragData[0] instanceof PersistDragData &&
-				(model instanceof Field || model instanceof GraphicalComponent || model instanceof ISupportMedia))
+			if (((DataRequest)request).getData() instanceof IDragData[])
 			{
-				return true;
+				IDragData[] dragData = (IDragData[])((DataRequest)request).getData();
+				if (dragData.length > 0 && dragData[0] instanceof PersistDragData &&
+					(model instanceof Field || model instanceof GraphicalComponent || model instanceof ISupportMedia))
+				{
+					return true;
+				}
+				if (dragData.length > 0 && dragData[0] instanceof DataProviderDragData && model instanceof ISupportDataProviderID)
+				{
+					return true;
+				}
 			}
-			if (dragData.length > 0 && dragData[0] instanceof DataProviderDragData && model instanceof ISupportDataProviderID)
+			if (((DataRequest)request).getData() instanceof Template)
 			{
-				return true;
+				return ElementFactory.getTemplateElementCount((Template)((DataRequest)request).getData()) == 1;
 			}
 		}
 		if ((VisualFormEditor.REQ_PLACE_TAB.equals(request.getType()) || VisualFormEditor.REQ_PLACE_TAB.equals(request.getType())) && model instanceof TabPanel)
@@ -291,9 +308,11 @@ class PersistEditPolicy extends ComponentEditPolicy
 			if (dragData.length == 0 || !(dragData[0] instanceof DataProviderDragData)) return null;
 			DataProviderDragData dataProviderDragData = (DataProviderDragData)dragData[0];
 			Form form = (Form)((IPersist)child).getAncestor(IRepository.FORMS);
-			if (dataProviderDragData.serverName == null || !dataProviderDragData.serverName.equals(form.getServerName())) return null;
-			if (dataProviderDragData.baseTableName == null || !dataProviderDragData.baseTableName.equals(form.getTableName())) return null;
-
+			if (dataProviderDragData.serverName != null && dataProviderDragData.baseTableName != null)
+			{
+				if (!dataProviderDragData.serverName.equals(form.getServerName()) || !dataProviderDragData.baseTableName.equals(form.getTableName())) return null;
+			}
+			// else drop a form or global variable
 			IPropertySource propertySource = new PersistPropertySource((IPersist)child, form, false);
 			SetValueCommand setCommand = new SetValueCommand("Drag-n-drop data provider");
 			setCommand.setTarget(propertySource);
@@ -302,6 +321,17 @@ class PersistEditPolicy extends ComponentEditPolicy
 				: (dataProviderDragData.relationName + '.' + dataProviderDragData.dataProviderId));
 			return setCommand;
 		}
+		return null;
+	}
+
+	protected Command createDropTemplateCommand(DataRequest dropRequest)
+	{
+		Object child = getHost().getModel();
+		if (child instanceof IPersist)
+		{
+			return new ApplyTemplatePropertiesCommand((Template)dropRequest.getData(), (IPersist)child);
+		}
+
 		return null;
 	}
 }

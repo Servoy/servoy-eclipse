@@ -26,8 +26,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -94,6 +94,12 @@ import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
+/**
+ * Class with static methods for creating elements in Servoy Developer.
+ * 
+ * @author rgansevles
+ *
+ */
 public class ElementFactory
 {
 	private static Random random = new Random();
@@ -593,8 +599,8 @@ public class ElementFactory
 		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
 
 		JSONObject json = new JSONObject();
-		json.put(Template.PROP_FORM, cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, repository),
-			null));
+		json.put(Template.PROP_FORM,
+			cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, repository), null));
 		json.put(Template.PROP_LOCATION, PersistHelper.createPointString(location));
 		JSONArray elements = new JSONArray();
 
@@ -737,7 +743,8 @@ public class ElementFactory
 				IPersist persist = SolutionDeserializer.deserializePersist(repository, parent, persist_json_map, object, null, null, null, false);
 				for (Map.Entry<IPersist, JSONObject> entry : persist_json_map.entrySet())
 				{
-					SolutionDeserializer.updatePersistWithValues(repository, entry.getKey(), resolveCleanedProperties(parent, entry.getValue()));
+					SolutionDeserializer.updatePersistWithValues(repository, entry.getKey(),
+						resolveCleanedProperties((Form)entry.getKey().getAncestor(IRepository.FORMS), entry.getValue()));
 				}
 				persists.put(persist, name);
 			}
@@ -801,7 +808,7 @@ public class ElementFactory
 				{
 					JSONObject formObject = (JSONObject)json.opt(Template.PROP_FORM);
 					formObject.remove(SolutionSerializer.PROP_NAME);
-					SolutionDeserializer.updatePersistWithValues(repository, parent, resolveCleanedProperties(parent, formObject));
+					SolutionDeserializer.updatePersistWithValues(repository, parent, resolveCleanedProperties((Form)parent, formObject));
 				}
 			}
 			else
@@ -918,19 +925,43 @@ public class ElementFactory
 		return box == null ? null : box.getSize();
 	}
 
+	public static int getTemplateElementCount(Template template)
+	{
+		if (template == null)
+		{
+			return 0;
+		}
+
+		try
+		{
+			JSONObject json = new ServoyJSONObject(template.getContent(), false);
+
+			// elements
+			JSONArray elements = (JSONArray)json.opt(Template.PROP_ELEMENTS);
+			if (elements != null)
+			{
+				return elements.length();
+			}
+		}
+		catch (JSONException e)
+		{
+			ServoyLog.logError("Error processing template " + template.getName(), e);
+		}
+		return 0;
+	}
+
 	/**
 	 * Resolve method names to UUIDs in json object.
 	 * 
-	 * @param parent
+	 * @param form
 	 * @param object
 	 * @return
 	 * @throws RepositoryException
 	 * @throws JSONException
 	 */
-	static JSONObject resolveCleanedProperties(ISupportFormElements parent, JSONObject object) throws RepositoryException, JSONException
+	public static JSONObject resolveCleanedProperties(Form form, JSONObject object) throws RepositoryException, JSONException
 	{
 		// replace method names with their UUIDs
-		Form form = (Form)parent.getAncestor(IRepository.FORMS);
 		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
 		Form flattenedForm = flattenedSolution.getFlattenedForm(form);
 		Iterator<String> keys = object.keys();
@@ -973,7 +1004,7 @@ public class ElementFactory
 					JSONArray array = ((JSONArray)items);
 					for (int i = 0; i < array.length(); i++)
 					{
-						array.put(i, resolveCleanedProperties(parent, array.getJSONObject(i)));
+						array.put(i, resolveCleanedProperties(form, array.getJSONObject(i)));
 					}
 				}
 			}

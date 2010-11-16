@@ -18,6 +18,8 @@
 package com.servoy.eclipse.designer.editor.palette;
 
 import org.eclipse.draw2d.geometry.Dimension;
+import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.dnd.TemplateTransfer;
@@ -26,6 +28,8 @@ import org.eclipse.gef.requests.CreationFactory;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.designer.dnd.ElementTransferDropTarget;
 import com.servoy.eclipse.designer.editor.CreateElementRequest;
+import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.commands.DataRequest;
 import com.servoy.j2db.persistence.Template;
 
 /**
@@ -48,27 +52,48 @@ public class PaletteItemTransferDropTargetListener extends ElementTransferDropTa
 	@Override
 	protected Request createTargetRequest()
 	{
+		Template template = null;
 		CreationFactory factory = getFactory(TemplateTransfer.getInstance().getTemplate());
-		CreateElementRequest request = new CreateElementRequest(factory);
-
-		Dimension d2size = null;
 		if (factory instanceof RequestTypeCreationFactory)
 		{
 			Object data = ((RequestTypeCreationFactory)factory).getData();
 			if (data instanceof Template)
 			{
-				java.awt.Dimension size = ElementFactory.getTemplateBoundsize((Template)data);
-				if (size != null)
-				{
-					d2size = new Dimension(size.width, size.height);
-				}
+				template = (Template)data;
 			}
 		}
 
-		if (d2size == null)
+		if (template != null)
+		{
+			org.eclipse.swt.graphics.Point swtPoint = getViewer().getControl().toControl(getCurrentEvent().x, getCurrentEvent().y);
+			Point point = new Point(swtPoint.x, swtPoint.y);
+			EditPart editPart = getViewer().findObjectAt(point);
+			if (editPart == getViewer().getRootEditPart())
+			{
+				editPart = getViewer().getContents();
+			}
+			DataRequest dropReq = new DataRequest(VisualFormEditor.REQ_DROP_LINK, point, template);
+			if (editPart.understandsRequest(dropReq))
+			{
+				// link template to existing element
+				return dropReq;
+			}
+		}
+
+		// drop element or template on form
+		CreateElementRequest request = new CreateElementRequest(factory);
+
+		Dimension d2size;
+		java.awt.Dimension size = ElementFactory.getTemplateBoundsize(template);
+		if (size == null)
 		{
 			d2size = new Dimension(80, 20);
 		}
+		else
+		{
+			d2size = new Dimension(size.width, size.height);
+		}
+
 		request.setSize(d2size);
 		return request;
 	}

@@ -1495,12 +1495,19 @@ public class SolutionDeserializer
 //		return arguments;
 //	}
 
-	public static void updatePersistWithValues(IDeveloperRepository repository, IPersist retval, JSONObject obj) throws RepositoryException, JSONException
+	public static void updatePersistWithValues(IDeveloperRepository repository, IPersist persist, JSONObject obj) throws RepositoryException, JSONException
+	{
+		Map<String, Object> propertyValues = getPropertyValuesForJsonObject(repository, persist, obj);
+		repository.updatePersistWithValueMap(persist, propertyValues);
+	}
+
+	public static Map<String, Object> getPropertyValuesForJsonObject(IDeveloperRepository repository, IPersist persist, JSONObject obj)
+		throws RepositoryException, JSONException
 	{
 		LinkedHashMap<String, Object> propertyValues = new LinkedHashMap<String, Object>(); //  use linked hashmap to preserve ordening
 		ContentSpec cs = repository.getContentSpec();
 
-		Iterator<ContentSpec.Element> iterator = cs.getPropertiesForObjectType(retval.getTypeID());
+		Iterator<ContentSpec.Element> iterator = cs.getPropertiesForObjectType(persist.getTypeID());
 		// Note that elements are sorted by contentid desc.
 		// This is needed because otherwise deprecated properties (with lower content id) may get overwritten with the default value of their replacement.
 		while (iterator.hasNext())
@@ -1530,11 +1537,11 @@ public class SolutionDeserializer
 					}
 
 					//filling this in case the obj is sent to team repository (with other ids)
-					HashMap<UUID, Integer> map = ((AbstractBase)retval).getSerializableRuntimeProperty(AbstractBase.UUIDToIDMapProperty);
+					HashMap<UUID, Integer> map = ((AbstractBase)persist).getSerializableRuntimeProperty(AbstractBase.UUIDToIDMapProperty);
 					if (map == null)
 					{
 						map = new HashMap<UUID, Integer>();
-						((AbstractBase)retval).setSerializableRuntimeProperty(AbstractBase.UUIDToIDMapProperty, map);
+						((AbstractBase)persist).setSerializableRuntimeProperty(AbstractBase.UUIDToIDMapProperty, map);
 					}
 					if (uuid != null)
 					{
@@ -1554,7 +1561,7 @@ public class SolutionDeserializer
 				propertyValues.put(propertyName, repository.convertArgumentStringToObject(element.getTypeID(), element.getDefaultTextualClassValue()));
 			}
 		}
-		repository.updatePersistWithValueMap(retval, propertyValues);
+		return propertyValues;
 	}
 
 	public static UUID getUUID(File file)
