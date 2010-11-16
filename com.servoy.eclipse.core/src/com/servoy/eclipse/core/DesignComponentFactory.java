@@ -50,6 +50,7 @@ import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.gui.OrientationApplier;
 
 /**
+ * Component factory for use in design more
  * @author jblok
  */
 public class DesignComponentFactory extends ComponentFactory
