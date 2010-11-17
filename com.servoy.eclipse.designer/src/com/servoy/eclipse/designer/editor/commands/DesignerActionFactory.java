@@ -85,10 +85,10 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
-	public static final String TOGGLE_SHOW_GRID_TEXT = "Toggle grid";
-	public static final String TOGGLE_SHOW_GRID_TOOLTIP = "Show grid";
-	public static final ImageDescriptor TOGGLE_SHOW_GRID_IMAGE = Activator.loadImageDescriptorFromOldLocations("grid.gif");//$NON-NLS-1$
-	public static final ActionFactory TOGGLE_SHOW_GRID = new ActionFactory("toggle-show-grid") {//$NON-NLS-1$
+	public static final String SELECT_FEEDBACK_TEXT = "Select feedback mode";
+	public static final String SELECT_FEEDBACK_TOOLTIP = SELECT_FEEDBACK_TEXT;
+	public static final ImageDescriptor SELECT_FEEDBACK_IMAGE = Activator.loadImageDescriptorFromOldLocations("grid.gif");//$NON-NLS-1$
+	public static final ActionFactory SELECT_FEEDBACK = new ActionFactory("select-feedback-mode") {//$NON-NLS-1$
 
 		@Override
 		public IWorkbenchAction create(IWorkbenchWindow window)
@@ -97,11 +97,11 @@ public abstract class DesignerActionFactory extends ActionFactory
 			{
 				throw new IllegalArgumentException();
 			}
-			RetargetAction action = new RetargetAction(getId(), TOGGLE_SHOW_GRID_TEXT, IAction.AS_CHECK_BOX);
-			action.setToolTipText(TOGGLE_SHOW_GRID_TOOLTIP);
+			RetargetAction action = new RetargetAction(getId(), SELECT_FEEDBACK_TEXT, IAction.AS_DROP_DOWN_MENU);
+			action.setToolTipText(SELECT_FEEDBACK_TOOLTIP);
 			window.getPartService().addPartListener(action);
 //			action.setActionDefinitionId("org.eclipse.ui.edit." + getId()); //$NON-NLS-1$
-			action.setImageDescriptor(TOGGLE_SHOW_GRID_IMAGE);
+			action.setImageDescriptor(SELECT_FEEDBACK_IMAGE);
 			return action;
 		}
 	};

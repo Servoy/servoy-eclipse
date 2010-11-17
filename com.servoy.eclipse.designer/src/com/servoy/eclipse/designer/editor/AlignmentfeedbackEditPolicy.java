@@ -65,6 +65,10 @@ import com.servoy.j2db.util.IAnchorConstants;
 final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 {
 	/**
+	 * A viewer property indicating whether the alignment feedback is enabled. The value must  be a Boolean.
+	 */
+	public static final String PROPERTY_ALIGMENT_FEEDBACK_VISIBLE = "AlignmentfeedbackEditPolicy.alignmentFeedbackVisible"; //$NON-NLS-1$
+	/**
 	 * A viewer property indicating whether the anchor feedback is enabled. The value must  be a Boolean.
 	 */
 	public static final String PROPERTY_ANCHOR_FEEDBACK_ENABLED = "AlignmentfeedbackEditPolicy.anchorFeedbackEnabled"; //$NON-NLS-1$

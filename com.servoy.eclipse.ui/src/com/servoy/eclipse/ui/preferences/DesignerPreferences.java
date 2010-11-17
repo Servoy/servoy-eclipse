@@ -54,8 +54,8 @@ public class DesignerPreferences
 	public static final String ALIGNMENT_GUIDE_COLOR_SETTING = "alignmentguidecolor";
 	public static final String GRID_SIZE_SETTING = "gridsize";
 	public static final String GRID_POINTSIZE_SETTING = "pointsize";
-	public static final String GRID_SHOW_SETTING = "showGrid";
 	public static final String SNAPTO_SETTING = "snapTo";
+	public static final String FEEDBACK_SETTING = "feedBack";
 	public static final String ANCHOR_SETTING = "anchor";
 	public static final String SAVE_EDITOR_STATE_SETTING = "saveEditorState";
 	public static final String FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING = "formToolsOnMainToolbar";
@@ -66,6 +66,10 @@ public class DesignerPreferences
 	public static final String SNAP_TO_ALIGMNENT = "alignment";
 	public static final String SNAP_TO_GRID = "grid";
 	public static final String SNAP_TO_NONE = "none";
+
+	public static final String FEEDBACK_ALIGMNENT = "alignment";
+	public static final String FEEDBACK_GRID = "grid";
+	public static final String FEEDBACK_NONE = "none";
 
 	public static final int COPY_PASTE_OFFSET_DEFAULT = 10;
 	public static final int ALIGNMENT_THRESHOLD_DEFAULT = 12;
@@ -78,8 +82,8 @@ public class DesignerPreferences
 	public static final String GRID_COLOR_DEFAULT = "#b4b4b4";
 	public static final String ALIGNMENT_GUIDE_COLOR_DEFAULT = "#8eacc3";
 	public static final int GRID_POINTSIZE_DEFAULT = 2;
-	public static final boolean GRID_SHOW_DEFAULT = false;
 	public static final String SNAPTO_DEFAULT = SNAP_TO_ALIGMNENT;
+	public static final String FEEDBACK_DEFAULT = FEEDBACK_ALIGMNENT;
 	public static final boolean ANCHOR_DEFAULT = false;
 	public static final boolean SAVE_EDITOR_STATE_DEFAULT = true;
 	public static final boolean SHOW_SAME_SIZE_DEFAULT = true;
@@ -245,16 +249,6 @@ public class DesignerPreferences
 		settings.setProperty(GRID_POINTSIZE_SETTING, String.valueOf(gridPointSize));
 	}
 
-	public boolean getGridShow()
-	{
-		return Utils.getAsBoolean(settings.getProperty(GRID_SHOW_SETTING, String.valueOf(GRID_SHOW_DEFAULT)));
-	}
-
-	public void setGridShow(boolean gridShow)
-	{
-		settings.setProperty(GRID_SHOW_SETTING, String.valueOf(gridShow));
-	}
-
 	public boolean getNoneSnapTo()
 	{
 		return !getGridSnapTo() && !getAlignmentSnapTo();
@@ -273,6 +267,26 @@ public class DesignerPreferences
 	public void setSnapTo(boolean grid, boolean alignment)
 	{
 		settings.setProperty(SNAPTO_SETTING, grid ? SNAP_TO_GRID : alignment ? SNAP_TO_ALIGMNENT : SNAP_TO_NONE);
+	}
+
+	public boolean getFeedbackNone()
+	{
+		return !getFeedbackGrid() && !getFeedbackAlignment();
+	}
+
+	public boolean getFeedbackGrid()
+	{
+		return FEEDBACK_GRID.equals(settings.getProperty(FEEDBACK_SETTING, FEEDBACK_DEFAULT));
+	}
+
+	public boolean getFeedbackAlignment()
+	{
+		return FEEDBACK_ALIGMNENT.equals(settings.getProperty(FEEDBACK_SETTING, FEEDBACK_DEFAULT));
+	}
+
+	public void setFeedback(boolean grid, boolean alignment)
+	{
+		settings.setProperty(FEEDBACK_SETTING, grid ? FEEDBACK_GRID : alignment ? FEEDBACK_ALIGMNENT : FEEDBACK_NONE);
 	}
 
 	public boolean getSaveEditorState()

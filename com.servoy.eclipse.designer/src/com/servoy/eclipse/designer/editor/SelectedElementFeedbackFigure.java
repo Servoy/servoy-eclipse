@@ -49,7 +49,8 @@ public class SelectedElementFeedbackFigure extends Figure implements AncestorLis
 		public void propertyChange(PropertyChangeEvent evt)
 		{
 			String property = evt.getPropertyName();
-			if (property.equals(AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_ENABLED))
+			if (property.equals(AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_ENABLED) ||
+				property.equals(AlignmentfeedbackEditPolicy.PROPERTY_ALIGMENT_FEEDBACK_VISIBLE))
 			{
 				refresh();
 			}
@@ -102,6 +103,11 @@ public class SelectedElementFeedbackFigure extends Figure implements AncestorLis
 
 	protected void addElementAlignmentFeedback()
 	{
+		if (!Boolean.TRUE.equals(editPart.getViewer().getProperty(AlignmentfeedbackEditPolicy.PROPERTY_ALIGMENT_FEEDBACK_VISIBLE)))
+		{
+			return;
+		}
+
 		List<EditPart> editParts = new ArrayList<EditPart>(1);
 		editParts.add(editPart);
 		SnapToElementAlignment snapToElementAlignment = new SnapToElementAlignment(container);
