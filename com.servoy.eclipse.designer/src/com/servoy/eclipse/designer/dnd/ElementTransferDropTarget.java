@@ -31,6 +31,7 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Display;
 
+import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 
 /**
@@ -58,7 +59,7 @@ public class ElementTransferDropTarget extends AbstractTransferDropTargetListene
 	@Override
 	protected void handleDragOver()
 	{
-		getCurrentEvent().detail = DND.DROP_COPY;
+		getCurrentEvent().detail = VisualFormEditor.REQ_DROP_LINK.equals(getTargetRequest().getType()) ? DND.DROP_LINK : DND.DROP_COPY;
 		super.handleDragOver();
 	}
 
