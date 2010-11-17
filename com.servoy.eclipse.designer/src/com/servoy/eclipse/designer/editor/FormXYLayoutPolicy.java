@@ -124,8 +124,9 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 						data = ((RequestTypeCreationFactory)factory).getData();
 					}
 				}
-				command = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), data, requestType, extendedData, null,
-					request.getLocation().getSWTPoint());
+				Point loc = request.getLocation().getCopy();
+				getHostFigure().translateToRelative(loc);
+				command = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), data, requestType, extendedData, null, loc.getSWTPoint());
 			}
 
 			// TODO: add more
@@ -153,11 +154,13 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			RequestTypeCreationFactory factory = (RequestTypeCreationFactory)((CreateElementRequest)request).getFactory();
 			if (factory.getData() instanceof Object[])
 			{
+				Point loc = ((CreateRequest)request).getLocation().getCopy();
+				getHostFigure().translateToRelative(loc);
 				Command command = new CompoundCommand();
 				for (Object o : (Object[])factory.getData())
 				{
 					FormPlaceElementCommand placeElementCommand = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(),
-						new Object[] { o }, request.getType(), request.getExtendedData(), null, ((CreateRequest)request).getLocation().getSWTPoint());
+						new Object[] { o }, request.getType(), request.getExtendedData(), null, loc.getSWTPoint());
 					((CompoundCommand)command).add(((CreateElementRequest)request).chainSetFactoryObjectCommand(placeElementCommand));
 				}
 				return command;

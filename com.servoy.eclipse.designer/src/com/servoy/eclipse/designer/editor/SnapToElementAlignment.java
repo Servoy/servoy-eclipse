@@ -20,6 +20,7 @@ package com.servoy.eclipse.designer.editor;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PrecisionRectangle;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
@@ -187,7 +188,9 @@ public class SnapToElementAlignment extends SnapToHelper
 
 	protected ElementAlignmentItem[] getElementAlignmentForCreate(CreateRequest request, int snapOrientation, boolean singleAlignmentPerDimension)
 	{
-		return getElementAlignment(new Rectangle(request.getLocation(), request.getSize()), snapOrientation, null, singleAlignmentPerDimension);
+		Point loc = request.getLocation().getCopy();
+		container.getFigure().translateToRelative(loc);
+		return getElementAlignment(new Rectangle(loc, request.getSize()), snapOrientation, null, singleAlignmentPerDimension);
 	}
 
 	protected ElementAlignmentItem[] getElementAlignment(Rectangle rect, int snapOrientation, List<EditPart> skipEditparts, boolean singleAlignmentPerDimension)
