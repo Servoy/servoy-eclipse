@@ -57,8 +57,6 @@ public class AbsoluteLocator implements Locator
 	public void relocate(IFigure target)
 	{
 		Rectangle targetBounds = new PrecisionRectangle(reference.getBounds().getResized(-1, -1));
-		reference.translateToAbsolute(targetBounds);
-		target.translateToRelative(targetBounds);
 		targetBounds.resize(1, 1);
 
 		Dimension targetSize = target.getPreferredSize();
