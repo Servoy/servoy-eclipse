@@ -369,10 +369,8 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 	public void eraseTargetFeedback(Request request)
 	{
 		super.eraseTargetFeedback(request);
-		if (VisualFormEditor.REQ_DROP_COPY.equals(request.getType()))
-		{
-			eraseSizeOnDropFeedback(request);
-		}
+		// always erase here, the request is the new request
+		eraseSizeOnDropFeedback(request);
 	}
 
 	@Override
