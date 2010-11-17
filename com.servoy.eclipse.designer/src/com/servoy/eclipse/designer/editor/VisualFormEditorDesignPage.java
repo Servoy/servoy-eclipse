@@ -39,6 +39,7 @@ import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.SnapToGrid;
 import org.eclipse.gef.dnd.TemplateTransferDragSourceListener;
+import org.eclipse.gef.internal.ui.palette.PaletteSelectionTool;
 import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.gef.rulers.RulerProvider;
 import org.eclipse.gef.ui.actions.ActionRegistry;
@@ -70,6 +71,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
@@ -1009,6 +1011,21 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 			protected void configurePaletteViewer(final PaletteViewer viewer)
 			{
 				super.configurePaletteViewer(viewer);
+
+				viewer.getEditDomain().setDefaultTool(new PaletteSelectionTool()
+				{
+					@Override
+					protected boolean handleKeyDown(KeyEvent e)
+					{
+						if (e.keyCode == SWT.ESC)
+						{
+							viewer.setActiveTool(null);
+							return true;
+						}
+						return super.handleKeyDown(e);
+					}
+				});
+				viewer.getEditDomain().loadDefaultTool();
 
 				// native drag-and-drop from 
 				viewer.addDragSourceListener(new TemplateTransferDragSourceListener(viewer));
