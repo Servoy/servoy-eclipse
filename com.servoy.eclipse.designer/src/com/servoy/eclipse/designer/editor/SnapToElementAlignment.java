@@ -186,11 +186,11 @@ public class SnapToElementAlignment extends SnapToHelper
 		return getElementAlignment(rect, snapOrientation, editParts, singleAlignmentPerDimension);
 	}
 
-	protected ElementAlignmentItem[] getElementAlignmentForCreate(CreateRequest request, int snapOrientation, boolean singleAlignmentPerDimension)
+	protected ElementAlignmentItem[] getElementAlignmentForCreate(PrecisionRectangle baseRect, int snapOrientation, boolean singleAlignmentPerDimension)
 	{
-		Point loc = request.getLocation().getCopy();
+		Point loc = baseRect.getLocation().getCopy();
 		container.getFigure().translateToRelative(loc);
-		return getElementAlignment(new Rectangle(loc, request.getSize()), snapOrientation, null, singleAlignmentPerDimension);
+		return getElementAlignment(new Rectangle(loc, baseRect.getSize()), snapOrientation, null, singleAlignmentPerDimension);
 	}
 
 	protected ElementAlignmentItem[] getElementAlignment(Rectangle rect, int snapOrientation, List<EditPart> skipEditparts, boolean singleAlignmentPerDimension)
@@ -421,7 +421,7 @@ public class SnapToElementAlignment extends SnapToHelper
 		}
 		else if (request instanceof CreateRequest)
 		{
-			elementAlignment = getElementAlignmentForCreate((CreateRequest)request, snapOrientation, !isResize);
+			elementAlignment = getElementAlignmentForCreate(baseRect, snapOrientation, !isResize);
 		}
 
 		if (elementAlignment == null)

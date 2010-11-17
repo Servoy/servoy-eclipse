@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.gef.EditPart;
 
 import com.servoy.eclipse.designer.property.IPersistEditPart;
@@ -60,5 +61,18 @@ public class DesignerUtil
 		}
 
 		return newEditParts;
+	}
+
+	/**
+	 * @param awtDimension
+	 * @return draw2d Dimension
+	 */
+	public static Dimension convertDimension(java.awt.Dimension awtDimension)
+	{
+		if (awtDimension == null)
+		{
+			return null;
+		}
+		return new Dimension(awtDimension.width, awtDimension.height);
 	}
 }

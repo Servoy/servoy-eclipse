@@ -25,7 +25,6 @@ import org.eclipse.gef.Request;
 import org.eclipse.gef.dnd.TemplateTransfer;
 import org.eclipse.gef.requests.CreationFactory;
 
-import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.designer.dnd.ElementTransferDropTarget;
 import com.servoy.eclipse.designer.editor.CreateElementRequest;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
@@ -53,10 +52,12 @@ public class PaletteItemTransferDropTargetListener extends ElementTransferDropTa
 	protected Request createTargetRequest()
 	{
 		Template template = null;
+		Dimension size = null;
 		CreationFactory factory = getFactory(TemplateTransfer.getInstance().getTemplate());
 		if (factory instanceof RequestTypeCreationFactory)
 		{
 			Object data = ((RequestTypeCreationFactory)factory).getData();
+			size = ((RequestTypeCreationFactory)factory).getNewObjectSize();
 			if (data instanceof Template)
 			{
 				template = (Template)data;
@@ -83,18 +84,12 @@ public class PaletteItemTransferDropTargetListener extends ElementTransferDropTa
 		// drop element or template on form
 		CreateElementRequest request = new CreateElementRequest(factory);
 
-		Dimension d2size;
-		java.awt.Dimension size = ElementFactory.getTemplateBoundsize(template);
 		if (size == null)
 		{
-			d2size = new Dimension(80, 20);
+			size = new Dimension(80, 20);
 		}
-		else
-		{
-			d2size = new Dimension(size.width, size.height);
-		}
+		request.setSize(size);
 
-		request.setSize(d2size);
 		return request;
 	}
 

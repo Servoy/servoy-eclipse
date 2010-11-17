@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.gef.palette.PaletteContainer;
 import org.eclipse.gef.palette.PaletteDrawer;
 import org.eclipse.gef.palette.PaletteRoot;
@@ -33,8 +34,10 @@ import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.persistence.Field;
@@ -60,12 +63,12 @@ public class VisualFormEditorPaletteFactory
 		PaletteDrawer componentsDrawer = new PaletteDrawer(Messages.LabelElementsPalette);
 		ToolEntry component;
 
-		component = new ElementCreationToolEntry("Button", "Create a button", new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_BUTTON),
-			Activator.loadImageDescriptorFromBundle("button.gif"), Activator.loadImageDescriptorFromBundle("button.gif"));
+		component = new ElementCreationToolEntry("Button", "Create a button", new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_BUTTON, new Dimension(
+			80, 20)), Activator.loadImageDescriptorFromBundle("button.gif"), Activator.loadImageDescriptorFromBundle("button.gif"));
 		componentsDrawer.add(component);
 
-		component = new ElementCreationToolEntry("Label", "Create a label", new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_LABEL),
-			Activator.loadImageDescriptorFromBundle("text.gif"), Activator.loadImageDescriptorFromBundle("text.gif"));
+		component = new ElementCreationToolEntry("Label", "Create a label", new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_LABEL, new Dimension(80,
+			20)), Activator.loadImageDescriptorFromBundle("text.gif"), Activator.loadImageDescriptorFromBundle("text.gif"));
 		componentsDrawer.add(component);
 
 		// TODO: Add more
@@ -92,7 +95,8 @@ public class VisualFormEditorPaletteFactory
 		while (templatesIterator.hasNext())
 		{
 			Template template = (Template)templatesIterator.next();
-			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TEMPLATE);
+			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TEMPLATE,
+				DesignerUtil.convertDimension(ElementFactory.getTemplateBoundsize(template)));
 			factory.setData(template);
 			ImageDescriptor icon = getTemplateIcon(template);
 			if (icon == null)

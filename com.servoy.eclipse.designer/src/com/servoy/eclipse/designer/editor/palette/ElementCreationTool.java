@@ -18,12 +18,18 @@
 package com.servoy.eclipse.designer.editor.palette;
 
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.PositionConstants;
+import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.PrecisionRectangle;
+import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.LayerConstants;
 import org.eclipse.gef.Request;
+import org.eclipse.gef.SnapToHelper;
 import org.eclipse.gef.editparts.LayerManager;
 import org.eclipse.gef.requests.CreateRequest;
+import org.eclipse.gef.requests.CreationFactory;
 import org.eclipse.gef.tools.CreationTool;
 import org.eclipse.swt.widgets.Display;
 
@@ -39,6 +45,7 @@ import com.servoy.eclipse.designer.editor.CreateElementRequest;
 public class ElementCreationTool extends CreationTool
 {
 	private AlignmentFeedbackHelper alignmentFeedbackHelper;
+	private SnapToHelper snapToHelper;
 
 	/**
 	 * @return the alignmentFeedbackHelper
@@ -95,6 +102,7 @@ public class ElementCreationTool extends CreationTool
 	public void deactivate()
 	{
 		super.deactivate();
+		snapToHelper = null;
 		alignmentFeedbackHelper = null;
 	}
 
@@ -107,9 +115,65 @@ public class ElementCreationTool extends CreationTool
 	@Override
 	protected Request createTargetRequest()
 	{
-		CreateElementRequest request = new CreateElementRequest(getFactory());
-		request.setResizable(true);
+		CreationFactory fact = getFactory();
+		CreateElementRequest request = new CreateElementRequest(fact);
+		if (fact instanceof RequestTypeCreationFactory)
+		{
+			request.setSize(((RequestTypeCreationFactory)fact).getNewObjectSize());
+		}
 		return request;
+	}
+
+	protected SnapToHelper getSnapToHelper()
+	{
+		if (snapToHelper == null && getTargetEditPart() != null)
+		{
+			snapToHelper = (SnapToHelper)getTargetEditPart().getAdapter(SnapToHelper.class);
+		}
+		return snapToHelper;
+	}
+
+	@Override
+	protected void updateTargetRequest()
+	{
+		CreateRequest req = getCreateRequest();
+		req.getExtendedData().clear();
+
+		if (isInState(STATE_DRAG_IN_PROGRESS))
+		{
+			// User is drawing selected palette item
+			Point loq = getStartLocation();
+			Rectangle bounds = new Rectangle(loq, loq);
+			bounds.union(loq.getTranslated(getDragMoveDelta()));
+			req.setSize(bounds.getSize());
+			req.setLocation(bounds.getLocation());
+			if (!getCurrentInput().isAltKeyDown() && getSnapToHelper() != null)
+			{
+				PrecisionRectangle baseRect = new PrecisionRectangle(bounds);
+				PrecisionRectangle result = baseRect.getPreciseCopy();
+				getSnapToHelper().snapRectangle(req, PositionConstants.NSEW, baseRect, result);
+				req.setLocation(result.getLocation());
+				req.setSize(result.getSize());
+			}
+		}
+		else if (req.getSize() != null)
+		{
+			// User is moving over form
+			Rectangle bounds = new Rectangle(getLocation(), req.getSize());
+			PrecisionRectangle baseRect = new PrecisionRectangle(bounds);
+			PrecisionRectangle result = baseRect.getPreciseCopy();
+			if (!getCurrentInput().isAltKeyDown() && getSnapToHelper() != null)
+			{
+				getSnapToHelper().snapRectangle(req, PositionConstants.NSEW, baseRect, result);
+			}
+			req.setLocation(result.getLocation());
+			req.setSize(result.getSize());
+		}
+
+		if (getCreateRequest() instanceof CreateElementRequest)
+		{
+			((CreateElementRequest)getCreateRequest()).setResizable(isInState(STATE_DRAG_IN_PROGRESS));
+		}
 	}
 
 	/**

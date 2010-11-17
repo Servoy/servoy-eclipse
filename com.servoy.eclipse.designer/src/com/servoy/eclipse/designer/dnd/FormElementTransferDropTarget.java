@@ -67,12 +67,12 @@ public class FormElementTransferDropTarget extends ElementTransferDropTarget
 				return dropReq;
 			}
 
-			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_DROP_COPY);
+			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_DROP_COPY, null);
 			factory.setData(UserNodeListDragSourceListener.dragObjects);
 			CreateElementRequest createRequest = new CreateElementRequest(factory);
 			createRequest.setType(VisualFormEditor.REQ_DROP_COPY);
 			createRequest.setLocation(point);
-			createRequest.setSize(factory.getDefaultElementSize(UserNodeListDragSourceListener.dragObjects[0]));
+			createRequest.setSize(RequestTypeCreationFactory.getDefaultElementSize(UserNodeListDragSourceListener.dragObjects[0]));
 			return createRequest;
 		}
 

@@ -37,10 +37,22 @@ public class RequestTypeCreationFactory implements CreationFactory
 	private final RequestType requestType;
 	private Object newObject;
 	private Object data;
+	private Dimension newObjectSize;
 
-	public RequestTypeCreationFactory(RequestType requestType)
+	public RequestTypeCreationFactory(RequestType requestType, Dimension newObjectSize)
 	{
 		this.requestType = requestType;
+		this.newObjectSize = newObjectSize;
+	}
+
+	public void setNewObjectSize(Dimension newObjectSize)
+	{
+		this.newObjectSize = newObjectSize;
+	}
+
+	public Dimension getNewObjectSize()
+	{
+		return newObjectSize;
 	}
 
 	public Object getNewObject()
@@ -78,7 +90,7 @@ public class RequestTypeCreationFactory implements CreationFactory
 	 * @param dragData
 	 * @return
 	 */
-	public Dimension getDefaultElementSize(IDragData dragData)
+	public static Dimension getDefaultElementSize(IDragData dragData)
 	{
 		if (dragData instanceof PersistDragData)
 		{
