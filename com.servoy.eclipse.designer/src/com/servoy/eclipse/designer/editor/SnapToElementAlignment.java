@@ -210,13 +210,13 @@ public class SnapToElementAlignment extends SnapToHelper
 		// Alignment: North to container
 		if ((snapOrientation & (NORTH | VERTICAL)) != 0)
 		{
-			north = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, north, rect.y, 0, 10, form.getWidth() - 10, getSetAnchor());
+			north = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, north, rect.y, 0, 10, form.getWidth() - 10, true, getSetAnchor());
 		}
 
 		// Alignment: West to container
 		if ((snapOrientation & (WEST | HORIZONTAL)) != 0)
 		{
-			west = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, west, rect.x, 0, 10, form.getSize().height - 10, getSetAnchor());
+			west = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, west, rect.x, 0, 10, form.getSize().height - 10, true, getSetAnchor());
 		}
 
 		// Alignment: East to container
@@ -225,7 +225,7 @@ public class SnapToElementAlignment extends SnapToHelper
 			if (singleAlignmentPerDimension) east = west;
 
 			east = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, east, rect.x + rect.width, form.getWidth(), 10,
-				form.getSize().height - 10, getSetAnchor());
+				form.getSize().height - 10, true, getSetAnchor());
 
 			if (singleAlignmentPerDimension) west = east;
 		}
@@ -259,8 +259,8 @@ public class SnapToElementAlignment extends SnapToHelper
 					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), (anchors & IAnchorConstants.NORTH) != 0);
 				// distance to bottom-top
 				north = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, north, rect.y, childBounds.y + childBounds.height,
-					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), getSetAnchor() &&
-						(elementModel instanceof Part || ((anchors & IAnchorConstants.NORTH) != 0 && (anchors & IAnchorConstants.SOUTH) == 0)));
+					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), elementModel instanceof Part,
+					getSetAnchor() && (elementModel instanceof Part || ((anchors & IAnchorConstants.NORTH) != 0 && (anchors & IAnchorConstants.SOUTH) == 0)));
 			}
 
 
@@ -275,8 +275,8 @@ public class SnapToElementAlignment extends SnapToHelper
 					(anchors & IAnchorConstants.SOUTH) != 0);
 				// distance to top-bottom
 				south = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, south, rect.y + rect.height, childBounds.y,
-					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), getSetAnchor() &&
-						(elementModel instanceof Part || ((anchors & IAnchorConstants.SOUTH) != 0 && (anchors & IAnchorConstants.NORTH) == 0)));
+					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), elementModel instanceof Part,
+					getSetAnchor() && (elementModel instanceof Part || ((anchors & IAnchorConstants.SOUTH) != 0 && (anchors & IAnchorConstants.NORTH) == 0)));
 
 				if (singleAlignmentPerDimension) north = south;
 			}
@@ -296,7 +296,7 @@ public class SnapToElementAlignment extends SnapToHelper
 					Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height), (anchors & IAnchorConstants.WEST) != 0);
 				// distance to right-left
 				west = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, west, rect.x, childBounds.x + childBounds.width,
-					Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height),
+					Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height), false,
 					(anchors & IAnchorConstants.WEST) != 0 && (anchors & IAnchorConstants.EAST) == 0);
 			}
 
@@ -311,7 +311,7 @@ public class SnapToElementAlignment extends SnapToHelper
 					(anchors & IAnchorConstants.EAST) != 0);
 				// distance to left-right
 				east = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, east, rect.x + rect.width, childBounds.x,
-					Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height),
+					Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height), false,
 					(anchors & IAnchorConstants.EAST) != 0 && (anchors & IAnchorConstants.WEST) == 0);
 
 				if (singleAlignmentPerDimension) west = east;
@@ -331,7 +331,7 @@ public class SnapToElementAlignment extends SnapToHelper
 	}
 
 	protected ElementAlignmentItem getDistanceAlignmentItem(String alignDirection, ElementAlignmentItem item, int dragOffset, int offset, int start, int end,
-		boolean anchor)
+		boolean addZeroDistance, boolean anchor)
 	{
 		int sign = (ElementAlignmentItem.ALIGN_DIRECTION_NORTH.equals(alignDirection) || ElementAlignmentItem.ALIGN_DIRECTION_WEST.equals(alignDirection)) ? 1
 			: -1;
@@ -339,10 +339,12 @@ public class SnapToElementAlignment extends SnapToHelper
 		int mediumOffset = offset + (sign * getMediumDistance());
 		int smallOffset = offset + (sign * getSmallDistance());
 
-
+		int zeroDif = offset - dragOffset;
 		int largeDif = largeOffset - dragOffset;
 		int mediumDif = mediumOffset - dragOffset;
 		int smallDif = smallOffset - dragOffset;
+
+		int zeroDistance = Math.abs(zeroDif);
 		int largeDistance = Math.abs(largeDif);
 		int mediumDistance = Math.abs(mediumDif);
 		int smallDistance = Math.abs(smallDif);
@@ -358,9 +360,18 @@ public class SnapToElementAlignment extends SnapToHelper
 		}
 		else if (smallDistance < mediumDistance)
 		{
-			delta = smallDif;
-			alignOffset = smallOffset;
-			alignType = ElementAlignmentItem.ALIGN_TYPE_DISTANCE_SMALL;
+			if (addZeroDistance && zeroDistance < smallDistance)
+			{
+				delta = zeroDif;
+				alignOffset = offset;
+				alignType = ElementAlignmentItem.ALIGN_TYPE_DISTANCE_ZERO;
+			}
+			else
+			{
+				delta = smallDif;
+				alignOffset = smallOffset;
+				alignType = ElementAlignmentItem.ALIGN_TYPE_DISTANCE_SMALL;
+			}
 		}
 		else
 		{

@@ -35,6 +35,7 @@ public class ElementAlignmentItem
 	public static final String ALIGN_TYPE_DISTANCE_LARGE = "large distance";
 	public static final String ALIGN_TYPE_DISTANCE_MEDIUM = "medium distance";
 	public static final String ALIGN_TYPE_DISTANCE_SMALL = "small distance";
+	public static final String ALIGN_TYPE_DISTANCE_ZERO = "no distance";
 
 	public final String alignDirection;
 	public final String alignType;
