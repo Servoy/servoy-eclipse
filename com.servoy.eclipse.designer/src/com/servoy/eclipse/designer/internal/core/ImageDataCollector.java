@@ -13,14 +13,16 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.internal.core;
 
 
+import java.awt.AlphaComposite;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
@@ -89,7 +91,7 @@ public class ImageDataCollector implements ImageConsumer
 	 * Start collecting the image of a component. Return whether collection has started or not. It is possible that collection didn't start but this is not an
 	 * error. For example the component has a width or height of 0.
 	 */
-	public boolean start(final Component component, final int maxWidth, final int maxHeight) throws IllegalArgumentException
+	public boolean start(final Component component, final int maxWidth, final int maxHeight, final float alpha) throws IllegalArgumentException
 	{
 		// Need to queue the printall off to the UI thread because there could be problems in some
 		// versions of the JDK if paint and print are done at the same time.
@@ -165,6 +167,10 @@ public class ImageDataCollector implements ImageConsumer
 					try
 					{
 						graphics = componentImage.getGraphics();
+						if (alpha != 1.0f && graphics instanceof Graphics2D)
+						{
+							((Graphics2D)graphics).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+						}
 						graphics.setClip(0, 0, iWidth, iHeight);
 						component.printAll(graphics);
 

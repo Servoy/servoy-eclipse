@@ -141,7 +141,18 @@ public class PersistImageNotifier implements IImageNotifier, IImageListener
 							((AbstractBase)persist).setRuntimeProperty(PersistPropertySource.LastPaintedBackgroundProperty, background);
 							((AbstractBase)persist).setRuntimeProperty(PersistPropertySource.LastPaintedFontProperty, comp.getFont());
 						}
-						new ImageDataCollector(imSupport).start(label, comp.getWidth(), comp.getHeight());
+						float alpha;
+						if (comp.isVisible())
+						{
+							alpha = 1.0f;
+						}
+						else
+						{
+							// paint 'invisible' elements with some translucency.
+							comp.setVisible(true);
+							alpha = 0.5f;
+						}
+						new ImageDataCollector(imSupport).start(label, comp.getWidth(), comp.getHeight(), alpha);
 					}
 					catch (Exception e)
 					{
