@@ -1948,6 +1948,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		manager.add(copyAction);
 		manager.add(pasteAction);
 		manager.add(new Separator());
+		if (searchAction.isEnabled()) manager.add(searchAction);
+		manager.add(new Separator());
 		manager.add(fRefreshAction);
 		manager.add(expandNodeAction);
 		manager.add(collapseTreeAction);
@@ -2345,6 +2347,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		tree.addSelectionChangedListener(newActionInListPrimary);
 
 		tree.addSelectionChangedListener(openActionInTree);
+		tree.addSelectionChangedListener(searchAction);
 		tree.addSelectionChangedListener(deleteActionInTree);
 		tree.addSelectionChangedListener(addAsModuleAction);
 		tree.addSelectionChangedListener(renameSolutionAction);

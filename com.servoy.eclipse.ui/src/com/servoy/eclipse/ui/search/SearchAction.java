@@ -25,6 +25,7 @@ import org.eclipse.search.ui.NewSearchUI;
 
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ValueList;
@@ -39,6 +40,7 @@ public class SearchAction extends Action implements ISelectionChangedListener
 {
 	private ValueList valueList;
 	private Relation relation;
+	private Form form;
 
 	/**
 	 * @param solutionExplorerView
@@ -64,6 +66,10 @@ public class SearchAction extends Action implements ISelectionChangedListener
 		{
 			NewSearchUI.runQueryInBackground(new RelationSearch(relation), NewSearchUI.activateSearchResultView());
 		}
+		else if (form != null)
+		{
+			NewSearchUI.runQueryInBackground(new FormSearch(form), NewSearchUI.activateSearchResultView());
+		}
 	}
 
 	/*
@@ -75,6 +81,7 @@ public class SearchAction extends Action implements ISelectionChangedListener
 	{
 		relation = null;
 		valueList = null;
+		form = null;
 
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		if (sel.size() == 1)
@@ -88,8 +95,12 @@ public class SearchAction extends Action implements ISelectionChangedListener
 			{
 				relation = (Relation)node.getRealObject();
 			}
+			if ((((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.FORM))
+			{
+				form = (Form)node.getRealObject();
+			}
 		}
-		setEnabled(valueList != null || relation != null);
+		setEnabled(valueList != null || relation != null || form != null);
 
 	}
 }
