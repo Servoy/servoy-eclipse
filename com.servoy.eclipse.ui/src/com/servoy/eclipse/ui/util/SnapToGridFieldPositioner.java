@@ -13,12 +13,11 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.util;
 
 import org.eclipse.swt.graphics.Point;
 
-import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 
 /**
@@ -27,24 +26,19 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences;
  * @author rgansevles
  * 
  */
-public class SnapToGridFieldPositioner implements IFieldPositioner
+public class SnapToGridFieldPositioner extends DefaultFieldPositioner
 {
 	private final DesignerPreferences designerPreferences;
-	private Point defaultLocation = null;
 
 	public SnapToGridFieldPositioner(DesignerPreferences designerPreferences)
 	{
 		this.designerPreferences = designerPreferences;
 	}
 
-	public void setDefaultLocation(Point defaultLocation)
-	{
-		this.defaultLocation = defaultLocation;
-	}
-
+	@Override
 	public Point getNextLocation(Point location)
 	{
-		Point loc = location == null ? defaultLocation : location;
+		Point loc = location == null ? getDefaultLocation() : location;
 		loc = loc == null ? new Point(0, 0) : loc;
 
 		int gridSize = designerPreferences.getGridSize();
@@ -57,7 +51,7 @@ public class SnapToGridFieldPositioner implements IFieldPositioner
 
 		// move a bit for next location if there has been no mouse click
 		int copyPasteOffset = gridSnapTo && gridSize > designerPreferences.getCopyPasteOffset() ? gridSize : designerPreferences.getCopyPasteOffset();
-		defaultLocation = new Point(loc.x + copyPasteOffset, loc.y + copyPasteOffset);
+		setDefaultLocation(new Point(loc.x + copyPasteOffset, loc.y + copyPasteOffset));
 
 		return loc;
 	}

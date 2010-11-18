@@ -183,7 +183,7 @@ public class SnapToElementAlignment extends SnapToHelper
 		rect.translate(request.getMoveDelta());
 		rect.resize(request.getSizeDelta());
 
-		return getElementAlignment(rect, snapOrientation, editParts, singleAlignmentPerDimension);
+		return getElementAlignment(rect, snapOrientation, request.getType().equals(RequestConstants.REQ_CLONE) ? null : editParts, singleAlignmentPerDimension);
 	}
 
 	protected ElementAlignmentItem[] getElementAlignmentForCreate(PrecisionRectangle baseRect, int snapOrientation, boolean singleAlignmentPerDimension)
