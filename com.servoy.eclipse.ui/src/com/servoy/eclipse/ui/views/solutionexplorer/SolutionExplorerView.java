@@ -161,6 +161,7 @@ import com.servoy.eclipse.ui.node.UserNodeComparer;
 import com.servoy.eclipse.ui.node.UserNodeListDragSourceListener;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.preferences.SolutionExplorerPreferences;
+import com.servoy.eclipse.ui.search.SearchAction;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.FilterDelayJob;
 import com.servoy.eclipse.ui.util.FilteredEntity;
@@ -335,6 +336,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private RemoveModuleAction removeModuleAction;
 
 	private MoveTextAction moveCode;
+
+	private SearchAction searchAction;
 
 	private OverrideMethodAction overrideMethod;
 
@@ -1961,6 +1964,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (editVariableAction.isEnabled()) manager.add(editVariableAction);
 		if (debugMethodAction.isMethodSelected()) manager.add(debugMethodAction);
 		if (openSqlEditorAction.isEnabled()) manager.add(openSqlEditorAction);
+		if (searchAction.isEnabled()) manager.add(searchAction);
 
 		manager.add(new Separator());
 		if (newActionInListPrimary.isEnabled()) manager.add(newActionInListPrimary);
@@ -2129,6 +2133,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	{
 		moveSample = new MoveTextAction(this, true);
 		moveCode = new MoveTextAction(this, false);
+		searchAction = new SearchAction();
 		moveFormAction = new MovePersistAction(getSite().getShell());
 		duplicateFormAction = new DuplicatePersistAction(getSite().getShell());
 		renameFormAction = new RenamePersistAction();
@@ -2324,6 +2329,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		list.addSelectionChangedListener(debugMethodAction);
 		list.addSelectionChangedListener(newActionInListSecondary);
 		list.addSelectionChangedListener(renameMediaAction);
+		list.addSelectionChangedListener(searchAction);
 		list.addSelectionChangedListener(movePersistAction);
 		list.addSelectionChangedListener(duplicatePersistAction);
 		list.addSelectionChangedListener(copyTable);

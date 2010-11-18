@@ -853,4 +853,12 @@
          </part>
       </actionSetPartAssociation>
    </extension>
+   <extension
+         point="org.eclipse.search.searchResultViewPages">
+      <viewPage
+            class="com.servoy.eclipse.ui.search.FileSearchPage"
+            id="com.servoy.eclipse.ui.search.FileSearchResultPage"
+            searchResultClass="com.servoy.eclipse.ui.search.FileSearchResult">
+      </viewPage>
+   </extension>
 </plugin>
