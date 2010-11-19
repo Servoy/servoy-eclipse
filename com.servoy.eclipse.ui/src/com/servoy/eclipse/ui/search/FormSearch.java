@@ -81,7 +81,7 @@ public class FormSearch extends AbstractPersistSearch
 	protected TextSearchResultCollector createTextSearchCollector(AbstractTextSearchResult searchResult)
 	{
 		Pair<String, String> filePathPair = SolutionSerializer.getFilePath(form, false);
-		final String fileName = "/" + filePathPair.getLeft() + filePathPair.getRight();
+		final String fileName = "/" + filePathPair.getLeft() + filePathPair.getRight(); //$NON-NLS-1$
 
 		return new TextSearchResultCollector(searchResult)
 		{
@@ -93,7 +93,7 @@ public class FormSearch extends AbstractPersistSearch
 			@Override
 			public boolean acceptFile(IFile file) throws CoreException
 			{
-				System.err.println(file.getFullPath().toPortableString() + "==" + fileName);
+				// ignore the declaration.
 				if (file.getFullPath().toPortableString().equals(fileName))
 				{
 					super.acceptFile(file);
