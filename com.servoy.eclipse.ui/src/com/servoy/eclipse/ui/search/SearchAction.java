@@ -21,6 +21,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.NewSearchUI;
 
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -28,6 +29,8 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.ValueList;
 
 /**
@@ -38,9 +41,7 @@ import com.servoy.j2db.persistence.ValueList;
  */
 public class SearchAction extends Action implements ISelectionChangedListener
 {
-	private ValueList valueList;
-	private Relation relation;
-	private Form form;
+	private IPersist persist;
 
 	/**
 	 * @param solutionExplorerView
@@ -58,18 +59,28 @@ public class SearchAction extends Action implements ISelectionChangedListener
 	@Override
 	public void run()
 	{
-		if (valueList != null)
+		ISearchQuery query = null;
+		if (persist instanceof ValueList)
 		{
-			NewSearchUI.runQueryInBackground(new ValueListSearch(valueList), NewSearchUI.activateSearchResultView());
+			query = new ValueListSearch((ValueList)persist);
 		}
-		else if (relation != null)
+		else if (persist instanceof Relation)
 		{
-			NewSearchUI.runQueryInBackground(new RelationSearch(relation), NewSearchUI.activateSearchResultView());
+			query = new RelationSearch((Relation)persist);
 		}
-		else if (form != null)
+		else if (persist instanceof Form)
 		{
-			NewSearchUI.runQueryInBackground(new FormSearch(form), NewSearchUI.activateSearchResultView());
+			query = new FormSearch((Form)persist);
 		}
+		else if (persist instanceof ScriptMethod)
+		{
+			query = new ScriptMethodSearch((ScriptMethod)persist);
+		}
+		else if (persist instanceof ScriptVariable)
+		{
+			query = new ScriptVariableSearch((ScriptVariable)persist);
+		}
+		if (query != null) NewSearchUI.runQueryInBackground(query, NewSearchUI.activateSearchResultView());
 	}
 
 	/*
@@ -79,28 +90,20 @@ public class SearchAction extends Action implements ISelectionChangedListener
 	 */
 	public void selectionChanged(SelectionChangedEvent event)
 	{
-		relation = null;
-		valueList = null;
-		form = null;
+		persist = null;
 
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		if (sel.size() == 1)
 		{
 			SimpleUserNode node = ((SimpleUserNode)sel.getFirstElement());
-			if ((((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.VALUELIST_ITEM))
+			if (node.getType() == UserNodeType.VALUELIST_ITEM || node.getType() == UserNodeType.RELATION || node.getType() == UserNodeType.FORM ||
+				node.getType() == UserNodeType.FORM_METHOD || node.getType() == UserNodeType.GLOBAL_METHOD_ITEM ||
+				node.getType() == UserNodeType.GLOBAL_VARIABLE_ITEM || node.getType() == UserNodeType.FORM_VARIABLE_ITEM)
 			{
-				valueList = (ValueList)node.getRealObject();
-			}
-			if ((((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.RELATION))
-			{
-				relation = (Relation)node.getRealObject();
-			}
-			if ((((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.FORM))
-			{
-				form = (Form)node.getRealObject();
+				persist = (IPersist)node.getRealObject();
 			}
 		}
-		setEnabled(valueList != null || relation != null || form != null);
+		setEnabled(persist != null);
 
 	}
 }

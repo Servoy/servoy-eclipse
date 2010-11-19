@@ -21,21 +21,24 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IField;
+import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.search.core.text.TextSearchEngine;
 import org.eclipse.search.core.text.TextSearchRequestor;
 import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.FileTextSearchScope;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
-import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.util.Pair;
 
 /**
  * An {@link ISearchQuery} implementation for finding relations in frm and js files.
@@ -43,14 +46,14 @@ import com.servoy.j2db.util.Pair;
  * @author jcompagner
  * @since 6.0
  */
-public class FormSearch extends AbstractPersistSearch
+public class ScriptVariableSearch extends DLTKSearchEngineSearch
 {
 
-	private final Form form;
+	private final ScriptVariable variable;
 
-	public FormSearch(Form form)
+	public ScriptVariableSearch(ScriptVariable variable)
 	{
-		this.form = form;
+		this.variable = variable;
 	}
 
 	/*
@@ -61,48 +64,26 @@ public class FormSearch extends AbstractPersistSearch
 	@SuppressWarnings("nls")
 	public IStatus run(IProgressMonitor monitor) throws OperationCanceledException
 	{
-		IResource[] scopes = getScopes((Solution)form.getRootObject());
-		TextSearchRequestor collector = getResultCollector();
+		IResource[] scopes = getScopes((Solution)variable.getRootObject());
+		final TextSearchRequestor collector = getResultCollector();
 
-		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm" }, true);
-		TextSearchEngine.create().search(scope, collector, Pattern.compile(form.getUUID().toString()), monitor);
-
-		scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.js" }, true);
-		TextSearchEngine.create().search(scope, collector, Pattern.compile("\\bforms." + form.getName() + "\\b"), monitor);
-
-		return Status.OK_STATUS;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.eclipse.ui.search.AbstractPersistSearch#createTextSearchCollector(org.eclipse.search.ui.text.AbstractTextSearchResult)
-	 */
-	@Override
-	protected TextSearchResultCollector createTextSearchCollector(AbstractTextSearchResult searchResult)
-	{
-		Pair<String, String> filePathPair = SolutionSerializer.getFilePath(form, false);
-		final String fileName = "/" + filePathPair.getLeft() + filePathPair.getRight(); //$NON-NLS-1$
-
-		return new TextSearchResultCollector(searchResult)
+		if (variable.getParent() instanceof Solution)
 		{
-			/*
-			 * (non-Javadoc)
-			 * 
-			 * @see com.servoy.eclipse.ui.search.TextSearchResultCollector#acceptFile(org.eclipse.core.resources.IFile)
-			 */
-			@Override
-			public boolean acceptFile(IFile file) throws CoreException
-			{
-				// ignore the declaration.
-				if (file.getFullPath().toPortableString().equals(fileName))
-				{
-					super.acceptFile(file);
-					return false;
-				}
-				return super.acceptFile(file);
-			}
-		};
+			FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm", "*.rel" }, true);
+			TextSearchEngine.create().search(scope, collector, Pattern.compile("\\bglobals." + variable.getName() + "\\b"), monitor);
+		}
+		else
+		{
+			FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm" }, true);
+			TextSearchEngine.create().search(scope, collector, Pattern.compile("\\b" + variable.getName() + "\\b"), monitor);
+		}
+
+		String scriptPath = SolutionSerializer.getScriptPath(variable, false);
+		IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
+		ISourceModule sourceModule = DLTKCore.createSourceModuleFrom(file);
+		IField variableElement = sourceModule.getField(variable.getName());
+		callDLTKSearchEngine(monitor, collector, variableElement, IDLTKSearchConstants.REFERENCES, (Solution)variable.getRootObject());
+		return Status.OK_STATUS;
 	}
 
 	/*
@@ -112,6 +93,6 @@ public class FormSearch extends AbstractPersistSearch
 	 */
 	public String getLabel()
 	{
-		return "Searching references to form '" + form.getName() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "Searching references to variable '" + variable.getName() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

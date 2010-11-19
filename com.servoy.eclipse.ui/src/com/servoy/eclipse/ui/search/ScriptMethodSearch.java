@@ -19,31 +19,41 @@ package com.servoy.eclipse.ui.search;
 
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IMethod;
+import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.search.core.text.TextSearchEngine;
+import org.eclipse.search.core.text.TextSearchRequestor;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.text.FileTextSearchScope;
 
+import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.ValueList;
 
 /**
- * An {@link ISearchQuery} implementation for finding valuelists in frm and js files.
+ * An {@link ISearchQuery} implementation for finding relations in frm and js files.
  * 
  * @author jcompagner
  * @since 6.0
  */
-public class ValueListSearch extends AbstractPersistSearch
+public class ScriptMethodSearch extends DLTKSearchEngineSearch
 {
-	private final ValueList valueList;
 
-	public ValueListSearch(ValueList valueList)
+	private final ScriptMethod method;
+
+	public ScriptMethodSearch(ScriptMethod method)
 	{
-		this.valueList = valueList;
+		this.method = method;
 	}
 
 	/*
@@ -54,15 +64,17 @@ public class ValueListSearch extends AbstractPersistSearch
 	@SuppressWarnings("nls")
 	public IStatus run(IProgressMonitor monitor) throws OperationCanceledException
 	{
-		IResource[] scopes = getScopes((Solution)valueList.getRootObject());
-		TextSearchResultCollector collector = getResultCollector();
+		IResource[] scopes = getScopes((Solution)method.getRootObject());
+		final TextSearchRequestor collector = getResultCollector();
 
-		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm" }, true);
-		TextSearchEngine.create().search(scope, collector, Pattern.compile(valueList.getUUID().toString()), monitor);
+		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm", "*.tbl" }, true);
+		TextSearchEngine.create().search(scope, collector, Pattern.compile(method.getUUID().toString()), monitor);
 
-		scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.js" }, true);
-		TextSearchEngine.create().search(scope, collector, Pattern.compile("getValueList.*\"" + valueList.getName() + "\""), monitor);
-		TextSearchEngine.create().search(scope, collector, Pattern.compile("getValueList.*'" + valueList.getName() + "'"), monitor);
+		String scriptPath = SolutionSerializer.getScriptPath(method, false);
+		IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
+		ISourceModule sourceModule = DLTKCore.createSourceModuleFrom(file);
+		IMethod methodElement = sourceModule.getMethod(method.getName());
+		callDLTKSearchEngine(monitor, collector, methodElement, IDLTKSearchConstants.REFERENCES, (Solution)method.getRootObject());
 
 		return Status.OK_STATUS;
 	}
@@ -74,8 +86,7 @@ public class ValueListSearch extends AbstractPersistSearch
 	 */
 	public String getLabel()
 	{
-		return "Searching references to valuelist '" + valueList.getName() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "Searching references to method '" + method.getName() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
-
 
 }

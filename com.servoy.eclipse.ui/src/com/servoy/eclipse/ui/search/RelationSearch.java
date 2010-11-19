@@ -40,6 +40,7 @@ import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.FileTextSearchScope;
 
 import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.persistence.Solution;
 
 /**
  * An {@link ISearchQuery} implementation for finding relations in frm and js files.
@@ -65,7 +66,7 @@ public class RelationSearch extends AbstractPersistSearch
 	@SuppressWarnings("nls")
 	public IStatus run(IProgressMonitor monitor) throws OperationCanceledException
 	{
-		IResource[] scopes = getScopes();
+		IResource[] scopes = getScopes((Solution)relation.getRootObject());
 		TextSearchRequestor collector = getResultCollector();
 
 		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm" }, true);

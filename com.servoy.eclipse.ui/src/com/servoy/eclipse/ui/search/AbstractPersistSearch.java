@@ -23,8 +23,10 @@ import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
+import com.servoy.j2db.persistence.Solution;
 
 /**
  * Base persist search implementation of {@link ISearchQuery} 
@@ -67,16 +69,17 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 	/**
 	 * @return
 	 */
-	protected IResource[] getScopes()
+	protected IResource[] getScopes(Solution sol)
 	{
-		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		ServoyProject[] modulesOfActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		ServoyProject activeProject = servoyModel.getServoyProject(sol.getName());
+		Solution[] modules = activeProject.getModules();
 
-		IResource[] scopes = new IResource[modulesOfActiveProject.length + 1];
+		IResource[] scopes = new IResource[modules.length + 1];
 		scopes[0] = activeProject.getProject();
-		for (int i = 0; i < modulesOfActiveProject.length; i++)
+		for (int i = 0; i < modules.length; i++)
 		{
-			scopes[i + 1] = modulesOfActiveProject[i].getProject();
+			scopes[i + 1] = servoyModel.getServoyProject(modules[i].getName()).getProject();
 		}
 		return scopes;
 	}
