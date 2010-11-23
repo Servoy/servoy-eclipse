@@ -140,12 +140,12 @@ public class SnapToElementAlignment extends SnapToHelper
 		{
 			return true;
 		}
-		if (model instanceof Part || !(model instanceof IPersist) || !(((IPersist)model).getParent() == container.getModel()))
+		if (!(model instanceof Part) && model instanceof IPersist && ((IPersist)model).getParent() instanceof Form)
 		{
-			// do not align parts, tabs or portal fields
-			return false;
+			return true;
 		}
-		return true;
+		// do not align parts, tabs or portal fields
+		return false;
 	}
 
 	protected ElementAlignmentItem[] getElementAlignmentForMoveOrResize(ChangeBoundsRequest request, int snapOrientation, boolean singleAlignmentPerDimension)
