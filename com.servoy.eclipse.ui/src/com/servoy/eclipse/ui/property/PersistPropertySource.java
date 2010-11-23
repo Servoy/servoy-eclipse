@@ -1642,6 +1642,16 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			return ((IPropertySetter)pd).isPropertySet(this);
 		}
 
+		if (context instanceof Form && (persist.getAncestor(IRepository.FORMS) != context))
+		{
+			return false;
+		}
+
+		if (((AbstractBase)persist).hasProperty((String)id))
+		{
+			return true;
+		}
+
 		Object defaultValue = getDefaultPersistValue(id);
 		Object propertyValue = getPersistPropertyValue(id);
 		return defaultValue != propertyValue && (defaultValue == null || !defaultValue.equals(propertyValue));
@@ -1701,7 +1711,32 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		PropertyDescriptorWrapper beanPropertyDescriptor = getBeansProperties().get(id);
 		if (beanPropertyDescriptor != null)
 		{
-			((AbstractBase)beanPropertyDescriptor.valueObject).clearProperty((String)id);
+			IPersist overridePersist = ElementUtil.getOverridePersist(context, persist);
+			if (overridePersist != persist)
+			{
+				persist = overridePersist;
+				beansProperties = null;
+				propertyDescriptors = null;
+				hiddenPropertyDescriptors = null;
+				if (beanPropertyDescriptor.valueObject instanceof IPersist)
+				{
+					beanPropertyDescriptor.valueObject = overridePersist;
+				}
+				else
+				{
+					beanPropertyDescriptor = getBeansProperties().get(id);
+				}
+
+			}
+
+			if (beanPropertyDescriptor.valueObject instanceof AbstractBase)
+			{
+				((AbstractBase)beanPropertyDescriptor.valueObject).clearProperty((String)id);
+			}
+			else
+			{
+				setPersistPropertyValue(id, getDefaultPersistValue(id));
+			}
 
 			if ("groupID".equals(id))
 			{

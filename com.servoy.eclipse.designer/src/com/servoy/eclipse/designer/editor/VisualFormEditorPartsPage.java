@@ -387,7 +387,7 @@ public class VisualFormEditorPartsPage extends Composite
 			while (flattenedParts.hasNext())
 			{
 				Part p = flattenedParts.next();
-				if (p.getParent() != editor.getForm())
+				if (p.getParent() != editor.getForm() || p.isOverrideElement())
 				{
 					lastSuperPart = p;
 				}
@@ -469,8 +469,22 @@ public class VisualFormEditorPartsPage extends Composite
 		upButton.setEnabled(enableUp);
 		downButton.setEnabled(enableDown);
 
-		removePartsButton.setEnabled(selection.size() > 0);
+		removePartsButton.setEnabled(selection.size() > 0 && !hasInheritedPart(selection));
 		addPartsButton.setEnabled(((IStructuredSelection)availableParts.getSelection()).size() > 0);
+	}
+
+	private boolean hasInheritedPart(IStructuredSelection selection)
+	{
+		Iterator it = selection.iterator();
+		while (it.hasNext())
+		{
+			Part part = (Part)it.next();
+			if (part.isOverrideElement())
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	protected void fillOptionsection()
@@ -620,7 +634,7 @@ public class VisualFormEditorPartsPage extends Composite
 	protected void handleRemoveParts()
 	{
 		final StructuredSelection currentSelection = (StructuredSelection)currentParts.getSelection();
-		if (currentSelection.size() > 0)
+		if (currentSelection.size() > 0 && !hasInheritedPart(currentSelection))
 		{
 			executeCommand(new RefreshingCommand(new RemovePartsCommand(editor.getForm(), currentSelection.toArray()))
 			{

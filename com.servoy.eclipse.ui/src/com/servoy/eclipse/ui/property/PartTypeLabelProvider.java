@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.LabelProvider;
@@ -38,7 +38,12 @@ public class PartTypeLabelProvider extends LabelProvider
 	{
 		if (value instanceof Part)
 		{
-			return Part.getDisplayName(((Part)value).getPartType());
+			String text = Part.getDisplayName(((Part)value).getPartType());
+			if (((Part)value).isOverrideElement())
+			{
+				text += " (" + Messages.LabelInherited + ")";
+			}
+			return text;
 		}
 		if (value instanceof Integer)
 		{

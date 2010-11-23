@@ -109,7 +109,7 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptor
 		@Override
 		protected Control createControl(final Composite parent)
 		{
-			return null;
+			return new Composite(parent, SWT.NONE);
 		}
 
 		/**

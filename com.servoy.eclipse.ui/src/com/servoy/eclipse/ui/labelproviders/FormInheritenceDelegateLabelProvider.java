@@ -74,8 +74,7 @@ public class FormInheritenceDelegateLabelProvider extends DelegateLabelProvider 
 	@Override
 	public String getText(Object value)
 	{
-		if (form != null && form.getExtendsForm() != null && !form.getPropertiesMap().containsKey(propertyId) &&
-			form.getExtendsForm().getPropertiesMap().containsKey(propertyId))
+		if (form != null && form.getExtendsForm() != null && !form.hasProperty((String)propertyId) && form.getExtendsForm().hasProperty((String)propertyId))
 		{
 			PersistPropertySource propertySource = new PersistPropertySource(form, null, true);
 			Object superValue = propertySource.getPersistPropertyValue(propertyId);
