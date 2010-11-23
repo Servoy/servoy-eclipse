@@ -51,9 +51,9 @@ public class FormPlaceFieldCommand extends FormPlaceElementCommand
 	 */
 	public FormPlaceFieldCommand(ISupportChilds parent, Object object, Object requestType, Map<Object, Object> objectProperties,
 		IFieldPositioner fieldPositioner, Point defaultLocation, boolean placeAsLabels, boolean placeWithLabels, boolean placeHorizontal, boolean fillText,
-		boolean fillName)
+		boolean fillName, IPersist context)
 	{
-		super(parent, object, requestType, objectProperties, fieldPositioner, defaultLocation);
+		super(parent, object, requestType, objectProperties, fieldPositioner, defaultLocation, context);
 		this.fieldPositioner = fieldPositioner;
 		this.placeAsLabels = placeAsLabels;
 		this.placeWithLabels = placeWithLabels;

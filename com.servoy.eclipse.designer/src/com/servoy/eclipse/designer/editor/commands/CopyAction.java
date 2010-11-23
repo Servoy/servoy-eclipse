@@ -33,6 +33,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
@@ -138,5 +139,12 @@ public class CopyAction extends DesignerSelectionAction
 			return ((VisualFormEditor)getWorkbenchPart()).isDesignerContextActive();
 		}
 		return true;
+	}
+
+	@Override
+	protected boolean calculateEnabled()
+	{
+		if (DesignerUtil.containsInheritedElement(getSelectedObjects())) return false;
+		return super.calculateEnabled();
 	}
 }

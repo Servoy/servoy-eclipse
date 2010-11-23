@@ -46,6 +46,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
@@ -72,7 +73,6 @@ import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.editors.BeanCustomCellEditor;
 import com.servoy.eclipse.ui.editors.DataProviderCellEditor;
 import com.servoy.eclipse.ui.editors.FontCellEditor;
-import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
 import com.servoy.eclipse.ui.editors.PageFormatEditor;
 import com.servoy.eclipse.ui.editors.SortCellEditor;
@@ -95,6 +95,7 @@ import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.MethodWithArguments.UnresolvedMethodWithArguments;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IDefaultValue;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
 import com.servoy.j2db.FlattenedSolution;
@@ -226,7 +227,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		private static final long serialVersionUID = 1L;
 	};
 
-	private final IPersist persist;
+	private IPersist persist;
 	private final boolean readOnly;
 
 	// Property Descriptors
@@ -401,6 +402,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		{
 			ServoyLog.logError("Could not create property descriptor for " + propertyDescriptor.propertyDescriptor.getDisplayName(), e);
 		}
+		beansProperties.put(pd != null ? pd.getId() : propertyDescriptor.propertyDescriptor.getName(), propertyDescriptor);
 		if (pd != null)
 		{
 			if (readOnly)
@@ -427,7 +429,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			{
 				propertyDescriptors.put(pd.getId(), pd);
 			}
-			beansProperties.put(pd.getId(), propertyDescriptor);
 
 			if (combinedPropertyDesciptor != null)
 			{
@@ -922,8 +923,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 						{
 							public CellEditor createPropertyEditor(Composite parent)
 							{
-								return new DataProviderCellEditor(parent, labelProviderHidePrefix, getFormInheritanceValueEditor(persist,
-									new DataProviderValueEditor(converter), id), flattenedForm, flattenedEditingSolution, readOnly, options, converter);
+								return new DataProviderCellEditor(parent, labelProviderHidePrefix, new DataProviderValueEditor(converter), flattenedForm,
+									flattenedEditingSolution, readOnly, options, converter);
 							}
 						});
 					propertyController.setSupportsReadonly(true);
@@ -1299,8 +1300,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 	public ComboboxPropertyController<String> createStyleClassPropertyController(String id, String displayName, final String styleLookupname)
 	{
 		StyleClassesComboboxModel model = new StyleClassesComboboxModel((Form)persist.getAncestor(IRepository.FORMS), styleLookupname);
-		return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved, getFormInheritanceValueEditor(persist,
-			new ComboboxDelegateValueEditor<String>(new StyleClassValueEditor((Form)persist.getAncestor(IRepository.FORMS), persist), model), id))
+		return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved, new ComboboxDelegateValueEditor<String>(
+			new StyleClassValueEditor((Form)persist.getAncestor(IRepository.FORMS), persist), model))
 		{
 			@Override
 			public ILabelProvider getLabelProvider()
@@ -1336,23 +1337,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			return new FormInheritenceDelegateLabelProvider((Form)persist, labelProvider, propertyId);
 		}
 		return labelProvider;
-	}
-
-	/**
-	 * Wrap the value editor with a {@link FormInheritanceDelegateValueEditor} if needed.
-	 * 
-	 * @param form
-	 * @param valueEditor
-	 * @param propertyId
-	 * @return
-	 */
-	public static <T> IValueEditor<T> getFormInheritanceValueEditor(IPersist persist, IValueEditor<T> valueEditor, Object propertyId)
-	{
-		if (persist instanceof Form && ((Form)persist).getExtendsFormID() > 0)
-		{
-			return new FormInheritanceDelegateValueEditor<T>(((Form)persist), valueEditor, propertyId);
-		}
-		return valueEditor;
 	}
 
 	/**
@@ -1489,7 +1473,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		return true;
 	}
 
-	protected Object getPersistPropertyValue(Object id)
+	public Object getPersistPropertyValue(Object id)
 	{
 		init();
 		PropertyDescriptorWrapper beanPropertyDescriptor = getBeansProperties().get(id);
@@ -1561,7 +1545,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		}
 	}
 
-	protected Object getDefaultPersistValue(Object id)
+	public Object getDefaultPersistValue(Object id)
 	{
 		init();
 		PropertyDescriptorWrapper beanPropertyDescriptor = getBeansProperties().get(id);
@@ -1609,61 +1593,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		}
 		// else it is a bean property
 		return null;
-	}
-
-	/**
-	 * Find the actual property value id value using form hierarchy.
-	 * <p>
-	 * Value is converted using propertyController
-	 * 
-	 * @param value current or proposed value (when in select list dialog)
-	 * @param id
-	 * @return
-	 */
-	public Object getInheritedPropertyValue(Object value, Object id)
-	{
-		// compare the current value with the default value
-		Object defaultValue = getDefaultPersistValue(id);
-		IPropertyDescriptor propertyDescriptor = getPropertyDescriptor(id);
-		Object propertyValue = value;
-		if (propertyDescriptor instanceof IPropertyController)
-		{
-			// convert to property value before making proper comparison
-			IPropertyConverter propertyConverter = ((IPropertyController)propertyDescriptor).getConverter();
-			if (propertyConverter != null)
-			{
-				propertyValue = propertyConverter.convertValue(id, value);
-			}
-		}
-		if (Utils.equalObjects(defaultValue, propertyValue))
-		{
-			// if it is a form property defined in a super-form, try to find that one
-			if (persist instanceof Form && ((Form)persist).getExtendsFormID() > 0)
-			{
-				// show which default form method is actually called
-				FlattenedSolution editingFlattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist);
-				for (Form f : editingFlattenedSolution.getFormHierarchy((Form)persist))
-				{
-					if (f != persist)
-					{
-						Object superValue = new PersistPropertySource(f, null, true).getPersistPropertyValue(id);
-						if (!Utils.equalObjects(defaultValue, superValue))
-						{
-							if (propertyDescriptor instanceof IPropertyController)
-							{
-								IPropertyConverter propertyConverter = ((IPropertyController)propertyDescriptor).getConverter();
-								if (propertyConverter != null)
-								{
-									return propertyConverter.convertProperty(id, superValue);
-								}
-							}
-							return superValue;
-						}
-					}
-				}
-			}
-		}
-		return value;
 	}
 
 
@@ -1769,7 +1698,22 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			return;
 		}
 
-		setPersistPropertyValue(id, getDefaultPersistValue(id));
+		PropertyDescriptorWrapper beanPropertyDescriptor = getBeansProperties().get(id);
+		if (beanPropertyDescriptor != null)
+		{
+			((AbstractBase)beanPropertyDescriptor.valueObject).clearProperty((String)id);
+
+			if ("groupID".equals(id))
+			{
+				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persist.getParent(), true);
+			}
+			else
+			{
+				// fire persist change recursively if the style is changed
+				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persist,
+					"styleName".equals(id) || "extendsFormID".equals(id));
+			}
+		}
 	}
 
 	private boolean isQuoted(String text)
@@ -1785,6 +1729,24 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		{
 			try
 			{
+
+				IPersist overridePersist = ElementUtil.getOverridePersist(context, persist);
+				if (overridePersist != persist)
+				{
+					persist = overridePersist;
+					beansProperties = null;
+					propertyDescriptors = null;
+					hiddenPropertyDescriptors = null;
+					if (beanPropertyDescriptor.valueObject instanceof IPersist)
+					{
+						beanPropertyDescriptor.valueObject = overridePersist;
+					}
+					else
+					{
+						beanPropertyDescriptor = getBeansProperties().get(id);
+					}
+
+				}
 				if ("name".equals(id) && beanPropertyDescriptor.valueObject instanceof ISupportUpdateableName)
 				{
 					if (value instanceof String || value == null)
@@ -2115,7 +2077,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 	private static class PropertyDescriptorWrapper
 	{
 		public final java.beans.PropertyDescriptor propertyDescriptor;
-		public final Object valueObject;
+		public Object valueObject;
 		private PropertyEditor propertyEditor;
 
 		PropertyDescriptorWrapper(java.beans.PropertyDescriptor propertyDescriptor, Object valueObject)
@@ -2333,8 +2295,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 				{
 					public CellEditor createPropertyEditor(Composite parent)
 					{
-						return new DataProviderCellEditor(parent, labelProviderHidePrefix, getFormInheritanceValueEditor(persist, new DataProviderValueEditor(
-							converter), id), flattenedForm, flattenedEditingSolution, readOnly, options, converter);
+						return new DataProviderCellEditor(parent, labelProviderHidePrefix, new DataProviderValueEditor(converter), flattenedForm,
+							flattenedEditingSolution, readOnly, options, converter);
 					}
 				});
 			propertyController.setSupportsReadonly(true);
@@ -2713,9 +2675,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 				public CellEditor createPropertyEditor(Composite parent)
 				{
 					return new ListSelectCellEditor(parent, "Select navigator form", new FormContentProvider(flattenedEditingSolution, (Form)persist),
-						formLabelProvider, getFormInheritanceValueEditor(persist, new FormValueEditor(flattenedEditingSolution), id), readOnly,
-						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, Boolean.FALSE, true, true, true), SWT.NONE, null,
-						"navigatorFormDialog");
+						formLabelProvider, new FormValueEditor(flattenedEditingSolution), readOnly, new FormContentProvider.FormListOptions(
+							FormListOptions.FormListType.FORMS, Boolean.FALSE, true, true, true), SWT.NONE, null, "navigatorFormDialog");
 				}
 			};
 			pd.setLabelProvider(formLabelProvider);
@@ -2751,7 +2712,43 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 					Form form = flattenedEditingSolution.getForm(flattenedForm.getID());
 					return new ListSelectCellEditor(parent, "Select parent form", new FormContentProvider(flattenedEditingSolution, form), formLabelProvider,
 						new FormValueEditor(flattenedEditingSolution), readOnly, new FormContentProvider.FormListOptions(
-							FormListOptions.FormListType.HIERARCHY, null, false, true, false), SWT.NONE, null, "parentFormDialog");
+							FormListOptions.FormListType.HIERARCHY, null, false, true, false), SWT.NONE, null, "parentFormDialog")
+					{
+						@Override
+						protected Object openDialogBox(Control cellEditorWindow)
+						{
+							Object returnValue = super.openDialogBox(cellEditorWindow);
+							if (returnValue != null)
+							{
+								Form f = (Form)persist;
+								if (!Utils.equalObjects(f.getExtendsFormID(), returnValue))
+								{
+									List<IPersist> overridePersists = new ArrayList<IPersist>();
+									for (IPersist child : f.getAllObjectsAsList())
+									{
+										if (((AbstractBase)child).isOverrideElement()) overridePersists.add(child);
+									}
+									if (overridePersists.size() > 0)
+									{
+										if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Delete override elements",
+											"You are about to change the parent form, this will also delete all override elements (this action cannot be undone). Are you sure you want to proceed?"))
+										{
+											for (IPersist child : overridePersists)
+											{
+												f.removeChild(child);
+											}
+										}
+										else
+										{
+											returnValue = null;
+										}
+
+									}
+								}
+							}
+							return returnValue;
+						}
+					};
 				}
 			};
 			pd.setLabelProvider(formLabelProvider);
@@ -2776,8 +2773,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		if (name.equals("styleName"))
 		{
 			ComboboxPropertyModel<String> model = new ComboboxPropertyModel<String>(getStyleNames(), NullDefaultLabelProvider.LABEL_DEFAULT);
-			return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved, getFormInheritanceValueEditor(persist,
-				new ComboboxDelegateValueEditor<String>(StyleValueEditor.INSTANCE, model), id))
+			return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved, new ComboboxDelegateValueEditor<String>(
+				StyleValueEditor.INSTANCE, model))
 			{
 				@Override
 				public ILabelProvider getLabelProvider()
@@ -2975,6 +2972,10 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 					{
 						public String isValid(Object value)
 						{
+							if (ElementUtil.isInheritedFormElement(context, persist))
+							{
+								return "Cannot change name of an override element.";
+							}
 							if (value instanceof String && ((String)value).length() > 0)
 							{
 								try

@@ -29,7 +29,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
-import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
@@ -105,17 +105,7 @@ public class CutAction extends DesignerSelectionAction
 	@Override
 	protected boolean calculateEnabled()
 	{
-		List selected = getSelectedObjects();
-		if (selected != null && !selected.isEmpty() && selected.get(0) instanceof EditPart)
-		{
-			for (int i = 0; i < selected.size(); i++)
-			{
-				EditPart object = (EditPart)selected.get(i);
-				EditPart parent = object.getParent();
-				if (parent != null && parent.getModel() instanceof IPersist &&
-					ElementUtil.isReadOnlyFormElement((IPersist)parent.getModel(), object.getModel())) return false;
-			}
-		}
+		if (DesignerUtil.containsInheritedElement(getSelectedObjects())) return false;
 		return super.calculateEnabled();
 	}
 

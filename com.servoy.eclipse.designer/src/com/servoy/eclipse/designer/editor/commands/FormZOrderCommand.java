@@ -23,9 +23,11 @@ import java.util.Map;
 import org.eclipse.gef.commands.Command;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
  * Command to change the z-ordering (stacking order) of elements in the form designer.
@@ -38,7 +40,6 @@ public class FormZOrderCommand extends Command implements ISupportModels
 	private final Object requestType;
 	private final Object[] models;
 	private final Form form;
-
 	Map<IFormElement, Integer> undoMap;
 
 	/**
@@ -112,11 +113,13 @@ public class FormZOrderCommand extends Command implements ISupportModels
 				undoMap.put(formElement, new Integer(formElement.getFormIndex()));
 				if (VisualFormEditor.REQ_SEND_TO_BACK.equals(requestType))
 				{
-					formElement.setFormIndex(indexFirstToUse - i);
+					new PersistPropertySource((IPersist)formElement, form, false).setPersistPropertyValue(
+						StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), new Integer(indexFirstToUse - i));
 				}
 				else if (VisualFormEditor.REQ_BRING_TO_FRONT.equals(requestType))
 				{
-					formElement.setFormIndex(indexFirstToUse + i);
+					new PersistPropertySource((IPersist)formElement, form, false).setPersistPropertyValue(
+						StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), new Integer(indexFirstToUse + i));
 				}
 			}
 		}
@@ -127,7 +130,8 @@ public class FormZOrderCommand extends Command implements ISupportModels
 	{
 		for (Map.Entry<IFormElement, Integer> entry : undoMap.entrySet())
 		{
-			entry.getKey().setFormIndex(entry.getValue().intValue());
+			new PersistPropertySource((IPersist)entry.getKey(), form, false).setPersistPropertyValue(
+				StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), new Integer(entry.getValue().intValue()));
 		}
 	}
 }

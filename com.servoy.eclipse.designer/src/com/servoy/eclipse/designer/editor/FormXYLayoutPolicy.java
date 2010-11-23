@@ -42,8 +42,6 @@ import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
 import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
-import com.servoy.eclipse.ui.util.ElementUtil;
-import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.Part;
@@ -68,17 +66,14 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 	@Override
 	protected Command createChangeConstraintCommand(ChangeBoundsRequest request, EditPart childEditPart, Object constraint)
 	{
-		if (ElementUtil.isReadOnlyFormElement((Form)parent.getModel(), childEditPart.getModel()))
-		{
-			return null;
-		}
 		if (childEditPart instanceof GraphicalEditPart && constraint instanceof Rectangle)
 		{
 			if (childEditPart.getModel() instanceof ISupportBounds && constraint instanceof Rectangle)
 			{
 				CompoundCommand compoundCommand = new CompoundCommand();
 
-				compoundCommand.add(new ChangeBoundsCommand((ISupportBounds)childEditPart.getModel(), (Rectangle)constraint));
+				compoundCommand.add(new ChangeBoundsCommand(new PersistPropertySource((IPersist)childEditPart.getModel(), parent.getPersist(), false),
+					(Rectangle)constraint));
 
 				// set properties via request.extendedData
 				Map<Object, Object> objectProperties = request.getExtendedData();
@@ -123,7 +118,8 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 				}
 				Point loc = request.getLocation().getCopy();
 				getHostFigure().translateToRelative(loc);
-				command = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), data, requestType, extendedData, null, loc.getSWTPoint());
+				command = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), data, requestType, extendedData, null,
+					loc.getSWTPoint(), parent.getPersist());
 			}
 
 			// TODO: add more
@@ -132,6 +128,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			if (request instanceof CreateElementRequest)
 			{
 				command = ((CreateElementRequest)request).chainSetFactoryObjectCommand(command);
+
 			}
 		}
 		return command;
@@ -157,7 +154,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 				for (Object o : (Object[])factory.getData())
 				{
 					FormPlaceElementCommand placeElementCommand = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(),
-						new Object[] { o }, request.getType(), request.getExtendedData(), null, loc.getSWTPoint());
+						new Object[] { o }, request.getType(), request.getExtendedData(), null, loc.getSWTPoint(), parent.getPersist());
 					((CompoundCommand)command).add(((CreateElementRequest)request).chainSetFactoryObjectCommand(placeElementCommand));
 				}
 				return command;
@@ -307,7 +304,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 					yNext += oncenter;
 					break;
 			}
-			distributeCommand.add(new ChangeBoundsCommand(supportBounds, moveDelta, noResize));
+			distributeCommand.add(new ChangeBoundsCommand(new PersistPropertySource((IPersist)supportBounds, parent.getPersist(), false), moveDelta, noResize));
 		}
 
 		return distributeCommand.unwrap();

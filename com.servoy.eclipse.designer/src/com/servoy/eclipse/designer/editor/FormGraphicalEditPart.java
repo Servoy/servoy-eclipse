@@ -190,17 +190,17 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 	{
 		if (child instanceof Part)
 		{
-			return new FormPartGraphicalEditPart(application, editorPart, (Part)child, ElementUtil.isReadOnlyFormElement(form, child));
+			return new FormPartGraphicalEditPart(application, editorPart, (Part)child, ElementUtil.isInheritedFormElement(form, child));
 		}
 		if (child instanceof Tab)
 		{
-			return new TabFormGraphicalEditPart(application, (Tab)child, ElementUtil.isReadOnlyFormElement(form, child));
+			return new TabFormGraphicalEditPart(application, (Tab)child, ElementUtil.isInheritedFormElement(form, child));
 		}
 		if (child instanceof FormElementGroup)
 		{
 			return new GroupGraphicalEditPart(application, editorPart, form, (FormElementGroup)child);
 		}
-		return new PersistGraphicalEditPart(application, (IPersist)child, form, ElementUtil.isReadOnlyFormElement(form, child));
+		return new PersistGraphicalEditPart(application, (IPersist)child, form, ElementUtil.isInheritedFormElement(form, child));
 	}
 
 	@Override
@@ -304,7 +304,7 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		return (Form)getModel();
 	}
 
-	public boolean isReadOnly()
+	public boolean isInherited()
 	{
 		return false;
 	}

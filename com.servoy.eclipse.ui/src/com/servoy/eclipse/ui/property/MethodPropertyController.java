@@ -87,9 +87,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 	{
 		ILabelProvider methodLabelProvider = PersistPropertySource.getFormInheritanceLabelProvider(persist, new FormContextDelegateLabelProvider(
 			new MethodLabelProvider(persist, context, false, !includeDefault), context), getId());
-		IValueEditor<MethodWithArguments> valueEditor = PersistPropertySource.getFormInheritanceValueEditor(persist, new MethodValueEditor(persist, context),
-			getId());
-		return new MethodCellEditor(parent, methodLabelProvider, valueEditor, persist, getId(), false, // readonly is handled in openDialogBox below
+		return new MethodCellEditor(parent, methodLabelProvider, new MethodValueEditor(persist, context), persist, getId(), false, // readonly is handled in openDialogBox below
 			includeNone, includeDefault, includeFormMethods, includeGlobalMethods)
 		{
 			@Override

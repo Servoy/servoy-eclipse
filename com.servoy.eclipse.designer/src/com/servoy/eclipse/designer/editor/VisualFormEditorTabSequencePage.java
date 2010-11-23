@@ -62,9 +62,9 @@ import org.eclipse.swt.widgets.TableItem;
 
 import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
-import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.dnd.IDragData;
+import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.views.IndexedListViewer;
 import com.servoy.eclipse.ui.views.IndexedStructuredSelection;
@@ -72,6 +72,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportTabSeq;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.SortedList;
 
 /**
@@ -379,7 +380,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 			}
 		});
 		List<ISupportTabSeq> selected = new ArrayList<ISupportTabSeq>();
-		Iterator<ISupportTabSeq> iterator = editor.getForm().getFieldsByTabOrder();
+		Iterator<ISupportTabSeq> iterator = editor.getFlattenedForm().getFieldsByTabOrder();
 		for (int i = 0; iterator.hasNext(); i++)
 		{
 			ISupportTabSeq tabSeq = iterator.next();
@@ -480,7 +481,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 	{
 		SetValueCommand setCommand = new SetValueCommand();
 		setCommand.setTarget(new PersistPropertySource(persist, editor.getForm(), false));
-		setCommand.setPropertyId("tabSeq");
+		setCommand.setPropertyId(StaticContentSpecLoader.PROPERTY_TABSEQ.getPropertyName());
 		setCommand.setPropertyValue(new Integer(tabSeq));
 		return setCommand;
 	}

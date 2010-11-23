@@ -55,6 +55,8 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Field;
+import com.servoy.j2db.persistence.FlattenedPortal;
+import com.servoy.j2db.persistence.FlattenedTabPanel;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -316,8 +318,8 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 					}
 					if (marker.getAttribute(IMarker.CHAR_START, -1) != -1)
 					{
-						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(),
-							Utils.getAsInteger(marker.getAttribute(IMarker.CHAR_START, -1)));
+						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(), Utils.getAsInteger(marker.getAttribute(
+							IMarker.CHAR_START, -1)));
 					}
 					if (elementUuid != null)
 					{
@@ -535,6 +537,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 				{
 					IPersist child = AbstractRepository.searchPersist(flattenedSolution.getSolution(), changed);
 
+					if (changed instanceof FlattenedTabPanel || changed instanceof FlattenedPortal) child = changed;
 					// is it the form itself ?
 					if (changed.getUUID().equals(form.getUUID()))
 					{

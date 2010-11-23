@@ -29,7 +29,7 @@ public interface IPersistEditPart
 {
 	IPersist getPersist();
 
-	boolean isReadOnly();
+	boolean isInherited();
 
 	public IFieldPositioner getFieldPositioner();
 

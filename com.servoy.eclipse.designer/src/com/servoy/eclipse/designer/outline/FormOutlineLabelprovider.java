@@ -110,9 +110,9 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 	public Color getForeground(Object element)
 	{
 		if (element instanceof PersistContext &&
-			ElementUtil.isReadOnlyFormElement(((PersistContext)element).getContext(), ((PersistContext)element).getPersist()))
+			ElementUtil.isInheritedFormElement(((PersistContext)element).getContext(), ((PersistContext)element).getPersist()))
 		{
-			// readonly elements
+			// inherited elements
 			return Display.getCurrent().getSystemColor(SWT.COLOR_RED);
 		}
 		return null;

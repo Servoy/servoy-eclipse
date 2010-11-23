@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.FigureUtilities;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
@@ -45,9 +46,9 @@ import com.servoy.j2db.persistence.TabPanel;
 
 public class TabFormGraphicalEditPart extends BasePersistGraphicalEditPart
 {
-	public TabFormGraphicalEditPart(IApplication application, Tab tab, boolean readOnly)
+	public TabFormGraphicalEditPart(IApplication application, Tab tab, boolean inherited)
 	{
-		super(application, tab, readOnly);
+		super(application, tab, inherited);
 	}
 
 	@Override
@@ -59,11 +60,8 @@ public class TabFormGraphicalEditPart extends BasePersistGraphicalEditPart
 	@Override
 	protected void createEditPolicies()
 	{
-		if (!isReadOnly())
-		{
-			installEditPolicy(PasteToSupportChildsEditPolicy.PASTE_ROLE, new PasteToSupportChildsEditPolicy(getFieldPositioner()));
-			installEditPolicy(EditPolicy.COMPONENT_ROLE, new PersistEditPolicy(getFieldPositioner()));
-		}
+		installEditPolicy(PasteToSupportChildsEditPolicy.PASTE_ROLE, new PasteToSupportChildsEditPolicy(getFieldPositioner()));
+		installEditPolicy(EditPolicy.COMPONENT_ROLE, new PersistEditPolicy(getFieldPositioner()));
 	}
 
 	@Override
@@ -73,6 +71,7 @@ public class TabFormGraphicalEditPart extends BasePersistGraphicalEditPart
 		label.setFont(FontResource.getDefaultFont(SWT.ITALIC, 0));
 		label.setBorder(new RaisedBorder(2, 2, 2, 2));
 		label.setOpaque(false);
+		if (isInherited()) label.setForegroundColor(ColorConstants.red);
 		updateLabel((Tab)getPersist(), label);
 		return label;
 	}

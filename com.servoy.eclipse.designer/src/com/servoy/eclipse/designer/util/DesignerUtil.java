@@ -23,6 +23,7 @@ import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.gef.EditPart;
 
 import com.servoy.eclipse.designer.property.IPersistEditPart;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.IPersist;
 
 /**
@@ -43,10 +44,6 @@ public class DesignerUtil
 			if (editPart instanceof IPersistEditPart)
 			{
 				IPersistEditPart persistEditpart = (IPersistEditPart)editPart;
-				if (persistEditpart.isReadOnly())
-				{
-					continue;
-				}
 				IPersist persist = persistEditpart.getPersist();
 				for (EditPart editPart2 : editParts)
 				{
@@ -63,6 +60,7 @@ public class DesignerUtil
 		return newEditParts;
 	}
 
+
 	/**
 	 * @param awtDimension
 	 * @return draw2d Dimension
@@ -75,4 +73,20 @@ public class DesignerUtil
 		}
 		return new Dimension(awtDimension.width, awtDimension.height);
 	}
+
+	public static boolean containsInheritedElement(List selectedEditParts)
+	{
+		if (selectedEditParts != null && !selectedEditParts.isEmpty() && selectedEditParts.get(0) instanceof EditPart)
+		{
+			for (int i = 0; i < selectedEditParts.size(); i++)
+			{
+				EditPart object = (EditPart)selectedEditParts.get(i);
+				EditPart parent = object.getParent();
+				if (parent != null && parent.getModel() instanceof IPersist &&
+					ElementUtil.isInheritedFormElement((IPersist)parent.getModel(), object.getModel())) return true;
+			}
+		}
+		return false;
+	}
+
 }

@@ -20,7 +20,10 @@ import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.commands.Command;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
  * Command to apply moving to a Part.
@@ -40,6 +43,7 @@ public class MovePartCommand extends Command
 
 	/** Object to manipulate. */
 	private final Part part;
+	private final IPersist context;
 
 	/**
 	 * Create a command that can move a part.
@@ -49,7 +53,7 @@ public class MovePartCommand extends Command
 	 * @param newBounds the new size and location
 	 * @throws IllegalArgumentException if any of the parameters is null
 	 */
-	public MovePartCommand(Part part, Object requestType, int newHeight)
+	public MovePartCommand(Part part, IPersist context, Object requestType, int newHeight)
 	{
 		if (part == null || requestType == null)
 		{
@@ -58,6 +62,7 @@ public class MovePartCommand extends Command
 		this.part = part;
 		this.requestType = requestType;
 		this.newHeight = newHeight;
+		this.context = context;
 		setLabel("move part");
 	}
 
@@ -109,7 +114,7 @@ public class MovePartCommand extends Command
 
 	private void apply(int height)
 	{
-		part.setHeight(height);
+		new PersistPropertySource(part, context, false).setPersistPropertyValue(StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), height);
 		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, part, false);
 	}
 

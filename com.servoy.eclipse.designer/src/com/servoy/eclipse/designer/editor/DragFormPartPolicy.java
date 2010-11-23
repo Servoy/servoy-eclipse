@@ -78,7 +78,7 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 		if (request instanceof ChangeBoundsRequest)
 		{
 			CompoundCommand compoundCommand = new CompoundCommand();
-			compoundCommand.add(new MovePartCommand((Part)getHost().getModel(), request.getType(), getHostFigure().getBounds().y +
+			compoundCommand.add(new MovePartCommand((Part)getHost().getModel(), null, request.getType(), getHostFigure().getBounds().y +
 				((ChangeBoundsRequest)request).getMoveDelta().y));
 			if (RequestConstants.REQ_CLONE.equals(request.getType()))
 			{

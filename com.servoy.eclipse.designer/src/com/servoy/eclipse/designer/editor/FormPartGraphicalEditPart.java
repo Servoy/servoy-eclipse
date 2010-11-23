@@ -61,14 +61,14 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 	protected IApplication application;
 
 	int formWidth;
-	private final boolean readonly;
+	private final boolean inherited;
 	private final VisualFormEditor editorPart;
 
-	public FormPartGraphicalEditPart(IApplication application, VisualFormEditor editorPart, Part part, boolean readonly)
+	public FormPartGraphicalEditPart(IApplication application, VisualFormEditor editorPart, Part part, boolean inherited)
 	{
 		this.application = application;
 		this.editorPart = editorPart;
-		this.readonly = readonly;
+		this.inherited = inherited;
 		setModel(part);
 	}
 
@@ -81,10 +81,7 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 	@Override
 	protected void createEditPolicies()
 	{
-		if (!readonly)
-		{
-			installEditPolicy(EditPolicy.COMPONENT_ROLE, new FormPartEditPolicy());
-		}
+		installEditPolicy(EditPolicy.COMPONENT_ROLE, new FormPartEditPolicy());
 	}
 
 	@Override
@@ -93,7 +90,7 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 		Part part = getPersist();
 		PartFigure fig = new PartFigure(editorPart);
 		fig.setFont(FontResource.getDefaultFont(SWT.NONE, 0));
-		if (readonly)
+		if (inherited)
 		{
 			fig.setForegroundColor(ColorConstants.red);
 		}
@@ -169,11 +166,6 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 		return (Part)getModel();
 	}
 
-	public boolean isReadOnly()
-	{
-		return readonly;
-	}
-
 	public IFieldPositioner getFieldPositioner()
 	{
 		if (getParent() instanceof IPersistEditPart)
@@ -246,11 +238,6 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 		};
 	}
 
-	public boolean canBeMoved()
-	{
-		return !isReadOnly();
-	}
-
 	public static List<Object> filterMovableEditParts(List<Object> editParts)
 	{
 		List<Object> newEditParts = new ArrayList<Object>(editParts.size());
@@ -260,10 +247,6 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 			if (editPart instanceof FormPartGraphicalEditPart)
 			{
 				FormPartGraphicalEditPart partEditpart = (FormPartGraphicalEditPart)editPart;
-				if (!partEditpart.canBeMoved())
-				{
-					continue;
-				}
 				IPersist persist = partEditpart.getPersist();
 				for (Object editPart2 : editParts)
 				{
@@ -529,5 +512,10 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 		}
 
 		return true;
+	}
+
+	public boolean isInherited()
+	{
+		return inherited;
 	}
 }

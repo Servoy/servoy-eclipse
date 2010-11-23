@@ -636,7 +636,7 @@ public class SolutionSerializer
 		{
 			ContentSpec.Element element = iterator.next();
 
-			if (element.isMetaData() || element.isDeprecated()) continue;
+			if (element.isMetaData() || element.isDeprecated() || !property_values.containsKey(element.getName())) continue;
 
 			String propertyName = element.getName();
 			Object propertyObjectValue = property_values.get(propertyName);
@@ -655,11 +655,7 @@ public class SolutionSerializer
 				}
 			}
 
-			if (!cs.mustUpdateValue(element.getContentID(), propertyValue))
-			{
-				property_values.remove(propertyName);
-			}
-			else if (!isBoolean && !isNumber)
+			if (!isBoolean && !isNumber)
 			{
 				property_values.put(propertyName, propertyValue);//replace with textual version
 			}

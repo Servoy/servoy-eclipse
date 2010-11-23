@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor.commands;
 
 import java.util.ArrayList;
@@ -28,8 +28,10 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.actions.SetPropertyRequest;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportTabSeq;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
  * An action to change the tab sequence of selected objects.
@@ -95,8 +97,16 @@ public class SetTabSequenceAction extends DesignerSelectionAction
 			values.put(editPart, new Integer(index < 0 ? ISupportTabSeq.SKIP : index + 1));
 		}
 
-		SetPropertyRequest setPropertyRequest = new SetPropertyRequest(requestType, "tabSeq", values, "set tab sequence");
+		SetPropertyRequest setPropertyRequest = new SetPropertyRequest(requestType, StaticContentSpecLoader.PROPERTY_TABSEQ.getPropertyName(), values,
+			"set tab sequence");
 		setPropertyRequest.setEditParts(tabSeqEditParts);
 		return setPropertyRequest;
+	}
+
+	@Override
+	protected boolean calculateEnabled()
+	{
+		if (DesignerUtil.containsInheritedElement(getSelectedObjects())) return false;
+		return super.calculateEnabled();
 	}
 }

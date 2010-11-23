@@ -13,15 +13,13 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -36,6 +34,7 @@ import com.servoy.eclipse.core.repository.EclipseRepository;
 import com.servoy.eclipse.core.util.OptionDialog;
 import com.servoy.eclipse.core.util.UIUtils.ExtendedInputDialog;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -182,8 +181,6 @@ public class MovePersistAction extends AbstractMovePersistAction
 						try
 						{
 							EclipseRepository er = (EclipseRepository)ServoyModel.getDeveloperRepository();
-							final Map<String, Method> methods = er.getGettersViaIntrospection(o);
-							final Map<String, Method> setterMethods = er.getSettersViaIntrospection(o);
 							Iterator<ContentSpec.Element> iterator = er.getContentSpec().getPropertiesForObjectType(o.getTypeID());
 							while (iterator.hasNext())
 							{
@@ -194,13 +191,11 @@ public class MovePersistAction extends AbstractMovePersistAction
 								final int typeId = element.getTypeID();
 								if (typeId == IRepository.ELEMENTS)
 								{
-									Method method = methods.get(element.getName());
-									Object property_value = method.invoke(o, new Object[] { });
+									Object property_value = ((AbstractBase)o).getProperty(element.getName());
 									final int element_id = Utils.getAsInteger(property_value);
 									if (element_id > 0 && element_id == oldId)
 									{
-										Method setter = setterMethods.get(element.getName());
-										setter.invoke(o, new Object[] { duplicate.getID() });
+										((AbstractBase)o).setProperty(element.getName(), new Integer(duplicate.getID()));
 									}
 								}
 							}

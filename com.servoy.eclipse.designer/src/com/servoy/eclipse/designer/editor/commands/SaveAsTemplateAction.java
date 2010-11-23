@@ -37,6 +37,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.repository.EclipseRepository;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
@@ -75,6 +76,7 @@ public class SaveAsTemplateAction extends SelectionAction
 	@Override
 	protected boolean calculateEnabled()
 	{
+		if (DesignerUtil.containsInheritedElement(getSelectedObjects())) return false;
 		return getSelection() != null && !getSelection().isEmpty();
 	}
 

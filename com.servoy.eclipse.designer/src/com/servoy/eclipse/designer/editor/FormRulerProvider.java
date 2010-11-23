@@ -35,11 +35,12 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 
 /**
- * Ruler provider for form designer, vertical rule is form widt, horizontal rules are part boundaries.
+ * Ruler provider for form designer, vertical rule is form width, horizontal rules are part boundaries.
  * 
  * @author rgansevles
  */
@@ -103,14 +104,11 @@ public class FormRulerProvider extends RulerProvider
 		if (guide instanceof FormPartGraphicalEditPart) // vertical
 		{
 			FormPartGraphicalEditPart editPart = (FormPartGraphicalEditPart)guide;
-			if (!editPart.canBeMoved())
-			{
-				return null;
-			}
 
 			delta = editPart.limitPartMove(new Point(0, positionDelta)).y;
 
-			return new MovePartCommand((Part)editPart.getModel(), RequestConstants.REQ_MOVE, ((Part)editPart.getModel()).getHeight() + delta);
+			return new MovePartCommand((Part)editPart.getModel(), (IPersist)editPart.getParent().getModel(), RequestConstants.REQ_MOVE,
+				((Part)editPart.getModel()).getHeight() + delta);
 		}
 
 		if (guide == formEditPart) // horizontal

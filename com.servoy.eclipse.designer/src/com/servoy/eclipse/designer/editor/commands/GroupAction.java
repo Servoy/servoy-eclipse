@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor.commands;
 
 import java.util.ArrayList;
@@ -28,6 +28,8 @@ import org.eclipse.ui.IWorkbenchPart;
 import com.servoy.eclipse.designer.actions.SetPropertyRequest;
 import com.servoy.eclipse.designer.editor.GroupGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -91,8 +93,15 @@ public class GroupAction extends DesignerSelectionAction
 			values.put(editPart, groupID);
 		}
 
-		GroupRequest propertyRequest = new SetPropertyRequest(requestType, "groupID", values, "group");
+		GroupRequest propertyRequest = new SetPropertyRequest(requestType, StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName(), values, "group");
 		propertyRequest.setEditParts(affectedEditparts);
 		return propertyRequest;
+	}
+
+	@Override
+	protected boolean calculateEnabled()
+	{
+		if (DesignerUtil.containsInheritedElement(getSelectedObjects())) return false;
+		return super.calculateEnabled();
 	}
 }

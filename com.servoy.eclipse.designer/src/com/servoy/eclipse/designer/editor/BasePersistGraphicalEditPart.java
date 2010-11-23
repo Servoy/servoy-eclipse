@@ -46,13 +46,13 @@ import com.servoy.j2db.persistence.IPersist;
 public abstract class BasePersistGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistEditPart
 {
 	protected final IApplication application;
-	private final boolean readOnly;
+	private final boolean inherited;
 	private boolean selectable = true;
 
-	public BasePersistGraphicalEditPart(IApplication application, IPersist persist, boolean readOnly)
+	public BasePersistGraphicalEditPart(IApplication application, IPersist persist, boolean inherited)
 	{
 		this.application = application;
-		this.readOnly = readOnly;
+		this.inherited = inherited;
 		setModel(persist);
 	}
 
@@ -117,10 +117,6 @@ public abstract class BasePersistGraphicalEditPart extends AbstractGraphicalEdit
 					if (editPart instanceof IPersistEditPart)
 					{
 						IPersistEditPart persistEditpart = (IPersistEditPart)editPart;
-						if (persistEditpart.isReadOnly())
-						{
-							continue;
-						}
 						IPersist persist = persistEditpart.getPersist();
 						for (Object editPart2 : editParts)
 						{
@@ -237,9 +233,9 @@ public abstract class BasePersistGraphicalEditPart extends AbstractGraphicalEdit
 		return (IPersist)getModel();
 	}
 
-	public boolean isReadOnly()
+	public boolean isInherited()
 	{
-		return readOnly;
+		return inherited;
 	}
 
 	public IFieldPositioner getFieldPositioner()

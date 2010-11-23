@@ -45,9 +45,9 @@ public class FormPlacePortalCommand extends FormPlaceElementCommand
 	 * @param object
 	 */
 	public FormPlacePortalCommand(ISupportFormElements parent, Object object, Object requestType, Map<Object, Object> objectProperties,
-		IFieldPositioner fieldPositioner, Point defaultLocation, boolean fillText, boolean fillName)
+		IFieldPositioner fieldPositioner, Point defaultLocation, boolean fillText, boolean fillName, IPersist context)
 	{
-		super(parent, object, requestType, objectProperties, fieldPositioner, defaultLocation);
+		super(parent, object, requestType, objectProperties, fieldPositioner, defaultLocation, context);
 		this.fillText = fillText;
 		this.fillName = fillName;
 	}

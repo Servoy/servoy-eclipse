@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.labelproviders;
 
 
@@ -21,8 +21,11 @@ import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.property.IPropertyController;
+import com.servoy.eclipse.ui.property.IPropertyConverter;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.util.Utils;
@@ -71,12 +74,26 @@ public class FormInheritenceDelegateLabelProvider extends DelegateLabelProvider 
 	@Override
 	public String getText(Object value)
 	{
-		if (form != null && form.getExtendsFormID() > 0)
+		if (form != null && form.getExtendsForm() != null && !form.getPropertiesMap().containsKey(propertyId) &&
+			form.getExtendsForm().getPropertiesMap().containsKey(propertyId))
 		{
-			Object inheritedValue = new PersistPropertySource(form, null, true).getInheritedPropertyValue(value, propertyId);
-			if (!Utils.equalObjects(value, inheritedValue))
+			PersistPropertySource propertySource = new PersistPropertySource(form, null, true);
+			Object superValue = propertySource.getPersistPropertyValue(propertyId);
+			Object convertedValue = value;
+			Object defaultValue = propertySource.getDefaultPersistValue(propertyId);
+			IPropertyDescriptor propertyDescriptor = propertySource.getPropertyDescriptor(propertyId);
+			if (propertyDescriptor instanceof IPropertyController)
 			{
-				return super.getText(inheritedValue) + " (" + Messages.LabelInherited + ')';
+				// convert to property value before making proper comparison
+				IPropertyConverter propertyConverter = ((IPropertyController)propertyDescriptor).getConverter();
+				if (propertyConverter != null)
+				{
+					convertedValue = propertyConverter.convertValue(propertyId, value);
+				}
+			}
+			if (Utils.equalObjects(convertedValue, superValue) && !Utils.equalObjects(convertedValue, defaultValue))
+			{
+				return super.getText(value) + " (" + Messages.LabelInherited + ')';
 			}
 		}
 

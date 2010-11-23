@@ -56,6 +56,7 @@ import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 
@@ -88,6 +89,11 @@ class PersistEditPolicy extends ComponentEditPolicy
 	public Command getCommand(Request request)
 	{
 		IPersist persist = (IPersist)getHost().getModel();
+		EditPart formEditPart = getHost().getParent();
+		while (formEditPart != null && !(formEditPart.getModel() instanceof Form))
+		{
+			formEditPart = formEditPart.getParent();
+		}
 
 		if (VisualFormEditor.REQ_DROP_LINK.equals(request.getType()) && request instanceof DataRequest)
 		{
@@ -134,12 +140,13 @@ class PersistEditPolicy extends ComponentEditPolicy
 				DataFieldRequest dataFieldRequest = ((DataFieldRequest)request);
 				command = new FormPlaceFieldCommand(portal, dataFieldRequest.getData(), dataFieldRequest.getType(), dataFieldRequest.getExtendedData(),
 					fieldPositioner, fieldsLocation, dataFieldRequest.placeAsLabels, dataFieldRequest.placeWithLabels, dataFieldRequest.placeHorizontal,
-					dataFieldRequest.fillText, dataFieldRequest.fillName);
+					dataFieldRequest.fillText, dataFieldRequest.fillName, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 			}
 			else
 			{
 				// other element
-				command = new FormPlaceElementCommand(portal, data, request.getType(), request.getExtendedData(), fieldPositioner, fieldsLocation);
+				command = new FormPlaceElementCommand(portal, data, request.getType(), request.getExtendedData(), fieldPositioner, fieldsLocation,
+					(IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 			}
 		}
 
@@ -148,13 +155,14 @@ class PersistEditPolicy extends ComponentEditPolicy
 			request instanceof DataRequest)
 		{
 			// add tab to existing tab panel
-			command = new FormPlaceElementCommand((TabPanel)persist, ((DataRequest)request).getData(), request.getType(), request.getExtendedData(), null, null);
+			command = new FormPlaceElementCommand((TabPanel)persist, ((DataRequest)request).getData(), request.getType(), request.getExtendedData(), null,
+				null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 		}
 
 		else if ((VisualFormEditor.REQ_BRING_TO_FRONT.equals(request.getType()) || VisualFormEditor.REQ_SEND_TO_BACK.equals(request.getType()) &&
 			request instanceof GroupRequest))
 		{
-			command = new FormZOrderCommand(request.getType(), (Form)persist.getAncestor(IRepository.FORMS), new IPersist[] { persist });
+			command = new FormZOrderCommand(request.getType(), (Form)formEditPart.getModel(), new IPersist[] { persist });
 		}
 
 		else if ((VisualFormEditor.REQ_SET_PROPERTY.equals(request.getType()) && request instanceof SetPropertyRequest))
@@ -166,7 +174,8 @@ class PersistEditPolicy extends ComponentEditPolicy
 				if (sel instanceof EditPart && ((EditPart)sel).getModel() instanceof IPersist && ((EditPart)sel).getModel() instanceof IFormElement)
 				{
 					SetValueCommand setCommand = new SetValueCommand(setPropertyRequest.getName());
-					setCommand.setTarget(new PersistPropertySource(((IPersist)((EditPart)sel).getModel()), null, false));
+					setCommand.setTarget(new PersistPropertySource(((IPersist)((EditPart)sel).getModel()), formEditPart != null ? (Form)formEditPart.getModel()
+						: null, false));
 					setCommand.setPropertyId(setPropertyRequest.getPropertyId());
 					setCommand.setPropertyValue(setPropertyRequest.getValue((EditPart)sel));
 					propCommand.add(setCommand);
@@ -275,7 +284,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 						: formEditPart.getModel()), false);
 					SetValueCommand setCommand = new SetValueCommand("Drag-n-drop script method");
 					setCommand.setTarget(propertySource);
-					setCommand.setPropertyId("onActionMethodID");
+					setCommand.setPropertyId(StaticContentSpecLoader.PROPERTY_ONACTIONMETHODID.getPropertyName());
 					setCommand.setPropertyValue(new MethodWithArguments(persist.getID()));
 					return setCommand;
 				}
@@ -285,7 +294,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 						: formEditPart.getModel()), false);
 					SetValueCommand setCommand = new SetValueCommand("Drag-n-drop image");
 					setCommand.setTarget(propertySource);
-					setCommand.setPropertyId("imageMediaID");
+					setCommand.setPropertyId(StaticContentSpecLoader.PROPERTY_IMAGEMEDIAID.getPropertyName());
 					setCommand.setPropertyValue(new Integer(persist.getID()));
 					return setCommand;
 				}
@@ -316,7 +325,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 			IPropertySource propertySource = new PersistPropertySource((IPersist)child, form, false);
 			SetValueCommand setCommand = new SetValueCommand("Drag-n-drop data provider");
 			setCommand.setTarget(propertySource);
-			setCommand.setPropertyId("dataProviderID");
+			setCommand.setPropertyId(StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName());
 			setCommand.setPropertyValue(dataProviderDragData.relationName == null ? dataProviderDragData.dataProviderId
 				: (dataProviderDragData.relationName + '.' + dataProviderDragData.dataProviderId));
 			return setCommand;

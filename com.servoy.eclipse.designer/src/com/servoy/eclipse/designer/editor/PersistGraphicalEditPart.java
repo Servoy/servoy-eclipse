@@ -26,8 +26,8 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.FigureUtilities;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.IImageFigure.ImageChangedListener;
 import org.eclipse.draw2d.ImageFigure;
+import org.eclipse.draw2d.IImageFigure.ImageChangedListener;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -44,8 +44,8 @@ import com.servoy.eclipse.designer.internal.core.ImageFigureController;
 import com.servoy.eclipse.designer.internal.core.OutlineBorder;
 import com.servoy.eclipse.designer.internal.core.PersistImageNotifier;
 import com.servoy.eclipse.designer.property.PropertyDirectEditManager;
-import com.servoy.eclipse.designer.property.PropertyDirectEditManager.PropertyCellEditorLocator;
 import com.servoy.eclipse.designer.property.PropertyDirectEditPolicy;
+import com.servoy.eclipse.designer.property.PropertyDirectEditManager.PropertyCellEditorLocator;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.resource.FontResource;
@@ -70,9 +70,9 @@ public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 	private PersistImageNotifier persistImageNotifier;
 	private final Form form;
 
-	public PersistGraphicalEditPart(IApplication application, IPersist model, Form form, boolean readOnly)
+	public PersistGraphicalEditPart(IApplication application, IPersist model, Form form, boolean inherited)
 	{
-		super(application, model, readOnly);
+		super(application, model, inherited);
 		this.form = form;
 		setModel(model);
 	}
@@ -113,12 +113,9 @@ public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 	@Override
 	protected void createEditPolicies()
 	{
-		if (!isReadOnly())
-		{
-			installEditPolicy(PasteToSupportChildsEditPolicy.PASTE_ROLE, new PasteToSupportChildsEditPolicy(getFieldPositioner()));
-			installEditPolicy(EditPolicy.COMPONENT_ROLE, new PersistEditPolicy(getFieldPositioner()));
-			installEditPolicy(EditPolicy.DIRECT_EDIT_ROLE, new PropertyDirectEditPolicy(getPersistProperties()));
-		}
+		installEditPolicy(PasteToSupportChildsEditPolicy.PASTE_ROLE, new PasteToSupportChildsEditPolicy(getFieldPositioner()));
+		installEditPolicy(EditPolicy.COMPONENT_ROLE, new PersistEditPolicy(getFieldPositioner()));
+		installEditPolicy(EditPolicy.DIRECT_EDIT_ROLE, new PropertyDirectEditPolicy(getPersistProperties()));
 	}
 
 	protected PersistPropertySource getPersistProperties()
@@ -158,7 +155,7 @@ public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 			}
 		};
 
-		fig.setBorder(new OutlineBorder(125, isReadOnly() ? ColorConstants.red : ColorConstants.gray, null, Graphics.LINE_DOT));
+		fig.setBorder(new OutlineBorder(125, isInherited() ? ColorConstants.red : ColorConstants.gray, null, Graphics.LINE_DOT));
 
 		// show the border only when you cannot see the elment from its background
 		fig.addImageChangedListener(new ImageChangedListener()

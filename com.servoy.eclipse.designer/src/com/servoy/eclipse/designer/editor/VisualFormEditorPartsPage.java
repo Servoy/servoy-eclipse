@@ -69,6 +69,7 @@ import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -683,13 +684,13 @@ public class VisualFormEditorPartsPage extends Composite
 
 		SetValueCommand setCommand = new SetValueCommand();
 		setCommand.setTarget(new PersistPropertySource(partToMove, editor.getForm(), false));
-		setCommand.setPropertyId("height");
+		setCommand.setPropertyId(StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName());
 		setCommand.setPropertyValue(new Integer(switchPart.getHeight()));
 		command.add(setCommand);
 
 		setCommand = new SetValueCommand();
 		setCommand.setTarget(new PersistPropertySource(switchPart, editor.getForm(), false));
-		setCommand.setPropertyId("height");
+		setCommand.setPropertyId(StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName());
 		setCommand.setPropertyValue(new Integer(partToMove.getHeight()));
 		command.add(setCommand);
 

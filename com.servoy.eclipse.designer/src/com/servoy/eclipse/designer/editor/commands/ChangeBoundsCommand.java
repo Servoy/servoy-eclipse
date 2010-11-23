@@ -28,14 +28,14 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.commands.Command;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
-import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 
 /**
- * Command to apply dragging changes to the ISupportBounds object. Children of the persist are moved along.
+ * Command to apply dragging changes to the PersistPropertySource object. Children of the persist are moved along.
  * 
  * @author rgansevles
  * 
@@ -43,32 +43,32 @@ import com.servoy.j2db.persistence.ISupportName;
 public class ChangeBoundsCommand extends Command implements ISupportModels
 {
 	/** Objects to manipulate. */
-	private final ISupportBounds supportBounds;
+	private final PersistPropertySource propertySource;
 	private final Point moveDelta;
 	private final Dimension sizeDelta;
 
 	private List<Object> models = null;
 	private boolean applyToChildren;
-	private Map<ISupportBounds, java.awt.Point> undoLocation = null;
-	private Map<ISupportBounds, java.awt.Dimension> undoSize = null;
+	private Map<PersistPropertySource, java.awt.Point> undoLocation = null;
+	private Map<PersistPropertySource, java.awt.Dimension> undoSize = null;
 
 	/**
 	 * Create a command that can resize and/or move ISupportBound objects.
 	 * 
 	 */
-	public ChangeBoundsCommand(ISupportBounds supportBounds, Point moveDelta, Dimension sizeDelta)
+	public ChangeBoundsCommand(PersistPropertySource propertySource, Point moveDelta, Dimension sizeDelta)
 	{
-		this.supportBounds = supportBounds;
+		this.propertySource = propertySource;
 		this.moveDelta = moveDelta;
 		this.sizeDelta = sizeDelta;
 	}
 
-	public ChangeBoundsCommand(ISupportBounds supportBounds, Rectangle newBounds)
+	public ChangeBoundsCommand(PersistPropertySource propertySource, Rectangle newBounds)
 	{
-		this.supportBounds = supportBounds;
-		java.awt.Point loc = supportBounds.getLocation();
+		this.propertySource = propertySource;
+		java.awt.Point loc = (java.awt.Point)propertySource.getPersistPropertyValue(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName());
 		this.moveDelta = new Point(newBounds.x - loc.x, newBounds.y - loc.y);
-		java.awt.Dimension dim = supportBounds.getSize();
+		java.awt.Dimension dim = (java.awt.Dimension)propertySource.getPersistPropertyValue(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
 		this.sizeDelta = new Dimension(newBounds.width - dim.width, newBounds.height - dim.height);
 	}
 
@@ -91,9 +91,9 @@ public class ChangeBoundsCommand extends Command implements ISupportModels
 			label = "resize";
 			applyToChildren = false;
 		}
-		if (supportBounds instanceof ISupportName && ((ISupportName)supportBounds).getName() != null)
+		if (propertySource.getPropertyValue(StaticContentSpecLoader.PROPERTY_NAME.getPropertyName()) != null)
 		{
-			label += " " + ((ISupportName)supportBounds).getName();
+			label += " " + propertySource.getPropertyValue(StaticContentSpecLoader.PROPERTY_NAME.getPropertyName()) != null;
 		}
 		setLabel(label);
 		redo();
@@ -118,21 +118,21 @@ public class ChangeBoundsCommand extends Command implements ISupportModels
 
 	public boolean changeBounds(boolean change)
 	{
-		undoLocation = new HashMap<ISupportBounds, java.awt.Point>();
-		undoSize = new HashMap<ISupportBounds, java.awt.Dimension>();
+		undoLocation = new HashMap<PersistPropertySource, java.awt.Point>();
+		undoSize = new HashMap<PersistPropertySource, java.awt.Dimension>();
 		List<Object> toApply = new ArrayList<Object>();
 		models = new ArrayList<Object>();
 		try
 		{
-			toApply.add(supportBounds);
+			toApply.add(propertySource);
 			while (toApply.size() > 0)
 			{
 				Object o = toApply.remove(0);
-				if (o instanceof ISupportBounds)
+				if (o instanceof PersistPropertySource)
 				{
-					ISupportBounds sb = (ISupportBounds)o;
-					undoLocation.put(sb, sb.getLocation());
-					undoSize.put(sb, sb.getSize());
+					PersistPropertySource sb = (PersistPropertySource)o;
+					undoLocation.put(sb, (java.awt.Point)propertySource.getPersistPropertyValue(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName()));
+					undoSize.put(sb, (java.awt.Dimension)propertySource.getPersistPropertyValue(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName()));
 					if (!changeBounds(sb, moveDelta, sizeDelta, change))
 					{
 						return false;
@@ -154,8 +154,8 @@ public class ChangeBoundsCommand extends Command implements ISupportModels
 		{
 			if (!change)
 			{
-				undoLocation = new HashMap<ISupportBounds, java.awt.Point>();
-				undoSize = new HashMap<ISupportBounds, java.awt.Dimension>();
+				undoLocation = new HashMap<PersistPropertySource, java.awt.Point>();
+				undoSize = new HashMap<PersistPropertySource, java.awt.Dimension>();
 				models = new ArrayList<Object>();
 			}
 		}
@@ -175,7 +175,7 @@ public class ChangeBoundsCommand extends Command implements ISupportModels
 	@Override
 	public void undo()
 	{
-		for (ISupportBounds sb : undoLocation.keySet())
+		for (PersistPropertySource sb : undoLocation.keySet())
 		{
 			setLocationAndSize(sb, undoLocation.get(sb), undoSize.get(sb));
 		}
@@ -183,22 +183,22 @@ public class ChangeBoundsCommand extends Command implements ISupportModels
 		undoSize = null;
 	}
 
-	private static void setLocationAndSize(ISupportBounds supportBounds, java.awt.Point location, java.awt.Dimension size)
+	private static void setLocationAndSize(PersistPropertySource propertySource, java.awt.Point location, java.awt.Dimension size)
 	{
-		supportBounds.setLocation(location);
-		supportBounds.setSize(size);
+		propertySource.setPersistPropertyValue(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
+		propertySource.setPersistPropertyValue(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), size);
 
 		// fire persist change recursively
-		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, supportBounds, true);
+		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, propertySource, true);
 	}
 
-	private static boolean changeBounds(ISupportBounds supportBounds, Point moveDelta, Dimension sizeDelta, boolean change)
+	private static boolean changeBounds(PersistPropertySource propertySource, Point moveDelta, Dimension sizeDelta, boolean change)
 	{
-		java.awt.Point loc = supportBounds.getLocation();
+		java.awt.Point loc = (java.awt.Point)propertySource.getPersistPropertyValue(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName());
 		int x = loc.x + moveDelta.x;
 		int y = loc.y + moveDelta.y;
 
-		java.awt.Dimension dim = supportBounds.getSize();
+		java.awt.Dimension dim = (java.awt.Dimension)propertySource.getPersistPropertyValue(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
 		int width = dim.width + sizeDelta.width;
 		int height = dim.height + sizeDelta.height;
 
@@ -206,7 +206,7 @@ public class ChangeBoundsCommand extends Command implements ISupportModels
 
 		if (change)
 		{
-			setLocationAndSize(supportBounds, new java.awt.Point(x, y), new java.awt.Dimension(width, height));
+			setLocationAndSize(propertySource, new java.awt.Point(x, y), new java.awt.Dimension(width, height));
 		}
 		return true;
 	}

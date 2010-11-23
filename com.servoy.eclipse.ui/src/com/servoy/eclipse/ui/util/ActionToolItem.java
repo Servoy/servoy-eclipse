@@ -88,6 +88,7 @@ public class ActionToolItem extends ToolItem implements IPropertyChangeListener
 		});
 		setSelection(action.getStyle() == IAction.AS_CHECK_BOX ? action.isChecked() : action.isEnabled());
 		action.addPropertyChangeListener(this);
+		setEnabled(action.isEnabled());
 	}
 
 	/*

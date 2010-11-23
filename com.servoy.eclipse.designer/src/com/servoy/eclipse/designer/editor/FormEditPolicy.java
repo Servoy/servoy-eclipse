@@ -73,14 +73,15 @@ public class FormEditPolicy extends ComponentEditPolicy
 			Object data = request instanceof DataRequest ? ((DataRequest)request).getData() : null;
 			final org.eclipse.draw2d.geometry.Point location = request instanceof DataRequest ? ((DataRequest)request).getlocation() : null;
 			command = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), data, request.getType(), request.getExtendedData(),
-				fieldPositioner, location == null ? null : location.getSWTPoint());
+				fieldPositioner, location == null ? null : location.getSWTPoint(), ((FormGraphicalEditPart)getHost()).getPersist());
 		}
 		else if (VisualFormEditor.REQ_PLACE_PORTAL.equals(request.getType()) && request instanceof DataFieldRequest)
 		{
 			DataFieldRequest dataFieldRequest = ((DataFieldRequest)request);
 			command = new FormPlacePortalCommand(((FormGraphicalEditPart)getHost()).getPersist(), dataFieldRequest.getData(), dataFieldRequest.getType(),
 				dataFieldRequest.getExtendedData(), fieldPositioner, dataFieldRequest.getlocation() == null ? null
-					: dataFieldRequest.getlocation().getSWTPoint(), dataFieldRequest.fillText, dataFieldRequest.fillName);
+					: dataFieldRequest.getlocation().getSWTPoint(), dataFieldRequest.fillText, dataFieldRequest.fillName,
+				((FormGraphicalEditPart)getHost()).getPersist());
 		}
 		else if (VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()) && request instanceof DataFieldRequest)
 		{
@@ -88,7 +89,7 @@ public class FormEditPolicy extends ComponentEditPolicy
 			command = new FormPlaceFieldCommand(((FormGraphicalEditPart)getHost()).getPersist(), dataFieldRequest.getData(), dataFieldRequest.getType(),
 				dataFieldRequest.getExtendedData(), fieldPositioner, dataFieldRequest.getlocation() == null ? null
 					: dataFieldRequest.getlocation().getSWTPoint(), dataFieldRequest.placeAsLabels, dataFieldRequest.placeWithLabels,
-				dataFieldRequest.placeHorizontal, dataFieldRequest.fillText, dataFieldRequest.fillName);
+				dataFieldRequest.placeHorizontal, dataFieldRequest.fillText, dataFieldRequest.fillName, ((FormGraphicalEditPart)getHost()).getPersist());
 		}
 		else if ((VisualFormEditor.REQ_COPY.equals(request.getType()) || VisualFormEditor.REQ_CUT.equals(request.getType())) && request instanceof GroupRequest)
 		{

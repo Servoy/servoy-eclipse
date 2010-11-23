@@ -39,9 +39,10 @@ import org.eclipse.swt.widgets.Display;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
 import com.servoy.eclipse.designer.editor.commands.PersistPlaceCommandWrapper;
-import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.dnd.FormElementTransfer;
+import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
@@ -71,9 +72,15 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 	public Command getCommand(Request request)
 	{
 		IPersist persist = (IPersist)getHost().getModel();
+		EditPart formEditPart = getHost().getParent();
+		while (formEditPart != null && !(formEditPart.getModel() instanceof Form))
+		{
+			formEditPart = formEditPart.getParent();
+		}
 		if (VisualFormEditor.REQ_PASTE.equals(request.getType()) && persist instanceof ISupportChilds)
 		{
-			return new PasteCommand((ISupportChilds)persist, request, getHost().getViewer(), fieldPositioner);
+			return new PasteCommand((ISupportChilds)persist, request, getHost().getViewer(), (IPersist)(formEditPart == null ? null : formEditPart.getModel()),
+				fieldPositioner);
 		}
 		if (RequestConstants.REQ_CLONE.equals(request.getType()) && request instanceof ChangeBoundsRequest)
 		{
@@ -118,7 +125,7 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 			}
 			Point location = new Point(minx + ((ChangeBoundsRequest)request).getMoveDelta().x, miny + ((ChangeBoundsRequest)request).getMoveDelta().y);
 			Command command = new FormPlaceElementCommand((ISupportChilds)persist, objects, request.getType(), request.getExtendedData(),
-				new DefaultFieldPositioner(location), null);
+				new DefaultFieldPositioner(location), null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 			// Refresh the form
 			return new PersistPlaceCommandWrapper((EditPart)getHost().getViewer().getEditPartRegistry().get(persist.getAncestor(IRepository.FORMS)), command,
 				true);
@@ -163,17 +170,19 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 	public static class PasteCommand extends Command
 	{
 		private final IPersist parent;
+		private final IPersist context;
 		private final Request request;
 		private Command subCommand;
 		private final EditPartViewer editPartViewer;
 		private final IFieldPositioner fieldPositioner;
 
-		public PasteCommand(ISupportChilds parent, Request request, EditPartViewer editPartViewer, IFieldPositioner fieldPositioner)
+		public PasteCommand(ISupportChilds parent, Request request, EditPartViewer editPartViewer, IPersist context, IFieldPositioner fieldPositioner)
 		{
 			this.parent = parent;
 			this.request = request;
 			this.editPartViewer = editPartViewer;
 			this.fieldPositioner = fieldPositioner;
+			this.context = context;
 		}
 
 		@Override
@@ -221,7 +230,7 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 			}
 
 			Command command = new FormPlaceElementCommand((ISupportChilds)pasteParent, clipboardContents, request.getType(), request.getExtendedData(),
-				fieldPositioner, null);
+				fieldPositioner, null, context);
 			// Refresh the form
 			return new PersistPlaceCommandWrapper((EditPart)editPartViewer.getEditPartRegistry().get(pasteParent.getAncestor(IRepository.FORMS)), command, true);
 		}

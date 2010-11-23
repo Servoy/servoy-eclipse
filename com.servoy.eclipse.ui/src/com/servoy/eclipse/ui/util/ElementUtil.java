@@ -18,7 +18,10 @@ package com.servoy.eclipse.ui.util;
 
 import java.util.Iterator;
 
+import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.j2db.component.ComponentFactory;
+import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
@@ -26,6 +29,7 @@ import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.Relation;
@@ -128,28 +132,80 @@ public class ElementUtil
 		return null;
 	}
 
-	public static boolean isReadOnlyFormElement(IPersist context, Object element)
+	public static boolean isInheritedFormElement(IPersist context, Object element)
 	{
-		if (context instanceof Form)
+		if (element instanceof Form)
+		{
+			return false;
+		}
+		if (context instanceof Form && element instanceof IPersist && (((IPersist)element).getAncestor(IRepository.FORMS) != context))
 		{
 			if (element instanceof IPersist && (((IPersist)element).getAncestor(IRepository.FORMS) != context))
 			{
 				// child of super-form, readonly
 				return true;
 			}
-			if (element instanceof FormElementGroup)
+		}
+		if (element instanceof FormElementGroup)
+		{
+			Iterator<IFormElement> elements = ((FormElementGroup)element).getElements();
+			while (elements.hasNext())
 			{
-				Iterator<IFormElement> elements = ((FormElementGroup)element).getElements();
-				while (elements.hasNext())
+				if (isInheritedFormElement(context, elements.next()))
 				{
-					if (isReadOnlyFormElement(context, elements.next()))
-					{
-						return true;
-					}
+					return true;
 				}
 			}
 		}
+		if (element instanceof AbstractBase)
+		{
+			return ((AbstractBase)element).isOverrideElement();
+		}
 		// child of this form, not of a inherited form
 		return false;
+	}
+
+	public static IPersist getOverridePersist(IPersist context, IPersist persist)
+	{
+		if (persist instanceof AbstractBase && context instanceof Form && persist.getAncestor(IRepository.FORMS) != context)
+		{
+			IPersist newPersist = AbstractRepository.searchPersist((Form)context, persist.getUUID());
+			if (newPersist == null)
+			{
+				ISupportChilds parent = (Form)context;
+				if (!(persist.getParent() instanceof Form))
+				{
+					parent = null;
+					parent = (ISupportChilds)AbstractRepository.searchPersist((Form)context, persist.getParent().getUUID());
+					if (parent == null)
+					{
+						try
+						{
+							parent = (ISupportChilds)((AbstractBase)persist.getParent()).cloneObj((Form)context, false, null, false, false);
+							((AbstractBase)parent).resetUUID(persist.getParent().getUUID());
+							((AbstractBase)parent).copyPropertiesMap(null);
+							((AbstractBase)parent).putOverrideProperty(((Form)persist.getAncestor(IRepository.FORMS)).getName());
+						}
+						catch (Exception ex)
+						{
+							ServoyLog.logError(ex);
+						}
+					}
+				}
+				try
+				{
+					newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false);
+					((AbstractBase)newPersist).resetUUID(persist.getUUID());
+					((AbstractBase)newPersist).copyPropertiesMap(null);
+					((AbstractBase)newPersist).putOverrideProperty(((Form)persist.getAncestor(IRepository.FORMS)).getName());
+				}
+				catch (Exception ex)
+				{
+					ServoyLog.logError(ex);
+				}
+			}
+			return newPersist;
+		}
+		return persist;
 	}
 }

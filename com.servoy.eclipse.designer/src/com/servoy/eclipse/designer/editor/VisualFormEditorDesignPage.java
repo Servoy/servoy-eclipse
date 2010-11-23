@@ -100,7 +100,6 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate;
-import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate.IActionAddedListener;
 import com.servoy.eclipse.designer.actions.AlignmentSortPartsAction;
 import com.servoy.eclipse.designer.actions.DistributeAction;
 import com.servoy.eclipse.designer.actions.DistributeRequest;
@@ -108,6 +107,7 @@ import com.servoy.eclipse.designer.actions.SelectFeedbackmodeAction;
 import com.servoy.eclipse.designer.actions.SelectSnapmodeAction;
 import com.servoy.eclipse.designer.actions.ToggleShowAnchorFeedbackAction;
 import com.servoy.eclipse.designer.actions.ToggleShowSameSizeFeedbackAction;
+import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate.IActionAddedListener;
 import com.servoy.eclipse.designer.dnd.FormElementTransferDropTarget;
 import com.servoy.eclipse.designer.editor.commands.BringToFrontAction;
 import com.servoy.eclipse.designer.editor.commands.CopyAction;
@@ -129,6 +129,7 @@ import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.property.PersistContext;
 import com.servoy.eclipse.designer.property.UndoablePersistPropertySourceProvider;
 import com.servoy.eclipse.designer.property.UndoablePropertySheetEntry;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.CoolbarLayout;
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
@@ -329,7 +330,15 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		action = new FixedSelectAllAction(editorPart);
 		registry.registerAction(action);
 
-		action = new DeleteAction((IWorkbenchPart)editorPart);
+		action = new DeleteAction((IWorkbenchPart)editorPart)
+		{
+			@Override
+			protected boolean calculateEnabled()
+			{
+				if (DesignerUtil.containsInheritedElement(getSelectedObjects())) return false;
+				return super.calculateEnabled();
+			}
+		};
 		registry.registerAction(action);
 		getSelectionActions().add(action.getId());
 

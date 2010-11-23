@@ -13,16 +13,12 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
-import java.beans.IntrospectionException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -260,8 +256,6 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 				{
 					ServoyModelManager.getServoyModelManager().getServoyModel();
 					EclipseRepository er = (EclipseRepository)ServoyModel.getDeveloperRepository();
-					final Map<String, Method> methods = er.getGettersViaIntrospection(o);
-					final Map<String, Method> setterMethods = er.getSettersViaIntrospection(o);
 					Iterator<ContentSpec.Element> iterator = er.getContentSpec().getPropertiesForObjectType(o.getTypeID());
 
 					while (iterator.hasNext())
@@ -274,8 +268,7 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 
 						if (typeId == IRepository.ELEMENTS)
 						{
-							Method method = methods.get(element.getName());
-							Object property_value = method.invoke(o, new Object[] { });
+							Object property_value = ((AbstractBase)o).getProperty(element.getName());
 							final int element_id = Utils.getAsInteger(property_value);
 							if (element_id > 0)
 							{
@@ -290,8 +283,7 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 										ScriptMethod duplicateMethod = duplicate.getScriptMethod(originalMethod.getName());
 										if (duplicateMethod != null)
 										{
-											method = setterMethods.get(element.getName());
-											method.invoke(o, new Object[] { new Integer(duplicateMethod.getID()) });
+											((AbstractBase)o).setProperty(element.getName(), new Integer(duplicateMethod.getID()));
 										}
 										idFound = true;
 									}
@@ -309,8 +301,7 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 											ScriptVariable duplicateVariable = duplicate.getScriptVariable(originalVariable.getName());
 											if (duplicateVariable != null)
 											{
-												method = setterMethods.get(element.getName());
-												method.invoke(o, new Object[] { new Integer(duplicateVariable.getID()) });
+												((AbstractBase)o).setProperty(element.getName(), new Integer(duplicateVariable.getID()));
 											}
 										}
 									}
@@ -323,19 +314,7 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 				{
 					ServoyLog.logError(e);
 				}
-				catch (IntrospectionException e)
-				{
-					ServoyLog.logError(e);
-				}
 				catch (IllegalArgumentException e)
-				{
-					ServoyLog.logError(e);
-				}
-				catch (IllegalAccessException e)
-				{
-					ServoyLog.logError(e);
-				}
-				catch (InvocationTargetException e)
 				{
 					ServoyLog.logError(e);
 				}

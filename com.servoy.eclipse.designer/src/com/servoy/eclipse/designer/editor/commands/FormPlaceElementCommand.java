@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.commands.Command;
@@ -48,6 +48,7 @@ import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -87,7 +88,8 @@ import com.servoy.j2db.util.UUID;
 @SuppressWarnings("nls")
 public class FormPlaceElementCommand extends Command implements ISupportModels
 {
-	protected final ISupportChilds parent;
+	protected ISupportChilds parent;
+	protected final IPersist context;
 	protected IPersist alternativeParent;
 	protected final Object object;
 	protected Point defaultLocation;
@@ -106,7 +108,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 	 * @param
 	 */
 	public FormPlaceElementCommand(ISupportChilds parent, Object object, Object requestType, Map<Object, Object> objectProperties,
-		IFieldPositioner fieldPositioner, Point defaultLocation)
+		IFieldPositioner fieldPositioner, Point defaultLocation, IPersist context)
 	{
 		this.parent = parent;
 		this.object = object;
@@ -114,6 +116,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 		this.objectProperties = objectProperties;
 		this.fieldPositioner = fieldPositioner;
 		this.defaultLocation = defaultLocation;
+		this.context = context;
 	}
 
 	public Object[] getModels()
@@ -130,6 +133,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 		}
 		models = null;
 		alternativeParent = null;
+		parent = (ISupportChilds)ElementUtil.getOverridePersist(context, parent);
 		try
 		{
 			models = placeElements(getNextLocation());

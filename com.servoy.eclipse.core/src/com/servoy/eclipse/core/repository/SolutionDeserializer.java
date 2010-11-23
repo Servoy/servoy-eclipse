@@ -1521,7 +1521,16 @@ public class SolutionDeserializer
 
 			if (obj.has(propertyName))
 			{
-				Object propertyObjectValue = obj.getString(propertyName);
+				Object propertyObjectValue = obj.get(propertyName);
+				if (JSONObject.NULL == propertyObjectValue)
+				{
+					propertyObjectValue = null;
+				}
+				else
+				{
+					propertyObjectValue = propertyObjectValue.toString();
+				}
+
 				if (element.getTypeID() == IRepository.ELEMENTS)
 				{
 					String id = propertyObjectValue.toString();
@@ -1554,11 +1563,6 @@ public class SolutionDeserializer
 				}
 				propertyValues.put(propertyName, propertyObjectValue);
 				obj.remove(propertyName);
-			}
-			else if (!element.isDeprecated())
-			{
-				// Overwrite with default value, when property has been reset to default it is not written to the json-file
-				propertyValues.put(propertyName, repository.convertArgumentStringToObject(element.getTypeID(), element.getDefaultTextualClassValue()));
 			}
 		}
 		return propertyValues;

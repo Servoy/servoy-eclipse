@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.property;
 
 import java.awt.Dimension;
@@ -40,9 +40,7 @@ import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PointPropertySource;
 import com.servoy.eclipse.ui.property.RetargetToEditorPersistProperties;
 import com.servoy.eclipse.ui.property.SavingPersistPropertySource;
-import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.AbstractRepository;
-import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
@@ -70,7 +68,6 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 		IPersist persist = null;
 		IPersist context = null;
 		boolean autoSave = false;
-		boolean readOnly = false;
 		boolean retargetToEditor = true;
 
 		if (obj instanceof Dimension && key == IPropertySource.class)
@@ -140,7 +137,6 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			}
 			if (formEditPart instanceof FormGraphicalEditPart)
 			{
-				readOnly = ElementUtil.isReadOnlyFormElement((Form)formEditPart.getModel(), persist);
 				context = (IPersist)formEditPart.getModel();
 			}
 		}
@@ -153,13 +149,11 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 		else if (obj instanceof PersistContext)
 		{
 			persist = ((PersistContext)obj).getPersist();
-			readOnly = ElementUtil.isReadOnlyFormElement(((PersistContext)obj).getContext(), persist);
 			retargetToEditor = false;
 		}
 		else if (obj instanceof IPersist)
 		{
 			persist = (IPersist)obj;
-			readOnly = false;
 			autoSave = persist instanceof Solution || persist instanceof ScriptVariable || persist instanceof IScriptProvider;
 		}
 
@@ -194,7 +188,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			if (key == IPropertySource.class)
 			{
 				// for properties view
-				PersistPropertySource persistProperties = new PersistPropertySource(persist, context, readOnly || isReadonlyPersist(persist));
+				PersistPropertySource persistProperties = new PersistPropertySource(persist, context, isReadonlyPersist(persist));
 				if (autoSave)
 				{
 					// all changes are saved immediately, on the persist node only (not recursive)
