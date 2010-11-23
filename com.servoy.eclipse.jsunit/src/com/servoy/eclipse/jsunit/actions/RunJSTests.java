@@ -22,6 +22,7 @@ import java.util.List;
 import javax.swing.SwingUtilities;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -360,23 +361,18 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 			{
 				pathToFile = pathToFile.makeRelativeTo(workspacePath);
 				String[] path = pathToFile.segments();
-				if (path.length >= 3)
+				if (path.length >= 2)
 				{
 					// first element is project then the rest are the path to a js file; get them as Java model ITypes
 					try
 					{
 						IProject p = ServoyModel.getWorkspace().getRoot().getProject(path[0]);
+						IResource pfrResource = (path.length == 2) ? p : p.getFolder(pathToFile.removeFirstSegments(1).removeLastSegments(1));
 						IJavaProject javaProject = JavaCore.create(p);
-						IPackageFragmentRoot pfr = javaProject.getPackageFragmentRoot(p);
+						IPackageFragmentRoot pfr = javaProject.getPackageFragmentRoot(pfrResource);
+						IPackageFragment pf = pfr.getPackageFragment("");
 
-						String pkg = "";
-						for (int i = 1; i < (path.length - 2); i++)
-						{
-							pkg += path[i];
-							if ((i + 3) < path.length) pkg += ".";
-						}
-						IPackageFragment pf = pfr.getPackageFragment(pkg);
-						return pf.getCompilationUnit(path[path.length - 2] + "." + path[path.length - 1]).getType(path[path.length - 2]);
+						return pf.getCompilationUnit(path[path.length - 1]).getType(path[path.length - 1].substring(0, path[path.length - 1].length() - 3));
 					}
 					catch (Exception e)
 					{

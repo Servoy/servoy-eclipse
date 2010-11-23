@@ -273,12 +273,12 @@ public class JSUnitTestListenerHandler
 
 	public static String getFileNameAsJavaType(String fileOrMethodName)
 	{
-		return fileOrMethodName.replace(".", "..").replace(":\\", "...").replace("/", ".").replace("\\", ".");
+		return fileOrMethodName.replace(".", "._").replace(":\\", "...").replace("/", "..").replace("\\", "..");
 	}
 
 	public static String getFileNameFromJavaType(String javaType)
 	{
-		return javaType.replace("...", ":/").replace("..", ".").replace(".", "/");
+		return javaType.replaceFirst("\\.\\.\\.", ":/").replace("..", "/").replace("._", ".");
 	}
 
 	private String getScriptablePropertyAsString(Scriptable s, String property)
