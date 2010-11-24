@@ -28,6 +28,7 @@ import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.repository.SolutionDeserializer;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
@@ -44,9 +45,9 @@ import com.servoy.j2db.util.ServoyJSONObject;
  */
 public class ApplyTemplatePropertiesCommand extends Command
 {
-
 	private final Template template;
 	private final IPersist persist;
+	private Map<String, Object> undoPropertiesMap;
 
 	public ApplyTemplatePropertiesCommand(Template template, IPersist persist)
 	{
@@ -57,7 +58,21 @@ public class ApplyTemplatePropertiesCommand extends Command
 	@Override
 	public boolean canExecute()
 	{
-		return template != null;
+		if (template != null)
+		{
+			try
+			{
+				JSONObject json = new ServoyJSONObject(template.getContent(), false);
+				// elements
+				JSONArray elements = (JSONArray)json.opt(Template.PROP_ELEMENTS);
+				return elements != null && elements.length() > 0;
+			}
+			catch (JSONException e)
+			{
+				ServoyLog.logError("Error processing template " + template.getName(), e);
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -80,6 +95,11 @@ public class ApplyTemplatePropertiesCommand extends Command
 			Map<String, Object> propertyValues = SolutionDeserializer.getPropertyValuesForJsonObject(repository, persist,
 				ElementFactory.resolveCleanedProperties((Form)persist.getAncestor(IRepository.FORMS), object));
 			propertyValues.remove(Template.PROP_LOCATION);
+			if (persist instanceof AbstractBase)
+			{
+				undoPropertiesMap = ((AbstractBase)persist).getPropertiesMap();
+			}
+
 			repository.updatePersistWithValueMap(persist, propertyValues);
 		}
 		catch (JSONException e)
@@ -97,13 +117,15 @@ public class ApplyTemplatePropertiesCommand extends Command
 	@Override
 	public boolean canUndo()
 	{
-		// TODO: handle undo via properties map
-		return false;
+		return undoPropertiesMap != null;
 	}
 
 	@Override
 	public void undo()
 	{
-		// TODO: handle undo via properties map
+		((AbstractBase)persist).copyPropertiesMap(null); // clears propertyMap
+		((AbstractBase)persist).copyPropertiesMap(undoPropertiesMap);
+		undoPropertiesMap = null;
+		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persist, false);
 	}
 }
