@@ -1301,8 +1301,18 @@ public class ServoyModel implements IWorkspaceSaveListener
 		for (ServoyProject p : getModulesOfActiveProject())
 		{
 			p.resetEditingFlattenedSolution();
+
+			WorkspaceJob testBuildPaths = new WorkspaceJob("Test Build Paths")
+			{
+				@Override
+				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+				{
+					testBuildPaths(activeProject, new HashSet<ServoyProject>());
+					return Status.OK_STATUS;
+				}
+			};
+			testBuildPaths.schedule();
 		}
-		testBuildPaths(activeProject, new HashSet<ServoyProject>());
 	}
 
 	private void testBuildPaths(ServoyProject sp, Set<ServoyProject> processed)
