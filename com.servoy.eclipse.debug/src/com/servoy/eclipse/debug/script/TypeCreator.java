@@ -170,7 +170,7 @@ public abstract class TypeCreator
 	}
 
 	private final ConcurrentMap<String, Type> types = new ConcurrentHashMap<String, Type>();
-	private final ConcurrentMap<String, Type> dynamicTypes = new ConcurrentHashMap<String, Type>();
+	private final ConcurrentMap<String, ConcurrentMap<String, Type>> dynamicTypes = new ConcurrentHashMap<String, ConcurrentMap<String, Type>>();
 	private final ConcurrentMap<String, Class< ? >> classTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, Class< ? >> anonymousClassTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, IScopeTypeCreator> scopeTypes = new ConcurrentHashMap<String, IScopeTypeCreator>();
@@ -263,7 +263,18 @@ public abstract class TypeCreator
 		Type type = types.get(realTypeName);
 		if (type == null)
 		{
-			type = dynamicTypes.get(realTypeName);
+			FlattenedSolution fs = getFlattenedSolution(context);
+			ConcurrentMap<String, Type> flattenedSolutionTypeMap = null;
+			if (fs != null && fs.getSolution() != null)
+			{
+				flattenedSolutionTypeMap = dynamicTypes.get(fs.getSolution().getName());
+				if (flattenedSolutionTypeMap == null)
+				{
+					flattenedSolutionTypeMap = new ConcurrentHashMap<String, Type>();
+					dynamicTypes.put(fs.getSolution().getName(), flattenedSolutionTypeMap);
+				}
+				else type = flattenedSolutionTypeMap.get(realTypeName);
+			}
 			if (type == null)
 			{
 				type = createType(context, realTypeName, realTypeName);
@@ -272,12 +283,12 @@ public abstract class TypeCreator
 					Type previous = types.putIfAbsent(realTypeName, type);
 					if (previous != null) return previous;
 				}
-				else
+				else if (flattenedSolutionTypeMap != null)
 				{
 					type = createDynamicType(context, realTypeName, realTypeName);
 					if (type != null)
 					{
-						Type previous = dynamicTypes.putIfAbsent(realTypeName, type);
+						Type previous = flattenedSolutionTypeMap.putIfAbsent(realTypeName, type);
 						if (previous != null) return previous;
 					}
 				}
