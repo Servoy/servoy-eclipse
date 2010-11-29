@@ -16,6 +16,9 @@
  */
 package com.servoy.eclipse.debug.script;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +34,7 @@ import javax.swing.Icon;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeProvider;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
+import org.eclipse.dltk.javascript.typeinfo.model.Parameter;
 import org.eclipse.dltk.javascript.typeinfo.model.Property;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
@@ -104,6 +108,9 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	private final ConcurrentMap<String, DynamicTypeFiller> dynamicTypeFillers = new ConcurrentHashMap<String, DynamicTypeFiller>();
 	private final Set<String> constantOnly = new HashSet<String>();
 
+	private static final ConcurrentHashMap<String, Type> classTypes = new ConcurrentHashMap<String, Type>();
+	private static final Type NO_CLASS = TypeInfoModelFactory.eINSTANCE.createType();
+
 	public TypeProvider()
 	{
 		addType(Record.JS_RECORD, Record.class);
@@ -124,6 +131,96 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		dynamicTypeFillers.put("Elements", new ElementsScopeFiller());
 
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.debug.script.TypeCreator#getType(org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext, java.lang.String)
+	 */
+	@Override
+	public Type getType(ITypeInfoContext context, String typeName)
+	{
+		if (typeName.startsWith("Packages."))
+		{
+			String name = typeName.substring("Packages.".length());
+			Type type = classTypes.get(name);
+			if (type == null)
+			{
+				try
+				{
+					ClassLoader cl = Activator.getDefault().getDesignClient().getBeanManager().getClassLoader();
+					if (cl == null) cl = Thread.currentThread().getContextClassLoader();
+					Class< ? > clz = Class.forName(name, false, cl);
+					type = getClassType(clz, name, context);
+				}
+				catch (ClassNotFoundException e)
+				{
+					// ignore
+					classTypes.put(name, NO_CLASS);
+				}
+			}
+			else if (type == NO_CLASS)
+			{
+				type = null;
+			}
+			return type;
+		}
+		return super.getType(context, typeName);
+	}
+
+	private static Type getClassType(Class< ? > clz, String name, ITypeInfoContext context)
+	{
+		Type type = classTypes.get(name);
+		if (type != null) return type;
+
+		type = TypeInfoModelFactory.eINSTANCE.createType();
+		type.setName(name);
+		type.setKind(TypeKind.JAVA);
+
+		classTypes.put(name, type);
+
+		Method[] methods = clz.getMethods();
+		Field[] fields = clz.getFields();
+
+		EList<Member> members = type.getMembers();
+
+		for (Field field : fields)
+		{
+			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+			property.setName(field.getName());
+			Class< ? > fieldType = field.getType();
+			if (fieldType != null) property.setType(context.getKnownType("Packages." + fieldType.getName()));
+			if (Modifier.isStatic(field.getModifiers()))
+			{
+				property.setStatic(true);
+			}
+			members.add(property);
+		}
+		for (Method method : methods)
+		{
+			org.eclipse.dltk.javascript.typeinfo.model.Method m = TypeInfoModelFactory.eINSTANCE.createMethod();
+			m.setName(method.getName());
+			Class< ? > methodType = method.getReturnType();
+			if (methodType != null) m.setType(context.getKnownType("Packages." + methodType.getName()));
+
+			EList<Parameter> parameters = m.getParameters();
+			Class< ? >[] parameterTypes = method.getParameterTypes();
+			for (int i = 0; i < parameterTypes.length; i++)
+			{
+				Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
+				parameter.setName(parameterTypes[i].getSimpleName() + " arg" + i);
+				parameter.setType(context.getKnownType("Packages." + parameterTypes[i].getName()));
+				parameters.add(parameter);
+			}
+			if (Modifier.isStatic(method.getModifiers()))
+			{
+				m.setStatic(true);
+			}
+			members.add(m);
+		}
+		return type;
+	}
+
 
 	@Override
 	protected synchronized void initalize()
