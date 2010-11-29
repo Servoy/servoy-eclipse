@@ -20,12 +20,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.j2db.IApplication;
 
@@ -82,6 +85,16 @@ public class Activator extends AbstractUIPlugin
 	@Override
 	public void stop(BundleContext context) throws Exception
 	{
+		try
+		{
+			// save any prefs not saved yet
+			getEclipsePreferences().flush();
+		}
+		catch (BackingStoreException e)
+		{
+			System.err.println(e);
+		}
+
 		Iterator<Image> it = imageCacheOld.values().iterator();
 		while (it.hasNext())
 		{
@@ -237,6 +250,11 @@ public class Activator extends AbstractUIPlugin
 	public static Activator getDefault()
 	{
 		return plugin;
+	}
+
+	public IEclipsePreferences getEclipsePreferences()
+	{
+		return new InstanceScope().getNode(PLUGIN_ID);
 	}
 
 	/**

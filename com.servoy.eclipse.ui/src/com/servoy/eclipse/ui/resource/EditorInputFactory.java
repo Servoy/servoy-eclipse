@@ -29,7 +29,6 @@ import com.servoy.eclipse.core.resource.ServerEditorInput;
 import com.servoy.eclipse.core.resource.TableEditorInput;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.j2db.persistence.ServerConfig;
-import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -200,9 +199,7 @@ public class EditorInputFactory implements IElementFactory, IAdapterFactory
 
 	public Object getAdapter(Object adaptableObject, Class adapterType)
 	{
-		ServoyModelManager.getServoyModelManager().getServoyModel();
-		Settings settings = ServoyModel.getSettings();
-		if (new DesignerPreferences(settings).getSaveEditorState())
+		if (new DesignerPreferences().getSaveEditorState())
 		{
 			if (adaptableObject instanceof PersistEditorInput)
 			{

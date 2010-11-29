@@ -16,8 +16,6 @@
  */
 package com.servoy.eclipse.designer.editor;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,6 +27,8 @@ import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Dimension;
@@ -96,10 +96,10 @@ import org.eclipse.ui.views.properties.PropertySheetPage;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate;
+import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate.IActionAddedListener;
 import com.servoy.eclipse.designer.actions.AlignmentSortPartsAction;
 import com.servoy.eclipse.designer.actions.DistributeAction;
 import com.servoy.eclipse.designer.actions.DistributeRequest;
@@ -107,7 +107,6 @@ import com.servoy.eclipse.designer.actions.SelectFeedbackmodeAction;
 import com.servoy.eclipse.designer.actions.SelectSnapmodeAction;
 import com.servoy.eclipse.designer.actions.ToggleShowAnchorFeedbackAction;
 import com.servoy.eclipse.designer.actions.ToggleShowSameSizeFeedbackAction;
-import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate.IActionAddedListener;
 import com.servoy.eclipse.designer.dnd.FormElementTransferDropTarget;
 import com.servoy.eclipse.designer.editor.commands.BringToFrontAction;
 import com.servoy.eclipse.designer.editor.commands.CopyAction;
@@ -138,7 +137,6 @@ import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
-import com.servoy.j2db.util.Settings;
 
 /**
  * Tab in form editor for designing the form visually.
@@ -146,7 +144,7 @@ import com.servoy.j2db.util.Settings;
  * @author rgansevles
  */
 
-public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette implements PropertyChangeListener, IActionAddedListener
+public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette implements IActionAddedListener
 {
 	public static final String COOLBAR_REORGANIZE = "reorganize";
 	public static final String COOLBAR_ALIGN = "align";
@@ -169,6 +167,27 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	private Runnable selectionChangedHandler;
 	private ISelection currentSelection;
 
+	protected final IPreferenceChangeListener preferenceChangeListener = new IPreferenceChangeListener()
+	{
+
+		public void preferenceChange(PreferenceChangeEvent event)
+		{
+
+			if (DesignerPreferences.isGuideSetting(event.getKey()))
+			{
+				applyGuidePreferences();
+			}
+			else if (DesignerPreferences.isMetricsSetting(event.getKey()))
+			{
+				refreshRulers();
+			}
+			else if (DesignerPreferences.isCoolbarSetting(event.getKey()))
+			{
+				refreshToolBars();
+			}
+		}
+	};
+
 	public VisualFormEditorDesignPage(VisualFormEditor editorPart)
 	{
 		this.editorPart = editorPart;
@@ -178,10 +197,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		editDomain.setActiveTool(selectionTool);
 		editDomain.getCommandStack().addCommandStackListener(editorPart);
 		setEditDomain(editDomain);
-		Settings settings = ServoyModel.getSettings();
-		settings.addPropertyChangeListener(this, DesignerPreferences.GUIDE_SIZE_SETTING);
-		settings.addPropertyChangeListener(this, DesignerPreferences.METRICS_SETTING);
-		settings.addPropertyChangeListener(this, DesignerPreferences.FORM_COOLBAR_LAYOUT_SETTING);
+		com.servoy.eclipse.ui.Activator.getDefault().getEclipsePreferences().addPreferenceChangeListener(preferenceChangeListener);
 	}
 
 	private final ISelectionProvider provider = new ISelectionProvider()
@@ -504,7 +520,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		viewer.setContextMenu(cmProvider);
 		getSite().registerContextMenu(cmProvider, viewer);
 
-		DesignerPreferences designerPreferences = new DesignerPreferences(Settings.getInstance());
+		DesignerPreferences designerPreferences = new DesignerPreferences();
 		viewer.setProperty(SnapToGrid.PROPERTY_GRID_VISIBLE, Boolean.valueOf(designerPreferences.getFeedbackGrid()));
 		viewer.setProperty(SnapToGrid.PROPERTY_GRID_ENABLED, Boolean.valueOf(designerPreferences.getGridSnapTo()));
 		viewer.setProperty(SnapToElementAlignment.PROPERTY_ALIGNMENT_ENABLED, Boolean.valueOf(designerPreferences.getAlignmentSnapTo()));
@@ -582,8 +598,8 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 	protected void saveCoolbarLayout()
 	{
-		new DesignerPreferences(Settings.getInstance()).saveCoolbarLayout(new CoolbarLayout(coolBar.getItemOrder(), coolBar.getWrapIndices(),
-			coolBar.getItemSizes(), hiddenBars.toArray(new String[hiddenBars.size()])));
+		new DesignerPreferences().saveCoolbarLayout(new CoolbarLayout(coolBar.getItemOrder(), coolBar.getWrapIndices(), coolBar.getItemSizes(),
+			hiddenBars.toArray(new String[hiddenBars.size()])));
 	}
 
 
@@ -616,7 +632,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 			@Override
 			public void run()
 			{
-				new DesignerPreferences(Settings.getInstance()).saveCoolbarLayout(null);
+				new DesignerPreferences().saveCoolbarLayout(null);
 			}
 		});
 		menuManager.add(new Separator("bars"));
@@ -688,7 +704,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 			return;
 		}
 
-		CoolbarLayout coolbarLayout = new DesignerPreferences(ServoyModel.getSettings()).getCoolbarLayout();
+		CoolbarLayout coolbarLayout = new DesignerPreferences().getCoolbarLayout();
 
 		hiddenBars = coolbarLayout == null ? new ArrayList<String>() : new ArrayList<String>(Arrays.asList(coolbarLayout.hiddenBars));
 
@@ -741,7 +757,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	@Override
 	public void createPartControl(Composite parent)
 	{
-		if (!new DesignerPreferences(ServoyModel.getSettings()).getFormToolsOnMainToolbar())
+		if (!new DesignerPreferences().getFormToolsOnMainToolbar())
 		{
 			super.createPartControl(parent);
 			return;
@@ -867,10 +883,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	public void dispose()
 	{
 		getEditDomain().getCommandStack().removeCommandStackListener(editorPart);
-		Settings settings = ServoyModel.getSettings();
-		settings.removePropertyChangeListener(this, DesignerPreferences.GUIDE_SIZE_SETTING);
-		settings.removePropertyChangeListener(this, DesignerPreferences.METRICS_SETTING);
-		settings.removePropertyChangeListener(this, DesignerPreferences.FORM_COOLBAR_LAYOUT_SETTING);
+		com.servoy.eclipse.ui.Activator.getDefault().getEclipsePreferences().removePreferenceChangeListener(preferenceChangeListener);
 		AbstractEditpartActionDelegate.removeActionAddedListener(this);
 
 		super.dispose();
@@ -965,26 +978,9 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		return super.getAdapter(type);
 	}
 
-	public void propertyChange(PropertyChangeEvent evt)
-	{
-		if (DesignerPreferences.GUIDE_SIZE_SETTING.equals(evt.getPropertyName()))
-		{
-			applyGuidePreferences();
-		}
-		else if (DesignerPreferences.METRICS_SETTING.equals(evt.getPropertyName()))
-		{
-			refreshRulers();
-		}
-		else if (DesignerPreferences.FORM_COOLBAR_LAYOUT_SETTING.equals(evt.getPropertyName()))
-		{
-			refreshToolBars();
-		}
-	}
-
 	protected void applyGuidePreferences()
 	{
-		DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
-		int guideSize = designerPreferences.getGuideSize();
+		int guideSize = new DesignerPreferences().getGuideSize();
 		getGraphicalViewer().setProperty(SnapToGrid.PROPERTY_GRID_SPACING, new Dimension(guideSize, guideSize));
 	}
 

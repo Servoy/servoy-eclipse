@@ -20,14 +20,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.jabsorb.JSONSerializer;
+import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.property.ColorPropertyController;
 import com.servoy.j2db.util.PersistHelper;
-import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -43,8 +45,10 @@ public class DesignerPreferences
 	public static final int CM = 1;
 	public static final int IN = 2;
 
-	public static final String METRICS_SETTING = "designer.preferdMetrics";
-	public static final String STEP_SIZE_SETTING = "designer.stepSize";
+	private static final String DESIGNER_SETTINGS_PREFIX = "designer.";
+
+	public static final String METRICS_SETTING = "preferdMetrics";
+	public static final String STEP_SIZE_SETTING = "stepSize";
 	public static final String COPY_PASTE_OFFSET_SETTING = "copyPasteOffset";
 	public static final String ALIGNMENT_THRESHOLD_SETTING = "alignmentThreshold";
 	public static final String ALIGNMENT_INDENT_SETTING = "alignmentIndent";
@@ -91,77 +95,133 @@ public class DesignerPreferences
 	public static final boolean FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT = true;
 	public static final int METRICS_DEFAULT = PX;
 
-	private final Settings settings;
+	protected final IEclipsePreferences eclipsePreferences;
 
-	public DesignerPreferences(Settings settings)
+
+	public DesignerPreferences()
 	{
-		this.settings = settings;
+		eclipsePreferences = Activator.getDefault().getEclipsePreferences();
+	}
+
+	public void save()
+	{
+		try
+		{
+			eclipsePreferences.flush();
+		}
+		catch (BackingStoreException e)
+		{
+			ServoyLog.logError(e);
+		}
+	}
+
+	protected String getProperty(String key, String defaultValue)
+	{
+		return eclipsePreferences.get(DESIGNER_SETTINGS_PREFIX + key, defaultValue);
+	}
+
+	protected int getProperty(String key, int defaultValue)
+	{
+		return eclipsePreferences.getInt(DESIGNER_SETTINGS_PREFIX + key, defaultValue);
+	}
+
+	protected boolean getProperty(String key, boolean defaultValue)
+	{
+		return eclipsePreferences.getBoolean(DESIGNER_SETTINGS_PREFIX + key, defaultValue);
+	}
+
+	protected void setProperty(String key, String value)
+	{
+		eclipsePreferences.put(DESIGNER_SETTINGS_PREFIX + key, value);
+	}
+
+	protected void setProperty(String key, int value)
+	{
+		eclipsePreferences.putInt(DESIGNER_SETTINGS_PREFIX + key, value);
+	}
+
+	protected void setProperty(String key, boolean value)
+	{
+		eclipsePreferences.putBoolean(DESIGNER_SETTINGS_PREFIX + key, value);
+	}
+
+	protected void removeProperty(String key)
+	{
+		eclipsePreferences.remove(DESIGNER_SETTINGS_PREFIX + key);
+	}
+
+	private static String getKeyPostfix(String key)
+	{
+		if (key == null || !key.startsWith(DESIGNER_SETTINGS_PREFIX))
+		{
+			return null;
+		}
+		return key.substring(DESIGNER_SETTINGS_PREFIX.length());
+	}
+
+	public static boolean isMetricsSetting(String key)
+	{
+		return METRICS_SETTING.equals(getKeyPostfix(key));
 	}
 
 	public int getMetrics()
 	{
-		return Utils.getAsInteger(settings.getProperty(METRICS_SETTING, String.valueOf(METRICS_DEFAULT)));
+		return getProperty(METRICS_SETTING, METRICS_DEFAULT);
 	}
 
 	public void setMetrics(int metrics)
 	{
-		settings.setProperty(METRICS_SETTING, String.valueOf(metrics));
+		setProperty(METRICS_SETTING, metrics);
 	}
 
 	public int getStepSize()
 	{
-		return PersistHelper.createDimension(settings.getProperty(STEP_SIZE_SETTING, STEP_SIZE_DEFAULT + ",0")).width;
+		return PersistHelper.createDimension(getProperty(STEP_SIZE_SETTING, STEP_SIZE_DEFAULT + ",0")).width;
 	}
 
 	public int getLargeStepSize()
 	{
-		int largeStepSize = PersistHelper.createDimension(settings.getProperty(STEP_SIZE_SETTING, "0," + LARGE_STEP_SIZE_DEFAULT)).height;
-		if (largeStepSize == getStepSize())
-		{
-			// old prefs stored 2 same numbers
-			return 2 * getStepSize();
-		}
-		return largeStepSize;
+		return PersistHelper.createDimension(getProperty(STEP_SIZE_SETTING, "0," + LARGE_STEP_SIZE_DEFAULT)).height;
 	}
 
 	public void setStepSize(int stepSize, int largeStepSize)
 	{
-		settings.setProperty(STEP_SIZE_SETTING, stepSize + "," + largeStepSize);
+		setProperty(STEP_SIZE_SETTING, stepSize + "," + largeStepSize);
 	}
 
 	public int getCopyPasteOffset()
 	{
-		return Utils.getAsInteger(settings.getProperty(COPY_PASTE_OFFSET_SETTING, String.valueOf(COPY_PASTE_OFFSET_DEFAULT)));
+		return getProperty(COPY_PASTE_OFFSET_SETTING, COPY_PASTE_OFFSET_DEFAULT);
 	}
 
 	public void setCopyPasteOffset(int copyPasteOffset)
 	{
-		settings.setProperty(COPY_PASTE_OFFSET_SETTING, String.valueOf(copyPasteOffset));
+		setProperty(COPY_PASTE_OFFSET_SETTING, copyPasteOffset);
 	}
 
 	public int getAlignmentThreshold()
 	{
-		return Utils.getAsInteger(settings.getProperty(ALIGNMENT_THRESHOLD_SETTING, String.valueOf(ALIGNMENT_THRESHOLD_DEFAULT)));
+		return getProperty(ALIGNMENT_THRESHOLD_SETTING, ALIGNMENT_THRESHOLD_DEFAULT);
 	}
 
 	public void setAlignmentThreshold(int alignmentThreshold)
 	{
-		settings.setProperty(ALIGNMENT_THRESHOLD_SETTING, String.valueOf(alignmentThreshold));
+		setProperty(ALIGNMENT_THRESHOLD_SETTING, alignmentThreshold);
 	}
 
 	public int getAlignmentIndent()
 	{
-		return Utils.getAsInteger(settings.getProperty(ALIGNMENT_INDENT_SETTING, String.valueOf(ALIGNMENT_INDENT_DEFAULT)));
+		return getProperty(ALIGNMENT_INDENT_SETTING, ALIGNMENT_INDENT_DEFAULT);
 	}
 
 	public void setAlignmentIndent(int indent)
 	{
-		settings.setProperty(ALIGNMENT_INDENT_SETTING, String.valueOf(indent));
+		setProperty(ALIGNMENT_INDENT_SETTING, indent);
 	}
 
 	public int[] getAlignmentDistances()
 	{
-		String property = settings.getProperty(ALIGNMENT_DISTANCES_SETTING);
+		String property = getProperty(ALIGNMENT_DISTANCES_SETTING, null);
 		if (property == null)
 		{
 			return ALIGNMENT_DISTANCES_DEFAULT;
@@ -181,72 +241,81 @@ public class DesignerPreferences
 
 	public void setAlignmentDistances(int smallDistance, int mediumDistance, int largeDistance)
 	{
-		settings.setProperty(ALIGNMENT_DISTANCES_SETTING,
-			String.valueOf(smallDistance) + ':' + String.valueOf(mediumDistance) + ':' + String.valueOf(largeDistance));
+		setProperty(ALIGNMENT_DISTANCES_SETTING, String.valueOf(smallDistance) + ':' + String.valueOf(mediumDistance) + ':' + String.valueOf(largeDistance));
 	}
 
 	public boolean getAnchor()
 	{
-		return Utils.getAsBoolean(settings.getProperty(ANCHOR_SETTING, String.valueOf(ANCHOR_DEFAULT)));
+		return getProperty(ANCHOR_SETTING, ANCHOR_DEFAULT);
 	}
 
 	public void setAnchor(boolean anchor)
 	{
-		settings.setProperty(ANCHOR_SETTING, String.valueOf(anchor));
+		setProperty(ANCHOR_SETTING, anchor);
+	}
+
+	public static boolean isGuideSetting(String key)
+	{
+		return GUIDE_SIZE_SETTING.equals(getKeyPostfix(key));
 	}
 
 	public int getGuideSize()
 	{
-		return Utils.getAsInteger(settings.getProperty(GUIDE_SIZE_SETTING, String.valueOf(GUIDE_SIZE_DEFAULT)));
+		return getProperty(GUIDE_SIZE_SETTING, GUIDE_SIZE_DEFAULT);
 	}
 
 	public void setGuideSize(int guideSize)
 	{
-		settings.setProperty(GUIDE_SIZE_SETTING, String.valueOf(guideSize));
+		setProperty(GUIDE_SIZE_SETTING, guideSize);
+	}
+
+	public static boolean isGridSetting(String key)
+	{
+		String setting = getKeyPostfix(key);
+		return GRID_POINTSIZE_SETTING.equals(setting) || GRID_COLOR_SETTING.equals(setting) || GRID_SIZE_SETTING.equals(setting);
 	}
 
 	public RGB getGridColor()
 	{
 		return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty("gridColor",
-			PersistHelper.createColor(settings.getProperty(GRID_COLOR_SETTING, GRID_COLOR_DEFAULT)));
+			PersistHelper.createColor(getProperty(GRID_COLOR_SETTING, GRID_COLOR_DEFAULT)));
 	}
 
 	public void setGridColor(RGB rgb)
 	{
-		settings.setProperty(GRID_COLOR_SETTING,
-			PersistHelper.createColorString(ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue("gridColor", rgb)));
+		setProperty(GRID_COLOR_SETTING, PersistHelper.createColorString(ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue("gridColor", rgb)));
 	}
 
 	public RGB getAlignmentGuideColor()
 	{
 		return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty("alignmentGuideColor",
-			PersistHelper.createColor(settings.getProperty(ALIGNMENT_GUIDE_COLOR_SETTING, ALIGNMENT_GUIDE_COLOR_DEFAULT)));
+			PersistHelper.createColor(getProperty(ALIGNMENT_GUIDE_COLOR_SETTING, ALIGNMENT_GUIDE_COLOR_DEFAULT)));
 	}
 
 	public void setAlignmentGuideColor(RGB rgb)
 	{
-		settings.setProperty(ALIGNMENT_GUIDE_COLOR_SETTING,
+		setProperty(ALIGNMENT_GUIDE_COLOR_SETTING,
 			PersistHelper.createColorString(ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue("alignmentGuideColor", rgb)));
 	}
 
 	public int getGridSize()
 	{
-		return Utils.getAsInteger(settings.getProperty(GRID_SIZE_SETTING, String.valueOf(GRID_SIZE_DEFAULT)));
+		return getProperty(GRID_SIZE_SETTING, GRID_SIZE_DEFAULT);
 	}
 
 	public void setGridSize(int gridSize)
 	{
-		settings.setProperty(GRID_SIZE_SETTING, String.valueOf(gridSize));
+		setProperty(GRID_SIZE_SETTING, gridSize);
 	}
 
 	public int getGridPointSize()
 	{
-		return Utils.getAsInteger(settings.getProperty(GRID_POINTSIZE_SETTING, String.valueOf(GRID_POINTSIZE_DEFAULT)));
+		return getProperty(GRID_POINTSIZE_SETTING, GRID_POINTSIZE_DEFAULT);
 	}
 
 	public void setGridPointSize(int gridPointSize)
 	{
-		settings.setProperty(GRID_POINTSIZE_SETTING, String.valueOf(gridPointSize));
+		setProperty(GRID_POINTSIZE_SETTING, gridPointSize);
 	}
 
 	public boolean getNoneSnapTo()
@@ -256,17 +325,17 @@ public class DesignerPreferences
 
 	public boolean getGridSnapTo()
 	{
-		return SNAP_TO_GRID.equals(settings.getProperty(SNAPTO_SETTING, SNAPTO_DEFAULT));
+		return SNAP_TO_GRID.equals(getProperty(SNAPTO_SETTING, SNAPTO_DEFAULT));
 	}
 
 	public boolean getAlignmentSnapTo()
 	{
-		return SNAP_TO_ALIGMNENT.equals(settings.getProperty(SNAPTO_SETTING, SNAPTO_DEFAULT));
+		return SNAP_TO_ALIGMNENT.equals(getProperty(SNAPTO_SETTING, SNAPTO_DEFAULT));
 	}
 
 	public void setSnapTo(boolean grid, boolean alignment)
 	{
-		settings.setProperty(SNAPTO_SETTING, grid ? SNAP_TO_GRID : alignment ? SNAP_TO_ALIGMNENT : SNAP_TO_NONE);
+		setProperty(SNAPTO_SETTING, grid ? SNAP_TO_GRID : alignment ? SNAP_TO_ALIGMNENT : SNAP_TO_NONE);
 	}
 
 	public boolean getFeedbackNone()
@@ -276,64 +345,70 @@ public class DesignerPreferences
 
 	public boolean getFeedbackGrid()
 	{
-		return FEEDBACK_GRID.equals(settings.getProperty(FEEDBACK_SETTING, FEEDBACK_DEFAULT));
+		return FEEDBACK_GRID.equals(getProperty(FEEDBACK_SETTING, FEEDBACK_DEFAULT));
 	}
 
 	public boolean getFeedbackAlignment()
 	{
-		return FEEDBACK_ALIGMNENT.equals(settings.getProperty(FEEDBACK_SETTING, FEEDBACK_DEFAULT));
+		return FEEDBACK_ALIGMNENT.equals(getProperty(FEEDBACK_SETTING, FEEDBACK_DEFAULT));
 	}
 
 	public void setFeedback(boolean grid, boolean alignment)
 	{
-		settings.setProperty(FEEDBACK_SETTING, grid ? FEEDBACK_GRID : alignment ? FEEDBACK_ALIGMNENT : FEEDBACK_NONE);
+		setProperty(FEEDBACK_SETTING, grid ? FEEDBACK_GRID : alignment ? FEEDBACK_ALIGMNENT : FEEDBACK_NONE);
 	}
 
 	public boolean getSaveEditorState()
 	{
-		return Utils.getAsBoolean(settings.getProperty(SAVE_EDITOR_STATE_SETTING, String.valueOf(SAVE_EDITOR_STATE_DEFAULT)));
+		return getProperty(SAVE_EDITOR_STATE_SETTING, SAVE_EDITOR_STATE_DEFAULT);
 	}
 
 	public void setSaveEditorState(boolean saveEditorState)
 	{
-		settings.setProperty(SAVE_EDITOR_STATE_SETTING, String.valueOf(saveEditorState));
+		setProperty(SAVE_EDITOR_STATE_SETTING, saveEditorState);
 	}
 
 	public boolean getShowSameSizeFeedback()
 	{
-		return Utils.getAsBoolean(settings.getProperty(SHOW_SAME_SIZE_SETTING, String.valueOf(SHOW_SAME_SIZE_DEFAULT)));
+		return getProperty(SHOW_SAME_SIZE_SETTING, SHOW_SAME_SIZE_DEFAULT);
 	}
 
 	public void setShowSameSizeFeedback(boolean showSameSize)
 	{
-		settings.setProperty(SHOW_SAME_SIZE_SETTING, String.valueOf(showSameSize));
+		setProperty(SHOW_SAME_SIZE_SETTING, showSameSize);
 	}
 
 	public boolean getShowAnchorFeedback()
 	{
-		return Utils.getAsBoolean(settings.getProperty(SHOW_ANCHORING_SETTING, String.valueOf(SHOW_ANCHORING_DEFAULT)));
+		return getProperty(SHOW_ANCHORING_SETTING, SHOW_ANCHORING_DEFAULT);
 	}
 
 	public void setShowAnchorFeedback(boolean showAnchoring)
 	{
-		settings.setProperty(SHOW_ANCHORING_SETTING, String.valueOf(showAnchoring));
+		setProperty(SHOW_ANCHORING_SETTING, showAnchoring);
 	}
 
 	public boolean getFormToolsOnMainToolbar()
 	{
-		return Utils.getAsBoolean(settings.getProperty(FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING, String.valueOf(FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT)));
+		return getProperty(FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING, FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT);
 	}
 
 	public void setFormToolsOnMainToolbar(boolean formToolsOnMainToolbar)
 	{
-		settings.setProperty(FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING, String.valueOf(formToolsOnMainToolbar));
+		setProperty(FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING, formToolsOnMainToolbar);
+	}
+
+	public static boolean isCoolbarSetting(String key)
+	{
+		return FORM_COOLBAR_LAYOUT_SETTING.equals(getKeyPostfix(key));
 	}
 
 	public void saveCoolbarLayout(CoolbarLayout coolbarLayout)
 	{
 		if (coolbarLayout == null)
 		{
-			settings.remove(FORM_COOLBAR_LAYOUT_SETTING);
+			removeProperty(FORM_COOLBAR_LAYOUT_SETTING);
+			save();
 			return;
 		}
 
@@ -358,17 +433,18 @@ public class DesignerPreferences
 		try
 		{
 			serializer.registerDefaultSerializers();
-			settings.setProperty(FORM_COOLBAR_LAYOUT_SETTING, serializer.toJSON(map));
+			setProperty(FORM_COOLBAR_LAYOUT_SETTING, serializer.toJSON(map));
 		}
 		catch (Exception e)
 		{
 			ServoyLog.logError(e);
 		}
+		save();
 	}
 
 	public CoolbarLayout getCoolbarLayout()
 	{
-		String property = settings.getProperty(FORM_COOLBAR_LAYOUT_SETTING);
+		String property = getProperty(FORM_COOLBAR_LAYOUT_SETTING, null);
 		if (property != null)
 		{
 			JSONSerializer serializer = new JSONSerializer();
@@ -424,5 +500,4 @@ public class DesignerPreferences
 			this.hiddenBars = hiddenBars;
 		}
 	}
-
 }

@@ -291,7 +291,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 					Object[] dataProviders = dataProviderWizardPage.getDataProviders();
 					if (dataProviders != null && dataProviders.length > 0)
 					{
-						DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
+						DesignerPreferences designerPreferences = new DesignerPreferences();
 						ElementFactory.createFields(form, dataProviders, dataProviderWizardPage.optionsGroup.isPlaceAsLabels(),
 							dataProviderWizardPage.optionsGroup.isPlaceWithLabels(), dataProviderWizardPage.optionsGroup.isPlaceHorizontal(),
 							dataProviderWizardPage.optionsGroup.isFillText(), dataProviderWizardPage.optionsGroup.isFillName(),

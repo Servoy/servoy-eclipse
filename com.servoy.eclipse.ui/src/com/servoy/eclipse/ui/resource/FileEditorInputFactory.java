@@ -24,10 +24,7 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.part.FileEditorInput;
 
-import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
-import com.servoy.j2db.util.Settings;
 
 /**
  * Factory for persisted editor inputs.
@@ -45,9 +42,7 @@ public class FileEditorInputFactory extends org.eclipse.ui.part.FileEditorInputF
 			@Override
 			public IPersistableElement getPersistable()
 			{
-				ServoyModelManager.getServoyModelManager().getServoyModel();
-				Settings settings = ServoyModel.getSettings();
-				if (new DesignerPreferences(settings).getSaveEditorState())
+				if (new DesignerPreferences().getSaveEditorState())
 				{
 					return super.getPersistable();
 				}

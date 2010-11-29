@@ -37,7 +37,6 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Point;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -247,7 +246,7 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 	{
 		if (snapToGridIFieldPositioner == null)
 		{
-			DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
+			DesignerPreferences designerPreferences = new DesignerPreferences();
 			snapToGridIFieldPositioner = new SnapToGridFieldPositioner(designerPreferences)
 			{
 				@Override

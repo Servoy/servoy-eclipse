@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.commands.Command;
@@ -37,7 +37,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.elements.ElementFactory;
@@ -386,8 +385,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 			int x, y;
 			if (location == null)
 			{
-				DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
-				int copyPasteOffset = designerPreferences.getCopyPasteOffset();
+				int copyPasteOffset = new DesignerPreferences().getCopyPasteOffset();
 				x = supportBounds.getLocation().x + copyPasteOffset;
 				y = supportBounds.getLocation().y + copyPasteOffset;
 			}

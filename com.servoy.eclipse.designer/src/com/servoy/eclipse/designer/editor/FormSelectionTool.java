@@ -33,7 +33,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
 import com.servoy.eclipse.designer.util.DesignerUtil;
@@ -122,13 +121,11 @@ public class FormSelectionTool extends PanningSelectionTool
 		int magnitude = 1;
 		if ((e.stateMask & SWT.ALT) != 0)
 		{
-			DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
-			magnitude = designerPreferences.getLargeStepSize();
+			magnitude = new DesignerPreferences().getLargeStepSize();
 		}
 		else if ((e.stateMask & SWT.MOD1) != 0)
 		{
-			DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
-			magnitude = designerPreferences.getStepSize();
+			magnitude = new DesignerPreferences().getStepSize();
 		}
 
 		int x = 0;

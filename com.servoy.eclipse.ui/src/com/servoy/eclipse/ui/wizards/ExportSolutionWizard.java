@@ -186,11 +186,6 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 						ClientVersion.getReleaseNumber(), exportModel.isExportSampleData(), exportModel.getNumberOfSampleDataExported(),
 						exportModel.isExportI18NData(), exportModel.isExportUsers(), exportModel.isExportReferencedModules(),
 						exportModel.isProtectWithPassword());
-
-					if (exportModel.isExportSampleData())
-					{
-						Settings.getInstance().setProperty("servoy.maxSampleDataTableRowCount", String.valueOf(exportModel.getNumberOfSampleDataExported()));
-					}
 					monitor.done();
 					return Status.OK_STATUS;
 				}
@@ -446,7 +441,6 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			exportAllTablesFromReferencedServers.addListener(SWT.Selection, this);
 
 			exportSampleDataButton = new Button(composite, SWT.CHECK);
-			int max = Utils.getAsInteger(Settings.getInstance().getProperty("servoy.maxSampleDataTableRowCount", "10000")); //$NON-NLS-1$ //$NON-NLS-2$
 			exportSampleDataButton.setText("Export solution sample data."); //$NON-NLS-1$ 
 			exportSampleDataButton.addListener(SWT.Selection, this);
 

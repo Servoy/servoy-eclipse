@@ -27,7 +27,6 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.rulers.RulerProvider;
 
 import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.commands.MovePartCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
@@ -167,7 +166,7 @@ public class FormRulerProvider extends RulerProvider
 	@Override
 	public int getUnit()
 	{
-		DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
+		DesignerPreferences designerPreferences = new DesignerPreferences();
 		switch (designerPreferences.getMetrics())
 		{
 			case DesignerPreferences.CM :

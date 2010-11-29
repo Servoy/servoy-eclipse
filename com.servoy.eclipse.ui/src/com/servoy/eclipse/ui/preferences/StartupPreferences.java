@@ -16,11 +16,13 @@
  */
 package com.servoy.eclipse.ui.preferences;
 
+
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
-import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -31,6 +33,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
@@ -42,23 +45,24 @@ import com.servoy.j2db.util.Utils;
  */
 public class StartupPreferences extends PreferencePage implements IWorkbenchPreferencePage
 {
+	// storedin Settings
 	public static final String STARTUP_LAUNCHER_SETTING = "nativeStartupLauncher";
 	public static final String SHUTDOWN_LAUNCHER_SETTING = "nativeShutdownLauncher";
 	public static final String RETRIES_SETTING = "developer.maxRepositoryConnectRetries";
-	public static final String DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS = "showConfirmationDialogWhenErrors";
-	public static final String DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS = "showConfirmationDialogWhenWarnings";
-	public static final String YES = "yes";
-	public static final String NO = "no";
-	public static String DEFAULT_ERROR_CONFIRMATION = "yes";
-	public static String DEFAULT_WARNING_CONFIRMATION = "no";
+
+	// stored in ui plugin prefs
+	public static final String DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS = "debugger.showConfirmationDialogWhenErrors";
+	public static final String DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS = "debugger.showConfirmationDialogWhenWarnings";
+	public static boolean DEFAULT_ERROR_CONFIRMATION = true;
+	public static boolean DEFAULT_WARNING_CONFIRMATION = false;
 
 	private static final int RETRIES_DEFAULT = 5;
 
 	private Spinner retriesSpinner;
 	private Text startupLauncherText;
 	private Text shutdownLauncherText;
-	private Combo showErrorsConfirmation;
-	private Combo showWarningsConfirmation;
+	private Button showErrorsConfirmation;
+	private Button showWarningsConfirmation;
 
 	public void init(IWorkbench workbench)
 	{
@@ -94,11 +98,8 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		Label lWarnings = new Label(composite, SWT.NONE);
 		lErrors.setText("Debug client confirmation launch when errors");
 		lWarnings.setText("Debug client confirmation launch when warnings");
-		String[] items = new String[] { YES, NO };
-		showErrorsConfirmation = new Combo(composite, SWT.READ_ONLY);
-		showErrorsConfirmation.setItems(items);
-		showWarningsConfirmation = new Combo(composite, SWT.READ_ONLY);
-		showWarningsConfirmation.setItems(items);
+		showErrorsConfirmation = new Button(composite, SWT.CHECK);
+		showWarningsConfirmation = new Button(composite, SWT.CHECK);
 
 		final GroupLayout groupLayout = new GroupLayout(composite);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
@@ -125,12 +126,13 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 	{
 		ServoyModelManager.getServoyModelManager().getServoyModel();
 		Settings settings = ServoyModel.getSettings();
-
 		startupLauncherText.setText(settings.getProperty(STARTUP_LAUNCHER_SETTING, ""));
 		shutdownLauncherText.setText(settings.getProperty(SHUTDOWN_LAUNCHER_SETTING, ""));
 		retriesSpinner.setSelection(Utils.getAsInteger(settings.getProperty(RETRIES_SETTING, String.valueOf(RETRIES_DEFAULT))));
-		showErrorsConfirmation.setText(settings.getProperty(DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS, DEFAULT_ERROR_CONFIRMATION));
-		showWarningsConfirmation.setText(settings.getProperty(DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS, DEFAULT_WARNING_CONFIRMATION));
+
+		IEclipsePreferences eclipsePreferences = Activator.getDefault().getEclipsePreferences();
+		showErrorsConfirmation.setSelection(eclipsePreferences.getBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS, DEFAULT_ERROR_CONFIRMATION));
+		showWarningsConfirmation.setSelection(eclipsePreferences.getBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS, DEFAULT_WARNING_CONFIRMATION));
 	}
 
 	@Override
@@ -138,12 +140,13 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 	{
 		ServoyModelManager.getServoyModelManager().getServoyModel();
 		Settings settings = ServoyModel.getSettings();
-
 		settings.setProperty(STARTUP_LAUNCHER_SETTING, startupLauncherText.getText());
 		settings.setProperty(SHUTDOWN_LAUNCHER_SETTING, shutdownLauncherText.getText());
 		settings.setProperty(RETRIES_SETTING, String.valueOf(retriesSpinner.getSelection()));
-		settings.setProperty(DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS, showErrorsConfirmation.getText());
-		settings.setProperty(DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS, showWarningsConfirmation.getText());
+
+		IEclipsePreferences eclipsePreferences = Activator.getDefault().getEclipsePreferences();
+		eclipsePreferences.putBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS, showErrorsConfirmation.getSelection());
+		eclipsePreferences.putBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS, showWarningsConfirmation.getSelection());
 		return true;
 	}
 
@@ -152,13 +155,12 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 	{
 		ServoyModelManager.getServoyModelManager().getServoyModel();
 		Settings settings = ServoyModel.getSettings();
-
 		startupLauncherText.setText(settings.getProperty(STARTUP_LAUNCHER_SETTING, ""));
 		shutdownLauncherText.setText(settings.getProperty(SHUTDOWN_LAUNCHER_SETTING, ""));
 		retriesSpinner.setSelection(RETRIES_DEFAULT);
-		showErrorsConfirmation.setText(DEFAULT_ERROR_CONFIRMATION);
-		showWarningsConfirmation.setText(DEFAULT_WARNING_CONFIRMATION);
+
+		showErrorsConfirmation.setSelection(DEFAULT_ERROR_CONFIRMATION);
+		showWarningsConfirmation.setSelection(DEFAULT_WARNING_CONFIRMATION);
 		super.performDefaults();
 	}
-
 }

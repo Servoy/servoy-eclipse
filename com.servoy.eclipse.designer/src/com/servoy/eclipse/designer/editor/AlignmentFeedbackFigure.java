@@ -24,7 +24,6 @@ import org.eclipse.draw2d.geometry.Rectangle;
 
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.ColorResource;
-import com.servoy.j2db.util.Settings;
 
 /** 
  * Figure for feedback in alignment when moving elements.
@@ -44,7 +43,7 @@ public class AlignmentFeedbackFigure extends Polygon
 	{
 		this.elementAlignmentItem = item;
 		this.referenceBounds = referenceBounds;
-		designerPreferences = new DesignerPreferences(Settings.getInstance());
+		designerPreferences = new DesignerPreferences();
 		setLineStyle(Graphics.LINE_CUSTOM);
 		setLineDash(new float[] { 5, 2 });
 		setForegroundColor(ColorResource.INSTANCE.getColor(designerPreferences.getAlignmentGuideColor()));
@@ -131,7 +130,7 @@ public class AlignmentFeedbackFigure extends Polygon
 		// snapped-to line
 		addLine(horizontal, elementAlignmentItem.target, elementAlignmentItem.start - 5, elementAlignmentItem.end + 5);
 
-		int[] alignmentDistances = new DesignerPreferences(Settings.getInstance()).getAlignmentDistances();
+		int[] alignmentDistances = new DesignerPreferences().getAlignmentDistances();
 		int mediumDiff = 0;
 		int smallDiff = 0;
 		if (ElementAlignmentItem.ALIGN_TYPE_DISTANCE_LARGE.equals(elementAlignmentItem.alignType))

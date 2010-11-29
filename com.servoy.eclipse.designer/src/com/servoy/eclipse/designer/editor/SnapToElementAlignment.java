@@ -40,7 +40,6 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportAnchors;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.util.IAnchorConstants;
-import com.servoy.j2db.util.Settings;
 
 /**
  * Snap elements according to alignment with other elements or container borders.
@@ -79,7 +78,7 @@ public class SnapToElementAlignment extends SnapToHelper
 	{
 		if (preferences == null)
 		{
-			preferences = new DesignerPreferences(Settings.getInstance());
+			preferences = new DesignerPreferences();
 			snapThreshold = preferences.getAlignmentThreshold();
 			indent = preferences.getAlignmentIndent();
 			distances = preferences.getAlignmentDistances();

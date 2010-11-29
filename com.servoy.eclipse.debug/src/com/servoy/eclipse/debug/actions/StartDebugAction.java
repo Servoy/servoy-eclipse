@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -54,15 +55,14 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.builder.ServoyBuilder;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
-import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner
@@ -135,12 +135,11 @@ public abstract class StartDebugAction implements IWorkbenchWindowActionDelegate
 				markers = project.getProject().findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
 				if (markers != null && markers.length > 0)
 				{
-					String confirmWhenErrors = ServoyModel.getSettings().getProperty(StartupPreferences.DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS,
+					IEclipsePreferences eclipsePreferences = Activator.getDefault().getEclipsePreferences();
+					boolean confirmErrors = eclipsePreferences.getBoolean(StartupPreferences.DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS,
 						StartupPreferences.DEFAULT_ERROR_CONFIRMATION);
-					boolean confirmErrors = Utils.getAsBoolean(confirmWhenErrors);
-					String confirmWhenWarnings = ServoyModel.getSettings().getProperty(StartupPreferences.DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS,
+					boolean confirmWarnings = eclipsePreferences.getBoolean(StartupPreferences.DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS,
 						StartupPreferences.DEFAULT_WARNING_CONFIRMATION);
-					boolean confirmWarnings = Utils.getAsBoolean(confirmWhenWarnings);
 					for (IMarker marker : markers)
 					{
 						if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_ERROR) &&
@@ -233,7 +232,6 @@ public abstract class StartDebugAction implements IWorkbenchWindowActionDelegate
 		}
 		return true;
 	}
-
 
 	private static boolean isScriptDebugTargetLaunched()
 	{

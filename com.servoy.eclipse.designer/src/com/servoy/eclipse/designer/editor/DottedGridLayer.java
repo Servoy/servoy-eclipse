@@ -22,7 +22,6 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.editparts.GridLayer;
 import org.eclipse.swt.graphics.Color;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.persistence.Form;
@@ -51,7 +50,7 @@ public class DottedGridLayer extends GridLayer
 		java.awt.Dimension size = flattenedForm.getSize();
 		if (size == null) return;
 
-		DesignerPreferences designerPreferences = new DesignerPreferences(ServoyModel.getSettings());
+		DesignerPreferences designerPreferences = new DesignerPreferences();
 		g.pushState();
 		try
 		{

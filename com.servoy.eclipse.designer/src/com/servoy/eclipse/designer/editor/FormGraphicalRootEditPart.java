@@ -16,9 +16,8 @@
  */
 package com.servoy.eclipse.designer.editor;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.draw2d.FreeformLayer;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.LayeredPane;
@@ -31,10 +30,9 @@ import org.eclipse.gef.editparts.FreeformGraphicalRootEditPart;
 import org.eclipse.gef.editparts.GridLayer;
 import org.eclipse.gef.editparts.GuideLayer;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.designer.internal.MarqueeDragTracker;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
-import com.servoy.j2db.util.Settings;
 
 /**
  * Root pane for forms, add datarender-layer.
@@ -42,7 +40,7 @@ import com.servoy.j2db.util.Settings;
  * @author rgansevles
  * 
  */
-public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart implements PropertyChangeListener
+public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart
 {
 	/**
 	 * The layer containing feedback for the selected element, this layer is below the handle layer and above the layers with the elements.
@@ -51,14 +49,26 @@ public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart imp
 
 	private final VisualFormEditor editorPart;
 
+	protected final IPreferenceChangeListener preferenceChangeListener = new IPreferenceChangeListener()
+	{
+
+		public void preferenceChange(PreferenceChangeEvent event)
+		{
+			if (DesignerPreferences.isGridSetting(event.getKey()))
+			{
+				IFigure gridLayer = getLayer(LayerConstants.GRID_LAYER);
+				if (gridLayer != null)
+				{
+					gridLayer.repaint();
+				}
+			}
+		}
+	};
+
 	public FormGraphicalRootEditPart(VisualFormEditor editorPart)
 	{
 		this.editorPart = editorPart;
-
-		Settings settings = ServoyModel.getSettings();
-		settings.addPropertyChangeListener(this, DesignerPreferences.GRID_POINTSIZE_SETTING);
-		settings.addPropertyChangeListener(this, DesignerPreferences.GRID_SIZE_SETTING);
-		settings.addPropertyChangeListener(this, DesignerPreferences.GRID_COLOR_SETTING);
+		Activator.getDefault().getEclipsePreferences().addPreferenceChangeListener(preferenceChangeListener);
 	}
 
 	@Override
@@ -105,26 +115,10 @@ public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart imp
 		return editorPart;
 	}
 
-	/**
-	 * registered properties: DesignerPreferences.GRID_*_SETTING
-	 */
-	public void propertyChange(PropertyChangeEvent evt)
-	{
-		IFigure gridLayer = getLayer(LayerConstants.GRID_LAYER);
-		if (gridLayer != null)
-		{
-			gridLayer.repaint();
-		}
-	}
-
 	@Override
 	public void deactivate()
 	{
-		Settings settings = ServoyModel.getSettings();
-		settings.removePropertyChangeListener(this, DesignerPreferences.GRID_POINTSIZE_SETTING);
-		settings.removePropertyChangeListener(this, DesignerPreferences.GRID_SIZE_SETTING);
-		settings.removePropertyChangeListener(this, DesignerPreferences.GRID_COLOR_SETTING);
-
+		Activator.getDefault().getEclipsePreferences().removePreferenceChangeListener(preferenceChangeListener);
 		super.deactivate();
 	}
 }

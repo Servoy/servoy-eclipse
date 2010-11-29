@@ -36,7 +36,6 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.ColorPropertyController;
 import com.servoy.eclipse.ui.views.ColorSelectViewer;
@@ -125,7 +124,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				new DesignerPreferences(ServoyModel.getSettings()).saveCoolbarLayout(null);
+				new DesignerPreferences().saveCoolbarLayout(null);
 			}
 		});
 		resetToolbarsButton.setBounds(349, 21, 68, 23);
@@ -325,7 +324,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 	protected void initializeFields()
 	{
-		DesignerPreferences prefs = new DesignerPreferences(ServoyModel.getSettings());
+		DesignerPreferences prefs = new DesignerPreferences();
 
 		gridPointsizeSpinner.setSelection(prefs.getGridPointSize());
 		gridSizeSpinner.setSelection(prefs.getGridSize());
@@ -358,7 +357,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	@Override
 	public boolean performOk()
 	{
-		DesignerPreferences prefs = new DesignerPreferences(ServoyModel.getSettings());
+		DesignerPreferences prefs = new DesignerPreferences();
 
 		prefs.setGridPointSize(gridPointsizeSpinner.getSelection());
 		prefs.setGridSize(gridSizeSpinner.getSelection());
@@ -379,6 +378,8 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		prefs.setMetrics(((Integer)((ObjectWrapper)((IStructuredSelection)metricsCombo.getSelection()).getFirstElement()).getType()).intValue());
 		prefs.setShowSameSizeFeedback(sameSizeFeedbackCheck.getSelection());
 		prefs.setShowAnchorFeedback(anchorFeedbackCheck.getSelection());
+
+		prefs.save();
 
 		return true;
 	}

@@ -28,7 +28,6 @@ import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.actions.RetargetAction;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 
@@ -54,7 +53,7 @@ public class ActionBarContributor extends org.eclipse.gef.ui.actions.ActionBarCo
 	@Override
 	protected void buildActions()
 	{
-		boolean formToolsInFormWindow = !new DesignerPreferences(ServoyModel.getSettings()).getFormToolsOnMainToolbar();
+		boolean formToolsInFormWindow = !new DesignerPreferences().getFormToolsOnMainToolbar();
 
 		addMyAction(ActionFactory.CUT.create(getPage().getWorkbenchWindow()), false);
 		addMyAction(ActionFactory.DELETE.create(getPage().getWorkbenchWindow()), false);
