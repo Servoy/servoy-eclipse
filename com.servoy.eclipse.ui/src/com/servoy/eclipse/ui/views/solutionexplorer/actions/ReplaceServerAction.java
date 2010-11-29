@@ -58,6 +58,7 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.DataSourceUtils;
 
@@ -147,6 +148,14 @@ public class ReplaceServerAction extends Action implements ISelectionChangedList
 												if (sourceServer.equals(vl.getServerName()))
 												{
 													vl.setServerName(targetServer);
+												}
+											}
+											else if (object instanceof TableNode)
+											{
+												TableNode tableNode = ((TableNode)object);
+												if (sourceServer.equals(tableNode.getServerName()))
+												{
+													tableNode.setServerName(targetServer);
 												}
 											}
 											return IPersistVisitor.CONTINUE_TRAVERSAL;
