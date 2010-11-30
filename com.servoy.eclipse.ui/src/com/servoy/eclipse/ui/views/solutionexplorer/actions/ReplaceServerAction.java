@@ -50,6 +50,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.wizards.ReplaceTableWizard;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -155,6 +156,7 @@ public class ReplaceServerAction extends Action implements ISelectionChangedList
 												TableNode tableNode = ((TableNode)object);
 												if (sourceServer.equals(tableNode.getServerName()))
 												{
+													tableNode.setRuntimeProperty(AbstractBase.NameChangeProperty, tableNode.getDataSource());
 													tableNode.setServerName(targetServer);
 												}
 											}

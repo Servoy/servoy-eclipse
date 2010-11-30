@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.repository;
 
 
@@ -62,6 +62,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -704,6 +705,14 @@ public class SolutionSerializer
 		else if (persist instanceof TableNode)
 		{
 			name = ((TableNode)persist).getTableName();
+			if (useOldName && ((TableNode)persist).getRuntimeProperty(AbstractBase.NameChangeProperty) != null)
+			{
+				String[] names = DataSourceUtils.getDBServernameTablename(((TableNode)persist).getRuntimeProperty(AbstractBase.NameChangeProperty));
+				if (names != null && names.length == 2)
+				{
+					name = names[1];
+				}
+			}
 		}
 
 		if (!Utils.stringIsEmpty(name))
@@ -786,7 +795,16 @@ public class SolutionSerializer
 
 		if (persist instanceof TableNode)
 		{
-			name = DATASOURCES_DIR_NAME + '/' + ((TableNode)persist).getServerName();
+			String serverName = ((TableNode)persist).getServerName();
+			if (useOldName && ((TableNode)persist).getRuntimeProperty(AbstractBase.NameChangeProperty) != null)
+			{
+				String[] names = DataSourceUtils.getDBServernameTablename(((TableNode)persist).getRuntimeProperty(AbstractBase.NameChangeProperty));
+				if (names != null && names.length == 2)
+				{
+					serverName = names[0];
+				}
+			}
+			name = DATASOURCES_DIR_NAME + '/' + serverName;
 		}
 		if (persist.getParent() instanceof TableNode)
 		{
@@ -837,7 +855,16 @@ public class SolutionSerializer
 		}
 		if (persist instanceof TableNode)
 		{
-			return ((TableNode)persist).getTableName() + CALCULATIONS_POSTFIX_WITH_EXT;
+			String tableName = ((TableNode)persist).getTableName();
+			if (useOldName && ((TableNode)persist).getRuntimeProperty(AbstractBase.NameChangeProperty) != null)
+			{
+				String[] names = DataSourceUtils.getDBServernameTablename(((TableNode)persist).getRuntimeProperty(AbstractBase.NameChangeProperty));
+				if (names != null && names.length == 2)
+				{
+					tableName = names[1];
+				}
+			}
+			return tableName + CALCULATIONS_POSTFIX_WITH_EXT;
 		}
 
 		return null;
