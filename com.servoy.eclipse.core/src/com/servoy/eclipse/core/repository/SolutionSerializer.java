@@ -520,18 +520,21 @@ public class SolutionSerializer
 					int type = Column.mapToDefaultType(sv.getVariableType());
 					// Add the "@type" tag.
 					String jsType = sv.getSerializableRuntimeProperty(IScriptProvider.TYPE);
-					String typeStr = ArgumentType.convertFromColumnType(type, jsType).getName();
-					int index = sb.lastIndexOf(TYPEKEY);
-					if (index != -1)
+					ArgumentType argumentType = ArgumentType.convertFromColumnType(type, jsType);
+					if (argumentType != ArgumentType.Object)
 					{
-						int lineEnd = sb.indexOf("\n", index); //$NON-NLS-1$
-						sb.replace(index + TYPEKEY.length() + 1, lineEnd, typeStr);
-					}
-					else
-					{
-						int startComment = sb.indexOf(SV_COMMENT);
-						int lineEnd = sb.indexOf("\n", startComment); //$NON-NLS-1$
-						sb.insert(lineEnd, "\n * " + TYPEKEY + " " + typeStr + "\n *"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						int index = sb.lastIndexOf(TYPEKEY);
+						if (index != -1)
+						{
+							int lineEnd = sb.indexOf("\n", index); //$NON-NLS-1$
+							sb.replace(index + TYPEKEY.length() + 1, lineEnd, argumentType.getName());
+						}
+						else
+						{
+							int startComment = sb.indexOf(SV_COMMENT);
+							int lineEnd = sb.indexOf("\n", startComment); //$NON-NLS-1$
+							sb.insert(lineEnd, "\n * " + TYPEKEY + " " + argumentType.getName() + "\n *"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						}
 					}
 					sb.append(VAR_KEYWORD);
 					sb.append(' ');
