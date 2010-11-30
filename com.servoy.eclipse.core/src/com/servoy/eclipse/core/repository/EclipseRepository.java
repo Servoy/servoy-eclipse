@@ -79,6 +79,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Style;
+import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
@@ -644,17 +645,26 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 						String fileToName = SolutionSerializer.getFileName(o, false);
 						try
 						{
-							wsa.move(fileRelativePath, fileFromPath.getLeft() + fileToName);
+							String path = fileFromPath.getLeft();
+							if (o instanceof TableNode)
+							{
+								path = SolutionSerializer.getRelativePath(o, false);
+								if (!wsa.exists(path)) wsa.createFolder(path);
+							}
+							wsa.move(fileRelativePath, path + fileToName);
 							if (SolutionSerializer.isJSONFile(fileToName))
 							{
 								// check if a script needs to be renamed
 								String oldScriptName = SolutionSerializer.getScriptName(o, true);
 								String newScriptName = SolutionSerializer.getScriptName(o, false);
-								if (oldScriptName != null && !oldScriptName.equals(newScriptName))
+								String oldScriptPath = SolutionSerializer.getScriptPath(o, true);
+								String newScriptPath = SolutionSerializer.getScriptPath(o, false);
+								if ((oldScriptName != null && !oldScriptName.equals(newScriptName)) ||
+									(o instanceof TableNode && oldScriptPath != null && !oldScriptPath.equals(newScriptPath)))
 								{
 									// note that the directory will be renamed below, just need to rename the file
-									String oldScriptPath = SolutionSerializer.getScriptPath(o, true);
-									String newScriptPath = oldScriptPath.substring(0, oldScriptPath.length() - oldScriptName.length()) + newScriptName;
+									if (!(o instanceof TableNode)) newScriptPath = oldScriptPath.substring(0, oldScriptPath.length() - oldScriptName.length()) +
+										newScriptName;
 									if (wsa.exists(oldScriptPath))
 									{
 										try
@@ -693,9 +703,9 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 									EclipseUserManager.SECURITY_FILE_EXTENSION;
 								if (wsa.exists(oldSecFileRelativePath))
 								{
-									wsa.move(oldSecFileRelativePath,
-										fileFromPath.getLeft() + fileToName.substring(0, fileToName.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) +
-											EclipseUserManager.SECURITY_FILE_EXTENSION);
+									wsa.move(oldSecFileRelativePath, fileFromPath.getLeft() +
+										fileToName.substring(0, fileToName.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) +
+										EclipseUserManager.SECURITY_FILE_EXTENSION);
 								}
 							}
 						}
