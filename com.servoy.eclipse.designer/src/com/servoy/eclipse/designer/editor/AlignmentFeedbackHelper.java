@@ -47,8 +47,11 @@ public class AlignmentFeedbackHelper
 
 	public void showElementAlignmentFeedback(Request request)
 	{
-		ElementAlignmentItem[] feedbackItems = (ElementAlignmentItem[])request.getExtendedData().get(SnapToElementAlignment.ELEMENT_ALIGNMENT_REQUEST_DATA);
+		showElementAlignmentFeedback((ElementAlignmentItem[])request.getExtendedData().get(SnapToElementAlignment.ELEMENT_ALIGNMENT_REQUEST_DATA));
+	}
 
+	public void showElementAlignmentFeedback(ElementAlignmentItem[] feedbackItems)
+	{
 		// remove old feedbacks
 		Iterator<Entry<ElementAlignmentItem, IFigure>> iterator = alignmentFeedbackFigures.entrySet().iterator();
 		while (iterator.hasNext())

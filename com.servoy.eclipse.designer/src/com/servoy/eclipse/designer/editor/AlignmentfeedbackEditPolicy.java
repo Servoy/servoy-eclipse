@@ -29,6 +29,7 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.DragTracker;
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.Handle;
 import org.eclipse.gef.LayerConstants;
@@ -53,6 +54,7 @@ import com.servoy.eclipse.designer.util.AnchoringFigure;
 import com.servoy.eclipse.designer.util.FigureMovedTracker;
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
 import com.servoy.j2db.persistence.ISupportAnchors;
+import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.util.IAnchorConstants;
 
 /**
@@ -80,15 +82,19 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 
 	private AlignmentFeedbackHelper alignmentFeedbackHelper;
 
-	/**
-	 * the feedback figure for the selected element.
-	 */
-	protected IFigure selectedElementFeedbackFigure;
+	private FigureMovedTracker alignmentSelectectElementFeedbackTracker;
+
+	private AlignmentFeedbackHelper alignmentSelectectElementFeedbackHelper;
 
 	/**
-	 * the figure for anchoring.
+	 * the tracker for the anchoring figure.
 	 */
-	protected Clickable anchoringFigure;
+	protected FigureMovedTracker anchoringFigureTracker;
+
+	/**
+	 * the trackers for same-size feedback figure.
+	 */
+	protected List<FigureMovedTracker> sameSizeFigureTrackers = new ArrayList<FigureMovedTracker>();
 
 	private final FormGraphicalEditPart container;
 
@@ -102,9 +108,23 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 		public void propertyChange(PropertyChangeEvent evt)
 		{
 			String property = evt.getPropertyName();
-			if (isSelected && property.equals(AlignmentfeedbackEditPolicy.PROPERTY_ANCHOR_FEEDBACK_ENABLED))
+			if (isSelected)
 			{
-				addAnchoringFigure();
+				if (property.equals(AlignmentfeedbackEditPolicy.PROPERTY_ANCHOR_FEEDBACK_ENABLED))
+				{
+					removeAnchoringFigure();
+					addAnchoringFigure();
+				}
+				else if (property.equals(AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_ENABLED))
+				{
+					removeSameSizeFeedback();
+					addSameSizeFeedback();
+				}
+				else if (property.equals(AlignmentfeedbackEditPolicy.PROPERTY_ALIGMENT_FEEDBACK_VISIBLE))
+				{
+					removeSelectedElementAlignmentFeedback();
+					addSelectedElementAlignmentFeedback();
+				}
 			}
 		}
 	};
@@ -138,6 +158,18 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 			alignmentFeedbackHelper = new AlignmentFeedbackHelper(getFeedbackLayer());
 		}
 		return alignmentFeedbackHelper;
+	}
+
+	/**
+	 * @return the alignmentFeedbackHelper
+	 */
+	public AlignmentFeedbackHelper getAlignmentSelectedElementFeedbackHelper()
+	{
+		if (alignmentSelectectElementFeedbackHelper == null)
+		{
+			alignmentSelectectElementFeedbackHelper = new AlignmentFeedbackHelper(getLayer(FormGraphicalRootEditPart.SELECTED_ELEMENT_FEEDBACK_LAYER));
+		}
+		return alignmentSelectectElementFeedbackHelper;
 	}
 
 	@Override
@@ -203,7 +235,8 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	protected void showChangeBoundsFeedback(ChangeBoundsRequest request)
 	{
 		super.showChangeBoundsFeedback(request);
-		removeSelectedElementFeedbackFigure();
+		removeSameSizeFeedback();
+		removeSelectedElementAlignmentFeedback();
 		removeAnchoringFigure();
 		getAlignmentFeedbackHelper().showElementAlignmentFeedback(request);
 	}
@@ -213,7 +246,8 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	{
 		super.eraseChangeBoundsFeedback(request);
 		getAlignmentFeedbackHelper().eraseElementAlignmentFeedback();
-		addSelectedElementFeedbackFigure();
+		addSameSizeFeedback();
+		addSelectedElementAlignmentFeedback();
 		addAnchoringFigure();
 	}
 
@@ -221,7 +255,8 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	protected void hideSelection()
 	{
 		super.hideSelection();
-		removeSelectedElementFeedbackFigure();
+		removeSameSizeFeedback();
+		removeSelectedElementAlignmentFeedback();
 		removeAnchoringFigure();
 		isSelected = false;
 	}
@@ -230,36 +265,19 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	protected void showSelection()
 	{
 		super.showSelection();
-		addSelectedElementFeedbackFigure();
+		addSameSizeFeedback();
+		addSelectedElementAlignmentFeedback();
 		addAnchoringFigure();
 		isSelected = true;
 	}
 
-	protected void removeSelectedElementFeedbackFigure()
-	{
-		if (selectedElementFeedbackFigure != null)
-		{
-			getLayer(FormGraphicalRootEditPart.SELECTED_ELEMENT_FEEDBACK_LAYER).remove(selectedElementFeedbackFigure);
-			selectedElementFeedbackFigure = null;
-		}
-	}
-
-	/**
-	 * Adds the alignment to the feedback layer.
-	 */
-	protected void addSelectedElementFeedbackFigure()
-	{
-		removeSelectedElementFeedbackFigure();
-		getLayer(FormGraphicalRootEditPart.SELECTED_ELEMENT_FEEDBACK_LAYER).add(
-			selectedElementFeedbackFigure = new SelectedElementFeedbackFigure(container, getHost()));
-	}
-
 	protected void removeAnchoringFigure()
 	{
-		if (anchoringFigure != null)
+		if (anchoringFigureTracker != null)
 		{
-			getLayer(LayerConstants.HANDLE_LAYER).remove(anchoringFigure);
-			anchoringFigure = null;
+			anchoringFigureTracker.unhook();
+			anchoringFigureTracker.getFigure().getParent().remove(anchoringFigureTracker.getFigure());
+			anchoringFigureTracker = null;
 		}
 	}
 
@@ -270,16 +288,12 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	{
 		if (!Boolean.TRUE.equals(getHost().getViewer().getProperty(AlignmentfeedbackEditPolicy.PROPERTY_ANCHOR_FEEDBACK_ENABLED)))
 		{
-			removeAnchoringFigure();
 			return;
 		}
 
-		if (anchoringFigure == null && getHost().getModel() instanceof ISupportAnchors)
+		if (anchoringFigureTracker == null && getHost().getModel() instanceof ISupportAnchors)
 		{
-			anchoringFigure = new Clickable(new AnchoringFigure((ISupportAnchors)getHost().getModel()), SWT.NONE);
-			getLayer(LayerConstants.HANDLE_LAYER).add(anchoringFigure);
-
-			getHost().getFigure().addAncestorListener(new FigureMovedTracker(anchoringFigure, new AbsoluteLocator(getHost().getFigure(), false, 4, true, 2)));
+			Clickable anchoringFigure = new Clickable(new AnchoringFigure((ISupportAnchors)getHost().getModel()), SWT.NONE);
 			anchoringFigure.addActionListener(new ActionListener()
 			{
 				public void actionPerformed(ActionEvent e)
@@ -287,6 +301,8 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 					showAnchoringmenu();
 				}
 			});
+			getLayer(LayerConstants.HANDLE_LAYER).add(anchoringFigure);
+			anchoringFigureTracker = new FigureMovedTracker(anchoringFigure, getHostFigure(), new AbsoluteLocator(getHost().getFigure(), false, 4, true, 2));
 		}
 	}
 
@@ -307,6 +323,7 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 			menuManager.setVisible(true);
 		}
 		Menu popup = menuManager.createContextMenu(container.getViewer().getControl());
+		IFigure anchoringFigure = anchoringFigureTracker.getFigure();
 		Rectangle clickableBounds = anchoringFigure.getBounds().getCopy();
 		anchoringFigure.translateToAbsolute(clickableBounds);
 		Point location = container.getViewer().getControl().toDisplay(clickableBounds.x, clickableBounds.y + clickableBounds.height);
@@ -329,5 +346,99 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.NORTH | IAnchorConstants.WEST));
 		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.NORTH | IAnchorConstants.WEST | IAnchorConstants.SOUTH |
 			IAnchorConstants.EAST));
+	}
+
+	protected void removeSameSizeFeedback()
+	{
+		for (FigureMovedTracker tracker : sameSizeFigureTrackers)
+		{
+			tracker.unhook();
+			tracker.getFigure().getParent().remove(tracker.getFigure());
+		}
+		sameSizeFigureTrackers.clear();
+	}
+
+	protected void addSameSizeFigure(IFigure hostFigure, String type)
+	{
+		SameSizeFeedbackFigure sameSizeFigure = new SameSizeFeedbackFigure(type);
+		getLayer(FormGraphicalRootEditPart.SELECTED_ELEMENT_FEEDBACK_LAYER).add(sameSizeFigure);
+		sameSizeFigureTrackers.add(new FigureMovedTracker(sameSizeFigure, hostFigure, SameSizeFeedbackFigure.getLocator(type, hostFigure)));
+	}
+
+	protected void addSameSizeFeedback()
+	{
+		if (!Boolean.TRUE.equals(container.getViewer().getProperty(AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_ENABLED)))
+		{
+			return;
+		}
+
+		Rectangle myBounds = getHostFigure().getBounds();
+		boolean addedSameWidth = false;
+		boolean addedSameHeight = false;
+
+		List<EditPart> children = container.getChildren();
+		for (EditPart child : children)
+		{
+			if (child.getModel() instanceof Part || child == getHost() || !(child instanceof GraphicalEditPart))
+			{
+				continue;
+			}
+
+			IFigure childFigure = ((GraphicalEditPart)child).getFigure();
+			Rectangle childBounds = childFigure.getBounds();
+			if (myBounds.width >= 5 && myBounds.width == childBounds.width)
+			{
+				addSameSizeFigure(childFigure, SameSizeFeedbackFigure.SAME_WIDTH);
+				addedSameWidth = true;
+			}
+			if (myBounds.height >= 5 && myBounds.height == childBounds.height)
+			{
+				addSameSizeFigure(childFigure, SameSizeFeedbackFigure.SAME_HEIGHT);
+				addedSameHeight = true;
+			}
+		}
+
+		if (addedSameWidth)
+		{
+			addSameSizeFigure(getHostFigure(), SameSizeFeedbackFigure.SAME_WIDTH);
+		}
+		if (addedSameHeight)
+		{
+			addSameSizeFigure(getHostFigure(), SameSizeFeedbackFigure.SAME_HEIGHT);
+		}
+	}
+
+	protected void removeSelectedElementAlignmentFeedback()
+	{
+		if (alignmentSelectectElementFeedbackTracker != null)
+		{
+			getAlignmentSelectedElementFeedbackHelper().showElementAlignmentFeedback((ElementAlignmentItem[])null);
+			alignmentSelectectElementFeedbackTracker.unhook();
+			alignmentSelectectElementFeedbackTracker = null;
+		}
+	}
+
+	protected void addSelectedElementAlignmentFeedback()
+	{
+		if (alignmentSelectectElementFeedbackTracker != null ||
+			!Boolean.TRUE.equals(container.getViewer().getProperty(AlignmentfeedbackEditPolicy.PROPERTY_ALIGMENT_FEEDBACK_VISIBLE)))
+		{
+			return;
+		}
+
+		alignmentSelectectElementFeedbackTracker = new FigureMovedTracker(null, getHostFigure(), null)
+		{
+			@Override
+			public void ancestorMoved(IFigure ancestor)
+			{
+				List<EditPart> editParts = new ArrayList<EditPart>(1);
+				editParts.add(getHost());
+				SnapToElementAlignment snapToElementAlignment = new SnapToElementAlignment(container);
+				snapToElementAlignment.setSnapThreshold(0);
+				Rectangle figureBounds = getHostFigure().getBounds();
+				ElementAlignmentItem[] elementAlignment = snapToElementAlignment.getElementAlignment(figureBounds, PositionConstants.NSEW, editParts, false);
+				getAlignmentSelectedElementFeedbackHelper().showElementAlignmentFeedback(elementAlignment);
+			}
+		};
 	}
 }

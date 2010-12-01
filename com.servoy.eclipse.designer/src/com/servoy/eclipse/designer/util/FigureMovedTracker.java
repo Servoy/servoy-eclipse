@@ -32,12 +32,15 @@ public class FigureMovedTracker implements AncestorListener
 
 	private final IFigure figure;
 	private final Locator locator;
+	private final IFigure hostFigure;
 
-	public FigureMovedTracker(IFigure figure, Locator locator)
+	public FigureMovedTracker(IFigure figure, IFigure hostFigure, Locator locator)
 	{
 		this.figure = figure;
+		this.hostFigure = hostFigure;
 		this.locator = locator;
-		ancestorMoved(null);
+		ancestorMoved(hostFigure);
+		hostFigure.addAncestorListener(this);
 	}
 
 	/**
@@ -46,6 +49,27 @@ public class FigureMovedTracker implements AncestorListener
 	public Locator getLocator()
 	{
 		return locator;
+	}
+
+	/**
+	 * @return the figure
+	 */
+	public IFigure getFigure()
+	{
+		return figure;
+	}
+
+	/**
+	 * @return the hostFigure
+	 */
+	public IFigure getHostFigure()
+	{
+		return hostFigure;
+	}
+
+	public void unhook()
+	{
+		hostFigure.removeAncestorListener(this);
 	}
 
 	public void ancestorAdded(IFigure ancestor)

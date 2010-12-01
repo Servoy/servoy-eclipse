@@ -42,17 +42,39 @@ public class SameSizeFeedbackFigure extends Figure
 	protected static final Border TOOL_TIP_BORDER = new MarginBorder(0, 2, 0, 2);
 
 	private final String type;
-	private final IFigure referenceFigure;
 
 	/**
 	 * @param sameHeight
 	 * @param childBounds
 	 */
-	public SameSizeFeedbackFigure(String type, IFigure referenceFigure)
+	public SameSizeFeedbackFigure(String type)
 	{
 		this.type = type;
-		this.referenceFigure = referenceFigure;
 		init();
+	}
+
+	/**
+	 * @return the type
+	 */
+	public String getType()
+	{
+		return type;
+	}
+
+	/**
+	 * Get the appropriate locator.
+	 */
+	public static Locator getLocator(String type, IFigure referenceFigure)
+	{
+		if (SAME_WIDTH.equals(type))
+		{
+			return new AbsoluteLocator(referenceFigure, true, 2, true, 3);
+		}
+		if (SAME_HEIGHT.equals(type))
+		{
+			return new AbsoluteLocator(referenceFigure, false, -4, true, 1);
+		}
+		return null;
 	}
 
 	/**
@@ -60,22 +82,14 @@ public class SameSizeFeedbackFigure extends Figure
 	 */
 	protected void init()
 	{
-		Locator locator;
 		if (SAME_WIDTH.equals(type))
 		{
-			locator = new AbsoluteLocator(referenceFigure, true, 2, true, 3);
 			setPreferredSize(5, 10);
 		}
 		else if (SAME_HEIGHT.equals(type))
 		{
 			setPreferredSize(10, 5);
-			locator = new AbsoluteLocator(referenceFigure, false, -4, true, 1);
 		}
-		else
-		{
-			return;
-		}
-		locator.relocate(this);
 	}
 
 	@Override
