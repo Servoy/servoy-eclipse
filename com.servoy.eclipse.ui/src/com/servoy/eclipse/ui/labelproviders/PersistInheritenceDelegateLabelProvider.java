@@ -21,14 +21,10 @@ import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
 import com.servoy.eclipse.ui.Messages;
-import com.servoy.eclipse.ui.property.IPropertyController;
-import com.servoy.eclipse.ui.property.IPropertyConverter;
-import com.servoy.eclipse.ui.property.PersistPropertySource;
-import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.IPersist;
 
 /**
  * Delegate label provider that adds the form inheritance context to the label.
@@ -36,17 +32,17 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  * 
  */
-public class FormInheritenceDelegateLabelProvider extends DelegateLabelProvider implements IFontProvider
+public class PersistInheritenceDelegateLabelProvider extends DelegateLabelProvider implements IFontProvider
 {
 	//public static final Image INHERITED_IMAGE = Activator.loadImageDescriptorFromBundle("inherited.gif").createImage();
 
-	private final Form form;
+	private final IPersist persist;
 	private final Object propertyId;
 
-	public FormInheritenceDelegateLabelProvider(Form form, ILabelProvider labelProvider, Object propertyId)
+	public PersistInheritenceDelegateLabelProvider(IPersist persist, ILabelProvider labelProvider, Object propertyId)
 	{
 		super(labelProvider);
-		this.form = form;
+		this.persist = persist;
 		this.propertyId = propertyId;
 	}
 
@@ -74,29 +70,13 @@ public class FormInheritenceDelegateLabelProvider extends DelegateLabelProvider 
 	@Override
 	public String getText(Object value)
 	{
-		if (form != null && form.getExtendsForm() != null && !form.hasProperty((String)propertyId) && form.getExtendsForm().hasProperty((String)propertyId))
+		String superText = super.getText(value);
+		if (((AbstractBase)persist).isOverrideElement() && ((AbstractBase)persist).hasProperty((String)propertyId))
 		{
-			PersistPropertySource propertySource = new PersistPropertySource(form, null, true);
-			Object superValue = propertySource.getPersistPropertyValue(propertyId);
-			Object convertedValue = value;
-			Object defaultValue = propertySource.getDefaultPersistValue(propertyId);
-			IPropertyDescriptor propertyDescriptor = propertySource.getPropertyDescriptor(propertyId);
-			if (propertyDescriptor instanceof IPropertyController)
-			{
-				// convert to property value before making proper comparison
-				IPropertyConverter propertyConverter = ((IPropertyController)propertyDescriptor).getConverter();
-				if (propertyConverter != null)
-				{
-					convertedValue = propertyConverter.convertValue(propertyId, value);
-				}
-			}
-			if (Utils.equalObjects(convertedValue, superValue) && !Utils.equalObjects(convertedValue, defaultValue))
-			{
-				return super.getText(value) + " (" + Messages.LabelInherited + ')';
-			}
+			superText = (superText != null ? superText : "") + " (" + Messages.LabelOverride + ')';
 		}
 
-		return super.getText(value);
+		return superText;
 	}
 
 	/**

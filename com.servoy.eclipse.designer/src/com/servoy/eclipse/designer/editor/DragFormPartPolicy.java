@@ -32,6 +32,7 @@ import org.eclipse.gef.internal.ui.rulers.GuideEditPart;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 
 import com.servoy.eclipse.designer.editor.commands.MovePartCommand;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportAnchors;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.Part;
@@ -78,8 +79,8 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 		if (request instanceof ChangeBoundsRequest)
 		{
 			CompoundCommand compoundCommand = new CompoundCommand();
-			compoundCommand.add(new MovePartCommand((Part)getHost().getModel(), null, request.getType(), getHostFigure().getBounds().y +
-				((ChangeBoundsRequest)request).getMoveDelta().y));
+			compoundCommand.add(new MovePartCommand((Part)getHost().getModel(), (IPersist)getHost().getParent().getModel(), request.getType(),
+				getHostFigure().getBounds().y + ((ChangeBoundsRequest)request).getMoveDelta().y));
 			if (RequestConstants.REQ_CLONE.equals(request.getType()))
 			{
 				// control held while dragging

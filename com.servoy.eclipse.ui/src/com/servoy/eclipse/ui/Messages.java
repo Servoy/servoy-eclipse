@@ -56,6 +56,7 @@ public class Messages extends NLS
 	public static String LabelError;
 	public static String LabelUnrelated;
 	public static String LabelInherited;
+	public static String LabelOverride;
 	public static String LabelReadonly;
 	public static String LabelSelect;
 	public static String LabelMulipleSelections;

@@ -83,10 +83,10 @@ import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FontLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
-import com.servoy.eclipse.ui.labelproviders.FormInheritenceDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.MediaLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.PageFormatLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.PersistInheritenceDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.TextCutoffLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.ValidvalueDelegatelabelProvider;
@@ -443,7 +443,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		return propertyDescriptors.values().toArray(new IPropertyDescriptor[propertyDescriptors.size()]);
 	}
 
-	public IPropertyDescriptor getPropertyDescriptor(Object id)
+	public IPropertyDescriptor getPropertyDescriptor(final Object id)
 	{
 		init();
 
@@ -504,7 +504,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		}
 
 		PropertyCategory category;
-		String id;
+		final String id;
 		if (propertyDescriptor.valueObject == persist)
 		{
 			category = PropertyCategory.createPropertyCategory(propertyDescriptor.propertyDescriptor.getName());
@@ -518,7 +518,14 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		IPropertyDescriptor desc = getPropertyDescriptor(propertyDescriptor, id, getDisplayName(propertyDescriptor.propertyDescriptor.getName()), category,
 			flattenedForm, flattenedEditingSolution);
 		setCategory(desc, category);
-		return desc;
+		return desc != null ? new DelegatePropertyController(desc, id)
+		{
+			@Override
+			public ILabelProvider getLabelProvider()
+			{
+				return new PersistInheritenceDelegateLabelProvider(persist, super.getLabelProvider(), id);
+			}
+		} : desc;
 	}
 
 	protected void setCategory(IPropertyDescriptor desc, PropertyCategory category)
@@ -1304,12 +1311,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			new StyleClassValueEditor((Form)persist.getAncestor(IRepository.FORMS), persist), model))
 		{
 			@Override
-			public ILabelProvider getLabelProvider()
-			{
-				return PersistPropertySource.getFormInheritanceLabelProvider(persist, super.getLabelProvider(), getId());
-			}
-
-			@Override
 			protected String getWarningMessage()
 			{
 				if (getModel().getRealValues().length == 1)
@@ -1320,23 +1321,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 				return null;
 			}
 		};
-	}
-
-	/**
-	 * Wrap the label provider with a {@link FormInheritenceDelegateLabelProvider} if needed.
-	 * 
-	 * @param form
-	 * @param labelProvider
-	 * @param propertyId
-	 * @return
-	 */
-	public static ILabelProvider getFormInheritanceLabelProvider(IPersist persist, ILabelProvider labelProvider, Object propertyId)
-	{
-		if (persist instanceof Form && ((Form)persist).getExtendsFormID() > 0)
-		{
-			return new FormInheritenceDelegateLabelProvider((Form)persist, labelProvider, propertyId);
-		}
-		return labelProvider;
 	}
 
 	/**
@@ -2142,8 +2126,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			// cannot change table when we have a super-form
 			boolean propertyReadOnly = (persist instanceof Form && ((Form)persist).getExtendsFormID() > 0);
 			return new DatasourceController(id, displayName, "Select table", readOnly || propertyReadOnly, new TableContentProvider.TableListOptions(
-				TableListOptions.TableListType.ALL, true), getFormInheritanceLabelProvider(persist, DatasourceLabelProvider.INSTANCE_NO_IMAGE_FULLY_QUALIFIED,
-				id));
+				TableListOptions.TableListType.ALL, true), DatasourceLabelProvider.INSTANCE_NO_IMAGE_FULLY_QUALIFIED);
 		}
 
 		if (name.equals("i18nDataSource"))
@@ -2182,8 +2165,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 						}
 					};
 				}
-			}, getFormInheritanceLabelProvider(persist, ScrollbarSettingLabelProvider.INSTANCE, id), new DummyCellEditorFactory(
-				ScrollbarSettingLabelProvider.INSTANCE));
+			}, ScrollbarSettingLabelProvider.INSTANCE, new DummyCellEditorFactory(ScrollbarSettingLabelProvider.INSTANCE));
 		}
 
 		if ("horizontalAlignment".equals(name))
@@ -2231,8 +2213,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 				}
 			};
 			return new PropertyController<String, Object>(id, displayName, new ChainedPropertyConverter<String, Border, Object>(borderStringConverter,
-				borderPropertyController.getConverter()), getFormInheritanceLabelProvider(persist, borderPropertyController.getLabelProvider(), id),
-				borderPropertyController);
+				borderPropertyController.getConverter()), borderPropertyController.getLabelProvider(), borderPropertyController);
 		}
 
 		if (name.equals("mediaOptions"))
@@ -2702,8 +2683,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		}
 		if (name.endsWith("navigatorID"))
 		{
-			final ILabelProvider formLabelProvider = getFormInheritanceLabelProvider(persist, new SolutionContextDelegateLabelProvider(new FormLabelProvider(
-				flattenedEditingSolution, false), context), id);
+			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, false), context);
 			PropertyDescriptor pd = new PropertyDescriptor(id, displayName)
 			{
 				@Override
@@ -2809,14 +2789,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		{
 			ComboboxPropertyModel<String> model = new ComboboxPropertyModel<String>(getStyleNames(), NullDefaultLabelProvider.LABEL_DEFAULT);
 			return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved, new ComboboxDelegateValueEditor<String>(
-				StyleValueEditor.INSTANCE, model))
-			{
-				@Override
-				public ILabelProvider getLabelProvider()
-				{
-					return getFormInheritanceLabelProvider(persist, super.getLabelProvider(), id);
-				}
-			};
+				StyleValueEditor.INSTANCE, model));
 		}
 
 		if (name.equals("anchors"))
@@ -2943,15 +2916,15 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 				return null;
 			}
 
-			final ILabelProvider labelProvider = getFormInheritanceLabelProvider(persist, NullDefaultLabelProvider.LABEL_DEFAULT, id);
-
-			return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, labelProvider, new ICellEditorFactory()
-			{
-				public CellEditor createPropertyEditor(Composite parent)
+			return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, NullDefaultLabelProvider.LABEL_DEFAULT,
+				new ICellEditorFactory()
 				{
-					return new SortCellEditor(parent, flattenedEditingSolution, tableDisplay, "Select sorting fields", labelProvider);
-				}
-			});
+					public CellEditor createPropertyEditor(Composite parent)
+					{
+						return new SortCellEditor(parent, flattenedEditingSolution, tableDisplay, "Select sorting fields",
+							NullDefaultLabelProvider.LABEL_DEFAULT);
+					}
+				});
 		}
 
 		if (name.equals("text") || name.equals("toolTipText") || name.equals("titleText"))
@@ -3043,7 +3016,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 
 		if (name.equals("defaultPageFormat"))
 		{
-			final ILabelProvider labelProvider = getFormInheritanceLabelProvider(persist, PageFormatLabelProvider.INSTANCE, id);
 			return new PropertyController<String, PageFormat>(id, displayName, new IPropertyConverter<String, PageFormat>()
 			{
 				public PageFormat convertProperty(Object id, String value)
@@ -3056,11 +3028,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 					return PersistHelper.createPageFormatString(value);
 				}
 
-			}, labelProvider, new ICellEditorFactory()
+			}, PageFormatLabelProvider.INSTANCE, new ICellEditorFactory()
 			{
 				public CellEditor createPropertyEditor(Composite parent)
 				{
-					return new PageFormatEditor(parent, flattenedForm, "Page Setup", labelProvider);
+					return new PageFormatEditor(parent, flattenedForm, "Page Setup", PageFormatLabelProvider.INSTANCE);
 				}
 			});
 		}

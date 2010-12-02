@@ -28,7 +28,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import com.servoy.eclipse.designer.actions.SetPropertyRequest;
 import com.servoy.eclipse.designer.editor.GroupGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
-import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
@@ -86,10 +85,4 @@ public class UngroupAction extends DesignerSelectionAction
 		return setPropertyRequest;
 	}
 
-	@Override
-	protected boolean calculateEnabled()
-	{
-		if (DesignerUtil.containsInheritedElement(getSelectedObjects())) return false;
-		return super.calculateEnabled();
-	}
 }

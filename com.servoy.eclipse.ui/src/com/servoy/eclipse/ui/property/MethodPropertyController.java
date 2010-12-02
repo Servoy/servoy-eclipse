@@ -77,16 +77,15 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 		this.includeFormMethods = includeFormMethods;
 		this.includeGlobalMethods = includeGlobalMethods;
 		this.persist = persist;
-		setLabelProvider(PersistPropertySource.getFormInheritanceLabelProvider(persist, new SolutionContextDelegateLabelProvider(
-			new FormContextDelegateLabelProvider(new MethodLabelProvider(persist, context, true, !includeDefault), context), context), id));
+		setLabelProvider(new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(new MethodLabelProvider(persist, context, true,
+			!includeDefault), context), context));
 		setSupportsReadonly(true);
 	}
 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		ILabelProvider methodLabelProvider = PersistPropertySource.getFormInheritanceLabelProvider(persist, new FormContextDelegateLabelProvider(
-			new MethodLabelProvider(persist, context, false, !includeDefault), context), getId());
+		ILabelProvider methodLabelProvider = new FormContextDelegateLabelProvider(new MethodLabelProvider(persist, context, false, !includeDefault), context);
 		return new MethodCellEditor(parent, methodLabelProvider, new MethodValueEditor(persist, context), persist, getId(), false, // readonly is handled in openDialogBox below
 			includeNone, includeDefault, includeFormMethods, includeGlobalMethods)
 		{
