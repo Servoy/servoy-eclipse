@@ -31,6 +31,7 @@ import org.eclipse.gef.editparts.LayerManager;
 import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.gef.requests.CreationFactory;
 import org.eclipse.gef.tools.CreationTool;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.designer.editor.AlignmentFeedbackHelper;
@@ -81,6 +82,19 @@ public class ElementCreationTool extends CreationTool
 		if (helper != null)
 		{
 			helper.showElementAlignmentFeedback(getTargetRequest());
+		}
+	}
+
+	@Override
+	protected void handleFinished()
+	{
+		if (getCurrentInput().isModKeyDown(SWT.MOD1))
+		{
+			reactivate();
+		}
+		else
+		{
+			super.handleFinished();
 		}
 	}
 
