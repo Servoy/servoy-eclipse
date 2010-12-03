@@ -704,15 +704,7 @@ public class SolutionSerializer
 		}
 		else if (persist instanceof TableNode)
 		{
-			name = ((TableNode)persist).getTableName();
-			if (useOldName && ((TableNode)persist).getRuntimeProperty(AbstractBase.NameChangeProperty) != null)
-			{
-				String[] names = DataSourceUtils.getDBServernameTablename(((TableNode)persist).getRuntimeProperty(AbstractBase.NameChangeProperty));
-				if (names != null && names.length == 2)
-				{
-					name = names[1];
-				}
-			}
+			name = getServerNameTableName((TableNode)persist, useOldName)[1];
 		}
 
 		if (!Utils.stringIsEmpty(name))
@@ -795,16 +787,7 @@ public class SolutionSerializer
 
 		if (persist instanceof TableNode)
 		{
-			String serverName = ((TableNode)persist).getServerName();
-			if (useOldName && ((TableNode)persist).getRuntimeProperty(AbstractBase.NameChangeProperty) != null)
-			{
-				String[] names = DataSourceUtils.getDBServernameTablename(((TableNode)persist).getRuntimeProperty(AbstractBase.NameChangeProperty));
-				if (names != null && names.length == 2)
-				{
-					serverName = names[0];
-				}
-			}
-			name = DATASOURCES_DIR_NAME + '/' + serverName;
+			name = DATASOURCES_DIR_NAME + '/' + getServerNameTableName((TableNode)persist, useOldName)[0];
 		}
 		if (persist.getParent() instanceof TableNode)
 		{
@@ -855,16 +838,7 @@ public class SolutionSerializer
 		}
 		if (persist instanceof TableNode)
 		{
-			String tableName = ((TableNode)persist).getTableName();
-			if (useOldName && ((TableNode)persist).getRuntimeProperty(AbstractBase.NameChangeProperty) != null)
-			{
-				String[] names = DataSourceUtils.getDBServernameTablename(((TableNode)persist).getRuntimeProperty(AbstractBase.NameChangeProperty));
-				if (names != null && names.length == 2)
-				{
-					tableName = names[1];
-				}
-			}
-			return tableName + CALCULATIONS_POSTFIX_WITH_EXT;
+			return getServerNameTableName((TableNode)persist, useOldName)[1] + CALCULATIONS_POSTFIX_WITH_EXT;
 		}
 
 		return null;
@@ -977,5 +951,22 @@ public class SolutionSerializer
 			}
 		}
 		return retval;
+	}
+
+	private static String[] getServerNameTableName(TableNode tableNode, boolean useOldName)
+	{
+		if (tableNode == null) return null;
+		String[] serverNameTableName = new String[2];
+		serverNameTableName[0] = tableNode.getServerName();
+		serverNameTableName[1] = tableNode.getTableName();
+		if (useOldName && tableNode.getRuntimeProperty(AbstractBase.NameChangeProperty) != null)
+		{
+			String[] names = DataSourceUtils.getDBServernameTablename(tableNode.getRuntimeProperty(AbstractBase.NameChangeProperty));
+			if (names != null && names.length == 2)
+			{
+				serverNameTableName = names;
+			}
+		}
+		return serverNameTableName;
 	}
 }
