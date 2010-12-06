@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.designer.editor;
 
+import java.util.List;
+
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.commands.Command;
@@ -24,12 +26,14 @@ import org.eclipse.gef.editpolicies.ComponentEditPolicy;
 import org.eclipse.gef.requests.GroupRequest;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.views.properties.IPropertySource;
+import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
+import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.actions.SetPropertyRequest;
 import com.servoy.eclipse.designer.editor.commands.DataFieldRequest;
 import com.servoy.eclipse.designer.editor.commands.DataRequest;
@@ -58,7 +62,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
-import com.servoy.j2db.persistence.Template;
 
 /**
  * This edit policy enables the removal and copy of a Form elements
@@ -110,7 +113,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 					return createDropColumnCommand((DataRequest)request);
 				}
 			}
-			else if (((DataRequest)request).getData() instanceof Template)
+			else if (((DataRequest)request).getData() instanceof TemplateElementHolder)
 			{
 				return createDropTemplateCommand((DataRequest)request);
 			}
@@ -221,9 +224,10 @@ class PersistEditPolicy extends ComponentEditPolicy
 					return true;
 				}
 			}
-			if (((DataRequest)request).getData() instanceof Template)
+			if (((DataRequest)request).getData() instanceof TemplateElementHolder)
 			{
-				return ElementFactory.getTemplateElementCount((Template)((DataRequest)request).getData()) == 1;
+				List<JSONObject> templateElements = ElementFactory.getTemplateElements((TemplateElementHolder)((DataRequest)request).getData());
+				return templateElements != null && templateElements.size() == 1;
 			}
 		}
 		if ((VisualFormEditor.REQ_PLACE_TAB.equals(request.getType()) || VisualFormEditor.REQ_PLACE_TAB.equals(request.getType())) && model instanceof TabPanel)
@@ -338,7 +342,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 		Object child = getHost().getModel();
 		if (child instanceof IPersist)
 		{
-			return new ApplyTemplatePropertiesCommand((Template)dropRequest.getData(), (IPersist)child);
+			return new ApplyTemplatePropertiesCommand((TemplateElementHolder)dropRequest.getData(), (IPersist)child);
 		}
 
 		return null;

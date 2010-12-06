@@ -39,8 +39,8 @@ import org.eclipse.swt.widgets.Display;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
 import com.servoy.eclipse.designer.editor.commands.PersistPlaceCommandWrapper;
-import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
+import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -121,7 +121,7 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 			for (int i = 0; i < models.size(); i++)
 			{
 				objects[i] = new PersistDragData(((Solution)models.get(i).getAncestor(IRepository.SOLUTIONS)).getName(), models.get(i).getUUID(),
-					models.get(i).getTypeID(), 0, 0);
+					models.get(i).getTypeID(), 0, 0, null);
 			}
 			Point location = new Point(minx + ((ChangeBoundsRequest)request).getMoveDelta().x, miny + ((ChangeBoundsRequest)request).getMoveDelta().y);
 			Command command = new FormPlaceElementCommand((ISupportChilds)persist, objects, request.getType(), request.getExtendedData(),

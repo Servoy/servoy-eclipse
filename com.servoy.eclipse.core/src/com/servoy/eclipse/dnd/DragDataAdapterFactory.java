@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IAdapterFactory;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.j2db.persistence.ColumnWrapper;
@@ -58,26 +59,37 @@ public class DragDataAdapterFactory implements IAdapterFactory
 					Form form = (Form)sv.getParent();
 					return new DataProviderDragData(form.getTableName(), form.getServerName(), sv.getDataProviderID(), form.getTableName(), null);
 				}
-				else
-				{
-					return new DataProviderDragData(null, null, sv.getDataProviderID(), null, null);
-				}
-
+				return new DataProviderDragData(null, null, sv.getDataProviderID(), null, null);
 			}
+
 			if (obj instanceof IPersist)
 			{
 				IPersist persist = (IPersist)obj;
 				int width = 80, height = 20;
 				if (persist instanceof Template)
 				{
-					Dimension size = ElementFactory.getTemplateBoundsize((Template)persist);
+					Dimension size = ElementFactory.getTemplateBoundsize(new TemplateElementHolder((Template)persist));
 					if (size != null)
 					{
 						width = size.width;
 						height = size.height;
 					}
 				}
-				return new PersistDragData(persist.getRootObject().getName(), persist.getUUID(), persist.getTypeID(), width, height);
+				return new PersistDragData(persist.getRootObject().getName(), persist.getUUID(), persist.getTypeID(), width, height, null);
+			}
+
+			if (obj instanceof TemplateElementHolder)
+			{
+				TemplateElementHolder templateHolder = (TemplateElementHolder)obj;
+				int width = 80, height = 20;
+				Dimension size = ElementFactory.getTemplateBoundsize(templateHolder);
+				if (size != null)
+				{
+					width = size.width;
+					height = size.height;
+				}
+				return new PersistDragData(templateHolder.template.getRootObject().getName(), templateHolder.template.getUUID(),
+					templateHolder.template.getTypeID(), width, height, templateHolder.element);
 			}
 
 			if (obj instanceof IDataProvider)

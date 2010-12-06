@@ -123,6 +123,7 @@ import com.servoy.eclipse.designer.editor.commands.SetTabSequenceAction;
 import com.servoy.eclipse.designer.editor.commands.ToggleAnchoringAction;
 import com.servoy.eclipse.designer.editor.commands.UngroupAction;
 import com.servoy.eclipse.designer.editor.palette.PaletteItemTransferDropTargetListener;
+import com.servoy.eclipse.designer.editor.palette.VisualFormEditorPaletteCustomizer;
 import com.servoy.eclipse.designer.editor.palette.VisualFormEditorPaletteFactory;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.property.PersistContext;
@@ -1016,6 +1017,8 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 			protected void configurePaletteViewer(final PaletteViewer viewer)
 			{
 				super.configurePaletteViewer(viewer);
+
+				viewer.setCustomizer(new VisualFormEditorPaletteCustomizer());
 
 				viewer.getEditDomain().setDefaultTool(new PaletteSelectionTool()
 				{

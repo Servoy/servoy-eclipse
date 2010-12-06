@@ -25,11 +25,11 @@ import org.eclipse.gef.Request;
 import org.eclipse.gef.dnd.TemplateTransfer;
 import org.eclipse.gef.requests.CreationFactory;
 
+import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.dnd.ElementTransferDropTarget;
 import com.servoy.eclipse.designer.editor.CreateElementRequest;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.DataRequest;
-import com.servoy.j2db.persistence.Template;
 
 /**
  * Drop target for elements from the palette.
@@ -51,16 +51,16 @@ public class PaletteItemTransferDropTargetListener extends ElementTransferDropTa
 	@Override
 	protected Request createTargetRequest()
 	{
-		Template template = null;
+		TemplateElementHolder template = null;
 		Dimension size = null;
 		CreationFactory factory = getFactory(TemplateTransfer.getInstance().getTemplate());
 		if (factory instanceof RequestTypeCreationFactory)
 		{
 			Object data = ((RequestTypeCreationFactory)factory).getData();
 			size = ((RequestTypeCreationFactory)factory).getNewObjectSize();
-			if (data instanceof Template)
+			if (data instanceof TemplateElementHolder)
 			{
-				template = (Template)data;
+				template = (TemplateElementHolder)data;
 			}
 		}
 

@@ -25,17 +25,16 @@ import java.util.List;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.gef.palette.PaletteContainer;
 import org.eclipse.gef.palette.PaletteDrawer;
+import org.eclipse.gef.palette.PaletteEntry;
 import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.gef.palette.ToolEntry;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.ui.Activator;
@@ -46,7 +45,6 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
-import com.servoy.j2db.util.ServoyJSONObject;
 
 
 /**
@@ -95,10 +93,11 @@ public class VisualFormEditorPaletteFactory
 		while (templatesIterator.hasNext())
 		{
 			Template template = (Template)templatesIterator.next();
+			TemplateElementHolder data = new TemplateElementHolder(template);
 			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TEMPLATE,
-				DesignerUtil.convertDimension(ElementFactory.getTemplateBoundsize(template)));
-			factory.setData(template);
-			ImageDescriptor icon = getTemplateIcon(template);
+				DesignerUtil.convertDimension(ElementFactory.getTemplateBoundsize(data)));
+			factory.setData(data);
+			ImageDescriptor icon = getTemplateIcon(data);
 			if (icon == null)
 			{
 				// default icon
@@ -110,87 +109,107 @@ public class VisualFormEditorPaletteFactory
 		return templatesEntries;
 	}
 
-	static ImageDescriptor getTemplateIcon(Template template)
+	/**
+	 * @param json
+	 * @return
+	 */
+	public static PaletteEntry createTemplateToolEntry(Template template, JSONObject json)
 	{
-		try
+		String name = json.optString(SolutionSerializer.PROP_NAME);
+		if (name == null)
 		{
-			JSONObject json = new ServoyJSONObject(template.getContent(), false);
-
-			// elements
-			JSONArray elements = (JSONArray)json.opt(Template.PROP_ELEMENTS);
-			if (elements == null || elements.length() == 0)
-			{
-				return null;
-			}
-
-			if (elements.length() > 1)
-			{
-				return Activator.loadImageDescriptorFromBundle("group.gif");
-			}
-
-			JSONObject object = elements.getJSONObject(0);
-			switch (object.optInt(SolutionSerializer.PROP_TYPEID))
-			{
-				case IRepository.FIELDS :
-
-					switch (object.optInt("displayType"))
-					{
-						case Field.CHECKS :
-							return Activator.loadImageDescriptorFromBundle("chk_on_icon.gif");
-
-						case Field.RADIOS :
-							return Activator.loadImageDescriptorFromBundle("radio_on.gif");
-
-						case Field.COMBOBOX :
-							return Activator.loadImageDescriptorFromBundle("dropdown_icon.gif");
-
-						case Field.CALENDAR :
-							return Activator.loadImageDescriptorFromBundle("calendar_icon.gif");
-
-					}
-
-					return Activator.loadImageDescriptorFromBundle("field.gif");
-
-				case IRepository.GRAPHICALCOMPONENTS :
-					if (object.optInt("onActionMethodID") == 0 || !object.optBoolean("showClick", true))
-					{
-						if (object.has("imageMediaID"))
-						{
-							return Activator.loadImageDescriptorFromBundle("image.gif");
-						}
-						return Activator.loadImageDescriptorFromBundle("text.gif");
-					}
-
-					return Activator.loadImageDescriptorFromBundle("button.gif");
-
-				case IRepository.RECTSHAPES :
-				case IRepository.SHAPES :
-					return Activator.loadImageDescriptorFromBundle("rectangle.gif");
-
-				case IRepository.PORTALS :
-					return Activator.loadImageDescriptorFromBundle("portal.gif");
-
-
-				case IRepository.TABPANELS :
-					int orient = object.optInt("tabOrientation");
-					if (orient == TabPanel.SPLIT_HORIZONTAL || orient == TabPanel.SPLIT_VERTICAL)
-					{
-						return Activator.loadImageDescriptorFromBundle("split.gif");
-					}
-					return Activator.loadImageDescriptorFromBundle("tabs.gif");
-
-				case IRepository.TABS :
-					return Activator.loadImageDescriptorFromBundle("tabs.gif");
-
-				case IRepository.BEANS :
-					return Activator.loadImageDescriptorFromBundle("bean.gif");
-			}
-
+			return null;
 		}
-		catch (JSONException e)
+		TemplateElementHolder data = new TemplateElementHolder(template, name);
+		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TEMPLATE,
+			DesignerUtil.convertDimension(ElementFactory.getTemplateBoundsize(data)));
+		factory.setData(data);
+		ImageDescriptor icon = getTemplateIcon(json);
+		if (icon == null)
 		{
-			ServoyLog.logError("Error reading template " + template.getName(), e);
+			// default icon
+			icon = Activator.loadImageDescriptorFromBundle("template.gif");
 		}
+		return new ElementCreationToolEntry(name, "Create/apply template item" + name, factory, icon, icon);
+	}
+
+	static ImageDescriptor getTemplateIcon(TemplateElementHolder template)
+	{
+		// elements
+		List<JSONObject> elements = ElementFactory.getTemplateElements(template);
+
+		if (elements == null || elements.size() == 0)
+		{
+			return null;
+		}
+
+		if (elements.size() > 1)
+		{
+			return Activator.loadImageDescriptorFromBundle("group.gif");
+		}
+
+		return getTemplateIcon(elements.get(0));
+	}
+
+	static ImageDescriptor getTemplateIcon(JSONObject object)
+	{
+		switch (object.optInt(SolutionSerializer.PROP_TYPEID))
+		{
+			case IRepository.FIELDS :
+
+				switch (object.optInt("displayType"))
+				{
+					case Field.CHECKS :
+						return Activator.loadImageDescriptorFromBundle("chk_on_icon.gif");
+
+					case Field.RADIOS :
+						return Activator.loadImageDescriptorFromBundle("radio_on.gif");
+
+					case Field.COMBOBOX :
+						return Activator.loadImageDescriptorFromBundle("dropdown_icon.gif");
+
+					case Field.CALENDAR :
+						return Activator.loadImageDescriptorFromBundle("calendar_icon.gif");
+
+				}
+
+				return Activator.loadImageDescriptorFromBundle("field.gif");
+
+			case IRepository.GRAPHICALCOMPONENTS :
+				if (object.optInt("onActionMethodID") == 0 || !object.optBoolean("showClick", true))
+				{
+					if (object.has("imageMediaID"))
+					{
+						return Activator.loadImageDescriptorFromBundle("image.gif");
+					}
+					return Activator.loadImageDescriptorFromBundle("text.gif");
+				}
+
+				return Activator.loadImageDescriptorFromBundle("button.gif");
+
+			case IRepository.RECTSHAPES :
+			case IRepository.SHAPES :
+				return Activator.loadImageDescriptorFromBundle("rectangle.gif");
+
+			case IRepository.PORTALS :
+				return Activator.loadImageDescriptorFromBundle("portal.gif");
+
+
+			case IRepository.TABPANELS :
+				int orient = object.optInt("tabOrientation");
+				if (orient == TabPanel.SPLIT_HORIZONTAL || orient == TabPanel.SPLIT_VERTICAL)
+				{
+					return Activator.loadImageDescriptorFromBundle("split.gif");
+				}
+				return Activator.loadImageDescriptorFromBundle("tabs.gif");
+
+			case IRepository.TABS :
+				return Activator.loadImageDescriptorFromBundle("tabs.gif");
+
+			case IRepository.BEANS :
+				return Activator.loadImageDescriptorFromBundle("bean.gif");
+		}
+
 
 		return null;
 	}

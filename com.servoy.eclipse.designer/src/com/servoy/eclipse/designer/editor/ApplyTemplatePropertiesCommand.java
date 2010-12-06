@@ -17,10 +17,10 @@
 
 package com.servoy.eclipse.designer.editor;
 
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.gef.commands.Command;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,6 +28,7 @@ import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.repository.SolutionDeserializer;
+import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDeveloperRepository;
@@ -35,7 +36,6 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Template;
-import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
  * Command to copy element properties from a template to an element.
@@ -45,34 +45,22 @@ import com.servoy.j2db.util.ServoyJSONObject;
  */
 public class ApplyTemplatePropertiesCommand extends Command
 {
-	private final Template template;
+	private final TemplateElementHolder templateHolder;
 	private final IPersist persist;
 	private Map<String, Object> undoPropertiesMap;
 
-	public ApplyTemplatePropertiesCommand(Template template, IPersist persist)
+	public ApplyTemplatePropertiesCommand(TemplateElementHolder template, IPersist persist)
 	{
-		this.template = template;
+		this.templateHolder = template;
 		this.persist = persist;
 	}
 
 	@Override
 	public boolean canExecute()
 	{
-		if (template != null)
-		{
-			try
-			{
-				JSONObject json = new ServoyJSONObject(template.getContent(), false);
-				// elements
-				JSONArray elements = (JSONArray)json.opt(Template.PROP_ELEMENTS);
-				return elements != null && elements.length() > 0;
-			}
-			catch (JSONException e)
-			{
-				ServoyLog.logError("Error processing template " + template.getName(), e);
-			}
-		}
-		return false;
+		// elements
+		List<JSONObject> elements = ElementFactory.getTemplateElements(templateHolder);
+		return elements != null && elements.size() > 0;
 	}
 
 	@Override
@@ -80,16 +68,14 @@ public class ApplyTemplatePropertiesCommand extends Command
 	{
 		try
 		{
-			JSONObject json = new ServoyJSONObject(template.getContent(), false);
-
 			// elements
-			JSONArray elements = (JSONArray)json.opt(Template.PROP_ELEMENTS);
-			if (elements == null || elements.length() == 0)
+			List<JSONObject> elements = ElementFactory.getTemplateElements(templateHolder);
+			if (elements == null || elements.size() == 0)
 			{
 				return;
 			}
 
-			JSONObject object = elements.getJSONObject(0);
+			JSONObject object = elements.get(0);
 
 			IDeveloperRepository repository = (IDeveloperRepository)persist.getRootObject().getRepository();
 			Map<String, Object> propertyValues = SolutionDeserializer.getPropertyValuesForJsonObject(repository, persist,
@@ -104,11 +90,11 @@ public class ApplyTemplatePropertiesCommand extends Command
 		}
 		catch (JSONException e)
 		{
-			ServoyLog.logError("Error processing template " + template.getName(), e);
+			ServoyLog.logError("Error processing template " + templateHolder.template.getName(), e);
 		}
 		catch (RepositoryException e)
 		{
-			ServoyLog.logError("Error processing template " + template.getName(), e);
+			ServoyLog.logError("Error processing template " + templateHolder.template.getName(), e);
 		}
 
 		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persist, false);

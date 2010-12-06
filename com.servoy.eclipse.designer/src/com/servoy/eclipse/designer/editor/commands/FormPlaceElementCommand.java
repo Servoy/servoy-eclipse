@@ -41,6 +41,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
+import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.property.SetValueCommand;
@@ -226,7 +227,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 		if (parent instanceof Form && VisualFormEditor.REQ_PLACE_TEMPLATE.equals(requestType))
 		{
 			setLabel("place template");
-			return ElementFactory.applyTemplate((Form)parent, (Template)object, location, false);
+			return ElementFactory.applyTemplate((Form)parent, (TemplateElementHolder)object, location, false);
 		}
 
 		if (object instanceof Object[] && ((Object[])object).length > 0)
@@ -307,7 +308,8 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 				if (template.getUUID().equals(dragData.uuid))
 				{
 					setLabel("place template");
-					return ElementFactory.applyTemplate((ISupportFormElements)parent, (Template)template, location, false);
+					return ElementFactory.applyTemplate((ISupportFormElements)parent, new TemplateElementHolder((Template)template, dragData.element), location,
+						false);
 				}
 			}
 			ServoyLog.logWarning("place template: template " + dragData.uuid + " not found", null);

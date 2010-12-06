@@ -45,6 +45,7 @@ import com.servoy.eclipse.core.repository.EclipseRepository;
 import com.servoy.eclipse.core.repository.SolutionDeserializer;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.core.util.CoreUtils;
+import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -699,13 +700,14 @@ public class ElementFactory
 		return object;
 	}
 
-	public static Object[] applyTemplate(ISupportFormElements parent, Template template, Point location, boolean setFormProperties) throws RepositoryException
+	public static Object[] applyTemplate(ISupportFormElements parent, TemplateElementHolder templateHolder, Point location, final boolean setFormProperties)
+		throws RepositoryException
 	{
 		IDeveloperRepository repository = (IDeveloperRepository)parent.getRootObject().getRepository();
-		Map<IPersist, String> persists = new HashMap<IPersist, String>(); // created persist -> name
+		final Map<IPersist, String> persists = new HashMap<IPersist, String>(); // created persist -> name
 		try
 		{
-			JSONObject json = new ServoyJSONObject(template.getContent(), false);
+			JSONObject json = new ServoyJSONObject(templateHolder.template.getContent(), false);
 
 			// location
 			final java.awt.Point awtLocation;
@@ -741,6 +743,11 @@ public class ElementFactory
 				if (object.has(SolutionSerializer.PROP_NAME))
 				{
 					name = (String)object.remove(SolutionSerializer.PROP_NAME);
+				}
+				if (templateHolder.element != null && !templateHolder.element.equals(name))
+				{
+					// only use the template item
+					continue;
 				}
 				Map<IPersist, JSONObject> persist_json_map = new HashMap<IPersist, JSONObject>();
 				IPersist persist = SolutionDeserializer.deserializePersist(repository, parent, persist_json_map, object, null, null, null, false);
@@ -795,8 +802,18 @@ public class ElementFactory
 						{
 							if (o instanceof ISupportBounds)
 							{
-								java.awt.Point ploc = ((ISupportBounds)o).getLocation();
-								((ISupportBounds)o).setLocation(new java.awt.Point(awtLocation.x + ploc.x, awtLocation.y + ploc.y));
+								int x, y;
+								if (setFormProperties || persists.size() > 1)
+								{
+									java.awt.Point ploc = ((ISupportBounds)o).getLocation();
+									x = ploc.x;
+									y = ploc.y;
+								}
+								else
+								{ // if a single element is placed, do not use its relative location
+									x = y = 0;
+								}
+								((ISupportBounds)o).setLocation(new java.awt.Point(awtLocation.x + x, awtLocation.y + y));
 							}
 							return IPersistVisitor.CONTINUE_TRAVERSAL;
 						}
@@ -828,7 +845,8 @@ public class ElementFactory
 					}
 
 					// determine a group name (do this after elements are placed in case they are named the same as the template)
-					String groupName = n == 0 ? template.getName() : (template.getName() + n);
+					String templateName = templateHolder.element == null ? templateHolder.template.getName() : templateHolder.element;
+					String groupName = n == 0 ? templateName : (templateName + n);
 					for (int i = n; i <= 100; i++)
 					{
 						try
@@ -841,7 +859,7 @@ public class ElementFactory
 						catch (RepositoryException e)
 						{
 						}
-						groupName = template.getName() + (i + 1);
+						groupName = templateName + (i + 1);
 					}
 
 					// set the group id
@@ -866,9 +884,9 @@ public class ElementFactory
 		return persists.keySet().toArray();
 	}
 
-	public static Dimension getTemplateBoundsize(Template template)
+	public static Dimension getTemplateBoundsize(TemplateElementHolder templateHolder)
 	{
-		if (template == null)
+		if (templateHolder == null || templateHolder.template == null)
 		{
 			return null;
 		}
@@ -876,7 +894,7 @@ public class ElementFactory
 		Rectangle box = null;
 		try
 		{
-			JSONObject json = new ServoyJSONObject(template.getContent(), false);
+			JSONObject json = new ServoyJSONObject(templateHolder.template.getContent(), false);
 
 			// elements
 			JSONArray elements = (JSONArray)json.opt(Template.PROP_ELEMENTS);
@@ -887,6 +905,12 @@ public class ElementFactory
 				if (object.has(SolutionSerializer.PROP_TYPEID) && object.getInt(SolutionSerializer.PROP_TYPEID) == IRepository.PARTS)
 				{
 					// ignore parts
+					continue;
+				}
+
+				if (templateHolder.element != null &&
+					(!object.has(SolutionSerializer.PROP_NAME) || !templateHolder.element.equals(object.get(SolutionSerializer.PROP_NAME))))
+				{
 					continue;
 				}
 
@@ -923,34 +947,39 @@ public class ElementFactory
 		}
 		catch (JSONException e)
 		{
-			ServoyLog.logError("Error processing template " + template.getName(), e);
+			ServoyLog.logError("Error processing template " + templateHolder.template.getName(), e);
 		}
 		return box == null ? null : box.getSize();
 	}
 
-	public static int getTemplateElementCount(Template template)
+	public static List<JSONObject> getTemplateElements(TemplateElementHolder templateHolder)
 	{
-		if (template == null)
+		if (templateHolder != null)
 		{
-			return 0;
-		}
-
-		try
-		{
-			JSONObject json = new ServoyJSONObject(template.getContent(), false);
-
-			// elements
-			JSONArray elements = (JSONArray)json.opt(Template.PROP_ELEMENTS);
-			if (elements != null)
+			try
 			{
-				return elements.length();
+				JSONObject json = new ServoyJSONObject(templateHolder.template.getContent(), false);
+
+				// elements
+				JSONArray elements = (JSONArray)json.opt(Template.PROP_ELEMENTS);
+				List<JSONObject> objects = new ArrayList<JSONObject>(elements.length());
+				for (int i = 0; i < elements.length(); i++)
+				{
+					JSONObject jsonObject = elements.getJSONObject(i);
+					if (templateHolder.element == null ||
+						(jsonObject.has(SolutionSerializer.PROP_NAME) && templateHolder.element.equals(jsonObject.get(SolutionSerializer.PROP_NAME))))
+					{
+						objects.add(jsonObject);
+					}
+				}
+				return objects;
+			}
+			catch (JSONException e)
+			{
+				ServoyLog.logError("Error processing template " + templateHolder.template.getName(), e);
 			}
 		}
-		catch (JSONException e)
-		{
-			ServoyLog.logError("Error processing template " + template.getName(), e);
-		}
-		return 0;
+		return null;
 	}
 
 	/**
