@@ -25,6 +25,7 @@ import org.eclipse.swt.graphics.Image;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Delegate label provider that adds the form inheritance context to the label.
@@ -73,7 +74,12 @@ public class PersistInheritenceDelegateLabelProvider extends DelegateLabelProvid
 		String superText = super.getText(value);
 		if (((AbstractBase)persist).isOverrideElement() && ((AbstractBase)persist).hasProperty((String)propertyId))
 		{
-			superText = (superText != null ? superText : "") + " (" + Messages.LabelOverride + ')';
+			IPersist superPersist = ((AbstractBase)persist).getSuperPersist();
+			if (superPersist != null &&
+				!Utils.equalObjects(((AbstractBase)superPersist).getProperty((String)propertyId), ((AbstractBase)persist).getProperty((String)propertyId)))
+			{
+				superText = (superText != null ? superText : "") + " (" + Messages.LabelOverride + ')';
+			}
 		}
 
 		return superText;
