@@ -100,6 +100,11 @@ import com.servoy.j2db.util.Utils;
 @SuppressWarnings("nls")
 public abstract class TypeCreator
 {
+	private static final int INSTANCE_METHOD = 1;
+	private static final int STATIC_METHOD = 2;
+	private static final int INSTANCE_FIELD = 3;
+	private static final int STATIC_FIELD = 4;
+
 	protected final static ImageDescriptor METHOD = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
 		new Path("/icons/function.gif"), null));
 	protected final static ImageDescriptor PROPERTY = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
@@ -408,17 +413,14 @@ public abstract class TypeCreator
 		if (javaMembers != null)
 		{
 			IScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectForClass(scriptObjectClass);
-			if (!constantsOnly(typeName))
+			Object[] members = javaMembers.getIds(false);
+			for (Object element : members)
 			{
-				Object[] members = javaMembers.getIds(false);
-				for (Object element : members)
-				{
-					al.add((String)element);
-				}
+				al.add((String)element);
 			}
-			else if (IConstantsObject.class.isAssignableFrom(scriptObjectClass))
+			if (IConstantsObject.class.isAssignableFrom(scriptObjectClass))
 			{
-				Object[] members = javaMembers.getIds(true);
+				members = javaMembers.getIds(true);
 				for (Object element : members)
 				{
 					al.add((String)element);
@@ -445,29 +447,34 @@ public abstract class TypeCreator
 						object = javaMembers.getField(name, true);
 						if (object != null)
 						{
-							type = 3;
+							type = STATIC_FIELD;
+						}
+						else
+						{
+							object = javaMembers.getMethod(name, true);
+							type = STATIC_METHOD;
 						}
 					}
-					else type = 2;
+					else type = INSTANCE_FIELD;
 				}
-				else type = 1;
+				else type = INSTANCE_METHOD;
 
 				if (object != null)
 				{
 					Class< ? > returnTypeClz = getReturnType(object);
-					if (type == 1)
+					if (type == INSTANCE_METHOD || type == STATIC_METHOD)
 					{
-						MemberBox[] members = null;
+						MemberBox[] memberbox = null;
 						if (object instanceof NativeJavaMethod)
 						{
-							members = ((NativeJavaMethod)object).getMethods();
+							memberbox = ((NativeJavaMethod)object).getMethods();
 						}
-						int membersSize = members == null ? 1 : members.length;
+						int membersSize = memberbox == null ? 1 : memberbox.length;
 						for (int i = 0; i < membersSize; i++)
 						{
 							Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
 							method.setName(name);
-							Class< ? >[] parameterTypes = members[i].getParameterTypes();
+							Class< ? >[] parameterTypes = memberbox[i].getParameterTypes();
 
 							if (scriptObject instanceof ITypedScriptObject && ((ITypedScriptObject)scriptObject).isDeprecated(name, parameterTypes))
 							{
@@ -485,8 +492,9 @@ public abstract class TypeCreator
 								method.setType(context.getType(getMemberTypeName(context, name, returnTypeClz, typeName)));
 							}
 							method.setAttribute(IMAGE_DESCRIPTOR, METHOD);
+							method.setStatic(type == STATIC_METHOD);
 
-							IParameter[] scriptParams = getParameters(name, scriptObjectClass, members[i]);
+							IParameter[] scriptParams = getParameters(name, scriptObjectClass, memberbox[i]);
 							if (scriptParams != null && scriptParams.length > 0)
 							{
 								EList<Parameter> parameters = method.getParameters();
@@ -524,9 +532,10 @@ public abstract class TypeCreator
 						ImageDescriptor descriptor = IconProvider.instance().descriptor(returnTypeClz);
 						if (descriptor == null)
 						{
-							descriptor = type == 3 ? CONSTANT : PROPERTY;
+							descriptor = type == STATIC_FIELD ? CONSTANT : PROPERTY;
 						}
 						Property property = createProperty(name, false, returnType, getDoc(name, scriptObjectClass, name, null), descriptor);
+						property.setStatic(type == STATIC_FIELD);
 						if (scriptObject != null && scriptObject.isDeprecated(name))
 						{
 							property.setDeprecated(true);
