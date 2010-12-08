@@ -55,6 +55,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.builder.MarkerMessages;
 import com.servoy.eclipse.core.builder.ServoyBuilder;
+import com.servoy.eclipse.core.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.core.util.ResourcesUtils;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UpdateMarkersJob;
@@ -147,9 +148,9 @@ public class DataModelManager implements IColumnInfoManager
 							IFile dbiFile = getDBIFile(t.getServerName(), t.getName());
 							if (dbiFile.exists())
 							{
-								IMarker marker = dbiFile.createMarker(ServoyBuilder.COLUMN_MARKER_TYPE);
-								String msg = MarkerMessages.getMessage(MarkerMessages.Marker_Column_UUIDFlagNotSet, t.getName(), column.getName());
-								marker.setAttribute(IMarker.MESSAGE, msg);
+								ServoyMarker mk = MarkerMessages.ColumnUUIDFlagNotSet.fill(t.getName(), column.getName());
+								IMarker marker = dbiFile.createMarker(mk.getType());
+								marker.setAttribute(IMarker.MESSAGE, mk.getText());
 								marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
 								marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
 								marker.setAttribute(IMarker.LOCATION, "JSON file");
@@ -929,9 +930,8 @@ public class DataModelManager implements IColumnInfoManager
 					}
 
 					// we have an active solution with a resources project but with invalid security info; add problem marker
-					String msg = MarkerMessages.getMessage(MarkerMessages.Marker_DBI_BadDBInfo, message);
-					ServoyBuilder.addMarker(file, ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE, msg, charNo, getErrorSeverity(t.getName()),
-						IMarker.PRIORITY_NORMAL, "JSON file");
+					ServoyMarker mk = MarkerMessages.DBIBadDBInfo.fill(message);
+					ServoyBuilder.addMarker(file, mk.getType(), mk.getText(), charNo, getErrorSeverity(t.getName()), IMarker.PRIORITY_NORMAL, "JSON file"); //$NON-NLS-1$
 				}
 			}
 		});
@@ -1151,34 +1151,33 @@ public class DataModelManager implements IColumnInfoManager
 
 		public String getUserFriendlyMessage()
 		{
-			String message;
+			ServoyMarker mk;
 			if (type == COLUMN_MISSING_FROM_DB)
 			{
-				message = MarkerMessages.getMessage(MarkerMessages.Marker_DBI_ColumnMissingFromDB, getColumnString());
+				mk = MarkerMessages.DBIColumnMissingFromDB.fill(getColumnString());
 			}
 			else if (type == COLUMN_MISSING_FROM_DBI_FILE)
 			{
-				message = MarkerMessages.getMessage(MarkerMessages.Marker_DBI_ColumnMissingFromDBIFile, getColumnString());
+				mk = MarkerMessages.DBIColumnMissingFromDBIFile.fill(getColumnString());
 			}
 			else if (type == COLUMN_CONFLICT)
 			{
-				message = MarkerMessages.getMessage(MarkerMessages.Marker_DBI_ColumnConflict, getColumnString(), getColumnDefinition(tableDefinition),
-					getColumnDefinition(dbiFileDefinition));
+				mk = MarkerMessages.DBIColumnConflict.fill(getColumnString(), getColumnDefinition(tableDefinition), getColumnDefinition(dbiFileDefinition));
 			}
 			else if (type == MISSING_TABLE)
 			{
-				message = MarkerMessages.getMessage(MarkerMessages.Marker_DBI_TableMissing, serverName + "->" + tableName); //$NON-NLS-1$
+				mk = MarkerMessages.DBITableMissing.fill(serverName + "->" + tableName); //$NON-NLS-1$
 			}
 			else if (type == MISSING_DBI_FILE)
 			{
-				message = MarkerMessages.getMessage(MarkerMessages.Marker_DBI_DBIFileMissing, serverName + "->" + tableName); //$NON-NLS-1$
+				mk = MarkerMessages.DBIFileMissing.fill(serverName + "->" + tableName); //$NON-NLS-1$
 			}
 			else
 			{
 				// this should not be reached in normal execution...
-				message = MarkerMessages.getMessage(MarkerMessages.Marker_DBI_GenericError, getColumnString());
+				mk = MarkerMessages.DBIGenericError.fill(getColumnString());
 			}
-			return message;
+			return mk.getText();
 		}
 
 		private String getColumnDefinition(ColumnInfoDef definition)

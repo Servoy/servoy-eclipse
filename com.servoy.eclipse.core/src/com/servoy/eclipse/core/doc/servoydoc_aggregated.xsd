@@ -62,8 +62,12 @@
 				minOccurs="0"></xs:element>
 			<xs:element name="description" type="xs:string" maxOccurs="1"
 				minOccurs="0"></xs:element>
+			<xs:element name="fix" type="xs:string" maxOccurs="1"
+				minOccurs="0"></xs:element>
 		</xs:sequence>
 		<xs:attribute name="id" type="xs:string" use="required" />
+		<xs:attribute name="type" type="xs:string" use="required" />
+		<xs:attribute name="typecode" type="xs:string" use="required" />
 	</xs:complexType>
 
 	<xs:complexType name="webadminlist">
