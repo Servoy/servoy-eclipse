@@ -419,7 +419,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 				// Add a wrapper that checks readonly of the other pd in isCompatibleWith()
 				pd = new DelegatePropertyController(pd, pd.getId());
 			}
-			((IPropertyController)pd).setReadonly(readOnly);
+			((IPropertyController)pd).setReadonly(readOnly ||
+				(persist instanceof Form && ((Form)persist).getExtendsFormID() > 0 && pd.getId().equals("dataSource")));
 
 			if (propertyDescriptor.valueObject == persist &&
 				RepositoryHelper.hideForProperties(propertyDescriptor.propertyDescriptor.getName(), persist.getClass(), persist))
