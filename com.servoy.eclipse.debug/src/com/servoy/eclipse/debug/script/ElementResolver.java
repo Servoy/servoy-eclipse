@@ -65,7 +65,7 @@ import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 @SuppressWarnings("nls")
 public class ElementResolver extends TypeCreator implements IElementResolver
 {
-	private static final List<String> noneConstantTypes = Arrays.asList(new String[] { "application", "security", "jsunit", "solutionModel", "databaseManager", "controller", "currentcontroller", "i18n", "history", "utils", "foundset", "forms", "elements" });
+	private static final List<String> noneConstantTypes = Arrays.asList(new String[] { "application", "security", "jsunit", "solutionModel", "databaseManager", "controller", "currentcontroller", "i18n", "history", "utils", "foundset", "forms", "elements", "plugins" });
 
 	private final Map<String, ITypeNameCreator> typeNameCreators = new HashMap<String, ElementResolver.ITypeNameCreator>();
 
@@ -296,7 +296,9 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 
 		if (type != null)
 		{
-			return createProperty(name, readOnly, type, type.getDescription(), image, resource);
+			Property property = createProperty(name, readOnly, type, type.getDescription(), image, resource);
+			property.setStatic(constantsOnly(name));
+			return property;
 		}
 		return null;
 	}
