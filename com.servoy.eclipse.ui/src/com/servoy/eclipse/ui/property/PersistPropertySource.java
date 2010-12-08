@@ -142,6 +142,7 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
@@ -523,7 +524,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			@Override
 			public ILabelProvider getLabelProvider()
 			{
-				return new PersistInheritenceDelegateLabelProvider(persist, super.getLabelProvider(), id);
+				String propertyId = id;
+				if (persist instanceof Form && StaticContentSpecLoader.PROPERTY_WIDTH.getPropertyName().equals(id))
+				{
+					propertyId = StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName();
+				}
+				return new PersistInheritenceDelegateLabelProvider(persist, super.getLabelProvider(), propertyId);
 			}
 		} : desc;
 	}
