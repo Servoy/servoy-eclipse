@@ -63,13 +63,13 @@ import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
+import com.servoy.eclipse.ui.dialogs.FormContentProvider;
+import com.servoy.eclipse.ui.dialogs.TableContentProvider;
+import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
-import com.servoy.eclipse.ui.dialogs.FormContentProvider;
 import com.servoy.eclipse.ui.dialogs.FormContentProvider.FormListOptions;
-import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
-import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
@@ -284,8 +284,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 					}
 					else
 					{
+						// just inherit everything
+						form.copyPropertiesMap(null);
 						form.setExtendsFormID(superForm.getID());
-						form.setWidth(superForm.getWidth());
+						form.setName(newFormWizardPage.getFormName());
 					}
 
 					// add selected data providers

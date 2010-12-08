@@ -24,8 +24,9 @@ import org.eclipse.swt.graphics.Image;
 
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
  * Delegate label provider that adds the form inheritance context to the label.
@@ -72,13 +73,20 @@ public class PersistInheritenceDelegateLabelProvider extends DelegateLabelProvid
 	public String getText(Object value)
 	{
 		String superText = super.getText(value);
-		if (((AbstractBase)persist).isOverrideElement() && ((AbstractBase)persist).hasProperty((String)propertyId))
+		if (((AbstractBase)persist).isOverrideElement())
 		{
-			IPersist superPersist = ((AbstractBase)persist).getSuperPersist();
-			if (superPersist != null &&
-				!Utils.equalObjects(((AbstractBase)superPersist).getProperty((String)propertyId), ((AbstractBase)persist).getProperty((String)propertyId)))
+			boolean override = false;
+			if (((AbstractBase)persist).hasProperty((String)propertyId))
 			{
-				superText = (superText != null ? superText : "") + " (" + Messages.LabelOverride + ')';
+				override = true;
+			}
+			if (persist instanceof Form && StaticContentSpecLoader.PROPERTY_WIDTH.getPropertyName().equals(propertyId))
+			{
+				override = ((AbstractBase)persist).hasProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
+			}
+			if (override)
+			{
+				superText = (superText != null ? superText : "") + " (" + Messages.LabelOverride + ')'; //$NON-NLS-1$//$NON-NLS-2$
 			}
 		}
 
