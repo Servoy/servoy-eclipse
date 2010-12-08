@@ -1,6 +1,8 @@
 package com.servoy.eclipse.debug.script;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IFile;
@@ -121,20 +123,40 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		return collection;
 	}
 
+	private static final ThreadLocal<Set<IFile>> creatingCollection = new ThreadLocal<Set<IFile>>()
+	{
+		@Override
+		protected java.util.Set<IFile> initialValue()
+		{
+			return new HashSet<IFile>();
+		}
+	};
+
 	public static IValueCollection getValueCollection(ITypeInfoContext context, IFile file)
 	{
-		if (context.getModelElement().getResource().equals(file))
-		{
-			return null;
-		}
 		IValueCollection collection = null;
 		try
 		{
 			Pair<Long, IValueCollection> pair = scriptCache.get(file);
 			if (pair == null || pair.getLeft().longValue() != file.getModificationStamp())
 			{
-				collection = ValueCollectionFactory.createValueCollection(file, false);
-				scriptCache.put(file, new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()), collection));
+				Set<IFile> set = creatingCollection.get();
+				if (set.contains(file))
+				{
+					if (pair != null) return pair.getRight();
+					return null;
+				}
+
+				set.add(file);
+				try
+				{
+					collection = ValueCollectionFactory.createValueCollection(file, false);
+					scriptCache.put(file, new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()), collection));
+				}
+				finally
+				{
+					set.remove(file);
+				}
 			}
 			else
 			{
