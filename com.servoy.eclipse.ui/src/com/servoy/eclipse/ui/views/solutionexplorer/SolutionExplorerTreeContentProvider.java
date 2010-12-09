@@ -57,6 +57,7 @@ import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EnableServerAction;
 import com.servoy.j2db.FlattenedSolution;
@@ -94,7 +95,6 @@ import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
-import com.servoy.j2db.smart.dataui.SwingItemFactory;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.SortedList;
@@ -1247,7 +1247,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		{
 			IApplication application = Activator.getDefault().getDesignClient();
 
-			Class< ? > beanClass = SwingItemFactory.getPersistClass(Activator.getDefault().getDesignClient(), bean);
+			Class< ? > beanClass = ElementUtil.getPersistScriptClass(Activator.getDefault().getDesignClient(), bean);
 			if (beanClass == null)
 			{
 				return null;

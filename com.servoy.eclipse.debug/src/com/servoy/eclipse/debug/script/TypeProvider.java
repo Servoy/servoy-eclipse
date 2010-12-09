@@ -48,11 +48,13 @@ import org.mozilla.javascript.JavaMembers;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
+import com.servoy.j2db.dataprocessing.IDisplayDependencyData;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.persistence.AggregateVariable;
@@ -79,24 +81,22 @@ import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
-import com.servoy.j2db.smart.dataui.DataButton;
-import com.servoy.j2db.smart.dataui.DataCalendar;
-import com.servoy.j2db.smart.dataui.DataCheckBox;
-import com.servoy.j2db.smart.dataui.DataChoice;
-import com.servoy.j2db.smart.dataui.DataComboBox;
-import com.servoy.j2db.smart.dataui.DataField;
-import com.servoy.j2db.smart.dataui.DataImgMediaField;
-import com.servoy.j2db.smart.dataui.DataLabel;
-import com.servoy.j2db.smart.dataui.DataLookupField;
-import com.servoy.j2db.smart.dataui.DataPassword;
-import com.servoy.j2db.smart.dataui.DataTextArea;
-import com.servoy.j2db.smart.dataui.DataTextEditor;
-import com.servoy.j2db.smart.dataui.PortalComponent;
-import com.servoy.j2db.smart.dataui.ScriptButton;
-import com.servoy.j2db.smart.dataui.ScriptLabel;
-import com.servoy.j2db.smart.dataui.SpecialSplitPane;
-import com.servoy.j2db.smart.dataui.SpecialTabPanel;
-import com.servoy.j2db.smart.dataui.SwingItemFactory;
+import com.servoy.j2db.ui.IDepricatedScriptTabPanelMethods;
+import com.servoy.j2db.ui.IScriptCheckBoxMethods;
+import com.servoy.j2db.ui.IScriptChoiceMethods;
+import com.servoy.j2db.ui.IScriptDataButtonMethods;
+import com.servoy.j2db.ui.IScriptDataCalendarMethods;
+import com.servoy.j2db.ui.IScriptDataComboboxMethods;
+import com.servoy.j2db.ui.IScriptDataLabelMethods;
+import com.servoy.j2db.ui.IScriptDataPasswordMethods;
+import com.servoy.j2db.ui.IScriptFieldMethods;
+import com.servoy.j2db.ui.IScriptMediaInputFieldMethods;
+import com.servoy.j2db.ui.IScriptPortalComponentMethods;
+import com.servoy.j2db.ui.IScriptScriptButtonMethods;
+import com.servoy.j2db.ui.IScriptScriptLabelMethods;
+import com.servoy.j2db.ui.IScriptSplitPaneMethods;
+import com.servoy.j2db.ui.IScriptTextAreaMethods;
+import com.servoy.j2db.ui.IScriptTextEditorMethods;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyException;
@@ -386,23 +386,24 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 		private ElementsScopeFiller()
 		{
-			typeNames.put(SpecialTabPanel.class.getSimpleName(), "TabPanel");
-			typeNames.put(SpecialSplitPane.class.getSimpleName(), "SplitPane");
-			typeNames.put(ScriptButton.class.getSimpleName(), "Button");
-			typeNames.put(DataButton.class.getSimpleName(), "Button");
-			typeNames.put(ScriptLabel.class.getSimpleName(), "Label");
-			typeNames.put(DataLabel.class.getSimpleName(), "Label");
-			typeNames.put(DataPassword.class.getSimpleName(), "Password");
-			typeNames.put(DataTextEditor.class.getSimpleName(), "HtmlArea");
-			typeNames.put(DataTextArea.class.getSimpleName(), "TextArea");
-			typeNames.put(DataChoice.class.getSimpleName(), "Checks");
-			typeNames.put(DataCheckBox.class.getSimpleName(), "CheckBox");
-			typeNames.put(DataComboBox.class.getSimpleName(), "ComboBox");
-			typeNames.put(DataCalendar.class.getSimpleName(), "Calendar");
-			typeNames.put(DataImgMediaField.class.getSimpleName(), "MediaField");
-			typeNames.put(DataLookupField.class.getSimpleName(), "TypeAhead");
-			typeNames.put(DataField.class.getSimpleName(), "TextField");
-			typeNames.put(PortalComponent.class.getSimpleName(), "Portal");
+			typeNames.put(IScriptScriptButtonMethods.class.getSimpleName(), "Button");
+			typeNames.put(IScriptDataButtonMethods.class.getSimpleName(), "Button");
+			typeNames.put(IScriptScriptLabelMethods.class.getSimpleName(), "Label");
+			typeNames.put(IScriptDataLabelMethods.class.getSimpleName(), "Label");
+			typeNames.put(IScriptDataPasswordMethods.class.getSimpleName(), "Password");
+			typeNames.put(IScriptTextEditorMethods.class.getSimpleName(), "HtmlArea");
+			typeNames.put(IScriptTextAreaMethods.class.getSimpleName(), "TextArea");
+			typeNames.put(IScriptChoiceMethods.class.getSimpleName(), "Checks");
+			typeNames.put(IScriptCheckBoxMethods.class.getSimpleName(), "CheckBox");
+			typeNames.put(IScriptChoiceMethods.class.getSimpleName(), "Radios");
+			typeNames.put(IScriptDataComboboxMethods.class.getSimpleName(), "ComboBox");
+			typeNames.put(IScriptDataCalendarMethods.class.getSimpleName(), "Calendar");
+			typeNames.put(IScriptMediaInputFieldMethods.class.getSimpleName(), "MediaField");
+			typeNames.put(IDisplayDependencyData.class.getSimpleName(), "TypeAhead");
+			typeNames.put(IScriptFieldMethods.class.getSimpleName(), "TextField");
+			typeNames.put(IDepricatedScriptTabPanelMethods.class.getSimpleName(), "TabPanel");
+			typeNames.put(IScriptSplitPaneMethods.class.getSimpleName(), "SplitPane");
+			typeNames.put(IScriptPortalComponentMethods.class.getSimpleName(), "Portal");
 
 		}
 
@@ -432,7 +433,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 								IFormElement formElement = (IFormElement)persist;
 								if (!Utils.stringIsEmpty(formElement.getName()))
 								{
-									Class< ? > persistClass = SwingItemFactory.getPersistClass(application, persist);
+									Class< ? > persistClass = ElementUtil.getPersistScriptClass(application, persist);
 									if (persistClass != null && formElement instanceof Bean && ((Bean)formElement).getBeanClassName() != null)
 									{
 										int index = ((Bean)formElement).getBeanClassName().lastIndexOf('.');

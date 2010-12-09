@@ -16,27 +16,57 @@
  */
 package com.servoy.eclipse.ui.util;
 
+import java.lang.ref.WeakReference;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.j2db.IApplication;
+import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFactory;
+import com.servoy.j2db.dataprocessing.IDisplayDependencyData;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
+import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.plugins.IClientPluginAccess;
+import com.servoy.j2db.scripting.IScriptObject;
+import com.servoy.j2db.scripting.ScriptObjectRegistry;
+import com.servoy.j2db.ui.IDepricatedScriptTabPanelMethods;
+import com.servoy.j2db.ui.IScriptCheckBoxMethods;
+import com.servoy.j2db.ui.IScriptChoiceMethods;
+import com.servoy.j2db.ui.IScriptDataButtonMethods;
+import com.servoy.j2db.ui.IScriptDataCalendarMethods;
+import com.servoy.j2db.ui.IScriptDataComboboxMethods;
+import com.servoy.j2db.ui.IScriptDataLabelMethods;
+import com.servoy.j2db.ui.IScriptDataPasswordMethods;
+import com.servoy.j2db.ui.IScriptFieldMethods;
+import com.servoy.j2db.ui.IScriptMediaInputFieldMethods;
+import com.servoy.j2db.ui.IScriptPortalComponentMethods;
+import com.servoy.j2db.ui.IScriptScriptButtonMethods;
+import com.servoy.j2db.ui.IScriptScriptLabelMethods;
+import com.servoy.j2db.ui.IScriptSplitPaneMethods;
+import com.servoy.j2db.ui.IScriptTextAreaMethods;
+import com.servoy.j2db.ui.IScriptTextEditorMethods;
+import com.servoy.j2db.util.Debug;
 
 /**
  * Utilities for elements and label providers.
@@ -208,4 +238,138 @@ public class ElementUtil
 		}
 		return persist;
 	}
+
+	private static Map<String, WeakReference<Class< ? >>> beanClassCache = new ConcurrentHashMap<String, WeakReference<Class< ? >>>();
+
+	public static Class< ? > getPersistScriptClass(IApplication application, IPersist persist)
+	{
+		if (persist instanceof GraphicalComponent)
+		{
+			GraphicalComponent label = (GraphicalComponent)persist;
+			if (label.getOnActionMethodID() != 0 && label.getShowClick())
+			{
+				if (label.getDataProviderID() == null && !label.getDisplaysTags())
+				{
+					return IScriptScriptButtonMethods.class;
+				}
+				else
+				{
+					return IScriptDataButtonMethods.class;
+				}
+			}
+			else
+			{
+				if (label.getDataProviderID() == null && !label.getDisplaysTags())
+				{
+					return IScriptScriptLabelMethods.class;
+				}
+				else
+				{
+					return IScriptDataLabelMethods.class;
+				}
+			}
+		}
+		else if (persist instanceof Field)
+		{
+			Field field = (Field)persist;
+
+			switch (field.getDisplayType())
+			{
+				case Field.PASSWORD :
+					return IScriptDataPasswordMethods.class;
+				case Field.RTF_AREA :
+				case Field.HTML_AREA :
+					return IScriptTextEditorMethods.class;
+				case Field.TEXT_AREA :
+					return IScriptTextAreaMethods.class;
+				case Field.CHECKS :
+					if (field.getValuelistID() > 0)
+					{
+//						IValueList list = getRealValueList(application, valuelist, true, type, format, field.getDataProviderID());
+//						if (!(valuelist.getValueListType() == ValueList.DATABASE_VALUES && valuelist.getDatabaseValuesType() == ValueList.RELATED_VALUES) &&
+//							list.getSize() == 1 && valuelist.getAddEmptyValue() != ValueList.EMPTY_VALUE_ALWAYS)
+//						{
+//							fl = application.getItemFactory().createDataCheckBox(getWebID(field), application.getI18NMessageIfPrefixed(field.getText()), list);
+//						}
+//						else
+						// 0 or >1
+						return IScriptChoiceMethods.class;
+					}
+					else
+					{
+						return IScriptCheckBoxMethods.class;
+					}
+				case Field.RADIOS :
+					return IScriptChoiceMethods.class;
+				case Field.COMBOBOX :
+					return IScriptDataComboboxMethods.class;
+				case Field.CALENDAR :
+					return IScriptDataCalendarMethods.class;
+				case Field.IMAGE_MEDIA :
+					return IScriptMediaInputFieldMethods.class;
+				case Field.TYPE_AHEAD :
+					return IDisplayDependencyData.class;
+				default :
+					if (field.getValuelistID() > 0)
+					{
+						return IDisplayDependencyData.class;
+					}
+					else
+					{
+						return IScriptFieldMethods.class;
+					}
+			}
+
+		}
+		else if (persist instanceof Bean)
+		{
+			Bean bean = (Bean)persist;
+			String beanClassName = bean.getBeanClassName();
+			WeakReference<Class< ? >> beanClassRef = beanClassCache.get(beanClassName);
+			Class< ? > beanClass = null;
+			if (beanClassRef != null)
+			{
+				beanClass = beanClassRef.get();
+			}
+			if (beanClass == null)
+			{
+				ClassLoader bcl = application.getBeanManager().getClassLoader();
+				try
+				{
+					beanClass = bcl.loadClass(beanClassName);
+					if (IServoyBeanFactory.class.isAssignableFrom(beanClass))
+					{
+						Form form = (Form)bean.getParent();
+						IServoyBeanFactory beanFactory = (IServoyBeanFactory)beanClass.newInstance();
+						Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(), (IClientPluginAccess)application.getPluginAccess(),
+							new Object[] { ComponentFactory.getWebID(null, bean), form.getName(), form.getStyleName() });
+						beanClass = beanInstance.getClass();
+						if (beanInstance instanceof IScriptObject)
+						{
+							ScriptObjectRegistry.registerScriptObjectForClass(beanClass, (IScriptObject)beanInstance);
+						}
+					}
+					beanClassCache.put(beanClassName, new WeakReference<Class< ? >>(beanClass));
+				}
+				catch (Exception e)
+				{
+					Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClassName, e); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
+			return beanClass;
+		}
+		else if (persist instanceof TabPanel)
+		{
+			int orient = ((TabPanel)persist).getTabOrientation();
+			if (orient == TabPanel.SPLIT_HORIZONTAL || orient == TabPanel.SPLIT_VERTICAL) return IScriptSplitPaneMethods.class;
+			else return IDepricatedScriptTabPanelMethods.class;
+		}
+		else if (persist instanceof Portal)
+		{
+			return IScriptPortalComponentMethods.class;
+		}
+		return null;
+
+	}
+
 }

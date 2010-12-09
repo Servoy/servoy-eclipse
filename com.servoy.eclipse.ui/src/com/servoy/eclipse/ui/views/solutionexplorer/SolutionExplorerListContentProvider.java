@@ -56,10 +56,11 @@ import com.servoy.eclipse.ui.node.TreeBuilder;
 import com.servoy.eclipse.ui.node.UserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.IApplication;
 import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
@@ -106,7 +107,6 @@ import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
-import com.servoy.j2db.smart.dataui.SwingItemFactory;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ITagResolver;
@@ -561,7 +561,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				{
 					try
 					{
-						lm = getJSMethods(SwingItemFactory.getPersistClass(Activator.getDefault().getDesignClient(), component), prefix, null,
+						lm = getJSMethods(ElementUtil.getPersistScriptClass(Activator.getDefault().getDesignClient(), component), prefix, null,
 							UserNodeType.FORM_ELEMENTS_ITEM_METHOD, null, null);
 					}
 					catch (Exception ex)
