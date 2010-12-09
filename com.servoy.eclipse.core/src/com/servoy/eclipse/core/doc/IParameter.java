@@ -23,4 +23,6 @@ public interface IParameter
 	String getType();
 
 	boolean isOptional();
+
+	boolean isVarArgs();
 }

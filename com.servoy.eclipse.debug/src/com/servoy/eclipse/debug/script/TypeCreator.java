@@ -503,7 +503,8 @@ public abstract class TypeCreator
 									Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
 									parameter.setName(param.getName());
 									if (param.getType() != null) parameter.setType(context.getType(SolutionExplorerListContentProvider.TYPES.get(param.getType())));
-									parameter.setKind(param.isOptional() ? ParameterKind.OPTIONAL : ParameterKind.NORMAL);
+									parameter.setKind(param.isOptional() ? param.isVarArgs() ? ParameterKind.VARARGS : ParameterKind.OPTIONAL
+										: ParameterKind.NORMAL);
 									parameters.add(parameter);
 								}
 							}
@@ -683,13 +684,23 @@ public abstract class TypeCreator
 				for (int i = 0; i < parameters.length; i++)
 				{
 					String name = parameterNames[i];
+					boolean vararg = false;
 					boolean optional = name.startsWith("[") && name.endsWith("]");
 					if (optional && removeOptional)
 					{
 						optional = false;
 						name = name.substring(1, name.length() - 1);
+						if (name.startsWith("..."))
+						{
+							vararg = true;
+							name = name.substring(3);
+						}
 					}
-					parameters[i] = new ScriptParameter(name, null, optional);
+					else if (name.startsWith("[..."))
+					{
+						vararg = true;
+					}
+					parameters[i] = new ScriptParameter(name, null, optional, vararg);
 				}
 			}
 			else if (memberParamLength == parameterNames.length)
@@ -721,7 +732,7 @@ public abstract class TypeCreator
 						type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getName());
 						name = SolutionExplorerListContentProvider.TYPES.get(paramClass.getName());
 					}
-					parameters[i] = new ScriptParameter(name, type, false);
+					parameters[i] = new ScriptParameter(name, type, false, false);
 				}
 			}
 		}

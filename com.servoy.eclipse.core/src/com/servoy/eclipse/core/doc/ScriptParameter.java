@@ -21,12 +21,14 @@ public class ScriptParameter implements IParameter
 	private final String name;
 	private final String type;
 	private final boolean optional;
+	private final boolean vararg;
 
-	public ScriptParameter(String name, String type, boolean isOptional)
+	public ScriptParameter(String name, String type, boolean optional, boolean vararg)
 	{
 		this.name = name;
 		this.type = type;
-		this.optional = isOptional;
+		this.optional = optional;
+		this.vararg = vararg;
 	}
 
 	public String getName()
@@ -42,6 +44,16 @@ public class ScriptParameter implements IParameter
 	public boolean isOptional()
 	{
 		return optional;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.core.doc.IParameter#isVarArgs()
+	 */
+	public boolean isVarArgs()
+	{
+		return vararg;
 	}
 
 }
