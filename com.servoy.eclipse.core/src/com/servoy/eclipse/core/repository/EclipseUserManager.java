@@ -2089,6 +2089,30 @@ public class EclipseUserManager implements IUserManager
 		return dataSet;
 	}
 
+	public IDataSet getUsersByGroup(String clientId, String group_name) throws ServoyException
+	{
+		List<Object[]> users = new ArrayList<Object[]>();
+		List<String> user_uids = userGroups.get(group_name);
+		if (user_uids != null)
+		{
+			Iterator<String> it = user_uids.iterator();
+			while (it.hasNext())
+			{
+				String uid = it.next();
+				for (User u : allDefinedUsers)
+				{
+					if (uid.equals(u.userUid))
+					{
+						users.add(new Object[] { u.userUid, u.name, new Integer(getId(u.userUid)) });
+						break;
+					}
+				}
+			}
+		}
+		BufferedDataSet dataSet = new BufferedDataSet(new String[] { "user_uid", "user_name", "user_id" }, users); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return dataSet;
+	}
+
 	public int createGroup(String clientId, String groupName) throws ServoyException
 	{
 		if (!createGroupInternal(clientId, groupName)) return -1;
