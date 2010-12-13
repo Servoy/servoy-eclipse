@@ -926,8 +926,18 @@ public class SolutionDeserializer
 					if (typeIndex != -1)
 					{
 						int newLine = comment.indexOf('\n', typeIndex);
-						String typeName = comment.substring(typeIndex + SolutionSerializer.TYPEKEY.length(), newLine);
-						json.putOpt(JS_TYPE_JSON_ATTRIBUTE, typeName.trim());
+						String typeName = comment.substring(typeIndex + SolutionSerializer.TYPEKEY.length(), newLine).trim();
+						json.putOpt(JS_TYPE_JSON_ATTRIBUTE, typeName);
+						int servoyType = getServoyType(typeName);
+						if (servoyType == IColumnTypes.NUMBER)
+						{
+							int currentType = json.optInt(VARIABLE_TYPE_JSON_ATTRIBUTE, servoyType);
+							if (currentType != IColumnTypes.INTEGER) json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, servoyType);
+						}
+						else
+						{
+							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, servoyType);
+						}
 					}
 				}
 
@@ -1032,7 +1042,13 @@ public class SolutionDeserializer
 				{
 					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(type.getName()));
 					json.putOpt(JS_TYPE_JSON_ATTRIBUTE, type.getName());
+					json.put("defaultValue", "");
 				}
+				else
+				{
+					json.put("defaultValue", "");
+				}
+
 
 				int linenr = 1;
 				int fieldLineIndex = field.sourceStart();
