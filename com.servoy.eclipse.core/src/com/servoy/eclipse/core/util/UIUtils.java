@@ -49,6 +49,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.j2db.util.Debug;
 
 /**
  * Utility class that offers all kinds of utilities (UI related functionality).
@@ -404,12 +405,14 @@ public class UIUtils
 		try
 		{
 			PipedInputStream inBytes = new PipedInputStream(outBytes);
+			Debug.error("Trying to get a png in thread: " + Thread.currentThread().getName());
 			ImageIO.write(bufferedImage, "PNG", outBytes);
+			Debug.error("Got a png in thread: " + Thread.currentThread().getName());
 			return new Image(device, inBytes);
 		}
 		catch (Throwable e)
 		{
-			ServoyLog.logWarning("Cannot convert swing icon into SWT image", e);
+			ServoyLog.logWarning("Cannot convert swing icon into SWT image in thread " + Thread.currentThread().getName(), e);
 			return null;
 		}
 	}
