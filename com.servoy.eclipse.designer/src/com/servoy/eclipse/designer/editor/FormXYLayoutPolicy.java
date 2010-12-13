@@ -72,8 +72,13 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			{
 				CompoundCommand compoundCommand = new CompoundCommand();
 
-				compoundCommand.add(new ChangeBoundsCommand(new PersistPropertySource((IPersist)childEditPart.getModel(), parent.getPersist(), false),
-					(Rectangle)constraint));
+				ISupportBounds supportBounds = (ISupportBounds)childEditPart.getModel();
+				Rectangle newBounds = (Rectangle)constraint;
+				java.awt.Point loc = supportBounds.getLocation();
+				java.awt.Dimension dim = supportBounds.getSize();
+
+				compoundCommand.add(new ChangeBoundsCommand(childEditPart, new Point(newBounds.x - loc.x, newBounds.y - loc.y), new Dimension(newBounds.width -
+					dim.width, newBounds.height - dim.height)));
 
 				// set properties via request.extendedData
 				Map<Object, Object> objectProperties = request.getExtendedData();
@@ -166,7 +171,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 
 	protected Command getDistributeChildrenCommand(final DistributeRequest request)
 	{
-		List editParts = request.getEditParts();
+		List<EditPart> editParts = request.getEditParts();
 		if (editParts == null || editParts.size() < 3)
 		{
 			return null;
@@ -174,18 +179,6 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 
 		int packGap = 8; // TODO: preferences
 		int size = editParts.size();
-
-		ISupportBounds[] figs = new ISupportBounds[size];
-		int e = 0;
-		for (Object editPart : editParts)
-		{
-			Object model = ((EditPart)editPart).getModel();
-			if (!(model instanceof ISupportBounds))
-			{
-				return null;
-			}
-			figs[e++] = (ISupportBounds)model;
-		}
 
 		// find the bbox of all selected objects
 		Rectangle _bbox = null;
@@ -196,8 +189,16 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 
 		int totalWidth = 0, totalHeight = 0;
 
-		for (ISupportBounds supportBounds : figs)
+		for (EditPart editPart : editParts)
 		{
+			Object model = editPart.getModel();
+			if (!(model instanceof ISupportBounds))
+			{
+				return null;
+			}
+
+			ISupportBounds supportBounds = (ISupportBounds)model;
+
 			Rectangle r = new Rectangle(supportBounds.getLocation().x, supportBounds.getLocation().y, supportBounds.getSize().width,
 				supportBounds.getSize().height);
 			_bbox = _bbox == null ? r : _bbox.getUnion(r);
@@ -210,6 +211,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			totalWidth += supportBounds.getSize().width;
 			totalHeight += supportBounds.getSize().height;
 		}
+
 
 		float gap = 0, oncenter = 0;
 		float xNext = 0, yNext = 0;
@@ -244,10 +246,14 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 
 		//sort top-to-bottom or left-to-right, this maintains visual order when we set the coordinates
 		//Sorting is also done according to leftmost, rightmost, topmost, bottommost and center point
-		Arrays.sort(figs, new Comparator<ISupportBounds>()
+		EditPart[] eps = editParts.toArray(new EditPart[editParts.size()]);
+		Arrays.sort(eps, new Comparator<EditPart>()
 		{
-			public int compare(ISupportBounds o1, ISupportBounds o2)
+			public int compare(EditPart ep1, EditPart ep2)
 			{
+				ISupportBounds o1 = ((ISupportBounds)ep1.getModel());
+				ISupportBounds o2 = ((ISupportBounds)ep2.getModel());
+
 				int a, b;
 				if (request.getDistribution() == DistributeRequest.Distribution.HORIZONTAL_SPACING ||
 					request.getDistribution() == DistributeRequest.Distribution.HORIZONTAL_PACK)
@@ -280,8 +286,9 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 
 		Dimension noResize = new Dimension(0, 0);
 		CompoundCommand distributeCommand = new CompoundCommand("distribute");
-		for (ISupportBounds supportBounds : figs)
+		for (EditPart ep : eps)
 		{
+			ISupportBounds supportBounds = (ISupportBounds)ep.getModel();
 			Point moveDelta = null;
 			switch (request.getDistribution())
 			{
@@ -304,7 +311,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 					yNext += oncenter;
 					break;
 			}
-			distributeCommand.add(new ChangeBoundsCommand(new PersistPropertySource((IPersist)supportBounds, parent.getPersist(), false), moveDelta, noResize));
+			distributeCommand.add(new ChangeBoundsCommand(ep, moveDelta, noResize));
 		}
 
 		return distributeCommand.unwrap();

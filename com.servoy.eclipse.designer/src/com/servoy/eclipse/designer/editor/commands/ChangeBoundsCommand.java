@@ -17,20 +17,20 @@
 package com.servoy.eclipse.designer.editor.commands;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.gef.commands.Command;
+import org.eclipse.gef.EditPart;
+import org.eclipse.gef.GraphicalEditPart;
+import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 
@@ -40,47 +40,30 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
  * @author rgansevles
  * 
  */
-public class ChangeBoundsCommand extends Command implements ISupportModels
+public class ChangeBoundsCommand extends BaseRestorableCommand implements ISupportModels
 {
 	/** Objects to manipulate. */
-	private final PersistPropertySource propertySource;
 	private final Point moveDelta;
+	private final EditPart editPart;
 	private final Dimension sizeDelta;
 
 	private List<Object> models = null;
-	private boolean applyToChildren;
-	private Map<PersistPropertySource, java.awt.Point> undoLocation = null;
-	private Map<PersistPropertySource, java.awt.Dimension> undoSize = null;
 
 	/**
 	 * Create a command that can resize and/or move ISupportBound objects.
 	 * 
 	 */
-	public ChangeBoundsCommand(PersistPropertySource propertySource, Point moveDelta, Dimension sizeDelta)
+	public ChangeBoundsCommand(EditPart editPart, Point moveDelta, Dimension sizeDelta)
 	{
-		this.propertySource = propertySource;
+		super("", editPart.getModel());
+		this.editPart = editPart;
 		this.moveDelta = moveDelta;
 		this.sizeDelta = sizeDelta;
 	}
 
-	public ChangeBoundsCommand(PersistPropertySource propertySource, Rectangle newBounds)
-	{
-		this.propertySource = propertySource;
-		java.awt.Point loc = (java.awt.Point)propertySource.getPersistPropertyValue(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName());
-		this.moveDelta = new Point(newBounds.x - loc.x, newBounds.y - loc.y);
-		java.awt.Dimension dim = (java.awt.Dimension)propertySource.getPersistPropertyValue(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
-		this.sizeDelta = new Dimension(newBounds.width - dim.width, newBounds.height - dim.height);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.commands.Command#execute()
-	 */
 	@Override
 	public void execute()
 	{
-		applyToChildren = true;
 		String label;
 		if (sizeDelta.width == 0 && sizeDelta.height == 0)
 		{
@@ -89,11 +72,16 @@ public class ChangeBoundsCommand extends Command implements ISupportModels
 		else
 		{
 			label = "resize";
-			applyToChildren = false;
 		}
-		if (propertySource.getPropertyValue(StaticContentSpecLoader.PROPERTY_NAME.getPropertyName()) != null)
+
+		String name = null;
+		if (editPart.getModel() instanceof ISupportName)
 		{
-			label += " " + propertySource.getPropertyValue(StaticContentSpecLoader.PROPERTY_NAME.getPropertyName()) != null;
+			name = ((ISupportName)editPart.getModel()).getName();
+		}
+		if (name != null)
+		{
+			label += " " + name;
 		}
 		setLabel(label);
 		redo();
@@ -105,11 +93,6 @@ public class ChangeBoundsCommand extends Command implements ISupportModels
 		return changeBounds(false);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.commands.Command#redo()
-	 */
 	@Override
 	public void redo()
 	{
@@ -118,33 +101,35 @@ public class ChangeBoundsCommand extends Command implements ISupportModels
 
 	public boolean changeBounds(boolean change)
 	{
-		undoLocation = new HashMap<PersistPropertySource, java.awt.Point>();
-		undoSize = new HashMap<PersistPropertySource, java.awt.Dimension>();
-		List<Object> toApply = new ArrayList<Object>();
+		if (change)
+		{
+			saveState();
+		}
+		List<EditPart> toApply = new ArrayList<EditPart>();
 		models = new ArrayList<Object>();
 		try
 		{
-			toApply.add(propertySource);
+			toApply.add(editPart);
 			while (toApply.size() > 0)
 			{
-				Object o = toApply.remove(0);
-				if (o instanceof PersistPropertySource)
+				EditPart ep = toApply.remove(0);
+				if (!(ep instanceof GraphicalEditPart) || !changeBounds((GraphicalEditPart)ep, moveDelta, sizeDelta, change))
 				{
-					PersistPropertySource sb = (PersistPropertySource)o;
-					undoLocation.put(sb, (java.awt.Point)propertySource.getPersistPropertyValue(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName()));
-					undoSize.put(sb, (java.awt.Dimension)propertySource.getPersistPropertyValue(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName()));
-					if (!changeBounds(sb, moveDelta, sizeDelta, change))
-					{
-						return false;
-					}
+					return false;
 				}
-				models.add(o);
-				if (applyToChildren && o instanceof ISupportChilds)
+				Object model = ep.getModel();
+				models.add(model);
+				if (sizeDelta.width == 0 && sizeDelta.height == 0 /* move, not resize */&& model instanceof ISupportChilds)
 				{
-					Iterator<IPersist> it = ((ISupportChilds)o).getAllObjects();
+					Iterator<IPersist> it = ((ISupportChilds)model).getAllObjects();
 					while (it.hasNext())
 					{
-						toApply.add(it.next());
+						IPersist child = it.next();
+						EditPart childEditPart = (EditPart)editPart.getViewer().getEditPartRegistry().get(child);
+						if (childEditPart != null)
+						{
+							toApply.add(childEditPart);
+						}
 					}
 				}
 			}
@@ -154,59 +139,31 @@ public class ChangeBoundsCommand extends Command implements ISupportModels
 		{
 			if (!change)
 			{
-				undoLocation = new HashMap<PersistPropertySource, java.awt.Point>();
-				undoSize = new HashMap<PersistPropertySource, java.awt.Dimension>();
 				models = new ArrayList<Object>();
 			}
 		}
 	}
 
-	@Override
-	public boolean canUndo()
+	private static void setLocationAndSize(GraphicalEditPart ep, java.awt.Point location, java.awt.Dimension size)
 	{
-		return undoLocation != null;
+		IPropertySource propertySource = (IPropertySource)ep.getAdapter(IPropertySource.class);
+		propertySource.setPropertyValue(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
+		propertySource.setPropertyValue(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), size);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.commands.Command#undo()
-	 */
-	@Override
-	public void undo()
+	private static boolean changeBounds(GraphicalEditPart ep, Point moveDelta, Dimension sizeDelta, boolean change)
 	{
-		for (PersistPropertySource sb : undoLocation.keySet())
-		{
-			setLocationAndSize(sb, undoLocation.get(sb), undoSize.get(sb));
-		}
-		undoLocation = null;
-		undoSize = null;
-	}
-
-	private static void setLocationAndSize(PersistPropertySource propertySource, java.awt.Point location, java.awt.Dimension size)
-	{
-		propertySource.setPersistPropertyValue(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
-		propertySource.setPersistPropertyValue(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), size);
-
-		// fire persist change recursively
-		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, propertySource, true);
-	}
-
-	private static boolean changeBounds(PersistPropertySource propertySource, Point moveDelta, Dimension sizeDelta, boolean change)
-	{
-		java.awt.Point loc = (java.awt.Point)propertySource.getPersistPropertyValue(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName());
-		int x = loc.x + moveDelta.x;
-		int y = loc.y + moveDelta.y;
-
-		java.awt.Dimension dim = (java.awt.Dimension)propertySource.getPersistPropertyValue(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
-		int width = dim.width + sizeDelta.width;
-		int height = dim.height + sizeDelta.height;
+		Rectangle bounds = ep.getFigure().getBounds();
+		int x = bounds.x + moveDelta.x;
+		int y = bounds.y + moveDelta.y;
+		int width = bounds.width + sizeDelta.width;
+		int height = bounds.height + sizeDelta.height;
 
 		if (x < 0 || y < 0 || width < 0 || height < 0) return false;
 
 		if (change)
 		{
-			setLocationAndSize(propertySource, new java.awt.Point(x, y), new java.awt.Dimension(width, height));
+			setLocationAndSize(ep, new java.awt.Point(x, y), new java.awt.Dimension(width, height));
 		}
 		return true;
 	}

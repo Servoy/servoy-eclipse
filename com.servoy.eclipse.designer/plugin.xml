@@ -30,6 +30,16 @@
             <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
       </factory>
       <factory
+            adaptableType="com.servoy.j2db.persistence.AbstractBase"
+            class="com.servoy.eclipse.designer.property.RestorerAdapterFactory">
+            <adapter type="com.servoy.eclipse.ui.property.IRestorer"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.j2db.persistence.FormElementGroup"
+            class="com.servoy.eclipse.designer.property.RestorerAdapterFactory">
+            <adapter type="com.servoy.eclipse.ui.property.IRestorer"/>
+      </factory>
+      <factory
             adaptableType="java.awt.Point"
             class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
             <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>

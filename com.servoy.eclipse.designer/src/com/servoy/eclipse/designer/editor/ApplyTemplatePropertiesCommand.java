@@ -20,7 +20,6 @@ package com.servoy.eclipse.designer.editor;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.gef.commands.Command;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,7 +28,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.repository.SolutionDeserializer;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
-import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
@@ -43,16 +41,14 @@ import com.servoy.j2db.persistence.Template;
  * @author rgansevles
  *
  */
-public class ApplyTemplatePropertiesCommand extends Command
+public class ApplyTemplatePropertiesCommand extends BaseRestorableCommand
 {
 	private final TemplateElementHolder templateHolder;
-	private final IPersist persist;
-	private Map<String, Object> undoPropertiesMap;
 
 	public ApplyTemplatePropertiesCommand(TemplateElementHolder template, IPersist persist)
 	{
+		super("Apply template", persist);
 		this.templateHolder = template;
-		this.persist = persist;
 	}
 
 	@Override
@@ -66,25 +62,24 @@ public class ApplyTemplatePropertiesCommand extends Command
 	@Override
 	public void execute()
 	{
+		saveState();
+
+		// elements
+		List<JSONObject> elements = ElementFactory.getTemplateElements(templateHolder);
+		if (elements == null || elements.size() == 0)
+		{
+			return;
+		}
+
+		IPersist persist = (IPersist)getObject();
 		try
 		{
-			// elements
-			List<JSONObject> elements = ElementFactory.getTemplateElements(templateHolder);
-			if (elements == null || elements.size() == 0)
-			{
-				return;
-			}
-
-			JSONObject object = elements.get(0);
+			JSONObject json = elements.get(0);
 
 			IDeveloperRepository repository = (IDeveloperRepository)persist.getRootObject().getRepository();
 			Map<String, Object> propertyValues = SolutionDeserializer.getPropertyValuesForJsonObject(repository, persist,
-				ElementFactory.resolveCleanedProperties((Form)persist.getAncestor(IRepository.FORMS), object));
+				ElementFactory.resolveCleanedProperties((Form)persist.getAncestor(IRepository.FORMS), json));
 			propertyValues.remove(Template.PROP_LOCATION);
-			if (persist instanceof AbstractBase)
-			{
-				undoPropertiesMap = ((AbstractBase)persist).getPropertiesMap();
-			}
 
 			repository.updatePersistWithValueMap(persist, propertyValues);
 		}
@@ -97,21 +92,6 @@ public class ApplyTemplatePropertiesCommand extends Command
 			ServoyLog.logError("Error processing template " + templateHolder.template.getName(), e);
 		}
 
-		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persist, false);
-	}
-
-	@Override
-	public boolean canUndo()
-	{
-		return undoPropertiesMap != null;
-	}
-
-	@Override
-	public void undo()
-	{
-		((AbstractBase)persist).copyPropertiesMap(null); // clears propertyMap
-		((AbstractBase)persist).copyPropertiesMap(undoPropertiesMap);
-		undoPropertiesMap = null;
 		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persist, false);
 	}
 }

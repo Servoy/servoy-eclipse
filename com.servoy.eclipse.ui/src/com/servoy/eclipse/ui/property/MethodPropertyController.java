@@ -271,7 +271,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 						ServoyLog.logError(e);
 						return new IPropertyDescriptor[0];
 					}
-					Object propertyValue = new PersistPropertySource(flattenedForm, null, true).getPropertyValue(methodKey);
+					Object propertyValue = new PersistPropertySource(flattenedForm, null, false).getPropertyValue(methodKey);
 					methodId = ((ComplexProperty<MethodWithArguments>)propertyValue).getValue().methodId;
 				}
 				else

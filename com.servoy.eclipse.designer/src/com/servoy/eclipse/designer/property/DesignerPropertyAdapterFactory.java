@@ -82,7 +82,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 		{
 			if (key == IPropertySource.class)
 			{
-				return new FormElementGroupPropertySource((FormElementGroup)((EditPart)obj).getModel());
+				return new FormElementGroupPropertySource((FormElementGroup)((EditPart)obj).getModel(), getEditpartFormContext((EditPart)obj));
 			}
 			if (key == FormElementGroup.class)
 			{
@@ -92,7 +92,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 		}
 		if (obj instanceof FormElementGroup && key == IPropertySource.class)
 		{
-			return new FormElementGroupPropertySource((FormElementGroup)obj);
+			return new FormElementGroupPropertySource((FormElementGroup)obj, null);
 		}
 		if (obj instanceof SimpleUserNode)
 		{
@@ -130,15 +130,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 				persist = (IPersist)model;
 				retargetToEditor = false;
 			}
-			EditPart formEditPart = editPart;
-			while (formEditPart != null && !(formEditPart instanceof FormGraphicalEditPart))
-			{
-				formEditPart = formEditPart.getParent();
-			}
-			if (formEditPart instanceof FormGraphicalEditPart)
-			{
-				context = (IPersist)formEditPart.getModel();
-			}
+			context = getEditpartFormContext(((EditPart)obj));
 		}
 		else if (obj instanceof PersistEditor)
 		{
@@ -149,6 +141,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 		else if (obj instanceof PersistContext)
 		{
 			persist = ((PersistContext)obj).getPersist();
+			context = ((PersistContext)obj).getContext();
 			retargetToEditor = false;
 		}
 		else if (obj instanceof IPersist)
@@ -212,6 +205,24 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			}
 		}
 
+		return null;
+	}
+
+	/**
+	 * @param editPart
+	 * @return
+	 */
+	private IPersist getEditpartFormContext(EditPart editPart)
+	{
+		EditPart formEditPart = editPart;
+		while (formEditPart != null && !(formEditPart instanceof FormGraphicalEditPart))
+		{
+			formEditPart = formEditPart.getParent();
+		}
+		if (formEditPart instanceof FormGraphicalEditPart)
+		{
+			return (IPersist)formEditPart.getModel();
+		}
 		return null;
 	}
 
