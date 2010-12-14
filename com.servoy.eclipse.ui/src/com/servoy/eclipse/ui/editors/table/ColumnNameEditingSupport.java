@@ -75,9 +75,9 @@ public class ColumnNameEditingSupport extends EditingSupport
 				{
 					public void run()
 					{
-						MessageDialog.openError(Display.getDefault().getActiveShell(), "Error setting name on the column", e.getMessage());
+						MessageDialog.openError(Display.getDefault().getActiveShell(), "Error setting name on the column", e.getMessage()); //$NON-NLS-1$
 						tableViewer.editElement(element, ColumnComposite.CI_NAME);
-						editor.setValue(value);
+						editor.setValue(((Column)element).getName());
 					}
 				});
 				ServoyLog.logError(e);

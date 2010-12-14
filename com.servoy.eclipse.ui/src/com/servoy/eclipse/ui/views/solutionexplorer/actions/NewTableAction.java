@@ -82,13 +82,28 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 		{
 			try
 			{
-				IServerInternal s = (IServerInternal)node.getRealObject();
+				final IServerInternal s = (IServerInternal)node.getRealObject();
 				InputDialog nameDialog = new InputDialog(viewer.getViewSite().getShell(), "Create table", "Supply table name", "", new IInputValidator()
 				{
 					public String isValid(String newText)
 					{
+						//check to see if a table with the same name does not already exist.
+						try
+						{
+							if (s.getTable(newText) != null)
+							{
+								return "A table with the same name already exists"; //$NON-NLS-1$
+							}
+						}
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError(e);
+							MessageDialog.openError(UIUtils.getActiveShell(), "Error", e.getMessage()); //$NON-NLS-1$
+							return e.getMessage();
+						}
+
 						boolean valid = IdentDocumentValidator.isSQLIdentifier(newText);
-						return valid ? null : (newText.length() == 0 ? "" : "Invalid table name");
+						return valid ? null : (newText.length() == 0 ? "" : "Invalid table name"); //$NON-NLS-1$//$NON-NLS-2$
 					}
 				});
 				int res = nameDialog.open();
@@ -100,8 +115,8 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 					{
 						IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 						t = s.createNewTable(validator, name);
+						EditorUtil.openTableEditor(t);
 					}
-					EditorUtil.openTableEditor(t);
 				}
 			}
 			catch (RepositoryException e)
