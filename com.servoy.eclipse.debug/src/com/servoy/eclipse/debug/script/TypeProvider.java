@@ -19,9 +19,7 @@ package com.servoy.eclipse.debug.script;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +41,6 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import org.mozilla.javascript.JavaMembers;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyLog;
@@ -56,6 +53,7 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.IDisplayDependencyData;
 import com.servoy.j2db.dataprocessing.JSDataSet;
+import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
@@ -79,8 +77,10 @@ import com.servoy.j2db.plugins.IPluginManager;
 import com.servoy.j2db.scripting.GroupScriptObject;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.IScriptObject;
-import com.servoy.j2db.scripting.InstanceJavaMembers;
+import com.servoy.j2db.scripting.JSApplication;
+import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
+import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.ui.IDepricatedScriptTabPanelMethods;
 import com.servoy.j2db.ui.IScriptCheckBoxMethods;
 import com.servoy.j2db.ui.IScriptChoiceMethods;
@@ -106,7 +106,6 @@ import com.servoy.j2db.util.Utils;
 public class TypeProvider extends TypeCreator implements ITypeProvider
 {
 	private final ConcurrentMap<String, DynamicTypeFiller> dynamicTypeFillers = new ConcurrentHashMap<String, DynamicTypeFiller>();
-	private final Set<String> constantOnly = new HashSet<String>();
 
 	private static final ConcurrentHashMap<String, Type> classTypes = new ConcurrentHashMap<String, Type>();
 	private static final Type NO_CLASS = TypeInfoModelFactory.eINSTANCE.createType();
@@ -163,6 +162,14 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			{
 				type = null;
 			}
+			return type;
+		}
+		else if (typeName.equals("Continuation"))
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVASCRIPT);
+			type.setSuperType(context.getKnownType("Function"));
 			return type;
 		}
 		return super.getType(context, typeName);
@@ -223,39 +230,30 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 
 	@Override
-	protected synchronized void initalize()
+	protected void initalize()
 	{
-		super.initalize();
-		if (constantOnly.size() == 0)
+		synchronized (this)
 		{
-			Set<String> typeNames = getTypeNames(null);
-			for (String name : typeNames)
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class));
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class));
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class));
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class));
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(ServoyException.class));
+
+			List<IClientPlugin> lst = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getPluginManager().getPlugins(IClientPlugin.class);
+			for (IClientPlugin clientPlugin : lst)
 			{
-				Class< ? > cls = getTypeClass(name);
-				if (cls != null)
+				try
 				{
-					ArrayList<String> al = new ArrayList<String>();
-					JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(cls, null);
-					if (javaMembers != null)
-					{
-						Object[] members = javaMembers.getIds(false);
-						for (Object element : members)
-						{
-							al.add((String)element);
-						}
-						if (javaMembers instanceof InstanceJavaMembers)
-						{
-							al.removeAll(((InstanceJavaMembers)javaMembers).getGettersAndSettersToHide());
-						}
-						else
-						{
-							al.removeAll(objectMethods);
-						}
-						if (al.size() == 0) constantOnly.add(name);
-					}
+					registerConstantsForScriptObject(clientPlugin.getScriptObject());
+				}
+				catch (Throwable e)
+				{
+					Debug.error("error registering constants for client plugin ", e); //$NON-NLS-1$
 				}
 			}
 		}
+		super.initalize();
 	}
 
 	@Override
@@ -267,11 +265,13 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	public Set<String> listTypes(ITypeInfoContext context, String prefix)
 	{
 		Set<String> names = getTypeNames(prefix);
+		//remove types that are only elements
 		names.remove("Elements");
 		names.remove("Super");
 		names.remove("Forms");
 		names.remove("Plugins");
-		names.removeAll(constantOnly);
+		// add the special rhinoe Continuation type.
+		names.add("Continuation");
 		return names;
 	}
 

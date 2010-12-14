@@ -65,7 +65,6 @@ import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
-import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
@@ -75,7 +74,6 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ScriptMethod;
-import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IDeprecated;
 import com.servoy.j2db.scripting.IJavaScriptType;
@@ -83,14 +81,9 @@ import com.servoy.j2db.scripting.IPrefixedConstantsObject;
 import com.servoy.j2db.scripting.IReturnedTypesProvider;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
-import com.servoy.j2db.scripting.JSApplication;
-import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
-import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.ui.IScriptRenderMethods;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
-import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -189,40 +182,21 @@ public abstract class TypeCreator
 
 	protected void initalize()
 	{
-		if (initialized) return;
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel(); // make sure servoy model is created before take sync lock
 		synchronized (this)
 		{
-			if (initialized) return;
-
-			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class));
-			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class));
-			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class));
-			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class));
-			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(ServoyException.class));
-
-			List<IClientPlugin> lst = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getPluginManager().getPlugins(IClientPlugin.class);
-			for (IClientPlugin clientPlugin : lst)
+			if (!initialized)
 			{
-				try
+				initialized = true;
+				servoyModel.addPersistChangeListener(true, new IPersistChangeListener()
 				{
-					registerConstantsForScriptObject(clientPlugin.getScriptObject());
-				}
-				catch (Throwable e)
-				{
-					Debug.error("error registering constants for client plugin ", e); //$NON-NLS-1$
-				}
+					public void persistChanges(Collection<IPersist> changes)
+					{
+						// TODO see if this will become a performance issue..
+						clearDynamicTypes();
+					}
+				});
 			}
-
-			servoyModel.addPersistChangeListener(true, new IPersistChangeListener()
-			{
-				public void persistChanges(Collection<IPersist> changes)
-				{
-					// TODO see if this will become a performance issue..
-					clearDynamicTypes();
-				}
-			});
-			initialized = true;
 		}
 	}
 
