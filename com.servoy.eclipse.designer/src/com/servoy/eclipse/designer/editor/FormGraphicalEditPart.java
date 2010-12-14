@@ -98,8 +98,10 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 				{
 					if (((IFormElement)o).getGroupID() != null)
 					{
+						// use persist.getparent as form in the group, not the current form.
+						// when the group elements are not overrides yet and a group property is changed, an different FormElementGroup is created with this form as parent.
 						FormElementGroup group = new FormElementGroup(((IFormElement)o).getGroupID(),
-							ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(getPersist()), getPersist());
+							ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(getPersist()), (Form)o.getParent());
 						if (groups.add(group))
 						{
 							list.add(group);
