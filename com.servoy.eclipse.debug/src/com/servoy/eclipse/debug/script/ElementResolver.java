@@ -16,10 +16,8 @@
  */
 package com.servoy.eclipse.debug.script;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -65,8 +63,6 @@ import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 @SuppressWarnings("nls")
 public class ElementResolver extends TypeCreator implements IElementResolver
 {
-	private static final List<String> noneConstantTypes = Arrays.asList(new String[] { "application", "security", "jsunit", "solutionModel", "databaseManager", "controller", "currentcontroller", "i18n", "history", "utils", "foundset", "forms", "elements", "plugins" });
-
 	private final Map<String, ITypeNameCreator> typeNameCreators = new HashMap<String, ElementResolver.ITypeNameCreator>();
 
 	public ElementResolver()
@@ -87,12 +83,6 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		typeNameCreators.put("elements", new ElementsTypeNameCreator());
 		typeNameCreators.put("forms", new FormsNameCreator());
 
-	}
-
-	@Override
-	protected boolean constantsOnly(String name)
-	{
-		return !noneConstantTypes.contains(name);
 	}
 
 	public Set<String> listGlobals(ITypeInfoContext context, String prefix)
@@ -296,9 +286,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 
 		if (type != null)
 		{
-			Property property = createProperty(name, readOnly, type, type.getDescription(), image, resource);
-			property.setStatic(constantsOnly(name));
-			return property;
+			return createProperty(name, readOnly, type, type.getDescription(), image, resource);
 		}
 		return null;
 	}

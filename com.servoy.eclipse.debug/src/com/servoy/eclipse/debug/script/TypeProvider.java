@@ -51,7 +51,6 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
-import com.servoy.j2db.dataprocessing.IDisplayDependencyData;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
@@ -256,12 +255,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		super.initalize();
 	}
 
-	@Override
-	protected boolean constantsOnly(String name)
-	{
-		return false;
-	}
-
 	public Set<String> listTypes(ITypeInfoContext context, String prefix)
 	{
 		Set<String> names = getTypeNames(prefix);
@@ -399,7 +392,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			typeNames.put(IScriptDataComboboxMethods.class.getSimpleName(), "ComboBox");
 			typeNames.put(IScriptDataCalendarMethods.class.getSimpleName(), "Calendar");
 			typeNames.put(IScriptMediaInputFieldMethods.class.getSimpleName(), "MediaField");
-			typeNames.put(IDisplayDependencyData.class.getSimpleName(), "TypeAhead");
+			typeNames.put(IScriptFieldMethods.class.getSimpleName(), "TypeAhead");
 			typeNames.put(IScriptFieldMethods.class.getSimpleName(), "TextField");
 			typeNames.put(IDepricatedScriptTabPanelMethods.class.getSimpleName(), "TabPanel");
 			typeNames.put(IScriptSplitPaneMethods.class.getSimpleName(), "SplitPane");

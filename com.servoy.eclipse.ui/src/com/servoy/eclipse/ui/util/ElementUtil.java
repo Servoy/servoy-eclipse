@@ -25,7 +25,6 @@ import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFactory;
-import com.servoy.j2db.dataprocessing.IDisplayDependencyData;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -307,17 +306,8 @@ public class ElementUtil
 					return IScriptDataCalendarMethods.class;
 				case Field.IMAGE_MEDIA :
 					return IScriptMediaInputFieldMethods.class;
-				case Field.TYPE_AHEAD :
-					return IDisplayDependencyData.class;
 				default :
-					if (field.getValuelistID() > 0)
-					{
-						return IDisplayDependencyData.class;
-					}
-					else
-					{
-						return IScriptFieldMethods.class;
-					}
+					return IScriptFieldMethods.class;
 			}
 
 		}

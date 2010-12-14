@@ -289,9 +289,6 @@ public abstract class TypeCreator
 	}
 
 
-	protected abstract boolean constantsOnly(String name);
-
-
 	protected final void registerConstantsForScriptObject(IReturnedTypesProvider scriptObject)
 	{
 		if (scriptObject == null) return;
@@ -318,7 +315,7 @@ public abstract class TypeCreator
 				{
 					addType(element.getSimpleName(), element);
 				}
-				else if (!constantsOnly(element.getSimpleName()) && IJavaScriptType.class.isAssignableFrom(element))
+				else if (IJavaScriptType.class.isAssignableFrom(element))
 				{
 					addType(element.getSimpleName(), element);
 				}
@@ -366,11 +363,6 @@ public abstract class TypeCreator
 		fill(context, members, cls, typeName);
 
 		ImageDescriptor desc = IconProvider.instance().descriptor(cls);
-		if (desc == null)
-		{
-			if (constantsOnly(typeName)) desc = CONSTANT;
-			//else desc = PROPERTY;
-		}
 		type.setAttribute(IMAGE_DESCRIPTOR, desc);
 		return type;
 	}
