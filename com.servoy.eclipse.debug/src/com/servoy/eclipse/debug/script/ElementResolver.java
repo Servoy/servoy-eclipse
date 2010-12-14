@@ -137,7 +137,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 				ServoyLog.logError("Cant get relations of " + form, e);
 			}
 		}
-		else
+		else if (fs != null)
 		{
 			// global, remove the form only things.
 			typeNames.remove("controller");
