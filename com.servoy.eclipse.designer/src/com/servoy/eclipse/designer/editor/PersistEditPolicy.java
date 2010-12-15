@@ -153,9 +153,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 			}
 		}
 
-		else if (persist instanceof TabPanel &&
-			(VisualFormEditor.REQ_PLACE_TAB.equals(request.getType()) || VisualFormEditor.REQ_PLACE_SPLIT_PANE.equals(request.getType())) &&
-			request instanceof DataRequest)
+		else if (persist instanceof TabPanel && VisualFormEditor.REQ_PLACE_TAB.equals(request.getType()) && request instanceof DataRequest)
 		{
 			// add tab to existing tab panel
 			command = new FormPlaceElementCommand((TabPanel)persist, ((DataRequest)request).getData(), request.getType(), request.getExtendedData(), null,

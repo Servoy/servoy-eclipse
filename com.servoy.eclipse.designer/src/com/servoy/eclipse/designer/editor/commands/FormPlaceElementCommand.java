@@ -191,12 +191,6 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 			}
 		}
 
-		if (VisualFormEditor.REQ_PLACE_SPLIT_PANE.equals(requestType))
-		{
-			setLabel("place splitpane");
-			return ElementFactory.createTabs(parent, (Object[])object, location, TabPanel.SPLIT_HORIZONTAL);
-		}
-
 		if (parent instanceof Form && VisualFormEditor.REQ_PLACE_BEAN.equals(requestType))
 		{
 			setLabel("place bean");

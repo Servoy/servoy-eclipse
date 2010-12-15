@@ -65,10 +65,10 @@ public class FormEditPolicy extends ComponentEditPolicy
 	public Command getCommand(final Request request)
 	{
 		Command command = null;
-		if (VisualFormEditor.REQ_PLACE_SPLIT_PANE.equals(request.getType()) || VisualFormEditor.REQ_PLACE_TAB.equals(request.getType()) ||
-			VisualFormEditor.REQ_PLACE_MEDIA.equals(request.getType()) || VisualFormEditor.REQ_PLACE_BEAN.equals(request.getType()) ||
-			VisualFormEditor.REQ_PLACE_BUTTON.equals(request.getType()) || VisualFormEditor.REQ_PLACE_LABEL.equals(request.getType()) ||
-			VisualFormEditor.REQ_PLACE_RECT_SHAPE.equals(request.getType()) || VisualFormEditor.REQ_PLACE_TEMPLATE.equals(request.getType()))
+		if (VisualFormEditor.REQ_PLACE_TAB.equals(request.getType()) || VisualFormEditor.REQ_PLACE_MEDIA.equals(request.getType()) ||
+			VisualFormEditor.REQ_PLACE_BEAN.equals(request.getType()) || VisualFormEditor.REQ_PLACE_BUTTON.equals(request.getType()) ||
+			VisualFormEditor.REQ_PLACE_LABEL.equals(request.getType()) || VisualFormEditor.REQ_PLACE_RECT_SHAPE.equals(request.getType()) ||
+			VisualFormEditor.REQ_PLACE_TEMPLATE.equals(request.getType()))
 		{
 			Object data = request instanceof DataRequest ? ((DataRequest)request).getData() : null;
 			final org.eclipse.draw2d.geometry.Point location = request instanceof DataRequest ? ((DataRequest)request).getlocation() : null;
@@ -197,12 +197,12 @@ public class FormEditPolicy extends ComponentEditPolicy
 	@Override
 	public boolean understandsRequest(Request request)
 	{
-		return VisualFormEditor.REQ_PLACE_SPLIT_PANE.equals(request.getType()) || VisualFormEditor.REQ_PLACE_TAB.equals(request.getType()) ||
-			VisualFormEditor.REQ_PLACE_PORTAL.equals(request.getType()) || VisualFormEditor.REQ_PLACE_MEDIA.equals(request.getType()) ||
-			VisualFormEditor.REQ_PLACE_BEAN.equals(request.getType()) || VisualFormEditor.REQ_PLACE_BUTTON.equals(request.getType()) ||
-			VisualFormEditor.REQ_PLACE_LABEL.equals(request.getType()) || VisualFormEditor.REQ_PLACE_RECT_SHAPE.equals(request.getType()) ||
-			VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()) || VisualFormEditor.REQ_PLACE_TEMPLATE.equals(request.getType()) ||
-			VisualFormEditor.REQ_COPY.equals(request.getType()) || VisualFormEditor.REQ_CUT.equals(request.getType()) || super.understandsRequest(request);
+		return VisualFormEditor.REQ_PLACE_TAB.equals(request.getType()) || VisualFormEditor.REQ_PLACE_PORTAL.equals(request.getType()) ||
+			VisualFormEditor.REQ_PLACE_MEDIA.equals(request.getType()) || VisualFormEditor.REQ_PLACE_BEAN.equals(request.getType()) ||
+			VisualFormEditor.REQ_PLACE_BUTTON.equals(request.getType()) || VisualFormEditor.REQ_PLACE_LABEL.equals(request.getType()) ||
+			VisualFormEditor.REQ_PLACE_RECT_SHAPE.equals(request.getType()) || VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()) ||
+			VisualFormEditor.REQ_PLACE_TEMPLATE.equals(request.getType()) || VisualFormEditor.REQ_COPY.equals(request.getType()) ||
+			VisualFormEditor.REQ_CUT.equals(request.getType()) || super.understandsRequest(request);
 	}
 
 	public static Object getClipboardContents()

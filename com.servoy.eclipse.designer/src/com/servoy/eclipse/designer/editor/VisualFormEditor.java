@@ -87,7 +87,6 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	public static final RequestType REQ_DROP_COPY = new RequestType();
 	public static final String REQ_DROP_LINK = "VFE_DROP_LINK"; //$NON-NLS-1$
 	public static final RequestType REQ_PLACE_TAB = new RequestType(RequestType.TYPE_TAB);
-	public static final RequestType REQ_PLACE_SPLIT_PANE = new RequestType(RequestType.TYPE_SPLIT_PANE);
 	public static final RequestType REQ_PLACE_PORTAL = new RequestType(RequestType.TYPE_PORTAL);
 	public static final RequestType REQ_PLACE_MEDIA = new RequestType(RequestType.TYPE_MEDIA);
 	public static final RequestType REQ_PLACE_BEAN = new RequestType(RequestType.TYPE_BEAN);
@@ -318,8 +317,8 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 					}
 					if (marker.getAttribute(IMarker.CHAR_START, -1) != -1)
 					{
-						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(), Utils.getAsInteger(marker.getAttribute(
-							IMarker.CHAR_START, -1)));
+						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(),
+							Utils.getAsInteger(marker.getAttribute(IMarker.CHAR_START, -1)));
 					}
 					if (elementUuid != null)
 					{

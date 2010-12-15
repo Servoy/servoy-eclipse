@@ -17,6 +17,9 @@
 
 package com.servoy.eclipse.designer.editor.palette;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.gef.requests.CreationFactory;
 
@@ -39,6 +42,7 @@ public class RequestTypeCreationFactory implements CreationFactory
 	private Object data;
 	private Dimension newObjectSize;
 	private IGetSize newObjectSizeCalculator;
+	private Map< ? , ? > extendedData;
 
 	public RequestTypeCreationFactory(RequestType requestType)
 	{
@@ -108,6 +112,20 @@ public class RequestTypeCreationFactory implements CreationFactory
 	public Object getData()
 	{
 		return data;
+	}
+
+	public Map getExtendedData()
+	{
+		if (extendedData == null)
+		{
+			extendedData = new HashMap();
+		}
+		return extendedData;
+	}
+
+	public void setExtendedData(Map< ? , ? > map)
+	{
+		extendedData = map;
 	}
 
 	/**

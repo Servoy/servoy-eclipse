@@ -115,4 +115,17 @@ public class Activator extends AbstractUIPlugin
 	{
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
+
+
+	/**
+	 * Get an image with the given name from this plugin's bundle.
+	 * 
+	 * @param name the name of the image file.
+	 * @return the image descriptor for the file.
+	 */
+	public static ImageDescriptor loadImageDescriptorFromBundle(String name)
+	{
+		return getImageDescriptor("$nl$/icons/" + name);
+	}
+
 }

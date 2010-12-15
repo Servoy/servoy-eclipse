@@ -56,6 +56,10 @@ public class CreateElementRequest extends CreateRequest
 
 	public Command chainSetFactoryObjectCommand(Command command)
 	{
+		if (command == null)
+		{
+			return null;
+		}
 		Command innerCommand = command;
 		while (!(innerCommand instanceof ISupportModels) && innerCommand instanceof ICommandWrapper)
 		{

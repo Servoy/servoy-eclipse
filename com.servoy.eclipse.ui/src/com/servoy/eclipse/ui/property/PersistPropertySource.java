@@ -64,20 +64,20 @@ import com.servoy.eclipse.core.repository.EclipseRepository;
 import com.servoy.eclipse.core.util.CoreUtils;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
-import com.servoy.eclipse.ui.dialogs.FormContentProvider;
-import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
+import com.servoy.eclipse.ui.dialogs.FormContentProvider;
 import com.servoy.eclipse.ui.dialogs.FormContentProvider.FormListOptions;
+import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.editors.BeanCustomCellEditor;
 import com.servoy.eclipse.ui.editors.DataProviderCellEditor;
+import com.servoy.eclipse.ui.editors.DataProviderCellEditor.DataProviderValueEditor;
 import com.servoy.eclipse.ui.editors.FontCellEditor;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
 import com.servoy.eclipse.ui.editors.PageFormatEditor;
 import com.servoy.eclipse.ui.editors.SortCellEditor;
 import com.servoy.eclipse.ui.editors.TagsAndI18NTextCellEditor;
-import com.servoy.eclipse.ui.editors.DataProviderCellEditor.DataProviderValueEditor;
 import com.servoy.eclipse.ui.labelproviders.ArrayLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
@@ -113,6 +113,7 @@ import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
+import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
@@ -149,7 +150,6 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.query.ISQLJoin;
 import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.util.ComponentFactoryHelper;
@@ -178,7 +178,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 	private static IPropertyController<Integer, Integer> VIEW_TYPE_CONTOLLER = null;
 	private static IPropertyController<Integer, Integer> DISPLAY_TYPE_CONTOLLER = null;
 	private static IPropertyController<String, Integer> NAMEDFOUNDSET_CONTOLLER = null;
-	private static IPropertyController<Integer, Integer> TAB_ORIENTATION_CONTROLLER = null;
+	public static final IPropertyController<Integer, Integer> TAB_ORIENTATION_CONTROLLER;
 	private static IPropertyController<String, String> MNEMONIC_CONTROLLER = null;
 	private static IPropertyController<Integer, Integer> TEXT_ORIENTATION_CONTROLLER = null;
 	private static IPropertyController<Integer, Integer> SOLUTION_TYPE_CONTROLLER = null;
@@ -193,6 +193,15 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		SHAPE_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>("shapeType", RepositoryHelper.getDisplayName("shapeType", RectShape.class),
 			new ComboboxPropertyModel<Integer>(new Integer[] { new Integer(RectShape.BORDER_PANEL), new Integer(RectShape.RECTANGLE), new Integer(
 				RectShape.ROUNDED_RECTANGLE), new Integer(RectShape.OVAL) }, new String[] { "BORDER_PANEL", "RECTANGLE", "ROUNDED_RECTANGLE", "OVAL" }),
+			Messages.LabelUnresolved);
+		TAB_ORIENTATION_CONTROLLER = new ComboboxPropertyController<Integer>(
+			"tabOrientation",
+			RepositoryHelper.getDisplayName("tabOrientation", TabPanel.class),
+			new ComboboxPropertyModel<Integer>(
+				new Integer[] { new Integer(TabPanel.DEFAULT), new Integer(SwingConstants.TOP), new Integer(SwingConstants.RIGHT), new Integer(
+					SwingConstants.BOTTOM), new Integer(SwingConstants.LEFT), new Integer(TabPanel.HIDE), new Integer(TabPanel.SPLIT_HORIZONTAL), new Integer(
+					TabPanel.SPLIT_VERTICAL) },
+				new String[] { Messages.LabelDefault, Messages.AlignTop, Messages.AlignRight, Messages.AlignBottom, Messages.AlignLeft, "HIDE", "SPLIT HORIZONTAL", "SPLIT VERTICAL" }),
 			Messages.LabelUnresolved);
 	}
 
@@ -1783,8 +1792,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 					else
 					{
 						// value not a string
-						ServoyLog.logWarning("Cannot set " + id + " property on object " + beanPropertyDescriptor.valueObject + " with type " +
-							value.getClass(), null);
+						ServoyLog.logWarning(
+							"Cannot set " + id + " property on object " + beanPropertyDescriptor.valueObject + " with type " + value.getClass(), null);
 					}
 				}
 				else
@@ -2644,18 +2653,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 
 		if (name.equals("tabOrientation"))
 		{
-			if (TAB_ORIENTATION_CONTROLLER == null)
-			{
-				TAB_ORIENTATION_CONTROLLER = new ComboboxPropertyController<Integer>(
-					id,
-					displayName,
-					new ComboboxPropertyModel<Integer>(
-						new Integer[] { new Integer(TabPanel.DEFAULT), new Integer(SwingConstants.TOP), new Integer(SwingConstants.RIGHT), new Integer(
-							SwingConstants.BOTTOM), new Integer(SwingConstants.LEFT), new Integer(TabPanel.HIDE), new Integer(TabPanel.SPLIT_HORIZONTAL), new Integer(
-							TabPanel.SPLIT_VERTICAL) },
-						new String[] { Messages.LabelDefault, Messages.AlignTop, Messages.AlignRight, Messages.AlignBottom, Messages.AlignLeft, "HIDE", "SPLIT HORIZONTAL", "SPLIT VERTICAL" }),
-					Messages.LabelUnresolved);
-			}
 			return TAB_ORIENTATION_CONTROLLER;
 		}
 

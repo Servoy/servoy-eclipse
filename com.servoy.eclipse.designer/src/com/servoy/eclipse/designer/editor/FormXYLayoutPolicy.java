@@ -39,6 +39,7 @@ import com.servoy.eclipse.designer.actions.DistributeRequest;
 import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.commands.ChangeBoundsCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
+import com.servoy.eclipse.designer.editor.commands.FormPlacePortalCommand;
 import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
@@ -110,25 +111,33 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			Map<Object, Object> extendedData = request.getExtendedData();
 			extendedData.put(SetValueCommand.REQUEST_PROPERTY_PREFIX + "size", new java.awt.Dimension(request.getSize().width, request.getSize().height));
 
-			if (requestType.type == RequestType.TYPE_BUTTON || requestType.type == RequestType.TYPE_LABEL || requestType.type == RequestType.TYPE_TEMPLATE ||
-				requestType.type == RequestType.TYPE_BEAN)
+			Object data = null;
+			if (request instanceof CreateElementRequest)
 			{
-				Object data = null;
-				if (request instanceof CreateElementRequest)
+				CreationFactory factory = ((CreateElementRequest)request).getFactory();
+				if (factory instanceof RequestTypeCreationFactory)
 				{
-					CreationFactory factory = ((CreateElementRequest)request).getFactory();
-					if (factory instanceof RequestTypeCreationFactory)
-					{
-						data = ((RequestTypeCreationFactory)factory).getData();
-					}
+					data = ((RequestTypeCreationFactory)factory).getData();
+					extendedData.putAll(((RequestTypeCreationFactory)factory).getExtendedData());
 				}
-				Point loc = request.getLocation().getCopy();
-				getHostFigure().translateToRelative(loc);
+			}
+
+			Point loc = request.getLocation().getCopy();
+			getHostFigure().translateToRelative(loc);
+
+			if (requestType.type == RequestType.TYPE_BUTTON || requestType.type == RequestType.TYPE_LABEL || requestType.type == RequestType.TYPE_TEMPLATE ||
+				requestType.type == RequestType.TYPE_BEAN || requestType.type == RequestType.TYPE_TAB)
+			{
+
 				command = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), data, requestType, extendedData, null,
 					loc.getSWTPoint(), parent.getPersist());
 			}
+			else if (requestType.type == RequestType.TYPE_PORTAL)
+			{
+				command = new FormPlacePortalCommand(((FormGraphicalEditPart)getHost()).getPersist(), data, requestType, extendedData, null, loc.getSWTPoint(),
+					false, false, parent.getPersist());
+			}
 
-			// TODO: add more
 
 			// set the created object in the CreateRequest, so it can be selected afterwards
 			if (request instanceof CreateElementRequest)

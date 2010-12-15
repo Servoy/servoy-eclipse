@@ -489,8 +489,6 @@ public class ElementFactory
 		{
 			tabPanel = ((Form)parent).createNewTabPanel("tabs_" + (location == null ? 0 : location.y));
 			tabPanel.setPrintable(false);
-			Dimension tabsdim = new Dimension((relatedForms.length * 80) + 200, 150);
-			tabPanel.setSize(tabsdim);
 			tabPanel.setTabOrientation(tabOrientation);
 			tabPanel.setLocation(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
 			placeElementOnTop(tabPanel);
@@ -508,28 +506,31 @@ public class ElementFactory
 		Dimension maxDimension = null;
 		java.awt.Point tabspos = tabPanel.getLocation();
 		tabspos = new java.awt.Point(tabspos.x, tabspos.y + 30);
-		for (Object element : relatedForms)
+		if (relatedForms != null)
 		{
-			if (element instanceof RelatedForm)
+			for (Object element : relatedForms)
 			{
-				RelatedForm rf = (RelatedForm)element;
-				try
+				if (element instanceof RelatedForm)
 				{
-					Tab tab = tabPanel.createNewTab(rf.form.getName(), Utils.stringJoin(rf.relations, '.'), rf.form);
-					tab.setLocation(tabspos);
-					tabspos = new java.awt.Point(tabspos.x + 80, tabspos.y);
-					tab.setSize(new java.awt.Dimension(80, 20));
-					if (tabs != null)
+					RelatedForm rf = (RelatedForm)element;
+					try
 					{
-						tabs.add(tab);
-					}
-					if (maxDimension == null) maxDimension = rf.form.getSize();
-					else if (maxDimension.width < rf.form.getSize().width && maxDimension.height < rf.form.getSize().height) maxDimension = rf.form.getSize();
+						Tab tab = tabPanel.createNewTab(rf.form.getName(), Utils.stringJoin(rf.relations, '.'), rf.form);
+						tab.setLocation(tabspos);
+						tabspos = new java.awt.Point(tabspos.x + 80, tabspos.y);
+						tab.setSize(new java.awt.Dimension(80, 20));
+						if (tabs != null)
+						{
+							tabs.add(tab);
+						}
+						if (maxDimension == null) maxDimension = rf.form.getSize();
+						else if (maxDimension.width < rf.form.getSize().width && maxDimension.height < rf.form.getSize().height) maxDimension = rf.form.getSize();
 
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError("Cannot create tab based on form " + rf.form.getName(), e);
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError("Cannot create tab based on form " + rf.form.getName(), e);
+					}
 				}
 			}
 		}
@@ -551,36 +552,31 @@ public class ElementFactory
 
 	public static IPersist createPortal(Form form, Object[] dataProviders, boolean fillText, boolean fillName, Point location) throws RepositoryException
 	{
-		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
-		Portal portal = null;
-		if (dataProviders.length > 0)
+		Relation[] relations = dataProviders == null || dataProviders.length == 0 ? null : ((IDataProvider)dataProviders[0]).getColumnWrapper().getRelations();
+
+		int x = location == null ? 0 : location.x;
+		int y = location == null ? 0 : location.y;
+
+		StringBuilder relationName = new StringBuilder();
+		StringBuilder portalName = new StringBuilder("portal");
+		for (int i = 0; relations != null && i < relations.length; i++)
 		{
-			Relation[] relations = ((IDataProvider)dataProviders[0]).getColumnWrapper().getRelations();
-			if (relations == null)
-			{
-				return null;
-			}
+			if (i > 0) relationName.append('.');
+			relationName.append(relations[i].getName());
+			portalName.append('_');
+			portalName.append(relations[i].getName());
+		}
+		portalName.append('_').append(y);
 
-			int x = location == null ? 0 : location.x;
-			int y = location == null ? 0 : location.y;
-
-			StringBuffer relationName = new StringBuffer();
-			StringBuffer portalName = new StringBuffer("portal");
-			for (int i = 0; i < relations.length; i++)
-			{
-				if (i > 0) relationName.append('.');
-				relationName.append(relations[i].getName());
-				portalName.append('_');
-				portalName.append(relations[i].getName());
-			}
-			portalName.append('_').append(y);
-
-			portal = form.createNewPortal(portalName.toString(), new java.awt.Point(x, y));
+		Portal portal = form.createNewPortal(portalName.toString(), new java.awt.Point(x, y));
+		if (dataProviders != null && dataProviders.length > 0)
+		{
 			Dimension portaldim = new Dimension(dataProviders.length * 80, 50);
 			portal.setSize(portaldim);
 
 			portal.setRelationName(relationName.toString());
 
+			FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
 			for (int r = 0; r < dataProviders.length; r++)
 			{
 				if (dataProviders[r] == null) continue;
@@ -602,8 +598,8 @@ public class ElementFactory
 				if (fillName) field.setName(getCorrectName(form, portalName + "_" + cutofDPID)); //$NON-NLS-1$
 				if (fillText) field.setText(cutofDPID);
 			}
-			placeElementOnTop(portal);
 		}
+		placeElementOnTop(portal);
 		return portal;
 	}
 

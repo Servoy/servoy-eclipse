@@ -40,12 +40,14 @@ import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory.IGetSize;
+import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.BeanClassContentProvider;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.PaletteCustomization;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataui.IServoyAwareBean;
@@ -53,6 +55,7 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.NameComparator;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.util.Utils;
@@ -66,17 +69,24 @@ import com.servoy.j2db.util.Utils;
  */
 public class VisualFormEditorPaletteFactory
 {
-	public static final String TEMPLATES_ID = "templates";
 	public static final String ELEMENTS_ID = "elements";
+	private static final String ELEMENTS_LABEL_ID = "label";
+	private static final String ELEMENTS_BUTTON_ID = "button";
+	private static final String[] ELEMENTS_IDS = new String[] { ELEMENTS_BUTTON_ID, ELEMENTS_LABEL_ID };
 
 	public static final String BEANS_ID_PREFIX = "beans:";
 	public static final String SERVOY_BEANS_ID = BEANS_ID_PREFIX + "servoy";
 	public static final String JAVA_BEANS_ID = BEANS_ID_PREFIX + "java";
 
+	public static final String TEMPLATES_ID = "templates";
 	public static final String TEMPLATE_ID_PREFIX = "template:";
 
-	private static final String ELEMENTS_LABEL_ID = "label";
-	private static final String ELEMENTS_BUTTON_ID = "button";
+	public static final String CONTAINERS_ID = "containers";
+	private static final String DEFAULT_PANEL_ID = "tabpanel";
+	private static final String TABLESS_PANEL_ID = "tabless panel";
+	private static final String SPLIT_PANE_HORIZONTAL_ID = "split pane";
+	private static final String PORTAL_ID = "portal";
+	private static final String[] CONTAINERS_IDS = new String[] { DEFAULT_PANEL_ID, TABLESS_PANEL_ID, SPLIT_PANE_HORIZONTAL_ID, PORTAL_ID };
 
 	private static PaletteCustomization getDefaultPaletteCustomization()
 	{
@@ -86,6 +96,9 @@ public class VisualFormEditorPaletteFactory
 
 		// add elements
 		addElements(drawers, drawerEntries, entryProperties);
+
+		// add containers
+		addContainers(drawers, drawerEntries, entryProperties);
 
 		// add templates
 		addTemplates(drawers, drawerEntries, entryProperties);
@@ -104,9 +117,21 @@ public class VisualFormEditorPaletteFactory
 		String id = ELEMENTS_ID;
 		drawers.add(id);
 		entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, Messages.LabelElementsPalette);
-		String[] elements = new String[] { ELEMENTS_BUTTON_ID, ELEMENTS_LABEL_ID };
-		drawerEntries.put(id, Arrays.asList(elements));
-		for (String itemId : elements)
+		drawerEntries.put(id, Arrays.asList(ELEMENTS_IDS));
+		for (String itemId : ELEMENTS_IDS)
+		{
+			entryProperties.put(id + '.' + itemId + '.' + PaletteCustomization.PROPERTY_LABEL, Utils.stringInitCap(itemId));
+			entryProperties.put(id + '.' + itemId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Create a " + itemId);
+		}
+	}
+
+	private static void addContainers(List<String> drawers, Map<String, List<String>> drawerEntries, Map<String, Object> entryProperties)
+	{
+		String id = CONTAINERS_ID;
+		drawers.add(id);
+		entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, Messages.LabelContainersPalette);
+		drawerEntries.put(id, Arrays.asList(CONTAINERS_IDS));
+		for (String itemId : CONTAINERS_IDS)
 		{
 			entryProperties.put(id + '.' + itemId + '.' + PaletteCustomization.PROPERTY_LABEL, Utils.stringInitCap(itemId));
 			entryProperties.put(id + '.' + itemId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Create a " + itemId);
@@ -115,22 +140,22 @@ public class VisualFormEditorPaletteFactory
 
 	private static void addTemplates(List<String> drawers, Map<String, List<String>> drawerEntries, Map<String, Object> entryProperties)
 	{
-		String id = TEMPLATES_ID;
-
 		List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
-		Collections.sort(templates, NameComparator.INSTANCE);
-
-		List<String> templateNames = new ArrayList<String>();
-		for (IRootObject template : templates)
+		if (templates.size() > 0)
 		{
-			String templateId = template.getName();
-			templateNames.add(templateId);
-			entryProperties.put(id + '.' + templateId + '.' + PaletteCustomization.PROPERTY_LABEL, Utils.stringInitCap(templateId));
-			entryProperties.put(id + '.' + templateId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Create/apply template " + templateId);
+			String id = TEMPLATES_ID;
+			Collections.sort(templates, NameComparator.INSTANCE);
 
-		}
-		if (templateNames.size() > 0)
-		{
+			List<String> templateNames = new ArrayList<String>();
+			for (IRootObject template : templates)
+			{
+				String templateId = template.getName();
+				templateNames.add(templateId);
+				entryProperties.put(id + '.' + templateId + '.' + PaletteCustomization.PROPERTY_LABEL, Utils.stringInitCap(templateId));
+				entryProperties.put(id + '.' + templateId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Create/apply template " + templateId);
+
+			}
+
 			drawers.add(id);
 			entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, Messages.LabelTemplatesPalette);
 			drawerEntries.put(id, templateNames);
@@ -184,6 +209,11 @@ public class VisualFormEditorPaletteFactory
 			return createElementsEntry(id);
 		}
 
+		if (CONTAINERS_ID.equals(drawerId))
+		{
+			return createContainersEntry(id);
+		}
+
 		if (TEMPLATES_ID.equals(drawerId))
 		{
 			return createTemplatesEntry(id);
@@ -221,6 +251,55 @@ public class VisualFormEditorPaletteFactory
 
 		ServoyLog.logError("Unknown palette elements entry: '" + id + "'", null);
 		return null;
+	}
+
+	private static PaletteEntry createContainersEntry(String id)
+	{
+		ImageDescriptor icon = null;
+		RequestTypeCreationFactory factory = null;
+
+		// tab panels
+		int tabOrienation = TabPanel.DEFAULT;
+		if (DEFAULT_PANEL_ID.equals(id))
+		{
+			icon = com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("tabs.gif");
+		}
+		else if (SPLIT_PANE_HORIZONTAL_ID.equals(id))
+		{
+			icon = com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("split.gif");
+			tabOrienation = TabPanel.SPLIT_HORIZONTAL;
+		}
+		else if (TABLESS_PANEL_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("button.gif"); // TODO: proper icon
+			tabOrienation = TabPanel.HIDE;
+		}
+
+		if (icon != null)
+		{
+			// one of the tab panels above
+			factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TAB, new Dimension(300, 300));
+			factory.getExtendedData().put(
+				SetValueCommand.REQUEST_PROPERTY_PREFIX + StaticContentSpecLoader.PROPERTY_TABORIENTATION.getPropertyName(),
+				PersistPropertySource.TAB_ORIENTATION_CONTROLLER.getConverter().convertProperty(
+					StaticContentSpecLoader.PROPERTY_TABORIENTATION.getPropertyName(), Integer.valueOf(tabOrienation)));
+
+		}
+
+		// portals
+		if (PORTAL_ID.equals(id))
+		{
+			factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_PORTAL, new Dimension(200, 200));
+			icon = com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("portal.gif");
+		}
+
+		if (factory == null)
+		{
+			ServoyLog.logError("Unknown palette containers entry: '" + id + "'", null);
+			return null;
+		}
+
+		return new ElementCreationToolEntry("", " ", factory, icon, icon);
 	}
 
 	private static PaletteEntry createBeansEntry(final String beanClassName)

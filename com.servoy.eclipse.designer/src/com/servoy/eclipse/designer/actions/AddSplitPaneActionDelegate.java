@@ -17,22 +17,9 @@
 package com.servoy.eclipse.designer.actions;
 
 
-import org.eclipse.gef.EditPart;
-import org.eclipse.gef.Request;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
-import org.eclipse.swt.SWT;
-
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
-import com.servoy.eclipse.designer.editor.commands.DataRequest;
-import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
-import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
-import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
-import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
-import com.servoy.eclipse.ui.labelproviders.RelatedFormsLabelProvider;
-import com.servoy.eclipse.ui.property.RelatedFormsContentProvider;
-import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IRepository;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.persistence.TabPanel;
 
 /**
  * Present the user related tabs via a dialog.
@@ -40,59 +27,19 @@ import com.servoy.j2db.persistence.IRepository;
  * The actual command is performed via the selected edit parts' edit policy.
  * 
  */
-public class AddSplitPaneActionDelegate extends AbstractEditpartActionDelegate
+public class AddSplitPaneActionDelegate extends AddTabActionDelegate
 {
 	public AddSplitPaneActionDelegate()
 	{
-		super(VisualFormEditor.REQ_PLACE_SPLIT_PANE);
-	}
-
-	/**
-	 * Check for access to a form.
-	 */
-	@Override
-	protected boolean checkApplicable(EditPart editPart)
-	{
-		return getModel(editPart, IRepository.FORMS) != null && super.checkApplicable(editPart);
+		addSetPropertyValue(
+			StaticContentSpecLoader.PROPERTY_TABORIENTATION.getPropertyName(),
+			PersistPropertySource.TAB_ORIENTATION_CONTROLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_TABORIENTATION.getPropertyName(),
+				Integer.valueOf(TabPanel.SPLIT_HORIZONTAL)));
 	}
 
 	@Override
-	protected Request createRequest(EditPart editPart)
+	protected String getDialogTitle()
 	{
-		Form form = (Form)getModel(editPart, IRepository.FORMS);
-		if (form == null)
-		{
-			return null;
-		}
-
-		RelatedFormsContentProvider contentProvider = new RelatedFormsContentProvider(form)
-		{
-			@Override
-			public Object[] getElements(Object inputElement)
-			{
-				Object[] initialElements = super.getElements(inputElement);
-				Object[] modifiedElements = new Object[initialElements.length + 1];
-				modifiedElements[0] = RelationContentProvider.NONE;
-				System.arraycopy(initialElements, 0, modifiedElements, 1, initialElements.length);
-				return modifiedElements;
-			}
-
-			@Override
-			public boolean hasChildren(Object element)
-			{
-				return super.hasChildren(element) && !RelationContentProvider.NONE.equals(element);
-			}
-		};
-		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, true, TreePatternFilter.FILTER_LEAFS, contentProvider,
-			RelatedFormsLabelProvider.INSTANCE, null, new LeafnodesSelectionFilter(contentProvider), SWT.MULTI, "Select split pane form", form, null, false,
-			TreeSelectDialog.TAB_DIALOG, null);
-		dialog.open();
-
-		if (dialog.getReturnCode() == Window.CANCEL)
-		{
-			return null;
-		}
-
-		return new DataRequest(getRequestType(), ((IStructuredSelection)dialog.getSelection()).toArray());
+		return "Select split pane form";
 	}
 }
