@@ -34,6 +34,7 @@ import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -96,7 +97,7 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 				Solution solution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingSolution();
 
 				ReplaceTableVisitor visitor = new ReplaceTableVisitor(DataSourceUtils.createDBTableDataSource(result[0], result[1]),
-					DataSourceUtils.createDBTableDataSource(result[2], result[3]));
+					DataSourceUtils.createDBTableDataSource(result[2], result[3]), sourcesSelector.getReplaceCalculationsAndAggregations());
 				try
 				{
 					solution.acceptVisitor(visitor);
@@ -127,7 +128,7 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 	public class SourcesSelectorWizardPage extends WizardPage
 	{
 		private String sourceServer, sourceTable, targetServer, targetTable;
-
+		private boolean replaceCalculationsAndAggregations = false;
 
 		private Set<String> dataSources;
 
@@ -135,6 +136,7 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 		private Combo sourceTableNamesCombo;
 		private Combo targetServersCombo;
 		private Combo targetTableNamesCombo;
+		private Button replaceCalculationsButton;
 
 		private final IDeveloperRepository repository;
 
@@ -153,6 +155,11 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 
 			ServoyModelManager.getServoyModelManager().getServoyModel();
 			repository = ServoyModel.getDeveloperRepository();
+		}
+
+		public boolean getReplaceCalculationsAndAggregations()
+		{
+			return replaceCalculationsAndAggregations;
 		}
 
 		/**
@@ -372,6 +379,17 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 				}
 			});
 
+			replaceCalculationsButton = new Button(topLevel, SWT.CHECK);
+			replaceCalculationsButton.setText("Replace table in calculations/aggregations"); //$NON-NLS-1$
+			replaceCalculationsButton.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					replaceCalculationsAndAggregations = replaceCalculationsButton.getSelection();
+				}
+			});
+
 			//Define the layout and place the components
 			FormLayout formLayout = new FormLayout();
 			formLayout.spacing = 5;
@@ -428,6 +446,11 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 			formData.top = new FormAttachment(targetServersCombo, 0, SWT.BOTTOM);
 			formData.right = new FormAttachment(100, 0);
 			targetTableNamesCombo.setLayoutData(formData);
+
+			formData = new FormData();
+			formData.left = new FormAttachment(0, 0);
+			formData.top = new FormAttachment(targetTableLabel, 20, SWT.LEFT);
+			replaceCalculationsButton.setLayoutData(formData);
 
 			sourceServersCombo.setItems(getCurrentServerNames());
 			sourceServersCombo.select(0);

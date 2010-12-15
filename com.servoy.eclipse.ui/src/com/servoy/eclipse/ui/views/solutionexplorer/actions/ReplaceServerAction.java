@@ -34,6 +34,7 @@ import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -68,6 +69,7 @@ public class ReplaceServerAction extends Action implements ISelectionChangedList
 	private final SolutionExplorerView viewer;
 	private String sourceServer;
 	private String targetServer;
+	private boolean replaceInCalculations;
 
 	public ReplaceServerAction(SolutionExplorerView sev)
 	{
@@ -101,6 +103,7 @@ public class ReplaceServerAction extends Action implements ISelectionChangedList
 			final Solution solution = project.getEditingSolution();
 			targetServer = null;
 			sourceServer = null;
+			replaceInCalculations = false;
 			Wizard replaceServer = new Wizard()
 			{
 				@Override
@@ -151,7 +154,7 @@ public class ReplaceServerAction extends Action implements ISelectionChangedList
 													vl.setServerName(targetServer);
 												}
 											}
-											else if (object instanceof TableNode)
+											else if (object instanceof TableNode && replaceInCalculations)
 											{
 												TableNode tableNode = ((TableNode)object);
 												if (sourceServer.equals(tableNode.getServerName()))
@@ -233,6 +236,17 @@ public class ReplaceServerAction extends Action implements ISelectionChangedList
 						}
 					});
 
+					final Button replaceCalculationsButton = new Button(topLevel, SWT.CHECK);
+					replaceCalculationsButton.setText("Replace server in calculations/aggregations"); //$NON-NLS-1$
+					replaceCalculationsButton.addSelectionListener(new SelectionAdapter()
+					{
+						@Override
+						public void widgetSelected(SelectionEvent e)
+						{
+							replaceInCalculations = replaceCalculationsButton.getSelection();
+						}
+					});
+
 					FormLayout formLayout = new FormLayout();
 					formLayout.spacing = 5;
 					formLayout.marginWidth = formLayout.marginHeight = 20;
@@ -262,6 +276,11 @@ public class ReplaceServerAction extends Action implements ISelectionChangedList
 					formData.top = new FormAttachment(sourceServersCombo, 0, SWT.BOTTOM);
 					formData.right = new FormAttachment(100, 0);
 					targetServersCombo.setLayoutData(formData);
+
+					formData = new FormData();
+					formData.left = new FormAttachment(0, 0);
+					formData.top = new FormAttachment(targetServerLabel, 20, SWT.LEFT);
+					replaceCalculationsButton.setLayoutData(formData);
 
 					DataSourceCollectorVisitor datasourceCollector = new DataSourceCollectorVisitor();
 					solution.acceptVisitor(datasourceCollector);
