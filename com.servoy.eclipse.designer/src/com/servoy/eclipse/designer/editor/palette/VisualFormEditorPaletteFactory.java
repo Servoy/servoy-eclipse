@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.designer.editor.palette;
 
+import java.beans.BeanDescriptor;
+import java.beans.BeanInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,11 +39,16 @@ import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory.IGetSize;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.dialogs.BeanClassContentProvider;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.PaletteCustomization;
+import com.servoy.j2db.IServoyBeanFactory;
+import com.servoy.j2db.component.ComponentFactory;
+import com.servoy.j2db.dataui.IServoyAwareBean;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
@@ -61,6 +68,11 @@ public class VisualFormEditorPaletteFactory
 {
 	public static final String TEMPLATES_ID = "templates";
 	public static final String ELEMENTS_ID = "elements";
+
+	public static final String BEANS_ID_PREFIX = "beans:";
+	public static final String SERVOY_BEANS_ID = BEANS_ID_PREFIX + "servoy";
+	public static final String JAVA_BEANS_ID = BEANS_ID_PREFIX + "java";
+
 	public static final String TEMPLATE_ID_PREFIX = "template:";
 
 	private static final String ELEMENTS_LABEL_ID = "label";
@@ -73,6 +85,22 @@ public class VisualFormEditorPaletteFactory
 		Map<String, Object> entryProperties = new HashMap<String, Object>();
 
 		// add elements
+		addElements(drawers, drawerEntries, entryProperties);
+
+		// add templates
+		addTemplates(drawers, drawerEntries, entryProperties);
+
+		// add servoy beans
+		addBeans(true, drawers, drawerEntries, entryProperties);
+
+		// add other beans
+		addBeans(false, drawers, drawerEntries, entryProperties);
+
+		return new PaletteCustomization(drawers, drawerEntries, entryProperties);
+	}
+
+	private static void addElements(List<String> drawers, Map<String, List<String>> drawerEntries, Map<String, Object> entryProperties)
+	{
 		String id = ELEMENTS_ID;
 		drawers.add(id);
 		entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, Messages.LabelElementsPalette);
@@ -83,11 +111,11 @@ public class VisualFormEditorPaletteFactory
 			entryProperties.put(id + '.' + itemId + '.' + PaletteCustomization.PROPERTY_LABEL, Utils.stringInitCap(itemId));
 			entryProperties.put(id + '.' + itemId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Create a " + itemId);
 		}
+	}
 
-		// add templates
-		id = TEMPLATES_ID;
-		drawers.add(id);
-		entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, Messages.LabelTemplatesPalette);
+	private static void addTemplates(List<String> drawers, Map<String, List<String>> drawerEntries, Map<String, Object> entryProperties)
+	{
+		String id = TEMPLATES_ID;
 
 		List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
 		Collections.sort(templates, NameComparator.INSTANCE);
@@ -101,9 +129,52 @@ public class VisualFormEditorPaletteFactory
 			entryProperties.put(id + '.' + templateId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Create/apply template " + templateId);
 
 		}
-		drawerEntries.put(id, templateNames);
+		if (templateNames.size() > 0)
+		{
+			drawers.add(id);
+			entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, Messages.LabelTemplatesPalette);
+			drawerEntries.put(id, templateNames);
+		}
+	}
 
-		return new PaletteCustomization(drawers, drawerEntries, entryProperties);
+	private static void addBeans(boolean servoyBeans, List<String> drawers, Map<String, List<String>> drawerEntries, Map<String, Object> entryProperties)
+	{
+		String id = servoyBeans ? SERVOY_BEANS_ID : JAVA_BEANS_ID;
+
+		Object[] beans = BeanClassContentProvider.DEFAULT.getElements(BeanClassContentProvider.BEANS_DUMMY_INPUT);
+		List<String> beanIds = new ArrayList<String>();
+		for (Object bean : beans)
+		{
+			if (bean instanceof BeanInfo)
+			{
+				BeanDescriptor beanDescriptor = ((BeanInfo)bean).getBeanDescriptor();
+				if ((IServoyBeanFactory.class.isAssignableFrom(beanDescriptor.getBeanClass()) || IServoyAwareBean.class.isAssignableFrom(beanDescriptor.getBeanClass())) == servoyBeans)
+				{
+					String beanId = beanDescriptor.getBeanClass().getName();
+					beanIds.add(beanId);
+
+					String name = beanDescriptor.getDisplayName();
+					if (name == null || name.length() == 0)
+					{
+						name = beanDescriptor.getName();
+					}
+					entryProperties.put(id + '.' + beanId + '.' + PaletteCustomization.PROPERTY_LABEL, name);
+					String desc = beanDescriptor.getShortDescription();
+					if (desc == null || desc.length() == 0)
+					{
+						desc = "Place bean " + name;
+					}
+					entryProperties.put(id + '.' + beanId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, desc);
+				}
+			}
+		}
+
+		if (beanIds.size() > 0)
+		{
+			drawers.add(id);
+			entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, servoyBeans ? Messages.LabelServoyBeansPalette : Messages.LabelJavaBeansPalette);
+			drawerEntries.put(id, beanIds);
+		}
 	}
 
 	private static PaletteEntry createPaletteEntry(String drawerId, String id)
@@ -116,6 +187,11 @@ public class VisualFormEditorPaletteFactory
 		if (TEMPLATES_ID.equals(drawerId))
 		{
 			return createTemplatesEntry(id);
+		}
+
+		if (drawerId.startsWith(BEANS_ID_PREFIX))
+		{
+			return createBeansEntry(id);
 		}
 
 		if (drawerId.startsWith(TEMPLATE_ID_PREFIX))
@@ -145,6 +221,34 @@ public class VisualFormEditorPaletteFactory
 
 		ServoyLog.logError("Unknown palette elements entry: '" + id + "'", null);
 		return null;
+	}
+
+	private static PaletteEntry createBeansEntry(final String beanClassName)
+	{
+		// determine preferred size in a lazy way, only when object is really dragged
+		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_BEAN, new IGetSize()
+		{
+			public Dimension getSize()
+			{
+				try
+				{
+					java.awt.Dimension prefferredSize = ElementFactory.getBeanPrefferredSize(ComponentFactory.getBeanInstanceFromXML(
+						com.servoy.eclipse.core.Activator.getDefault().getDesignClient(), beanClassName, null));
+					if (prefferredSize != null)
+					{
+						return new Dimension(prefferredSize.width, prefferredSize.height);
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("Could not instantiate bean " + beanClassName, e);
+				}
+				return new Dimension(80, 80);
+			}
+		});
+		factory.setData(beanClassName);
+		ImageDescriptor icon = Activator.loadImageDescriptorFromBundle("bean.gif");
+		return new ElementCreationToolEntry("", "", factory, icon, icon);
 	}
 
 	private static PaletteEntry createTemplatesEntry(String id)
@@ -313,12 +417,6 @@ public class VisualFormEditorPaletteFactory
 
 		for (String drawerId : paletteCustomization.drawers == null ? defaultPaletteCustomization.drawers : paletteCustomization.drawers)
 		{
-			PaletteDrawer drawer = new PaletteDrawer("");
-			drawer.setId(drawerId);
-			drawer.setUserModificationPermission(drawerId.startsWith(TEMPLATE_ID_PREFIX) ? PaletteEntry.PERMISSION_FULL_MODIFICATION
-				: PaletteEntry.PERMISSION_LIMITED_MODIFICATION);
-			applyPaletteCustomization(paletteCustomization.entryProperties, drawerId, drawer, defaultPaletteCustomization.entryProperties);
-
 			List<String> itemIds = null;
 			if (paletteCustomization.drawerEntries != null)
 			{
@@ -347,20 +445,31 @@ public class VisualFormEditorPaletteFactory
 					itemIds = combinedIds;
 				}
 			}
-			for (String itemId : itemIds)
+
+			if (itemIds != null && itemIds.size() > 0)
 			{
-				PaletteEntry entry = createPaletteEntry(drawerId, itemId);
-				if (entry != null)
+				PaletteDrawer drawer = new PaletteDrawer("");
+				drawer.setId(drawerId);
+				drawer.setUserModificationPermission(drawerId.startsWith(TEMPLATE_ID_PREFIX) ? PaletteEntry.PERMISSION_FULL_MODIFICATION
+					: PaletteEntry.PERMISSION_LIMITED_MODIFICATION);
+				applyPaletteCustomization(paletteCustomization.entryProperties, drawerId, drawer, defaultPaletteCustomization.entryProperties);
+
+				palette.add(drawer);
+
+				for (String itemId : itemIds)
 				{
-					entry.setId(itemId);
-					entry.setUserModificationPermission(drawerId.startsWith(TEMPLATE_ID_PREFIX) ? PaletteEntry.PERMISSION_FULL_MODIFICATION
-						: PaletteEntry.PERMISSION_LIMITED_MODIFICATION);
-					applyPaletteCustomization(paletteCustomization.entryProperties, drawerId + '.' + itemId, entry, defaultPaletteCustomization.entryProperties);
-					drawer.add(entry);
+					PaletteEntry entry = createPaletteEntry(drawerId, itemId);
+					if (entry != null)
+					{
+						entry.setId(itemId);
+						entry.setUserModificationPermission(drawerId.startsWith(TEMPLATE_ID_PREFIX) ? PaletteEntry.PERMISSION_FULL_MODIFICATION
+							: PaletteEntry.PERMISSION_LIMITED_MODIFICATION);
+						applyPaletteCustomization(paletteCustomization.entryProperties, drawerId + '.' + itemId, entry,
+							defaultPaletteCustomization.entryProperties);
+						drawer.add(entry);
+					}
 				}
 			}
-
-			palette.add(drawer);
 		}
 	}
 

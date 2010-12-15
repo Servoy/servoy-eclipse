@@ -197,6 +197,22 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 			return ElementFactory.createTabs(parent, (Object[])object, location, TabPanel.SPLIT_HORIZONTAL);
 		}
 
+		if (parent instanceof Form && VisualFormEditor.REQ_PLACE_BEAN.equals(requestType))
+		{
+			setLabel("place bean");
+			String beanClassname;
+			if (object instanceof BeanInfo)
+			{
+				beanClassname = ((BeanInfo)object).getBeanDescriptor().getBeanClass().getName();
+			}
+			else
+			{
+				beanClassname = (String)object;
+			}
+
+			return new IPersist[] { ElementFactory.createBean((Form)parent, beanClassname, location) };
+		}
+
 		if (parent instanceof ISupportFormElements)
 		{
 			if (VisualFormEditor.REQ_PLACE_MEDIA.equals(requestType))
@@ -216,12 +232,6 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 				setLabel("place shape");
 				return new IPersist[] { ElementFactory.createRectShape((ISupportFormElements)parent, location) };
 			}
-		}
-
-		if (parent instanceof Form && VisualFormEditor.REQ_PLACE_BEAN.equals(requestType))
-		{
-			setLabel("place bean");
-			return new IPersist[] { ElementFactory.createBean((Form)parent, (BeanInfo)object, location) };
 		}
 
 		if (parent instanceof Form && VisualFormEditor.REQ_PLACE_TEMPLATE.equals(requestType))
@@ -308,8 +318,8 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 				if (template.getUUID().equals(dragData.uuid))
 				{
 					setLabel("place template");
-					return ElementFactory.applyTemplate((ISupportFormElements)parent, new TemplateElementHolder((Template)template, dragData.element), location,
-						false);
+					return ElementFactory.applyTemplate((ISupportFormElements)parent, new TemplateElementHolder((Template)template, dragData.element),
+						location, false);
 				}
 			}
 			ServoyLog.logWarning("place template: template " + dragData.uuid + " not found", null);

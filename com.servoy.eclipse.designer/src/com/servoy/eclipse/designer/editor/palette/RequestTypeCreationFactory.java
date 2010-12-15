@@ -38,20 +38,44 @@ public class RequestTypeCreationFactory implements CreationFactory
 	private Object newObject;
 	private Object data;
 	private Dimension newObjectSize;
+	private IGetSize newObjectSizeCalculator;
+
+	public RequestTypeCreationFactory(RequestType requestType)
+	{
+		this(requestType, null, null);
+	}
+
+	public RequestTypeCreationFactory(RequestType requestType, IGetSize newObjectSizeCalculator)
+	{
+		this(requestType, null, newObjectSizeCalculator);
+	}
 
 	public RequestTypeCreationFactory(RequestType requestType, Dimension newObjectSize)
 	{
+		this(requestType, newObjectSize, null);
+	}
+
+	private RequestTypeCreationFactory(RequestType requestType, Dimension newObjectSize, IGetSize newObjectSizeCalculator)
+	{
 		this.requestType = requestType;
 		this.newObjectSize = newObjectSize;
+		this.newObjectSizeCalculator = newObjectSizeCalculator;
 	}
 
-	public void setNewObjectSize(Dimension newObjectSize)
-	{
-		this.newObjectSize = newObjectSize;
-	}
-
+	/*
+	 * Call the newObjectSizeCalculator only once.
+	 */
 	public Dimension getNewObjectSize()
 	{
+		if (newObjectSize != null)
+		{
+			return newObjectSize;
+		}
+		if (newObjectSizeCalculator != null)
+		{
+			newObjectSize = newObjectSizeCalculator.getSize();
+			newObjectSizeCalculator = null;
+		}
 		return newObjectSize;
 	}
 
@@ -104,4 +128,14 @@ public class RequestTypeCreationFactory implements CreationFactory
 		return new Dimension(100, 100);
 	}
 
+	/**
+	 * Simple interface for getting the size in a lazy way.
+	 * 
+	 * @author rgansevles
+	 *
+	 */
+	public interface IGetSize
+	{
+		Dimension getSize();
+	}
 }

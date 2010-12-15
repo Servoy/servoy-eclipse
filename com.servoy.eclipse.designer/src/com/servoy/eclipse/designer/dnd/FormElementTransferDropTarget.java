@@ -67,7 +67,7 @@ public class FormElementTransferDropTarget extends ElementTransferDropTarget
 				return dropReq;
 			}
 
-			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_DROP_COPY, null);
+			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_DROP_COPY);
 			factory.setData(UserNodeListDragSourceListener.dragObjects);
 			CreateElementRequest createRequest = new CreateElementRequest(factory);
 			createRequest.setType(VisualFormEditor.REQ_DROP_COPY);

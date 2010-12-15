@@ -19,7 +19,6 @@ package com.servoy.eclipse.core.elements;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.beans.BeanInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -264,17 +263,29 @@ public class ElementFactory
 		return label;
 	}
 
-	public static IPersist createBean(Form form, BeanInfo beanInfo, Point location) throws RepositoryException
+	public static IPersist createBean(Form form, String beanClassName, Point location) throws RepositoryException
 	{
-		Bean bean = form.createNewBean("bean_" + random.nextInt(1024), beanInfo.getBeanDescriptor().getBeanClass().getName()); //$NON-NLS-1$
+		Bean bean = form.createNewBean("bean_" + random.nextInt(1024), beanClassName); //$NON-NLS-1$
 		bean.setLocation(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
 
 		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
 		Object beanInstance = DesignComponentFactory.getBeanDesignInstance(Activator.getDefault().getDesignClient(), flattenedSolution, bean, form);
-		if (beanInstance instanceof Component)
+		// check preferredSize and minimumSize
+		Dimension preferredSize = getBeanPrefferredSize(beanInstance);
+		if (preferredSize != null)
 		{
-			// check preferredSize and minimumSize
-			try
+			bean.setSize(preferredSize);
+		}
+
+		placeElementOnTop(bean);
+		return bean;
+	}
+
+	public static Dimension getBeanPrefferredSize(Object beanInstance)
+	{
+		try
+		{
+			if (beanInstance instanceof Component)
 			{
 				Dimension initSize = ((Component)beanInstance).getPreferredSize();
 				if (initSize == null)
@@ -283,17 +294,17 @@ public class ElementFactory
 				}
 				if (initSize != null && initSize.width > 0 && initSize.height > 0)
 				{
-					bean.setSize(initSize);
+					return initSize;
 				}
 			}
-			catch (Exception e)
-			{
-				Debug.error("Could not get preferred size from bean instance " + bean.getBeanClassName(), e);
-			}
+		}
+		catch (Exception e)
+		{
+			Debug.error("Could not get preferred size from bean instance " + beanInstance.getClass().getName(), e);
 		}
 
-		placeElementOnTop(bean);
-		return bean;
+		return null;
+
 	}
 
 	public static Field createField(ISupportFormElements parent, IDataProvider dataProvider, Point location) throws RepositoryException

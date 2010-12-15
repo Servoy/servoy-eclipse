@@ -110,7 +110,8 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			Map<Object, Object> extendedData = request.getExtendedData();
 			extendedData.put(SetValueCommand.REQUEST_PROPERTY_PREFIX + "size", new java.awt.Dimension(request.getSize().width, request.getSize().height));
 
-			if (requestType.type == RequestType.TYPE_BUTTON || requestType.type == RequestType.TYPE_LABEL || requestType.type == RequestType.TYPE_TEMPLATE)
+			if (requestType.type == RequestType.TYPE_BUTTON || requestType.type == RequestType.TYPE_LABEL || requestType.type == RequestType.TYPE_TEMPLATE ||
+				requestType.type == RequestType.TYPE_BEAN)
 			{
 				Object data = null;
 				if (request instanceof CreateElementRequest)
