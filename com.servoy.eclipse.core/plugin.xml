@@ -774,4 +774,13 @@
             type="com.servoy.eclipse.core.builderProblem">
       </super>
    </extension>
+   <extension
+         point="org.eclipse.ui.ide.markerSupport">
+      <problemFilter
+            enabled="true"
+            id="com.servoy.eclipse.core.servoyProblemFilter"
+            name="Servoy Active Project Filter">
+      </problemFilter>
+     
+   </extension>
 </plugin>

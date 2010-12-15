@@ -54,6 +54,7 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -80,7 +81,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
@@ -937,6 +941,44 @@ public class ServoyModel implements IWorkspaceSaveListener
 							}
 						};
 						testBuildPaths.schedule();
+
+
+						WorkspaceJob updateServoyWorkingSet = new WorkspaceJob("Servoy active solution workingset updater")
+						{
+							@Override
+							public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+							{
+								PlatformUI.getPreferenceStore().setValue(IWorkbenchPreferenceConstants.USE_WINDOW_WORKING_SET_BY_DEFAULT, true);
+								ServoyProject[] allprojects = getModulesOfActiveProject();
+								IAdaptable[] projects = new IAdaptable[allprojects.length];
+								for (int i = 0; i < allprojects.length; i++)
+								{
+									projects[i] = allprojects[i].getProject();
+								}
+								IWorkingSetManager workingSetManager = PlatformUI.getWorkbench().getWorkingSetManager();
+								IWorkingSet ws = workingSetManager.getWorkingSet("Servoy Active Solution"); //$NON-NLS-1$
+								if (ws == null)
+								{
+									ws = workingSetManager.createWorkingSet("Servoy Active Solution", projects);
+									workingSetManager.addWorkingSet(ws);
+								}
+								else
+								{
+									ws.setElements(projects);
+								}
+								final IWorkingSet[] wsa = new IWorkingSet[1];
+								wsa[0] = ws;
+								Display.getDefault().asyncExec(new Runnable()
+								{
+									public void run()
+									{
+										PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().setWorkingSets(wsa);
+									}
+								});
+								return Status.OK_STATUS;
+							}
+						};
+						updateServoyWorkingSet.schedule();
 
 						Display.getDefault().syncExec(new Runnable()
 						{
