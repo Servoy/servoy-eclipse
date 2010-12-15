@@ -26,17 +26,13 @@ import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.rulers.RulerProvider;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.commands.MovePartCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
-import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
-import com.servoy.j2db.persistence.RepositoryException;
 
 /**
  * Ruler provider for form designer, vertical rule is form width, horizontal rules are part boundaries.
@@ -112,37 +108,12 @@ public class FormRulerProvider extends RulerProvider
 
 		if (guide == formEditPart) // horizontal
 		{
-			// sub-form width is editable, but not smaller then superform
-			int minVal = 0;
 			Form form = (Form)formEditPart.getModel();
-			if (form.getExtendsFormID() > 0)
-			{
-				FlattenedSolution editingFlattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
-				if (editingFlattenedSolution == null)
-				{
-					ServoyLog.logError("Could not get project for form " + form, null);
-					return null;
-				}
-				Form superForm = editingFlattenedSolution.getForm(form.getExtendsFormID());
-				if (superForm != null)
-				{
-					Form flattenedSuperForm = superForm;
-					try
-					{
-						flattenedSuperForm = editingFlattenedSolution.getFlattenedForm(superForm);
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
-					minVal = flattenedSuperForm.getWidth();
-				}
-			}
 
-			String property = "width";
+			String property = "width"; //$NON-NLS-1$
 			PersistPropertySource persistProperties = new PersistPropertySource(form, form, false);
 			int oldVal = ((Integer)persistProperties.getPropertyValue(property)).intValue();
-			int newVal = (oldVal + positionDelta) > minVal ? (oldVal + positionDelta) : minVal;
+			int newVal = oldVal + positionDelta;
 			if (oldVal == newVal)
 			{
 				return null;
