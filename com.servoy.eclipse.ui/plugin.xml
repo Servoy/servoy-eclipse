@@ -16,13 +16,6 @@
             id="com.servoy.eclipse.ui.views.SolutionExplorerView">
       </view>
       <view
-            category="com.servoy.eclipse.ui"
-            class="com.servoy.eclipse.ui.views.ServoyWebBrowserView"
-            icon="icons/globe.gif"
-            id="com.servoy.eclipse.ui.browser.view"
-            name="Servoy News">
-      </view>
-      <view
       		name="Servoy Marketplace"
       		icon="icons/marketplace.gif"
             category="com.servoy.eclipse.ui"

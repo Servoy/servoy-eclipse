@@ -37,7 +37,6 @@ import org.eclipse.ui.internal.registry.ActionSetRegistry;
 import org.eclipse.ui.internal.registry.IActionSetDescriptor;
 
 import com.servoy.eclipse.ui.views.ServoyMarketplaceView;
-import com.servoy.eclipse.ui.views.ServoyWebBrowserView;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.wizards.NewFormWizard;
 import com.servoy.eclipse.ui.wizards.NewMethodWizard;
@@ -60,7 +59,6 @@ public class DesignPerspective implements IPerspectiveFactory
 		String editorArea = layout.getEditorArea();
 		IFolderLayout left = layout.createFolder("left", IPageLayout.LEFT, 0.21f, editorArea); //$NON-NLS-1$
 		left.addView(SolutionExplorerView.PART_ID);
-		left.addView(ServoyWebBrowserView.ID);
 //		left.addView(IPageLayout.ID_RES_NAV);//move to synchronize perspective only
 
 		IFolderLayout right = layout.createFolder("right", IPageLayout.RIGHT, 0.8f, editorArea); //$NON-NLS-1$
@@ -74,7 +72,7 @@ public class DesignPerspective implements IPerspectiveFactory
 		bottom.addView(IPageLayout.ID_BOOKMARKS);
 		bottom.addView(NewSearchUI.SEARCH_VIEW_ID);
 
-		IFolderLayout marketPlaceFolder = layout.createFolder("marketplaceFolder", IPageLayout.LEFT, 0.8f, editorArea); //$NON-NLS-1$ 
+		IFolderLayout marketPlaceFolder = layout.createFolder("marketplaceFolder", IPageLayout.LEFT, 0.5f, editorArea); //$NON-NLS-1$ 
 		marketPlaceFolder.addPlaceholder(ServoyMarketplaceView.MARKETPLACE_VIEW_ID);
 
 

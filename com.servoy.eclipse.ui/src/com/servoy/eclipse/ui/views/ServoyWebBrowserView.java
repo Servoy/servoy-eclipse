@@ -43,11 +43,8 @@ import com.servoy.eclipse.ui.Activator;
  * 
  * @author gerzse
  */
-public class ServoyWebBrowserView extends WebBrowserView
+public abstract class ServoyWebBrowserView extends WebBrowserView
 {
-	public static final String ID = "com.servoy.eclipse.ui.browser.view"; //$NON-NLS-1$
-	private static final String SERVOY_URL = "http://www.servoy.com/i"; //$NON-NLS-1$
-
 	@Override
 	public void init(IViewSite site) throws PartInitException
 	{
@@ -166,13 +163,7 @@ public class ServoyWebBrowserView extends WebBrowserView
 		}
 	}
 
-	protected String getViewID()
-	{
-		return ID;
-	}
+	abstract protected String getViewID();
 
-	protected String getViewURL()
-	{
-		return SERVOY_URL;
-	}
+	abstract protected String getViewURL();
 }

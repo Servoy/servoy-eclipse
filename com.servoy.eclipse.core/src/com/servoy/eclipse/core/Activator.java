@@ -105,6 +105,8 @@ import com.servoy.j2db.util.Utils;
  */
 public class Activator extends Plugin
 {
+	private static final String SERVOY_URL = "http://www.servoy.com/i"; //$NON-NLS-1$
+
 	private volatile boolean defaultAccessed = false;
 
 	private Boolean sqlExplorerLoaded = null;
@@ -258,6 +260,14 @@ public class Activator extends Plugin
 
 			public void windowOpened(IWorkbenchWindow window)
 			{
+				try
+				{
+					PlatformUI.getWorkbench().getBrowserSupport().createBrowser(null).openURL(new URL(SERVOY_URL));
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("Failed to open browser editor.", e); //$NON-NLS-1$
+				}
 				window.getPartService().addPartListener(new IPartListener()
 				{
 					public void partActivated(IWorkbenchPart part)
