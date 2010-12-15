@@ -20,7 +20,7 @@ package com.servoy.eclipse.ui.search;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
@@ -34,7 +34,6 @@ import org.eclipse.search.core.text.TextSearchRequestor;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 
 import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.j2db.persistence.Solution;
 
 
@@ -113,9 +112,8 @@ public abstract class DLTKSearchEngineSearch extends AbstractPersistSearch
 	 */
 	protected void callDLTKSearchEngine(IProgressMonitor monitor, final TextSearchRequestor collector, IModelElement element, int limitTo, Solution sol)
 	{
-		IDLTKSearchScope dltkScope = SearchEngine.createSearchScope(DLTKCore.create((ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
-			sol.getName()).getProject())));
-		IDLTKLanguageToolkit toolkit = dltkScope.getLanguageToolkit();
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager.getLanguageToolkit(element);
+		IDLTKSearchScope dltkScope = SearchEngine.createWorkspaceScope(toolkit);
 		SearchPattern pattern = SearchPattern.createPattern(element, limitTo, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, toolkit);
 		SearchParticipant[] participants = new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 
