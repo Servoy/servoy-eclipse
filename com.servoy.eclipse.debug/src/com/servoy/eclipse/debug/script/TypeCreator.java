@@ -713,7 +713,7 @@ public abstract class TypeCreator
 			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 			String name = resource.getProject().getName();
-			if (servoyModel.isActiveProject(name))
+			//if (servoyModel.isActiveProject(name))
 			{
 				ServoyProject servoyProject = servoyModel.getServoyProject(name);
 				return servoyProject.getEditingFlattenedSolution();
