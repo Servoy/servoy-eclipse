@@ -139,7 +139,6 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 						if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_WARNING))
 						{
 							hasWarnings = true;
-							break;
 						}
 					}
 				}
