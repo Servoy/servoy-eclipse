@@ -53,6 +53,7 @@ import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.gef.ui.actions.UndoAction;
 import org.eclipse.gef.ui.palette.PaletteViewer;
 import org.eclipse.gef.ui.palette.PaletteViewerProvider;
+import org.eclipse.gef.ui.palette.customize.PaletteCustomizerDialog;
 import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
 import org.eclipse.gef.ui.parts.GraphicalViewerKeyHandler;
 import org.eclipse.gef.ui.parts.ScrollingGraphicalViewer;
@@ -173,7 +174,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 		public void preferenceChange(PreferenceChangeEvent event)
 		{
-
 			if (DesignerPreferences.isGuideSetting(event.getKey()))
 			{
 				applyGuidePreferences();
@@ -185,6 +185,10 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 			else if (DesignerPreferences.isCoolbarSetting(event.getKey()))
 			{
 				refreshToolBars();
+			}
+			else if (paletteModel != null && DesignerPreferences.isPaletteSetting(event.getKey()))
+			{
+				VisualFormEditorPaletteFactory.refreshPalette(paletteModel);
 			}
 		}
 	};
@@ -1014,12 +1018,75 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		return new PaletteViewerProvider(getEditDomain())
 		{
 			@Override
+			public PaletteViewer createPaletteViewer(Composite parent)
+			{
+				PaletteViewer pViewer = new PaletteViewer()
+				{
+					private PaletteCustomizerDialog customizerDialog;
+
+					@Override
+					public PaletteCustomizerDialog getCustomizerDialog()
+					{
+						if (customizerDialog == null)
+						{
+							customizerDialog = new PaletteCustomizerDialog(getControl().getShell(), getCustomizer(), getPaletteRoot())
+							{
+								private static final int DEFAULTS_ID = APPLY_ID + 3;
+
+								@Override
+								protected void createButtonsForButtonBar(Composite parent)
+								{
+									super.createButtonsForButtonBar(parent);
+									createButton(parent, DEFAULTS_ID, "Defaults", false);
+								}
+
+								@Override
+								protected void buttonPressed(int buttonId)
+								{
+									if (DEFAULTS_ID == buttonId)
+									{
+										handleDefaultsPressed();
+									}
+									else
+									{
+										super.buttonPressed(buttonId);
+									}
+								}
+
+								@Override
+								protected VisualFormEditorPaletteCustomizer getCustomizer()
+								{
+									return (VisualFormEditorPaletteCustomizer)super.getCustomizer();
+								}
+
+								protected void handleDefaultsPressed()
+								{
+									getCustomizer().revertToDefaults();
+								}
+
+								@Override
+								public int open()
+								{
+									getCustomizer().initialize();
+									return super.open();
+								}
+							};
+						}
+						return customizerDialog;
+					}
+				};
+				pViewer.createControl(parent);
+				configurePaletteViewer(pViewer);
+				hookPaletteViewer(pViewer);
+				return pViewer;
+			}
+
+			@Override
 			protected void configurePaletteViewer(final PaletteViewer viewer)
 			{
 				super.configurePaletteViewer(viewer);
 
-				viewer.setCustomizer(new VisualFormEditorPaletteCustomizer());
-
+				viewer.setCustomizer(new VisualFormEditorPaletteCustomizer(getPaletteRoot()));
 				viewer.getEditDomain().setDefaultTool(new PaletteSelectionTool()
 				{
 					@Override
@@ -1054,7 +1121,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 				viewer.getControl().addDisposeListener(new DisposeListener()
 				{
-
 					public void widgetDisposed(DisposeEvent e)
 					{
 						ServoyModelManager.getServoyModelManager().getServoyModel().removeActiveProjectListener(activeProjectListener);

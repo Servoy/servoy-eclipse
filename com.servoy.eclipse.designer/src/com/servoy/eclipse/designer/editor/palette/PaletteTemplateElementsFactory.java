@@ -91,14 +91,20 @@ public class PaletteTemplateElementsFactory extends PaletteContainerFactory
 		PaletteContainer parent = determineContainerForNewEntry(selected);
 		int index = determineIndexForNewEntry(parent, selected);
 		PaletteDrawer drawer = new PaletteDrawer(selected.getLabel());
+		drawer.setId(VisualFormEditorPaletteFactory.TEMPLATE_ID_PREFIX + templateHolder.template.getName());
 		drawer.setUserModificationPermission(PaletteEntry.PERMISSION_FULL_MODIFICATION);
 
 		for (JSONObject jsonObject : templateElements)
 		{
-			PaletteEntry toolEntry = VisualFormEditorPaletteFactory.createTemplateToolEntry(templateHolder.template, jsonObject);
-			if (toolEntry != null)
+			String name = jsonObject.optString(SolutionSerializer.PROP_NAME);
+			if (name != null)
 			{
-				drawer.add(toolEntry);
+				PaletteEntry toolEntry = VisualFormEditorPaletteFactory.createTemplateToolEntry(templateHolder.template, jsonObject, name);
+				if (toolEntry != null)
+				{
+					toolEntry.setId(name);
+					drawer.add(toolEntry);
+				}
 			}
 		}
 

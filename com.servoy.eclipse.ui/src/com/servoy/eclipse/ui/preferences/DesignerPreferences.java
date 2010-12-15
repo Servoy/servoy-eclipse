@@ -18,18 +18,22 @@ package com.servoy.eclipse.ui.preferences;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.jabsorb.JSONSerializer;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.property.ColorPropertyController;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -40,7 +44,6 @@ import com.servoy.j2db.util.Utils;
  */
 public class DesignerPreferences
 {
-
 	public static final int PX = 0;
 	public static final int CM = 1;
 	public static final int IN = 2;
@@ -66,6 +69,7 @@ public class DesignerPreferences
 	public static final String FORM_COOLBAR_LAYOUT_SETTING = "formCoolBarLayout";
 	public static final String SHOW_SAME_SIZE_SETTING = "showSameSizeFeedback";
 	public static final String SHOW_ANCHORING_SETTING = "showAnchoringFeedback";
+	public static final String PALETTE_CUSTOMIZATION_SETTING = "paletteCustomization";
 
 	public static final String SNAP_TO_ALIGMNENT = "alignment";
 	public static final String SNAP_TO_GRID = "grid";
@@ -403,6 +407,11 @@ public class DesignerPreferences
 		return FORM_COOLBAR_LAYOUT_SETTING.equals(getKeyPostfix(key));
 	}
 
+	public static boolean isPaletteSetting(String key)
+	{
+		return PALETTE_CUSTOMIZATION_SETTING.equals(getKeyPostfix(key));
+	}
+
 	public void saveCoolbarLayout(CoolbarLayout coolbarLayout)
 	{
 		if (coolbarLayout == null)
@@ -500,4 +509,89 @@ public class DesignerPreferences
 			this.hiddenBars = hiddenBars;
 		}
 	}
+
+	public PaletteCustomization getPaletteCustomization()
+	{
+		String property = getProperty(PALETTE_CUSTOMIZATION_SETTING, null);
+		if (property != null)
+		{
+			try
+			{
+				Map map = (Map)ServoyJSONObject.toJava(new ServoyJSONObject(property, false));
+				return new PaletteCustomization((List<String>)map.get(PaletteCustomization.DRAWERS),
+					(Map<String, List<String>>)map.get(PaletteCustomization.DRAWER_ENTRIES),
+					(Map<String, Object>)map.get(PaletteCustomization.ENTRY_PROPERTIES));
+			}
+			catch (JSONException e)
+			{
+				ServoyLog.logError("Could not read palette preferences", e);
+			}
+		}
+		return null;
+	}
+
+	public void setPaletteCustomization(PaletteCustomization prefs)
+	{
+		try
+		{
+			JSONObject jsonObject = null;
+			if (prefs != null)
+			{
+				jsonObject = new JSONObject();
+				if (prefs.drawers != null)
+				{
+					jsonObject.put(PaletteCustomization.DRAWERS, prefs.drawers);
+				}
+				if (prefs.drawerEntries != null && prefs.drawerEntries.size() > 0)
+				{
+					jsonObject.put(PaletteCustomization.DRAWER_ENTRIES, prefs.drawerEntries);
+				}
+				if (prefs.entryProperties != null && prefs.entryProperties.size() > 0)
+				{
+					jsonObject.put(PaletteCustomization.ENTRY_PROPERTIES, prefs.entryProperties);
+				}
+			}
+			if (jsonObject != null && jsonObject.keys().hasNext())
+			{
+				setProperty(PALETTE_CUSTOMIZATION_SETTING, ServoyJSONObject.toString(jsonObject, false, false, false));
+			}
+			else
+			{
+				removeProperty(PALETTE_CUSTOMIZATION_SETTING);
+			}
+		}
+		catch (JSONException e)
+		{
+			ServoyLog.logError("Could not save palette preferences", e);
+		}
+	}
+
+	public static class PaletteCustomization
+	{
+		public static final String ENTRY_PROPERTIES = "entryProperties";
+		public static final String DRAWER_ENTRIES = "drawerEntries";
+		public static final String DRAWERS = "drawers";
+
+		public static final String PROPERTY_INITIAL_STATE = "initialState";
+		public static final String PROPERTY_DESCRIPTION = "description";
+		public static final String PROPERTY_LABEL = "label";
+		public static final String PROPERTY_HIDDEN = "hidden";
+
+		public final List<String> drawers;
+		public final Map<String, List<String>> drawerEntries;
+		public final Map<String, Object> entryProperties;
+
+		/**
+		 * @param drawers
+		 * @param drawerEntries
+		 * @param entryProperties
+		 */
+		public PaletteCustomization(List<String> drawers, Map<String, List<String>> drawerEntries, Map<String, Object> entryProperties)
+		{
+			this.drawers = drawers;
+			this.drawerEntries = drawerEntries;
+			this.entryProperties = entryProperties;
+		}
+	}
+
 }

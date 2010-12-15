@@ -18,19 +18,20 @@
 package com.servoy.eclipse.designer.editor.palette;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.draw2d.geometry.Dimension;
-import org.eclipse.gef.palette.PaletteContainer;
 import org.eclipse.gef.palette.PaletteDrawer;
 import org.eclipse.gef.palette.PaletteEntry;
 import org.eclipse.gef.palette.PaletteRoot;
-import org.eclipse.gef.palette.ToolEntry;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
@@ -39,12 +40,15 @@ import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences.PaletteCustomization;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
+import com.servoy.j2db.util.Utils;
 
 
 /**
@@ -55,71 +59,145 @@ import com.servoy.j2db.persistence.Template;
  */
 public class VisualFormEditorPaletteFactory
 {
+	public static final String TEMPLATES_ID = "templates";
+	public static final String ELEMENTS_ID = "elements";
+	public static final String TEMPLATE_ID_PREFIX = "template:";
 
-	private static PaletteContainer createElementsDrawer()
+	private static final String ELEMENTS_LABEL_ID = "label";
+	private static final String ELEMENTS_BUTTON_ID = "button";
+
+	private static PaletteCustomization getDefaultPaletteCustomization()
 	{
-		PaletteDrawer componentsDrawer = new PaletteDrawer(Messages.LabelElementsPalette);
-		ToolEntry component;
+		List<String> drawers = new ArrayList<String>();
+		Map<String, List<String>> drawerEntries = new HashMap<String, List<String>>();
+		Map<String, Object> entryProperties = new HashMap<String, Object>();
 
-		component = new ElementCreationToolEntry("Button", "Create a button", new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_BUTTON, new Dimension(
-			80, 20)), Activator.loadImageDescriptorFromBundle("button.gif"), Activator.loadImageDescriptorFromBundle("button.gif"));
-		componentsDrawer.add(component);
+		// add elements
+		String id = ELEMENTS_ID;
+		drawers.add(id);
+		entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, Messages.LabelElementsPalette);
+		String[] elements = new String[] { ELEMENTS_BUTTON_ID, ELEMENTS_LABEL_ID };
+		drawerEntries.put(id, Arrays.asList(elements));
+		for (String itemId : elements)
+		{
+			entryProperties.put(id + '.' + itemId + '.' + PaletteCustomization.PROPERTY_LABEL, Utils.stringInitCap(itemId));
+			entryProperties.put(id + '.' + itemId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Create a " + itemId);
+		}
 
-		component = new ElementCreationToolEntry("Label", "Create a label", new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_LABEL, new Dimension(80,
-			20)), Activator.loadImageDescriptorFromBundle("text.gif"), Activator.loadImageDescriptorFromBundle("text.gif"));
-		componentsDrawer.add(component);
-
-		// TODO: Add more
-
-		return componentsDrawer;
-	}
-
-	private static PaletteContainer createTemplatesDrawer()
-	{
-		PaletteDrawer componentsDrawer = new PaletteDrawer(Messages.LabelTemplatesPalette);
-		componentsDrawer.setChildren(getTemplatesEntries());
-
-		return componentsDrawer;
-	}
-
-	private static List<ToolEntry> getTemplatesEntries()
-	{
-		List<ToolEntry> templatesEntries = new ArrayList<ToolEntry>();
+		// add templates
+		id = TEMPLATES_ID;
+		drawers.add(id);
+		entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, Messages.LabelTemplatesPalette);
 
 		List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
 		Collections.sort(templates, NameComparator.INSTANCE);
 
-		Iterator<IRootObject> templatesIterator = templates.iterator();
-		while (templatesIterator.hasNext())
+		List<String> templateNames = new ArrayList<String>();
+		for (IRootObject template : templates)
 		{
-			Template template = (Template)templatesIterator.next();
-			TemplateElementHolder data = new TemplateElementHolder(template);
-			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TEMPLATE,
-				DesignerUtil.convertDimension(ElementFactory.getTemplateBoundsize(data)));
-			factory.setData(data);
-			ImageDescriptor icon = getTemplateIcon(data);
-			if (icon == null)
-			{
-				// default icon
-				icon = Activator.loadImageDescriptorFromBundle("template.gif");
-			}
-			templatesEntries.add(new ElementCreationToolEntry(template.getName(), "Create/apply template " + template.getName(), factory, icon, icon));
+			String templateId = template.getName();
+			templateNames.add(templateId);
+			entryProperties.put(id + '.' + templateId + '.' + PaletteCustomization.PROPERTY_LABEL, Utils.stringInitCap(templateId));
+			entryProperties.put(id + '.' + templateId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Create/apply template " + templateId);
+
+		}
+		drawerEntries.put(id, templateNames);
+
+		return new PaletteCustomization(drawers, drawerEntries, entryProperties);
+	}
+
+	private static PaletteEntry createPaletteEntry(String drawerId, String id)
+	{
+		if (ELEMENTS_ID.equals(drawerId))
+		{
+			return createElementsEntry(id);
 		}
 
-		return templatesEntries;
+		if (TEMPLATES_ID.equals(drawerId))
+		{
+			return createTemplatesEntry(id);
+		}
+
+		if (drawerId.startsWith(TEMPLATE_ID_PREFIX))
+		{
+			return createTemplateToolEntry(drawerId.substring(TEMPLATE_ID_PREFIX.length()), id);
+		}
+
+		ServoyLog.logError("Unknown palette drawer: '" + drawerId + "'", null);
+		return null;
+	}
+
+	private static PaletteEntry createElementsEntry(String id)
+	{
+		if (ELEMENTS_BUTTON_ID.equals(id))
+		{
+			return new ElementCreationToolEntry("", " ", new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_BUTTON, new Dimension(80, 20)),
+				Activator.loadImageDescriptorFromBundle("button.gif"), Activator.loadImageDescriptorFromBundle("button.gif"));
+		}
+
+		if (ELEMENTS_LABEL_ID.equals(id))
+		{
+			return new ElementCreationToolEntry("", "", new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_LABEL, new Dimension(80, 20)),
+				Activator.loadImageDescriptorFromBundle("text.gif"), Activator.loadImageDescriptorFromBundle("text.gif"));
+		}
+
+		// TODO: Add more
+
+		ServoyLog.logError("Unknown palette elements entry: '" + id + "'", null);
+		return null;
+	}
+
+	private static PaletteEntry createTemplatesEntry(String id)
+	{
+		Template template = (Template)ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObject(id, IRepository.TEMPLATES);
+		if (template == null)
+		{
+			return null;
+		}
+
+		TemplateElementHolder data = new TemplateElementHolder(template);
+		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TEMPLATE,
+			DesignerUtil.convertDimension(ElementFactory.getTemplateBoundsize(data)));
+		factory.setData(data);
+		ImageDescriptor icon = getTemplateIcon(data);
+		if (icon == null)
+		{
+			// default icon
+			icon = Activator.loadImageDescriptorFromBundle("template.gif");
+		}
+		return new ElementCreationToolEntry("", "", factory, icon, icon);
+	}
+
+	private static PaletteEntry createTemplateToolEntry(String templateName, String elementName)
+	{
+		Template template = (Template)ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObject(templateName, IRepository.TEMPLATES);
+		if (template == null)
+		{
+			return null;
+		}
+
+		TemplateElementHolder templateHolder = new TemplateElementHolder(template);
+		List<JSONObject> templateElements = ElementFactory.getTemplateElements(templateHolder);
+		if (templateElements != null)
+		{
+			for (JSONObject jsonObject : templateElements)
+			{
+				if (elementName.equals(jsonObject.optString(SolutionSerializer.PROP_NAME)))
+				{
+					return VisualFormEditorPaletteFactory.createTemplateToolEntry(templateHolder.template, jsonObject, elementName);
+				}
+			}
+		}
+
+		return null;
 	}
 
 	/**
 	 * @param json
 	 * @return
 	 */
-	public static PaletteEntry createTemplateToolEntry(Template template, JSONObject json)
+	public static PaletteEntry createTemplateToolEntry(Template template, JSONObject json, String name)
 	{
-		String name = json.optString(SolutionSerializer.PROP_NAME);
-		if (name == null)
-		{
-			return null;
-		}
 		TemplateElementHolder data = new TemplateElementHolder(template, name);
 		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TEMPLATE,
 			DesignerUtil.convertDimension(ElementFactory.getTemplateBoundsize(data)));
@@ -130,7 +208,7 @@ public class VisualFormEditorPaletteFactory
 			// default icon
 			icon = Activator.loadImageDescriptorFromBundle("template.gif");
 		}
-		return new ElementCreationToolEntry(name, "Create/apply template item" + name, factory, icon, icon);
+		return new ElementCreationToolEntry(Utils.stringInitCap(name), "Create/apply template item " + name, factory, icon, icon);
 	}
 
 	static ImageDescriptor getTemplateIcon(TemplateElementHolder template)
@@ -210,7 +288,6 @@ public class VisualFormEditorPaletteFactory
 				return Activator.loadImageDescriptorFromBundle("bean.gif");
 		}
 
-
 		return null;
 	}
 
@@ -224,20 +301,164 @@ public class VisualFormEditorPaletteFactory
 	static public PaletteRoot createPalette()
 	{
 		PaletteRoot palette = new PaletteRoot();
-//		palette.add(createToolsGroup(palette));
-		palette.add(createElementsDrawer());
-		palette.add(createTemplatesDrawer());
+		fillPalette(palette);
 		return palette;
+	}
+
+	private static void fillPalette(PaletteRoot palette)
+	{
+		PaletteCustomization defaultPaletteCustomization = getDefaultPaletteCustomization();
+		PaletteCustomization savedPaletteCustomization = new DesignerPreferences().getPaletteCustomization();
+		PaletteCustomization paletteCustomization = savedPaletteCustomization == null ? defaultPaletteCustomization : savedPaletteCustomization;
+
+		for (String drawerId : paletteCustomization.drawers == null ? defaultPaletteCustomization.drawers : paletteCustomization.drawers)
+		{
+			PaletteDrawer drawer = new PaletteDrawer("");
+			drawer.setId(drawerId);
+			drawer.setUserModificationPermission(drawerId.startsWith(TEMPLATE_ID_PREFIX) ? PaletteEntry.PERMISSION_FULL_MODIFICATION
+				: PaletteEntry.PERMISSION_LIMITED_MODIFICATION);
+			applyPaletteCustomization(paletteCustomization.entryProperties, drawerId, drawer, defaultPaletteCustomization.entryProperties);
+
+			List<String> itemIds = null;
+			if (paletteCustomization.drawerEntries != null)
+			{
+				itemIds = paletteCustomization.drawerEntries.get(drawerId);
+			}
+			if (itemIds == null)
+			{
+				itemIds = defaultPaletteCustomization.drawerEntries.get(drawerId);
+			}
+			else
+			{
+				List<String> defaultItemIds = defaultPaletteCustomization.drawerEntries.get(drawerId);
+				if (defaultItemIds != null)
+				{
+					List<String> combinedIds = new ArrayList<String>(itemIds);
+					for (int i = 0; i < defaultItemIds.size(); i++)
+					{
+						String defaultItemId = defaultItemIds.get(i);
+						if (combinedIds.indexOf(defaultItemId) < 0)
+						{
+							// a new default item, add after previous item or at the beginning
+							int idx = (i > 0) ? combinedIds.indexOf(defaultItemIds.get(i - 1)) : 0;
+							combinedIds.add(idx, defaultItemId);
+						}
+					}
+					itemIds = combinedIds;
+				}
+			}
+			for (String itemId : itemIds)
+			{
+				PaletteEntry entry = createPaletteEntry(drawerId, itemId);
+				if (entry != null)
+				{
+					entry.setId(itemId);
+					entry.setUserModificationPermission(drawerId.startsWith(TEMPLATE_ID_PREFIX) ? PaletteEntry.PERMISSION_FULL_MODIFICATION
+						: PaletteEntry.PERMISSION_LIMITED_MODIFICATION);
+					applyPaletteCustomization(paletteCustomization.entryProperties, drawerId + '.' + itemId, entry, defaultPaletteCustomization.entryProperties);
+					drawer.add(entry);
+				}
+			}
+
+			palette.add(drawer);
+		}
+	}
+
+	private static void applyPaletteCustomization(Map<String, Object> map, String key, PaletteEntry entry, Map<String, Object> defaults)
+	{
+		entry.setVisible(!getValueWithDefaults(map, key + '.' + PaletteCustomization.PROPERTY_HIDDEN, defaults, Boolean.FALSE).booleanValue());
+		entry.setLabel(getValueWithDefaults(map, key + '.' + PaletteCustomization.PROPERTY_LABEL, defaults, ""));
+		entry.setDescription(getValueWithDefaults(map, key + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, defaults, ""));
+
+		if (entry instanceof PaletteDrawer)
+		{
+			((PaletteDrawer)entry).setInitialState(getValueWithDefaults(map, key + '.' + PaletteCustomization.PROPERTY_INITIAL_STATE, defaults,
+				Integer.valueOf(PaletteDrawer.INITIAL_STATE_OPEN)).intValue());
+		}
+	}
+
+	private static <T> T getValueWithDefaults(Map<String, Object> map, String key, Map<String, Object> defaults, T defval)
+	{
+		if (map != null && map.containsKey(key))
+		{
+			return (T)map.get(key);
+		}
+		if (defaults != null && defaults.containsKey(key))
+		{
+			return (T)defaults.get(key);
+		}
+		return defval;
 	}
 
 	public static void refreshPalette(PaletteRoot palette)
 	{
-		for (Object drawer : palette.getChildren())
+		palette.setChildren(new ArrayList<PaletteEntry>());
+		fillPalette(palette);
+	}
+
+	public static void savePaletteCustomization(PaletteRoot palette)
+	{
+		// get the current and the default drawers and entries, save where they differ
+		PaletteCustomization defaultPaletteCustomization = getDefaultPaletteCustomization();
+
+		Map<String, List<String>> drawerEntries = new HashMap<String, List<String>>();
+		Map<String, Object> entryProperties = new HashMap<String, Object>();
+		List<String> drawerIds = new ArrayList<String>();
+
+		for (PaletteEntry drawer : ((List<PaletteEntry>)palette.getChildren()))
 		{
-			if (drawer instanceof PaletteDrawer && Messages.LabelTemplatesPalette.equals(((PaletteDrawer)drawer).getLabel()))
+			if (drawer instanceof PaletteDrawer)
 			{
-				((PaletteDrawer)drawer).setChildren(getTemplatesEntries());
+				String drawerId = drawer.getId();
+				drawerIds.add(drawerId);
+				addPaletteEntryProperties(entryProperties, drawerId, drawer, defaultPaletteCustomization.entryProperties);
+
+				List<String> itemIds = new ArrayList<String>();
+				for (PaletteEntry entry : (List<PaletteEntry>)((PaletteDrawer)drawer).getChildren())
+				{
+					itemIds.add(entry.getId());
+					addPaletteEntryProperties(entryProperties, drawerId + '.' + entry.getId(), entry, defaultPaletteCustomization.entryProperties);
+				}
+				List<String> defaultItemIds = defaultPaletteCustomization.drawerEntries.get(drawerId);
+				if (!itemIds.equals(defaultItemIds))
+				{
+					drawerEntries.put(drawerId, itemIds);
+				}
+				// else do not save
 			}
+		}
+
+		if (defaultPaletteCustomization.drawers.equals(drawerIds))
+		{
+			drawerIds = null; // do not save
+		}
+
+		new DesignerPreferences().setPaletteCustomization(new PaletteCustomization(drawerIds, drawerEntries, entryProperties));
+	}
+
+	/**
+	 * @param entryProperties
+	 * @param id
+	 * @param entry
+	 */
+	private static void addPaletteEntryProperties(Map<String, Object> map, String key, PaletteEntry entry, Map<String, Object> defaults)
+	{
+		putIfNotDefault(map, key + '.' + PaletteCustomization.PROPERTY_HIDDEN, Boolean.valueOf(!entry.isVisible()), defaults, Boolean.FALSE);
+		putIfNotDefault(map, key + '.' + PaletteCustomization.PROPERTY_LABEL, entry.getLabel(), defaults, null);
+		putIfNotDefault(map, key + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, entry.getDescription(), defaults, "");
+		if (entry instanceof PaletteDrawer)
+		{
+			putIfNotDefault(map, key + '.' + PaletteCustomization.PROPERTY_INITIAL_STATE, Integer.valueOf(((PaletteDrawer)entry).getInitialState()), defaults,
+				Integer.valueOf(PaletteDrawer.INITIAL_STATE_OPEN));
+		}
+	}
+
+	private static void putIfNotDefault(Map<String, Object> map, String key, Object value, Map<String, Object> defaults, Object defval)
+	{
+		Object def = defaults.containsKey(key) ? defaults.get(key) : defval;
+		if (def != null ? !def.equals(value) : value != null)
+		{
+			map.put(key, value);
 		}
 	}
 }

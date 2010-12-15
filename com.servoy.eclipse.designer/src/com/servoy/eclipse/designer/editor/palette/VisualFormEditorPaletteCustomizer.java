@@ -20,10 +20,14 @@ package com.servoy.eclipse.designer.editor.palette;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.gef.ui.palette.PaletteCustomizer;
 import org.eclipse.gef.ui.palette.customize.PaletteEntryFactory;
 import org.eclipse.gef.ui.palette.customize.PaletteSeparatorFactory;
 import org.eclipse.gef.ui.palette.customize.PaletteStackFactory;
+
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences.PaletteCustomization;
 
 /**
  * Customizer for palette with VisualFormEditor.
@@ -33,6 +37,21 @@ import org.eclipse.gef.ui.palette.customize.PaletteStackFactory;
  */
 public class VisualFormEditorPaletteCustomizer extends PaletteCustomizer
 {
+	private final PaletteRoot paletteRoot;
+	private PaletteCustomization savedPaletteCustomization;
+
+	/**
+	 * @param paletteRoot
+	 */
+	public VisualFormEditorPaletteCustomizer(PaletteRoot paletteRoot)
+	{
+		this.paletteRoot = paletteRoot;
+	}
+
+	public void initialize()
+	{
+		savedPaletteCustomization = new DesignerPreferences().getPaletteCustomization();
+	}
 
 	@Override
 	public List<PaletteEntryFactory> getNewEntryFactories()
@@ -44,17 +63,22 @@ public class VisualFormEditorPaletteCustomizer extends PaletteCustomizer
 		return list;
 	}
 
-
 	@Override
 	public void revertToSaved()
 	{
-		// TODO  
-
+		new DesignerPreferences().setPaletteCustomization(savedPaletteCustomization);
 	}
 
 	@Override
 	public void save()
 	{
-		// TODO  
+		VisualFormEditorPaletteFactory.savePaletteCustomization(paletteRoot);
+		initialize();
 	}
+
+	public void revertToDefaults()
+	{
+		new DesignerPreferences().setPaletteCustomization(null);
+	}
+
 }
