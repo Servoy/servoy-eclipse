@@ -48,8 +48,8 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
@@ -234,6 +234,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		synchronized (this)
 		{
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class));
+			addType(JSSecurity.class.getSimpleName(), JSSecurity.class);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class));
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class));
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class));
