@@ -1229,14 +1229,19 @@ public class DataModelManager implements IColumnInfoManager
 					int t1 = Column.mapToDefaultType(c.getType());
 					int t2 = Column.mapToDefaultType(dbiFileDefinition.datatype);
 					if ((t1 == t2 && c.getLength() == dbiFileDefinition.length) ||
-						(t1 == IColumnTypes.NUMBER && c.getScale() == 0 && t2 == IColumnTypes.INTEGER) ||
-						(t1 == t2 && (t1 == IColumnTypes.MEDIA || t1 == IColumnTypes.TEXT) && (Math.abs(c.getLength() - (float)dbiFileDefinition.length) > (Integer.MAX_VALUE / 2)))) // this check is for -1 and big value lengths
+						(t1 == IColumnTypes.NUMBER && c.getScale() == 0 && t2 == IColumnTypes.INTEGER))
 					{
 						severity = IMarker.SEVERITY_WARNING; // somewhat compatible types... but still different
 					}
 					else
 					{
-						severity = getErrorSeverity(tableName);
+						boolean compatibleLengths = (t1 == t2) && (t1 == IColumnTypes.MEDIA || t1 == IColumnTypes.TEXT) &&
+							(Math.abs(c.getLength() - (float)dbiFileDefinition.length) > (Integer.MAX_VALUE / 2));
+						// this check is for -1 and big value lengths
+						if (!compatibleLengths)
+						{
+							severity = getErrorSeverity(tableName);
+						}
 					}
 				}
 				else if (c.getAllowNull() != dbiFileDefinition.allowNull)
