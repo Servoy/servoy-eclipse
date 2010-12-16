@@ -211,6 +211,10 @@ public class FormDomProvider implements IDesignTimeDOMProvider
 				IExecutingEnviroment.TOPLEVEL_SECURITY));
 			topLevelTableScope.put(IExecutingEnviroment.TOPLEVEL_SECURITY, topLevelTableScope, new ScriptObjectClassScope(topLevelTableScope, JSSecurity.class,
 				IExecutingEnviroment.TOPLEVEL_SECURITY));
+			toplevelScope.put(JSSecurity.class.getSimpleName(), toplevelScope, new ScriptObjectClassScope(toplevelScope, JSSecurity.class,
+				JSSecurity.class.getSimpleName(), true));
+			topLevelTableScope.put(JSSecurity.class.getSimpleName(), topLevelTableScope, new ScriptObjectClassScope(topLevelTableScope, JSSecurity.class,
+				JSSecurity.class.getSimpleName(), true));
 
 			Scriptable solutionModifier = new ScriptObjectClassScope(toplevelScope, JSSolutionModel.class, IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER);
 			toplevelScope.put(IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER, toplevelScope, solutionModifier);
