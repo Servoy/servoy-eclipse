@@ -33,8 +33,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.wicket.Request;
@@ -91,8 +91,8 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import com.servoy.eclipse.core.builder.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.builder.ServoyBuilder;
+import com.servoy.eclipse.core.builder.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.DataModelManager;
 import com.servoy.eclipse.core.repository.EclipseMessages;
 import com.servoy.eclipse.core.repository.EclipseRepository;
@@ -940,6 +940,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 								return Status.OK_STATUS;
 							}
 						};
+						testBuildPaths.setRule(getWorkspace().getRoot());
 						testBuildPaths.schedule();
 
 
@@ -1342,7 +1343,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 	{
 		for (ServoyProject p : getModulesOfActiveProject())
 		{
-			p.resetEditingFlattenedSolution();
+			p.resetEditingFlattenedSolution(true, true);
 
 			WorkspaceJob testBuildPaths = new WorkspaceJob("Test Build Paths")
 			{
@@ -1353,13 +1354,14 @@ public class ServoyModel implements IWorkspaceSaveListener
 					return Status.OK_STATUS;
 				}
 			};
+			testBuildPaths.setRule(getWorkspace().getRoot());
 			testBuildPaths.schedule();
 		}
 	}
 
 	private void testBuildPaths(ServoyProject sp, Set<ServoyProject> processed)
 	{
-		if (sp == null) return;
+		if (sp == null || sp.getProject() == null || !sp.getProject().exists()) return;
 		if (processed.add(sp))
 		{
 			IScriptProject scriptProject = DLTKCore.create(sp.getProject());
@@ -1754,7 +1756,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 						// a project was deleted, closed, or it does not have Servoy nature; see if it is was part of the repository and if so, remove it
 						if (getServoyProject(resource.getName()) != null)
 						{
-							getServoyProject(resource.getName()).resetEditingFlattenedSolution();
+							getServoyProject(resource.getName()).resetEditingFlattenedSolution(false, false);
 							refreshServoyProjects();
 						}
 						Solution solution = (Solution)eclipseRepository.getActiveRootObject(resource.getName(), IRepository.SOLUTIONS);
@@ -2185,12 +2187,12 @@ public class ServoyModel implements IWorkspaceSaveListener
 													Integer lineNumber = (Integer)map.get(IMarker.LINE_NUMBER);
 													String oldLine = oldLines[lineNumber.intValue() - 1];
 													if (oldLine.trim().equals("")) continue;
-													int find = findLines(newLines, oldLine, lineNumber.intValue(), true,
-														Math.abs(oldLines.length - newLines.length) + 1);
+													int find = findLines(newLines, oldLine, lineNumber.intValue(), true, Math.abs(oldLines.length -
+														newLines.length) + 1);
 													if (find == -1)
 													{
-														find = findLines(newLines, oldLine, lineNumber.intValue(), false,
-															Math.abs(oldLines.length - newLines.length) + 1);
+														find = findLines(newLines, oldLine, lineNumber.intValue(), false, Math.abs(oldLines.length -
+															newLines.length) + 1);
 													}
 													if (find == -1) continue;
 													lineNumber = new Integer(find + 1);

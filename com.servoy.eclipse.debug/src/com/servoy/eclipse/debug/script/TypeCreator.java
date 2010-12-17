@@ -716,7 +716,10 @@ public abstract class TypeCreator
 			//if (servoyModel.isActiveProject(name))
 			{
 				ServoyProject servoyProject = servoyModel.getServoyProject(name);
-				return servoyProject.getEditingFlattenedSolution();
+				if (servoyProject != null)
+				{
+					return servoyProject.getEditingFlattenedSolution();
+				}
 			}
 		}
 		return null;

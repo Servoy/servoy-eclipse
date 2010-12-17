@@ -37,10 +37,10 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import com.servoy.eclipse.core.builder.ChangeResourcesProjectQuickFix.ResourceProjectChoiceDialog;
-import com.servoy.eclipse.core.builder.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.builder.ErrorKeeper;
 import com.servoy.eclipse.core.builder.ServoyBuilder;
+import com.servoy.eclipse.core.builder.ChangeResourcesProjectQuickFix.ResourceProjectChoiceDialog;
+import com.servoy.eclipse.core.builder.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.EclipseRepository;
 import com.servoy.eclipse.core.util.CoreUtils;
 import com.servoy.j2db.AbstractActiveSolutionHandler;
@@ -536,7 +536,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changed);
 	}
 
-	public synchronized FlattenedSolution getEditingFlattenedSolution()
+	public synchronized FlattenedSolution getEditingFlattenedSolution(boolean loadLoginSolution, boolean loadMainSolution)
 	{
 		try
 		{
@@ -548,33 +548,34 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 			if (editingFlattenedSolution.getSolution() == null)
 			{
 				// new or flattened solution was reset
-				editingFlattenedSolution.setSolution(getEditingSolution().getSolutionMetaData(), true, true, new AbstractActiveSolutionHandler()
-				{
-					@Override
-					public IRepository getRepository()
+				editingFlattenedSolution.setSolution(getEditingSolution().getSolutionMetaData(), loadLoginSolution, loadMainSolution,
+					new AbstractActiveSolutionHandler()
 					{
-						return ServoyModel.getDeveloperRepository();
-					}
-
-					@Override
-					protected Solution loadSolution(RootObjectMetaData solutionDef) throws RemoteException, RepositoryException
-					{
-						ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
-						ServoyProject servoyProject = sm.getServoyProject(solutionDef.getName());
-						if (servoyProject != null)
+						@Override
+						public IRepository getRepository()
 						{
-							return servoyProject.getEditingSolution();
+							return ServoyModel.getDeveloperRepository();
 						}
-						return null;
-					}
 
-					@Override
-					protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef) throws RemoteException,
-						RepositoryException
-					{
-						return loadSolution(loginSolutionDef);
-					}
-				});
+						@Override
+						protected Solution loadSolution(RootObjectMetaData solutionDef) throws RemoteException, RepositoryException
+						{
+							ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+							ServoyProject servoyProject = sm.getServoyProject(solutionDef.getName());
+							if (servoyProject != null)
+							{
+								return servoyProject.getEditingSolution();
+							}
+							return null;
+						}
+
+						@Override
+						protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef) throws RemoteException,
+							RepositoryException
+						{
+							return loadSolution(loginSolutionDef);
+						}
+					});
 			}
 		}
 		catch (RemoteException e)
@@ -588,7 +589,12 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 		return editingFlattenedSolution;
 	}
 
-	public synchronized void resetEditingFlattenedSolution()
+	public synchronized FlattenedSolution getEditingFlattenedSolution()
+	{
+		return getEditingFlattenedSolution(true, true);
+	}
+
+	public synchronized void resetEditingFlattenedSolution(boolean loadLoginSolution, boolean loadMainSolution)
 	{
 		if (this.editingFlattenedSolution != null)
 		{
@@ -602,7 +608,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 			}
 			// do not set editingFlattenedSolution to null, in several places a reference is kept (like in FormLabelProvider)
 			// make sure the editing flattened solution is filled ok, otherwise references to it cannot use it.
-			getEditingFlattenedSolution();
+			getEditingFlattenedSolution(loadLoginSolution, loadMainSolution);
 		}
 	}
 
