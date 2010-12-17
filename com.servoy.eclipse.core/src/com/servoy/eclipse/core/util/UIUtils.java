@@ -16,16 +16,25 @@
  */
 package com.servoy.eclipse.core.util;
 
+import java.awt.Graphics;
+import java.awt.GraphicsEnvironment;
+import java.awt.HeadlessException;
+import java.awt.Transparency;
 import java.awt.image.BufferedImage;
+import java.awt.image.PixelGrabber;
+import java.awt.image.Raster;
+import java.awt.image.RenderedImage;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -35,6 +44,7 @@ import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -416,6 +426,114 @@ public class UIUtils
 			return null;
 		}
 	}
+
+
+	public static ImageDescriptor createImageDescriptorFromAwtImage(java.awt.Image image, final boolean transparent)
+	{
+		if (image == null) return null;
+
+		final RenderedImage renderedImage;
+		if (image instanceof RenderedImage)
+		{
+			renderedImage = (RenderedImage)image;
+		}
+		else
+		{
+			renderedImage = toBufferedImage(image);
+		}
+
+		return new ImageDescriptor()
+		{
+			@Override
+			public ImageData getImageData()
+			{
+				int width = renderedImage.getWidth();
+				int height = renderedImage.getHeight();
+
+				int depth = 24;
+				PaletteData palette = new PaletteData(0xFF, 0xFF00, 0xFF0000);
+				ImageData swtdata = new ImageData(width, height, depth, palette);
+				Raster raster = renderedImage.getData();
+				int numbands = raster.getNumBands();
+				int[] awtdata = raster.getPixels(0, 0, width, height, new int[width * height * numbands]);
+				int step = swtdata.depth / 8;
+
+				byte[] data = swtdata.data;
+				swtdata.transparentPixel = -1;
+				int baseindex = 0;
+				for (int y = 0; y < height; y++)
+				{
+					int idx = (0 + y) * swtdata.bytesPerLine + 0 * step;
+
+					for (int x = 0; x < width; x++)
+					{
+						int pixel = x + y * width;
+						baseindex = pixel * numbands;
+
+						data[idx++] = (byte)awtdata[baseindex + 2];
+						data[idx++] = (byte)awtdata[baseindex + 1];
+						data[idx++] = (byte)awtdata[baseindex];
+						if (numbands == 4 && transparent)
+						{
+							swtdata.setAlpha(x, y, awtdata[baseindex + 3]);
+						}
+					}
+				}
+				return swtdata;
+			}
+		};
+	}
+
+	private static boolean hasAlpha(java.awt.Image image)
+	{
+		if (image instanceof BufferedImage)
+		{
+			return ((BufferedImage)image).getColorModel().hasAlpha();
+		}
+
+		PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
+		try
+		{
+			pg.grabPixels();
+		}
+		catch (InterruptedException e)
+		{
+		}
+		return pg.getColorModel().hasAlpha();
+	}
+
+
+	private static BufferedImage toBufferedImage(java.awt.Image image)
+	{
+		if (image instanceof BufferedImage)
+		{
+			return (BufferedImage)image;
+		}
+
+		// Ensure that all the pixels in the image are loaded 
+		java.awt.Image img = new ImageIcon(image).getImage();
+
+		boolean hasAlpha = hasAlpha(img);
+		BufferedImage bimage = null;
+		try
+		{
+			bimage = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(
+				img.getWidth(null), img.getHeight(null), hasAlpha ? Transparency.BITMASK : Transparency.OPAQUE);
+		}
+		catch (HeadlessException e)
+		{
+		}
+		if (bimage == null)
+		{
+			bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), hasAlpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
+		}
+
+		Graphics g = bimage.createGraphics(); // Paint the image onto the buffered 
+		g.drawImage(img, 0, 0, null);
+		g.dispose();
+		return bimage;
+	}
+
 
 	/**
 	 * Shows an option dialog showing the options in a combo.

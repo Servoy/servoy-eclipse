@@ -18,6 +18,7 @@
 package com.servoy.eclipse.designer.editor.palette;
 
 import java.awt.Color;
+import java.awt.Image;
 import java.beans.BeanDescriptor;
 import java.beans.BeanInfo;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory.IGetSize;
@@ -107,6 +109,7 @@ public class VisualFormEditorPaletteFactory
 	private static final String BEANS_ID_PREFIX = "beans:";
 	private static final String SERVOY_BEANS_ID = BEANS_ID_PREFIX + "servoy";
 	private static final String JAVA_BEANS_ID = BEANS_ID_PREFIX + "java";
+	private static final Map<String, BeanInfo> beanInfos = new HashMap<String, BeanInfo>();
 
 	private static final String TEMPLATES_ID = "templates";
 	protected static final String TEMPLATE_ID_PREFIX = "template:";
@@ -196,6 +199,7 @@ public class VisualFormEditorPaletteFactory
 				{
 					String beanId = beanDescriptor.getBeanClass().getName();
 					beanIds.add(beanId);
+					beanInfos.put(beanId, (BeanInfo)bean);
 
 					String name = beanDescriptor.getDisplayName();
 					if (name == null || name.length() == 0)
@@ -526,8 +530,40 @@ public class VisualFormEditorPaletteFactory
 			}
 		});
 		factory.setData(beanClassName);
-		ImageDescriptor icon = Activator.loadImageDescriptorFromBundle("bean.gif");
-		return new ElementCreationToolEntry("", "", factory, icon, icon);
+
+		Image smallIcon = null, largeIcon = null;
+		BeanInfo beanInfo = beanInfos.get(beanClassName);
+		if (beanInfo != null)
+		{
+			smallIcon = beanInfo.getIcon(BeanInfo.ICON_COLOR_16x16);
+			if (smallIcon == null) smallIcon = beanInfo.getIcon(BeanInfo.ICON_MONO_16x16);
+			if (smallIcon == null) smallIcon = beanInfo.getIcon(BeanInfo.ICON_COLOR_32x32);
+			if (smallIcon == null) smallIcon = beanInfo.getIcon(BeanInfo.ICON_MONO_32x32);
+			if (smallIcon != null)
+			{
+				largeIcon = beanInfo.getIcon(BeanInfo.ICON_COLOR_32x32);
+				if (largeIcon == null) largeIcon = beanInfo.getIcon(BeanInfo.ICON_MONO_32x32);
+			}
+		}
+		ImageDescriptor iconSmall, iconLarge;
+		if (smallIcon == null)
+		{
+			iconSmall = Activator.loadImageDescriptorFromBundle("bean.gif");
+		}
+		else
+		{
+			iconSmall = UIUtils.createImageDescriptorFromAwtImage(smallIcon, true);
+		}
+		if (largeIcon == smallIcon || largeIcon == null)
+		{
+			iconLarge = iconSmall;
+		}
+		else
+		{
+			iconLarge = UIUtils.createImageDescriptorFromAwtImage(largeIcon, true);
+		}
+
+		return new ElementCreationToolEntry("", "", factory, iconSmall, iconLarge);
 	}
 
 	private static PaletteEntry createTemplatesEntry(String id)
