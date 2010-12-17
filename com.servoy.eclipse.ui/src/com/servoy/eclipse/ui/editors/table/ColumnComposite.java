@@ -22,6 +22,7 @@ import java.util.Comparator;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -49,6 +50,7 @@ import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Scrollable;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -61,6 +63,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.DataModelManager;
 import com.servoy.eclipse.ui.editors.TableEditor;
+import com.servoy.eclipse.ui.editors.table.actions.CopyColumnNameAction;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -82,6 +85,8 @@ public class ColumnComposite extends Composite
 	private final ColumnValidationComposite columnValidationComposite;
 	private final ColumnConversionComposite columnConversionComposite;
 	private final Composite tableContainer;
+
+	private CopyColumnNameAction copyColumnNameAction;
 
 	/**
 	 * Create the composite
@@ -340,6 +345,13 @@ public class ColumnComposite extends Composite
 		nameColumn.setText("Name");
 		TableViewerColumn nameViewerColumn = new TableViewerColumn(tableViewer, nameColumn);
 		nameViewerColumn.setEditingSupport(new ColumnNameEditingSupport(tableViewer));
+
+		copyColumnNameAction = new CopyColumnNameAction(tableViewer.getTable().getDisplay());//getSite().getShell().getDisplay());
+		MenuManager menuMgr = new MenuManager("#PopupMenu"); //$NON-NLS-1$
+		menuMgr.add(copyColumnNameAction);
+		Menu menu = menuMgr.createContextMenu(nameViewerColumn.getViewer().getControl());
+		nameViewerColumn.getViewer().getControl().setMenu(menu);
+		nameViewerColumn.getViewer().addSelectionChangedListener(copyColumnNameAction);
 
 		final TableColumn typeColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_TYPE);
 		typeColumn.setText("Type");
