@@ -113,14 +113,6 @@ public class ElementFactory
 		return label;
 	}
 
-	public static GraphicalComponent createLabel(ISupportFormElements parent, IDataProvider dataProvider, String text, Point location)
-		throws RepositoryException
-	{
-		GraphicalComponent label = createLabel(parent, text, location);
-		label.setDataProviderID(dataProvider.getDataProviderID());
-		return label;
-	}
-
 	public static IPersist createButton(ISupportFormElements parent, ScriptMethod method, String text, Point location) throws RepositoryException
 	{
 		GraphicalComponent button = parent.createNewGraphicalComponent(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
@@ -311,27 +303,30 @@ public class ElementFactory
 	{
 		Field field = parent.createNewField(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
 
-		field.setDataProviderID(dataProvider.getDataProviderID());
-
-		field.setEditable(dataProvider.isEditable());
-		if (dataProvider instanceof Column)
+		if (dataProvider != null)
 		{
-			ColumnInfo ci = ((Column)dataProvider).getColumnInfo();
-			if (ci != null && ci.getTitleText() != null && ci.getTitleText().length() > 0)
+			field.setDataProviderID(dataProvider.getDataProviderID());
+
+			field.setEditable(dataProvider.isEditable());
+			if (dataProvider instanceof Column)
 			{
-				field.setText(ci.getTitleText());
+				ColumnInfo ci = ((Column)dataProvider).getColumnInfo();
+				if (ci != null && ci.getTitleText() != null && ci.getTitleText().length() > 0)
+				{
+					field.setText(ci.getTitleText());
+				}
+			}
+			int type = dataProvider.getDataProviderType();
+			if (type == IColumnTypes.MEDIA)
+			{
+				field.setDisplayType(Field.IMAGE_MEDIA);
+			}
+			else if (type == IColumnTypes.DATETIME)
+			{
+				field.setDisplayType(Field.CALENDAR);
 			}
 		}
-		int type = dataProvider.getDataProviderType();
-		if (type == IColumnTypes.MEDIA)
-		{
-			field.setDisplayType(Field.IMAGE_MEDIA);
-		}
-		else if (type == IColumnTypes.DATETIME)
-		{
-			field.setDisplayType(Field.CALENDAR);
 
-		}
 		placeElementOnTop(field);
 		return field;
 	}
@@ -347,6 +342,11 @@ public class ElementFactory
 		if (startLocation == null)
 		{
 			startLocation = new Point(0, 0);
+		}
+
+		if (dataProviders == null)
+		{
+			return new IPersist[] { placeAsLabels ? createLabel(parent, null, startLocation) : createField(parent, null, startLocation) };
 		}
 
 		Point loc = null;
@@ -429,7 +429,8 @@ public class ElementFactory
 				BaseComponent bc;
 				if (placeAsLabels)
 				{
-					bc = createLabel(parent, dataProvider, null, loc);
+					bc = createLabel(parent, null, loc);
+					((GraphicalComponent)bc).setDataProviderID(dataProvider.getDataProviderID());
 				}
 				else
 				{

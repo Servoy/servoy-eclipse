@@ -39,6 +39,7 @@ import com.servoy.eclipse.designer.actions.DistributeRequest;
 import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.commands.ChangeBoundsCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
+import com.servoy.eclipse.designer.editor.commands.FormPlaceFieldCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlacePortalCommand;
 import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.eclipse.designer.property.SetValueCommand;
@@ -126,9 +127,8 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			getHostFigure().translateToRelative(loc);
 
 			if (requestType.type == RequestType.TYPE_BUTTON || requestType.type == RequestType.TYPE_LABEL || requestType.type == RequestType.TYPE_TEMPLATE ||
-				requestType.type == RequestType.TYPE_BEAN || requestType.type == RequestType.TYPE_TAB)
+				requestType.type == RequestType.TYPE_BEAN || requestType.type == RequestType.TYPE_TAB || requestType.type == RequestType.TYPE_SHAPE)
 			{
-
 				command = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), data, requestType, extendedData, null,
 					loc.getSWTPoint(), parent.getPersist());
 			}
@@ -136,6 +136,11 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			{
 				command = new FormPlacePortalCommand(((FormGraphicalEditPart)getHost()).getPersist(), data, requestType, extendedData, null, loc.getSWTPoint(),
 					false, false, parent.getPersist());
+			}
+			else if (requestType.type == RequestType.TYPE_FIELD)
+			{
+				command = new FormPlaceFieldCommand(((FormGraphicalEditPart)getHost()).getPersist(), data, requestType, extendedData, null, loc.getSWTPoint(),
+					false, false, false, false, false, parent.getPersist());
 			}
 
 

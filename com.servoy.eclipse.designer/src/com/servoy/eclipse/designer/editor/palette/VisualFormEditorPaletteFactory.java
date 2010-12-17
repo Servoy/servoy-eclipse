@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.palette;
 
+import java.awt.Color;
 import java.beans.BeanDescriptor;
 import java.beans.BeanInfo;
 import java.util.ArrayList;
@@ -25,6 +26,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.BorderFactory;
+import javax.swing.SwingConstants;
+import javax.swing.border.Border;
 
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.gef.palette.PaletteDrawer;
@@ -39,6 +44,7 @@ import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory.IGetSize;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.designer.util.DesignerUtil;
@@ -47,6 +53,7 @@ import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.BeanClassContentProvider;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.PaletteCustomization;
+import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFactory;
@@ -55,10 +62,13 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.NameComparator;
+import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.gui.SpecialMatteBorder;
 
 
 /**
@@ -69,24 +79,44 @@ import com.servoy.j2db.util.Utils;
  */
 public class VisualFormEditorPaletteFactory
 {
-	public static final String ELEMENTS_ID = "elements";
+	private static final String ELEMENTS_ID = "elements";
 	private static final String ELEMENTS_LABEL_ID = "label";
 	private static final String ELEMENTS_BUTTON_ID = "button";
-	private static final String[] ELEMENTS_IDS = new String[] { ELEMENTS_BUTTON_ID, ELEMENTS_LABEL_ID };
+	private static final String ELEMENTS_TEXT_FIELD_ID = "text field";
+	private static final String ELEMENTS_TEXT_AREA_ID = "text area";
+	private static final String ELEMENTS_COMBOBOX_ID = "combobox";
+	private static final String ELEMENTS_RADIOS_ID = "radio button";
+	private static final String ELEMENTS_CHECKS_ID = "checkbox";
+	private static final String ELEMENTS_CALENDAR_ID = "calendar";
+	private static final String ELEMENTS_PASSWORD_ID = "password field";
+	private static final String ELEMENTS_RTF_AREA_ID = "rtf area";
+	private static final String ELEMENTS_HTML_AREA_ID = "html area";
+	private static final String ELEMENTS_IMAGE_MEDIA_ID = "image field";
+	private static final String ELEMENTS_TYPE_AHEAD_ID = "type ahead";
+	private static final String[] ELEMENTS_IDS = new String[] { ELEMENTS_BUTTON_ID, ELEMENTS_LABEL_ID, ELEMENTS_TEXT_FIELD_ID, ELEMENTS_TEXT_AREA_ID, ELEMENTS_COMBOBOX_ID, ELEMENTS_RADIOS_ID, ELEMENTS_CHECKS_ID, ELEMENTS_CALENDAR_ID, ELEMENTS_PASSWORD_ID, ELEMENTS_RTF_AREA_ID, ELEMENTS_HTML_AREA_ID, ELEMENTS_IMAGE_MEDIA_ID, ELEMENTS_TYPE_AHEAD_ID };
 
-	public static final String BEANS_ID_PREFIX = "beans:";
-	public static final String SERVOY_BEANS_ID = BEANS_ID_PREFIX + "servoy";
-	public static final String JAVA_BEANS_ID = BEANS_ID_PREFIX + "java";
+	private static final String SHAPES_ID = "shapes";
+	private static final String SHAPES_BORDER_PANEL_ID = "border panel";
+	private static final String SHAPES_RECTANGLE_ID = "rectangle";
+	private static final String SHAPES_ROUNDED_RECTANGLE_ID = "rounded rectangle";
+	private static final String SHAPES_OVAL_ID = "circle";
+	private static final String SHAPES_HORIZONTAL_LINE_ID = "horizontal line";
+	private static final String SHAPES_VERTICAL_LINE_ID = "vertical line";
+	private static final String[] SHAPES_IDS = new String[] { SHAPES_BORDER_PANEL_ID, SHAPES_RECTANGLE_ID, SHAPES_ROUNDED_RECTANGLE_ID, SHAPES_OVAL_ID, SHAPES_HORIZONTAL_LINE_ID, SHAPES_VERTICAL_LINE_ID };
 
-	public static final String TEMPLATES_ID = "templates";
-	public static final String TEMPLATE_ID_PREFIX = "template:";
+	private static final String BEANS_ID_PREFIX = "beans:";
+	private static final String SERVOY_BEANS_ID = BEANS_ID_PREFIX + "servoy";
+	private static final String JAVA_BEANS_ID = BEANS_ID_PREFIX + "java";
 
-	public static final String CONTAINERS_ID = "containers";
-	private static final String DEFAULT_PANEL_ID = "tabpanel";
-	private static final String TABLESS_PANEL_ID = "tabless panel";
-	private static final String SPLIT_PANE_HORIZONTAL_ID = "split pane";
-	private static final String PORTAL_ID = "portal";
-	private static final String[] CONTAINERS_IDS = new String[] { DEFAULT_PANEL_ID, TABLESS_PANEL_ID, SPLIT_PANE_HORIZONTAL_ID, PORTAL_ID };
+	private static final String TEMPLATES_ID = "templates";
+	protected static final String TEMPLATE_ID_PREFIX = "template:";
+
+	private static final String CONTAINERS_ID = "containers";
+	private static final String CONTAINERS_DEFAULT_PANEL_ID = "tabpanel";
+	private static final String CONTAINERS_TABLESS_PANEL_ID = "tabless panel";
+	private static final String CONTAINERS_SPLIT_PANE_HORIZONTAL_ID = "split pane";
+	private static final String CONTAINERS_PORTAL_ID = "portal";
+	private static final String[] CONTAINERS_IDS = new String[] { CONTAINERS_DEFAULT_PANEL_ID, CONTAINERS_TABLESS_PANEL_ID, CONTAINERS_SPLIT_PANE_HORIZONTAL_ID, CONTAINERS_PORTAL_ID };
 
 	private static PaletteCustomization getDefaultPaletteCustomization()
 	{
@@ -95,10 +125,10 @@ public class VisualFormEditorPaletteFactory
 		Map<String, Object> entryProperties = new HashMap<String, Object>();
 
 		// add elements
-		addElements(drawers, drawerEntries, entryProperties);
+		addFixedEntries(ELEMENTS_ID, Messages.LabelElementsPalette, ELEMENTS_IDS, drawers, drawerEntries, entryProperties);
 
 		// add containers
-		addContainers(drawers, drawerEntries, entryProperties);
+		addFixedEntries(CONTAINERS_ID, Messages.LabelContainersPalette, CONTAINERS_IDS, drawers, drawerEntries, entryProperties);
 
 		// add templates
 		addTemplates(drawers, drawerEntries, entryProperties);
@@ -109,29 +139,19 @@ public class VisualFormEditorPaletteFactory
 		// add other beans
 		addBeans(false, drawers, drawerEntries, entryProperties);
 
+		// add shapes
+		addFixedEntries(SHAPES_ID, Messages.LabelShapesPalette, SHAPES_IDS, drawers, drawerEntries, entryProperties);
+
 		return new PaletteCustomization(drawers, drawerEntries, entryProperties);
 	}
 
-	private static void addElements(List<String> drawers, Map<String, List<String>> drawerEntries, Map<String, Object> entryProperties)
+	private static void addFixedEntries(String id, String label, String[] entries, List<String> drawers, Map<String, List<String>> drawerEntries,
+		Map<String, Object> entryProperties)
 	{
-		String id = ELEMENTS_ID;
 		drawers.add(id);
-		entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, Messages.LabelElementsPalette);
-		drawerEntries.put(id, Arrays.asList(ELEMENTS_IDS));
-		for (String itemId : ELEMENTS_IDS)
-		{
-			entryProperties.put(id + '.' + itemId + '.' + PaletteCustomization.PROPERTY_LABEL, Utils.stringInitCap(itemId));
-			entryProperties.put(id + '.' + itemId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Create a " + itemId);
-		}
-	}
-
-	private static void addContainers(List<String> drawers, Map<String, List<String>> drawerEntries, Map<String, Object> entryProperties)
-	{
-		String id = CONTAINERS_ID;
-		drawers.add(id);
-		entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, Messages.LabelContainersPalette);
-		drawerEntries.put(id, Arrays.asList(CONTAINERS_IDS));
-		for (String itemId : CONTAINERS_IDS)
+		entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, label);
+		drawerEntries.put(id, Arrays.asList(entries));
+		for (String itemId : entries)
 		{
 			entryProperties.put(id + '.' + itemId + '.' + PaletteCustomization.PROPERTY_LABEL, Utils.stringInitCap(itemId));
 			entryProperties.put(id + '.' + itemId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Create a " + itemId);
@@ -153,7 +173,6 @@ public class VisualFormEditorPaletteFactory
 				templateNames.add(templateId);
 				entryProperties.put(id + '.' + templateId + '.' + PaletteCustomization.PROPERTY_LABEL, Utils.stringInitCap(templateId));
 				entryProperties.put(id + '.' + templateId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Create/apply template " + templateId);
-
 			}
 
 			drawers.add(id);
@@ -209,6 +228,11 @@ public class VisualFormEditorPaletteFactory
 			return createElementsEntry(id);
 		}
 
+		if (SHAPES_ID.equals(drawerId))
+		{
+			return createShapesEntry(id);
+		}
+
 		if (CONTAINERS_ID.equals(drawerId))
 		{
 			return createContainersEntry(id);
@@ -235,19 +259,195 @@ public class VisualFormEditorPaletteFactory
 
 	private static PaletteEntry createElementsEntry(String id)
 	{
+		ImageDescriptor icon = null;
+		Dimension size = new Dimension(140, 20);
+		RequestType requestType = VisualFormEditor.REQ_PLACE_FIELD;
+		int displayType = -1;
+		Map<String, Object> extendedData = new HashMap<String, Object>();
+
 		if (ELEMENTS_BUTTON_ID.equals(id))
 		{
-			return new ElementCreationToolEntry("", " ", new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_BUTTON, new Dimension(80, 20)),
-				Activator.loadImageDescriptorFromBundle("button.gif"), Activator.loadImageDescriptorFromBundle("button.gif"));
+			icon = Activator.loadImageDescriptorFromBundle("button.gif");
+			requestType = VisualFormEditor.REQ_PLACE_BUTTON;
+			size = new Dimension(80, 20);
 		}
 
-		if (ELEMENTS_LABEL_ID.equals(id))
+		else if (ELEMENTS_LABEL_ID.equals(id))
 		{
-			return new ElementCreationToolEntry("", "", new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_LABEL, new Dimension(80, 20)),
-				Activator.loadImageDescriptorFromBundle("text.gif"), Activator.loadImageDescriptorFromBundle("text.gif"));
+			icon = Activator.loadImageDescriptorFromBundle("text.gif");
+			requestType = VisualFormEditor.REQ_PLACE_LABEL;
+			size = new Dimension(80, 20);
 		}
 
-		// TODO: Add more
+		else if (ELEMENTS_TEXT_FIELD_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("field.gif"); // TODO: get proper icon
+		}
+
+		else if (ELEMENTS_TEXT_AREA_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			displayType = Field.TEXT_AREA;
+			size = new Dimension(140, 140);
+		}
+
+		else if (ELEMENTS_RTF_AREA_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			displayType = Field.RTF_AREA;
+			size = new Dimension(140, 140);
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_EDITABLE, Boolean.FALSE);
+		}
+
+		else if (ELEMENTS_HTML_AREA_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			displayType = Field.HTML_AREA;
+			size = new Dimension(140, 140);
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_EDITABLE, Boolean.FALSE);
+		}
+
+		else if (ELEMENTS_COMBOBOX_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			displayType = Field.COMBOBOX;
+		}
+
+		else if (ELEMENTS_RADIOS_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			displayType = Field.RADIOS;
+		}
+
+		else if (ELEMENTS_CHECKS_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			displayType = Field.CHECKS;
+		}
+
+		else if (ELEMENTS_CALENDAR_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			displayType = Field.CALENDAR;
+		}
+
+		else if (ELEMENTS_PASSWORD_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			displayType = Field.PASSWORD;
+		}
+
+		else if (ELEMENTS_IMAGE_MEDIA_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			displayType = Field.IMAGE_MEDIA;
+		}
+
+		else if (ELEMENTS_TYPE_AHEAD_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			displayType = Field.TYPE_AHEAD;
+		}
+
+		if (icon != null)
+		{
+			if (displayType != -1)
+			{
+				setProperty(
+					extendedData,
+					StaticContentSpecLoader.PROPERTY_DISPLAYTYPE,
+					PersistPropertySource.DISPLAY_TYPE_CONTOLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_DISPLAYTYPE.getPropertyName(),
+						Integer.valueOf(displayType)));
+			}
+			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(requestType, size);
+			factory.setExtendedData(extendedData);
+			return new ElementCreationToolEntry("", "", factory, icon, icon);
+		}
+
+		ServoyLog.logError("Unknown palette elements entry: '" + id + "'", null);
+		return null;
+	}
+
+	private static PaletteEntry createShapesEntry(String id)
+	{
+		ImageDescriptor icon = null;
+		Dimension size = new Dimension(70, 70);
+		RequestType requestType = VisualFormEditor.REQ_PLACE_RECT_SHAPE;
+		int shapeType = -1;
+		Map<String, Object> extendedData = new HashMap<String, Object>();
+
+		if (SHAPES_BORDER_PANEL_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("titledBorder.gif");
+			shapeType = RectShape.BORDER_PANEL;
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE, new ComplexProperty<Border>(BorderFactory.createTitledBorder("xy")));
+		}
+
+		else if (SHAPES_RECTANGLE_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("rectangle.gif");
+			shapeType = RectShape.RECTANGLE;
+		}
+
+		else if (SHAPES_ROUNDED_RECTANGLE_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("rrect.gif");
+			shapeType = RectShape.ROUNDED_RECTANGLE;
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_ROUNDEDRADIUS, Integer.valueOf(35));
+		}
+
+		else if (SHAPES_OVAL_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("circle.gif");
+			shapeType = RectShape.OVAL;
+		}
+
+		else if (SHAPES_HORIZONTAL_LINE_ID.equals(id) || SHAPES_VERTICAL_LINE_ID.equals(id))
+		{
+			float top, left;
+			if (SHAPES_HORIZONTAL_LINE_ID.equals(id))
+			{
+				icon = Activator.loadImageDescriptorFromBundle("hline.gif");
+				top = 1;
+				left = 0;
+				size = new Dimension(40, 1);
+			}
+			else
+			{
+				// SHAPES_VERTICAL_LINE_ID
+				icon = Activator.loadImageDescriptorFromBundle("vline.gif");
+				top = 0;
+				left = 1;
+				size = new Dimension(1, 40);
+			}
+
+			requestType = VisualFormEditor.REQ_PLACE_LABEL;
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TEXT, "");
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE, new ComplexProperty<Border>(new SpecialMatteBorder(top, left, 0, 0,
+				Color.black, Color.black, Color.black, Color.black)));
+			setProperty(
+				extendedData,
+				StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT,
+				PersistPropertySource.HORIZONTAL_ALIGNMENT_CONTROLLER.getConverter().convertProperty(
+					StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT.getPropertyName(), Integer.valueOf(SwingConstants.RIGHT)));
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TRANSPARENT, Boolean.TRUE);
+
+		}
+
+		if (icon != null)
+		{
+			if (shapeType != -1)
+			{
+				setProperty(
+					extendedData,
+					StaticContentSpecLoader.PROPERTY_SHAPETYPE,
+					PersistPropertySource.SHAPE_TYPE_CONTOLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_SHAPETYPE.getPropertyName(),
+						Integer.valueOf(shapeType)));
+			}
+			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(requestType, size);
+			factory.setExtendedData(extendedData);
+			return new ElementCreationToolEntry("", "", factory, icon, icon);
+		}
 
 		ServoyLog.logError("Unknown palette elements entry: '" + id + "'", null);
 		return null;
@@ -260,16 +460,16 @@ public class VisualFormEditorPaletteFactory
 
 		// tab panels
 		int tabOrienation = TabPanel.DEFAULT;
-		if (DEFAULT_PANEL_ID.equals(id))
+		if (CONTAINERS_DEFAULT_PANEL_ID.equals(id))
 		{
 			icon = com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("tabs.gif");
 		}
-		else if (SPLIT_PANE_HORIZONTAL_ID.equals(id))
+		else if (CONTAINERS_SPLIT_PANE_HORIZONTAL_ID.equals(id))
 		{
 			icon = com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("split.gif");
 			tabOrienation = TabPanel.SPLIT_HORIZONTAL;
 		}
-		else if (TABLESS_PANEL_ID.equals(id))
+		else if (CONTAINERS_TABLESS_PANEL_ID.equals(id))
 		{
 			icon = Activator.loadImageDescriptorFromBundle("button.gif"); // TODO: proper icon
 			tabOrienation = TabPanel.HIDE;
@@ -279,15 +479,15 @@ public class VisualFormEditorPaletteFactory
 		{
 			// one of the tab panels above
 			factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TAB, new Dimension(300, 300));
-			factory.getExtendedData().put(
-				SetValueCommand.REQUEST_PROPERTY_PREFIX + StaticContentSpecLoader.PROPERTY_TABORIENTATION.getPropertyName(),
+			setProperty(
+				factory.getExtendedData(),
+				StaticContentSpecLoader.PROPERTY_TABORIENTATION,
 				PersistPropertySource.TAB_ORIENTATION_CONTROLLER.getConverter().convertProperty(
 					StaticContentSpecLoader.PROPERTY_TABORIENTATION.getPropertyName(), Integer.valueOf(tabOrienation)));
-
 		}
 
 		// portals
-		if (PORTAL_ID.equals(id))
+		if (CONTAINERS_PORTAL_ID.equals(id))
 		{
 			factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_PORTAL, new Dimension(200, 200));
 			icon = com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("portal.gif");
@@ -392,6 +592,11 @@ public class VisualFormEditorPaletteFactory
 			icon = Activator.loadImageDescriptorFromBundle("template.gif");
 		}
 		return new ElementCreationToolEntry(Utils.stringInitCap(name), "Create/apply template item " + name, factory, icon, icon);
+	}
+
+	static void setProperty(Map<String, Object> map, TypedProperty< ? > property, Object value)
+	{
+		map.put(SetValueCommand.REQUEST_PROPERTY_PREFIX + property.getPropertyName(), value);
 	}
 
 	static ImageDescriptor getTemplateIcon(TemplateElementHolder template)

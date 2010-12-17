@@ -176,13 +176,15 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 	private static IPropertyController<Integer, Integer> ROTATION_CONTROLLER = null;
 	public static final IPropertyController<Integer, Integer> SHAPE_TYPE_CONTOLLER;
 	private static IPropertyController<Integer, Integer> VIEW_TYPE_CONTOLLER = null;
-	private static IPropertyController<Integer, Integer> DISPLAY_TYPE_CONTOLLER = null;
+	public static final IPropertyController<Integer, Integer> DISPLAY_TYPE_CONTOLLER;
 	private static IPropertyController<String, Integer> NAMEDFOUNDSET_CONTOLLER = null;
 	public static final IPropertyController<Integer, Integer> TAB_ORIENTATION_CONTROLLER;
 	private static IPropertyController<String, String> MNEMONIC_CONTROLLER = null;
 	private static IPropertyController<Integer, Integer> TEXT_ORIENTATION_CONTROLLER = null;
 	private static IPropertyController<Integer, Integer> SOLUTION_TYPE_CONTROLLER = null;
 	private static IPropertyController<Integer, Integer> JOIN_TYPE_CONTROLLER = null;
+
+	public static final IPropertyConverter<String, Border> BORDER_STRING_CONVERTER;
 
 	static
 	{
@@ -203,6 +205,28 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 					TabPanel.SPLIT_VERTICAL) },
 				new String[] { Messages.LabelDefault, Messages.AlignTop, Messages.AlignRight, Messages.AlignBottom, Messages.AlignLeft, "HIDE", "SPLIT HORIZONTAL", "SPLIT VERTICAL" }),
 			Messages.LabelUnresolved);
+		DISPLAY_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>(
+			"displayType",
+			RepositoryHelper.getDisplayName("displayType", Field.class),
+			new ComboboxPropertyModel<Integer>(
+				new Integer[] { new Integer(Field.TEXT_FIELD), new Integer(Field.TEXT_AREA), new Integer(Field.RTF_AREA), new Integer(Field.HTML_AREA), new Integer(
+					Field.TYPE_AHEAD), new Integer(Field.COMBOBOX), new Integer(Field.RADIOS), new Integer(Field.CHECKS), new Integer(Field.CALENDAR), new Integer(
+					Field.IMAGE_MEDIA), new Integer(Field.PASSWORD) },
+				new String[] { "TEXT_FIELD", "TEXT_AREA", "RTF_AREA", "HTML_AREA", "TYPE_AHEAD", "COMBOBOX", "RADIOS", "CHECK", "CALENDAR", "IMAGE_MEDIA", "PASSWORD" }),
+			Messages.LabelUnresolved);
+
+		BORDER_STRING_CONVERTER = new IPropertyConverter<String, Border>()
+		{
+			public Border convertProperty(Object property, String value)
+			{
+				return ComponentFactoryHelper.createBorder(value, true);
+			}
+
+			public String convertValue(Object property, Border value)
+			{
+				return ComponentFactoryHelper.createBorderString(value);
+			}
+		};
 	}
 
 	private static final String BEAN_PROPERTY_PREFIX_DOT = "bean.";
@@ -2216,19 +2240,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			borderPropertyController.setReadonly(readOnly);
 
 			// BorderPropertyController handles Border objects, the property is a String.
-			IPropertyConverter<String, Border> borderStringConverter = new IPropertyConverter<String, Border>()
-			{
-				public Border convertProperty(Object property, String value)
-				{
-					return ComponentFactoryHelper.createBorder(value, true);
-				}
-
-				public String convertValue(Object property, Border value)
-				{
-					return ComponentFactoryHelper.createBorderString(value);
-				}
-			};
-			return new PropertyController<String, Object>(id, displayName, new ChainedPropertyConverter<String, Border, Object>(borderStringConverter,
+			return new PropertyController<String, Object>(id, displayName, new ChainedPropertyConverter<String, Border, Object>(BORDER_STRING_CONVERTER,
 				borderPropertyController.getConverter()), borderPropertyController.getLabelProvider(), borderPropertyController);
 		}
 
@@ -2625,18 +2637,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 
 		if (name.equals("displayType"))
 		{
-			if (DISPLAY_TYPE_CONTOLLER == null)
-			{
-				DISPLAY_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>(
-					id,
-					displayName,
-					new ComboboxPropertyModel<Integer>(
-						new Integer[] { new Integer(Field.TEXT_FIELD), new Integer(Field.TEXT_AREA), new Integer(Field.RTF_AREA), new Integer(Field.HTML_AREA), new Integer(
-							Field.TYPE_AHEAD), new Integer(Field.COMBOBOX), new Integer(Field.RADIOS), new Integer(Field.CHECKS), new Integer(Field.CALENDAR), new Integer(
-							Field.IMAGE_MEDIA), new Integer(Field.PASSWORD) },
-						new String[] { "TEXT_FIELD", "TEXT_AREA", "RTF_AREA", "HTML_AREA", "TYPE_AHEAD", "COMBOBOX", "RADIOS", "CHECK", "CALENDAR", "IMAGE_MEDIA", "PASSWORD" }),
-					Messages.LabelUnresolved);
-			}
 			return DISPLAY_TYPE_CONTOLLER;
 		}
 

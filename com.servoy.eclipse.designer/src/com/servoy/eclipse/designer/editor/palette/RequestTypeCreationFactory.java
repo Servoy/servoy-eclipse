@@ -42,7 +42,7 @@ public class RequestTypeCreationFactory implements CreationFactory
 	private Object data;
 	private Dimension newObjectSize;
 	private IGetSize newObjectSizeCalculator;
-	private Map< ? , ? > extendedData;
+	private Map<String, Object> extendedData;
 
 	public RequestTypeCreationFactory(RequestType requestType)
 	{
@@ -114,16 +114,16 @@ public class RequestTypeCreationFactory implements CreationFactory
 		return data;
 	}
 
-	public Map getExtendedData()
+	public Map<String, Object> getExtendedData()
 	{
 		if (extendedData == null)
 		{
-			extendedData = new HashMap();
+			extendedData = new HashMap<String, Object>();
 		}
 		return extendedData;
 	}
 
-	public void setExtendedData(Map< ? , ? > map)
+	public void setExtendedData(Map<String, Object> map)
 	{
 		extendedData = map;
 	}
