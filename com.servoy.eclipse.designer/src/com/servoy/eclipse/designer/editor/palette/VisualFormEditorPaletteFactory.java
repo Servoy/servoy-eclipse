@@ -221,6 +221,8 @@ public class VisualFormEditorPaletteFactory
 		{
 			drawers.add(id);
 			entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, servoyBeans ? Messages.LabelServoyBeansPalette : Messages.LabelJavaBeansPalette);
+			// by default hide java beans
+			entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_HIDDEN, Boolean.valueOf(!servoyBeans));
 			drawerEntries.put(id, beanIds);
 		}
 	}
