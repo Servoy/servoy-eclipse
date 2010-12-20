@@ -48,8 +48,8 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.IApplication;
 import com.servoy.j2db.FormController.JSForm;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
@@ -264,8 +264,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		names.remove("Super");
 		names.remove("Forms");
 		names.remove("Plugins");
-		// add the special rhinoe Continuation type.
-		names.add("Continuation");
+		// add the special Rhino Continuation type.
+		if (prefix == null || "Continuation".startsWith(prefix)) names.add("Continuation");
 		return names;
 	}
 
