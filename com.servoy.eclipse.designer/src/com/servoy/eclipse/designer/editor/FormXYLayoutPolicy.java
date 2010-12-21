@@ -43,6 +43,7 @@ import com.servoy.eclipse.designer.editor.commands.FormPlaceFieldCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlacePortalCommand;
 import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.eclipse.designer.property.SetValueCommand;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
@@ -192,7 +193,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			return null;
 		}
 
-		int packGap = 8; // TODO: preferences
+		int packGap = new DesignerPreferences().getAlignmentDistances()[0]; // small step
 		int size = editParts.size();
 
 		// find the bbox of all selected objects
