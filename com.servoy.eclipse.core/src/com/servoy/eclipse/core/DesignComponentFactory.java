@@ -43,6 +43,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.smart.dataui.SpecialSplitPane;
 import com.servoy.j2db.ui.IComponent;
 import com.servoy.j2db.ui.ILabel;
 import com.servoy.j2db.ui.IStandardLabel;
@@ -93,15 +94,35 @@ public class DesignComponentFactory extends ComponentFactory
 			switch (meta.getTypeID())
 			{
 				case IRepository.TABPANELS :
-					JComponent retval = null;
+					JComponent retval;
 					int orient = ((TabPanel)meta).getTabOrientation();
-					if (orient == -1)
+					if (orient == TabPanel.HIDE)
 					{
 						// Designer all always real components!!
 						retval = (JComponent)application.getItemFactory().createLabel(null, "Tabless panel, for JavaScript use");
 						((IStandardLabel)retval).setHorizontalAlignment(SwingConstants.CENTER);
-						applyBasicComponentProperties(application, (IComponent)retval, (BaseComponent)meta, getStyleForBasicComponent(application,
-							(BaseComponent)meta, form));
+						applyBasicComponentProperties(application, (IComponent)retval, (BaseComponent)meta,
+							getStyleForBasicComponent(application, (BaseComponent)meta, form));
+					}
+					else if (orient == TabPanel.SPLIT_HORIZONTAL || orient == TabPanel.SPLIT_VERTICAL)
+					{
+						SpecialSplitPane splitPane = new SpecialSplitPane(application, orient, true);
+						applyBasicComponentProperties(application, splitPane, (BaseComponent)meta,
+							getStyleForBasicComponent(application, (BaseComponent)meta, form));
+
+						for (int i = 0; i < 2; i++)
+						{
+							String name;
+							if (i == 0) name = orient == TabPanel.SPLIT_HORIZONTAL ? "Left panel" : "Top panel";
+							else name = orient == TabPanel.SPLIT_HORIZONTAL ? "Top panel" : "Bottom panel";
+
+							JLabel label = new JLabel(name, SwingConstants.CENTER);
+							if (i == 0) splitPane.getSplitPane().setLeftComponent(label);
+							else splitPane.getSplitPane().setRightComponent(label);
+						}
+
+						splitPane.js_setDividerLocation((orient == TabPanel.SPLIT_HORIZONTAL ? splitPane.getSize().width / 2 : splitPane.getSize().height / 2));
+						retval = splitPane;
 					}
 					else
 					{
@@ -161,7 +182,6 @@ public class DesignComponentFactory extends ComponentFactory
 		OrientationApplier.setOrientationToAWTComponent(c, application.getLocale(), application.getSolution().getTextOrientation());
 		return c;//removeTransparencyAndScrolling(c);
 	}
-
 //	private static Component removeTransparencyAndScrolling(Component c)
 //	{
 //		//remove any transparency of scrollpanes
