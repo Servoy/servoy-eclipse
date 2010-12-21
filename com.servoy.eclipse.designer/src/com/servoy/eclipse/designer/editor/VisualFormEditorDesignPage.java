@@ -51,6 +51,8 @@ import org.eclipse.gef.ui.actions.RedoAction;
 import org.eclipse.gef.ui.actions.SaveAction;
 import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.gef.ui.actions.UndoAction;
+import org.eclipse.gef.ui.palette.FlyoutPaletteComposite;
+import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.palette.PaletteViewer;
 import org.eclipse.gef.ui.palette.PaletteViewerProvider;
 import org.eclipse.gef.ui.palette.customize.PaletteCustomizerDialog;
@@ -1000,6 +1002,21 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 			return true;
 		}
 		return false;
+	}
+
+	/*
+	 * Set some defaults for palette preferences.
+	 */
+	@Override
+	protected FlyoutPreferences getPalettePreferences()
+	{
+		FlyoutPreferences palettePreferences = super.getPalettePreferences();
+		if (palettePreferences.getPaletteState() == 0)
+		{
+			// open palette first time it is shown
+			palettePreferences.setPaletteState(FlyoutPaletteComposite.STATE_PINNED_OPEN);
+		}
+		return palettePreferences;
 	}
 
 	@Override
