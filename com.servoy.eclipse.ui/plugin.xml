@@ -167,13 +167,6 @@
        		id="com.servoy.eclipse.ui.ExportSolutionWizard"
        		name="Export Active Solution">
    		</wizard>
-     <wizard
-           category="com.servoy.eclipse.ui"
-           class="com.servoy.eclipse.ui.wizards.RuntimeBuilderWizard"
-           icon="icons/solution_icon.gif"
-           id="com.servoy.eclipse.ui.ExportRuntimeWizard"
-           name="Runtime Builder">
-     </wizard>
  </extension>
    <extension
          point="org.eclipse.ui.editors">
