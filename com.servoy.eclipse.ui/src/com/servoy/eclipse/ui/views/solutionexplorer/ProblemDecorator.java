@@ -104,12 +104,11 @@ public class ProblemDecorator implements ILightweightLabelDecorator
 		if (element instanceof PlatformSimpleUserNode)
 		{
 			IResource resource = (IResource)((PlatformSimpleUserNode)element).getAdapter(IResource.class);
-			if (resource != null)
+			if (resource != null && resource.exists())
 			{
 				try
 				{
 					IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-
 					if (resource.getName().toLowerCase().endsWith(SolutionSerializer.FORM_FILE_EXTENSION))
 					{
 						String resourceName = resource.getName();
