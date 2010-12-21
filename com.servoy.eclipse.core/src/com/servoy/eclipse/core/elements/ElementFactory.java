@@ -18,18 +18,22 @@ package com.servoy.eclipse.core.elements;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
+import javax.swing.border.Border;
 
 import org.eclipse.swt.graphics.Point;
 import org.json.JSONArray;
@@ -46,6 +50,7 @@ import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.core.util.CoreUtils;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.FormController;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -86,6 +91,7 @@ import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.server.headlessclient.dataui.WebDefaultRecordNavigator;
 import com.servoy.j2db.util.ComponentFactoryHelper;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ImageLoader;
@@ -489,6 +495,7 @@ public class ElementFactory
 		if (parent instanceof Form)
 		{
 			tabPanel = ((Form)parent).createNewTabPanel("tabs_" + (location == null ? 0 : location.y));
+			tabPanel.setTransparent(true);
 			tabPanel.setPrintable(false);
 			tabPanel.setTabOrientation(tabOrientation);
 			tabPanel.setLocation(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
@@ -524,8 +531,9 @@ public class ElementFactory
 						{
 							tabs.add(tab);
 						}
-						if (maxDimension == null) maxDimension = rf.form.getSize();
-						else if (maxDimension.width < rf.form.getSize().width && maxDimension.height < rf.form.getSize().height) maxDimension = rf.form.getSize();
+						Dimension formSize = calculateFormSize(rf.form);
+						if (maxDimension == null) maxDimension = formSize;
+						else if (maxDimension.width < formSize.width && maxDimension.height < formSize.height) maxDimension = formSize;
 
 					}
 					catch (Exception e)
@@ -538,7 +546,7 @@ public class ElementFactory
 		if (maxDimension != null && parent instanceof Form)
 		{
 			// set size of the maximum dimension form
-			tabPanel.setSize(new Dimension(maxDimension.width + 4, maxDimension.height + 4));
+			tabPanel.setSize(new Dimension(maxDimension.width, maxDimension.height));
 		}
 		if (tabs == null || tabs.size() == 0)
 		{
@@ -550,6 +558,60 @@ public class ElementFactory
 		return tabs.toArray(new IPersist[tabs.size()]);
 	}
 
+	/**
+	 * Calculate form size, take border and navigator into account.
+	 * 
+	 * @param form
+	 * @return
+	 */
+	public static Dimension calculateFormSize(Form form)
+	{
+		return calculateFormSize(form, new HashSet<Form>());
+	}
+
+	private static Dimension calculateFormSize(Form form, Set<Form> processed)
+	{
+		if (form == null || !processed.add(form))
+		{
+			return null;
+		}
+
+		// include border size
+		Border border = ComponentFactoryHelper.createBorder(form.getBorderType(), true);
+		Insets borderInsets;
+		if (border != null)
+		{
+			borderInsets = border.getBorderInsets(null);
+		}
+		else
+		{
+			borderInsets = new Insets(2, 2, 2, 2);
+		}
+		Dimension formSize = form.getSize();
+		int width = formSize.width + borderInsets.left + borderInsets.right;
+		int height = formSize.height + borderInsets.top + borderInsets.bottom;
+
+		// include navigator size
+		Dimension navigatorSize = null;
+		int navigatorID = form.getNavigatorID();
+		if (navigatorID == Form.NAVIGATOR_DEFAULT && form.getView() != FormController.TABLE_VIEW && form.getView() != FormController.LOCKED_TABLE_VIEW)
+		{
+			navigatorSize = new Dimension(WebDefaultRecordNavigator.DEFAULT_WIDTH, WebDefaultRecordNavigator.DEFAULT_HEIGHT_WEB);
+		}
+		else if (navigatorID != Form.NAVIGATOR_NONE)
+		{
+			navigatorSize = calculateFormSize(
+				ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form).getForm(navigatorID), processed);
+		}
+
+		if (navigatorSize != null)
+		{
+			width += navigatorSize.width;
+			if (height < navigatorSize.height) height = navigatorSize.height;
+		}
+
+		return new Dimension(width, height);
+	}
 
 	public static IPersist createPortal(Form form, Object[] dataProviders, boolean fillText, boolean fillName, Point location) throws RepositoryException
 	{
