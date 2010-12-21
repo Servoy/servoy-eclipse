@@ -2800,7 +2800,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		{
 			return new AnchorPropertyController(id, displayName);
 		}
-		if (name.equals("access"))
+		if (name.equals("encapsulation"))
 		{
 			return new EncapsulationPropertyController(id, displayName);
 		}
