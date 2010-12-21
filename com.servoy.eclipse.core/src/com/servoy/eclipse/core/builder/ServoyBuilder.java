@@ -109,11 +109,9 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
-import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportName;
-import com.servoy.j2db.persistence.ISupportSize;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IVariable;
@@ -1426,15 +1424,16 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 						}
 						checkCancel();
-						if (o instanceof ISupportBounds && o instanceof ISupportSize)
+						if (o instanceof BaseComponent && ((BaseComponent)o).getVisible())
 						{
 							// check if not outside form
 							Form form = (Form)o.getAncestor(IRepository.FORMS);
 							if (form != null)
 							{
-								Point location = ((ISupportBounds)o).getLocation();
+								Point location = ((BaseComponent)o).getLocation();
 								if (location != null)
 								{
+									boolean outsideForm = false;
 									Iterator<com.servoy.j2db.persistence.Part> parts = form.getParts();
 									while (parts.hasNext())
 									{
@@ -1444,7 +1443,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										if (startPos <= location.y && endPos > location.y)
 										{
 											// found the part
-											int height = ((ISupportSize)o).getSize().height;
+											int height = ((BaseComponent)o).getSize().height;
 											if (location.y + height > endPos)
 											{
 												String elementName = null;
@@ -1495,25 +1494,31 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													}
 												}
 											}
-											if (width < location.x + ((ISupportSize)o).getSize().width)
+											if (width < location.x + ((BaseComponent)o).getSize().width)
 											{
-												String elementName = null;
-												String inForm = null;
-												if (o instanceof ISupportName && ((ISupportName)o).getName() != null) elementName = ((ISupportName)o).getName();
-												if (parentForm != null) inForm = form.getName();
-												ServoyMarker mk;
-												if (elementName == null)
-												{
-													mk = MarkerMessages.FormUnnamedElementOutsideBoundsOfForm.fill(inForm);
-												}
-												else
-												{
-													mk = MarkerMessages.FormNamedElementOutsideBoundsOfForm.fill(elementName, inForm);
-												}
-												addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, o);
+												outsideForm = true;
 											}
 											break;
 										}
+									}
+									if (location.y > form.getSize().height && form.getParts().hasNext())
+									{
+										outsideForm = true;
+									}
+									if (outsideForm)
+									{
+										String elementName = null;
+										if (o instanceof ISupportName && ((ISupportName)o).getName() != null) elementName = ((ISupportName)o).getName();
+										ServoyMarker mk;
+										if (elementName == null)
+										{
+											mk = MarkerMessages.FormUnnamedElementOutsideBoundsOfForm.fill(form.getName());
+										}
+										else
+										{
+											mk = MarkerMessages.FormNamedElementOutsideBoundsOfForm.fill(elementName, form.getName());
+										}
+										addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, o);
 									}
 								}
 							}
