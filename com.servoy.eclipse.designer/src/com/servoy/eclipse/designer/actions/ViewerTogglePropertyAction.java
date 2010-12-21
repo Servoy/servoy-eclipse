@@ -26,10 +26,15 @@ import org.eclipse.jface.resource.ImageDescriptor;
  * 
  * @author rgansevles
  */
-public abstract class ViewerTogglePropertyAction extends Action
+public class ViewerTogglePropertyAction extends Action
 {
 	private final GraphicalViewer diagramViewer;
 	private final String property;
+
+	public ViewerTogglePropertyAction(GraphicalViewer diagramViewer, String text, String property)
+	{
+		this(diagramViewer, null, text, null, null, property);
+	}
 
 	/**
 	 * Constructor

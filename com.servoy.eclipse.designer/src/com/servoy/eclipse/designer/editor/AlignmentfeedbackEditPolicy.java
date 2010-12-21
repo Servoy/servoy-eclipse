@@ -73,12 +73,12 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	/**
 	 * A viewer property indicating whether the anchor feedback is enabled. The value must  be a Boolean.
 	 */
-	public static final String PROPERTY_ANCHOR_FEEDBACK_ENABLED = "AlignmentfeedbackEditPolicy.anchorFeedbackEnabled"; //$NON-NLS-1$
+	public static final String PROPERTY_ANCHOR_FEEDBACK_VISIBLE = "AlignmentfeedbackEditPolicy.anchorFeedbackVisible"; //$NON-NLS-1$
 
 	/**
 	 * A viewer property indicating whether the same size feedback is enabled. The value must  be a Boolean.
 	 */
-	public static final String PROPERTY_SAME_SIZE_FEEDBACK_ENABLED = "AlignmentfeedbackEditPolicy.sameSizeFeedbackEnabled"; //$NON-NLS-1$
+	public static final String PROPERTY_SAME_SIZE_FEEDBACK_VISIBLE = "AlignmentfeedbackEditPolicy.sameSizeFeedbackVisible"; //$NON-NLS-1$
 
 	private AlignmentFeedbackHelper alignmentFeedbackHelper;
 
@@ -110,12 +110,12 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 			String property = evt.getPropertyName();
 			if (isSelected)
 			{
-				if (property.equals(AlignmentfeedbackEditPolicy.PROPERTY_ANCHOR_FEEDBACK_ENABLED))
+				if (property.equals(AlignmentfeedbackEditPolicy.PROPERTY_ANCHOR_FEEDBACK_VISIBLE))
 				{
 					removeAnchoringFigure();
 					addAnchoringFigure();
 				}
-				else if (property.equals(AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_ENABLED))
+				else if (property.equals(AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_VISIBLE))
 				{
 					removeSameSizeFeedback();
 					addSameSizeFeedback();
@@ -286,7 +286,7 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	 */
 	protected void addAnchoringFigure()
 	{
-		if (!Boolean.TRUE.equals(getHost().getViewer().getProperty(AlignmentfeedbackEditPolicy.PROPERTY_ANCHOR_FEEDBACK_ENABLED)))
+		if (!Boolean.TRUE.equals(getHost().getViewer().getProperty(AlignmentfeedbackEditPolicy.PROPERTY_ANCHOR_FEEDBACK_VISIBLE)))
 		{
 			return;
 		}
@@ -367,7 +367,7 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 
 	protected void addSameSizeFeedback()
 	{
-		if (!Boolean.TRUE.equals(container.getViewer().getProperty(AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_ENABLED)))
+		if (!Boolean.TRUE.equals(container.getViewer().getProperty(AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_VISIBLE)))
 		{
 			return;
 		}

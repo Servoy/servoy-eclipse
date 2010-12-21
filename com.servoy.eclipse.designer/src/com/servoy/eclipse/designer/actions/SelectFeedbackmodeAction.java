@@ -18,8 +18,6 @@ package com.servoy.eclipse.designer.actions;
 
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.SnapToGrid;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.widgets.Menu;
 
 import com.servoy.eclipse.designer.editor.AlignmentfeedbackEditPolicy;
@@ -44,57 +42,12 @@ public class SelectFeedbackmodeAction extends ViewerDropdownPropertyAction
 			DesignerActionFactory.SELECT_FEEDBACK_TOOLTIP, DesignerActionFactory.SELECT_FEEDBACK_IMAGE);
 	}
 
-	protected void setFeedbackMode(boolean grid, boolean alignment)
-	{
-		diagramViewer.setProperty(SnapToGrid.PROPERTY_GRID_VISIBLE, Boolean.valueOf(grid));
-		diagramViewer.setProperty(AlignmentfeedbackEditPolicy.PROPERTY_ALIGMENT_FEEDBACK_VISIBLE, Boolean.valueOf(alignment));
-	}
-
 	@Override
 	protected void fillMenu(Menu menu)
 	{
-		add(new Action("None", IAction.AS_CHECK_BOX)
-		{
-			@Override
-			public void run()
-			{
-				setFeedbackMode(false, false);
-			}
-
-			@Override
-			public boolean isChecked()
-			{
-				return !Boolean.TRUE.equals(diagramViewer.getProperty(SnapToGrid.PROPERTY_GRID_VISIBLE)) &&
-					!Boolean.TRUE.equals(diagramViewer.getProperty(AlignmentfeedbackEditPolicy.PROPERTY_ALIGMENT_FEEDBACK_VISIBLE));
-			}
-		});
-		add(new Action("Grid", IAction.AS_CHECK_BOX)
-		{
-			@Override
-			public void run()
-			{
-				setFeedbackMode(true, false);
-			}
-
-			@Override
-			public boolean isChecked()
-			{
-				return Boolean.TRUE.equals(diagramViewer.getProperty(SnapToGrid.PROPERTY_GRID_VISIBLE));
-			}
-		});
-		add(new Action("Alignment", IAction.AS_CHECK_BOX)
-		{
-			@Override
-			public void run()
-			{
-				setFeedbackMode(false, true);
-			}
-
-			@Override
-			public boolean isChecked()
-			{
-				return Boolean.TRUE.equals(diagramViewer.getProperty(AlignmentfeedbackEditPolicy.PROPERTY_ALIGMENT_FEEDBACK_VISIBLE));
-			}
-		});
+		add(new ViewerTogglePropertyAction(diagramViewer, "Show anchoring", AlignmentfeedbackEditPolicy.PROPERTY_ANCHOR_FEEDBACK_VISIBLE));
+		add(new ViewerTogglePropertyAction(diagramViewer, "Show alignment", AlignmentfeedbackEditPolicy.PROPERTY_ALIGMENT_FEEDBACK_VISIBLE));
+		add(new ViewerTogglePropertyAction(diagramViewer, "Show same-size indicators", AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_VISIBLE));
+		add(new ViewerTogglePropertyAction(diagramViewer, "Show grid", SnapToGrid.PROPERTY_GRID_VISIBLE));
 	}
 }
