@@ -49,6 +49,14 @@ import com.servoy.j2db.persistence.Tab;
 
 public class FormSelectionTool extends PanningSelectionTool
 {
+
+	@Override
+	protected boolean handleViewerExited()
+	{
+		// on mac, the viewer-exited event kills selecting elements when marquee goes outside viewer.
+		return false;
+	}
+
 	/**
 	 * Handle double click.
 	 * <p>
