@@ -102,7 +102,15 @@ public class PersistImageNotifier implements IImageNotifier, IImageListener
 					{
 						if (label == null)
 						{
-							label = new JLabel();
+							label = new JLabel()
+							{
+								@Override
+								public boolean isShowing()
+								{
+									// make sure all awt components will paint
+									return true;
+								}
+							};
 						}
 						label.removeAll();
 						label.setOpaque(false);
