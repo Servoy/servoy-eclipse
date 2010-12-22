@@ -48,7 +48,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.sse.core;bundle-version="1.1.401",
  servoy_debug,
  org.eclipse.ui.cheatsheets,
- org.eclipse.ui.browser
+ org.eclipse.ui.browser,
+ com.servoy.eclipse.model,
+ org.eclipse.ui.externaltools
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.ui,com.servoy.eclipse.ui.actions,com
  .servoy.eclipse.ui.dialogs,com.servoy.eclipse.ui.editors,com.servoy.ec

@@ -18,6 +18,7 @@ Require-Bundle: org.eclipse.dltk.javascript.rhino,
  org.junit;bundle-version="3.8.2",
  com.servoy.eclipse.debug,
  com.servoy.eclipse.core,
+ com.servoy.eclipse.model,
  com.servoy.eclipse.ui
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

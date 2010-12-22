@@ -672,7 +672,7 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
    </license>
 
    <url>
-      <update label="Servoy Update Site" url="http://www.servoy.com/developer/5xx_updates"/>
+      <update label="Servoy Update Site" url="http://www.servoy.com/developer/6xx_updates"/>
       <discovery label="Servoy Update Site" url="http://www.servoy.com/developer/6xx_updates"/>
    </url>
 
@@ -772,7 +772,7 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          version="0.0.0"
          unpack="false"/>
 
-    <plugin
+   <plugin
          id="j2db_documentation"
          download-size="0"
          install-size="0"
@@ -785,7 +785,7 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="j2db_runtime"
          download-size="0"
@@ -823,6 +823,13 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
 
    <plugin
          id="servoy_smart_client"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.servoy.eclipse.model"
          download-size="0"
          install-size="0"
          version="0.0.0"

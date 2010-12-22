@@ -13,11 +13,10 @@ Require-Bundle: servoy_debug,
  org.eclipse.ui,
  org.eclipse.core.runtime,
  servoy_shared,
- servoy_smart_client,
  org.eclipse.core.resources,
  com.servoy.eclipse.core,
  com.servoy.eclipse.ui,
- org.eclipse.ui.ide
+ com.servoy.eclipse.model
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy

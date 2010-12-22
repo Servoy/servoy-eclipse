@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Workspace based Repository
+Bundle-SymbolicName: com.servoy.eclipse.model;singleton:=true
+Bundle-Version: 6.0.0.1200
+Bundle-Vendor: Servoy
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Require-Bundle: servoy_shared,
+ org.eclipse.core.resources,
+ org.eclipse.core.runtime,
+ org.eclipse.wst.css.core,
+ org.eclipse.dltk.javascript.parser,
+ org.eclipse.dltk.core
+Export-Package: com.servoy.eclipse.model,
+ com.servoy.eclipse.model.builder,
+ com.servoy.eclipse.model.extensions,
+ com.servoy.eclipse.model.nature,
+ com.servoy.eclipse.model.repository,
+ com.servoy.eclipse.model.util
+Bundle-Activator: com.servoy.eclipse.model.Activator
+Bundle-ActivationPolicy: lazy

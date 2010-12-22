@@ -8,6 +8,7 @@ Bundle-Vendor: Servoy
 Require-Bundle: servoy_smart_client,
  org.eclipse.core.runtime,
  com.servoy.eclipse.core,
+ com.servoy.eclipse.model,
  org.eclipse.ui.workbench,
  org.eclipse.debug.core,
  org.eclipse.jface,

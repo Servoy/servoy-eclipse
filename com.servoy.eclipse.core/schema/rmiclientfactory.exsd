@@ -69,7 +69,7 @@
                   
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn=":com.servoy.eclipse.core.repository.IRMIClientFactoryProvider"/>
+                  <meta.attribute kind="java" basedOn=":com.servoy.j2db.util.rmi.IRMIClientFactoryProvider"/>
                </appInfo>
             </annotation>
          </attribute>

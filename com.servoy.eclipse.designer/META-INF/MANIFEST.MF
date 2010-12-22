@@ -19,6 +19,7 @@ Require-Bundle: org.eclipse.core.databinding,
  servoy_smart_client,
  org.eclipse.gef,
  com.servoy.eclipse.core,
+ com.servoy.eclipse.model,
  com.servoy.eclipse.appserver,
  com.servoy.eclipse.ui,
  org.eclipse.core.expressions
