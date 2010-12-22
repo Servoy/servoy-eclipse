@@ -470,6 +470,7 @@ public class VisualFormEditorPaletteFactory
 	{
 		ImageDescriptor icon = null;
 		RequestTypeCreationFactory factory = null;
+		String nameHint = null;
 
 		// tab panels
 		int tabOrienation = TabPanel.DEFAULT;
@@ -481,11 +482,13 @@ public class VisualFormEditorPaletteFactory
 		{
 			icon = com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("split.gif");
 			tabOrienation = TabPanel.SPLIT_HORIZONTAL;
+			nameHint = "split_";
 		}
 		else if (CONTAINERS_TABLESS_PANEL_ID.equals(id))
 		{
 			icon = Activator.loadImageDescriptorFromBundle("button.gif"); // TODO: proper icon
 			tabOrienation = TabPanel.HIDE;
+			nameHint = "tabless_";
 		}
 
 		if (icon != null)
@@ -497,6 +500,10 @@ public class VisualFormEditorPaletteFactory
 				StaticContentSpecLoader.PROPERTY_TABORIENTATION,
 				PersistPropertySource.TAB_ORIENTATION_CONTROLLER.getConverter().convertProperty(
 					StaticContentSpecLoader.PROPERTY_TABORIENTATION.getPropertyName(), Integer.valueOf(tabOrienation)));
+			if (nameHint != null)
+			{
+				factory.getExtendedData().put(ElementFactory.NAME_HINT_PROPERTY, nameHint);
+			}
 		}
 
 		if (factory == null)

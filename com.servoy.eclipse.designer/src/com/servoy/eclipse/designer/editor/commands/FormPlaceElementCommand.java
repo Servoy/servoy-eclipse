@@ -177,7 +177,8 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 			if (((RequestType)requestType).type == RequestType.TYPE_TAB)
 			{
 				setLabel("place tabpanel");
-				return ElementFactory.createTabs(parent, (Object[])object, location, TabPanel.DEFAULT);
+				return ElementFactory.createTabs(parent, (Object[])object, location, TabPanel.DEFAULT,
+					(String)objectProperties.get(ElementFactory.NAME_HINT_PROPERTY));
 			}
 
 			if (parent instanceof ISupportFormElements)

@@ -108,6 +108,8 @@ import com.servoy.j2db.util.Utils;
  */
 public class ElementFactory
 {
+	public static final String NAME_HINT_PROPERTY = "ElementFactory:nameHint";
+
 	private static Random random = new Random();
 
 	public static GraphicalComponent createLabel(ISupportFormElements parent, String text, Point location) throws RepositoryException
@@ -488,13 +490,14 @@ public class ElementFactory
 		return name;
 	}
 
-	public static IPersist[] createTabs(ISupportChilds parent, Object[] relatedForms, Point location, int tabOrientation) throws RepositoryException
+	public static IPersist[] createTabs(ISupportChilds parent, Object[] relatedForms, Point location, int tabOrientation, String nameHint)
+		throws RepositoryException
 	{
 		TabPanel tabPanel;
 		List<IPersist> tabs = null;
 		if (parent instanceof Form)
 		{
-			tabPanel = ((Form)parent).createNewTabPanel("tabs_" + (location == null ? 0 : location.y));
+			tabPanel = ((Form)parent).createNewTabPanel((nameHint == null ? "tabs_" : nameHint) + (location == null ? 0 : location.y));
 			tabPanel.setTransparent(true);
 			tabPanel.setPrintable(false);
 			tabPanel.setTabOrientation(tabOrientation);
