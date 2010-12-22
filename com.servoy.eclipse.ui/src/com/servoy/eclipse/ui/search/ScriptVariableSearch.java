@@ -36,7 +36,7 @@ import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.text.FileTextSearchScope;
 
 import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 

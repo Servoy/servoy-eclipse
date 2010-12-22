@@ -54,11 +54,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.builder.ServoyBuilder;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.util.EditorUtil;

@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;

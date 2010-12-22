@@ -52,7 +52,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
 import com.servoy.eclipse.ui.editors.table.ColumnLabelProvider;

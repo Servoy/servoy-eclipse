@@ -53,10 +53,10 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.util.SerialRule;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.table.ColumnLabelProvider;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;

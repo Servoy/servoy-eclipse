@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
-import com.servoy.eclipse.core.repository.TableWrapper;
+import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.I18NServerTableDialog;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;

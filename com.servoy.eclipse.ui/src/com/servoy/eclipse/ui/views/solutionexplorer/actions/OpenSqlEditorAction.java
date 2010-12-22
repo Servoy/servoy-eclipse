@@ -36,8 +36,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.repository.TableWrapper;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;

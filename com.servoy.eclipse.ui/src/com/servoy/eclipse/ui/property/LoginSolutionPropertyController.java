@@ -21,7 +21,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.SolutionContentProvider;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
 import com.servoy.j2db.persistence.IPersist;

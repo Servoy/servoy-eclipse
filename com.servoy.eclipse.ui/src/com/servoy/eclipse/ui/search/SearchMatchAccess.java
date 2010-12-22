@@ -27,7 +27,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.search.SearchMatch;
 import org.eclipse.search.core.text.TextSearchMatchAccess;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 class SearchMatchAccess extends TextSearchMatchAccess
 {

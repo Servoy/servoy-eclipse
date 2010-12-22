@@ -34,8 +34,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Settings;

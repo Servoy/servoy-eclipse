@@ -25,8 +25,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
 
-import com.servoy.eclipse.core.repository.EclipseMessages;
-import com.servoy.eclipse.core.util.CoreUtils;
+import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 
@@ -54,7 +54,7 @@ public class DeleteI18NAction extends Action implements ISelectionChangedListene
 			String[] i18nName;
 			while (it.hasNext())
 			{
-				i18nName = CoreUtils.getTokenElements(it.next().getName(), ".", true); //$NON-NLS-1$
+				i18nName = ModelUtils.getTokenElements(it.next().getName(), ".", true); //$NON-NLS-1$
 				EclipseMessages.deleteMessageFileNames(i18nName[0], i18nName[1]);
 			}
 		}

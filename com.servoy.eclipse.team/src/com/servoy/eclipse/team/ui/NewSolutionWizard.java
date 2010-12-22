@@ -36,12 +36,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.repository.RepositoryAccessPoint;
 import com.servoy.eclipse.core.util.SerialRule;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.team.RepositoryAccessPoint;
 import com.servoy.eclipse.team.ServoyTeamProvider;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITeamRepository;

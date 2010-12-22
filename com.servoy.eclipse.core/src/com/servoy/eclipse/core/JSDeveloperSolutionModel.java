@@ -21,7 +21,9 @@ import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.IFileAccess;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;

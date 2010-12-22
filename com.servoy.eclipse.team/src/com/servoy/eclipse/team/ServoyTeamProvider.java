@@ -62,22 +62,21 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.IOFileAccess;
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.ServoyResourcesProject;
 import com.servoy.eclipse.core.TeamShareMonitor;
 import com.servoy.eclipse.core.TeamShareMonitor.TeamShareMonitorExtension;
-import com.servoy.eclipse.core.WorkspaceFileAccess;
-import com.servoy.eclipse.core.repository.DataModelManager;
-import com.servoy.eclipse.core.repository.EclipseMessages;
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.RepositoryAccessPoint;
-import com.servoy.eclipse.core.repository.RepositorySettingsDeserializer;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.core.util.IServoyTeamProvider;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.repository.RepositorySettingsDeserializer;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.team.subscriber.SolutionMergeContext;
 import com.servoy.eclipse.team.subscriber.SolutionResourceVariant;
 import com.servoy.eclipse.team.subscriber.SolutionSubscriber;
@@ -654,7 +653,7 @@ public class ServoyTeamProvider extends RepositoryProvider implements IServoyTea
 
 		Team.setAllIgnores(ignorePatterns.toArray(new String[0]), bIgnorePatternsStatus);
 		Team.getFileContentManager().addExtensionMappings(
-			new String[] { SolutionSerializer.FORM_FILE_EXTENSION.substring(1), SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT, SolutionSerializer.JSON_DEFAULT_FILE_EXTENSION.substring(1), SolutionSerializer.RELATION_FILE_EXTENSION.substring(1), SolutionSerializer.VALUELIST_FILE_EXTENSION.substring(1), SolutionSerializer.TABLENODE_FILE_EXTENSION.substring(1), SolutionSerializer.STYLE_FILE_EXTENSION.substring(1), EclipseUserManager.SECURITY_FILE_EXTENSION_WITHOUT_DOT, EclipseMessages.MESSAGES_EXTENSION.substring(1), DataModelManager.COLUMN_INFO_FILE_EXTENSION },
+			new String[] { SolutionSerializer.FORM_FILE_EXTENSION.substring(1), SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT, SolutionSerializer.JSON_DEFAULT_FILE_EXTENSION.substring(1), SolutionSerializer.RELATION_FILE_EXTENSION.substring(1), SolutionSerializer.VALUELIST_FILE_EXTENSION.substring(1), SolutionSerializer.TABLENODE_FILE_EXTENSION.substring(1), SolutionSerializer.STYLE_FILE_EXTENSION.substring(1), WorkspaceUserManager.SECURITY_FILE_EXTENSION_WITHOUT_DOT, EclipseMessages.MESSAGES_EXTENSION.substring(1), DataModelManager.COLUMN_INFO_FILE_EXTENSION },
 			new int[] { Team.TEXT, Team.TEXT, Team.TEXT, Team.TEXT, Team.TEXT, Team.TEXT, Team.TEXT, Team.TEXT, Team.TEXT, Team.TEXT, });
 
 

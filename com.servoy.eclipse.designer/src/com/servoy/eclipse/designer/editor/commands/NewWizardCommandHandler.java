@@ -26,7 +26,7 @@ import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.wizards.NewFormWizard;
 import com.servoy.eclipse.ui.wizards.NewMethodWizard;

@@ -63,14 +63,14 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 
-import com.servoy.eclipse.core.IFileAccess;
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.WorkspaceFileAccess;
-import com.servoy.eclipse.core.repository.EclipseExportI18NHelper;
 import com.servoy.eclipse.core.util.SerialRule;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
+import com.servoy.eclipse.model.util.IFileAccess;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.J2DBGlobals;
@@ -139,7 +139,6 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 						if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_WARNING))
 						{
 							hasWarnings = true;
-							break;
 						}
 					}
 				}

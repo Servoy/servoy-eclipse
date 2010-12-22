@@ -57,12 +57,12 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;

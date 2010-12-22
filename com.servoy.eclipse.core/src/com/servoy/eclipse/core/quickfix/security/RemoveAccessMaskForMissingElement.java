@@ -20,8 +20,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.EclipseUserManager.SecurityInfo;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager.SecurityInfo;
 
 /**
  * Quick fix for removing access mask for an element that does not exist.
@@ -45,7 +45,7 @@ public class RemoveAccessMaskForMissingElement extends AlterPermissionSecFileQui
 	@Override
 	protected boolean canHandleType(int type)
 	{
-		return type == EclipseUserManager.SecurityReadException.MISSING_ELEMENT;
+		return type == WorkspaceUserManager.SecurityReadException.MISSING_ELEMENT;
 	}
 
 	public String getLabel()

@@ -22,9 +22,9 @@ import java.util.Iterator;
 
 import org.json.JSONException;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -134,7 +134,7 @@ public final class DatabaseUtils
 					// Set the sequence type (new table, or override).
 					try
 					{
-						int sequenceType = columnInfoInfo.systemValue;
+						int sequenceType = columnInfoInfo.autoEnterSubType;
 						if (!server.supportsSequenceType(sequenceType, null))
 						{
 							// Database does not support the import sequence type, default to servoy sequence.
@@ -198,7 +198,7 @@ public final class DatabaseUtils
 				if (columnInfo != null)
 				{
 					columnInfo.setAutoEnterType(columnInfoDef.autoEnterType);
-					columnInfo.setAutoEnterSubType(columnInfoDef.systemValue);
+					columnInfo.setAutoEnterSubType(columnInfoDef.autoEnterSubType);
 					columnInfo.setDefaultValue(columnInfoDef.defaultValue);
 					columnInfo.setLookupValue(columnInfoDef.lookupValue);
 					// validation id not implemented yet -- leave alone

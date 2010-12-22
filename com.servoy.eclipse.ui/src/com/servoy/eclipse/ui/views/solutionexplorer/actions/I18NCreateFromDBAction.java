@@ -20,9 +20,9 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.repository.EclipseMessages;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.EclipseMessages;
 
 public class I18NCreateFromDBAction extends Action
 {

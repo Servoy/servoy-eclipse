@@ -24,10 +24,10 @@ import java.util.List;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.repository.TableWrapper;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions.TableListType;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;

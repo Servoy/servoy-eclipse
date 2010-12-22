@@ -20,8 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.CoreUtils;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
@@ -77,9 +76,9 @@ public class StyleClassesComboboxModel implements IComboboxPropertyModel<String>
 	{
 		List<String> styleClasses = new ArrayList<String>();
 
-		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
+		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
 		Style style = flattenedSolution.getStyleForForm(form, null);
-		String[] classes = CoreUtils.getStyleClasses(style, lookupName);
+		String[] classes = ModelUtils.getStyleClasses(style, lookupName);
 		if (classes != null && classes.length > 0)
 		{
 			styleClasses.addAll(Arrays.asList(classes));

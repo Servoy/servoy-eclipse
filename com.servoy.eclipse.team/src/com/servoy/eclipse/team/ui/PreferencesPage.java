@@ -32,8 +32,8 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyResourcesProject;
 import com.servoy.eclipse.core.TeamShareMonitor;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.team.Activator;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.util.Settings;

@@ -26,12 +26,12 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.util.CoreUtils;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -74,10 +74,10 @@ public class RemoveModuleAction extends Action implements ISelectionChangedListe
 			Solution editingSolution = parentProject.getEditingSolution();
 			if (editingSolution != null)
 			{
-				String[] modules = CoreUtils.getTokenElements(editingSolution.getModulesNames(), ",", true);
+				String[] modules = ModelUtils.getTokenElements(editingSolution.getModulesNames(), ",", true);
 				List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
 				modulesList.remove(selectedProject.getProject().getName());
-				String modulesTokenized = CoreUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
+				String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
 				editingSolution.setModulesNames(modulesTokenized);
 				try
 				{

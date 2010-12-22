@@ -91,22 +91,25 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import com.servoy.eclipse.core.builder.ServoyBuilder;
-import com.servoy.eclipse.core.builder.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
-import com.servoy.eclipse.core.repository.DataModelManager;
-import com.servoy.eclipse.core.repository.EclipseMessages;
-import com.servoy.eclipse.core.repository.EclipseRepository;
-import com.servoy.eclipse.core.repository.EclipseRepositoryFactory;
-import com.servoy.eclipse.core.repository.EclipseSequenceProvider;
+import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.IWorkspaceSaveListener;
-import com.servoy.eclipse.core.repository.SolutionDeserializer;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
-import com.servoy.eclipse.core.repository.StringResourceDeserializer;
-import com.servoy.eclipse.core.util.CoreUtils;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.j2db.AbstractActiveSolutionHandler;
+import com.servoy.eclipse.model.extensions.AbstractServoyModel;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.repository.EclipseRepositoryFactory;
+import com.servoy.eclipse.model.repository.EclipseSequenceProvider;
+import com.servoy.eclipse.model.repository.IWorkspaceSaveListener;
+import com.servoy.eclipse.model.repository.SolutionDeserializer;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.repository.StringResourceDeserializer;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.Messages;
 import com.servoy.j2db.component.ComponentFactory;
@@ -116,7 +119,6 @@ import com.servoy.j2db.debug.DebugWebClientSession;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
-import com.servoy.j2db.persistence.IActiveSolutionHandler;
 import com.servoy.j2db.persistence.IColumnInfoBasedSequenceProvider;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
@@ -135,7 +137,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
@@ -154,11 +155,10 @@ import com.servoy.j2db.util.Utils;
  * @author jblok
  */
 @SuppressWarnings("nls")
-public class ServoyModel implements IWorkspaceSaveListener
+public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveListener
 {
 	private static final String SERVOY_ACTIVE_PROJECT = "SERVOY_ACTIVE_PROJECT"; //$NON-NLS-1$
 
-	private ServoyProject activeProject;
 	private final AtomicBoolean activatingProject = new AtomicBoolean(false);
 	private final List<IActiveProjectListener> activeProjectListeners;
 	private final List<IPersistChangeListener> realPersistChangeListeners;
@@ -169,10 +169,6 @@ public class ServoyModel implements IWorkspaceSaveListener
 	private final Job fireRealPersistchangesJob;
 	private List<IPersist> realOutstandingChanges;
 
-	private Map<String, ServoyProject> servoyProjectCache;
-
-	private ServoyResourcesProject activeResourcesProject;
-	private DataModelManager dataModelManager;
 	private final EclipseMessages messagesManager;
 
 	private TeamShareMonitor teamShareMonitor;
@@ -235,7 +231,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 			{
 				if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
 				{
-					String[] moduleNames = CoreUtils.getTokenElements(activeProject.getSolution().getModulesNames(), ",", true);
+					String[] moduleNames = ModelUtils.getTokenElements(activeProject.getSolution().getModulesNames(), ",", true);
 					final ArrayList<ServoyProject> modulesToUpdate = new ArrayList<ServoyProject>();
 					final StringBuffer sbUpdateModuleNames = new StringBuffer();
 
@@ -290,11 +286,11 @@ public class ServoyModel implements IWorkspaceSaveListener
 										Solution editingSolution = activeProject.getEditingSolution();
 										if (editingSolution != null)
 										{
-											String[] modules = CoreUtils.getTokenElements(editingSolution.getModulesNames(), ",", true);
+											String[] modules = ModelUtils.getTokenElements(editingSolution.getModulesNames(), ",", true);
 											List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
 											for (ServoyProject updateModule : modulesToUpdate)
 												modulesList.remove(updateModule.getSolution().getName());
-											String modulesTokenized = CoreUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
+											String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
 											editingSolution.setModulesNames(modulesTokenized);
 											try
 											{
@@ -334,7 +330,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 			public boolean activeProjectWillChange(ServoyProject activeProject, final ServoyProject toProject)
 			{
 				// if it has no resource project, let the user choose one
-				if (toProject != null && toProject.getResourcesProject() == null && !toProject.showChangeResourceProjectDlg(UIUtils.getActiveShell())) return false;
+				if (toProject != null && toProject.getResourcesProject() == null && !UIUtils.showChangeResourceProjectDlg(UIUtils.getActiveShell(), toProject)) return false;
 				try
 				{
 					if (toProject != null && ServoyUpdatingProject.needUpdate(toProject.getProject()))
@@ -401,7 +397,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 				{
 					ServoyProject servoyProject = (ServoyProject)project.getNature(ServoyProject.NATURE_ID);
 					Solution solution = servoyProject.getSolution();
-					String[] modules = CoreUtils.getTokenElements(solution.getModulesNames(), ",", true);
+					String[] modules = ModelUtils.getTokenElements(solution.getModulesNames(), ",", true);
 					updatingProjects.add(project);
 
 					for (String moduleName : modules)
@@ -523,11 +519,6 @@ public class ServoyModel implements IWorkspaceSaveListener
 		return ApplicationServerSingleton.get().getDataServer();
 	}
 
-	public DataModelManager getDataModelManager()
-	{
-		return dataModelManager;
-	}
-
 	public static Settings getSettings()
 	{
 		startAppServer();
@@ -540,131 +531,16 @@ public class ServoyModel implements IWorkspaceSaveListener
 		return this;
 	}
 
-	private void reloadProjectCacheIfNecessary()
-	{
-		if (servoyProjectCache == null)
-		{
-			Map<String, ServoyProject> servoyProjects = new HashMap<String, ServoyProject>();
-			List<ServoyProject> retval = new ArrayList<ServoyProject>();
-			for (IProject project : getWorkspace().getRoot().getProjects())
-			{
-				try
-				{
-					if (project.isOpen() && project.hasNature(ServoyProject.NATURE_ID))
-					{
-						ServoyProject sp = (ServoyProject)project.getNature(ServoyProject.NATURE_ID);
-						retval.add(sp);
-						servoyProjects.put(project.getName(), sp);
-					}
-				}
-				catch (CoreException e)
-				{
-					ServoyLog.logError(e);
-				}
-			}
-			servoyProjectCache = servoyProjects;
-		}
-	}
-
+	@Override
 	public synchronized ServoyProject[] getServoyProjects()
 	{
-		reloadProjectCacheIfNecessary();
-		return servoyProjectCache.values().toArray(new ServoyProject[servoyProjectCache.size()]);
+		return super.getServoyProjects();
 	}
 
+	@Override
 	public synchronized ServoyProject getServoyProject(String name)
 	{
-		reloadProjectCacheIfNecessary();
-		return servoyProjectCache.get(name);
-	}
-
-	public ServoyProject getActiveProject()
-	{
-		// if we would want to call autoSelectActiveProjectIfNull() here, it could generate a activeProjectChanged
-		// event inside a get method (not very nice + that can result in reentrant calls)
-		return activeProject;
-	}
-
-	/**
-	 * Returns an array containing the modules of the active project (including the active project). If there is no active project, will return an array of size
-	 * 0.
-	 * 
-	 * @return an array containing the modules of the active project.
-	 */
-	public ServoyProject[] getModulesOfActiveProject()
-	{
-		// the set of solutions a user can work with at a given time is determined by the active solution;
-		// this means that the only expandable solution nodes will be the active solution and it's referenced modules;
-		// all other solutions will appear grayed-out and not-expandable (still allows the user to activate them if necessary
-
-		List<ServoyProject> moduleProjects = new ArrayList<ServoyProject>();
-		// get all modules of the active solution (related solutions)
-		FlattenedSolution flatActiveSolution = getFlattenedSolution();
-		if (flatActiveSolution != null)
-		{
-			Solution[] relatedSolutions = flatActiveSolution.getModules();
-			if (relatedSolutions != null)
-			{
-				for (Solution s : relatedSolutions)
-				{
-					if (s != null)
-					{
-						ServoyProject tmp = getServoyProject(s.getName());
-						if (tmp != null)
-						{
-							moduleProjects.add(tmp);
-						}
-					}
-				}
-			}
-		}
-		if (activeProject != null && (!moduleProjects.contains(activeProject)))
-		{
-			moduleProjects.add(activeProject);
-		}
-		return moduleProjects.toArray(new ServoyProject[moduleProjects.size()]);
-	}
-
-	/**
-	 * Returns the active resources project. This is the only resources project referenced by the current active project. Will return null if the active project
-	 * is null or if the number of resources projects referenced by the active project != 1.
-	 * 
-	 * @return the active resources project.
-	 */
-	public ServoyResourcesProject getActiveResourcesProject()
-	{
-		return activeResourcesProject;
-	}
-
-	/**
-	 * Gives the list of resource projects in the workspace. If you are looking for a resource project related to a solution project, please use
-	 * {@link #getActiveResourcesProject()} or {@link ServoyProject#getResourcesProject()} instead.
-	 * 
-	 * @return the list of resource projects in the workspace.
-	 */
-	public ServoyResourcesProject[] getResourceProjects()
-	{
-		List<ServoyResourcesProject> retval = new ArrayList<ServoyResourcesProject>();
-		for (IProject project : getWorkspace().getRoot().getProjects())
-		{
-			try
-			{
-				if (project.isOpen() && project.hasNature(ServoyResourcesProject.NATURE_ID))
-				{
-					ServoyResourcesProject prj = (ServoyResourcesProject)project.getNature(ServoyResourcesProject.NATURE_ID);
-					if (prj == null)
-					{
-						prj = new ServoyResourcesProject(project);
-					}
-					retval.add(prj);
-				}
-			}
-			catch (CoreException e)
-			{
-				ServoyLog.logError(e);
-			}
-		}
-		return retval.toArray(new ServoyResourcesProject[retval.size()]);
+		return super.getServoyProject(name);
 	}
 
 	/**
@@ -929,7 +805,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 						});
 						progressMonitor.worked(1);
 
-						buildActiveProject();
+						buildActiveProjectsInJob();
 
 						WorkspaceJob testBuildPaths = new WorkspaceJob("Test Build Paths")
 						{
@@ -1074,7 +950,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 		}
 	}
 
-	public void buildActiveProject()
+	public void buildActiveProjectsInJob()
 	{
 		if (activeProject != null && getWorkspace().isAutoBuilding())
 		{
@@ -1083,28 +959,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 				@Override
 				protected IStatus run(IProgressMonitor monitor)
 				{
-					try
-					{
-						ServoyBuilder.deleteAllBuilderMarkers();
-						if (getModulesOfActiveProject() != null)
-						{
-							for (ServoyProject module : getModulesOfActiveProject())
-							{
-								if (module.getProject() != null)
-								{
-									module.getProject().build(IncrementalProjectBuilder.FULL_BUILD, monitor);
-								}
-							}
-						}
-						if (activeResourcesProject != null)
-						{
-							activeResourcesProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, monitor);
-						}
-					}
-					catch (Exception ex)
-					{
-						ServoyLog.logError(ex);
-					}
+					buildActiveProjects(monitor);
 					return Status.OK_STATUS;
 				}
 			};
@@ -1320,25 +1175,6 @@ public class ServoyModel implements IWorkspaceSaveListener
 		}
 	}
 
-	private void updateFlattenedSolution()
-	{
-		if (flattenedSolution != null)
-		{
-			try
-			{
-				flattenedSolution.close(null);
-				if (activeProject != null && activeProject.getSolution() != null)
-				{
-					flattenedSolution.setSolution(activeProject.getSolution().getSolutionMetaData(), true, true, getActiveSolutionHandler());
-				}
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError(e);
-			}
-		}
-	}
-
 	private void resetActiveEditingFlattenedSolutions()
 	{
 		for (ServoyProject p : getModulesOfActiveProject())
@@ -1370,7 +1206,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 			{
 				List<IBuildpathEntry> buildPaths = new ArrayList<IBuildpathEntry>();
 				buildPaths.add(DLTKCore.newSourceEntry(sp.getProject().getFullPath()));
-				String[] moduleNames = CoreUtils.getTokenElements(sp.getSolution().getModulesNames(), ",", true);
+				String[] moduleNames = ModelUtils.getTokenElements(sp.getSolution().getModulesNames(), ",", true);
 				Arrays.sort(moduleNames);
 				// test all build paths
 				for (String moduleName : moduleNames)
@@ -1543,6 +1379,33 @@ public class ServoyModel implements IWorkspaceSaveListener
 		};
 		refreshJob.setSystem(true);
 		return refreshJob;
+	}
+
+
+	public void revertEditingPersist(ServoyProject sp, IPersist persist) throws RepositoryException
+	{
+		if (sp.getEditingSolution() == null) return;
+
+		if (persist.getRootObject() != sp.getEditingSolution())
+		{
+			// not in this editing solution, probably in real solution.
+			throw new RepositoryException("Object to revert out of sync"); //$NON-NLS-1$
+		}
+
+		final List<IPersist> changed = new ArrayList<IPersist>();
+		persist.acceptVisitor(new IPersistVisitor()
+		{
+			public Object visit(IPersist o)
+			{
+				if (o.isChanged())
+				{
+					changed.add(o);
+				}
+				return IPersistVisitor.CONTINUE_TRAVERSAL;
+			}
+		});
+		sp.updateEditingPersist(persist, true);
+		firePersistsChanged(false, changed);
 	}
 
 	/**
@@ -2041,7 +1904,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 				// file outside of visited tree, ignore
 				continue;
 			}
-			else if (file.getName().endsWith(EclipseUserManager.SECURITY_FILE_EXTENSION) && isModuleActive(project.getName()))
+			else if (file.getName().endsWith(WorkspaceUserManager.SECURITY_FILE_EXTENSION) && isModuleActive(project.getName()))
 			{
 				// must be a form ".sec" file; find the form for it...
 				File projectFolder = project.getLocation().toFile();
@@ -2049,7 +1912,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 				if (formsContainer != null && formsContainer.getName().equals(SolutionSerializer.FORMS_DIR) &&
 					projectFolder.equals(formsContainer.getParentFile()))
 				{
-					String formName = file.getName().substring(0, file.getName().length() - EclipseUserManager.SECURITY_FILE_EXTENSION.length());
+					String formName = file.getName().substring(0, file.getName().length() - WorkspaceUserManager.SECURITY_FILE_EXTENSION.length());
 					Form f = solution.getForm(formName);
 					if (f != null)
 					{
@@ -2376,8 +2239,8 @@ public class ServoyModel implements IWorkspaceSaveListener
 			{
 				columnInfoFiles.add(fileRd);
 			}
-			else if (file.equals(activeResourcesProject.getProject().getFile(new Path(EclipseUserManager.SECURITY_FILE_RELATIVE_TO_PROJECT))) ||
-				file.getName().endsWith(EclipseUserManager.SECURITY_FILE_EXTENSION))
+			else if (file.equals(activeResourcesProject.getProject().getFile(new Path(WorkspaceUserManager.SECURITY_FILE_RELATIVE_TO_PROJECT))) ||
+				file.getName().endsWith(WorkspaceUserManager.SECURITY_FILE_EXTENSION))
 			{
 				securityFiles.add(fileRd);
 			}
@@ -2444,7 +2307,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 		else for (IResourceDelta fileRd : securityFiles)
 		{
 			final IFile file = (IFile)fileRd.getResource();
-			if (file.equals(activeResourcesProject.getProject().getFile(new Path(EclipseUserManager.SECURITY_FILE_RELATIVE_TO_PROJECT))))
+			if (file.equals(activeResourcesProject.getProject().getFile(new Path(WorkspaceUserManager.SECURITY_FILE_RELATIVE_TO_PROJECT))))
 			{
 				// users/groups have changed - will reload all security information
 				securityInfoChanged = true;
@@ -2453,7 +2316,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 					getUserManager().reloadAllSecurityInformation();
 				}
 			}
-			else if (file.getName().endsWith(EclipseUserManager.SECURITY_FILE_EXTENSION))
+			else if (file.getName().endsWith(WorkspaceUserManager.SECURITY_FILE_EXTENSION))
 			{
 				IContainer serverContainer = file.getParent();
 				if (serverContainer != null && serverContainer.getParent() != null &&
@@ -2469,7 +2332,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 						{
 							try
 							{
-								String tableName = file.getName().substring(0, file.getName().length() - EclipseUserManager.SECURITY_FILE_EXTENSION.length());
+								String tableName = file.getName().substring(0, file.getName().length() - WorkspaceUserManager.SECURITY_FILE_EXTENSION.length());
 								ITable t = s.getTable(tableName);
 								if (t != null)
 								{
@@ -2689,70 +2552,10 @@ public class ServoyModel implements IWorkspaceSaveListener
 		return al;
 	}
 
-	private FlattenedSolution flattenedSolution;
-
-	private IActiveSolutionHandler activeSolutionHandler;
-
-	public IActiveSolutionHandler getActiveSolutionHandler()
-	{
-		if (activeSolutionHandler == null)
-		{
-			activeSolutionHandler = createActiveSolutionHandler();
-		}
-		return activeSolutionHandler;
-	}
-
-	protected IActiveSolutionHandler createActiveSolutionHandler()
-	{
-		return new AbstractActiveSolutionHandler()
-		{
-			@Override
-			public IRepository getRepository()
-			{
-				return ServoyModel.getDeveloperRepository();
-			}
-
-			@Override
-			protected Solution loadSolution(RootObjectMetaData solutionDef) throws RemoteException, RepositoryException
-			{
-				ServoyProject servoyProject = getServoyProject(solutionDef.getName());
-				if (servoyProject != null)
-				{
-					return servoyProject.getSolution();
-				}
-				return null;
-			}
-
-			@Override
-			protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef) throws RemoteException,
-				RepositoryException
-			{
-				return loadSolution(loginSolutionDef);
-			}
-		};
-	}
-
+	@Override
 	public synchronized FlattenedSolution getFlattenedSolution()
 	{
-		if (flattenedSolution == null)
-		{
-			flattenedSolution = new FlattenedSolution();
-
-			try
-			{
-				if (getActiveProject() == null || getActiveProject().getSolution() == null) return flattenedSolution; // projects might give deserialize exceptions => solution is null
-				flattenedSolution.setSolution(getActiveProject().getSolution().getSolutionMetaData(), true, true, getActiveSolutionHandler());
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-			}
-			catch (RemoteException e)
-			{
-				ServoyLog.logError(e);
-			}
-		}
-		return flattenedSolution;
+		return super.getFlattenedSolution();
 	}
 
 	private IValidateName nameValidator;
@@ -2800,15 +2603,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 	 */
 	public FlattenedSolution getEditingFlattenedSolution(IPersist persist)
 	{
-		if (persist == null) return null;
-
-		Solution solution = (Solution)persist.getAncestor(IRepository.SOLUTIONS);
-		if (solution == null) return null;
-
-		ServoyProject servoyProject = getServoyProject(solution.getName());
-		if (servoyProject == null) return null;
-
-		return servoyProject.getEditingFlattenedSolution();
+		return ModelUtils.getEditingFlattenedSolution(persist);
 	}
 
 	/*

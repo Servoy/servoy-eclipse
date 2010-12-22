@@ -24,9 +24,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.DataRequest;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.dialogs.MediaContentProvider;
 import com.servoy.eclipse.ui.dialogs.MediaPreview;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
@@ -60,8 +60,7 @@ public class AddMediaActionDelegate extends AbstractEditpartActionDelegate
 			return null;
 		}
 
-		final FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(
-			(IPersist)editPart.getModel());
+		final FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution((IPersist)editPart.getModel());
 		final TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS, new MediaContentProvider(
 			flattenedSolution), new SolutionContextDelegateLabelProvider(new MediaLabelProvider(flattenedSolution), flattenedSolution.getSolution()), null,
 			null, SWT.NONE, "Select image", new MediaContentProvider.MediaListOptions(false), null, false, TreeSelectDialog.MEDIA_DIALOG, null);

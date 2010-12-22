@@ -73,6 +73,9 @@ import org.osgi.service.url.URLStreamHandlerService;
 
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IBrowserLauncher;
@@ -637,8 +640,7 @@ public class Activator extends Plugin
 						{
 							if (persist instanceof Bean)
 							{
-								FlattenedSolution editingFlattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(
-									persist);
+								FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
 								if (editingFlattenedSolution != null)
 								{
 									editingFlattenedSolution.flushBeanDesignInstance((Bean)persist);

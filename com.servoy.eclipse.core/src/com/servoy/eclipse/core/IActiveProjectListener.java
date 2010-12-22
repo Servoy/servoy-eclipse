@@ -16,6 +16,9 @@
  */
 package com.servoy.eclipse.core;
 
+import com.servoy.eclipse.model.nature.ServoyProject;
+
+
 /**
  * @author jcompagner
  * 

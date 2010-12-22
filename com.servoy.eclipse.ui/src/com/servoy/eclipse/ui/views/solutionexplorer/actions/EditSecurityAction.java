@@ -13,15 +13,15 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyResourcesProject;
-import com.servoy.eclipse.core.repository.EclipseUserManager;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.EditorUtil;
 
@@ -49,7 +49,7 @@ public class EditSecurityAction extends Action
 		ServoyResourcesProject srp = sm.getActiveResourcesProject();
 		if (srp != null)
 		{
-			EditorUtil.openSecurityEditor(srp.getProject().getFile(EclipseUserManager.SECURITY_FILE_RELATIVE_TO_PROJECT));
+			EditorUtil.openSecurityEditor(srp.getProject().getFile(WorkspaceUserManager.SECURITY_FILE_RELATIVE_TO_PROJECT));
 		}
 	}
 }

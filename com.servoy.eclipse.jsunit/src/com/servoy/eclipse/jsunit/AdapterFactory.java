@@ -19,7 +19,7 @@ package com.servoy.eclipse.jsunit;
 import org.eclipse.core.runtime.IAdapterFactory;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 
 /**

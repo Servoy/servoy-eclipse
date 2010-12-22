@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.CellEditor;
@@ -21,8 +21,8 @@ import org.eclipse.jface.viewers.IFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
 import com.servoy.eclipse.ui.editors.IValueEditor;
@@ -68,13 +68,13 @@ public class RelationPropertyController extends PropertyController<String, Objec
 	@Override
 	protected IPropertyConverter<String, Object> createConverter()
 	{
-		return new RelationNameConverter(ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist));
+		return new RelationNameConverter(ModelUtils.getEditingFlattenedSolution(persist));
 	}
 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		FlattenedSolution flattenedEditingSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist);
+		FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist);
 		final RelationContentProvider.RelationListOptions relationListOptions = new RelationContentProvider.RelationListOptions(primaryTable, foreignTable,
 			incudeNone, includeNested);
 		ListSelectCellEditor editor = new ListSelectCellEditor(parent, "Select relation", new RelationContentProvider(flattenedEditingSolution),

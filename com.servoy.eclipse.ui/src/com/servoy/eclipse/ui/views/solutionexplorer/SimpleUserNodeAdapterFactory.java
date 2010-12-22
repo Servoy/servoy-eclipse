@@ -32,13 +32,13 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.team.core.RepositoryProvider;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.ServoyResourcesProject;
-import com.servoy.eclipse.core.repository.EclipseMessages;
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
-import com.servoy.eclipse.core.repository.StringResourceDeserializer;
 import com.servoy.eclipse.core.util.IServoyTeamProvider;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.repository.StringResourceDeserializer;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.ui.actions.Openable;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -132,7 +132,7 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 			}
 			else if (nodeType == UserNodeType.USER_GROUP_SECURITY)
 			{
-				SimpleResourceMapping securities = getResourceProjectResourceMapping(EclipseUserManager.SECURITY_DIR);
+				SimpleResourceMapping securities = getResourceProjectResourceMapping(WorkspaceUserManager.SECURITY_DIR);
 				if (securities != null) mappings.add(securities);
 			}
 			else if (nodeType == UserNodeType.I18N_FILES)
@@ -268,7 +268,7 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 				}
 				else if (type == UserNodeType.USER_GROUP_SECURITY)
 				{
-					SimpleResourceMapping securities = getResourceProjectResourceMapping(EclipseUserManager.SECURITY_DIR);
+					SimpleResourceMapping securities = getResourceProjectResourceMapping(WorkspaceUserManager.SECURITY_DIR);
 					if (securities != null) return securities.getModelObject();
 				}
 				else if (type == UserNodeType.I18N_FILES)

@@ -39,13 +39,19 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.javascript.core.JavaScriptNature;
 
-import com.servoy.eclipse.core.IFileAccess;
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.ServoyResourcesProject;
-import com.servoy.eclipse.core.WorkspaceFileAccess;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.EclipseChangeHandler;
+import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.repository.StringResourceDeserializer;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.util.IFileAccess;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.persistence.AbstractRootObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -79,14 +85,14 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 
 	protected ServoyResourcesProject resourcesProject;
 
-	private final EclipseUserManager userManager;
+	private final WorkspaceUserManager userManager;
 	private final IProgressMonitor m;
 	private final IXMLImportHandlerVersions11AndHigher x11handler;
 
 	private final List<IProject> createdProjects;
 
 	public XMLEclipseWorkspaceImportHandlerVersions11AndHigher(IXMLImportHandlerVersions11AndHigher x11handler, EclipseRepository repository,
-		ServoyResourcesProject resourcesProject, EclipseUserManager userManager, IProgressMonitor monitor, List<IProject> createdProjects)
+		ServoyResourcesProject resourcesProject, WorkspaceUserManager userManager, IProgressMonitor monitor, List<IProject> createdProjects)
 	{
 		this.x11handler = x11handler;
 		this.repository = repository;
@@ -106,7 +112,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		try
 		{
 			m.beginTask("Importing...", 5);
-			final EclipseUserManager userManager = new EclipseUserManager()
+			final WorkspaceUserManager userManager = new WorkspaceUserManager()
 			{
 				@Override
 				public void setResourcesProject(IProject project)
@@ -114,7 +120,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					this.resourcesProject = project;
 				}
 			};
-			userManager.setWriteMode(EclipseUserManager.WRITE_MODE_MANUAL);
+			userManager.setWriteMode(WorkspaceUserManager.WRITE_MODE_MANUAL);
 			userManager.setOperational(true);
 			if (resourcesProject != null)
 			{

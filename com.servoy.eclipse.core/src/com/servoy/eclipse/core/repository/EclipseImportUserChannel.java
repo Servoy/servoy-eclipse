@@ -34,11 +34,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.OptionDialog;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.util.Debug;
@@ -98,8 +98,8 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	{
 		if (groupsAction != OVERWRITE_ACTION && groupsAction != CANCEL_ACTION)
 		{
-			final MessageDialog dialog = new MessageDialog(shell, "Group exists", null,
-				"Do you wish to create this solution rights for the existing groups?\nNOTE: Rights for other solutions will not be affected by this action",
+			final MessageDialog dialog = new MessageDialog(shell, "User groups used by imported solution already exist", null,
+				"Do you want to configure security rights on existing groups?\nIf you choose no then no security rights will be imported for existing groups.",
 				MessageDialog.WARNING, new String[] { "Yes to all", "No to all" }, 0);
 			Display.getDefault().syncExec(new Runnable()
 			{

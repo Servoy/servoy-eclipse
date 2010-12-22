@@ -27,8 +27,8 @@ import org.eclipse.swt.graphics.ImageData;
 
 import com.servoy.eclipse.core.DesignApplication;
 import com.servoy.eclipse.core.DesignComponentFactory;
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
@@ -117,8 +117,7 @@ public class PersistImageNotifier implements IImageNotifier, IImageListener
 						label.setVisible(true);
 
 						((DesignApplication)application).getEditLabel().add(label);
-						FlattenedSolution editingFlattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(
-							persist);
+						FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
 						isWaitingStart = false;
 						Component comp = null;
 						if (persist instanceof Bean)

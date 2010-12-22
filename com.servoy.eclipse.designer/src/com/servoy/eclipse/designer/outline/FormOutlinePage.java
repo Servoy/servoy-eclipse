@@ -40,6 +40,7 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.property.PersistContext;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
@@ -102,7 +103,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 	{
 		if (selection instanceof IStructuredSelection)
 		{
-			FlattenedSolution editingFlattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
+			FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
 			if (editingFlattenedSolution == null)
 			{
 				return;
@@ -149,7 +150,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			return;
 		}
 
-		List<Form> formHierarchy = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form).getFormHierarchy(form);
+		List<Form> formHierarchy = ModelUtils.getEditingFlattenedSolution(form).getFormHierarchy(form);
 		for (IPersist changed : changes)
 		{
 			IPersist parentForm = changed.getAncestor(IRepository.FORMS);

@@ -36,13 +36,13 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
 import com.servoy.eclipse.debug.Activator.ShortcutDefinition;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;

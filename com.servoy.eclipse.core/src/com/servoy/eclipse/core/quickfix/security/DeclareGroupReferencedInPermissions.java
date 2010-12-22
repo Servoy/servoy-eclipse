@@ -24,11 +24,11 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.EclipseUserManager.SecurityInfo;
-import com.servoy.eclipse.core.repository.EclipseUserManager.User;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager.SecurityInfo;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager.User;
 
 /**
  * Quick fix for declaring a missing group that has associated access mask/permissions in a form/table sec. file.
@@ -53,7 +53,7 @@ public class DeclareGroupReferencedInPermissions extends AlterPermissionSecFileQ
 	@Override
 	protected boolean canHandleType(int type)
 	{
-		return type == EclipseUserManager.SecurityReadException.GROUP_NOT_DECLARED;
+		return type == WorkspaceUserManager.SecurityReadException.GROUP_NOT_DECLARED;
 	}
 
 	public String getLabel()
@@ -110,9 +110,9 @@ public class DeclareGroupReferencedInPermissions extends AlterPermissionSecFileQ
 				return "";
 			}
 		};
-		IPath path = new Path(EclipseUserManager.SECURITY_FILE_RELATIVE_TO_PROJECT);
+		IPath path = new Path(WorkspaceUserManager.SECURITY_FILE_RELATIVE_TO_PROJECT);
 		IFile usersGroupsFile = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getProject().getFile(path);
-		alterUsersAndGroups.run(EclipseUserManager.SecurityReadException.UNKNOWN, null, usersGroupsFile); // type and wrong value are not relevant
+		alterUsersAndGroups.run(WorkspaceUserManager.SecurityReadException.UNKNOWN, null, usersGroupsFile); // type and wrong value are not relevant
 
 		return permissionsFileAltered;
 	}

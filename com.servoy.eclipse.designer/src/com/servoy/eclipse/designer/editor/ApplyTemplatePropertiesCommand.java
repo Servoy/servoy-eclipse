@@ -23,11 +23,11 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
-import com.servoy.eclipse.core.repository.SolutionDeserializer;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
+import com.servoy.eclipse.model.repository.SolutionDeserializer;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;

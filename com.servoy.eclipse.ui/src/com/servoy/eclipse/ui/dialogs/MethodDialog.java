@@ -37,8 +37,8 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.labelproviders.DelegateLabelProvider;
@@ -199,8 +199,7 @@ public class MethodDialog extends TreeSelectDialog
 				{
 					try
 					{
-						scriptMethods = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form).getFlattenedForm(form).getScriptMethods(
-							true);
+						scriptMethods = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form).getScriptMethods(true);
 					}
 					catch (RepositoryException e)
 					{
@@ -213,7 +212,7 @@ public class MethodDialog extends TreeSelectDialog
 			{
 				Solution solution = (Solution)persist.getAncestor(IRepository.SOLUTIONS);
 				Object[] children = getChildren(solution);
-				Solution[] modules = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(solution).getModules();
+				Solution[] modules = ModelUtils.getEditingFlattenedSolution(solution).getModules();
 				return Utils.arrayInsert(children, modules, children == null ? 0 : children.length, modules == null ? 0 : modules.length);
 			}
 

@@ -24,9 +24,9 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.ui.IEditorPart;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;

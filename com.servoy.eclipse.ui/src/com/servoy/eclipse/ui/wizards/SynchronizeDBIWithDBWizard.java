@@ -77,12 +77,12 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PartInitException;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.repository.DataModelManager;
 import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;

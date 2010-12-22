@@ -25,7 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;

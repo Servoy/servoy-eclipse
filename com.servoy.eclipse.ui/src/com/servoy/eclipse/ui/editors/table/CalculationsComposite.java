@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
 
 import java.util.ArrayList;
@@ -45,9 +45,10 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.servoy.eclipse.core.IPersistChangeListener;
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
@@ -156,8 +157,7 @@ public class CalculationsComposite extends Composite
 						}
 						if (solution != null)
 						{
-							ScriptCalculation calc = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(solution).getScriptCalculation(
-								calcName, t);
+							ScriptCalculation calc = ModelUtils.getEditingFlattenedSolution(solution).getScriptCalculation(calcName, t);
 							int i = 1;
 							while (calc != null)
 							{

@@ -25,10 +25,11 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.DataFieldRequest;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
@@ -73,7 +74,7 @@ public class AddFieldActionDelegate extends AbstractEditpartActionDelegate
 		Portal portal = (Portal)getModel(editPart, IRepository.PORTALS);
 		if (portal != null)
 		{
-			flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(portal);
+			flattenedSolution = ModelUtils.getEditingFlattenedSolution(portal);
 			Relation[] relations = flattenedSolution.getRelationSequence(portal.getRelationName());
 			if (relations == null)
 			{

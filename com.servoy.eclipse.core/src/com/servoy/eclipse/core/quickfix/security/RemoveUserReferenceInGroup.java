@@ -20,8 +20,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.EclipseUserManager.User;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager.User;
 
 /**
  * Quick fix for removing an UUID reference from the user-group mapping table to an user that is not declared.
@@ -45,7 +45,7 @@ public class RemoveUserReferenceInGroup extends AlterUserGroupSecFileQuickFix
 	@Override
 	protected boolean canHandleType(int type)
 	{
-		return type == EclipseUserManager.SecurityReadException.MISSING_USER_REFERENCED_IN_GROUP;
+		return type == WorkspaceUserManager.SecurityReadException.MISSING_USER_REFERENCED_IN_GROUP;
 	}
 
 	public String getLabel()

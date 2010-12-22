@@ -16,7 +16,7 @@
 */
 package com.servoy.eclipse.ui.property;
 
-import com.servoy.eclipse.core.util.CoreUtils;
+import com.servoy.eclipse.model.util.ModelUtils;
 
 
 /**
@@ -38,11 +38,11 @@ public class StringTokenizerConverter implements IPropertyConverter<String, Obje
 
 	public String[] convertProperty(Object id, String value)
 	{
-		return CoreUtils.getTokenElements(value, delim, trim);
+		return ModelUtils.getTokenElements(value, delim, trim);
 	}
 
 	public String convertValue(Object id, Object[] value)
 	{
-		return CoreUtils.getTokenValue(value, delim);
+		return ModelUtils.getTokenValue(value, delim);
 	}
 }

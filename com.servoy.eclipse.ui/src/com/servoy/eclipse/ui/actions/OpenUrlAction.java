@@ -24,7 +24,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 public class OpenUrlAction implements IWorkbenchWindowActionDelegate
 {

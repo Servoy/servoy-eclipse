@@ -18,7 +18,7 @@ package com.servoy.eclipse.jsunit;
 
 import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * A remote test runnner who's class loader is able to access Servoy classes.

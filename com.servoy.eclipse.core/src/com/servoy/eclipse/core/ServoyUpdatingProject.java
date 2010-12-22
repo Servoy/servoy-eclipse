@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core;
 
 import java.io.IOException;
@@ -34,7 +34,11 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.IFileAccess;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AbstractScriptProvider;
 import com.servoy.j2db.persistence.Form;
@@ -53,7 +57,7 @@ public class ServoyUpdatingProject implements IProjectNature
 	 * ID of this project nature
 	 */
 	public static final String NATURE_ID = "com.servoy.eclipse.core.ServoyUpdatingProject"; //$NON-NLS-1$
-	public static final int UPDATE_38 = 38;
+	public static final int UPDATE_38 = SolutionSerializer.VERSION_38;
 	private IProject project;
 
 	public void configure() throws CoreException

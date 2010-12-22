@@ -31,8 +31,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.ColorPropertyController;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.FlattenedSolution;
@@ -123,7 +123,7 @@ public class FormBackgroundLayer extends FreeformLayer
 	 */
 	public static java.awt.Color getFormBackground(Form form)
 	{
-		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
+		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
 		FixedStyleSheet styleSheet = ComponentFactory.getCSSStyle(flattenedSolution.getStyleForForm(form, null));
 		java.awt.Color background = null;
 		if (styleSheet != null)

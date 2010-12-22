@@ -28,7 +28,7 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TreeViewer;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.MethodCellEditor;
 import com.servoy.eclipse.ui.editors.table.EventsComposite.EventNode;
 import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;

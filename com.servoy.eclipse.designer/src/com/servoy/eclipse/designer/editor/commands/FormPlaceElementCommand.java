@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.commands.Command;
@@ -36,9 +36,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
@@ -47,6 +45,9 @@ import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
@@ -482,7 +483,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 		if (parent instanceof ISupportFormElements)
 		{
 			IDataProvider dataProvider = null;
-			FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(parent);
+			FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(parent);
 			if (!dragData.dataProviderId.startsWith(ScriptVariable.GLOBAL_DOT_PREFIX))
 			{
 				Table table = null;

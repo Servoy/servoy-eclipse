@@ -27,9 +27,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory.RelatedForm;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.CachingContentProvider;
 import com.servoy.eclipse.ui.dialogs.ISearchKeyAdapter;
@@ -58,7 +58,7 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 	public RelatedFormsContentProvider(Form rootForm)
 	{
 		this.rootForm = rootForm;
-		this.flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(rootForm);
+		this.flattenedSolution = ModelUtils.getEditingFlattenedSolution(rootForm);
 	}
 
 	@Override

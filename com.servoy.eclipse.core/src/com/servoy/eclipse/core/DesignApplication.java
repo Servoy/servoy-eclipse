@@ -40,6 +40,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IBeanManager;

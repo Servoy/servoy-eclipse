@@ -32,7 +32,7 @@ import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.internal.ui.palette.editparts.RaisedBorder;
 import org.eclipse.swt.SWT;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Tab;

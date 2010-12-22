@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.resource;
 
 import org.eclipse.core.runtime.Platform;
@@ -23,8 +23,8 @@ import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 
-import com.servoy.eclipse.core.repository.DataModelManager;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 
 /**
  * Adapter for making a table resource a suitable input for an editor.

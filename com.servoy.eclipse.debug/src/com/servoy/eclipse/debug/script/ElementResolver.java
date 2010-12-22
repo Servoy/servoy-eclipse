@@ -32,9 +32,9 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;

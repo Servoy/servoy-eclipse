@@ -46,11 +46,11 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.ImmutableObjectObservable;
@@ -454,7 +454,7 @@ public class ServerEditor extends EditorPart
 			}
 
 			// manually trigger a build here as it doesn't modify files on disk
-			servoyModel.buildActiveProject();
+			servoyModel.buildActiveProjectsInJob();
 		}
 		catch (Exception e)
 		{

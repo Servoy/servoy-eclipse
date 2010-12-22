@@ -25,10 +25,10 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.EclipseUserManager.SecurityInfo;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager.SecurityInfo;
 import com.servoy.j2db.persistence.IRepository;
 
 /**
@@ -53,7 +53,7 @@ public class RemoveAllButOneOfTheAccessMasksForElement extends AlterPermissionSe
 	@Override
 	protected boolean canHandleType(int type)
 	{
-		return type == EclipseUserManager.SecurityReadException.DUPLICATE_ELEMENT_PERMISSION;
+		return type == WorkspaceUserManager.SecurityReadException.DUPLICATE_ELEMENT_PERMISSION;
 	}
 
 	public String getLabel()

@@ -57,10 +57,10 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.builder.ServoyBuilder;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;

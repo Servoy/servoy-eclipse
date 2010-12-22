@@ -45,8 +45,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.repository.TableWrapper;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.editors.FormatDialog;

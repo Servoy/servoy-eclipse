@@ -24,11 +24,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.builder.ServoyBuilder;
-import com.servoy.eclipse.core.repository.DataModelManager;
-import com.servoy.eclipse.core.repository.DataModelManager.TableDifference;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
+import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * Class that gives the list of quick-fixes (available in the ui plugin) for Servoy markers.

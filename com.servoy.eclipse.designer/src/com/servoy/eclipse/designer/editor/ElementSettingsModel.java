@@ -22,9 +22,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.repository.EclipseUserManager.SecurityInfo;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager.SecurityInfo;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;

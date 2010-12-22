@@ -20,7 +20,7 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
 import com.servoy.j2db.persistence.Column;

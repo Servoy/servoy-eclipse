@@ -21,10 +21,10 @@ import org.eclipse.dltk.javascript.core.JavaScriptNature;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.ServoyResourcesProject;
-import com.servoy.eclipse.core.builder.ServoyBuilder;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 public class ToggleServoySolutionNatureAction extends ToggleNatureAction
 {

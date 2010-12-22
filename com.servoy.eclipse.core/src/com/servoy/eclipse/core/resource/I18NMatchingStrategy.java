@@ -22,7 +22,7 @@ import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * Match input for i18n editors against file editor input. Try do as many checks as possible before activating the plugin.

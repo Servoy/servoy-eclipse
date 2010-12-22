@@ -32,11 +32,12 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.resource.TableEditorInput;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.table.AggregationsComposite;
 import com.servoy.eclipse.ui.editors.table.CalculationsComposite;
 import com.servoy.eclipse.ui.editors.table.ColumnComposite;
@@ -184,9 +185,9 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 						Iterator<TableNode> tableNodes = solution.getTableNodes(table);
 						while (tableNodes.hasNext())
 						{
-							servoyProject.revertEditingPersist(tableNodes.next());
+							servoyModel.revertEditingPersist(servoyProject, tableNodes.next());
 						}
-						Solution[] modules = servoyModel.getEditingFlattenedSolution(solution).getModules();
+						Solution[] modules = ModelUtils.getEditingFlattenedSolution(solution).getModules();
 						if (modules != null)
 						{
 							for (Solution module : modules)
@@ -200,7 +201,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 										tableNodes = solution.getTableNodes(table);
 										while (tableNodes.hasNext())
 										{
-											project.revertEditingPersist(tableNodes.next());
+											ServoyModelManager.getServoyModelManager().getServoyModel().revertEditingPersist(project, tableNodes.next());
 										}
 									}
 								}
@@ -523,7 +524,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 					if (solution != null)
 					{
 						servoyProject.saveEditingSolutionNodes(Utils.asArray(solution.getTableNodes(table), IPersist.class), true);
-						Solution[] modules = servoyModel.getEditingFlattenedSolution(solution).getModules();
+						Solution[] modules = ModelUtils.getEditingFlattenedSolution(solution).getModules();
 						if (modules != null)
 						{
 							for (Solution module : modules)
@@ -595,14 +596,14 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	}
 
 	/**
-	 * @see com.servoy.eclipse.core.IActiveProjectListener#activeProjectChanged(com.servoy.eclipse.core.ServoyProject)
+	 * @see com.servoy.eclipse.model.nature.IActiveProjectListener#activeProjectChanged(com.servoy.eclipse.model.nature.ServoyProject)
 	 */
 	public void activeProjectChanged(ServoyProject activeProject)
 	{
 	}
 
 	/**
-	 * @see com.servoy.eclipse.core.IActiveProjectListener#activeProjectUpdated(com.servoy.eclipse.core.ServoyProject, int)
+	 * @see com.servoy.eclipse.model.nature.IActiveProjectListener#activeProjectUpdated(com.servoy.eclipse.model.nature.ServoyProject, int)
 	 */
 	public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
 	{
@@ -627,7 +628,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	}
 
 	/**
-	 * @see com.servoy.eclipse.core.IActiveProjectListener#activeProjectWillChange(com.servoy.eclipse.core.ServoyProject, com.servoy.eclipse.core.ServoyProject)
+	 * @see com.servoy.eclipse.model.nature.IActiveProjectListener#activeProjectWillChange(com.servoy.eclipse.model.nature.ServoyProject, com.servoy.eclipse.model.nature.ServoyProject)
 	 */
 	public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
 	{

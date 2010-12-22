@@ -25,10 +25,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.DataFieldRequest;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
@@ -76,7 +76,7 @@ public class AddPortalActionDelegate extends AbstractEditpartActionDelegate
 			return null;
 		}
 
-		FlattenedSolution editingFlattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
+		FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
 		Table table = null;
 		try
 		{

@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.servoy.eclipse.core.repository.TableWrapper;
+import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;

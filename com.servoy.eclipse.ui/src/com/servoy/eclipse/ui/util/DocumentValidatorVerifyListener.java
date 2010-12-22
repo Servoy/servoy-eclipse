@@ -25,7 +25,7 @@ import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.widgets.Text;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.IdentDocumentValidator;
 import com.servoy.j2db.util.NumberDocumentValidator;
 import com.servoy.j2db.util.ValidatingDocument;

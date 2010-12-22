@@ -73,8 +73,8 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.profiler.Activator;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;

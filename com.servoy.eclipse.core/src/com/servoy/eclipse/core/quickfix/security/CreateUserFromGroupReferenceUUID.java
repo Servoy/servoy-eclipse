@@ -19,10 +19,10 @@ package com.servoy.eclipse.core.quickfix.security;
 import java.util.List;
 import java.util.Map;
 
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.EclipseUserManager.User;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager.User;
 
 /**
  * Quick fix for creating an user for an UUID specified in the user to group mappings.
@@ -46,7 +46,7 @@ public class CreateUserFromGroupReferenceUUID extends AlterUserGroupSecFileQuick
 	@Override
 	protected boolean canHandleType(int type)
 	{
-		return type == EclipseUserManager.SecurityReadException.MISSING_USER_REFERENCED_IN_GROUP;
+		return type == WorkspaceUserManager.SecurityReadException.MISSING_USER_REFERENCED_IN_GROUP;
 	}
 
 	public String getLabel()
@@ -58,7 +58,7 @@ public class CreateUserFromGroupReferenceUUID extends AlterUserGroupSecFileQuick
 	protected boolean alterUserAndGroupInfo(List<String> groups, List<User> users, Map<String, List<String>> usersForGroups)
 	{
 		boolean altered = false;
-		EclipseUserManager.User newUser = new EclipseUserManager.User(null, null, (String)wrongValue);
+		User newUser = new User(null, null, (String)wrongValue);
 		ReturnValueRunnable r = new GetNewUserNameRunnable(users, "Create user for UID", null);
 		UIUtils.runInUI(r, true);
 		newUser.name = (String)r.getReturnValue();

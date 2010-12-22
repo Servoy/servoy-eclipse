@@ -18,8 +18,8 @@ package com.servoy.eclipse.designer.editor.commands;
 
 import org.eclipse.gef.commands.Command;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;

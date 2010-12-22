@@ -1,5 +1,5 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2010 Servoy BV
+\ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2010 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -20,6 +20,7 @@ import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.swt.widgets.Display;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 /**

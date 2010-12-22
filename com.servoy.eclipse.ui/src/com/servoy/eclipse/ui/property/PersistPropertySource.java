@@ -55,13 +55,14 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.DesignComponentFactory;
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.repository.EclipseMessages;
-import com.servoy.eclipse.core.repository.EclipseRepository;
-import com.servoy.eclipse.core.util.CoreUtils;
+import com.servoy.eclipse.core.repository.I18NMessagesUtil;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
@@ -302,7 +303,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 		{
 			try
 			{
-				FlattenedSolution flattenedEditingSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist);
+				FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist);
 				Form flattenedForm = flattenedEditingSolution.getFlattenedForm(persist);
 
 				java.beans.BeanInfo info = null;
@@ -313,8 +314,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 					{
 						try
 						{
-							FlattenedSolution editingFlattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(
-								persist);
+							FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
 							valueObject = DesignComponentFactory.getBeanDesignInstance(Activator.getDefault().getDesignClient(), editingFlattenedSolution,
 								(Bean)persist, (Form)persist.getAncestor(IRepository.FORMS));
 						}
@@ -802,8 +802,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 						{
 							if (value == null) return null;
 
-							FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(
-								persist);
+							FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
 							Iterator<ScriptMethod> scriptMethods = null;
 							if (value.getFormName() != null)
 							{
@@ -832,7 +831,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 
 						public FunctionDefinition convertValue(Object id, MethodWithArguments value)
 						{
-							IScriptProvider scriptMethod = CoreUtils.getScriptMethod(persist, context, null, value.methodId);
+							IScriptProvider scriptMethod = ModelUtils.getScriptMethod(persist, context, null, value.methodId);
 							if (scriptMethod != null)
 							{
 								String formName = (scriptMethod.getParent() instanceof Form) ? ((Form)scriptMethod.getParent()).getName() : null;
@@ -1380,7 +1379,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			if (name.equals("containsFormID"))
 			{
 				return new RelatedTabController("containsForm", "containsForm", "Select tab form", readOnly, (Form)persist.getAncestor(IRepository.FORMS),
-					ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist));
+					ModelUtils.getEditingFlattenedSolution(persist));
 			}
 		}
 		return null;
@@ -1825,7 +1824,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 					beanPropertyDescriptor.propertyDescriptor.getWriteMethod().invoke(beanPropertyDescriptor.valueObject, new Object[] { value });
 					if ("i18nDataSource".equals(id))
 					{
-						EclipseMessages.showDatasourceWarning();
+						I18NMessagesUtil.showDatasourceWarning();
 						ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 						EclipseMessages.writeProjectI18NFiles(servoyProject, false);
 					}
@@ -1837,8 +1836,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 						// size, location and name are set on persist, not on bean instance
 						if ("size".equals(id) && (value == null || value instanceof Dimension))
 						{
-							Object beanDesignInstance = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist).getBeanDesignInstance(
-								(Bean)persist);
+							Object beanDesignInstance = ModelUtils.getEditingFlattenedSolution(persist).getBeanDesignInstance((Bean)persist);
 							if (beanDesignInstance instanceof Component)
 							{
 								((Component)beanDesignInstance).setSize((Dimension)value);
@@ -1995,7 +1993,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			try
 			{
 				String dataprovider = ((ISupportDataProviderID)persist).getDataProviderID();
-				FlattenedSolution editingFlattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist);
+				FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
 				Form flattenedForm = editingFlattenedSolution.getFlattenedForm(persist);
 				IDataProviderLookup dataproviderLookup = editingFlattenedSolution.getDataproviderLookup(null, flattenedForm);
 				IDataProvider dp = dataproviderLookup.getDataProvider(dataprovider);

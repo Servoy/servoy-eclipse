@@ -29,8 +29,8 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * Problem decorator

@@ -27,9 +27,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -42,13 +42,13 @@ import org.json.JSONObject;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.DesignComponentFactory;
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.repository.EclipseRepository;
-import com.servoy.eclipse.core.repository.SolutionDeserializer;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
-import com.servoy.eclipse.core.util.CoreUtils;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
+import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.repository.SolutionDeserializer;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
 import com.servoy.j2db.component.ComponentFactory;
@@ -236,7 +236,7 @@ public class ElementFactory
 
 	public static IPersist createImage(ISupportFormElements parent, Media media, Point location) throws RepositoryException
 	{
-		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(parent);
+		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(parent);
 		ImageIcon ii = ImageLoader.getIcon(ComponentFactory.loadIcon(flattenedSolution, new Integer(media.getID())), -1, -1, true);
 		if (ii == null) return null;
 
@@ -268,7 +268,7 @@ public class ElementFactory
 		Bean bean = form.createNewBean("bean_" + random.nextInt(1024), beanClassName); //$NON-NLS-1$
 		bean.setLocation(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
 
-		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
+		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
 		Object beanInstance = DesignComponentFactory.getBeanDesignInstance(Activator.getDefault().getDesignClient(), flattenedSolution, bean, form);
 		// check preferredSize and minimumSize
 		Dimension preferredSize = getBeanPrefferredSize(beanInstance);
@@ -673,11 +673,11 @@ public class ElementFactory
 	{
 		java.awt.Point location = Utils.getBounds(persists.iterator()).getLocation();
 
-		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
+		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
 
 		JSONObject json = new JSONObject();
-		json.put(Template.PROP_FORM,
-			cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, repository), null));
+		json.put(Template.PROP_FORM, cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, repository),
+			null));
 		json.put(Template.PROP_LOCATION, PersistHelper.createPointString(location));
 		JSONArray elements = new JSONArray();
 
@@ -728,7 +728,7 @@ public class ElementFactory
 				int methodId = repository.getElementIdForUUID(uuid);
 				if (methodId > 0)
 				{
-					IScriptProvider scriptMethod = CoreUtils.getScriptMethod(form, null, null, methodId);
+					IScriptProvider scriptMethod = ModelUtils.getScriptMethod(form, null, null, methodId);
 					if (scriptMethod != null)
 					{
 						object.put(key, scriptMethod.getParent() instanceof IRootObject ? ScriptVariable.GLOBAL_DOT_PREFIX + scriptMethod.getDisplayName()
@@ -826,8 +826,8 @@ public class ElementFactory
 				IPersist persist = SolutionDeserializer.deserializePersist(repository, parent, persist_json_map, object, null, null, null, false);
 				for (Map.Entry<IPersist, JSONObject> entry : persist_json_map.entrySet())
 				{
-					SolutionDeserializer.updatePersistWithValues(repository, entry.getKey(),
-						resolveCleanedProperties((Form)entry.getKey().getAncestor(IRepository.FORMS), entry.getValue()));
+					SolutionDeserializer.updatePersistWithValues(repository, entry.getKey(), resolveCleanedProperties((Form)entry.getKey().getAncestor(
+						IRepository.FORMS), entry.getValue()));
 				}
 				persists.put(persist, name);
 			}
@@ -944,8 +944,7 @@ public class ElementFactory
 						}
 					}
 
-					return new Object[] { new FormElementGroup(groupName,
-						ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(parent), (Form)parent) };
+					return new Object[] { new FormElementGroup(groupName, ModelUtils.getEditingFlattenedSolution(parent), (Form)parent) };
 				}
 			}
 		}
@@ -1067,7 +1066,7 @@ public class ElementFactory
 	public static JSONObject resolveCleanedProperties(Form form, JSONObject object) throws RepositoryException, JSONException
 	{
 		// replace method names with their UUIDs
-		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
+		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
 		Form flattenedForm = flattenedSolution.getFlattenedForm(form);
 		Iterator<String> keys = object.keys();
 		while (keys.hasNext())

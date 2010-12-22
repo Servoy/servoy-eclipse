@@ -28,8 +28,8 @@ import org.eclipse.team.core.diff.IThreeWayDiff;
 import org.eclipse.team.core.mapping.ISynchronizationScopeManager;
 import org.eclipse.ui.IWorkbenchPart;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyResourcesProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.team.ServoyTeamProvider;
 import com.servoy.eclipse.team.subscriber.SolutionSubscriber;
 

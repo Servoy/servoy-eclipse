@@ -42,13 +42,14 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.repository.EclipseMessages;
-import com.servoy.eclipse.core.repository.TableWrapper;
+import com.servoy.eclipse.core.repository.I18NMessagesUtil;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.I18NExternalizeDialog;
 import com.servoy.eclipse.ui.dialogs.I18NServerTableDialog;
 import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
@@ -163,7 +164,7 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 					{
 						activeProject.getEditingSolution().setI18nDataSource(
 							DataSourceUtils.createDBTableDataSource(tableWrapper.getServerName(), tableWrapper.getTableName()));
-						EclipseMessages.showDatasourceWarning();
+						I18NMessagesUtil.showDatasourceWarning();
 						try
 						{
 							activeProject.saveEditingSolutionNodes(new IPersist[] { activeProject.getEditingSolution() }, false);

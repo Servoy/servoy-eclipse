@@ -33,7 +33,7 @@ import org.eclipse.search.core.text.TextSearchMatchAccess;
 import org.eclipse.search.core.text.TextSearchRequestor;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Solution;
 
 

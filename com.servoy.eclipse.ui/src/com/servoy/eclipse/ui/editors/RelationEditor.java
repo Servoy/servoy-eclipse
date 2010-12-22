@@ -59,9 +59,10 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.relation.DataProviderEditingSupport;
 import com.servoy.eclipse.ui.editors.relation.DatasourceSelectComposite;
 import com.servoy.eclipse.ui.editors.relation.OperatorEditingSupport;
@@ -640,7 +641,7 @@ public class RelationEditor extends PersistEditor
 
 			com.servoy.j2db.persistence.Table t = null;
 			Map<String, ScriptCalculation> calcs = null;
-			FlattenedSolution fs = servoyModel.getEditingFlattenedSolution(getPersist());
+			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(getPersist());
 			if (index == CI_FROM)
 			{
 				IServerInternal s = (IServerInternal)ServoyModel.getServerManager().getServer(getRelation().getPrimaryServerName());

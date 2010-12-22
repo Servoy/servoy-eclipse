@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.quickfix.security;
 
 import java.io.InputStream;
@@ -29,15 +29,15 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IMarkerResolution;
 import org.json.JSONException;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.ServoyResourcesProject;
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.EclipseUserManager.User;
-import com.servoy.eclipse.core.util.ResourcesUtils;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager.User;
+import com.servoy.eclipse.model.util.ResourcesUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.Utils;
 
 public abstract class SecurityQuickFix implements IMarkerResolution
@@ -50,7 +50,7 @@ public abstract class SecurityQuickFix implements IMarkerResolution
 		private final String initialValue;
 		private final String title;
 
-		public GetNewUserNameRunnable(List<EclipseUserManager.User> existingUsers, String title, String initialValue)
+		public GetNewUserNameRunnable(List<User> existingUsers, String title, String initialValue)
 		{
 			this.title = title;
 			this.initialValue = initialValue;
@@ -80,7 +80,7 @@ public abstract class SecurityQuickFix implements IMarkerResolution
 
 		protected boolean userNameExists(String name)
 		{
-			for (EclipseUserManager.User u : existingUsers)
+			for (User u : existingUsers)
 			{
 				if (name.equals(u.name)) return true;
 			}
@@ -294,24 +294,24 @@ public abstract class SecurityQuickFix implements IMarkerResolution
 
 	private int getType(IMarker marker)
 	{
-		return marker.getAttribute(EclipseUserManager.MARKER_ATTRIBUTE_TYPE, EclipseUserManager.SecurityReadException.UNKNOWN);
+		return marker.getAttribute(WorkspaceUserManager.MARKER_ATTRIBUTE_TYPE, WorkspaceUserManager.SecurityReadException.UNKNOWN);
 	}
 
 	private Object getWrongValue(IMarker marker)
 	{
-		int l = marker.getAttribute(EclipseUserManager.MARKER_ATTRIBUTE_WRONG_VALUE_ARRAY_LENGTH, -1);
+		int l = marker.getAttribute(WorkspaceUserManager.MARKER_ATTRIBUTE_WRONG_VALUE_ARRAY_LENGTH, -1);
 		if (l != -1)
 		{
 			String[] wv = new String[l];
 			for (int i = 0; i < l; i++)
 			{
-				wv[i] = marker.getAttribute(EclipseUserManager.MARKER_ATTRIBUTE_WRONG_VALUE_ARRAY + i, (String)null);
+				wv[i] = marker.getAttribute(WorkspaceUserManager.MARKER_ATTRIBUTE_WRONG_VALUE_ARRAY + i, (String)null);
 			}
 			return wv;
 		}
 		else
 		{
-			return marker.getAttribute(EclipseUserManager.MARKER_ATTRIBUTE_WRONG_VALUE, (String)null);
+			return marker.getAttribute(WorkspaceUserManager.MARKER_ATTRIBUTE_WRONG_VALUE, (String)null);
 		}
 	}
 

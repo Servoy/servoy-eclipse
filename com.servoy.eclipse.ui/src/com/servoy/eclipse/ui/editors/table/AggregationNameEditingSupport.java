@@ -28,8 +28,8 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
 import com.servoy.j2db.persistence.AggregateVariable;

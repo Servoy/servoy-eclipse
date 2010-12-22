@@ -28,7 +28,7 @@ import org.eclipse.core.databinding.BindingException;
 import org.eclipse.core.databinding.observable.value.AbstractObservableValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * Observer immutable objects, the setters will create a new instance.

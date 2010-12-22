@@ -32,7 +32,7 @@ import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.FileTextSearchScope;
 
-import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Pair;

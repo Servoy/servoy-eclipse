@@ -18,7 +18,6 @@ package com.servoy.eclipse.ui.wizards;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.xmlxport.IXMLExportUserChannel;
 
@@ -33,9 +32,9 @@ public class EclipseExportUserChannel implements IXMLExportUserChannel
 		this.monitor = monitor;
 	}
 
-	public SortedList getModuleIncludeList(SortedList allModules)
+	public SortedList<String> getModuleIncludeList(SortedList<String> allModules)
 	{
-		SortedList sl = new SortedList();
+		SortedList<String> sl = new SortedList<String>();
 		String[] modules = exportModel.getModulesToExport();
 		if (modules != null)
 		{
@@ -45,14 +44,9 @@ public class EclipseExportUserChannel implements IXMLExportUserChannel
 		return sl;
 	}
 
-	public String getProtectionPassword(Solution solution)
+	public String getProtectionPassword()
 	{
 		return exportModel.getPassword();
-	}
-
-	public boolean unlock(Solution solution)
-	{
-		return true;
 	}
 
 	public void info(String message, int priority)

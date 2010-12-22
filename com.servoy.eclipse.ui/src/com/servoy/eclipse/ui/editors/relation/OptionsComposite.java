@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.relation;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -37,8 +37,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.SortDialog;
 import com.servoy.eclipse.ui.editors.RelationEditor;
@@ -102,8 +102,7 @@ public class OptionsComposite extends Group
 				{
 					if (relation.getForeignTableName() != null)
 					{
-						FlattenedSolution editingFlattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(
-							relation);
+						FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(relation);
 						dialog = new SortDialog(getShell(), editingFlattenedSolution, relation.getForeignTable(), relation.getInitialSort(), "Sort options");
 						dialog.open();
 

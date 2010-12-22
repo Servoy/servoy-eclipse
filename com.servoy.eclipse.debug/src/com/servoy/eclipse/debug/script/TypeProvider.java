@@ -43,13 +43,13 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;

@@ -19,8 +19,8 @@ package com.servoy.eclipse.core.quickfix.security;
 import java.util.List;
 import java.util.Map;
 
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.EclipseUserManager.User;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager.User;
 
 /**
  * Quick fix for removing a group with invalid name from the user to group mappings.
@@ -44,7 +44,7 @@ public class RemoveGroupWithInvalidNameFromUserList extends AlterUserGroupSecFil
 	@Override
 	protected boolean canHandleType(int type)
 	{
-		return type == EclipseUserManager.SecurityReadException.INVALID_GROUP_NAME_IN_USER_LIST;
+		return type == WorkspaceUserManager.SecurityReadException.INVALID_GROUP_NAME_IN_USER_LIST;
 	}
 
 	public String getLabel()

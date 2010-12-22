@@ -22,8 +22,8 @@ import java.util.Map;
 
 import org.json.JSONException;
 
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.EclipseUserManager.SecurityInfo;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager.SecurityInfo;
 
 /**
  * Abstract class that helps derived classes to alter the table/form sec. files.
@@ -39,13 +39,13 @@ public abstract class AlterPermissionSecFileQuickFix extends SecurityQuickFix
 		Map<String, List<SecurityInfo>> access = new HashMap<String, List<SecurityInfo>>();
 
 		// read the file into memory
-		EclipseUserManager.deserializeSecurityPermissionInfo(fileContent, access);
+		WorkspaceUserManager.deserializeSecurityPermissionInfo(fileContent, access);
 
 		// alter contents
 		boolean altered = alterPermissionInfo(access);
 
 		// write new contents
-		if (altered) return EclipseUserManager.serializeSecurityPermissionInfo(access);
+		if (altered) return WorkspaceUserManager.serializeSecurityPermissionInfo(access);
 		return null;
 	}
 

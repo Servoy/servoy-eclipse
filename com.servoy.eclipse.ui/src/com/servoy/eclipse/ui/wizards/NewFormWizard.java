@@ -52,14 +52,14 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.json.JSONObject;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.elements.ElementFactory;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
-import com.servoy.eclipse.core.repository.TableWrapper;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;

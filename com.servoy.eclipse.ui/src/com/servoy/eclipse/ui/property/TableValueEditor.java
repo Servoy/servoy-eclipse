@@ -22,9 +22,9 @@ package com.servoy.eclipse.ui.property;
  * @author rgansevles
  */
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.core.repository.TableWrapper;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.IServer;

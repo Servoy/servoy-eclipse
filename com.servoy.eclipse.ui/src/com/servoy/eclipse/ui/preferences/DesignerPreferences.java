@@ -29,7 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.service.prefs.BackingStoreException;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.property.ColorPropertyController;
 import com.servoy.j2db.util.PersistHelper;
@@ -281,8 +281,8 @@ public class DesignerPreferences
 
 	public RGB getGridColor()
 	{
-		return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty("gridColor",
-			PersistHelper.createColor(getProperty(GRID_COLOR_SETTING, GRID_COLOR_DEFAULT)));
+		return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty("gridColor", PersistHelper.createColor(getProperty(GRID_COLOR_SETTING,
+			GRID_COLOR_DEFAULT)));
 	}
 
 	public void setGridColor(RGB rgb)
@@ -292,14 +292,14 @@ public class DesignerPreferences
 
 	public RGB getAlignmentGuideColor()
 	{
-		return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty("alignmentGuideColor",
-			PersistHelper.createColor(getProperty(ALIGNMENT_GUIDE_COLOR_SETTING, ALIGNMENT_GUIDE_COLOR_DEFAULT)));
+		return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty("alignmentGuideColor", PersistHelper.createColor(getProperty(
+			ALIGNMENT_GUIDE_COLOR_SETTING, ALIGNMENT_GUIDE_COLOR_DEFAULT)));
 	}
 
 	public void setAlignmentGuideColor(RGB rgb)
 	{
-		setProperty(ALIGNMENT_GUIDE_COLOR_SETTING,
-			PersistHelper.createColorString(ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue("alignmentGuideColor", rgb)));
+		setProperty(ALIGNMENT_GUIDE_COLOR_SETTING, PersistHelper.createColorString(ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(
+			"alignmentGuideColor", rgb)));
 	}
 
 	public int getGridSize()

@@ -26,8 +26,8 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IDebugJ2DBClient;
 
 /**

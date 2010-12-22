@@ -42,8 +42,8 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.resource.FontResource;
@@ -362,8 +362,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 
 				if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).node == FORM_VARIABLES)
 				{
-					Form flattenedForm = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist).getFlattenedForm(
-						persist);
+					Form flattenedForm = ModelUtils.getEditingFlattenedSolution(persist).getFlattenedForm(persist);
 					if (flattenedForm != null)
 					{
 						Iterator<ScriptVariable> formVariables = flattenedForm.getScriptVariables(true);

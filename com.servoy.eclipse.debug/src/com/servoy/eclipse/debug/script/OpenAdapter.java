@@ -37,7 +37,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;

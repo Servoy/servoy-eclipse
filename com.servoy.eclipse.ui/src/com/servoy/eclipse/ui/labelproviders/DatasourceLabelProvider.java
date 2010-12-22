@@ -19,7 +19,7 @@ package com.servoy.eclipse.ui.labelproviders;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-import com.servoy.eclipse.core.repository.TableWrapper;
+import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;

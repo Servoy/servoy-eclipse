@@ -42,10 +42,11 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.IDeveloperRepository;
@@ -102,7 +103,7 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 				{
 					solution.acceptVisitor(visitor);
 					ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().saveEditingSolutionNodes(new IPersist[] { solution }, true);
-					ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(solution).flushAllCachedData();
+					ModelUtils.getEditingFlattenedSolution(solution).flushAllCachedData();
 					ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().flushAllCachedData();
 				}
 				catch (RepositoryException e)

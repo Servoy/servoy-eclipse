@@ -19,7 +19,7 @@ package com.servoy.eclipse.ui.quickfix;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.persistence.AbstractRepository;

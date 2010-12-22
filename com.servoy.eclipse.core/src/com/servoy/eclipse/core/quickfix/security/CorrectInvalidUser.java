@@ -21,11 +21,11 @@ import java.util.Map;
 
 import org.json.JSONException;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.EclipseUserManager.User;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager.User;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
@@ -50,7 +50,7 @@ public class CorrectInvalidUser extends AlterUserGroupSecFileQuickFix
 	@Override
 	protected boolean canHandleType(int type)
 	{
-		return type == EclipseUserManager.SecurityReadException.INVALID_USER_NAME_OR_PASSWORD;
+		return type == WorkspaceUserManager.SecurityReadException.INVALID_USER_NAME_OR_PASSWORD;
 	}
 
 	public String getLabel()
@@ -61,14 +61,14 @@ public class CorrectInvalidUser extends AlterUserGroupSecFileQuickFix
 	@Override
 	protected boolean alterUserAndGroupInfo(List<String> groups, final List<User> users, Map<String, List<String>> usersForGroups)
 	{
-		final EclipseUserManager.User invalidUser;
+		final User invalidUser;
 		boolean altered = false;
 		try
 		{
-			invalidUser = EclipseUserManager.User.fromJSON(new ServoyJSONObject((String)wrongValue, true));
+			invalidUser = User.fromJSON(new ServoyJSONObject((String)wrongValue, true));
 			if (users.contains(invalidUser))
 			{
-				final EclipseUserManager.User newUser = new EclipseUserManager.User(invalidUser.name, invalidUser.passwordHash, invalidUser.userUid);
+				final User newUser = new User(invalidUser.name, invalidUser.passwordHash, invalidUser.userUid);
 				ReturnValueRunnable r;
 				if (newUser.name == null || newUser.name.trim().length() == 0)
 				{

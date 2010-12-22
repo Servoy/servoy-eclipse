@@ -19,10 +19,10 @@ package com.servoy.eclipse.core.quickfix.security;
 import java.util.List;
 import java.util.Map;
 
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.EclipseUserManager.User;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager.User;
 
 /**
  * Quick fix for renaming a group declared with an invalid name.
@@ -46,7 +46,7 @@ public class RenameGroupWithInvalidName extends AlterUserGroupSecFileQuickFix
 	@Override
 	protected boolean canHandleType(int type)
 	{
-		return type == EclipseUserManager.SecurityReadException.INVALID_GROUP_NAME;
+		return type == WorkspaceUserManager.SecurityReadException.INVALID_GROUP_NAME;
 	}
 
 	public String getLabel()

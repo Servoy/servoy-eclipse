@@ -16,11 +16,11 @@
  */
 package com.servoy.eclipse.core.quickfix.dbi;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.repository.DataModelManager;
-import com.servoy.eclipse.core.repository.DataModelManager.TableDifference;
+import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
 

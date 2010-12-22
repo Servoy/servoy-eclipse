@@ -26,9 +26,9 @@ import java.util.Set;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.property.PersistContext;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
@@ -79,8 +79,8 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 						}
 						if (parentElement == ELEMENTS && persist instanceof IFormElement && ((IFormElement)persist).getGroupID() != null)
 						{
-							FormElementGroup group = new FormElementGroup(((IFormElement)persist).getGroupID(),
-								ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form), form);
+							FormElementGroup group = new FormElementGroup(((IFormElement)persist).getGroupID(), ModelUtils.getEditingFlattenedSolution(form),
+								form);
 							if (groups.add(group))
 							{
 								nodes.add(group);
@@ -136,8 +136,8 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			{
 				if (persist instanceof IFormElement && ((IFormElement)persist).getGroupID() != null)
 				{
-					return new FormElementGroup(((IFormElement)persist).getGroupID(),
-						ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist), (Form)persist.getParent());
+					return new FormElementGroup(((IFormElement)persist).getGroupID(), ModelUtils.getEditingFlattenedSolution(persist),
+						(Form)persist.getParent());
 				}
 
 				if (persist.getParent() == form)
@@ -166,7 +166,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 	{
 		if (persist instanceof Form)
 		{
-			FlattenedSolution editingFlattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist);
+			FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
 			if (editingFlattenedSolution == null)
 			{
 				ServoyLog.logError("Could not get project for form " + persist, null);

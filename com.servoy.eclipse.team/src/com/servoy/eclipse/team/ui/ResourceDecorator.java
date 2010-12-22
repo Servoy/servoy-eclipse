@@ -37,7 +37,7 @@ import org.eclipse.team.ui.ISharedImages;
 import org.eclipse.team.ui.TeamImages;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.team.Activator;
 import com.servoy.eclipse.team.ServoyTeamProvider;
 import com.servoy.eclipse.team.subscriber.SolutionSubscriber;

@@ -19,8 +19,8 @@ package com.servoy.eclipse.core.quickfix.security;
 import java.util.List;
 import java.util.Map;
 
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.EclipseUserManager.SecurityInfo;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager.SecurityInfo;
 
 /**
  * Quick fix for removing permissions/access mask in a form/table sec file for a group that is not declared.
@@ -44,7 +44,7 @@ public class RemoveGroupReferencedInPermission extends AlterPermissionSecFileQui
 	@Override
 	protected boolean canHandleType(int type)
 	{
-		return type == EclipseUserManager.SecurityReadException.GROUP_NOT_DECLARED;
+		return type == WorkspaceUserManager.SecurityReadException.GROUP_NOT_DECLARED;
 	}
 
 	public String getLabel()

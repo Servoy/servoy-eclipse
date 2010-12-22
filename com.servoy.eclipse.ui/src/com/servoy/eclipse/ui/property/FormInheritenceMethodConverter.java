@@ -16,7 +16,7 @@
 */
 package com.servoy.eclipse.ui.property;
 
-import com.servoy.eclipse.core.util.CoreUtils;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
 
@@ -41,7 +41,7 @@ public class FormInheritenceMethodConverter implements IPropertyConverter<Method
 	{
 		if (context != null && value != null)
 		{
-			IScriptProvider scriptMethod = CoreUtils.getScriptMethod(persist, context, null, value.methodId);
+			IScriptProvider scriptMethod = ModelUtils.getScriptMethod(persist, context, null, value.methodId);
 			if (scriptMethod != null)
 			{
 				return new MethodWithArguments(scriptMethod.getID(), value.arguments);

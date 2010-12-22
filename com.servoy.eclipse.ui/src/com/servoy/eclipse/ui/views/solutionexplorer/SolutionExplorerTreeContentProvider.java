@@ -47,11 +47,11 @@ import org.eclipse.ui.PlatformUI;
 import org.mozilla.javascript.JavaMembers;
 
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -61,8 +61,8 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EnableServerAction;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
@@ -796,7 +796,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						if (icon != null)
 						{
 							image = UIUtils.getSWTImageFromSwingIcon(icon, view.getSite().getShell().getDisplay());
-							imagesConvertedFromSwing.add(image);
+							if (image != null) imagesConvertedFromSwing.add(image);
 						}
 						if (image == null)
 						{

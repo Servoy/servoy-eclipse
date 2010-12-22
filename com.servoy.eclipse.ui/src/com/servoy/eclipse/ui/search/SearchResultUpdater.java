@@ -31,7 +31,7 @@ import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.Match;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * Class that handles resource changes to update the search results.

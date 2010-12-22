@@ -21,7 +21,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 
-import com.servoy.eclipse.core.util.CoreUtils;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.property.ComplexProperty;
@@ -92,7 +92,7 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 			return UnresolvedValue.getUnresolvedMessage(((UnresolvedMethodWithArguments)mwa).unresolvedValue);
 		}
 
-		IScriptProvider sm = CoreUtils.getScriptMethod(persist, context, table, mwa.methodId);
+		IScriptProvider sm = ModelUtils.getScriptMethod(persist, context, table, mwa.methodId);
 		if (sm == null)
 		{
 			return Messages.LabelUnresolved;
@@ -144,6 +144,6 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 		{
 			mwa = (MethodWithArguments)value;
 		}
-		return CoreUtils.getScriptMethod(persist, context, null, mwa.methodId);
+		return ModelUtils.getScriptMethod(persist, context, null, mwa.methodId);
 	}
 }

@@ -38,9 +38,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;

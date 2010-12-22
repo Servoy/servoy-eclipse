@@ -35,8 +35,8 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.TableItem;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
@@ -137,8 +137,7 @@ public class DataProviderEditingSupport extends EditingSupport
 				if (table != null || index == RelationEditor.CI_FROM)
 				{
 					boolean includeGlobalsAndCalcs = (index == RelationEditor.CI_FROM);
-					FlattenedSolution flattenedEditingSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(
-						re.getPersist());
+					FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(re.getPersist());
 
 					String[] dataProviders = relationEditor.getDataProviders(index);
 					Object rowInput = re.getRowInput(idx);

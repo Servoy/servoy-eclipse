@@ -24,8 +24,8 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.team.TeamProviderProperties;
 import com.servoy.eclipse.team.ui.ResourceDecorator;
 

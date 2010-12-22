@@ -25,7 +25,7 @@ import org.eclipse.search.ui.text.AbstractTextSearchResult;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.persistence.Solution;
 
 /**

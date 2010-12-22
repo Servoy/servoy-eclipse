@@ -45,12 +45,13 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.IPersistChangeListener;
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.repository.SolutionDeserializer;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.SolutionDeserializer;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -116,7 +117,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		final IPersist filePersist;
 		if (input instanceof FileEditorInput)
 		{
-			filePersist = SolutionDeserializer.findPersistFromFile((FileEditorInput)input);
+			filePersist = SolutionDeserializer.findPersistFromFile(((FileEditorInput)input).getFile());
 			if (filePersist != null)
 			{
 				Form f = (Form)filePersist.getAncestor(IRepository.FORMS);
@@ -228,7 +229,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		{
 			try
 			{
-				servoyProject.revertEditingPersist(form);
+				ServoyModelManager.getServoyModelManager().getServoyModel().revertEditingPersist(servoyProject, form);
 				getCommandStack().flush();
 			}
 			catch (RepositoryException e)
@@ -249,7 +250,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		{
 			try
 			{
-				FlattenedSolution editingFlattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
+				FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
 				if (editingFlattenedSolution == null)
 				{
 					ServoyLog.logError("Could not get project for form " + form, null);
@@ -484,7 +485,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	private Collection<IPersist> replaceValuelistWithFields(Collection<IPersist> changes)
 	{
 		ArrayList<IPersist> replaceValuelistWithFields = new ArrayList<IPersist>();
-		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
+		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
 		List<Form> formHierarchy = flattenedSolution.getFormHierarchy(form);
 		for (IPersist changed : changes)
 		{
@@ -518,7 +519,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		List<IPersist> changedChildren = new ArrayList<IPersist>();
 
 		// get all the uuids of the forms in the current hierarchy.
-		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
+		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
 		Set<UUID> formUuids = new HashSet<UUID>();
 		for (Form f : flattenedSolution.getFormHierarchy(form))
 		{
@@ -649,7 +650,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	}
 
 	/**
-	 * @see com.servoy.eclipse.core.IActiveProjectListener#activeProjectWillChange(ServoyProject, com.servoy.eclipse.core.ServoyProject)
+	 * @see com.servoy.eclipse.model.nature.IActiveProjectListener#activeProjectWillChange(ServoyProject, com.servoy.eclipse.model.nature.ServoyProject)
 	 */
 	public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
 	{
@@ -772,7 +773,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	{
 		if (editorInput instanceof FileEditorInput)
 		{
-			showPersist(SolutionDeserializer.findPersistFromFile((FileEditorInput)editorInput));
+			showPersist(SolutionDeserializer.findPersistFromFile(((FileEditorInput)editorInput).getFile()));
 		}
 	}
 

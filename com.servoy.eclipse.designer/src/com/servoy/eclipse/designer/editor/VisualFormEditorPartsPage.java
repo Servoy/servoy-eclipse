@@ -51,10 +51,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
@@ -727,7 +728,7 @@ public class VisualFormEditorPartsPage extends Composite
 		DataProviderDialog dialog;
 		try
 		{
-			FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(editor.getForm());
+			FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(editor.getForm());
 			dialog = new DataProviderDialog(getShell(), DataProviderLabelProvider.INSTANCE_HIDEPREFIX, editor.getForm(), flattenedSolution,
 				editor.getFlattenedForm().getTable(), new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, false, false, false,
 					INCLUDE_RELATIONS.NESTED, false, true, null), null, SWT.MULTI, "Select Group-by fields");

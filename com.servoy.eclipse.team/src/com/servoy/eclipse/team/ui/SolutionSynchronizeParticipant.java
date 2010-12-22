@@ -31,7 +31,7 @@ import org.eclipse.team.ui.synchronize.ModelSynchronizeParticipant;
 import org.eclipse.team.ui.synchronize.ModelSynchronizeParticipantActionGroup;
 import org.eclipse.team.ui.synchronize.SynchronizePageActionGroup;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.team.subscriber.SolutionSubscriber;
 import com.servoy.eclipse.team.ui.actions.SynchronizeViewCommit;
 import com.servoy.eclipse.team.ui.actions.SynchronizeViewRevert;

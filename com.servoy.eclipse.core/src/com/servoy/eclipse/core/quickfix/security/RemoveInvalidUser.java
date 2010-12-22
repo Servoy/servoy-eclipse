@@ -22,9 +22,9 @@ import java.util.Map;
 
 import org.json.JSONException;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.EclipseUserManager.User;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager.User;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
@@ -49,7 +49,7 @@ public class RemoveInvalidUser extends AlterUserGroupSecFileQuickFix
 	@Override
 	protected boolean canHandleType(int type)
 	{
-		return type == EclipseUserManager.SecurityReadException.INVALID_USER_NAME_OR_PASSWORD;
+		return type == WorkspaceUserManager.SecurityReadException.INVALID_USER_NAME_OR_PASSWORD;
 	}
 
 	public String getLabel()
@@ -60,11 +60,11 @@ public class RemoveInvalidUser extends AlterUserGroupSecFileQuickFix
 	@Override
 	protected boolean alterUserAndGroupInfo(List<String> groups, List<User> users, Map<String, List<String>> usersForGroups)
 	{
-		EclipseUserManager.User invalidUser;
+		WorkspaceUserManager.User invalidUser;
 		boolean removed = false;
 		try
 		{
-			invalidUser = EclipseUserManager.User.fromJSON(new ServoyJSONObject((String)wrongValue, true));
+			invalidUser = WorkspaceUserManager.User.fromJSON(new ServoyJSONObject((String)wrongValue, true));
 			removed = users.remove(invalidUser);
 			if (removed)
 			{

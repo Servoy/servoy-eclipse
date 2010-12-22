@@ -27,12 +27,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.builder.ServoyBuilder;
-import com.servoy.eclipse.core.repository.DataModelManager;
-import com.servoy.eclipse.core.repository.DataModelManager.TableDifference;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
+import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 public abstract class TableDifferenceQuickFix extends WorkbenchMarkerResolution
 {

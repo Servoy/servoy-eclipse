@@ -17,7 +17,7 @@
 
 package com.servoy.eclipse.ui.property;
 
-import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
@@ -43,7 +43,7 @@ public class StyleClassValueEditor implements IValueEditor<String>
 
 	public void openEditor(String value)
 	{
-		Style style = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form).getStyleForForm(form, null);
+		Style style = ModelUtils.getEditingFlattenedSolution(form).getStyleForForm(form, null);
 		if (style != null)
 		{
 			String lookup = StyleClassesComboboxModel.getStyleLookupname(persist);
@@ -55,6 +55,6 @@ public class StyleClassValueEditor implements IValueEditor<String>
 
 	public boolean canEdit(String value)
 	{
-		return ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form).getStyleForForm(form, null) != null;
+		return ModelUtils.getEditingFlattenedSolution(form).getStyleForForm(form, null) != null;
 	}
 }

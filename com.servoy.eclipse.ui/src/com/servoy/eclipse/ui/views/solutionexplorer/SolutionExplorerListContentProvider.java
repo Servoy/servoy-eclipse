@@ -43,11 +43,11 @@ import org.mozilla.javascript.ScriptableObject;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IPersistChangeListener;
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.repository.EclipseMessages;
-import com.servoy.eclipse.core.repository.TableWrapper;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.node.IDeveloperFeedback;
 import com.servoy.eclipse.ui.node.IImageLookup;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
@@ -1417,7 +1417,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	}
 
 	/**
-	 * @see com.servoy.eclipse.core.IPersistChangeListener#persistChanges(java.util.Collection)
+	 * @see com.servoy.eclipse.model.nature.IPersistChangeListener#persistChanges(java.util.Collection)
 	 */
 	public void persistChanges(Collection<IPersist> changes)
 	{

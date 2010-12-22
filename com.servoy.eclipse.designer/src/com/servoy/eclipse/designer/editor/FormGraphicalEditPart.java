@@ -37,8 +37,8 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Point;
 
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.SnapToGridFieldPositioner;
@@ -100,8 +100,8 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 					{
 						// use persist.getparent as form in the group, not the current form.
 						// when the group elements are not overrides yet and a group property is changed, an different FormElementGroup is created with this form as parent.
-						FormElementGroup group = new FormElementGroup(((IFormElement)o).getGroupID(),
-							ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(getPersist()), (Form)o.getParent());
+						FormElementGroup group = new FormElementGroup(((IFormElement)o).getGroupID(), ModelUtils.getEditingFlattenedSolution(getPersist()),
+							(Form)o.getParent());
 						if (groups.add(group))
 						{
 							list.add(group);

@@ -35,7 +35,7 @@ import org.eclipse.ui.part.FileEditorInput;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
 import com.servoy.j2db.persistence.IPersist;

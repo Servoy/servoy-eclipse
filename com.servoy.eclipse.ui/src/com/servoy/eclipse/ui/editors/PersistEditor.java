@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors;
 
 import java.util.Collection;
@@ -31,11 +31,11 @@ import org.eclipse.ui.views.properties.IPropertySourceProvider;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.IPersistChangeListener;
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.repository.SolutionDeserializer;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.SolutionDeserializer;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -181,7 +181,7 @@ public abstract class PersistEditor extends EditorPart implements IActiveProject
 		{
 			try
 			{
-				servoyProject.revertEditingPersist(persist);
+				ServoyModelManager.getServoyModelManager().getServoyModel().revertEditingPersist(servoyProject, persist);
 			}
 			catch (RepositoryException e)
 			{
@@ -233,7 +233,7 @@ public abstract class PersistEditor extends EditorPart implements IActiveProject
 	{
 		if (input instanceof FileEditorInput)
 		{
-			IPersist filePersist = SolutionDeserializer.findPersistFromFile((FileEditorInput)input);
+			IPersist filePersist = SolutionDeserializer.findPersistFromFile(((FileEditorInput)input).getFile());
 			if (filePersist != null)
 			{
 				Solution solution = (Solution)filePersist.getAncestor(IRepository.SOLUTIONS);

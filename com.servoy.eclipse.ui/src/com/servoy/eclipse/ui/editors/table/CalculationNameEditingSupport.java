@@ -32,8 +32,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IValidateName;

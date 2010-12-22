@@ -27,10 +27,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.json.JSONException;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.repository.DataModelManager;
-import com.servoy.eclipse.core.repository.DataModelManager.TableDifference;
+import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.Utils;

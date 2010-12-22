@@ -42,8 +42,8 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.editors.FontCellEditor;
 import com.servoy.eclipse.ui.editors.TagsAndI18NTextCellEditor;
@@ -941,8 +941,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			{
 				try
 				{
-					final FlattenedSolution flattenedEditingSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(
-						persist);
+					final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist);
 					final Form form = (Form)persist.getAncestor(IRepository.FORMS);
 					final Table table = form == null ? null : form.getTable();
 					propertyDescriptors = new IPropertyDescriptor[] { new PropertyDescriptor(TITLE, "title text")

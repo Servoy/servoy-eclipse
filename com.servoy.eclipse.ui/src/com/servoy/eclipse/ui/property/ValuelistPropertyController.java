@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.CellEditor;
@@ -21,7 +21,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.dialogs.ValuelistContentProvider;
 import com.servoy.eclipse.ui.editors.AddValueListButtonComposite;
@@ -52,8 +52,7 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 		super(id, displayName);
 		this.persist = persist;
 		this.includeNone = includeNone;
-		setLabelProvider(new SolutionContextDelegateLabelProvider(new ValuelistLabelProvider(
-			ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist)), context));
+		setLabelProvider(new SolutionContextDelegateLabelProvider(new ValuelistLabelProvider(ModelUtils.getEditingFlattenedSolution(persist)), context));
 		setSupportsReadonly(true);
 	}
 
@@ -61,7 +60,7 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 	public CellEditor createPropertyEditor(Composite parent)
 	{
 
-		final FlattenedSolution flattenedEditingSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist);
+		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist);
 		return new ListSelectCellEditor(parent, "Select value list", new ValuelistContentProvider(flattenedEditingSolution), getLabelProvider(),
 			new ValueListValueEditor(flattenedEditingSolution), isReadOnly(), new ValuelistContentProvider.ValuelistListOptions(includeNone), SWT.NONE,
 			new ListSelectControlFactory()

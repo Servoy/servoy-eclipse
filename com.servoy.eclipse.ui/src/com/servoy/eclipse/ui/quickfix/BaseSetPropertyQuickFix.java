@@ -21,9 +21,9 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.UUID;

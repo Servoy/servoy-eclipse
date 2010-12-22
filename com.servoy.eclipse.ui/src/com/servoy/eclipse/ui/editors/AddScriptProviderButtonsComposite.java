@@ -27,10 +27,10 @@ import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
 import com.servoy.j2db.persistence.IColumnTypes;

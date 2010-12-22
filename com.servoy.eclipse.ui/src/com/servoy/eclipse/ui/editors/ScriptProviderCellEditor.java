@@ -36,9 +36,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.CoreUtils;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
@@ -192,8 +191,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 				{
 					if (ScriptDialog.CALCULATIONS == parentElement && table != null)
 					{
-						Iterator<ScriptCalculation> calcs = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist).getScriptCalculations(
-							table, true);
+						Iterator<ScriptCalculation> calcs = ModelUtils.getEditingFlattenedSolution(persist).getScriptCalculations(table, true);
 						while (calcs.hasNext())
 						{
 							children.add(new MethodWithArguments(calcs.next().getID()));
@@ -202,8 +200,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 
 					if (ScriptDialog.GLOBAL_METHODS == parentElement)
 					{
-						Iterator<ScriptMethod> scriptMethodsIte = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(
-							persist).getScriptMethods(true);
+						Iterator<ScriptMethod> scriptMethodsIte = ModelUtils.getEditingFlattenedSolution(persist).getScriptMethods(true);
 						while (scriptMethodsIte.hasNext())
 						{
 							children.add(new MethodWithArguments(scriptMethodsIte.next().getID()));
@@ -222,7 +219,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 			{
 				if (value instanceof MethodWithArguments)
 				{
-					IScriptProvider scriptProvider = CoreUtils.getScriptMethod(persist, null, table, ((MethodWithArguments)value).methodId);
+					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persist, null, table, ((MethodWithArguments)value).methodId);
 					if (scriptProvider instanceof ScriptCalculation)
 					{
 						return ScriptDialog.CALCULATIONS;
@@ -259,12 +256,12 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 
 			public boolean canEdit(Object value)
 			{
-				return value instanceof MethodWithArguments && CoreUtils.getScriptMethod(persist, null, table, ((MethodWithArguments)value).methodId) != null;
+				return value instanceof MethodWithArguments && ModelUtils.getScriptMethod(persist, null, table, ((MethodWithArguments)value).methodId) != null;
 			}
 
 			public void openEditor(Object value)
 			{
-				IScriptProvider scriptprovider = CoreUtils.getScriptMethod(persist, null, table, ((MethodWithArguments)value).methodId);
+				IScriptProvider scriptprovider = ModelUtils.getScriptMethod(persist, null, table, ((MethodWithArguments)value).methodId);
 				if (scriptprovider instanceof IDataProvider) // it is a calculation
 				{
 					EditorUtil.openDataProviderEditor((IDataProvider)scriptprovider);
@@ -357,7 +354,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 			{
 				if (value instanceof MethodWithArguments)
 				{
-					return CoreUtils.getScriptMethod(persist, context, table, ((MethodWithArguments)value).methodId);
+					return ModelUtils.getScriptMethod(persist, context, table, ((MethodWithArguments)value).methodId);
 				}
 				return null;
 			}

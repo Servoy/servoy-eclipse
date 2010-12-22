@@ -31,6 +31,8 @@ import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -58,7 +60,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourceProjectChoiceDialog;
+import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -757,4 +763,36 @@ public class UIUtils
 	{
 		combo.setVisibleItemCount(COMBO_VISIBLE_ITEM_COUNT);
 	}
+
+	public static boolean showChangeResourceProjectDlg(Shell parentShell, ServoyProject sp)
+	{
+		// show resource project choice dialog
+		final ResourceProjectChoiceDialog dialog = new ResourceProjectChoiceDialog(parentShell, "Resources project for solution '" + sp.getProject().getName() +
+			"'", sp.getResourcesProject());
+
+		if (dialog.open() == Window.OK)
+		{
+			IProject newResourcesProject;
+			if (dialog.getResourceProjectData().getNewResourceProjectName() != null)
+			{
+				newResourcesProject = ServoyModel.getWorkspace().getRoot().getProject(dialog.getResourceProjectData().getNewResourceProjectName());
+			}
+			else
+			{
+				newResourcesProject = dialog.getResourceProjectData().getExistingResourceProject().getProject();
+			}
+			// ok now associate the selected(create if necessary) resources project with the solution resources project
+			WorkspaceJob job;
+			// create new resource project if necessary and reference it from selected solution
+			job = new ResourcesProjectSetupJob("Setting up resources project for solution '" + sp.getProject().getName() + "'", newResourcesProject, null, sp,
+				true);
+			job.setRule(ServoyModel.getWorkspace().getRoot());
+			job.setUser(true);
+			job.schedule();
+			return true;
+		}
+
+		return false;
+	}
+
 }

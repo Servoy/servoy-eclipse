@@ -22,8 +22,8 @@ import java.util.Map;
 
 import org.json.JSONException;
 
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.EclipseUserManager.User;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager.User;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.StringComparator;
 
@@ -43,13 +43,13 @@ public abstract class AlterUserGroupSecFileQuickFix extends SecurityQuickFix
 		Map<String, List<String>> usersForGroups = new HashMap<String, List<String>>();
 
 		// read the file into memory
-		EclipseUserManager.deserializeUserAndGroupInfo(fileContent, groups, users, usersForGroups);
+		WorkspaceUserManager.deserializeUserAndGroupInfo(fileContent, groups, users, usersForGroups);
 
 		// alter contents
 		boolean altered = alterUserAndGroupInfo(groups, users, usersForGroups);
 
 		// write new contents
-		if (altered) return EclipseUserManager.serializeUserAndGroupInfo(groups, users, usersForGroups);
+		if (altered) return WorkspaceUserManager.serializeUserAndGroupInfo(groups, users, usersForGroups);
 		return null;
 	}
 

@@ -52,15 +52,15 @@ import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 
 import com.servoy.eclipse.core.IPersistChangeListener;
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
 import com.servoy.eclipse.core.doc.IParameter;
 import com.servoy.eclipse.core.doc.ITypedScriptObject;
 import com.servoy.eclipse.core.doc.ScriptParameter;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.debug.Activator;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
 import com.servoy.j2db.FlattenedSolution;

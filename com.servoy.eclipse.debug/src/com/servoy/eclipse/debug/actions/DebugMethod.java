@@ -29,9 +29,9 @@ import org.eclipse.ui.IViewPart;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.repository.SolutionDeserializer;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.SolutionDeserializer;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;

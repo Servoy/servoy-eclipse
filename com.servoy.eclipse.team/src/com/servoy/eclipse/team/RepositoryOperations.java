@@ -53,25 +53,23 @@ import org.eclipse.team.core.variants.IResourceVariant;
 import org.eclipse.team.core.variants.IResourceVariantComparator;
 import org.eclipse.team.core.variants.ThreeWaySynchronizer;
 
-import com.servoy.eclipse.core.IFileAccess;
 import com.servoy.eclipse.core.IOFileAccess;
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.ServoyResourcesProject;
-import com.servoy.eclipse.core.WorkspaceFileAccess;
-import com.servoy.eclipse.core.repository.DataModelManager;
-import com.servoy.eclipse.core.repository.EclipseMessages;
-import com.servoy.eclipse.core.repository.EclipseRepository;
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.RepositoryAccessPoint;
-import com.servoy.eclipse.core.repository.RepositorySettingsDeserializer;
-import com.servoy.eclipse.core.repository.SolutionDeserializer;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
-import com.servoy.eclipse.core.repository.StringResourceDeserializer;
-import com.servoy.eclipse.core.repository.TeamEclipseUserManager;
-import com.servoy.eclipse.core.util.ResourcesUtils;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.repository.RepositorySettingsDeserializer;
+import com.servoy.eclipse.model.repository.SolutionDeserializer;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.repository.StringResourceDeserializer;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.util.IFileAccess;
+import com.servoy.eclipse.model.util.ResourcesUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.team.subscriber.SolutionResourceVariant;
 import com.servoy.eclipse.team.subscriber.SolutionSubscriber;
 import com.servoy.j2db.dataprocessing.IDataServer;
@@ -453,7 +451,7 @@ public class RepositoryOperations
 			{
 				changedDBServers.add(resourceFile.getLocation().toFile());
 			}
-			else if (name.endsWith(EclipseUserManager.SECURITY_FILE_EXTENSION))
+			else if (name.endsWith(WorkspaceUserManager.SECURITY_FILE_EXTENSION))
 			{
 				changedSecurity.add(resourceFile.getLocation().toFile());
 			}
@@ -545,7 +543,7 @@ public class RepositoryOperations
 				}
 
 				boolean securityInfoUpdated = false;
-				String securityFile = EclipseUserManager.SECURITY_DIR + File.separator + EclipseUserManager.SECURITY_FILENAME;
+				String securityFile = WorkspaceUserManager.SECURITY_DIR + File.separator + WorkspaceUserManager.SECURITY_FILENAME;
 				for (File changedSecFile : changedSecurity)
 				{
 					if (changedSecFile.getAbsolutePath().endsWith(securityFile))
@@ -627,7 +625,7 @@ public class RepositoryOperations
 		// get remote user manager and use eclipse user manager for serialize
 		IUserManager userManager = rap.getUserManager();
 		TeamEclipseUserManager eclipseUserManager = new TeamEclipseUserManager(fileAccess, solution);
-		eclipseUserManager.setWriteMode(EclipseUserManager.WRITE_MODE_MANUAL);
+		eclipseUserManager.setWriteMode(WorkspaceUserManager.WRITE_MODE_MANUAL);
 
 		// serialize form elements security entries
 		IDataSet groups = userManager.getGroups(rap.getClientID());
@@ -668,7 +666,7 @@ public class RepositoryOperations
 		// get remote user manager and use eclipse user manager for serialize
 		IUserManager userManager = rap.getUserManager();
 		TeamEclipseUserManager eclipseUserManager = new TeamEclipseUserManager(fileAccess, projectName);
-		eclipseUserManager.setWriteMode(EclipseUserManager.WRITE_MODE_MANUAL);
+		eclipseUserManager.setWriteMode(WorkspaceUserManager.WRITE_MODE_MANUAL);
 
 		// serialize security groups & users
 		IDataSet groups = userManager.getGroups(rap.getClientID());
@@ -703,8 +701,8 @@ public class RepositoryOperations
 			{
 				for (String userUIDGroup : userUIDGroups)
 				{
-					eclipseUserManager.addUserToGroup(ApplicationServerSingleton.get().getClientId(), userID,
-						eclipseUserManager.getGroupId(ApplicationServerSingleton.get().getClientId(), userUIDGroup));
+					eclipseUserManager.addUserToGroup(ApplicationServerSingleton.get().getClientId(), userID, eclipseUserManager.getGroupId(
+						ApplicationServerSingleton.get().getClientId(), userUIDGroup));
 				}
 			}
 		}
@@ -745,7 +743,7 @@ public class RepositoryOperations
 		// get remote user manager
 		IUserManager remoteUserManager = rap.getUserManager();
 		// get local user manager
-		EclipseUserManager eclipseUserManager = (EclipseUserManager)ApplicationServerSingleton.get().getUserManager();
+		IUserManager eclipseUserManager = ApplicationServerSingleton.get().getUserManager();
 
 		// delete remote groups if locally were deleted
 		Integer groupID;
@@ -788,7 +786,7 @@ public class RepositoryOperations
 		// get remote user manager
 		IUserManager remoteUserManager = rap.getUserManager();
 		// get local user manager
-		EclipseUserManager eclipseUserManager = (EclipseUserManager)ApplicationServerSingleton.get().getUserManager();
+		IUserManager eclipseUserManager = ApplicationServerSingleton.get().getUserManager();
 
 
 		// delete remote users if locally were deleted
@@ -881,13 +879,13 @@ public class RepositoryOperations
 	private void updateTableSecurityInfo(File tableSecFile) throws Exception
 	{
 		String tableNameKey = tableSecFile.getParentFile().getName() + "." + tableSecFile.getName();
-		int extIdx = tableNameKey.indexOf(EclipseUserManager.SECURITY_FILE_EXTENSION);
+		int extIdx = tableNameKey.indexOf(WorkspaceUserManager.SECURITY_FILE_EXTENSION);
 		if (extIdx != -1) tableNameKey = tableNameKey.substring(0, extIdx);
 
 		// get remote user manager
 		IUserManager remoteUserManager = repositoryAP.getUserManager();
 		// get local user manager
-		EclipseUserManager eclipseUserManager = (EclipseUserManager)ApplicationServerSingleton.get().getUserManager();
+		IUserManager eclipseUserManager = ApplicationServerSingleton.get().getUserManager();
 		IDataSet groups = eclipseUserManager.getGroups(ApplicationServerSingleton.get().getClientId());
 		int groupsNr = groups.getRowCount();
 		String groupsNames[] = new String[groupsNr];
@@ -954,14 +952,14 @@ public class RepositoryOperations
 	private void updateSolutionSecurityInfo(RepositoryAccessPoint rap, String solutionName, Solution remoteSolution, File formSecFile) throws Exception
 	{
 		String formName = formSecFile.getName();
-		int extIdx = formName.indexOf(EclipseUserManager.SECURITY_FILE_EXTENSION);
+		int extIdx = formName.indexOf(WorkspaceUserManager.SECURITY_FILE_EXTENSION);
 		if (extIdx != -1) formName = formName.substring(0, extIdx);
 
 
 		// get remote user manager
 		IUserManager remoteUserManager = rap.getUserManager();
 		// get local user manager
-		EclipseUserManager eclipseUserManager = (EclipseUserManager)ApplicationServerSingleton.get().getUserManager();
+		IUserManager eclipseUserManager = ApplicationServerSingleton.get().getUserManager();
 		IDataSet groups = eclipseUserManager.getGroups(ApplicationServerSingleton.get().getClientId());
 		int groupsNr = groups.getRowCount();
 		String groupsNames[] = new String[groupsNr];

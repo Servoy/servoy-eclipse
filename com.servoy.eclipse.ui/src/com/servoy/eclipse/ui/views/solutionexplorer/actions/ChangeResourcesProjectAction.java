@@ -23,7 +23,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
 
-import com.servoy.eclipse.core.ServoyProject;
+import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -91,7 +92,7 @@ public class ChangeResourcesProjectAction extends Action implements ISelectionCh
 	public void run()
 	{
 		if (selectedSolutionProject == null) return;
-		selectedSolutionProject.showChangeResourceProjectDlg(shell);
+		UIUtils.showChangeResourceProjectDlg(shell, selectedSolutionProject);
 	}
 
 }

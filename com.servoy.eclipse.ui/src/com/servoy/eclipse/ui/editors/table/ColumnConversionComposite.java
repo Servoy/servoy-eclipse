@@ -36,8 +36,8 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.MapEntryValueEditor;
 import com.servoy.j2db.dataprocessing.IColumnConverter;
 import com.servoy.j2db.dataprocessing.IPropertyDescriptorProvider;

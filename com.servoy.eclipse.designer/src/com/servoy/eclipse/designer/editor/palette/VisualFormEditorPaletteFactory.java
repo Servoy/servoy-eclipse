@@ -39,10 +39,8 @@ import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.json.JSONObject;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
@@ -50,6 +48,8 @@ import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory.IGetSize;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.BeanClassContentProvider;
@@ -66,9 +66,9 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
+import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.gui.SpecialMatteBorder;
 
@@ -392,9 +392,7 @@ public class VisualFormEditorPaletteFactory
 		{
 			if (displayType != -1)
 			{
-				setProperty(
-					extendedData,
-					StaticContentSpecLoader.PROPERTY_DISPLAYTYPE,
+				setProperty(extendedData, StaticContentSpecLoader.PROPERTY_DISPLAYTYPE,
 					PersistPropertySource.DISPLAY_TYPE_CONTOLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_DISPLAYTYPE.getPropertyName(),
 						Integer.valueOf(displayType)));
 			}
@@ -464,9 +462,7 @@ public class VisualFormEditorPaletteFactory
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TEXT, "");
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE, new ComplexProperty<Border>(new SpecialMatteBorder(top, left, 0, 0,
 				Color.black, Color.black, Color.black, Color.black)));
-			setProperty(
-				extendedData,
-				StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT,
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT,
 				PersistPropertySource.HORIZONTAL_ALIGNMENT_CONTROLLER.getConverter().convertProperty(
 					StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT.getPropertyName(), Integer.valueOf(SwingConstants.RIGHT)));
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TRANSPARENT, Boolean.TRUE);
@@ -477,9 +473,7 @@ public class VisualFormEditorPaletteFactory
 		{
 			if (shapeType != -1)
 			{
-				setProperty(
-					extendedData,
-					StaticContentSpecLoader.PROPERTY_SHAPETYPE,
+				setProperty(extendedData, StaticContentSpecLoader.PROPERTY_SHAPETYPE,
 					PersistPropertySource.SHAPE_TYPE_CONTOLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_SHAPETYPE.getPropertyName(),
 						Integer.valueOf(shapeType)));
 			}
@@ -521,9 +515,7 @@ public class VisualFormEditorPaletteFactory
 		{
 			// one of the tab panels above
 			factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TAB, new Dimension(300, 300));
-			setProperty(
-				factory.getExtendedData(),
-				StaticContentSpecLoader.PROPERTY_TABORIENTATION,
+			setProperty(factory.getExtendedData(), StaticContentSpecLoader.PROPERTY_TABORIENTATION,
 				PersistPropertySource.TAB_ORIENTATION_CONTROLLER.getConverter().convertProperty(
 					StaticContentSpecLoader.PROPERTY_TABORIENTATION.getPropertyName(), Integer.valueOf(tabOrienation)));
 			if (nameHint != null)

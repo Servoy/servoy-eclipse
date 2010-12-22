@@ -55,13 +55,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.builder.ServoyBuilder;
-import com.servoy.eclipse.core.builder.ServoyBuilder.Problem;
-import com.servoy.eclipse.core.repository.TableWrapper;
 import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
+import com.servoy.eclipse.model.builder.ServoyBuilder.Problem;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
@@ -164,7 +165,7 @@ public class ValueListEditor extends PersistEditor
 	@Override
 	public void createPartControl(Composite parent)
 	{
-		FlattenedSolution editingFlattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(getPersist());
+		FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(getPersist());
 
 		ScrolledComposite myScrolledComposite = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		myScrolledComposite.setExpandHorizontal(true);
@@ -353,7 +354,7 @@ public class ValueListEditor extends PersistEditor
 				String sortOptions = (String)(selection.isEmpty() ? null : selection.getFirstElement());
 				if (currentTable != null)
 				{
-					FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(getPersist());
+					FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(getPersist());
 
 					SortDialog dialog = new SortDialog(control.getShell(), flattenedSolution, currentTable, sortOptions, "Sort options"); //$NON-NLS-1$
 					dialog.open();
@@ -499,7 +500,7 @@ public class ValueListEditor extends PersistEditor
 			applyValuelistNameButton.setEnabled(tableValuesButton.getSelection());
 			relatedValuesButton.setSelection(valueList.getValueListType() == ValueList.DATABASE_VALUES && databaseValuesType == ValueList.RELATED_VALUES);
 
-			FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(getPersist());
+			FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(getPersist());
 			Table table = null;
 			if (valueList.getValueListType() == ValueList.DATABASE_VALUES && databaseValuesType == ValueList.TABLE_VALUES)
 			{
@@ -703,7 +704,7 @@ public class ValueListEditor extends PersistEditor
 				if (fromObject instanceof String) return fromObject;
 				if (fromObject instanceof MethodWithArguments)
 				{
-					FlattenedSolution fs = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(getPersist());
+					FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(getPersist());
 					ScriptMethod scriptMethod = fs.getScriptMethod(((MethodWithArguments)fromObject).methodId);
 					if (scriptMethod != null)
 					{
@@ -724,7 +725,7 @@ public class ValueListEditor extends PersistEditor
 				{
 					return fromObject;
 				}
-				FlattenedSolution fs = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(getPersist());
+				FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(getPersist());
 				ScriptMethod scriptMethod = fs.getScriptMethod(fromObject.toString().substring(ScriptVariable.GLOBAL_DOT_PREFIX.length()));
 				if (scriptMethod != null)
 				{
@@ -820,7 +821,7 @@ public class ValueListEditor extends PersistEditor
 		else
 		{
 			handleGlobalMethodButtonSelected();
-			FlattenedSolution fs = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(getPersist());
+			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(getPersist());
 			ScriptMethod scriptMethod = fs.getScriptMethod(methodWithArguments.methodId);
 			if (scriptMethod != null)
 			{
@@ -1168,7 +1169,7 @@ public class ValueListEditor extends PersistEditor
 		@Override
 		public Object[] getElements(Object inputElement)
 		{
-			FlattenedSolution editingFlattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist);
+			FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
 			Iterator<ScriptMethod> scriptMethods = editingFlattenedSolution.getScriptMethods(true);
 			List<MethodWithArguments> lst = new ArrayList<MethodWithArguments>();
 			while (scriptMethods.hasNext())

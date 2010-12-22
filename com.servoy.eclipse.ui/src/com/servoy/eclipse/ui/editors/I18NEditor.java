@@ -52,8 +52,8 @@ import org.eclipse.ui.part.FileEditorInput;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.repository.EclipseMessages;
 import com.servoy.eclipse.core.resource.I18NEditorInput;
+import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.ui.dialogs.I18nComposite;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.I18NUtil.MessageEntry;

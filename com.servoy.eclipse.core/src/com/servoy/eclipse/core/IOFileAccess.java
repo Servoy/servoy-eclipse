@@ -27,6 +27,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 
+import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.j2db.util.Utils;
 
 /**

@@ -27,8 +27,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.core.elements.ElementFactory;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 
 /**
  * Factory for creating drawers from templates with named elements in the PaletteCustomizer.

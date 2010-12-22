@@ -44,9 +44,9 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.I18NServerTableDialog;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerManagerInternal;

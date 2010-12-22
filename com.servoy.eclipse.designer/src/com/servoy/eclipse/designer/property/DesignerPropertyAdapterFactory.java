@@ -26,11 +26,11 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.gef.EditPart;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
 import com.servoy.eclipse.designer.editor.FormGraphicalEditPart;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.actions.Openable;
 import com.servoy.eclipse.ui.editors.PersistEditor;
 import com.servoy.eclipse.ui.node.SimpleUserNode;

@@ -21,9 +21,9 @@ import java.util.List;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.ui.IMarkerResolution;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.dataprocessing.FoundSetManager;
 import com.servoy.j2db.dataprocessing.SortColumn;
 import com.servoy.j2db.persistence.Form;

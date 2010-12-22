@@ -36,7 +36,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.editors.text.TextEditor;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.PersistHelper;
 
 public class ShowColorChooserActionDelegate implements IWorkbenchWindowActionDelegate

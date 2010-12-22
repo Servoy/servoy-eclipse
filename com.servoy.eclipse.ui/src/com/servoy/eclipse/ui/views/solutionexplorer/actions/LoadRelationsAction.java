@@ -41,9 +41,9 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.SerialRule;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.wizards.LoadRelationsWizard;

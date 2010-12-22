@@ -24,10 +24,10 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.EclipseUserManager.User;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager.User;
 
 /**
  * Quick fix for removing one of the duplicate users that appear in the users file.
@@ -51,7 +51,7 @@ public class RemoveSomeOfDuplicateUsers extends AlterUserGroupSecFileQuickFix
 	@Override
 	protected boolean canHandleType(int type)
 	{
-		return type == EclipseUserManager.SecurityReadException.DUPLICATE_USER_NAME;
+		return type == WorkspaceUserManager.SecurityReadException.DUPLICATE_USER_NAME;
 	}
 
 	public String getLabel()

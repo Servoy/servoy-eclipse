@@ -25,8 +25,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -84,7 +84,7 @@ public class EnableServerAction extends Action implements ISelectionChangedListe
 				setServerEnabled(shell, server, !server.getConfig().isEnabled());
 			}
 		}
-		ServoyModelManager.getServoyModelManager().getServoyModel().buildActiveProject();
+		ServoyModelManager.getServoyModelManager().getServoyModel().buildActiveProjectsInJob();
 	}
 
 	public static void setServerEnabled(Shell shell, IServerInternal server, boolean enabled)

@@ -27,7 +27,7 @@ import java.util.Set;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;

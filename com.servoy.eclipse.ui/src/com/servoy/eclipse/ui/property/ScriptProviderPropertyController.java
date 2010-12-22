@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import java.util.Iterator;
@@ -23,9 +23,8 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.servoy.eclipse.core.ServoyLog;
-import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.CoreUtils;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.ScriptProviderCellEditor;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.MethodPropertyController.MethodPropertySource;
@@ -79,7 +78,7 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 
 				try
 				{
-					FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(persist);
+					FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
 					int methodId = -1;
 
 					// try global method
@@ -153,7 +152,7 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 				if (mwa != null)
 				{
 					MethodPropertyController.setInstancMethodArguments(persist, id, mwa.arguments);
-					IScriptProvider scriptProvider = CoreUtils.getScriptMethod(persist, context, table, mwa.methodId);
+					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persist, context, table, mwa.methodId);
 					if (scriptProvider != null)
 					{
 						return scriptProvider.getParent() instanceof IRootObject ? ScriptVariable.GLOBAL_DOT_PREFIX + scriptProvider.getDisplayName()

@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.IPropertyConverter;
 import com.servoy.j2db.plugins.IBeanClassProvider;
 

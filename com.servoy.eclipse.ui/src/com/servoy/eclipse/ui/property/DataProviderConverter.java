@@ -16,7 +16,7 @@
 */
 package com.servoy.eclipse.ui.property;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;

@@ -20,8 +20,8 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;

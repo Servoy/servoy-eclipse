@@ -141,19 +141,19 @@ import com.servoy.eclipse.core.I18NChangeListener;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ISolutionMetaDataChangeListener;
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.ServoyResourcesProject;
 import com.servoy.eclipse.core.ServoyUpdatingProject;
-import com.servoy.eclipse.core.repository.EclipseMessages;
-import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.repository.SolutionDeserializer;
-import com.servoy.eclipse.core.repository.SolutionSerializer;
-import com.servoy.eclipse.core.repository.StringResourceDeserializer;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.dnd.FormElementTransfer;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.repository.SolutionDeserializer;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.repository.StringResourceDeserializer;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -1384,8 +1384,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		activeProjectListener = new IActiveProjectListener()
 		{
 			/**
-			 * @see com.servoy.eclipse.core.IActiveProjectListener#activeProjectWillChange(com.servoy.eclipse.core.ServoyProject,
-			 *      com.servoy.eclipse.core.ServoyProject)
+			 * @see com.servoy.eclipse.model.nature.IActiveProjectListener#activeProjectWillChange(com.servoy.eclipse.model.nature.ServoyProject,
+			 *      com.servoy.eclipse.model.nature.ServoyProject)
 			 */
 			public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
 			{
@@ -2769,7 +2769,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 							{
 								return cp.getServers();
 							}
-							else if (segments[1].equals(EclipseUserManager.SECURITY_DIR))
+							else if (segments[1].equals(WorkspaceUserManager.SECURITY_DIR))
 							{
 								return cp.getUserGroupSecurityNode();
 							}

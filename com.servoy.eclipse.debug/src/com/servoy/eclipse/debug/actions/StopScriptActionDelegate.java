@@ -32,7 +32,7 @@ import org.eclipse.ui.IActionDelegate2;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * An ActionDelegate that is attached to the debug views toolbar that stops the executing of the current script

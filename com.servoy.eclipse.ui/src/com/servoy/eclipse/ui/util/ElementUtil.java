@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFactory;

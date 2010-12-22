@@ -20,7 +20,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IWorkbench;
 
-import com.servoy.eclipse.core.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.team.ServoyTeamProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SimpleResourceMapping;
 

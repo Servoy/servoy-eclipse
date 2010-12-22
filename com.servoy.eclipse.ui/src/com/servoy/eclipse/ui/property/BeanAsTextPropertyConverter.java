@@ -18,7 +18,7 @@ package com.servoy.eclipse.ui.property;
 
 import java.beans.PropertyEditor;
 
-import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
 
 /**

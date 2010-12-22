@@ -32,12 +32,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPart;
 import org.json.JSONException;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
-import com.servoy.eclipse.core.repository.EclipseRepository;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;

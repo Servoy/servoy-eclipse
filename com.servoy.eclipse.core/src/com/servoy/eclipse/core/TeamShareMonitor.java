@@ -29,6 +29,9 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.core.util.UIUtils.MessageAndCheckBoxDialog;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 

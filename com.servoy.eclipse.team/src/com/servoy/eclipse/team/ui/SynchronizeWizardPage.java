@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.List;
 import org.eclipse.team.core.RepositoryProvider;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.team.ServoyTeamProvider;
 
 public class SynchronizeWizardPage extends WizardPage

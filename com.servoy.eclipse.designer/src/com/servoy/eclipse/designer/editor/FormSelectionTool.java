@@ -33,9 +33,9 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.FormValueEditor;
 import com.servoy.j2db.FlattenedSolution;
@@ -69,7 +69,7 @@ public class FormSelectionTool extends PanningSelectionTool
 		if (editpart instanceof TabFormGraphicalEditPart)
 		{
 			Tab tab = (Tab)((TabFormGraphicalEditPart)editpart).getModel();
-			FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(tab);
+			FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(tab);
 			FormValueEditor formValueEditor = new FormValueEditor(flattenedSolution);
 			if (formValueEditor.canEdit(new Integer(tab.getContainsFormID())))
 			{

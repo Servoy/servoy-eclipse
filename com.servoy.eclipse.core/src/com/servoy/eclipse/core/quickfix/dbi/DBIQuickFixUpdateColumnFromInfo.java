@@ -19,11 +19,11 @@ package com.servoy.eclipse.core.quickfix.dbi;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.repository.DataModelManager;
-import com.servoy.eclipse.core.repository.DataModelManager.TableDifference;
+import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -115,7 +115,7 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 						// Set the sequence type (new table, or override).
 						try
 						{
-							int sequenceType = difference.getDbiFileDefinition().systemValue;
+							int sequenceType = difference.getDbiFileDefinition().autoEnterSubType;
 							if (!s.supportsSequenceType(sequenceType, null))
 							{
 								// Database does not support the import sequence type, default to servoy sequence.

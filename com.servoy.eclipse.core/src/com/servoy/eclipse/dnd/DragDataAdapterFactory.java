@@ -20,12 +20,12 @@ import java.awt.Dimension;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumn;

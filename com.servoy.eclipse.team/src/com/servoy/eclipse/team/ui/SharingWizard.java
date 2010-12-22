@@ -24,11 +24,11 @@ import org.eclipse.team.ui.IConfigurationWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.ServoyProject;
-import com.servoy.eclipse.core.ServoyResourcesProject;
-import com.servoy.eclipse.core.repository.RepositoryAccessPoint;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.team.RepositoryAccessPoint;
 import com.servoy.eclipse.team.ServoyTeamProvider;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RootObjectMetaData;

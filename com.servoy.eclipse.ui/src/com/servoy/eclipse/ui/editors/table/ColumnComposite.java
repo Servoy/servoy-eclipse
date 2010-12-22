@@ -58,10 +58,10 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Widget;
 
-import com.servoy.eclipse.core.ServoyLog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.editors.table.actions.CopyColumnNameAction;
 import com.servoy.j2db.FlattenedSolution;
