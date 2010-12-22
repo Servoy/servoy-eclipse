@@ -114,7 +114,7 @@ public class DesignComponentFactory extends ComponentFactory
 						{
 							String name;
 							if (i == 0) name = orient == TabPanel.SPLIT_HORIZONTAL ? "Left panel" : "Top panel";
-							else name = orient == TabPanel.SPLIT_HORIZONTAL ? "Top panel" : "Bottom panel";
+							else name = orient == TabPanel.SPLIT_HORIZONTAL ? "Right panel" : "Bottom panel";
 
 							JLabel label = new JLabel(name, SwingConstants.CENTER);
 							if (i == 0) splitPane.getSplitPane().setLeftComponent(label);
