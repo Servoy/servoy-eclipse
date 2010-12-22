@@ -50,6 +50,9 @@ import com.servoy.j2db.util.PersistHelper;
  */
 public class DesignerPreferencePage extends PreferencePage implements IWorkbenchPreferencePage
 {
+
+	public static final String DESIGNER_PREFERENCES_ID = "com.servoy.eclipse.ui.designer";
+
 	public DesignerPreferencePage()
 	{
 	}

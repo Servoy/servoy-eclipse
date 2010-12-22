@@ -480,6 +480,18 @@
             </objectClass>
          </visibility>
       </objectContribution>
+      <viewerContribution
+            id="com.servoy.eclipse.designer.editor.DesignerPreferences"
+            targetID="#FormDesignerContext">
+         <action
+               class="com.servoy.eclipse.designer.actions.ShowDesignerPreferencesActionDelegate"
+               definitionId="com.servoy.eclipse.designer.command.showDesignerPrefences"
+               id="com.servoy.eclipse.designer.showDesignerPrefences"
+               label="Preferences..."
+               menubarPath="show.ext"
+               tooltip="Set designer preferences">
+         </action>
+      </viewerContribution>
    </extension>
       <extension
             point="org.eclipse.ui.contexts">

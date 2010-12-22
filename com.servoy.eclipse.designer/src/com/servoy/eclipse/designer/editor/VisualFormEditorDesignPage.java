@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChange
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Dimension;
-import org.eclipse.gef.ContextMenuProvider;
 import org.eclipse.gef.DefaultEditDomain;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
@@ -216,7 +215,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 		public void removeSelectionChangedListener(ISelectionChangedListener listener)
 		{
-
 		}
 
 		public ISelection getSelection()
@@ -226,7 +224,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 		public void addSelectionChangedListener(ISelectionChangedListener listener)
 		{
-
 		}
 	};
 
@@ -521,9 +518,10 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		viewer.setKeyHandler(new GraphicalViewerKeyHandler(viewer));
 
 		// configure the context menu provider
-		ContextMenuProvider cmProvider = new VisualFormEditorContextMenuProvider(viewer, getActionRegistry());
+		String id = "#FormDesignerContext";
+		VisualFormEditorContextMenuProvider cmProvider = new VisualFormEditorContextMenuProvider(id, viewer, getActionRegistry());
 		viewer.setContextMenu(cmProvider);
-		getSite().registerContextMenu(cmProvider, viewer);
+		getSite().registerContextMenu(id, cmProvider, viewer);
 
 		DesignerPreferences designerPreferences = new DesignerPreferences();
 		viewer.setProperty(SnapToGrid.PROPERTY_GRID_VISIBLE, Boolean.valueOf(designerPreferences.getFeedbackGrid()));

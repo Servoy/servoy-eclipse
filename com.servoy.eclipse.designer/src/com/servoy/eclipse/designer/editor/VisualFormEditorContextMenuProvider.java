@@ -16,11 +16,12 @@
  */
 package com.servoy.eclipse.designer.editor;
 
-import org.eclipse.gef.ContextMenuProvider;
 import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.actions.GEFActionConstants;
+import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.actions.ActionFactory;
@@ -31,8 +32,9 @@ import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
 /**
  * Provides context menu actions for the VisualFormEditor.
  */
-class VisualFormEditorContextMenuProvider extends ContextMenuProvider
+class VisualFormEditorContextMenuProvider extends MenuManager implements IMenuListener
 {
+	private final EditPartViewer viewer;
 
 	/** The editor's action registry. */
 	private final ActionRegistry actionRegistry;
@@ -44,9 +46,12 @@ class VisualFormEditorContextMenuProvider extends ContextMenuProvider
 	 * @param registry the editor's action registry
 	 * @throws IllegalArgumentException if registry is <tt>null</tt>.
 	 */
-	public VisualFormEditorContextMenuProvider(EditPartViewer viewer, ActionRegistry registry)
+	public VisualFormEditorContextMenuProvider(String id, EditPartViewer viewer, ActionRegistry registry)
 	{
-		super(viewer);
+		super(id, id);
+		this.viewer = viewer;
+		addMenuListener(this);
+		setRemoveAllWhenShown(true);
 		if (registry == null)
 		{
 			throw new IllegalArgumentException();
@@ -55,11 +60,29 @@ class VisualFormEditorContextMenuProvider extends ContextMenuProvider
 	}
 
 	/**
+	 * Returns the EditPartViewer
+	 * 
+	 * @return the viewer
+	 */
+	protected EditPartViewer getViewer()
+	{
+		return viewer;
+	}
+
+	/**
+	 * @see IMenuListener#menuAboutToShow(IMenuManager)
+	 */
+	public void menuAboutToShow(IMenuManager menu)
+	{
+		buildContextMenu(menu);
+	}
+
+
+	/**
 	 * Called when the context menu is about to show. Actions, whose state is enabled, will appear in the context menu.
 	 * 
 	 * @see org.eclipse.gef.ContextMenuProvider#buildContextMenu(org.eclipse.jface.action.IMenuManager)
 	 */
-	@Override
 	public void buildContextMenu(IMenuManager menu)
 	{
 		// Add standard action groups to the menu, but in the order we want to.
@@ -72,6 +95,7 @@ class VisualFormEditorContextMenuProvider extends ContextMenuProvider
 		menu.add(new Separator(IWorkbenchActionConstants.SAVE_EXT));
 		// Placeholder for contributions from other plugins
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+		menu.add(new Separator(IWorkbenchActionConstants.SHOW_EXT));
 		menu.add(new Separator(IWorkbenchActionConstants.OPEN_EXT));
 
 		// Add actions to the menu
@@ -92,5 +116,4 @@ class VisualFormEditorContextMenuProvider extends ContextMenuProvider
 		menu.appendToGroup(IWorkbenchActionConstants.SAVE_EXT, actionRegistry.getAction(DesignerActionFactory.SAVE_AS_TEMPLATE.getId()));
 		menu.appendToGroup(GEFActionConstants.GROUP_REST, actionRegistry.getAction(DesignerActionFactory.SET_TAB_SEQUENCE.getId()));
 	}
-
 }
