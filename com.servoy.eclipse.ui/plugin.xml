@@ -51,7 +51,7 @@
                id="com.servoy.eclipse.ui.views.SolutionExplorerView">
          </showInPart>
          <showInPart
-               id=" org.eclipse.ui.views.ResourceNavigator">
+               id="org.eclipse.ui.views.ResourceNavigator">
          </showInPart>
          <actionSet
                id="com.servoy.eclipse.ui.servoySearchActionSet">
@@ -822,13 +822,6 @@
         Servoy solution explorer problem decorator
      </description>
   	</decorator>  	  	
-   </extension>
-   <extension point="org.eclipse.help.base.browser">
-      <browser 
-      		id="org.eclipse.myPlugin.myBrowserID" 
-      		factoryClass="org.eclipse.help.ui.internal.browser.embedded.EmbeddedBrowserFactory" 
-      		name="My Browser">
-      </browser>
    </extension>
    <extension
          point="org.eclipse.ui.actionSetPartAssociations">
