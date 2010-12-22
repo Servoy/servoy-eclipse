@@ -96,7 +96,22 @@ public class VisualFormEditorPaletteFactory
 	private static final String ELEMENTS_IMAGE_MEDIA_ID = "image field";
 	private static final String ELEMENTS_TYPE_AHEAD_ID = "type ahead";
 	private static final String ELEMENTS_PORTAL_ID = "portal";
-	private static final String[] ELEMENTS_IDS = new String[] { ELEMENTS_BUTTON_ID, ELEMENTS_LABEL_ID, ELEMENTS_TEXT_FIELD_ID, ELEMENTS_TEXT_AREA_ID, ELEMENTS_COMBOBOX_ID, ELEMENTS_RADIOS_ID, ELEMENTS_CHECKS_ID, ELEMENTS_CALENDAR_ID, ELEMENTS_PASSWORD_ID, ELEMENTS_RTF_AREA_ID, ELEMENTS_HTML_AREA_ID, ELEMENTS_IMAGE_MEDIA_ID, ELEMENTS_TYPE_AHEAD_ID, ELEMENTS_PORTAL_ID };
+	private static final String[] ELEMENTS_IDS = new String[] {
+	/* */ELEMENTS_TEXT_FIELD_ID,
+	/* */ELEMENTS_TEXT_AREA_ID,
+	/* */ELEMENTS_HTML_AREA_ID,
+	/* */ELEMENTS_RTF_AREA_ID,
+	/* */ELEMENTS_PASSWORD_ID,
+	/* */ELEMENTS_CALENDAR_ID,
+	/* */ELEMENTS_IMAGE_MEDIA_ID,
+	/* */ELEMENTS_COMBOBOX_ID,
+	/* */ELEMENTS_TYPE_AHEAD_ID,
+	/* */ELEMENTS_RADIOS_ID,
+	/* */ELEMENTS_CHECKS_ID,
+	/* */ELEMENTS_LABEL_ID,
+	/* */ELEMENTS_BUTTON_ID,
+	/* */ELEMENTS_PORTAL_ID
+	/* */};
 
 	private static final String SHAPES_ID = "shapes";
 	private static final String SHAPES_BORDER_PANEL_ID = "border panel";
@@ -105,7 +120,14 @@ public class VisualFormEditorPaletteFactory
 	private static final String SHAPES_OVAL_ID = "circle";
 	private static final String SHAPES_HORIZONTAL_LINE_ID = "horizontal line";
 	private static final String SHAPES_VERTICAL_LINE_ID = "vertical line";
-	private static final String[] SHAPES_IDS = new String[] { SHAPES_BORDER_PANEL_ID, SHAPES_RECTANGLE_ID, SHAPES_ROUNDED_RECTANGLE_ID, SHAPES_OVAL_ID, SHAPES_HORIZONTAL_LINE_ID, SHAPES_VERTICAL_LINE_ID };
+	private static final String[] SHAPES_IDS = new String[] {
+	/* */SHAPES_BORDER_PANEL_ID,
+	/* */SHAPES_RECTANGLE_ID,
+	/* */SHAPES_ROUNDED_RECTANGLE_ID,
+	/* */SHAPES_OVAL_ID,
+	/* */SHAPES_HORIZONTAL_LINE_ID,
+	/* */SHAPES_VERTICAL_LINE_ID
+	/* */};
 
 	private static final String BEANS_ID_PREFIX = "beans:";
 	private static final String SERVOY_BEANS_ID = BEANS_ID_PREFIX + "servoy";
@@ -119,7 +141,11 @@ public class VisualFormEditorPaletteFactory
 	private static final String CONTAINERS_DEFAULT_PANEL_ID = "tabpanel";
 	private static final String CONTAINERS_TABLESS_PANEL_ID = "tabless panel";
 	private static final String CONTAINERS_SPLIT_PANE_HORIZONTAL_ID = "split pane";
-	private static final String[] CONTAINERS_IDS = new String[] { CONTAINERS_DEFAULT_PANEL_ID, CONTAINERS_TABLESS_PANEL_ID, CONTAINERS_SPLIT_PANE_HORIZONTAL_ID };
+	private static final String[] CONTAINERS_IDS = new String[] {
+	/* */CONTAINERS_DEFAULT_PANEL_ID,
+	/* */CONTAINERS_TABLESS_PANEL_ID,
+	/* */CONTAINERS_SPLIT_PANE_HORIZONTAL_ID
+	/* */};
 
 	private static PaletteCustomization getDefaultPaletteCustomization()
 	{
