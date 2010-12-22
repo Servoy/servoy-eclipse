@@ -133,7 +133,7 @@ public class BackgroundTableLoader implements IActiveProjectListener
 						}
 						catch (Exception ex)
 						{
-							((IServerInternal)s).flagInvalid();
+							((IServerInternal)s).forceFlagInvalid();
 							Debug.trace(ex); //report only when tracing 
 						}
 					}

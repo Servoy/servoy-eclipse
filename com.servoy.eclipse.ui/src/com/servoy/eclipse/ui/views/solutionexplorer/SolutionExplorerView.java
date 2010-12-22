@@ -1549,15 +1549,18 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			public void serverStateChanged(IServer server, int oldState, int newState)
 			{
 				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(((IServerInternal)server).getName());
-				if ((oldState & ITableListener.VALID) == ITableListener.VALID && (newState & ITableListener.VALID) != ITableListener.VALID)
+				//either we have a change of state or we had a change of state and we did not expand the node
+				if ((newState & ITableListener.VALID) != ITableListener.VALID) //server state is invalid
 				{
+					final boolean wasValid = (oldState & ITableListener.VALID) == ITableListener.VALID;
 					SolutionExplorerTreeContentProvider treeContentProvider = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
 					final Object serverNode = treeContentProvider.getServers();
 					UIUtils.runInUI(new Runnable()
 					{
 						public void run()
 						{
-							tree.setExpandedState(serverNode, true);
+							//either we were valid so we need to expand or we were invalid but did not expand
+							if (wasValid || !tree.getExpandedState(serverNode)) tree.setExpandedState(serverNode, true);
 						}
 					}, false);
 				}
@@ -2113,8 +2116,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
-		newActionInTreeSecondary.registerAction(UserNodeType.FORM,
-			new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form")); //$NON-NLS-1$ //$NON-NLS-2$
+		newActionInTreeSecondary.registerAction(UserNodeType.FORM, new OpenWizardAction(NewFormWizard.class,
+			Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form")); //$NON-NLS-1$ //$NON-NLS-2$
 		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION, newForm);
 
 		newActionInListPrimary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
