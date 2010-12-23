@@ -175,8 +175,6 @@
 			<pathelement path="${build.result.folder}/../servoy_shared_6.0.0.1200/lib/slf4j-api.jar"/>
 			<pathelement path="../servoy_shared/lib/slf4j-log4j.jar"/>
 			<pathelement path="${build.result.folder}/../servoy_shared_6.0.0.1200/lib/slf4j-log4j.jar"/>
-			<pathelement path="../servoy_shared/lib/terracotta-api.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_6.0.0.1200/lib/terracotta-api.jar"/>
 			<pathelement path="../servoy_shared/lib/wicket-calendar.jar"/>
 			<pathelement path="${build.result.folder}/../servoy_shared_6.0.0.1200/lib/wicket-calendar.jar"/>
 			<pathelement path="../servoy_shared/lib/wicket-extentions.jar"/>
@@ -352,6 +350,10 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.update.core.win32_3.2.200.v20100512.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.update.core.linux_3.2.200.v20100512.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.update.configurator_3.3.100.v20100512.jar"/>
+			<pathelement path="../com.servoy.eclipse.model/bin/"/>
+			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model_6.0.0.1200/bin/"/>
+			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model/@dot"/>
+			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model_6.0.0.1200/@dot"/>
 		</path>
 		<!-- compile the source code -->
 		<javac destdir="${build.result.folder}/@dot" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}"		>
@@ -501,7 +503,7 @@
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="C:/Users/Jan Blok/dev/com.servoy.eclipse.core" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="D:/Workspaces/HEAD/com.servoy.eclipse.core" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 	</target>
 
