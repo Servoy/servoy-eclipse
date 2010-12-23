@@ -246,6 +246,10 @@ public class VisualFormEditorSecurityPage extends Composite
 		{
 			elementsViewer.setInput(null);
 		}
+		else
+		{
+			setElements();
+		}
 
 		doRefresh = false;
 	}
