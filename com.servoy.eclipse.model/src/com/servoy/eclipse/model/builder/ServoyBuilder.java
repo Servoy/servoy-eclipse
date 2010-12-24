@@ -76,10 +76,10 @@ import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
-import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
@@ -1089,13 +1089,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																		// for now only add it on both if there is 1, just skip the rest.
 																		if (lst.size() == 1)
 																		{
-																			ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(other.getUUID(),
+																			ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(
+																				other.getUUID(),
 																				SolutionSerializer.getRelativePath(p, false) +
 																					SolutionSerializer.getFileName(p, false));
 																			addMarker(moduleProject, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR,
 																				IMarker.PRIORITY_HIGH, null, other);
 																		}
-																		ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(p.getUUID(),
+																		ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(
+																			p.getUUID(),
 																			SolutionSerializer.getRelativePath(other, false) +
 																				SolutionSerializer.getFileName(other, false));
 																		addMarker(moduleProject, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR,
@@ -1175,9 +1177,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												{
 													String elementName = "";
 													ServoyMarker mk = null;
-													if (o instanceof ISupportName && (((ISupportName)o).getName() != null))
+													if (o instanceof ISupportName)
 													{
 														elementName = ((ISupportName)o).getName();
+														if (elementName == null || "".equals(elementName)) elementName = "<no name>";
 														mk = MarkerMessages.PropertyMultipleMethodsOnSameElement.fill(elementName);
 													}
 													else if (o instanceof TableNode)
