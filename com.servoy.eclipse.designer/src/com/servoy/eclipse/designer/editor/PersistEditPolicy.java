@@ -41,9 +41,9 @@ import com.servoy.eclipse.designer.editor.commands.FormPlaceFieldCommand;
 import com.servoy.eclipse.designer.editor.commands.FormZOrderCommand;
 import com.servoy.eclipse.designer.editor.commands.PersistPlaceCommandWrapper;
 import com.servoy.eclipse.designer.property.SetValueCommand;
-import com.servoy.eclipse.dnd.IDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
+import com.servoy.eclipse.dnd.IDragData;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
@@ -62,6 +62,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.persistence.ValueList;
 
 /**
  * This edit policy enables the removal and copy of a Form elements
@@ -228,7 +229,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 				return templateElements != null && templateElements.size() == 1;
 			}
 		}
-		if ((VisualFormEditor.REQ_PLACE_TAB.equals(request.getType()) || VisualFormEditor.REQ_PLACE_TAB.equals(request.getType())) && model instanceof TabPanel)
+		if (VisualFormEditor.REQ_PLACE_TAB.equals(request.getType()) && model instanceof TabPanel)
 		{
 			return true;
 		}
@@ -297,6 +298,16 @@ class PersistEditPolicy extends ComponentEditPolicy
 					SetValueCommand setCommand = new SetValueCommand("Drag-n-drop image");
 					setCommand.setTarget(propertySource);
 					setCommand.setPropertyId(StaticContentSpecLoader.PROPERTY_IMAGEMEDIAID.getPropertyName());
+					setCommand.setPropertyValue(new Integer(persist.getID()));
+					return setCommand;
+				}
+				if (persist instanceof ValueList && child instanceof Field)
+				{
+					IPropertySource propertySource = new PersistPropertySource((IPersist)child, (IPersist)(formEditPart == null ? null
+						: formEditPart.getModel()), false);
+					SetValueCommand setCommand = new SetValueCommand("Drag-n-drop value list");
+					setCommand.setTarget(propertySource);
+					setCommand.setPropertyId(StaticContentSpecLoader.PROPERTY_VALUELISTID.getPropertyName());
 					setCommand.setPropertyValue(new Integer(persist.getID()));
 					return setCommand;
 				}
