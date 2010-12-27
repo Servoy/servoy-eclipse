@@ -17,24 +17,26 @@
 package com.servoy.eclipse.designer.editor;
 
 import java.awt.Point;
+import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.FigureUtilities;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
-import org.eclipse.gef.internal.ui.palette.editparts.RaisedBorder;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 
@@ -46,6 +48,8 @@ import com.servoy.j2db.persistence.TabPanel;
 
 public class TabFormGraphicalEditPart extends BasePersistGraphicalEditPart
 {
+	protected int prevImageId = -1;
+
 	public TabFormGraphicalEditPart(IApplication application, Tab tab, boolean inherited)
 	{
 		super(application, tab, inherited);
@@ -69,8 +73,10 @@ public class TabFormGraphicalEditPart extends BasePersistGraphicalEditPart
 	{
 		Label label = new Label();
 		label.setFont(FontResource.getDefaultFont(SWT.ITALIC, 0));
-		label.setBorder(new RaisedBorder(2, 2, 2, 2));
+		label.setBorder(new TabLikeBorder());
 		label.setOpaque(false);
+		label.setIconAlignment(PositionConstants.LEFT);
+		label.setTextAlignment(PositionConstants.LEFT);
 		if (isInherited()) label.setForegroundColor(ColorConstants.red);
 		updateLabel((Tab)getPersist(), label);
 		return label;
@@ -79,11 +85,28 @@ public class TabFormGraphicalEditPart extends BasePersistGraphicalEditPart
 	protected void updateLabel(Tab tab, Label label)
 	{
 		label.setText(tab.getText());
-		// TODO: show tab image
-		if (tab.getImageMediaID() > 0)
+
+		if (prevImageId != tab.getImageMediaID())
 		{
-			ServoyLog.log(IStatus.WARNING, IStatus.OK, "Image in tab not yet supported in developer", null);
+			prevImageId = tab.getImageMediaID();
+			Image image = label.getIcon();
+			if (image != null)
+			{
+				image.dispose();
+				image = null;
+			}
+			if (tab.getImageMediaID() > 0)
+			{
+				Media media = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(getPersist()).getMedia(
+					tab.getImageMediaID());
+				if (media != null)
+				{
+					image = new Image(Display.getCurrent(), new ImageData(new ByteArrayInputStream(media.getMediaData())));
+				}
+			}
+			label.setIcon(image);
 		}
+
 		int x = 0;
 		int y = 0;
 		Point loc = tab.getLocation();
@@ -94,18 +117,9 @@ public class TabFormGraphicalEditPart extends BasePersistGraphicalEditPart
 		}
 		x = loc.x > 0 ? loc.x : x;
 		y = loc.y > 0 ? loc.y : y;
-		tab.setLocation(new java.awt.Point(x, y));
-		Dimension textDim = FigureUtilities.getStringExtents(label.getText(), label.getFont());
-		label.setBounds(new Rectangle(x, y, Math.min(textDim.width + 4, 250), Math.min(textDim.height + 4, 40)));
-	}
 
-	/**
-	 * Form in tab panel has no children
-	 */
-	@Override
-	protected EditPart createChild(Object child)
-	{
-		return null;
+		Dimension preferredSize = label.getPreferredSize();
+		label.setBounds(new Rectangle(x, y, Math.min(preferredSize.width + 10, 250), Math.max(preferredSize.height, 30)));
 	}
 
 	@Override
@@ -113,6 +127,21 @@ public class TabFormGraphicalEditPart extends BasePersistGraphicalEditPart
 	{
 		super.refreshVisuals();
 		updateLabel((Tab)getPersist(), (Label)getFigure());
+	}
+
+	@Override
+	public void deactivate()
+	{
+		Label label = (Label)getFigure();
+		Image image = label.getIcon();
+		if (image != null)
+		{
+			image.dispose();
+			label.setIcon(null);
+		}
+		prevImageId = -1;
+
+		super.deactivate();
 	}
 
 }

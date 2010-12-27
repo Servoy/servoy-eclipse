@@ -75,13 +75,11 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			{
 				CompoundCommand compoundCommand = new CompoundCommand();
 
-				ISupportBounds supportBounds = (ISupportBounds)childEditPart.getModel();
+				Rectangle oldBounds = ((GraphicalEditPart)childEditPart).getFigure().getBounds();
 				Rectangle newBounds = (Rectangle)constraint;
-				java.awt.Point loc = supportBounds.getLocation();
-				java.awt.Dimension dim = supportBounds.getSize();
 
-				compoundCommand.add(new ChangeBoundsCommand(childEditPart, new Point(newBounds.x - loc.x, newBounds.y - loc.y), new Dimension(newBounds.width -
-					dim.width, newBounds.height - dim.height)));
+				compoundCommand.add(new ChangeBoundsCommand(childEditPart, new Point(newBounds.x - oldBounds.x, newBounds.y - oldBounds.y), new Dimension(
+					newBounds.width - oldBounds.width, newBounds.height - oldBounds.height)));
 
 				// set properties via request.extendedData
 				Map<Object, Object> objectProperties = request.getExtendedData();
