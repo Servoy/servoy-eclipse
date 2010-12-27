@@ -1198,7 +1198,7 @@ public class SolutionDeserializer
 	}
 
 	// cache for expensive UUID->string creation.
-	private static final Map<IPersist, String> persistFileNameCache = new HashMap<IPersist, String>(512, 9f);
+	private static final Map<IPersist, String> persistFileNameCache = new HashMap<IPersist, String>(512, 0.9f);
 
 	private static String getFileName(IPersist persist)
 	{
