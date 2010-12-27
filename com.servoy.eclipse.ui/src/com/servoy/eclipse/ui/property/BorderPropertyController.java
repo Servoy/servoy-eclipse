@@ -250,13 +250,13 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 					{
 						border = ((ComplexProperty<Border>)value).getValue();
 					}
-					return getBorderTypeConstant(border).name();
+					BorderType borderTypeConstant = getBorderTypeConstant(border);
+					return borderTypeConstant == BorderType.Default ? Messages.LabelDefault : borderTypeConstant.name();
 				}
 			};
 		}
 		return labelProvider;
 	}
-
 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
