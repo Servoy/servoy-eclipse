@@ -28,8 +28,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProjectNature;
@@ -119,7 +119,7 @@ public class SolutionDeserializer
 	};
 	private final IDeveloperRepository repository;
 	private final ErrorKeeper<File, Exception> errorKeeper;
-	private static final Map<UUID, HashSet<UUID>> alreadyUsedUUID = new HashMap<UUID, HashSet<UUID>>();
+	private static final Map<UUID, HashSet<UUID>> alreadyUsedUUID = new HashMap<UUID, HashSet<UUID>>(16, 0.9f);
 
 	public SolutionDeserializer(IDeveloperRepository repository, ErrorKeeper<File, Exception> errorKeeper)
 	{
@@ -158,7 +158,7 @@ public class SolutionDeserializer
 		HashSet<UUID> solutionUUIDs = alreadyUsedUUID.get(solutionUUID);
 		if (solutionUUIDs == null)
 		{
-			solutionUUIDs = new HashSet<UUID>();
+			solutionUUIDs = new HashSet<UUID>(512, 0.9f);
 			alreadyUsedUUID.put(solutionUUID, solutionUUIDs);
 		}
 
@@ -433,8 +433,8 @@ public class SolutionDeserializer
 					else
 					{
 						// tablenode
-						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0, jsFileName.length() -
-							SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length()) +
+						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0,
+							jsFileName.length() - SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length()) +
 							SolutionSerializer.TABLENODE_FILE_EXTENSION);
 					}
 
@@ -1198,7 +1198,7 @@ public class SolutionDeserializer
 	}
 
 	// cache for expensive UUID->string creation.
-	private static final Map<IPersist, String> persistFileNameCache = new HashMap<IPersist, String>(512);
+	private static final Map<IPersist, String> persistFileNameCache = new HashMap<IPersist, String>(512, 9f);
 
 	private static String getFileName(IPersist persist)
 	{
