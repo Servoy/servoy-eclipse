@@ -38,6 +38,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.ide.ResourceUtil;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
+import com.servoy.eclipse.designer.editor.commands.SelectModelsCommandWrapper;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.j2db.persistence.IPersist;
@@ -124,7 +125,7 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 		if (command != null)
 		{
 			// execute the command on the command stack (supports undo/redo)
-			editPart.getViewer().getEditDomain().getCommandStack().execute(command);
+			editPart.getViewer().getEditDomain().getCommandStack().execute(new SelectModelsCommandWrapper(editPart.getViewer(), command));
 		}
 	}
 

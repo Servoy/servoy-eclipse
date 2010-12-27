@@ -24,6 +24,7 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.SnapToHelper;
+import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.dnd.AbstractTransferDropTargetListener;
 import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.swt.dnd.DND;
@@ -32,6 +33,7 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.commands.SelectModelsCommandWrapper;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 
 /**
@@ -159,5 +161,12 @@ public class ElementTransferDropTarget extends AbstractTransferDropTargetListene
 	public boolean isAltKeyDown()
 	{
 		return false; // TODO: investigate how alt-key down can be detected
+	}
+
+	@Override
+	protected Command getCommand()
+	{
+		Command command = super.getCommand();
+		return command == null ? null : new SelectModelsCommandWrapper(getViewer(), command);
 	}
 }

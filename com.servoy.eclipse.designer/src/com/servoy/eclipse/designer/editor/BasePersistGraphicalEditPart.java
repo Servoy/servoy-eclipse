@@ -33,6 +33,7 @@ import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.tools.DragEditPartsTracker;
 
 import com.servoy.eclipse.core.elements.IFieldPositioner;
+import com.servoy.eclipse.designer.editor.commands.SelectModelsCommandWrapper;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.IPersist;
@@ -178,6 +179,13 @@ public abstract class BasePersistGraphicalEditPart extends AbstractGraphicalEdit
 						}
 					}
 				}
+			}
+
+			@Override
+			protected Command getCommand()
+			{
+				Command command = super.getCommand();
+				return command == null ? null : new SelectModelsCommandWrapper(getViewer(), command);
 			}
 		};
 	}

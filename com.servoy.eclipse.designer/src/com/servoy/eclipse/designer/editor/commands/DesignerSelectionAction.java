@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.gef.EditPart;
+import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.requests.GroupRequest;
@@ -70,9 +71,11 @@ public abstract class DesignerSelectionAction extends SelectionAction
 		if (!(objects.get(0) instanceof EditPart)) return null;
 
 		Map<EditPart, List<EditPart>> parentsMap = new HashMap<EditPart, List<EditPart>>();
+		EditPartViewer viewer = null;
 		for (int i = 0; i < objects.size(); i++)
 		{
 			EditPart object = (EditPart)objects.get(i);
+			if (viewer == null) viewer = object.getViewer();
 			EditPart parent = object.getParent();
 			if (parent != null)
 			{
@@ -113,7 +116,7 @@ public abstract class DesignerSelectionAction extends SelectionAction
 				}
 			}
 		}
-		return compoundCmd.unwrap();
+		return new SelectModelsCommandWrapper(viewer, compoundCmd.unwrap());
 	}
 
 	protected GroupRequest createRequest(List<EditPart> selected)

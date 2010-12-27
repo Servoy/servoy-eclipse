@@ -29,11 +29,10 @@ import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.requests.DirectEditRequest;
 import org.eclipse.gef.tools.PanningSelectionTool;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 
-import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
+import com.servoy.eclipse.designer.editor.commands.SelectModelsCommandWrapper;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -165,7 +164,7 @@ public class FormSelectionTool extends PanningSelectionTool
 		request.setSizeDelta(new Dimension(width, height));
 
 		// check the selected edit parts if they understand the request.
-		final List<EditPart> selectedEditParts = viewer.getSelectedEditParts();
+		List<EditPart> selectedEditParts = viewer.getSelectedEditParts();
 		List<EditPart> applicableEditParts = new ArrayList<EditPart>(selectedEditParts.size());
 		for (EditPart editPart : selectedEditParts)
 		{
@@ -190,15 +189,7 @@ public class FormSelectionTool extends PanningSelectionTool
 		}
 
 		// execute on the command stack
-		viewer.getEditDomain().getCommandStack().execute(new RefreshingCommand(command.unwrap())
-		{
-			@Override
-			public void refresh(boolean haveExecuted)
-			{
-				viewer.setSelection(new StructuredSelection(selectedEditParts.toArray()));
-			}
-
-		});
+		viewer.getEditDomain().getCommandStack().execute(new SelectModelsCommandWrapper(getCurrentViewer(), command.unwrap()));
 		return true;
 	}
 }

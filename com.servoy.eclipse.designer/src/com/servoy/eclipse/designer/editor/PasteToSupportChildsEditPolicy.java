@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
+import com.servoy.eclipse.designer.editor.commands.ICommandWrapper;
 import com.servoy.eclipse.designer.editor.commands.PersistPlaceCommandWrapper;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.dnd.FormElementTransfer;
@@ -167,7 +168,7 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 		return clip;
 	}
 
-	public static class PasteCommand extends Command
+	public static class PasteCommand extends Command implements ICommandWrapper
 	{
 		private final IPersist parent;
 		private final IPersist context;
@@ -233,6 +234,11 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 				fieldPositioner, null, context);
 			// Refresh the form
 			return new PersistPlaceCommandWrapper((EditPart)editPartViewer.getEditPartRegistry().get(pasteParent.getAncestor(IRepository.FORMS)), command, true);
+		}
+
+		public Command getCommand()
+		{
+			return subCommand;
 		}
 	}
 }
