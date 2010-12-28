@@ -84,6 +84,7 @@ import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.ui.IScriptRenderMethods;
 import com.servoy.j2db.util.HtmlUtils;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -167,8 +168,9 @@ public abstract class TypeCreator
 		BASE_TYPES.add("Math");
 	}
 
-	private final ConcurrentMap<String, Type> types = new ConcurrentHashMap<String, Type>();
+	protected final ConcurrentMap<String, Type> types = new ConcurrentHashMap<String, Type>();
 	private final ConcurrentMap<String, ConcurrentMap<String, Type>> dynamicTypes = new ConcurrentHashMap<String, ConcurrentMap<String, Type>>();
+	protected final ConcurrentMap<String, Type> directDynamicTypes = new ConcurrentHashMap<String, Type>();
 	private final ConcurrentMap<String, Class< ? >> classTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, Class< ? >> anonymousClassTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, IScopeTypeCreator> scopeTypes = new ConcurrentHashMap<String, IScopeTypeCreator>();
@@ -203,6 +205,7 @@ public abstract class TypeCreator
 	private void clearDynamicTypes()
 	{
 		dynamicTypes.clear();
+		directDynamicTypes.clear();
 	}
 
 	protected final Class< ? > getTypeClass(String name)
@@ -242,6 +245,11 @@ public abstract class TypeCreator
 		Type type = types.get(realTypeName);
 		if (type == null)
 		{
+			type = directDynamicTypes.get(realTypeName);
+			if (type != null)
+			{
+				return type;
+			}
 			FlattenedSolution fs = getFlattenedSolution(context);
 			ConcurrentMap<String, Type> flattenedSolutionTypeMap = null;
 			if (fs != null && fs.getSolution() != null)
@@ -919,6 +927,8 @@ public abstract class TypeCreator
 		}
 	}
 
+	private static final ConcurrentMap<Pair<Class< ? >, String>, String> docCache = new ConcurrentHashMap<Pair<Class< ? >, String>, String>(64, 0.9f, 16);
+
 	/**
 	 * @param key
 	 * @param scriptObject
@@ -928,33 +938,40 @@ public abstract class TypeCreator
 	public static String getDoc(String key, Class< ? > scriptObjectClass, String name, Class[] parameterTypes)
 	{
 		if (scriptObjectClass == null) return null;
-		String doc = key;
-		IScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectForClass(scriptObjectClass);
-		if (scriptObject != null)
+
+		Pair<Class< ? >, String> cacheKey = new Pair<Class< ? >, String>(scriptObjectClass, name);
+		String doc = docCache.get(cacheKey);
+		if (doc == null)
 		{
-			String sample = null;
-			if (scriptObject instanceof ITypedScriptObject)
+			doc = key;
+			IScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectForClass(scriptObjectClass);
+			if (scriptObject != null)
 			{
-				String toolTip = ((ITypedScriptObject)scriptObject).getToolTip(key, parameterTypes);
-				if (toolTip != null) doc = toolTip;
-				sample = ((ITypedScriptObject)scriptObject).getSample(key, parameterTypes);
+				String sample = null;
+				if (scriptObject instanceof ITypedScriptObject)
+				{
+					String toolTip = ((ITypedScriptObject)scriptObject).getToolTip(key, parameterTypes);
+					if (toolTip != null) doc = toolTip;
+					sample = ((ITypedScriptObject)scriptObject).getSample(key, parameterTypes);
+				}
+				else
+				{
+					String toolTip = scriptObject.getToolTip(name);
+					if (toolTip != null) doc = toolTip;
+					sample = scriptObject.getSample(key);
+				}
+				if (sample != null)
+				{
+					doc = doc + HtmlUtils.escapeMarkup(sample); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				if (doc != null)
+				{
+					doc = Utils.stringReplace(doc, "\n", "<br/>"); //$NON-NLS-1$ //$NON-NLS-2$
+					doc = Utils.stringReplace(doc, "%%prefix%%", ""); //$NON-NLS-1$ //$NON-NLS-2$
+					doc = Utils.stringReplace(doc, "%%elementName%%", name); //$NON-NLS-1$
+				}
 			}
-			else
-			{
-				String toolTip = scriptObject.getToolTip(name);
-				if (toolTip != null) doc = toolTip;
-				sample = scriptObject.getSample(key);
-			}
-			if (sample != null)
-			{
-				doc = doc + HtmlUtils.escapeMarkup(sample); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-			if (doc != null)
-			{
-				doc = Utils.stringReplace(doc, "\n", "<br/>"); //$NON-NLS-1$ //$NON-NLS-2$
-				doc = Utils.stringReplace(doc, "%%prefix%%", ""); //$NON-NLS-1$ //$NON-NLS-2$
-				doc = Utils.stringReplace(doc, "%%elementName%%", name); //$NON-NLS-1$
-			}
+			docCache.putIfAbsent(cacheKey, doc);
 		}
 		return doc;
 	}
