@@ -1293,7 +1293,7 @@ public class SolutionDeserializer
 		{
 			// check if there is already a child with that name and not with that uuid (then it is an incoming uuid change)
 			// so that child should be used. Else we will have 2 childs with the same name but different uuids.
-			if (obj.has(SolutionSerializer.PROP_NAME))
+			if (obj.has(SolutionSerializer.PROP_NAME) && obj.has(SolutionSerializer.PROP_UUID))
 			{
 				int objectTypeId = obj.getInt(SolutionSerializer.PROP_TYPEID);
 				String name = obj.getString(SolutionSerializer.PROP_NAME);
@@ -1301,7 +1301,8 @@ public class SolutionDeserializer
 				while (allObjects.hasNext())
 				{
 					IPersist persist = allObjects.next();
-					if (persist.getTypeID() == objectTypeId && persist instanceof ISupportName && name.equals(((ISupportName)persist).getName()))
+					if (persist.getTypeID() == objectTypeId && persist instanceof ISupportName && name.equals(((ISupportName)persist).getName()) &&
+						!persist_json_map.containsKey(persist))
 					{
 						retval = persist;
 						if (scriptUUIDNotFound)
