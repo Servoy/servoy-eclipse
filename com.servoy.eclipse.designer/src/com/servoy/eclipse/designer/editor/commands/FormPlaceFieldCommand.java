@@ -16,16 +16,21 @@
  */
 package com.servoy.eclipse.designer.editor.commands;
 
+import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.graphics.Point;
 
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
+import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
  * Command to place a field in the form designer.
@@ -41,6 +46,7 @@ public class FormPlaceFieldCommand extends FormPlaceElementCommand
 	private final boolean fillText;
 	private final boolean fillName;
 	private final IFieldPositioner fieldPositioner;
+	private final IPersist formContext;
 
 	/**
 	 * Command to add a field.
@@ -49,11 +55,12 @@ public class FormPlaceFieldCommand extends FormPlaceElementCommand
 	 * @param location
 	 * @param object
 	 */
-	public FormPlaceFieldCommand(ISupportChilds parent, Object object, Object requestType, Map<Object, Object> objectProperties,
+	public FormPlaceFieldCommand(ISupportChilds parent, IPersist formContext, Object object, Object requestType, Map<Object, Object> objectProperties,
 		IFieldPositioner fieldPositioner, Point defaultLocation, boolean placeAsLabels, boolean placeWithLabels, boolean placeHorizontal, boolean fillText,
 		boolean fillName, IPersist context)
 	{
 		super(parent, object, requestType, objectProperties, fieldPositioner, defaultLocation, context);
+		this.formContext = formContext;
 		this.fieldPositioner = fieldPositioner;
 		this.placeAsLabels = placeAsLabels;
 		this.placeWithLabels = placeWithLabels;
@@ -68,8 +75,38 @@ public class FormPlaceFieldCommand extends FormPlaceElementCommand
 		if (parent instanceof ISupportFormElements)
 		{
 			setLabel("place field(s)");
-			return ElementFactory.createFields((ISupportFormElements)parent, (Object[])object, placeAsLabels, placeWithLabels, placeHorizontal, fillText,
-				fillName, fieldPositioner, location);
+			IPersist[] elements = ElementFactory.createFields((ISupportFormElements)parent, (Object[])object, placeAsLabels, placeWithLabels, placeHorizontal,
+				fillText, fillName, fieldPositioner, location);
+			if (parent instanceof Portal)
+			{
+				// if all elements are from 1 relation, correct the portal
+				Iterator<Field> fields = ((Portal)parent).getFields();
+				String relationName = null;
+				boolean same = true;
+				while (same && fields.hasNext())
+				{
+					Field field = fields.next();
+					if (field.getDataProviderID() != null && field.getDataProviderID().indexOf('.') > 0)
+					{
+						String relName = field.getDataProviderID().substring(0, field.getDataProviderID().lastIndexOf('.'));
+						if (relationName == null)
+						{
+							relationName = relName;
+						}
+						else
+						{
+							same = relationName.equals(relName);
+						}
+					}
+				}
+				if (same && relationName != null)
+				{
+					// don't set the relation name directly, use PersistPropertySource in case the portal is from a superform.
+					new PersistPropertySource(parent, formContext, false).setPersistPropertyValue(
+						StaticContentSpecLoader.PROPERTY_RELATIONNAME.getPropertyName(), relationName);
+				}
+			}
+			return elements;
 		}
 		return null;
 	}

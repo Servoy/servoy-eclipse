@@ -142,9 +142,10 @@ class PersistEditPolicy extends ComponentEditPolicy
 			if (VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()))
 			{
 				DataFieldRequest dataFieldRequest = ((DataFieldRequest)request);
-				command = new FormPlaceFieldCommand(portal, dataFieldRequest.getData(), dataFieldRequest.getType(), dataFieldRequest.getExtendedData(),
-					fieldPositioner, fieldsLocation, dataFieldRequest.placeAsLabels, dataFieldRequest.placeWithLabels, dataFieldRequest.placeHorizontal,
-					dataFieldRequest.fillText, dataFieldRequest.fillName, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
+				command = new FormPlaceFieldCommand(portal, (IPersist)formEditPart.getModel(), dataFieldRequest.getData(), dataFieldRequest.getType(),
+					dataFieldRequest.getExtendedData(), fieldPositioner, fieldsLocation, dataFieldRequest.placeAsLabels, dataFieldRequest.placeWithLabels,
+					dataFieldRequest.placeHorizontal, dataFieldRequest.fillText, dataFieldRequest.fillName, (IPersist)(formEditPart == null ? null
+						: formEditPart.getModel()));
 			}
 			else
 			{
@@ -228,6 +229,13 @@ class PersistEditPolicy extends ComponentEditPolicy
 				List<JSONObject> templateElements = ElementFactory.getTemplateElements((TemplateElementHolder)((DataRequest)request).getData());
 				return templateElements != null && templateElements.size() == 1;
 			}
+		}
+		if (model instanceof Portal &&
+			(VisualFormEditor.REQ_DROP_COPY.equals(request.getType()) || VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()) ||
+				VisualFormEditor.REQ_PLACE_MEDIA.equals(request.getType()) || VisualFormEditor.REQ_PLACE_BUTTON.equals(request.getType()) ||
+				VisualFormEditor.REQ_PLACE_LABEL.equals(request.getType()) || VisualFormEditor.REQ_PLACE_RECT_SHAPE.equals(request.getType())))
+		{
+			return true;
 		}
 		if (VisualFormEditor.REQ_PLACE_TAB.equals(request.getType()) && model instanceof TabPanel)
 		{

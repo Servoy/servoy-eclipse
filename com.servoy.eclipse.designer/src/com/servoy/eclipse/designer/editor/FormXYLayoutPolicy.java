@@ -45,6 +45,7 @@ import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.Part;
@@ -125,21 +126,20 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			Point loc = request.getLocation().getCopy();
 			getHostFigure().translateToRelative(loc);
 
+			Form form = ((FormGraphicalEditPart)getHost()).getPersist();
 			if (requestType.type == RequestType.TYPE_BUTTON || requestType.type == RequestType.TYPE_LABEL || requestType.type == RequestType.TYPE_TEMPLATE ||
 				requestType.type == RequestType.TYPE_BEAN || requestType.type == RequestType.TYPE_TAB || requestType.type == RequestType.TYPE_SHAPE)
 			{
-				command = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(), data, requestType, extendedData, null,
-					loc.getSWTPoint(), parent.getPersist());
+				command = new FormPlaceElementCommand(form, data, requestType, extendedData, null, loc.getSWTPoint(), parent.getPersist());
 			}
 			else if (requestType.type == RequestType.TYPE_PORTAL)
 			{
-				command = new FormPlacePortalCommand(((FormGraphicalEditPart)getHost()).getPersist(), data, requestType, extendedData, null, loc.getSWTPoint(),
-					false, false, parent.getPersist());
+				command = new FormPlacePortalCommand(form, data, requestType, extendedData, null, loc.getSWTPoint(), false, false, parent.getPersist());
 			}
 			else if (requestType.type == RequestType.TYPE_FIELD)
 			{
-				command = new FormPlaceFieldCommand(((FormGraphicalEditPart)getHost()).getPersist(), data, requestType, extendedData, null, loc.getSWTPoint(),
-					false, false, false, false, false, parent.getPersist());
+				command = new FormPlaceFieldCommand(form, form, data, requestType, extendedData, null, loc.getSWTPoint(), false, false, false, false, false,
+					parent.getPersist());
 			}
 
 

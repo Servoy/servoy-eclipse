@@ -72,12 +72,13 @@ public class AddFieldActionDelegate extends AbstractEditpartActionDelegate
 		DataProviderOptions input;
 		Form form = null;
 		Portal portal = (Portal)getModel(editPart, IRepository.PORTALS);
-		if (portal != null)
+		if (portal != null && portal.getRelationName() != null)
 		{
 			flattenedSolution = ModelUtils.getEditingFlattenedSolution(portal);
 			Relation[] relations = flattenedSolution.getRelationSequence(portal.getRelationName());
 			if (relations == null)
 			{
+				org.eclipse.jface.dialogs.MessageDialog.openError(getShell(), "Relation not found", "Could not find relation for portal");
 				return null;
 			}
 			input = new DataProviderTreeViewer.DataProviderOptions(true, false, false, true /* related calcs */, false, false, false, false,
