@@ -24,10 +24,12 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.NewSearchUI;
 
+import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
@@ -41,7 +43,7 @@ import com.servoy.j2db.persistence.ValueList;
  */
 public class SearchAction extends Action implements ISelectionChangedListener
 {
-	private IPersist persist;
+	private Object selectedObject;
 
 	/**
 	 * @param solutionExplorerView
@@ -60,25 +62,33 @@ public class SearchAction extends Action implements ISelectionChangedListener
 	public void run()
 	{
 		ISearchQuery query = null;
-		if (persist instanceof ValueList)
+		if (selectedObject instanceof ValueList)
 		{
-			query = new ValueListSearch((ValueList)persist);
+			query = new ValueListSearch((ValueList)selectedObject);
 		}
-		else if (persist instanceof Relation)
+		else if (selectedObject instanceof Relation)
 		{
-			query = new RelationSearch((Relation)persist);
+			query = new RelationSearch((Relation)selectedObject);
 		}
-		else if (persist instanceof Form)
+		else if (selectedObject instanceof Form)
 		{
-			query = new FormSearch((Form)persist);
+			query = new FormSearch((Form)selectedObject);
 		}
-		else if (persist instanceof ScriptMethod)
+		else if (selectedObject instanceof ScriptMethod)
 		{
-			query = new ScriptMethodSearch((ScriptMethod)persist);
+			query = new ScriptMethodSearch((ScriptMethod)selectedObject);
 		}
-		else if (persist instanceof ScriptVariable)
+		else if (selectedObject instanceof ScriptVariable)
 		{
-			query = new ScriptVariableSearch((ScriptVariable)persist);
+			query = new ScriptVariableSearch((ScriptVariable)selectedObject);
+		}
+		else if (selectedObject instanceof IServer)
+		{
+			query = new ServerSearch((IServer)selectedObject);
+		}
+		else if (selectedObject instanceof TableWrapper)
+		{
+			query = new TableSearch((TableWrapper)selectedObject);
 		}
 		if (query != null) NewSearchUI.runQueryInBackground(query, NewSearchUI.activateSearchResultView());
 	}
@@ -90,7 +100,7 @@ public class SearchAction extends Action implements ISelectionChangedListener
 	 */
 	public void selectionChanged(SelectionChangedEvent event)
 	{
-		persist = null;
+		selectedObject = null;
 
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		if (sel.size() == 1)
@@ -98,12 +108,13 @@ public class SearchAction extends Action implements ISelectionChangedListener
 			SimpleUserNode node = ((SimpleUserNode)sel.getFirstElement());
 			if (node.getType() == UserNodeType.VALUELIST_ITEM || node.getType() == UserNodeType.RELATION || node.getType() == UserNodeType.FORM ||
 				node.getType() == UserNodeType.FORM_METHOD || node.getType() == UserNodeType.GLOBAL_METHOD_ITEM ||
-				node.getType() == UserNodeType.GLOBAL_VARIABLE_ITEM || node.getType() == UserNodeType.FORM_VARIABLE_ITEM)
+				node.getType() == UserNodeType.GLOBAL_VARIABLE_ITEM || node.getType() == UserNodeType.FORM_VARIABLE_ITEM ||
+				node.getType() == UserNodeType.SERVER || node.getType() == UserNodeType.TABLE)
 			{
-				persist = (IPersist)node.getRealObject();
+				selectedObject = node.getRealObject();
 			}
 		}
-		setEnabled(persist != null);
+		setEnabled(selectedObject != null);
 
 	}
 }

@@ -75,11 +75,10 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 		ServoyProject activeProject = servoyModel.getServoyProject(sol.getName());
 		Solution[] modules = activeProject.getModules();
 
-		IResource[] scopes = new IResource[modules.length + 1];
-		scopes[0] = activeProject.getProject();
+		IResource[] scopes = new IResource[modules.length];
 		for (int i = 0; i < modules.length; i++)
 		{
-			scopes[i + 1] = servoyModel.getServoyProject(modules[i].getName()).getProject();
+			scopes[i] = servoyModel.getServoyProject(modules[i].getName()).getProject();
 		}
 		return scopes;
 	}
