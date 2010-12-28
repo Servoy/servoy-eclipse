@@ -264,6 +264,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		names.remove("Super");
 		names.remove("Forms");
 		names.remove("Plugins");
+		names.remove("Globals");
 		// add the special Rhino Continuation type.
 		if (prefix == null || "Continuation".startsWith(prefix)) names.add("Continuation");
 		return names;
