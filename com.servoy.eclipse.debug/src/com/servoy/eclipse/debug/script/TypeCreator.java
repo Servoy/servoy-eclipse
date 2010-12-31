@@ -962,7 +962,7 @@ public abstract class TypeCreator
 				}
 				if (sample != null)
 				{
-					doc = doc + HtmlUtils.escapeMarkup(sample); //$NON-NLS-1$ //$NON-NLS-2$
+					doc = doc + "<br/>" + HtmlUtils.escapeMarkup(sample); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				if (doc != null)
 				{
