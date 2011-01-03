@@ -17,6 +17,10 @@
 
 package com.servoy.eclipse.designer.editor;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.commands.Command;
 
@@ -31,42 +35,50 @@ import com.servoy.eclipse.ui.property.IRestorer;
  */
 public abstract class BaseRestorableCommand extends Command
 {
-	private final Object object;
-	private Object state;
+	private Map<Object, Object> states;
 
-	public BaseRestorableCommand(String label, Object object)
+	public BaseRestorableCommand(String label)
 	{
 		super(label);
-		this.object = object;
 	}
 
-	/**
-	 * @return the object
-	 */
-	public Object getObject()
+	protected void saveState(Object object)
 	{
-		return object;
-	}
-
-	protected void saveState()
-	{
+		if (states != null && states.containsKey(object))
+		{
+			// already saved
+			return;
+		}
 		IRestorer restorable = (IRestorer)Platform.getAdapterManager().getAdapter(object, IRestorer.class);
-		state = restorable == null ? null : restorable.getState(object);
+		Object state = restorable == null ? null : restorable.getState(object);
+		if (state != null)
+		{
+			if (states == null)
+			{
+				states = new HashMap<Object, Object>();
+			}
+			states.put(object, state);
+		}
 	}
 
 	@Override
 	public boolean canUndo()
 	{
-		return state != null;
+		return states != null;
 	}
 
 	@Override
 	public void undo()
 	{
-		IRestorer restorable = (IRestorer)Platform.getAdapterManager().getAdapter(object, IRestorer.class);
-		restorable.restoreState(object, state);
-		state = null;
-		// fire persist change recursively
-		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, object, true);
+		for (Entry<Object, Object> entry : states.entrySet())
+		{
+			Object object = entry.getKey();
+			IRestorer restorable = (IRestorer)Platform.getAdapterManager().getAdapter(object, IRestorer.class);
+			restorable.restoreState(object, entry.getValue());
+
+			// fire persist change recursively
+			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, object, true);
+		}
+		states = null;
 	}
 }

@@ -55,7 +55,7 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 	 */
 	public ChangeBoundsCommand(EditPart editPart, Point moveDelta, Dimension sizeDelta)
 	{
-		super("", editPart.getModel());
+		super("");
 		this.editPart = editPart;
 		this.moveDelta = moveDelta;
 		this.sizeDelta = sizeDelta;
@@ -101,10 +101,6 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 
 	public boolean changeBounds(boolean change)
 	{
-		if (change)
-		{
-			saveState();
-		}
 		List<EditPart> toApply = new ArrayList<EditPart>();
 		models = new ArrayList<Object>();
 		try
@@ -113,7 +109,7 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 			while (toApply.size() > 0)
 			{
 				EditPart ep = toApply.remove(0);
-				if (!(ep instanceof GraphicalEditPart) || !changeBounds((GraphicalEditPart)ep, moveDelta, sizeDelta, change))
+				if (!(ep instanceof GraphicalEditPart) || !changeBounds((GraphicalEditPart)ep, change))
 				{
 					return false;
 				}
@@ -151,7 +147,7 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 		propertySource.setPropertyValue(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), size);
 	}
 
-	private static boolean changeBounds(GraphicalEditPart ep, Point moveDelta, Dimension sizeDelta, boolean change)
+	protected boolean changeBounds(GraphicalEditPart ep, boolean change)
 	{
 		Rectangle bounds = ep.getFigure().getBounds();
 		int x = bounds.x + moveDelta.x;
@@ -163,6 +159,7 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 
 		if (change)
 		{
+			saveState(ep.getModel());
 			setLocationAndSize(ep, new java.awt.Point(x, y), new java.awt.Dimension(width, height));
 		}
 		return true;

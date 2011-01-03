@@ -44,11 +44,13 @@ import com.servoy.j2db.persistence.Template;
 public class ApplyTemplatePropertiesCommand extends BaseRestorableCommand
 {
 	private final TemplateElementHolder templateHolder;
+	private final IPersist persist;
 
 	public ApplyTemplatePropertiesCommand(TemplateElementHolder template, IPersist persist)
 	{
-		super("Apply template", persist);
+		super("Apply template");
 		this.templateHolder = template;
+		this.persist = persist;
 	}
 
 	@Override
@@ -62,7 +64,7 @@ public class ApplyTemplatePropertiesCommand extends BaseRestorableCommand
 	@Override
 	public void execute()
 	{
-		saveState();
+		saveState(persist);
 
 		// elements
 		List<JSONObject> elements = ElementFactory.getTemplateElements(templateHolder);
@@ -71,7 +73,6 @@ public class ApplyTemplatePropertiesCommand extends BaseRestorableCommand
 			return;
 		}
 
-		IPersist persist = (IPersist)getObject();
 		try
 		{
 			JSONObject json = elements.get(0);
