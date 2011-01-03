@@ -17,6 +17,7 @@
 package com.servoy.eclipse.designer.editor;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.draw2d.geometry.Dimension;
@@ -29,8 +30,10 @@ import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.requests.DirectEditRequest;
 import org.eclipse.gef.tools.PanningSelectionTool;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.TraverseEvent;
 
 import com.servoy.eclipse.designer.editor.commands.SelectModelsCommandWrapper;
 import com.servoy.eclipse.designer.util.DesignerUtil;
@@ -38,6 +41,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.FormValueEditor;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.Tab;
 
 /**
@@ -48,6 +52,15 @@ import com.servoy.j2db.persistence.Tab;
 
 public class FormSelectionTool extends PanningSelectionTool
 {
+	private final VisualFormEditor editorPart;
+
+	/**
+	 * @param editorPart
+	 */
+	public FormSelectionTool(VisualFormEditor editorPart)
+	{
+		this.editorPart = editorPart;
+	}
 
 	@Override
 	protected boolean handleViewerExited()
@@ -95,6 +108,15 @@ public class FormSelectionTool extends PanningSelectionTool
 			return true;
 		}
 		return super.handleKeyDown(e);
+	}
+
+	@Override
+	protected void handleKeyTraversed(TraverseEvent event)
+	{
+		if (performElementTraverse(event))
+		{
+			event.doit = false;
+		}
 	}
 
 	/**
@@ -191,5 +213,96 @@ public class FormSelectionTool extends PanningSelectionTool
 		// execute on the command stack
 		viewer.getEditDomain().getCommandStack().execute(new SelectModelsCommandWrapper(getCurrentViewer(), command.unwrap()));
 		return true;
+	}
+
+	/**  
+	 * Traverse selected elements according to tab sequence.
+	 * <p>
+	 * shift key held: traverse backward
+	 * 
+	 * @param e event
+	 * @return applicability
+	 */
+	protected boolean performElementTraverse(KeyEvent e)
+	{
+		if (e.keyCode != SWT.TAB)
+		{
+			return false;
+		}
+
+		// find a ISupportTabSeq in the selection, when multiple found, just pick one.
+		ISupportTabSeq field = null;
+		for (EditPart editPart : ((List<EditPart>)getCurrentViewer().getSelectedEditParts()))
+		{
+			if (editPart.getModel() instanceof ISupportTabSeq)
+			{
+				field = (ISupportTabSeq)editPart.getModel();
+			}
+		}
+		if (field == null)
+		{
+			return false;
+		}
+
+		ISupportTabSeq next = findNextField(field, editorPart.getFlattenedForm().getFieldsByTabOrder(), (e.stateMask & SWT.SHIFT) == 0);
+		if (next == null)
+		{
+			return false;
+		}
+
+		Object nextEditPart = getCurrentViewer().getEditPartRegistry().get(next);
+		if (nextEditPart == null)
+		{
+			return false;
+		}
+
+		getCurrentViewer().setSelection(new StructuredSelection(nextEditPart));
+
+		return true;
+	}
+
+	protected static ISupportTabSeq findNextField(ISupportTabSeq field, Iterator<ISupportTabSeq> fieldsByTabOrder, boolean forward)
+	{
+		ISupportTabSeq prev = null;
+		ISupportTabSeq first = null;
+		while (fieldsByTabOrder.hasNext())
+		{
+			ISupportTabSeq next = fieldsByTabOrder.next();
+			if (next.equals(field))
+			{
+				if (forward)
+				{
+					if (fieldsByTabOrder.hasNext())
+					{
+						return fieldsByTabOrder.next();
+					}
+					return first;
+				}
+
+				// backward
+				if (prev != null)
+				{
+					return prev;
+				}
+
+				// go to last
+				ISupportTabSeq last = null;
+				while (fieldsByTabOrder.hasNext())
+				{
+					last = fieldsByTabOrder.next();
+				}
+				return last;
+			}
+
+			// search further
+			if (first == null)
+			{
+				first = next;
+			}
+			prev = next;
+		}
+
+		// not found
+		return null;
 	}
 }

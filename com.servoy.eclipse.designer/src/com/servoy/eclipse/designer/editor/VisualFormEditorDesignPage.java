@@ -51,9 +51,9 @@ import org.eclipse.gef.ui.actions.SaveAction;
 import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.gef.ui.actions.UndoAction;
 import org.eclipse.gef.ui.palette.FlyoutPaletteComposite;
+import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.palette.PaletteViewer;
 import org.eclipse.gef.ui.palette.PaletteViewerProvider;
-import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.palette.customize.PaletteCustomizerDialog;
 import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
 import org.eclipse.gef.ui.parts.GraphicalViewerKeyHandler;
@@ -99,12 +99,12 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate;
+import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate.IActionAddedListener;
 import com.servoy.eclipse.designer.actions.AlignmentSortPartsAction;
 import com.servoy.eclipse.designer.actions.DistributeAction;
 import com.servoy.eclipse.designer.actions.DistributeRequest;
 import com.servoy.eclipse.designer.actions.SelectFeedbackmodeAction;
 import com.servoy.eclipse.designer.actions.SelectSnapmodeAction;
-import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate.IActionAddedListener;
 import com.servoy.eclipse.designer.dnd.FormElementTransferDropTarget;
 import com.servoy.eclipse.designer.editor.commands.BringToFrontAction;
 import com.servoy.eclipse.designer.editor.commands.CopyAction;
@@ -195,7 +195,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	public VisualFormEditorDesignPage(VisualFormEditor editorPart)
 	{
 		this.editorPart = editorPart;
-		FormSelectionTool selectionTool = new FormSelectionTool();
+		FormSelectionTool selectionTool = new FormSelectionTool(editorPart);
 		DefaultEditDomain editDomain = new DefaultEditDomain(editorPart);
 		editDomain.setDefaultTool(selectionTool);
 		editDomain.setActiveTool(selectionTool);
