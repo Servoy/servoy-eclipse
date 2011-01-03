@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.quickfix;
 
 import org.eclipse.core.resources.IMarker;
@@ -22,7 +22,6 @@ import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.ServerConfig;
@@ -45,11 +44,10 @@ public class MissingServerQuickFix implements IMarkerResolution
 	{
 		try
 		{
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-			ServerConfig serverConfig = servoyModel.getServerManager().getServerConfig(serverName);
+			ServerConfig serverConfig = ServoyModel.getServerManager().getServerConfig(serverName);
 			if (serverConfig == null)
 			{
-				serverConfig = ServerConfig.TEMPLATES.get(ServerConfig.SYBASE_TEMPLATE_NAME).getNamedCopy(serverName);
+				serverConfig = ServerConfig.TEMPLATES.get(ServerConfig.POSTGRESQL_TEMPLATE_NAME).getNamedCopy(serverName);
 			}
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
 				new ServerEditorInput(serverConfig),
