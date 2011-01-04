@@ -37,7 +37,7 @@ import com.servoy.j2db.persistence.ISupportChilds;
 /**
  * An action to cut selected objects.
  */
-public class CutAction extends DesignerSelectionAction
+public class CutAction extends MultipleSelectionAction
 {
 	/**
 	 * Constructs a <code>CutAction</code> using the specified part.
@@ -107,15 +107,5 @@ public class CutAction extends DesignerSelectionAction
 	{
 		if (DesignerUtil.containsInheritedElement(getSelectedObjects())) return false;
 		return super.calculateEnabled();
-	}
-
-	@Override
-	public boolean isHandled()
-	{
-		if (getWorkbenchPart() instanceof VisualFormEditor)
-		{
-			return ((VisualFormEditor)getWorkbenchPart()).isDesignerContextActive();
-		}
-		return true;
 	}
 }

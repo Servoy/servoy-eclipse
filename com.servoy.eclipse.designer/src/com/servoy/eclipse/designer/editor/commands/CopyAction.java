@@ -40,7 +40,7 @@ import com.servoy.j2db.persistence.ISupportChilds;
 /**
  * An action to delete selected objects.
  */
-public class CopyAction extends DesignerSelectionAction
+public class CopyAction extends MultipleSelectionAction
 {
 
 	/**
@@ -128,15 +128,5 @@ public class CopyAction extends DesignerSelectionAction
 		if (command == null || !command.canExecute()) return;
 		// cannot undo (like copy command), run outside the command stack (will not make editor dirty)
 		command.execute();
-	}
-
-	@Override
-	public boolean isHandled()
-	{
-		if (getWorkbenchPart() instanceof VisualFormEditor)
-		{
-			return ((VisualFormEditor)getWorkbenchPart()).isDesignerContextActive();
-		}
-		return true;
 	}
 }

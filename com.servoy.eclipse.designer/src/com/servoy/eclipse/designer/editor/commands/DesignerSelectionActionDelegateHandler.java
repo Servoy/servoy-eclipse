@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.designer.editor.commands;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,8 +27,13 @@ import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
-import org.eclipse.gef.ui.actions.SelectionAction;
-import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import com.servoy.eclipse.core.IPersistChangeListener;
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.designer.actions.AbstractEditorActionDelegateHandler;
+import com.servoy.j2db.persistence.IPersist;
 
 /**
  * Base class for actions based on the selection in form designer.
@@ -35,42 +41,49 @@ import org.eclipse.ui.IWorkbenchPart;
  * @author rgansevles
  */
 
-public abstract class DesignerSelectionAction extends SelectionAction
+public abstract class DesignerSelectionActionDelegateHandler extends AbstractEditorActionDelegateHandler
 {
 	protected final Object requestType;
 
-	public DesignerSelectionAction(IWorkbenchPart part, Object requestType)
+	private final IPersistChangeListener persistChangeListener;
+
+	public DesignerSelectionActionDelegateHandler(Object requestType)
 	{
-		super(part);
 		this.requestType = requestType;
-		setLazyEnablementCalculation(false);
+		ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(false, persistChangeListener = createPersistChangeListener());
 	}
 
-	/**
-	 * Returns <code>true</code> if the selected objects can be handled. Returns <code>false</code> if there are no objects selected or the selected objects
-	 * are not {@link EditPart}s.
-	 * 
-	 * @return <code>true</code> if the command should be enabled
-	 */
-	@Override
-	protected boolean calculateEnabled()
+	protected IPersistChangeListener createPersistChangeListener()
 	{
-		Command cmd = createCommand(getSelectedObjects());
-		return cmd != null && cmd.canExecute();
+		return new IPersistChangeListener()
+		{
+			public void persistChanges(Collection<IPersist> changes)
+			{
+				IAction action = getCurrentAction();
+				if (action != null)
+				{
+					Boolean checked = calculateChecked();
+					if (checked != null)
+					{
+						action.setChecked(checked.booleanValue());
+					}
+				}
+			}
+		};
 	}
 
 	/**
 	 * Create a command to work the selected objects.
 	 * 
-	 * @param objects The objects selected.
 	 * @return The command to work the selected objects.
 	 */
-	protected final Command createCommand(List objects)
+	@Override
+	protected final Command createCommand()
 	{
+		IStructuredSelection objects = getSelection();
 		if (objects.isEmpty()) return null;
-		if (!(objects.get(0) instanceof EditPart)) return null;
 
-		Map<EditPart, Request> requests = createRequests(objects);
+		Map<EditPart, Request> requests = createRequests(objects.toList());
 		CompoundCommand compoundCmd = null;
 		EditPartViewer viewer = null;
 		if (requests != null)
@@ -118,22 +131,10 @@ public abstract class DesignerSelectionAction extends SelectionAction
 		return selected;
 	}
 
-	/**
-	 * Initializes this action's text and images.
-	 */
 	@Override
-	protected void init()
+	public void dispose()
 	{
-		super.init();
-		setEnabled(false);
-	}
-
-	/**
-	 * Performs the action on the selected objects.
-	 */
-	@Override
-	public void run()
-	{
-		execute(createCommand(getSelectedObjects()));
+		ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(false, persistChangeListener);
+		super.dispose();
 	}
 }

@@ -83,10 +83,6 @@ public class ActionBarContributor extends org.eclipse.gef.ui.actions.ActionBarCo
 		addMyAction(DesignerActionFactory.DISTRIBUTE_VERTICAL_PACK.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
 		addMyAction(DesignerActionFactory.SAME_WIDTH.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
 		addMyAction(DesignerActionFactory.SAME_HEIGHT.create(getPage().getWorkbenchWindow()), formToolsInFormWindow);
-		addMyAction(DesignerActionFactory.ANCHOR_TOP_TOGGLE.create(getPage().getWorkbenchWindow()), false);
-		addMyAction(DesignerActionFactory.ANCHOR_RIGHT_TOGGLE.create(getPage().getWorkbenchWindow()), false);
-		addMyAction(DesignerActionFactory.ANCHOR_BOTTOM_TOGGLE.create(getPage().getWorkbenchWindow()), false);
-		addMyAction(DesignerActionFactory.ANCHOR_LEFT_TOGGLE.create(getPage().getWorkbenchWindow()), false);
 		addMyAction(DesignerActionFactory.SET_TAB_SEQUENCE.create(getPage().getWorkbenchWindow()), false);
 		addMyAction(DesignerActionFactory.SAVE_AS_TEMPLATE.create(getPage().getWorkbenchWindow()), false);
 

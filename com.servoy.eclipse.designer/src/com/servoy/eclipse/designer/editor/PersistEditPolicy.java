@@ -21,7 +21,6 @@ import java.util.List;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.commands.Command;
-import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.editpolicies.ComponentEditPolicy;
 import org.eclipse.gef.requests.GroupRequest;
 import org.eclipse.swt.graphics.Point;
@@ -51,7 +50,6 @@ import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
@@ -162,8 +160,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 				null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 		}
 
-		else if ((VisualFormEditor.REQ_BRING_TO_FRONT.equals(request.getType()) || VisualFormEditor.REQ_SEND_TO_BACK.equals(request.getType()) &&
-			request instanceof GroupRequest))
+		else if (VisualFormEditor.REQ_BRING_TO_FRONT.equals(request.getType()) || VisualFormEditor.REQ_SEND_TO_BACK.equals(request.getType()))
 		{
 			command = new FormZOrderCommand(request.getType(), (Form)formEditPart.getModel(), new IPersist[] { persist });
 		}
@@ -171,23 +168,11 @@ class PersistEditPolicy extends ComponentEditPolicy
 		else if ((VisualFormEditor.REQ_SET_PROPERTY.equals(request.getType()) && request instanceof SetPropertyRequest))
 		{
 			SetPropertyRequest setPropertyRequest = (SetPropertyRequest)request;
-			CompoundCommand propCommand = new CompoundCommand(setPropertyRequest.getName());
-			for (Object sel : ((GroupRequest)request).getEditParts())
-			{
-				if (sel instanceof EditPart && ((EditPart)sel).getModel() instanceof IPersist && ((EditPart)sel).getModel() instanceof IFormElement)
-				{
-					SetValueCommand setCommand = new SetValueCommand(setPropertyRequest.getName());
-					setCommand.setTarget(new PersistPropertySource(((IPersist)((EditPart)sel).getModel()), formEditPart != null ? (Form)formEditPart.getModel()
-						: null, false));
-					setCommand.setPropertyId(setPropertyRequest.getPropertyId());
-					setCommand.setPropertyValue(setPropertyRequest.getValue((EditPart)sel));
-					propCommand.add(setCommand);
-				}
-			}
-			if (!propCommand.isEmpty())
-			{
-				command = propCommand;
-			}
+			SetValueCommand setCommand = new SetValueCommand(setPropertyRequest.getName());
+			setCommand.setTarget(new PersistPropertySource(persist, formEditPart != null ? (Form)formEditPart.getModel() : null, false));
+			setCommand.setPropertyId(setPropertyRequest.getPropertyId());
+			setCommand.setPropertyValue(setPropertyRequest.getValue());
+			command = setCommand;
 		}
 
 		if (command != null)

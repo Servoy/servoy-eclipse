@@ -24,7 +24,7 @@ import java.util.Map;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalEditPart;
-import org.eclipse.gef.requests.GroupRequest;
+import org.eclipse.gef.Request;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.actions.SetPropertyRequest;
@@ -42,39 +42,58 @@ public abstract class SameSizeAction extends DesignerSelectionAction
 
 	public SameSizeAction(IWorkbenchPart part, boolean sameWidth)
 	{
-		super(part, VisualFormEditor.REQ_SET_PROPERTY);
+		super(part, null);
 		this.sameWidth = sameWidth;
 	}
 
 	@Override
-	protected GroupRequest createRequest(List<EditPart> selected)
+	protected Map<EditPart, Request> createRequests(List<EditPart> selected)
 	{
-		if (selected == null || selected.size() < 2)
+		return createSameSizeRequests(sameWidth, selected);
+	}
+
+	public static Map<EditPart, Request> createSameSizeRequests(boolean sameWidth, List<EditPart> selected)
+	{
+		if (selected == null)
 		{
 			return null;
 		}
 
-		EditPart first = selected.get(0);
-		if (!(first instanceof GraphicalEditPart))
-		{
-			return null;
-		}
+		Rectangle bounds = null;
 
-		Rectangle bounds = ((GraphicalEditPart)first).getFigure().getBounds();
-
-		Map<EditPart, Object> values = new HashMap<EditPart, Object>(selected.size());
+		Map<EditPart, Request> requests = null;
 		for (EditPart editPart : selected)
 		{
 			if (editPart instanceof GraphicalEditPart)
 			{
-				// set new size
-				values.put(editPart, sameWidth ? new Dimension(bounds.width, ((GraphicalEditPart)editPart).getFigure().getBounds().height) : new Dimension(
-					((GraphicalEditPart)editPart).getFigure().getBounds().width, bounds.height));
+				if (bounds == null)
+				{
+					// match with first
+					bounds = ((GraphicalEditPart)editPart).getFigure().getBounds();
+				}
+				else
+				{
+					// second or more
+					if (requests == null)
+					{
+						requests = new HashMap<EditPart, Request>(selected.size());
+					}
+					// set new size
+					Dimension value;
+					if (sameWidth)
+					{
+						value = new Dimension(bounds.width, ((GraphicalEditPart)editPart).getFigure().getBounds().height);
+					}
+					else
+					{
+						value = new Dimension(((GraphicalEditPart)editPart).getFigure().getBounds().width, bounds.height);
+					}
+					requests.put(editPart, new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, "size", value, "set same " +
+						(sameWidth ? "width" : "height")));
+				}
 			}
 		}
 
-		SetPropertyRequest setPropertyRequest = new SetPropertyRequest(requestType, "size", values, "set same " + (sameWidth ? "width" : "height"));
-		setPropertyRequest.setEditParts(selected);
-		return setPropertyRequest;
+		return requests;
 	}
 }

@@ -369,6 +369,72 @@
           schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
           sequence="M1+M2+A">
       </key>
+      <key
+            commandId="com.servoy.eclipse.designer.anchorTop"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+-">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.anchorRight"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+*">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.anchorBottom"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1++">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.anchorLeft"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+/">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.group"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+G">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.ungroup"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+U">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.sameheight"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2+H">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.samewidth"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2+W">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.bringtofront"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+[">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.sendtoback"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+]">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.settabseq"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+T">
+      </key>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -446,6 +512,72 @@
           id="com.servoy.eclipse.designer.command.showDesigner"
           name="Show form in Form Editor">
        </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler$ToggleAnchoringTop"
+            id="com.servoy.eclipse.designer.anchorTop"
+            name="Anchor Top">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler$ToggleAnchoringRight"
+            id="com.servoy.eclipse.designer.anchorRight"
+            name="Anchor Right">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler$ToggleAnchoringBottom"
+            id="com.servoy.eclipse.designer.anchorBottom"
+            name="Anchor Bottom">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler$ToggleAnchoringLeft"
+            id="com.servoy.eclipse.designer.anchorLeft"
+            name="Anchor Left">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.ToggleGroupingActionDelegateHandler$Group"
+            id="com.servoy.eclipse.designer.group"
+            name="Group">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.ToggleGroupingActionDelegateHandler$Ungroup"
+            id="com.servoy.eclipse.designer.ungroup"
+            name="Ungroup">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.SameSizeActionDelegateHandler$Width"
+            id="com.servoy.eclipse.designer.samewidth"
+            name="Same Width">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.SameSizeActionDelegateHandler$Height"
+            id="com.servoy.eclipse.designer.sameheight"
+            name="Same Height">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.ZOrderActionDelegateHandler$ToFront"
+            id="com.servoy.eclipse.designer.bringtofront"
+            name="Bring to front">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.ZOrderActionDelegateHandler$ToBack"
+            id="com.servoy.eclipse.designer.sendtoback"
+            name="Send to back">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.TabSequenceActionDelegateHandler"
+            id="com.servoy.eclipse.designer.settabseq"
+            name="Set Tab Sequence">
+      </command>
    </extension>
       <extension
          point="org.eclipse.ui.preferencePages">
@@ -483,6 +615,112 @@
       <viewerContribution
             id="com.servoy.eclipse.designer.editor.DesignerPreferences"
             targetID="#FormDesignerContext">
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler$ToggleAnchoringLeft"
+               definitionId="com.servoy.eclipse.designer.anchorLeft"
+               id="com.servoy.eclipse.designer.action.anchorLeft"
+               label="Anchor Left"
+               menubarPath="group.anchoring"
+               style="toggle"
+               tooltip="Toggle Left Anchoring">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler$ToggleAnchoringBottom"
+               definitionId="com.servoy.eclipse.designer.anchorBottom"
+               id="com.servoy.eclipse.designer.action.anchorBottom"
+               label="Anchor Bottom"
+               menubarPath="group.anchoring"
+               style="toggle"
+               tooltip="Toggle Bottom Anchoring">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler$ToggleAnchoringRight"
+               definitionId="com.servoy.eclipse.designer.anchorRight"
+               id="com.servoy.eclipse.designer.action.anchorRight"
+               label="Anchor Right"
+               menubarPath="group.anchoring"
+               style="toggle"
+               tooltip="Toggle Right Anchoring">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler$ToggleAnchoringTop"
+               definitionId="com.servoy.eclipse.designer.anchorTop"
+               id="com.servoy.eclipse.designer.action.anchorTop"
+               label="Anchor Top"
+               menubarPath="group.anchoring"
+               style="toggle"
+               tooltip="Toggle Top Anchoring">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.ToggleGroupingActionDelegateHandler$Ungroup"
+               definitionId="com.servoy.eclipse.designer.ungroup"
+               icon="icons/ungroup.gif"
+               id="com.servoy.eclipse.designer.action.ungroup"
+               label="Ungroup"
+               menubarPath="group.grouping"
+               style="push"
+               tooltip="Ungroup elements">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.ToggleGroupingActionDelegateHandler$Group"
+               definitionId="com.servoy.eclipse.designer.group"
+               icon="icons/group.gif"
+               id="com.servoy.eclipse.designer.action.group"
+               label="Group"
+               menubarPath="group.grouping"
+               style="push"
+               tooltip="Group elements">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.SameSizeActionDelegateHandler$Height"
+               definitionId="com.servoy.eclipse.designer.sameheight"
+               icon="icons/same_height.gif"
+               id="com.servoy.eclipse.designer.action.sameheight"
+               label="Same Height"
+               menubarPath="group.samesize"
+               style="push"
+               tooltip="Set elements same height">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.SameSizeActionDelegateHandler$Width"
+               definitionId="com.servoy.eclipse.designer.samewidth"
+               icon="icons/same_width.gif"
+               id="com.servoy.eclipse.designer.action.samewidth"
+               label="Same Width"
+               menubarPath="group.samesize"
+               style="push"
+               tooltip="Set elements same width">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.ZOrderActionDelegateHandler$ToBack"
+               definitionId="com.servoy.eclipse.designer.sendtoback"
+               icon="icons/sendtoback.gif"
+               id="com.servoy.eclipse.designer.action.sendtoback"
+               label="Send to back"
+               menubarPath="group.z.order"
+               style="push"
+               tooltip="Send elements to the back">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.ZOrderActionDelegateHandler$ToFront"
+               definitionId="com.servoy.eclipse.designer.bringtofront"
+               icon="icons/bringtofront.gif"
+               id="com.servoy.eclipse.designer.action.bringtofront"
+               label="Bring to front"
+               menubarPath="group.z.order"
+               style="push"
+               tooltip="Bring elements to the front">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.TabSequenceActionDelegateHandler"
+               definitionId="com.servoy.eclipse.designer.settabseq"
+               icon="icons/th_horizontal.gif"
+               id="com.servoy.eclipse.designer.action.settabseq"
+               label="Set Tab Sequence"
+               menubarPath="org.eclipse.gef.group.rest"
+               style="push"
+               tooltip="Set Tab Sequence of selected elements">
+         </action>
          <action
                class="com.servoy.eclipse.designer.actions.ShowDesignerPreferencesActionDelegate"
                definitionId="com.servoy.eclipse.designer.command.showDesignerPrefences"

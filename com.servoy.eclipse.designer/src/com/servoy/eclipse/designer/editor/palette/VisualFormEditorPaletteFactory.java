@@ -689,7 +689,7 @@ public class VisualFormEditorPaletteFactory
 
 		if (elements.size() > 1)
 		{
-			return Activator.loadImageDescriptorFromBundle("group.gif");
+			return com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("group.gif");
 		}
 
 		return getTemplateIcon(elements.get(0));

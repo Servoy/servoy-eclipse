@@ -14,42 +14,40 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
-package com.servoy.eclipse.designer.actions;
+package com.servoy.eclipse.designer.editor.commands;
 
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 
 /**
- * Request to set a property value.
+ * An action to set selected objects to the same size.
  * 
  * @author rgansevles
- * 
  */
-public class SetPropertyRequest extends Request
+public abstract class SameSizeActionDelegateHandler extends DesignerSelectionActionDelegateHandler
 {
-	private final String propertyId;
-	private final String name;
-	private final Object value;
-
-	public SetPropertyRequest(Object requestType, String propertyId, Object value, String name)
+	public SameSizeActionDelegateHandler()
 	{
-		super(requestType);
-		this.propertyId = propertyId;
-		this.value = value;
-		this.name = name;
+		super(null);
 	}
 
-	public String getPropertyId()
+	public static class Width extends SameSizeActionDelegateHandler
 	{
-		return propertyId;
+		@Override
+		protected Map<EditPart, Request> createRequests(List<EditPart> selected)
+		{
+			return SameSizeAction.createSameSizeRequests(true, selected);
+		}
 	}
-
-	public Object getValue()
+	public static class Height extends SameSizeActionDelegateHandler
 	{
-		return value;
-	}
-
-	public String getName()
-	{
-		return name;
+		@Override
+		protected Map<EditPart, Request> createRequests(List<EditPart> selected)
+		{
+			return SameSizeAction.createSameSizeRequests(false, selected);
+		}
 	}
 }

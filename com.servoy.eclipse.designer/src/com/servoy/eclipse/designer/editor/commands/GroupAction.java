@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.requests.GroupRequest;
+import org.eclipse.gef.Request;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.actions.SetPropertyRequest;
@@ -38,7 +38,7 @@ public class GroupAction extends DesignerSelectionAction
 {
 	public GroupAction(IWorkbenchPart part)
 	{
-		super(part, VisualFormEditor.REQ_SET_PROPERTY);
+		super(part, null);
 	}
 
 	/**
@@ -55,7 +55,12 @@ public class GroupAction extends DesignerSelectionAction
 	}
 
 	@Override
-	protected GroupRequest createRequest(List<EditPart> selected)
+	protected Map<EditPart, Request> createRequests(List<EditPart> selected)
+	{
+		return createGroupingRequests(selected);
+	}
+
+	public static Map<EditPart, Request> createGroupingRequests(List<EditPart> selected)
 	{
 		// check existing groups
 		String groupID = null;
@@ -86,14 +91,13 @@ public class GroupAction extends DesignerSelectionAction
 			groupID = UUID.randomUUID().toString();
 		}
 
-		Map<EditPart, Object> values = new HashMap<EditPart, Object>(selected.size());
+		Map<EditPart, Request> requests = new HashMap<EditPart, Request>(affectedEditparts.size());
 		for (EditPart editPart : affectedEditparts)
 		{
-			values.put(editPart, groupID);
+			requests.put(editPart, new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName(),
+				groupID, "group"));
 		}
 
-		GroupRequest propertyRequest = new SetPropertyRequest(requestType, StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName(), values, "group");
-		propertyRequest.setEditParts(affectedEditparts);
-		return propertyRequest;
+		return requests;
 	}
 }

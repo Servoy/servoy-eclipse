@@ -14,42 +14,34 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
-package com.servoy.eclipse.designer.actions;
+package com.servoy.eclipse.designer.editor.commands;
 
-import org.eclipse.gef.Request;
+import com.servoy.eclipse.designer.editor.VisualFormEditor;
 
 /**
- * Request to set a property value.
+ * An action to change the z-ordering of selected objects.
  * 
  * @author rgansevles
- * 
  */
-public class SetPropertyRequest extends Request
+public abstract class ZOrderActionDelegateHandler extends DesignerSelectionActionDelegateHandler
 {
-	private final String propertyId;
-	private final String name;
-	private final Object value;
-
-	public SetPropertyRequest(Object requestType, String propertyId, Object value, String name)
+	public ZOrderActionDelegateHandler(Object requestType)
 	{
 		super(requestType);
-		this.propertyId = propertyId;
-		this.value = value;
-		this.name = name;
 	}
 
-	public String getPropertyId()
+	public static class ToFront extends ZOrderActionDelegateHandler
 	{
-		return propertyId;
+		public ToFront()
+		{
+			super(VisualFormEditor.REQ_BRING_TO_FRONT);
+		}
 	}
-
-	public Object getValue()
+	public static class ToBack extends ZOrderActionDelegateHandler
 	{
-		return value;
-	}
-
-	public String getName()
-	{
-		return name;
+		public ToBack()
+		{
+			super(VisualFormEditor.REQ_SEND_TO_BACK);
+		}
 	}
 }

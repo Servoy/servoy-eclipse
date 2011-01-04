@@ -14,42 +14,37 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
-package com.servoy.eclipse.designer.actions;
+package com.servoy.eclipse.designer.editor.commands;
 
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 
+import com.servoy.eclipse.designer.util.DesignerUtil;
+
 /**
- * Request to set a property value.
+ * An action to manually set the tab sequence to the selected objects.
  * 
  * @author rgansevles
- * 
  */
-public class SetPropertyRequest extends Request
+public class TabSequenceActionDelegateHandler extends DesignerSelectionActionDelegateHandler
 {
-	private final String propertyId;
-	private final String name;
-	private final Object value;
-
-	public SetPropertyRequest(Object requestType, String propertyId, Object value, String name)
+	public TabSequenceActionDelegateHandler()
 	{
-		super(requestType);
-		this.propertyId = propertyId;
-		this.value = value;
-		this.name = name;
+		super(null);
 	}
 
-	public String getPropertyId()
+	@Override
+	protected Map<EditPart, Request> createRequests(List<EditPart> selected)
 	{
-		return propertyId;
+		return SetTabSequenceAction.createSetTabSeqRequests(selected);
 	}
 
-	public Object getValue()
+	@Override
+	protected boolean calculateEnabled()
 	{
-		return value;
-	}
-
-	public String getName()
-	{
-		return name;
+		return !DesignerUtil.containsInheritedElement(getSelectedObjects()) && super.calculateEnabled();
 	}
 }

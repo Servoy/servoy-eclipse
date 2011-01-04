@@ -22,7 +22,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.RetargetAction;
 
-import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.designer.Activator;
+
 
 /**
  * Factory for actions in form designer.
@@ -45,7 +46,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String BRING_TO_FRONT_TEXT = "Bring to front";
 	public static final String BRING_TO_FRONT_TOOLTIP = "Bring selected objects to front";
-	public static final ImageDescriptor BRING_TO_FRONT_IMAGE = Activator.loadImageDescriptorFromOldLocations("bringtofront.gif");//$NON-NLS-1$
+	public static final ImageDescriptor BRING_TO_FRONT_IMAGE = Activator.loadImageDescriptorFromBundle("bringtofront.gif");//$NON-NLS-1$
 	public static final ActionFactory BRING_TO_FRONT = new ActionFactory("bring-to-front") {//$NON-NLS-1$
 
 		@Override
@@ -66,7 +67,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String SEND_TO_BACK_TEXT = "Send to back";
 	public static final String SEND_TO_BACK_TOOLTIP = "Send selected objects to back";
-	public static final ImageDescriptor SEND_TO_BACK_IMAGE = Activator.loadImageDescriptorFromOldLocations("sendtoback.gif");//$NON-NLS-1$
+	public static final ImageDescriptor SEND_TO_BACK_IMAGE = Activator.loadImageDescriptorFromBundle("sendtoback.gif");//$NON-NLS-1$
 	public static final ActionFactory SEND_TO_BACK = new ActionFactory("send-to-back") {//$NON-NLS-1$
 
 		@Override
@@ -87,7 +88,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String SELECT_FEEDBACK_TEXT = "Select feedback mode";
 	public static final String SELECT_FEEDBACK_TOOLTIP = SELECT_FEEDBACK_TEXT;
-	public static final ImageDescriptor SELECT_FEEDBACK_IMAGE = Activator.loadImageDescriptorFromOldLocations("grid.gif");//$NON-NLS-1$
+	public static final ImageDescriptor SELECT_FEEDBACK_IMAGE = Activator.loadImageDescriptorFromBundle("grid.gif");//$NON-NLS-1$
 	public static final ActionFactory SELECT_FEEDBACK = new ActionFactory("select-feedback-mode") {//$NON-NLS-1$
 
 		@Override
@@ -150,7 +151,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String SELECT_SNAPMODE_TEXT = "Select snap mode";
 	public static final String SELECT_SNAPMODE_TOOLTIP = SELECT_SNAPMODE_TEXT;
-	public static final ImageDescriptor SELECT_SNAPTMODE_IMAGE = Activator.loadImageDescriptorFromOldLocations("snaptogrid.gif");//$NON-NLS-1$
+	public static final ImageDescriptor SELECT_SNAPTMODE_IMAGE = Activator.loadImageDescriptorFromBundle("snaptogrid.gif");//$NON-NLS-1$
 	public static final ActionFactory SELECT_SNAPMODE = new ActionFactory("select-snapmode") {//$NON-NLS-1$
 
 		@Override
@@ -291,82 +292,6 @@ public abstract class DesignerActionFactory extends ActionFactory
 			window.getPartService().addPartListener(action);
 //			action.setActionDefinitionId("org.eclipse.ui.edit." + getId()); //$NON-NLS-1$
 			action.setImageDescriptor(DISTRIBUTE_VERTICAL_PACK_IMAGE);
-			return action;
-		}
-	};
-
-	public static final String ANCHOR_TOP_TOGGLE_TEXT = "Anchor Top";
-	public static final String ANCHOR_TOP_TOGGLE_TOOLTIP = ANCHOR_TOP_TOGGLE_TEXT;
-	public static final ActionFactory ANCHOR_TOP_TOGGLE = new ActionFactory("anchor-top-toggle") {//$NON-NLS-1$
-
-		@Override
-		public IWorkbenchAction create(IWorkbenchWindow window)
-		{
-			if (window == null)
-			{
-				throw new IllegalArgumentException();
-			}
-			RetargetAction action = new RetargetAction(getId(), ANCHOR_TOP_TOGGLE_TEXT, IAction.AS_CHECK_BOX);
-			action.setToolTipText(ANCHOR_TOP_TOGGLE_TOOLTIP);
-			window.getPartService().addPartListener(action);
-//			action.setActionDefinitionId("org.eclipse.ui.edit." + getId()); //$NON-NLS-1$
-			return action;
-		}
-	};
-
-	public static final String ANCHOR_RIGHT_TOGGLE_TEXT = "Anchor Right";
-	public static final String ANCHOR_RIGHT_TOGGLE_TOOLTIP = ANCHOR_RIGHT_TOGGLE_TEXT;
-	public static final ActionFactory ANCHOR_RIGHT_TOGGLE = new ActionFactory("anchor-right-toggle") {//$NON-NLS-1$
-
-		@Override
-		public IWorkbenchAction create(IWorkbenchWindow window)
-		{
-			if (window == null)
-			{
-				throw new IllegalArgumentException();
-			}
-			RetargetAction action = new RetargetAction(getId(), ANCHOR_RIGHT_TOGGLE_TEXT, IAction.AS_CHECK_BOX);
-			action.setToolTipText(ANCHOR_RIGHT_TOGGLE_TOOLTIP);
-			window.getPartService().addPartListener(action);
-//			action.setActionDefinitionId("org.eclipse.ui.edit." + getId()); //$NON-NLS-1$
-			return action;
-		}
-	};
-
-	public static final String ANCHOR_BOTTOM_TOGGLE_TEXT = "Anchor Bottom";
-	public static final String ANCHOR_BOTTOM_TOGGLE_TOOLTIP = ANCHOR_BOTTOM_TOGGLE_TEXT;
-	public static final ActionFactory ANCHOR_BOTTOM_TOGGLE = new ActionFactory("anchor-bottom-toggle") {//$NON-NLS-1$
-
-		@Override
-		public IWorkbenchAction create(IWorkbenchWindow window)
-		{
-			if (window == null)
-			{
-				throw new IllegalArgumentException();
-			}
-			RetargetAction action = new RetargetAction(getId(), ANCHOR_BOTTOM_TOGGLE_TEXT, IAction.AS_CHECK_BOX);
-			action.setToolTipText(ANCHOR_BOTTOM_TOGGLE_TOOLTIP);
-			window.getPartService().addPartListener(action);
-//			action.setActionDefinitionId("org.eclipse.ui.edit." + getId()); //$NON-NLS-1$
-			return action;
-		}
-	};
-
-	public static final String ANCHOR_LEFT_TOGGLE_TEXT = "Anchor Left";
-	public static final String ANCHOR_LEFT_TOGGLE_TOOLTIP = ANCHOR_LEFT_TOGGLE_TEXT;
-	public static final ActionFactory ANCHOR_LEFT_TOGGLE = new ActionFactory("anchor-left-toggle") {//$NON-NLS-1$
-
-		@Override
-		public IWorkbenchAction create(IWorkbenchWindow window)
-		{
-			if (window == null)
-			{
-				throw new IllegalArgumentException();
-			}
-			RetargetAction action = new RetargetAction(getId(), ANCHOR_LEFT_TOGGLE_TEXT, IAction.AS_CHECK_BOX);
-			action.setToolTipText(ANCHOR_LEFT_TOGGLE_TOOLTIP);
-			window.getPartService().addPartListener(action);
-//			action.setActionDefinitionId("org.eclipse.ui.edit." + getId()); //$NON-NLS-1$
 			return action;
 		}
 	};

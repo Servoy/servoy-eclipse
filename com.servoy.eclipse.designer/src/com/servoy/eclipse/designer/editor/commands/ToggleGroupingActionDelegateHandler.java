@@ -14,42 +14,40 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
-package com.servoy.eclipse.designer.actions;
+package com.servoy.eclipse.designer.editor.commands;
 
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 
 /**
- * Request to set a property value.
+ * An action to change the grouping of selected objects.
  * 
  * @author rgansevles
- * 
  */
-public class SetPropertyRequest extends Request
+public abstract class ToggleGroupingActionDelegateHandler extends DesignerSelectionActionDelegateHandler
 {
-	private final String propertyId;
-	private final String name;
-	private final Object value;
-
-	public SetPropertyRequest(Object requestType, String propertyId, Object value, String name)
+	public ToggleGroupingActionDelegateHandler()
 	{
-		super(requestType);
-		this.propertyId = propertyId;
-		this.value = value;
-		this.name = name;
+		super(null);
 	}
 
-	public String getPropertyId()
+	public static class Group extends ToggleGroupingActionDelegateHandler
 	{
-		return propertyId;
+		@Override
+		protected Map<EditPart, Request> createRequests(List<EditPart> selected)
+		{
+			return GroupAction.createGroupingRequests(selected);
+		}
 	}
-
-	public Object getValue()
+	public static class Ungroup extends ToggleGroupingActionDelegateHandler
 	{
-		return value;
-	}
-
-	public String getName()
-	{
-		return name;
+		@Override
+		protected Map<EditPart, Request> createRequests(List<EditPart> selected)
+		{
+			return UngroupAction.createUngroupingRequests(selected);
+		}
 	}
 }

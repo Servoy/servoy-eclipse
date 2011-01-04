@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor.commands;
 
 import java.util.HashMap;
@@ -22,10 +22,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.requests.GroupRequest;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.gef.Request;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.designer.actions.SetPropertyRequest;
@@ -34,63 +31,54 @@ import com.servoy.eclipse.ui.property.PersistPropertySource;
 
 /**
  * Base action class to toggle change a boolean property of selected objects.
+ * 
+ * @author rgansevles
  */
-public abstract class ToggleCheckboxAction extends DesignerSelectionAction
+public abstract class ToggleCheckboxActionDelegateHandler extends DesignerSelectionActionDelegateHandler
 {
 	private final String propertyId;
 	private final String name;
 
-	public ToggleCheckboxAction(IWorkbenchPart part, String propertyId, String name)
+	public ToggleCheckboxActionDelegateHandler(String propertyId, String name)
 	{
-		super(part, VisualFormEditor.REQ_SET_PROPERTY);
+		super(VisualFormEditor.REQ_SET_PROPERTY);
 		this.propertyId = propertyId;
 		this.name = name;
 	}
 
 	@Override
-	protected void handleSelectionChanged()
+	protected Boolean calculateChecked()
 	{
-		firePropertyChange(new PropertyChangeEvent(this, IAction.CHECKED, null, Boolean.valueOf(isChecked())));
-		super.handleSelectionChanged();
-	}
-
-	@Override
-	public boolean isChecked()
-	{
-		for (Object sel : getSelectedObjects())
+		for (Object sel : getSelection().toArray())
 		{
 			IPropertySource propertySource = (IPropertySource)Platform.getAdapterManager().getAdapter(sel, IPropertySource.class);
 			if (propertySource instanceof PersistPropertySource)
 			{
 				if (((PersistPropertySource)propertySource).getPropertyDescriptor(propertyId) != null)
 				{
-					return Boolean.TRUE.equals(propertySource.getPropertyValue(propertyId));
+					return (Boolean)propertySource.getPropertyValue(propertyId);
 				}
 			}
 		}
 
-		return false;
+		return Boolean.FALSE;
 	}
 
 	@Override
-	protected GroupRequest createRequest(List<EditPart> objects)
+	protected Map<EditPart, Request> createRequests(List<EditPart> objects)
 	{
-		Boolean value = Boolean.valueOf(!isChecked());
+		Boolean value = Boolean.valueOf(!calculateChecked().booleanValue());
 		// set all editparts to the same value
-		Map<EditPart, Object> values = new HashMap<EditPart, Object>(objects.size());
+		Map<EditPart, Request> requests = null;
 		for (EditPart editPart : objects)
 		{
-			values.put(editPart, value);
-		}
-		SetPropertyRequest setPropertyRequest = new SetPropertyRequest(requestType, propertyId, values, name);
-		setPropertyRequest.setEditParts(objects);
-		return setPropertyRequest;
-	}
+			if (requests == null)
+			{
+				requests = new HashMap<EditPart, Request>(objects.size());
+			}
 
-	@Override
-	public void run()
-	{
-		super.run();
-		firePropertyChange(new PropertyChangeEvent(this, IAction.CHECKED, null, Boolean.valueOf(isChecked())));
+			requests.put(editPart, new SetPropertyRequest(requestType, propertyId, value, name));
+		}
+		return requests;
 	}
 }

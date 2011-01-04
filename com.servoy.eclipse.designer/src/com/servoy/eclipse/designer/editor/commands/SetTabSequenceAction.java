@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.requests.GroupRequest;
+import org.eclipse.gef.Request;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.actions.SetPropertyRequest;
@@ -41,7 +41,7 @@ public class SetTabSequenceAction extends DesignerSelectionAction
 
 	public SetTabSequenceAction(IWorkbenchPart part)
 	{
-		super(part, VisualFormEditor.REQ_SET_PROPERTY);
+		super(part, null);
 	}
 
 	/**
@@ -58,7 +58,12 @@ public class SetTabSequenceAction extends DesignerSelectionAction
 	}
 
 	@Override
-	protected GroupRequest createRequest(List<EditPart> selected)
+	protected Map<EditPart, Request> createRequests(List<EditPart> selected)
+	{
+		return createSetTabSeqRequests(selected);
+	}
+
+	public static Map<EditPart, Request> createSetTabSeqRequests(List<EditPart> selected)
 	{
 		if (selected == null || selected.size() < 2)
 		{
@@ -90,23 +95,22 @@ public class SetTabSequenceAction extends DesignerSelectionAction
 			}
 		}
 
-		Map<EditPart, Object> values = new HashMap<EditPart, Object>(tabSeqEditParts.size());
+		Map<EditPart, Request> requests = new HashMap<EditPart, Request>(tabSeqEditParts.size());
 		for (EditPart editPart : tabSeqEditParts)
 		{
 			int index = selected.indexOf(editPart);
-			values.put(editPart, new Integer(index < 0 ? ISupportTabSeq.SKIP : index + 1));
+			requests.put(
+				editPart,
+				new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_TABSEQ.getPropertyName(), Integer.valueOf(index < 0
+					? ISupportTabSeq.SKIP : index + 1), "set tab sequence"));
 		}
 
-		SetPropertyRequest setPropertyRequest = new SetPropertyRequest(requestType, StaticContentSpecLoader.PROPERTY_TABSEQ.getPropertyName(), values,
-			"set tab sequence");
-		setPropertyRequest.setEditParts(tabSeqEditParts);
-		return setPropertyRequest;
+		return requests;
 	}
 
 	@Override
 	protected boolean calculateEnabled()
 	{
-		if (DesignerUtil.containsInheritedElement(getSelectedObjects())) return false;
-		return super.calculateEnabled();
+		return !DesignerUtil.containsInheritedElement(getSelectedObjects()) && super.calculateEnabled();
 	}
 }

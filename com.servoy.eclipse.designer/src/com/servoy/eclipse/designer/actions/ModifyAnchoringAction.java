@@ -20,7 +20,6 @@ package com.servoy.eclipse.designer.actions;
 import org.eclipse.gef.EditPart;
 import org.eclipse.ui.IWorkbenchPart;
 
-import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
 
 /**
@@ -48,26 +47,22 @@ public class ModifyAnchoringAction extends SetPropertyAction
 		if (AnchorPropertySource.TOP.equals(anchoringProperty))
 		{
 			setText("Top");
-			setToolTipText(DesignerActionFactory.ANCHOR_TOP_TOGGLE_TOOLTIP);
-			setId(DesignerActionFactory.ANCHOR_TOP_TOGGLE.getId());
+			setToolTipText("Anchor " + getText());
 		}
 		if (AnchorPropertySource.RIGHT.equals(anchoringProperty))
 		{
 			setText("Right");
-			setToolTipText(DesignerActionFactory.ANCHOR_RIGHT_TOGGLE_TOOLTIP);
-			setId(DesignerActionFactory.ANCHOR_RIGHT_TOGGLE.getId());
+			setToolTipText("Anchor " + getText());
 		}
 		if (AnchorPropertySource.BOTTOM.equals(anchoringProperty))
 		{
 			setText("Bottom");
-			setToolTipText(DesignerActionFactory.ANCHOR_BOTTOM_TOGGLE_TOOLTIP);
-			setId(DesignerActionFactory.ANCHOR_BOTTOM_TOGGLE.getId());
+			setToolTipText("Anchor " + getText());
 		}
 		if (AnchorPropertySource.LEFT.equals(anchoringProperty))
 		{
 			setText("Left");
-			setToolTipText(DesignerActionFactory.ANCHOR_LEFT_TOGGLE_TOOLTIP);
-			setId(DesignerActionFactory.ANCHOR_LEFT_TOGGLE.getId());
+			setToolTipText("Anchor " + getText());
 		}
 	}
 

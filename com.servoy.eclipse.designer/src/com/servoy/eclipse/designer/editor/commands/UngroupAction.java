@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.requests.GroupRequest;
+import org.eclipse.gef.Request;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.actions.SetPropertyRequest;
@@ -37,7 +37,7 @@ public class UngroupAction extends DesignerSelectionAction
 {
 	public UngroupAction(IWorkbenchPart part)
 	{
-		super(part, VisualFormEditor.REQ_SET_PROPERTY);
+		super(part, null);
 	}
 
 	/**
@@ -54,9 +54,13 @@ public class UngroupAction extends DesignerSelectionAction
 	}
 
 	@Override
-	protected GroupRequest createRequest(List<EditPart> selected)
+	protected Map<EditPart, Request> createRequests(List<EditPart> selected)
 	{
+		return createUngroupingRequests(selected);
+	}
 
+	protected static Map<EditPart, Request> createUngroupingRequests(List<EditPart> selected)
+	{
 		if (selected == null) return null;
 
 		List<EditPart> children = new ArrayList<EditPart>();
@@ -69,20 +73,18 @@ public class UngroupAction extends DesignerSelectionAction
 			}
 		}
 
-		if (children.size() == 0)
-		{
-			return null;
-		}
-
-		Map<EditPart, Object> values = new HashMap<EditPart, Object>(selected.size());
+		Map<EditPart, Request> requests = null;
 		for (EditPart child : children)
 		{
-			values.put(child, null);
+			if (requests == null)
+			{
+				requests = new HashMap<EditPart, Request>(selected.size());
+			}
+			requests.put(child, new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName(), null,
+				"ungroup"));
 		}
 
-		GroupRequest setPropertyRequest = new SetPropertyRequest(requestType, StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName(), values, "ungroup");
-		setPropertyRequest.setEditParts(children);
-		return setPropertyRequest;
+		return requests;
 	}
 
 }

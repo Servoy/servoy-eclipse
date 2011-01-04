@@ -17,13 +17,10 @@
 
 package com.servoy.eclipse.designer.actions;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.EditPart;
+import org.eclipse.gef.Request;
 import org.eclipse.gef.commands.Command;
-import org.eclipse.gef.requests.GroupRequest;
 import org.eclipse.gef.ui.actions.WorkbenchPartAction;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -79,13 +76,9 @@ public class SetPropertyAction extends WorkbenchPartAction
 		return newValue;
 	}
 
-	protected GroupRequest createRequest()
+	protected Request createRequest()
 	{
-		Map<EditPart, Object> values = new HashMap<EditPart, Object>(1);
-		values.put(editPart, getNewValue());
-		SetPropertyRequest setPropertyRequest = new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, propertyId, values, name);
-		setPropertyRequest.setEditParts(editPart);
-		return setPropertyRequest;
+		return new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, propertyId, getNewValue(), name);
 	}
 
 	@Override

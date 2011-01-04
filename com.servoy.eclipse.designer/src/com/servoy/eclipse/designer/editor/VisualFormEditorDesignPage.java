@@ -118,7 +118,6 @@ import com.servoy.eclipse.designer.editor.commands.SameWidthAction;
 import com.servoy.eclipse.designer.editor.commands.SaveAsTemplateAction;
 import com.servoy.eclipse.designer.editor.commands.SendToBackAction;
 import com.servoy.eclipse.designer.editor.commands.SetTabSequenceAction;
-import com.servoy.eclipse.designer.editor.commands.ToggleAnchoringAction;
 import com.servoy.eclipse.designer.editor.commands.UngroupAction;
 import com.servoy.eclipse.designer.editor.palette.PaletteItemTransferDropTargetListener;
 import com.servoy.eclipse.designer.editor.palette.VisualFormEditorPaletteCustomizer;
@@ -132,7 +131,6 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.CoolbarLayout;
-import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
 import com.servoy.eclipse.ui.util.ActionToolItem;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -435,22 +433,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		getSelectionActions().add(action.getId());
 
 		action = new DistributeAction(editorPart, DistributeRequest.Distribution.VERTICAL_PACK);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new ToggleAnchoringAction(editorPart, AnchorPropertySource.TOP);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new ToggleAnchoringAction(editorPart, AnchorPropertySource.RIGHT);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new ToggleAnchoringAction(editorPart, AnchorPropertySource.BOTTOM);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new ToggleAnchoringAction(editorPart, AnchorPropertySource.LEFT);
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
 

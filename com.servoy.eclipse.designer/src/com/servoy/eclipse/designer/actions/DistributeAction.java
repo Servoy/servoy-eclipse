@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.actions;
 
 import java.util.List;
@@ -24,13 +24,13 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.actions.DistributeRequest.Distribution;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.commands.MultipleSelectionAction;
 import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
-import com.servoy.eclipse.designer.editor.commands.DesignerSelectionAction;
 
 /**
  * An action to distribute objects.
  */
-public class DistributeAction extends DesignerSelectionAction
+public class DistributeAction extends MultipleSelectionAction
 {
 	private final Distribution distribution;
 

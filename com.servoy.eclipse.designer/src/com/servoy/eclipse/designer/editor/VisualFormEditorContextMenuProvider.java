@@ -90,6 +90,7 @@ class VisualFormEditorContextMenuProvider extends MenuManager implements IMenuLi
 		menu.add(new Separator(GEFActionConstants.GROUP_COPY));
 		menu.add(new Separator(DesignerActionFactory.GROUP_Z_ORDER));
 		menu.add(new Separator(DesignerActionFactory.GROUP_GROUPING));
+		menu.add(new Separator(DesignerActionFactory.GROUP_SAMESIZE));
 		menu.add(new Separator(DesignerActionFactory.GROUP_ANCHORING));
 		menu.add(new Separator(GEFActionConstants.GROUP_REST));
 		menu.add(new Separator(IWorkbenchActionConstants.SAVE_EXT));
@@ -105,15 +106,6 @@ class VisualFormEditorContextMenuProvider extends MenuManager implements IMenuLi
 		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.COPY.getId()));
 		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.PASTE.getId()));
 		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.DELETE.getId()));
-		menu.appendToGroup(DesignerActionFactory.GROUP_Z_ORDER, actionRegistry.getAction(DesignerActionFactory.BRING_TO_FRONT.getId()));
-		menu.appendToGroup(DesignerActionFactory.GROUP_Z_ORDER, actionRegistry.getAction(DesignerActionFactory.SEND_TO_BACK.getId()));
-		menu.appendToGroup(DesignerActionFactory.GROUP_GROUPING, actionRegistry.getAction(DesignerActionFactory.GROUP.getId()));
-		menu.appendToGroup(DesignerActionFactory.GROUP_GROUPING, actionRegistry.getAction(DesignerActionFactory.UNGROUP.getId()));
-		menu.appendToGroup(DesignerActionFactory.GROUP_ANCHORING, actionRegistry.getAction(DesignerActionFactory.ANCHOR_TOP_TOGGLE.getId()));
-		menu.appendToGroup(DesignerActionFactory.GROUP_ANCHORING, actionRegistry.getAction(DesignerActionFactory.ANCHOR_RIGHT_TOGGLE.getId()));
-		menu.appendToGroup(DesignerActionFactory.GROUP_ANCHORING, actionRegistry.getAction(DesignerActionFactory.ANCHOR_BOTTOM_TOGGLE.getId()));
-		menu.appendToGroup(DesignerActionFactory.GROUP_ANCHORING, actionRegistry.getAction(DesignerActionFactory.ANCHOR_LEFT_TOGGLE.getId()));
 		menu.appendToGroup(IWorkbenchActionConstants.SAVE_EXT, actionRegistry.getAction(DesignerActionFactory.SAVE_AS_TEMPLATE.getId()));
-		menu.appendToGroup(GEFActionConstants.GROUP_REST, actionRegistry.getAction(DesignerActionFactory.SET_TAB_SEQUENCE.getId()));
 	}
 }
