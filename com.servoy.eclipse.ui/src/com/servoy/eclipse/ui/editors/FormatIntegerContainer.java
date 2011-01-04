@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -29,6 +29,8 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -38,6 +40,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.Text;
 
 import com.ibm.icu.text.DecimalFormat;
 import com.servoy.eclipse.ui.editors.FormatDialog.IFormatTextContainer;
@@ -68,6 +71,7 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 
 	private Point displayCaret = null;
 	private Point editCaret = null;
+	private final Text maxLength;
 
 	/**
 	 * @param parent
@@ -125,6 +129,26 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 			{
 				editCaret = editFormat.getSelection();
 				displayCaret = null;
+			}
+		});
+		new Label(this, SWT.NONE).setText("Max length");
+		maxLength = new Text(this, SWT.BORDER);
+		maxLength.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		maxLength.addVerifyListener(new VerifyListener()
+		{
+			public void verifyText(VerifyEvent e)
+			{
+				if (e.keyCode == SWT.DEL || e.keyCode == SWT.BS) return;
+				char[] chars = new char[] { e.character };
+				if (e.text != null) chars = e.text.toCharArray();
+				for (char c : chars)
+				{
+					if (!Character.isDigit(c))
+					{
+						e.doit = false;
+						break;
+					}
+				}
 			}
 		});
 		new Label(this, SWT.NONE);
@@ -200,7 +224,11 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 		{
 			// test it
 			new DecimalFormat(editFormat.getText());
-			format = format + "|" + editFormat.getText(); //$NON-NLS-1$
+			format = format + '|' + editFormat.getText();
+		}
+		if (maxLength.getText().length() > 0)
+		{
+			format = format + "|#(" + maxLength.getText() + ')'; //$NON-NLS-1$
 		}
 		return format;
 
@@ -214,6 +242,7 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 	{
 		displayFormat.setText("");
 		editFormat.setText("");
+		maxLength.setText("");
 
 		if (format != null)
 		{
@@ -228,6 +257,10 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 			{
 				displayFormat.setText(fp.getDisplayFormat());
 				editFormat.setText("");
+			}
+			if (fp.getMaxLength() != null)
+			{
+				maxLength.setText(fp.getMaxLength().toString());
 			}
 		}
 	}
