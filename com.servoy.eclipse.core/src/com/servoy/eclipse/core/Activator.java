@@ -45,7 +45,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWindowListener;
@@ -108,7 +107,7 @@ import com.servoy.j2db.util.Utils;
  */
 public class Activator extends Plugin
 {
-	private static final String SERVOY_URL = "http://www.servoy.com/i"; //$NON-NLS-1$
+	private static final String ISERVOY_URL = "http://www.servoy.com/i"; //$NON-NLS-1$
 
 	private volatile boolean defaultAccessed = false;
 
@@ -265,7 +264,7 @@ public class Activator extends Plugin
 			{
 				try
 				{
-					PlatformUI.getWorkbench().getBrowserSupport().createBrowser(null).openURL(new URL(SERVOY_URL));
+					PlatformUI.getWorkbench().getBrowserSupport().createBrowser(null).openURL(new URL(ISERVOY_URL));
 				}
 				catch (Exception e)
 				{
@@ -775,8 +774,8 @@ public class Activator extends Plugin
 				{
 					for (IViewReference vw : page.getViewReferences())
 						page.setPartState(vw, IWorkbenchPage.STATE_MINIMIZED);
-					for (IEditorReference ed : page.getEditorReferences())
-						page.setPartState(ed, IWorkbenchPage.STATE_MINIMIZED);
+//					for (IEditorReference ed : page.getEditorReferences())
+//						page.setPartState(ed, IWorkbenchPage.STATE_MINIMIZED);
 
 					new OpenCheatSheetAction(cheatSheetId).run();
 

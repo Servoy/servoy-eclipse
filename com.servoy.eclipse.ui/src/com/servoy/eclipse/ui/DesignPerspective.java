@@ -36,7 +36,6 @@ import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.registry.ActionSetRegistry;
 import org.eclipse.ui.internal.registry.IActionSetDescriptor;
 
-import com.servoy.eclipse.ui.views.ServoyMarketplaceView;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.wizards.NewFormWizard;
 import com.servoy.eclipse.ui.wizards.NewMethodWizard;
@@ -71,10 +70,6 @@ public class DesignPerspective implements IPerspectiveFactory
 		bottom.addView(IPageLayout.ID_TASK_LIST);
 		bottom.addView(IPageLayout.ID_BOOKMARKS);
 		bottom.addView(NewSearchUI.SEARCH_VIEW_ID);
-
-		IFolderLayout marketPlaceFolder = layout.createFolder("marketplaceFolder", IPageLayout.LEFT, 0.5f, editorArea); //$NON-NLS-1$ 
-		marketPlaceFolder.addPlaceholder(ServoyMarketplaceView.MARKETPLACE_VIEW_ID);
-
 
 		/* Remove redundant activities (including fake ones created by us) to reduce UI clutter. */
 		IWorkbenchActivitySupport was = PlatformUI.getWorkbench().getActivitySupport();

@@ -15,13 +15,6 @@
             class="com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView"
             id="com.servoy.eclipse.ui.views.SolutionExplorerView">
       </view>
-      <view
-      		name="Servoy Marketplace"
-      		icon="icons/marketplace.gif"
-            category="com.servoy.eclipse.ui"
-            class="com.servoy.eclipse.ui.views.ServoyMarketplaceView"
-            id="com.servoy.eclipse.ui.views.ServoyMarketplaceView">
-      </view>      
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">

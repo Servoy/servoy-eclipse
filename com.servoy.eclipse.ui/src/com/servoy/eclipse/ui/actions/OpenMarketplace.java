@@ -16,12 +16,12 @@
  */
 package com.servoy.eclipse.ui.actions;
 
+import java.net.URL;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -29,7 +29,6 @@ import com.servoy.eclipse.ui.views.ServoyMarketplaceView;
 
 public class OpenMarketplace implements IWorkbenchWindowActionDelegate
 {
-
 	public void dispose()
 	{
 	}
@@ -42,14 +41,11 @@ public class OpenMarketplace implements IWorkbenchWindowActionDelegate
 	{
 		try
 		{
-			IWorkbenchPage activePage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-			activePage.showView(ServoyMarketplaceView.MARKETPLACE_VIEW_ID);
-			activePage.setPartState(activePage.findViewReference(ServoyMarketplaceView.MARKETPLACE_VIEW_ID), IWorkbenchPage.STATE_MAXIMIZED);
-
+			PlatformUI.getWorkbench().getBrowserSupport().createBrowser(null).openURL(new URL(ServoyMarketplaceView.MARKETPLACE_URL));
 		}
-		catch (PartInitException ex)
+		catch (Exception e)
 		{
-			ServoyLog.logError(ex);
+			ServoyLog.logError("Failed to open Marketplace browser.", e); //$NON-NLS-1$
 		}
 	}
 

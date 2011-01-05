@@ -22,14 +22,17 @@ import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.widgets.Composite;
 
 /**
- * Shows the Servoy Marketplace
+ * Shows the Servoy Marketplace. 
+ * 
+ * Currently this is not used, rather the Marketplace is shown in an editor browser. The editor browser
+ * is opened from com.servoy.eclipse.ui.actions.OpenMarketplace.
  * 
  * @author gboros
  */
 public class ServoyMarketplaceView extends ServoyWebBrowserView
 {
 	public static final String MARKETPLACE_VIEW_ID = "com.servoy.eclipse.ui.views.ServoyMarketplaceView"; //$NON-NLS-1$
-	private static final String MARKETPLACE_URL = "http://www.servoy.com/marketplace"; //$NON-NLS-1$
+	public static final String MARKETPLACE_URL = "http://www.servoy.com/marketplace"; //$NON-NLS-1$
 
 	@Override
 	public void createPartControl(Composite parent)
