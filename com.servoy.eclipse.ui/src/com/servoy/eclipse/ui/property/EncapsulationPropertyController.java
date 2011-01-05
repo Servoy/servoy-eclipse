@@ -89,10 +89,16 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 		public IPropertyDescriptor[] createPropertyDescriptors()
 		{
 			// make sure sub-properties are sorted in defined order
-			return PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { new CheckboxPropertyDescriptor(PRIVATE, PRIVATE), new CheckboxPropertyDescriptor(
-				MODULE_PRIVATE, MODULE_PRIVATE), new CheckboxPropertyDescriptor(HIDE_DATAPROVIDERS, HIDE_DATAPROVIDERS), new CheckboxPropertyDescriptor(
-				HIDE_FOUNDSET, HIDE_FOUNDSET), new CheckboxPropertyDescriptor(HIDE_CONTROLLER, HIDE_CONTROLLER), new CheckboxPropertyDescriptor(HIDE_ELEMENTS,
-				HIDE_ELEMENTS) });
+			return PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { new CheckboxPropertyDescriptor(PRIVATE,
+				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(FormEncapsulation.PRIVATE))),//
+			new CheckboxPropertyDescriptor(MODULE_PRIVATE, EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(FormEncapsulation.MODULE_PRIVATE))),//
+			new CheckboxPropertyDescriptor(HIDE_DATAPROVIDERS,
+				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(FormEncapsulation.HIDE_DATAPROVIDERS))),//
+			new CheckboxPropertyDescriptor(HIDE_FOUNDSET, EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(FormEncapsulation.HIDE_FOUNDSET))),//
+			new CheckboxPropertyDescriptor(HIDE_CONTROLLER,
+				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(FormEncapsulation.HIDE_CONTROLLER))),//
+			new CheckboxPropertyDescriptor(HIDE_ELEMENTS, EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(FormEncapsulation.HIDE_ELEMENTS))) //
+			});
 		}
 
 		@Override
@@ -155,7 +161,7 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 				return Messages.Public;
 			}
 
-			StringBuffer retval = new StringBuffer();
+			StringBuilder retval = new StringBuilder();
 			if ((encapsulation & FormEncapsulation.PRIVATE) == FormEncapsulation.PRIVATE)
 			{
 				retval.append(Messages.Private);
