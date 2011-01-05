@@ -578,6 +578,12 @@
             id="com.servoy.eclipse.designer.settabseq"
             name="Set Tab Sequence">
       </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.RevertFormActionDelegateHandler"
+            id="com.servoy.eclipse.designer.revertForm"
+            name="Revert Form">
+      </command>
    </extension>
       <extension
          point="org.eclipse.ui.preferencePages">
@@ -615,6 +621,16 @@
       <viewerContribution
             id="com.servoy.eclipse.designer.editor.DesignerPreferences"
             targetID="#FormDesignerContext">
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.RevertFormActionDelegateHandler"
+               definitionId="com.servoy.eclipse.designer.revertForm"
+               id="com.servoy.eclipse.designer.action.revertForm"
+               label="Revert Form"
+               menubarPath="org.eclipse.gef.group.undo"
+               state="true"
+               style="push"
+               tooltip="Revert Form">
+         </action>
          <action
                class="com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler$ToggleAnchoringLeft"
                definitionId="com.servoy.eclipse.designer.anchorLeft"
