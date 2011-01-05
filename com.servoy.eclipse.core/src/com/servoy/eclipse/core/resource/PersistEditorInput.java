@@ -38,6 +38,7 @@ public class PersistEditorInput implements IEditorInput
 	private final String name;
 	private final UUID uuid;
 	private final String solutionName;
+	private boolean isNew = false; // runtime setting, should not be persisted.
 
 	/**
 	 * Creates a persist input.
@@ -49,6 +50,24 @@ public class PersistEditorInput implements IEditorInput
 		this.name = name;
 		this.uuid = uuid;
 		this.solutionName = solutionName;
+	}
+
+
+	/**
+	 * @param isNew the isNew to set
+	 */
+	public PersistEditorInput setNew(boolean isNew)
+	{
+		this.isNew = isNew;
+		return this;
+	}
+
+	/**
+	 * @return the isNew
+	 */
+	public boolean isNew()
+	{
+		return isNew;
 	}
 
 	/*

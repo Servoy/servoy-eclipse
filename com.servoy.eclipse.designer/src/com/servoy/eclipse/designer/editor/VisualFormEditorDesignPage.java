@@ -98,6 +98,7 @@ import org.eclipse.ui.views.properties.PropertySheetPage;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate;
 import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate.IActionAddedListener;
 import com.servoy.eclipse.designer.actions.AlignmentSortPartsAction;
@@ -981,10 +982,15 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	protected FlyoutPreferences getPalettePreferences()
 	{
 		FlyoutPreferences palettePreferences = super.getPalettePreferences();
-		if (palettePreferences.getPaletteState() == 0)
+		if ((getEditorInput() instanceof PersistEditorInput && ((PersistEditorInput)getEditorInput()).isNew()) || palettePreferences.getPaletteState() == 0)
 		{
-			// open palette first time it is shown
+			// open palette first time it is shown or when it is a new form
 			palettePreferences.setPaletteState(FlyoutPaletteComposite.STATE_PINNED_OPEN);
+		}
+		if (palettePreferences.getDockLocation() == 0)
+		{
+			// default dock location to the left
+			palettePreferences.setDockLocation(PositionConstants.WEST);
 		}
 		return palettePreferences;
 	}

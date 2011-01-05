@@ -168,12 +168,23 @@ public class EditorUtil
 	 */
 	public static IEditorPart openFormDesignEditor(Form form)
 	{
+		return openFormDesignEditor(form, false);
+	}
+
+	/**
+	 * Open an editor for the form.
+	 * @param newForm 
+	 * 
+	 * @param formId
+	 */
+	public static IEditorPart openFormDesignEditor(Form form, boolean newForm)
+	{
 		if (form != null)
 		{
 			try
 			{
 				return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-					new PersistEditorInput(form.getName(), form.getSolution().getName(), form.getUUID()),
+					new PersistEditorInput(form.getName(), form.getSolution().getName(), form.getUUID()).setNew(newForm),
 					PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
 						Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
 			}
