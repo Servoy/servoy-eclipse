@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- */
+*/
 package com.servoy.eclipse.designer.internal;
 
 import java.util.ArrayList;
@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.Figure;
@@ -509,18 +508,8 @@ public class MarqueeSelectionTool extends AbstractTool
 			Rectangle bounds = getBounds().getCopy();
 			graphics.translate(getLocation());
 
-			if (Platform.WS_COCOA.equals(Platform.getWS()))
-			{
-				// Bugzilla 303659 setXORMode(true) broken on MAC COCOA
-				graphics.setForegroundColor(ColorConstants.black);
-				graphics.setBackgroundColor(ColorConstants.black);
-			}
-			else
-			{
-				graphics.setXORMode(true);
-				graphics.setForegroundColor(ColorConstants.white);
-				graphics.setBackgroundColor(ColorConstants.black);
-			}
+			graphics.setForegroundColor(ColorConstants.black);
+			graphics.setBackgroundColor(ColorConstants.white);
 
 			graphics.setLineStyle(Graphics.LINE_DOT);
 
@@ -537,6 +526,30 @@ public class MarqueeSelectionTool extends AbstractTool
 
 			points[0] = 0;
 			points[1] = 0 + offset;
+			points[2] = 0;
+			points[3] = bounds.height - 1;
+			points[4] = bounds.width - 1;
+			points[5] = bounds.height - 1;
+
+			graphics.drawPolyline(points);
+
+			// background is not drawn, so we draw polyline again shifted 3 ppixels and reversed bg/fg
+			// Note: on mac background.foreground seem to be switched around, marquee on white bg was invisible
+
+			graphics.setForegroundColor(ColorConstants.white);
+			graphics.setBackgroundColor(ColorConstants.black);
+
+			points[0] = 0 + offset + 3;
+			points[1] = 0;
+			points[2] = bounds.width - 1;
+			points[3] = 0;
+			points[4] = bounds.width - 1;
+			points[5] = bounds.height - 1;
+
+			graphics.drawPolyline(points);
+
+			points[0] = 0;
+			points[1] = 0 + offset + 3;
 			points[2] = 0;
 			points[3] = bounds.height - 1;
 			points[4] = bounds.width - 1;
