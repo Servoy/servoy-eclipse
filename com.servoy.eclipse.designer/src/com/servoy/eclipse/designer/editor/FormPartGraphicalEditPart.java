@@ -35,6 +35,7 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
+import org.eclipse.gef.requests.SelectionRequest;
 import org.eclipse.gef.tools.DragEditPartsTracker;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
@@ -43,6 +44,7 @@ import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
+import com.servoy.eclipse.designer.internal.MarqueeDragTracker;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.IApplication;
@@ -179,6 +181,13 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 	@Override
 	public DragTracker getDragTracker(Request request)
 	{
+		if (request instanceof SelectionRequest && ((SelectionRequest)request).isShiftKeyPressed())
+		{
+			MarqueeDragTracker marqueeDragTracker = new MarqueeDragTracker();
+			marqueeDragTracker.setStartEditpart(this);
+			return marqueeDragTracker;
+		}
+
 		return new DragEditPartsTracker(this)
 		{
 			@Override

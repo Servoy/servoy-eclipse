@@ -91,6 +91,7 @@ public class MarqueeSelectionTool extends AbstractTool
 	private Request targetRequest;
 	private int marqueeBehavior = BEHAVIOR_NODES_CONTAINED;
 	private int mode;
+	private GraphicalEditPart startEditpart;
 
 	private static final Request MARQUEE_REQUEST = new Request(RequestConstants.REQ_SELECTION);
 
@@ -101,6 +102,23 @@ public class MarqueeSelectionTool extends AbstractTool
 	{
 		setDefaultCursor(Cursors.CROSS);
 		setUnloadWhenFinished(false);
+	}
+
+
+	/**
+	 * @param startEditpart the startEditpart to set
+	 */
+	public void setStartEditpart(GraphicalEditPart startEditpart)
+	{
+		this.startEditpart = startEditpart;
+	}
+
+	/**
+	 * @return the startEditpart
+	 */
+	public GraphicalEditPart getStartEditpart()
+	{
+		return startEditpart;
 	}
 
 	/**
@@ -322,7 +340,7 @@ public class MarqueeSelectionTool extends AbstractTool
 		if (stateTransition(STATE_INITIAL, STATE_DRAG_IN_PROGRESS))
 		{
 			if (getCurrentInput().isModKeyDown(SWT.MOD1)) setSelectionMode(TOGGLE_MODE);
-			else if (getCurrentInput().isShiftKeyDown()) setSelectionMode(APPEND_MODE);
+			// else if (getCurrentInput().isShiftKeyDown()) setSelectionMode(APPEND_MODE); // shift-down was used to trigger marquee select in stead of editpart dragging 
 			else setSelectionMode(DEFAULT_MODE);
 		}
 		return true;
@@ -442,6 +460,44 @@ public class MarqueeSelectionTool extends AbstractTool
 		{
 			newSelections.addAll(viewer.getSelectedEditParts());
 			newSelections.removeAll(deselections);
+		}
+		else if (newSelections.isEmpty() && getCurrentInput().isShiftKeyDown() && getStartEditpart() != null &&
+			getStartLocation().getDistance(getCurrentInput().getMouseLocation()) < 5)
+		{
+			// emulate shift-click of regular editpart drag tracker.
+
+			// shift-select: select all edit parts inbetween the current selection and the source edit part
+			List<EditPart> editParts = viewer.getContents().getChildren();
+			// get the bounding box of all currently selected edit parts
+			Rectangle selectedRectangle = null;
+			for (EditPart editpart : editParts)
+			{
+				if (editpart == getStartEditpart() || (editpart.getSelected() != EditPart.SELECTED_NONE && editpart instanceof GraphicalEditPart))
+				{
+					if (selectedRectangle == null)
+					{
+						// make a copy, the union method modifies the rectangle
+						selectedRectangle = ((GraphicalEditPart)editpart).getFigure().getBounds().getCopy();
+					}
+					else
+					{
+						selectedRectangle = selectedRectangle.union(((GraphicalEditPart)editpart).getFigure().getBounds());
+					}
+				}
+			}
+
+			if (selectedRectangle != null)
+			{
+				// select all edit parts that touch this box unioned with the current edit part
+				selectedRectangle = selectedRectangle.union(getStartEditpart().getFigure().getBounds());
+				for (EditPart editpart : editParts)
+				{
+					if (editpart instanceof GraphicalEditPart && selectedRectangle.intersects(((GraphicalEditPart)editpart).getFigure().getBounds()))
+					{
+						newSelections.add(editpart);
+					}
+				}
+			}
 		}
 		viewer.setSelection(new StructuredSelection(newSelections.toArray()));
 	}

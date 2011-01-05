@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 
@@ -24,8 +24,10 @@ import java.util.List;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.gef.DragTracker;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
+import org.eclipse.gef.Request;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.swt.widgets.Display;
 
@@ -148,6 +150,12 @@ public class GroupGraphicalEditPart extends AbstractGraphicalEditPart implements
 				}
 			});
 		}
+	}
+
+	@Override
+	public DragTracker getDragTracker(Request request)
+	{
+		return BasePersistGraphicalEditPart.createDragTracker(this, request);
 	}
 
 	public FormElementGroup getGroup()
