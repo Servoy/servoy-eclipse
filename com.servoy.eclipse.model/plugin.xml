@@ -432,6 +432,28 @@
       </super>
    </extension>
    <extension
+         id="com.servoy.eclipse.core.invalidCommandMethod"
+         name="Invalid Command Method"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+   </extension>
+   <extension
+         id="com.servoy.eclipse.core.invalidDataProvideID"
+         name="Invalid DataProviderID"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+   </extension>
+   <extension
          id="com.servoy.eclipse.core.deprecatedPropertyUsage"
          name="Deprecated Property Usage"
          point="org.eclipse.core.resources.markers">

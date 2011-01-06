@@ -368,7 +368,7 @@ public class MarkerMessages
 	 * The dataprovider used by an element cannot be found. This can happen for example if the structure of a database is changed and columns are deleted or renamed.
 	 */
 	public static ServoyMarker FormDataproviderNotFound = new ServoyMarker(
-		"Element in form \"{0}\" has dataprovider \"{1}\" that does not exist.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Element in form \"{0}\" has dataprovider \"{1}\" that does not exist.", ServoyBuilder.INVALID_DATAPROVIDERID); //$NON-NLS-1$
 
 	/**
 	 * The dataprovider used by an element cannot be found. This can happen for example if the structure of a database is changed and columns are deleted or renamed.
@@ -386,7 +386,7 @@ public class MarkerMessages
 	 * The dataprovider used by an element cannot be found. This can happen for example if the structure of a database is changed and columns are deleted or renamed.
 	 */
 	public static ServoyMarker FormDataproviderOnElementNotFound = new ServoyMarker(
-		"Element \"{0}\" in form \"{1}\" has dataprovider \"{2}\" that does not exist.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Element \"{0}\" in form \"{1}\" has dataprovider \"{2}\" that does not exist.", ServoyBuilder.INVALID_DATAPROVIDERID); //$NON-NLS-1$
 
 	public static ServoyMarker ColumnUUIDFlagNotSet = new ServoyMarker(
 		"Table \"{0}\" has column \"{1}\" which is an UUID generator but does not have the UUID flag set.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$

@@ -29,6 +29,7 @@ import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
  * Class that gives the list of quick-fixes (available in the ui plugin) for Servoy markers.
@@ -85,6 +86,23 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 
 				return new IMarkerResolution[] { new ResolveUuidRelationNameQuickFix(solName, uuid, propertyName, displayName), new ClearPropertyQuickFix(
 					solName, uuid, propertyName, displayName) };
+			}
+
+			if (type.equals(ServoyBuilder.INVALID_EVENT_METHOD) || type.equals(ServoyBuilder.INVALID_COMMAND_METHOD))
+			{
+				String solName = (String)marker.getAttribute("SolutionName");
+				String eventName = (String)marker.getAttribute("EventName");
+				String uuid = (String)marker.getAttribute("Uuid");
+				return new IMarkerResolution[] { new ClearPropertyQuickFix(solName, uuid, eventName, eventName), new CreateMethodReferenceQuickFix(uuid,
+					solName, eventName, false), new CreateMethodReferenceQuickFix(uuid, solName, eventName, true) };
+			}
+			if (type.equals(ServoyBuilder.INVALID_DATAPROVIDERID))
+			{
+				String solName = (String)marker.getAttribute("SolutionName");
+				String uuid = (String)marker.getAttribute("Uuid");
+				return new IMarkerResolution[] { new ClearPropertyQuickFix(solName, uuid, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
+					StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName()), new CreateColumnReferenceQuickFix(uuid, solName), new CreateVariableReferenceQuickFix(
+					uuid, solName) };
 			}
 		}
 		catch (CoreException e)

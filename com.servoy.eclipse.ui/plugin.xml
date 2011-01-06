@@ -448,7 +448,19 @@
         <markerResolutionGenerator
               class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
               markerType="com.servoy.eclipse.core.formWithDatasourceInLoginSolution">
-        </markerResolutionGenerator>        
+        </markerResolutionGenerator>
+        <markerResolutionGenerator
+            class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.invalidEventMethod">
+      	</markerResolutionGenerator>
+        <markerResolutionGenerator
+            class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.invalidCommandMethod">
+       	</markerResolutionGenerator>
+       	<markerResolutionGenerator
+            class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.invalidDataProvideID">
+       	</markerResolutionGenerator>     
      </extension>
      <extension
            point="org.eclipse.dltk.javascript.ui.keywordsprovider">

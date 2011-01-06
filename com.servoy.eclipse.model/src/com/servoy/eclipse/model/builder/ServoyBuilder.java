@@ -76,10 +76,10 @@ import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
-import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
@@ -267,6 +267,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String I18N_MARKER_TYPE = _PREFIX + ".i18nProblem"; //$NON-NLS-1$
 	public static final String COLUMN_MARKER_TYPE = _PREFIX + ".columnProblem"; //$NON-NLS-1$
 	public static final String INVALID_EVENT_METHOD = _PREFIX + ".invalidEventMethod"; //$NON-NLS-1$
+	public static final String INVALID_COMMAND_METHOD = _PREFIX + ".invalidCommandMethod"; //$NON-NLS-1$
+	public static final String INVALID_DATAPROVIDERID = _PREFIX + ".invalidDataProvideID"; //$NON-NLS-1$
 	public static final String DEPRECATED_PROPERTY_USAGE = _PREFIX + ".deprecatedPropertyUsage"; //$NON-NLS-1$
 	public static final String FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION = _PREFIX + ".formWithDatasourceInLoginSolution"; //$NON-NLS-1$
 	public static final String MULTIPLE_METHODS_ON_SAME_ELEMENT = _PREFIX + ".multipleMethodsInfo"; //$NON-NLS-1$
@@ -956,6 +958,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, INVALID_SORT_OPTION);
 		deleteMarkers(project, PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE);
 		deleteMarkers(project, INVALID_EVENT_METHOD);
+		deleteMarkers(project, INVALID_DATAPROVIDERID);
+		deleteMarkers(project, INVALID_COMMAND_METHOD);
 		deleteMarkers(project, DEPRECATED_PROPERTY_USAGE);
 		deleteMarkers(project, MULTIPLE_METHODS_ON_SAME_ELEMENT);
 		deleteMarkers(project, UNRESOLVED_RELATION_UUID);
@@ -1089,15 +1093,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																		// for now only add it on both if there is 1, just skip the rest.
 																		if (lst.size() == 1)
 																		{
-																			ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(
-																				other.getUUID(),
+																			ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(other.getUUID(),
 																				SolutionSerializer.getRelativePath(p, false) +
 																					SolutionSerializer.getFileName(p, false));
 																			addMarker(moduleProject, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR,
 																				IMarker.PRIORITY_HIGH, null, other);
 																		}
-																		ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(
-																			p.getUUID(),
+																		ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(p.getUUID(),
 																			SolutionSerializer.getRelativePath(other, false) +
 																				SolutionSerializer.getFileName(other, false));
 																		addMarker(moduleProject, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR,
@@ -1133,6 +1135,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											{
 												// TODO: this is a place where the same marker appears in more than one category...
 												IMarker marker = addMarker(project, INVALID_EVENT_METHOD, mk.getText(), -1, IMarker.SEVERITY_WARNING,
+													IMarker.PRIORITY_LOW, null, o);
+												marker.setAttribute("EventName", element.getName()); //$NON-NLS-1$
+											}
+											else if (BaseComponent.isCommandProperty(element.getName()))
+											{
+												IMarker marker = addMarker(project, INVALID_COMMAND_METHOD, mk.getText(), -1, IMarker.SEVERITY_WARNING,
 													IMarker.PRIORITY_LOW, null, o);
 												marker.setAttribute("EventName", element.getName()); //$NON-NLS-1$
 											}
@@ -3455,7 +3463,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 			else if (type.equals(DUPLICATE_UUID) || type.equals(DUPLICATE_SIBLING_UUID) || type.equals(BAD_STRUCTURE_MARKER_TYPE) ||
 				type.equals(INVALID_SORT_OPTION) || type.equals(EVENT_METHOD_MARKER_TYPE) || type.equals(PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE) ||
-				type.equals(INVALID_EVENT_METHOD) || type.equals(MISSING_STYLE))
+				type.equals(INVALID_EVENT_METHOD) || type.equals(MISSING_STYLE) || type.equals(INVALID_COMMAND_METHOD) || type.equals(INVALID_DATAPROVIDERID))
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString()); //$NON-NLS-1$
 				marker.setAttribute("SolutionName", resource.getName()); //$NON-NLS-1$

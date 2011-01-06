@@ -826,7 +826,7 @@ public class ElementFactory
 				IPersist persist = SolutionDeserializer.deserializePersist(repository, parent, persist_json_map, object, null, null, null, false);
 				for (Map.Entry<IPersist, JSONObject> entry : persist_json_map.entrySet())
 				{
-					SolutionDeserializer.updatePersistWithValues(repository, entry.getKey(), resolveCleanedProperties((Form)entry.getKey().getAncestor(
+					SolutionDeserializer.setPersistValues(repository, entry.getKey(), resolveCleanedProperties((Form)entry.getKey().getAncestor(
 						IRepository.FORMS), entry.getValue()));
 				}
 				persists.put(persist, name);
@@ -901,7 +901,7 @@ public class ElementFactory
 				{
 					JSONObject formObject = (JSONObject)json.opt(Template.PROP_FORM);
 					formObject.remove(SolutionSerializer.PROP_NAME);
-					SolutionDeserializer.updatePersistWithValues(repository, parent, resolveCleanedProperties((Form)parent, formObject));
+					SolutionDeserializer.setPersistValues(repository, parent, resolveCleanedProperties((Form)parent, formObject));
 				}
 			}
 			else

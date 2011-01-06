@@ -253,10 +253,6 @@
       </markerResolutionGenerator>
       <markerResolutionGenerator
             class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
-            markerType="com.servoy.eclipse.core.invalidEventMethod">
-      </markerResolutionGenerator>
-      <markerResolutionGenerator
-            class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.missingStyle">
       </markerResolutionGenerator>
       <markerResolutionGenerator
