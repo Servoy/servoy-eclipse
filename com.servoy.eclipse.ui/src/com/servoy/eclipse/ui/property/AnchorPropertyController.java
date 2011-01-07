@@ -133,6 +133,15 @@ public class AnchorPropertyController extends PropertyController<Integer, Object
 			{
 				return new Integer(0);
 			}
+			// for each direction at least 1 shold be turned on
+			if ((anchors & (IAnchorConstants.NORTH | IAnchorConstants.SOUTH)) == 0)
+			{
+				anchors |= (flag == IAnchorConstants.NORTH ? IAnchorConstants.SOUTH : IAnchorConstants.NORTH);
+			}
+			if ((anchors & (IAnchorConstants.WEST | IAnchorConstants.EAST)) == 0)
+			{
+				anchors |= (flag == IAnchorConstants.WEST ? IAnchorConstants.EAST : IAnchorConstants.WEST);
+			}
 			return new Integer(anchors);
 		}
 	}
