@@ -85,6 +85,7 @@ import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.ui.IDepricatedScriptTabPanelMethods;
+import com.servoy.j2db.ui.IScriptBaseMethods;
 import com.servoy.j2db.ui.IScriptCheckBoxMethods;
 import com.servoy.j2db.ui.IScriptChoiceMethods;
 import com.servoy.j2db.ui.IScriptDataButtonMethods;
@@ -1077,6 +1078,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			typeNames.put(IScriptSplitPaneMethods.class.getSimpleName(), "SplitPane");
 			typeNames.put(IScriptPortalComponentMethods.class.getSimpleName(), "Portal");
 
+			addAnonymousClassType("BaseComponent", IScriptBaseMethods.class);
 		}
 
 		public Type createType(ITypeInfoContext context, String typeName)
@@ -1090,6 +1092,9 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				EList<Member> members = type.getMembers();
 				members.add(createProperty(context, "allnames", true, "Array", SPECIAL_PROPERTY));
 				members.add(createProperty(context, "length", true, "Number", PROPERTY));
+				Property arrayProp = createProperty(context, "[]", true, "BaseComponent", PROPERTY);
+				arrayProp.setVisible(false);
+				members.add(arrayProp);
 				// quickly add this one to the static types.
 				types.put("Elements", type);
 			}
