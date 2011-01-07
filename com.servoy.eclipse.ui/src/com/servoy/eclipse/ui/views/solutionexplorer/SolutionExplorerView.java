@@ -1616,18 +1616,15 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			public void serverStateChanged(IServer server, int oldState, int newState)
 			{
 				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(((IServerInternal)server).getName());
-				//either we have a change of state or we had a change of state and we did not expand the node
-				if ((newState & ITableListener.VALID) != ITableListener.VALID) //server state is invalid
+				if ((oldState & ITableListener.VALID) == ITableListener.VALID && (newState & ITableListener.VALID) != ITableListener.VALID)
 				{
-					final boolean wasValid = (oldState & ITableListener.VALID) == ITableListener.VALID;
 					SolutionExplorerTreeContentProvider treeContentProvider = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
 					final Object serverNode = treeContentProvider.getServers();
 					UIUtils.runInUI(new Runnable()
 					{
 						public void run()
 						{
-							//either we were valid so we need to expand or we were invalid but did not expand
-							if (wasValid || !tree.getExpandedState(serverNode)) tree.setExpandedState(serverNode, true);
+							tree.setExpandedState(serverNode, true);
 						}
 					}, false);
 				}
