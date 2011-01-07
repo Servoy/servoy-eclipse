@@ -47,14 +47,18 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
@@ -62,6 +66,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IActionBars;
@@ -77,9 +83,10 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.profiler.Activator;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
+import com.servoy.j2db.debug.DataCallProfileData;
+import com.servoy.j2db.debug.IProfileListener;
+import com.servoy.j2db.debug.ProfileData;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
-import com.servoy.j2db.scripting.IProfileListener;
-import com.servoy.j2db.scripting.ProfileData;
 
 /**
  * This sample class demonstrates how to plug-in a new workbench view. The view
@@ -289,7 +296,7 @@ public class ProfilerView extends ViewPart
 	 */
 	public static final String ID = "com.servoy.eclipse.profiler.views.ProfilerView";
 
-	private TreeViewer viewer;
+	private TreeViewer methodCallViewer;
 
 	private DrillDownAdapter drillDownAdapter;
 
@@ -305,11 +312,13 @@ public class ProfilerView extends ViewPart
 
 	private Action doubleClickAction;
 
-	private ViewContentProvider contentProvider;
+	private MethodCallContentProvider contentProvider;
 
 	private TreeColumn argsColumn;
 
-	class ViewContentProvider implements IStructuredContentProvider, ITreeContentProvider, IProfileListener
+	private TableViewer sqlDataViewer;
+
+	class MethodCallContentProvider implements IStructuredContentProvider, ITreeContentProvider, IProfileListener
 	{
 
 		private final List<ProfileData> invisibleRoot = new ArrayList<ProfileData>();
@@ -369,7 +378,7 @@ public class ProfilerView extends ViewPart
 		}
 
 		/**
-		 * @see com.servoy.j2db.scripting.IProfileListener#addProfileData(com.servoy.j2db.scripting.ProfileData)
+		 * @see com.servoy.j2db.debug.IProfileListener#addProfileData(com.servoy.j2db.debug.ProfileData)
 		 */
 		public void addProfileData(ProfileData profileData)
 		{
@@ -388,7 +397,7 @@ public class ProfilerView extends ViewPart
 
 				public void run()
 				{
-					viewer.refresh();
+					methodCallViewer.refresh();
 				}
 			});
 
@@ -434,13 +443,53 @@ public class ProfilerView extends ViewPart
 
 				public void run()
 				{
-					viewer.refresh();
+					methodCallViewer.refresh();
 				}
 			});
 		}
 	}
 
-	class ViewLabelProvider implements ITableLabelProvider
+	class DataCallContentProvider implements IStructuredContentProvider
+	{
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
+		 */
+		public void dispose()
+		{
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+		 */
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
+		{
+			// TODO Auto-generated method stub
+
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
+		 */
+		public Object[] getElements(Object inputElement)
+		{
+			if (inputElement instanceof ProfileData)
+			{
+				return ((ProfileData)inputElement).getDataCallProfileDatas().toArray();
+			}
+
+			return new Object[0];
+		}
+
+	}
+
+	class MethodCallLabelProvider implements ITableLabelProvider
 	{
 		private final Image methodImage = Activator.getImageDescriptor("icons/form_method.gif").createImage();
 
@@ -556,6 +605,94 @@ public class ProfilerView extends ViewPart
 		}
 	}
 
+	class DataCallLabelProvider implements ITableLabelProvider
+	{
+		/**
+		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object,
+		 *      int)
+		 */
+		public Image getColumnImage(Object element, int columnIndex)
+		{
+			return null;
+		}
+
+		/**
+		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object,
+		 *      int)
+		 */
+		@SuppressWarnings("nls")
+		public String getColumnText(Object element, int columnIndex)
+		{
+			if (element instanceof DataCallProfileData)
+			{
+				DataCallProfileData pd = (DataCallProfileData)element;
+				switch (columnIndex)
+				{
+					case 0 :
+						return pd.getName();
+					case 1 :
+						return Long.toString(pd.getTime());
+					case 2 :
+						return pd.getQuery();
+					case 3 :
+						return pd.getArgumentString();
+					case 4 :
+						return pd.getDatasource();
+					case 5 :
+						return pd.getTransactionId();
+				}
+			}
+			else if (element instanceof AggregateData)
+			{
+				AggregateData pd = (AggregateData)element;
+				switch (columnIndex)
+				{
+					case 0 :
+						return pd.getInnerFunctionLineStart() == -1 ? pd.getMethodName() : pd.getMethodName() + "#" + pd.getInnerFunctionLineStart();
+					case 1 :
+						return Long.toString(pd.getOwnTime());
+					case 2 :
+						return Long.toString(pd.getTime());
+					case 3 :
+						return Integer.toString(pd.getCount());
+					case 4 :
+						return pd.getSourceName();
+				}
+			}
+			return null;
+		}
+
+		/**
+		 * @see org.eclipse.jface.viewers.IBaseLabelProvider#addListener(org.eclipse.jface.viewers.ILabelProviderListener)
+		 */
+		public void addListener(ILabelProviderListener listener)
+		{
+		}
+
+		/**
+		 * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
+		 */
+		public void dispose()
+		{
+		}
+
+		/**
+		 * @see org.eclipse.jface.viewers.IBaseLabelProvider#isLabelProperty(java.lang.Object,
+		 *      java.lang.String)
+		 */
+		public boolean isLabelProperty(Object element, String property)
+		{
+			return false;
+		}
+
+		/**
+		 * @see org.eclipse.jface.viewers.IBaseLabelProvider#removeListener(org.eclipse.jface.viewers.ILabelProviderListener)
+		 */
+		public void removeListener(ILabelProviderListener listener)
+		{
+		}
+	}
+
 	class NameSorter extends ViewerSorter
 	{
 	}
@@ -574,16 +711,18 @@ public class ProfilerView extends ViewPart
 	@Override
 	public void createPartControl(Composite parent)
 	{
-		viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		drillDownAdapter = new DrillDownAdapter(viewer);
+		SashForm sashForm = new SashForm(parent, SWT.NONE);
+		methodCallViewer = new TreeViewer(sashForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+
+		drillDownAdapter = new DrillDownAdapter(methodCallViewer);
 		makeActions();
 		hookContextMenu();
 		hookDoubleClickAction();
 		contributeToActionBars();
 
-		contentProvider = new ViewContentProvider();
+		contentProvider = new MethodCallContentProvider();
 
-		Tree tree = viewer.getTree();
+		Tree tree = methodCallViewer.getTree();
 		tree.setHeaderVisible(true);
 		tree.setLinesVisible(true);
 
@@ -612,10 +751,68 @@ public class ProfilerView extends ViewPart
 		fileColumn.setResizable(true);
 		fileColumn.setWidth(400);
 
-		viewer.setContentProvider(contentProvider);
-		viewer.setLabelProvider(new ViewLabelProvider());
+		methodCallViewer.setContentProvider(contentProvider);
+		methodCallViewer.setLabelProvider(new MethodCallLabelProvider());
 		// viewer.setSorter(new NameSorter());
-		viewer.setInput(getViewSite());
+		methodCallViewer.setInput(getViewSite());
+
+		sqlDataViewer = new TableViewer(sashForm);
+		Table table = sqlDataViewer.getTable();
+		table.setHeaderVisible(true);
+		table.setLinesVisible(true);
+
+		TableColumn name = new TableColumn(table, SWT.NONE);
+		name.setText("Action");
+		name.setWidth(100);
+		name.setResizable(true);
+
+		TableColumn time = new TableColumn(table, SWT.NONE);
+		time.setText("Time (ms)");
+		time.setWidth(70);
+		time.setResizable(true);
+
+		TableColumn query = new TableColumn(table, SWT.NONE);
+		query.setText("Query/Action");
+		query.setWidth(350);
+		query.setResizable(true);
+
+		TableColumn arguments = new TableColumn(table, SWT.NONE);
+		arguments.setText("Arguments");
+		arguments.setWidth(100);
+		arguments.setResizable(true);
+
+		TableColumn datasource = new TableColumn(table, SWT.NONE);
+		datasource.setText("Datasource");
+		datasource.setWidth(100);
+		datasource.setResizable(true);
+
+		TableColumn transaction = new TableColumn(table, SWT.NONE);
+		transaction.setText("TransactionId");
+		transaction.setWidth(100);
+		transaction.setResizable(true);
+
+
+		sqlDataViewer.setLabelProvider(new DataCallLabelProvider());
+		sqlDataViewer.setContentProvider(new DataCallContentProvider());
+		sqlDataViewer.setInput(getViewSite());
+
+		methodCallViewer.addSelectionChangedListener(new ISelectionChangedListener()
+		{
+			public void selectionChanged(SelectionChangedEvent event)
+			{
+				IStructuredSelection selection = (IStructuredSelection)event.getSelection();
+				if (selection.getFirstElement() != null)
+				{
+					sqlDataViewer.setInput(selection.getFirstElement());
+				}
+				else
+				{
+					sqlDataViewer.setInput(getViewSite());
+				}
+			}
+		});
+
+
 	}
 
 	/**
@@ -639,9 +836,9 @@ public class ProfilerView extends ViewPart
 				ProfilerView.this.fillContextMenu(manager);
 			}
 		});
-		Menu menu = menuMgr.createContextMenu(viewer.getControl());
-		viewer.getControl().setMenu(menu);
-		getSite().registerContextMenu(menuMgr, viewer);
+		Menu menu = menuMgr.createContextMenu(methodCallViewer.getControl());
+		methodCallViewer.getControl().setMenu(menu);
+		getSite().registerContextMenu(menuMgr, methodCallViewer);
 	}
 
 	private void contributeToActionBars()
@@ -664,7 +861,7 @@ public class ProfilerView extends ViewPart
 
 	private void fillContextMenu(IMenuManager manager)
 	{
-		ISelection selection = viewer.getSelection();
+		ISelection selection = methodCallViewer.getSelection();
 		Object obj = ((IStructuredSelection)selection).getFirstElement();
 		if (obj instanceof ProfileData && ((ProfileData)obj).getParentSourceCall() != null)
 		{
@@ -704,7 +901,7 @@ public class ProfilerView extends ViewPart
 				{
 					contentProvider.aggregateData.clear();
 				}
-				viewer.refresh();
+				methodCallViewer.refresh();
 			}
 		};
 		clearData.setText("Clear data");
@@ -763,7 +960,7 @@ public class ProfilerView extends ViewPart
 			@Override
 			public void run()
 			{
-				ISelection selection = viewer.getSelection();
+				ISelection selection = methodCallViewer.getSelection();
 				Object obj = ((IStructuredSelection)selection).getFirstElement();
 				if (obj instanceof ProfileData && ((ProfileData)obj).getParentSourceCall() != null)
 				{
@@ -820,7 +1017,7 @@ public class ProfilerView extends ViewPart
 			@Override
 			public void run()
 			{
-				ISelection selection = viewer.getSelection();
+				ISelection selection = methodCallViewer.getSelection();
 				Object obj = ((IStructuredSelection)selection).getFirstElement();
 				String sourceName = null;
 				String methodName = null;
@@ -917,7 +1114,7 @@ public class ProfilerView extends ViewPart
 
 	private void hookDoubleClickAction()
 	{
-		viewer.addDoubleClickListener(new IDoubleClickListener()
+		methodCallViewer.addDoubleClickListener(new IDoubleClickListener()
 		{
 			public void doubleClick(DoubleClickEvent event)
 			{
@@ -932,6 +1129,6 @@ public class ProfilerView extends ViewPart
 	@Override
 	public void setFocus()
 	{
-		viewer.getControl().setFocus();
+		methodCallViewer.getControl().setFocus();
 	}
 }
