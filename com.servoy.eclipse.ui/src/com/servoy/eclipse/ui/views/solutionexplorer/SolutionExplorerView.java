@@ -678,6 +678,20 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setScriptingNodesEnabled(servoyProject != null);
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setResourceNodesEnabled(servoyProject != null);
 
+				//expand the servers node if we have invalid (but enabled) servers (expansion will occur after startup)
+				IServerManagerInternal serverManager = ServoyModel.getServerManager();
+				String[] array = serverManager.getServerNames(true, false, true, true);
+				for (String server_name : array)
+				{
+					IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
+					if (!server.isValid())
+					{
+						Object serverNode = treeContentProvider.getServers();
+						tree.setExpandedState(serverNode, true);
+						break;
+					}
+				}
+
 				return Status.OK_STATUS;
 			}
 		};
