@@ -53,11 +53,12 @@ import org.mozilla.javascript.NativeJavaMethod;
 
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.doc.IParameter;
 import com.servoy.eclipse.core.doc.ITypedScriptObject;
 import com.servoy.eclipse.core.doc.ScriptParameter;
 import com.servoy.eclipse.debug.Activator;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -184,20 +185,23 @@ public abstract class TypeCreator
 
 	protected void initalize()
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel(); // make sure servoy model is created before take sync lock
+		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 		synchronized (this)
 		{
 			if (!initialized)
 			{
 				initialized = true;
-				servoyModel.addPersistChangeListener(true, new IPersistChangeListener()
+				if (servoyModel instanceof ServoyModel)
 				{
-					public void persistChanges(Collection<IPersist> changes)
+					((ServoyModel)servoyModel).addPersistChangeListener(true, new IPersistChangeListener()
 					{
-						// TODO see if this will become a performance issue..
-						clearDynamicTypes();
-					}
-				});
+						public void persistChanges(Collection<IPersist> changes)
+						{
+							// TODO see if this will become a performance issue..
+							clearDynamicTypes();
+						}
+					});
+				}
 			}
 		}
 	}
@@ -718,7 +722,7 @@ public abstract class TypeCreator
 		IResource resource = context.getModelElement().getResource();
 		if (resource != null)
 		{
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 
 			String name = resource.getProject().getName();
 			//if (servoyModel.isActiveProject(name))

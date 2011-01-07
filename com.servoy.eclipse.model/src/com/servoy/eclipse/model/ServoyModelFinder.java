@@ -51,12 +51,29 @@ public class ServoyModelFinder
 			}
 			else
 			{
+				IExtension extension = extensions[0];
 				if (extensions.length > 1)
 				{
-					ServoyLog.logError("Multiple servoy model provider extensions found (extension point " + IServoyModelProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$ //$NON-NLS-2$
+					int prio = Integer.MIN_VALUE;
+					for (IExtension ext : extensions)
+					{
+						String priorityString = ext.getConfigurationElements()[0].getAttribute("priority"); //$NON-NLS-1$
+						try
+						{
+							int priority = Integer.parseInt(priorityString);
+							if (priority > prio)
+							{
+								prio = priority;
+								extension = ext;
+							}
+						}
+						catch (Exception e)
+						{
+						}
+					}
 				}
 
-				IConfigurationElement[] ce = extensions[0].getConfigurationElements();
+				IConfigurationElement[] ce = extension.getConfigurationElements();
 				if (ce == null || ce.length == 0)
 				{
 					ServoyLog.logError(

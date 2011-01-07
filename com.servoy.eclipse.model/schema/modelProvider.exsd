@@ -18,8 +18,8 @@ Should only be extended once in a product (multiple servoy model providers does 
          </appinfo>
       </annotation>
       <complexType>
-         <sequence>
-            <element ref="provider"/>
+         <sequence minOccurs="1" maxOccurs="unbounded">
+            <element ref="provider" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -72,6 +72,13 @@ Should only be extended once in a product (multiple servoy model providers does 
                <appinfo>
                   <meta.attribute kind="java" basedOn=":com.servoy.eclipse.model.extensions.IServoyModelProvider"/>
                </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="priority" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
             </annotation>
          </attribute>
       </complexType>

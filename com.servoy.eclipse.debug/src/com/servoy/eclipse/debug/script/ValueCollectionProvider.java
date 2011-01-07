@@ -14,7 +14,7 @@ import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 
 import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -111,7 +111,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		{
 			for (Solution module : modules)
 			{
-				ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(module.getName());
+				ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(module.getName());
 				IFile file = project.getProject().getFile("globals.js"); //$NON-NLS-1$
 				IValueCollection moduleCollection = getValueCollection(context, file);
 				if (moduleCollection != null)

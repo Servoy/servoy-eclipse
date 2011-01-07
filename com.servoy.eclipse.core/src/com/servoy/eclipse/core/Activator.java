@@ -246,7 +246,7 @@ public class Activator extends Plugin
 
 		// We need to hook a listener and detect when the Welcome page is closed.
 		// (And for that we need to hook another listener to detect when the workbench window is opened).
-		PlatformUI.getWorkbench().addWindowListener(new IWindowListener()
+		if (PlatformUI.isWorkbenchRunning()) PlatformUI.getWorkbench().addWindowListener(new IWindowListener()
 		{
 			public void windowActivated(IWorkbenchWindow window)
 			{
@@ -347,30 +347,33 @@ public class Activator extends Plugin
 
 		plugin = null;
 		super.stop(context);
-		SwingUtilities.invokeAndWait(new Runnable() // wait until webserver is stopped for case of
-		// restart (webserver cannot re-start when port is still in use, this may even cause a freeze after restart)
+		if (PlatformUI.isWorkbenchRunning())
 		{
-			public void run()
+			SwingUtilities.invokeAndWait(new Runnable() // wait until webserver is stopped for case of
+			// restart (webserver cannot re-start when port is still in use, this may even cause a freeze after restart)
 			{
-				try
+				public void run()
 				{
-					if (Settings.getInstance() != null)
+					try
 					{
-						IApplication application = getDebugClientHandler().getDebugReadyClient();
-						if (application instanceof J2DBClient)
+						if (Settings.getInstance() != null)
 						{
-							((J2DBClient)application).shutDown(true);
+							IApplication application = getDebugClientHandler().getDebugReadyClient();
+							if (application instanceof J2DBClient)
+							{
+								((J2DBClient)application).shutDown(true);
+							}
+							Settings.getInstance().save();
 						}
-						Settings.getInstance().save();
+						ApplicationServerSingleton.get().shutDown();
 					}
-					ApplicationServerSingleton.get().shutDown();
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
 				}
-				catch (Exception e)
-				{
-					ServoyLog.logError(e);
-				}
-			}
-		});
+			});
+		}
 	}
 
 	/**
@@ -518,155 +521,158 @@ public class Activator extends Plugin
 
 		// install servoy model listeners in separate job, when ServoyModel is created in bundle.activator thread
 		// a deadlock may occur (display thread waits for loading of ui bundle which waits for core bundle 
-		// which waits for ServoyModel latch, but the ServoyModel runnable is never running because display thread is blocking in wait)  
-		new Job("HookupToServoyModel") //$NON-NLS-1$
+		// which waits for ServoyModel latch, but the ServoyModel runnable is never running because display thread is blocking in wait)
+		if (PlatformUI.isWorkbenchRunning())
 		{
-			@Override
-			protected IStatus run(IProgressMonitor monitor)
+			new Job("HookupToServoyModel") //$NON-NLS-1$
 			{
-				final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-
-				IActiveProjectListener apl = new IActiveProjectListener()
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
 				{
-					public void activeProjectChanged(final ServoyProject project)
-					{
-						if (designClient != null)
-						{
-							designClient.refreshI18NMessages();
-						}
-						// can this be really later? or should we wait?
-						// its much nice to do that later in the event thread.
-						SwingUtilities.invokeLater(new Runnable()
-						{
-							public void run()
-							{
-								IDebugClientHandler dch = getDebugClientHandler();
-								if (project != null)
-								{
-									dch.reloadDebugSolution(project.getSolution());
-									dch.reloadDebugSolutionSecurity();
-								}
-								else
-								{
-									dch.reloadDebugSolution(null);
-								}
-							}
-						});
-					}
+					final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
-					public void activeProjectUpdated(final ServoyProject activeProject, int updateInfo)
+					IActiveProjectListener apl = new IActiveProjectListener()
 					{
-						if (activeProject == null) return;
-						if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
+						public void activeProjectChanged(final ServoyProject project)
 						{
-							// in order to have a good module cache in the flattened solution
+							if (designClient != null)
+							{
+								designClient.refreshI18NMessages();
+							}
+							// can this be really later? or should we wait?
+							// its much nice to do that later in the event thread.
 							SwingUtilities.invokeLater(new Runnable()
 							{
 								public void run()
 								{
 									IDebugClientHandler dch = getDebugClientHandler();
-									dch.reloadDebugSolution(activeProject.getSolution());
-									dch.reloadDebugSolutionSecurity();
+									if (project != null)
+									{
+										dch.reloadDebugSolution(project.getSolution());
+										dch.reloadDebugSolutionSecurity();
+									}
+									else
+									{
+										dch.reloadDebugSolution(null);
+									}
 								}
 							});
 						}
-						else if (updateInfo == IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT)
+
+						public void activeProjectUpdated(final ServoyProject activeProject, int updateInfo)
+						{
+							if (activeProject == null) return;
+							if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
+							{
+								// in order to have a good module cache in the flattened solution
+								SwingUtilities.invokeLater(new Runnable()
+								{
+									public void run()
+									{
+										IDebugClientHandler dch = getDebugClientHandler();
+										dch.reloadDebugSolution(activeProject.getSolution());
+										dch.reloadDebugSolutionSecurity();
+									}
+								});
+							}
+							else if (updateInfo == IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT)
+							{
+								SwingUtilities.invokeLater(new Runnable()
+								{
+									public void run()
+									{
+										IDebugClientHandler dch = getDebugClientHandler();
+										dch.reloadDebugSolutionSecurity();
+										dch.reloadAllStyles();
+									}
+								});
+							}
+							else if (updateInfo == IActiveProjectListener.STYLES_ADDED_OR_REMOVED)
+							{
+								SwingUtilities.invokeLater(new Runnable()
+								{
+									public void run()
+									{
+										IDebugClientHandler dch = getDebugClientHandler();
+										dch.reloadAllStyles();
+									}
+								});
+							}
+							else if (updateInfo == IActiveProjectListener.SECURITY_INFO_CHANGED)
+							{
+								SwingUtilities.invokeLater(new Runnable()
+								{
+									public void run()
+									{
+										IDebugClientHandler dch = getDebugClientHandler();
+										dch.reloadDebugSolutionSecurity();
+									}
+								});
+							}
+						}
+
+						public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+						{
+							return true;
+						}
+					};
+
+					servoyModel.addActiveProjectListener(apl);
+					apl.activeProjectChanged(servoyModel.getActiveProject());
+
+					servoyModel.addPersistChangeListener(true, new IPersistChangeListener()
+					{
+						public void persistChanges(final Collection<IPersist> changes)
 						{
 							SwingUtilities.invokeLater(new Runnable()
 							{
 								public void run()
 								{
 									IDebugClientHandler dch = getDebugClientHandler();
-									dch.reloadDebugSolutionSecurity();
-									dch.reloadAllStyles();
+									dch.refreshDebugClients(changes);
 								}
 							});
 						}
-						else if (updateInfo == IActiveProjectListener.STYLES_ADDED_OR_REMOVED)
+					});
+
+					// flush bean design instances of changed beans
+					servoyModel.addPersistChangeListener(false, new IPersistChangeListener()
+					{
+						public void persistChanges(final Collection<IPersist> changes)
 						{
+							for (IPersist persist : changes)
+							{
+								if (persist instanceof Bean)
+								{
+									FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
+									if (editingFlattenedSolution != null)
+									{
+										editingFlattenedSolution.flushBeanDesignInstance((Bean)persist);
+									}
+								}
+							}
+						}
+					});
+
+					servoyModel.addI18NChangeListener(new I18NChangeListener()
+					{
+						public void i18nChanged()
+						{
+							servoyModel.getMessagesManager().removeCachedMessages();
 							SwingUtilities.invokeLater(new Runnable()
 							{
 								public void run()
 								{
 									IDebugClientHandler dch = getDebugClientHandler();
-									dch.reloadAllStyles();
+									dch.refreshDebugClientsI18N();
 								}
 							});
 						}
-						else if (updateInfo == IActiveProjectListener.SECURITY_INFO_CHANGED)
-						{
-							SwingUtilities.invokeLater(new Runnable()
-							{
-								public void run()
-								{
-									IDebugClientHandler dch = getDebugClientHandler();
-									dch.reloadDebugSolutionSecurity();
-								}
-							});
-						}
-					}
-
-					public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
-					{
-						return true;
-					}
-				};
-
-				servoyModel.addActiveProjectListener(apl);
-				apl.activeProjectChanged(servoyModel.getActiveProject());
-
-				servoyModel.addPersistChangeListener(true, new IPersistChangeListener()
-				{
-					public void persistChanges(final Collection<IPersist> changes)
-					{
-						SwingUtilities.invokeLater(new Runnable()
-						{
-							public void run()
-							{
-								IDebugClientHandler dch = getDebugClientHandler();
-								dch.refreshDebugClients(changes);
-							}
-						});
-					}
-				});
-
-				// flush bean design instances of changed beans
-				servoyModel.addPersistChangeListener(false, new IPersistChangeListener()
-				{
-					public void persistChanges(final Collection<IPersist> changes)
-					{
-						for (IPersist persist : changes)
-						{
-							if (persist instanceof Bean)
-							{
-								FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
-								if (editingFlattenedSolution != null)
-								{
-									editingFlattenedSolution.flushBeanDesignInstance((Bean)persist);
-								}
-							}
-						}
-					}
-				});
-
-				servoyModel.addI18NChangeListener(new I18NChangeListener()
-				{
-					public void i18nChanged()
-					{
-						servoyModel.getMessagesManager().removeCachedMessages();
-						SwingUtilities.invokeLater(new Runnable()
-						{
-							public void run()
-							{
-								IDebugClientHandler dch = getDebugClientHandler();
-								dch.refreshDebugClientsI18N();
-							}
-						});
-					}
-				});
-				return Status.OK_STATUS;
-			}
-		}.schedule();
+					});
+					return Status.OK_STATUS;
+				}
+			}.schedule();
+		}
 
 		// Visit all column validators/converters and let them add any method templates to
 		// MethodTemplate.
@@ -690,14 +696,17 @@ public class Activator extends Plugin
 			}
 		}
 
-		String[] actionIds = { "org.eclipse.ui.edit.text.actionSet.convertLineDelimitersTo" }; //$NON-NLS-1$
-		ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
-		IActionSetDescriptor[] actionSets = reg.getActionSets();
-		for (IActionSetDescriptor element : actionSets)
+		if (PlatformUI.isWorkbenchRunning())
 		{
-			for (String actionSetId : actionIds)
+			String[] actionIds = { "org.eclipse.ui.edit.text.actionSet.convertLineDelimitersTo" }; //$NON-NLS-1$
+			ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
+			IActionSetDescriptor[] actionSets = reg.getActionSets();
+			for (IActionSetDescriptor element : actionSets)
 			{
-				if (Utils.stringSafeEquals(element.getId(), actionSetId)) element.setInitiallyVisible(false);
+				for (String actionSetId : actionIds)
+				{
+					if (Utils.stringSafeEquals(element.getId(), actionSetId)) element.setInitiallyVisible(false);
+				}
 			}
 		}
 	}
