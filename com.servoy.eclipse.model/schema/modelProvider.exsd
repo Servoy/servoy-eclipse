@@ -74,7 +74,7 @@ Should only be extended once in a product (multiple servoy model providers does 
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="priority" type="string" use="required">
+         <attribute name="instance" type="string">
             <annotation>
                <documentation>
                   

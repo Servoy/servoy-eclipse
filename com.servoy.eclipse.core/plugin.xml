@@ -291,8 +291,7 @@
       <provider
             class="com.servoy.eclipse.core.ServoyModelProvider"
             id="com.servoy.eclipse.core.modelProvider"
-            name="Provides the development ServoyModel"
-            priority="100">
+            name="Provides the development ServoyModel">
       </provider>
    </extension>
    <extension

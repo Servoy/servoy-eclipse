@@ -39,6 +39,11 @@ public class ServoyModelFinder
 
 	public static IServoyModel getServoyModel()
 	{
+		return initializeServoyModel(null);
+	}
+
+	public static IServoyModel initializeServoyModel(String instance)
+	{
 		if (modelProvider == null)
 		{
 			IExtensionRegistry reg = Platform.getExtensionRegistry();
@@ -54,21 +59,13 @@ public class ServoyModelFinder
 				IExtension extension = extensions[0];
 				if (extensions.length > 1)
 				{
-					int prio = Integer.MIN_VALUE;
 					for (IExtension ext : extensions)
 					{
-						String priorityString = ext.getConfigurationElements()[0].getAttribute("priority"); //$NON-NLS-1$
-						try
+						String instanceString = ext.getConfigurationElements()[0].getAttribute("instance"); //$NON-NLS-1$
+						if ((instanceString == null && instance == null) || instanceString != null && instance != null && instance.equals(instanceString))
 						{
-							int priority = Integer.parseInt(priorityString);
-							if (priority > prio)
-							{
-								prio = priority;
-								extension = ext;
-							}
-						}
-						catch (Exception e)
-						{
+							extension = ext;
+							break;
 						}
 					}
 				}
