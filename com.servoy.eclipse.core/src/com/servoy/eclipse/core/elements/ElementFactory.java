@@ -27,9 +27,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -372,7 +372,12 @@ public class ElementFactory
 				}
 				else if (placeHorizontal)
 				{
-					int offset = lastSize == null || lastSize.width < 80 ? 90 : lastSize.width + 10; // do not overlap large fields, leave 10 px space
+					int offset = lastSize == null || lastSize.width < 80 ? 80 : lastSize.width;
+					if (!placeWithLabels)
+					{
+						// do not overlap large fields, leave 10 px space
+						offset += 10;
+					}
 					loc = new Point(loc.x + offset, startLocation.y);
 				}
 				else
@@ -408,20 +413,21 @@ public class ElementFactory
 					}
 				}
 				String name = getCorrectName(parent, cutofDPID);
+
 				if (placeWithLabels)
 				{
 					GraphicalComponent label = createLabel(parent, labelText, loc);
 					lst.add(label);
 
 					java.awt.Dimension labeldim = label.getSize();
-					labeldim.width = 80;
+					labeldim.width = placeHorizontal ? 140 /* field width */: 80;
 					label.setSize(labeldim);
 
 					if (fillName) label.setLabelFor(name);
 
 					if (placeHorizontal)
 					{
-						loc = new Point(loc.x, loc.y + 30);
+						loc = new Point(loc.x, loc.y + 20);
 					}
 					else
 					{
@@ -443,9 +449,13 @@ public class ElementFactory
 				else
 				{
 					bc = createField(parent, dataProvider, loc);
-
+					java.awt.Dimension dim = bc.getSize();
+					dim.width = 140;
+					bc.setSize(dim);
 				}
 				lst.add(bc);
+
+
 				if (fillName)
 				{
 					bc.setName(name);
@@ -676,8 +686,8 @@ public class ElementFactory
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
 
 		JSONObject json = new JSONObject();
-		json.put(Template.PROP_FORM, cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, repository),
-			null));
+		json.put(Template.PROP_FORM,
+			cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, repository), null));
 		json.put(Template.PROP_LOCATION, PersistHelper.createPointString(location));
 		JSONArray elements = new JSONArray();
 
@@ -826,8 +836,8 @@ public class ElementFactory
 				IPersist persist = SolutionDeserializer.deserializePersist(repository, parent, persist_json_map, object, null, null, null, false);
 				for (Map.Entry<IPersist, JSONObject> entry : persist_json_map.entrySet())
 				{
-					SolutionDeserializer.setPersistValues(repository, entry.getKey(), resolveCleanedProperties((Form)entry.getKey().getAncestor(
-						IRepository.FORMS), entry.getValue()));
+					SolutionDeserializer.setPersistValues(repository, entry.getKey(),
+						resolveCleanedProperties((Form)entry.getKey().getAncestor(IRepository.FORMS), entry.getValue()));
 				}
 				persists.put(persist, name);
 			}
