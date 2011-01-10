@@ -94,7 +94,7 @@ public class RestorerAdapterFactory implements IAdapterFactory
 					base.clearProperty(key);
 				}
 			}
-			base.copyPropertiesMap(saved);
+			base.copyPropertiesMap(saved, true);
 		}
 	}
 
