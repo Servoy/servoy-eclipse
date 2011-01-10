@@ -285,7 +285,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 					else
 					{
 						// just inherit everything
-						form.copyPropertiesMap(null);
+						form.copyPropertiesMap(null, true);
 						form.setExtendsFormID(superForm.getID());
 						form.setName(newFormWizardPage.getFormName());
 					}

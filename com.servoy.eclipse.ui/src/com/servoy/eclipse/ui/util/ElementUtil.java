@@ -212,7 +212,7 @@ public class ElementUtil
 						{
 							parent = (ISupportChilds)((AbstractBase)persist.getParent()).cloneObj((Form)context, false, null, false, false);
 							((AbstractBase)parent).resetUUID(persist.getParent().getUUID());
-							((AbstractBase)parent).copyPropertiesMap(null);
+							((AbstractBase)parent).copyPropertiesMap(null, true);
 							((AbstractBase)parent).putOverrideProperty(((Form)persist.getAncestor(IRepository.FORMS)).getName());
 						}
 						catch (Exception ex)
@@ -225,7 +225,7 @@ public class ElementUtil
 				{
 					newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false);
 					((AbstractBase)newPersist).resetUUID(persist.getUUID());
-					((AbstractBase)newPersist).copyPropertiesMap(null);
+					((AbstractBase)newPersist).copyPropertiesMap(null, true);
 					((AbstractBase)newPersist).putOverrideProperty(((Form)persist.getAncestor(IRepository.FORMS)).getName());
 				}
 				catch (Exception ex)

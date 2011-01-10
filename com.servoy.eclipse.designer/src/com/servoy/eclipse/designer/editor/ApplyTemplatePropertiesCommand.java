@@ -82,7 +82,7 @@ public class ApplyTemplatePropertiesCommand extends BaseRestorableCommand
 				ElementFactory.resolveCleanedProperties((Form)persist.getAncestor(IRepository.FORMS), json));
 			propertyValues.remove(Template.PROP_LOCATION);
 
-			repository.updatePersistWithValueMap(persist, propertyValues);
+			repository.updatePersistWithValueMap(persist, propertyValues, false);
 		}
 		catch (JSONException e)
 		{
