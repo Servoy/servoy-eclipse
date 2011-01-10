@@ -16,16 +16,15 @@
  */
 package com.servoy.eclipse.ui.actions;
 
-import java.net.URL;
-
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.marketplace.MarketplaceBrowserEditor;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.views.ServoyMarketplaceView;
 
 public class OpenMarketplace implements IWorkbenchWindowActionDelegate
 {
@@ -41,7 +40,8 @@ public class OpenMarketplace implements IWorkbenchWindowActionDelegate
 	{
 		try
 		{
-			PlatformUI.getWorkbench().getBrowserSupport().createBrowser(null).openURL(new URL(ServoyMarketplaceView.MARKETPLACE_URL));
+			IWorkbenchPage activePage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+			activePage.openEditor(MarketplaceBrowserEditor.INPUT, MarketplaceBrowserEditor.MARKETPLACE_BROWSER_EDITOR_ID);
 		}
 		catch (Exception e)
 		{

@@ -14,7 +14,7 @@
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView"
             id="com.servoy.eclipse.ui.views.SolutionExplorerView">
-      </view>
+      </view>      
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -244,6 +244,12 @@
          <contentTypeBinding
                contentTypeId="com.servoy.eclipse.core.resource.security">
          </contentTypeBinding>
+      </editor>
+	  <editor
+	  		class="com.servoy.eclipse.marketplace.MarketplaceBrowserEditor"
+	  		icon="icons/marketplace.gif"
+	  		id="com.servoy.eclipse.marketplace.MarketplaceBrowserEditor"
+      		name="Servoy Marketplace">
       </editor>
    </extension>
    <extension
