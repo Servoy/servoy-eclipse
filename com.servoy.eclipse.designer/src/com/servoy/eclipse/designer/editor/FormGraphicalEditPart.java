@@ -86,9 +86,16 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 	@Override
 	protected List<Object> getModelChildren()
 	{
-		List<Object> list = new ArrayList<Object>();
-		List<Part> parts = new ArrayList<Part>();
 		Form flattenedForm = editorPart.getFlattenedForm();
+		List<Object> list = new ArrayList<Object>();
+
+		Border border = ElementFactory.getFormBorder(application, flattenedForm);
+		if (border != null)
+		{
+			list.add(new BorderModel(flattenedForm)); // A separate editpart to show the form border 
+		}
+
+		List<Part> parts = new ArrayList<Part>();
 		Set<FormElementGroup> groups = new HashSet<FormElementGroup>();
 		if (flattenedForm != null)
 		{
@@ -142,12 +149,6 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 					}
 				}
 			}
-		}
-
-		Border border = ElementFactory.getFormBorder(application, flattenedForm);
-		if (border != null)
-		{
-			list.add(new BorderModel(flattenedForm)); // A separate editpart to show the form border 
 		}
 
 		// parts go on top
