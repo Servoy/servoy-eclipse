@@ -17,18 +17,18 @@
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ICellEditorValidator;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.graphics.PaletteData;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.editors.ColorCellEditor;
+import com.servoy.eclipse.ui.resource.ColorResource;
+import com.servoy.j2db.util.TreeBidiMap;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Property controller for selecting a color in Properties view.
@@ -37,15 +37,17 @@ import com.servoy.eclipse.ui.editors.ColorCellEditor;
  *
  */
 
-public class ColorPropertyController extends PropertyDescriptor implements IPropertyController<java.awt.Color, RGB>
+public class ColorPropertyController extends PropertyDescriptor implements IPropertyController<java.awt.Color, String>
 {
 	public static final PropertyColorConverter PROPERTY_COLOR_CONVERTER = new PropertyColorConverter();
 	public static final ColorLabelProvider COLOR_LABEL_PROVIDER = new ColorLabelProvider();
+	public static final ColorStringValidator COLOR_STRING_VALIDATOR = new ColorStringValidator();
 
 	public ColorPropertyController(String id, String displayName)
 	{
 		super(id, displayName);
 		setLabelProvider(COLOR_LABEL_PROVIDER);
+		setValidator(COLOR_STRING_VALIDATOR);
 	}
 
 	public PropertyColorConverter getConverter()
@@ -92,26 +94,64 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 	 * @author rgansevles
 	 * 
 	 */
-	public static class PropertyColorConverter implements IPropertyConverter<java.awt.Color, RGB>
+	public static class PropertyColorConverter implements IPropertyConverter<java.awt.Color, String>
 	{
-		public static final RGB NULL_VALUE = null;
+		private static final TreeBidiMap<String, String> colorsMap = new TreeBidiMap<String, String>();
+		static
+		{
+			// The 17 standard css colors
+			colorsMap.put("black", "#000000");
+			colorsMap.put("silver", "#c0c0c0");
+//			colorsMap.put("gray", "#808080");
+			colorsMap.put("grey", "#808080");
+			colorsMap.put("white", "#ffffff");
+			colorsMap.put("maroon", "#800000");
+			colorsMap.put("red", "#ff0000");
+			colorsMap.put("purple", "#800080");
+			colorsMap.put("fuchsia", "#ff00ff");
+			colorsMap.put("green", "#008000");
+			colorsMap.put("lime", "#00ff00");
+			colorsMap.put("olive", "#808000");
+			colorsMap.put("yellow", "#ffff00");
+			colorsMap.put("navy", "#000080");
+			colorsMap.put("blue", "#0000ff");
+			colorsMap.put("teal", "#008080");
+			colorsMap.put("aqua", "#00ffff");
+		}
 
 		/**
 		 * Convert AWT color to SWT color
 		 */
-		public RGB convertProperty(Object id, java.awt.Color awtcolor)
+		public String convertProperty(Object id, java.awt.Color awtcolor)
 		{
-			if (awtcolor == null) return NULL_VALUE;
-			return new RGB(awtcolor.getRed(), awtcolor.getGreen(), awtcolor.getBlue());
+			if (awtcolor == null) return null;
+			String hexString = Integer.toHexString(awtcolor.getRGB() & 0x00ffffff);
+			if (hexString.length() < 6)
+			{
+				hexString = "000000".substring(hexString.length()) + hexString; //$NON-NLS-1$
+			}
+			String colorString = '#' + hexString;
+			String named = colorsMap.getKey(colorString);
+			if (named != null)
+			{
+				return Utils.stringInitCap(named);
+			}
+			return colorString;
 		}
+
 
 		/**
 		 * Convert SWT color to AWT color
 		 */
-		public java.awt.Color convertValue(Object id, RGB rgb)
+		public java.awt.Color convertValue(Object id, String string)
 		{
-			if (rgb == null || rgb == NULL_VALUE) return null;
-			return new java.awt.Color(rgb.red, rgb.green, rgb.blue);
+			if (string == null || string.trim().length() == 0) return null;
+			String hex = colorsMap.get("gray".equalsIgnoreCase(string) ? "grey" : string.toLowerCase());
+			if (hex == null)
+			{
+				hex = string;
+			}
+			return java.awt.Color.decode(hex);
 		}
 	}
 
@@ -127,7 +167,7 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 		@Override
 		public String getText(Object element)
 		{
-			if (element == PropertyColorConverter.NULL_VALUE)
+			if (element == null)
 			{
 				return Messages.LabelDefault;
 			}
@@ -137,13 +177,37 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 		@Override
 		public Image getImage(Object element)
 		{
-			if (element instanceof RGB && element != PropertyColorConverter.NULL_VALUE)
+			if (element instanceof String)
 			{
-				ImageData imageData = new ImageData(25, 12, 1, new PaletteData(new RGB[] { (RGB)element }));
-				return new Image(Display.getDefault(), imageData);
+				return ColorResource.INSTANCE.getColorImage(25, 12, 1, ColorResource.ColorAwt2Rgb(PROPERTY_COLOR_CONVERTER.convertValue(null, (String)element)));
 			}
 
 			return super.getImage(element);
 		}
 	}
+
+	/**
+	 * Validate color strings for the text cell editor.
+	 * 
+	 * @author rgansevles
+	 *
+	 */
+	public static class ColorStringValidator implements ICellEditorValidator
+	{
+		public String isValid(Object value)
+		{
+			try
+			{
+				PROPERTY_COLOR_CONVERTER.convertValue(null, (String)value);
+				// valid
+				return null;
+			}
+			catch (Exception e)
+			{
+				return "Cannot parse color value \"" + value + '"';
+			}
+
+		}
+	}
+
 }

@@ -34,7 +34,6 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -416,7 +415,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 
 			if (COLOR.equals(id))
 			{
-				return new MatteBorder(border.getBorderInsets(), ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (RGB)v));
+				return new MatteBorder(border.getBorderInsets(), ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (String)v));
 			}
 			if (id instanceof String && ((String)id).startsWith(INSETS))
 			{
@@ -575,23 +574,23 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			else if (TOP_COLOR.equals(id))
 			{
 				smb = new SpecialMatteBorder(border.getTop(), border.getLeft(), border.getBottom(), border.getRight(),
-					ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (RGB)v), border.getLeftColor(), border.getBottomColor(),
+					ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (String)v), border.getLeftColor(), border.getBottomColor(),
 					border.getRightColor());
 			}
 			else if (LEFT_COLOR.equals(id))
 			{
 				smb = new SpecialMatteBorder(border.getTop(), border.getLeft(), border.getBottom(), border.getRight(), border.getTopColor(),
-					ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (RGB)v), border.getBottomColor(), border.getRightColor());
+					ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (String)v), border.getBottomColor(), border.getRightColor());
 			}
 			else if (BOTTOM_COLOR.equals(id))
 			{
 				smb = new SpecialMatteBorder(border.getTop(), border.getLeft(), border.getBottom(), border.getRight(), border.getTopColor(),
-					border.getLeftColor(), ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (RGB)v), border.getRightColor());
+					border.getLeftColor(), ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (String)v), border.getRightColor());
 			}
 			else if (RIGHT_COLOR.equals(id))
 			{
 				smb = new SpecialMatteBorder(border.getTop(), border.getLeft(), border.getBottom(), border.getRight(), border.getTopColor(),
-					border.getLeftColor(), border.getBottomColor(), ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (RGB)v));
+					border.getLeftColor(), border.getBottomColor(), ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (String)v));
 			}
 
 			if (smb != null)
@@ -722,13 +721,13 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 
 			if (HIGHLIGHT.equals(id))
 			{
-				return new EtchedBorder(border.getEtchType(), ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (RGB)v),
+				return new EtchedBorder(border.getEtchType(), ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (String)v),
 					border.getShadowColor());
 			}
 			if (SHADOW.equals(id))
 			{
-				return new EtchedBorder(border.getEtchType(), border.getHighlightColor(), ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id,
-					(RGB)v));
+				return new EtchedBorder(border.getEtchType(), border.getHighlightColor(),
+					ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (String)v));
 			}
 			if (RAISED.equals(id))
 			{
@@ -799,11 +798,11 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 
 			if (HIGHLIGHT_INNER.equals(id))
 			{
-				highlight = ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (RGB)v);
+				highlight = ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (String)v);
 			}
 			if (SHADOW_OUTER.equals(id))
 			{
-				shadow = ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (RGB)v);
+				shadow = ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (String)v);
 			}
 			if (RAISED.equals(id))
 			{
@@ -873,7 +872,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 
 			if (COLOR.equals(id))
 			{
-				return new LineBorder(ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (RGB)v), border.getThickness());
+				return new LineBorder(ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (String)v), border.getThickness());
 			}
 			if (THICKNESS.equals(id))
 			{
@@ -1039,7 +1038,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			if (COLOR.equals(id))
 			{
 				return new TitledBorder(null, border.getTitle(), border.getTitleJustification(), border.getTitlePosition(), border.getTitleFont(),
-					ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (RGB)v));
+					ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (String)v));
 			}
 			return null;
 		}

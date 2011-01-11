@@ -21,7 +21,11 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Resource;
 import org.eclipse.swt.widgets.Display;
 
 /**
@@ -34,27 +38,30 @@ public class ColorResource
 {
 	public static ColorResource INSTANCE = new ColorResource();
 
-	/** The display table. */
-	private Map<Display, Map<RGB, Color>> fDisplayTable;
+	/** The display table for colors. */
+	private Map<Display, Map<RGB, Color>> fDisplayColorsTable;
+
+	/** The display table for colored images. */
+	private Map<Display, Map<ImageKey, Image>> fDisplayImagesTable;
 
 	public Color getColor(RGB rgb)
 	{
 		if (rgb == null) return null;
 
-		if (fDisplayTable == null) fDisplayTable = new HashMap<Display, Map<RGB, Color>>(2);
+		if (fDisplayColorsTable == null) fDisplayColorsTable = new HashMap<Display, Map<RGB, Color>>(2);
 
 		final Display display = Display.getCurrent();
 
-		Map<RGB, Color> colorTable = fDisplayTable.get(display);
+		Map<RGB, Color> colorTable = fDisplayColorsTable.get(display);
 		if (colorTable == null)
 		{
 			colorTable = new HashMap<RGB, Color>(10);
-			fDisplayTable.put(display, colorTable);
+			fDisplayColorsTable.put(display, colorTable);
 			display.disposeExec(new Runnable()
 			{
 				public void run()
 				{
-					dispose(display);
+					if (fDisplayColorsTable != null) disposeResources(fDisplayColorsTable.remove(display));
 				}
 			});
 		}
@@ -69,44 +76,157 @@ public class ColorResource
 		return color;
 	}
 
-	public void dispose()
+	public void disposeColors()
 	{
-		if (fDisplayTable == null) return;
-
-		Iterator<Map<RGB, Color>> iter = fDisplayTable.values().iterator();
-		while (iter.hasNext())
+		if (fDisplayColorsTable != null)
 		{
-			dispose(iter.next());
+			Iterator<Map<RGB, Color>> iter = fDisplayColorsTable.values().iterator();
+			while (iter.hasNext())
+			{
+				disposeResources(iter.next());
+			}
+			fDisplayColorsTable = null;
 		}
-		fDisplayTable = null;
+	}
+
+	public void disposeImages()
+	{
+		if (fDisplayImagesTable != null)
+		{
+			Iterator<Map<ImageKey, Image>> iter = fDisplayImagesTable.values().iterator();
+			while (iter.hasNext())
+			{
+				disposeResources(iter.next());
+			}
+			fDisplayImagesTable = null;
+		}
 	}
 
 	/**
-	 * Disposes the colors for the given display.
+	 * Disposes the given resources table.
 	 * 
-	 * @param display the display for which to dispose the colors
+	 * @param resourceTable the table that maps to <code>Resource</code>
 	 */
-	private void dispose(Display display)
+	private void disposeResources(Map< ? , ? extends Resource> resourceTable)
 	{
-		if (fDisplayTable != null) dispose(fDisplayTable.remove(display));
-	}
+		if (resourceTable == null) return;
 
-	/**
-	 * Disposes the given color table.
-	 * 
-	 * @param colorTable the color table that maps <code>RGB</code> to <code>Color</code>
-	 */
-	private void dispose(Map<RGB, Color> colorTable)
-	{
-		if (colorTable == null) return;
-
-		Iterator<Color> iter = colorTable.values().iterator();
+		Iterator< ? extends Resource> iter = resourceTable.values().iterator();
 		while (iter.hasNext())
 		{
 			iter.next().dispose();
 		}
 
-		colorTable.clear();
+		resourceTable.clear();
 	}
 
+	public static RGB ColorAwt2Rgb(java.awt.Color awtColor)
+	{
+		if (awtColor == null) return null;
+		return new RGB(awtColor.getRed(), awtColor.getGreen(), awtColor.getBlue());
+	}
+
+	public static java.awt.Color ColoRgb2Awt(RGB rgb)
+	{
+		if (rgb == null) return null;
+		return new java.awt.Color(rgb.red, rgb.green, rgb.blue);
+	}
+
+	/**
+	 * Get a cached color image.
+	 */
+	public Image getColorImage(int width, int height, int depth, RGB rgb)
+	{
+		if (rgb == null)
+		{
+			return null;
+		}
+
+		if (fDisplayImagesTable == null) fDisplayImagesTable = new HashMap<Display, Map<ImageKey, Image>>(2);
+
+		final Display display = Display.getCurrent();
+
+		Map<ImageKey, Image> imagesTable = fDisplayImagesTable.get(display);
+		if (imagesTable == null)
+		{
+			imagesTable = new HashMap<ImageKey, Image>(100);
+			fDisplayImagesTable.put(display, imagesTable);
+			display.disposeExec(new Runnable()
+			{
+				public void run()
+				{
+					if (fDisplayImagesTable != null) disposeResources(fDisplayImagesTable.remove(display));
+				}
+			});
+		}
+
+		ImageKey key = new ImageKey(width, height, depth, rgb);
+		Image image = imagesTable.get(key);
+		if (image == null)
+		{
+			ImageData imageData = new ImageData(width, height, depth, new PaletteData(new RGB[] { rgb }));
+			image = new Image(display, imageData);
+			imagesTable.put(key, image);
+		}
+
+		return image;
+	}
+
+	/**
+	 * Key for simple colored images
+	 * 
+	 * @author rgansevles
+	 *
+	 */
+	public static class ImageKey
+	{
+		private final int width;
+		private final int height;
+		private final int depth;
+		private final RGB rgb;
+
+		/**
+		 * @param width
+		 * @param height
+		 * @param depth
+		 * @param rgb
+		 */
+		public ImageKey(int width, int height, int depth, RGB rgb)
+		{
+			this.width = width;
+			this.height = height;
+			this.depth = depth;
+			this.rgb = new RGB(rgb.red, rgb.green, rgb.blue); // RGB is mutable
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + depth;
+			result = prime * result + height;
+			result = prime * result + ((rgb == null) ? 0 : rgb.hashCode());
+			result = prime * result + width;
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj) return true;
+			if (obj == null) return false;
+			if (getClass() != obj.getClass()) return false;
+			ImageKey other = (ImageKey)obj;
+			if (depth != other.depth) return false;
+			if (height != other.height) return false;
+			if (rgb == null)
+			{
+				if (other.rgb != null) return false;
+			}
+			else if (!rgb.equals(other.rgb)) return false;
+			if (width != other.width) return false;
+			return true;
+		}
+	}
 }

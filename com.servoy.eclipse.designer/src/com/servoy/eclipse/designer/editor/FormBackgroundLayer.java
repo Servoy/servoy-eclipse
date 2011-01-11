@@ -33,7 +33,6 @@ import org.eclipse.swt.graphics.Color;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.property.ColorPropertyController;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
@@ -99,14 +98,13 @@ public class FormBackgroundLayer extends FreeformLayer
 			{
 				if (formBg == null)
 				{
-					formBg = ColorResource.INSTANCE.getColor(ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty("background",
-						getFormBackground(flattenedForm)));
+					formBg = ColorResource.INSTANCE.getColor(ColorResource.ColorAwt2Rgb(getFormBackground(flattenedForm)));
 				}
 				bg = formBg;
 			}
 			else
 			{
-				bg = ColorResource.INSTANCE.getColor(ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty("background", part.getBackground()));
+				bg = ColorResource.INSTANCE.getColor(ColorResource.ColorAwt2Rgb(part.getBackground()));
 			}
 
 			graphics.setBackgroundColor(bg);

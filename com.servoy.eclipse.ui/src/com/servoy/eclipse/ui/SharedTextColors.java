@@ -46,7 +46,7 @@ class SharedTextColors implements ISharedTextColors
 	 */
 	public void dispose()
 	{
-		colorResource.dispose();
+		colorResource.disposeColors();
 		colorResource = null;
 	}
 }

@@ -34,12 +34,10 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.ui.property.ColorPropertyController;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Media;
-import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 
@@ -125,8 +123,7 @@ public class TabFormGraphicalEditPart extends BasePersistGraphicalEditPart
 		Dimension preferredSize = label.getPreferredSize();
 		label.setBounds(new Rectangle(x, y, Math.min(preferredSize.width + 10, 250), Math.max(preferredSize.height, 30)));
 
-		label.setForegroundColor(ColorResource.INSTANCE.getColor(ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty(
-			StaticContentSpecLoader.PROPERTY_FOREGROUND.getPropertyName(), tab.getForeground())));
+		label.setForegroundColor(ColorResource.INSTANCE.getColor(ColorResource.ColorAwt2Rgb(tab.getForeground())));
 	}
 
 	@Override
