@@ -47,13 +47,13 @@ public class SetAnchoringAction extends SetPropertyAction
 		{
 			text = extendText(text, "Right");
 		}
-		if ((anchors & IAnchorConstants.SOUTH) != 0)
-		{
-			text = extendText(text, "Bottom");
-		}
 		if ((anchors & IAnchorConstants.WEST) != 0)
 		{
 			text = extendText(text, "Left");
+		}
+		if ((anchors & IAnchorConstants.SOUTH) != 0)
+		{
+			text = extendText(text, "Bottom");
 		}
 		setText(text);
 		// TODO: set image
