@@ -22,6 +22,7 @@ import org.eclipse.swt.graphics.Point;
 
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportFormElements;
@@ -44,10 +45,10 @@ public class FormPlacePortalCommand extends FormPlaceElementCommand
 	 * @param location
 	 * @param object
 	 */
-	public FormPlacePortalCommand(ISupportFormElements parent, Object object, Object requestType, Map<Object, Object> objectProperties,
-		IFieldPositioner fieldPositioner, Point defaultLocation, boolean fillText, boolean fillName, IPersist context)
+	public FormPlacePortalCommand(IApplication application, ISupportFormElements parent, Object object, Object requestType,
+		Map<Object, Object> objectProperties, IFieldPositioner fieldPositioner, Point defaultLocation, boolean fillText, boolean fillName, IPersist context)
 	{
-		super(parent, object, requestType, objectProperties, fieldPositioner, defaultLocation, context);
+		super(application, parent, object, requestType, objectProperties, fieldPositioner, defaultLocation, context);
 		this.fillText = fillText;
 		this.fillName = fillName;
 	}

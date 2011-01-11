@@ -24,6 +24,7 @@ import org.eclipse.swt.graphics.Point;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
@@ -55,11 +56,11 @@ public class FormPlaceFieldCommand extends FormPlaceElementCommand
 	 * @param location
 	 * @param object
 	 */
-	public FormPlaceFieldCommand(ISupportChilds parent, IPersist formContext, Object object, Object requestType, Map<Object, Object> objectProperties,
-		IFieldPositioner fieldPositioner, Point defaultLocation, boolean placeAsLabels, boolean placeWithLabels, boolean placeHorizontal, boolean fillText,
-		boolean fillName, IPersist context)
+	public FormPlaceFieldCommand(IApplication application, ISupportChilds parent, IPersist formContext, Object object, Object requestType,
+		Map<Object, Object> objectProperties, IFieldPositioner fieldPositioner, Point defaultLocation, boolean placeAsLabels, boolean placeWithLabels,
+		boolean placeHorizontal, boolean fillText, boolean fillName, IPersist context)
 	{
-		super(parent, object, requestType, objectProperties, fieldPositioner, defaultLocation, context);
+		super(application, parent, object, requestType, objectProperties, fieldPositioner, defaultLocation, context);
 		this.formContext = formContext;
 		this.fieldPositioner = fieldPositioner;
 		this.placeAsLabels = placeAsLabels;

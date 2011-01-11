@@ -45,6 +45,7 @@ import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
@@ -62,8 +63,11 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 
 	private AlignmentFeedbackHelper alignmentFeedbackHelper;
 
-	public FormXYLayoutPolicy(FormGraphicalEditPart parent)
+	private final IApplication application;
+
+	public FormXYLayoutPolicy(IApplication application, FormGraphicalEditPart parent)
 	{
+		this.application = application;
 		this.parent = parent;
 	}
 
@@ -130,16 +134,17 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			if (requestType.type == RequestType.TYPE_BUTTON || requestType.type == RequestType.TYPE_LABEL || requestType.type == RequestType.TYPE_TEMPLATE ||
 				requestType.type == RequestType.TYPE_BEAN || requestType.type == RequestType.TYPE_TAB || requestType.type == RequestType.TYPE_SHAPE)
 			{
-				command = new FormPlaceElementCommand(form, data, requestType, extendedData, null, loc.getSWTPoint(), parent.getPersist());
+				command = new FormPlaceElementCommand(application, form, data, requestType, extendedData, null, loc.getSWTPoint(), parent.getPersist());
 			}
 			else if (requestType.type == RequestType.TYPE_PORTAL)
 			{
-				command = new FormPlacePortalCommand(form, data, requestType, extendedData, null, loc.getSWTPoint(), false, false, parent.getPersist());
+				command = new FormPlacePortalCommand(application, form, data, requestType, extendedData, null, loc.getSWTPoint(), false, false,
+					parent.getPersist());
 			}
 			else if (requestType.type == RequestType.TYPE_FIELD)
 			{
-				command = new FormPlaceFieldCommand(form, form, data, requestType, extendedData, null, loc.getSWTPoint(), false, false, false, false, false,
-					parent.getPersist());
+				command = new FormPlaceFieldCommand(application, form, form, data, requestType, extendedData, null, loc.getSWTPoint(), false, false, false,
+					false, false, parent.getPersist());
 			}
 
 
@@ -172,7 +177,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 				Command command = new CompoundCommand();
 				for (Object o : (Object[])factory.getData())
 				{
-					FormPlaceElementCommand placeElementCommand = new FormPlaceElementCommand(((FormGraphicalEditPart)getHost()).getPersist(),
+					FormPlaceElementCommand placeElementCommand = new FormPlaceElementCommand(application, ((FormGraphicalEditPart)getHost()).getPersist(),
 						new Object[] { o }, request.getType(), request.getExtendedData(), null, loc.getSWTPoint(), parent.getPersist());
 					((CompoundCommand)command).add(((CreateElementRequest)request).chainSetFactoryObjectCommand(placeElementCommand));
 				}

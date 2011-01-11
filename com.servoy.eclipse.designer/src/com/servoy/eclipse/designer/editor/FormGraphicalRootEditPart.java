@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChange
 import org.eclipse.draw2d.FreeformLayer;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.LayeredPane;
+import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.geometry.Insets;
 import org.eclipse.gef.AutoexposeHelper;
 import org.eclipse.gef.DragTracker;
@@ -89,6 +90,8 @@ public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart
 		layeredPane.add(layer, FEEDBACK_LAYER);
 
 		layeredPane.add(new GuideLayer(), GUIDE_LAYER);
+
+		layeredPane.setBorder(new MarginBorder(FormBorderGraphicalEditPart.BORDER_MARGIN)); // Add some space for the border
 	}
 
 	@Override

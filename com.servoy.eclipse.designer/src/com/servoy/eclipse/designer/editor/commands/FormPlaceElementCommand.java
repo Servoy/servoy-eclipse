@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.commands.Command;
@@ -51,6 +51,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.ColumnWrapper;
@@ -99,6 +100,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 	protected Object[] models;
 	private final Map<Object, Object> objectProperties;
 	private final Object requestType;
+	private final IApplication application;
 
 	/**
 	 * Command to add a field.
@@ -108,9 +110,10 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 	 * @param object
 	 * @param
 	 */
-	public FormPlaceElementCommand(ISupportChilds parent, Object object, Object requestType, Map<Object, Object> objectProperties,
+	public FormPlaceElementCommand(IApplication application, ISupportChilds parent, Object object, Object requestType, Map<Object, Object> objectProperties,
 		IFieldPositioner fieldPositioner, Point defaultLocation, IPersist context)
 	{
+		this.application = application;
 		this.parent = parent;
 		this.object = object;
 		this.requestType = requestType;
@@ -178,7 +181,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 			if (((RequestType)requestType).type == RequestType.TYPE_TAB)
 			{
 				setLabel("place tabpanel");
-				return ElementFactory.createTabs(parent, (Object[])object, location, TabPanel.DEFAULT,
+				return ElementFactory.createTabs(application, parent, (Object[])object, location, TabPanel.DEFAULT,
 					(String)objectProperties.get(ElementFactory.NAME_HINT_PROPERTY));
 			}
 

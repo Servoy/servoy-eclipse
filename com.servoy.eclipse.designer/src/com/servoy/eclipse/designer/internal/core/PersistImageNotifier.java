@@ -16,26 +16,16 @@
  */
 package com.servoy.eclipse.designer.internal.core;
 
-import java.awt.Color;
 import java.awt.Component;
 
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
-
-import org.eclipse.swt.graphics.ImageData;
-
-import com.servoy.eclipse.core.DesignApplication;
 import com.servoy.eclipse.core.DesignComponentFactory;
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+
 
 /**
  * Handles painting of form editor elements using awt printing.
@@ -43,158 +33,48 @@ import com.servoy.j2db.persistence.IPersist;
  * @author rgansevles
  */
 
-public class PersistImageNotifier implements IImageNotifier, IImageListener
+public class PersistImageNotifier extends AbstractImageNotifier
 {
-	private final IApplication application;
 	private final IPersist persist;
 	private final Form form;
-	private ImageData imageData;
-	private JLabel label = null; // for painting
-	private volatile boolean isWaitingStart = false;
-
-	ImageNotifierSupport imSupport;
 
 	public PersistImageNotifier(IApplication application, IPersist persist, Form form)
 	{
-		this.application = application;
+		super(application);
 		this.persist = persist;
 		this.form = form;
 	}
 
-	public void addImageListener(IImageListener listener)
+	@Override
+	protected Component createComponent()
 	{
-		if (imSupport == null)
+		FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
+		Component comp = null;
+		if (persist instanceof Bean)
 		{
-			imSupport = new ImageNotifierSupport();
-			imSupport.addImageListener(this); // for caching imageData
-		}
-		imSupport.addImageListener(listener);
-	}
-
-	public void removeImageListener(IImageListener listener)
-	{
-		if (imSupport != null)
-		{
-			imSupport.removeImageListener(listener);
-		}
-	}
-
-	public void invalidateImage()
-	{
-		imageData = null;
-	}
-
-	public void refreshImage()
-	{
-		if (imageData == null)
-		{
-			if (isWaitingStart)
+			Object beanInstance = DesignComponentFactory.getBeanDesignInstance(application, editingFlattenedSolution, (Bean)persist, form);
+			if (beanInstance instanceof Component)
 			{
-				// am already waiting to paint the persist, no need to paint again 
-				return;
+				comp = (Component)beanInstance;
 			}
-			isWaitingStart = true;
-			SwingUtilities.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					try
-					{
-						if (label == null)
-						{
-							label = new JLabel()
-							{
-								@Override
-								public boolean isShowing()
-								{
-									// make sure all awt components will paint
-									return true;
-								}
-							};
-						}
-						label.removeAll();
-						label.setOpaque(false);
-						label.setVisible(true);
-
-						((DesignApplication)application).getEditLabel().add(label);
-						FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
-						isWaitingStart = false;
-						Component comp = null;
-						if (persist instanceof Bean)
-						{
-							Object beanInstance = DesignComponentFactory.getBeanDesignInstance(application, editingFlattenedSolution, (Bean)persist, form);
-							if (beanInstance instanceof Component)
-							{
-								comp = (Component)beanInstance;
-							}
-						}
-						if (comp == null)
-						{
-							comp = DesignComponentFactory.createDesignComponent(application, editingFlattenedSolution, persist, form);
-						}
-
-						label.add(comp);
-						label.setSize(comp.getWidth(), comp.getHeight());
-						comp.setLocation(0, 0); // paint in left-upper corner
-						label.doLayout();
-
-						if (persist instanceof AbstractBase)
-						{
-							Color background = null;
-							if (comp instanceof JComponent && ((JComponent)comp).isOpaque() && comp.isBackgroundSet())
-							{
-								background = comp.getBackground();
-							}
-							((AbstractBase)persist).setRuntimeProperty(PersistPropertySource.LastPaintedBackgroundProperty, background);
-							((AbstractBase)persist).setRuntimeProperty(PersistPropertySource.LastPaintedFontProperty, comp.getFont());
-						}
-						float alpha;
-						if (comp.isVisible())
-						{
-							alpha = 1.0f;
-						}
-						else
-						{
-							// paint 'invisible' elements with some translucency.
-							comp.setVisible(true);
-							alpha = 0.5f;
-						}
-						new ImageDataCollector(imSupport).start(label, comp.getWidth(), comp.getHeight(), alpha);
-					}
-					catch (Exception e)
-					{
-						isWaitingStart = false;
-						ServoyLog.logError(e);
-						((DesignApplication)application).getEditLabel().remove(label); // normally done in imageChanged()
-					}
-				}
-			});
 		}
-		else
+		if (comp == null)
 		{
-			imSupport.fireImageChanged(imageData);
+			comp = DesignComponentFactory.createDesignComponent(application, editingFlattenedSolution, persist, form);
 		}
+		return comp;
 	}
 
-	public void imageChanged(ImageData data)
+	@Override
+	protected float handleAlpha(Component component)
 	{
-		imageData = data;
-		if (label != null)
+		if (component.isVisible())
 		{
-			SwingUtilities.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					((DesignApplication)application).getEditLabel().remove(label);
-					((DesignApplication)application).getEditLabel().repaint();
-				}
-			});
-
+			return super.handleAlpha(component);
 		}
-	}
 
-	public boolean hasImageListeners()
-	{
-		return true; // not used
+		// paint 'invisible' elements with some translucency.
+		component.setVisible(true);
+		return 0.5f;
 	}
 }

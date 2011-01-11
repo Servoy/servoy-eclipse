@@ -43,7 +43,7 @@ import com.servoy.j2db.util.FixedStyleSheet;
 import com.servoy.j2db.util.PersistHelper;
 
 /**
- * Layer to print form background stuff like data-renders and page-breaks.
+ * Layer to print form background stuff like data-renderers and page-breaks.
  * 
  * @author rgansevles
  * 
@@ -67,7 +67,7 @@ public class FormBackgroundLayer extends FreeformLayer
 		graphics.pushState();
 		try
 		{
-			paintDatarenderes(graphics);
+			paintDatarenderers(graphics);
 			paintPagebreaks(graphics);
 		}
 		finally
@@ -77,16 +77,16 @@ public class FormBackgroundLayer extends FreeformLayer
 	}
 
 	/**
-	 * Paint data-renders.
+	 * Paint data-renderers.
 	 * <p>
 	 * graphics state is expected to be saved by caller.
 	 * 
 	 * @param graphics
 	 */
-	protected void paintDatarenderes(Graphics graphics)
+	protected void paintDatarenderers(Graphics graphics)
 	{
 		Form flattenedForm = editorPart.getFlattenedForm();
-		if (flattenedForm == null) return;
+		if (flattenedForm == null || flattenedForm.getTransparent()) return;
 
 		Iterator<Part> parts = flattenedForm.getParts();
 		int prevY = 0;
@@ -131,7 +131,7 @@ public class FormBackgroundLayer extends FreeformLayer
 			String lookupname = "form";
 			if (form.getStyleClass() != null && !"".equals(form.getStyleClass()))
 			{
-				lookupname += "." + form.getStyleClass();
+				lookupname += '.' + form.getStyleClass();
 			}
 			Style style = styleSheet.getStyle(lookupname);
 			if (style != null)

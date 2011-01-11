@@ -67,8 +67,8 @@ public class TabFormGraphicalEditPart extends BasePersistGraphicalEditPart
 	@Override
 	protected void createEditPolicies()
 	{
-		installEditPolicy(PasteToSupportChildsEditPolicy.PASTE_ROLE, new PasteToSupportChildsEditPolicy(getFieldPositioner()));
-		installEditPolicy(EditPolicy.COMPONENT_ROLE, new PersistEditPolicy(getFieldPositioner()));
+		installEditPolicy(PasteToSupportChildsEditPolicy.PASTE_ROLE, new PasteToSupportChildsEditPolicy(application, getFieldPositioner()));
+		installEditPolicy(EditPolicy.COMPONENT_ROLE, new PersistEditPolicy(application, getFieldPositioner()));
 	}
 
 	@Override

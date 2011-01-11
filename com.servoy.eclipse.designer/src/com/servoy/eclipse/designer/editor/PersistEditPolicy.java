@@ -47,6 +47,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
@@ -71,9 +72,11 @@ class PersistEditPolicy extends ComponentEditPolicy
 {
 
 	private final IFieldPositioner fieldPositioner;
+	private final IApplication application;
 
-	public PersistEditPolicy(IFieldPositioner fieldPositioner)
+	public PersistEditPolicy(IApplication application, IFieldPositioner fieldPositioner)
 	{
+		this.application = application;
 		this.fieldPositioner = fieldPositioner;
 	}
 
@@ -140,15 +143,15 @@ class PersistEditPolicy extends ComponentEditPolicy
 			if (VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()))
 			{
 				DataFieldRequest dataFieldRequest = ((DataFieldRequest)request);
-				command = new FormPlaceFieldCommand(portal, (IPersist)formEditPart.getModel(), dataFieldRequest.getData(), dataFieldRequest.getType(),
-					dataFieldRequest.getExtendedData(), fieldPositioner, fieldsLocation, dataFieldRequest.placeAsLabels, dataFieldRequest.placeWithLabels,
-					dataFieldRequest.placeHorizontal, dataFieldRequest.fillText, dataFieldRequest.fillName, (IPersist)(formEditPart == null ? null
-						: formEditPart.getModel()));
+				command = new FormPlaceFieldCommand(application, portal, (IPersist)formEditPart.getModel(), dataFieldRequest.getData(),
+					dataFieldRequest.getType(), dataFieldRequest.getExtendedData(), fieldPositioner, fieldsLocation, dataFieldRequest.placeAsLabels,
+					dataFieldRequest.placeWithLabels, dataFieldRequest.placeHorizontal, dataFieldRequest.fillText, dataFieldRequest.fillName,
+					(IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 			}
 			else
 			{
 				// other element
-				command = new FormPlaceElementCommand(portal, data, request.getType(), request.getExtendedData(), fieldPositioner, fieldsLocation,
+				command = new FormPlaceElementCommand(application, portal, data, request.getType(), request.getExtendedData(), fieldPositioner, fieldsLocation,
 					(IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 			}
 		}
@@ -156,8 +159,8 @@ class PersistEditPolicy extends ComponentEditPolicy
 		else if (persist instanceof TabPanel && VisualFormEditor.REQ_PLACE_TAB.equals(request.getType()) && request instanceof DataRequest)
 		{
 			// add tab to existing tab panel
-			command = new FormPlaceElementCommand((TabPanel)persist, ((DataRequest)request).getData(), request.getType(), request.getExtendedData(), null,
-				null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
+			command = new FormPlaceElementCommand(application, (TabPanel)persist, ((DataRequest)request).getData(), request.getType(),
+				request.getExtendedData(), null, null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 		}
 
 		else if (VisualFormEditor.REQ_BRING_TO_FRONT.equals(request.getType()) || VisualFormEditor.REQ_SEND_TO_BACK.equals(request.getType()))

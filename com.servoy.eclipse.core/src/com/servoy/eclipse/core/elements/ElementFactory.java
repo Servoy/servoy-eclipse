@@ -51,6 +51,8 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
+import com.servoy.j2db.IApplication;
+import com.servoy.j2db.IServiceProvider;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -94,6 +96,7 @@ import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.server.headlessclient.dataui.WebDefaultRecordNavigator;
 import com.servoy.j2db.util.ComponentFactoryHelper;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.FixedStyleSheet;
 import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -304,7 +307,37 @@ public class ElementFactory
 		}
 
 		return null;
+	}
 
+	public static Border getFormBorder(IServiceProvider sp, Form form)
+	{
+		if (form == null)
+		{
+			return null;
+		}
+		Border border = ComponentFactoryHelper.createBorder(form.getBorderType(), true);
+		if (border != null)
+		{
+			return border;
+		}
+
+		// Look into styles.
+		FixedStyleSheet ss = ComponentFactory.getCSSStyleForForm(sp, form);
+		if (ss != null)
+		{
+			String lookupname = "form"; //$NON-NLS-1$
+			if (form.getStyleClass() != null && !"".equals(form.getStyleClass())) //$NON-NLS-1$
+			{
+				lookupname += '.' + form.getStyleClass();
+			}
+			javax.swing.text.Style style = ss.getStyle(lookupname);
+			if (style != null)
+			{
+				return ss.getBorder(style);
+			}
+		}
+
+		return null;
 	}
 
 	public static Field createField(ISupportFormElements parent, IDataProvider dataProvider, Point location) throws RepositoryException
@@ -500,8 +533,8 @@ public class ElementFactory
 		return name;
 	}
 
-	public static IPersist[] createTabs(ISupportChilds parent, Object[] relatedForms, Point location, int tabOrientation, String nameHint)
-		throws RepositoryException
+	public static IPersist[] createTabs(IApplication application, ISupportChilds parent, Object[] relatedForms, Point location, int tabOrientation,
+		String nameHint) throws RepositoryException
 	{
 		TabPanel tabPanel;
 		List<IPersist> tabs = null;
@@ -544,7 +577,7 @@ public class ElementFactory
 						{
 							tabs.add(tab);
 						}
-						Dimension formSize = calculateFormSize(rf.form);
+						Dimension formSize = calculateFormSize(application, rf.form);
 						if (maxDimension == null) maxDimension = formSize;
 						else if (maxDimension.width < formSize.width && maxDimension.height < formSize.height) maxDimension = formSize;
 
@@ -577,12 +610,12 @@ public class ElementFactory
 	 * @param form
 	 * @return
 	 */
-	public static Dimension calculateFormSize(Form form)
+	public static Dimension calculateFormSize(IApplication application, Form form)
 	{
-		return calculateFormSize(form, new HashSet<Form>());
+		return calculateFormSize(application, form, new HashSet<Form>());
 	}
 
-	private static Dimension calculateFormSize(Form form, Set<Form> processed)
+	private static Dimension calculateFormSize(IApplication application, Form form, Set<Form> processed)
 	{
 		if (form == null || !processed.add(form))
 		{
@@ -590,7 +623,7 @@ public class ElementFactory
 		}
 
 		// include border size
-		Border border = ComponentFactoryHelper.createBorder(form.getBorderType(), true);
+		Border border = getFormBorder(application, form);
 		Insets borderInsets;
 		if (border != null)
 		{
@@ -613,7 +646,7 @@ public class ElementFactory
 		}
 		else if (navigatorID != Form.NAVIGATOR_NONE)
 		{
-			navigatorSize = calculateFormSize(
+			navigatorSize = calculateFormSize(application,
 				ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form).getForm(navigatorID), processed);
 		}
 

@@ -42,6 +42,7 @@ import com.servoy.eclipse.designer.editor.commands.FormPlaceFieldCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlacePortalCommand;
 import com.servoy.eclipse.designer.editor.commands.PersistPlaceCommandWrapper;
 import com.servoy.eclipse.dnd.FormElementTransfer;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
@@ -55,9 +56,11 @@ import com.servoy.j2db.persistence.Part;
 public class FormEditPolicy extends ComponentEditPolicy
 {
 	private final IFieldPositioner fieldPositioner;
+	private final IApplication application;
 
-	public FormEditPolicy(IFieldPositioner fieldPositioner)
+	public FormEditPolicy(IApplication application, IFieldPositioner fieldPositioner)
 	{
+		this.application = application;
 		this.fieldPositioner = fieldPositioner;
 	}
 
@@ -73,22 +76,23 @@ public class FormEditPolicy extends ComponentEditPolicy
 		{
 			Object data = request instanceof DataRequest ? ((DataRequest)request).getData() : null;
 			final org.eclipse.draw2d.geometry.Point location = request instanceof DataRequest ? ((DataRequest)request).getlocation() : null;
-			command = new FormPlaceElementCommand(form, data, request.getType(), request.getExtendedData(), fieldPositioner, location == null ? null
-				: location.getSWTPoint(), form);
+			command = new FormPlaceElementCommand(application, form, data, request.getType(), request.getExtendedData(), fieldPositioner, location == null
+				? null : location.getSWTPoint(), form);
 		}
 		else if (VisualFormEditor.REQ_PLACE_PORTAL.equals(request.getType()) && request instanceof DataFieldRequest)
 		{
 			DataFieldRequest dataFieldRequest = ((DataFieldRequest)request);
-			command = new FormPlacePortalCommand(form, dataFieldRequest.getData(), dataFieldRequest.getType(), dataFieldRequest.getExtendedData(),
+			command = new FormPlacePortalCommand(application, form, dataFieldRequest.getData(), dataFieldRequest.getType(), dataFieldRequest.getExtendedData(),
 				fieldPositioner, dataFieldRequest.getlocation() == null ? null : dataFieldRequest.getlocation().getSWTPoint(), dataFieldRequest.fillText,
 				dataFieldRequest.fillName, form);
 		}
 		else if (VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()) && request instanceof DataFieldRequest)
 		{
 			DataFieldRequest dataFieldRequest = ((DataFieldRequest)request);
-			command = new FormPlaceFieldCommand(form, form, dataFieldRequest.getData(), dataFieldRequest.getType(), dataFieldRequest.getExtendedData(),
-				fieldPositioner, dataFieldRequest.getlocation() == null ? null : dataFieldRequest.getlocation().getSWTPoint(), dataFieldRequest.placeAsLabels,
-				dataFieldRequest.placeWithLabels, dataFieldRequest.placeHorizontal, dataFieldRequest.fillText, dataFieldRequest.fillName, form);
+			command = new FormPlaceFieldCommand(application, form, form, dataFieldRequest.getData(), dataFieldRequest.getType(),
+				dataFieldRequest.getExtendedData(), fieldPositioner, dataFieldRequest.getlocation() == null ? null
+					: dataFieldRequest.getlocation().getSWTPoint(), dataFieldRequest.placeAsLabels, dataFieldRequest.placeWithLabels,
+				dataFieldRequest.placeHorizontal, dataFieldRequest.fillText, dataFieldRequest.fillName, form);
 		}
 		else if ((VisualFormEditor.REQ_COPY.equals(request.getType()) || VisualFormEditor.REQ_CUT.equals(request.getType())) && request instanceof GroupRequest)
 		{

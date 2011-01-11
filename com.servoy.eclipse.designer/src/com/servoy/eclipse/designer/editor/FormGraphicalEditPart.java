@@ -24,6 +24,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.border.Border;
+
 import org.eclipse.draw2d.FreeformLayer;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -37,6 +39,8 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Point;
 
+import com.servoy.eclipse.core.elements.ElementFactory;
+import com.servoy.eclipse.designer.editor.FormBorderGraphicalEditPart.BorderModel;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -54,6 +58,8 @@ import com.servoy.j2db.persistence.TabPanel;
 
 /**
  * The Contents Graphical Edit Part for a Servoy Form.
+ * 
+ * @author rgansevles
  */
 public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistEditPart
 {
@@ -138,6 +144,12 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 			}
 		}
 
+		Border border = ElementFactory.getFormBorder(application, flattenedForm);
+		if (border != null)
+		{
+			list.add(new BorderModel(flattenedForm)); // A separate editpart to show the form border 
+		}
+
 		// parts go on top
 		list.addAll(parts);
 		return list;
@@ -150,7 +162,6 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		formLayer.setLayoutManager(new FormLayout());
 		return formLayer;
 	}
-
 
 	@Override
 	public void activate()
@@ -170,9 +181,9 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 	@Override
 	protected void createEditPolicies()
 	{
-		installEditPolicy(PasteToSupportChildsEditPolicy.PASTE_ROLE, new PasteToSupportChildsEditPolicy(getFieldPositioner()));
-		installEditPolicy(EditPolicy.LAYOUT_ROLE, new FormXYLayoutPolicy(this));
-		installEditPolicy(EditPolicy.COMPONENT_ROLE, new FormEditPolicy(getFieldPositioner()));
+		installEditPolicy(PasteToSupportChildsEditPolicy.PASTE_ROLE, new PasteToSupportChildsEditPolicy(application, getFieldPositioner()));
+		installEditPolicy(EditPolicy.LAYOUT_ROLE, new FormXYLayoutPolicy(application, this));
+		installEditPolicy(EditPolicy.COMPONENT_ROLE, new FormEditPolicy(application, getFieldPositioner()));
 	}
 
 	/**
@@ -189,6 +200,10 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 	 */
 	protected static EditPart createChild(IApplication application, VisualFormEditor editorPart, Form form, Object child)
 	{
+		if (child instanceof BorderModel)
+		{
+			return new FormBorderGraphicalEditPart(application, (BorderModel)child);
+		}
 		if (child instanceof Part)
 		{
 			return new FormPartGraphicalEditPart(application, editorPart, (Part)child, ElementUtil.isInheritedFormElement(form, child));
