@@ -44,7 +44,6 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -1215,12 +1214,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 
 		if (propertyDescriptor.propertyDescriptor.getPropertyType() == java.awt.Font.class)
 		{
-			final IDefaultValue<FontData[]> getLastPaintedFont;
+			final IDefaultValue<String> getLastPaintedFont;
 			if (persist instanceof AbstractBase)
 			{
-				getLastPaintedFont = new IDefaultValue<FontData[]>()
+				getLastPaintedFont = new IDefaultValue<String>()
 				{
-					public FontData[] getValue()
+					public String getValue()
 					{
 						return PropertyFontConverter.INSTANCE.convertProperty(id, ((AbstractBase)persist).getRuntimeProperty(LastPaintedFontProperty));
 					}
@@ -1230,14 +1229,13 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			{
 				getLastPaintedFont = null;
 			}
-			return new PropertyController<java.awt.Font, FontData[]>(id, displayName, PropertyFontConverter.INSTANCE, FontLabelProvider.INSTANCE,
-				new ICellEditorFactory()
+			return new PropertyController<java.awt.Font, String>(id, displayName, PropertyFontConverter.INSTANCE, new LabelProvider(), new ICellEditorFactory()
+			{
+				public CellEditor createPropertyEditor(Composite parent)
 				{
-					public CellEditor createPropertyEditor(Composite parent)
-					{
-						return new FontCellEditor(parent, getLastPaintedFont);
-					}
-				});
+					return new FontCellEditor(parent, getLastPaintedFont);
+				}
+			});
 		}
 
 		if (propertyDescriptor.propertyDescriptor.getPropertyType() == Border.class)
@@ -2254,24 +2252,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 
 		if (name.equals("fontType"))
 		{
-			IPropertyConverter<String, java.awt.Font> fontStringConverter = new IPropertyConverter<String, java.awt.Font>()
-			{
-				public java.awt.Font convertProperty(Object property, String value)
-				{
-					return PersistHelper.createFont(value);
-				}
-
-				public String convertValue(Object property, java.awt.Font value)
-				{
-					return PersistHelper.createFontString(value);
-				}
-			};
-			final IDefaultValue<FontData[]> getLastPaintedFont;
+			final IDefaultValue<String> getLastPaintedFont;
 			if (persist instanceof AbstractBase)
 			{
-				getLastPaintedFont = new IDefaultValue<FontData[]>()
+				getLastPaintedFont = new IDefaultValue<String>()
 				{
-					public FontData[] getValue()
+					public String getValue()
 					{
 						return PropertyFontConverter.INSTANCE.convertProperty(id, ((AbstractBase)persist).getRuntimeProperty(LastPaintedFontProperty));
 					}
@@ -2281,14 +2267,17 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 			{
 				getLastPaintedFont = null;
 			}
-			return new PropertyController<String, FontData[]>(id, displayName, new ChainedPropertyConverter<String, java.awt.Font, FontData[]>(
-				fontStringConverter, PropertyFontConverter.INSTANCE), FontLabelProvider.INSTANCE, new ICellEditorFactory()
-			{
-				public CellEditor createPropertyEditor(Composite parent)
+			// Both property (P) and edit (E) types are font strings, parse the string as awt font and convert back so that guessed fonts are mapped to 
+			// the correct string for that font
+			return new PropertyController<String, String>(id, displayName, new ChainedPropertyConverter<String, java.awt.Font, String>(
+				new InversedPropertyConverter<String, java.awt.Font>(PropertyFontConverter.INSTANCE), PropertyFontConverter.INSTANCE),
+				FontLabelProvider.INSTANCE, new ICellEditorFactory()
 				{
-					return new FontCellEditor(parent, getLastPaintedFont);
-				}
-			});
+					public CellEditor createPropertyEditor(Composite parent)
+					{
+						return new FontCellEditor(parent, getLastPaintedFont);
+					}
+				});
 		}
 
 		if (name.endsWith("dataProviderID"))

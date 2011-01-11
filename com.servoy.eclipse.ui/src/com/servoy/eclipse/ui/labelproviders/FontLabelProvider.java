@@ -16,14 +16,15 @@
  */
 package com.servoy.eclipse.ui.labelproviders;
 
+import java.awt.Font;
+
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.FontData;
 
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.property.PropertyFontConverter;
 
 /**
- * Label provider for SWT FontData .
+ * Label provider for Font strings .
  * 
  * @author rgansevles
  */
@@ -35,47 +36,44 @@ public class FontLabelProvider extends LabelProvider
 	@Override
 	public String getText(Object element)
 	{
-		if (element instanceof FontData[])
+		if (element instanceof String || element == null)
 		{
-			FontData[] fontDatas = (FontData[])element;
-			if (fontDatas.length == 0)
+			Font awtFont = PropertyFontConverter.INSTANCE.convertValue(null, (String)element);
+			if (awtFont == null)
 			{
 				return Messages.LabelDefault;
 			}
 
-			StringBuffer sb = new StringBuffer();
-			for (FontData fd : fontDatas)
+			StringBuilder sb = new StringBuilder();
+			sb.append(awtFont.getName());
+			sb.append(',');
+			String style;
+			switch (awtFont.getStyle())
 			{
-				if (sb.length() > 0) sb.append(' ');
-				sb.append(fd.getName());
-				sb.append(',');
-				String style;
-				switch (fd.getStyle())
-				{
-					case SWT.NORMAL :
-						style = Messages.FontPlain;
-						break;
-					case SWT.BOLD :
-						style = Messages.FontBold;
-						break;
-					case SWT.ITALIC :
-						style = Messages.FontItalic;
-						break;
-					case SWT.BOLD + SWT.ITALIC :
-						style = Messages.FontBoldItalic;
-						break;
+				case Font.PLAIN :
+					style = Messages.FontPlain;
+					break;
+				case Font.BOLD :
+					style = Messages.FontBold;
+					break;
+				case Font.ITALIC :
+					style = Messages.FontItalic;
+					break;
+				case Font.BOLD + Font.ITALIC :
+					style = Messages.FontBoldItalic;
+					break;
 
-					default :
-						style = String.valueOf(fd.getStyle());
-						break;
-				}
-
-				sb.append(style);
-				sb.append(',');
-				sb.append(fd.getHeight());
+				default :
+					style = String.valueOf(awtFont.getStyle());
+					break;
 			}
+
+			sb.append(style);
+			sb.append(',');
+			sb.append(awtFont.getSize());
 			return sb.toString();
 		}
-		return null;
+
+		return super.getText(element);
 	}
 }

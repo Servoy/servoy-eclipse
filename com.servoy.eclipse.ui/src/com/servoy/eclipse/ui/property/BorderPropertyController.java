@@ -33,7 +33,6 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -726,8 +725,8 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			}
 			if (SHADOW.equals(id))
 			{
-				return new EtchedBorder(border.getEtchType(), border.getHighlightColor(),
-					ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (String)v));
+				return new EtchedBorder(border.getEtchType(), border.getHighlightColor(), ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id,
+					(String)v));
 			}
 			if (RAISED.equals(id))
 			{
@@ -959,8 +958,8 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 						}
 					},
 
-					JUSTIFICATION_CONTROLLER, POSITION_CONTROLLER, new PropertyController<java.awt.Font, FontData[]>(FONT, "font",
-						PropertyFontConverter.INSTANCE, FontLabelProvider.INSTANCE, new ICellEditorFactory()
+					JUSTIFICATION_CONTROLLER, POSITION_CONTROLLER, new PropertyController<java.awt.Font, String>(FONT, "font", PropertyFontConverter.INSTANCE,
+						FontLabelProvider.INSTANCE, new ICellEditorFactory()
 						{
 							public CellEditor createPropertyEditor(Composite parent)
 							{
@@ -1033,7 +1032,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			if (FONT.equals(id))
 			{
 				return new TitledBorder(null, border.getTitle(), border.getTitleJustification(), border.getTitlePosition(),
-					PropertyFontConverter.INSTANCE.convertValue(id, (FontData[])v), border.getTitleColor());
+					PropertyFontConverter.INSTANCE.convertValue(id, (String)v), border.getTitleColor());
 			}
 			if (COLOR.equals(id))
 			{

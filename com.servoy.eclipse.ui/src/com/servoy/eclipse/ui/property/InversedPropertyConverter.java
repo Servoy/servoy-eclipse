@@ -16,37 +16,28 @@
  */
 package com.servoy.eclipse.ui.property;
 
-import com.servoy.j2db.util.PersistHelper;
-
 /**
- * Converter between swing (awt) fonts and font strings.
+ * Property converter that inverse the wrapped property converter.
  * 
  * @author rgansevles
  */
 
-public class PropertyFontConverter implements IPropertyConverter<java.awt.Font, String>
+public class InversedPropertyConverter<P, E> implements IPropertyConverter<P, E>
 {
-	public static final PropertyFontConverter INSTANCE = new PropertyFontConverter();
+	private final IPropertyConverter<E, P> propertyConverter;
 
-	private PropertyFontConverter()
+	public InversedPropertyConverter(IPropertyConverter<E, P> propertyConverter)
 	{
+		this.propertyConverter = propertyConverter;
 	}
 
-	/**
-	 * Convert AWT font to font string
-	 */
-	public String convertProperty(Object id, java.awt.Font awtfont)
+	public E convertProperty(Object id, P value)
 	{
-		if (awtfont == null) return null;
-		return PersistHelper.createFontString(awtfont);
+		return propertyConverter.convertValue(id, value);
 	}
 
-	/**
-	 * Convert font string to AWT font
-	 */
-	public java.awt.Font convertValue(Object id, String fontString)
+	public P convertValue(Object id, E value)
 	{
-		if (fontString == null || fontString.trim().length() == 0) return null;
-		return PersistHelper.createFont(fontString);
+		return propertyConverter.convertProperty(id, value);
 	}
 }
