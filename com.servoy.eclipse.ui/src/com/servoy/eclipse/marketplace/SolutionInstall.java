@@ -17,8 +17,18 @@
 
 package com.servoy.eclipse.marketplace;
 
+import java.io.File;
+
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.w3c.dom.Node;
+
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
 
 /**
  * Class representing an installable solution from the Servoy Marketplace
@@ -27,14 +37,44 @@ import org.w3c.dom.Node;
  */
 public class SolutionInstall extends InstallItem
 {
+	public static final String destinationDir = "solutions/marketplace"; //$NON-NLS-1$
+	private final ImportSolutionWizard importSolutionWizard;
+
 	public SolutionInstall(Node entryNode)
 	{
 		super(entryNode);
+		importSolutionWizard = new ImportSolutionWizard();
 	}
 
 	@Override
-	public void install(IProgressMonitor monitor)
+	public void install(IProgressMonitor monitor) throws Exception
 	{
+		if (DOWNLOAD_TYPE_ZIP.equals(getDownloadType()) || DOWNLOAD_TYPE_SERVOY.equals(getDownloadType()))
+		{
+			File downloadedFile = downloadURL(
+				DOWNLOAD_TYPE_SERVOY.equals(getDownloadType()) ? destinationDir : "", monitor, "Installing solution " + getName() + " ..."); //$NON-NLS-1$
+			if (downloadedFile != null)
+			{
+				final String downloadFileCanonicalPath = downloadedFile.getCanonicalPath();
 
+				Display.getDefault().syncExec(new Runnable()
+				{
+					public void run()
+					{
+						IStructuredSelection selection = StructuredSelection.EMPTY;
+						importSolutionWizard.setSolutionFilePath(downloadFileCanonicalPath);
+						importSolutionWizard.setAskForImportServerName(true);
+						importSolutionWizard.init(PlatformUI.getWorkbench(), selection);
+						WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), importSolutionWizard);
+						dialog.create();
+						dialog.open();
+					}
+				});
+			}
+		}
+		else
+		{
+			ServoyLog.logWarning("Maketplace unknown download type for solution install " + getDownloadType(), null);
+		}
 	}
 }

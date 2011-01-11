@@ -241,6 +241,34 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 
 	}
 
+	public String askServerForImportUserData(String importServerName)
+	{
+		ServoyModelManager.getServoyModelManager().getServoyModel();
+		String[] serverNames = ServoyModel.getServerManager().getServerNames(true, true, true, false);
+		int selectedServerIdx = 0;
+		for (int i = 0; i < serverNames.length; i++)
+		{
+			if (serverNames[i].equals(importServerName))
+			{
+				selectedServerIdx = i;
+				break;
+			}
+		}
+		final OptionDialog optionDialog = new OptionDialog(shell, "Select server for import user data", null,
+			"Please select server to be used for importing user data that were exported from a server with name : " + importServerName +
+				"\n\nIf you want to import into a new server, please press skip, create the new server and restart the import.", MessageDialog.QUESTION,
+			new String[] { "OK", "Skip" }, 0, serverNames, selectedServerIdx);
+		Display.getDefault().syncExec(new Runnable()
+		{
+			public void run()
+			{
+				retval = optionDialog.open();
+			}
+		});
+
+		return retval == Window.OK ? serverNames[optionDialog.getSelectedOption()] : null;
+	}
+
 	public String askServerForRepositoryUserData()
 	{
 		try

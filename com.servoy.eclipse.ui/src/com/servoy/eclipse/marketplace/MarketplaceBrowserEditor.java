@@ -134,6 +134,20 @@ public class MarketplaceBrowserEditor extends EditorPart
 											try
 											{
 												installItem.install(monitor);
+												if (installItem.isRestartRequired())
+												{
+													Display.getDefault().asyncExec(new Runnable()
+													{
+														public void run()
+														{
+															if (MessageDialog.openQuestion(UIUtils.getActiveShell(), "Servoy Marketplace",
+																"Servoy Developer must be restarted to complete the installation.\n\nDo you want to restart now ?"))
+															{
+																PlatformUI.getWorkbench().restart();
+															}
+														}
+													});
+												}
 											}
 											catch (final Exception ex)
 											{
@@ -145,7 +159,6 @@ public class MarketplaceBrowserEditor extends EditorPart
 															installItem.getName() + ".\n\n" + ex.getMessage());
 													}
 												});
-
 											}
 										}
 									});

@@ -103,6 +103,8 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					IXMLImportHandlerVersions11AndHigher x11handler = as.createXMLInMemoryImportHandler(importEngine.getVersionInfo(), as.getDataServer(),
 						as.getClientId(), userChannel, (EclipseRepository)ServoyModel.getDeveloperRepository());
 
+					x11handler.setAskForImportServerName(ImportSolutionWizard.this.shouldAskForImportServerName());
+
 					IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler, userChannel,
 						(EclipseRepository)ServoyModel.getDeveloperRepository(), resourcesProjectName, existingProject, monitor, activateSolution, cleanImport);
 					if (rootObjects != null)
@@ -177,7 +179,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
 		setNeedsProgressMonitor(true);
-		page = new ImportSolutionWizardPage("Import solution");
+		page = new ImportSolutionWizardPage(this, "Import solution");
 	}
 
 	@Override
@@ -187,6 +189,28 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	}
 
 	public static String initialPath = null;
+	private String solutionFilePath;
+	private boolean askForImportServerName;
+
+	public void setSolutionFilePath(String solutionFilePath)
+	{
+		this.solutionFilePath = solutionFilePath;
+	}
+
+	public String getSolutionFilePath()
+	{
+		return solutionFilePath;
+	}
+
+	public void setAskForImportServerName(boolean askForImportServerName)
+	{
+		this.askForImportServerName = askForImportServerName;
+	}
+
+	public boolean shouldAskForImportServerName()
+	{
+		return askForImportServerName;
+	}
 
 	public static class ImportSolutionWizardPage extends WizardPage implements IValidator
 	{
@@ -198,9 +222,12 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		private Button displayDataModelChanges;
 		private Button activateSolution;
 
-		protected ImportSolutionWizardPage(String pageName)
+		private final ImportSolutionWizard wizard;
+
+		protected ImportSolutionWizardPage(ImportSolutionWizard wizard, String pageName)
 		{
 			super(pageName);
+			this.wizard = wizard;
 			setTitle("Import a solution");
 			setDescription("A solution (with or without modules) will be imported into the workspace from a .servoy file.");
 		}
@@ -219,6 +246,10 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					validate();
 				}
 			});
+
+			String solutionFilePath = wizard.getSolutionFilePath();
+			if (solutionFilePath != null) filePath.setText(solutionFilePath);
+
 			browseButton = new Button(topLevel, SWT.NONE);
 			browseButton.setText("Browse");
 			browseButton.addSelectionListener(new SelectionAdapter()

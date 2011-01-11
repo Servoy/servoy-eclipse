@@ -53,6 +53,7 @@ import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.persistence.AbstractRootObject;
+import com.servoy.j2db.persistence.I18NUtil.MessageEntry;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
@@ -63,21 +64,20 @@ import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Style;
-import com.servoy.j2db.persistence.I18NUtil.MessageEntry;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.ILogLevel;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.xmlxport.GroupInfo;
+import com.servoy.j2db.util.xmlxport.GroupInfo.GroupElementInfo;
 import com.servoy.j2db.util.xmlxport.IXMLImportEngine;
 import com.servoy.j2db.util.xmlxport.IXMLImportHandlerVersions11AndHigher;
 import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
 import com.servoy.j2db.util.xmlxport.ImportInfo;
 import com.servoy.j2db.util.xmlxport.ImportTransactable;
 import com.servoy.j2db.util.xmlxport.RootObjectImportInfo;
-import com.servoy.j2db.util.xmlxport.UserInfo;
-import com.servoy.j2db.util.xmlxport.GroupInfo.GroupElementInfo;
 import com.servoy.j2db.util.xmlxport.RootObjectInfo.RootElementInfo;
+import com.servoy.j2db.util.xmlxport.UserInfo;
 
 public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXMLImportHandlerVersions11AndHigher
 {
@@ -882,6 +882,15 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 	public void setStyleActiveRelease(IRootObject[] rootObjects) throws RepositoryException
 	{
 		x11handler.setStyleActiveRelease(rootObjects);
+	}
+
+
+	/*
+	 * @see com.servoy.j2db.util.xmlxport.IXMLImportHandlerVersions11AndHigher#setAskForImportServerName(boolean)
+	 */
+	public void setAskForImportServerName(boolean askForImportServerName)
+	{
+		x11handler.setAskForImportServerName(askForImportServerName);
 	}
 
 }

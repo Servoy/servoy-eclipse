@@ -47,6 +47,7 @@ public abstract class InstallItem
 
 	private String name, description, url;
 	private final String downloadType;
+	private boolean isRestartRequired;
 
 	public InstallItem(Node entryNode)
 	{
@@ -70,6 +71,10 @@ public abstract class InstallItem
 			{
 				url = entryChild.getTextContent();
 			}
+			else if ("restart".equals(entryChildName)) //$NON-NLS-1$
+			{
+				isRestartRequired = true;
+			}
 		}
 	}
 
@@ -91,6 +96,11 @@ public abstract class InstallItem
 	public String getDownloadType()
 	{
 		return downloadType;
+	}
+
+	public boolean isRestartRequired()
+	{
+		return isRestartRequired;
 	}
 
 	private void writeStream(InputStream is, File destination, IProgressMonitor monitor)
@@ -131,8 +141,9 @@ public abstract class InstallItem
 		}
 	}
 
-	public void downloadURL(String destinationDir, IProgressMonitor monitor, String monitorMessage) throws IOException
+	public File downloadURL(String destinationDir, IProgressMonitor monitor, String monitorMessage) throws IOException
 	{
+		File destination = null;
 		InputStream sourceInputStream = null;
 		try
 		{
@@ -143,23 +154,31 @@ public abstract class InstallItem
 			int sourceURLContentLen = sourceURLConnection.getContentLength();
 
 			monitor.beginTask(monitorMessage, sourceURLContentLen != -1 ? sourceURLContentLen : 1);
-			if (DOWNLOAD_TYPE_JAR.equals(getDownloadType()))
+			if (DOWNLOAD_TYPE_JAR.equals(getDownloadType()) || DOWNLOAD_TYPE_SERVOY.equals(getDownloadType()))
 			{
-				File destination = new File(new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), destinationDir), getName() +
-					".jar"); //$NON-NLS-1$ 
+				File destinationDirFile = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), destinationDir);
+				destinationDirFile.mkdirs();
+				destination = new File(destinationDirFile, getName() + "." + DOWNLOAD_TYPE_SERVOY); //$NON-NLS-1$ 
 				writeStream(sourceInputStream, destination, sourceURLContentLen != -1 ? monitor : null);
 			}
 			else if (DOWNLOAD_TYPE_ZIP.equals(getDownloadType()))
 			{
 				ZipInputStream zipIS = new ZipInputStream(sourceInputStream);
 				ZipEntry zipEntry;
-				File destination;
+				String zipEntryName;
+				File entryDestination;
 				while ((zipEntry = zipIS.getNextEntry()) != null)
 				{
-					destination = new File(new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), destinationDir), zipEntry.getName());
-					destination = null;
-					if (zipEntry.isDirectory()) destination.mkdirs();
-					else writeStream(zipIS, destination, sourceURLContentLen != -1 ? monitor : null);
+					zipEntryName = zipEntry.getName();
+					entryDestination = new File(new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), destinationDir), zipEntryName);
+
+					// if we have *.servoy file in the solutions/marketplace folder, consider that as the return
+					if (zipEntryName.startsWith(SolutionInstall.destinationDir) && zipEntryName.endsWith(DOWNLOAD_TYPE_SERVOY))
+					{
+						destination = entryDestination;
+					}
+					if (zipEntry.isDirectory()) entryDestination.mkdirs();
+					else writeStream(zipIS, entryDestination, sourceURLContentLen != -1 ? monitor : null);
 				}
 			}
 			else
@@ -182,6 +201,8 @@ public abstract class InstallItem
 			}
 			monitor.done();
 		}
+
+		return destination;
 	}
 
 	public abstract void install(IProgressMonitor monitor) throws Exception;
