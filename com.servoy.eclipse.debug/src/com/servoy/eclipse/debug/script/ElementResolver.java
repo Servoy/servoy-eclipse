@@ -32,7 +32,7 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 
-import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
@@ -175,7 +175,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 			{
 				return null;
 			}
-			ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(fs.getSolution().getName());
+			ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(fs.getSolution().getName());
 			IFile file = project.getProject().getFile("globals.js");
 			IValueCollection globalsValueCollection = ValueCollectionProvider.getValueCollection(context, file);
 			if (globalsValueCollection != null)

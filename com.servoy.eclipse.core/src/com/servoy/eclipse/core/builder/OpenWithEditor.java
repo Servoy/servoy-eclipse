@@ -38,8 +38,11 @@ public class OpenWithEditor implements IMarkerAttributeContributor
 		{
 			try
 			{
-				marker.setAttribute(IDE.EDITOR_ID_ATTR, PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType(contentTypeIdentifier)).getId());
+				if (PlatformUI.isWorkbenchRunning())
+				{
+					marker.setAttribute(IDE.EDITOR_ID_ATTR, PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+						Platform.getContentTypeManager().getContentType(contentTypeIdentifier)).getId());
+				}
 				marker.setAttribute("elementUuid", persist.getUUID().toString()); //$NON-NLS-1$
 			}
 			catch (CoreException e)

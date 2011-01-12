@@ -11,7 +11,6 @@
 <booleanAttribute key="clearwslog" value="false"/>
 <stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/Servoy Launch_mac"/>
 <booleanAttribute key="default" value="false"/>
-<stringAttribute key="deselected_workspace_plugins" value="com.servoy.eclipse.exporter"/>
 <booleanAttribute key="includeOptional" value="true"/>
 <stringAttribute key="location" value="${servoy_install}/workspace"/>
 <listAttribute key="org.eclipse.debug.ui.favoriteGroups">

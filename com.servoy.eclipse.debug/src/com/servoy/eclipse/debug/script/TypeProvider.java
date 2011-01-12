@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -46,16 +46,16 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
@@ -990,7 +990,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	{
 		if (typeName.endsWith(">"))
 		{
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 			int index = typeName.indexOf('<');
 			String config = typeName.substring(index + 1, typeName.length() - 1);
 			String[] solutionServerTableNames = config.split("/");

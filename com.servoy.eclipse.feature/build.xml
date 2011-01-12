@@ -101,6 +101,11 @@
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
+		<ant antfile="build.xml" dir="../com.servoy.eclipse.exporter" target="${target}">
+			<property name="arch" value="x86_64"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
+		</ant>
 	</target>
 	<target name="all.features" depends="init">
 	</target>

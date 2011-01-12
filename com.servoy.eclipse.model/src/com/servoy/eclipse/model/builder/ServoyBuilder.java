@@ -417,10 +417,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					checkModules(getProject());
 					checkResourcesForServoyProject(getProject());
 					checkResourcesForModules(getProject());
-					ServoyProject servoyProject = getServoyProject(project);
-					if (isActiveSolutionOrModule(servoyProject))
+					if (project.exists())
 					{
-						checkColumns(project);
+						ServoyProject servoyProject = getServoyProject(project);
+						if (isActiveSolutionOrModule(servoyProject))
+						{
+							checkColumns(project);
+						}
 					}
 				}
 				else
