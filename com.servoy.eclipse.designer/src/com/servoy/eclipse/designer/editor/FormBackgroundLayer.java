@@ -33,6 +33,7 @@ import org.eclipse.swt.graphics.Color;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
@@ -154,6 +155,10 @@ public class FormBackgroundLayer extends FreeformLayer
 	 */
 	protected void paintPagebreaks(Graphics graphics)
 	{
+		if (!new DesignerPreferences().getPaintPageBreaks())
+		{
+			return;
+		}
 		Form flattenedForm = editorPart.getFlattenedForm();
 		if (flattenedForm == null) return;
 

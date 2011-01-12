@@ -62,7 +62,8 @@ public class DesignerPreferences
 	public static final String GRID_SIZE_SETTING = "gridsize";
 	public static final String GRID_POINTSIZE_SETTING = "pointsize";
 	public static final String SNAPTO_SETTING = "snapTo";
-	public static final String FEEDBACK_SETTING = "feedBack";
+	public static final String FEEDBACK_ALIGNMENT_SETTING = "feedBackAlignment";
+	public static final String FEEDBACK_GRID_SETTING = "feedBackGrid";
 	public static final String ANCHOR_SETTING = "anchor";
 	public static final String SAVE_EDITOR_STATE_SETTING = "saveEditorState";
 	public static final String FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING = "formToolsOnMainToolbar";
@@ -70,14 +71,11 @@ public class DesignerPreferences
 	public static final String SHOW_SAME_SIZE_SETTING = "showSameSizeFeedback";
 	public static final String SHOW_ANCHORING_SETTING = "showAnchoringFeedback";
 	public static final String PALETTE_CUSTOMIZATION_SETTING = "paletteCustomization";
+	public static final String PAINT_PAGEBREAKS_SETTING = "paintPageBreaks";
 
 	public static final String SNAP_TO_ALIGMNENT = "alignment";
 	public static final String SNAP_TO_GRID = "grid";
 	public static final String SNAP_TO_NONE = "none";
-
-	public static final String FEEDBACK_ALIGMNENT = "alignment";
-	public static final String FEEDBACK_GRID = "grid";
-	public static final String FEEDBACK_NONE = "none";
 
 	public static final int COPY_PASTE_OFFSET_DEFAULT = 10;
 	public static final int ALIGNMENT_THRESHOLD_DEFAULT = 12;
@@ -91,13 +89,15 @@ public class DesignerPreferences
 	public static final String ALIGNMENT_GUIDE_COLOR_DEFAULT = "#8eacc3";
 	public static final int GRID_POINTSIZE_DEFAULT = 2;
 	public static final String SNAPTO_DEFAULT = SNAP_TO_ALIGMNENT;
-	public static final String FEEDBACK_DEFAULT = FEEDBACK_ALIGMNENT;
+	public static final boolean FEEDBACK_ALIGNMENT_DEFAULT = true;
+	public static final boolean FEEDBACK_GRID_DEFAULT = false;
 	public static final boolean ANCHOR_DEFAULT = false;
 	public static final boolean SAVE_EDITOR_STATE_DEFAULT = true;
 	public static final boolean SHOW_SAME_SIZE_DEFAULT = true;
 	public static final boolean SHOW_ANCHORING_DEFAULT = true;
 	public static final boolean FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT = true;
 	public static final int METRICS_DEFAULT = PX;
+	public static final boolean PAINT_PAGEBREAKS_DEFAULT = false;
 
 	protected final IEclipsePreferences eclipsePreferences;
 
@@ -258,6 +258,16 @@ public class DesignerPreferences
 		setProperty(ANCHOR_SETTING, anchor);
 	}
 
+	public boolean getPaintPageBreaks()
+	{
+		return getProperty(PAINT_PAGEBREAKS_SETTING, PAINT_PAGEBREAKS_DEFAULT);
+	}
+
+	public void setPaintPageBreaks(boolean paintPageBreaks)
+	{
+		setProperty(PAINT_PAGEBREAKS_SETTING, paintPageBreaks);
+	}
+
 	public static boolean isGuideSetting(String key)
 	{
 		return GUIDE_SIZE_SETTING.equals(getKeyPostfix(key));
@@ -339,24 +349,24 @@ public class DesignerPreferences
 		setProperty(SNAPTO_SETTING, grid ? SNAP_TO_GRID : alignment ? SNAP_TO_ALIGMNENT : SNAP_TO_NONE);
 	}
 
-	public boolean getFeedbackNone()
-	{
-		return !getFeedbackGrid() && !getFeedbackAlignment();
-	}
-
 	public boolean getFeedbackGrid()
 	{
-		return FEEDBACK_GRID.equals(getProperty(FEEDBACK_SETTING, FEEDBACK_DEFAULT));
+		return getProperty(FEEDBACK_GRID_SETTING, FEEDBACK_GRID_DEFAULT);
+	}
+
+	public void setFeedbackGrid(boolean feedbackGrid)
+	{
+		setProperty(FEEDBACK_GRID_SETTING, feedbackGrid);
 	}
 
 	public boolean getFeedbackAlignment()
 	{
-		return FEEDBACK_ALIGMNENT.equals(getProperty(FEEDBACK_SETTING, FEEDBACK_DEFAULT));
+		return getProperty(FEEDBACK_ALIGNMENT_SETTING, FEEDBACK_ALIGNMENT_DEFAULT);
 	}
 
-	public void setFeedback(boolean grid, boolean alignment)
+	public void setFeedbackAlignment(boolean feedbackAlignment)
 	{
-		setProperty(FEEDBACK_SETTING, grid ? FEEDBACK_GRID : alignment ? FEEDBACK_ALIGMNENT : FEEDBACK_NONE);
+		setProperty(FEEDBACK_ALIGNMENT_SETTING, feedbackAlignment);
 	}
 
 	public boolean getSaveEditorState()

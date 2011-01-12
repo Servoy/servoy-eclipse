@@ -13,22 +13,21 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
+
+import com.servoy.eclipse.ui.resource.ColorResource;
 
 /**
  * Viewer for selecting a color value
@@ -65,8 +64,8 @@ public class ColorSelectViewer extends TreeSelectViewer
 		if (image == null)
 		{
 			Point buttonSize = button.getSize();
-			image = new Image(Display.getDefault(), new ImageData(buttonSize.x > 10 ? buttonSize.x - 8 : buttonSize.x, buttonSize.y > 10 ? buttonSize.y - 8
-				: buttonSize.y, 1, new PaletteData(new RGB[] { (RGB)value })));
+			image = ColorResource.INSTANCE.getColorImage(buttonSize.x > 10 ? buttonSize.x - 8 : buttonSize.x, buttonSize.y > 10 ? buttonSize.y - 8
+				: buttonSize.y, 1, (RGB)value);
 		}
 		button.setImage(image);
 	}
