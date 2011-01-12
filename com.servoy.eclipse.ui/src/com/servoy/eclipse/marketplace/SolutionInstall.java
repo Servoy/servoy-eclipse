@@ -57,7 +57,7 @@ public class SolutionInstall extends InstallItem
 			{
 				final String downloadFileCanonicalPath = downloadedFile.getCanonicalPath();
 
-				Display.getDefault().syncExec(new Runnable()
+				Display.getDefault().asyncExec(new Runnable()
 				{
 					public void run()
 					{

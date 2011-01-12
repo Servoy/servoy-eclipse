@@ -41,6 +41,7 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
  */
 public abstract class InstallItem
 {
+	public static final String DOWNLOAD_TYPE_NONE = "none"; //$NON-NLS-1$
 	public static final String DOWNLOAD_TYPE_SERVOY = "servoy"; //$NON-NLS-1$
 	public static final String DOWNLOAD_TYPE_ZIP = "zip"; //$NON-NLS-1$
 	public static final String DOWNLOAD_TYPE_JAR = "jar"; //$NON-NLS-1$

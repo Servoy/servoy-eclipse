@@ -16,21 +16,28 @@
  */
 package com.servoy.eclipse.ui;
 
+import java.io.File;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.equinox.p2.core.IProvisioningAgent;
+import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.prefs.BackingStoreException;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 /**
  * The activator class controls the plug-in life cycle.
@@ -124,6 +131,12 @@ public class Activator extends AbstractUIPlugin
 		imageCacheDescriptor.clear();
 
 		sharedTextColors.dispose();
+
+		if (provisioningAgent != null)
+		{
+			provisioningAgent.stop();
+		}
+
 		plugin = null;
 		super.stop(context);
 	}
@@ -281,5 +294,32 @@ public class Activator extends AbstractUIPlugin
 			grayCacheBundle.put(name, gray);
 		}
 		return gray;
+	}
+
+	private IProvisioningAgent provisioningAgent;
+
+	public IProvisioningAgent getProvisioningAgent()
+	{
+		if (provisioningAgent == null)
+		{
+			BundleContext context = getBundle().getBundleContext();
+			ServiceReference sr = context.getServiceReference(IProvisioningAgentProvider.SERVICE_NAME);
+			if (sr != null)
+			{
+				IProvisioningAgentProvider agentProvider = (IProvisioningAgentProvider)context.getService(sr);
+
+				URI p2URI = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), "../developer/p2/").toURI(); //$NON-NLS-1$
+				try
+				{
+					provisioningAgent = agentProvider.createAgent(p2URI);
+				}
+				catch (Exception ex)
+				{
+					ServoyLog.logError(ex);
+				}
+			}
+		}
+
+		return provisioningAgent;
 	}
 }

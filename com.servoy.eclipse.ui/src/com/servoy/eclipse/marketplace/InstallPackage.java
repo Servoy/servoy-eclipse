@@ -33,6 +33,11 @@ import org.w3c.dom.NodeList;
  */
 public class InstallPackage
 {
+	private static final String INSTALL_TYPE_SOLUTION = "solution"; //$NON-NLS-1$
+	private static final String INSTALL_TYPE_BEAN = "bean"; //$NON-NLS-1$
+	private static final String INSTALL_TYPE_PLUGIN = "plugin"; //$NON-NLS-1$
+	private static final String INSTALL_TYPE_UPDATE_URL = "updateURL"; //$NON-NLS-1$
+
 	private final ArrayList<InstallItem> installItems = new ArrayList<InstallItem>();
 
 	public InstallPackage(String urlInstallXML) throws Exception
@@ -47,17 +52,21 @@ public class InstallPackage
 			installEntryNode = installEntryNodes.item(i);
 			String type = installEntryNode.getAttributes().getNamedItem("type").getNodeValue(); //$NON-NLS-1$					
 			InstallItem installItem = null;
-			if ("solution".equals(type)) //$NON-NLS-1$
+			if (INSTALL_TYPE_SOLUTION.equals(type))
 			{
 				installItem = new SolutionInstall(installEntryNode);
 			}
-			else if ("bean".equals(type)) //$NON-NLS-1$
+			else if (INSTALL_TYPE_BEAN.equals(type))
 			{
 				installItem = new BeanInstall(installEntryNode);
 			}
-			else if ("plugin".equals(type)) //$NON-NLS-1$
+			else if (INSTALL_TYPE_PLUGIN.equals(type))
 			{
 				installItem = new PluginInstall(installEntryNode);
+			}
+			else if (INSTALL_TYPE_UPDATE_URL.equals(type))
+			{
+				installItem = new UpdateURLInstall(installEntryNode);
 			}
 
 			if (installItem != null) installItems.add(installItem);
