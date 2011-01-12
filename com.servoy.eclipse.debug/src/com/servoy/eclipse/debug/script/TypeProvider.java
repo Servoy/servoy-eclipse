@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -54,8 +54,8 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.IApplication;
 import com.servoy.j2db.FormController.JSForm;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
@@ -410,6 +410,17 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				alldataproviders.setDescription("the dataproviders array of this foundset");
 				alldataproviders.setAttribute(IMAGE_DESCRIPTOR, SPECIAL_PROPERTY);
 				type.getMembers().add(alldataproviders);
+
+				Property maxRecordIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
+				maxRecordIndex.setName("maxRecordIndex");
+				maxRecordIndex.setDeprecated(true);
+				type.getMembers().add(maxRecordIndex);
+
+				Property selectedIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
+				selectedIndex.setName("selectedIndex");
+				selectedIndex.setDeprecated(true);
+				type.getMembers().add(selectedIndex);
+
 				// quickly add this one to the static types.
 				types.put(FoundSet.JS_FOUNDSET, type);
 			}
