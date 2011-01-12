@@ -1029,7 +1029,7 @@ public class SolutionDeserializer
 					else if (code instanceof ArrayInitializer)
 					{
 						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-						String current = json.getString(JS_TYPE_JSON_ATTRIBUTE);
+						String current = json.optString(JS_TYPE_JSON_ATTRIBUTE);
 						if (current == null || !current.startsWith("Array")) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array");
 					}
 					else
