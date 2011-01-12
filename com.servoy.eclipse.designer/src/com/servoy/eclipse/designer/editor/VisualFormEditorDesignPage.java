@@ -571,7 +571,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		GraphicalViewer viewer = getGraphicalViewer();
 		viewer.setProperty(RulerProvider.PROPERTY_HORIZONTAL_RULER, new FormRulerProvider(viewer.getContents(), true));
 		viewer.setProperty(RulerProvider.PROPERTY_VERTICAL_RULER, new FormRulerProvider(viewer.getContents(), false));
-		viewer.setProperty(RulerProvider.PROPERTY_RULER_VISIBILITY, Boolean.TRUE);
+		viewer.setProperty(RulerProvider.PROPERTY_RULER_VISIBILITY, Boolean.valueOf(new DesignerPreferences().getShowRulers()));
 	}
 
 	protected void saveCoolbarLayout()

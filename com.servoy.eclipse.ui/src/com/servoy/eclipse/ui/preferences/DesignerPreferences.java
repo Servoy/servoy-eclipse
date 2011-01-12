@@ -72,6 +72,7 @@ public class DesignerPreferences
 	public static final String SHOW_ANCHORING_SETTING = "showAnchoringFeedback";
 	public static final String PALETTE_CUSTOMIZATION_SETTING = "paletteCustomization";
 	public static final String PAINT_PAGEBREAKS_SETTING = "paintPageBreaks";
+	public static final String SHOW_RULERS_SETTING = "showRulers";
 
 	public static final String SNAP_TO_ALIGMNENT = "alignment";
 	public static final String SNAP_TO_GRID = "grid";
@@ -98,6 +99,7 @@ public class DesignerPreferences
 	public static final boolean FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT = true;
 	public static final int METRICS_DEFAULT = PX;
 	public static final boolean PAINT_PAGEBREAKS_DEFAULT = false;
+	public static final boolean SHOW_RULERS_DEFAULT = true;
 
 	protected final IEclipsePreferences eclipsePreferences;
 
@@ -266,6 +268,16 @@ public class DesignerPreferences
 	public void setPaintPageBreaks(boolean paintPageBreaks)
 	{
 		setProperty(PAINT_PAGEBREAKS_SETTING, paintPageBreaks);
+	}
+
+	public boolean getShowRulers()
+	{
+		return getProperty(SHOW_RULERS_SETTING, SHOW_RULERS_DEFAULT);
+	}
+
+	public void setShowRulers(boolean showRulers)
+	{
+		setProperty(SHOW_RULERS_SETTING, showRulers);
 	}
 
 	public static boolean isGuideSetting(String key)

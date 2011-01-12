@@ -82,6 +82,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	private Button alignmentFeedbackCheck;
 	private Button gridFeedbackCheck;
 	private Button paintPagebreaksCheck;
+	private Button showRulersCheck;
 
 	public void init(IWorkbench workbench)
 	{
@@ -98,7 +99,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		metricsCombo = new ComboViewer(composite);
 		Combo combo = metricsCombo.getCombo();
-		combo.setBounds(109, 72, 125, 23);
+		combo.setBounds(195, 75, 125, 23);
 		metricsCombo.setContentProvider(new ArrayContentProvider());
 		metricsCombo.setLabelProvider(new LabelProvider());
 		metricsCombo.setInput(new ObjectWrapper[] { new ObjectWrapper("pixels", new Integer(DesignerPreferences.PX)), new ObjectWrapper("centimeters",
@@ -110,7 +111,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		Label metricsLabel = new Label(composite, SWT.NONE);
 		metricsLabel.setText("Ruler Metrics");
-		metricsLabel.setBounds(0, 75, 80, 20);
+		metricsLabel.setBounds(109, 78, 80, 20);
 
 		saveEditorStateButton = new Button(composite, SWT.CHECK);
 		saveEditorStateButton.setText("Re-open Form Editors at startup");
@@ -300,6 +301,10 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		paintPagebreaksCheck.setBounds(10, 254, 303, 26);
 		paintPagebreaksCheck.setText("Paint page breaks");
 
+		showRulersCheck = new Button(composite, SWT.CHECK);
+		showRulersCheck.setBounds(0, 72, 101, 26);
+		showRulersCheck.setText("Show rulers");
+
 		initializeFields();
 		setEnabledState();
 
@@ -354,6 +359,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		sameSizeFeedbackCheck.setSelection(prefs.getShowSameSizeFeedback());
 		anchorFeedbackCheck.setSelection(prefs.getShowAnchorFeedback());
 		paintPagebreaksCheck.setSelection(prefs.getPaintPageBreaks());
+		showRulersCheck.setSelection(prefs.getShowRulers());
 	}
 
 	@Override
@@ -382,6 +388,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		prefs.setShowSameSizeFeedback(sameSizeFeedbackCheck.getSelection());
 		prefs.setShowAnchorFeedback(anchorFeedbackCheck.getSelection());
 		prefs.setPaintPageBreaks(paintPagebreaksCheck.getSelection());
+		prefs.setShowRulers(showRulersCheck.getSelection());
 
 		prefs.save();
 
@@ -418,6 +425,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		sameSizeFeedbackCheck.setSelection(DesignerPreferences.SHOW_SAME_SIZE_DEFAULT);
 		anchorFeedbackCheck.setSelection(DesignerPreferences.SHOW_ANCHORING_DEFAULT);
 		paintPagebreaksCheck.setSelection(DesignerPreferences.PAINT_PAGEBREAKS_DEFAULT);
+		showRulersCheck.setSelection(DesignerPreferences.SHOW_RULERS_DEFAULT);
 
 		setEnabledState();
 		super.performDefaults();
