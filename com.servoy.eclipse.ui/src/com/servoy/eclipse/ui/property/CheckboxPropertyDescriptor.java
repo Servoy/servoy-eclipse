@@ -21,7 +21,10 @@ import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
@@ -105,11 +108,19 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptor
 			super(parent, style);
 		}
 
-
 		@Override
 		protected Control createControl(final Composite parent)
 		{
-			return new Composite(parent, SWT.NONE);
+			Canvas canvas = new Canvas(parent, SWT.NO_BACKGROUND); // transparent
+			canvas.addMouseListener(new MouseAdapter()
+			{
+				@Override
+				public void mouseUp(MouseEvent e)
+				{
+					toggle();
+				}
+			});
+			return canvas;
 		}
 
 		/**
