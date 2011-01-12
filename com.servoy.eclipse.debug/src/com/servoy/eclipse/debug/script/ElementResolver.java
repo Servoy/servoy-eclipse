@@ -164,6 +164,16 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		return typeNames;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.debug.script.TypeCreator#addAnonymousClassType(java.lang.String, java.lang.Class)
+	 */
+	@Override
+	protected void addAnonymousClassType(String name, Class< ? > cls)
+	{
+	}
+
 	public Member resolveElement(ITypeInfoContext context, String name)
 	{
 		if (BASE_TYPES.contains(name)) return null;
