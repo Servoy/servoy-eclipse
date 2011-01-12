@@ -5,32 +5,31 @@ Bundle-SymbolicName: com.servoy.eclipse.debug;singleton:=true
 Bundle-Version: 6.0.0.1200
 Bundle-Activator: com.servoy.eclipse.debug.Activator
 Bundle-Vendor: Servoy
-Require-Bundle: servoy_smart_client,
- org.eclipse.core.runtime,
- com.servoy.eclipse.core,
- com.servoy.eclipse.model,
- org.eclipse.ui.workbench,
- org.eclipse.debug.core,
- org.eclipse.jface,
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.ui,
+ org.eclipse.ui.ide,
+ org.eclipse.ui.workbench.texteditor,
+ org.eclipse.ui.console,
+ org.eclipse.debug.ui,
+ org.eclipse.jface.text,
+ org.eclipse.dltk.console.ui,
+ org.eclipse.dltk.console,
  org.eclipse.dltk.javascript.ui,
  org.eclipse.dltk.javascript.launching,
- org.eclipse.debug.ui,
- servoy_shared,
- servoy_debug,
  org.eclipse.dltk.ui,
- org.eclipse.dltk.javascript.parser,
- org.eclipse.dltk.javascript.core.dom.support,
  org.eclipse.dltk.core,
  org.eclipse.dltk.javascript.rhino,
  org.eclipse.dltk.launching,
  org.eclipse.dltk.javascript.core,
- org.eclipse.dltk.javascript.debug.ui,
  org.eclipse.dltk.debug,
  org.eclipse.dltk.debug.ui,
- org.eclipse.ui.ide,
- org.eclipse.ui,
- com.servoy.eclipse.ui,
- org.eclipse.dltk.javascript.jsjdtdebugger
+ org.eclipse.dltk.javascript.jsjdtdebugger,
+ servoy_shared,
+ servoy_headless_client;bundle-version="6.0.0",
+ servoy_debug,
+ com.servoy.eclipse.model,
+ com.servoy.eclipse.core,
+ com.servoy.eclipse.ui
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Export-Package: com.servoy.eclipse.debug.actions

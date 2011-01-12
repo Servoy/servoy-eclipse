@@ -159,4 +159,16 @@
             class="com.servoy.eclipse.debug.script.OpenAdapter">
       </delegate>
    </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            allowMultiple="false"
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.debug.scriptingconsole.ScriptingConsole"
+            icon="icons/launch.gif"
+            id="com.servoy.eclipse.debug.scriptingconsole"
+            name="Live Scripting Console"
+            restorable="true">
+      </view>
+   </extension>
 </plugin>

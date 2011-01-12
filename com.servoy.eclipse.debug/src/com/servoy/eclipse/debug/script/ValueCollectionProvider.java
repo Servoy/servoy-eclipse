@@ -37,7 +37,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		{
 			String scriptPath = SolutionSerializer.getScriptPath(form, false);
 			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
-			return getSuperFormContext(context, form, getValueCollection(context, file));
+			return getSuperFormContext(context, form, getValueCollection(file));
 		}
 		return null;
 	}
@@ -60,7 +60,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				{
 					String scriptPath = SolutionSerializer.getScriptPath(superForm, false);
 					IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
-					ValueCollectionFactory.copyInto(superForms, getValueCollection(context, file));
+					ValueCollectionFactory.copyInto(superForms, getValueCollection(file));
 					superForm = fs.getForm(superForm.getExtendsFormID());
 				}
 				if (formCollection != null) ValueCollectionFactory.copyInto(superForms, formCollection);
@@ -84,7 +84,12 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
 				if (fs != null)
 				{
-					return getGlobalModulesValueCollection(context, fs, ValueCollectionFactory.createValueCollection());
+					IValueCollection globalsValeuCollection = getGlobalModulesValueCollection(context, fs, ValueCollectionFactory.createValueCollection());
+					if (fullGlobalScope.get().booleanValue())
+					{
+						ValueCollectionFactory.copyInto(globalsValeuCollection, getValueCollection((IFile)context.getModelElement().getResource()));
+					}
+					return globalsValeuCollection;
 				}
 			}
 			else
@@ -113,7 +118,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			{
 				ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(module.getName());
 				IFile file = project.getProject().getFile("globals.js"); //$NON-NLS-1$
-				IValueCollection moduleCollection = getValueCollection(context, file);
+				IValueCollection moduleCollection = getValueCollection(file);
 				if (moduleCollection != null)
 				{
 					ValueCollectionFactory.copyInto(collection, moduleCollection);
@@ -132,7 +137,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		}
 	};
 
-	public static IValueCollection getValueCollection(ITypeInfoContext context, IFile file)
+	public static IValueCollection getValueCollection(IFile file)
 	{
 		IValueCollection collection = null;
 		try
@@ -169,5 +174,22 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			ServoyLog.logError(e);
 		}
 		return collection;
+	}
+
+	private static final ThreadLocal<Boolean> fullGlobalScope = new ThreadLocal<Boolean>()
+	{
+		@Override
+		protected Boolean initialValue()
+		{
+			return Boolean.FALSE;
+		}
+	};
+
+	/**
+	 * @param b
+	 */
+	public static void setGenerateFullGlobalCollection(Boolean b)
+	{
+		fullGlobalScope.set(b);
 	}
 }
