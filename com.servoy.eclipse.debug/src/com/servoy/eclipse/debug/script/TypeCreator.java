@@ -582,7 +582,7 @@ public abstract class TypeCreator
 		classTypes.put(name, cls);
 	}
 
-	protected final void addAnonymousClassType(String name, Class< ? > cls)
+	protected void addAnonymousClassType(String name, Class< ? > cls)
 	{
 		if (!classTypes.containsKey(name) && !scopeTypes.containsKey(name) && !BASE_TYPES.contains(name))
 		{
