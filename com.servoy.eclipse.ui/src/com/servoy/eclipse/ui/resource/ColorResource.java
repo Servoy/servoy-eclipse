@@ -67,6 +67,11 @@ public class ColorResource
 		}
 
 		Color color = colorTable.get(rgb);
+		if (color != null && color.isDisposed())
+		{
+			colorTable.remove(rgb);
+			color = null;
+		}
 		if (color == null)
 		{
 			color = new Color(display, rgb);
@@ -162,6 +167,11 @@ public class ColorResource
 
 		ImageKey key = new ImageKey(width, height, depth, rgb);
 		Image image = imagesTable.get(key);
+		if (image != null && image.isDisposed())
+		{
+			imagesTable.remove(key);
+			image = null;
+		}
 		if (image == null)
 		{
 			ImageData imageData = new ImageData(width, height, depth, new PaletteData(new RGB[] { rgb }));
