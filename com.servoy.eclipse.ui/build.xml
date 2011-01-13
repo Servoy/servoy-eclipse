@@ -384,6 +384,7 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.browser_3.3.0.v20100517.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.externaltools_3.2.0.v20100427.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.externaltools_1.0.1.v20100831_r361.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.team.ui_3.5.101.R36x_v20100825-0800.jar"/>
 			<pathelement path="baseline.jar"/>
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.ui_6.0.0.1200/baseline.jar"/>
 			<pathelement path="swt-grouplayout.jar"/>

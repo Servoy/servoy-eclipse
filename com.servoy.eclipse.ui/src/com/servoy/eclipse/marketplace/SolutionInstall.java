@@ -24,9 +24,11 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.team.internal.ui.ProjectSetImporter;
 import org.eclipse.ui.PlatformUI;
 import org.w3c.dom.Node;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
 
@@ -49,27 +51,35 @@ public class SolutionInstall extends InstallItem
 	@Override
 	public void install(IProgressMonitor monitor) throws Exception
 	{
-		if (DOWNLOAD_TYPE_ZIP.equals(getDownloadType()) || DOWNLOAD_TYPE_SERVOY.equals(getDownloadType()))
+		final String dType = getDownloadType();
+		if (DOWNLOAD_TYPE_ZIP.equals(dType) || DOWNLOAD_TYPE_SERVOY.equals(dType) || DOWNLOAD_TYPE_PSF.equals(dType))
 		{
-			File downloadedFile = downloadURL(
-				DOWNLOAD_TYPE_SERVOY.equals(getDownloadType()) ? destinationDir : "", monitor, "Installing solution " + getName() + " ..."); //$NON-NLS-1$
+			File downloadedFile = downloadURL(DOWNLOAD_TYPE_ZIP.equals(dType) ? "" : destinationDir, monitor, "Installing solution " + getName() + " ..."); //$NON-NLS-1$
 			if (downloadedFile != null)
 			{
 				final String downloadFileCanonicalPath = downloadedFile.getCanonicalPath();
 
-				Display.getDefault().asyncExec(new Runnable()
+				if (DOWNLOAD_TYPE_PSF.equals(dType))
 				{
-					public void run()
+					ProjectSetImporter.importProjectSet(downloadFileCanonicalPath, UIUtils.getActiveShell(), monitor);
+					new File(downloadFileCanonicalPath).delete();
+				}
+				else
+				{
+					Display.getDefault().asyncExec(new Runnable()
 					{
-						IStructuredSelection selection = StructuredSelection.EMPTY;
-						importSolutionWizard.setSolutionFilePath(downloadFileCanonicalPath);
-						importSolutionWizard.setAskForImportServerName(true);
-						importSolutionWizard.init(PlatformUI.getWorkbench(), selection);
-						WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), importSolutionWizard);
-						dialog.create();
-						dialog.open();
-					}
-				});
+						public void run()
+						{
+							IStructuredSelection selection = StructuredSelection.EMPTY;
+							importSolutionWizard.setSolutionFilePath(downloadFileCanonicalPath);
+							importSolutionWizard.setAskForImportServerName(true);
+							importSolutionWizard.init(PlatformUI.getWorkbench(), selection);
+							WizardDialog dialog = new WizardDialog(UIUtils.getActiveShell(), importSolutionWizard);
+							dialog.create();
+							dialog.open();
+						}
+					});
+				}
 			}
 		}
 		else

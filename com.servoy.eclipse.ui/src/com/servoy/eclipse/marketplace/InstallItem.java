@@ -41,10 +41,10 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
  */
 public abstract class InstallItem
 {
-	public static final String DOWNLOAD_TYPE_NONE = "none"; //$NON-NLS-1$
 	public static final String DOWNLOAD_TYPE_SERVOY = "servoy"; //$NON-NLS-1$
 	public static final String DOWNLOAD_TYPE_ZIP = "zip"; //$NON-NLS-1$
 	public static final String DOWNLOAD_TYPE_JAR = "jar"; //$NON-NLS-1$
+	public static final String DOWNLOAD_TYPE_PSF = "psf"; //$NON-NLS-1$
 
 	private String name, description, url;
 	private final String downloadType;
@@ -155,11 +155,12 @@ public abstract class InstallItem
 			int sourceURLContentLen = sourceURLConnection.getContentLength();
 
 			monitor.beginTask(monitorMessage, sourceURLContentLen != -1 ? sourceURLContentLen : 1);
-			if (DOWNLOAD_TYPE_JAR.equals(getDownloadType()) || DOWNLOAD_TYPE_SERVOY.equals(getDownloadType()))
+			String dType = getDownloadType();
+			if (DOWNLOAD_TYPE_JAR.equals(dType) || DOWNLOAD_TYPE_SERVOY.equals(dType) || DOWNLOAD_TYPE_PSF.equals(dType))
 			{
 				File destinationDirFile = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), destinationDir);
 				destinationDirFile.mkdirs();
-				destination = new File(destinationDirFile, getName() + "." + DOWNLOAD_TYPE_SERVOY); //$NON-NLS-1$ 
+				destination = new File(destinationDirFile, getName() + "." + dType); //$NON-NLS-1$ 
 				writeStream(sourceInputStream, destination, sourceURLContentLen != -1 ? monitor : null);
 			}
 			else if (DOWNLOAD_TYPE_ZIP.equals(getDownloadType()))

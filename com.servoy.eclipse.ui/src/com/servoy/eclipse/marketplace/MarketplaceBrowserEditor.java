@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
@@ -28,6 +29,7 @@ import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -126,7 +128,9 @@ public class MarketplaceBrowserEditor extends EditorPart
 							{
 								try
 								{
-									PlatformUI.getWorkbench().getProgressService().run(true, false, new IRunnableWithProgress()
+									MarketplaceProgressMonitorDialog progressMonitorDialog = new MarketplaceProgressMonitorDialog(UIUtils.getActiveShell(),
+										installItem.getName());
+									progressMonitorDialog.run(true, false, new IRunnableWithProgress()
 									{
 
 										public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
@@ -188,5 +192,23 @@ public class MarketplaceBrowserEditor extends EditorPart
 	public void setFocus()
 	{
 		if (browser != null) browser.setFocus();
+	}
+
+	class MarketplaceProgressMonitorDialog extends ProgressMonitorDialog
+	{
+		private final String installName;
+
+		public MarketplaceProgressMonitorDialog(Shell parent, String installName)
+		{
+			super(parent);
+			this.installName = installName;
+		}
+
+		@Override
+		protected void configureShell(final Shell shell)
+		{
+			super.configureShell(shell);
+			shell.setText("Servoy Marketplace - Installing " + installName + " ...");
+		}
 	}
 }

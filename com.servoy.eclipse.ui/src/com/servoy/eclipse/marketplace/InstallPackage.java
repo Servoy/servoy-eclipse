@@ -36,7 +36,10 @@ public class InstallPackage
 	private static final String INSTALL_TYPE_SOLUTION = "solution"; //$NON-NLS-1$
 	private static final String INSTALL_TYPE_BEAN = "bean"; //$NON-NLS-1$
 	private static final String INSTALL_TYPE_PLUGIN = "plugin"; //$NON-NLS-1$
+	private static final String INSTALL_TYPE_DRIVER = "driver"; //$NON-NLS-1$
+	private static final String INSTALL_TYPE_LOOK_AND_FEEL = "laf"; //$NON-NLS-1$
 	private static final String INSTALL_TYPE_UPDATE_URL = "updateURL"; //$NON-NLS-1$
+
 
 	private final ArrayList<InstallItem> installItems = new ArrayList<InstallItem>();
 
@@ -63,6 +66,14 @@ public class InstallPackage
 			else if (INSTALL_TYPE_PLUGIN.equals(type))
 			{
 				installItem = new PluginInstall(installEntryNode);
+			}
+			else if (INSTALL_TYPE_DRIVER.equals(type))
+			{
+				installItem = new DriverInstall(installEntryNode);
+			}
+			else if (INSTALL_TYPE_LOOK_AND_FEEL.equals(type))
+			{
+				installItem = new LookAndFellInstall(installEntryNode);
 			}
 			else if (INSTALL_TYPE_UPDATE_URL.equals(type))
 			{
