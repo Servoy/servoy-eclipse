@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -54,8 +54,8 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
@@ -1010,14 +1010,17 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				// this is only server/table
 				try
 				{
-					IServer server = servoyModel.getFlattenedSolution().getSolution().getRepository().getServer(solutionServerTableNames[0]);
-					if (server != null)
+					if (servoyModel.getFlattenedSolution().getSolution() != null)
 					{
-						Table table = (Table)server.getTable(solutionServerTableNames[1]);
-
-						if (table != null)
+						IServer server = servoyModel.getFlattenedSolution().getSolution().getRepository().getServer(solutionServerTableNames[0]);
+						if (server != null)
 						{
-							return new Object[] { table };
+							Table table = (Table)server.getTable(solutionServerTableNames[1]);
+
+							if (table != null)
+							{
+								return new Object[] { table };
+							}
 						}
 					}
 				}
@@ -1033,7 +1036,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				{
 					FlattenedSolution fs = servoyProject.getEditingFlattenedSolution();
 
-					if (solutionServerTableNames.length > 1)
+					if (solutionServerTableNames.length > 1 && fs.getSolution() != null)
 					{
 						// solutionName/server/table
 						try
