@@ -347,7 +347,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			type.setAttribute(IMAGE_DESCRIPTOR, FORMS);
 
 			EList<Member> members = type.getMembers();
-			members.add(createProperty(context, "allnames", true, "Array", "All form names as an array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "allnames", true, "Array<String>", "All form names as an array", SPECIAL_PROPERTY));
 			members.add(createProperty(context, "length", true, "Number", "Number of forms", PROPERTY));
 
 			// special array lookup property so that forms[xxx]. does code complete.
@@ -538,7 +538,21 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		protected final Type getCombinedType(ITypeInfoContext context, String fullTypeName, String config, List<Member> members, Type superType,
 			ImageDescriptor imageDescriptor, boolean visible)
 		{
+			if (config == null)
+			{
+				Type type = TypeInfoModelFactory.eINSTANCE.createType();
+				type.setName(fullTypeName);
+				type.setKind(TypeKind.JAVA);
+				type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
+				type.setSuperType(superType);
 
+				EList<Member> typeMembers = type.getMembers();
+				for (Member member : members)
+				{
+					typeMembers.add(member);
+				}
+				return type;
+			}
 			FlattenedSolution fs = getFlattenedSolution(context);
 			if (fs == null) return superType;
 
@@ -677,7 +691,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			type.setAttribute(IMAGE_DESCRIPTOR, PLUGINS);
 
 			EList<Member> members = type.getMembers();
-			members.add(createProperty(context, "allnames", true, "Array", "All form names as an array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "allnames", true, "Array<String>", "All form names as an array", SPECIAL_PROPERTY));
 			members.add(createProperty(context, "length", true, "Number", "Number of forms", PROPERTY));
 
 
@@ -751,11 +765,11 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 				EList<Member> members = type.getMembers();
 
-				members.add(createProperty(context, "allnames", true, "Array", SPECIAL_PROPERTY));
-				members.add(createProperty(context, "alldataproviders", true, "Array", SPECIAL_PROPERTY));
-				members.add(createProperty(context, "allmethods", true, "Array", SPECIAL_PROPERTY));
-				members.add(createProperty(context, "allrelations", true, "Array", SPECIAL_PROPERTY));
-				members.add(createProperty(context, "allvariables", true, "Array", SPECIAL_PROPERTY));
+				members.add(createProperty(context, "allnames", true, "Array<String>", SPECIAL_PROPERTY));
+				members.add(createProperty(context, "alldataproviders", true, "Array<String>", SPECIAL_PROPERTY));
+				members.add(createProperty(context, "allmethods", true, "Array<String>", SPECIAL_PROPERTY));
+				members.add(createProperty(context, "allrelations", true, "Array<String>", SPECIAL_PROPERTY));
+				members.add(createProperty(context, "allvariables", true, "Array<String>", SPECIAL_PROPERTY));
 
 				// controller and foundset and elements
 				members.add(createProperty(context, "controller", true, "Controller", IconProvider.instance().descriptor(JSForm.class)));
@@ -791,7 +805,10 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				{
 					if (member.getName().equals("foundset"))
 					{
-						Member clone = clone(context, member, FoundSet.JS_FOUNDSET + '<' + ds + '>');
+						if (ds == null && !FormEncapsulation.hideFoundset(formToUse)) continue;
+						String foundsetType = FoundSet.JS_FOUNDSET;
+						if (ds != null) foundsetType += '<' + ds + '>';
+						Member clone = clone(context, member, foundsetType);
 						overwrittenMembers.add(clone);
 						clone.setVisible(!FormEncapsulation.hideFoundset(formToUse));
 					}
@@ -1075,22 +1092,37 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		{
 			typeNames.put(IScriptScriptButtonMethods.class.getSimpleName(), "Button");
 			typeNames.put(IScriptDataButtonMethods.class.getSimpleName(), "Button");
+			addType("Button", IScriptScriptButtonMethods.class);
 			typeNames.put(IScriptScriptLabelMethods.class.getSimpleName(), "Label");
 			typeNames.put(IScriptDataLabelMethods.class.getSimpleName(), "Label");
+			addType("Label", IScriptScriptLabelMethods.class);
 			typeNames.put(IScriptDataPasswordMethods.class.getSimpleName(), "Password");
+			addType("Password", IScriptDataPasswordMethods.class);
 			typeNames.put(IScriptTextEditorMethods.class.getSimpleName(), "HtmlArea");
+			addType("HtmlArea", IScriptTextEditorMethods.class);
 			typeNames.put(IScriptTextAreaMethods.class.getSimpleName(), "TextArea");
+			addType("TextArea", IScriptTextAreaMethods.class);
 			typeNames.put(IScriptChoiceMethods.class.getSimpleName(), "Checks");
+			addType("Checks", IScriptChoiceMethods.class);
 			typeNames.put(IScriptCheckBoxMethods.class.getSimpleName(), "CheckBox");
+			addType("CheckBox", IScriptCheckBoxMethods.class);
 			typeNames.put(IScriptChoiceMethods.class.getSimpleName(), "Radios");
+			addType("Radios", IScriptChoiceMethods.class);
 			typeNames.put(IScriptDataComboboxMethods.class.getSimpleName(), "ComboBox");
+			addType("ComboBox", IScriptDataComboboxMethods.class);
 			typeNames.put(IScriptDataCalendarMethods.class.getSimpleName(), "Calendar");
+			addType("Calendar", IScriptDataCalendarMethods.class);
 			typeNames.put(IScriptMediaInputFieldMethods.class.getSimpleName(), "MediaField");
+			addType("MediaField", IScriptMediaInputFieldMethods.class);
 			typeNames.put(IScriptFieldMethods.class.getSimpleName(), "TypeAhead");
 			typeNames.put(IScriptFieldMethods.class.getSimpleName(), "TextField");
+			addType("TextField", IScriptFieldMethods.class);
 			typeNames.put(IDepricatedScriptTabPanelMethods.class.getSimpleName(), "TabPanel");
+			addType("TabPanel", IDepricatedScriptTabPanelMethods.class);
 			typeNames.put(IScriptSplitPaneMethods.class.getSimpleName(), "SplitPane");
+			addType("SplitPane", IScriptSplitPaneMethods.class);
 			typeNames.put(IScriptPortalComponentMethods.class.getSimpleName(), "Portal");
+			addType("Portal", IScriptPortalComponentMethods.class);
 
 			addAnonymousClassType("BaseComponent", IScriptBaseMethods.class);
 		}
@@ -1104,7 +1136,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			if (typeName.equals("Elements"))
 			{
 				EList<Member> members = type.getMembers();
-				members.add(createProperty(context, "allnames", true, "Array", SPECIAL_PROPERTY));
+				members.add(createProperty(context, "allnames", true, "Array<String>", SPECIAL_PROPERTY));
 				members.add(createProperty(context, "length", true, "Number", PROPERTY));
 				Property arrayProp = createProperty(context, "[]", true, "BaseComponent", PROPERTY);
 				arrayProp.setVisible(false);
@@ -1122,6 +1154,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 					Form form = fs.getForm(config);
 					if (form != null)
 					{
+						type.setSuperType(context.getType("Elements"));
 						try
 						{
 							EList<Member> members = type.getMembers();
