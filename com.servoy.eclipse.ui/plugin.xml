@@ -89,7 +89,7 @@
             hasPages="true"
             icon="icons/new_form_wizard.gif"
             id="com.servoy.eclipse.ui.NewFormWizard"
-            name="Form"
+            name="&amp;Form"
             project="false">
       </wizard>
       <wizard
@@ -98,7 +98,7 @@
             class="com.servoy.eclipse.ui.wizards.NewSolutionWizard"
             icon="icons/new_solution_wizard.gif"
             id="com.servoy.eclipse.ui.NewSolutionWizard"
-            name="Servoy Solution"
+            name="Servoy &amp;Solution"
             project="true">
       </wizard>
       <wizard
@@ -107,7 +107,7 @@
             class="com.servoy.eclipse.ui.wizards.NewStyleWizard"
             icon="icons/new_style_wizard.gif"
             id="com.servoy.eclipse.ui.NewStyleWizard"
-            name="Style"
+            name="St&amp;yle"
             project="false">
       </wizard>
       <wizard
@@ -116,7 +116,7 @@
             class="com.servoy.eclipse.ui.wizards.NewRelationWizard"
             icon="icons/new_relation_wizard.gif"
             id="com.servoy.eclipse.ui.NewRelationWizard"
-            name="Relation"
+            name="R&amp;elation"
             project="false">
       </wizard>
       <wizard
@@ -125,7 +125,7 @@
             class="com.servoy.eclipse.ui.wizards.NewValueListWizard"
             icon="icons/new_valuelist_wizard.gif"
             id="com.servoy.eclipse.ui.NewValueListWizard"
-            name="Valuelist"
+            name="&amp;Valuelist"
             project="false">
       </wizard>
       <wizard
@@ -134,7 +134,7 @@
             class="com.servoy.eclipse.ui.wizards.NewMethodWizard"
             icon="icons/new_method_wizard.gif"
             id="com.servoy.eclipse.ui.NewMethodWizard"
-            name="Method"
+            name="&amp;Method"
             project="false">
       </wizard>
       <wizard
@@ -143,7 +143,7 @@
             class="com.servoy.eclipse.ui.wizards.NewServerWizard"
             icon="icons/new_server.gif"
             id="com.servoy.eclipse.ui.NewServerWizard"
-            name="Database Server"
+            name="&amp;Database Server"
             project="false">
       </wizard>
    </extension>
