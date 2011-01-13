@@ -66,6 +66,7 @@ import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
+import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.documentation.scripting.docs.JSLib;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
@@ -836,17 +837,27 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		{
 			List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 			List<PlatformSimpleUserNode> constantsChildren = new ArrayList<PlatformSimpleUserNode>();
-			for (Class cls : clss)
+			for (Class< ? > cls : clss)
 			{
 				if (cls != null && !IDeprecated.class.isAssignableFrom(cls))
 				{
-					int index = cls.getName().lastIndexOf("."); //$NON-NLS-1$
-					int index2 = cls.getName().indexOf("$", index); //$NON-NLS-1$
-					if (index2 != -1)
+					String nodeName = null;
+					if (cls.isAnnotationPresent(ServoyDocumented.class))
 					{
-						index = index2;
+						ServoyDocumented sd = cls.getAnnotation(ServoyDocumented.class);
+						if (sd.scriptingName() != null && sd.scriptingName().trim().length() > 0) nodeName = sd.scriptingName().trim();
 					}
-					PlatformSimpleUserNode n = new PlatformSimpleUserNode(cls.getName().substring(index + 1), UserNodeType.RETURNTYPE, cls, null);
+					if (nodeName == null)
+					{
+						int index = cls.getName().lastIndexOf("."); //$NON-NLS-1$
+						int index2 = cls.getName().indexOf("$", index); //$NON-NLS-1$
+						if (index2 != -1)
+						{
+							index = index2;
+						}
+						nodeName = cls.getName().substring(index + 1);
+					}
+					PlatformSimpleUserNode n = new PlatformSimpleUserNode(nodeName, UserNodeType.RETURNTYPE, cls, null);
 					JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(cls, null);
 					if (IPrefixedConstantsObject.class.isAssignableFrom(cls) &&
 						!(javaMembers instanceof InstanceJavaMembers && javaMembers.getMethodIds(false).size() > 0))
