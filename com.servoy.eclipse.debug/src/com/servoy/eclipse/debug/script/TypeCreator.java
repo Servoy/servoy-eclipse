@@ -309,28 +309,25 @@ public abstract class TypeCreator
 
 		for (Class< ? > element : allReturnedTypes)
 		{
-			if (!IDeprecated.class.isAssignableFrom(element))
+			if (IPrefixedConstantsObject.class.isAssignableFrom(element))
 			{
-				if (IPrefixedConstantsObject.class.isAssignableFrom(element))
+				try
 				{
-					try
-					{
-						IPrefixedConstantsObject constants = (IPrefixedConstantsObject)element.newInstance();
-						addType(constants.getPrefix(), element);
-					}
-					catch (Exception e)
-					{
-						ServoyLog.logError(e);
-					}
+					IPrefixedConstantsObject constants = (IPrefixedConstantsObject)element.newInstance();
+					addType(constants.getPrefix(), element);
 				}
-				else if (IConstantsObject.class.isAssignableFrom(element))
+				catch (Exception e)
 				{
-					addType(element.getSimpleName(), element);
+					ServoyLog.logError(e);
 				}
-				else if (IJavaScriptType.class.isAssignableFrom(element))
-				{
-					addType(element.getSimpleName(), element);
-				}
+			}
+			else if (IConstantsObject.class.isAssignableFrom(element))
+			{
+				addType(element.getSimpleName(), element);
+			}
+			else if (IJavaScriptType.class.isAssignableFrom(element))
+			{
+				addType(element.getSimpleName(), element);
 			}
 		}
 	}
@@ -376,6 +373,11 @@ public abstract class TypeCreator
 
 		ImageDescriptor desc = IconProvider.instance().descriptor(cls);
 		type.setAttribute(IMAGE_DESCRIPTOR, desc);
+		if (IDeprecated.class.isAssignableFrom(cls))
+		{
+			type.setDeprecated(true);
+			type.setVisible(false);
+		}
 		return type;
 	}
 
