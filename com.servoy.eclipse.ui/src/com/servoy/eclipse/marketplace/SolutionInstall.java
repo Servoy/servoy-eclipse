@@ -66,7 +66,7 @@ public class SolutionInstall extends InstallItem
 				}
 				else
 				{
-					Display.getDefault().asyncExec(new Runnable()
+					Display.getDefault().syncExec(new Runnable()
 					{
 						public void run()
 						{

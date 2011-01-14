@@ -55,7 +55,7 @@ public class UpdateURLInstall extends InstallItem
 			final URI installURI = new URL(getURL()).toURI();
 			manager.addRepository(installURI);
 
-			Display.getDefault().asyncExec(new Runnable()
+			Display.getDefault().syncExec(new Runnable()
 			{
 				public void run()
 				{

@@ -147,7 +147,7 @@ public class MarketplaceBrowserEditor extends EditorPart
 												installItem.install(monitor);
 												if (installItem.isRestartRequired())
 												{
-													Display.getDefault().asyncExec(new Runnable()
+													Display.getDefault().syncExec(new Runnable()
 													{
 														public void run()
 														{
