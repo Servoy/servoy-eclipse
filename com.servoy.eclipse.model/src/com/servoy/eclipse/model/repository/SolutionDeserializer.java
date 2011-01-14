@@ -39,6 +39,7 @@ import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.javascript.ast.Argument;
 import org.eclipse.dltk.javascript.ast.ArrayInitializer;
+import org.eclipse.dltk.javascript.ast.BooleanLiteral;
 import org.eclipse.dltk.javascript.ast.CallExpression;
 import org.eclipse.dltk.javascript.ast.Comment;
 import org.eclipse.dltk.javascript.ast.DecimalLiteral;
@@ -1008,6 +1009,11 @@ public class SolutionDeserializer
 							{
 								objectclass = ((Identifier)objectClassExpression).getName();
 							}
+							else if (objectClassExpression instanceof CallExpression &&
+								((CallExpression)objectClassExpression).getExpression() instanceof Identifier)
+							{
+								objectclass = ((Identifier)((CallExpression)objectClassExpression).getExpression()).getName();
+							}
 						}
 						if ("String".equals(objectclass)) //$NON-NLS-1$
 						{
@@ -1016,6 +1022,12 @@ public class SolutionDeserializer
 						else if ("Date".equals(objectclass)) //$NON-NLS-1$
 						{
 							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.DATETIME);
+						}
+						else if ("Array".equals(objectclass)) //$NON-NLS-1$
+						{
+							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+							String current = json.optString(JS_TYPE_JSON_ATTRIBUTE);
+							if (current == null || (!current.startsWith("Array") && !current.endsWith("[]"))) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array");
 						}
 						else
 						{
@@ -1031,6 +1043,11 @@ public class SolutionDeserializer
 						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
 						String current = json.optString(JS_TYPE_JSON_ATTRIBUTE);
 						if (current == null || (!current.startsWith("Array") && !current.endsWith("[]"))) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array");
+					}
+					else if (code instanceof BooleanLiteral)
+					{
+						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+						json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Boolean");
 					}
 					else
 					{
