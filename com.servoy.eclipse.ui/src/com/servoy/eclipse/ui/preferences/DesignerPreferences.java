@@ -165,9 +165,10 @@ public class DesignerPreferences
 		return key.substring(DESIGNER_SETTINGS_PREFIX.length());
 	}
 
-	public static boolean isMetricsSetting(String key)
+	public static boolean isRulersSetting(String key)
 	{
-		return METRICS_SETTING.equals(getKeyPostfix(key));
+		String keyPostfix = getKeyPostfix(key);
+		return METRICS_SETTING.equals(keyPostfix) || SHOW_RULERS_SETTING.equals(keyPostfix);
 	}
 
 	public int getMetrics()

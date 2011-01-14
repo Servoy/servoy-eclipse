@@ -40,7 +40,6 @@ import org.eclipse.gef.SnapToGrid;
 import org.eclipse.gef.dnd.TemplateTransferDragSourceListener;
 import org.eclipse.gef.internal.ui.palette.PaletteSelectionTool;
 import org.eclipse.gef.palette.PaletteRoot;
-import org.eclipse.gef.rulers.RulerProvider;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.actions.DeleteAction;
 import org.eclipse.gef.ui.actions.DirectEditAction;
@@ -58,7 +57,6 @@ import org.eclipse.gef.ui.palette.customize.PaletteCustomizerDialog;
 import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
 import org.eclipse.gef.ui.parts.GraphicalViewerKeyHandler;
 import org.eclipse.gef.ui.parts.ScrollingGraphicalViewer;
-import org.eclipse.gef.ui.rulers.RulerComposite;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.CoolBarManager;
 import org.eclipse.jface.action.IAction;
@@ -123,6 +121,8 @@ import com.servoy.eclipse.designer.editor.commands.UngroupAction;
 import com.servoy.eclipse.designer.editor.palette.PaletteItemTransferDropTargetListener;
 import com.servoy.eclipse.designer.editor.palette.VisualFormEditorPaletteCustomizer;
 import com.servoy.eclipse.designer.editor.palette.VisualFormEditorPaletteFactory;
+import com.servoy.eclipse.designer.editor.rulers.FormRulerComposite;
+import com.servoy.eclipse.designer.editor.rulers.RulerManager;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.property.PersistContext;
 import com.servoy.eclipse.designer.property.UndoablePersistPropertySourceProvider;
@@ -156,7 +156,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	protected GraphicalViewer graphicalViewer;
 	private final VisualFormEditor editorPart;
 	private PaletteRoot paletteModel;
-	private RulerComposite rulerComposite;
+	private FormRulerComposite rulerComposite;
 	private CoolBar coolBar;
 	private List<String> hiddenBars;
 	private MenuManager toolbarMenuManager;
@@ -176,7 +176,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 			{
 				applyGuidePreferences();
 			}
-			else if (DesignerPreferences.isMetricsSetting(event.getKey()))
+			else if (DesignerPreferences.isRulersSetting(event.getKey()))
 			{
 				refreshRulers();
 			}
@@ -225,6 +225,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		{
 		}
 	};
+	private RulerManager rulerManager;
 
 	@Override
 	public void selectionChanged(IWorkbenchPart part, ISelection newSelection)
@@ -568,10 +569,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 	private void refreshRulers()
 	{
-		GraphicalViewer viewer = getGraphicalViewer();
-		viewer.setProperty(RulerProvider.PROPERTY_HORIZONTAL_RULER, new FormRulerProvider(viewer.getContents(), true));
-		viewer.setProperty(RulerProvider.PROPERTY_VERTICAL_RULER, new FormRulerProvider(viewer.getContents(), false));
-		viewer.setProperty(RulerProvider.PROPERTY_RULER_VISIBILITY, Boolean.valueOf(new DesignerPreferences().getShowRulers()));
+		rulerManager.refreshRulers(new DesignerPreferences().getShowRulers());
 	}
 
 	protected void saveCoolbarLayout()
@@ -817,14 +815,18 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	@Override
 	protected void createGraphicalViewer(Composite parent)
 	{
-		rulerComposite = new RulerComposite(parent, SWT.NONE);
+		rulerComposite = new FormRulerComposite(parent, SWT.NONE);
 
 		GraphicalViewer viewer = new ModifiedScrollingGraphicalViewer();
 		viewer.createControl(rulerComposite);
 		setGraphicalViewer(viewer);
+
+		rulerManager = new RulerManager(viewer);
+
 		configureGraphicalViewer();
 		hookGraphicalViewer();
 		initializeGraphicalViewer();
+
 
 		rulerComposite.setGraphicalViewer((ScrollingGraphicalViewer)getGraphicalViewer());
 	}

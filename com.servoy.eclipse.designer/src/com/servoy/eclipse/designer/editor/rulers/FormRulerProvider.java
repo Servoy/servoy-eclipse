@@ -14,7 +14,7 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
-package com.servoy.eclipse.designer.editor;
+package com.servoy.eclipse.designer.editor.rulers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +26,7 @@ import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.rulers.RulerProvider;
 
+import com.servoy.eclipse.designer.editor.FormPartGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.commands.MovePartCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -44,11 +45,18 @@ public class FormRulerProvider extends RulerProvider
 {
 	private final boolean horizontal;
 	private final EditPart formEditPart;
+	private final RulerManager rulerManager;
 
-	public FormRulerProvider(EditPart formEditPart, boolean horizontal)
+	public FormRulerProvider(RulerManager rulerManager, EditPart formEditPart, boolean horizontal)
 	{
+		this.rulerManager = rulerManager;
 		this.formEditPart = formEditPart;
 		this.horizontal = horizontal;
+	}
+
+	public boolean isHorizontal()
+	{
+		return horizontal;
 	}
 
 	@Override
@@ -67,13 +75,18 @@ public class FormRulerProvider extends RulerProvider
 			}
 		}
 
+		if (guide instanceof RulerGuide)
+		{
+			return ((RulerGuide)guide).getPosition();
+		}
+
 		return super.getGuidePosition(guide);
 	}
 
 	@Override
-	public List<EditPart> getGuides()
+	public List<Object> getGuides()
 	{
-		List<EditPart> guides = new ArrayList<EditPart>();
+		List<Object> guides = new ArrayList<Object>();
 		if (horizontal)
 		{
 			guides.add(formEditPart);
@@ -89,7 +102,23 @@ public class FormRulerProvider extends RulerProvider
 				}
 			}
 		}
+
+		// added guides
+		guides.addAll(rulerManager.getGuides(horizontal));
+
 		return guides;
+	}
+
+	@Override
+	public int[] getGuidePositions()
+	{
+		List<Object> guides = getGuides();
+		int[] guidePositions = new int[guides.size()];
+		for (int i = 0; i < guides.size(); i++)
+		{
+			guidePositions[i] = getGuidePosition(guides.get(i));
+		}
+		return guidePositions;
 	}
 
 	@Override
@@ -125,7 +154,28 @@ public class FormRulerProvider extends RulerProvider
 			return setCommand;
 		}
 
+		if (guide instanceof RulerGuide)
+		{
+			return new MoveGuideCommand(this, (RulerGuide)guide, positionDelta);
+		}
+
 		return super.getMoveGuideCommand(guide, positionDelta);
+	}
+
+	@Override
+	public Command getCreateGuideCommand(int position)
+	{
+		return new CreateGuideCommand(this, position);
+	}
+
+	@Override
+	public Command getDeleteGuideCommand(Object guide)
+	{
+		if (guide instanceof RulerGuide)
+		{
+			return new DeleteGuideCommand(this, (RulerGuide)guide);
+		}
+		return super.getDeleteGuideCommand(guide);
 	}
 
 	@Override
@@ -147,4 +197,29 @@ public class FormRulerProvider extends RulerProvider
 		}
 		return RulerProvider.UNIT_PIXELS;
 	}
+
+	/**
+	 * @param guide
+	 */
+	public void addGuide(RulerGuide guide)
+	{
+		rulerManager.addGuide(guide, isHorizontal());
+	}
+
+	/**
+	 * @param guide
+	 */
+	public void removeGuide(RulerGuide guide)
+	{
+		rulerManager.removeGuide(guide, isHorizontal());
+	}
+
+	/**
+	 * @param guide
+	 */
+	public void refreshGuide(RulerGuide guide)
+	{
+		rulerManager.refreshGuide(guide, isHorizontal());
+	}
+
 }

@@ -24,12 +24,14 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PrecisionRectangle;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
+import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.SnapToHelper;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.requests.CreateRequest;
+import org.eclipse.gef.rulers.RulerProvider;
 
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -218,21 +220,64 @@ public class SnapToElementAlignment extends SnapToHelper
 			west = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, west, rect.x, 0, 10, form.getSize().height - 10, true, getSetAnchor());
 		}
 
-		// Alignment: East to container
-		if ((snapOrientation & (EAST | HORIZONTAL)) != 0)
+		// Snap against rulers
+		EditPartViewer viewer = container.getViewer();
+
+		RulerProvider rulerProvider = (RulerProvider)viewer.getProperty(RulerProvider.PROPERTY_HORIZONTAL_RULER);
+		if (rulerProvider != null)
 		{
-			if (singleAlignmentPerDimension) east = west;
+			for (int pos : rulerProvider.getGuidePositions()) // when ruler is invisible, this will only return the form-width ruler
+			{
+				// Alignment: West to guide
+				if ((snapOrientation & (WEST | HORIZONTAL)) != 0)
+				{
+					west = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, west, rect.x, pos, 10, form.getSize().height - 10, true,
+						getSetAnchor());
+				}
+				// Alignment: East to guide
+				if ((snapOrientation & (EAST | HORIZONTAL)) != 0)
+				{
+					if (singleAlignmentPerDimension) east = west;
 
-			east = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, east, rect.x + rect.width, form.getWidth(), 10,
-				form.getSize().height - 10, true, getSetAnchor());
+					east = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, east, rect.x + rect.width, pos, 10, form.getSize().height - 10,
+						true, getSetAnchor());
 
-			if (singleAlignmentPerDimension) west = east;
+					if (singleAlignmentPerDimension) west = east;
+				}
+			}
 		}
 
-		List<EditPart> children = container.getChildren();
-		for (EditPart child : children)
+		rulerProvider = (RulerProvider)viewer.getProperty(RulerProvider.PROPERTY_VERTICAL_RULER);
+		if (rulerProvider != null)
 		{
-			if ((!(child.getModel() instanceof Part) && !isAligmenttEditPart(child)) || (skipEditparts != null && skipEditparts.contains(child)))
+			for (int pos : rulerProvider.getGuidePositions()) // when ruler is invisible, this will only return the parts rulers
+			{
+				// Alignment: North to guide
+				if ((snapOrientation & (NORTH | VERTICAL)) != 0)
+				{
+					// distance to bottom-top
+					north = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, north, rect.y, pos, Math.min(rect.x, 10),
+						Math.max(rect.x + rect.width, 10 + form.getWidth() - 20), true, getSetAnchor());
+				}
+
+				// Alignment: South to guide
+				if ((snapOrientation & (SOUTH | VERTICAL)) != 0)
+				{
+					if (singleAlignmentPerDimension) south = north;
+
+					// distance to top-bottom
+					south = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, south, rect.y + rect.height, pos, Math.min(rect.x, 10),
+						Math.max(rect.x + rect.width, 10 + form.getWidth() - 20), true, getSetAnchor());
+
+					if (singleAlignmentPerDimension) north = south;
+				}
+
+			}
+		}
+
+		for (EditPart child : (List<EditPart>)container.getChildren())
+		{
+			if (!isAligmenttEditPart(child) || (skipEditparts != null && skipEditparts.contains(child)))
 			{
 				continue;
 			}
@@ -247,8 +292,7 @@ public class SnapToElementAlignment extends SnapToHelper
 			}
 
 			// align against bounds of child figure or part line
-			Rectangle childBounds = (elementModel instanceof Part) ? new Rectangle(10, ((Part)elementModel).getHeight(), form.getWidth() - 20, 0)
-				: ((GraphicalEditPart)child).getFigure().getBounds();
+			Rectangle childBounds = ((GraphicalEditPart)child).getFigure().getBounds();
 
 			// Alignment: North to element
 			if ((snapOrientation & (NORTH | VERTICAL)) != 0)
@@ -258,8 +302,8 @@ public class SnapToElementAlignment extends SnapToHelper
 					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), (anchors & IAnchorConstants.NORTH) != 0);
 				// distance to bottom-top
 				north = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, north, rect.y, childBounds.y + childBounds.height,
-					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), elementModel instanceof Part,
-					getSetAnchor() && (elementModel instanceof Part || ((anchors & IAnchorConstants.NORTH) != 0 && (anchors & IAnchorConstants.SOUTH) == 0)));
+					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), false, getSetAnchor() &&
+						(anchors & IAnchorConstants.NORTH) != 0 && (anchors & IAnchorConstants.SOUTH) == 0);
 			}
 
 
@@ -274,8 +318,8 @@ public class SnapToElementAlignment extends SnapToHelper
 					(anchors & IAnchorConstants.SOUTH) != 0);
 				// distance to top-bottom
 				south = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, south, rect.y + rect.height, childBounds.y,
-					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), elementModel instanceof Part,
-					getSetAnchor() && (elementModel instanceof Part || ((anchors & IAnchorConstants.SOUTH) != 0 && (anchors & IAnchorConstants.NORTH) == 0)));
+					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), false, getSetAnchor() &&
+						(anchors & IAnchorConstants.SOUTH) != 0 && (anchors & IAnchorConstants.NORTH) == 0);
 
 				if (singleAlignmentPerDimension) north = south;
 			}
