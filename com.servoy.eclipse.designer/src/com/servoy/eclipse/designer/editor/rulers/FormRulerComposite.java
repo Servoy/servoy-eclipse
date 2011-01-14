@@ -34,21 +34,29 @@ public class FormRulerComposite extends RulerComposite
 		{
 			public void propertyChange(PropertyChangeEvent evt)
 			{
-				if (RulerProvider.PROPERTY_RULER_VISIBILITY.equals(evt.getPropertyName()) &&
-					Boolean.TRUE.equals(primaryViewer.getProperty(RulerProvider.PROPERTY_RULER_VISIBILITY)))
+				if (RulerProvider.PROPERTY_RULER_VISIBILITY.equals(evt.getPropertyName()))
 				{
-					setkeyHandlers();
+					// set key handlers a bit later, top and left may not have been created yet
+					getDisplay().asyncExec(new Runnable()
+					{
+						public void run()
+						{
+							setkeyHandlers(primaryViewer);
+						}
+					});
 				}
 			}
-
 		});
-		setkeyHandlers();
+		setkeyHandlers(primaryViewer);
 	}
 
-	protected void setkeyHandlers()
+	protected void setkeyHandlers(ScrollingGraphicalViewer primaryViewer)
 	{
 		// replace the key handlers
-		getTop().setKeyHandler(new FormRulerKeyHandler(getTop()));
-		getLeft().setKeyHandler(new FormRulerKeyHandler(getLeft()));
+		if (Boolean.TRUE.equals(primaryViewer.getProperty(RulerProvider.PROPERTY_RULER_VISIBILITY)))
+		{
+			getTop().setKeyHandler(new FormRulerKeyHandler(getTop()));
+			getLeft().setKeyHandler(new FormRulerKeyHandler(getLeft()));
+		}
 	}
 }
