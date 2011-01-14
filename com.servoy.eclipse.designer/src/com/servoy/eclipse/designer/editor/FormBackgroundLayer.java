@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.designer.editor;
 
+import java.awt.Dimension;
 import java.awt.print.PageFormat;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -29,6 +30,7 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -50,6 +52,12 @@ import com.servoy.j2db.util.PersistHelper;
  */
 public class FormBackgroundLayer extends FreeformLayer
 {
+	private static final RGB TRANSPARENT_PATTERN_ODD = new RGB(0x66, 0x66, 0x66);
+	private static final RGB TRANSPARENT_PATTERN_EVEN = new RGB(0x99, 0x99, 0x99);
+
+	public static final int TRANSPARENT_PATTERN_SIZE = 8;
+
+
 	protected final VisualFormEditor editorPart;
 
 	public FormBackgroundLayer(VisualFormEditor editorPart)
@@ -64,16 +72,18 @@ public class FormBackgroundLayer extends FreeformLayer
 	protected void paintFigure(Graphics graphics)
 	{
 		super.paintFigure(graphics);
-		graphics.pushState();
-		try
+
+		Form flattenedForm = editorPart.getFlattenedForm();
+		if (flattenedForm == null) return;
+		if (flattenedForm.getTransparent())
 		{
-			paintDatarenderers(graphics);
-			paintPagebreaks(graphics);
+			paintTransparencyFormPattern(graphics, flattenedForm);
 		}
-		finally
+		else
 		{
-			graphics.popState();
+			paintDatarenderers(graphics, flattenedForm);
 		}
+		paintPagebreaks(graphics);
 	}
 
 	/**
@@ -83,11 +93,8 @@ public class FormBackgroundLayer extends FreeformLayer
 	 * 
 	 * @param graphics
 	 */
-	protected void paintDatarenderers(Graphics graphics)
+	protected void paintDatarenderers(Graphics graphics, Form flattenedForm)
 	{
-		Form flattenedForm = editorPart.getFlattenedForm();
-		if (flattenedForm == null || flattenedForm.getTransparent()) return;
-
 		Iterator<Part> parts = flattenedForm.getParts();
 		int prevY = 0;
 		Color formBg = null;
@@ -111,6 +118,30 @@ public class FormBackgroundLayer extends FreeformLayer
 			graphics.setBackgroundColor(bg);
 			graphics.fillRectangle(0, prevY, flattenedForm.getWidth(), part.getHeight() - prevY);
 			prevY = part.getHeight();
+		}
+	}
+
+	/**
+	 * Paint a block-pattern to indicate the dimensions of the transparent form.
+	 * @param graphics
+	 * @param flattenedForm
+	 */
+	protected void paintTransparencyFormPattern(Graphics graphics, Form flattenedForm)
+	{
+		Dimension size = flattenedForm.getSize();
+		paintTransparencypattern(graphics, true, size);
+		paintTransparencypattern(graphics, false, size);
+	}
+
+	private void paintTransparencypattern(Graphics graphics, boolean even, Dimension size)
+	{
+		graphics.setBackgroundColor(ColorResource.INSTANCE.getColor(even ? TRANSPARENT_PATTERN_EVEN : TRANSPARENT_PATTERN_ODD));
+		for (int y = 0; y < size.height; y += TRANSPARENT_PATTERN_SIZE)
+		{
+			for (int x = (even == ((y / TRANSPARENT_PATTERN_SIZE) % 2 == 0)) ? TRANSPARENT_PATTERN_SIZE : 0; x < size.width; x += 2 * TRANSPARENT_PATTERN_SIZE)
+			{
+				graphics.fillRectangle(x, y, Math.min(TRANSPARENT_PATTERN_SIZE, size.width - x), Math.min(TRANSPARENT_PATTERN_SIZE, size.height - y));
+			}
 		}
 	}
 
