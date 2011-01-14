@@ -79,6 +79,15 @@ public class SuggestForeignTypesAction extends Action implements ISelectionChang
 		{
 			return false;
 		}
-		else return super.isEnabled();
+
+		// if the server is not enabled or invalid
+		SimpleUserNode node = viewer.getSelectedTreeNode();
+		if (node.getRealObject() instanceof IServerInternal)
+		{
+			IServerInternal s = (IServerInternal)node.getRealObject();
+			if (!s.getConfig().isEnabled() || !s.isValid()) return false;
+		}
+
+		return super.isEnabled();
 	}
 }

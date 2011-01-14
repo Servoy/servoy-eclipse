@@ -68,8 +68,12 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 		boolean state = (sel.size() == 1);
 		if (state)
 		{
-			UserNodeType type = ((SimpleUserNode)sel.getFirstElement()).getType();
-			state = type == UserNodeType.SERVER;
+			SimpleUserNode node = (SimpleUserNode)sel.getFirstElement();
+			if (node.getRealObject() instanceof IServerInternal)
+			{
+				IServerInternal s = (IServerInternal)node.getRealObject();
+				state = (node.getType() == UserNodeType.SERVER) && (s.getConfig().isEnabled() && s.isValid());
+			}
 		}
 		setEnabled(state);
 	}
