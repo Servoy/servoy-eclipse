@@ -52,10 +52,10 @@ import com.servoy.j2db.util.PersistHelper;
  */
 public class FormBackgroundLayer extends FreeformLayer
 {
-	private static final Color TRANSPARENT_PATTERN_EVEN = ColorResource.INSTANCE.getColor(new RGB(0xc0, 0xc0, 0xc0));
+	private static final Color TRANSPARENT_PATTERN_EVEN = ColorResource.INSTANCE.getColor(new RGB(0xf0, 0xf0, 0xf0));
 	private static final Color TRANSPARENT_PATTERN_ODD = ColorConstants.white;
 
-	public static final int TRANSPARENT_PATTERN_SIZE = 8;
+	public static final int TRANSPARENT_PATTERN_SIZE = 14;
 
 
 	protected final VisualFormEditor editorPart;
