@@ -52,8 +52,8 @@ import com.servoy.j2db.util.PersistHelper;
  */
 public class FormBackgroundLayer extends FreeformLayer
 {
-	private static final RGB TRANSPARENT_PATTERN_ODD = new RGB(0x66, 0x66, 0x66);
-	private static final RGB TRANSPARENT_PATTERN_EVEN = new RGB(0x99, 0x99, 0x99);
+	private static final Color TRANSPARENT_PATTERN_EVEN = ColorResource.INSTANCE.getColor(new RGB(0xc0, 0xc0, 0xc0));
+	private static final Color TRANSPARENT_PATTERN_ODD = ColorConstants.white;
 
 	public static final int TRANSPARENT_PATTERN_SIZE = 8;
 
@@ -135,7 +135,7 @@ public class FormBackgroundLayer extends FreeformLayer
 
 	private void paintTransparencypattern(Graphics graphics, boolean even, Dimension size)
 	{
-		graphics.setBackgroundColor(ColorResource.INSTANCE.getColor(even ? TRANSPARENT_PATTERN_EVEN : TRANSPARENT_PATTERN_ODD));
+		graphics.setBackgroundColor(even ? TRANSPARENT_PATTERN_EVEN : TRANSPARENT_PATTERN_ODD);
 		for (int y = 0; y < size.height; y += TRANSPARENT_PATTERN_SIZE)
 		{
 			for (int x = (even == ((y / TRANSPARENT_PATTERN_SIZE) % 2 == 0)) ? TRANSPARENT_PATTERN_SIZE : 0; x < size.width; x += 2 * TRANSPARENT_PATTERN_SIZE)
