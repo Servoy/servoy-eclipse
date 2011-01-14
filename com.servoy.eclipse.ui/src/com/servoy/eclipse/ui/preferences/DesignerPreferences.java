@@ -66,6 +66,7 @@ public class DesignerPreferences
 	public static final String FEEDBACK_GRID_SETTING = "feedBackGrid";
 	public static final String ANCHOR_SETTING = "anchor";
 	public static final String SAVE_EDITOR_STATE_SETTING = "saveEditorState";
+	public static final String OPEN_FIRST_FORM_DESIGNER_SETTING = "openFirstFormDesigner";
 	public static final String FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING = "formToolsOnMainToolbar";
 	public static final String FORM_COOLBAR_LAYOUT_SETTING = "formCoolBarLayout";
 	public static final String SHOW_SAME_SIZE_SETTING = "showSameSizeFeedback";
@@ -94,6 +95,7 @@ public class DesignerPreferences
 	public static final boolean FEEDBACK_GRID_DEFAULT = false;
 	public static final boolean ANCHOR_DEFAULT = false;
 	public static final boolean SAVE_EDITOR_STATE_DEFAULT = true;
+	public static final boolean OPEN_FIRST_FORM_DESIGNER_DEFAULT = true;
 	public static final boolean SHOW_SAME_SIZE_DEFAULT = true;
 	public static final boolean SHOW_ANCHORING_DEFAULT = true;
 	public static final boolean FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT = true;
@@ -390,6 +392,16 @@ public class DesignerPreferences
 	public void setSaveEditorState(boolean saveEditorState)
 	{
 		setProperty(SAVE_EDITOR_STATE_SETTING, saveEditorState);
+	}
+
+	public boolean getOpenFirstFormDesigner()
+	{
+		return getProperty(OPEN_FIRST_FORM_DESIGNER_SETTING, OPEN_FIRST_FORM_DESIGNER_DEFAULT);
+	}
+
+	public void setOpenFirstFormDesigner(boolean openFirstFormDesigner)
+	{
+		setProperty(OPEN_FIRST_FORM_DESIGNER_SETTING, openFirstFormDesigner);
 	}
 
 	public boolean getShowSameSizeFeedback()

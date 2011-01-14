@@ -69,6 +69,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	private Button snapToGridRadio;
 	private Button anchorCheck;
 	private Button saveEditorStateButton;
+	private Button openFirstFormDesignerButton;
 	private Button toolbarsInFormWindowButton;
 	private Button snapToAlignmentRadio;
 	private Spinner alignmentThresholdSpinner;
@@ -99,7 +100,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		metricsCombo = new ComboViewer(composite);
 		Combo combo = metricsCombo.getCombo();
-		combo.setBounds(195, 75, 125, 23);
+		combo.setBounds(195, 94, 125, 23);
 		metricsCombo.setContentProvider(new ArrayContentProvider());
 		metricsCombo.setLabelProvider(new LabelProvider());
 		metricsCombo.setInput(new ObjectWrapper[] { new ObjectWrapper("pixels", new Integer(DesignerPreferences.PX)), new ObjectWrapper("centimeters",
@@ -107,18 +108,22 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		Label copypasteOffsetLabel = new Label(composite, SWT.NONE);
 		copypasteOffsetLabel.setText("Copy/Paste offset");
-		copypasteOffsetLabel.setBounds(0, 51, 107, 20);
+		copypasteOffsetLabel.setBounds(0, 70, 107, 20);
 
 		Label metricsLabel = new Label(composite, SWT.NONE);
 		metricsLabel.setText("Ruler Metrics");
-		metricsLabel.setBounds(109, 78, 80, 20);
+		metricsLabel.setBounds(109, 97, 80, 20);
 
 		saveEditorStateButton = new Button(composite, SWT.CHECK);
 		saveEditorStateButton.setText("Re-open Form Editors at startup");
 		saveEditorStateButton.setBounds(0, 0, 225, 20);
 
+		openFirstFormDesignerButton = new Button(composite, SWT.CHECK);
+		openFirstFormDesignerButton.setText("Open the first form designer on activating a solution");
+		openFirstFormDesignerButton.setBounds(0, 20, 345, 20);
+
 		toolbarsInFormWindowButton = new Button(composite, SWT.CHECK);
-		toolbarsInFormWindowButton.setBounds(0, 19, 343, 26);
+		toolbarsInFormWindowButton.setBounds(0, 38, 343, 26);
 		toolbarsInFormWindowButton.setText("Show Form Editing Toolbars inside Form Editor");
 
 		Button resetToolbarsButton = new Button(composite, SWT.NONE);
@@ -130,16 +135,16 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 				new DesignerPreferences().saveCoolbarLayout(null);
 			}
 		});
-		resetToolbarsButton.setBounds(349, 21, 68, 23);
+		resetToolbarsButton.setBounds(349, 40, 68, 23);
 		resetToolbarsButton.setText("Show all");
 
 		copyPasteOffsetSpinner = new Spinner(composite, SWT.BORDER);
 		copyPasteOffsetSpinner.setValues(0, 0, 100, 0, 1, 5);
-		copyPasteOffsetSpinner.setBounds(109, 48, 125, 20);
+		copyPasteOffsetSpinner.setBounds(109, 67, 125, 20);
 
 		Group grpAlignmentSettings = new Group(composite, SWT.NONE);
 		grpAlignmentSettings.setText("Guide Settings");
-		grpAlignmentSettings.setBounds(0, 408, 431, 246);
+		grpAlignmentSettings.setBounds(0, 432, 431, 246);
 
 		snapToGridRadio = new Button(grpAlignmentSettings, SWT.RADIO);
 		snapToGridRadio.setBounds(10, 50, 108, 26);
@@ -218,7 +223,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		Group grpResizing = new Group(composite, SWT.NONE);
 		grpResizing.setText("Keyboard resize/move step sizes");
-		grpResizing.setBounds(0, 660, 431, 73);
+		grpResizing.setBounds(0, 684, 431, 73);
 
 		Label stepsizeLabel = new Label(grpResizing, SWT.NONE);
 		stepsizeLabel.setBounds(10, 24, 60, 20);
@@ -240,7 +245,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		Group grpFeedbackSettings = new Group(composite, SWT.NONE);
 		grpFeedbackSettings.setText("Feedback Settings");
-		grpFeedbackSettings.setBounds(0, 101, 430, 312);
+		grpFeedbackSettings.setBounds(0, 120, 430, 312);
 
 		alignmentFeedbackCheck = new Button(grpFeedbackSettings, SWT.CHECK);
 		alignmentFeedbackCheck.setBounds(10, 130, 303, 26);
@@ -302,7 +307,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		paintPagebreaksCheck.setText("Paint page breaks");
 
 		showRulersCheck = new Button(composite, SWT.CHECK);
-		showRulersCheck.setBounds(0, 72, 101, 26);
+		showRulersCheck.setBounds(0, 93, 101, 26);
 		showRulersCheck.setText("Show rulers");
 
 		initializeFields();
@@ -343,6 +348,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		alignmentFeedbackCheck.setSelection(prefs.getFeedbackAlignment());
 		gridFeedbackCheck.setSelection(prefs.getFeedbackGrid());
 		saveEditorStateButton.setSelection(prefs.getSaveEditorState());
+		openFirstFormDesignerButton.setSelection(prefs.getOpenFirstFormDesigner());
 		toolbarsInFormWindowButton.setSelection(prefs.getFormToolsOnMainToolbar());
 		guideSizeSpinner.setSelection(prefs.getGuideSize());
 		copyPasteOffsetSpinner.setSelection(prefs.getCopyPasteOffset());
@@ -376,6 +382,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		prefs.setSnapTo(snapToGridRadio.getSelection(), snapToAlignmentRadio.getSelection());
 		prefs.setAnchor(anchorCheck.getSelection());
 		prefs.setSaveEditorState(saveEditorStateButton.getSelection());
+		prefs.setOpenFirstFormDesigner(openFirstFormDesignerButton.getSelection());
 		prefs.setFormToolsOnMainToolbar(toolbarsInFormWindowButton.getSelection());
 		prefs.setGuideSize(guideSizeSpinner.getSelection());
 		prefs.setCopyPasteOffset(copyPasteOffsetSpinner.getSelection());
@@ -412,6 +419,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		snapToAlignmentRadio.setSelection(DesignerPreferences.SNAPTO_DEFAULT.equals(DesignerPreferences.SNAP_TO_ALIGMNENT));
 		snapToNoneRadio.setSelection(DesignerPreferences.SNAPTO_DEFAULT.equals(DesignerPreferences.SNAP_TO_NONE));
 		saveEditorStateButton.setSelection(DesignerPreferences.SAVE_EDITOR_STATE_DEFAULT);
+		openFirstFormDesignerButton.setSelection(DesignerPreferences.OPEN_FIRST_FORM_DESIGNER_DEFAULT);
 		toolbarsInFormWindowButton.setSelection(DesignerPreferences.FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT);
 		copyPasteOffsetSpinner.setSelection(DesignerPreferences.COPY_PASTE_OFFSET_DEFAULT);
 		alignmentThresholdSpinner.setSelection(DesignerPreferences.ALIGNMENT_THRESHOLD_DEFAULT);

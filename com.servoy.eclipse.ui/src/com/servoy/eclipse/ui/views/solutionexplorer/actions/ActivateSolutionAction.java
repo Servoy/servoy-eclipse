@@ -13,8 +13,10 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
+
+import java.util.Iterator;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -26,6 +28,9 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.Solution;
 
 /**
  * Action for activating a solution.
@@ -50,7 +55,25 @@ public class ActivateSolutionAction extends Action implements ISelectionChangedL
 	{
 		if (selectedProject != null)
 		{
+			Form firstForm = null;
+
+			Solution activeSolution = selectedProject.getSolution();
+			firstForm = activeSolution.getForm(activeSolution.getFirstFormID());
+			if (firstForm == null)
+			{
+				Iterator<Form> formIterator = activeSolution.getForms(null, false);
+				if (formIterator.hasNext())
+				{
+					firstForm = formIterator.next();
+				}
+			}
+
 			ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(selectedProject);
+
+			if (firstForm != null)
+			{
+				EditorUtil.openFormDesignEditor(firstForm);
+			}
 		}
 	}
 
