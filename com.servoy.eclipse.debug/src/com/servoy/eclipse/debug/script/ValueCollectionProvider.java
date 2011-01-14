@@ -1,6 +1,8 @@
 package com.servoy.eclipse.debug.script;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,12 +58,17 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			{
 				IValueCollection superForms = ValueCollectionFactory.createScopeValueCollection();
 				Form superForm = fs.getForm(form.getExtendsFormID());
+				List<IValueCollection> superCollections = new ArrayList<IValueCollection>();
 				while (superForm != null)
 				{
 					String scriptPath = SolutionSerializer.getScriptPath(superForm, false);
 					IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
-					ValueCollectionFactory.copyInto(superForms, getValueCollection(file));
+					superCollections.add(getValueCollection(file));
 					superForm = fs.getForm(superForm.getExtendsFormID());
+				}
+				for (int i = superCollections.size(); --i >= 0;)
+				{
+					ValueCollectionFactory.copyInto(superForms, superCollections.get(i));
 				}
 				if (formCollection != null) ValueCollectionFactory.copyInto(superForms, formCollection);
 				return superForms;
