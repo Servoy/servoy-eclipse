@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.javascript.typeinference.IValueCollection;
 import org.eclipse.dltk.javascript.typeinference.ValueCollectionFactory;
 import org.eclipse.dltk.javascript.typeinfo.IElementResolver;
@@ -34,6 +36,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController.JSForm;
@@ -43,9 +46,11 @@ import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
+import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSSecurity;
@@ -141,27 +146,83 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		{
 			// global, remove the form only things.
 			typeNames.remove("controller");
-
-			typeNames.add("forms");
 			typeNames.add("plugins");
 
-			try
+			Table calcTable = getCalculationTable(context, fs);
+			if (calcTable != null)
 			{
-				Iterator<Relation> relations = fs.getRelations(null, true, false);
-				while (relations.hasNext())
+				typeNames.remove("currentcontroller");
+				typeNames.remove("databaseManager");
+				typeNames.remove("history");
+				typeNames.remove("jsunit");
+				try
 				{
-					typeNames.add(relations.next().getName());
+					Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(calcTable);
+					if (allDataProvidersForTable != null)
+					{
+						typeNames.addAll(allDataProvidersForTable.keySet());
+					}
+					Iterator<Relation> relations = fs.getRelations(calcTable, true, false);
+					while (relations.hasNext())
+					{
+						typeNames.add(relations.next().getName());
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("Cant get dataproviders of " + calcTable + " for calculations " + context.getModelElement().getResource(), e);
+				}
+
+			}
+			else
+			{
+				typeNames.add("forms");
+				try
+				{
+					Iterator<Relation> relations = fs.getRelations(null, true, false);
+					while (relations.hasNext())
+					{
+						typeNames.add(relations.next().getName());
+					}
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError("Cant get relations of " + form, e);
 				}
 			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError("Cant get relations of " + form, e);
-			}
-
-
-			// or calculation???
 		}
 		return typeNames;
+	}
+
+	/**
+	 * @param context
+	 * @param fs
+	 * @return
+	 */
+	private Table getCalculationTable(ITypeInfoContext context, FlattenedSolution fs)
+	{
+		Table calcTable = null;
+		IResource resource = context.getModelElement().getResource();
+		if (resource != null)
+		{
+			IPath path = resource.getProjectRelativePath();
+			if (path != null && path.segmentCount() == 3 && path.segment(0).equals(SolutionSerializer.DATASOURCES_DIR_NAME) &&
+				path.segment(2).endsWith(SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT))
+			{
+				String calcServerName = path.segment(1);
+				String calcTableName = path.segment(2).substring(0, path.segment(2).length() - SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length());
+				try
+				{
+					IServer server = fs.getSolution().getServer(calcServerName);
+					calcTable = (Table)server.getTable(calcTableName);
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("Cant get table " + calcTableName + " for " + calcServerName + " for calculations " + resource, e);
+				}
+			}
+		}
+		return calcTable;
 	}
 
 	/*
@@ -251,14 +312,30 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 				else
 				{
 					Form form = getForm(context);
+					Table table = null;
 					if (form != null)
+					{
+						try
+						{
+							table = form.getTable();
+						}
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+					else
+					{
+						table = getCalculationTable(context, fs);
+					}
+					if (table != null)
 					{
 						IDataProvider provider = null; //form.getScriptVariable(name);
 						if (provider == null)
 						{
 							try
 							{
-								Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(form.getTable());
+								Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(table);
 								if (allDataProvidersForTable != null)
 								{
 									provider = allDataProvidersForTable.get(name);

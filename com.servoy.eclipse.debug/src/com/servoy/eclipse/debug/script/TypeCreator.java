@@ -619,6 +619,7 @@ public abstract class TypeCreator
 				type = context.getType("String");
 				break;
 			case IColumnTypes.MEDIA :
+				type = context.getType("Object");
 				break;
 		}
 		return type;
