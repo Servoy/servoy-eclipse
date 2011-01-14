@@ -129,8 +129,8 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 					models.get(i).getTypeID(), 0, 0, null);
 			}
 			Point location = new Point(minx + ((ChangeBoundsRequest)request).getMoveDelta().x, miny + ((ChangeBoundsRequest)request).getMoveDelta().y);
-			Command command = new FormPlaceElementCommand(application, (ISupportChilds)persist, objects, request.getType(), request.getExtendedData(),
-				new DefaultFieldPositioner(location), null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
+			Command command = new FormPlaceElementCommand(application, (ISupportChilds)persist.getAncestor(IRepository.FORMS), objects, request.getType(),
+				request.getExtendedData(), new DefaultFieldPositioner(location), null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 			// Refresh the form
 			return new PersistPlaceCommandWrapper((EditPart)getHost().getViewer().getEditPartRegistry().get(persist.getAncestor(IRepository.FORMS)), command,
 				true);
