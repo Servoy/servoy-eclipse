@@ -54,7 +54,8 @@ public class OpenAdapter implements IOpenDelegate
 
 	public boolean supports(Object object)
 	{
-		return object instanceof Element && ((Element)object).getAttribute(TypeCreator.RESOURCE) != null;
+		return object instanceof Element &&
+			(((Element)object).getAttribute(TypeCreator.RESOURCE) != null || ((Element)object).getAttribute(TypeCreator.LAZY_VALUECOLLECTION) != null);
 	}
 
 	public String getName(Object object)
@@ -66,6 +67,10 @@ public class OpenAdapter implements IOpenDelegate
 	public IEditorPart openInEditor(Object object, boolean activate) throws PartInitException, CoreException
 	{
 		Object resource = ((Element)object).getAttribute(TypeCreator.RESOURCE);
+		if (resource == null)
+		{
+			resource = ((Element)object).getAttribute(TypeCreator.LAZY_VALUECOLLECTION);
+		}
 		if (resource instanceof IPersist)
 		{
 			EditorUtil.openPersistEditor((IPersist)resource);
