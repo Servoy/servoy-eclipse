@@ -38,6 +38,7 @@ import org.eclipse.ui.part.EditorPart;
 
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.ClientVersion;
 
 /**
  * Editor used to show the Servoy Marketplace. 
@@ -47,8 +48,11 @@ import com.servoy.eclipse.model.util.ServoyLog;
 public class MarketplaceBrowserEditor extends EditorPart
 {
 	public static final String MARKETPLACE_BROWSER_EDITOR_ID = "com.servoy.eclipse.marketplace.MarketplaceBrowserEditor"; //$NON-NLS-1$
-	public static final String MARKETPLACE_URL = "http://www.servoy.com/marketplace"; //$NON-NLS-1$
-	//public static final String MARKETPLACE_URL = "http://localhost:8080/servoy-webclient/solutions/solution/downloadLink"; //$NON-NLS-1$
+	public static final String MARKETPLACE_URL = "https://crm.servoy.com/servoy-webclient/ss?s=marketplace"; //$NON-NLS-1$
+	//public static final String MARKETPLACE_URL = "http://localhost:8080/servoy-webclient/ss?s=downloadLink"; //$NON-NLS-1$
+	public static final String MARKETPLACE_XML_VERSION = "1.0"; //$NON-NLS-1$
+	private static final String PARAM_SERVOY_VERSION = "servoyVersion"; //$NON-NLS-1$
+	private static final String PARAM_MARKETPLACE_XML_VERSION = "marketplaceXMLVersion"; //$NON-NLS-1$ 
 	public static final MarketplaceBrowserEditorInput INPUT = new MarketplaceBrowserEditorInput();
 
 	private Browser browser;
@@ -106,7 +110,8 @@ public class MarketplaceBrowserEditor extends EditorPart
 	public void createPartControl(Composite parent)
 	{
 		browser = new Browser(parent, SWT.NONE);
-		browser.setUrl(MARKETPLACE_URL, null, new String[] { "Cache-Control: no-cache" }); //$NON-NLS-1$
+		browser.setUrl(
+			new StringBuffer(MARKETPLACE_URL).append("&a=&").append(PARAM_SERVOY_VERSION).append("=").append(ClientVersion.getBundleVersion()).append("&").append(PARAM_MARKETPLACE_XML_VERSION).append("=").append(MARKETPLACE_XML_VERSION).toString(), null, new String[] { "Cache-Control: no-cache" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		browser.addLocationListener(new LocationAdapter()
 		{
 			@Override
