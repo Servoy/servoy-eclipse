@@ -221,7 +221,8 @@ public class VisualFormEditorPaletteFactory
 			if (bean instanceof BeanInfo)
 			{
 				BeanDescriptor beanDescriptor = ((BeanInfo)bean).getBeanDescriptor();
-				if ((IServoyBeanFactory.class.isAssignableFrom(beanDescriptor.getBeanClass()) || IServoyAwareBean.class.isAssignableFrom(beanDescriptor.getBeanClass())) == servoyBeans)
+				if (beanDescriptor.getBeanClass() != null &&
+					((IServoyBeanFactory.class.isAssignableFrom(beanDescriptor.getBeanClass()) || IServoyAwareBean.class.isAssignableFrom(beanDescriptor.getBeanClass())) == servoyBeans))
 				{
 					String beanId = beanDescriptor.getBeanClass().getName();
 					beanIds.add(beanId);
