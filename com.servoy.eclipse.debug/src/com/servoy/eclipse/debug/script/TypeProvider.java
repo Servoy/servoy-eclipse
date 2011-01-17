@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -54,8 +54,9 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.IApplication;
 import com.servoy.j2db.FormController.JSForm;
+import com.servoy.j2db.FormManager.HistoryProvider;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
@@ -81,7 +82,10 @@ import com.servoy.j2db.scripting.GroupScriptObject;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.JSApplication;
+import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSSecurity;
+import com.servoy.j2db.scripting.JSUnitAssertFunctions;
+import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.ui.IDepricatedScriptTabPanelMethods;
@@ -117,6 +121,14 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addType("JSDataSet", JSDataSet.class);
 		addType(IExecutingEnviroment.TOPLEVEL_SERVOY_EXCEPTION, ServoyException.class);
 		addAnonymousClassType("Controller", JSForm.class);
+		addAnonymousClassType("JSApplication", JSApplication.class);
+		addAnonymousClassType("JSSecurity", JSSecurity.class);
+		addAnonymousClassType("JSI18N", JSI18N.class);
+		addAnonymousClassType("JSHistory", HistoryProvider.class);
+		addAnonymousClassType("JSUtils", JSUtils.class);
+		addAnonymousClassType("JSUnit", JSUnitAssertFunctions.class);
+		addAnonymousClassType("JSSolutionModel", JSSolutionModel.class);
+		addAnonymousClassType("JSDatabaseManager", JSDatabaseManager.class);
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
@@ -170,6 +182,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVASCRIPT);
 			type.setSuperType(context.getKnownType("Function"));
+			context.markInvariant(type);
 			return type;
 		}
 		return super.getType(context, typeName);
@@ -185,6 +198,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		type.setKind(TypeKind.JAVA);
 
 		classTypes.put(name, type);
+		context.markInvariant(type);
 
 		Method[] methods = clz.getMethods();
 		Field[] fields = clz.getFields();
@@ -396,6 +410,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 	private class FoundSetCreator implements IScopeTypeCreator
 	{
+		private Type cachedSuperTypeTemplateType = null;
 
 		public Type createType(ITypeInfoContext context, String fullTypeName)
 		{
@@ -422,13 +437,16 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				type.getMembers().add(selectedIndex);
 
 				// quickly add this one to the static types.
-				types.put(FoundSet.JS_FOUNDSET, type);
+				context.markInvariant(type);
 			}
 			else
 			{
 				String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
-				Type superType = getType(context, FoundSet.JS_FOUNDSET);
-				EList<Member> members = superType.getMembers();
+				if (cachedSuperTypeTemplateType == null)
+				{
+					cachedSuperTypeTemplateType = getType(context, FoundSet.JS_FOUNDSET);
+				}
+				EList<Member> members = cachedSuperTypeTemplateType.getMembers();
 				List<Member> overwrittenMembers = new ArrayList<Member>();
 				for (Member member : members)
 				{
@@ -640,6 +658,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 	private class RecordCreator extends FoundSetCreator
 	{
+		private Type cachedSuperTypeTemplateType;
 
 		@Override
 		public Type createType(ITypeInfoContext context, String fullTypeName)
@@ -651,13 +670,16 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				ImageDescriptor desc = IconProvider.instance().descriptor(Record.class);
 				type.setAttribute(IMAGE_DESCRIPTOR, desc);
 				// quickly add this one to the static types.
-				types.put(Record.JS_RECORD, type);
+				context.markInvariant(type);
 			}
 			else
 			{
 				String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
-				Type superType = getType(context, Record.JS_RECORD);
-				EList<Member> members = superType.getMembers();
+				if (cachedSuperTypeTemplateType == null)
+				{
+					cachedSuperTypeTemplateType = getType(context, Record.JS_RECORD);
+				}
+				EList<Member> members = cachedSuperTypeTemplateType.getMembers();
 				List<Member> overwrittenMembers = new ArrayList<Member>();
 				for (Member member : members)
 				{
@@ -745,13 +767,14 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				}
 			}
 			// quickly add this one to the static types.
-			types.put(fullTypeName, type);
+			context.markInvariant(type);
 			return type;
 		}
 	}
 
 	private class FormScopeCreator extends FoundSetCreator
 	{
+		private Type cachedSuperTypeTemplateType = null;
 
 		@Override
 		public Type createType(ITypeInfoContext context, String typeName)
@@ -778,7 +801,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 				type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
 				// quickly add this one to the static types.
-				types.put("Form", type);
+				context.markInvariant(type);
 			}
 			else
 			{
@@ -798,8 +821,11 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 					ServoyLog.logError(e);
 				}
 				String ds = formToUse.getDataSource();
-				Type superType = getType(context, "Form");
-				EList<Member> members = superType.getMembers();
+				if (cachedSuperTypeTemplateType == null)
+				{
+					cachedSuperTypeTemplateType = getType(context, "Form");
+				}
+				EList<Member> members = cachedSuperTypeTemplateType.getMembers();
 				List<Member> overwrittenMembers = new ArrayList<Member>();
 				for (Member member : members)
 				{
@@ -949,7 +975,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				{
 					Table table = (Table)fsAndTable[0];
 					addDataProviders(table.getColumns().iterator(), type.getMembers(), context, isVisible(), true);
-					directDynamicTypes.put(typeName, type);
+//					directDynamicTypes.put(typeName, type);
 				}
 			}
 
@@ -1142,11 +1168,10 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				arrayProp.setVisible(false);
 				members.add(arrayProp);
 				// quickly add this one to the static types.
-				types.put("Elements", type);
+				context.markInvariant(type);
 			}
 			else
 			{
-
 				FlattenedSolution fs = getFlattenedSolution(context);
 				if (fs != null)
 				{

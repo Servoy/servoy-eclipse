@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -51,8 +50,6 @@ import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 
-import com.servoy.eclipse.core.IPersistChangeListener;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.doc.IParameter;
 import com.servoy.eclipse.core.doc.ITypedScriptObject;
 import com.servoy.eclipse.core.doc.ScriptParameter;
@@ -70,7 +67,6 @@ import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Relation;
@@ -153,7 +149,7 @@ public abstract class TypeCreator
 	public static final String VALUECOLLECTION = "servoy.VALUECOLLECTION";
 	public static final String LAZY_VALUECOLLECTION = "servoy.LAZY_VALUECOLLECTION";
 
-	protected final static Set<String> BASE_TYPES = new HashSet<String>(128);
+	public final static Set<String> BASE_TYPES = new HashSet<String>(128);
 
 	static
 	{
@@ -169,9 +165,9 @@ public abstract class TypeCreator
 		BASE_TYPES.add("Math");
 	}
 
-	protected final ConcurrentMap<String, Type> types = new ConcurrentHashMap<String, Type>();
-	private final ConcurrentMap<String, ConcurrentMap<String, Type>> dynamicTypes = new ConcurrentHashMap<String, ConcurrentMap<String, Type>>();
-	protected final ConcurrentMap<String, Type> directDynamicTypes = new ConcurrentHashMap<String, Type>();
+//	private final ConcurrentMap<String, Type> types = new ConcurrentHashMap<String, Type>();
+//	private final ConcurrentMap<String, ConcurrentMap<String, Type>> dynamicTypes = new ConcurrentHashMap<String, ConcurrentMap<String, Type>>();
+//	protected final ConcurrentMap<String, Type> directDynamicTypes = new ConcurrentHashMap<String, Type>();
 	private final ConcurrentMap<String, Class< ? >> classTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, Class< ? >> anonymousClassTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, IScopeTypeCreator> scopeTypes = new ConcurrentHashMap<String, IScopeTypeCreator>();
@@ -185,32 +181,32 @@ public abstract class TypeCreator
 
 	protected void initalize()
 	{
-		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+//		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 		synchronized (this)
 		{
 			if (!initialized)
 			{
 				initialized = true;
-				if (servoyModel instanceof ServoyModel)
-				{
-					((ServoyModel)servoyModel).addPersistChangeListener(true, new IPersistChangeListener()
-					{
-						public void persistChanges(Collection<IPersist> changes)
-						{
-							// TODO see if this will become a performance issue..
-							clearDynamicTypes();
-						}
-					});
-				}
+//				if (servoyModel instanceof ServoyModel)
+//				{
+//					((ServoyModel)servoyModel).addPersistChangeListener(true, new IPersistChangeListener()
+//					{
+//						public void persistChanges(Collection<IPersist> changes)
+//						{
+//							// TODO see if this will become a performance issue..
+//							clearDynamicTypes();
+//						}
+//					});
+//				}
 			}
 		}
 	}
 
-	private void clearDynamicTypes()
-	{
-		dynamicTypes.clear();
-		directDynamicTypes.clear();
-	}
+//	private void clearDynamicTypes()
+//	{
+//		dynamicTypes.clear();
+//		directDynamicTypes.clear();
+//	}
 
 	protected final Class< ? > getTypeClass(String name)
 	{
@@ -246,42 +242,45 @@ public abstract class TypeCreator
 		if (BASE_TYPES.contains(typeName) || typeName.startsWith("Array<")) return null;
 		if (!initialized) initalize();
 		String realTypeName = typeName;
-		Type type = types.get(realTypeName);
-		if (type == null)
+		Type type = null;
+//		types.get(realTypeName);
+//		if (type == null)
 		{
-			type = directDynamicTypes.get(realTypeName);
-			if (type != null)
-			{
-				return type;
-			}
-			FlattenedSolution fs = getFlattenedSolution(context);
-			ConcurrentMap<String, Type> flattenedSolutionTypeMap = null;
-			if (fs != null && fs.getSolution() != null)
-			{
-				flattenedSolutionTypeMap = dynamicTypes.get(fs.getSolution().getName());
-				if (flattenedSolutionTypeMap == null)
-				{
-					flattenedSolutionTypeMap = new ConcurrentHashMap<String, Type>();
-					dynamicTypes.put(fs.getSolution().getName(), flattenedSolutionTypeMap);
-				}
-				else type = flattenedSolutionTypeMap.get(realTypeName);
-			}
+//			type = directDynamicTypes.get(realTypeName);
+//			if (type != null)
+//			{
+//				return type;
+//			}
+//			FlattenedSolution fs = getFlattenedSolution(context);
+//			ConcurrentMap<String, Type> flattenedSolutionTypeMap = null;
+//			if (fs != null && fs.getSolution() != null)
+//			{
+//				flattenedSolutionTypeMap = dynamicTypes.get(fs.getSolution().getName());
+//				if (flattenedSolutionTypeMap == null)
+//				{
+//					flattenedSolutionTypeMap = new ConcurrentHashMap<String, Type>();
+//					dynamicTypes.put(fs.getSolution().getName(), flattenedSolutionTypeMap);
+//				}
+//				else type = flattenedSolutionTypeMap.get(realTypeName);
+//			}
 			if (type == null)
 			{
 				type = createType(context, realTypeName, realTypeName);
 				if (type != null)
 				{
-					Type previous = types.putIfAbsent(realTypeName, type);
-					if (previous != null) return previous;
+//					Type previous = types.putIfAbsent(realTypeName, type);
+//					if (previous != null) return previous;
+					context.markInvariant(type);
 				}
-				else if (flattenedSolutionTypeMap != null)
+				else
+//					if (flattenedSolutionTypeMap != null)
 				{
 					type = createDynamicType(context, realTypeName, realTypeName);
-					if (type != null)
-					{
-						Type previous = flattenedSolutionTypeMap.putIfAbsent(realTypeName, type);
-						if (previous != null) return previous;
-					}
+//					if (type != null)
+//					{
+//						Type previous = flattenedSolutionTypeMap.putIfAbsent(realTypeName, type);
+//						if (previous != null) return previous;
+//					}
 				}
 			}
 		}

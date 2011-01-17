@@ -17,6 +17,7 @@
 package com.servoy.eclipse.debug.script;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -39,10 +40,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.FormController.JSForm;
-import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.dataprocessing.FoundSet;
-import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -51,12 +49,6 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.scripting.JSApplication;
-import com.servoy.j2db.scripting.JSI18N;
-import com.servoy.j2db.scripting.JSSecurity;
-import com.servoy.j2db.scripting.JSUnitAssertFunctions;
-import com.servoy.j2db.scripting.JSUtils;
-import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 
 /**
  * Class that resolves names in javascript like application or controller to a {@link Property} with a reference to the {@link Type} of that name.
@@ -66,25 +58,25 @@ import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
  * @since 6.0
  */
 @SuppressWarnings("nls")
-public class ElementResolver extends TypeCreator implements IElementResolver
+public class ElementResolver implements IElementResolver
 {
 	private final Map<String, ITypeNameCreator> typeNameCreators = new HashMap<String, ElementResolver.ITypeNameCreator>();
 
 	public ElementResolver()
 	{
-		addType("application", JSApplication.class);
-		addType("security", JSSecurity.class);
-		addType("i18n", JSI18N.class);
-		addType("history", HistoryProvider.class);
-		addType("utils", JSUtils.class);
-		addType("jsunit", JSUnitAssertFunctions.class);
-		addType("solutionModel", JSSolutionModel.class);
-		addType("databaseManager", JSDatabaseManager.class);
-		addType("controller", JSForm.class);
-		addType("currentcontroller", JSForm.class);
+		typeNameCreators.put("application", new SimpleNameTypeNameCreator("JSApplication"));
+		typeNameCreators.put("security", new SimpleNameTypeNameCreator("JSSecurity"));
+		typeNameCreators.put("i18n", new SimpleNameTypeNameCreator("JSI18N"));
+		typeNameCreators.put("history", new SimpleNameTypeNameCreator("JSHistory"));
+		typeNameCreators.put("utils", new SimpleNameTypeNameCreator("JSUtils"));
+		typeNameCreators.put("jsunit", new SimpleNameTypeNameCreator("JSUnit"));
+		typeNameCreators.put("solutionModel", new SimpleNameTypeNameCreator("JSSolutionModel"));
+		typeNameCreators.put("databaseManager", new SimpleNameTypeNameCreator("JSDatabaseManager"));
+		typeNameCreators.put("controller", new SimpleNameTypeNameCreator("Controller"));
+		typeNameCreators.put("currentcontroller", new SimpleNameTypeNameCreator("Controller"));
 
 		typeNameCreators.put("foundset", new FoundsetTypeNameCreator());
-		typeNameCreators.put("plugins", new PluginsTypeNameCreator());
+		typeNameCreators.put("plugins", new SimpleNameTypeNameCreator("Plugins"));
 		typeNameCreators.put("elements", new ElementsTypeNameCreator());
 		typeNameCreators.put("forms", new FormsNameCreator());
 
@@ -93,11 +85,10 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 	public Set<String> listGlobals(ITypeInfoContext context, String prefix)
 	{
 		Set<String> typeNames = getTypeNames(prefix);
-		FlattenedSolution fs = getFlattenedSolution(context);
-		Form form = getForm(context);
+		FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
+		Form form = TypeCreator.getForm(context);
 		if (form != null)
 		{
-			typeNames.add("forms");
 			typeNames.add("globals");
 			typeNames.addAll(typeNameCreators.keySet());
 			Form formToUse = form;
@@ -106,15 +97,12 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 				try
 				{
 					formToUse = fs.getFlattenedForm(form);
+					typeNames.add("_super");
 				}
 				catch (RepositoryException e)
 				{
 					ServoyLog.logError("Cant get super flattened form for " + form, e);
 				}
-			}
-			else
-			{
-				typeNames.remove("_super");
 			}
 			try
 			{
@@ -146,7 +134,8 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		{
 			// global, remove the form only things.
 			typeNames.remove("controller");
-			typeNames.add("plugins");
+			typeNames.remove("foundset");
+			typeNames.remove("elements");
 
 			Table calcTable = getCalculationTable(context, fs);
 			if (calcTable != null)
@@ -176,7 +165,6 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 			}
 			else
 			{
-				typeNames.add("forms");
 				try
 				{
 					Iterator<Relation> relations = fs.getRelations(null, true, false);
@@ -192,6 +180,27 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 			}
 		}
 		return typeNames;
+	}
+
+	/**
+	 * @param prefix
+	 * @return
+	 */
+	public final Set<String> getTypeNames(String prefix)
+	{
+		Set<String> names = new HashSet<String>(typeNameCreators.keySet());
+		names.addAll(typeNameCreators.keySet());
+		if (prefix != null && !"".equals(prefix.trim()))
+		{
+			String lowerCasePrefix = prefix.toLowerCase();
+			Iterator<String> iterator = names.iterator();
+			while (iterator.hasNext())
+			{
+				String name = iterator.next();
+				if (!name.toLowerCase().startsWith(lowerCasePrefix)) iterator.remove();
+			}
+		}
+		return names;
 	}
 
 	/**
@@ -225,23 +234,13 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		return calcTable;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.eclipse.debug.script.TypeCreator#addAnonymousClassType(java.lang.String, java.lang.Class)
-	 */
-	@Override
-	protected void addAnonymousClassType(String name, Class< ? > cls)
-	{
-	}
-
 	public Member resolveElement(ITypeInfoContext context, String name)
 	{
-		if (BASE_TYPES.contains(name)) return null;
+		if (TypeCreator.BASE_TYPES.contains(name)) return null;
 
 		if ("globals".equals(name))
 		{
-			FlattenedSolution fs = getFlattenedSolution(context);
+			FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
 			if (fs == null || fs.getSolution() == null)
 			{
 				return null;
@@ -259,8 +258,8 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 					property.setName(name);
 					property.setReadOnly(true);
-					property.setAttribute(VALUECOLLECTION, collection);
-					property.setAttribute(IMAGE_DESCRIPTOR, GLOBALS);
+					property.setAttribute(TypeCreator.VALUECOLLECTION, collection);
+					property.setAttribute(TypeCreator.IMAGE_DESCRIPTOR, TypeCreator.GLOBALS);
 					property.setType(context.getType("Globals<" + fs.getSolution().getName() + '>'));
 					return property;
 				}
@@ -269,16 +268,16 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		}
 		else if ("_super".equals(name))
 		{
-			Form form = getForm(context);
+			Form form = TypeCreator.getForm(context);
 			if (form != null && form.getExtendsFormID() > 0)
 			{
-				FlattenedSolution fs = getFlattenedSolution(context);
+				FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
 				if (fs != null)
 				{
 					Form superForm = fs.getForm(form.getExtendsFormID());
-					Property property = createProperty(context, "_super", true, null, FORM_IMAGE);
-					property.setDescription(getDoc("_super", com.servoy.j2db.documentation.scripting.docs.Form.class, "", null));
-					property.setAttribute(LAZY_VALUECOLLECTION, superForm);
+					Property property = TypeCreator.createProperty(context, "_super", true, null, TypeCreator.FORM_IMAGE);
+					property.setDescription(TypeCreator.getDoc("_super", com.servoy.j2db.documentation.scripting.docs.Form.class, "", null));
+					property.setAttribute(TypeCreator.LAZY_VALUECOLLECTION, superForm);
 					return property;
 				}
 			}
@@ -290,28 +289,24 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		{
 			type = context.getType(typeName);
 		}
-		else
-		{
-			type = getType(context, name);
-		}
 		boolean readOnly = true;
 		ImageDescriptor image = null;
 		Object resource = null;
 		if (type == null && name.indexOf('.') == -1)
 		{
-			FlattenedSolution fs = getFlattenedSolution(context);
+			FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
 			if (fs != null)
 			{
 				Relation relation = fs.getRelation(name);
 				if (relation != null)
 				{
 					type = context.getType(FoundSet.JS_FOUNDSET + "<" + relation.getName() + ">");
-					image = RELATION_IMAGE;
+					image = TypeCreator.RELATION_IMAGE;
 					resource = relation;
 				}
 				else
 				{
-					Form form = getForm(context);
+					Form form = TypeCreator.getForm(context);
 					Table table = null;
 					if (form != null)
 					{
@@ -339,14 +334,14 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 								if (allDataProvidersForTable != null)
 								{
 									provider = allDataProvidersForTable.get(name);
-									image = COLUMN_IMAGE;
+									image = TypeCreator.COLUMN_IMAGE;
 									if (provider instanceof AggregateVariable)
 									{
-										image = COLUMN_AGGR_IMAGE;
+										image = TypeCreator.COLUMN_AGGR_IMAGE;
 									}
 									else if (provider instanceof ScriptCalculation)
 									{
-										image = COLUMN_CALC_IMAGE;
+										image = TypeCreator.COLUMN_CALC_IMAGE;
 									}
 								}
 							}
@@ -358,7 +353,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 						if (provider != null)
 						{
 							readOnly = false;
-							type = getDataProviderType(context, provider);
+							type = TypeCreator.getDataProviderType(context, provider);
 							resource = provider;
 						}
 					}
@@ -368,12 +363,12 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		}
 		else if (type != null)
 		{
-			image = (ImageDescriptor)type.getAttribute(IMAGE_DESCRIPTOR);
+			image = (ImageDescriptor)type.getAttribute(TypeCreator.IMAGE_DESCRIPTOR);
 		}
 
 		if (type != null)
 		{
-			return createProperty(name, readOnly, type, type.getDescription(), image, resource);
+			return TypeCreator.createProperty(name, readOnly, type, type.getDescription(), image, resource);
 		}
 		return null;
 	}
@@ -398,7 +393,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		 */
 		public String getTypeName(ITypeInfoContext context, String fullTypeName)
 		{
-			Form form = getForm(context);
+			Form form = TypeCreator.getForm(context);
 			if (form != null)
 			{
 				return "Elements<" + form.getName() + '>';
@@ -414,7 +409,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		 */
 		public String getTypeName(ITypeInfoContext context, String fullTypeName)
 		{
-			FlattenedSolution fs = getFlattenedSolution(context);
+			FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
 			if (fs != null)
 			{
 				return "Forms<" + fs.getMainSolutionMetaData().getName() + '>';
@@ -423,14 +418,21 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		}
 	}
 
-	private class PluginsTypeNameCreator implements ITypeNameCreator
+	private class SimpleNameTypeNameCreator implements ITypeNameCreator
 	{
+		private final String name;
+
+		public SimpleNameTypeNameCreator(String name)
+		{
+			this.name = name;
+		}
+
 		/**
 		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
 		 */
 		public String getTypeName(ITypeInfoContext context, String fullTypeName)
 		{
-			return "Plugins";
+			return name;
 		}
 	}
 
@@ -441,7 +443,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 		 */
 		public String getTypeName(ITypeInfoContext context, String fullTypeName)
 		{
-			Form form = getForm(context);
+			Form form = TypeCreator.getForm(context);
 			if (form != null && form.getDataSource() != null)
 			{
 				return FoundSet.JS_FOUNDSET + '<' + form.getDataSource() + '>';
