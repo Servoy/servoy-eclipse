@@ -214,7 +214,7 @@ public class ElementResolver extends TypeCreator implements IElementResolver
 				try
 				{
 					IServer server = fs.getSolution().getServer(calcServerName);
-					calcTable = (Table)server.getTable(calcTableName);
+					if (server != null) calcTable = (Table)server.getTable(calcTableName);
 				}
 				catch (Exception e)
 				{
