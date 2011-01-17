@@ -72,6 +72,7 @@ import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
@@ -116,6 +117,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 	public boolean performFinish()
 	{
 		if (exportModel.isExportReferencedModules()) modulesSelectionPage.initializeModulesToExport();
+		EditorUtil.saveDirtyEditors(getShell(), true);
 		boolean hasErrors = false;
 		boolean hasWarnings = false;
 		try
