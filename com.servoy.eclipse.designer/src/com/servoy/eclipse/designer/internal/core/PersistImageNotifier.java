@@ -75,6 +75,6 @@ public class PersistImageNotifier extends AbstractImageNotifier
 
 		// paint 'invisible' elements with some translucency.
 		component.setVisible(true);
-		return 0.5f;
+		return 0.3f;
 	}
 }
