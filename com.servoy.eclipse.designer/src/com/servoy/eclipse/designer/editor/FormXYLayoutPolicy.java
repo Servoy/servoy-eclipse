@@ -342,7 +342,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 		{
 			return new DragFormPartPolicy();
 		}
-		if (child instanceof PersistGraphicalEditPart || child instanceof GroupGraphicalEditPart)
+		if (child instanceof PersistGraphicalEditPart || child instanceof GroupGraphicalEditPart || child instanceof TabFormGraphicalEditPart)
 		{
 			return new AlignmentfeedbackEditPolicy(parent);
 		}
