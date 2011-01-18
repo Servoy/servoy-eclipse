@@ -24,8 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.border.Border;
-
 import org.eclipse.draw2d.FreeformLayer;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -39,7 +37,6 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Point;
 
-import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.designer.editor.FormBorderGraphicalEditPart.BorderModel;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -89,11 +86,7 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		Form flattenedForm = editorPart.getFlattenedForm();
 		List<Object> list = new ArrayList<Object>();
 
-		Border border = ElementFactory.getFormBorder(application, flattenedForm);
-		if (border != null)
-		{
-			list.add(new BorderModel(flattenedForm)); // A separate editpart to show the form border 
-		}
+		list.add(new BorderModel(flattenedForm)); // A separate editpart to show the form border and resize handles
 
 		List<Part> parts = new ArrayList<Part>();
 		Set<FormElementGroup> groups = new HashSet<FormElementGroup>();

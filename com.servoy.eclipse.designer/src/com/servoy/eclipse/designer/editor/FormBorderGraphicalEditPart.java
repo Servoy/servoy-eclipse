@@ -18,21 +18,37 @@
 package com.servoy.eclipse.designer.editor;
 
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.ImageFigure;
+import org.eclipse.draw2d.MarginBorder;
+import org.eclipse.draw2d.PositionConstants;
+import org.eclipse.draw2d.geometry.Insets;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.gef.EditPolicy;
+import org.eclipse.gef.Handle;
+import org.eclipse.gef.LayerConstants;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
+import org.eclipse.gef.editparts.LayerManager;
 
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.designer.internal.core.BorderImageNotifier;
 import com.servoy.eclipse.designer.internal.core.IImageNotifier;
 import com.servoy.eclipse.designer.internal.core.ImageFigureController;
+import com.servoy.eclipse.designer.util.BoundsImageFigure;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.Part;
 
 /**
  * Edit part for painting the form border.
- * This editpart is only for showing the border, it cannot be selected and has no commands.
+ * This editpart is only for showing the border, it cannot be selected.
+ * 
+ * It is also used for resizing the form.
+ * 
+ * @since 6.0
  * 
  * @author rgansevles
  *
@@ -46,6 +62,8 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 	protected ImageFigureController imageFigureController;
 	private BorderImageNotifier borderImageNotifier;
 
+	private List<Handle> handles;
+
 	public FormBorderGraphicalEditPart(IApplication application, BorderModel model)
 	{
 		this.application = application;
@@ -53,34 +71,80 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 	}
 
 	@Override
-	protected IFigure createFigure()
+	protected void createEditPolicies()
 	{
-		ImageFigure fig = new ImageFigure();
-		imageFigureController = new ImageFigureController();
-		imageFigureController.setImageFigure(fig);
-		return applyBounds(fig);
+		installEditPolicy(EditPolicy.LAYOUT_ROLE, new FormResizableEditPolicy(this));
 	}
 
-	protected IFigure applyBounds(IFigure fig)
+	protected void createHandles()
 	{
-		java.awt.Dimension size = getBorderModel().form.getSize();
-		// add border size
-		javax.swing.border.Border border = ElementFactory.getFormBorder(application, getBorderModel().form);
-		Rectangle bounds;
-		if (border == null)
+		removeHandles();
+		LayerManager layermanager = (LayerManager)getViewer().getEditPartRegistry().get(LayerManager.ID);
+		if (layermanager != null)
 		{
-			bounds = new Rectangle(0, 0, size.width, size.height);
+			handles = new ArrayList<Handle>();
+			handles.add(new FormResizeHandle(this, PositionConstants.EAST)); // resize form via right side of form
+
+			Iterator<Part> parts = getModel().form.getParts();
+			while (parts.hasNext())
+			{
+				PartMoveHandle handle = new PartMoveHandle(parts.next(), this);
+				handle.setOpaque(parts.hasNext()); // do not paint the last one
+				handles.add(handle);
+			}
+
+			IFigure layer = layermanager.getLayer(LayerConstants.HANDLE_LAYER);
+			for (int i = 0; i < handles.size(); i++)
+			{
+				layer.add((IFigure)handles.get(i));
+			}
 		}
-		else
+	}
+
+	protected void removeHandles()
+	{
+		if (handles != null)
+		{
+			LayerManager layermanager = (LayerManager)getViewer().getEditPartRegistry().get(LayerManager.ID);
+			IFigure layer = layermanager.getLayer(LayerConstants.HANDLE_LAYER);
+			for (Handle handle : handles)
+			{
+				layer.remove((IFigure)handle);
+			}
+
+			handles = null;
+		}
+	}
+
+	@Override
+	public BoundsImageFigure getFigure()
+	{
+		return (BoundsImageFigure)super.getFigure();
+	}
+
+	@Override
+	protected IFigure createFigure()
+	{
+		BoundsImageFigure fig = new BoundsImageFigure();
+		imageFigureController = new ImageFigureController();
+		imageFigureController.setImageFigure(fig);
+		return updateFigure(fig);
+	}
+
+	protected IFigure updateFigure(BoundsImageFigure fig)
+	{
+		java.awt.Dimension size = getModel().form.getSize();
+		// add border size
+		Insets insets = IFigure.NO_INSETS;
+		javax.swing.border.Border border = ElementFactory.getFormBorder(application, getModel().form);
+		if (border != null)
 		{
 			java.awt.Insets borderInsets = border.getBorderInsets(null);
-			bounds = new Rectangle(-borderInsets.left, -borderInsets.top, size.width + borderInsets.left + borderInsets.right, size.height + borderInsets.top +
-				borderInsets.bottom);
-			// add some space for borders that print outside the insets (like TitleBorder)
-			bounds.expand(Math.max(BORDER_MARGIN - borderInsets.left, 0), Math.max(BORDER_MARGIN - borderInsets.top, 0));
+			insets = new Insets(borderInsets.top, borderInsets.left, borderInsets.bottom, borderInsets.right);
 		}
 
-		fig.setBounds(bounds);
+		fig.setBorder(new MarginBorder(insets));
+		fig.setBounds(new Rectangle(0, 0, size.width, size.height).expand(insets));
 		return fig;
 	}
 
@@ -88,7 +152,7 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 	protected void refreshVisuals()
 	{
 		super.refreshVisuals();
-		applyBounds(getFigure());
+		updateFigure(getFigure());
 		imageFigureController.setImageNotifier(getFieldImageNotifier());
 	}
 
@@ -98,14 +162,10 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 		return false;
 	}
 
-	protected BorderModel getBorderModel()
-	{
-		return (BorderModel)getModel();
-	}
-
 	@Override
-	protected void createEditPolicies()
+	public BorderModel getModel()
 	{
+		return (BorderModel)super.getModel();
 	}
 
 	@Override
@@ -113,6 +173,7 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 	{
 		super.activate();
 		imageFigureController.setImageNotifier(getFieldImageNotifier());
+		createHandles();
 	}
 
 	@Override
@@ -122,6 +183,7 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 		{
 			imageFigureController.deactivate();
 		}
+		removeHandles();
 		super.deactivate();
 	}
 
@@ -129,7 +191,7 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 	{
 		if (borderImageNotifier == null)
 		{
-			borderImageNotifier = new BorderImageNotifier(application, getBorderModel().form);
+			borderImageNotifier = new BorderImageNotifier(application, getModel().form);
 		}
 		return borderImageNotifier;
 	}
@@ -143,7 +205,6 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 	 */
 	public static class BorderModel
 	{
-
 		public final Form form;
 
 		/**
@@ -154,5 +215,4 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 			this.form = form;
 		}
 	}
-
 }

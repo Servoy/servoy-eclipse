@@ -220,13 +220,24 @@ public class SnapToElementAlignment extends SnapToHelper
 			west = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, west, rect.x, 0, 10, form.getSize().height - 10, true, getSetAnchor());
 		}
 
+		// Alignment: East to container
+		if ((snapOrientation & (EAST | HORIZONTAL)) != 0)
+		{
+			if (singleAlignmentPerDimension) east = west;
+
+			east = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_EAST, east, rect.x + rect.width, form.getSize().width, 10,
+				form.getSize().height - 10, true, getSetAnchor());
+
+			if (singleAlignmentPerDimension) west = east;
+		}
+
 		// Snap against rulers
 		EditPartViewer viewer = container.getViewer();
 
 		RulerProvider rulerProvider = (RulerProvider)viewer.getProperty(RulerProvider.PROPERTY_HORIZONTAL_RULER);
 		if (rulerProvider != null)
 		{
-			for (int pos : rulerProvider.getGuidePositions()) // when ruler is invisible, this will only return the form-width ruler
+			for (int pos : rulerProvider.getGuidePositions())
 			{
 				// Alignment: West to guide
 				if ((snapOrientation & (WEST | HORIZONTAL)) != 0)
@@ -250,7 +261,7 @@ public class SnapToElementAlignment extends SnapToHelper
 		rulerProvider = (RulerProvider)viewer.getProperty(RulerProvider.PROPERTY_VERTICAL_RULER);
 		if (rulerProvider != null)
 		{
-			for (int pos : rulerProvider.getGuidePositions()) // when ruler is invisible, this will only return the parts rulers
+			for (int pos : rulerProvider.getGuidePositions())
 			{
 				// Alignment: North to guide
 				if ((snapOrientation & (NORTH | VERTICAL)) != 0)
@@ -271,13 +282,12 @@ public class SnapToElementAlignment extends SnapToHelper
 
 					if (singleAlignmentPerDimension) north = south;
 				}
-
 			}
 		}
 
 		for (EditPart child : (List<EditPart>)container.getChildren())
 		{
-			if (!isAligmenttEditPart(child) || (skipEditparts != null && skipEditparts.contains(child)))
+			if ((!(child.getModel() instanceof Part) && !isAligmenttEditPart(child)) || (skipEditparts != null && skipEditparts.contains(child)))
 			{
 				continue;
 			}
@@ -292,7 +302,8 @@ public class SnapToElementAlignment extends SnapToHelper
 			}
 
 			// align against bounds of child figure or part line
-			Rectangle childBounds = ((GraphicalEditPart)child).getFigure().getBounds();
+			Rectangle childBounds = (elementModel instanceof Part) ? new Rectangle(10, ((Part)elementModel).getHeight(), form.getWidth() - 20, 0)
+				: ((GraphicalEditPart)child).getFigure().getBounds();
 
 			// Alignment: North to element
 			if ((snapOrientation & (NORTH | VERTICAL)) != 0)
@@ -302,8 +313,8 @@ public class SnapToElementAlignment extends SnapToHelper
 					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), (anchors & IAnchorConstants.NORTH) != 0);
 				// distance to bottom-top
 				north = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_NORTH, north, rect.y, childBounds.y + childBounds.height,
-					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), false, getSetAnchor() &&
-						(anchors & IAnchorConstants.NORTH) != 0 && (anchors & IAnchorConstants.SOUTH) == 0);
+					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), elementModel instanceof Part,
+					getSetAnchor() && (elementModel instanceof Part || ((anchors & IAnchorConstants.NORTH) != 0 && (anchors & IAnchorConstants.SOUTH) == 0)));
 			}
 
 
@@ -318,8 +329,8 @@ public class SnapToElementAlignment extends SnapToHelper
 					(anchors & IAnchorConstants.SOUTH) != 0);
 				// distance to top-bottom
 				south = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_SOUTH, south, rect.y + rect.height, childBounds.y,
-					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), false, getSetAnchor() &&
-						(anchors & IAnchorConstants.SOUTH) != 0 && (anchors & IAnchorConstants.NORTH) == 0);
+					Math.min(rect.x, childBounds.x), Math.max(rect.x + rect.width, childBounds.x + childBounds.width), elementModel instanceof Part,
+					getSetAnchor() && (elementModel instanceof Part || ((anchors & IAnchorConstants.SOUTH) != 0 && (anchors & IAnchorConstants.NORTH) == 0)));
 
 				if (singleAlignmentPerDimension) north = south;
 			}

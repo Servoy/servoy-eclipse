@@ -16,24 +16,12 @@
  */
 package com.servoy.eclipse.designer.editor.rulers;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.draw2d.geometry.Point;
-import org.eclipse.gef.EditPart;
-import org.eclipse.gef.GraphicalEditPart;
-import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.rulers.RulerProvider;
 
-import com.servoy.eclipse.designer.editor.FormPartGraphicalEditPart;
-import com.servoy.eclipse.designer.editor.commands.MovePartCommand;
-import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
-import com.servoy.eclipse.ui.property.PersistPropertySource;
-import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.Part;
 
 /**
  * Ruler provider for form designer, vertical rule is form width, horizontal rules are part boundaries.
@@ -44,13 +32,11 @@ import com.servoy.j2db.persistence.Part;
 public class FormRulerProvider extends RulerProvider
 {
 	private final boolean horizontal;
-	private final EditPart formEditPart;
 	private final RulerManager rulerManager;
 
-	public FormRulerProvider(RulerManager rulerManager, EditPart formEditPart, boolean horizontal)
+	public FormRulerProvider(RulerManager rulerManager, boolean horizontal)
 	{
 		this.rulerManager = rulerManager;
-		this.formEditPart = formEditPart;
 		this.horizontal = horizontal;
 	}
 
@@ -62,19 +48,6 @@ public class FormRulerProvider extends RulerProvider
 	@Override
 	public int getGuidePosition(Object guide)
 	{
-		if (guide instanceof GraphicalEditPart)
-		{
-			Object model = ((EditPart)guide).getModel();
-			if (horizontal)
-			{
-				return ((Form)model).getWidth();
-			}
-			else
-			{
-				return ((Part)model).getHeight();
-			}
-		}
-
 		if (guide instanceof RulerGuide)
 		{
 			return ((RulerGuide)guide).getPosition();
@@ -84,35 +57,15 @@ public class FormRulerProvider extends RulerProvider
 	}
 
 	@Override
-	public List<Object> getGuides()
+	public List<RulerGuide> getGuides()
 	{
-		List<Object> guides = new ArrayList<Object>();
-		if (horizontal)
-		{
-			guides.add(formEditPart);
-		}
-		else
-		{
-			List<EditPart> children = formEditPart.getChildren();
-			for (EditPart child : children)
-			{
-				if (child instanceof FormPartGraphicalEditPart)
-				{
-					guides.add(child);
-				}
-			}
-		}
-
-		// added guides
-		guides.addAll(rulerManager.getGuides(horizontal));
-
-		return guides;
+		return rulerManager.getGuides(horizontal);
 	}
 
 	@Override
 	public int[] getGuidePositions()
 	{
-		List<Object> guides = getGuides();
+		List<RulerGuide> guides = getGuides();
 		int[] guidePositions = new int[guides.size()];
 		for (int i = 0; i < guides.size(); i++)
 		{
@@ -124,36 +77,6 @@ public class FormRulerProvider extends RulerProvider
 	@Override
 	public Command getMoveGuideCommand(Object guide, int positionDelta)
 	{
-		int delta;
-		if (guide instanceof FormPartGraphicalEditPart) // vertical
-		{
-			FormPartGraphicalEditPart editPart = (FormPartGraphicalEditPart)guide;
-
-			delta = editPart.limitPartMove(new Point(0, positionDelta)).y;
-
-			return new MovePartCommand((Part)editPart.getModel(), (IPersist)editPart.getParent().getModel(), RequestConstants.REQ_MOVE,
-				((Part)editPart.getModel()).getHeight() + delta);
-		}
-
-		if (guide == formEditPart) // horizontal
-		{
-			Form form = (Form)formEditPart.getModel();
-
-			String property = "width"; //$NON-NLS-1$
-			PersistPropertySource persistProperties = new PersistPropertySource(form, form, false);
-			int oldVal = ((Integer)persistProperties.getPropertyValue(property)).intValue();
-			int newVal = oldVal + positionDelta;
-			if (oldVal == newVal)
-			{
-				return null;
-			}
-			SetValueCommand setCommand = new SetValueCommand();
-			setCommand.setTarget(persistProperties);
-			setCommand.setPropertyId(property);
-			setCommand.setPropertyValue(new Integer(newVal));
-			return setCommand;
-		}
-
 		if (guide instanceof RulerGuide)
 		{
 			return new MoveGuideCommand(this, (RulerGuide)guide, positionDelta);

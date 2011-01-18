@@ -303,7 +303,6 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			}
 		});
 
-		Dimension noResize = new Dimension(0, 0);
 		CompoundCommand distributeCommand = new CompoundCommand("distribute");
 		for (EditPart ep : eps)
 		{
@@ -330,7 +329,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 					yNext += oncenter;
 					break;
 			}
-			distributeCommand.add(new ChangeBoundsCommand(ep, moveDelta, noResize));
+			distributeCommand.add(new ChangeBoundsCommand(ep, moveDelta, null));
 		}
 
 		return distributeCommand.unwrap();
@@ -343,7 +342,11 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 		{
 			return new DragFormPartPolicy();
 		}
-		return new AlignmentfeedbackEditPolicy(parent);
+		if (child instanceof PersistGraphicalEditPart || child instanceof GroupGraphicalEditPart)
+		{
+			return new AlignmentfeedbackEditPolicy(parent);
+		}
+		return null;
 	}
 
 	/**

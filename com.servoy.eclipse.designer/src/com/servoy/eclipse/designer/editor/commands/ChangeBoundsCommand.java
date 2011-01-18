@@ -65,7 +65,7 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 	public void execute()
 	{
 		String label;
-		if (sizeDelta.width == 0 && sizeDelta.height == 0)
+		if (sizeDelta == null || (sizeDelta.width == 0 && sizeDelta.height == 0))
 		{
 			label = "move";
 		}
@@ -115,7 +115,7 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 				}
 				Object model = ep.getModel();
 				models.add(model);
-				if (sizeDelta.width == 0 && sizeDelta.height == 0 /* move, not resize */&& model instanceof ISupportChilds)
+				if ((sizeDelta == null || (sizeDelta.width == 0 && sizeDelta.height == 0)/* move, not resize */) && model instanceof ISupportChilds)
 				{
 					Iterator<IPersist> it = ((ISupportChilds)model).getAllObjects();
 					while (it.hasNext())
@@ -150,10 +150,10 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 	protected boolean changeBounds(GraphicalEditPart ep, boolean change)
 	{
 		Rectangle bounds = ep.getFigure().getBounds();
-		int x = bounds.x + moveDelta.x;
-		int y = bounds.y + moveDelta.y;
-		int width = bounds.width + sizeDelta.width;
-		int height = bounds.height + sizeDelta.height;
+		int x = bounds.x + (moveDelta == null ? 0 : moveDelta.x);
+		int y = bounds.y + (moveDelta == null ? 0 : moveDelta.y);
+		int width = bounds.width + (sizeDelta == null ? 0 : sizeDelta.width);
+		int height = bounds.height + (sizeDelta == null ? 0 : sizeDelta.height);
 
 		if (x < 0 || y < 0 || width < 0 || height < 0) return false;
 

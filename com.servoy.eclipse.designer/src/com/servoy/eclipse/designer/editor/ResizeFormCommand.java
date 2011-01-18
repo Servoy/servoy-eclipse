@@ -1,0 +1,138 @@
+/*
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2010 Servoy BV
+
+ This program is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Affero General Public License as published by the Free
+ Software Foundation; either version 3 of the License, or (at your option) any
+ later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License along
+ with this program; if not, see http://www.gnu.org/licenses or write to the Free
+ Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+ */
+
+package com.servoy.eclipse.designer.editor;
+
+import java.util.List;
+
+import org.eclipse.draw2d.PositionConstants;
+import org.eclipse.draw2d.geometry.Dimension;
+import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.gef.EditPart;
+import org.eclipse.gef.commands.Command;
+import org.eclipse.gef.commands.CompoundCommand;
+
+import com.servoy.eclipse.designer.editor.commands.ChangeBoundsCommand;
+import com.servoy.eclipse.designer.property.SetValueCommand;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportAnchors;
+import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.util.IAnchorConstants;
+
+/**
+ * Command to resize a form in form editor.
+ * Move/resize elements also when control is pressed.
+ * 
+ * @since 6.0
+ * 
+ * @author rgansevles
+ *
+ */
+public class ResizeFormCommand extends Command
+{
+	private static final String PROPERTY_WIDTH = StaticContentSpecLoader.PROPERTY_WIDTH.getPropertyName();
+
+	private final int resizeDirection;
+	private final Dimension sizeDelta;
+	private final boolean controlPressed;
+	private CompoundCommand resizeCommand;
+
+	private final FormGraphicalEditPart formEditPart;
+
+	/**
+	 * @param formEditPart 
+	 * @param resizeDirection
+	 * @param sizeDelta
+	 * @param controlPressed 
+	 */
+	public ResizeFormCommand(FormGraphicalEditPart formEditPart, int resizeDirection, Dimension sizeDelta, boolean controlPressed)
+	{
+		this.formEditPart = formEditPart;
+		this.resizeDirection = resizeDirection;
+		this.sizeDelta = sizeDelta;
+		this.controlPressed = controlPressed;
+	}
+
+	@Override
+	public void execute()
+	{
+		Form form = (Form)formEditPart.getModel();
+
+		resizeCommand = new CompoundCommand();
+		if ((resizeDirection & PositionConstants.EAST_WEST) != 0)
+		{
+			// move all right-anchored elements, when control is pressed
+			PersistPropertySource persistProperties = new PersistPropertySource(form, form, false);
+			SetValueCommand setCommand = new SetValueCommand();
+			setCommand.setTarget(persistProperties);
+			setCommand.setPropertyId(PROPERTY_WIDTH);
+			setCommand.setPropertyValue(new Integer(((Integer)persistProperties.getPropertyValue(PROPERTY_WIDTH)).intValue() + sizeDelta.width));
+			resizeCommand.add(setCommand);
+
+			// move/resize elements if needed
+			List<EditPart> children = formEditPart.getChildren();
+			for (EditPart editPart : children)
+			{
+				Object model = editPart.getModel();
+				if (model instanceof Part || !(model instanceof IPersist))
+				{
+					continue;
+				}
+				int anchors = (model instanceof ISupportAnchors) ? ((ISupportAnchors)model).getAnchors() : 0;
+
+				boolean resize = false;
+				boolean move = controlPressed && (resizeDirection & PositionConstants.EAST) != 0 && (anchors & IAnchorConstants.EAST) != 0;
+				if (move)
+				{
+					// resize right side of form and control is pressed, move/resize anchored elements
+					resize = (anchors & IAnchorConstants.WEST) != 0;
+				}
+				else
+				{
+					move = !controlPressed && (resizeDirection & PositionConstants.WEST) != 0;
+					// resize left side of form and control is NOT pressed, move/resize anchored elements
+					resize = move && (anchors & IAnchorConstants.EAST) != 0;
+				}
+				if (resize)
+				{
+					resizeCommand.add(new ChangeBoundsCommand(editPart, null, sizeDelta));
+				}
+				else if (move)
+				{
+					resizeCommand.add(new ChangeBoundsCommand(editPart, new Point(sizeDelta.width, 0), null));
+				}
+			}
+		}
+
+		resizeCommand.execute();
+	}
+
+	@Override
+	public boolean canUndo()
+	{
+		return resizeCommand != null && resizeCommand.canUndo();
+	}
+
+	@Override
+	public void undo()
+	{
+		resizeCommand.undo();
+	}
+}

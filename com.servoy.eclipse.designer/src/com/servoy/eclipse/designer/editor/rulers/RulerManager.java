@@ -52,8 +52,8 @@ public class RulerManager
 	{
 		if (Boolean.TRUE.equals(viewer.getProperty(RulerProvider.PROPERTY_RULER_VISIBILITY)))
 		{
-			viewer.setProperty(horizontal ? RulerProvider.PROPERTY_HORIZONTAL_RULER : RulerProvider.PROPERTY_VERTICAL_RULER,
-				new FormRulerProvider(this, viewer.getContents(), horizontal));
+			viewer.setProperty(horizontal ? RulerProvider.PROPERTY_HORIZONTAL_RULER : RulerProvider.PROPERTY_VERTICAL_RULER, new FormRulerProvider(this,
+				horizontal));
 		}
 	}
 

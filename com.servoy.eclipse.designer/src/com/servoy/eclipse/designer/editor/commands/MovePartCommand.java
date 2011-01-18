@@ -17,9 +17,8 @@
 package com.servoy.eclipse.designer.editor.commands;
 
 import org.eclipse.gef.RequestConstants;
-import org.eclipse.gef.commands.Command;
 
-import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
@@ -31,13 +30,10 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
  * @author rgansevles
  * 
  */
-public class MovePartCommand extends Command
+public class MovePartCommand extends BaseRestorableCommand
 {
-
 	/** Stores the new size and location. */
 	private final int newHeight;
-	/** Stores the old size and location. */
-	private int oldHeight;
 	/** A request to move/resize an edit part. */
 	private final Object requestType;
 
@@ -50,11 +46,12 @@ public class MovePartCommand extends Command
 	 * 
 	 * @param part the part to move
 	 * @param req the move and resize request
-	 * @param newBounds the new size and location
+	 * @param newHeight the new height
 	 * @throws IllegalArgumentException if any of the parameters is null
 	 */
 	public MovePartCommand(Part part, IPersist context, Object requestType, int newHeight)
 	{
+		super("move part");
 		if (part == null || requestType == null)
 		{
 			throw new IllegalArgumentException();
@@ -63,14 +60,8 @@ public class MovePartCommand extends Command
 		this.requestType = requestType;
 		this.newHeight = newHeight;
 		this.context = context;
-		setLabel("move part");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.commands.Command#canExecute()
-	 */
 	@Override
 	public boolean canExecute()
 	{
@@ -78,44 +69,11 @@ public class MovePartCommand extends Command
 		return (RequestConstants.REQ_MOVE.equals(requestType) || RequestConstants.REQ_MOVE_CHILDREN.equals(requestType) || RequestConstants.REQ_CLONE.equals(requestType));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.commands.Command#execute()
-	 */
 	@Override
 	public void execute()
 	{
-		oldHeight = part.getHeight();
-		redo();
+		saveState(part);
+		new PersistPropertySource(part, context, false).setPersistPropertyValue(StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(
+			newHeight));
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.commands.Command#redo()
-	 */
-	@Override
-	public void redo()
-	{
-		apply(newHeight);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.commands.Command#undo()
-	 */
-	@Override
-	public void undo()
-	{
-		apply(oldHeight);
-	}
-
-	private void apply(int height)
-	{
-		new PersistPropertySource(part, context, false).setPersistPropertyValue(StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), height);
-		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, part, false);
-	}
-
 }
