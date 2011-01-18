@@ -113,9 +113,6 @@ import com.servoy.j2db.util.Utils;
 @SuppressWarnings("nls")
 public class TypeProvider extends TypeCreator implements ITypeProvider
 {
-	private static final ConcurrentHashMap<String, Type> classTypes = new ConcurrentHashMap<String, Type>();
-	private static final Type NO_CLASS = TypeInfoModelFactory.eINSTANCE.createType();
-
 	public TypeProvider()
 	{
 		addType("JSDataSet", JSDataSet.class);
@@ -154,27 +151,17 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		if (typeName.startsWith("Packages."))
 		{
 			String name = typeName.substring("Packages.".length());
-			Type type = classTypes.get(name);
-			if (type == null)
+			try
 			{
-				try
-				{
-					ClassLoader cl = Activator.getDefault().getDesignClient().getBeanManager().getClassLoader();
-					if (cl == null) cl = Thread.currentThread().getContextClassLoader();
-					Class< ? > clz = Class.forName(name, false, cl);
-					type = getClassType(clz, name, context);
-				}
-				catch (ClassNotFoundException e)
-				{
-					// ignore
-					classTypes.put(name, NO_CLASS);
-				}
+				ClassLoader cl = Activator.getDefault().getDesignClient().getBeanManager().getClassLoader();
+				if (cl == null) cl = Thread.currentThread().getContextClassLoader();
+				Class< ? > clz = Class.forName(name, false, cl);
+				return getClassType(clz, name, context);
 			}
-			else if (type == NO_CLASS)
+			catch (ClassNotFoundException e)
 			{
-				type = null;
 			}
-			return type;
+			return null;
 		}
 		else if (typeName.equals("Continuation"))
 		{
@@ -188,17 +175,46 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		return super.getType(context, typeName);
 	}
 
+	private static String getPackageTypeString(Class< ? > type)
+	{
+		if (type != null && type != Object.class && type != Void.class && type != void.class)
+		{
+			if (type.isArray())
+			{
+				Class< ? > componentType = type.getComponentType();
+				String componentString = getPackageTypeString(componentType);
+				if (componentString != null)
+				{
+					return "Array<" + componentString + '>';
+				}
+				return "Array";
+			}
+			else if (type == Boolean.class || type == boolean.class)
+			{
+				return "Boolean";
+			}
+			else if (Number.class.isAssignableFrom(type) || type.isPrimitive())
+			{
+				return "Number";
+			}
+			else if (type == String.class)
+			{
+				return "String";
+			}
+			else
+			{
+
+				return "Packages." + type.getName();
+			}
+		}
+		return null;
+	}
+
 	private static Type getClassType(Class< ? > clz, String name, ITypeInfoContext context)
 	{
-		Type type = classTypes.get(name);
-		if (type != null) return type;
-
-		type = TypeInfoModelFactory.eINSTANCE.createType();
+		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(name);
 		type.setKind(TypeKind.JAVA);
-
-		classTypes.put(name, type);
-		context.markInvariant(type);
 
 		Method[] methods = clz.getMethods();
 		Field[] fields = clz.getFields();
@@ -209,8 +225,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		{
 			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 			property.setName(field.getName());
-			Class< ? > fieldType = field.getType();
-			if (fieldType != null) property.setType(context.getKnownType("Packages." + fieldType.getName()));
+			String fieldType = getPackageTypeString(field.getType());
+			if (fieldType != null) property.setType(context.getType(fieldType));
 			if (Modifier.isStatic(field.getModifiers()))
 			{
 				property.setStatic(true);
@@ -221,8 +237,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		{
 			org.eclipse.dltk.javascript.typeinfo.model.Method m = TypeInfoModelFactory.eINSTANCE.createMethod();
 			m.setName(method.getName());
-			Class< ? > methodType = method.getReturnType();
-			if (methodType != null) m.setType(context.getKnownType("Packages." + methodType.getName()));
+			String methodType = getPackageTypeString(method.getReturnType());
+			if (methodType != null) m.setType(context.getType(methodType));
 
 			EList<Parameter> parameters = m.getParameters();
 			Class< ? >[] parameterTypes = method.getParameterTypes();
@@ -230,7 +246,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			{
 				Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
 				parameter.setName(parameterTypes[i].getSimpleName() + " arg" + i);
-				parameter.setType(context.getKnownType("Packages." + parameterTypes[i].getName()));
+				parameter.setType(context.getType(getPackageTypeString(parameterTypes[i])));
 				parameters.add(parameter);
 			}
 			if (Modifier.isStatic(method.getModifiers()))
@@ -239,6 +255,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			}
 			members.add(m);
 		}
+		context.markInvariant(type);
 		return type;
 	}
 
