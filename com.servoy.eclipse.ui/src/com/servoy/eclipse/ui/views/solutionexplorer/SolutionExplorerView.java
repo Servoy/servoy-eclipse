@@ -160,6 +160,7 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeComparer;
 import com.servoy.eclipse.ui.node.UserNodeListDragSourceListener;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.SolutionExplorerPreferences;
 import com.servoy.eclipse.ui.search.SearchAction;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -2462,8 +2463,32 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				else if (doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE)
 				{
 					Object clickedRealObject = doubleClickedItem.getRealObject();
-					if (clickedRealObject instanceof ServoyProject) ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(
-						(ServoyProject)clickedRealObject);
+					if (clickedRealObject instanceof ServoyProject)
+					{
+						DesignerPreferences dp = new DesignerPreferences();
+						Form firstForm = null;
+
+						if (dp.getOpenFirstFormDesigner())
+						{
+							Solution activeSolution = ((ServoyProject)clickedRealObject).getSolution();
+							firstForm = activeSolution.getForm(activeSolution.getFirstFormID());
+							if (firstForm == null)
+							{
+								Iterator<Form> formIterator = activeSolution.getForms(null, false);
+								if (formIterator.hasNext())
+								{
+									firstForm = formIterator.next();
+								}
+							}
+						}
+
+						ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject((ServoyProject)clickedRealObject);
+
+						if (firstForm != null)
+						{
+							EditorUtil.openFormDesignEditor(firstForm);
+						}
+					}
 				}
 				else if ((!expandable || ctrlPressed) && openActionInTree.isEnabled())
 				{
