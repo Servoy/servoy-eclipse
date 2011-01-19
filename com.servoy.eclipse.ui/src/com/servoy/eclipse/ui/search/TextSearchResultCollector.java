@@ -71,7 +71,7 @@ class TextSearchResultCollector extends TextSearchRequestor
 		if (lineElement != null)
 		{
 			FileMatch fileMatch = createFileMatch(matchRequestor, matchOffset, lineElement);
-			fCachedMatches.add(fileMatch);
+			if (fileMatch != null) fCachedMatches.add(fileMatch);
 		}
 		return true;
 	}

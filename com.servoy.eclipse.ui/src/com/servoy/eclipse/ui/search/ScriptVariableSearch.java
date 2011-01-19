@@ -31,14 +31,18 @@ import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.search.core.text.TextSearchEngine;
+import org.eclipse.search.core.text.TextSearchMatchAccess;
 import org.eclipse.search.core.text.TextSearchRequestor;
 import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.FileTextSearchScope;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Pair;
 
 /**
  * An {@link ISearchQuery} implementation for finding relations in frm and js files.
@@ -74,8 +78,10 @@ public class ScriptVariableSearch extends DLTKSearchEngineSearch
 		}
 		else
 		{
+			((VariableSearchResultCollector)collector).setFormToMatch((Form)variable.getParent());
 			FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm" }, true);
-			TextSearchEngine.create().search(scope, collector, Pattern.compile("\\b" + variable.getName() + "\\b"), monitor);
+			TextSearchEngine.create().search(scope, collector, Pattern.compile("dataProviderID:\"" + variable.getName() + "\""), monitor);
+			((VariableSearchResultCollector)collector).setFormToMatch(null);
 		}
 
 		String scriptPath = SolutionSerializer.getScriptPath(variable, false);
@@ -95,4 +101,65 @@ public class ScriptVariableSearch extends DLTKSearchEngineSearch
 	{
 		return "Searching references to variable '" + variable.getName() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.search.DLTKSearchEngineSearch#createTextSearchCollector(org.eclipse.search.ui.text.AbstractTextSearchResult)
+	 */
+	@Override
+	protected TextSearchResultCollector createTextSearchCollector(AbstractTextSearchResult searchResult)
+	{
+		return new VariableSearchResultCollector(searchResult);
+	}
+
+	/**
+	 * @author jcompagner
+	 *
+	 */
+	private static final class VariableSearchResultCollector extends TextSearchResultCollector
+	{
+		private Form form;
+
+		/**
+		 * @param result
+		 */
+		private VariableSearchResultCollector(AbstractTextSearchResult result)
+		{
+			super(result);
+		}
+
+		public void setFormToMatch(Form form)
+		{
+			this.form = form;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.servoy.eclipse.ui.search.TextSearchResultCollector#createFileMatch(org.eclipse.search.core.text.TextSearchMatchAccess, int,
+		 * com.servoy.eclipse.ui.search.LineElement)
+		 */
+		@Override
+		protected FileMatch createFileMatch(TextSearchMatchAccess searchMatch, int matchOffset, LineElement lineElement)
+		{
+			if (form != null)
+			{
+				Pair<String, String> fileName = SolutionSerializer.getFilePath(form, false);
+				IFile file = searchMatch.getFile();
+				if (!file.getFullPath().toPortableString().endsWith(fileName.getLeft() + fileName.getRight()))
+				{
+					return null;
+				}
+			}
+			FileMatch fileMatch = super.createFileMatch(searchMatch, matchOffset, lineElement);
+			if (searchMatch instanceof SearchMatchAccess)
+			{
+				fileMatch.setPossibleMatch(((SearchMatchAccess)searchMatch).isPossibleMatch());
+			}
+			return fileMatch;
+		}
+	}
+
+
 }
