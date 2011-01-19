@@ -17,11 +17,8 @@
 package com.servoy.eclipse.designer.editor.commands;
 
 import java.awt.Dimension;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.eclipse.gef.commands.Command;
-
+import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.Form;
@@ -35,12 +32,11 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
  * @author rgansevles
  */
 
-public class FormZOrderCommand extends Command implements ISupportModels
+public class FormZOrderCommand extends BaseRestorableCommand implements ISupportModels
 {
 	private final Object requestType;
 	private final Object[] models;
 	private final Form form;
-	Map<IFormElement, Integer> undoMap;
 
 	/**
 	 * Command to change the z-order of a number of persists.
@@ -49,23 +45,12 @@ public class FormZOrderCommand extends Command implements ISupportModels
 	 * @param location
 	 * @param object
 	 */
-	public FormZOrderCommand(Object requestType, Form form, IPersist[] persists)
+	public FormZOrderCommand(Object requestType, Form form, IPersist[] models)
 	{
+		super(determineLabel(requestType));
 		this.requestType = requestType;
 		this.form = form;
-		this.models = persists;
-	}
-
-	@Override
-	public boolean canExecute()
-	{
-		return determineLabel() != null;
-	}
-
-	@Override
-	public boolean canUndo()
-	{
-		return undoMap != null;
+		this.models = models;
 	}
 
 	public Object[] getModels()
@@ -73,7 +58,7 @@ public class FormZOrderCommand extends Command implements ISupportModels
 		return models;
 	}
 
-	protected String determineLabel()
+	protected static String determineLabel(Object requestType)
 	{
 		if (VisualFormEditor.REQ_BRING_TO_FRONT.equals(requestType))
 		{
@@ -89,8 +74,6 @@ public class FormZOrderCommand extends Command implements ISupportModels
 	@Override
 	public void execute()
 	{
-		undoMap = null;
-		setLabel(determineLabel());
 
 		Dimension min_max = form.getMinMaxUsedFormIndex();
 		int indexFirstToUse = 0;
@@ -103,35 +86,30 @@ public class FormZOrderCommand extends Command implements ISupportModels
 			indexFirstToUse = min_max.height + 1;//==max
 		}
 
-		undoMap = new HashMap<IFormElement, Integer>();
 		for (int i = 0; i < models.length; i++)
 		{
 			if (models[i] instanceof IFormElement)
 			{
 				IFormElement formElement = (IFormElement)models[i];
 
-				undoMap.put(formElement, new Integer(formElement.getFormIndex()));
+				int formIndex;
 				if (VisualFormEditor.REQ_SEND_TO_BACK.equals(requestType))
 				{
-					new PersistPropertySource((IPersist)formElement, form, false).setPersistPropertyValue(
-						StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), new Integer(indexFirstToUse - i));
+					formIndex = indexFirstToUse - i;
 				}
 				else if (VisualFormEditor.REQ_BRING_TO_FRONT.equals(requestType))
 				{
-					new PersistPropertySource((IPersist)formElement, form, false).setPersistPropertyValue(
-						StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), new Integer(indexFirstToUse + i));
+					formIndex = indexFirstToUse + i;
 				}
+				else
+				{
+					continue;
+				}
+				saveState(formElement);
+				new PersistPropertySource((IPersist)formElement, form, false).setPersistPropertyValue(
+					StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), new Integer(formIndex));
 			}
 		}
 	}
 
-	@Override
-	public void undo()
-	{
-		for (Map.Entry<IFormElement, Integer> entry : undoMap.entrySet())
-		{
-			new PersistPropertySource((IPersist)entry.getKey(), form, false).setPersistPropertyValue(
-				StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), new Integer(entry.getValue().intValue()));
-		}
-	}
 }
