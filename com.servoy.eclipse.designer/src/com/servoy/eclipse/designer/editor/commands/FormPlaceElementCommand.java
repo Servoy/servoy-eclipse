@@ -190,8 +190,8 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 				if (((RequestType)requestType).type == RequestType.TYPE_BUTTON)
 				{
 					setLabel("place button");
-					return new IPersist[] { ElementFactory.createButton((ISupportFormElements)parent, null, (object instanceof String) ? (String)object
-						: "button", location) };
+					return toArrAy(ElementFactory.createButton((ISupportFormElements)parent, null, (object instanceof String) ? (String)object : "button",
+						location));
 				}
 			}
 		}
@@ -209,7 +209,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 				beanClassname = (String)object;
 			}
 
-			return new IPersist[] { ElementFactory.createBean((Form)parent, beanClassname, location) };
+			return toArrAy(ElementFactory.createBean((Form)parent, beanClassname, location));
 		}
 
 		if (parent instanceof ISupportFormElements)
@@ -217,19 +217,19 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 			if (VisualFormEditor.REQ_PLACE_MEDIA.equals(requestType))
 			{
 				setLabel("place image");
-				return new IPersist[] { ElementFactory.createImage((ISupportFormElements)parent, (Media)object, location) };
+				return toArrAy(ElementFactory.createImage((ISupportFormElements)parent, (Media)object, location));
 			}
 
 			if (VisualFormEditor.REQ_PLACE_LABEL.equals(requestType) || object instanceof String)
 			{
 				setLabel("place label");
-				return new IPersist[] { ElementFactory.createLabel((ISupportFormElements)parent, (object instanceof String) ? (String)object : "type", location) };
+				return toArrAy(ElementFactory.createLabel((ISupportFormElements)parent, (object instanceof String) ? (String)object : "type", location));
 			}
 
 			if (VisualFormEditor.REQ_PLACE_RECT_SHAPE.equals(requestType))
 			{
 				setLabel("place shape");
-				return new IPersist[] { ElementFactory.createRectShape((ISupportFormElements)parent, location) };
+				return toArrAy(ElementFactory.createRectShape((ISupportFormElements)parent, location));
 			}
 		}
 
@@ -307,6 +307,15 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 		return null;
 	}
 
+	private static IPersist[] toArrAy(IPersist persist)
+	{
+		if (persist == null)
+		{
+			return null;
+		}
+		return new IPersist[] { persist };
+	}
+
 	protected Object[] pastePersist(PersistDragData dragData, Point location, Map<ISupportBounds, java.awt.Point> origLocations, Map<String, String> groupMap)
 		throws RepositoryException
 	{
@@ -372,19 +381,19 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 			{
 				setLabel("place method button");
 				ScriptMethod sm = (ScriptMethod)draggedPersist;
-				return new IPersist[] { ElementFactory.createButton((ISupportFormElements)parent, sm, sm.getName(), location) };
+				return toArrAy(ElementFactory.createButton((ISupportFormElements)parent, sm, sm.getName(), location));
 			}
 
 			if (draggedPersist instanceof IDataProvider)
 			{
 				setLabel("drag-n-drop field");
-				return new IPersist[] { ElementFactory.createField((ISupportFormElements)parent, (IDataProvider)draggedPersist, location) };
+				return toArrAy(ElementFactory.createField((ISupportFormElements)parent, (IDataProvider)draggedPersist, location));
 			}
 
 			if (draggedPersist instanceof Media)
 			{
 				setLabel("place image");
-				return new IPersist[] { ElementFactory.createImage((ISupportFormElements)parent, (Media)draggedPersist, location) };
+				return toArrAy(ElementFactory.createImage((ISupportFormElements)parent, (Media)draggedPersist, location));
 			}
 		}
 
@@ -439,7 +448,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 				((ISupportTabSeq)persist).setTabSeq(ISupportTabSeq.DEFAULT);
 			}
 			origLocations.put((ISupportBounds)persist, supportBounds.getLocation());
-			return new IPersist[] { persist };
+			return toArrAy(persist);
 		}
 
 		ServoyLog.logWarning("place object: dropped object not supported: " + draggedPersist.getClass().getName(), null);
