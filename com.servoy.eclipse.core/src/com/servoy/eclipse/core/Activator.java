@@ -246,7 +246,7 @@ public class Activator extends Plugin
 
 		// We need to hook a listener and detect when the Welcome page is closed.
 		// (And for that we need to hook another listener to detect when the workbench window is opened).
-		if (PlatformUI.isWorkbenchRunning()) PlatformUI.getWorkbench().addWindowListener(new IWindowListener()
+		if (ModelUtils.isUIRunning()) PlatformUI.getWorkbench().addWindowListener(new IWindowListener()
 		{
 			public void windowActivated(IWorkbenchWindow window)
 			{
@@ -347,7 +347,7 @@ public class Activator extends Plugin
 
 		plugin = null;
 		super.stop(context);
-		if (PlatformUI.isWorkbenchRunning())
+		if (ModelUtils.isUIRunning())
 		{
 			SwingUtilities.invokeAndWait(new Runnable() // wait until webserver is stopped for case of
 			// restart (webserver cannot re-start when port is still in use, this may even cause a freeze after restart)
@@ -522,7 +522,7 @@ public class Activator extends Plugin
 		// install servoy model listeners in separate job, when ServoyModel is created in bundle.activator thread
 		// a deadlock may occur (display thread waits for loading of ui bundle which waits for core bundle 
 		// which waits for ServoyModel latch, but the ServoyModel runnable is never running because display thread is blocking in wait)
-		if (PlatformUI.isWorkbenchRunning())
+		if (ModelUtils.isUIRunning())
 		{
 			new Job("HookupToServoyModel") //$NON-NLS-1$
 			{
@@ -696,7 +696,7 @@ public class Activator extends Plugin
 			}
 		}
 
-		if (PlatformUI.isWorkbenchRunning())
+		if (ModelUtils.isUIRunning())
 		{
 			String[] actionIds = { "org.eclipse.ui.edit.text.actionSet.convertLineDelimitersTo" }; //$NON-NLS-1$
 			ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();

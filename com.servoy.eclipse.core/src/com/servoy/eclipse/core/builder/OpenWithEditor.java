@@ -8,6 +8,7 @@ import org.eclipse.ui.ide.IDE;
 
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -38,7 +39,7 @@ public class OpenWithEditor implements IMarkerAttributeContributor
 		{
 			try
 			{
-				if (PlatformUI.isWorkbenchRunning())
+				if (ModelUtils.isUIRunning())
 				{
 					marker.setAttribute(IDE.EDITOR_ID_ATTR, PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
 						Platform.getContentTypeManager().getContentType(contentTypeIdentifier)).getId());

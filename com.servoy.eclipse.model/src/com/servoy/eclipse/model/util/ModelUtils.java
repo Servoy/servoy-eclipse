@@ -256,4 +256,15 @@ public class ModelUtils
 		return ts;
 	}
 
+	private static boolean uiRunning = true;
+
+	public static boolean isUIRunning()
+	{
+		return uiRunning;
+	}
+
+	public static void setUIRunning(boolean running)
+	{
+		uiRunning = running;
+	}
 }

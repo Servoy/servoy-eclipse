@@ -17,8 +17,9 @@
 package com.servoy.eclipse.team;
 
 import org.eclipse.core.runtime.Plugin;
-import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.BundleContext;
+
+import com.servoy.eclipse.model.util.ModelUtils;
 
 
 /**
@@ -53,7 +54,7 @@ public class Activator extends Plugin
 		super.start(context);
 		plugin = this;
 
-		if (PlatformUI.isWorkbenchRunning())
+		if (ModelUtils.isUIRunning())
 		{
 			ServoyTeamProvider.startup();
 		}
