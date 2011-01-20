@@ -123,7 +123,7 @@ public class TreeBuilder
 				// We need constructors listed before anything else.
 				for (IFunctionDocumentation fdoc : objDoc.getFunctions())
 				{
-					if (fdoc.getType() == IFunctionDocumentation.TYPE_CONSTRUCTOR)
+					if (fdoc.getType() == IFunctionDocumentation.TYPE_CONSTRUCTOR && !fdoc.isDeprecated())
 					{
 						dlm.add(fdoc2usernode(fdoc, type, constructorIcon));
 					}
@@ -131,14 +131,14 @@ public class TreeBuilder
 				// We need properties listed before functions.
 				for (IFunctionDocumentation fdoc : objDoc.getFunctions())
 				{
-					if (fdoc.getType() == IFunctionDocumentation.TYPE_PROPERTY)
+					if (fdoc.getType() == IFunctionDocumentation.TYPE_PROPERTY && !fdoc.isDeprecated())
 					{
 						dlm.add(fdoc2usernode(fdoc, type, propertiesIcon));
 					}
 				}
 				for (IFunctionDocumentation fdoc : objDoc.getFunctions())
 				{
-					if (fdoc.getType() == IFunctionDocumentation.TYPE_FUNCTION)
+					if (fdoc.getType() == IFunctionDocumentation.TYPE_FUNCTION && !fdoc.isDeprecated())
 					{
 						dlm.add(fdoc2usernode(fdoc, type, functionIcon));
 					}
