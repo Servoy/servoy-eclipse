@@ -171,4 +171,10 @@
             restorable="true">
       </view>
    </extension>
+   <extension
+         point="org.eclipse.dltk.debug.console">
+      <factory
+            class="com.servoy.eclipse.debug.scriptingconsole.ScriptingConsoleFactory">
+      </factory>
+   </extension>
 </plugin>
