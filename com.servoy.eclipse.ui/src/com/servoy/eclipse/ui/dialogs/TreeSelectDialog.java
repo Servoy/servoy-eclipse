@@ -165,7 +165,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	protected void createButtonsForButtonBar(Composite parent)
 	{
 		okButton = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-		if (valueEditor != null) openButton = createButton(parent, IDialogConstants.OPEN_ID, "Ok && Show", false);
+		if (valueEditor != null) openButton = createButton(parent, IDialogConstants.OPEN_ID, "OK && Show", false);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		updateButtons();
 	}
