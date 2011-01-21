@@ -18,6 +18,7 @@
 package com.servoy.eclipse.designer.editor;
 
 import org.eclipse.draw2d.Cursors;
+import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.handles.AbstractHandle;
 
@@ -41,7 +42,7 @@ public abstract class AbstractFormHandle extends AbstractHandle
 	{
 		this.direction = direction;
 		setOwner(owner);
-		setCursor(Cursors.getDirectionalCursor(direction, owner.getFigure().isMirrored()));
+		setCursor((PositionConstants.NORTH_SOUTH & direction) != 0 ? Cursors.SIZENS : Cursors.SIZEWE);
 	}
 
 	/**

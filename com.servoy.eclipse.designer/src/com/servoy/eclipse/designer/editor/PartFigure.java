@@ -13,10 +13,11 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor;
 
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureUtilities;
 import org.eclipse.draw2d.Graphics;
@@ -24,30 +25,26 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.gef.handles.HandleBounds;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.widgets.Display;
-
-import com.servoy.j2db.persistence.Form;
 
 /**
  * A figure for a form part
  */
-public class PartFigure extends Figure implements HandleBounds
+public class PartFigure extends Figure
 {
-	private static final int MARGIN = 2;
+	private static final int MARGINX = 10;
+	private static final int MARGINY = 2;
 
 	private String text = "";//$NON-NLS-1$
-	private final VisualFormEditor editorPart;
 
 	private Dimension textSize = null;
 
 	/**
 	 * Construct an empty part figure.
 	 */
-	public PartFigure(VisualFormEditor editorPart)
+	public PartFigure()
 	{
-		this.editorPart = editorPart;
+		setCursor(Cursors.SIZENS);
 	}
 
 
@@ -56,7 +53,6 @@ public class PartFigure extends Figure implements HandleBounds
 	{
 		textSize = null;
 		super.setFont(f);
-		redraw();
 	}
 
 
@@ -69,23 +65,13 @@ public class PartFigure extends Figure implements HandleBounds
 		return textSize;
 	}
 
-	@Override
-	public void setBounds(Rectangle rect)
-	{
-		Form flattenedForm = editorPart.getFlattenedForm();
-		if (flattenedForm == null) return;
-
-		Dimension dim = getMinimumSize(0, 0);
-		super.setBounds(new Rectangle(flattenedForm.getWidth(), rect.y, dim.width, dim.height));
-	}
-
 	/**
 	 * @see IFigure#getMinimumSize(int, int)
 	 */
 	@Override
 	public Dimension getMinimumSize(int w, int h)
 	{
-		return new Dimension(getTextSize().width + MARGIN, getTextSize().height + MARGIN);
+		return new Dimension(getTextSize().width + MARGINX, getTextSize().height + MARGINY);
 	}
 
 	/**
@@ -121,8 +107,8 @@ public class PartFigure extends Figure implements HandleBounds
 		try
 		{
 			graphics.setBackgroundColor(ColorConstants.buttonDarker);
-			graphics.fillRectangle(bnds.x, bnds.y, textWidth + MARGIN, textHeight + MARGIN);
-			graphics.drawText(getText(), new Point(bnds.x + MARGIN, bnds.y + MARGIN));
+			graphics.fillRectangle(bnds.x, bnds.y, textWidth + MARGINX, textHeight + MARGINY);
+			graphics.drawText(getText(), new Point(bnds.x + (MARGINX / 2), bnds.y + (MARGINY / 2)));
 
 			graphics.drawLine(0, bnds.y, bnds.x, bnds.y);
 		}
@@ -151,26 +137,8 @@ public class PartFigure extends Figure implements HandleBounds
 		}
 		textSize = null;
 		text = s;
-		redraw();
-	}
-
-	public Rectangle getHandleBounds()
-	{
-		// just show the line as rectangle
-		Rectangle bnds = getBounds();
-		return new Rectangle(bnds.x, bnds.y, bnds.width - (getTextSize().width + MARGIN), 1);
-	}
-
-	protected void redraw()
-	{
-		Display.getDefault().asyncExec(new Runnable()
-		{
-			public void run()
-			{
-				revalidate();
-				repaint();
-			}
-		});
+		revalidate();
+		repaint();
 	}
 
 }

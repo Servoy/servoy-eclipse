@@ -18,6 +18,7 @@ package com.servoy.eclipse.designer.editor;
 
 import java.util.List;
 
+import org.eclipse.draw2d.FocusBorder;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.Polyline;
 import org.eclipse.draw2d.geometry.Dimension;
@@ -68,6 +69,19 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 		polyline.setLineStyle(Graphics.LINE_DOT);
 
 		return polyline;
+	}
+
+	@Override
+	protected void showSelection()
+	{
+		// do not show selection handles on form part
+		getHostFigure().setBorder(new FocusBorder());
+	}
+
+	@Override
+	protected void hideSelection()
+	{
+		getHostFigure().setBorder(null);
 	}
 
 	@Override

@@ -20,6 +20,7 @@ package com.servoy.eclipse.designer.editor;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
@@ -50,14 +51,16 @@ public class FormResizeTracker extends ResizeTracker
 	{
 		super(owner, direction);
 		this.owner = owner;
+		setDefaultCursor((PositionConstants.NORTH_SOUTH & direction) != 0 ? Cursors.SIZENS : Cursors.SIZEWE);
 	}
+
 
 	@Override
 	protected List<EditPart> getOperationSet()
 	{
 		if (resizeOperationSet == null)
 		{
-			resizeOperationSet = new ArrayList<EditPart>();
+			resizeOperationSet = new ArrayList<EditPart>(1);
 			resizeOperationSet.add(owner);
 		}
 		return resizeOperationSet;

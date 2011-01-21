@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.DragTracker;
@@ -62,7 +63,6 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 {
 	protected IApplication application;
 
-	int formWidth;
 	private final boolean inherited;
 	private final VisualFormEditor editorPart;
 
@@ -90,7 +90,7 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 	protected IFigure createFigure()
 	{
 		Part part = getPersist();
-		PartFigure fig = new PartFigure(editorPart);
+		PartFigure fig = new PartFigure();
 		fig.setFont(FontResource.getDefaultFont(SWT.NONE, 0));
 		if (inherited)
 		{
@@ -106,9 +106,9 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 		Form flattenedForm = editorPart.getFlattenedForm();
 		if (flattenedForm == null) return;
 
-		formWidth = flattenedForm.getWidth();
-		fig.setBounds(new Rectangle(0, part.getHeight(), formWidth, 20));
 		fig.setText(part.getEditorName());
+		Dimension dim = fig.getMinimumSize(0, 0);
+		fig.setBounds(new Rectangle(flattenedForm.getWidth() + 3, part.getHeight(), dim.width, dim.height));
 	}
 
 	/**
@@ -151,7 +151,7 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 	public void persistChanges(Collection<IPersist> changes)
 	{
 		Form flattenedForm = editorPart.getFlattenedForm();
-		if (flattenedForm != null && formWidth != flattenedForm.getWidth())
+		if (flattenedForm != null)
 		{
 			Display.getDefault().asyncExec(new Runnable()
 			{
