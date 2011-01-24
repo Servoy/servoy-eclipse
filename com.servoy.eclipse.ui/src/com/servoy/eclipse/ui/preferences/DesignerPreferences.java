@@ -80,7 +80,7 @@ public class DesignerPreferences
 	public static final String SNAP_TO_NONE = "none";
 
 	public static final int COPY_PASTE_OFFSET_DEFAULT = 10;
-	public static final int ALIGNMENT_THRESHOLD_DEFAULT = 12;
+	public static final int ALIGNMENT_THRESHOLD_DEFAULT = 3;
 	public static final int ALIGNMENT_INDENT_DEFAULT = 5;
 	public static final int[] ALIGNMENT_DISTANCES_DEFAULT = { 5, 10, 15 }; // small, medium, large
 	public static final int STEP_SIZE_DEFAULT = 10;
