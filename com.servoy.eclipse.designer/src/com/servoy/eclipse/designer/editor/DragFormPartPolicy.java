@@ -20,8 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.draw2d.FocusBorder;
-import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.Polyline;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PrecisionRectangle;
@@ -32,12 +30,10 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.editpolicies.ResizableEditPolicy;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
-import org.eclipse.swt.graphics.RGB;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.commands.MovePartCommand;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -57,26 +53,16 @@ import com.servoy.j2db.util.IAnchorConstants;
  */
 public class DragFormPartPolicy extends ResizableEditPolicy
 {
-	public static final RGB PART_HANDLE_RGB = new RGB(0x41, 0x8F, 0xD4);
-
 	private Integer previousPartHeight = null;
 
 	@Override
-	protected Polyline createDragSourceFeedbackFigure()
+	protected DragFormBoundsFigure createDragSourceFeedbackFigure()
 	{
-		Polyline polyline;
-		addFeedback(polyline = createMovePartFeedbackFigure());
-		return polyline;
-	}
-
-	public static Polyline createMovePartFeedbackFigure()
-	{
-		// Use a line for feedback
-		Polyline polyline = new Polyline();
-		polyline.setForegroundColor(ColorResource.INSTANCE.getColor(PART_HANDLE_RGB)); // TODO: add preference 
-		polyline.setLineStyle(Graphics.LINE_DOT);
-
-		return polyline;
+		DragFormBoundsFigure movePartFeedbackFigure;
+		movePartFeedbackFigure = new DragFormBoundsFigure();
+		movePartFeedbackFigure.addPartHandle(((Part)getHost().getModel()).getEditorName());
+		addFeedback(movePartFeedbackFigure);
+		return movePartFeedbackFigure;
 	}
 
 	@Override
@@ -122,7 +108,7 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 	@Override
 	protected void showChangeBoundsFeedback(ChangeBoundsRequest request)
 	{
-		Polyline feedback = (Polyline)getDragSourceFeedbackFigure();
+		DragFormBoundsFigure feedback = (DragFormBoundsFigure)getDragSourceFeedbackFigure();
 		PrecisionRectangle rect = new PrecisionRectangle(getInitialFeedbackBounds());
 
 		getHostFigure().translateToAbsolute(rect);
@@ -130,9 +116,7 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 		rect.setY(rect.y + request.getMoveDelta().y);
 		feedback.translateToRelative(rect);
 
-		feedback.removeAllPoints();
-		feedback.addPoint(new Point(0, rect.y));
-		feedback.addPoint(new Point(rect.x, rect.y));
+		feedback.setHorizontalLine(rect.y, rect.x);
 
 		// feedback on status line
 		StringBuilder message = new StringBuilder("Part height ");

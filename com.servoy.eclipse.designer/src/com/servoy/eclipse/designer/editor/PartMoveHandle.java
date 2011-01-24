@@ -64,7 +64,7 @@ public class PartMoveHandle extends AbstractFormHandle
 		{
 			Rectangle bnds = getBounds();
 			graphics.setLineStyle(Graphics.LINE_DOT);
-			setForegroundColor(ColorResource.INSTANCE.getColor(DragFormPartPolicy.PART_HANDLE_RGB));
+			setForegroundColor(ColorResource.INSTANCE.getColor(DragFormBoundsFigure.PART_HANDLE_RGB));
 			graphics.drawLine(bnds.x, bnds.y + (bnds.height / 2), bnds.x + bnds.width, bnds.y + (bnds.height / 2));
 		}
 	}

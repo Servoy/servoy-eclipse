@@ -17,7 +17,6 @@
 package com.servoy.eclipse.designer.editor;
 
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureUtilities;
 import org.eclipse.draw2d.Graphics;
@@ -38,14 +37,6 @@ public class PartFigure extends Figure
 	private String text = "";//$NON-NLS-1$
 
 	private Dimension textSize = null;
-
-	/**
-	 * Construct an empty part figure.
-	 */
-	public PartFigure()
-	{
-		setCursor(Cursors.SIZENS);
-	}
 
 
 	@Override

@@ -17,8 +17,6 @@
 
 package com.servoy.eclipse.designer.editor;
 
-import org.eclipse.draw2d.Polyline;
-import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PrecisionRectangle;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editpolicies.ResizableEditPolicy;
@@ -46,13 +44,11 @@ public class FormResizableEditPolicy extends ResizableEditPolicy
 	@Override
 	protected void showChangeBoundsFeedback(ChangeBoundsRequest request)
 	{
-		Polyline feedback = (Polyline)getDragSourceFeedbackFigure();
+		DragFormBoundsFigure feedback = (DragFormBoundsFigure)getDragSourceFeedbackFigure();
 
 		PrecisionRectangle rect = new PrecisionRectangle(getInitialFeedbackBounds());
 
-		feedback.removeAllPoints();
-		feedback.addPoint(new Point(rect.width + request.getSizeDelta().width, rect.y));
-		feedback.addPoint(new Point(rect.width + request.getSizeDelta().width, rect.y + rect.height));
+		feedback.setVerticalLine(rect.width + request.getSizeDelta().width, rect.height);
 
 		// feedback on status line
 		EditorUtil.setStatuslineMessage("Form width " + (((BorderModel)getHost().getModel()).flattenedForm.getWidth() + request.getSizeDelta().width));
@@ -66,11 +62,11 @@ public class FormResizableEditPolicy extends ResizableEditPolicy
 	}
 
 	@Override
-	protected Polyline createDragSourceFeedbackFigure()
+	protected DragFormBoundsFigure createDragSourceFeedbackFigure()
 	{
-		Polyline polyline;
-		addFeedback(polyline = DragFormPartPolicy.createMovePartFeedbackFigure());
-		return polyline;
+		DragFormBoundsFigure feedback;
+		addFeedback(feedback = new DragFormBoundsFigure());
+		return feedback;
 	}
 
 	@Override

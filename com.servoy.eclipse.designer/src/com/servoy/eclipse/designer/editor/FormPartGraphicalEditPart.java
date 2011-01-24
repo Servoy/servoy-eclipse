@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
@@ -91,6 +92,7 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 	{
 		Part part = getPersist();
 		PartFigure fig = new PartFigure();
+		fig.setCursor(Cursors.SIZENS);
 		fig.setFont(FontResource.getDefaultFont(SWT.NONE, 0));
 		if (inherited)
 		{
