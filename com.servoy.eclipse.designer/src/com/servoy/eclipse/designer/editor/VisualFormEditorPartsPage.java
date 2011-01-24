@@ -697,17 +697,11 @@ public class VisualFormEditorPartsPage extends Composite
 
 		CompoundCommand command = new CompoundCommand("Move Part " + (up ? "up" : "down"));
 
-		SetValueCommand setCommand = new SetValueCommand();
-		setCommand.setTarget(new PersistPropertySource(partToMove, editor.getForm(), false));
-		setCommand.setPropertyId(StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName());
-		setCommand.setPropertyValue(new Integer(switchPart.getHeight()));
-		command.add(setCommand);
+		command.add(SetValueCommand.createSetvalueCommand("", new PersistPropertySource(partToMove, editor.getForm(), false),
+			StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(switchPart.getHeight())));
 
-		setCommand = new SetValueCommand();
-		setCommand.setTarget(new PersistPropertySource(switchPart, editor.getForm(), false));
-		setCommand.setPropertyId(StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName());
-		setCommand.setPropertyValue(new Integer(partToMove.getHeight()));
-		command.add(setCommand);
+		command.add(SetValueCommand.createSetvalueCommand("", new PersistPropertySource(switchPart, editor.getForm(), false),
+			StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(partToMove.getHeight())));
 
 		return command;
 	}
@@ -957,20 +951,12 @@ public class VisualFormEditorPartsPage extends Composite
 		 */
 		private void setPartProperty(String property, Object value)
 		{
-			if (part == null)
+			if (part != null)
 			{
-				return;
+				// set the property via the command stack to support undo/redo
+				executeCommand(SetValueCommand.createSetvalueCommand("Edit Part Property", new PersistPropertySource(part, editor.getForm(), false), property,
+					value));
 			}
-			SetValueCommand setCommand = new SetValueCommand("Edit Part Property");
-			if (propertySource == null)
-			{
-				propertySource = new PersistPropertySource(part, editor.getForm(), false);
-			}
-			setCommand.setTarget(propertySource);
-			setCommand.setPropertyId(property);
-			setCommand.setPropertyValue(value);
-			// set the property via the command stack to support undo/redo
-			executeCommand(setCommand);
 		}
 	}
 

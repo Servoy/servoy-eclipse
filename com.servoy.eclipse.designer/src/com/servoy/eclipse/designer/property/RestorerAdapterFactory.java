@@ -22,11 +22,15 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.IRestorer;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 
@@ -38,6 +42,8 @@ import com.servoy.j2db.util.UUID;
 public class RestorerAdapterFactory implements IAdapterFactory
 {
 	private static Class[] ADAPTERS = new Class[] { IRestorer.class };
+
+	public static final Object REMOVED_OBJECT = new Object();
 
 	public Class[] getAdapterList()
 	{
@@ -68,10 +74,16 @@ public class RestorerAdapterFactory implements IAdapterFactory
 		return null;
 	}
 
+	/**
+	 * Restorer of AbstractBase objects.
+	 * 
+	 * @author rgansevles
+	 *
+	 */
 	static class AbstractBaseRestorer implements IRestorer
 	{
-
 		public static final AbstractBaseRestorer INSTANCE = new AbstractBaseRestorer();
+
 
 		private AbstractBaseRestorer()
 		{
@@ -82,19 +94,29 @@ public class RestorerAdapterFactory implements IAdapterFactory
 			return ((AbstractBase)object).getPropertiesMap();
 		}
 
+		public Object getRemoveState(Object object)
+		{
+			return REMOVED_OBJECT;
+		}
+
 		public void restoreState(Object object, Object state)
 		{
-			Map<String, Object> saved = (Map<String, Object>)state;
-			AbstractBase base = ((AbstractBase)object);
-			Map<String, Object> propertiesMap = base.getPropertiesMap();
-			for (String key : propertiesMap.keySet())
+			if (state == REMOVED_OBJECT)
 			{
-				if (!saved.containsKey(key))
+				try
 				{
-					base.clearProperty(key);
+					((IDeveloperRepository)((AbstractBase)object).getRootObject().getRepository()).deleteObject((IPersist)object);
 				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError("Could not delete element", e);
+				}
+				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, object, false);
 			}
-			base.copyPropertiesMap(saved, true);
+			else
+			{
+				((AbstractBase)object).copyPropertiesMap((Map<String, Object>)state, true);
+			}
 		}
 	}
 
@@ -122,6 +144,28 @@ public class RestorerAdapterFactory implements IAdapterFactory
 					if (restorer != null)
 					{
 						elementStates.put(((IPersist)element).getUUID(), restorer.getState(element));
+					}
+				}
+			}
+
+			return new Pair<String, Map<UUID, Object>>(group.getGroupID(), elementStates);
+		}
+
+		public Object getRemoveState(Object object)
+		{
+			FormElementGroup group = (FormElementGroup)object;
+
+			Map<UUID, Object> elementStates = new HashMap<UUID, Object>();
+			Iterator<IFormElement> elements = group.getElements();
+			while (elements.hasNext())
+			{
+				IFormElement element = elements.next();
+				if (element instanceof IPersist)
+				{
+					IRestorer restorer = getRestorer(element);
+					if (restorer != null)
+					{
+						elementStates.put(((IPersist)element).getUUID(), restorer.getRemoveState(element));
 					}
 				}
 			}

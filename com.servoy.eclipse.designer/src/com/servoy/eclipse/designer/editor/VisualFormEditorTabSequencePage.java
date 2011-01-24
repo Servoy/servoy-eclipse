@@ -62,9 +62,9 @@ import org.eclipse.swt.widgets.TableItem;
 
 import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
+import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.dnd.IDragData;
-import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.views.IndexedListViewer;
 import com.servoy.eclipse.ui.views.IndexedStructuredSelection;
@@ -477,13 +477,10 @@ public class VisualFormEditorTabSequencePage extends Composite
 		return command;
 	}
 
-	protected SetValueCommand getSetTabSeqCommand(IPersist persist, int tabSeq)
+	protected Command getSetTabSeqCommand(IPersist persist, int tabSeq)
 	{
-		SetValueCommand setCommand = new SetValueCommand();
-		setCommand.setTarget(new PersistPropertySource(persist, editor.getForm(), false));
-		setCommand.setPropertyId(StaticContentSpecLoader.PROPERTY_TABSEQ.getPropertyName());
-		setCommand.setPropertyValue(new Integer(tabSeq));
-		return setCommand;
+		return SetValueCommand.createSetvalueCommand("", new PersistPropertySource(persist, editor.getForm(), false),
+			StaticContentSpecLoader.PROPERTY_TABSEQ.getPropertyName(), new Integer(tabSeq));
 	}
 
 	/**

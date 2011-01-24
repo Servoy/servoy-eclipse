@@ -101,15 +101,15 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 	@Override
 	public void resetPropertyValue()
 	{
-		CompoundCommand cc = new CompoundCommand();
-		ResetValueCommand restoreCmd;
-
 		if (getParent() == null)
 		// root does not have a default value
-		return;
+		{
+			return;
+		}
+
+		CompoundCommand cc = new CompoundCommand();
 
 		//	Use our parent's values to reset our values.
-		boolean change = false;
 		Object[] objects = getParent().getValues();
 		for (Object element : objects)
 		{
@@ -117,15 +117,14 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 			if (source.isPropertySet(getDescriptor().getId()))
 			{
 				//source.resetPropertyValue(getDescriptor()getId());
-				restoreCmd = new ResetValueCommand();
+				ResetValueCommand restoreCmd = new ResetValueCommand();
 				restoreCmd.setTarget(source);
 				restoreCmd.setPropertySheetEntry(this);
 				restoreCmd.setPropertyId(getDescriptor().getId());
 				cc.add(restoreCmd);
-				change = true;
 			}
 		}
-		if (change)
+		if (cc.getCommands().size() > 0)
 		{
 			getCommandStack().execute(cc);
 			refreshFromRoot();
@@ -192,13 +191,9 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 		CompoundCommand cc = new CompoundCommand();
 		command.add(cc);
 
-		SetValueCommand setCommand;
 		for (int i = 0; i < getValues().length; i++)
 		{
-			setCommand = new SetValueCommand(child.getDisplayName());
 			IPropertySource target = getPropertySource(getValues()[i]);
-			setCommand.setTarget(target);
-
 			Object value = child.getValues()[0];
 			Object entryValue = value;
 			IPropertyDescriptor desc = child.getDescriptor();
@@ -214,10 +209,7 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 					}
 				}
 			}
-
-			setCommand.setPropertyId(child.getDescriptor().getId());
-			setCommand.setPropertyValue(entryValue);
-			cc.add(setCommand);
+			cc.add(SetValueCommand.createSetvalueCommand(child.getDisplayName(), target, (String)child.getDescriptor().getId(), entryValue));
 		}
 
 		// inform our parent

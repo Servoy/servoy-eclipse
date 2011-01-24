@@ -105,11 +105,9 @@ public class FormZOrderCommand extends BaseRestorableCommand implements ISupport
 				{
 					continue;
 				}
-				saveState(formElement);
-				new PersistPropertySource((IPersist)formElement, form, false).setPersistPropertyValue(
-					StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), new Integer(formIndex));
+				setPropertyValue(new PersistPropertySource((IPersist)formElement, form, false), StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
+					new Integer(formIndex));
 			}
 		}
 	}
-
 }

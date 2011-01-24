@@ -91,7 +91,8 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 				if (childEditPart.getModel() instanceof IPersist && objectProperties != null && objectProperties.size() > 0)
 				{
 					IPersist persist = (IPersist)childEditPart.getModel();
-					compoundCommand.add(SetValueCommand.createSetPropertiesComnmand(new PersistPropertySource(persist, persist, false), objectProperties));
+					compoundCommand.add(SetValueCommand.createSetPropertiesComnmand(new PersistPropertySource(persist, parent.getPersist(), false),
+						objectProperties));
 				}
 				return compoundCommand.unwrap();
 			}

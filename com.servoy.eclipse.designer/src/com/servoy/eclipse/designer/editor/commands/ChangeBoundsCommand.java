@@ -28,6 +28,7 @@ import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
+import com.servoy.eclipse.ui.property.IModelSavePropertySource;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportName;
@@ -140,11 +141,21 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 		}
 	}
 
-	private static void setLocationAndSize(GraphicalEditPart ep, java.awt.Point location, java.awt.Dimension size)
+	protected void setLocationAndSize(GraphicalEditPart ep, java.awt.Point location, java.awt.Dimension size)
 	{
 		IPropertySource propertySource = (IPropertySource)ep.getAdapter(IPropertySource.class);
-		propertySource.setPropertyValue(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
-		propertySource.setPropertyValue(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), size);
+		if (propertySource instanceof IModelSavePropertySource)
+		{
+			// supports saving of state, set property and check if model changed (first change in inherited object)
+			setPropertyValue((IModelSavePropertySource)propertySource, StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
+			setPropertyValue((IModelSavePropertySource)propertySource, StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), size);
+		}
+		else
+		{
+			saveState(ep.getModel());
+			propertySource.setPropertyValue(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
+			propertySource.setPropertyValue(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), size);
+		}
 	}
 
 	protected boolean changeBounds(GraphicalEditPart ep, boolean change)
@@ -159,7 +170,6 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 
 		if (change)
 		{
-			saveState(ep.getModel());
 			setLocationAndSize(ep, new java.awt.Point(x, y), new java.awt.Dimension(width, height));
 		}
 		return true;

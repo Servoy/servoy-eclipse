@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.property;
 
 import org.eclipse.gef.commands.CommandStack;
@@ -72,12 +72,7 @@ public class UndoablePropertySource implements IPropertySource
 	public void setPropertyValue(Object id, Object value)
 	{
 		IPropertyDescriptor pd = getPropertyDescriptor(id);
-
-		SetValueCommand setCommand = new SetValueCommand(pd == null ? "" : pd.getDisplayName());
-		setCommand.setTarget(propertySource);
-		setCommand.setPropertyId(id);
-		setCommand.setPropertyValue(value);
-		commandStack.execute(setCommand);
+		commandStack.execute(SetValueCommand.createSetvalueCommand(pd == null ? "" : pd.getDisplayName(), propertySource, (String)id, value));
 	}
 
 	public void resetPropertyValue(Object id)

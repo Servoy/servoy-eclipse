@@ -78,15 +78,11 @@ public class ResizeFormCommand extends Command
 		resizeCommand = new CompoundCommand();
 		if ((resizeDirection & PositionConstants.EAST_WEST) != 0)
 		{
-			// move all right-anchored elements, when control is pressed
-			PersistPropertySource persistProperties = new PersistPropertySource(form, form, false);
-			SetValueCommand setCommand = new SetValueCommand();
-			setCommand.setTarget(persistProperties);
-			setCommand.setPropertyId(PROPERTY_WIDTH);
-			setCommand.setPropertyValue(new Integer(((Integer)persistProperties.getPropertyValue(PROPERTY_WIDTH)).intValue() + sizeDelta.width));
-			resizeCommand.add(setCommand);
+			// resize form
+			resizeCommand.add(SetValueCommand.createSetvalueCommand("Resize form", new PersistPropertySource(form, form, false), PROPERTY_WIDTH, new Integer(
+				form.getWidth() + sizeDelta.width)));
 
-			// move/resize elements if needed
+			// move/resize all right-anchored elements, when control is pressed
 			List<EditPart> children = formEditPart.getChildren();
 			for (EditPart editPart : children)
 			{

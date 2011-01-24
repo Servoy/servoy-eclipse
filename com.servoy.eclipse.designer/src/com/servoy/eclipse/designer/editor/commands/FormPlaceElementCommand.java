@@ -148,7 +148,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 				{
 					if (objectProperties != null && objectProperties.size() > 0)
 					{
-						CompoundCommand setPropertiesCommand = SetValueCommand.createSetPropertiesComnmand(
+						Command setPropertiesCommand = SetValueCommand.createSetPropertiesComnmand(
 							(IPropertySource)Platform.getAdapterManager().getAdapter(model, IPropertySource.class), objectProperties);
 						if (setPropertiesCommand != null)
 						{

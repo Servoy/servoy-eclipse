@@ -31,18 +31,21 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.property.ComplexProperty;
+import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.DimensionPropertySource;
 import com.servoy.eclipse.ui.property.ICellEditorFactory;
+import com.servoy.eclipse.ui.property.IModelSavePropertySource;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PointPropertySource;
 import com.servoy.eclipse.ui.property.PropertyCategory;
 import com.servoy.eclipse.ui.property.PropertyController;
-import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
@@ -59,9 +62,9 @@ import com.servoy.j2db.util.UUID;
  * @author rgansevles
  * 
  */
-public class FormElementGroupPropertySource implements IPropertySource
+public class FormElementGroupPropertySource implements IPropertySource, IModelSavePropertySource
 {
-	private final FormElementGroup group;
+	private FormElementGroup group;
 	private final IPersist context;
 
 	public FormElementGroupPropertySource(FormElementGroup group, IPersist context)
@@ -73,6 +76,11 @@ public class FormElementGroupPropertySource implements IPropertySource
 	public Object getEditableValue()
 	{
 		return null;
+	}
+
+	public Object getSaveModel()
+	{
+		return group;
 	}
 
 	public IPropertyDescriptor[] getPropertyDescriptors()
@@ -230,7 +238,6 @@ public class FormElementGroupPropertySource implements IPropertySource
 		}
 	}
 
-
 	protected void setLocation(Point p)
 	{
 		Point oldLocation = group.getLocation();
@@ -246,8 +253,7 @@ public class FormElementGroupPropertySource implements IPropertySource
 			{
 				Point oldElementLocation = element.getLocation();
 				Point location = new Point(oldElementLocation.x + dx, oldElementLocation.y + dy);
-				new PersistPropertySource((IPersist)element, context == null ? (IPersist)element : context, false).setPropertyValue(
-					StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
+				setElementProperty((IPersist)element, StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
 			}
 		}
 	}
@@ -298,10 +304,21 @@ public class FormElementGroupPropertySource implements IPropertySource
 				}
 				Point location = new Point(newX, newY);
 
-				PersistPropertySource elementPropertySource = new PersistPropertySource((IPersist)element, context == null ? (IPersist)element : context, false);
-				elementPropertySource.setPropertyValue(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), size);
-				elementPropertySource.setPropertyValue(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
+				setElementProperty((IPersist)element, StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), size);
+				setElementProperty((IPersist)element, StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
 			}
+		}
+	}
+
+	protected void setElementProperty(IPersist element, String propertyName, Object propertyValue)
+	{
+		PersistPropertySource elementPropertySource = new PersistPropertySource(element, context == null ? (IPersist)element : context, false);
+		elementPropertySource.setPropertyValue(propertyName, propertyValue);
+		IPersist newPersist = (IPersist)elementPropertySource.getSaveModel();
+		if (newPersist != element)
+		{
+			// element model was changed (added as override element), replace our model as well
+			group = new FormElementGroup(group.getGroupID(), ModelUtils.getEditingFlattenedSolution(newPersist), (Form)newPersist.getParent());
 		}
 	}
 
@@ -327,8 +344,7 @@ public class FormElementGroupPropertySource implements IPropertySource
 			IFormElement element = elements.next();
 			if (element instanceof IPersist)
 			{
-				new PersistPropertySource((IPersist)element, context == null ? (IPersist)element : context, false).setPropertyValue(
-					StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName(), newGroupId);
+				setElementProperty((IPersist)element, StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName(), newGroupId);
 			}
 		}
 		// must set grouID after looping over elements (uses current groupID)

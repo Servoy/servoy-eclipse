@@ -72,8 +72,6 @@ public class MovePartCommand extends BaseRestorableCommand
 	@Override
 	public void execute()
 	{
-		saveState(part);
-		new PersistPropertySource(part, context, false).setPersistPropertyValue(StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(
-			newHeight));
+		setPropertyValue(new PersistPropertySource(part, context, false), StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(newHeight));
 	}
 }

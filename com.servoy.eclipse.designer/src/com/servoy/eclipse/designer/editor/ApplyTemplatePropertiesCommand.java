@@ -28,6 +28,8 @@ import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
@@ -45,12 +47,14 @@ public class ApplyTemplatePropertiesCommand extends BaseRestorableCommand
 {
 	private final TemplateElementHolder templateHolder;
 	private final IPersist persist;
+	private final IPersist context;
 
-	public ApplyTemplatePropertiesCommand(TemplateElementHolder template, IPersist persist)
+	public ApplyTemplatePropertiesCommand(TemplateElementHolder template, IPersist persist, IPersist context)
 	{
 		super("Apply template");
 		this.templateHolder = template;
 		this.persist = persist;
+		this.context = context;
 	}
 
 	@Override
@@ -82,7 +86,20 @@ public class ApplyTemplatePropertiesCommand extends BaseRestorableCommand
 				ElementFactory.resolveCleanedProperties((Form)persist.getAncestor(IRepository.FORMS), json));
 			propertyValues.remove(Template.PROP_LOCATION);
 
-			repository.updatePersistWithValueMap(persist, propertyValues, false);
+			IPersist newPersist = ElementUtil.getOverridePersist(context, persist);
+			if (newPersist == persist)
+			{
+				save(persist, getState(persist));
+			}
+			else
+			{
+				// first change in overridden element, remove in undo
+				save(newPersist, getRemovedState(newPersist));
+			}
+
+			((AbstractBase)newPersist).copyPropertiesMap(propertyValues, false);
+
+			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, newPersist, false);
 		}
 		catch (JSONException e)
 		{
@@ -93,6 +110,5 @@ public class ApplyTemplatePropertiesCommand extends BaseRestorableCommand
 			ServoyLog.logError("Error processing template " + templateHolder.template.getName(), e);
 		}
 
-		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persist, false);
 	}
 }

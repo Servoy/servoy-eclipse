@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.commands.Command;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.ui.property.IModelSavePropertySource;
 import com.servoy.eclipse.ui.property.IRestorer;
 
 /**
@@ -42,15 +43,61 @@ public abstract class BaseRestorableCommand extends Command
 		super(label);
 	}
 
+	public static IRestorer getRestorer(Object object)
+	{
+		if (object == null)
+		{
+			return null;
+		}
+		return (IRestorer)Platform.getAdapterManager().getAdapter(object, IRestorer.class);
+	}
+
+	public static Object getState(Object object)
+	{
+		if (object == null)
+		{
+			return null;
+		}
+		IRestorer restorer = (IRestorer)Platform.getAdapterManager().getAdapter(object, IRestorer.class);
+		if (restorer == null)
+		{
+			return null;
+		}
+		return restorer.getState(object);
+	}
+
+	public static Object getRemovedState(Object object)
+	{
+		if (object == null)
+		{
+			return null;
+		}
+		IRestorer restorer = (IRestorer)Platform.getAdapterManager().getAdapter(object, IRestorer.class);
+		if (restorer == null)
+		{
+			return null;
+		}
+		return restorer.getRemoveState(object);
+	}
+
 	protected void saveState(Object object)
 	{
 		if (states != null && states.containsKey(object))
 		{
-			// already saved
+			// already saved 
 			return;
 		}
-		IRestorer restorable = (IRestorer)Platform.getAdapterManager().getAdapter(object, IRestorer.class);
-		Object state = restorable == null ? null : restorable.getState(object);
+		save(object, getState(object));
+	}
+
+	protected void save(Object object, Object state)
+	{
+		if (states != null && states.containsKey(object))
+		{
+			// already saved 
+			return;
+		}
+
 		if (state != null)
 		{
 			if (states == null)
@@ -58,6 +105,31 @@ public abstract class BaseRestorableCommand extends Command
 				states = new HashMap<Object, Object>();
 			}
 			states.put(object, state);
+		}
+	}
+
+	/**
+	 * Set a property in the propertySource.
+	 * Save state for undo().
+	 *  
+	 * @param propertySource
+	 * @param propertyName
+	 * @param location
+	 */
+	protected void setPropertyValue(IModelSavePropertySource propertySource, Object id, Object value)
+	{
+		Object modelBefore = propertySource.getSaveModel();
+		Object stateBefore = getState(modelBefore);
+		propertySource.setPropertyValue(id, value);
+		Object modelAfter = propertySource.getSaveModel();
+		if (modelBefore == modelAfter)
+		{
+			save(modelBefore, stateBefore);
+		}
+		else
+		{
+			// model of propertySource changed during setPropertyValue, 
+			save(modelAfter, getRemovedState(modelAfter));
 		}
 	}
 

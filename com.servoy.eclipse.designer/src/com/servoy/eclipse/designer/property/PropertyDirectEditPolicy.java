@@ -13,17 +13,20 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.property;
 
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editpolicies.DirectEditPolicy;
 import org.eclipse.gef.requests.DirectEditRequest;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.eclipse.ui.views.properties.IPropertySource;
+
+import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
 
 /**
- * Edit policy for directly editing edit parts based on a property source.
+ * Edit policy for directly editing edit parts.
  * 
  * @see PropertyDirectEditManager
  * @author rgansevles
@@ -31,22 +34,25 @@ import org.eclipse.ui.views.properties.IPropertySource;
  */
 public class PropertyDirectEditPolicy extends DirectEditPolicy
 {
-	private final IPropertySource propertySource;
+	private final IPersist persist;
+	private final Form form; // context
 
-	public PropertyDirectEditPolicy(IPropertySource propertySource)
+	/**
+	 * @param persist
+	 * @param form
+	 */
+	public PropertyDirectEditPolicy(IPersist persist, Form form)
 	{
-		this.propertySource = propertySource;
+		this.persist = persist;
+		this.form = form;
 	}
 
 	@Override
 	protected Command getDirectEditCommand(DirectEditRequest request)
 	{
 		IPropertyDescriptor propertyDescriptor = (IPropertyDescriptor)request.getDirectEditFeature();
-		SetValueCommand setCommand = new SetValueCommand("Direct edit");
-		setCommand.setTarget(propertySource);
-		setCommand.setPropertyId(propertyDescriptor.getId());
-		setCommand.setPropertyValue(request.getCellEditor().getValue());
-		return setCommand;
+		return SetValueCommand.createSetvalueCommand("Direct edit", new PersistPropertySource(persist, form, false), (String)propertyDescriptor.getId(),
+			request.getCellEditor().getValue());
 	}
 
 	@Override

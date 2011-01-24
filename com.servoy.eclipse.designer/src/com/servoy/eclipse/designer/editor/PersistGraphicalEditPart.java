@@ -115,7 +115,7 @@ public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 	{
 		installEditPolicy(PasteToSupportChildsEditPolicy.PASTE_ROLE, new PasteToSupportChildsEditPolicy(application, getFieldPositioner()));
 		installEditPolicy(EditPolicy.COMPONENT_ROLE, new PersistEditPolicy(application, getFieldPositioner()));
-		installEditPolicy(EditPolicy.DIRECT_EDIT_ROLE, new PropertyDirectEditPolicy(getPersistProperties()));
+		installEditPolicy(EditPolicy.DIRECT_EDIT_ROLE, new PropertyDirectEditPolicy(getPersist(), form));
 	}
 
 	protected PersistPropertySource getPersistProperties()
