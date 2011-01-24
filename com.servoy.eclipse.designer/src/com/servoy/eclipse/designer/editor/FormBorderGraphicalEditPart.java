@@ -86,7 +86,7 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 			handles = new ArrayList<Handle>();
 			handles.add(new FormResizeHandle(this, PositionConstants.EAST)); // resize form via right side of form
 
-			Iterator<Part> parts = getModel().form.getParts();
+			Iterator<Part> parts = getModel().flattenedForm.getParts();
 			while (parts.hasNext())
 			{
 				PartMoveHandle handle = new PartMoveHandle(parts.next(), this);
@@ -134,10 +134,10 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 
 	protected IFigure updateFigure(BoundsImageFigure fig)
 	{
-		java.awt.Dimension size = getModel().form.getSize();
+		java.awt.Dimension size = getModel().flattenedForm.getSize();
 		// add border size
 		Insets insets = IFigure.NO_INSETS;
-		javax.swing.border.Border border = ElementFactory.getFormBorder(application, getModel().form);
+		javax.swing.border.Border border = ElementFactory.getFormBorder(application, getModel().flattenedForm);
 		if (border != null)
 		{
 			java.awt.Insets borderInsets = border.getBorderInsets(null);
@@ -200,7 +200,7 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 	{
 		if (borderImageNotifier == null)
 		{
-			borderImageNotifier = new BorderImageNotifier(application, getModel().form);
+			borderImageNotifier = new BorderImageNotifier(application, getModel().flattenedForm);
 		}
 		return borderImageNotifier;
 	}
@@ -214,14 +214,14 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 	 */
 	public static class BorderModel
 	{
-		public final Form form;
+		public final Form flattenedForm;
 
 		/**
-		 * @param form
+		 * @param flattenedForm
 		 */
-		public BorderModel(Form form)
+		public BorderModel(Form flattenedForm)
 		{
-			this.form = form;
+			this.flattenedForm = flattenedForm;
 		}
 	}
 }

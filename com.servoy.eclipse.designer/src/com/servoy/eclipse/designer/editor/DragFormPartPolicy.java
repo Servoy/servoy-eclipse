@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.designer.editor;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.draw2d.FocusBorder;
@@ -33,9 +34,14 @@ import org.eclipse.gef.editpolicies.ResizableEditPolicy;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.swt.graphics.RGB;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.commands.MovePartCommand;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.resource.ColorResource;
+import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportAnchors;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.Part;
@@ -52,6 +58,8 @@ import com.servoy.j2db.util.IAnchorConstants;
 public class DragFormPartPolicy extends ResizableEditPolicy
 {
 	public static final RGB PART_HANDLE_RGB = new RGB(0x41, 0x8F, 0xD4);
+
+	private Integer previousPartHeight = null;
 
 	@Override
 	protected Polyline createDragSourceFeedbackFigure()
@@ -84,6 +92,33 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 		getHostFigure().setBorder(null);
 	}
 
+	protected int getPreviousPartHeight()
+	{
+		if (previousPartHeight == null)
+		{
+			previousPartHeight = Integer.valueOf(0);
+			Part part = (Part)getHost().getModel();
+			try
+			{
+				Form flattenedForm = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(part).getFlattenedForm(part);
+				Iterator<Part> parts = flattenedForm.getObjects(IRepository.PARTS);
+				while (parts.hasNext())
+				{
+					int nextHeight = parts.next().getHeight();
+					if (nextHeight < part.getHeight() && nextHeight > previousPartHeight.intValue())
+					{
+						previousPartHeight = new Integer(nextHeight);
+					}
+				}
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+		return previousPartHeight.intValue();
+	}
+
 	@Override
 	protected void showChangeBoundsFeedback(ChangeBoundsRequest request)
 	{
@@ -92,12 +127,30 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 
 		getHostFigure().translateToAbsolute(rect);
 
-		rect.setY(request.getLocation().y);
+		rect.setY(rect.y + request.getMoveDelta().y);
 		feedback.translateToRelative(rect);
 
 		feedback.removeAllPoints();
 		feedback.addPoint(new Point(0, rect.y));
 		feedback.addPoint(new Point(rect.x, rect.y));
+
+		// feedback on status line
+		StringBuilder message = new StringBuilder("Part height ");
+		int newHeight = ((Part)getHost().getModel()).getHeight() + request.getMoveDelta().y;
+		message.append(newHeight);
+		if (getPreviousPartHeight() > 0)
+		{
+			message.append(" (").append(newHeight - getPreviousPartHeight()).append(')'); //$NON-NLS-1$
+		}
+		EditorUtil.setStatuslineMessage(message.toString());
+	}
+
+	@Override
+	protected void eraseChangeBoundsFeedback(ChangeBoundsRequest request)
+	{
+		super.eraseChangeBoundsFeedback(request);
+		EditorUtil.setStatuslineMessage(null);
+		previousPartHeight = null;
 	}
 
 	@Override

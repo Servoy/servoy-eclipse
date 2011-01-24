@@ -24,6 +24,9 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editpolicies.ResizableEditPolicy;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 
+import com.servoy.eclipse.designer.editor.FormBorderGraphicalEditPart.BorderModel;
+import com.servoy.eclipse.ui.util.EditorUtil;
+
 /**
  * Edit policy for resizing form via boundary.
  * 
@@ -47,14 +50,19 @@ public class FormResizableEditPolicy extends ResizableEditPolicy
 
 		PrecisionRectangle rect = new PrecisionRectangle(getInitialFeedbackBounds());
 
-		getHostFigure().translateToAbsolute(rect);
-
-		rect.setX(request.getLocation().x);
-		feedback.translateToRelative(rect);
-
 		feedback.removeAllPoints();
-		feedback.addPoint(new Point(rect.x, rect.y));
-		feedback.addPoint(new Point(rect.x, rect.y + rect.height));
+		feedback.addPoint(new Point(rect.width + request.getSizeDelta().width, rect.y));
+		feedback.addPoint(new Point(rect.width + request.getSizeDelta().width, rect.y + rect.height));
+
+		// feedback on status line
+		EditorUtil.setStatuslineMessage("Form width " + (((BorderModel)getHost().getModel()).flattenedForm.getWidth() + request.getSizeDelta().width));
+	}
+
+	@Override
+	protected void eraseChangeBoundsFeedback(ChangeBoundsRequest request)
+	{
+		super.eraseChangeBoundsFeedback(request);
+		EditorUtil.setStatuslineMessage(null);
 	}
 
 	@Override

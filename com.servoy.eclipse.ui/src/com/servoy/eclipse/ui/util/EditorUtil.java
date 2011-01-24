@@ -47,7 +47,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -616,5 +618,33 @@ public class EditorUtil
 				}
 			}
 		});
+	}
+
+	/**
+	 * Set the status line message for the current active editor
+	 * @param message
+	 */
+	public static void setStatuslineMessage(String message)
+	{
+		IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (activeWorkbenchWindow == null)
+		{
+			return;
+		}
+		IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
+		if (activePage == null)
+		{
+			return;
+		}
+		IEditorPart activeEditor = activePage.getActiveEditor();
+		if (activeEditor == null)
+		{
+			return;
+		}
+		IWorkbenchPartSite site = activeEditor.getSite();
+		if (site instanceof IEditorSite)
+		{
+			((IEditorSite)site).getActionBars().getStatusLineManager().setMessage(message);
+		}
 	}
 }

@@ -36,18 +36,18 @@ import com.servoy.j2db.persistence.Form;
 
 public class BorderImageNotifier extends AbstractImageNotifier
 {
-	private final Form form;
+	private final Form flattenedForm;
 
-	public BorderImageNotifier(IApplication application, Form form)
+	public BorderImageNotifier(IApplication application, Form flattenedForm)
 	{
 		super(application);
-		this.form = form;
+		this.flattenedForm = flattenedForm;
 	}
 
 	@Override
 	protected Component createComponent()
 	{
-		Border border = ElementFactory.getFormBorder(application, form);
+		Border border = ElementFactory.getFormBorder(application, flattenedForm);
 		if (border == null)
 		{
 			return null;
@@ -55,7 +55,7 @@ public class BorderImageNotifier extends AbstractImageNotifier
 		JComponent comp = new JPanel();
 		comp.setBorder(border);
 		comp.setOpaque(false);
-		Dimension size = form.getSize();
+		Dimension size = flattenedForm.getSize();
 
 		// add border insets
 		Insets insets = border.getBorderInsets(comp);
