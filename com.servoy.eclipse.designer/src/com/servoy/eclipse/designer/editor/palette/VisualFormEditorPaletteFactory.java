@@ -43,6 +43,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory.IGetSize;
@@ -50,7 +51,6 @@ import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.BeanClassContentProvider;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -314,19 +314,19 @@ public class VisualFormEditorPaletteFactory
 
 		else if (ELEMENTS_TEXT_FIELD_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("field.gif"); // TODO: get proper icon
+			icon = Activator.loadImageDescriptorFromBundle("field.gif");
 		}
 
 		else if (ELEMENTS_TEXT_AREA_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			icon = Activator.loadImageDescriptorFromBundle("TEXTAREA16.png");
 			displayType = Field.TEXT_AREA;
 			size = new Dimension(140, 140);
 		}
 
 		else if (ELEMENTS_RTF_AREA_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			icon = Activator.loadImageDescriptorFromBundle("doc_rtf.png");
 			displayType = Field.RTF_AREA;
 			size = new Dimension(140, 140);
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_EDITABLE, Boolean.FALSE);
@@ -334,7 +334,7 @@ public class VisualFormEditorPaletteFactory
 
 		else if (ELEMENTS_HTML_AREA_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			icon = Activator.loadImageDescriptorFromBundle("H1_C16.png");
 			displayType = Field.HTML_AREA;
 			size = new Dimension(140, 140);
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_EDITABLE, Boolean.FALSE);
@@ -342,7 +342,7 @@ public class VisualFormEditorPaletteFactory
 
 		else if (ELEMENTS_COMBOBOX_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			icon = Activator.loadImageDescriptorFromBundle("SELECT16.png");
 			displayType = Field.COMBOBOX;
 			setProperty(
 				extendedData,
@@ -353,39 +353,39 @@ public class VisualFormEditorPaletteFactory
 
 		else if (ELEMENTS_RADIOS_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			icon = Activator.loadImageDescriptorFromBundle("RADIO16.png");
 			displayType = Field.RADIOS;
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TRANSPARENT, Boolean.TRUE);
 		}
 
 		else if (ELEMENTS_CHECKS_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			icon = Activator.loadImageDescriptorFromBundle("CHECKBOX16.png");
 			displayType = Field.CHECKS;
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TRANSPARENT, Boolean.TRUE);
 		}
 
 		else if (ELEMENTS_CALENDAR_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			icon = Activator.loadImageDescriptorFromBundle("Calendar_C16.png");
 			displayType = Field.CALENDAR;
 		}
 
 		else if (ELEMENTS_PASSWORD_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			icon = Activator.loadImageDescriptorFromBundle("password_field_16.png");
 			displayType = Field.PASSWORD;
 		}
 
 		else if (ELEMENTS_IMAGE_MEDIA_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			icon = Activator.loadImageDescriptorFromBundle("IMG16.png");
 			displayType = Field.IMAGE_MEDIA;
 		}
 
 		else if (ELEMENTS_TYPE_AHEAD_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // TODO: get proper icon
+			icon = Activator.loadImageDescriptorFromBundle("bhdropdownlisticon.gif");
 			displayType = Field.TYPE_AHEAD;
 		}
 
@@ -520,7 +520,7 @@ public class VisualFormEditorPaletteFactory
 		}
 		else if (CONTAINERS_TABLESS_PANEL_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("button.gif"); // TODO: proper icon
+			icon = Activator.loadImageDescriptorFromBundle("tabless.gif");
 			tabOrienation = TabPanel.HIDE;
 			nameHint = "tabless_";
 		}
