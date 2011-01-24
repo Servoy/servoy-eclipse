@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.draw2d.FigureCanvas;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.gef.EditPart;
@@ -143,7 +144,11 @@ public class ModifiedScrollingGraphicalViewer extends ScrollingGraphicalViewer i
 
 	public void scrollTo(int x, int y)
 	{
-		getFigureCanvas().scrollTo(x, y);
+		FigureCanvas figureCanvas = getFigureCanvas();
+		if (figureCanvas != null)
+		{
+			figureCanvas.scrollTo(x, y);
+		}
 	}
 
 	@Override
