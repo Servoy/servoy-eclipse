@@ -17,32 +17,17 @@
 
 package com.servoy.eclipse.ui.property;
 
+import org.eclipse.ui.views.properties.IPropertySource;
+
 /**
- * IRestorer interface, for objects that can save an objects state into an object and can restore state from that object.
+ * Interface for IPropertySource to erturn the underlying model for saving state/supporting undo
  * 
  * @author rgansevles
+ * 
+ * @since 6.0
  *
  */
-public interface IRestorer
+public interface IModelSavePropertySource extends IPropertySource
 {
-	/**
-	 * Get state of an object to restore from
-	 * @param object
-	 * @return
-	 */
-	Object getState(Object object);
-
-	/**
-	 * Get state to indicate object was created and should be removed when restored.
-	 * @param object
-	 * @return
-	 */
-	Object getRemoveState(Object object);
-
-	/**
-	 * Restore state of object
-	 * @param object
-	 * @param state from either getState() or getRemoveState()
-	 */
-	void restoreState(Object object, Object state);
+	Object getSaveModel();
 }

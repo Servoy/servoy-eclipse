@@ -167,7 +167,7 @@ import com.servoy.j2db.util.Utils;
  */
 
 @SuppressWarnings("nls")
-public class PersistPropertySource implements IPropertySource, IAdaptable
+public class PersistPropertySource implements IPropertySource, IAdaptable, IModelSavePropertySource
 {
 	public static final IPropertyController<Integer, Integer> HORIZONTAL_ALIGNMENT_CONTROLLER;
 	private static IPropertyController<Integer, Integer> VERTICAL_ALIGNMENT_CONTROLLER = null;
@@ -278,6 +278,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable
 	}
 
 	public IPersist getPersist()
+	{
+		return persist;
+	}
+
+	public Object getSaveModel()
 	{
 		return persist;
 	}
