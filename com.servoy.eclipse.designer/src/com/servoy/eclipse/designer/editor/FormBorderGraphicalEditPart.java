@@ -32,6 +32,7 @@ import org.eclipse.gef.Handle;
 import org.eclipse.gef.LayerConstants;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.gef.editparts.LayerManager;
+import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.designer.internal.core.BorderImageNotifier;
@@ -174,6 +175,14 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 		super.activate();
 		imageFigureController.setImageNotifier(getFieldImageNotifier());
 		createHandles();
+		// scroll form so that border is shown, have to asyncExec because layout is not done yet.
+		Display.getCurrent().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				((ModifiedScrollingGraphicalViewer)getViewer()).scrollTo(-BORDER_MARGIN, -BORDER_MARGIN);
+			}
+		});
 	}
 
 	@Override

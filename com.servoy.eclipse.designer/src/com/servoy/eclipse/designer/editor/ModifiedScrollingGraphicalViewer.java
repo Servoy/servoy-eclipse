@@ -20,14 +20,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Viewport;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
-import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.gef.AccessibleEditPart;
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.ExposeHelper;
 import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.ui.parts.ScrollingGraphicalViewer;
@@ -146,39 +141,9 @@ public class ModifiedScrollingGraphicalViewer extends ScrollingGraphicalViewer i
 		return size.height * size.width;
 	}
 
-	@Override
-	public void reveal(EditPart part)
+	public void scrollTo(int x, int y)
 	{
-		if (part == null) return;
-		EditPart current = part.getParent();
-		while (current != null)
-		{
-			ExposeHelper helper = (ExposeHelper)current.getAdapter(ExposeHelper.class);
-			if (helper != null) helper.exposeDescendant(part);
-			current = current.getParent();
-		}
-		AccessibleEditPart acc = (AccessibleEditPart)part.getAdapter(AccessibleEditPart.class);
-		if (acc != null) getControl().getAccessible().setFocus(acc.getAccessibleID());
-
-		Viewport port = getFigureCanvas().getViewport();
-		IFigure target = ((GraphicalEditPart)part).getFigure();
-		Rectangle exposeRegion = target.getBounds().getCopy();
-		target = target.getParent();
-		while (target != null && target != port)
-		{
-			target.translateToParent(exposeRegion);
-			target = target.getParent();
-		}
-		exposeRegion.expand(5, 5);
-
-		// make sure the top left is in the client area
-		Point topLeft = exposeRegion.getTopLeft();
-		Rectangle clientArea = port.getClientArea();
-		Point topRight = exposeRegion.getTopRight();
-		if (!clientArea.contains(topLeft) || !clientArea.contains(topRight))
-		{
-			getFigureCanvas().scrollSmoothTo(topLeft.x, topLeft.y);
-		}
+		getFigureCanvas().scrollTo(x, y);
 	}
 
 	@Override
