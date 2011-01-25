@@ -29,7 +29,6 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionDelegate2;
@@ -39,9 +38,7 @@ import org.eclipse.ui.ide.ResourceUtil;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.commands.SelectModelsCommandWrapper;
-import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.designer.property.SetValueCommand;
-import com.servoy.j2db.persistence.IPersist;
 
 /**
  * Abstract action delegate for actions on graphical edit parts.
@@ -54,15 +51,11 @@ import com.servoy.j2db.persistence.IPersist;
  */
 public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindowActionDelegate, IActionDelegate2
 {
-
-	private static List<IActionAddedListener> actionListeners = new ArrayList<AbstractEditpartActionDelegate.IActionAddedListener>();
-	protected final static List<IAction> editPartActions = new ArrayList<IAction>();
-
 	private ISelection fSelection;
 	private Shell fCurrentShell;
 	protected IAction fAction;
 	protected final RequestType requestType;
-	protected final Map<Object, Object> extendedData = new HashMap<Object, Object>();
+	protected Map<Object, Object> extendedData = null;
 
 
 	public AbstractEditpartActionDelegate(RequestType requestType)
@@ -72,14 +65,11 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 
 	public void dispose()
 	{
-		editPartActions.remove(fAction);
 	}
 
 	public void init(IAction action)
 	{
 		fAction = action;
-		editPartActions.add(action);
-		fireActionAdded(action);
 	}
 
 	public void init(IWorkbenchWindow window)
@@ -132,9 +122,9 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 	private Request getRequest(EditPart editPart)
 	{
 		Request request = createRequest(editPart);
-		if (request != null)
+		if (extendedData != null && request != null)
 		{
-			request.setExtendedData(extendedData);
+			request.getExtendedData().putAll(extendedData);
 		}
 		return request;
 	}
@@ -158,6 +148,10 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 	 */
 	protected void addSetPropertyValue(String key, Object value)
 	{
+		if (extendedData == null)
+		{
+			extendedData = new HashMap<Object, Object>();
+		}
 		extendedData.put(SetValueCommand.REQUEST_PROPERTY_PREFIX + key, value);
 	}
 
@@ -178,8 +172,11 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 	public void selectionChanged(IAction action, ISelection selection)
 	{
 		fSelection = selection;
+		action.setEnabled(calculateEnabled(getEditparts()));
+	}
 
-		List<EditPart> editParts = getEditparts();
+	public boolean calculateEnabled(List<EditPart> editParts)
+	{
 		boolean enabled = editParts.size() > 0;
 
 		for (int i = 0; enabled && i < editParts.size(); i++)
@@ -187,7 +184,7 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 			EditPart editPart = editParts.get(i);
 			enabled = editPart.understandsRequest(new Request(requestType)) && checkApplicable(editPart);
 		}
-		action.setEnabled(enabled);
+		return enabled;
 	}
 
 	/**
@@ -212,87 +209,5 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 			}
 		}
 		return editParts;
-	}
-
-
-	/**
-	 * Get the model parent with the given class from the edit part. Return null if not found.
-	 */
-	protected IPersist getModel(EditPart editPart, int typeId)
-	{
-		EditPart ep = editPart;
-		while (!(ep instanceof IPersistEditPart))
-		{
-			if (ep == null)
-			{
-				return null;
-
-			}
-			ep = ep.getParent();
-		}
-		IPersist persist = ((IPersistEditPart)ep).getPersist();
-		if (persist == null)
-		{
-			return null;
-		}
-		return persist.getAncestor(typeId);
-	}
-
-	public static List<IAction> getEditPartActions()
-	{
-		return new ArrayList<IAction>(editPartActions);
-	}
-
-	public static void addActionAddedListener(IActionAddedListener listener)
-	{
-		synchronized (actionListeners)
-		{
-			if (!actionListeners.contains(listener))
-			{
-				actionListeners.add(listener);
-			}
-		}
-	}
-
-	public static void removeActionAddedListener(IActionAddedListener listener)
-	{
-		synchronized (actionListeners)
-		{
-			actionListeners.remove(listener);
-		}
-	}
-
-	protected void fireActionAdded(final IAction action)
-	{
-		if (actionListeners.size() > 0)
-		{
-			Display.getDefault().asyncExec(new Runnable()
-			{
-				// fire later, the action is not fully initialized
-				public void run()
-				{
-					IActionAddedListener[] array;
-					synchronized (actionListeners)
-					{
-						array = actionListeners.toArray(new IActionAddedListener[actionListeners.size()]);
-					}
-
-					for (IActionAddedListener element : array)
-					{
-						element.editorActionCreated(action);
-					}
-				}
-			});
-		}
-	}
-
-	/** Listener interface for actions added from plugin.xml
-	 * 
-	 * @author rgansevles
-	 *
-	 */
-	public interface IActionAddedListener
-	{
-		void editorActionCreated(IAction action);
 	}
 }

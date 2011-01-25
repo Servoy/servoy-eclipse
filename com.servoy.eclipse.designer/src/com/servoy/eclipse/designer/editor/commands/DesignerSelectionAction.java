@@ -27,6 +27,7 @@ import org.eclipse.gef.Request;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.ui.actions.SelectionAction;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPart;
 
 /**
@@ -105,9 +106,25 @@ public abstract class DesignerSelectionAction extends SelectionAction
 			{
 				requests = new HashMap<EditPart, Request>(selected.size());
 			}
-			requests.put(editPart, new Request(requestType));
+			requests.put(editPart, createRequest(editPart));
 		}
 		return requests;
+	}
+
+	/**
+	 * @param editPart  
+	 */
+	public Request createRequest(EditPart editPart)
+	{
+		return new Request(getRequestType());
+	}
+
+	/**
+	 * @return the requestType
+	 */
+	public Object getRequestType()
+	{
+		return requestType;
 	}
 
 	/**
@@ -116,6 +133,12 @@ public abstract class DesignerSelectionAction extends SelectionAction
 	protected List<EditPart> getSelectedElements(List<EditPart> selected)
 	{
 		return selected;
+	}
+
+
+	public Shell getShell()
+	{
+		return getWorkbenchPart().getSite().getShell();
 	}
 
 	/**

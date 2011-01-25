@@ -17,29 +17,24 @@
 package com.servoy.eclipse.designer.actions;
 
 
-import com.servoy.eclipse.ui.property.PersistPropertySource;
-import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.persistence.TabPanel;
+import org.eclipse.ui.IWorkbenchPart;
+
+import com.servoy.eclipse.designer.editor.commands.AddSplitpaneAction;
+import com.servoy.eclipse.designer.editor.commands.DesignerToolbarAction;
 
 /**
  * Present the user related tabs via a dialog.
  * <p>
  * The actual command is performed via the selected edit parts' edit policy.
  * 
+ * @author gboros, rgansevles
+ * 
  */
-public class AddSplitPaneActionDelegate extends AddTabActionDelegate
+public class AddSplitPaneActionDelegate extends BaseToolbarActionDelegate
 {
-	public AddSplitPaneActionDelegate()
-	{
-		addSetPropertyValue(
-			StaticContentSpecLoader.PROPERTY_TABORIENTATION.getPropertyName(),
-			PersistPropertySource.TAB_ORIENTATION_CONTROLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_TABORIENTATION.getPropertyName(),
-				Integer.valueOf(TabPanel.SPLIT_HORIZONTAL)));
-	}
-
 	@Override
-	protected String getDialogTitle()
+	protected DesignerToolbarAction createToolbarAction(IWorkbenchPart part)
 	{
-		return "Select split pane form";
+		return new AddSplitpaneAction(part);
 	}
 }

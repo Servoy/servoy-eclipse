@@ -16,25 +16,56 @@
  */
 package com.servoy.eclipse.designer.actions;
 
+import java.util.List;
 
+import org.eclipse.gef.EditPart;
+import org.eclipse.gef.Request;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
 
-import com.servoy.eclipse.designer.editor.commands.AddTabpanelAction;
 import com.servoy.eclipse.designer.editor.commands.DesignerToolbarAction;
 
 /**
- * Present the user related tabs via a dialog.
- * <p>
- * The actual command is performed via the selected edit parts' edit policy.
+ * Base class for EditpartActionDelegate actions who are wrappers around actions on the form designer toolbar.
  * 
  * @author rgansevles
  * 
  */
-public class AddTabActionDelegate extends BaseToolbarActionDelegate
+public abstract class BaseToolbarActionDelegate extends AbstractEditpartActionDelegate
 {
-	@Override
-	protected DesignerToolbarAction createToolbarAction(IWorkbenchPart part)
+	private DesignerToolbarAction designerToolbarAction;
+
+	public BaseToolbarActionDelegate()
 	{
-		return new AddTabpanelAction(part);
+		super(null);
 	}
+
+	@Override
+	public void init(IWorkbenchWindow window)
+	{
+		designerToolbarAction = createToolbarAction(window.getActivePage().getActivePart());
+		super.init(window);
+	}
+
+	protected abstract DesignerToolbarAction createToolbarAction(IWorkbenchPart part);
+
+	@Override
+	public boolean calculateEnabled(List<EditPart> editParts)
+	{
+		return designerToolbarAction.calculateEnabled(editParts);
+	}
+
+	@Override
+	protected Request createRequest(EditPart editPart)
+	{
+		return designerToolbarAction.createRequest(editPart);
+	}
+
+	@Override
+	public void dispose()
+	{
+		designerToolbarAction.dispose();
+		designerToolbarAction = null;
+	}
+
 }

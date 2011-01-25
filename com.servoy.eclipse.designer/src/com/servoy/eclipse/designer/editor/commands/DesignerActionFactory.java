@@ -419,4 +419,84 @@ public abstract class DesignerActionFactory extends ActionFactory
 			return action;
 		}
 	};
+
+	public static final String ADD_TAB_TEXT = "Place TabPanel...";
+	public static final String ADD_TAB_TOOLTIP = ADD_TAB_TEXT;
+	public static final ImageDescriptor ADD_TAB_IMAGE = Activator.loadImageDescriptorFromBundle("tabs.gif");
+	public static final ActionFactory ADD_TAB = new ActionFactory("place-tabpanel") {//$NON-NLS-1$
+
+		@Override
+		public IWorkbenchAction create(IWorkbenchWindow window)
+		{
+			if (window == null)
+			{
+				throw new IllegalArgumentException();
+			}
+			RetargetAction action = new RetargetAction(getId(), ADD_TAB_TEXT);
+			action.setToolTipText(ADD_TAB_TOOLTIP);
+			window.getPartService().addPartListener(action);
+			action.setImageDescriptor(ADD_TAB_IMAGE);
+			return action;
+		}
+	};
+
+	public static final String ADD_SPLITPANE_TEXT = "Place SplitPane...";
+	public static final String ADD_SPLITPANE_TOOLTIP = ADD_SPLITPANE_TEXT;
+	public static final ImageDescriptor ADD_SPLITPANE_IMAGE = Activator.loadImageDescriptorFromBundle("split.gif");
+	public static final ActionFactory ADD_SPLITPANE = new ActionFactory("place-splitpane") {//$NON-NLS-1$
+
+		@Override
+		public IWorkbenchAction create(IWorkbenchWindow window)
+		{
+			if (window == null)
+			{
+				throw new IllegalArgumentException();
+			}
+			RetargetAction action = new RetargetAction(getId(), ADD_SPLITPANE_TEXT);
+			action.setToolTipText(ADD_SPLITPANE_TOOLTIP);
+			window.getPartService().addPartListener(action);
+			action.setImageDescriptor(ADD_SPLITPANE_IMAGE);
+			return action;
+		}
+	};
+
+	public static final String ADD_PORTAL_TEXT = "Place Portal...";
+	public static final String ADD_PORTAL_TOOLTIP = ADD_PORTAL_TEXT;
+	public static final ImageDescriptor ADD_PORTAL_IMAGE = Activator.loadImageDescriptorFromBundle("portal.gif");
+	public static final ActionFactory ADD_PORTAL = new ActionFactory("place-portal") {//$NON-NLS-1$
+
+		@Override
+		public IWorkbenchAction create(IWorkbenchWindow window)
+		{
+			if (window == null)
+			{
+				throw new IllegalArgumentException();
+			}
+			RetargetAction action = new RetargetAction(getId(), ADD_PORTAL_TEXT);
+			action.setToolTipText(ADD_PORTAL_TOOLTIP);
+			window.getPartService().addPartListener(action);
+			action.setImageDescriptor(ADD_PORTAL_IMAGE);
+			return action;
+		}
+	};
+
+	public static final String ADD_FIELD_TEXT = "Place Field...";
+	public static final String ADD_FIELD_TOOLTIP = ADD_FIELD_TEXT;
+	public static final ImageDescriptor ADD_FIELD_IMAGE = Activator.loadImageDescriptorFromBundle("field.gif");
+	public static final ActionFactory ADD_FIELD = new ActionFactory("place-field") {//$NON-NLS-1$
+
+		@Override
+		public IWorkbenchAction create(IWorkbenchWindow window)
+		{
+			if (window == null)
+			{
+				throw new IllegalArgumentException();
+			}
+			RetargetAction action = new RetargetAction(getId(), ADD_FIELD_TEXT);
+			action.setToolTipText(ADD_FIELD_TOOLTIP);
+			window.getPartService().addPartListener(action);
+			action.setImageDescriptor(ADD_FIELD_IMAGE);
+			return action;
+		}
+	};
 }

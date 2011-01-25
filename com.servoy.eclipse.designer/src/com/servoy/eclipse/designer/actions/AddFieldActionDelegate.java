@@ -16,36 +16,10 @@
  */
 package com.servoy.eclipse.designer.actions;
 
-import org.eclipse.gef.EditPart;
-import org.eclipse.gef.Request;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IWorkbenchPart;
 
-import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
-import com.servoy.eclipse.designer.editor.commands.DataFieldRequest;
-import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
-import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
-import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
-import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
-import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
-import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
-import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
-import com.servoy.eclipse.ui.util.IControlFactory;
-import com.servoy.eclipse.ui.views.PlaceFieldOptionGroup;
-import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.Portal;
-import com.servoy.j2db.persistence.Relation;
-import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Table;
+import com.servoy.eclipse.designer.editor.commands.AddFieldAction;
+import com.servoy.eclipse.designer.editor.commands.DesignerToolbarAction;
 
 /**
  * Present the user available dataproviders via a dialog.
@@ -55,103 +29,11 @@ import com.servoy.j2db.persistence.Table;
  * @author rgansevles
  * 
  */
-public class AddFieldActionDelegate extends AbstractEditpartActionDelegate
+public class AddFieldActionDelegate extends BaseToolbarActionDelegate
 {
-	protected PlaceFieldOptionGroup optionsGroup;
-
-	public AddFieldActionDelegate()
-	{
-		super(VisualFormEditor.REQ_PLACE_FIELD);
-	}
-
 	@Override
-	protected Request createRequest(EditPart editPart)
+	protected DesignerToolbarAction createToolbarAction(IWorkbenchPart part)
 	{
-		FlattenedSolution flattenedSolution;
-		Table table = null;
-		DataProviderOptions input;
-		Form form = null;
-		Portal portal = (Portal)getModel(editPart, IRepository.PORTALS);
-		if (portal != null && portal.getRelationName() != null)
-		{
-			flattenedSolution = ModelUtils.getEditingFlattenedSolution(portal);
-			Relation[] relations = flattenedSolution.getRelationSequence(portal.getRelationName());
-			if (relations == null)
-			{
-				org.eclipse.jface.dialogs.MessageDialog.openError(getShell(), "Relation not found", "Could not find relation for portal");
-				return null;
-			}
-			input = new DataProviderTreeViewer.DataProviderOptions(true, false, false, true /* related calcs */, false, false, false, false,
-				INCLUDE_RELATIONS.NESTED, false, true, relations);
-		}
-		else
-		{
-			form = (Form)getModel(editPart, IRepository.FORMS);
-			flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
-
-			try
-			{
-				table = flattenedSolution.getFlattenedForm(form).getTable();
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError("Could not get table for form " + form, e);
-			}
-			input = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, true, true, true, table != null, true,
-				INCLUDE_RELATIONS.NESTED, true, true, null);
-		}
-
-		DataProviderDialog dialog = new DataProviderDialog(getShell(), new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(
-			DataProviderLabelProvider.INSTANCE_HIDEPREFIX, form), form), form, flattenedSolution, table, input, null, SWT.MULTI, "Select Data Providers");
-
-		IDialogSettings settings = dialog.getDataProvideDialogSettings();
-		final boolean isPlaceHorizontal = settings.getBoolean("placeHorizontal");
-		final String isPlaceAsLabels = settings.get("placeAsLabels");
-		final String isPlaceWithLabels = settings.get("placeLabels");
-		final boolean isFillText = settings.getBoolean("fillText");
-		final boolean isFillName = settings.getBoolean("fillName");
-
-		dialog.setOptionsAreaFactory(new IControlFactory()
-		{
-			public Control createControl(Composite composite)
-			{
-				optionsGroup = new PlaceFieldOptionGroup(composite, SWT.NONE);
-				optionsGroup.setText("Options");
-
-				optionsGroup.setPlaceAsLabels(String.valueOf(true).equals(isPlaceAsLabels));
-				// placeWithLabels defaults to true
-				optionsGroup.setPlaceWithLabels(isPlaceWithLabels == null || String.valueOf(true).equals(isPlaceWithLabels));
-				optionsGroup.setPlaceHorizontal(isPlaceHorizontal);
-				optionsGroup.setFillText(isFillText);
-				optionsGroup.setFillName(isFillName);
-
-				return optionsGroup;
-			}
-		});
-
-		dialog.open();
-
-		if (dialog.getReturnCode() == Window.CANCEL)
-		{
-			return null;
-		}
-		settings.put("placeHorizontal", optionsGroup.isPlaceHorizontal());
-		settings.put("placeAsLabels", optionsGroup.isPlaceAsLabels());
-		settings.put("placeLabels", optionsGroup.isPlaceWithLabels());
-		settings.put("fillText", optionsGroup.isFillText());
-		settings.put("fillName", optionsGroup.isFillName());
-
-		// multiple selection
-		return new DataFieldRequest(getRequestType(), ((IStructuredSelection)dialog.getSelection()).toArray(), optionsGroup.isPlaceAsLabels(),
-			optionsGroup.isPlaceWithLabels(), optionsGroup.isPlaceHorizontal(), optionsGroup.isFillText(), optionsGroup.isFillName());
-	}
-
-	/**
-	 * Check for access to a form.
-	 */
-	@Override
-	protected boolean checkApplicable(EditPart editPart)
-	{
-		return getModel(editPart, IRepository.FORMS) != null && super.checkApplicable(editPart);
+		return new AddFieldAction(part);
 	}
 }

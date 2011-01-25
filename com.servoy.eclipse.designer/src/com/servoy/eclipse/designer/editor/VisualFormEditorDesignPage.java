@@ -97,14 +97,16 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
-import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate;
-import com.servoy.eclipse.designer.actions.AbstractEditpartActionDelegate.IActionAddedListener;
 import com.servoy.eclipse.designer.actions.AlignmentSortPartsAction;
 import com.servoy.eclipse.designer.actions.DistributeAction;
 import com.servoy.eclipse.designer.actions.DistributeRequest;
 import com.servoy.eclipse.designer.actions.SelectFeedbackmodeAction;
 import com.servoy.eclipse.designer.actions.SelectSnapmodeAction;
 import com.servoy.eclipse.designer.dnd.FormElementTransferDropTarget;
+import com.servoy.eclipse.designer.editor.commands.AddFieldAction;
+import com.servoy.eclipse.designer.editor.commands.AddPortalAction;
+import com.servoy.eclipse.designer.editor.commands.AddSplitpaneAction;
+import com.servoy.eclipse.designer.editor.commands.AddTabpanelAction;
 import com.servoy.eclipse.designer.editor.commands.BringToFrontAction;
 import com.servoy.eclipse.designer.editor.commands.CopyAction;
 import com.servoy.eclipse.designer.editor.commands.CutAction;
@@ -144,7 +146,7 @@ import com.servoy.j2db.persistence.Part;
  * @author rgansevles
  */
 
-public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette implements IActionAddedListener
+public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 {
 	public static final String COOLBAR_REORGANIZE = "reorganize";
 	public static final String COOLBAR_ALIGN = "align";
@@ -461,6 +463,22 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		action = new SaveAsTemplateAction(editorPart);
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
+
+		action = new AddTabpanelAction(editorPart);
+		getActionRegistry().registerAction(action);
+		getSelectionActions().add(action.getId());
+
+		action = new AddSplitpaneAction(editorPart);
+		getActionRegistry().registerAction(action);
+		getSelectionActions().add(action.getId());
+
+		action = new AddPortalAction(editorPart);
+		getActionRegistry().registerAction(action);
+		getSelectionActions().add(action.getId());
+
+		action = new AddFieldAction(editorPart);
+		getActionRegistry().registerAction(action);
+		getSelectionActions().add(action.getId());
 	}
 
 	/**
@@ -559,13 +577,10 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		addToolbarAction(COOLBAR_SAMESIZE, getActionRegistry().getAction(DesignerActionFactory.SAME_WIDTH.getId()));
 		addToolbarAction(COOLBAR_SAMESIZE, getActionRegistry().getAction(DesignerActionFactory.SAME_HEIGHT.getId()));
 
-		addToolbarAction(COOLBAR_ELEMENTS, null);
-
-		List<IAction> editPartActions = AbstractEditpartActionDelegate.getEditPartActions();
-		for (IAction action : editPartActions)
-		{
-			addToolbarAction(COOLBAR_ELEMENTS, action);
-		}
+		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_TAB.getId()));
+		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_SPLITPANE.getId()));
+		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_PORTAL.getId()));
+		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_FIELD.getId()));
 	}
 
 	private void refreshRulers()
@@ -779,8 +794,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 		fillToolbar();
 
-		AbstractEditpartActionDelegate.addActionAddedListener(this); // sometimes the VFE is created before the actions are created
-
 		refreshToolBars();
 
 		super.createPartControl(composite);
@@ -799,13 +812,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		{
 			list.add(action);
 		}
-	}
-
-
-	public void editorActionCreated(final IAction action)
-	{
-		addToolbarAction(COOLBAR_ELEMENTS, action);
-		refreshToolBars();
 	}
 
 	/**
@@ -865,7 +871,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	{
 		getEditDomain().getCommandStack().removeCommandStackListener(editorPart);
 		com.servoy.eclipse.ui.Activator.getDefault().getEclipsePreferences().removePreferenceChangeListener(preferenceChangeListener);
-		AbstractEditpartActionDelegate.removeActionAddedListener(this);
 
 		super.dispose();
 	}
