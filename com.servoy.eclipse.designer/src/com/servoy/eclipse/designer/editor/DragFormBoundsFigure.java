@@ -73,7 +73,7 @@ public class DragFormBoundsFigure extends Figure
 	public void setHorizontalLine(int y, int width)
 	{
 		getLine().removeAllPoints();
-		getLine().addPoint(new Point(0, y));
+		getLine().addPoint(new Point(-FormBorderGraphicalEditPart.BORDER_MARGIN, y));
 		getLine().addPoint(new Point(width, y));
 
 		if (partFigure != null)
@@ -92,7 +92,7 @@ public class DragFormBoundsFigure extends Figure
 	public void setVerticalLine(int x, int height)
 	{
 		getLine().removeAllPoints();
-		getLine().addPoint(new Point(x, 0));
+		getLine().addPoint(new Point(x, -FormBorderGraphicalEditPart.BORDER_MARGIN));
 		getLine().addPoint(new Point(x, height));
 		setBounds(line.getBounds());
 	}
