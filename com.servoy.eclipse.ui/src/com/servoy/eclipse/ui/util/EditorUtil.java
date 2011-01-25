@@ -48,7 +48,9 @@ import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
@@ -636,6 +638,17 @@ public class EditorUtil
 		{
 			return;
 		}
+		IWorkbenchPart activePart = activePage.getActivePart();
+		if (activePart != null)
+		{
+			IWorkbenchPartSite site = activePart.getSite();
+			if (site instanceof IViewSite)
+			{
+				((IViewSite)site).getActionBars().getStatusLineManager().setMessage(message);
+				return;
+			}
+		}
+
 		IEditorPart activeEditor = activePage.getActiveEditor();
 		if (activeEditor == null)
 		{

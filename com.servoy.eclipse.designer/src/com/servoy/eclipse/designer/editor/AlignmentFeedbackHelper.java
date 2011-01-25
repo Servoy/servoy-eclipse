@@ -19,11 +19,20 @@ package com.servoy.eclipse.designer.editor;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.geometry.Dimension;
+import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
+import org.eclipse.gef.requests.ChangeBoundsRequest;
+import org.eclipse.gef.requests.CreateRequest;
+
+import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.ISupportBounds;
 
 /**
  * Helper for adding/removing of alignment feedback figures from the feedback layer.
@@ -48,6 +57,14 @@ public class AlignmentFeedbackHelper
 	public void showElementAlignmentFeedback(Request request)
 	{
 		showElementAlignmentFeedback((ElementAlignmentItem[])request.getExtendedData().get(SnapToElementAlignment.ELEMENT_ALIGNMENT_REQUEST_DATA));
+		if (request instanceof ChangeBoundsRequest)
+		{
+			EditorUtil.setStatuslineMessage(getChangeBoundsFeedbackMessage((ChangeBoundsRequest)request));
+		}
+		else if (request instanceof CreateRequest)
+		{
+			EditorUtil.setStatuslineMessage(getCreateFeedbackMessage((CreateRequest)request));
+		}
 	}
 
 	public void showElementAlignmentFeedback(ElementAlignmentItem[] feedbackItems)
@@ -96,5 +113,48 @@ public class AlignmentFeedbackHelper
 			feedbackLayer.remove(figure);
 		}
 		alignmentFeedbackFigures.clear();
+		EditorUtil.setStatuslineMessage(null);
+	}
+
+	protected String getChangeBoundsFeedbackMessage(ChangeBoundsRequest request)
+	{
+		boolean move = request.getMoveDelta().x != 0 || request.getMoveDelta().y != 0;
+		boolean resize = request.getSizeDelta().width != 0 || request.getSizeDelta().height != 0;
+		StringBuilder sb = new StringBuilder(resize ? "Resize to" : "Move to");
+
+		for (EditPart editPart : (List<EditPart>)request.getEditParts())
+		{
+			if (sb.length() > 50) break; // don't make the string too long
+
+			if (editPart.getModel() instanceof ISupportBounds)
+			{
+				java.awt.Point location = ((ISupportBounds)editPart.getModel()).getLocation();
+				sb.append(" (");
+				if (move)
+				{
+					sb.append(location.x + request.getMoveDelta().x).append(',').append(location.y + request.getMoveDelta().y);
+				}
+				if (resize)
+				{
+					java.awt.Dimension size = ((ISupportBounds)editPart.getModel()).getSize();
+					if (move) sb.append(' ');
+					sb.append(size.width + request.getSizeDelta().width).append('x').append(size.height + request.getSizeDelta().height);
+				}
+				sb.append(')');
+			}
+		}
+		return sb.toString();
+	}
+
+	protected String getCreateFeedbackMessage(CreateRequest request)
+	{
+		Point location = request.getLocation().getCopy();
+		feedbackLayer.translateToRelative(location);
+		Dimension size = request.getSize();
+		return new StringBuilder().append('(')//
+		.append(location.x).append(',').append(location.y)//
+		.append(' ')//
+		.append(size.width).append('x').append(size.height)//
+		.append(')').toString();
 	}
 }
