@@ -594,6 +594,10 @@ public class ElementFactory
 			// set size of the maximum dimension form
 			tabPanel.setSize(new Dimension(maxDimension.width, maxDimension.height));
 		}
+		else
+		{
+			tabPanel.setSize(new Dimension(280, 150));
+		}
 		if (tabs == null || tabs.size() == 0)
 		{
 			// added tabpanel to form, undo removes entire tab
