@@ -113,6 +113,8 @@ import com.servoy.j2db.util.Utils;
 @SuppressWarnings("nls")
 public class TypeProvider extends TypeCreator implements ITypeProvider
 {
+	private final ConcurrentHashMap<String, Boolean> ignorePackages = new ConcurrentHashMap<String, Boolean>();
+
 	public TypeProvider()
 	{
 		addType("JSDataSet", JSDataSet.class);
@@ -148,9 +150,14 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	@Override
 	public Type getType(ITypeInfoContext context, String typeName)
 	{
-		if (typeName.startsWith("Packages."))
+		if (typeName.startsWith("Packages.") || typeName.startsWith("java."))
 		{
-			String name = typeName.substring("Packages.".length());
+			String name = typeName;
+			if (typeName.startsWith("P"))
+			{
+				name = typeName.substring("Packages.".length());
+			}
+			if (ignorePackages.containsKey(name)) return null;
 			try
 			{
 				ClassLoader cl = Activator.getDefault().getDesignClient().getBeanManager().getClassLoader();
@@ -160,6 +167,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			}
 			catch (ClassNotFoundException e)
 			{
+				ignorePackages.put(name, Boolean.FALSE);
 			}
 			return null;
 		}
@@ -364,32 +372,34 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		public Type createType(ITypeInfoContext context, String fullTypeName)
 		{
 			FlattenedSolution fs = getFlattenedSolution(context);
+			Type type = null;
+			if ("Forms".equals(fullTypeName))
+			{
+				type = TypeInfoModelFactory.eINSTANCE.createType();
+				type.setKind(TypeKind.JAVA);
+				type.setAttribute(IMAGE_DESCRIPTOR, FORMS);
 
-			Type type = TypeInfoModelFactory.eINSTANCE.createType();
-			if (fs != null)
-			{
-				type.setName("Forms<" + fs.getMainSolutionMetaData().getName() + '>');
-			}
-			else
-			{
+				EList<Member> members = type.getMembers();
+				members.add(createProperty(context, "allnames", true, "Array<String>", "All form names as an array", SPECIAL_PROPERTY));
+				members.add(createProperty(context, "length", true, "Number", "Number of forms", PROPERTY));
+
+				// special array lookup property so that forms[xxx]. does code complete.
+				Property arrayProp = createProperty(context, "[]", true, "Form", PROPERTY);
+				arrayProp.setVisible(false);
+				members.add(arrayProp);
 				type.setName("Forms");
+				// quickly add this one to the static types.
+				context.markInvariant(type);
 			}
-			type.setKind(TypeKind.JAVA);
-			type.setAttribute(IMAGE_DESCRIPTOR, FORMS);
-
-			EList<Member> members = type.getMembers();
-			members.add(createProperty(context, "allnames", true, "Array<String>", "All form names as an array", SPECIAL_PROPERTY));
-			members.add(createProperty(context, "length", true, "Number", "Number of forms", PROPERTY));
-
-			// special array lookup property so that forms[xxx]. does code complete.
-			Property arrayProp = createProperty(context, "[]", true, "Form", PROPERTY);
-			arrayProp.setVisible(false);
-			members.add(arrayProp);
-
-			if (fs != null)
+			else if (fs != null)
 			{
+				type = TypeInfoModelFactory.eINSTANCE.createType();
+				type.setSuperType(context.getType("Forms"));
+				type.setName("Forms<" + fs.getMainSolutionMetaData().getName() + '>');
+				type.setKind(TypeKind.JAVA);
+				type.setAttribute(IMAGE_DESCRIPTOR, FORMS);
+				EList<Member> members = type.getMembers();
 				Iterator<Form> forms = fs.getForms(false);
-
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
@@ -461,7 +471,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 				if (cachedSuperTypeTemplateType == null)
 				{
-					cachedSuperTypeTemplateType = getType(context, FoundSet.JS_FOUNDSET);
+					cachedSuperTypeTemplateType = createType(context, FoundSet.JS_FOUNDSET);
 				}
 				EList<Member> members = cachedSuperTypeTemplateType.getMembers();
 				List<Member> overwrittenMembers = new ArrayList<Member>();
@@ -694,7 +704,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 				if (cachedSuperTypeTemplateType == null)
 				{
-					cachedSuperTypeTemplateType = getType(context, Record.JS_RECORD);
+					cachedSuperTypeTemplateType = createType(context, Record.JS_RECORD);
 				}
 				EList<Member> members = cachedSuperTypeTemplateType.getMembers();
 				List<Member> overwrittenMembers = new ArrayList<Member>();
@@ -825,6 +835,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				FlattenedSolution fs = getFlattenedSolution(context);
 				String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
 				Form form = fs.getForm(config);
+				if (form == null) return context.getKnownType("Form");
 				Form formToUse = form;
 				try
 				{
@@ -840,7 +851,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				String ds = formToUse.getDataSource();
 				if (cachedSuperTypeTemplateType == null)
 				{
-					cachedSuperTypeTemplateType = getType(context, "Form");
+					cachedSuperTypeTemplateType = createType(context, "Form");
 				}
 				EList<Member> members = cachedSuperTypeTemplateType.getMembers();
 				List<Member> overwrittenMembers = new ArrayList<Member>();
@@ -992,7 +1003,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				{
 					Table table = (Table)fsAndTable[0];
 					addDataProviders(table.getColumns().iterator(), type.getMembers(), context, isVisible(), true);
-//					directDynamicTypes.put(typeName, type);
+					context.markInvariant(type, "scope:tables");
 				}
 			}
 

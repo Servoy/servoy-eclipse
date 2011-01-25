@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -50,6 +51,8 @@ import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 
+import com.servoy.eclipse.core.IPersistChangeListener;
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.doc.IParameter;
 import com.servoy.eclipse.core.doc.ITypedScriptObject;
 import com.servoy.eclipse.core.doc.ScriptParameter;
@@ -67,6 +70,7 @@ import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Relation;
@@ -172,6 +176,7 @@ public abstract class TypeCreator
 	private final ConcurrentMap<String, Class< ? >> anonymousClassTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, IScopeTypeCreator> scopeTypes = new ConcurrentHashMap<String, IScopeTypeCreator>();
 	private volatile boolean initialized;
+	private final ConcurrentMap<String, Boolean> invariantScopes = new ConcurrentHashMap<String, Boolean>();
 	protected static final List<String> objectMethods = Arrays.asList(new String[] { "wait", "toString", "hashCode", "equals", "notify", "notifyAll", "getClass" });
 
 	public TypeCreator()
@@ -181,32 +186,33 @@ public abstract class TypeCreator
 
 	protected void initalize()
 	{
-//		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 		synchronized (this)
 		{
 			if (!initialized)
 			{
 				initialized = true;
-//				if (servoyModel instanceof ServoyModel)
-//				{
-//					((ServoyModel)servoyModel).addPersistChangeListener(true, new IPersistChangeListener()
-//					{
-//						public void persistChanges(Collection<IPersist> changes)
-//						{
-//							// TODO see if this will become a performance issue..
-//							clearDynamicTypes();
-//						}
-//					});
-//				}
+				if (servoyModel instanceof ServoyModel)
+				{
+					((ServoyModel)servoyModel).addPersistChangeListener(true, new IPersistChangeListener()
+					{
+						public void persistChanges(Collection<IPersist> changes)
+						{
+							//if (changes.contains(tables))
+							ITypeInfoContext.INVARIANTS.reset("scope:tables");
+
+							Set<String> keySet = invariantScopes.keySet();
+							for (String context : keySet)
+							{
+								ITypeInfoContext.INVARIANTS.reset(context);
+							}
+
+						}
+					});
+				}
 			}
 		}
 	}
-
-//	private void clearDynamicTypes()
-//	{
-//		dynamicTypes.clear();
-//		directDynamicTypes.clear();
-//	}
 
 	protected final Class< ? > getTypeClass(String name)
 	{
@@ -243,44 +249,38 @@ public abstract class TypeCreator
 		if (!initialized) initalize();
 		String realTypeName = typeName;
 		Type type = null;
-//		types.get(realTypeName);
-//		if (type == null)
 		{
-//			type = directDynamicTypes.get(realTypeName);
-//			if (type != null)
-//			{
-//				return type;
-//			}
-//			FlattenedSolution fs = getFlattenedSolution(context);
-//			ConcurrentMap<String, Type> flattenedSolutionTypeMap = null;
-//			if (fs != null && fs.getSolution() != null)
-//			{
-//				flattenedSolutionTypeMap = dynamicTypes.get(fs.getSolution().getName());
-//				if (flattenedSolutionTypeMap == null)
-//				{
-//					flattenedSolutionTypeMap = new ConcurrentHashMap<String, Type>();
-//					dynamicTypes.put(fs.getSolution().getName(), flattenedSolutionTypeMap);
-//				}
-//				else type = flattenedSolutionTypeMap.get(realTypeName);
-//			}
 			if (type == null)
 			{
 				type = createType(context, realTypeName, realTypeName);
 				if (type != null)
 				{
-//					Type previous = types.putIfAbsent(realTypeName, type);
-//					if (previous != null) return previous;
 					context.markInvariant(type);
 				}
 				else
-//					if (flattenedSolutionTypeMap != null)
 				{
-					type = createDynamicType(context, realTypeName, realTypeName);
-//					if (type != null)
-//					{
-//						Type previous = flattenedSolutionTypeMap.putIfAbsent(realTypeName, type);
-//						if (previous != null) return previous;
-//					}
+					FlattenedSolution fs = getFlattenedSolution(context);
+					if (fs != null)
+					{
+						type = context.getInvariantType(realTypeName, fs.getSolution().getName());
+						if (type == null)
+						{
+							type = context.getInvariantType(realTypeName, "scope:tables");
+							if (type == null)
+							{
+								type = createDynamicType(context, realTypeName, realTypeName);
+								if (type != null && realTypeName.indexOf('<') != -1)
+								{
+									context.markInvariant(type, fs.getSolution().getName());
+									invariantScopes.put(fs.getSolution().getName(), Boolean.TRUE);
+								}
+							}
+						}
+					}
+					else
+					{
+						type = createDynamicType(context, realTypeName, realTypeName);
+					}
 				}
 			}
 		}
@@ -721,19 +721,23 @@ public abstract class TypeCreator
 
 	public static FlattenedSolution getFlattenedSolution(ITypeInfoContext context)
 	{
-		IResource resource = context.getModelElement().getResource();
-		if (resource != null)
+		String name = context.getContext();
+		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+		if (name == null && context.getModelElement() != null)
 		{
-			IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
-
-			String name = resource.getProject().getName();
-			//if (servoyModel.isActiveProject(name))
+			IResource resource = context.getModelElement().getResource();
+			if (resource != null)
 			{
-				ServoyProject servoyProject = servoyModel.getServoyProject(name);
-				if (servoyProject != null)
-				{
-					return servoyProject.getEditingFlattenedSolution();
-				}
+				name = resource.getProject().getName();
+			}
+		}
+		//if (servoyModel.isActiveProject(name))
+		if (name != null)
+		{
+			ServoyProject servoyProject = servoyModel.getServoyProject(name);
+			if (servoyProject != null)
+			{
+				return servoyProject.getEditingFlattenedSolution();
 			}
 		}
 		return null;
