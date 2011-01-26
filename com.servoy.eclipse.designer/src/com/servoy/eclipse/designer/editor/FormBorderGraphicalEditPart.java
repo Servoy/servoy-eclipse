@@ -180,7 +180,7 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 		{
 			public void run()
 			{
-				((ModifiedScrollingGraphicalViewer)getViewer()).scrollTo(-BORDER_MARGIN, -BORDER_MARGIN);
+				if (getParent() != null) ((ModifiedScrollingGraphicalViewer)getViewer()).scrollTo(-BORDER_MARGIN, -BORDER_MARGIN);
 			}
 		});
 	}
