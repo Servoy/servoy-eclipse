@@ -19,6 +19,7 @@ import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.hyperlink.HyperlinkManager;
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.StyleRange;
@@ -606,7 +607,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 
 	}
 
-	private ScriptConsoleHistory history;
+	private final ScriptConsoleHistory history;
 	private ConsoleDocumentListener documentListener;
 	private final ICommandHandler commandHandler;
 
@@ -725,7 +726,37 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 		});
 
 		styledText.setKeyBinding('X' | SWT.MOD1, ST.COPY);
-		styledText.addVerifyKeyListener(new VerifyKeyListener()
+
+
+		if (getDocumentListener().viewerList.size() == 1)
+		{
+			clear();
+		}
+	}
+
+	// IConsoleTextViewer
+	public String getCommandLine()
+	{
+		try
+		{
+			return getDocumentListener().getCommandLine();
+		}
+		catch (BadLocationException e)
+		{
+			return null;
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jface.text.source.SourceViewer#configure(org.eclipse.jface.text.source.SourceViewerConfiguration)
+	 */
+	@Override
+	public void configure(SourceViewerConfiguration configuration)
+	{
+		super.configure(configuration);
+		appendVerifyKeyListener(new VerifyKeyListener()
 		{
 			public void verifyKey(VerifyEvent event)
 			{
@@ -767,6 +798,12 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 							}
 						}
 
+						if (event.character == SWT.CR)
+						{
+							getTextWidget().setCaretOffset(getDocument().getLength());
+							return;
+						}
+
 						// ssanders: Avoid outputting " " when invoking
 						// completion on Mac OS X
 						if (event.keyCode == 32 && (event.stateMask & SWT.CTRL) > 0)
@@ -790,24 +827,6 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 				}
 			}
 		});
-
-		if (getDocumentListener().viewerList.size() == 1)
-		{
-			clear();
-		}
-	}
-
-	// IConsoleTextViewer
-	public String getCommandLine()
-	{
-		try
-		{
-			return getDocumentListener().getCommandLine();
-		}
-		catch (BadLocationException e)
-		{
-			return null;
-		}
 	}
 
 	public int getCommandLineOffset()
