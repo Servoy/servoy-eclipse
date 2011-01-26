@@ -421,9 +421,9 @@ public class UIUtils
 		try
 		{
 			PipedInputStream inBytes = new PipedInputStream(outBytes);
-			Debug.error("Trying to get a png in thread: " + Thread.currentThread().getName());
+			if (Debug.tracing()) Debug.trace("Trying to get a png in thread: " + Thread.currentThread().getName());
 			ImageIO.write(bufferedImage, "PNG", outBytes);
-			Debug.error("Got a png in thread: " + Thread.currentThread().getName());
+			if (Debug.tracing()) Debug.trace("Got a png in thread: " + Thread.currentThread().getName());
 			return new Image(device, inBytes);
 		}
 		catch (Throwable e)
