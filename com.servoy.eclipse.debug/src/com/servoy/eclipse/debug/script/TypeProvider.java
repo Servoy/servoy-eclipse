@@ -46,6 +46,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.JSDeveloperSolutionModel;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
@@ -128,6 +129,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addAnonymousClassType("JSUnit", JSUnitAssertFunctions.class);
 		addAnonymousClassType("JSSolutionModel", JSSolutionModel.class);
 		addAnonymousClassType("JSDatabaseManager", JSDatabaseManager.class);
+		addAnonymousClassType("JSDeveloperSolutionModel", JSDeveloperSolutionModel.class);
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());

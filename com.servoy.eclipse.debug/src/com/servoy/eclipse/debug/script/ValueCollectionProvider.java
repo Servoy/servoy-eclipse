@@ -199,4 +199,9 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	{
 		fullGlobalScope.set(b);
 	}
+
+	public static boolean getGenerateFullGlobalCollection()
+	{
+		return fullGlobalScope.get().booleanValue();
+	}
 }

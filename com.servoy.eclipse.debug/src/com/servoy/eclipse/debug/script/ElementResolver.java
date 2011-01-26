@@ -87,6 +87,13 @@ public class ElementResolver implements IElementResolver
 		Set<String> typeNames = getTypeNames(prefix);
 		FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
 		Form form = TypeCreator.getForm(context);
+
+		if (ValueCollectionProvider.getGenerateFullGlobalCollection())
+		{
+			typeNames.add("developerSolutionModel");
+		}
+
+
 		if (form != null)
 		{
 			typeNames.add("globals");
@@ -285,6 +292,10 @@ public class ElementResolver implements IElementResolver
 		}
 		Type type = null;
 		String typeName = getTypeName(context, name);
+		if ("developerSolutionModel".equals(name))
+		{
+			typeName = "JSDeveloperSolutionModel";
+		}
 		if (typeName != null)
 		{
 			type = context.getType(typeName);
