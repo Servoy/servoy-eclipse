@@ -207,6 +207,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewSybaseDbAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewTableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewValueListAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewVariableAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenFormEditorAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenI18NAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenMediaAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenNewFormWizardAction;
@@ -452,6 +453,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private IAction importSolutionAction;
 
 	private IAction suggestForeignTypes;
+
+	private OpenFormEditorAction openFormEditorAction;
 
 	private IAction i18nExternalizeAction;
 	private IAction i18nCreateFromDBAction;
@@ -1905,6 +1908,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (openSqlEditorAction.isEnabled()) manager.add(openSqlEditorAction);
 		// extra open actions contributions
 		manager.add(new Separator(IWorkbenchActionConstants.OPEN_EXT));
+		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.FORM)
+		{
+			manager.add(openFormEditorAction);
+		}
 		manager.add(new Separator());
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.SERVERS)
 		{
@@ -2219,6 +2226,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		suggestForeignTypes = new SuggestForeignTypesAction(this);
 
+		openFormEditorAction = new OpenFormEditorAction();
+
 		IAction newRelation = new NewRelationAction(this);
 		IAction importMedia = new ImportMediaAction(this);
 		importMediaFolder = new ImportMediaFolderAction(this);
@@ -2406,6 +2415,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		tree.addSelectionChangedListener(newSybaseDatabase);
 		tree.addSelectionChangedListener(toggleFormCommandsActions);
 		tree.addSelectionChangedListener(expandNodeAction);
+
+		tree.addSelectionChangedListener(openFormEditorAction);
 
 		fRefreshAction = new RefreshAction(this);
 		collapseTreeAction = new CollapseTreeAction(tree);

@@ -279,19 +279,6 @@
                style="push"
                tooltip="Place Circle"/>
       </actionSet>
-       <actionSet
-            id="com.servoy.eclipse.designer.open_actions"
-            label="Open Form Editor"
-            visible="true">
-         <action
-               class="com.servoy.eclipse.designer.actions.OpenFormInDesignerActionDelegate"
-               id="com.servoy.eclipse.designer.command.showDesigner"
-               definitionId="com.servoy.eclipse.designer.command.showDesigner"
-               label="Open in Form Editor"
-               style="push"
-               tooltip="Open in Form Editor">
-         </action>
-      </actionSet>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -510,6 +497,7 @@
       <command
           description="Show form in Form Editor"
           id="com.servoy.eclipse.designer.command.showDesigner"
+          defaultHandler="com.servoy.eclipse.designer.actions.OpenFormInDesignerActionDelegateHandler"
           name="Show form in Form Editor">
        </command>
       <command
@@ -596,28 +584,6 @@
    </extension>
       <extension
          point="org.eclipse.ui.popupMenus">
-       <objectContribution
-            objectClass="com.servoy.j2db.persistence.IPersist"
-            adaptable="true"
-            id="com.servoy.eclipse.ui.OpenDesignerContributions">
-         <action
-               class="com.servoy.eclipse.designer.actions.OpenFormInDesignerActionDelegate"
-               definitionId="com.servoy.eclipse.designer.command.showDesigner"
-               enablesFor="1"
-               icon="icons/designer.gif"
-               id="com.servoy.eclipse.designer.OpenFormDesignerAction"
-               label="Open in Form Editor"
-               menubarPath="open.ext"
-               state="false"
-               style="push"
-               tooltip="Open in Form Editor">
-         </action>
-         <visibility>
-            <objectClass
-                  name="com.servoy.j2db.persistence.Form">
-            </objectClass>
-         </visibility>
-      </objectContribution>
       <viewerContribution
             id="com.servoy.eclipse.designer.editor.DesignerPreferences"
             targetID="#FormDesignerContext">
