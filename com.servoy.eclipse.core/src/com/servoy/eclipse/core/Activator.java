@@ -75,6 +75,7 @@ import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.ClientState;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IBrowserLauncher;
@@ -412,13 +413,13 @@ public class Activator extends Plugin
 					});
 				}
 
-				public void addScriptObjects(Scriptable scope)
+				public void addScriptObjects(ClientState client, Scriptable scope)
 				{
 					Context.enter();
 					try
 					{
-						scope.put("developerSolutionModel", scope, new NativeJavaObject(scope, new JSDeveloperSolutionModel(), new InstanceJavaMembers(scope,
-							JSDeveloperSolutionModel.class)));
+						scope.put("developerSolutionModel", scope, new NativeJavaObject(scope, new JSDeveloperSolutionModel(client), new InstanceJavaMembers( //$NON-NLS-1$
+							scope, JSDeveloperSolutionModel.class)));
 					}
 					finally
 					{
