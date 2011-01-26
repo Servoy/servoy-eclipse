@@ -16,8 +16,6 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
-import java.util.Iterator;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -28,10 +26,6 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
-import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.Solution;
 
 /**
  * Action for activating a solution.
@@ -56,29 +50,7 @@ public class ActivateSolutionAction extends Action implements ISelectionChangedL
 	{
 		if (selectedProject != null)
 		{
-			DesignerPreferences dp = new DesignerPreferences();
-			Form firstForm = null;
-
-			if (dp.getOpenFirstFormDesigner())
-			{
-				Solution activeSolution = selectedProject.getSolution();
-				firstForm = activeSolution.getForm(activeSolution.getFirstFormID());
-				if (firstForm == null)
-				{
-					Iterator<Form> formIterator = activeSolution.getForms(null, false);
-					if (formIterator.hasNext())
-					{
-						firstForm = formIterator.next();
-					}
-				}
-			}
-
 			ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(selectedProject);
-
-			if (firstForm != null)
-			{
-				EditorUtil.openFormDesignEditor(firstForm);
-			}
 		}
 	}
 

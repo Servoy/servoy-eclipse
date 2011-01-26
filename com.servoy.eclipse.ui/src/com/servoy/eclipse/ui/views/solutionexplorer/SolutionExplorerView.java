@@ -1454,6 +1454,28 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 							}
 							Object AllSolutionsNode = ((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getAllSolutionsNode();
 							tree.collapseToLevel(AllSolutionsNode, 1);
+
+
+							DesignerPreferences dp = new DesignerPreferences();
+							Form firstForm = null;
+
+							if (dp.getOpenFirstFormDesigner())
+							{
+								Solution activeSolution = activeProject.getSolution();
+								firstForm = activeSolution.getForm(activeSolution.getFirstFormID());
+								if (firstForm == null)
+								{
+									Iterator<Form> formIterator = activeSolution.getForms(null, false);
+									if (formIterator.hasNext())
+									{
+										firstForm = formIterator.next();
+									}
+								}
+							}
+							if (firstForm != null)
+							{
+								EditorUtil.openFormDesignEditor(firstForm);
+							}
 						}
 						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setScriptingNodesEnabled(activeProject != null);
 						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setResourceNodesEnabled(activeProject != null);
@@ -2463,32 +2485,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				else if (doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE)
 				{
 					Object clickedRealObject = doubleClickedItem.getRealObject();
-					if (clickedRealObject instanceof ServoyProject)
-					{
-						DesignerPreferences dp = new DesignerPreferences();
-						Form firstForm = null;
-
-						if (dp.getOpenFirstFormDesigner())
-						{
-							Solution activeSolution = ((ServoyProject)clickedRealObject).getSolution();
-							firstForm = activeSolution.getForm(activeSolution.getFirstFormID());
-							if (firstForm == null)
-							{
-								Iterator<Form> formIterator = activeSolution.getForms(null, false);
-								if (formIterator.hasNext())
-								{
-									firstForm = formIterator.next();
-								}
-							}
-						}
-
-						ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject((ServoyProject)clickedRealObject);
-
-						if (firstForm != null)
-						{
-							EditorUtil.openFormDesignEditor(firstForm);
-						}
-					}
+					if (clickedRealObject instanceof ServoyProject) ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(
+						(ServoyProject)clickedRealObject);
 				}
 				else if ((!expandable || ctrlPressed) && openActionInTree.isEnabled())
 				{
