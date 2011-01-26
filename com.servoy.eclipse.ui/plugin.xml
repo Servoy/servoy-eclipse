@@ -729,6 +729,10 @@
             pattern="org\.eclipse\.dltk\..*/.*wizard.*">
       </activityPatternBinding>
       <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.dltk"
+            pattern="org\.eclipse\.dltk\..*/.*openMethod.*">
+      </activityPatternBinding>
+      <activityPatternBinding
             activityId="com.servoy.eclipse.activities.xml"
             pattern="org\.eclipse\.wst\.xml\..*/.*">
       </activityPatternBinding>
@@ -760,6 +764,10 @@
             activityId="com.servoy.eclipse.activities.antDevelopment"
             pattern="org\.eclipse\.ui\.externaltools/.*">
       </activityPatternBinding>
+      <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.edit"
+            pattern="org\.eclipse\.ui\..*/.*toggleShowWhitespaceCharacters.*">
+      </activityPatternBinding>
       <activity
             id="com.servoy.eclipse.activities.dltk"
             name="DLTK Perspectives and Wizards">
@@ -780,6 +788,10 @@
             id="com.servoy.eclipse.activities.antDevelopment"
             name="ANT Development">
       </activity>
+      <activity
+            id="com.servoy.eclipse.activities.edit"
+            name="Editor">
+      </activity>
       <category
             id="com.servoy.eclipse.activities.categories.dltk"
             name="DLTK">
@@ -795,6 +807,10 @@
       <category
             id="com.servoy.eclipse.activities.categories.ant"
             name="ANT">
+      </category>
+      <category
+            id="com.servoy.eclipse.activities.categories.edit"
+            name="Editor">
       </category>
       <categoryActivityBinding
             activityId="com.servoy.eclipse.activities.dltk"
@@ -815,6 +831,10 @@
       <categoryActivityBinding
             activityId="com.servoy.eclipse.activities.antDevelopment"
             categoryId="com.servoy.eclipse.activities.categories.ant">
+      </categoryActivityBinding>            
+      <categoryActivityBinding
+            activityId="com.servoy.eclipse.activities.edit"
+            categoryId="com.servoy.eclipse.activities.categories.edit">
       </categoryActivityBinding>            
    </extension>
   <extension
