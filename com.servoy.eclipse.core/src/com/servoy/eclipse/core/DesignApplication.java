@@ -81,7 +81,6 @@ import com.servoy.j2db.smart.J2DBClient;
 import com.servoy.j2db.smart.dataui.SwingItemFactory;
 import com.servoy.j2db.ui.ItemFactory;
 import com.servoy.j2db.util.ITaskExecuter;
-import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Settings;
@@ -581,7 +580,7 @@ public class DesignApplication implements IApplication, IMessagesCallback
 
 	public Map getRuntimeProperties()
 	{
-		return getClient().getRuntimeProperties();
+		return new HashMap<Object, Object>();
 	}
 
 	public IExecutingEnviroment getScriptEngine()
