@@ -549,7 +549,11 @@ public class ProfilerView extends ViewPart
 					case 3 :
 						return pd.getArgs();
 					case 4 :
-						return pd.getSourceName();
+					{
+						String sourceName = pd.getSourceName();
+						IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(sourceName));
+						return file.getProject().getName() + '/' + file.getProjectRelativePath().toPortableString();
+					}
 				}
 			}
 			else if (element instanceof AggregateData)
