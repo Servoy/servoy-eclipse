@@ -34,6 +34,15 @@
       </arguments>
     </methodtemplate>
   </event>
+  <event name="onChangeMethodID">
+    <methodtemplate name="onTabChange" addtodo="true">
+      <description><![CDATA[Callback method when the user changes tab in a tab panel or divider position in split pane]]></description>
+      <arguments>
+        <methodargument name="previousIndex" type="Number"><![CDATA[index of tab shown before the change]]></methodargument>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
   <event name="onCloseMethodID">
     <methodtemplate name="onSolutionClose" type="Boolean" addtodo="true">
       <description><![CDATA[Callback method for when solution is closed, force boolean argument tells if this is a force (not stopable) close or not.]]></description>
@@ -109,7 +118,7 @@ return true]]></code>
     </methodtemplate>
   </event>
   <event name="onDragEndMethodID">
-    <methodtemplate name="onDragEnd" type="Number">
+    <methodtemplate name="onDragEnd" type="Number" addtodo="true">
       <description><![CDATA[Handle end of a drag]]></description>
       <arguments>
         <methodargument name="event" type="JSDNDEvent"><![CDATA[the event that triggered the action]]></methodargument>
@@ -117,14 +126,14 @@ return true]]></code>
     </methodtemplate>
   </event>
   <event name="onDragMethodID">
-    <methodtemplate name="onDrag" type="Number" addtodo="true">
+    <methodtemplate name="onDrag" type="Number" addtodo="true" private="true">
       <description><![CDATA[Handle start of a drag, it can set the data that should be transfered and should return a constant which dragndrop mode/modes is/are supported
 
 Should return a DRAGNDROP constant or a combination of 2 constants:
 DRAGNDROP.MOVE if only a move can happen,
 DRAGNDROP.COPY if only a copy can happen,
 DRAGNDROP.MOVE|DRAGNDROP.COPY if a move or copy can happen,
-DRAGNDROP.NONE if nothing is supported (drag should start).]]></description>
+DRAGNDROP.NONE if nothing is supported (drag should not start).]]></description>
       <code><![CDATA[return DRAGNDROP.NONE]]></code>
       <arguments>
         <methodargument name="event" type="JSDNDEvent"><![CDATA[the event that triggered the action]]></methodargument>
@@ -147,7 +156,8 @@ Return true is drop is allowed, otherwise false.]]></description>
   </event>
   <event name="onDropMethodID">
     <methodtemplate name="onDrop" type="Boolean" addtodo="true">
-      <description><![CDATA[Handle a drop]]></description>
+      <description><![CDATA[Handle a drop
+Return true if drop has been performed successfully, otherwise false.]]></description>
       <code><![CDATA[return false]]></code>
       <arguments>
         <methodargument name="event" type="JSDNDEvent"><![CDATA[the event that triggered the action]]></methodargument>
@@ -280,7 +290,7 @@ return true]]></code>
     </methodtemplate>
   </event>
   <event name="onLoadMethodID">
-    <methodtemplate name="onLoad" addtodo="true">
+    <methodtemplate name="onLoad" addtodo="true" private="true">
       <description><![CDATA[Callback method when form is (re)loaded]]></description>
       <arguments>
         <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
@@ -436,17 +446,8 @@ return true]]></code>
       </arguments>
     </methodtemplate>
   </event>
-  <event name="onTabChangeMethodID">
-    <methodtemplate name="onTabChange" addtodo="true">
-      <description><![CDATA[Callback method when the user changes tab in a tab panel]]></description>
-      <arguments>
-        <methodargument name="previousIndex" type="Number"><![CDATA[index of tab shown before the change]]></methodargument>
-        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
-      </arguments>
-    </methodtemplate>
-  </event>
   <event name="onUnLoadMethodID">
-    <methodtemplate name="onUnload" addtodo="true">
+    <methodtemplate name="onUnload" addtodo="true" private="true">
       <description><![CDATA[Callback method when form is destroyed]]></description>
       <arguments>
         <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
@@ -471,7 +472,7 @@ return true]]></code>
     </methodtemplate>
   </event>
   <event name="rowBGColorCalculation">
-    <methodtemplate name="rowBGColorCalculation" type="Color" addtodo="true">
+    <methodtemplate name="rowBGColorCalculation" type="String" addtodo="true">
       <description><![CDATA[Calculate the row background color]]></description>
       <code><![CDATA[if (selected)
   return '#c4ffff';
