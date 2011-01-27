@@ -167,7 +167,7 @@
             class="com.servoy.eclipse.debug.scriptingconsole.ScriptingConsole"
             icon="icons/launch.gif"
             id="com.servoy.eclipse.debug.scriptingconsole"
-            name="Live Scripting Console"
+            name="Command Console"
             restorable="true">
       </view>
    </extension>
@@ -177,4 +177,21 @@
             class="com.servoy.eclipse.debug.scriptingconsole.ScriptingConsoleFactory">
       </factory>
    </extension>
+    	<extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="com.servoy.eclipse.ui.DesignPerspective">
+         <viewShortcut
+               id="com.servoy.eclipse.debug.scriptingconsole">
+         </viewShortcut>
+         <view
+               id="com.servoy.eclipse.debug.scriptingconsole"
+               minimized="false"
+               relationship="stack"
+               relative="org.eclipse.ui.console.ConsoleView"
+               visible="false">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   
 </plugin>

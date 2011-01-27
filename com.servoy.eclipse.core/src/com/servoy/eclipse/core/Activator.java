@@ -418,7 +418,7 @@ public class Activator extends Plugin
 					Context.enter();
 					try
 					{
-						scope.put("developerSolutionModel", scope, new NativeJavaObject(scope, new JSDeveloperSolutionModel(client), new InstanceJavaMembers( //$NON-NLS-1$
+						scope.put("devSolutionModel", scope, new NativeJavaObject(scope, new JSDeveloperSolutionModel(client), new InstanceJavaMembers( //$NON-NLS-1$
 							scope, JSDeveloperSolutionModel.class)));
 					}
 					finally

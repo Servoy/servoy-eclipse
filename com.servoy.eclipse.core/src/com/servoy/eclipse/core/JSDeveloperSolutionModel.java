@@ -100,11 +100,15 @@ public class JSDeveloperSolutionModel
 		}
 	}
 
-
-	public void js_showFormInEditor(JSForm jsForm)
+	/**
+	 * Opens the form FormEditor in the developer.
+	 * 
+	 * @param form
+	 */
+	public void js_openForm(JSForm form)
 	{
-		final Form form = ServoyModelFinder.getServoyModel().getFlattenedSolution().getForm(jsForm.js_getName());
-		if (form != null)
+		final Form frm = ServoyModelFinder.getServoyModel().getFlattenedSolution().getForm(form.js_getName());
+		if (frm != null)
 		{
 			Display.getDefault().asyncExec(new Runnable()
 			{
@@ -113,7 +117,7 @@ public class JSDeveloperSolutionModel
 					try
 					{
 						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-							new PersistEditorInput(form.getName(), form.getSolution().getName(), form.getUUID()).setNew(false),
+							new PersistEditorInput(frm.getName(), frm.getSolution().getName(), frm.getUUID()).setNew(false),
 							PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
 								Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
 					}
@@ -126,7 +130,7 @@ public class JSDeveloperSolutionModel
 		}
 		else
 		{
-			throw new IllegalArgumentException("form " + jsForm.js_getName() + " is not a workspace stored (blueprint) form"); //$NON-NLS-1$//$NON-NLS-2$
+			throw new IllegalArgumentException("form " + form.js_getName() + " is not a workspace stored (blueprint) form"); //$NON-NLS-1$//$NON-NLS-2$
 		}
 	}
 }

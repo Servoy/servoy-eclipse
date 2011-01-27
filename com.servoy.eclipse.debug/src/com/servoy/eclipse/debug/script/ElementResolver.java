@@ -90,7 +90,7 @@ public class ElementResolver implements IElementResolver
 
 		if (ValueCollectionProvider.getGenerateFullGlobalCollection())
 		{
-			typeNames.add("developerSolutionModel");
+			typeNames.add("devSolutionModel");
 		}
 
 

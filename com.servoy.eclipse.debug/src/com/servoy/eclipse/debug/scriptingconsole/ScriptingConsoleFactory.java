@@ -30,7 +30,7 @@ public class ScriptingConsoleFactory implements IEvaluateConsoleFactory
 
 	public String getLabel()
 	{
-		return "Live Scripting Console";
+		return "Command Console";
 	}
 
 	public ImageDescriptor getImageDescriptor()
