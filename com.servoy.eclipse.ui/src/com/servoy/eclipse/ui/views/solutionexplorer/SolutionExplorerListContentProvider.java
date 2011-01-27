@@ -58,9 +58,9 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
-import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
@@ -125,6 +125,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	public static Set<String> ignoreMethods = new TreeSet<String>();
 
+	public static Set<String> ignoreMethodsFromPrefixedConstants = new TreeSet<String>();
+
 	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
 	public static HashMap<String, String> TYPES = new HashMap<String, String>()
@@ -166,6 +168,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		for (Method method : methods)
 		{
 			ignoreMethods.add(method.getName());
+		}
+		methods = IPrefixedConstantsObject.class.getDeclaredMethods();
+		for (Method method : methods)
+		{
+			ignoreMethodsFromPrefixedConstants.add(method.getName());
 		}
 	}
 
@@ -1348,8 +1355,17 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			String id = (String)element;
 
-			// check if method from Object itself..
-			if (!(ijm instanceof InstanceJavaMembers) && ignoreMethods.contains(id)) continue;
+			if (!(ijm instanceof InstanceJavaMembers))
+			{
+				// check if method from Object itself..
+				if (ignoreMethods.contains(id)) continue;
+
+				// don't list the methods from IPrefixedConstantsObject
+				if ((real instanceof IPrefixedConstantsObject) && ignoreMethodsFromPrefixedConstants.contains(id))
+				{
+					continue;
+				}
+			}
 
 			if (scriptObject != null)
 			{
