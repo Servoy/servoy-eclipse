@@ -165,7 +165,7 @@
             allowMultiple="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.debug.scriptingconsole.ScriptingConsole"
-            icon="icons/launch.gif"
+            icon="icons/commandconsole.gif"
             id="com.servoy.eclipse.debug.scriptingconsole"
             name="Command Console"
             restorable="true">

@@ -35,7 +35,7 @@ public class ScriptingConsoleFactory implements IEvaluateConsoleFactory
 
 	public ImageDescriptor getImageDescriptor()
 	{
-		return ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/launch.gif"), null));
+		return ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/commandconsole.gif"), null));
 	}
 
 }
