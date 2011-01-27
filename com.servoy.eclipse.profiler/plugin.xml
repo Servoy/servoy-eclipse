@@ -28,6 +28,18 @@
                id="com.servoy.eclipse.uicom.servoy.eclipse.profiler.views.ProfilerView">
          </viewShortcut>
       </perspectiveExtension>
+      <perspectiveExtension
+            targetID="com.servoy.eclipse.ui.DesignPerspective">
+         <viewShortcut
+               id="com.servoy.eclipse.uicom.servoy.eclipse.profiler.views.ProfilerView">
+         </viewShortcut>
+         <view
+               id="com.servoy.eclipse.uicom.servoy.eclipse.profiler.views.ProfilerView"
+               minimized="false"
+               relationship="stack"
+               relative="org.eclipse.ui.console.ConsoleView"
+               visible="false">
+         </view>
+      </perspectiveExtension>
    </extension>
-
 </plugin>
