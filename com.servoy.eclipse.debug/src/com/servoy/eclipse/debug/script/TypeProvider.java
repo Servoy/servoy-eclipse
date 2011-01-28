@@ -129,7 +129,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addAnonymousClassType("JSUnit", JSUnitAssertFunctions.class);
 		addAnonymousClassType("JSSolutionModel", JSSolutionModel.class);
 		addAnonymousClassType("JSDatabaseManager", JSDatabaseManager.class);
-		addAnonymousClassType("JSDeveloperSolutionModel", JSDeveloperSolutionModel.class);
+		addAnonymousClassType("devSolutionModel", JSDeveloperSolutionModel.class);
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());

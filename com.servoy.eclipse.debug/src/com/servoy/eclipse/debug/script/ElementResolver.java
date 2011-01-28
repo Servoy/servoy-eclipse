@@ -292,9 +292,9 @@ public class ElementResolver implements IElementResolver
 		}
 		Type type = null;
 		String typeName = getTypeName(context, name);
-		if ("developerSolutionModel".equals(name))
+		if ("devSolutionModel".equals(name))
 		{
-			typeName = "JSDeveloperSolutionModel";
+			typeName = "devSolutionModel";
 		}
 		if (typeName != null)
 		{
