@@ -89,69 +89,65 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 
 		list.add(new BorderModel(flattenedForm)); // A separate editpart to show the form border and resize handles
 
-		List<Part> parts = new ArrayList<Part>();
 		Set<FormElementGroup> groups = new HashSet<FormElementGroup>();
 		if (flattenedForm != null)
 		{
-			Iterator<IPersist> it = flattenedForm.getAllObjectsSortedByFormIndex();
+			Iterator<IFormElement> it = flattenedForm.getFormElementsSortedByFormIndex();
 			while (it.hasNext())
 			{
-				IPersist o = it.next();
+				IFormElement o = it.next();
 				if (o instanceof AbstractBase && ((AbstractBase)o).isOverrideElement() && ((AbstractBase)o).getSuperPersist() == null)
 				{
 					// skip orphaned overrides
 					continue;
 				}
-				if (o instanceof Part)
+				if (o.getGroupID() != null)
 				{
-					parts.add((Part)o);
-				}
-				else if (o instanceof IFormElement)
-				{
-					if (((IFormElement)o).getGroupID() != null)
+					// use persist.getparent as form in the group, not the current form.
+					// when the group elements are not overrides yet and a group property is changed, an different FormElementGroup is created with this form as parent.
+					FormElementGroup group = new FormElementGroup((o).getGroupID(), ModelUtils.getEditingFlattenedSolution(getPersist()), (Form)o.getParent());
+					if (groups.add(group))
 					{
-						// use persist.getparent as form in the group, not the current form.
-						// when the group elements are not overrides yet and a group property is changed, an different FormElementGroup is created with this form as parent.
-						FormElementGroup group = new FormElementGroup(((IFormElement)o).getGroupID(), ModelUtils.getEditingFlattenedSolution(getPersist()),
-							(Form)o.getParent());
-						if (groups.add(group))
-						{
-							list.add(group);
-						}
+						list.add(group);
 					}
-					else
+				}
+				else
+				{
+					list.add(o);
+					Iterator<IPersist> subElements = null;
+					if (o instanceof TabPanel)
 					{
-						list.add(o);
-						Iterator<IPersist> subElements = null;
-						if (o instanceof TabPanel)
+						subElements = ((TabPanel)o).getTabs();
+					}
+					else if (o instanceof Portal)
+					{
+						subElements = ((Portal)o).getAllObjects(new Comparator<IPersist>()
 						{
-							subElements = ((TabPanel)o).getTabs();
-						}
-						else if (o instanceof Portal)
-						{
-							subElements = ((Portal)o).getAllObjects(new Comparator<IPersist>()
+							public int compare(IPersist persist1, IPersist persist2)
 							{
-								public int compare(IPersist persist1, IPersist persist2)
+								if (persist1 instanceof IFormElement && persist2 instanceof IFormElement)
 								{
-									if (persist1 instanceof IFormElement && persist2 instanceof IFormElement)
-									{
-										return ((IFormElement)persist1).getFormIndex() - ((IFormElement)persist2).getFormIndex();
-									}
-									return 0;
+									return ((IFormElement)persist1).getFormIndex() - ((IFormElement)persist2).getFormIndex();
 								}
-							});
-						}
-						while (subElements != null && subElements.hasNext())
-						{
-							list.add(subElements.next());
-						}
+								return 0;
+							}
+						});
+					}
+					while (subElements != null && subElements.hasNext())
+					{
+						list.add(subElements.next());
 					}
 				}
 			}
 		}
 
 		// parts go on top
-		list.addAll(parts);
+		Iterator<Part> parts = flattenedForm.getParts();
+		while (parts.hasNext())
+		{
+			list.add(parts.next());
+		}
+
 		return list;
 	}
 
