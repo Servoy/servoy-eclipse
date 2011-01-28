@@ -1745,25 +1745,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return;
 		}
 
-		PropertyDescriptorWrapper beanPropertyDescriptor = getBeansProperties().get(id);
-		if (beanPropertyDescriptor != null)
+		if (getBeansProperties().get(id) != null)
 		{
-			IPersist overridePersist = ElementUtil.getOverridePersist(context, persist);
-			if (overridePersist != persist)
-			{
-				persist = overridePersist;
-				beansProperties = null;
-				propertyDescriptors = null;
-				hiddenPropertyDescriptors = null;
-				if (beanPropertyDescriptor.valueObject instanceof IPersist)
-				{
-					beanPropertyDescriptor.valueObject = overridePersist;
-				}
-				else
-				{
-					beanPropertyDescriptor = getBeansProperties().get(id);
-				}
-			}
+			createOverrideElementIfNeeded();
 
 			if (persist instanceof AbstractBase)
 			{
@@ -1780,14 +1764,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 						beansProperties = null;
 						propertyDescriptors = null;
 						hiddenPropertyDescriptors = null;
-						if (beanPropertyDescriptor.valueObject instanceof IPersist)
-						{
-							beanPropertyDescriptor.valueObject = persist;
-						}
-						else
-						{
-							beanPropertyDescriptor = getBeansProperties().get(id);
-						}
 					}
 					catch (RepositoryException e)
 					{
@@ -1826,23 +1802,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		{
 			try
 			{
-
-				IPersist overridePersist = ElementUtil.getOverridePersist(context, persist);
-				if (overridePersist != persist)
+				if (createOverrideElementIfNeeded())
 				{
-					persist = overridePersist;
-					beansProperties = null;
-					propertyDescriptors = null;
-					hiddenPropertyDescriptors = null;
-					if (beanPropertyDescriptor.valueObject instanceof IPersist)
-					{
-						beanPropertyDescriptor.valueObject = overridePersist;
-					}
-					else
-					{
-						beanPropertyDescriptor = getBeansProperties().get(id);
-					}
-
+					beanPropertyDescriptor = getBeansProperties().get(id);
 				}
 				if ("name".equals(id) && beanPropertyDescriptor.valueObject instanceof ISupportUpdateableName)
 				{
@@ -1907,6 +1869,25 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 	}
 
+	/**
+	 * Create an override element of the current element if this is the first override
+	 */
+	private boolean createOverrideElementIfNeeded()
+	{
+		IPersist overridePersist = ElementUtil.getOverridePersist(context, persist);
+		if (overridePersist == persist)
+		{
+			return false;
+		}
+
+		persist = overridePersist;
+		beansProperties = null;
+		propertyDescriptors = null;
+		hiddenPropertyDescriptors = null;
+		init();
+		return true;
+	}
+
 	public void setPropertyValue(Object id, Object value)
 	{
 		if (readOnly)
@@ -1914,6 +1895,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			throw new RuntimeException("Cannot save read-only property");
 		}
 
+		createOverrideElementIfNeeded();
 		init();
 
 		// recursively process a.b.c properties
