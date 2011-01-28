@@ -134,23 +134,20 @@ public abstract class BaseRestorableCommand extends Command
 	}
 
 	@Override
-	public boolean canUndo()
-	{
-		return states != null;
-	}
-
-	@Override
 	public void undo()
 	{
-		for (Entry<Object, Object> entry : states.entrySet())
+		if (states != null)
 		{
-			Object object = entry.getKey();
-			IRestorer restorable = (IRestorer)Platform.getAdapterManager().getAdapter(object, IRestorer.class);
-			restorable.restoreState(object, entry.getValue());
+			for (Entry<Object, Object> entry : states.entrySet())
+			{
+				Object object = entry.getKey();
+				IRestorer restorable = (IRestorer)Platform.getAdapterManager().getAdapter(object, IRestorer.class);
+				restorable.restoreState(object, entry.getValue());
 
-			// fire persist change recursively
-			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, object, true);
+				// fire persist change recursively
+				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, object, true);
+			}
+			states = null;
 		}
-		states = null;
 	}
 }
