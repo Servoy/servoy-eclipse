@@ -44,6 +44,7 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.SnapToGridFieldPositioner;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
@@ -96,6 +97,11 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 			while (it.hasNext())
 			{
 				IPersist o = it.next();
+				if (o instanceof AbstractBase && ((AbstractBase)o).isOverrideElement() && ((AbstractBase)o).getSuperPersist() == null)
+				{
+					// skip orphaned overrides
+					continue;
+				}
 				if (o instanceof Part)
 				{
 					parts.add((Part)o);
