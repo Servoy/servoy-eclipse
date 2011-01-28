@@ -209,7 +209,7 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 					}
 				}
 			}
-			cc.add(SetValueCommand.createSetvalueCommand(child.getDisplayName(), target, (String)child.getDescriptor().getId(), entryValue));
+			cc.add(SetValueCommand.createSetvalueCommand(child.getDisplayName(), target, child.getDescriptor().getId(), entryValue));
 		}
 
 		// inform our parent

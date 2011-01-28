@@ -38,17 +38,17 @@ public class SetValueCommand extends Command
 	public static final String REQUEST_PROPERTY_PREFIX = "property:";
 
 	private Object propertyValue;
-	private final Object propertyName;
+	private final Object propertyId;
 	private final IPropertySource target;
 
 	private Object undoValue;
 	private boolean resetOnUndo;
 
-	private SetValueCommand(String label, IPropertySource target, String propertyName, Object propertyValue)
+	private SetValueCommand(String label, IPropertySource target, Object propertyId, Object propertyValue)
 	{
 		super(label);
 		this.target = target;
-		this.propertyName = propertyName;
+		this.propertyId = propertyId;
 		this.propertyValue = propertyValue;
 	}
 
@@ -61,13 +61,13 @@ public class SetValueCommand extends Command
  * after setPropertyValue(...) is invoked. If they are different (it must have been false before and true after -- it cannot be the other way around), then that
  * means we need to reset.
  */
-		boolean wasPropertySet = target.isPropertySet(propertyName);
-		undoValue = target.getPropertyValue(propertyName);
+		boolean wasPropertySet = target.isPropertySet(propertyId);
+		undoValue = target.getPropertyValue(propertyId);
 		if (undoValue instanceof IPropertySource) undoValue = ((IPropertySource)undoValue).getEditableValue();
 		if (propertyValue instanceof IPropertySource) propertyValue = ((IPropertySource)propertyValue).getEditableValue();
-		target.setPropertyValue(propertyName, propertyValue);
-		if (target instanceof IPropertySource2) resetOnUndo = !wasPropertySet && ((IPropertySource2)target).isPropertyResettable(propertyName);
-		else resetOnUndo = !wasPropertySet && target.isPropertySet(propertyName);
+		target.setPropertyValue(propertyId, propertyValue);
+		if (target instanceof IPropertySource2) resetOnUndo = !wasPropertySet && ((IPropertySource2)target).isPropertyResettable(propertyId);
+		else resetOnUndo = !wasPropertySet && target.isPropertySet(propertyId);
 		if (resetOnUndo) undoValue = null;
 	}
 
@@ -80,8 +80,8 @@ public class SetValueCommand extends Command
 	@Override
 	public void undo()
 	{
-		if (resetOnUndo) target.resetPropertyValue(propertyName);
-		else target.setPropertyValue(propertyName, undoValue);
+		if (resetOnUndo) target.resetPropertyValue(propertyId);
+		else target.setPropertyValue(propertyId, undoValue);
 	}
 
 	/**
@@ -95,7 +95,7 @@ public class SetValueCommand extends Command
 	 * @param propertyValue
 	 * @return
 	 */
-	public static Command createSetvalueCommand(String propLabel, final IPropertySource target, final String propertyName, final Object propertyValue)
+	public static Command createSetvalueCommand(String propLabel, final IPropertySource target, final Object propertyId, final Object propertyValue)
 	{
 		String label = (propLabel != null && propLabel.length() > 0) ? "Set " + propLabel + " Property" : "";
 		if (target instanceof IModelSavePropertySource && BaseRestorableCommand.getRestorer(((IModelSavePropertySource)target).getSaveModel()) != null)
@@ -106,13 +106,13 @@ public class SetValueCommand extends Command
 				@Override
 				public void execute()
 				{
-					setPropertyValue((IModelSavePropertySource)target, propertyName, propertyValue);
+					setPropertyValue((IModelSavePropertySource)target, propertyId, propertyValue);
 				}
 			};
 		}
 
 		// state cannot be saved, use the old style set-value-command
-		return new SetValueCommand(label, target, propertyName, propertyValue);
+		return new SetValueCommand(label, target, propertyId, propertyValue);
 	}
 
 	public static Command createSetPropertiesComnmand(IPropertySource target, Map<Object, Object> extendedData)
