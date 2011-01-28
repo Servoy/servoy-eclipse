@@ -151,6 +151,12 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 			{
 				hex = string;
 			}
+			if (hex.startsWith("#") && hex.length() == 4)
+			{
+				// #rgb -> #rrggbb
+				hex = new StringBuilder("#").append(hex.charAt(1)).append(hex.charAt(1)).append(hex.charAt(2)).append(hex.charAt(2)).append(hex.charAt(3)).append(
+					hex.charAt(3)).toString();
+			}
 			return java.awt.Color.decode(hex);
 		}
 	}
