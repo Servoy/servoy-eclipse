@@ -557,19 +557,24 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		IPropertyDescriptor desc = getPropertyDescriptor(propertyDescriptor, id, getDisplayName(propertyDescriptor.propertyDescriptor.getName()), category,
 			flattenedForm, flattenedEditingSolution);
 		setCategory(desc, category);
-		return desc != null ? new DelegatePropertyController(desc, id)
+		if (desc != null && !(persist instanceof Form && StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(id)) &&
+			!StaticContentSpecLoader.PROPERTY_EXTENDSFORMID.getPropertyName().equals(id))
 		{
-			@Override
-			public ILabelProvider getLabelProvider()
+			return new DelegatePropertyController(desc, id)
 			{
-				String propertyId = id;
-				if (persist instanceof Form && StaticContentSpecLoader.PROPERTY_WIDTH.getPropertyName().equals(id))
+				@Override
+				public ILabelProvider getLabelProvider()
 				{
-					propertyId = StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName();
+					String propertyId = id;
+					if (persist instanceof Form && StaticContentSpecLoader.PROPERTY_WIDTH.getPropertyName().equals(id))
+					{
+						propertyId = StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName();
+					}
+					return new PersistInheritenceDelegateLabelProvider(persist, super.getLabelProvider(), propertyId);
 				}
-				return new PersistInheritenceDelegateLabelProvider(persist, super.getLabelProvider(), propertyId);
-			}
-		} : desc;
+			};
+		}
+		return desc;
 	}
 
 	protected void setCategory(IPropertyDescriptor desc, PropertyCategory category)
