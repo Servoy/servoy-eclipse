@@ -120,6 +120,7 @@ import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDataProviderLookup;
+import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -557,7 +558,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		IPropertyDescriptor desc = getPropertyDescriptor(propertyDescriptor, id, getDisplayName(propertyDescriptor.propertyDescriptor.getName()), category,
 			flattenedForm, flattenedEditingSolution);
 		setCategory(desc, category);
-		if (desc != null && !(persist instanceof Form && StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(id)) &&
+		if (desc != null //
+			&&
+			persist.getParent() == context // only show overrides when element is shown in its 'own' form
+			&&
+			// skip some specific properties
+			!(persist instanceof Form && StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(id)) &&
 			!StaticContentSpecLoader.PROPERTY_EXTENDSFORMID.getPropertyName().equals(id))
 		{
 			return new DelegatePropertyController(desc, id)
@@ -1757,12 +1763,37 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				{
 					beanPropertyDescriptor = getBeansProperties().get(id);
 				}
-
 			}
 
-			if (beanPropertyDescriptor.valueObject instanceof AbstractBase)
+			if (persist instanceof AbstractBase)
 			{
-				((AbstractBase)beanPropertyDescriptor.valueObject).clearProperty((String)id);
+				((AbstractBase)persist).clearProperty((String)id);
+				if (!((AbstractBase)persist).hasOverrideProperties())
+				{
+					// last property was reset, remove overriding persist
+					IPersist superPersist = ((AbstractBase)persist).getSuperPersist();
+					try
+					{
+						((IDeveloperRepository)((AbstractBase)persist).getRootObject().getRepository()).deleteObject(persist);
+						persist.getParent().removeChild(persist);
+						persist = superPersist;
+						beansProperties = null;
+						propertyDescriptors = null;
+						hiddenPropertyDescriptors = null;
+						if (beanPropertyDescriptor.valueObject instanceof IPersist)
+						{
+							beanPropertyDescriptor.valueObject = persist;
+						}
+						else
+						{
+							beanPropertyDescriptor = getBeansProperties().get(id);
+						}
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
 			}
 			else
 			{
@@ -2737,7 +2768,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 							if (returnValue != null)
 							{
 								Form f = (Form)persist;
-								if (!Utils.equalObjects(f.getExtendsFormID(), returnValue))
+								if (!Utils.equalObjects(new Integer(f.getExtendsFormID()), returnValue))
 								{
 									List<IPersist> overridePersists = new ArrayList<IPersist>();
 									for (IPersist child : f.getAllObjectsAsList())
