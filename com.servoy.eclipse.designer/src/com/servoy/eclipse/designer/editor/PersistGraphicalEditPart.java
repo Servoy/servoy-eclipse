@@ -221,7 +221,6 @@ public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 				x = loc.x > 0 ? loc.x : x;
 				y = loc.y > 0 ? loc.y : y;
 			}
-			((ISupportBounds)model).setLocation(new java.awt.Point(x, y));
 			java.awt.Dimension size = ((ISupportBounds)model).getSize();
 			if (size != null)
 			{
