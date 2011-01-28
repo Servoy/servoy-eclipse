@@ -63,10 +63,10 @@ public abstract class MultipleSelectionAction extends SelectionAction
 		for (int i = 0; i < objects.size(); i++)
 		{
 			EditPart object = (EditPart)objects.get(i);
-			if (viewer == null) viewer = object.getViewer();
 			EditPart parent = object.getParent();
 			if (parent != null)
 			{
+				if (viewer == null) viewer = object.getViewer();
 				if (parentsMap.get(parent) == null)
 				{
 					parentsMap.put(parent, new ArrayList<EditPart>());
