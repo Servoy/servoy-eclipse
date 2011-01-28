@@ -33,6 +33,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 
 
 /**
@@ -141,36 +142,63 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 		}
 	}
 
-	protected void setLocationAndSize(GraphicalEditPart ep, java.awt.Point location, java.awt.Dimension size)
+	protected <T> void setBoundsProperty(GraphicalEditPart ep, IPropertySource propertySource, TypedProperty<T> property, T value)
 	{
-		IPropertySource propertySource = (IPropertySource)ep.getAdapter(IPropertySource.class);
 		if (propertySource instanceof IModelSavePropertySource)
 		{
 			// supports saving of state, set property and check if model changed (first change in inherited object)
-			setPropertyValue((IModelSavePropertySource)propertySource, StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
-			setPropertyValue((IModelSavePropertySource)propertySource, StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), size);
+			setPropertyValue((IModelSavePropertySource)propertySource, property.getPropertyName(), value);
 		}
 		else
 		{
 			saveState(ep.getModel());
-			propertySource.setPropertyValue(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
-			propertySource.setPropertyValue(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), size);
+			propertySource.setPropertyValue(property.getPropertyName(), value);
 		}
 	}
 
 	protected boolean changeBounds(GraphicalEditPart ep, boolean change)
 	{
 		Rectangle bounds = ep.getFigure().getBounds();
-		int x = bounds.x + (moveDelta == null ? 0 : moveDelta.x);
-		int y = bounds.y + (moveDelta == null ? 0 : moveDelta.y);
-		int width = bounds.width + (sizeDelta == null ? 0 : sizeDelta.width);
-		int height = bounds.height + (sizeDelta == null ? 0 : sizeDelta.height);
+		boolean moved = false;
+		int x = bounds.x;
+		if (moveDelta != null && moveDelta.x != 0)
+		{
+			x += moveDelta.x;
+			moved = true;
+		}
+		int y = bounds.y;
+		if (moveDelta != null && moveDelta.y != 0)
+		{
+			y += moveDelta.y;
+			moved = true;
+		}
+		boolean resized = false;
+		int width = bounds.width;
+		if (sizeDelta != null && sizeDelta.width != 0)
+		{
+			width += sizeDelta.width;
+			resized = true;
+		}
+		int height = bounds.height;
+		if (sizeDelta != null && sizeDelta.height != 0)
+		{
+			height += sizeDelta.height;
+			resized = true;
+		}
 
 		if (x < 0 || y < 0 || width < 0 || height < 0) return false;
 
 		if (change)
 		{
-			setLocationAndSize(ep, new java.awt.Point(x, y), new java.awt.Dimension(width, height));
+			IPropertySource propertySource = (IPropertySource)ep.getAdapter(IPropertySource.class);
+			if (moved)
+			{
+				setBoundsProperty(ep, propertySource, StaticContentSpecLoader.PROPERTY_LOCATION, new java.awt.Point(x, y));
+			}
+			if (resized)
+			{
+				setBoundsProperty(ep, propertySource, StaticContentSpecLoader.PROPERTY_SIZE, new java.awt.Dimension(width, height));
+			}
 		}
 		return true;
 	}
