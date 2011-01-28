@@ -41,6 +41,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -81,7 +82,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 	 */
 	public ScriptConsole()
 	{
-		super("Live Scripting Console", "ScriptConsole", null, true); //$NON-NLS-1$ //$NON-NLS-2$
+		super("Command Console", "CommandConsole", null, true); //$NON-NLS-1$ //$NON-NLS-2$
 
 		ScriptConsolePartitioner partitioner = new ScriptConsolePartitioner();
 		getDocument().setDocumentPartitioner(partitioner);
@@ -109,6 +110,11 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 	public void clearConsole()
 	{
 		page.clearConsole();
+	}
+
+	public StyledText getTextWidget()
+	{
+		return page.getViewer().getTextWidget();
 	}
 
 	/*

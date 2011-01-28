@@ -44,6 +44,7 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 	@Override
 	public void setFocus()
 	{
+		console.getTextWidget().setFocus();
 	}
 
 	/*
