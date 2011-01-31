@@ -132,11 +132,11 @@ final class ContentAssistProcessor implements IContentAssistProcessor
 				}
 			};
 			engine.setRequestor(collector);
+			int caretPosition = ((ScriptConsoleViewer)viewer).getCaretPosition();
 			// a bit of a hack to get full globals completion.
 			ValueCollectionProvider.setGenerateFullGlobalCollection(Boolean.TRUE);
 			try
 			{
-				int caretPosition = ((ScriptConsoleViewer)viewer).getCaretPosition();
 				caretPosition = caretPosition - ((ScriptConsoleViewer)viewer).getCommandLineOffset();
 				if (sb != null) caretPosition += sb.length();
 				engine.complete(source, caretPosition, 0);
@@ -145,62 +145,64 @@ final class ContentAssistProcessor implements IContentAssistProcessor
 			{
 				ValueCollectionProvider.setGenerateFullGlobalCollection(Boolean.FALSE);
 			}
-
 			ArrayList<ICompletionProposal> list = new ArrayList<ICompletionProposal>();
 			String prefix = extractPrefix(viewer, offset);
 			IRegion region = new Region(offset - prefix.length(), prefix.length());
-			ScriptTemplateContextType contextType = new ScriptTemplateContextType()
+			if (isValidLocation(viewer, region))
 			{
-				/*
-				 * (non-Javadoc)
-				 * 
-				 * @see org.eclipse.dltk.ui.templates.ScriptTemplateContextType#createContext(org.eclipse.jface.text.IDocument, int, int,
-				 * org.eclipse.dltk.core.ISourceModule)
-				 */
-				@Override
-				public ScriptTemplateContext createContext(IDocument document, int completionPosition, int length, ISourceModule sourceModule)
+				ScriptTemplateContextType contextType = new ScriptTemplateContextType()
 				{
-					return new ScriptTemplateContext(this, document, completionPosition, length, sourceModule)
+					/*
+					 * (non-Javadoc)
+					 * 
+					 * @see org.eclipse.dltk.ui.templates.ScriptTemplateContextType#createContext(org.eclipse.jface.text.IDocument, int, int,
+					 * org.eclipse.dltk.core.ISourceModule)
+					 */
+					@Override
+					public ScriptTemplateContext createContext(IDocument document, int completionPosition, int length, ISourceModule sourceModule)
 					{
-						/*
-						 * (non-Javadoc)
-						 * 
-						 * @see org.eclipse.dltk.ui.templates.ScriptTemplateContext#evaluate(org.eclipse.jface.text.templates.Template)
-						 */
-						@Override
-						public TemplateBuffer evaluate(Template template) throws BadLocationException, TemplateException
+						return new ScriptTemplateContext(this, document, completionPosition, length, sourceModule)
 						{
-							if (!canEvaluate(template))
+							/*
+							 * (non-Javadoc)
+							 * 
+							 * @see org.eclipse.dltk.ui.templates.ScriptTemplateContext#evaluate(org.eclipse.jface.text.templates.Template)
+							 */
+							@Override
+							public TemplateBuffer evaluate(Template template) throws BadLocationException, TemplateException
 							{
-								return null;
-							}
-							Template copy = template;
-							final String[] lines = TextUtils.splitLines(copy.getPattern());
-							if (lines.length > 1)
-							{
-								StringBuilder sb1 = new StringBuilder();
-								for (String line : lines)
+								if (!canEvaluate(template))
 								{
-									sb1.append(line);
+									return null;
 								}
-								copy = new Template(copy.getName(), copy.getDescription(), copy.getContextTypeId(), sb1.toString(), copy.isAutoInsertable());
+								Template copy = template;
+								final String[] lines = TextUtils.splitLines(copy.getPattern());
+								if (lines.length > 1)
+								{
+									StringBuilder sb1 = new StringBuilder();
+									for (String line : lines)
+									{
+										sb1.append(line);
+									}
+									copy = new Template(copy.getName(), copy.getDescription(), copy.getContextTypeId(), sb1.toString(), copy.isAutoInsertable());
+								}
+								return super.evaluate(copy);
 							}
-							return super.evaluate(copy);
-						}
-					};
-				}
-			};
-			TemplateContext context = contextType.createContext(viewer.getDocument(), offset - prefix.length(), prefix.length(), (ISourceModule)modelElement);
-			IDLTKUILanguageToolkit languageToolkit = DLTKUILanguageManager.getLanguageToolkit(JavaScriptLanguageToolkit.getDefault().getNatureId());
-			Template[] templates = languageToolkit.getEditorTemplates().getTemplateStore().getTemplates();
-			for (Template template : templates)
-			{
-				if (template.getName().startsWith(prefix))
+						};
+					}
+				};
+				TemplateContext context = contextType.createContext(viewer.getDocument(), offset - prefix.length(), prefix.length(),
+					(ISourceModule)modelElement);
+				IDLTKUILanguageToolkit languageToolkit = DLTKUILanguageManager.getLanguageToolkit(JavaScriptLanguageToolkit.getDefault().getNatureId());
+				Template[] templates = languageToolkit.getEditorTemplates().getTemplateStore().getTemplates();
+				for (Template template : templates)
 				{
-					list.add(new ScriptTemplateProposal(template, context, region, DLTKPluginImages.get(DLTKPluginImages.IMG_OBJS_TEMPLATE), 1));
+					if (template.getName().startsWith(prefix))
+					{
+						list.add(new ScriptTemplateProposal(template, context, region, DLTKPluginImages.get(DLTKPluginImages.IMG_OBJS_TEMPLATE), 1));
+					}
 				}
 			}
-
 
 			IScriptCompletionProposal[] scriptCompletionProposals = collector.getScriptCompletionProposals();
 
@@ -215,6 +217,48 @@ final class ContentAssistProcessor implements IContentAssistProcessor
 			return list.toArray(new ICompletionProposal[list.size()]);
 		}
 		return new ICompletionProposal[0];
+	}
+
+	protected boolean isValidLocation(ITextViewer viewer, IRegion region)
+	{
+		try
+		{
+			final String trigger = getTrigger(viewer, region);
+			final char[] ignore = new char[] { '.', ':', '@', '$' };
+			for (char element : ignore)
+			{
+				if (trigger.indexOf(element) != -1)
+				{
+					return false;
+				}
+			}
+		}
+		catch (BadLocationException e)
+		{
+			if (DLTKCore.DEBUG)
+			{
+				e.printStackTrace();
+			}
+			return false;
+		}
+		return true;
+	}
+
+	protected String getTrigger(ITextViewer viewer, IRegion region) throws BadLocationException
+	{
+		final IDocument doc = viewer.getDocument();
+		final int regionEnd = region.getOffset() + region.getLength();
+		final IRegion line = doc.getLineInformationOfOffset(regionEnd);
+		final String s = doc.get(line.getOffset(), regionEnd - line.getOffset());
+		final int spaceIndex = s.lastIndexOf(' ');
+		if (spaceIndex != -1)
+		{
+			return s.substring(spaceIndex);
+		}
+		else
+		{
+			return s;
+		}
 	}
 
 	protected String extractPrefix(ITextViewer viewer, int offset)
