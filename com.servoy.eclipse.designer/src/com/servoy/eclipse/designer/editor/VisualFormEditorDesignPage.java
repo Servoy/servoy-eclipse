@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.designer.editor;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -102,6 +104,7 @@ import com.servoy.eclipse.designer.actions.DistributeAction;
 import com.servoy.eclipse.designer.actions.DistributeRequest;
 import com.servoy.eclipse.designer.actions.SelectFeedbackmodeAction;
 import com.servoy.eclipse.designer.actions.SelectSnapmodeAction;
+import com.servoy.eclipse.designer.actions.ViewerTogglePropertyAction;
 import com.servoy.eclipse.designer.dnd.FormElementTransferDropTarget;
 import com.servoy.eclipse.designer.editor.commands.AddFieldAction;
 import com.servoy.eclipse.designer.editor.commands.AddPortalAction;
@@ -154,6 +157,11 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	public static final String COOLBAR_SAMESIZE = "same size";
 	public static final String COOLBAR_TOGGLE = "toggle";
 	public static final String COOLBAR_ELEMENTS = "elements";
+
+	/**
+	 * A viewer property indicating whether inherited elements are hidden. The value must  be a Boolean.
+	 */
+	public static final String PROPERTY_HIDE_INHERITED = "Hide.inherited"; //$NON-NLS-1$
 
 	protected GraphicalViewer graphicalViewer;
 	private final VisualFormEditor editorPart;
@@ -543,12 +551,26 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		action = new SelectSnapmodeAction(viewer);
 		getActionRegistry().registerAction(action);
 
+		action = new ViewerTogglePropertyAction(viewer, DesignerActionFactory.TOGGLE_HIDE_INHERITED.getId(), DesignerActionFactory.TOGGLE_HIDE_INHERITED_TEXT,
+			DesignerActionFactory.TOGGLE_HIDE_INHERITED_TOOLTIP, DesignerActionFactory.TOGGLE_HIDE_INHERITED_IMAGE, PROPERTY_HIDE_INHERITED);
+		getActionRegistry().registerAction(action);
+
 		addToolbarAction(COOLBAR_TOGGLE, getActionRegistry().getAction(DesignerActionFactory.SELECT_FEEDBACK.getId()));
 		addToolbarAction(COOLBAR_TOGGLE, getActionRegistry().getAction(DesignerActionFactory.SELECT_SNAPMODE.getId()));
-		addToolbarAction(COOLBAR_TOGGLE, getActionRegistry().getAction(DesignerActionFactory.TOGGLE_SHOW_ANCHOR_FEEDBACK.getId()));
-		addToolbarAction(COOLBAR_TOGGLE, getActionRegistry().getAction(DesignerActionFactory.TOGGLE_SHOW_SAME_SIZE_FEEDBACK.getId()));
+		addToolbarAction(COOLBAR_TOGGLE, getActionRegistry().getAction(DesignerActionFactory.TOGGLE_HIDE_INHERITED.getId()));
 
 		refreshToolBars();
+
+		viewer.addPropertyChangeListener(new PropertyChangeListener()
+		{
+			public void propertyChange(PropertyChangeEvent evt)
+			{
+				if (evt.getPropertyName().equals(PROPERTY_HIDE_INHERITED))
+				{
+					getGraphicalViewer().getRootEditPart().getContents().refresh();
+				}
+			}
+		});
 	}
 
 	protected void fillToolbar()

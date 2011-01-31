@@ -107,10 +107,10 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
-	public static final String TOGGLE_SHOW_ANCHOR_FEEDBACK_TEXT = "Show Anchor feedback";
-	public static final String TOGGLE_SHOW_ANCHOR_FEEDBACK_TOOLTIP = "Show anchor feedback for selected elements";
-	public static final ImageDescriptor TOGGLE_SHOW_ANCHOR_FEEDBACK_IMAGE = Activator.loadImageDescriptorFromBundle("anchor.gif");//$NON-NLS-1$ 
-	public static final ActionFactory TOGGLE_SHOW_ANCHOR_FEEDBACK = new ActionFactory("toggle-show-anchor-feedback") {//$NON-NLS-1$
+	public static final String TOGGLE_HIDE_INHERITED_TEXT = "Hide inherited elements";
+	public static final String TOGGLE_HIDE_INHERITED_TOOLTIP = TOGGLE_HIDE_INHERITED_TEXT;
+	public static final ImageDescriptor TOGGLE_HIDE_INHERITED_IMAGE = Activator.loadImageDescriptorFromBundle("hide_inherited.gif"); //$NON-NLS-1$ 
+	public static final ActionFactory TOGGLE_HIDE_INHERITED = new ActionFactory("toggle-hide-inherited") {//$NON-NLS-1$
 
 		@Override
 		public IWorkbenchAction create(IWorkbenchWindow window)
@@ -119,32 +119,11 @@ public abstract class DesignerActionFactory extends ActionFactory
 			{
 				throw new IllegalArgumentException();
 			}
-			RetargetAction action = new RetargetAction(getId(), TOGGLE_SHOW_ANCHOR_FEEDBACK_TEXT, IAction.AS_CHECK_BOX);
-			action.setToolTipText(TOGGLE_SHOW_ANCHOR_FEEDBACK_TOOLTIP);
+			RetargetAction action = new RetargetAction(getId(), TOGGLE_HIDE_INHERITED_TEXT, IAction.AS_PUSH_BUTTON);
+			action.setToolTipText(TOGGLE_HIDE_INHERITED_TOOLTIP);
 			window.getPartService().addPartListener(action);
 //			action.setActionDefinitionId("org.eclipse.ui.edit." + getId()); //$NON-NLS-1$
-			action.setImageDescriptor(TOGGLE_SHOW_ANCHOR_FEEDBACK_IMAGE);
-			return action;
-		}
-	};
-
-	public static final String TOGGLE_SHOW_SAME_SIZE_FEEDBACK_TEXT = "Show same-size feedback";
-	public static final String TOGGLE_SHOW_SAME_SIZE_FEEDBACK_TOOLTIP = "Show same-size feedback for selected elements";
-	public static final ImageDescriptor TOGGLE_SHOW_SAME_SIZE_FEEDBACK_IMAGE = Activator.loadImageDescriptorFromBundle("samesize.gif");//$NON-NLS-1$ 
-	public static final ActionFactory TOGGLE_SHOW_SAME_SIZE_FEEDBACK = new ActionFactory("toggle-show-samesize-feedback") {//$NON-NLS-1$
-
-		@Override
-		public IWorkbenchAction create(IWorkbenchWindow window)
-		{
-			if (window == null)
-			{
-				throw new IllegalArgumentException();
-			}
-			RetargetAction action = new RetargetAction(getId(), TOGGLE_SHOW_SAME_SIZE_FEEDBACK_TEXT, IAction.AS_CHECK_BOX);
-			action.setToolTipText(TOGGLE_SHOW_SAME_SIZE_FEEDBACK_TOOLTIP);
-			window.getPartService().addPartListener(action);
-//			action.setActionDefinitionId("org.eclipse.ui.edit." + getId()); //$NON-NLS-1$
-			action.setImageDescriptor(TOGGLE_SHOW_SAME_SIZE_FEEDBACK_IMAGE);
+			action.setImageDescriptor(TOGGLE_HIDE_INHERITED_IMAGE);
 			return action;
 		}
 	};

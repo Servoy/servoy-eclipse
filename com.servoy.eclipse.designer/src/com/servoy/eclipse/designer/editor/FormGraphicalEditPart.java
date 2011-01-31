@@ -96,6 +96,14 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 			while (it.hasNext())
 			{
 				IFormElement o = it.next();
+
+				if (Boolean.TRUE.equals(getViewer().getProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED)) &&
+					!editorPart.getForm().equals(o.getParent()))
+				{
+					// Hide inherited elements 
+					continue;
+				}
+
 				if (o instanceof AbstractBase && ((AbstractBase)o).isOverrideElement() && ((AbstractBase)o).getSuperPersist() == null)
 				{
 					// skip orphaned overrides

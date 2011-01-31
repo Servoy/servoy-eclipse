@@ -69,7 +69,7 @@ public class ViewerTogglePropertyAction extends Action
 	@Override
 	public void run()
 	{
-		diagramViewer.setProperty(property, new Boolean(!isChecked()));
+		diagramViewer.setProperty(property, Boolean.valueOf(!isChecked()));
 	}
 
 }
