@@ -298,9 +298,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 						ElementFactory.createFields(form, dataProviders, dataProviderWizardPage.optionsGroup.isPlaceAsLabels(),
 							dataProviderWizardPage.optionsGroup.isPlaceWithLabels(), dataProviderWizardPage.optionsGroup.isPlaceHorizontal(),
 							dataProviderWizardPage.optionsGroup.isFillText(), dataProviderWizardPage.optionsGroup.isFillName(),
-							designerPreferences.getGridSnapTo() ? new SnapToGridFieldPositioner(designerPreferences) : null, new Point(60, 70));
+							designerPreferences.getGridSnapTo() ? new SnapToGridFieldPositioner(designerPreferences) : null,
+							dataProviderWizardPage.optionsGroup.isPlaceHorizontal() ? new Point(0, 0) : new Point(60, 70));
 
-						if (settings.getBoolean("placeHorizontal"))
+						if (dataProviderWizardPage.optionsGroup.isPlaceHorizontal())
 						{
 							form.setView(FormController.LOCKED_TABLE_VIEW);
 						}
