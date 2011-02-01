@@ -28,6 +28,7 @@ import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.Transfer;
 
 import com.servoy.eclipse.dnd.IDragData;
+import com.servoy.eclipse.ui.Activator;
 
 /**
  * @author jcompagner
@@ -93,7 +94,7 @@ public class UserNodeListDragSourceListener implements DragSourceListener
 		if (lst.size() > 0)
 		{
 			dragObjects = lst.toArray(new IDragData[lst.size()]);
-			event.image = com.servoy.eclipse.ui.Activator.getDefault().loadImageFromOldLocation("button.gif"); // TODO: better drag image
+			event.image = Activator.getDefault().loadImageFromBundle("empty.png");
 		}
 
 		event.doit = dragObjects != null;
