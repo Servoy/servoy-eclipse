@@ -24,6 +24,7 @@ import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.dnd.TemplateTransfer;
 import org.eclipse.gef.requests.CreationFactory;
+import org.eclipse.swt.dnd.DND;
 
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.dnd.ElementTransferDropTarget;
@@ -64,7 +65,7 @@ public class PaletteItemTransferDropTargetListener extends ElementTransferDropTa
 			}
 		}
 
-		if (template != null)
+		if (template != null && (getCurrentEvent().operations & DND.DROP_LINK) != 0)
 		{
 			org.eclipse.swt.graphics.Point swtPoint = getViewer().getControl().toControl(getCurrentEvent().x, getCurrentEvent().y);
 			Point point = new Point(swtPoint.x, swtPoint.y);

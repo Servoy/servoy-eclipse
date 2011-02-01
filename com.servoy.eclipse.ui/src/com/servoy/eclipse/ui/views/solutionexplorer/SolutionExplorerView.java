@@ -1189,8 +1189,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		listMenuToolbarManager.add(pullDown);
 		listMenuToolbarManager.update(true);
 
-		list.addDragSupport(DND.DROP_COPY | DND.DROP_LINK, new Transfer[] { FormElementTransfer.getInstance() }, new UserNodeListDragSourceListener(list,
-			FormElementTransfer.getInstance()));
+		list.addDragSupport(DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK, new Transfer[] { FormElementTransfer.getInstance() },
+			new UserNodeListDragSourceListener(list, FormElementTransfer.getInstance()));
 
 		list.addDoubleClickListener(new IDoubleClickListener()
 		{
@@ -2254,8 +2254,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
-		newActionInTreeSecondary.registerAction(UserNodeType.FORM, new OpenWizardAction(NewFormWizard.class,
-			Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form")); //$NON-NLS-1$ //$NON-NLS-2$
+		newActionInTreeSecondary.registerAction(UserNodeType.FORM,
+			new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form")); //$NON-NLS-1$ //$NON-NLS-2$
 		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION, newForm);
 
 		newActionInListPrimary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),

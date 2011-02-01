@@ -20,6 +20,7 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.Request;
+import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 
 import com.servoy.eclipse.designer.editor.CreateElementRequest;
@@ -60,11 +61,14 @@ public class FormElementTransferDropTarget extends ElementTransferDropTarget
 			{
 				editPart = getViewer().getContents();
 			}
-			// note. if setDropObject() call can be avoided, we do not need the UserNodeListDragSourceListener.dragObjects hack!
-			DataRequest dropReq = new DataRequest(VisualFormEditor.REQ_DROP_LINK, point, UserNodeListDragSourceListener.dragObjects);
-			if (editPart.understandsRequest(dropReq))
+			if ((getCurrentEvent().operations & DND.DROP_LINK) != 0)
 			{
-				return dropReq;
+				// note. if setDropObject() call can be avoided, we do not need the UserNodeListDragSourceListener.dragObjects hack!
+				DataRequest dropReq = new DataRequest(VisualFormEditor.REQ_DROP_LINK, point, UserNodeListDragSourceListener.dragObjects);
+				if (editPart.understandsRequest(dropReq))
+				{
+					return dropReq;
+				}
 			}
 
 			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_DROP_COPY);
