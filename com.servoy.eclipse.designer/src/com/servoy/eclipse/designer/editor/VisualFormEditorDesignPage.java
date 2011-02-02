@@ -69,6 +69,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -138,9 +139,11 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.CoolbarLayout;
 import com.servoy.eclipse.ui.util.ActionToolItem;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.Part;
 
 /**
@@ -621,6 +624,50 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	protected void configureGraphicalViewer()
 	{
 		getGraphicalViewer().getControl().setBackground(ColorConstants.lightGray);
+		getGraphicalViewer().addSelectionChangedListener(new ISelectionChangedListener()
+		{
+			// Show the size and location of the current selection in the status line
+			public void selectionChanged(SelectionChangedEvent event)
+			{
+				StringBuilder sb = null;
+				if (event.getSelection() instanceof IStructuredSelection)
+				{
+					Iterator< ? > iterator = ((IStructuredSelection)event.getSelection()).iterator();
+					while (iterator.hasNext())
+					{
+						Object next = iterator.next();
+						if (next instanceof EditPart && ((EditPart)next).getModel() instanceof ISupportBounds)
+						{
+							ISupportBounds supportBounds = (ISupportBounds)((EditPart)next).getModel();
+							java.awt.Point location = supportBounds.getLocation();
+							java.awt.Dimension size = supportBounds.getSize();
+							if (location != null && size != null)
+							{
+								if (sb == null)
+								{
+									sb = new StringBuilder();
+								}
+								else
+								{
+									if (sb.length() > 50)
+									{
+										// too much information
+										break;
+									}
+									sb.append(' ');
+								}
+								sb.append('(')//
+								.append(location.x).append(',').append(location.y)//
+								.append(' ')//
+								.append(size.width).append('x').append(size.height)//
+								.append(')');
+							}
+						}
+					}
+					EditorUtil.setStatuslineMessage(sb == null ? null : sb.toString());
+				}
+			}
+		});
 	}
 
 	@Override
