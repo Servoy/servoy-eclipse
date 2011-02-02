@@ -28,6 +28,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.editors.MethodCellEditor;
 import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
+import com.servoy.eclipse.ui.property.MethodPropertyController.MethodValueEditor;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.util.MapEntryValueEditor.IRelayEditorProvider;
 import com.servoy.j2db.dataprocessing.IPropertyDescriptor;
@@ -61,7 +62,8 @@ class RelayEditorProvider implements IRelayEditorProvider
 					{
 						Solution solution = servoyModel.getFlattenedSolution().getSolution();
 						MethodLabelProvider methodLabelProvider = new MethodLabelProvider(solution, solution, false, false);
-						methodCellEditor = new MethodCellEditor(parent.getTable(), methodLabelProvider, null, solution, key, false, true, false, false, true);
+						methodCellEditor = new MethodCellEditor(parent.getTable(), methodLabelProvider, new MethodValueEditor(solution, null), solution, key,
+							false, true, false, false, true);
 						methodCellEditors.put(key, methodCellEditor);
 					}
 					return methodCellEditor;
