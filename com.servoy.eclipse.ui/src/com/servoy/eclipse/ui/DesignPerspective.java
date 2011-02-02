@@ -49,7 +49,7 @@ import com.servoy.j2db.util.Utils;
 public class DesignPerspective implements IPerspectiveFactory
 {
 
-	protected static final String[] actionIds = { "org.eclipse.debug.ui.debugActionSet", "org.eclipse.dltk.debug.ui.ScriptDebugActionSet", "org.eclipse.debug.ui.launchActionSet", "org.eclipse.ui.externaltools.ExternalToolsSet" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+	protected static final String[] actionIds = { "org.eclipse.debug.ui.launchActionSet", "org.eclipse.ui.externaltools.ExternalToolsSet" }; //$NON-NLS-1$ //$NON-NLS-2$
 	protected static final String[] activityIds = { "com.servoy.eclipse.activities.javaDevelopment", "com.servoy.eclipse.activities.antDevelopment", "org.eclipse.team.cvs", "org.eclipse.antDevelopment", "org.eclipse.javaDevelopment", "org.eclipse.plugInDevelopment", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk", "com.servoy.eclipse.activities.edit", "org.eclipse.equinox.p2.ui.sdk.classicUpdate" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ 
 
 	@SuppressWarnings("restriction")
