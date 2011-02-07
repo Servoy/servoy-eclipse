@@ -223,7 +223,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					}
 					else
 					{
-						servoyModel.setActiveProject(newProject);
+						servoyModel.setActiveProject(newProject, true);
 					}
 				}
 				monitor.worked(1);

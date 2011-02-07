@@ -53,7 +53,6 @@ import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.persistence.AbstractRootObject;
-import com.servoy.j2db.persistence.I18NUtil.MessageEntry;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
@@ -64,20 +63,21 @@ import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Style;
+import com.servoy.j2db.persistence.I18NUtil.MessageEntry;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.ILogLevel;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.xmlxport.GroupInfo;
-import com.servoy.j2db.util.xmlxport.GroupInfo.GroupElementInfo;
 import com.servoy.j2db.util.xmlxport.IXMLImportEngine;
 import com.servoy.j2db.util.xmlxport.IXMLImportHandlerVersions11AndHigher;
 import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
 import com.servoy.j2db.util.xmlxport.ImportInfo;
 import com.servoy.j2db.util.xmlxport.ImportTransactable;
 import com.servoy.j2db.util.xmlxport.RootObjectImportInfo;
-import com.servoy.j2db.util.xmlxport.RootObjectInfo.RootElementInfo;
 import com.servoy.j2db.util.xmlxport.UserInfo;
+import com.servoy.j2db.util.xmlxport.GroupInfo.GroupElementInfo;
+import com.servoy.j2db.util.xmlxport.RootObjectInfo.RootElementInfo;
 
 public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXMLImportHandlerVersions11AndHigher
 {
@@ -152,9 +152,9 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						ServoyProject servoyProject = servoyModel.getServoyProject(mainProject[0].getName());
 						if (resourcesProject == null) userManager.setResourcesProject(rProject[0]);
 
-						servoyModel.setActiveProject(servoyProject);
+						servoyModel.setActiveProject(servoyProject, true);
 						userManager.writeAllSecurityInformation(true);
-						if (!activateSolution) servoyModel.setActiveProject(activeProject);
+						if (!activateSolution) servoyModel.setActiveProject(activeProject, true);
 						dummySolProject[0].delete(true, true, null); // dummy did it's job - to activate correct resources project, now we must remove it
 					}
 					catch (Exception e)
@@ -189,7 +189,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						// activate dummy
 						ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 						ServoyProject dummyServoyProject = servoyModel.getServoyProject(dummySolProject[0].getName());
-						servoyModel.setActiveProject(dummyServoyProject);
+						servoyModel.setActiveProject(dummyServoyProject, false);
 
 						// verify that correct resources project is active
 						if (servoyModel.getActiveResourcesProject() == null || servoyModel.getActiveResourcesProject().getProject() != rProject[0])
@@ -853,7 +853,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 
 	public void importingFailed(ImportInfo importInfo, ImportTransactable importTransactable, Exception e)
 	{
-		ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(null);
+		ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(null, false);
 		rollback(importTransactable);
 		x11handler.importingFailed(importInfo, importTransactable, e);
 	}

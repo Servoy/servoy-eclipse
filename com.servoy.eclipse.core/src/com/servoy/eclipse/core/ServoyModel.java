@@ -355,7 +355,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 										try
 										{
 											EclipseMessages.writeProjectI18NFiles(toProject, false);
-											ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(toProject);
+											ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(toProject, true);
 										}
 										catch (Exception ex)
 										{
@@ -628,7 +628,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		return new ArrayList<IRootObject>();
 	}
 
-	private void autoSelectActiveProjectIfNull()
+	private void autoSelectActiveProjectIfNull(final boolean buildProject)
 	{
 		if (activeProject == null && !activatingProject.get())
 		{
@@ -649,7 +649,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				activatingProject.set(true);
 				if (Display.getCurrent() != null)
 				{
-					setActiveProject(autoSetActiveProject);
+					setActiveProject(autoSetActiveProject, buildProject);
 				}
 				else
 				{
@@ -659,7 +659,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 
 						public void run()
 						{
-							setActiveProject(toActivateProject);
+							setActiveProject(toActivateProject, buildProject);
 						}
 					});
 				}
@@ -672,7 +672,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		}
 	}
 
-	public void setActiveProject(final ServoyProject project)
+	public void setActiveProject(final ServoyProject project, final boolean buildProject)
 	{
 		// listeners must run in GUI thread to prevent 'Invalid thread access' exceptions;
 		// the rest should run in a progress dialog that blocks the workbench but does not make the GUI
@@ -805,7 +805,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 						});
 						progressMonitor.worked(1);
 
-						buildActiveProjectsInJob();
+						if (buildProject) buildActiveProjectsInJob();
 
 						WorkspaceJob testBuildPaths = new WorkspaceJob("Test Build Paths")
 						{
@@ -1628,7 +1628,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 							eclipseRepository.removeRootObject(solution.getID());
 							if (activeProject != null && activeProject.getProject().getName().equals(resource.getName()))
 							{
-								setActiveProject(null);
+								setActiveProject(null, true);
 								callActiveProject = true;
 							}
 							else if (activeProject != null)
@@ -1692,7 +1692,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		}
 		if (callActiveProject)
 		{
-			autoSelectActiveProjectIfNull();
+			autoSelectActiveProjectIfNull(true);
 		}
 	}
 
@@ -2582,9 +2582,8 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 	public void initialize()
 	{
 		getUserManager().setFormAndTableChangeAware();
-
 		// first auto select active project
-		autoSelectActiveProjectIfNull();
+		autoSelectActiveProjectIfNull(false);
 		// then start listen to changes. Else a deadlock can happen
 		getWorkspace().addResourceChangeListener(new IResourceChangeListener()
 		{

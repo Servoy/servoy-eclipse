@@ -50,7 +50,7 @@ public class ActivateSolutionAction extends Action implements ISelectionChangedL
 	{
 		if (selectedProject != null)
 		{
-			ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(selectedProject);
+			ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(selectedProject, true);
 		}
 	}
 

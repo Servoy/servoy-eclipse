@@ -232,7 +232,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						// make the solution active
 						ServoyProject newServoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().refreshServoyProjects().getServoyProject(
 							result.getSelectedSolution());
-						ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(newServoyProject);
+						ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(newServoyProject, true);
 					}
 					return Status.OK_STATUS;
 				}

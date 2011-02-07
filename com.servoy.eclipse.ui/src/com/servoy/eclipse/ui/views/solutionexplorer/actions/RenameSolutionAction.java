@@ -110,7 +110,7 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 						ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 						if (isActive)
 						{
-							ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(null);
+							ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(null, false);
 						}
 						servoyProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
 						editingSolution.updateName(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), name);
@@ -128,11 +128,11 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 							if (activeProject.getEditingSolution().getName().equals(name))
 							{
 								ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(
-									ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name));
+									ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name), true);
 							}
 							else
 							{
-								ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(activeProject);
+								ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(activeProject, true);
 							}
 						}
 					}
