@@ -71,6 +71,10 @@ public class SearchAction extends Action implements ISelectionChangedListener
 		{
 			query = new RelationSearch((Relation)selectedObject);
 		}
+		else if (selectedObject instanceof String) // when it is a string it is the plugin name.
+		{
+			query = new PluginSearch((String)selectedObject);
+		}
 		else if (selectedObject instanceof Form)
 		{
 			query = new FormSearch((Form)selectedObject);
@@ -122,6 +126,10 @@ public class SearchAction extends Action implements ISelectionChangedListener
 				{
 					selectedObject = ((Object[])selectedObject)[0];
 				}
+			}
+			else if (node.getType() == UserNodeType.PLUGIN)
+			{
+				selectedObject = node.getName();
 			}
 		}
 		setEnabled(selectedObject != null);
