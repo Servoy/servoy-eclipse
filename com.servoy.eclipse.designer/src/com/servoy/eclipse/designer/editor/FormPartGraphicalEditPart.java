@@ -33,11 +33,13 @@ import org.eclipse.gef.DragTracker;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.Request;
+import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.requests.SelectionRequest;
+import org.eclipse.gef.tools.DirectEditManager;
 import org.eclipse.gef.tools.DragEditPartsTracker;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
@@ -48,11 +50,15 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.internal.MarqueeDragTracker;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
+import com.servoy.eclipse.designer.property.PropertyDirectEditManager;
+import com.servoy.eclipse.designer.property.PropertyDirectEditManager.PropertyCellEditorLocator;
+import com.servoy.eclipse.designer.property.PropertyDirectEditPolicy;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
  * Edit part for parts in form designer.
@@ -63,6 +69,7 @@ import com.servoy.j2db.persistence.Part;
 public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistEditPart, IPersistChangeListener
 {
 	protected IApplication application;
+	private DirectEditManager directEditManager;
 
 	private final boolean inherited;
 	private final VisualFormEditor editorPart;
@@ -85,7 +92,26 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 	protected void createEditPolicies()
 	{
 		installEditPolicy(EditPolicy.COMPONENT_ROLE, new FormPartEditPolicy());
+		installEditPolicy(EditPolicy.DIRECT_EDIT_ROLE, new PropertyDirectEditPolicy(getPersist(), editorPart.getForm()));
 	}
+
+	@Override
+	public void performRequest(Request request)
+	{
+		if (request.getType() == RequestConstants.REQ_DIRECT_EDIT) performDirectEdit();
+		else super.performRequest(request);
+	}
+
+	protected void performDirectEdit()
+	{
+		if (directEditManager == null)
+		{
+			directEditManager = new PropertyDirectEditManager(this, new PropertyCellEditorLocator(this),
+				StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName());
+		}
+		directEditManager.show();
+	}
+
 
 	@Override
 	protected IFigure createFigure()

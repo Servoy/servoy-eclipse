@@ -25,12 +25,14 @@ import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.requests.DirectEditRequest;
 import org.eclipse.gef.tools.CellEditorLocator;
 import org.eclipse.gef.tools.DirectEditManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -109,7 +111,6 @@ public class PropertyDirectEditManager extends DirectEditManager
 	@Override
 	protected void initCellEditor()
 	{
-
 		CellEditor cellEditor = getCellEditor();
 		if (cellEditor != null)
 		{
@@ -127,6 +128,16 @@ public class PropertyDirectEditManager extends DirectEditManager
 			editor.setFont(scaledFont);
 		}
 	}
+
+	/**
+	 * Set the error text. This should be set to null when the current value is valid, otherwise it should be set to a error string
+	 */
+	protected void setErrorText()
+	{
+		((FormGraphicalRootEditPart)getEditPart().getRoot()).getEditorPart().getEditorSite().getActionBars().getStatusLineManager().setErrorMessage(
+			getCellEditor().isValueValid() ? null : getCellEditor().getErrorMessage());
+	}
+
 
 	/**
 	 * Override show to enable immediate showing of dialog direct editors.
@@ -159,6 +170,42 @@ public class PropertyDirectEditManager extends DirectEditManager
 			getCellEditor().getControl().setVisible(true);
 			getCellEditor().setFocus();
 			showFeedback();
+		}
+	}
+
+	@Override
+	public void showFeedback()
+	{
+		setErrorText();
+		super.showFeedback();
+	}
+
+	@Override
+	protected void commit()
+	{
+		if (getCellEditor().isValueValid())
+		{
+			super.commit();
+		}
+		else
+		{
+			// do not commit an invalid value, show a dialog instead
+			final String errorMessage = getCellEditor().getErrorMessage() == null ? "Invalid value" : getCellEditor().getErrorMessage(); //$NON-NLS-1$
+			try
+			{
+				eraseFeedback();
+			}
+			finally
+			{
+				bringDown();
+			}
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not set property value", errorMessage); //$NON-NLS-1$
+				}
+			});
 		}
 	}
 
