@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
+import org.eclipse.dltk.javascript.typeinfo.TypeInfoUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Method;
 import org.eclipse.dltk.javascript.typeinfo.model.Parameter;
@@ -248,40 +249,34 @@ public abstract class TypeCreator
 		if (BASE_TYPES.contains(typeName) || typeName.startsWith("Array<")) return null;
 		if (!initialized) initalize();
 		String realTypeName = typeName;
-		Type type = null;
+		Type type = createType(context, realTypeName, realTypeName);
+		if (type != null)
 		{
-			if (type == null)
+			context.markInvariant(type);
+		}
+		else
+		{
+			FlattenedSolution fs = getFlattenedSolution(context);
+			if (fs != null)
 			{
-				type = createType(context, realTypeName, realTypeName);
-				if (type != null)
+				type = context.getInvariantType(realTypeName, fs.getSolution().getName());
+				if (type == null)
 				{
-					context.markInvariant(type);
-				}
-				else
-				{
-					FlattenedSolution fs = getFlattenedSolution(context);
-					if (fs != null)
-					{
-						type = context.getInvariantType(realTypeName, fs.getSolution().getName());
-						if (type == null)
-						{
-							type = context.getInvariantType(realTypeName, "scope:tables");
-							if (type == null)
-							{
-								type = createDynamicType(context, realTypeName, realTypeName);
-								if (type != null && realTypeName.indexOf('<') != -1)
-								{
-									context.markInvariant(type, fs.getSolution().getName());
-									invariantScopes.put(fs.getSolution().getName(), Boolean.TRUE);
-								}
-							}
-						}
-					}
-					else
+					type = context.getInvariantType(realTypeName, "scope:tables");
+					if (type == null)
 					{
 						type = createDynamicType(context, realTypeName, realTypeName);
+						if (type != null && realTypeName.indexOf('<') != -1)
+						{
+							context.markInvariant(type, fs.getSolution().getName());
+							invariantScopes.put(fs.getSolution().getName(), Boolean.TRUE);
+						}
 					}
 				}
+			}
+			else
+			{
+				type = createDynamicType(context, realTypeName, realTypeName);
 			}
 		}
 		return type;
@@ -468,7 +463,7 @@ public abstract class TypeCreator
 							method.setDescription(getDoc(name, scriptObjectClass, name, parameterTypes)); // TODO name should be of parent.
 							if (returnTypeClz != null)
 							{
-								method.setType(context.getType(getMemberTypeName(context, name, returnTypeClz, typeName)));
+								method.setType(context.getTypeRef(getMemberTypeName(context, name, returnTypeClz, typeName)));
 							}
 							method.setAttribute(IMAGE_DESCRIPTOR, METHOD);
 							method.setStatic(type == STATIC_METHOD);
@@ -481,7 +476,7 @@ public abstract class TypeCreator
 								{
 									Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
 									parameter.setName(param.getName());
-									if (param.getType() != null) parameter.setType(context.getType(SolutionExplorerListContentProvider.TYPES.get(param.getType())));
+									if (param.getType() != null) parameter.setType(context.getTypeRef(SolutionExplorerListContentProvider.TYPES.get(param.getType())));
 									parameter.setKind(param.isOptional() ? param.isVarArgs() ? ParameterKind.VARARGS : ParameterKind.OPTIONAL
 										: ParameterKind.NORMAL);
 									parameters.add(parameter);
@@ -494,7 +489,7 @@ public abstract class TypeCreator
 								{
 									Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
 									parameter.setName(SolutionExplorerListContentProvider.TYPES.get(paramClass.getName()));
-									parameter.setType(context.getType(SolutionExplorerListContentProvider.TYPES.get(paramClass.getName())));
+									parameter.setType(context.getTypeRef(SolutionExplorerListContentProvider.TYPES.get(paramClass.getName())));
 									parameter.setKind(ParameterKind.NORMAL);
 									parameters.add(parameter);
 								}
@@ -528,7 +523,6 @@ public abstract class TypeCreator
 		}
 	}
 
-	@SuppressWarnings("unused")
 	protected final String getMemberTypeName(ITypeInfoContext context, String memberName, Class< ? > memberReturnType, String objectTypeName)
 	{
 		int index = objectTypeName.indexOf('<');
@@ -789,7 +783,7 @@ public abstract class TypeCreator
 				Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
 				parameter.setKind(ParameterKind.NORMAL);
 				parameter.setName(argument.getName());
-				parameter.setType(context.getType(argument.getType().getName()));
+				parameter.setType(context.getTypeRef(argument.getType().getName()));
 				parameters.add(parameter);
 			}
 		}
@@ -798,7 +792,7 @@ public abstract class TypeCreator
 		String type = sm.getSerializableRuntimeProperty(IScriptProvider.TYPE);
 		if (type != null)
 		{
-			method.setType(context.getType(type));
+			method.setType(context.getTypeRef(type));
 		}
 		String comment = sm.getRuntimeProperty(IScriptProvider.COMMENT);
 		if (comment == null)
@@ -874,7 +868,7 @@ public abstract class TypeCreator
 		}
 		if (type != null)
 		{
-			property.setType(type);
+			property.setType(TypeInfoUtil.ref(type));
 		}
 		if (image != null)
 		{
@@ -945,7 +939,7 @@ public abstract class TypeCreator
 	 * @param name
 	 * @return
 	 */
-	public static String getDoc(String key, Class< ? > scriptObjectClass, String name, Class[] parameterTypes)
+	public static String getDoc(String key, Class< ? > scriptObjectClass, String name, Class< ? >[] parameterTypes)
 	{
 		if (scriptObjectClass == null) return null;
 

@@ -90,7 +90,7 @@ public class ElementResolver implements IElementResolver
 
 		if (ValueCollectionProvider.getGenerateFullGlobalCollection())
 		{
-			typeNames.add("devSolutionModel");
+			typeNames.add("servoyDeveloper");
 		}
 
 
@@ -267,7 +267,7 @@ public class ElementResolver implements IElementResolver
 					property.setReadOnly(true);
 					property.setAttribute(TypeCreator.VALUECOLLECTION, collection);
 					property.setAttribute(TypeCreator.IMAGE_DESCRIPTOR, TypeCreator.GLOBALS);
-					property.setType(context.getType("Globals<" + fs.getSolution().getName() + '>'));
+					property.setType(context.getTypeRef("Globals<" + fs.getSolution().getName() + '>'));
 					return property;
 				}
 			}
@@ -292,9 +292,9 @@ public class ElementResolver implements IElementResolver
 		}
 		Type type = null;
 		String typeName = getTypeName(context, name);
-		if ("devSolutionModel".equals(name))
+		if ("servoyDeveloper".equals(name))
 		{
-			typeName = "devSolutionModel";
+			typeName = "servoyDeveloper";
 		}
 		if (typeName != null)
 		{

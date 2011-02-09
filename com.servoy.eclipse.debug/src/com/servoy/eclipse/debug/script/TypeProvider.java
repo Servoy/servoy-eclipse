@@ -33,6 +33,7 @@ import javax.swing.Icon;
 
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeProvider;
+import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Parameter;
 import org.eclipse.dltk.javascript.typeinfo.model.Property;
@@ -129,7 +130,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addAnonymousClassType("JSUnit", JSUnitAssertFunctions.class);
 		addAnonymousClassType("JSSolutionModel", JSSolutionModel.class);
 		addAnonymousClassType("JSDatabaseManager", JSDatabaseManager.class);
-		addAnonymousClassType("devSolutionModel", JSDeveloperSolutionModel.class);
+		addAnonymousClassType("servoyDeveloper", JSDeveloperSolutionModel.class);
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
@@ -152,7 +153,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	@Override
 	public Type getType(ITypeInfoContext context, String typeName)
 	{
-		if (typeName.startsWith("Packages.") || typeName.startsWith("java."))
+		if (typeName.startsWith("Packages.") || typeName.startsWith("java.") || typeName.startsWith("javax."))
 		{
 			String name = typeName;
 			if (typeName.startsWith("P"))
@@ -236,7 +237,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 			property.setName(field.getName());
 			String fieldType = getPackageTypeString(field.getType());
-			if (fieldType != null) property.setType(context.getType(fieldType));
+			if (fieldType != null) property.setType(context.getTypeRef(fieldType));
 			if (Modifier.isStatic(field.getModifiers()))
 			{
 				property.setStatic(true);
@@ -248,7 +249,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			org.eclipse.dltk.javascript.typeinfo.model.Method m = TypeInfoModelFactory.eINSTANCE.createMethod();
 			m.setName(method.getName());
 			String methodType = getPackageTypeString(method.getReturnType());
-			if (methodType != null) m.setType(context.getType(methodType));
+			if (methodType != null) m.setType(context.getTypeRef(methodType));
 
 			EList<Parameter> parameters = m.getParameters();
 			Class< ? >[] parameterTypes = method.getParameterTypes();
@@ -256,7 +257,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			{
 				Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
 				parameter.setName(parameterTypes[i].getSimpleName() + " arg" + i);
-				parameter.setType(context.getType(getPackageTypeString(parameterTypes[i])));
+				parameter.setType(context.getTypeRef(getPackageTypeString(parameterTypes[i])));
 				parameters.add(parameter);
 			}
 			if (Modifier.isStatic(method.getModifiers()))
@@ -458,11 +459,13 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				Property maxRecordIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
 				maxRecordIndex.setName("maxRecordIndex");
 				maxRecordIndex.setDeprecated(true);
+				maxRecordIndex.setVisible(false);
 				type.getMembers().add(maxRecordIndex);
 
 				Property selectedIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
 				selectedIndex.setName("selectedIndex");
 				selectedIndex.setDeprecated(true);
+				selectedIndex.setVisible(false);
 				type.getMembers().add(selectedIndex);
 
 				// quickly add this one to the static types.
@@ -479,7 +482,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				List<Member> overwrittenMembers = new ArrayList<Member>();
 				for (Member member : members)
 				{
-					Type memberType = member.getType();
+					JSType memberType = member.getType();
 					if (memberType != null)
 					{
 						if (memberType.getName().equals(Record.JS_RECORD))
@@ -563,7 +566,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			}
 			else
 			{
-				clone.setType(context.getType(typeName));
+				clone.setType(context.getTypeRef(typeName));
 			}
 
 			return clone;
@@ -677,9 +680,17 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				compositeType.setSuperType(superType);
 				return compositeType;
 			}
+			else
+			{
+				Type compositeType = TypeInfoModelFactory.eINSTANCE.createType();
+				compositeType.getMembers().addAll(members);
+				compositeType.setName(fullTypeName);
+				compositeType.setKind(TypeKind.JAVA);
+				compositeType.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
+				compositeType.setSuperType(superType);
+				return compositeType;
 
-			return superType;
-
+			}
 		}
 
 	}
@@ -712,7 +723,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				List<Member> overwrittenMembers = new ArrayList<Member>();
 				for (Member member : members)
 				{
-					Type memberType = member.getType();
+					JSType memberType = member.getType();
 					if (memberType != null)
 					{
 						if (memberType.getName().equals(FoundSet.JS_FOUNDSET))
@@ -766,7 +777,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 					property.setName(clientPlugin.getName());
 					property.setReadOnly(true);
 					addAnonymousClassType("Plugin<" + clientPlugin.getName() + '>', scriptObject.getClass());
-					property.setType(context.getType("Plugin<" + clientPlugin.getName() + '>'));
+					property.setType(context.getTypeRef("Plugin<" + clientPlugin.getName() + '>'));
 
 					Image clientImage = null;
 					Icon icon = clientPlugin.getImage();
@@ -1034,14 +1045,14 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				switch (provider.getDataProviderType())
 				{
 					case IColumnTypes.DATETIME :
-						property.setType(context.getType("Date"));
+						property.setType(context.getTypeRef("Date"));
 						break;
 					case IColumnTypes.INTEGER :
 					case IColumnTypes.NUMBER :
-						property.setType(context.getType("Number"));
+						property.setType(context.getTypeRef("Number"));
 						break;
 					case IColumnTypes.TEXT :
-						property.setType(context.getType("String"));
+						property.setType(context.getTypeRef("String"));
 						break;
 				}
 				ImageDescriptor image = COLUMN_IMAGE;

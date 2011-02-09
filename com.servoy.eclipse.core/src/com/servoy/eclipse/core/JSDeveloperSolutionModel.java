@@ -81,56 +81,80 @@ public class JSDeveloperSolutionModel
 	 * Saves just the give form into the developers workspace.
 	 * This must be a solution created or altered form.
 	 * 
-	 * @param form
+	 * @param form The formname or JSForm object to save.
 	 */
-	public void js_save(JSForm form)
+	public void js_save(Object form)
 	{
-		final IFileAccess wfa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
-		Solution solutionCopy = state.getFlattenedSolution().getSolutionCopy();
-		try
+		String name = null;
+		if (form instanceof String)
 		{
-			Form frm = solutionCopy.getForm(form.js_getName());
-			if (frm == null) throw new IllegalArgumentException("JSForm is not a solution model created/altered form"); //$NON-NLS-1$
-
-			SolutionSerializer.writePersist(frm, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
+			name = (String)form;
 		}
-		catch (RepositoryException e)
+		else if (form instanceof JSForm)
 		{
-			Debug.error(e);
+			name = ((JSForm)form).js_getName();
+		}
+		if (name != null)
+		{
+			final IFileAccess wfa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
+			Solution solutionCopy = state.getFlattenedSolution().getSolutionCopy();
+			try
+			{
+				Form frm = solutionCopy.getForm(name);
+				if (frm == null) throw new IllegalArgumentException("JSForm is not a solution model created/altered form"); //$NON-NLS-1$
+
+				SolutionSerializer.writePersist(frm, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
+			}
+			catch (RepositoryException e)
+			{
+				Debug.error(e);
+			}
 		}
 	}
 
 	/**
 	 * Opens the form FormEditor in the developer.
 	 * 
-	 * @param form
+	 * @param form The form name or JSForm object to open in an editor.
 	 */
-	public void js_openForm(JSForm form)
+	public void js_openForm(Object form)
 	{
-		final Form frm = ServoyModelFinder.getServoyModel().getFlattenedSolution().getForm(form.js_getName());
-		if (frm != null)
+		String name = null;
+		if (form instanceof String)
 		{
-			Display.getDefault().asyncExec(new Runnable()
-			{
-				public void run()
-				{
-					try
-					{
-						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-							new PersistEditorInput(frm.getName(), frm.getSolution().getName(), frm.getUUID()).setNew(false),
-							PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-								Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
-					}
-					catch (PartInitException ex)
-					{
-						ServoyLog.logError(ex);
-					}
-				}
-			});
+			name = (String)form;
 		}
-		else
+		else if (form instanceof JSForm)
 		{
-			throw new IllegalArgumentException("form " + form.js_getName() + " is not a workspace stored (blueprint) form"); //$NON-NLS-1$//$NON-NLS-2$
+			name = ((JSForm)form).js_getName();
+		}
+		if (name != null)
+		{
+			final Form frm = ServoyModelFinder.getServoyModel().getFlattenedSolution().getForm(name);
+			if (frm != null)
+			{
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						try
+						{
+							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
+								new PersistEditorInput(frm.getName(), frm.getSolution().getName(), frm.getUUID()).setNew(false),
+								PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+									Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
+						}
+						catch (PartInitException ex)
+						{
+							ServoyLog.logError(ex);
+						}
+					}
+				});
+			}
+			else
+			{
+				throw new IllegalArgumentException("form " + name + " is not a workspace stored (blueprint) form"); //$NON-NLS-1$//$NON-NLS-2$
+			}
 		}
 	}
 }
