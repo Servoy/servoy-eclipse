@@ -52,6 +52,7 @@ import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
@@ -495,11 +496,11 @@ public class SolutionSerializer
 					if (source != null && source.trim().length() > 0)
 					{
 						sb.append(source);
-						replacePropertiesTag(obj, sb);
+						replacePropertiesTag(obj, sb, abstractScriptProvider);
 					}
 					else
 					{
-						generateDefaultJSDoc(obj, sb);
+						generateDefaultJSDoc(obj, sb, abstractScriptProvider);
 						sb.append("function "); //$NON-NLS-1$
 						sb.append(abstractScriptProvider.getName());
 						sb.append("()\n{\n}\n"); //$NON-NLS-1$
@@ -512,11 +513,11 @@ public class SolutionSerializer
 					{
 						sb.append(sv.getComment());
 						sb.append('\n');
-						replacePropertiesTag(obj, sb);
+						replacePropertiesTag(obj, sb, null);
 					}
 					else
 					{
-						generateDefaultJSDoc(obj, sb);
+						generateDefaultJSDoc(obj, sb, null);
 					}
 					int type = Column.mapToDefaultType(sv.getVariableType());
 					// Add the "@type" tag.
@@ -582,7 +583,7 @@ public class SolutionSerializer
 	 * @param sb
 	 */
 	@SuppressWarnings("nls")
-	private static void replacePropertiesTag(ServoyJSONObject obj, StringBuilder sb)
+	private static void replacePropertiesTag(ServoyJSONObject obj, StringBuilder sb, AbstractScriptProvider abstractScriptProvider)
 	{
 		if (sb.toString().trim().startsWith(SV_COMMENT))
 		{
@@ -597,13 +598,24 @@ public class SolutionSerializer
 			}
 			else if (obj.length() > 0)
 			{
+				StringBuilder params = new StringBuilder();
+				if (sb.indexOf("@param") == -1)
+				{
+					generateParams(params, abstractScriptProvider);
+					if (params.length() > 0)
+					{
+						sb.insert(endComment, "* \n" + params + " ");
+						endComment += params.length() + 4;
+					}
+				}
 				sb.insert(endComment, "*\n * " + PROPERTIESKEY + obj.toString(false) + "\n "); //$NON-NLS-1$ //$NON-NLS-2$
+
 			}
 		}
 		else
 		{
 			StringBuilder doc = new StringBuilder();
-			generateDefaultJSDoc(obj, doc);
+			generateDefaultJSDoc(obj, doc, abstractScriptProvider);
 			sb.insert(0, doc);
 		}
 	}
@@ -611,18 +623,61 @@ public class SolutionSerializer
 	/**
 	 * @param obj
 	 * @param sb
+	 * @param abstractScriptProvider TODO
 	 */
-	private static void generateDefaultJSDoc(ServoyJSONObject obj, StringBuilder sb)
+	@SuppressWarnings("nls")
+	private static void generateDefaultJSDoc(ServoyJSONObject obj, StringBuilder sb, AbstractScriptProvider abstractScriptProvider)
 	{
 		sb.append(SV_COMMENT);
-		sb.append("\n *"); //$NON-NLS-1$
+		sb.append("\n");
+
+		if (generateParams(sb, abstractScriptProvider))
+		{
+			sb.append(" *\n");
+		}
 		if (obj.length() > 0)
 		{
-			sb.append(' ');
+			sb.append(" * ");
 			sb.append(PROPERTIESKEY);
 			sb.append(obj.toString(false));
 		}
+		else
+		{
+			sb.append(" *");
+		}
 		sb.append("\n */\n"); //$NON-NLS-1$
+	}
+
+	/**
+	 * @param sb
+	 * @param abstractScriptProvider
+	 */
+	@SuppressWarnings("nls")
+	private static boolean generateParams(StringBuilder sb, AbstractScriptProvider abstractScriptProvider)
+	{
+		if (abstractScriptProvider == null) return false;
+		MethodArgument[] arguments = abstractScriptProvider.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
+		if (arguments != null && arguments.length > 0)
+		{
+			for (MethodArgument methodArgument : arguments)
+			{
+				sb.append(" * @param {");
+				sb.append(methodArgument.getType().toString());
+				sb.append("} ");
+				sb.append(methodArgument.getName());
+				if (methodArgument.getDescription() != null)
+				{
+					sb.append(methodArgument.getDescription());
+				}
+				else
+				{
+					sb.append(" // TODO generated, please specify type and doc");
+				}
+				sb.append("\n");
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/**
