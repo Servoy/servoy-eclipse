@@ -33,8 +33,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.wicket.Request;
@@ -805,57 +805,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 						});
 						progressMonitor.worked(1);
 
-						if (buildProject) buildActiveProjectsInJob();
-
-						WorkspaceJob testBuildPaths = new WorkspaceJob("Test Build Paths")
-						{
-							@Override
-							public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
-							{
-								testBuildPaths(project, new HashSet<ServoyProject>());
-								return Status.OK_STATUS;
-							}
-						};
-						testBuildPaths.setRule(getWorkspace().getRoot());
-						testBuildPaths.schedule();
-
-
-						WorkspaceJob updateServoyWorkingSet = new WorkspaceJob("Servoy active solution workingset updater")
-						{
-							@Override
-							public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
-							{
-								PlatformUI.getPreferenceStore().setValue(IWorkbenchPreferenceConstants.USE_WINDOW_WORKING_SET_BY_DEFAULT, true);
-								ServoyProject[] allprojects = getModulesOfActiveProject();
-								IAdaptable[] projects = new IAdaptable[allprojects.length];
-								for (int i = 0; i < allprojects.length; i++)
-								{
-									projects[i] = allprojects[i].getProject();
-								}
-								IWorkingSetManager workingSetManager = PlatformUI.getWorkbench().getWorkingSetManager();
-								IWorkingSet ws = workingSetManager.getWorkingSet("Servoy Active Solution"); //$NON-NLS-1$
-								if (ws == null)
-								{
-									ws = workingSetManager.createWorkingSet("Servoy Active Solution", projects);
-									workingSetManager.addWorkingSet(ws);
-								}
-								else
-								{
-									ws.setElements(projects);
-								}
-								final IWorkingSet[] wsa = new IWorkingSet[1];
-								wsa[0] = ws;
-								Display.getDefault().asyncExec(new Runnable()
-								{
-									public void run()
-									{
-										PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().setWorkingSets(wsa);
-									}
-								});
-								return Status.OK_STATUS;
-							}
-						};
-						updateServoyWorkingSet.schedule();
+						testBuildPathsAndBuild(project, buildProject);
 
 						Display.getDefault().syncExec(new Runnable()
 						{
@@ -2050,12 +2000,12 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 													Integer lineNumber = (Integer)map.get(IMarker.LINE_NUMBER);
 													String oldLine = oldLines[lineNumber.intValue() - 1];
 													if (oldLine.trim().equals("")) continue;
-													int find = findLines(newLines, oldLine, lineNumber.intValue(), true, Math.abs(oldLines.length -
-														newLines.length) + 1);
+													int find = findLines(newLines, oldLine, lineNumber.intValue(), true,
+														Math.abs(oldLines.length - newLines.length) + 1);
 													if (find == -1)
 													{
-														find = findLines(newLines, oldLine, lineNumber.intValue(), false, Math.abs(oldLines.length -
-															newLines.length) + 1);
+														find = findLines(newLines, oldLine, lineNumber.intValue(), false,
+															Math.abs(oldLines.length - newLines.length) + 1);
 													}
 													if (find == -1) continue;
 													lineNumber = new Integer(find + 1);
@@ -2622,5 +2572,66 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		// TODO add more cleanup to this method
 		removeActiveProjectListener(backgroundTableLoader);
 		getServerManager().removeServerConfigListener(serverConfigSyncer);
+	}
+
+	/**
+	 * @param project
+	 * @param buildProject
+	 */
+	public void testBuildPathsAndBuild(final ServoyProject project, final boolean buildProject)
+	{
+		WorkspaceJob testBuildPaths = new WorkspaceJob("Test Build Paths")
+		{
+			@Override
+			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+			{
+				testBuildPaths(project, new HashSet<ServoyProject>());
+				if (buildProject) buildActiveProjectsInJob();
+				return Status.OK_STATUS;
+			}
+		};
+		testBuildPaths.setRule(getWorkspace().getRoot());
+		testBuildPaths.schedule();
+
+
+		WorkspaceJob updateServoyWorkingSet = new WorkspaceJob("Servoy active solution workingset updater")
+		{
+			@Override
+			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+			{
+				PlatformUI.getPreferenceStore().setValue(IWorkbenchPreferenceConstants.USE_WINDOW_WORKING_SET_BY_DEFAULT, true);
+				ServoyProject[] allprojects = getModulesOfActiveProject();
+
+				IAdaptable[] projects = new IAdaptable[allprojects.length + 1];
+				for (int i = 0; i < allprojects.length; i++)
+				{
+					projects[i] = allprojects[i].getProject();
+				}
+				projects[allprojects.length] = getActiveProject().getResourcesProject().getProject();
+				IWorkingSetManager workingSetManager = PlatformUI.getWorkbench().getWorkingSetManager();
+				IWorkingSet ws = workingSetManager.getWorkingSet("Servoy Active Solution"); //$NON-NLS-1$
+				if (ws == null)
+				{
+					ws = workingSetManager.createWorkingSet("Servoy Active Solution", projects);
+					workingSetManager.addWorkingSet(ws);
+				}
+				else
+				{
+					ws.setElements(projects);
+				}
+				final IWorkingSet[] wsa = new IWorkingSet[1];
+				wsa[0] = ws;
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+//						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().setWorkingSets(null);
+						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().setWorkingSets(wsa);
+					}
+				});
+				return Status.OK_STATUS;
+			}
+		};
+		updateServoyWorkingSet.schedule();
 	}
 }
