@@ -52,8 +52,11 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 
@@ -81,6 +84,7 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.util.IdentDocumentValidator;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -90,7 +94,6 @@ import com.servoy.j2db.util.Utils;
  */
 public class NewMethodAction extends Action implements ISelectionChangedListener
 {
-
 	private final SolutionExplorerView viewer;
 	private final ImageDescriptor newFormMethodImage;
 	private final ImageDescriptor newGlobalMethodImage;
@@ -166,7 +169,18 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 
 		boolean override = false;
 		MethodArgument[] superArguments = null;
-		String methodName = forcedMethodName == null ? askForMethodName(methodType, parent, methodKey, shell) : forcedMethodName;
+		String methodName = forcedMethodName;
+		boolean addPrivateFlag = false;
+		if (methodName == null)
+		{
+			Pair<String, Boolean> methodNameAndPrivateFlag = askForMethodName(methodType, parent, methodKey, shell);
+			if (methodNameAndPrivateFlag != null)
+			{
+				methodName = methodNameAndPrivateFlag.getLeft();
+				addPrivateFlag = methodNameAndPrivateFlag.getRight().booleanValue();
+			}
+		}
+
 		if (methodName != null)
 		{
 			// create the method as a repository object - to check for duplicates
@@ -237,7 +251,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 						file.create(new ByteArrayInputStream(new byte[0]), true, null);
 					}
 
-					String declaration = template.getMethodDeclaration(met.getName(), null);
+					String declaration = template.getMethodDeclaration(met.getName(), null, addPrivateFlag);
 
 					declaration = format(declaration, file, 0);
 
@@ -433,7 +447,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		return null;
 	}
 
-	private static String askForMethodName(String methodType, final IPersist parent, String methodKey, Shell shell)
+	@SuppressWarnings("nls")
+	private static Pair<String, Boolean> askForMethodName(String methodType, final IPersist parent, String methodKey, Shell shell)
 	{
 		String defaultName = ""; //$NON-NLS-1$
 		if (methodKey != null)
@@ -461,7 +476,35 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 				}
 			}
 		}
-		InputDialog dialog = new InputDialog(shell, "New " + methodType + " method", "Specify a method name", defaultName, new IInputValidator() //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		NewMethodInputDialog dialog = new NewMethodInputDialog(shell, "New " + methodType + " method", "Specify a method name", defaultName, parent);
+		dialog.setBlockOnOpen(true);
+		dialog.open();
+
+		return (dialog.getReturnCode() == Window.CANCEL) ? null : new Pair<String, Boolean>(dialog.getValue(), dialog.outputPrivateTag ? Boolean.TRUE
+			: Boolean.FALSE);
+	}
+
+
+	/**
+	 * @author jcompagner
+	 *
+	 */
+	private static final class NewMethodInputDialog extends InputDialog
+	{
+		private Button okButton;
+		private boolean outputPrivateTag;
+		private Button createPrivateButton;
+
+		/**
+		 * @param parentShell
+		 * @param dialogTitle
+		 * @param dialogMessage
+		 * @param initialValue
+		 * @param validator
+		 */
+		private NewMethodInputDialog(Shell parentShell, String dialogTitle, String dialogMessage, String initialValue, final IPersist parent)
+		{
+			super(parentShell, dialogTitle, dialogMessage, initialValue, new IInputValidator()
 			{
 				public String isValid(String newText)
 				{
@@ -469,9 +512,69 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 					return validateMethodName(parent, newText);
 				}
 			});
-		dialog.setBlockOnOpen(true);
-		dialog.open();
+		}
 
-		return (dialog.getReturnCode() == Window.CANCEL) ? null : dialog.getValue();
+		@SuppressWarnings("nls")
+		@Override
+		protected void createButtonsForButtonBar(Composite parent)
+		{
+			// create OK and Cancel buttons by default
+			okButton = createButton(parent, IDialogConstants.OK_ID, "Create normal", true);
+			createPrivateButton = createButton(parent, IDialogConstants.PROCEED_ID, "Create private", false);
+			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+			//do this here because setting the text will set enablement on the ok
+			// button
+			Text text = getText();
+			text.setFocus();
+			if (getValue() != null)
+			{
+				text.setText(getValue());
+				text.selectAll();
+			}
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.jface.dialogs.InputDialog#getOkButton()
+		 */
+		@Override
+		protected Button getOkButton()
+		{
+			return okButton;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.jface.dialogs.InputDialog#buttonPressed(int)
+		 */
+		@Override
+		protected void buttonPressed(int buttonId)
+		{
+			if (buttonId == IDialogConstants.PROCEED_ID)
+			{
+				outputPrivateTag = true;
+				super.buttonPressed(IDialogConstants.OK_ID);
+			}
+			else
+			{
+				super.buttonPressed(buttonId);
+			}
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.jface.dialogs.InputDialog#setErrorMessage(java.lang.String)
+		 */
+		@Override
+		public void setErrorMessage(String errorMessage)
+		{
+			super.setErrorMessage(errorMessage);
+			if (createPrivateButton != null) createPrivateButton.setEnabled(errorMessage == null);
+		}
 	}
+
+
 }
