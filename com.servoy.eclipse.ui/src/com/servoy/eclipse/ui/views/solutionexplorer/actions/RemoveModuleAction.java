@@ -87,6 +87,7 @@ public class RemoveModuleAction extends Action implements ISelectionChangedListe
 				{
 					ServoyLog.logError("Cannot save new module list for solution " + parentProject.getProject().getName(), e);
 				}
+				ServoyModelManager.getServoyModelManager().getServoyModel().testBuildPathsAndBuild(parentProject, true);
 			}
 		}
 	}
