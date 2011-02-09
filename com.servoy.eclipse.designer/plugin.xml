@@ -360,25 +360,25 @@
             commandId="com.servoy.eclipse.designer.anchorTop"
             contextId="com.servoy.eclipse.designer.context"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+-">
+            sequence="M2+-">
       </key>
       <key
             commandId="com.servoy.eclipse.designer.anchorRight"
             contextId="com.servoy.eclipse.designer.context"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+*">
+            sequence="M2+*">
       </key>
       <key
             commandId="com.servoy.eclipse.designer.anchorBottom"
             contextId="com.servoy.eclipse.designer.context"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1++">
+            sequence="M2++">
       </key>
       <key
             commandId="com.servoy.eclipse.designer.anchorLeft"
             contextId="com.servoy.eclipse.designer.context"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+/">
+            sequence="M2+/">
       </key>
       <key
             commandId="com.servoy.eclipse.designer.group"
