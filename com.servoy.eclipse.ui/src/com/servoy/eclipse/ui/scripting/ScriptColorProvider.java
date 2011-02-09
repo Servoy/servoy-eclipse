@@ -19,10 +19,6 @@ package com.servoy.eclipse.ui.scripting;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.dltk.javascript.ui.scriptcolor.provider.ColorProviderCategory;
-import org.eclipse.dltk.javascript.ui.scriptcolor.provider.IColorProviderCategoryItem;
-import org.eclipse.dltk.javascript.ui.scriptcolor.provider.IScriptColorPreferenceProvider;
-import org.eclipse.dltk.javascript.ui.scriptcolor.provider.IScriptColorProvider;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -39,7 +35,7 @@ import org.eclipse.swt.graphics.RGB;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 
-public class ScriptColorProvider implements IScriptColorProvider, IScriptColorPreferenceProvider
+public class ScriptColorProvider /* implements IScriptColorProvider, IScriptColorPreferenceProvider */
 {
 	private static final String BOLD_KEY = PreferenceConstants.EDITOR_BOLD_SUFFIX;
 
@@ -73,15 +69,15 @@ public class ScriptColorProvider implements IScriptColorProvider, IScriptColorPr
 	private final IPreferenceStore fPreferenceStore;
 	private final ISharedTextColors sharedTextColors;
 
-	private ColorProviderCategory servoy_cat;
-
-	private ColorProviderCategory servoy_op;
-
-	private ColorProviderCategory servoy_aux;
-
-	private ColorProviderCategory servoy_comp;
-
-	private ColorProviderCategory servoy_main;
+//	private ColorProviderCategory servoy_cat;
+//
+//	private ColorProviderCategory servoy_op;
+//
+//	private ColorProviderCategory servoy_aux;
+//
+//	private ColorProviderCategory servoy_comp;
+//
+//	private ColorProviderCategory servoy_main;
 
 	public ScriptColorProvider()
 	{
@@ -96,102 +92,82 @@ public class ScriptColorProvider implements IScriptColorProvider, IScriptColorPr
 
 	private void initDefaults()
 	{
-		servoy_cat = new ColorProviderCategory(SERVOY_CAT);
-		servoy_op = new ColorProviderCategory(SERVOY_OP);
-		servoy_aux = new ColorProviderCategory(SERVOY_AUX_OPERATOR);
-		servoy_comp = new ColorProviderCategory(SERVOY_COMPARE_OPERATORS);
-		servoy_main = new ColorProviderCategory(SERVOY_MAIN);
-
-		initKey(IExecutingEnviroment.TOPLEVEL_JSUNIT, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
-
-		initKey(IExecutingEnviroment.TOPLEVEL_UTILS, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
-
-		initKey(IExecutingEnviroment.TOPLEVEL_SECURITY, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
-
-		initKey("elements", new RGB(100, 200, 0), false, false, false, false, servoy_cat);
-
-		initKey("controller", new RGB(50, 200, 0), false, false, false, false, servoy_cat);
-
-		initKey("currentcontroller", new RGB(50, 200, 0), false, false, false, false, servoy_cat);
-
-		initKey(IExecutingEnviroment.TOPLEVEL_APPLICATION, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
-
-		initKey(IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
-
-		initKey(IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
-
-		initKey("globals", new RGB(0, 200, 50), false, false, false, false, servoy_cat);
-
-		initKey(IExecutingEnviroment.TOPLEVEL_FORMS, new RGB(0, 200, 100), false, false, false, false, servoy_cat);
-
-		initKey(IExecutingEnviroment.TOPLEVEL_HISTORY, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
-
-		initKey(IExecutingEnviroment.TOPLEVEL_PLUGINS, new RGB(255, 0, 0), false, false, false, false, servoy_cat);
-
-		initKey(SERVOY_COMPARE_OPERATORS, new RGB(0, 0, 255), true, false, false, false, servoy_main);
-
-		initKey("_super", new RGB(85, 0, 127), true, false, false, false, servoy_aux);
-		/*
-		 * initKey("[", new RGB(0, 0, 255), true, false, false, false, servoy_aux);
-		 * 
-		 * initKey("]", new RGB(0, 0, 255), true, false, false, false, servoy_aux);
-		 */
-		initKey("null", new RGB(0, 0, 255), true, false, false, false, servoy_aux);
-
-		initKey("undefined", new RGB(0, 0, 255), true, false, false, false, servoy_aux);
-/*
- * initKey("</", new RGB(0, 0, 255), false, false, false, false, servoy_aux);
- */
-
-		initKey(SERVOY_OP, new RGB(255, 0, 0), false, false, false, false, servoy_main);
-
-		initKey("TODO", new RGB(180, 0, 0), false, true, false, false, servoy_aux);
-
-		initKey("CHECKME", new RGB(180, 0, 0), false, true, false, false, servoy_aux);
-
-		initKey("FIXME", new RGB(180, 0, 0), false, true, false, false, servoy_aux);
-
-		servoy_main.addItem(servoy_cat);
-		servoy_main.addItem(servoy_aux);
+////		servoy_cat = new ColorProviderCategory(SERVOY_CAT);
+////		servoy_op = new ColorProviderCategory(SERVOY_OP);
+////		servoy_aux = new ColorProviderCategory(SERVOY_AUX_OPERATOR);
+////		servoy_comp = new ColorProviderCategory(SERVOY_COMPARE_OPERATORS);
+////		servoy_main = new ColorProviderCategory(SERVOY_MAIN);
+//
+//		initKey(IExecutingEnviroment.TOPLEVEL_JSUNIT, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
+//
+//		initKey(IExecutingEnviroment.TOPLEVEL_UTILS, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
+//
+//		initKey(IExecutingEnviroment.TOPLEVEL_SECURITY, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
+//
+//		initKey("elements", new RGB(100, 200, 0), false, false, false, false, servoy_cat);
+//
+//		initKey("controller", new RGB(50, 200, 0), false, false, false, false, servoy_cat);
+//
+//		initKey("currentcontroller", new RGB(50, 200, 0), false, false, false, false, servoy_cat);
+//
+//		initKey(IExecutingEnviroment.TOPLEVEL_APPLICATION, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
+//
+//		initKey(IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
+//
+//		initKey(IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
+//
+//		initKey("globals", new RGB(0, 200, 50), false, false, false, false, servoy_cat);
+//
+//		initKey(IExecutingEnviroment.TOPLEVEL_FORMS, new RGB(0, 200, 100), false, false, false, false, servoy_cat);
+//
+//		initKey(IExecutingEnviroment.TOPLEVEL_HISTORY, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
+//
+//		initKey(IExecutingEnviroment.TOPLEVEL_PLUGINS, new RGB(255, 0, 0), false, false, false, false, servoy_cat);
+//
+//		initKey(SERVOY_COMPARE_OPERATORS, new RGB(0, 0, 255), true, false, false, false, servoy_main);
+//
+//		initKey("_super", new RGB(85, 0, 127), true, false, false, false, servoy_aux);
+//		/*
+//		 * initKey("[", new RGB(0, 0, 255), true, false, false, false, servoy_aux);
+//		 * 
+//		 * initKey("]", new RGB(0, 0, 255), true, false, false, false, servoy_aux);
+//		 */
+//		initKey("null", new RGB(0, 0, 255), true, false, false, false, servoy_aux);
+//
+//		initKey("undefined", new RGB(0, 0, 255), true, false, false, false, servoy_aux);
+///*
+// * initKey("</", new RGB(0, 0, 255), false, false, false, false, servoy_aux);
+// */
+//
+//		initKey(SERVOY_OP, new RGB(255, 0, 0), false, false, false, false, servoy_main);
+//
+//		initKey("TODO", new RGB(180, 0, 0), false, true, false, false, servoy_aux);
+//
+//		initKey("CHECKME", new RGB(180, 0, 0), false, true, false, false, servoy_aux);
+//
+//		initKey("FIXME", new RGB(180, 0, 0), false, true, false, false, servoy_aux);
+//
+//		servoy_main.addItem(servoy_cat);
+//		servoy_main.addItem(servoy_aux);
 
 
 	}
 
-	void initKey(String key, RGB defRgbValue, boolean defIsBold, boolean defIsItalic, boolean defIsStrikeThrough, boolean defIsUnderline,
-		ColorProviderCategory category)
-	{
-		if (getRgbFor(getColorKey(key)) == null)
-		{
-			PreferenceConverter.setDefault(fPreferenceStore, getColorKey(key), defRgbValue);
-		}
-
-		ColorProviderCategory item = new ColorProviderCategory(key, getColorKey(key));
-		category.addItem(item);
-
-		//bold
-		if (getDecorationFor(getBoldKey(key)) == null)
-		{
-			fPreferenceStore.setDefault(getBoldKey(key), defIsBold);
-		}
-
-		//italic
-		if (getDecorationFor(getItalicKey(key)) == null)
-		{
-			fPreferenceStore.setDefault(getItalicKey(key), defIsItalic);
-		}
-
-		//strike through
-		if (getDecorationFor(getStrikeThroughKey(key)) == null)
-		{
-			fPreferenceStore.setDefault(getStrikeThroughKey(key), defIsStrikeThrough);
-		}
-
-		//underline
-		if (getDecorationFor(getUnderlineKey(key)) == null)
-		{
-			fPreferenceStore.setDefault(getUnderlineKey(key), defIsUnderline);
-		}
-	}
+	/*
+	 * void initKey(String key, RGB defRgbValue, boolean defIsBold, boolean defIsItalic, boolean defIsStrikeThrough, boolean defIsUnderline,
+	 * ColorProviderCategory category) { if (getRgbFor(getColorKey(key)) == null) { PreferenceConverter.setDefault(fPreferenceStore, getColorKey(key),
+	 * defRgbValue); }
+	 * 
+	 * ColorProviderCategory item = new ColorProviderCategory(key, getColorKey(key)); category.addItem(item);
+	 * 
+	 * //bold if (getDecorationFor(getBoldKey(key)) == null) { fPreferenceStore.setDefault(getBoldKey(key), defIsBold); }
+	 * 
+	 * //italic if (getDecorationFor(getItalicKey(key)) == null) { fPreferenceStore.setDefault(getItalicKey(key), defIsItalic); }
+	 * 
+	 * //strike through if (getDecorationFor(getStrikeThroughKey(key)) == null) { fPreferenceStore.setDefault(getStrikeThroughKey(key), defIsStrikeThrough); }
+	 * 
+	 * //underline if (getDecorationFor(getUnderlineKey(key)) == null) { fPreferenceStore.setDefault(getUnderlineKey(key), defIsUnderline); } }
+	 */
 
 	private Boolean getDecorationFor(String key)
 	{
@@ -413,10 +389,10 @@ public class ScriptColorProvider implements IScriptColorProvider, IScriptColorPr
 		return getPreferenceKeyPrefix() + keyword + COLOR_KEY;
 	}
 
-	public IColorProviderCategoryItem[] getCategories()
-	{
-		return new IColorProviderCategoryItem[] { servoy_main };
-	}
+//	public IColorProviderCategoryItem[] getCategories()
+//	{
+//		return new IColorProviderCategoryItem[] { servoy_main };
+//	}
 
 	public IPreferenceStore getPreferenceStore()
 	{

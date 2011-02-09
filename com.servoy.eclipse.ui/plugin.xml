@@ -463,13 +463,6 @@
        	</markerResolutionGenerator>     
      </extension>
      <extension
-           point="org.eclipse.dltk.javascript.ui.keywordsprovider">
-        <provider
-              class="com.servoy.eclipse.ui.scripting.ScriptColorProvider"
-              id="com.servoy.eclipse.ui.scriptcolor.provider">
-        </provider>
-     </extension>
-     <extension
            point="org.eclipse.ui.commands">
         <command
               categoryId="org.eclipse.ui.category.navigate"
@@ -864,5 +857,25 @@
             id="com.servoy.eclipse.ui.search.FileSearchResultPage"
             searchResultClass="com.servoy.eclipse.ui.search.FileSearchResult">
       </viewPage>
+   </extension>
+   <extension
+         point="org.eclipse.dltk.ui.coloring">
+      <coloring
+            class="com.servoy.eclipse.ui.scripting.ColoringPreferenceProvider"
+            nature="org.eclipse.dltk.javascript.core.nature"
+            priority="0">
+      </coloring>
+      <keywordColor
+            class="com.servoy.eclipse.ui.scripting.KeywordColorProvider"
+            nature="org.eclipse.dltk.javascript.core.nature"
+            priority="0">
+      </keywordColor>
+   </extension>
+   <extension
+         point="org.eclipse.dltk.core.keywords">
+      <keywordProvider
+            class="com.servoy.eclipse.ui.scripting.KeywordProvider"
+            nature="org.eclipse.dltk.javascript.core.nature">
+      </keywordProvider>
    </extension>
 </plugin>
