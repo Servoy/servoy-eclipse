@@ -16,12 +16,17 @@
  */
 package com.servoy.eclipse.designer.internal.core;
 
+import java.awt.Color;
 import java.awt.Component;
+
+import javax.swing.JComponent;
 
 import com.servoy.eclipse.core.DesignComponentFactory;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -62,6 +67,18 @@ public class PersistImageNotifier extends AbstractImageNotifier
 		{
 			comp = DesignComponentFactory.createDesignComponent(application, editingFlattenedSolution, persist, form);
 		}
+
+		if (persist instanceof AbstractBase)
+		{
+			Color background = null;
+			if (comp instanceof JComponent && ((JComponent)comp).isOpaque() && comp.isBackgroundSet())
+			{
+				background = comp.getBackground();
+			}
+			((AbstractBase)persist).setRuntimeProperty(PersistPropertySource.LastPaintedBackgroundProperty, background);
+			((AbstractBase)persist).setRuntimeProperty(PersistPropertySource.LastPaintedFontProperty, comp.getFont());
+		}
+
 		return comp;
 	}
 
