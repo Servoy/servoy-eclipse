@@ -263,7 +263,7 @@
             category="com.servoy.eclipse.ui.preference"
             class="com.servoy.eclipse.ui.preferences.I18NPreferences"
             id="com.servoy.eclipse.ui.i18n"
-            name="I18N">
+            name="Internationalization(I18N)">
       </page>
       <page
             category="com.servoy.eclipse.ui.preference"
