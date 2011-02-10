@@ -387,10 +387,10 @@
                class="com.servoy.eclipse.ui.actions.OpenMarketplace"
                definitionId="com.servoy.eclipse.ui.OpenMarketplaceAction"
                id="com.servoy.eclipse.ui.openMarketplace"
-               label="Servoy Marketplace"
+               label="Servoy MarketPlace"
                menubarPath="help/updates"
                style="push"
-               tooltip="Open Servoy Marketplace">
+               tooltip="Open Servoy MarketPlace">
          </action>      
       </actionSet>
       <actionSet
