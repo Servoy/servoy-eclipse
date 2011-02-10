@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -42,8 +43,13 @@ import com.servoy.j2db.debug.DeveloperPreferences;
  */
 public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkbenchPreferencePage
 {
+	public static final boolean SAVE_EDITOR_STATE_DEFAULT = true;
+	public static final boolean OPEN_FIRST_FORM_DESIGNER_DEFAULT = true;
+
 	private Label enhancedSecurityLabel;
-	private Button changeButton;
+	private Button securityChangeButton;
+	private Button saveEditorStateButton;
+	private Button openFirstFormDesignerButton;
 
 	public ServoyGlobalPreferencePage()
 	{
@@ -66,25 +72,34 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	{
 		initializeDialogUnits(parent);
 
-		Composite composite = new Composite(parent, SWT.NONE);
+		Composite rootContainer = new Composite(parent, SWT.NONE);
 
-		// GridLayout
 		GridLayout layout = new GridLayout();
-		layout.numColumns = 2;
-		composite.setLayout(layout);
+		layout.numColumns = 1;
+		rootContainer.setLayout(layout);
 
-		// GridData
-		GridData data = new GridData();
-		data.verticalAlignment = GridData.FILL;
-		data.horizontalAlignment = GridData.FILL;
-		composite.setLayoutData(data);
+		GridData rootGridData = new GridData();
+		rootGridData.verticalAlignment = GridData.FILL;
+		rootGridData.horizontalAlignment = GridData.FILL;
+		rootContainer.setLayoutData(rootGridData);
 
-		enhancedSecurityLabel = new Label(composite, SWT.NONE);
+		Group securityInfoContainer = new Group(rootContainer, SWT.NONE);
+		securityInfoContainer.setText("Security Information");
+		GridLayout securityInfoLayout = new GridLayout();
+		securityInfoLayout.numColumns = 2;
+		securityInfoContainer.setLayout(securityInfoLayout);
+
+		GridData securityInfoGridData = new GridData();
+		securityInfoGridData.verticalAlignment = GridData.FILL;
+		securityInfoGridData.horizontalAlignment = GridData.FILL;
+		securityInfoContainer.setLayoutData(securityInfoGridData);
+
+		enhancedSecurityLabel = new Label(securityInfoContainer, SWT.NONE);
 		enhancedSecurityLabel.setText("loading...");
 
-		changeButton = new Button(composite, SWT.NONE);
-		changeButton.setText("Change");
-		changeButton.addSelectionListener(new SelectionAdapter()
+		securityChangeButton = new Button(securityInfoContainer, SWT.NONE);
+		securityChangeButton.setText("Change");
+		securityChangeButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
@@ -94,11 +109,27 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 			}
 		});
 
+		Group optionsContainer = new Group(rootContainer, SWT.NONE);
+		optionsContainer.setText("Form Editor Options");
+
+		GridLayout optionsLayout = new GridLayout();
+		optionsLayout.numColumns = 1;
+		optionsContainer.setLayout(optionsLayout);
+
+		GridData optionsGridData = new GridData();
+		optionsGridData.verticalAlignment = GridData.FILL;
+		optionsGridData.horizontalAlignment = GridData.FILL;
+		optionsContainer.setLayoutData(optionsGridData);
+
+		saveEditorStateButton = new Button(optionsContainer, SWT.CHECK);
+		saveEditorStateButton.setText("Re-open Form Editors at startup");
+
+		openFirstFormDesignerButton = new Button(optionsContainer, SWT.CHECK);
+		openFirstFormDesignerButton.setText("Open the first form designer on activating a solution");
+
 		initializeFields();
 
-		noDefaultAndApplyButton();
-
-		return composite;
+		return rootContainer;
 	}
 
 	protected void initializeFields()
@@ -107,13 +138,40 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		{
 			enhancedSecurityLabel.setText("Servoy Application Server is running with Enhanced Security");
 			enhancedSecurityLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-			changeButton.setVisible(false);
+			securityChangeButton.setVisible(false);
 		}
 		else
 		{
 			enhancedSecurityLabel.setText("Servoy Application Server NOT is running with Enhanced Security, this is strongly discouraged");
 			enhancedSecurityLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
-			changeButton.setVisible(true);
+			securityChangeButton.setVisible(true);
 		}
+
+		DesignerPreferences prefs = new DesignerPreferences();
+
+		saveEditorStateButton.setSelection(prefs.getSaveEditorState());
+		openFirstFormDesignerButton.setSelection(prefs.getOpenFirstFormDesigner());
+	}
+
+	@Override
+	protected void performDefaults()
+	{
+		saveEditorStateButton.setSelection(ServoyGlobalPreferencePage.SAVE_EDITOR_STATE_DEFAULT);
+		openFirstFormDesignerButton.setSelection(ServoyGlobalPreferencePage.OPEN_FIRST_FORM_DESIGNER_DEFAULT);
+
+		super.performDefaults();
+	}
+
+	@Override
+	public boolean performOk()
+	{
+		DesignerPreferences prefs = new DesignerPreferences();
+
+		prefs.setSaveEditorState(saveEditorStateButton.getSelection());
+		prefs.setOpenFirstFormDesigner(openFirstFormDesignerButton.getSelection());
+
+		prefs.save();
+
+		return true;
 	}
 }
