@@ -168,7 +168,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 						INCLUDE_RELATIONS.NESTED, true, true, null), getSelection(), SWT.NONE, title);
 			}
 		};
-		lookupValueSelect.setTitleText("Specify Field");
+		lookupValueSelect.setTitleText("Specify DataProvider");
 		lookupValueSelect.setName("lookupDialog");
 		lookupValueSelect.setLabelProvider(new SolutionContextDelegateLabelProvider(DataProviderLabelProvider.INSTANCE_HIDEPREFIX,
 			flattenedSolution.getSolution()));
