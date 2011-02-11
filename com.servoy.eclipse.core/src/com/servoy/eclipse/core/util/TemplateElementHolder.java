@@ -28,17 +28,17 @@ import com.servoy.j2db.persistence.Template;
 public class TemplateElementHolder
 {
 	public final Template template;
-	public final String element;
+	public final int element;
 
 	/**
 	 * @param template
 	 */
 	public TemplateElementHolder(Template template)
 	{
-		this(template, null);
+		this(template, -1);
 	}
 
-	public TemplateElementHolder(Template template, String element)
+	public TemplateElementHolder(Template template, int element)
 	{
 		this.template = template;
 		this.element = element;
@@ -47,7 +47,6 @@ public class TemplateElementHolder
 	@Override
 	public String toString()
 	{
-		// is used in label providers
-		return element == null ? template.getName() : element;
+		return template.getName() + (element >= 0 ? "" : ":" + element);
 	}
 }

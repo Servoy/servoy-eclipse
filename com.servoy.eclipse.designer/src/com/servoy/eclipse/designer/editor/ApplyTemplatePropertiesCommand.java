@@ -61,7 +61,7 @@ public class ApplyTemplatePropertiesCommand extends BaseRestorableCommand
 	public boolean canExecute()
 	{
 		// elements
-		List<JSONObject> elements = ElementFactory.getTemplateElements(templateHolder);
+		List<JSONObject> elements = ElementFactory.getTemplateElements(templateHolder.template, templateHolder.element);
 		return elements != null && elements.size() > 0;
 	}
 
@@ -71,7 +71,7 @@ public class ApplyTemplatePropertiesCommand extends BaseRestorableCommand
 		saveState(persist);
 
 		// elements
-		List<JSONObject> elements = ElementFactory.getTemplateElements(templateHolder);
+		List<JSONObject> elements = ElementFactory.getTemplateElements(templateHolder.template, templateHolder.element);
 		if (elements == null || elements.size() == 0)
 		{
 			return;

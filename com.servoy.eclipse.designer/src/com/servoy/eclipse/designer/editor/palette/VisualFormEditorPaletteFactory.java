@@ -283,7 +283,17 @@ public class VisualFormEditorPaletteFactory
 
 		if (drawerId.startsWith(TEMPLATE_ID_PREFIX))
 		{
-			return createTemplateToolEntry(drawerId.substring(TEMPLATE_ID_PREFIX.length()), id);
+			int element;
+			try
+			{
+				element = Integer.parseInt(id);
+			}
+			catch (NumberFormatException e)
+			{
+				ServoyLog.logError(e);
+				return null;
+			}
+			return createTemplateToolEntry(drawerId.substring(TEMPLATE_ID_PREFIX.length()), element);
 		}
 
 		ServoyLog.logError("Unknown palette drawer: '" + drawerId + "'", null);
@@ -630,7 +640,7 @@ public class VisualFormEditorPaletteFactory
 		return new ElementCreationToolEntry("", "", factory, icon, icon);
 	}
 
-	private static PaletteEntry createTemplateToolEntry(String templateName, String elementName)
+	private static PaletteEntry createTemplateToolEntry(String templateName, int element)
 	{
 		Template template = (Template)ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObject(templateName, IRepository.TEMPLATES);
 		if (template == null)
@@ -638,17 +648,10 @@ public class VisualFormEditorPaletteFactory
 			return null;
 		}
 
-		TemplateElementHolder templateHolder = new TemplateElementHolder(template);
-		List<JSONObject> templateElements = ElementFactory.getTemplateElements(templateHolder);
-		if (templateElements != null)
+		List<JSONObject> templateElements = ElementFactory.getTemplateElements(template, element);
+		if (templateElements != null && templateElements.size() > 0)
 		{
-			for (JSONObject jsonObject : templateElements)
-			{
-				if (elementName.equals(jsonObject.optString(SolutionSerializer.PROP_NAME)))
-				{
-					return VisualFormEditorPaletteFactory.createTemplateToolEntry(templateHolder.template, jsonObject, elementName);
-				}
-			}
+			return VisualFormEditorPaletteFactory.createTemplateToolEntry(template, templateElements.get(0), null, element);
 		}
 
 		return null;
@@ -658,9 +661,9 @@ public class VisualFormEditorPaletteFactory
 	 * @param json
 	 * @return
 	 */
-	public static PaletteEntry createTemplateToolEntry(Template template, JSONObject json, String name)
+	public static PaletteEntry createTemplateToolEntry(Template template, JSONObject json, String displayName, int element)
 	{
-		TemplateElementHolder data = new TemplateElementHolder(template, name);
+		TemplateElementHolder data = new TemplateElementHolder(template, element);
 		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TEMPLATE,
 			DesignerUtil.convertDimension(ElementFactory.getTemplateBoundsize(data)));
 		factory.setData(data);
@@ -670,7 +673,7 @@ public class VisualFormEditorPaletteFactory
 			// default icon
 			icon = Activator.loadImageDescriptorFromBundle("template.gif");
 		}
-		return new ElementCreationToolEntry(Utils.stringInitCap(name), "Create/apply template item " + name, factory, icon, icon);
+		return new ElementCreationToolEntry(Utils.stringInitCap(displayName), "Create/apply template " + displayName, factory, icon, icon);
 	}
 
 	static void setProperty(Map<String, Object> map, TypedProperty< ? > property, Object value)
@@ -678,11 +681,10 @@ public class VisualFormEditorPaletteFactory
 		map.put(SetValueCommand.REQUEST_PROPERTY_PREFIX + property.getPropertyName(), value);
 	}
 
-	static ImageDescriptor getTemplateIcon(TemplateElementHolder template)
+	static ImageDescriptor getTemplateIcon(TemplateElementHolder templateHolder)
 	{
 		// elements
-		List<JSONObject> elements = ElementFactory.getTemplateElements(template);
-
+		List<JSONObject> elements = ElementFactory.getTemplateElements(templateHolder.template, templateHolder.element);
 		if (elements == null || elements.size() == 0)
 		{
 			return null;
@@ -811,13 +813,7 @@ public class VisualFormEditorPaletteFactory
 
 			if (itemIds != null && itemIds.size() > 0)
 			{
-				PaletteDrawer drawer = new PaletteDrawer("");
-				drawer.setId(drawerId);
-				drawer.setUserModificationPermission(drawerId.startsWith(TEMPLATE_ID_PREFIX) ? PaletteEntry.PERMISSION_FULL_MODIFICATION
-					: PaletteEntry.PERMISSION_LIMITED_MODIFICATION);
-				applyPaletteCustomization(paletteCustomization.entryProperties, drawerId, drawer, defaultPaletteCustomization.entryProperties);
-
-				palette.add(drawer);
+				PaletteDrawer drawer = null;
 
 				for (String itemId : itemIds)
 				{
@@ -829,6 +825,19 @@ public class VisualFormEditorPaletteFactory
 							: PaletteEntry.PERMISSION_LIMITED_MODIFICATION);
 						applyPaletteCustomization(paletteCustomization.entryProperties, drawerId + '.' + itemId, entry,
 							defaultPaletteCustomization.entryProperties);
+
+
+						if (drawer == null)
+						{
+							drawer = new PaletteDrawer("");
+							drawer.setId(drawerId);
+							drawer.setUserModificationPermission(drawerId.startsWith(TEMPLATE_ID_PREFIX) ? PaletteEntry.PERMISSION_FULL_MODIFICATION
+								: PaletteEntry.PERMISSION_LIMITED_MODIFICATION);
+							applyPaletteCustomization(paletteCustomization.entryProperties, drawerId, drawer, defaultPaletteCustomization.entryProperties);
+
+							palette.add(drawer);
+						}
+
 						drawer.add(entry);
 					}
 				}

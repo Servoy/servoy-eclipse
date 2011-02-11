@@ -75,7 +75,7 @@ public class DragDataAdapterFactory implements IAdapterFactory
 						height = size.height;
 					}
 				}
-				return new PersistDragData(persist.getRootObject().getName(), persist.getUUID(), persist.getTypeID(), width, height, null);
+				return new PersistDragData(persist.getRootObject().getName(), persist.getUUID(), persist.getTypeID(), width, height, -1);
 			}
 
 			if (obj instanceof TemplateElementHolder)

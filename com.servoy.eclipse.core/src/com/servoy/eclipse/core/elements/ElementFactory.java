@@ -851,6 +851,12 @@ public class ElementFactory
 			JSONArray elements = (JSONArray)json.opt(Template.PROP_ELEMENTS);
 			for (int i = 0; elements != null && i < elements.length(); i++)
 			{
+				if (templateHolder.element >= 0 && templateHolder.element != i)
+				{
+					// only use the template item
+					continue;
+				}
+
 				JSONObject object = elements.getJSONObject(i);
 
 				if (!setFormProperties && object.has(SolutionSerializer.PROP_TYPEID) && object.getInt(SolutionSerializer.PROP_TYPEID) == IRepository.PARTS)
@@ -863,11 +869,6 @@ public class ElementFactory
 				if (object.has(SolutionSerializer.PROP_NAME))
 				{
 					name = (String)object.remove(SolutionSerializer.PROP_NAME);
-				}
-				if (templateHolder.element != null && !templateHolder.element.equals(name))
-				{
-					// only use the template item
-					continue;
 				}
 				Map<IPersist, JSONObject> persist_json_map = new HashMap<IPersist, JSONObject>();
 				IPersist persist = SolutionDeserializer.deserializePersist(repository, parent, persist_json_map, object, null, null, null, false);
@@ -965,7 +966,7 @@ public class ElementFactory
 					}
 
 					// determine a group name (do this after elements are placed in case they are named the same as the template)
-					String templateName = templateHolder.element == null ? templateHolder.template.getName() : templateHolder.element;
+					String templateName = templateHolder.element < 0 ? templateHolder.template.getName() : "item";
 					String groupName = n == 0 ? templateName : (templateName + n);
 					for (int i = n; i <= 100; i++)
 					{
@@ -1019,17 +1020,16 @@ public class ElementFactory
 			JSONArray elements = (JSONArray)json.opt(Template.PROP_ELEMENTS);
 			for (int i = 0; elements != null && i < elements.length(); i++)
 			{
+				if (templateHolder.element >= 0 && i != templateHolder.element)
+				{
+					continue;
+				}
+
 				JSONObject object = elements.getJSONObject(i);
 
 				if (object.has(SolutionSerializer.PROP_TYPEID) && object.getInt(SolutionSerializer.PROP_TYPEID) == IRepository.PARTS)
 				{
 					// ignore parts
-					continue;
-				}
-
-				if (templateHolder.element != null &&
-					(!object.has(SolutionSerializer.PROP_NAME) || !templateHolder.element.equals(object.get(SolutionSerializer.PROP_NAME))))
-				{
 					continue;
 				}
 
@@ -1071,31 +1071,40 @@ public class ElementFactory
 		return box == null ? null : box.getSize();
 	}
 
-	public static List<JSONObject> getTemplateElements(TemplateElementHolder templateHolder)
+	public static List<JSONObject> getTemplateElements(Template template, int element)
 	{
-		if (templateHolder != null)
+		if (template != null)
 		{
 			try
 			{
-				JSONObject json = new ServoyJSONObject(templateHolder.template.getContent(), false);
+				JSONObject json = new ServoyJSONObject(template.getContent(), false);
 
 				// elements
 				JSONArray elements = (JSONArray)json.opt(Template.PROP_ELEMENTS);
-				List<JSONObject> objects = new ArrayList<JSONObject>(elements.length());
-				for (int i = 0; i < elements.length(); i++)
+				if (elements == null)
 				{
-					JSONObject jsonObject = elements.getJSONObject(i);
-					if (templateHolder.element == null ||
-						(jsonObject.has(SolutionSerializer.PROP_NAME) && templateHolder.element.equals(jsonObject.get(SolutionSerializer.PROP_NAME))))
+					return null;
+				}
+				List<JSONObject> objects = new ArrayList<JSONObject>(elements.length());
+				if (element >= 0)
+				{
+					if (element < elements.length())
 					{
-						objects.add(jsonObject);
+						objects.add(elements.getJSONObject(element));
+					}
+				}
+				else
+				{
+					for (int i = 0; i < elements.length(); i++)
+					{
+						objects.add(elements.getJSONObject(i));
 					}
 				}
 				return objects;
 			}
 			catch (JSONException e)
 			{
-				ServoyLog.logError("Error processing template " + templateHolder.template.getName(), e);
+				ServoyLog.logError("Error processing template " + template.getName(), e);
 			}
 		}
 		return null;

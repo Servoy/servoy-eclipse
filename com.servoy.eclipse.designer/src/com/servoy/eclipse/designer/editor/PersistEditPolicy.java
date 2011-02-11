@@ -210,7 +210,9 @@ class PersistEditPolicy extends ComponentEditPolicy
 			}
 			if (((DataRequest)request).getData() instanceof TemplateElementHolder)
 			{
-				List<JSONObject> templateElements = ElementFactory.getTemplateElements((TemplateElementHolder)((DataRequest)request).getData());
+				TemplateElementHolder templateHolder = (TemplateElementHolder)((DataRequest)request).getData();
+				List<JSONObject> templateElements = templateHolder == null ? null : ElementFactory.getTemplateElements(templateHolder.template,
+					templateHolder.element);
 				return templateElements != null && templateElements.size() == 1;
 			}
 		}

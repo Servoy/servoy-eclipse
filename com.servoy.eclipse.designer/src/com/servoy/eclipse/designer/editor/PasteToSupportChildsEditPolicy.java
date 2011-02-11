@@ -112,7 +112,7 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 						IFormElement element = elements.next();
 						if (element instanceof IPersist)
 						{
-							models.add((IPersist)element);
+							models.add(element);
 						}
 					}
 				}
@@ -126,7 +126,7 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 			for (int i = 0; i < models.size(); i++)
 			{
 				objects[i] = new PersistDragData(((Solution)models.get(i).getAncestor(IRepository.SOLUTIONS)).getName(), models.get(i).getUUID(),
-					models.get(i).getTypeID(), 0, 0, null);
+					models.get(i).getTypeID(), 0, 0, -1);
 			}
 			Point location = new Point(minx + ((ChangeBoundsRequest)request).getMoveDelta().x, miny + ((ChangeBoundsRequest)request).getMoveDelta().y);
 			Command command = new FormPlaceElementCommand(application, (ISupportChilds)persist.getAncestor(IRepository.FORMS), objects, request.getType(),

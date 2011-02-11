@@ -53,24 +53,19 @@ public class PaletteTemplateElementsFactory extends PaletteContainerFactory
 	@Override
 	public boolean canCreate(PaletteEntry selected)
 	{
-		TemplateElementHolder template = null;
+		TemplateElementHolder templateHolder = null;
 		if (selected instanceof ElementCreationToolEntry && ((ElementCreationToolEntry)selected).getTemplate() instanceof RequestTypeCreationFactory &&
 			((RequestTypeCreationFactory)((ElementCreationToolEntry)selected).getTemplate()).getData() instanceof TemplateElementHolder)
 		{
-			template = (TemplateElementHolder)((RequestTypeCreationFactory)((ElementCreationToolEntry)selected).getTemplate()).getData();
+			templateHolder = (TemplateElementHolder)((RequestTypeCreationFactory)((ElementCreationToolEntry)selected).getTemplate()).getData();
 		}
-
-		List<JSONObject> templateElements = ElementFactory.getTemplateElements(template);
-		for (int i = 0; templateElements != null && i < templateElements.size(); i++)
+		if (templateHolder == null)
 		{
-			Object object = templateElements.get(i);
-			if (object instanceof JSONObject && ((JSONObject)object).has(SolutionSerializer.PROP_NAME))
-			{
-				return true;
-			}
+			return false;
 		}
 
-		return false;
+		List<JSONObject> templateElements = ElementFactory.getTemplateElements(templateHolder.template, templateHolder.element);
+		return templateElements != null && templateElements.size() > 0; // has some objects available
 	}
 
 	@Override
@@ -82,7 +77,11 @@ public class PaletteTemplateElementsFactory extends PaletteContainerFactory
 		{
 			templateHolder = (TemplateElementHolder)((RequestTypeCreationFactory)((ElementCreationToolEntry)selected).getTemplate()).getData();
 		}
-		List<JSONObject> templateElements = ElementFactory.getTemplateElements(templateHolder);
+		if (templateHolder == null)
+		{
+			return null;
+		}
+		List<JSONObject> templateElements = ElementFactory.getTemplateElements(templateHolder.template, templateHolder.element);
 		if (templateElements == null)
 		{
 			return null;
@@ -94,17 +93,16 @@ public class PaletteTemplateElementsFactory extends PaletteContainerFactory
 		drawer.setId(VisualFormEditorPaletteFactory.TEMPLATE_ID_PREFIX + templateHolder.template.getName());
 		drawer.setUserModificationPermission(PaletteEntry.PERMISSION_FULL_MODIFICATION);
 
-		for (JSONObject jsonObject : templateElements)
+		for (int i = 0; i < templateElements.size(); i++)
 		{
+			JSONObject jsonObject = templateElements.get(i);
 			String name = jsonObject.optString(SolutionSerializer.PROP_NAME);
-			if (name != null)
+			String displayName = (name == null || name.length() == 0) ? "item " + (i + 1) : name;
+			PaletteEntry toolEntry = VisualFormEditorPaletteFactory.createTemplateToolEntry(templateHolder.template, jsonObject, displayName, i);
+			if (toolEntry != null)
 			{
-				PaletteEntry toolEntry = VisualFormEditorPaletteFactory.createTemplateToolEntry(templateHolder.template, jsonObject, name);
-				if (toolEntry != null)
-				{
-					toolEntry.setId(name);
-					drawer.add(toolEntry);
-				}
+				toolEntry.setId(Integer.toString(i));
+				drawer.add(toolEntry);
 			}
 		}
 

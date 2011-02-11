@@ -38,9 +38,9 @@ public abstract class FormElementDragData implements IDragData, Serializable
 		public final int type;
 		public final int width;
 		public final int height;
-		public final String element;
+		public final int element;
 
-		public PersistDragData(String solutionName, UUID uuid, int type, int width, int height, String element)
+		public PersistDragData(String solutionName, UUID uuid, int type, int width, int height, int element)
 		{
 			this.solutionName = solutionName;
 			this.uuid = uuid;
