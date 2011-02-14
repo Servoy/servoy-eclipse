@@ -589,14 +589,10 @@ public class ElementFactory
 				}
 			}
 		}
-		if (maxDimension != null && parent instanceof Form)
+		if (parent instanceof Form)
 		{
 			// set size of the maximum dimension form
-			tabPanel.setSize(new Dimension(maxDimension.width, maxDimension.height));
-		}
-		else
-		{
-			tabPanel.setSize(new Dimension(280, 150));
+			tabPanel.setSize(maxDimension == null ? new Dimension(280, 150) : new Dimension(maxDimension.width, maxDimension.height));
 		}
 		if (tabs == null || tabs.size() == 0)
 		{
