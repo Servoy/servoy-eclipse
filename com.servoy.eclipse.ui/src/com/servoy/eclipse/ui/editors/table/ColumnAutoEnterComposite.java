@@ -67,11 +67,13 @@ import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentP
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderNodeWrapper;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider.UnresolvedDataProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
+import com.servoy.eclipse.ui.editors.AddMethodButtonsComposite;
 import com.servoy.eclipse.ui.editors.table.ColumnDetailsComposite.NotSameValidator;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.DataProviderConverter;
 import com.servoy.eclipse.ui.util.BindingHelper;
+import com.servoy.eclipse.ui.util.IControlFactory;
 import com.servoy.eclipse.ui.views.TreeSelectObservableValue;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.j2db.FlattenedSolution;
@@ -168,7 +170,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			@Override
 			protected TreeSelectDialog createDialog(Control control)
 			{
-				DataProviderDialog dialog = new DataProviderDialog(control.getShell(), (ILabelProvider)getLabelProvider(), null,
+				final DataProviderDialog dialog = new DataProviderDialog(control.getShell(), (ILabelProvider)getLabelProvider(), null,
 					ColumnAutoEnterComposite.this.flattenedSolution, column.getTable(), new DataProviderTreeViewer.DataProviderOptions(false, true, false,
 						false, false, true, false, false, INCLUDE_RELATIONS.NESTED, true, true, null), getSelection(), SWT.NONE, title);
 				dialog.setContentProvider(new DataProviderContentProvider(null, ColumnAutoEnterComposite.this.flattenedSolution, column.getTable())
@@ -176,29 +178,21 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 					@Override
 					public Object[] getChildren(Object parentElement)
 					{
-						Object[] children = super.getChildren(parentElement);
-						if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).node == DataProviderTreeViewer.GLOBALS)
+						if (parentElement instanceof DataProviderNodeWrapper &&
+							((DataProviderNodeWrapper)parentElement).node == DataProviderTreeViewer.GLOBAL_METHODS)
 						{
 							Iterator<ScriptMethod> globals = ColumnAutoEnterComposite.this.flattenedSolution.getScriptMethods(true);
-							List<Object> combinedChildren = null;
+							List<Object> combinedChildren = new ArrayList<Object>();
 							if (globals.hasNext())
 							{
-								if (children == null)
-								{
-									combinedChildren = new ArrayList<Object>();
-								}
-								else
-								{
-									combinedChildren = new ArrayList<Object>(Arrays.asList(children));
-								}
 								while (globals.hasNext())
 								{
 									combinedChildren.add(globals.next());
 								}
-								children = combinedChildren.toArray();
+								return combinedChildren.toArray();
 							}
 						}
-						return children;
+						return super.getChildren(parentElement);
 					}
 
 					@Override
@@ -206,9 +200,35 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 					{
 						if (value instanceof ScriptMethod)
 						{
-							return new DataProviderNodeWrapper(DataProviderTreeViewer.GLOBALS, (RelationList)null);
+							return new DataProviderNodeWrapper(DataProviderTreeViewer.GLOBAL_METHODS, (RelationList)null);
 						}
 						return super.getParent(value);
+					}
+
+					@Override
+					public Object[] getElements(Object inputElement)
+					{
+						Object[] input = super.getElements(inputElement);
+						List<Object> combinedInputs = new ArrayList<Object>(Arrays.asList(input));
+						combinedInputs.add(new DataProviderNodeWrapper(DataProviderTreeViewer.GLOBAL_METHODS, (RelationList)null));
+						return combinedInputs.toArray();
+					}
+				});
+				dialog.setOptionsAreaFactory(new IControlFactory()
+				{
+					public Control createControl(Composite composite)
+					{
+						AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(composite, SWT.NONE)
+						{
+							@Override
+							protected Object getSelectionObject(ScriptMethod method)
+							{
+								return method;
+							}
+						};
+						buttons.setPersist(ColumnAutoEnterComposite.this.flattenedSolution.getSolution(), "getLookupValue");
+						buttons.setDialog(dialog);
+						return buttons;
 					}
 				});
 				return dialog;

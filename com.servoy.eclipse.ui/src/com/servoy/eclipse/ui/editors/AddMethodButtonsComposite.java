@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors;
 
 import org.eclipse.swt.SWT;
@@ -24,7 +24,7 @@ import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
-import com.servoy.eclipse.ui.dialogs.MethodDialog;
+import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
 import com.servoy.j2db.persistence.IPersist;
@@ -40,7 +40,7 @@ public class AddMethodButtonsComposite extends Composite
 	private IPersist persist;
 	private String methodKey;
 
-	private MethodDialog dialog;
+	private TreeSelectDialog dialog;
 
 	private final Button addFormMethodButton;
 
@@ -63,8 +63,7 @@ public class AddMethodButtonsComposite extends Composite
 				if (method != null)
 				{
 					dialog.refreshTree();
-					dialog.expandFormNode();
-					dialog.setSelection(new MethodWithArguments(method.getID()));
+					dialog.setSelection(getSelectionObject(method));
 					dialog.buttonBar.forceFocus();
 				}
 			}
@@ -82,8 +81,7 @@ public class AddMethodButtonsComposite extends Composite
 				if (method != null)
 				{
 					dialog.refreshTree();
-					dialog.expandGlobalsNode();
-					dialog.setSelection(new MethodWithArguments(method.getID()));
+					dialog.setSelection(getSelectionObject(method));
 					dialog.buttonBar.forceFocus();
 				}
 			}
@@ -118,9 +116,13 @@ public class AddMethodButtonsComposite extends Composite
 	/**
 	 * @param dialog
 	 */
-	public void setDialog(MethodDialog dialog)
+	public void setDialog(TreeSelectDialog dialog)
 	{
 		this.dialog = dialog;
 	}
 
+	protected Object getSelectionObject(ScriptMethod method)
+	{
+		return new MethodWithArguments(method.getID());
+	}
 }

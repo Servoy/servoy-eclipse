@@ -83,4 +83,10 @@ public class DataProviderDialog extends TreeSelectDialog
 	{
 		this.contentProvider = contentProvider;
 	}
+
+	@Override
+	public void refreshTree()
+	{
+		getTreeViewer().setInput(getTreeViewer().getInput());
+	}
 }
