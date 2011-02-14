@@ -62,6 +62,8 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -82,6 +84,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.profiler.Activator;
+import com.servoy.eclipse.ui.preferences.ProfilerViewPreferences;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
 import com.servoy.j2db.debug.DataCallProfileData;
 import com.servoy.j2db.debug.IProfileListener;
@@ -701,12 +704,99 @@ public class ProfilerView extends ViewPart
 	{
 	}
 
+	private TreeColumn methodNameColumn;
+	private TreeColumn ownTimeColumn;
+	private TreeColumn timeColumn;
+	private TreeColumn fileColumn;
+	private TableColumn name;
+	private TableColumn time;
+	private TableColumn query;
+	private TableColumn arguments;
+	private TableColumn datasource;
+	private TableColumn transaction;
+	private Tree tree;
+
+	private int methodNameColumnWidth;
+	private int ownTimeColumnWidth;
+	private int timeColumnWidth;
+	private int fileColumnWidth;
+	private int argsColumnWidth;
+	private int nameTableColumnWidth;
+	private int timeTableColumnWidth;
+	private int queryTableColumnWidth;
+	private int argumentsTableColumnWidth;
+	private int datasourceTableColumnWidth;
+	private int transactionTableColumnWidth;
+	private int[] sashFormWeights;
+
 	/**
 	 * The constructor.
 	 */
 	public ProfilerView()
 	{
 	}
+
+	private void updateMethodNameColumnWidths()
+	{
+		methodNameColumnWidth = methodNameColumn.getWidth();
+	}
+
+	private void updateOwnTimeColumnWidths()
+	{
+		ownTimeColumnWidth = ownTimeColumn.getWidth();
+	}
+
+	private void updateTimeColumnWidths()
+	{
+		timeColumnWidth = timeColumn.getWidth();
+	}
+
+	private void updateFileColumnWidths()
+	{
+		fileColumnWidth = fileColumn.getWidth();
+	}
+
+	private void updateArgsColumnWidths()
+	{
+		argsColumnWidth = argsColumn.getWidth();
+	}
+
+	private void updateNameTableColumnWidths()
+	{
+		nameTableColumnWidth = name.getWidth();
+	}
+
+	private void updateTimeTableColumnWidths()
+	{
+		timeTableColumnWidth = time.getWidth();
+	}
+
+	private void updateQueryTableColumnWidths()
+	{
+		queryTableColumnWidth = query.getWidth();
+	}
+
+	private void updateArgumentsTableColumnWidths()
+	{
+		argumentsTableColumnWidth = arguments.getWidth();
+	}
+
+	private void updateDatasourceTableColumnWidths()
+	{
+		datasourceTableColumnWidth = datasource.getWidth();
+	}
+
+	private void updateTransactionTableColumnWidths()
+	{
+		transactionTableColumnWidth = transaction.getWidth();
+	}
+
+	private void updateSashFormWeights()
+	{
+		sashFormWeights = sashForm.getWeights();
+	}
+
+	SashForm sashForm;
 
 	/**
 	 * This is a callback that will allow us to create the viewer and initialize
@@ -715,9 +805,9 @@ public class ProfilerView extends ViewPart
 	@Override
 	public void createPartControl(Composite parent)
 	{
-		SashForm sashForm = new SashForm(parent, SWT.NONE);
-		methodCallViewer = new TreeViewer(sashForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		sashForm = new SashForm(parent, SWT.NONE);
 
+		methodCallViewer = new TreeViewer(sashForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		drillDownAdapter = new DrillDownAdapter(methodCallViewer);
 		makeActions();
 		hookContextMenu();
@@ -726,34 +816,130 @@ public class ProfilerView extends ViewPart
 
 		contentProvider = new MethodCallContentProvider();
 
-		Tree tree = methodCallViewer.getTree();
+		tree = methodCallViewer.getTree();
+		tree.addControlListener(new ControlListener()
+		{
+
+			public void controlMoved(ControlEvent e)
+			{
+			}
+
+			public void controlResized(ControlEvent e)
+			{
+				updateSashFormWeights();
+			}
+
+		});
 		tree.setHeaderVisible(true);
 		tree.setLinesVisible(true);
 
-		TreeColumn methodNameColumn = new TreeColumn(tree, SWT.NONE);
+		ProfilerViewPreferences pvp = new ProfilerViewPreferences();
+
+		sashFormWeights = new int[2];
+		sashFormWeights[0] = pvp.getTreeWidth();
+		sashFormWeights[1] = pvp.getTableWidth();
+
+		methodNameColumnWidth = pvp.getMethodNameColumnWidth();
+		ownTimeColumnWidth = pvp.getOwnTimeColumnWidth();
+		timeColumnWidth = pvp.getTimeColumnWidth();
+		fileColumnWidth = pvp.getFileColumnWidth();
+		argsColumnWidth = pvp.getArgsColumnWidth();
+		nameTableColumnWidth = pvp.getNameTableColumnWidth();
+		timeTableColumnWidth = pvp.getTimeTableColumnWidth();
+		queryTableColumnWidth = pvp.getQueryTableColumnWidth();
+		argumentsTableColumnWidth = pvp.getArgumentsTableColumnWidth();
+		datasourceTableColumnWidth = pvp.getDatasourceTableColumnWidth();
+		transactionTableColumnWidth = pvp.getTransactionTableColumnWidth();
+
+		methodNameColumn = new TreeColumn(tree, SWT.NONE);
 		methodNameColumn.setText("Method Name");
 		methodNameColumn.setResizable(true);
-		methodNameColumn.setWidth(200);
+		methodNameColumn.setWidth(methodNameColumnWidth);
+		methodNameColumn.addControlListener(new ControlListener()
+		{
 
-		TreeColumn ownTimeColumn = new TreeColumn(tree, SWT.NONE);
+			public void controlMoved(ControlEvent e)
+			{
+			}
+
+			public void controlResized(ControlEvent e)
+			{
+				updateMethodNameColumnWidths();
+			}
+
+		});
+
+		ownTimeColumn = new TreeColumn(tree, SWT.NONE);
 		ownTimeColumn.setText("Own Time (ms)");
 		ownTimeColumn.setResizable(true);
-		ownTimeColumn.setWidth(100);
+		ownTimeColumn.setWidth(ownTimeColumnWidth);
+		ownTimeColumn.addControlListener(new ControlListener()
+		{
 
-		TreeColumn timeColumn = new TreeColumn(tree, SWT.NONE);
+			public void controlMoved(ControlEvent e)
+			{
+			}
+
+			public void controlResized(ControlEvent e)
+			{
+				updateOwnTimeColumnWidths();
+			}
+
+		});
+
+		timeColumn = new TreeColumn(tree, SWT.NONE);
 		timeColumn.setText("Time (ms)");
 		timeColumn.setResizable(true);
-		timeColumn.setWidth(80);
+		timeColumn.setWidth(timeColumnWidth);
+		timeColumn.addControlListener(new ControlListener()
+		{
+
+			public void controlMoved(ControlEvent e)
+			{
+			}
+
+			public void controlResized(ControlEvent e)
+			{
+				updateTimeColumnWidths();
+			}
+
+		});
 
 		argsColumn = new TreeColumn(tree, SWT.NONE);
 		argsColumn.setText("Arguments");
 		argsColumn.setResizable(true);
-		argsColumn.setWidth(120);
+		argsColumn.setWidth(argsColumnWidth);
+		argsColumn.addControlListener(new ControlListener()
+		{
 
-		TreeColumn fileColumn = new TreeColumn(tree, SWT.NONE);
+			public void controlMoved(ControlEvent e)
+			{
+			}
+
+			public void controlResized(ControlEvent e)
+			{
+				updateArgsColumnWidths();
+			}
+
+		});
+
+		fileColumn = new TreeColumn(tree, SWT.NONE);
 		fileColumn.setText("Source File");
 		fileColumn.setResizable(true);
-		fileColumn.setWidth(400);
+		fileColumn.setWidth(fileColumnWidth);
+		fileColumn.addControlListener(new ControlListener()
+		{
+
+			public void controlMoved(ControlEvent e)
+			{
+			}
+
+			public void controlResized(ControlEvent e)
+			{
+				updateFileColumnWidths();
+			}
+
+		});
 
 		methodCallViewer.setContentProvider(contentProvider);
 		methodCallViewer.setLabelProvider(new MethodCallLabelProvider());
@@ -765,35 +951,113 @@ public class ProfilerView extends ViewPart
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 
-		TableColumn name = new TableColumn(table, SWT.NONE);
+		name = new TableColumn(table, SWT.NONE);
 		name.setText("Action");
-		name.setWidth(100);
+		name.setWidth(nameTableColumnWidth);
 		name.setResizable(true);
+		name.addControlListener(new ControlListener()
+		{
 
-		TableColumn time = new TableColumn(table, SWT.NONE);
+			public void controlMoved(ControlEvent e)
+			{
+			}
+
+			public void controlResized(ControlEvent e)
+			{
+				updateNameTableColumnWidths();
+			}
+
+		});
+
+		time = new TableColumn(table, SWT.NONE);
 		time.setText("Time (ms)");
-		time.setWidth(70);
+		time.setWidth(timeTableColumnWidth);
 		time.setResizable(true);
+		time.addControlListener(new ControlListener()
+		{
 
-		TableColumn query = new TableColumn(table, SWT.NONE);
+			public void controlMoved(ControlEvent e)
+			{
+			}
+
+			public void controlResized(ControlEvent e)
+			{
+				updateTimeTableColumnWidths();
+			}
+
+		});
+
+		query = new TableColumn(table, SWT.NONE);
 		query.setText("Query/Action");
-		query.setWidth(350);
+		query.setWidth(queryTableColumnWidth);
 		query.setResizable(true);
+		query.addControlListener(new ControlListener()
+		{
 
-		TableColumn arguments = new TableColumn(table, SWT.NONE);
+			public void controlMoved(ControlEvent e)
+			{
+			}
+
+			public void controlResized(ControlEvent e)
+			{
+				updateQueryTableColumnWidths();
+			}
+
+		});
+
+		arguments = new TableColumn(table, SWT.NONE);
 		arguments.setText("Arguments");
-		arguments.setWidth(100);
+		arguments.setWidth(argumentsTableColumnWidth);
 		arguments.setResizable(true);
+		arguments.addControlListener(new ControlListener()
+		{
 
-		TableColumn datasource = new TableColumn(table, SWT.NONE);
+			public void controlMoved(ControlEvent e)
+			{
+			}
+
+			public void controlResized(ControlEvent e)
+			{
+				updateArgumentsTableColumnWidths();
+			}
+
+		});
+
+		datasource = new TableColumn(table, SWT.NONE);
 		datasource.setText("Datasource");
-		datasource.setWidth(100);
+		datasource.setWidth(datasourceTableColumnWidth);
 		datasource.setResizable(true);
+		datasource.addControlListener(new ControlListener()
+		{
 
-		TableColumn transaction = new TableColumn(table, SWT.NONE);
+			public void controlMoved(ControlEvent e)
+			{
+			}
+
+			public void controlResized(ControlEvent e)
+			{
+				updateDatasourceTableColumnWidths();
+			}
+
+		});
+
+		transaction = new TableColumn(table, SWT.NONE);
 		transaction.setText("TransactionId");
-		transaction.setWidth(100);
+		transaction.setWidth(transactionTableColumnWidth);
 		transaction.setResizable(true);
+		transaction.addControlListener(new ControlListener()
+		{
+
+			public void controlMoved(ControlEvent e)
+			{
+			}
+
+			public void controlResized(ControlEvent e)
+			{
+				updateTransactionTableColumnWidths();
+			}
+
+		});
 
 
 		sqlDataViewer.setLabelProvider(new DataCallLabelProvider());
@@ -816,7 +1080,7 @@ public class ProfilerView extends ViewPart
 			}
 		});
 
-
+		sashForm.setWeights(sashFormWeights);
 	}
 
 	/**
@@ -826,6 +1090,24 @@ public class ProfilerView extends ViewPart
 	public void dispose()
 	{
 		super.dispose();
+		ProfilerViewPreferences pvp = new ProfilerViewPreferences();
+
+		pvp.setTreeWidth(sashFormWeights[0]);
+		pvp.setTableWidth(sashFormWeights[1]);
+
+		pvp.setMethodNameColumnWidth(methodNameColumnWidth);
+		pvp.setOwnTimeColumnWidth(ownTimeColumnWidth);
+		pvp.setTimeColumnWidth(timeColumnWidth);
+		pvp.setFileColumnWidth(fileColumnWidth);
+		pvp.setArgsColumnWidth(argsColumnWidth);
+		pvp.setNameTableColumnWidth(nameTableColumnWidth);
+		pvp.setTimeTableColumnWidth(timeTableColumnWidth);
+		pvp.setQueryTableColumnWidth(queryTableColumnWidth);
+		pvp.setArgumentsTableColumnWidth(argumentsTableColumnWidth);
+		pvp.setDatasourceTableColumnWidth(datasourceTableColumnWidth);
+		pvp.setTransactionTableColumnWidth(transactionTableColumnWidth);
+
+		pvp.save();
 		RemoteDebugScriptEngine.deregisterProfileListener(contentProvider);
 	}
 
@@ -1134,5 +1416,27 @@ public class ProfilerView extends ViewPart
 	public void setFocus()
 	{
 		methodCallViewer.getControl().setFocus();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.swt.events.ControlListener#controlMoved(org.eclipse.swt.events.ControlEvent)
+	 */
+	public void controlMoved(ControlEvent e)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.swt.events.ControlListener#controlResized(org.eclipse.swt.events.ControlEvent)
+	 */
+	public void controlResized(ControlEvent e)
+	{
+		// TODO Auto-generated method stub
+
 	}
 }
