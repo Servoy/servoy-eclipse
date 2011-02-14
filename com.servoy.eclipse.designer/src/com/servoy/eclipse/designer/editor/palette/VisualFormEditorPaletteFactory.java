@@ -829,7 +829,7 @@ public class VisualFormEditorPaletteFactory
 
 						if (drawer == null)
 						{
-							drawer = new PaletteDrawer("");
+							drawer = new ElementPaletteDrawer("");
 							drawer.setId(drawerId);
 							drawer.setUserModificationPermission(drawerId.startsWith(TEMPLATE_ID_PREFIX) ? PaletteEntry.PERMISSION_FULL_MODIFICATION
 								: PaletteEntry.PERMISSION_LIMITED_MODIFICATION);

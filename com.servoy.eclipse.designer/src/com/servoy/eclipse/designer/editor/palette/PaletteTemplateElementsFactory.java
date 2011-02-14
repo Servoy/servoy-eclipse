@@ -59,7 +59,7 @@ public class PaletteTemplateElementsFactory extends PaletteContainerFactory
 		{
 			templateHolder = (TemplateElementHolder)((RequestTypeCreationFactory)((ElementCreationToolEntry)selected).getTemplate()).getData();
 		}
-		if (templateHolder == null)
+		if (templateHolder == null || templateHolder.element >= 0) // only top-level templates
 		{
 			return false;
 		}
@@ -89,7 +89,7 @@ public class PaletteTemplateElementsFactory extends PaletteContainerFactory
 
 		PaletteContainer parent = determineContainerForNewEntry(selected);
 		int index = determineIndexForNewEntry(parent, selected);
-		PaletteDrawer drawer = new PaletteDrawer(selected.getLabel());
+		PaletteDrawer drawer = new ElementPaletteDrawer(selected.getLabel());
 		drawer.setId(VisualFormEditorPaletteFactory.TEMPLATE_ID_PREFIX + templateHolder.template.getName());
 		drawer.setUserModificationPermission(PaletteEntry.PERMISSION_FULL_MODIFICATION);
 
