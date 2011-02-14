@@ -367,7 +367,8 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 
 	protected void addSameSizeFeedback()
 	{
-		if (!Boolean.TRUE.equals(container.getViewer().getProperty(AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_VISIBLE)))
+		if (!Boolean.TRUE.equals(container.getViewer().getProperty(AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_VISIBLE)) ||
+			getHost() instanceof TabFormGraphicalEditPart)
 		{
 			return;
 		}
@@ -379,7 +380,7 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 		List<EditPart> children = container.getChildren();
 		for (EditPart child : children)
 		{
-			if (child.getModel() instanceof Part || child == getHost() || !(child instanceof GraphicalEditPart))
+			if (child.getModel() instanceof Part || child == getHost() || !(child instanceof GraphicalEditPart) || child instanceof TabFormGraphicalEditPart)
 			{
 				continue;
 			}
