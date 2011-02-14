@@ -315,7 +315,7 @@
       <problemFilter
             enabled="true"
             id="com.servoy.eclipse.core.servoyProblemFilter"
-            name="Servoy Active Project Filter">
+            name="Servoy Active Solution Filter">
       </problemFilter>
    </extension>
 </plugin>
