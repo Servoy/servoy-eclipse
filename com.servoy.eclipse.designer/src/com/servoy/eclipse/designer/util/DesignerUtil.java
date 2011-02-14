@@ -17,14 +17,21 @@
 package com.servoy.eclipse.designer.util;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.gef.EditPart;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.RepositoryException;
 
 /**
  * Utility methods for form designer.
@@ -89,4 +96,27 @@ public class DesignerUtil
 		return false;
 	}
 
+	public static Part getPreviousPart(Part part)
+	{
+		Part previousPart = null;
+		try
+		{
+			Form flattenedForm = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(part).getFlattenedForm(part);
+			Iterator<Part> parts = flattenedForm.getObjects(IRepository.PARTS);
+			while (parts.hasNext())
+			{
+				Part nextPart = parts.next();
+				int nextHeight = nextPart.getHeight();
+				if (nextHeight < part.getHeight() && (previousPart == null || nextHeight > previousPart.getHeight()))
+				{
+					previousPart = nextPart;
+				}
+			}
+		}
+		catch (RepositoryException e)
+		{
+			ServoyLog.logError(e);
+		}
+		return previousPart;
+	}
 }

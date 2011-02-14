@@ -636,31 +636,54 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 					while (iterator.hasNext())
 					{
 						Object next = iterator.next();
-						if (next instanceof EditPart && ((EditPart)next).getModel() instanceof ISupportBounds)
+						if (next instanceof EditPart)
 						{
-							ISupportBounds supportBounds = (ISupportBounds)((EditPart)next).getModel();
-							java.awt.Point location = supportBounds.getLocation();
-							java.awt.Dimension size = supportBounds.getSize();
-							if (location != null && size != null)
+							if (((EditPart)next).getModel() instanceof ISupportBounds)
 							{
+								ISupportBounds supportBounds = (ISupportBounds)((EditPart)next).getModel();
+								java.awt.Point location = supportBounds.getLocation();
+								java.awt.Dimension size = supportBounds.getSize();
+								if (location != null && size != null)
+								{
+									if (sb == null)
+									{
+										sb = new StringBuilder();
+									}
+									else
+									{
+										if (sb.length() > 50)
+										{
+											// too much information
+											break;
+										}
+										sb.append(' ');
+									}
+									sb.append('(')//
+									.append(location.x).append(',').append(location.y)//
+									.append(' ')//
+									.append(size.width).append('x').append(size.height)//
+									.append(')');
+								}
+							}
+							else if (((EditPart)next).getModel() instanceof Part)
+							{
+								Part part = (Part)((EditPart)next).getModel();
 								if (sb == null)
 								{
 									sb = new StringBuilder();
 								}
 								else
 								{
-									if (sb.length() > 50)
-									{
-										// too much information
-										break;
-									}
 									sb.append(' ');
 								}
-								sb.append('(')//
-								.append(location.x).append(',').append(location.y)//
-								.append(' ')//
-								.append(size.width).append('x').append(size.height)//
-								.append(')');
+
+								sb.append(part.getEditorName());
+								sb.append(' ').append(part.getHeight());
+								Part prev = DesignerUtil.getPreviousPart(part);
+								if (prev != null && prev.getHeight() > 0)
+								{
+									sb.append(" (").append(part.getHeight() - prev.getHeight()).append(')'); //$NON-NLS-1$
+								}
 							}
 						}
 					}

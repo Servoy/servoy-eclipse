@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.designer.editor;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.draw2d.FocusBorder;
@@ -31,13 +30,10 @@ import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.editpolicies.ResizableEditPolicy;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.commands.MovePartCommand;
-import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportAnchors;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.Part;
@@ -53,7 +49,7 @@ import com.servoy.j2db.util.IAnchorConstants;
  */
 public class DragFormPartPolicy extends ResizableEditPolicy
 {
-	private Integer previousPartHeight = null;
+	private Part previousPart = null;
 
 	@Override
 	protected DragFormBoundsFigure createDragSourceFeedbackFigure()
@@ -78,31 +74,13 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 		getHostFigure().setBorder(null);
 	}
 
-	protected int getPreviousPartHeight()
+	protected Part getPreviousPart()
 	{
-		if (previousPartHeight == null)
+		if (previousPart == null)
 		{
-			previousPartHeight = Integer.valueOf(0);
-			Part part = (Part)getHost().getModel();
-			try
-			{
-				Form flattenedForm = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(part).getFlattenedForm(part);
-				Iterator<Part> parts = flattenedForm.getObjects(IRepository.PARTS);
-				while (parts.hasNext())
-				{
-					int nextHeight = parts.next().getHeight();
-					if (nextHeight < part.getHeight() && nextHeight > previousPartHeight.intValue())
-					{
-						previousPartHeight = new Integer(nextHeight);
-					}
-				}
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-			}
+			previousPart = DesignerUtil.getPreviousPart((Part)getHost().getModel());
 		}
-		return previousPartHeight.intValue();
+		return previousPart;
 	}
 
 	@Override
@@ -122,9 +100,10 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 		StringBuilder message = new StringBuilder("Part height ");
 		int newHeight = ((Part)getHost().getModel()).getHeight() + request.getMoveDelta().y;
 		message.append(newHeight);
-		if (getPreviousPartHeight() > 0)
+		Part prev = getPreviousPart();
+		if (prev != null && prev.getHeight() > 0)
 		{
-			message.append(" (").append(newHeight - getPreviousPartHeight()).append(')'); //$NON-NLS-1$
+			message.append(" (").append(newHeight - prev.getHeight()).append(')'); //$NON-NLS-1$
 		}
 		EditorUtil.setStatuslineMessage(message.toString());
 	}
@@ -134,7 +113,7 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 	{
 		super.eraseChangeBoundsFeedback(request);
 		EditorUtil.setStatuslineMessage(null);
-		previousPartHeight = null;
+		previousPart = null;
 	}
 
 	@Override
