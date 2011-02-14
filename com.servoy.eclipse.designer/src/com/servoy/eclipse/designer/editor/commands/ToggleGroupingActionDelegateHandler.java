@@ -22,6 +22,8 @@ import java.util.Map;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 
+import com.servoy.eclipse.designer.util.DesignerUtil;
+
 /**
  * An action to change the grouping of selected objects.
  * 
@@ -32,6 +34,12 @@ public abstract class ToggleGroupingActionDelegateHandler extends DesignerSelect
 	public ToggleGroupingActionDelegateHandler()
 	{
 		super(null);
+	}
+
+	@Override
+	protected Iterable<EditPart> getToRefresh(Iterable<EditPart> affected)
+	{
+		return DesignerUtil.getFormEditparts(affected);
 	}
 
 	public static class Group extends ToggleGroupingActionDelegateHandler

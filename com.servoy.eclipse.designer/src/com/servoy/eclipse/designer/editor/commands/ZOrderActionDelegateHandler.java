@@ -16,7 +16,10 @@
  */
 package com.servoy.eclipse.designer.editor.commands;
 
+import org.eclipse.gef.EditPart;
+
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 
 /**
  * An action to change the z-ordering of selected objects.
@@ -28,6 +31,12 @@ public abstract class ZOrderActionDelegateHandler extends DesignerSelectionActio
 	public ZOrderActionDelegateHandler(Object requestType)
 	{
 		super(requestType);
+	}
+
+	@Override
+	protected Iterable<EditPart> getToRefresh(Iterable<EditPart> affected)
+	{
+		return DesignerUtil.getFormEditparts(affected);
 	}
 
 	public static class ToFront extends ZOrderActionDelegateHandler

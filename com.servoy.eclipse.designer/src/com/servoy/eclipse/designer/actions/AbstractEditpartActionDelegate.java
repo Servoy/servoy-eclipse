@@ -115,8 +115,14 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 		if (command != null)
 		{
 			// execute the command on the command stack (supports undo/redo)
-			editPart.getViewer().getEditDomain().getCommandStack().execute(new SelectModelsCommandWrapper(editPart.getViewer(), command));
+			editPart.getViewer().getEditDomain().getCommandStack().execute(
+				new SelectModelsCommandWrapper(editPart.getViewer(), getToRefresh(editPart), command));
 		}
+	}
+
+	protected EditPart getToRefresh(EditPart affected)
+	{
+		return affected == null ? null : affected.getParent();
 	}
 
 	private Request getRequest(EditPart editPart)

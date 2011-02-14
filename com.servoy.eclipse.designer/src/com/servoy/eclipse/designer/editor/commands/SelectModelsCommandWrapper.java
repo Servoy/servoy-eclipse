@@ -18,8 +18,10 @@
 package com.servoy.eclipse.designer.editor.commands;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
@@ -35,11 +37,18 @@ import org.eclipse.swt.widgets.Display;
 public class SelectModelsCommandWrapper extends CompoundCommand
 {
 	private final EditPartViewer viewer;
+	private final Iterable<EditPart> toRefresh;
 
-	public SelectModelsCommandWrapper(EditPartViewer viewer, Command command)
+	public SelectModelsCommandWrapper(EditPartViewer viewer, Iterable<EditPart> toRefresh, Command command)
 	{
 		this.viewer = viewer;
+		this.toRefresh = toRefresh;
 		add(command);
+	}
+
+	public SelectModelsCommandWrapper(EditPartViewer viewer, EditPart toRefresh, Command command)
+	{
+		this(viewer, toRefresh == null ? null : Collections.singletonList(toRefresh), command);
 	}
 
 	@Override
@@ -69,6 +78,15 @@ public class SelectModelsCommandWrapper extends CompoundCommand
 		{
 			return;
 		}
+
+		if (toRefresh != null)
+		{
+			for (EditPart editPart : toRefresh)
+			{
+				editPart.refresh();
+			}
+		}
+
 		// select the models later in the display thread, some editparts may not have been created yet.
 		final List<Object> models = getModels(this, new ArrayList<Object>());
 		if (models.size() > 0)
@@ -133,6 +151,6 @@ public class SelectModelsCommandWrapper extends CompoundCommand
 	public Command unwrap()
 	{
 		Command unwrapped = super.unwrap();
-		return unwrapped == this ? this : new SelectModelsCommandWrapper(viewer, unwrapped);
+		return unwrapped == this ? this : new SelectModelsCommandWrapper(viewer, toRefresh, unwrapped);
 	}
 }

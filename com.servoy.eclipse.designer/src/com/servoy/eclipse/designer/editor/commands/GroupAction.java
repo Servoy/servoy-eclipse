@@ -28,6 +28,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import com.servoy.eclipse.designer.actions.SetPropertyRequest;
 import com.servoy.eclipse.designer.editor.GroupGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.UUID;
 
@@ -99,5 +100,11 @@ public class GroupAction extends DesignerSelectionAction
 		}
 
 		return requests;
+	}
+
+	@Override
+	protected Iterable<EditPart> getToRefresh(Iterable<EditPart> affected)
+	{
+		return DesignerUtil.getFormEditparts(affected);
 	}
 }

@@ -37,7 +37,6 @@ import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceFieldCommand;
 import com.servoy.eclipse.designer.editor.commands.FormZOrderCommand;
-import com.servoy.eclipse.designer.editor.commands.PersistPlaceCommandWrapper;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
@@ -176,8 +175,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 
 		if (command != null)
 		{
-			// Must refresh parent of host (= form editpart) not host (=portal editpart) because field is child of form figure
-			return new PersistPlaceCommandWrapper(getHost().getParent(), command, true);
+			return command;
 		}
 
 		command = super.getCommand(request);

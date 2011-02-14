@@ -39,7 +39,6 @@ import org.eclipse.swt.widgets.Display;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
 import com.servoy.eclipse.designer.editor.commands.ICommandWrapper;
-import com.servoy.eclipse.designer.editor.commands.PersistPlaceCommandWrapper;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
@@ -129,11 +128,8 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 					models.get(i).getTypeID(), 0, 0, -1);
 			}
 			Point location = new Point(minx + ((ChangeBoundsRequest)request).getMoveDelta().x, miny + ((ChangeBoundsRequest)request).getMoveDelta().y);
-			Command command = new FormPlaceElementCommand(application, (ISupportChilds)persist.getAncestor(IRepository.FORMS), objects, request.getType(),
+			return new FormPlaceElementCommand(application, (ISupportChilds)persist.getAncestor(IRepository.FORMS), objects, request.getType(),
 				request.getExtendedData(), new DefaultFieldPositioner(location), null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
-			// Refresh the form
-			return new PersistPlaceCommandWrapper((EditPart)getHost().getViewer().getEditPartRegistry().get(persist.getAncestor(IRepository.FORMS)), command,
-				true);
 		}
 		return null;
 	}
@@ -237,10 +233,8 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 				}
 			}
 
-			Command command = new FormPlaceElementCommand(application, (ISupportChilds)pasteParent, clipboardContents, request.getType(),
-				request.getExtendedData(), fieldPositioner, null, context);
-			// Refresh the form
-			return new PersistPlaceCommandWrapper((EditPart)editPartViewer.getEditPartRegistry().get(pasteParent.getAncestor(IRepository.FORMS)), command, true);
+			return new FormPlaceElementCommand(application, (ISupportChilds)pasteParent, clipboardContents, request.getType(), request.getExtendedData(),
+				fieldPositioner, null, context);
 		}
 
 		public Command getCommand()

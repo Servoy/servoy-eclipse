@@ -211,7 +211,7 @@ public class FormSelectionTool extends PanningSelectionTool
 		}
 
 		// execute on the command stack
-		viewer.getEditDomain().getCommandStack().execute(new SelectModelsCommandWrapper(getCurrentViewer(), command.unwrap()));
+		viewer.getEditDomain().getCommandStack().execute(new SelectModelsCommandWrapper(getCurrentViewer(), applicableEditParts, command.unwrap()));
 		return true;
 	}
 

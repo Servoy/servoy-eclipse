@@ -94,7 +94,16 @@ public abstract class DesignerSelectionAction extends SelectionAction
 		{
 			return null;
 		}
-		return new SelectModelsCommandWrapper(viewer, compoundCmd.unwrap());
+		return new SelectModelsCommandWrapper(viewer, getToRefresh(requests.keySet()), compoundCmd.unwrap());
+	}
+
+	/**
+	 * @param keySet
+	 * @return
+	 */
+	protected Iterable<EditPart> getToRefresh(Iterable<EditPart> affected)
+	{
+		return affected;
 	}
 
 	protected Map<EditPart, Request> createRequests(List<EditPart> selected)

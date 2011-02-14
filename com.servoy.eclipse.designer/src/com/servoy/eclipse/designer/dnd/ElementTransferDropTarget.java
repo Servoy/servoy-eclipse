@@ -167,6 +167,6 @@ public class ElementTransferDropTarget extends AbstractTransferDropTargetListene
 	protected Command getCommand()
 	{
 		Command command = super.getCommand();
-		return command == null ? null : new SelectModelsCommandWrapper(getViewer(), command);
+		return command == null ? null : new SelectModelsCommandWrapper(getViewer(), getTargetEditPart(), command);
 	}
 }

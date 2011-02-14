@@ -53,7 +53,7 @@ public abstract class MultipleSelectionAction extends SelectionAction
 	 * @param objects The objects selected.
 	 * @return The command to work the selected objects.
 	 */
-	protected Command createCommand(List objects)
+	protected Command createCommand(List< ? > objects)
 	{
 		if (objects.isEmpty()) return null;
 		if (!(objects.get(0) instanceof EditPart)) return null;
@@ -100,7 +100,7 @@ public abstract class MultipleSelectionAction extends SelectionAction
 		{
 			return null;
 		}
-		return new SelectModelsCommandWrapper(viewer, compoundCmd.unwrap());
+		return new SelectModelsCommandWrapper(viewer, (Iterable<EditPart>)null, compoundCmd.unwrap());
 	}
 
 	protected GroupRequest createRequest(List<EditPart> selected)

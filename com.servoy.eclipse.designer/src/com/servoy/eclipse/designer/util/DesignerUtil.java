@@ -17,8 +17,10 @@
 package com.servoy.eclipse.designer.util;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.gef.EditPart;
@@ -118,5 +120,28 @@ public class DesignerUtil
 			ServoyLog.logError(e);
 		}
 		return previousPart;
+	}
+
+	public static Set<EditPart> getFormEditparts(Iterable<EditPart> editparts)
+	{
+		if (editparts == null)
+		{
+			return null;
+		}
+		Set<EditPart> parents = new HashSet<EditPart>();
+
+		for (EditPart editPart : editparts)
+		{
+			for (EditPart parent = editPart; parent != null; parent = parent.getParent())
+			{
+				if (parent.getModel() instanceof Form)
+				{
+					parents.add(parent);
+					break;
+				}
+			}
+		}
+
+		return parents;
 	}
 }

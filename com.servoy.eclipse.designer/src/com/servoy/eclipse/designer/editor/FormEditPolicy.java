@@ -40,7 +40,6 @@ import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceFieldCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlacePortalCommand;
-import com.servoy.eclipse.designer.editor.commands.PersistPlaceCommandWrapper;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
@@ -113,7 +112,7 @@ public class FormEditPolicy extends ComponentEditPolicy
 							IFormElement next = elements.next();
 							if (next instanceof IPersist)
 							{
-								models.add((IPersist)next);
+								models.add(next);
 							}
 						}
 					}
@@ -194,7 +193,7 @@ public class FormEditPolicy extends ComponentEditPolicy
 		{
 			return super.getCommand(request);
 		}
-		return new PersistPlaceCommandWrapper(getHost(), command, true);
+		return command;
 	}
 
 	@Override

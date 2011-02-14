@@ -198,7 +198,7 @@ public abstract class BasePersistGraphicalEditPart extends AbstractGraphicalEdit
 			protected Command getCommand()
 			{
 				Command command = super.getCommand();
-				return command == null ? null : new SelectModelsCommandWrapper(editPart.getViewer(), command);
+				return command == null ? null : new SelectModelsCommandWrapper(editPart.getViewer(), editPart, command);
 			}
 		};
 	}

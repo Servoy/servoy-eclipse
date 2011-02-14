@@ -13,12 +13,14 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor.commands;
 
+import org.eclipse.gef.EditPart;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 
 /**
  * An action to change the z-order of selected objects.
@@ -29,6 +31,12 @@ public class BringToFrontAction extends DesignerSelectionAction
 	public BringToFrontAction(IWorkbenchPart part)
 	{
 		super(part, VisualFormEditor.REQ_BRING_TO_FRONT);
+	}
+
+	@Override
+	protected Iterable<EditPart> getToRefresh(Iterable<EditPart> affected)
+	{
+		return DesignerUtil.getFormEditparts(affected);
 	}
 
 	/**
