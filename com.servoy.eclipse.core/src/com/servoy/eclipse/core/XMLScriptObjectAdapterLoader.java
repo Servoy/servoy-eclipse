@@ -76,8 +76,9 @@ public class XMLScriptObjectAdapterLoader
 				}
 			}
 
-			System.out.println("Documentation loaded successfully. " + succeeded + " classes registered successfully. " + failed + //$NON-NLS-1$//$NON-NLS-2$
-				" classes failed registration."); //$NON-NLS-1$
+			System.out.print("Documentation loaded successfully. " + succeeded + " classes registered successfully."); //$NON-NLS-1$ //$NON-NLS-2$
+			if (failed > 0) System.out.print(" " + failed + " classes failed registration."); //$NON-NLS-1$ //$NON-NLS-2$
+			System.out.println();
 		}
 
 		Date stop = new Date();
