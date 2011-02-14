@@ -34,6 +34,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.property.CheckboxPropertyDescriptor;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.DimensionPropertySource;
@@ -53,6 +54,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.util.UUID;
 
@@ -85,7 +87,7 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 
 	public IPropertyDescriptor[] getPropertyDescriptors()
 	{
-		List<IPropertyDescriptor> lst = new ArrayList<IPropertyDescriptor>();
+		List<PropertyDescriptor> lst = new ArrayList<PropertyDescriptor>();
 		Iterator<IFormElement> elements = group.getElements();
 		for (int i = 0; elements.hasNext(); i++)
 		{
@@ -102,8 +104,8 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 		}
 
 		// size property
-		PropertyController<java.awt.Dimension, Object> sizePc = new PropertyController<java.awt.Dimension, Object>(
-			StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), "size", new ComplexPropertyConverter<java.awt.Dimension>()
+		lst.add(new PropertyController<java.awt.Dimension, Object>(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), "size",
+			new ComplexPropertyConverter<java.awt.Dimension>()
 			{
 				@Override
 				public Object convertProperty(Object id, java.awt.Dimension value)
@@ -124,13 +126,11 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 				{
 					return DimensionPropertySource.createPropertyEditor(parent);
 				}
-			});
-		sizePc.setCategory(PropertyCategory.Properties.name());
-		lst.add(sizePc);
+			}));
 
 		// location property
-		PropertyController<java.awt.Point, Object> locationPc = new PropertyController<java.awt.Point, Object>(
-			StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), "location", new ComplexPropertyConverter<java.awt.Point>()
+		lst.add(new PropertyController<java.awt.Point, Object>(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), "location",
+			new ComplexPropertyConverter<java.awt.Point>()
 			{
 				@Override
 				public Object convertProperty(Object id, java.awt.Point value)
@@ -150,12 +150,16 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 				{
 					return PointPropertySource.createPropertyEditor(parent);
 				}
-			});
-		locationPc.setCategory(PropertyCategory.Properties.name());
-		lst.add(locationPc);
+			}));
+
+		// enabled property
+		lst.add(new CheckboxPropertyDescriptor(StaticContentSpecLoader.PROPERTY_ENABLED.getPropertyName(), "enabled"));
+
+		// visible property
+		lst.add(new CheckboxPropertyDescriptor(StaticContentSpecLoader.PROPERTY_VISIBLE.getPropertyName(), "visible"));
 
 		// name property
-		PropertyDescriptor namePc = new PropertyDescriptor(StaticContentSpecLoader.PROPERTY_NAME.getPropertyName(), "name")
+		lst.add(new PropertyDescriptor(StaticContentSpecLoader.PROPERTY_NAME.getPropertyName(), "name")
 		{
 			@Override
 			public CellEditor createPropertyEditor(Composite parent)
@@ -184,9 +188,16 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 
 				return cellEditor;
 			}
-		};
-		namePc.setCategory(PropertyCategory.Properties.name());
-		lst.add(namePc);
+		});
+
+		// all prop descs that do not have a category yet belong to category PropertyCategory.Properties
+		for (PropertyDescriptor desc : lst)
+		{
+			if (desc.getCategory() == null)
+			{
+				desc.setCategory(PropertyCategory.Properties.name());
+			}
+		}
 
 		return lst.toArray(new IPropertyDescriptor[lst.size()]);
 	}
@@ -195,11 +206,13 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 	{
 		if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(id)) return group.getSize();
 		if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(id)) return group.getLocation();
+		if (StaticContentSpecLoader.PROPERTY_VISIBLE.getPropertyName().equals(id)) return Boolean.valueOf(group.getVisible());
+		if (StaticContentSpecLoader.PROPERTY_ENABLED.getPropertyName().equals(id)) return Boolean.valueOf(group.getEnabled());
 		if (StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(id)) return PersistPropertySource.NULL_STRING_CONVERTER.convertProperty(id,
 			group.getName());
 		if (id instanceof Integer)
 		{
-			return new PersistContext((IPersist)group.getElement(((Integer)id).intValue()), null);
+			return new PersistContext(group.getElement(((Integer)id).intValue()), null);
 		}
 		return null;
 	}
@@ -222,6 +235,14 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 		else if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(id))
 		{
 			setLocation((Point)value);
+		}
+		else if (StaticContentSpecLoader.PROPERTY_VISIBLE.getPropertyName().equals(id))
+		{
+			setPropertyToElements(StaticContentSpecLoader.PROPERTY_VISIBLE, (Boolean)value);
+		}
+		else if (StaticContentSpecLoader.PROPERTY_ENABLED.getPropertyName().equals(id))
+		{
+			setPropertyToElements(StaticContentSpecLoader.PROPERTY_ENABLED, (Boolean)value);
 		}
 		else if (StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(id))
 		{
@@ -249,12 +270,9 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 		while (elements.hasNext())
 		{
 			IFormElement element = elements.next();
-			if (element instanceof IPersist)
-			{
-				Point oldElementLocation = element.getLocation();
-				Point location = new Point(oldElementLocation.x + dx, oldElementLocation.y + dy);
-				setElementProperty((IPersist)element, StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
-			}
+			Point oldElementLocation = element.getLocation();
+			Point location = new Point(oldElementLocation.x + dx, oldElementLocation.y + dy);
+			setElementProperty(element, StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
 		}
 	}
 
@@ -273,40 +291,47 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 		while (elements.hasNext())
 		{
 			IFormElement element = elements.next();
-			if (element instanceof IPersist)
+			Dimension oldElementSize = element.getSize();
+			Point oldElementLocation = element.getLocation();
+
+			Dimension size = new Dimension((int)(oldElementSize.width * factorW), (int)(oldElementSize.height * factorH));
+
+			int newX;
+			if (oldElementLocation.x + oldElementSize.width == oldBounds.x + oldBounds.width)
 			{
-				Dimension oldElementSize = element.getSize();
-				Point oldElementLocation = element.getLocation();
-
-				Dimension size = new Dimension((int)(oldElementSize.width * factorW), (int)(oldElementSize.height * factorH));
-
-				int newX;
-				if (oldElementLocation.x + oldElementSize.width == oldBounds.x + oldBounds.width)
-				{
-					// element was attached to the right side, keep it there
-					newX = oldBounds.x + d.width - size.width;
-				}
-				else
-				{
-					// move relative to size factor
-					newX = oldBounds.x + (int)((oldElementLocation.x - oldBounds.x) * factorW);
-				}
-				int newY;
-				if (oldElementLocation.y + oldElementSize.height == oldBounds.y + oldBounds.height)
-				{
-					// element was attached to the bottom side, keep it there
-					newY = oldBounds.y + d.height - size.height;
-				}
-				else
-				{
-					// move relative to size factor
-					newY = oldBounds.y + (int)((oldElementLocation.y - oldBounds.y) * factorH);
-				}
-				Point location = new Point(newX, newY);
-
-				setElementProperty((IPersist)element, StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), size);
-				setElementProperty((IPersist)element, StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
+				// element was attached to the right side, keep it there
+				newX = oldBounds.x + d.width - size.width;
 			}
+			else
+			{
+				// move relative to size factor
+				newX = oldBounds.x + (int)((oldElementLocation.x - oldBounds.x) * factorW);
+			}
+			int newY;
+			if (oldElementLocation.y + oldElementSize.height == oldBounds.y + oldBounds.height)
+			{
+				// element was attached to the bottom side, keep it there
+				newY = oldBounds.y + d.height - size.height;
+			}
+			else
+			{
+				// move relative to size factor
+				newY = oldBounds.y + (int)((oldElementLocation.y - oldBounds.y) * factorH);
+			}
+			Point location = new Point(newX, newY);
+
+			setElementProperty(element, StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), size);
+			setElementProperty(element, StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
+		}
+	}
+
+	protected <T> void setPropertyToElements(TypedProperty<T> property, T arg)
+	{
+		Iterator<IFormElement> elements = group.getElements();
+		while (elements.hasNext())
+		{
+			IFormElement element = elements.next();
+			setElementProperty(element, property.getPropertyName(), arg);
 		}
 	}
 
@@ -338,15 +363,8 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 			newGroupId = name;
 		}
 
-		Iterator<IFormElement> elements = group.getElements();
-		while (elements.hasNext())
-		{
-			IFormElement element = elements.next();
-			if (element instanceof IPersist)
-			{
-				setElementProperty((IPersist)element, StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName(), newGroupId);
-			}
-		}
+		setPropertyToElements(StaticContentSpecLoader.PROPERTY_GROUPID, newGroupId);
+
 		// must set grouID after looping over elements (uses current groupID)
 		group.setGroupID(newGroupId);
 	}
