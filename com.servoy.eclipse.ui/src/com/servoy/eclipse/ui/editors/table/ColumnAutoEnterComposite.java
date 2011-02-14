@@ -17,6 +17,8 @@
 package com.servoy.eclipse.ui.editors.table;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -62,6 +64,7 @@ import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
+import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderNodeWrapper;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider.UnresolvedDataProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
 import com.servoy.eclipse.ui.editors.table.ColumnDetailsComposite.NotSameValidator;
@@ -77,7 +80,9 @@ import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.RelationList;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Table;
 
 public class ColumnAutoEnterComposite extends Composite implements SelectionListener
@@ -163,15 +168,66 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			@Override
 			protected TreeSelectDialog createDialog(Control control)
 			{
-				return new DataProviderDialog(control.getShell(), (ILabelProvider)getLabelProvider(), null, ColumnAutoEnterComposite.this.flattenedSolution,
-					column.getTable(), new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, true, false, false,
-						INCLUDE_RELATIONS.NESTED, true, true, null), getSelection(), SWT.NONE, title);
+				DataProviderDialog dialog = new DataProviderDialog(control.getShell(), (ILabelProvider)getLabelProvider(), null,
+					ColumnAutoEnterComposite.this.flattenedSolution, column.getTable(), new DataProviderTreeViewer.DataProviderOptions(false, true, false,
+						false, false, true, false, false, INCLUDE_RELATIONS.NESTED, true, true, null), getSelection(), SWT.NONE, title);
+				dialog.setContentProvider(new DataProviderContentProvider(null, ColumnAutoEnterComposite.this.flattenedSolution, column.getTable())
+				{
+					@Override
+					public Object[] getChildren(Object parentElement)
+					{
+						Object[] children = super.getChildren(parentElement);
+						if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).node == DataProviderTreeViewer.GLOBALS)
+						{
+							Iterator<ScriptMethod> globals = ColumnAutoEnterComposite.this.flattenedSolution.getScriptMethods(true);
+							List<Object> combinedChildren = null;
+							if (globals.hasNext())
+							{
+								if (children == null)
+								{
+									combinedChildren = new ArrayList<Object>();
+								}
+								else
+								{
+									combinedChildren = new ArrayList<Object>(Arrays.asList(children));
+								}
+								while (globals.hasNext())
+								{
+									combinedChildren.add(globals.next());
+								}
+								children = combinedChildren.toArray();
+							}
+						}
+						return children;
+					}
+
+					@Override
+					public Object getParent(Object value)
+					{
+						if (value instanceof ScriptMethod)
+						{
+							return new DataProviderNodeWrapper(DataProviderTreeViewer.GLOBALS, (RelationList)null);
+						}
+						return super.getParent(value);
+					}
+				});
+				return dialog;
 			}
 		};
-		lookupValueSelect.setTitleText("Specify DataProvider");
+		lookupValueSelect.setTitleText("Specify DataProvider/Global Method");
 		lookupValueSelect.setName("lookupDialog");
-		lookupValueSelect.setLabelProvider(new SolutionContextDelegateLabelProvider(DataProviderLabelProvider.INSTANCE_HIDEPREFIX,
-			flattenedSolution.getSolution()));
+		lookupValueSelect.setLabelProvider(new SolutionContextDelegateLabelProvider(new DataProviderLabelProvider(true)
+		{
+			@Override
+			public String getText(Object dataProvider)
+			{
+				if (dataProvider instanceof ScriptMethod)
+				{
+					return ((ScriptMethod)dataProvider).getName() + "()";
+				}
+				return super.getText(dataProvider);
+			}
+		}, flattenedSolution.getSolution()));
 		lookupValueSelect.setTextLabelProvider(new LabelProvider()
 		{
 			@Override
@@ -184,6 +240,10 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			public String getText(Object element)
 			{
 				if (element instanceof IDataProvider) return ((IDataProvider)element).getDataProviderID();
+				if (element instanceof ScriptMethod)
+				{
+					return ((ScriptMethod)element).getPrefixedName() + "()";
+				}
 				return "";
 			}
 		});
@@ -623,6 +683,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		public Object convert(Object fromObject)
 		{
 			if (fromObject == null || fromObject == DataProviderContentProvider.NONE) return null;
+			if (fromObject instanceof ScriptMethod) return ((ScriptMethod)fromObject).getPrefixedName();
 			return ((IDataProvider)fromObject).getDataProviderID();
 		}
 	}
@@ -645,6 +706,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			try
 			{
 				Object object = DataProviderConverter.getDataProvider(flattenedSolution, null, table, (String)fromObject);
+				if (object == null) object = flattenedSolution.getScriptMethod((String)fromObject);
 				if (object == null) return new UnresolvedDataProvider((String)fromObject);
 				return object;
 			}
@@ -667,7 +729,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 
 		public IStatus validate(Object value)
 		{
-			if (value == null || value instanceof UnresolvedDataProvider)
+			if (value == null || value instanceof UnresolvedDataProvider || value instanceof ScriptMethod)
 			{
 				return Status.OK_STATUS;
 			}
