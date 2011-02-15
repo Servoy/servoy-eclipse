@@ -1,9 +1,23 @@
 package com.servoy.eclipse.debug.scriptingconsole;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPageService;
+import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PerspectiveAdapter;
+import org.eclipse.ui.WorkbenchException;
+import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsoleView;
@@ -13,9 +27,13 @@ import org.eclipse.ui.part.MessagePage;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.PageBookView;
 
+import com.servoy.eclipse.debug.Activator;
+
 public class ScriptingConsole extends PageBookView implements IConsoleView
 {
+	private static final String SCRIPTINGCONSOLE_SETTING = "SCRIPTINGCONSOLE"; //$NON-NLS-1$
 	private ScriptConsole console;
+	private IMemento memento;
 
 	@Override
 	public void createPartControl(Composite parent)
@@ -26,8 +44,76 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 		tbm.add(new Separator(IConsoleConstants.OUTPUT_GROUP));
 
 		console = new ScriptConsole();
+		if (memento != null) console.restoreState(memento);
 		ConsoleWorkbenchPart part = new ConsoleWorkbenchPart(console, getSite());
 		partActivated(part);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.part.ViewPart#init(org.eclipse.ui.IViewSite, org.eclipse.ui.IMemento)
+	 */
+	@Override
+	public void init(IViewSite site, IMemento mem) throws PartInitException
+	{
+		super.init(site, mem);
+
+		IPageService service = (IPageService)getSite().getService(IPageService.class);
+		service.addPerspectiveListener(new PerspectiveAdapter()
+		{
+			@Override
+			public void perspectiveChanged(IWorkbenchPage page, IPerspectiveDescriptor perspective, IWorkbenchPartReference partRef, String changeId)
+			{
+				if (IWorkbenchPage.CHANGE_VIEW_HIDE.equals(changeId) && partRef.getPart(false) == ScriptingConsole.this)
+				{
+					XMLMemento xmlMemento = XMLMemento.createWriteRoot(SCRIPTINGCONSOLE_SETTING);
+					saveState(xmlMemento);
+					StringWriter writer = new StringWriter();
+					try
+					{
+						xmlMemento.save(writer);
+						Activator.getDefault().getDialogSettings().put(SCRIPTINGCONSOLE_SETTING, writer.getBuffer().toString());
+					}
+					catch (IOException e)
+					{
+						// don't do anything. Simply don't store the settings
+					}
+				}
+			}
+		});
+
+		if (mem == null)
+		{
+			String persistedMemento = Activator.getDefault().getDialogSettings().get(SCRIPTINGCONSOLE_SETTING);
+			if (persistedMemento != null)
+			{
+				try
+				{
+					this.memento = XMLMemento.createReadRoot(new StringReader(persistedMemento));
+				}
+				catch (WorkbenchException e)
+				{
+					// don't do anything. Simply don't restore the settings
+				}
+			}
+		}
+		else
+		{
+			this.memento = mem;
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.part.ViewPart#saveState(org.eclipse.ui.IMemento)
+	 */
+	@Override
+	public void saveState(IMemento mem)
+	{
+		super.saveState(mem);
+		console.saveState(mem);
 	}
 
 	/*

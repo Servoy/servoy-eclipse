@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.IMemento;
 import org.eclipse.ui.console.IConsoleDocumentPartitioner;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.TextConsole;
@@ -73,6 +74,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 {
 	private static final String TEST_SCOPE = "____TEST_SCOPE____"; //$NON-NLS-1$
 	private ScriptConsolePage page;
+	private IMemento memento;
 
 	/**
 	 * @param name
@@ -148,6 +150,27 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 
 
 	/**
+	 * @param mem
+	 */
+	public void saveState(IMemento mem)
+	{
+		if (page != null)
+		{
+			page.saveState(mem);
+		}
+	}
+
+
+	/**
+	 * @param mem
+	 */
+	public void restoreState(IMemento mem)
+	{
+		this.memento = mem;
+	}
+
+
+	/**
 	 * @author jcompagner
 	 *
 	 */
@@ -171,6 +194,14 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 		private ScriptConsolePage(TextConsole console, IConsoleView view)
 		{
 			super(console, view);
+		}
+
+		/**
+		 * @param memento
+		 */
+		public void saveState(IMemento memento)
+		{
+			if (text != null) text.saveState(memento);
 		}
 
 		public void clearConsole()
@@ -281,6 +312,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 			text = new ScriptConsoleViewer(parent, ScriptConsole.this, new CommandHandler(provider));
 			text.setEditable(false);
 			text.configure(cfg);
+			if (memento != null) text.restoreState(memento);
 
 			IHandlerService handlerService = (IHandlerService)getSite().getService(IHandlerService.class);
 			proposalsAction = new TextViewerAction(text, ISourceViewer.CONTENTASSIST_PROPOSALS);
@@ -384,5 +416,4 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 		}
 
 	}
-
 }

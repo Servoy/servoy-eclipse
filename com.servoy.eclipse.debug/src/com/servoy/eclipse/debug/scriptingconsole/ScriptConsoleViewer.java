@@ -33,11 +33,15 @@ import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IMemento;
 import org.eclipse.ui.console.TextConsole;
 import org.eclipse.ui.console.TextConsoleViewer;
 
 public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptConsoleViewer
 {
+	private static final String TEXT_SETTING = "TEXT"; //$NON-NLS-1$
+	private static final String HISTORY_SETTING = "HISTORY"; //$NON-NLS-1$
+
 	private class ConsoleDocumentListener implements IDocumentListener
 	{
 		private String leftOverString;
@@ -880,6 +884,24 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 	{
 		getDocumentListener().removeViewer(this);
 		getDocument().removeDocumentListener(getDocumentListener());
+	}
+
+	/**
+	 * @param memento
+	 */
+	public void saveState(IMemento memento)
+	{
+		memento.putString(HISTORY_SETTING, history.saveState());
+//		memento.putString(TEXT_SETTING, getDocument().get());
+	}
+
+	/**
+	 * @param memento
+	 */
+	public void restoreState(IMemento memento)
+	{
+		history.restoreState(memento.getString(HISTORY_SETTING));
+//		getDocument().set(memento.getString(TEXT_SETTING));
 	}
 
 }
