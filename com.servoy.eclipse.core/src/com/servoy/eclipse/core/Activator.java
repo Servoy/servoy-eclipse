@@ -265,7 +265,7 @@ public class Activator extends Plugin
 			{
 				try
 				{
-					if (ApplicationServerSingleton.get().hasDeveloperLicense())
+					if (!ApplicationServerSingleton.get().hasDeveloperLicense())
 					{
 						PlatformUI.getWorkbench().getBrowserSupport().createBrowser(null).openURL(new URL(ISERVOY_URL));
 					}
