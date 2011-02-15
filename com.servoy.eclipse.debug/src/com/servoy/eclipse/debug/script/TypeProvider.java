@@ -32,7 +32,9 @@ import java.util.concurrent.ConcurrentMap;
 import javax.swing.Icon;
 
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
+import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
 import org.eclipse.dltk.javascript.typeinfo.ITypeProvider;
+import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Parameter;
@@ -40,6 +42,7 @@ import org.eclipse.dltk.javascript.typeinfo.model.Property;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
+import org.eclipse.dltk.javascript.typeinfo.model.TypeRef;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.EMap;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -148,6 +151,16 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see org.eclipse.dltk.javascript.typeinfo.ITypeProvider#initialize(org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext)
+	 */
+	public boolean initialize(ITypeInfoContext context)
+	{
+		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.servoy.eclipse.debug.script.TypeCreator#getType(org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext, java.lang.String)
 	 */
 	@Override
@@ -159,6 +172,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			if (typeName.startsWith("P"))
 			{
 				name = typeName.substring("Packages.".length());
+				Type type = context.getInvariantType(name, null);
+				if (type != null) return type;
 			}
 			if (ignorePackages.containsKey(name)) return null;
 			try
@@ -186,36 +201,36 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		return super.getType(context, typeName);
 	}
 
-	private static String getPackageTypeString(Class< ? > type)
+	private static JSType getJSType(Class< ? > type, ITypeInfoContext context)
 	{
 		if (type != null && type != Object.class && type != Void.class && type != void.class)
 		{
 			if (type.isArray())
 			{
 				Class< ? > componentType = type.getComponentType();
-				String componentString = getPackageTypeString(componentType);
-				if (componentString != null)
+				JSType componentJSType = getJSType(componentType, context);
+				if (componentJSType != null)
 				{
-					return "Array<" + componentString + '>';
+					return TypeUtil.arrayOf(componentJSType);
 				}
-				return "Array";
+				return context.getTypeRef(ITypeNames.ARRAY);
 			}
 			else if (type == Boolean.class || type == boolean.class)
 			{
-				return "Boolean";
+				return context.getTypeRef(ITypeNames.BOOLEAN);
 			}
 			else if (Number.class.isAssignableFrom(type) || type.isPrimitive())
 			{
-				return "Number";
+				return context.getTypeRef(ITypeNames.NUMBER);
 			}
 			else if (type == String.class)
 			{
-				return "String";
+				return context.getTypeRef(ITypeNames.STRING);
 			}
 			else
 			{
 
-				return "Packages." + type.getName();
+				return context.getTypeRef("Packages." + type.getName());
 			}
 		}
 		return null;
@@ -236,8 +251,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		{
 			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 			property.setName(field.getName());
-			String fieldType = getPackageTypeString(field.getType());
-			if (fieldType != null) property.setType(context.getTypeRef(fieldType));
+			property.setType(getJSType(field.getType(), context));
 			if (Modifier.isStatic(field.getModifiers()))
 			{
 				property.setStatic(true);
@@ -248,8 +262,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		{
 			org.eclipse.dltk.javascript.typeinfo.model.Method m = TypeInfoModelFactory.eINSTANCE.createMethod();
 			m.setName(method.getName());
-			String methodType = getPackageTypeString(method.getReturnType());
-			if (methodType != null) m.setType(context.getTypeRef(methodType));
+			m.setType(getJSType(method.getReturnType(), context));
 
 			EList<Parameter> parameters = m.getParameters();
 			Class< ? >[] parameterTypes = method.getParameterTypes();
@@ -257,7 +270,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			{
 				Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
 				parameter.setName(parameterTypes[i].getSimpleName() + " arg" + i);
-				parameter.setType(context.getTypeRef(getPackageTypeString(parameterTypes[i])));
+				parameter.setType(getJSType(parameterTypes[i], context));
 				parameters.add(parameter);
 			}
 			if (Modifier.isStatic(method.getModifiers()))
@@ -406,7 +419,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					Property formProperty = createProperty(form.getName(), true, context.getType("Form<" + form.getName() + '>'),
+					Property formProperty = createProperty(form.getName(), true, context.getTypeRef("Form<" + form.getName() + '>'),
 						getDescription(form.getDataSource()), FORM_IMAGE);
 					formProperty.setAttribute(LAZY_VALUECOLLECTION, form);
 					if (FormEncapsulation.isPrivate(form, fs))
@@ -1271,7 +1284,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			return type;
 		}
 
-		private Type getElementType(ITypeInfoContext context, Class< ? > cls)
+		private TypeRef getElementType(ITypeInfoContext context, Class< ? > cls)
 		{
 			if (cls == null) return null;
 			String name = typeNames.get(cls.getSimpleName());
@@ -1281,7 +1294,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				name = cls.getSimpleName();
 			}
 			addAnonymousClassType(name, cls);
-			return context.getType(name);
+			return context.getTypeRef(name);
 		}
 
 	}
@@ -1303,7 +1316,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				Relation relation = relations.next();
 				if (relation.isValid())
 				{
-					Property property = createProperty(relation.getName(), true, context.getType(FoundSet.JS_FOUNDSET + "<" + relation.getName() + ">"),
+					Property property = createProperty(relation.getName(), true, context.getTypeRef(FoundSet.JS_FOUNDSET + "<" + relation.getName() + ">"),
 						getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE, relation);
 					property.setVisible(visible);
 					members.add(property);

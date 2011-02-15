@@ -138,7 +138,7 @@
    <extension
          point="org.eclipse.dltk.javascript.core.typeinfo">
       <provider
-            class="com.servoy.eclipse.debug.script.TypeProvider">
+            class="com.servoy.eclipse.debug.script.TypeProviderFactory">
       </provider>
       <resolver
             class="com.servoy.eclipse.debug.script.ElementResolver">

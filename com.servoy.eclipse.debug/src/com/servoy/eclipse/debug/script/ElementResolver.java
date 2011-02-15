@@ -29,6 +29,7 @@ import org.eclipse.dltk.javascript.typeinference.IValueCollection;
 import org.eclipse.dltk.javascript.typeinference.ValueCollectionFactory;
 import org.eclipse.dltk.javascript.typeinfo.IElementResolver;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
+import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Property;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
@@ -61,6 +62,8 @@ import com.servoy.j2db.persistence.Table;
 public class ElementResolver implements IElementResolver
 {
 	private final Map<String, ITypeNameCreator> typeNameCreators = new HashMap<String, ElementResolver.ITypeNameCreator>();
+	private final Set<String> noneGlobalNames = new HashSet<String>();
+	private final Set<String> noneCalcNames = new HashSet<String>();
 
 	public ElementResolver()
 	{
@@ -80,6 +83,16 @@ public class ElementResolver implements IElementResolver
 		typeNameCreators.put("elements", new ElementsTypeNameCreator());
 		typeNameCreators.put("forms", new FormsNameCreator());
 
+		noneGlobalNames.add("controller");
+		noneGlobalNames.add("foundset");
+		noneGlobalNames.add("elements");
+
+		noneCalcNames.add("currentcontroller");
+		noneCalcNames.add("databaseManager");
+		noneCalcNames.add("history");
+		noneCalcNames.add("jsunit");
+		noneCalcNames.add("forms");
+
 	}
 
 	public Set<String> listGlobals(ITypeInfoContext context, String prefix)
@@ -97,7 +110,6 @@ public class ElementResolver implements IElementResolver
 		if (form != null)
 		{
 			typeNames.add("globals");
-			typeNames.addAll(typeNameCreators.keySet());
 			Form formToUse = form;
 			if (form.getExtendsFormID() > 0)
 			{
@@ -140,17 +152,13 @@ public class ElementResolver implements IElementResolver
 		else if (fs != null)
 		{
 			// global, remove the form only things.
-			typeNames.remove("controller");
-			typeNames.remove("foundset");
-			typeNames.remove("elements");
+			typeNames.removeAll(noneGlobalNames);
 
 			Table calcTable = getCalculationTable(context, fs);
 			if (calcTable != null)
 			{
-				typeNames.remove("currentcontroller");
-				typeNames.remove("databaseManager");
-				typeNames.remove("history");
-				typeNames.remove("jsunit");
+				typeNames.removeAll(noneCalcNames);
+				typeNames.add("globals");
 				try
 				{
 					Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(calcTable);
@@ -245,9 +253,9 @@ public class ElementResolver implements IElementResolver
 	{
 		if (TypeCreator.BASE_TYPES.contains(name)) return null;
 
+		FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
 		if ("globals".equals(name))
 		{
-			FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
 			if (fs == null || fs.getSolution() == null)
 			{
 				return null;
@@ -278,7 +286,6 @@ public class ElementResolver implements IElementResolver
 			Form form = TypeCreator.getForm(context);
 			if (form != null && form.getExtendsFormID() > 0)
 			{
-				FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
 				if (fs != null)
 				{
 					Form superForm = fs.getForm(form.getExtendsFormID());
@@ -298,6 +305,10 @@ public class ElementResolver implements IElementResolver
 		}
 		if (typeName != null)
 		{
+			if ((noneCalcNames.contains(name) || noneGlobalNames.contains(name)) && getCalculationTable(context, fs) != null)
+			{
+				return null;
+			}
 			type = context.getType(typeName);
 		}
 		boolean readOnly = true;
@@ -305,7 +316,6 @@ public class ElementResolver implements IElementResolver
 		Object resource = null;
 		if (type == null && name.indexOf('.') == -1)
 		{
-			FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
 			if (fs != null)
 			{
 				Relation relation = fs.getRelation(name);
@@ -379,7 +389,7 @@ public class ElementResolver implements IElementResolver
 
 		if (type != null)
 		{
-			return TypeCreator.createProperty(name, readOnly, type, type.getDescription(), image, resource);
+			return TypeCreator.createProperty(name, readOnly, TypeUtil.ref(type), type.getDescription(), image, resource);
 		}
 		return null;
 	}

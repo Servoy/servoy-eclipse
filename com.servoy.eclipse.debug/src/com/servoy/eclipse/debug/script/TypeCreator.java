@@ -36,7 +36,9 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
-import org.eclipse.dltk.javascript.typeinfo.TypeInfoUtil;
+import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
+import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
+import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Method;
 import org.eclipse.dltk.javascript.typeinfo.model.Parameter;
@@ -45,6 +47,7 @@ import org.eclipse.dltk.javascript.typeinfo.model.Property;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
+import org.eclipse.dltk.javascript.typeinfo.model.TypeRef;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.mozilla.javascript.JavaMembers;
@@ -463,7 +466,7 @@ public abstract class TypeCreator
 							method.setDescription(getDoc(name, scriptObjectClass, name, parameterTypes)); // TODO name should be of parent.
 							if (returnTypeClz != null)
 							{
-								method.setType(context.getTypeRef(getMemberTypeName(context, name, returnTypeClz, typeName)));
+								method.setType(getMemberTypeName(context, name, returnTypeClz, typeName));
 							}
 							method.setAttribute(IMAGE_DESCRIPTOR, METHOD);
 							method.setStatic(type == STATIC_METHOD);
@@ -499,10 +502,10 @@ public abstract class TypeCreator
 					}
 					else
 					{
-						Type returnType = null;
+						JSType returnType = null;
 						if (returnTypeClz != null)
 						{
-							returnType = context.getType(getMemberTypeName(context, name, returnTypeClz, typeName));
+							returnType = getMemberTypeName(context, name, returnTypeClz, typeName);
 						}
 						ImageDescriptor descriptor = IconProvider.instance().descriptor(returnTypeClz);
 						if (descriptor == null)
@@ -523,7 +526,7 @@ public abstract class TypeCreator
 		}
 	}
 
-	protected final String getMemberTypeName(ITypeInfoContext context, String memberName, Class< ? > memberReturnType, String objectTypeName)
+	protected final JSType getMemberTypeName(ITypeInfoContext context, String memberName, Class< ? > memberReturnType, String objectTypeName)
 	{
 		int index = objectTypeName.indexOf('<');
 		int index2;
@@ -533,7 +536,7 @@ public abstract class TypeCreator
 
 			if (memberReturnType == Record.class)
 			{
-				return Record.JS_RECORD + '<' + config + '>';
+				return context.getTypeRef(Record.JS_RECORD + '<' + config + '>');
 			}
 			if (memberReturnType == FoundSet.class)
 			{
@@ -548,13 +551,13 @@ public abstract class TypeCreator
 							Relation relation = fs.getRelation(config);
 							if (relation != null)
 							{
-								return FoundSet.JS_FOUNDSET + '<' + relation.getForeignDataSource() + '>';
+								return context.getTypeRef(FoundSet.JS_FOUNDSET + '<' + relation.getForeignDataSource() + '>');
 							}
 						}
-						return FoundSet.JS_FOUNDSET;
+						return context.getTypeRef(FoundSet.JS_FOUNDSET);
 					}
 				}
-				return FoundSet.JS_FOUNDSET + '<' + config + '>';
+				return context.getTypeRef(FoundSet.JS_FOUNDSET + '<' + config + '>');
 			}
 		}
 		if (memberReturnType.isArray())
@@ -562,14 +565,18 @@ public abstract class TypeCreator
 			Class< ? > returnType = getReturnType(memberReturnType.getComponentType());
 			if (returnType != null)
 			{
-				return "Array<" + getMemberTypeName(context, memberName, returnType, objectTypeName) + '>';
+				JSType componentJSType = getMemberTypeName(context, memberName, returnType, objectTypeName);
+				if (componentJSType != null)
+				{
+					return TypeUtil.arrayOf(componentJSType);
+				}
 			}
-			return "Array";
+			return context.getTypeRef(ITypeNames.ARRAY);
 		}
 
 		String typeName = getRealName(memberReturnType.getSimpleName());
 		addAnonymousClassType(typeName, memberReturnType);
-		return typeName;
+		return context.getTypeRef(typeName);
 	}
 
 	public final void addType(String name, Class< ? > cls)
@@ -833,10 +840,10 @@ public abstract class TypeCreator
 	public static Property createProperty(ITypeInfoContext context, String name, boolean readonly, String typeName, String description, ImageDescriptor image,
 		Object resource)
 	{
-		Type type = null;
+		TypeRef type = null;
 		if (typeName != null)
 		{
-			type = context.getType(typeName);
+			type = context.getTypeRef(typeName);
 		}
 		return createProperty(name, readonly, type, description, image, resource);
 	}
@@ -844,20 +851,20 @@ public abstract class TypeCreator
 
 	public static Property createProperty(ITypeInfoContext context, String name, boolean readonly, String typeName, ImageDescriptor image)
 	{
-		Type type = null;
+		TypeRef type = null;
 		if (typeName != null)
 		{
-			type = context.getType(typeName);
+			type = context.getTypeRef(typeName);
 		}
 		return createProperty(name, readonly, type, null, image);
 	}
 
-	public static Property createProperty(String name, boolean readonly, Type type, String description, ImageDescriptor image)
+	public static Property createProperty(String name, boolean readonly, JSType type, String description, ImageDescriptor image)
 	{
 		return createProperty(name, readonly, type, description, image, null);
 	}
 
-	public static Property createProperty(String name, boolean readonly, Type type, String description, ImageDescriptor image, Object resource)
+	public static Property createProperty(String name, boolean readonly, JSType type, String description, ImageDescriptor image, Object resource)
 	{
 		Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 		property.setName(name);
@@ -868,15 +875,15 @@ public abstract class TypeCreator
 		}
 		if (type != null)
 		{
-			property.setType(TypeInfoUtil.ref(type));
+			property.setType(type);
 		}
 		if (image != null)
 		{
 			property.setAttribute(IMAGE_DESCRIPTOR, image);
 		}
-		else if (type != null && type.getAttribute(IMAGE_DESCRIPTOR) != null)
+		else if (type instanceof TypeRef && ((TypeRef)type).getTarget().getAttribute(IMAGE_DESCRIPTOR) != null)
 		{
-			property.setAttribute(IMAGE_DESCRIPTOR, type.getAttribute(IMAGE_DESCRIPTOR));
+			property.setAttribute(IMAGE_DESCRIPTOR, ((TypeRef)type).getTarget().getAttribute(IMAGE_DESCRIPTOR));
 		}
 		if (resource != null)
 		{
