@@ -72,7 +72,7 @@ public class FormResizableEditPolicy extends ResizableEditPolicy
 	@Override
 	protected Command getResizeCommand(ChangeBoundsRequest request)
 	{
-		return new ResizeFormCommand((FormGraphicalEditPart)(getHost().getParent()), request.getResizeDirection(), request.getSizeDelta(),
+		return new ResizeFormCommand((FormGraphicalEditPart)(getHost().getParent()), request.getResizeDirection(), request.getSizeDelta().width,
 			request.isCenteredResize());
 	}
 }

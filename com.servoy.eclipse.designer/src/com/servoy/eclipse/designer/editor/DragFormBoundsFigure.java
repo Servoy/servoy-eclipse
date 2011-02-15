@@ -39,6 +39,7 @@ public class DragFormBoundsFigure extends Figure
 
 	private Polyline line;
 	private PartFigure partFigure;
+	private final Rectangle lines = new Rectangle(-1, -1, -1, -1);
 
 	public void addPartHandle(String text)
 	{
@@ -63,7 +64,6 @@ public class DragFormBoundsFigure extends Figure
 			add(line);
 		}
 		return line;
-
 	}
 
 	/**
@@ -72,15 +72,35 @@ public class DragFormBoundsFigure extends Figure
 	 */
 	public void setHorizontalLine(int y, int width)
 	{
-		getLine().removeAllPoints();
-		getLine().addPoint(new Point(-FormBorderGraphicalEditPart.BORDER_MARGIN, y));
-		getLine().addPoint(new Point(width, y));
+		lines.y = y;
+		lines.width = width;
+		updateLine();
+	}
 
-		if (partFigure != null)
+	public void setVerticalLine(int x, int height)
+	{
+		lines.x = x;
+		lines.height = height;
+		updateLine();
+	}
+
+	protected void updateLine()
+	{
+		getLine().removeAllPoints();
+		if (lines.height >= 0)
+		{
+			getLine().addPoint(new Point(lines.x, -FormBorderGraphicalEditPart.BORDER_MARGIN));
+			getLine().addPoint(new Point(lines.x, lines.height));
+		}
+		if (lines.width >= 0)
+		{
+			getLine().addPoint(new Point(-FormBorderGraphicalEditPart.BORDER_MARGIN, lines.y));
+			getLine().addPoint(new Point(lines.width, lines.y));
+		}
+		if (partFigure != null && lines.width >= 0)
 		{
 			Dimension dim = partFigure.getMinimumSize(0, 0);
-			partFigure.setBounds(new Rectangle(width, y, dim.width, dim.height));
-
+			partFigure.setBounds(new Rectangle(lines.width, lines.y, dim.width, dim.height));
 			setBounds(line.getBounds().union(partFigure.getBounds()));
 		}
 		else
@@ -88,13 +108,4 @@ public class DragFormBoundsFigure extends Figure
 			setBounds(line.getBounds());
 		}
 	}
-
-	public void setVerticalLine(int x, int height)
-	{
-		getLine().removeAllPoints();
-		getLine().addPoint(new Point(x, -FormBorderGraphicalEditPart.BORDER_MARGIN));
-		getLine().addPoint(new Point(x, height));
-		setBounds(line.getBounds());
-	}
-
 }

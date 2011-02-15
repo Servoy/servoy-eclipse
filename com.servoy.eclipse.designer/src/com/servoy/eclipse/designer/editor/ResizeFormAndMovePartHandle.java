@@ -17,83 +17,56 @@
 
 package com.servoy.eclipse.designer.editor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.draw2d.Cursors;
-import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Locator;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.DragTracker;
-import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.handles.HandleBounds;
-import org.eclipse.swt.graphics.Cursor;
 
-import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.persistence.Part;
 
-/**
- * Handle for moving parts in form editor.
+/** Handle to set form width and at the same time move the part.
  * 
- * @since 6.0
- *  
  * @author rgansevles
  *
  */
-public class PartMoveHandle extends AbstractFormHandle
+public class ResizeFormAndMovePartHandle extends PartMoveHandle
 {
-	private final Part part;
-
-	public PartMoveHandle(Part part, GraphicalEditPart owner, int direction)
+	public ResizeFormAndMovePartHandle(Part part, GraphicalEditPart owner, int direction)
 	{
-		this(part, owner, direction, new PartHandleLocator(part, owner.getFigure()), Cursors.SIZENS);
-	}
-
-	public PartMoveHandle(Part part, GraphicalEditPart owner, int direction, Locator locator, Cursor cursor)
-	{
-		super(owner, direction);
-		this.part = part;
-		setLocator(locator);
-		setCursor(cursor);
+		super(part, owner, direction, new ResizeFormAndMovePartLocator(owner.getFigure()), Cursors.SIZESE);
 	}
 
 	@Override
 	protected DragTracker createDragTracker()
 	{
-		EditPart partEditPart = (EditPart)getOwner().getViewer().getEditPartRegistry().get(part);
-		if (partEditPart != null)
+		DragTracker tracker = super.createDragTracker();
+		if (tracker != null)
 		{
-			// use the drag tracker from the parts edit part
-			return partEditPart.getDragTracker(null);
+			Map<String, Object> properties = new HashMap<String, Object>();
+			properties.put(DragFormPartPolicy.PROPERTY_ALLOW_FORM_RESIZE, Boolean.TRUE);
+			tracker.setProperties(properties);
 		}
-		return null;
-	}
-
-	@Override
-	protected void paintFigure(Graphics graphics)
-	{
-		if (isOpaque())
-		{
-			Rectangle bnds = getBounds();
-			graphics.setLineStyle(Graphics.LINE_DOT);
-			setForegroundColor(ColorResource.INSTANCE.getColor(DragFormBoundsFigure.PART_HANDLE_RGB));
-			graphics.drawLine(bnds.x, bnds.y + (bnds.height / 2), bnds.x + bnds.width, bnds.y + (bnds.height / 2));
-		}
+		return tracker;
 	}
 
 	/**
-	 * Locate the part move handler.
+	 * Locate resize handle.
 	 * 
 	 * @author rgansevles
 	 *
 	 */
-	static class PartHandleLocator implements Locator
+	static class ResizeFormAndMovePartLocator implements Locator
 	{
 		private final IFigure reference;
-		private final Part part;
 
-		public PartHandleLocator(Part part, IFigure reference)
+		public ResizeFormAndMovePartLocator(IFigure reference)
 		{
-			this.part = part;
 			this.reference = reference;
 		}
 
@@ -109,8 +82,7 @@ public class PartMoveHandle extends AbstractFormHandle
 				figBounds = reference.getBounds();
 			}
 
-			int height = part.getHeight();
-			target.setBounds(new Rectangle(figBounds.x, height - 2, figBounds.width, 4));
+			target.setBounds(new Rectangle(figBounds.width - 3, figBounds.y + figBounds.height - 3, 6, 6));
 		}
 	}
 }

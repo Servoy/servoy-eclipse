@@ -50,7 +50,7 @@ public class ResizeFormCommand extends Command
 	private static final String PROPERTY_WIDTH = StaticContentSpecLoader.PROPERTY_WIDTH.getPropertyName();
 
 	private final int resizeDirection;
-	private final Dimension sizeDelta;
+	private final int delta;
 	private final boolean controlPressed;
 	private CompoundCommand resizeCommand;
 
@@ -62,11 +62,11 @@ public class ResizeFormCommand extends Command
 	 * @param sizeDelta
 	 * @param controlPressed 
 	 */
-	public ResizeFormCommand(FormGraphicalEditPart formEditPart, int resizeDirection, Dimension sizeDelta, boolean controlPressed)
+	public ResizeFormCommand(FormGraphicalEditPart formEditPart, int resizeDirection, int delta, boolean controlPressed)
 	{
 		this.formEditPart = formEditPart;
 		this.resizeDirection = resizeDirection;
-		this.sizeDelta = sizeDelta;
+		this.delta = delta;
 		this.controlPressed = controlPressed;
 	}
 
@@ -76,11 +76,11 @@ public class ResizeFormCommand extends Command
 		Form form = (Form)formEditPart.getModel();
 
 		resizeCommand = new CompoundCommand();
-		if ((resizeDirection & PositionConstants.EAST_WEST) != 0)
+		if (delta != 0)
 		{
 			// resize form
 			resizeCommand.add(SetValueCommand.createSetvalueCommand("Resize form", new PersistPropertySource(form, form, false), PROPERTY_WIDTH, new Integer(
-				form.getWidth() + sizeDelta.width)));
+				form.getWidth() + delta)));
 
 			// move/resize all right-anchored elements, when control is pressed
 			List<EditPart> children = formEditPart.getChildren();
@@ -108,11 +108,11 @@ public class ResizeFormCommand extends Command
 				}
 				if (resize)
 				{
-					resizeCommand.add(new ChangeBoundsCommand(editPart, null, sizeDelta));
+					resizeCommand.add(new ChangeBoundsCommand(editPart, null, new Dimension(delta, 0)));
 				}
 				else if (move)
 				{
-					resizeCommand.add(new ChangeBoundsCommand(editPart, new Point(sizeDelta.width, 0), null));
+					resizeCommand.add(new ChangeBoundsCommand(editPart, new Point(delta, 0), null));
 				}
 			}
 		}

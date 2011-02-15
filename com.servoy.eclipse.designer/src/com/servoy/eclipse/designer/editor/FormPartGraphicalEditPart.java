@@ -218,12 +218,15 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 
 		return new DragEditPartsTracker(this)
 		{
+			private boolean allowFormResize;
+
 			@Override
 			protected void updateTargetRequest()
 			{
 				super.updateTargetRequest();
 				ChangeBoundsRequest targetRequest = (ChangeBoundsRequest)getTargetRequest();
 				targetRequest.setMoveDelta(limitPartMove(targetRequest.getMoveDelta()));
+				targetRequest.getExtendedData().put(DragFormPartPolicy.PROPERTY_ALLOW_FORM_RESIZE, Boolean.valueOf(allowFormResize));
 			}
 
 			@Override
@@ -240,11 +243,17 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 				// direct edit is handled in FormSelectionTool on double-click 
 			}
 
-			/*
-			 * (non-Javadoc)
-			 * 
-			 * @see org.eclipse.gef.tools.DragEditPartsTracker#getCommand()
-			 */
+			@Override
+			protected void applyProperty(Object key, Object value)
+			{
+				if (DragFormPartPolicy.PROPERTY_ALLOW_FORM_RESIZE.equals(key))
+				{
+					allowFormResize = Boolean.TRUE.equals(value);
+					return;
+				}
+				super.applyProperty(key, value);
+			}
+
 			@Override
 			protected Command getCommand()
 			{

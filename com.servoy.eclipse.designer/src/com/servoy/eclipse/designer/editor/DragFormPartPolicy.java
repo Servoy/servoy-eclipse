@@ -33,6 +33,7 @@ import org.eclipse.gef.requests.ChangeBoundsRequest;
 import com.servoy.eclipse.designer.editor.commands.MovePartCommand;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportAnchors;
 import com.servoy.j2db.persistence.ISupportBounds;
@@ -49,6 +50,8 @@ import com.servoy.j2db.util.IAnchorConstants;
  */
 public class DragFormPartPolicy extends ResizableEditPolicy
 {
+	public static final String PROPERTY_ALLOW_FORM_RESIZE = "Allow form resize";
+
 	private Part previousPart = null;
 
 	@Override
@@ -83,18 +86,33 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 		return previousPart;
 	}
 
+
 	@Override
 	protected void showChangeBoundsFeedback(ChangeBoundsRequest request)
 	{
+		boolean allowFormResize = Boolean.TRUE.equals(request.getExtendedData().get(PROPERTY_ALLOW_FORM_RESIZE));
 		DragFormBoundsFigure feedback = (DragFormBoundsFigure)getDragSourceFeedbackFigure();
 		PrecisionRectangle rect = new PrecisionRectangle(getInitialFeedbackBounds());
 
 		getHostFigure().translateToAbsolute(rect);
 
 		rect.setY(rect.y + request.getMoveDelta().y);
+		if (allowFormResize)
+		{
+			rect.setX(rect.x + request.getMoveDelta().x);
+		}
 		feedback.translateToRelative(rect);
 
 		feedback.setHorizontalLine(rect.y, rect.x);
+		int formWidth = -1;
+		if (allowFormResize && request.getMoveDelta().x != 0)
+		{
+			Object parentModel = getHost().getParent().getModel();
+			if (parentModel instanceof Form)
+			{
+				feedback.setVerticalLine(formWidth = ((Form)parentModel).getWidth() + request.getMoveDelta().x, rect.y);
+			}
+		}
 
 		// feedback on status line
 		StringBuilder message = new StringBuilder("Part height ");
@@ -104,6 +122,10 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 		if (prev != null && prev.getHeight() > 0)
 		{
 			message.append(" (").append(newHeight - prev.getHeight()).append(')'); //$NON-NLS-1$
+		}
+		if (formWidth != -1)
+		{
+			message.append(", Form width " + formWidth);
 		}
 		EditorUtil.setStatuslineMessage(message.toString());
 	}
@@ -128,6 +150,12 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 			{
 				// control held while dragging
 				addCommandsForElementsMovingWithPart(compoundCommand, ((ChangeBoundsRequest)request).getMoveDelta().y);
+			}
+			if (Boolean.TRUE.equals(request.getExtendedData().get(PROPERTY_ALLOW_FORM_RESIZE)))
+			{
+				// add form resize command
+				compoundCommand.add(new ResizeFormCommand((FormGraphicalEditPart)(getHost().getParent()), ((ChangeBoundsRequest)request).getResizeDirection(),
+					((ChangeBoundsRequest)request).getMoveDelta().x, ((ChangeBoundsRequest)request).isCenteredResize()));
 			}
 
 			return compoundCommand.unwrap();

@@ -89,9 +89,18 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 			Iterator<Part> parts = getModel().flattenedForm.getParts();
 			while (parts.hasNext())
 			{
-				PartMoveHandle handle = new PartMoveHandle(parts.next(), this);
-				handle.setOpaque(parts.hasNext()); // do not paint the last one
+				Part next = parts.next();
+				PartMoveHandle handle = new PartMoveHandle(next, this, PositionConstants.NORTH);
 				handles.add(handle);
+				if (!parts.hasNext())
+				{
+					// resize form via handle in right-bottom corner
+					handles.add(new ResizeFormAndMovePartHandle(next, this, PositionConstants.SOUTH_EAST));
+				}
+				else
+				{
+					handle.setOpaque(true); // paint all but the last one
+				}
 			}
 
 			IFigure layer = layermanager.getLayer(LayerConstants.HANDLE_LAYER);
