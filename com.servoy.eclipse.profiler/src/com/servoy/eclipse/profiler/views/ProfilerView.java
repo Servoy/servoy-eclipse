@@ -16,6 +16,9 @@
  */
 package com.servoy.eclipse.profiler.views;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -62,8 +65,6 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -76,9 +77,16 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPageService;
+import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PerspectiveAdapter;
+import org.eclipse.ui.WorkbenchException;
+import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -107,9 +115,11 @@ import com.servoy.j2db.debug.RemoteDebugScriptEngine;
  * are presented in the same way everywhere.
  * <p>
  */
-
+@SuppressWarnings("nls")
 public class ProfilerView extends ViewPart
 {
+	private static final String PROFILER_VIEW = "ProfilerViewSettings";
+
 	public static final String METHOD_NAME_COLUMN_WIDTH_SETTING = "profilerView.methodNameColumnWidth";
 	public static final String OWN_TIME_COLUMN_WIDTH_SETTING = "profilerView.ownTimeColumnWidth";
 	public static final String TIME_COLUMN_WIDTH_SETTING = "profilerView.timeColumnWidth";
@@ -173,7 +183,6 @@ public class ProfilerView extends ViewPart
 			return innerFunctionLineStart;
 		}
 
-		@SuppressWarnings("nls")
 		public void add(ProfileData pd)
 		{
 			if (pd.getMethodName().equals(methodName) && pd.getSourceName().equals(sourceName))
@@ -746,19 +755,6 @@ public class ProfilerView extends ViewPart
 	private TableColumn transaction;
 	private Tree tree;
 
-	private int methodNameColumnWidth;
-	private int ownTimeColumnWidth;
-	private int timeColumnWidth;
-	private int fileColumnWidth;
-	private int argsColumnWidth;
-	private int nameTableColumnWidth;
-	private int timeTableColumnWidth;
-	private int queryTableColumnWidth;
-	private int argumentsTableColumnWidth;
-	private int datasourceTableColumnWidth;
-	private int transactionTableColumnWidth;
-	private int[] sashFormWeights;
-
 	/**
 	 * The constructor.
 	 */
@@ -766,67 +762,9 @@ public class ProfilerView extends ViewPart
 	{
 	}
 
-	private void updateMethodNameColumnWidths()
-	{
-		methodNameColumnWidth = methodNameColumn.getWidth();
-	}
-
-	private void updateOwnTimeColumnWidths()
-	{
-		ownTimeColumnWidth = ownTimeColumn.getWidth();
-	}
-
-	private void updateTimeColumnWidths()
-	{
-		timeColumnWidth = timeColumn.getWidth();
-	}
-
-	private void updateFileColumnWidths()
-	{
-		fileColumnWidth = fileColumn.getWidth();
-	}
-
-	private void updateArgsColumnWidths()
-	{
-		argsColumnWidth = argsColumn.getWidth();
-	}
-
-	private void updateNameTableColumnWidths()
-	{
-		nameTableColumnWidth = name.getWidth();
-	}
-
-	private void updateTimeTableColumnWidths()
-	{
-		timeTableColumnWidth = time.getWidth();
-	}
-
-	private void updateQueryTableColumnWidths()
-	{
-		queryTableColumnWidth = query.getWidth();
-	}
-
-	private void updateArgumentsTableColumnWidths()
-	{
-		argumentsTableColumnWidth = arguments.getWidth();
-	}
-
-	private void updateDatasourceTableColumnWidths()
-	{
-		datasourceTableColumnWidth = datasource.getWidth();
-	}
-
-	private void updateTransactionTableColumnWidths()
-	{
-		transactionTableColumnWidth = transaction.getWidth();
-	}
-
-	private void updateSashFormWeights()
-	{
-		sashFormWeights = sashForm.getWeights();
-	}
-
 	SashForm sashForm;
+
+	private IMemento memento;
 
 	/**
 	 * This is a callback that will allow us to create the viewer and initialize
@@ -836,7 +774,6 @@ public class ProfilerView extends ViewPart
 	public void createPartControl(Composite parent)
 	{
 		sashForm = new SashForm(parent, SWT.NONE);
-
 		methodCallViewer = new TreeViewer(sashForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		drillDownAdapter = new DrillDownAdapter(methodCallViewer);
 		makeActions();
@@ -844,22 +781,23 @@ public class ProfilerView extends ViewPart
 		hookDoubleClickAction();
 		contributeToActionBars();
 
+
+		int methodNameColumnWidth = getSavedState(METHOD_NAME_COLUMN_WIDTH_SETTING, METHOD_NAME_COLUMN_WIDTH_DEFAULT);
+		int ownTimeColumnWidth = getSavedState(OWN_TIME_COLUMN_WIDTH_SETTING, OWN_TIME_COLUMN_WIDTH_DEFAULT);
+		int timeColumnWidth = getSavedState(TIME_COLUMN_WIDTH_SETTING, TIME_COLUMN_WIDTH_DEFAULT);
+		int fileColumnWidth = getSavedState(FILE_COLUMN_WIDTH_SETTING, FILE_COLUMN_WIDTH_DEFAULT);
+		int argsColumnWidth = getSavedState(ARGS_COLUMN_WIDTH_SETTING, ARGS_COLUMN_WIDTH_DEFAULT);
+		int nameTableColumnWidth = getSavedState(NAME_TABLE_COLUMN_WIDTH_SETTING, NAME_TABLE_COLUMN_WIDTH_DEFAULT);
+		int timeTableColumnWidth = getSavedState(TIME_TABLE_COLUMN_WIDTH_SETTING, TIME_TABLE_COLUMN_WIDTH_DEFAULT);
+		int queryTableColumnWidth = getSavedState(QUERY_TABLE_COLUMN_WIDTH_SETTING, QUERY_TABLE_COLUMN_WIDTH_DEFAULT);
+		int argumentsTableColumnWidth = getSavedState(ARGUMENTS_TABLE_COLUMN_WIDTH_SETTING, ARGUMENTS_TABLE_COLUMN_WIDTH_DEFAULT);
+		int datasourceTableColumnWidth = getSavedState(DATASOURCE_TABLE_COLUMN_WIDTH_SETTING, DATASOURCE_TABLE_COLUMN_WIDTH_DEFAULT);
+		int transactionTableColumnWidth = getSavedState(TRANSACTION_TABLE_COLUMN_WIDTH_SETTING, TRANSACTION_TABLE_COLUMN_WIDTH_DEFAULT);
+		int[] sashFormWeights = new int[] { getSavedState(TREE_WIDTH_SETTING, TREE_WIDTH_DEFAULT), getSavedState(TABLE_WIDTH_SETTING, TABLE_WIDTH_DEFAULT) };
+
 		contentProvider = new MethodCallContentProvider();
 
 		tree = methodCallViewer.getTree();
-		tree.addControlListener(new ControlListener()
-		{
-
-			public void controlMoved(ControlEvent e)
-			{
-			}
-
-			public void controlResized(ControlEvent e)
-			{
-				updateSashFormWeights();
-			}
-
-		});
 		tree.setHeaderVisible(true);
 		tree.setLinesVisible(true);
 
@@ -867,91 +805,26 @@ public class ProfilerView extends ViewPart
 		methodNameColumn.setText("Method Name");
 		methodNameColumn.setResizable(true);
 		methodNameColumn.setWidth(methodNameColumnWidth);
-		methodNameColumn.addControlListener(new ControlListener()
-		{
-
-			public void controlMoved(ControlEvent e)
-			{
-			}
-
-			public void controlResized(ControlEvent e)
-			{
-				updateMethodNameColumnWidths();
-			}
-
-		});
 
 		ownTimeColumn = new TreeColumn(tree, SWT.NONE);
 		ownTimeColumn.setText("Own Time (ms)");
 		ownTimeColumn.setResizable(true);
 		ownTimeColumn.setWidth(ownTimeColumnWidth);
-		ownTimeColumn.addControlListener(new ControlListener()
-		{
-
-			public void controlMoved(ControlEvent e)
-			{
-			}
-
-			public void controlResized(ControlEvent e)
-			{
-				updateOwnTimeColumnWidths();
-			}
-
-		});
 
 		timeColumn = new TreeColumn(tree, SWT.NONE);
 		timeColumn.setText("Time (ms)");
 		timeColumn.setResizable(true);
 		timeColumn.setWidth(timeColumnWidth);
-		timeColumn.addControlListener(new ControlListener()
-		{
-
-			public void controlMoved(ControlEvent e)
-			{
-			}
-
-			public void controlResized(ControlEvent e)
-			{
-				updateTimeColumnWidths();
-			}
-
-		});
 
 		argsColumn = new TreeColumn(tree, SWT.NONE);
 		argsColumn.setText("Arguments");
 		argsColumn.setResizable(true);
 		argsColumn.setWidth(argsColumnWidth);
-		argsColumn.addControlListener(new ControlListener()
-		{
-
-			public void controlMoved(ControlEvent e)
-			{
-			}
-
-			public void controlResized(ControlEvent e)
-			{
-				updateArgsColumnWidths();
-			}
-
-		});
 
 		fileColumn = new TreeColumn(tree, SWT.NONE);
 		fileColumn.setText("Source File");
 		fileColumn.setResizable(true);
 		fileColumn.setWidth(fileColumnWidth);
-		fileColumn.addControlListener(new ControlListener()
-		{
-
-			public void controlMoved(ControlEvent e)
-			{
-			}
-
-			public void controlResized(ControlEvent e)
-			{
-				updateFileColumnWidths();
-			}
-
-		});
 
 		methodCallViewer.setContentProvider(contentProvider);
 		methodCallViewer.setLabelProvider(new MethodCallLabelProvider());
@@ -967,109 +840,31 @@ public class ProfilerView extends ViewPart
 		name.setText("Action");
 		name.setWidth(nameTableColumnWidth);
 		name.setResizable(true);
-		name.addControlListener(new ControlListener()
-		{
-
-			public void controlMoved(ControlEvent e)
-			{
-			}
-
-			public void controlResized(ControlEvent e)
-			{
-				updateNameTableColumnWidths();
-			}
-
-		});
 
 		time = new TableColumn(table, SWT.NONE);
 		time.setText("Time (ms)");
 		time.setWidth(timeTableColumnWidth);
 		time.setResizable(true);
-		time.addControlListener(new ControlListener()
-		{
-
-			public void controlMoved(ControlEvent e)
-			{
-			}
-
-			public void controlResized(ControlEvent e)
-			{
-				updateTimeTableColumnWidths();
-			}
-
-		});
 
 		query = new TableColumn(table, SWT.NONE);
 		query.setText("Query/Action");
 		query.setWidth(queryTableColumnWidth);
 		query.setResizable(true);
-		query.addControlListener(new ControlListener()
-		{
-
-			public void controlMoved(ControlEvent e)
-			{
-			}
-
-			public void controlResized(ControlEvent e)
-			{
-				updateQueryTableColumnWidths();
-			}
-
-		});
 
 		arguments = new TableColumn(table, SWT.NONE);
 		arguments.setText("Arguments");
 		arguments.setWidth(argumentsTableColumnWidth);
 		arguments.setResizable(true);
-		arguments.addControlListener(new ControlListener()
-		{
-
-			public void controlMoved(ControlEvent e)
-			{
-			}
-
-			public void controlResized(ControlEvent e)
-			{
-				updateArgumentsTableColumnWidths();
-			}
-
-		});
 
 		datasource = new TableColumn(table, SWT.NONE);
 		datasource.setText("Datasource");
 		datasource.setWidth(datasourceTableColumnWidth);
 		datasource.setResizable(true);
-		datasource.addControlListener(new ControlListener()
-		{
-
-			public void controlMoved(ControlEvent e)
-			{
-			}
-
-			public void controlResized(ControlEvent e)
-			{
-				updateDatasourceTableColumnWidths();
-			}
-
-		});
 
 		transaction = new TableColumn(table, SWT.NONE);
 		transaction.setText("TransactionId");
 		transaction.setWidth(transactionTableColumnWidth);
 		transaction.setResizable(true);
-		transaction.addControlListener(new ControlListener()
-		{
-
-			public void controlMoved(ControlEvent e)
-			{
-			}
-
-			public void controlResized(ControlEvent e)
-			{
-				updateTransactionTableColumnWidths();
-			}
-
-		});
 
 
 		sqlDataViewer.setLabelProvider(new DataCallLabelProvider());
@@ -1093,6 +888,21 @@ public class ProfilerView extends ViewPart
 		});
 
 		sashForm.setWeights(sashFormWeights);
+	}
+
+	/**
+	 * @param methodNameColumnWidthSetting
+	 * @param methodNameColumnWidthDefault
+	 * @return
+	 */
+	private int getSavedState(String settingString, int defaultValue)
+	{
+		if (memento != null)
+		{
+			Integer integer = memento.getInteger(settingString);
+			if (integer != null) return integer.intValue();
+		}
+		return defaultValue;
 	}
 
 	/**
@@ -1416,166 +1226,56 @@ public class ProfilerView extends ViewPart
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.swt.events.ControlListener#controlMoved(org.eclipse.swt.events.ControlEvent)
-	 */
-	public void controlMoved(ControlEvent e)
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.swt.events.ControlListener#controlResized(org.eclipse.swt.events.ControlEvent)
-	 */
-	public void controlResized(ControlEvent e)
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see org.eclipse.ui.part.ViewPart#init(org.eclipse.ui.IViewSite, org.eclipse.ui.IMemento)
 	 */
 	@Override
-	public void init(IViewSite site, IMemento memento) throws PartInitException
+	public void init(IViewSite site, IMemento mem) throws PartInitException
 	{
-		Integer width = memento.getInteger(METHOD_NAME_COLUMN_WIDTH_SETTING);
-		if (width != null && width.intValue() >= 10)
+		if (mem == null)
 		{
-			methodNameColumnWidth = width.intValue();
+			String persistedMemento = Activator.getDefault().getDialogSettings().get(PROFILER_VIEW);
+			if (persistedMemento != null)
+			{
+				try
+				{
+					this.memento = XMLMemento.createReadRoot(new StringReader(persistedMemento));
+				}
+				catch (WorkbenchException e)
+				{
+					// don't do anything. Simply don't restore the settings
+				}
+			}
 		}
 		else
 		{
-			methodNameColumnWidth = METHOD_NAME_COLUMN_WIDTH_DEFAULT;
+			this.memento = mem;
 		}
 
-		width = memento.getInteger(OWN_TIME_COLUMN_WIDTH_SETTING);
-		if (width != null && width.intValue() >= 10)
-		{
-			ownTimeColumnWidth = width.intValue();
-		}
-		else
-		{
-			ownTimeColumnWidth = OWN_TIME_COLUMN_WIDTH_DEFAULT;
-		}
+		super.init(site, mem);
 
-		width = memento.getInteger(TIME_COLUMN_WIDTH_SETTING);
-		if (width != null && width.intValue() <= 10)
+		IPageService service = (IPageService)getSite().getService(IPageService.class);
+		service.addPerspectiveListener(new PerspectiveAdapter()
 		{
-			timeColumnWidth = width.intValue();
-		}
-		else
-		{
-			timeColumnWidth = TIME_COLUMN_WIDTH_DEFAULT;
-		}
-
-		width = memento.getInteger(FILE_COLUMN_WIDTH_SETTING);
-		if (width != null && width.intValue() >= 10)
-		{
-			fileColumnWidth = width.intValue();
-		}
-		else
-		{
-			fileColumnWidth = FILE_COLUMN_WIDTH_DEFAULT;
-		}
-
-		width = memento.getInteger(ARGS_COLUMN_WIDTH_SETTING);
-		if (width != null && width.intValue() >= 10)
-		{
-			argsColumnWidth = width.intValue();
-		}
-		else
-		{
-			argsColumnWidth = ARGS_COLUMN_WIDTH_DEFAULT;
-		}
-
-		width = memento.getInteger(NAME_TABLE_COLUMN_WIDTH_SETTING);
-		if (width != null && width.intValue() >= 10)
-		{
-			nameTableColumnWidth = width.intValue();
-		}
-		else
-		{
-			nameTableColumnWidth = NAME_TABLE_COLUMN_WIDTH_DEFAULT;
-		}
-
-		width = memento.getInteger(TIME_TABLE_COLUMN_WIDTH_SETTING);
-		if (width != null && width.intValue() >= 10)
-		{
-			timeTableColumnWidth = width.intValue();
-		}
-		else
-		{
-			timeTableColumnWidth = TIME_TABLE_COLUMN_WIDTH_DEFAULT;
-		}
-
-		width = memento.getInteger(QUERY_TABLE_COLUMN_WIDTH_SETTING);
-		if (width != null && width.intValue() >= 10)
-		{
-			queryTableColumnWidth = width.intValue();
-		}
-		else
-		{
-			queryTableColumnWidth = QUERY_TABLE_COLUMN_WIDTH_DEFAULT;
-		}
-
-		width = memento.getInteger(ARGUMENTS_TABLE_COLUMN_WIDTH_SETTING);
-		if (width != null && width.intValue() >= 10)
-		{
-			argumentsTableColumnWidth = width.intValue();
-		}
-		else
-		{
-			argumentsTableColumnWidth = ARGUMENTS_TABLE_COLUMN_WIDTH_DEFAULT;
-		}
-
-		width = memento.getInteger(DATASOURCE_TABLE_COLUMN_WIDTH_SETTING);
-		if (width != null && width.intValue() >= 10)
-		{
-			datasourceTableColumnWidth = width.intValue();
-		}
-		else
-		{
-			datasourceTableColumnWidth = DATASOURCE_TABLE_COLUMN_WIDTH_DEFAULT;
-		}
-
-		width = memento.getInteger(TRANSACTION_TABLE_COLUMN_WIDTH_SETTING);
-		if (width != null && width.intValue() >= 10)
-		{
-			transactionTableColumnWidth = width.intValue();
-		}
-		else
-		{
-			transactionTableColumnWidth = TRANSACTION_TABLE_COLUMN_WIDTH_DEFAULT;
-		}
-
-		sashFormWeights = new int[2];
-
-		width = memento.getInteger(TREE_WIDTH_SETTING);
-		if (width != null && width.intValue() >= 10)
-		{
-			sashFormWeights[0] = width.intValue();
-		}
-		else
-		{
-			sashFormWeights[0] = TREE_WIDTH_DEFAULT;
-		}
-
-		width = memento.getInteger(TABLE_WIDTH_SETTING);
-		if (width != null && width.intValue() >= 10)
-		{
-			sashFormWeights[1] = width.intValue();
-		}
-		else
-		{
-			sashFormWeights[1] = TABLE_WIDTH_DEFAULT;
-		}
-
-		super.init(site, memento);
+			@Override
+			public void perspectiveChanged(IWorkbenchPage page, IPerspectiveDescriptor perspective, IWorkbenchPartReference partRef, String changeId)
+			{
+				if (IWorkbenchPage.CHANGE_VIEW_HIDE.equals(changeId) && partRef.getPart(false) == ProfilerView.this)
+				{
+					XMLMemento xmlMemento = XMLMemento.createWriteRoot(PROFILER_VIEW);
+					saveState(xmlMemento);
+					StringWriter writer = new StringWriter();
+					try
+					{
+						xmlMemento.save(writer);
+						Activator.getDefault().getDialogSettings().put(PROFILER_VIEW, writer.getBuffer().toString());
+					}
+					catch (IOException e)
+					{
+						// don't do anything. Simply don't store the settings
+					}
+				}
+			}
+		});
 	}
 
 	/*
@@ -1584,22 +1284,22 @@ public class ProfilerView extends ViewPart
 	 * @see org.eclipse.ui.part.ViewPart#saveState(org.eclipse.ui.IMemento)
 	 */
 	@Override
-	public void saveState(IMemento memento)
+	public void saveState(IMemento mem)
 	{
-		super.saveState(memento);
+		super.saveState(mem);
 
-		memento.putInteger(METHOD_NAME_COLUMN_WIDTH_SETTING, methodNameColumnWidth);
-		memento.putInteger(OWN_TIME_COLUMN_WIDTH_SETTING, ownTimeColumnWidth);
-		memento.putInteger(TIME_COLUMN_WIDTH_SETTING, timeColumnWidth);
-		memento.putInteger(FILE_COLUMN_WIDTH_SETTING, fileColumnWidth);
-		memento.putInteger(ARGS_COLUMN_WIDTH_SETTING, argsColumnWidth);
-		memento.putInteger(NAME_TABLE_COLUMN_WIDTH_SETTING, nameTableColumnWidth);
-		memento.putInteger(TIME_TABLE_COLUMN_WIDTH_SETTING, timeTableColumnWidth);
-		memento.putInteger(QUERY_TABLE_COLUMN_WIDTH_SETTING, queryTableColumnWidth);
-		memento.putInteger(ARGUMENTS_TABLE_COLUMN_WIDTH_SETTING, argumentsTableColumnWidth);
-		memento.putInteger(DATASOURCE_TABLE_COLUMN_WIDTH_SETTING, datasourceTableColumnWidth);
-		memento.putInteger(TRANSACTION_TABLE_COLUMN_WIDTH_SETTING, transactionTableColumnWidth);
-		memento.putInteger(TREE_WIDTH_SETTING, sashFormWeights[0]);
-		memento.putInteger(TABLE_WIDTH_SETTING, sashFormWeights[1]);
+		mem.putInteger(METHOD_NAME_COLUMN_WIDTH_SETTING, methodNameColumn.getWidth());
+		mem.putInteger(OWN_TIME_COLUMN_WIDTH_SETTING, ownTimeColumn.getWidth());
+		mem.putInteger(TIME_COLUMN_WIDTH_SETTING, timeColumn.getWidth());
+		mem.putInteger(FILE_COLUMN_WIDTH_SETTING, fileColumn.getWidth());
+		mem.putInteger(ARGS_COLUMN_WIDTH_SETTING, argsColumn.getWidth());
+		mem.putInteger(NAME_TABLE_COLUMN_WIDTH_SETTING, name.getWidth());
+		mem.putInteger(TIME_TABLE_COLUMN_WIDTH_SETTING, time.getWidth());
+		mem.putInteger(QUERY_TABLE_COLUMN_WIDTH_SETTING, query.getWidth());
+		mem.putInteger(ARGUMENTS_TABLE_COLUMN_WIDTH_SETTING, arguments.getWidth());
+		mem.putInteger(DATASOURCE_TABLE_COLUMN_WIDTH_SETTING, datasource.getWidth());
+		mem.putInteger(TRANSACTION_TABLE_COLUMN_WIDTH_SETTING, transaction.getWidth());
+		mem.putInteger(TREE_WIDTH_SETTING, sashForm.getWeights()[0]);
+		mem.putInteger(TABLE_WIDTH_SETTING, sashForm.getWeights()[1]);
 	}
 }
