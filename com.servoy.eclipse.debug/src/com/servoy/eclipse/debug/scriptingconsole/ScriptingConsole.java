@@ -31,7 +31,7 @@ import com.servoy.eclipse.debug.Activator;
 
 public class ScriptingConsole extends PageBookView implements IConsoleView
 {
-	private static final String SCRIPTINGCONSOLE_SETTING = "SCRIPTINGCONSOLE"; //$NON-NLS-1$
+	public static final String SCRIPTINGCONSOLE_SETTING = "SCRIPTINGCONSOLE"; //$NON-NLS-1$
 	private ScriptConsole console;
 	private IMemento memento;
 

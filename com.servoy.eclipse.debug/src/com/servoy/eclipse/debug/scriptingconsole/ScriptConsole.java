@@ -95,6 +95,17 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see org.eclipse.ui.console.TextConsole#dispose()
+	 */
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.ui.console.TextConsole#getPartitioner()
 	 */
 	@Override
