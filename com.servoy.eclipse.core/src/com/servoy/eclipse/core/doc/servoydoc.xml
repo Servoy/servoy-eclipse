@@ -4180,6 +4180,20 @@ for (x=0;x<editr.length;x++)
 }
 //in most cases you will want to set autoSave back on now
 databaseManager.setAutoSave(true);]]></sample>
+          <parameters>
+            <parameter name="foundset" optional="true">
+              <description><![CDATA[return edited records in the foundset only.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getEditedRecords" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return typecode="[Lcom.servoy.j2db.dataprocessing.IRecordInternal;" type="com.servoy.j2db.dataprocessing.Record[]"/>
+          <parameters>
+            <parameter name="foundset" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          </parameters>
         </function>
         <function name="getFailedRecords">
           <argumentsTypes/>
@@ -4202,6 +4216,20 @@ for( var i = 0 ; i < array.length ; i++ )
  var tableSQLName = jstable.getSQLName();
  application.output('Table:'+tableSQLName+' in server:'+jstable.getServerName()+' failed to save.')
 }]]></sample>
+          <parameters>
+            <parameter name="foundset" optional="true">
+              <description><![CDATA[return failed records in the foundset only.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getFailedRecords" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return typecode="[Lcom.servoy.j2db.dataprocessing.IRecordInternal;" type="com.servoy.j2db.dataprocessing.Record[]"/>
+          <parameters>
+            <parameter name="foundset" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          </parameters>
         </function>
         <function name="getFoundSet">
           <argumentsTypes>
