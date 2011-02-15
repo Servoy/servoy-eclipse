@@ -75,7 +75,10 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -84,7 +87,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.profiler.Activator;
-import com.servoy.eclipse.ui.preferences.ProfilerViewPreferences;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
 import com.servoy.j2db.debug.DataCallProfileData;
 import com.servoy.j2db.debug.IProfileListener;
@@ -108,6 +110,34 @@ import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 
 public class ProfilerView extends ViewPart
 {
+	public static final String METHOD_NAME_COLUMN_WIDTH_SETTING = "profilerView.methodNameColumnWidth";
+	public static final String OWN_TIME_COLUMN_WIDTH_SETTING = "profilerView.ownTimeColumnWidth";
+	public static final String TIME_COLUMN_WIDTH_SETTING = "profilerView.timeColumnWidth";
+	public static final String FILE_COLUMN_WIDTH_SETTING = "profilerView.fileColumnWidth";
+	public static final String ARGS_COLUMN_WIDTH_SETTING = "profilerView.argsColumnWidth";
+	public static final String NAME_TABLE_COLUMN_WIDTH_SETTING = "profilerView.nameTableColumnWidth";
+	public static final String TIME_TABLE_COLUMN_WIDTH_SETTING = "profilerView.timeTableColumnWidth";
+	public static final String QUERY_TABLE_COLUMN_WIDTH_SETTING = "profilerView.queryTableColumnWidth";
+	public static final String ARGUMENTS_TABLE_COLUMN_WIDTH_SETTING = "profilerView.argumentsTableColumnWidth";
+	public static final String DATASOURCE_TABLE_COLUMN_WIDTH_SETTING = "profilerView.datasourceTableColumnWidth";
+	public static final String TRANSACTION_TABLE_COLUMN_WIDTH_SETTING = "profilerView.transactionTableColumnWidth";
+	public static final String TREE_WIDTH_SETTING = "profilerView.treeWidth";
+	public static final String TABLE_WIDTH_SETTING = "profilerView.tableWidth";
+
+	public static final int METHOD_NAME_COLUMN_WIDTH_DEFAULT = 200;
+	public static final int OWN_TIME_COLUMN_WIDTH_DEFAULT = 100;
+	public static final int TIME_COLUMN_WIDTH_DEFAULT = 80;
+	public static final int FILE_COLUMN_WIDTH_DEFAULT = 400;
+	public static final int ARGS_COLUMN_WIDTH_DEFAULT = 120;
+	public static final int NAME_TABLE_COLUMN_WIDTH_DEFAULT = 100;
+	public static final int TIME_TABLE_COLUMN_WIDTH_DEFAULT = 70;
+	public static final int QUERY_TABLE_COLUMN_WIDTH_DEFAULT = 350;
+	public static final int ARGUMENTS_TABLE_COLUMN_WIDTH_DEFAULT = 100;
+	public static final int DATASOURCE_TABLE_COLUMN_WIDTH_DEFAULT = 100;
+	public static final int TRANSACTION_TABLE_COLUMN_WIDTH_DEFAULT = 100;
+	public static final int TREE_WIDTH_DEFAULT = 50;
+	public static final int TABLE_WIDTH_DEFAULT = 50;
+
 	private static final class AggregateData
 	{
 		private final String methodName;
@@ -833,24 +863,6 @@ public class ProfilerView extends ViewPart
 		tree.setHeaderVisible(true);
 		tree.setLinesVisible(true);
 
-		ProfilerViewPreferences pvp = new ProfilerViewPreferences();
-
-		sashFormWeights = new int[2];
-		sashFormWeights[0] = pvp.getTreeWidth();
-		sashFormWeights[1] = pvp.getTableWidth();
-
-		methodNameColumnWidth = pvp.getMethodNameColumnWidth();
-		ownTimeColumnWidth = pvp.getOwnTimeColumnWidth();
-		timeColumnWidth = pvp.getTimeColumnWidth();
-		fileColumnWidth = pvp.getFileColumnWidth();
-		argsColumnWidth = pvp.getArgsColumnWidth();
-		nameTableColumnWidth = pvp.getNameTableColumnWidth();
-		timeTableColumnWidth = pvp.getTimeTableColumnWidth();
-		queryTableColumnWidth = pvp.getQueryTableColumnWidth();
-		argumentsTableColumnWidth = pvp.getArgumentsTableColumnWidth();
-		datasourceTableColumnWidth = pvp.getDatasourceTableColumnWidth();
-		transactionTableColumnWidth = pvp.getTransactionTableColumnWidth();
-
 		methodNameColumn = new TreeColumn(tree, SWT.NONE);
 		methodNameColumn.setText("Method Name");
 		methodNameColumn.setResizable(true);
@@ -1090,24 +1102,7 @@ public class ProfilerView extends ViewPart
 	public void dispose()
 	{
 		super.dispose();
-		ProfilerViewPreferences pvp = new ProfilerViewPreferences();
 
-		pvp.setTreeWidth(sashFormWeights[0]);
-		pvp.setTableWidth(sashFormWeights[1]);
-
-		pvp.setMethodNameColumnWidth(methodNameColumnWidth);
-		pvp.setOwnTimeColumnWidth(ownTimeColumnWidth);
-		pvp.setTimeColumnWidth(timeColumnWidth);
-		pvp.setFileColumnWidth(fileColumnWidth);
-		pvp.setArgsColumnWidth(argsColumnWidth);
-		pvp.setNameTableColumnWidth(nameTableColumnWidth);
-		pvp.setTimeTableColumnWidth(timeTableColumnWidth);
-		pvp.setQueryTableColumnWidth(queryTableColumnWidth);
-		pvp.setArgumentsTableColumnWidth(argumentsTableColumnWidth);
-		pvp.setDatasourceTableColumnWidth(datasourceTableColumnWidth);
-		pvp.setTransactionTableColumnWidth(transactionTableColumnWidth);
-
-		pvp.save();
 		RemoteDebugScriptEngine.deregisterProfileListener(contentProvider);
 	}
 
@@ -1438,5 +1433,173 @@ public class ProfilerView extends ViewPart
 	{
 		// TODO Auto-generated method stub
 
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.part.ViewPart#init(org.eclipse.ui.IViewSite, org.eclipse.ui.IMemento)
+	 */
+	@Override
+	public void init(IViewSite site, IMemento memento) throws PartInitException
+	{
+		Integer width = memento.getInteger(METHOD_NAME_COLUMN_WIDTH_SETTING);
+		if (width != null && width.intValue() >= 10)
+		{
+			methodNameColumnWidth = width.intValue();
+		}
+		else
+		{
+			methodNameColumnWidth = METHOD_NAME_COLUMN_WIDTH_DEFAULT;
+		}
+
+		width = memento.getInteger(OWN_TIME_COLUMN_WIDTH_SETTING);
+		if (width != null && width.intValue() >= 10)
+		{
+			ownTimeColumnWidth = width.intValue();
+		}
+		else
+		{
+			ownTimeColumnWidth = OWN_TIME_COLUMN_WIDTH_DEFAULT;
+		}
+
+		width = memento.getInteger(TIME_COLUMN_WIDTH_SETTING);
+		if (width != null && width.intValue() <= 10)
+		{
+			timeColumnWidth = width.intValue();
+		}
+		else
+		{
+			timeColumnWidth = TIME_COLUMN_WIDTH_DEFAULT;
+		}
+
+		width = memento.getInteger(FILE_COLUMN_WIDTH_SETTING);
+		if (width != null && width.intValue() >= 10)
+		{
+			fileColumnWidth = width.intValue();
+		}
+		else
+		{
+			fileColumnWidth = FILE_COLUMN_WIDTH_DEFAULT;
+		}
+
+		width = memento.getInteger(ARGS_COLUMN_WIDTH_SETTING);
+		if (width != null && width.intValue() >= 10)
+		{
+			argsColumnWidth = width.intValue();
+		}
+		else
+		{
+			argsColumnWidth = ARGS_COLUMN_WIDTH_DEFAULT;
+		}
+
+		width = memento.getInteger(NAME_TABLE_COLUMN_WIDTH_SETTING);
+		if (width != null && width.intValue() >= 10)
+		{
+			nameTableColumnWidth = width.intValue();
+		}
+		else
+		{
+			nameTableColumnWidth = NAME_TABLE_COLUMN_WIDTH_DEFAULT;
+		}
+
+		width = memento.getInteger(TIME_TABLE_COLUMN_WIDTH_SETTING);
+		if (width != null && width.intValue() >= 10)
+		{
+			timeTableColumnWidth = width.intValue();
+		}
+		else
+		{
+			timeTableColumnWidth = TIME_TABLE_COLUMN_WIDTH_DEFAULT;
+		}
+
+		width = memento.getInteger(QUERY_TABLE_COLUMN_WIDTH_SETTING);
+		if (width != null && width.intValue() >= 10)
+		{
+			queryTableColumnWidth = width.intValue();
+		}
+		else
+		{
+			queryTableColumnWidth = QUERY_TABLE_COLUMN_WIDTH_DEFAULT;
+		}
+
+		width = memento.getInteger(ARGUMENTS_TABLE_COLUMN_WIDTH_SETTING);
+		if (width != null && width.intValue() >= 10)
+		{
+			argumentsTableColumnWidth = width.intValue();
+		}
+		else
+		{
+			argumentsTableColumnWidth = ARGUMENTS_TABLE_COLUMN_WIDTH_DEFAULT;
+		}
+
+		width = memento.getInteger(DATASOURCE_TABLE_COLUMN_WIDTH_SETTING);
+		if (width != null && width.intValue() >= 10)
+		{
+			datasourceTableColumnWidth = width.intValue();
+		}
+		else
+		{
+			datasourceTableColumnWidth = DATASOURCE_TABLE_COLUMN_WIDTH_DEFAULT;
+		}
+
+		width = memento.getInteger(TRANSACTION_TABLE_COLUMN_WIDTH_SETTING);
+		if (width != null && width.intValue() >= 10)
+		{
+			transactionTableColumnWidth = width.intValue();
+		}
+		else
+		{
+			transactionTableColumnWidth = TRANSACTION_TABLE_COLUMN_WIDTH_DEFAULT;
+		}
+
+		sashFormWeights = new int[2];
+
+		width = memento.getInteger(TREE_WIDTH_SETTING);
+		if (width != null && width.intValue() >= 10)
+		{
+			sashFormWeights[0] = width.intValue();
+		}
+		else
+		{
+			sashFormWeights[0] = TREE_WIDTH_DEFAULT;
+		}
+
+		width = memento.getInteger(TABLE_WIDTH_SETTING);
+		if (width != null && width.intValue() >= 10)
+		{
+			sashFormWeights[1] = width.intValue();
+		}
+		else
+		{
+			sashFormWeights[1] = TABLE_WIDTH_DEFAULT;
+		}
+
+		super.init(site, memento);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.part.ViewPart#saveState(org.eclipse.ui.IMemento)
+	 */
+	@Override
+	public void saveState(IMemento memento)
+	{
+		super.saveState(memento);
+
+		memento.putInteger(METHOD_NAME_COLUMN_WIDTH_SETTING, methodNameColumnWidth);
+		memento.putInteger(OWN_TIME_COLUMN_WIDTH_SETTING, ownTimeColumnWidth);
+		memento.putInteger(TIME_COLUMN_WIDTH_SETTING, timeColumnWidth);
+		memento.putInteger(FILE_COLUMN_WIDTH_SETTING, fileColumnWidth);
+		memento.putInteger(ARGS_COLUMN_WIDTH_SETTING, argsColumnWidth);
+		memento.putInteger(NAME_TABLE_COLUMN_WIDTH_SETTING, nameTableColumnWidth);
+		memento.putInteger(TIME_TABLE_COLUMN_WIDTH_SETTING, timeTableColumnWidth);
+		memento.putInteger(QUERY_TABLE_COLUMN_WIDTH_SETTING, queryTableColumnWidth);
+		memento.putInteger(ARGUMENTS_TABLE_COLUMN_WIDTH_SETTING, argumentsTableColumnWidth);
+		memento.putInteger(DATASOURCE_TABLE_COLUMN_WIDTH_SETTING, datasourceTableColumnWidth);
+		memento.putInteger(TRANSACTION_TABLE_COLUMN_WIDTH_SETTING, transactionTableColumnWidth);
+		memento.putInteger(TREE_WIDTH_SETTING, sashFormWeights[0]);
+		memento.putInteger(TABLE_WIDTH_SETTING, sashFormWeights[1]);
 	}
 }
