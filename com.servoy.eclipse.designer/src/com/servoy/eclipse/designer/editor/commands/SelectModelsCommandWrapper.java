@@ -19,7 +19,9 @@ package com.servoy.eclipse.designer.editor.commands;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartViewer;
@@ -27,6 +29,11 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
+
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IFormElement;
 
 /**
  * Wrapper for commands, set the selection after execute/undo.
@@ -88,7 +95,7 @@ public class SelectModelsCommandWrapper extends CompoundCommand
 		}
 
 		// select the models later in the display thread, some editparts may not have been created yet.
-		final List<Object> models = getModels(this, new ArrayList<Object>());
+		final List<Object> models = getModels();
 		if (models.size() > 0)
 		{
 			Display.getDefault().asyncExec(new Runnable()
@@ -119,6 +126,31 @@ public class SelectModelsCommandWrapper extends CompoundCommand
 	 * @param models
 	 * @return models
 	 */
+	private List<Object> getModels()
+	{
+		List<Object> models = new ArrayList<Object>();
+		Set<FormElementGroup> groups = new HashSet<FormElementGroup>();
+		for (Object model : getModels(this, new ArrayList<Object>()))
+		{
+			// replace group elements model with group model
+			if (model instanceof FormElementGroup)
+			{
+				groups.add((FormElementGroup)model);
+			}
+			else if (model instanceof IFormElement && ((IFormElement)model).getGroupID() != null)
+			{
+				Form form = (Form)viewer.getContents().getModel();
+				groups.add(new FormElementGroup(((IFormElement)model).getGroupID(), ModelUtils.getEditingFlattenedSolution(form), form));
+			}
+			else
+			{
+				models.add(model);
+			}
+		}
+		models.addAll(groups);
+		return models;
+	}
+
 	private static List<Object> getModels(Command command, List<Object> models)
 	{
 		if (command instanceof ISupportModels)
