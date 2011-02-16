@@ -73,6 +73,7 @@ public class PersistChangedTracker implements IPersistChangeListener
 	public void persistChanged()
 	{
 		getLocator().relocate(figure);
+		figure.repaint();
 	}
 
 	public void persistChanges(Collection<IPersist> changes)
