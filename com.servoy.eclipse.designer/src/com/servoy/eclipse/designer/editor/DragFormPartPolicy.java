@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.editor;
 import java.util.List;
 
 import org.eclipse.draw2d.FocusBorder;
+import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PrecisionRectangle;
@@ -154,8 +155,9 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 			if (Boolean.TRUE.equals(request.getExtendedData().get(PROPERTY_ALLOW_FORM_RESIZE)))
 			{
 				// add form resize command
-				compoundCommand.add(new ResizeFormCommand((FormGraphicalEditPart)(getHost().getParent()), ((ChangeBoundsRequest)request).getResizeDirection(),
-					((ChangeBoundsRequest)request).getMoveDelta().x, ((ChangeBoundsRequest)request).isCenteredResize()));
+				compoundCommand.add(new ResizeFormCommand((FormGraphicalEditPart)(getHost().getParent()), PositionConstants.SOUTH_EAST,
+					((ChangeBoundsRequest)request).getMoveDelta().x, RequestConstants.REQ_CLONE.equals(request.getType()) ||
+						((ChangeBoundsRequest)request).isCenteredResize()));
 			}
 
 			return compoundCommand.unwrap();

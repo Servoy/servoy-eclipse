@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
-import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -30,6 +29,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.ui.property.IModelSavePropertySource;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
@@ -158,28 +158,31 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 
 	protected boolean changeBounds(GraphicalEditPart ep, boolean change)
 	{
-		Rectangle bounds = ep.getFigure().getBounds();
+		ISupportBounds model = (ISupportBounds)ep.getModel();
+		java.awt.Point location = model.getLocation();
+		java.awt.Dimension size = model.getSize();
+
 		boolean moved = false;
-		int x = bounds.x;
+		int x = location.x;
 		if (moveDelta != null && moveDelta.x != 0)
 		{
 			x += moveDelta.x;
 			moved = true;
 		}
-		int y = bounds.y;
+		int y = location.y;
 		if (moveDelta != null && moveDelta.y != 0)
 		{
 			y += moveDelta.y;
 			moved = true;
 		}
 		boolean resized = false;
-		int width = bounds.width;
+		int width = size.width;
 		if (sizeDelta != null && sizeDelta.width != 0)
 		{
 			width += sizeDelta.width;
 			resized = true;
 		}
-		int height = bounds.height;
+		int height = size.height;
 		if (sizeDelta != null && sizeDelta.height != 0)
 		{
 			height += sizeDelta.height;
