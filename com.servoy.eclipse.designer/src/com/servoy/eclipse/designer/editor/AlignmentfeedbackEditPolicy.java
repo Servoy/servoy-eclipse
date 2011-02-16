@@ -52,7 +52,9 @@ import com.servoy.eclipse.designer.actions.SetAnchoringAction;
 import com.servoy.eclipse.designer.util.AbsoluteLocator;
 import com.servoy.eclipse.designer.util.AnchoringFigure;
 import com.servoy.eclipse.designer.util.FigureMovedTracker;
+import com.servoy.eclipse.designer.util.PersistChangedTracker;
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportAnchors;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.util.IAnchorConstants;
@@ -89,7 +91,7 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	/**
 	 * the tracker for the anchoring figure.
 	 */
-	protected FigureMovedTracker anchoringFigureTracker;
+	protected PersistChangedTracker anchoringFigureTracker;
 
 	/**
 	 * the trackers for same-size feedback figure.
@@ -291,7 +293,7 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 			return;
 		}
 
-		if (anchoringFigureTracker == null && getHost().getModel() instanceof ISupportAnchors)
+		if (anchoringFigureTracker == null && getHost().getModel() instanceof ISupportAnchors && getHost().getModel() instanceof IPersist)
 		{
 			Clickable anchoringFigure = new Clickable(new AnchoringFigure((ISupportAnchors)getHost().getModel()), SWT.NONE);
 			anchoringFigure.addActionListener(new ActionListener()
@@ -302,7 +304,8 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 				}
 			});
 			getLayer(LayerConstants.HANDLE_LAYER).add(anchoringFigure);
-			anchoringFigureTracker = new FigureMovedTracker(anchoringFigure, getHostFigure(), new AbsoluteLocator(getHost().getFigure(), false, 4, true, 2));
+			anchoringFigureTracker = new PersistChangedTracker(anchoringFigure, (IPersist)getHost().getModel(), new AbsoluteLocator(getHost().getFigure(),
+				false, 4, true, 2));
 		}
 	}
 
