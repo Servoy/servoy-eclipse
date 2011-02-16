@@ -83,7 +83,7 @@ public class PersistChangedTracker implements IPersistChangeListener
 			if (persist.equals(changed))
 			{
 				// refresh later when the figure was updated
-				Display.getCurrent().asyncExec(new Runnable()
+				Display.getDefault().asyncExec(new Runnable()
 				{
 					public void run()
 					{
