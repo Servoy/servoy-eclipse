@@ -124,6 +124,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	{
 		addType("JSDataSet", JSDataSet.class);
 		addType(IExecutingEnviroment.TOPLEVEL_SERVOY_EXCEPTION, ServoyException.class);
+
 		addAnonymousClassType("Controller", JSForm.class);
 		addAnonymousClassType("currentcontroller", JSForm.class);
 		addAnonymousClassType("application", JSApplication.class);
@@ -291,7 +292,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		synchronized (this)
 		{
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class));
-			addType(JSSecurity.class.getSimpleName(), JSSecurity.class);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class));
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class));
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class));
@@ -316,14 +316,20 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	public Set<String> listTypes(ITypeInfoContext context, String prefix)
 	{
 		Set<String> names = getTypeNames(prefix);
-		//remove types that are only elements
-		names.remove("Elements");
-		names.remove("Super");
-		names.remove("Forms");
-		names.remove("Plugins");
-		names.remove("Globals");
-		// add the special Rhino Continuation type.
-		if (prefix == null || "Continuation".startsWith(prefix)) names.add("Continuation");
+		if (prefix != null)
+		{
+			if (Record.JS_RECORD.startsWith(prefix)) names.add(Record.JS_RECORD);
+			if (FoundSet.JS_FOUNDSET.startsWith(prefix)) names.add(FoundSet.JS_FOUNDSET);
+			if ("Form".startsWith(prefix)) names.add("Form");
+			if ("Continuation".startsWith(prefix)) names.add("Continuation");
+		}
+		else
+		{
+			names.add(Record.JS_RECORD);
+			names.add(FoundSet.JS_FOUNDSET);
+			names.add("Form");
+			names.add("Continuation");
+		}
 		return names;
 	}
 

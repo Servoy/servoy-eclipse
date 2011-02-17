@@ -173,9 +173,6 @@ public abstract class TypeCreator
 		BASE_TYPES.add("Math");
 	}
 
-//	private final ConcurrentMap<String, Type> types = new ConcurrentHashMap<String, Type>();
-//	private final ConcurrentMap<String, ConcurrentMap<String, Type>> dynamicTypes = new ConcurrentHashMap<String, ConcurrentMap<String, Type>>();
-//	protected final ConcurrentMap<String, Type> directDynamicTypes = new ConcurrentHashMap<String, Type>();
 	private final ConcurrentMap<String, Class< ? >> classTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, Class< ? >> anonymousClassTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, IScopeTypeCreator> scopeTypes = new ConcurrentHashMap<String, IScopeTypeCreator>();
@@ -232,7 +229,6 @@ public abstract class TypeCreator
 	public final Set<String> getTypeNames(String prefix)
 	{
 		Set<String> names = new HashSet<String>(classTypes.keySet());
-		names.addAll(scopeTypes.keySet());
 		if (prefix != null && !"".equals(prefix.trim()))
 		{
 			String lowerCasePrefix = prefix.toLowerCase();
