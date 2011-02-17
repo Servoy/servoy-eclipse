@@ -16,10 +16,7 @@
  */
 package com.servoy.eclipse.core;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -33,16 +30,19 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.wicket.Request;
 import org.apache.wicket.Response;
 import org.apache.wicket.Session;
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -63,21 +63,25 @@ import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IBreakpointManager;
-import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.debug.ui.breakpoints.BreakpointUtils;
-import org.eclipse.dltk.internal.debug.core.model.AbstractScriptBreakpoint;
-import org.eclipse.dltk.internal.debug.core.model.ScriptMarkerFactory;
-import org.eclipse.dltk.internal.debug.core.model.ScriptMethodEntryBreakpoint;
-import org.eclipse.dltk.internal.debug.core.model.ScriptWatchpoint;
-import org.eclipse.dltk.utils.TextUtils;
+import org.eclipse.dltk.javascript.ast.Comment;
+import org.eclipse.dltk.javascript.ast.Expression;
+import org.eclipse.dltk.javascript.ast.FunctionStatement;
+import org.eclipse.dltk.javascript.ast.Script;
+import org.eclipse.dltk.javascript.ast.Statement;
+import org.eclipse.dltk.javascript.ast.VariableDeclaration;
+import org.eclipse.dltk.javascript.ast.VariableStatement;
+import org.eclipse.dltk.javascript.ast.VoidExpression;
+import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -89,7 +93,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.UIJob;
-import org.eclipse.ui.texteditor.ITextEditor;
 
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
@@ -1955,174 +1958,133 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor)
 				{
+					//if (true) return Status.OK_STATUS;
 					for (ISupportChilds parent : changedScriptParents)
 					{
-						ByteArrayOutputStream baos = new ByteArrayOutputStream();
-						InputStream is = null;
 						final IFile scriptFile = workspace.getFile(new Path(SolutionSerializer.getScriptPath(parent, false)));
-						try
-						{
-							if (scriptFile.exists())
-							{
-								is = scriptFile.getContents(true);
-								Utils.streamCopy(is, baos);
-							}
-							final String oldContent = baos.toString("UTF8"); //$NON-NLS-1$
+						MultiTextEdit textEdit = new MultiTextEdit();
 
-							// If there where new objects, regenerate the script and save that one again.
-							final String newContent = SolutionSerializer.generateScriptFile(parent, getDeveloperRepository());
-							if (newContent != null && !newContent.equals(oldContent))
+						Script parse = JavaScriptParserUtil.parse(DLTKCore.createSourceModuleFrom(scriptFile));
+						List<Statement> statements = parse.getStatements();
+						for (Statement statement : statements)
+						{
+							if (statement instanceof VoidExpression)
 							{
+								IPersist persist = null;
+								Expression expression = ((VoidExpression)statement).getExpression();
+								if (expression instanceof VariableStatement)
+								{
+									VariableDeclaration decl = ((VariableStatement)expression).getVariables().get(0);
+
+									if (parent instanceof Form)
+									{
+										persist = ((Form)parent).getScriptVariable(decl.getVariableName());
+									}
+									else if (parent instanceof Solution)
+									{
+										persist = ((Solution)parent).getScriptVariable(decl.getVariableName());
+									}
+								}
+								else if (expression instanceof FunctionStatement)
+								{
+									String name = ((FunctionStatement)expression).getName().getName();
+									if (parent instanceof Form)
+									{
+										persist = ((Form)parent).getScriptMethod(name);
+									}
+									else if (parent instanceof Solution)
+									{
+										persist = ((Solution)parent).getScriptMethod(name);
+									}
+								}
+								if (persist != null)
+								{
+									Comment documentation = expression.getDocumentation();
+									String comment = SolutionSerializer.getComment(persist, getDeveloperRepository());
+									if (documentation == null || !documentation.getText().equals(comment.trim()))
+									{
+										if (documentation == null)
+										{
+											if (!comment.endsWith("\n")) comment += "\n";
+											textEdit.addChild(new InsertEdit(statement.sourceStart(), comment));
+										}
+										else
+										{
+											textEdit.addChild(new ReplaceEdit(documentation.sourceStart(), documentation.sourceEnd() -
+												documentation.sourceStart(), comment.trim()));
+										}
+									}
+								}
+
+							}
+						}
+
+						if (textEdit.getChildrenSize() > 0)
+						{
+							ITextFileBufferManager textFileBufferManager = FileBuffers.getTextFileBufferManager();
+							try
+							{
+								textFileBufferManager.connect(scriptFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
+							}
+							catch (CoreException e)
+							{
+								ServoyLog.logError(e);
+								continue;
+							}
+
+							try
+							{
+								ITextFileBuffer textFileBuffer = textFileBufferManager.getTextFileBuffer(scriptFile.getFullPath(), LocationKind.IFILE);
+								IDocument document = textFileBuffer.getDocument();
+
+								FileEditorInput editorInput = new FileEditorInput(scriptFile);
+								final IEditorPart openEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(editorInput);
+
+
+								boolean dirty = openEditor != null ? openEditor.isDirty() : textFileBuffer.isDirty();
+
 								try
 								{
-									final IEditorPart openEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(
-										new FileEditorInput(scriptFile));
-									if (openEditor instanceof ITextEditor)
-									{
-										scriptFile.setContents(Utils.getUTF8EncodedStream(newContent), IResource.FORCE, null);
-										IMarker[] findMarkers = scriptFile.findMarkers(null, true, IResource.DEPTH_INFINITE);
-										IBreakpointManager breakPointManager = DebugPlugin.getDefault().getBreakpointManager();
-
-										String[] oldLines = TextUtils.splitLines(oldContent);
-										String[] newLines = TextUtils.splitLines(newContent);
-										for (IMarker findMarker : findMarkers)
-										{
-											IBreakpoint breakpoint = breakPointManager.getBreakpoint(findMarker);
-											if (breakpoint != null)
-											{
-												String type = findMarker.getType();
-												if (type.equals(ScriptMarkerFactory.LINE_BREAKPOINT_MARKER_ID) ||
-													type.equals(ScriptMarkerFactory.METHOD_ENTRY_MARKER_ID) ||
-													type.equals(ScriptMarkerFactory.WATCHPOINT_MARKER_ID))
-												{
-													Map map = findMarker.getAttributes();
-													breakPointManager.removeBreakpoint(breakpoint, true);
-													Integer lineNumber = (Integer)map.get(IMarker.LINE_NUMBER);
-													String oldLine = oldLines[lineNumber.intValue() - 1];
-													if (oldLine.trim().equals("")) continue;
-													int find = findLines(newLines, oldLine, lineNumber.intValue(), true, Math.abs(oldLines.length -
-														newLines.length) + 1);
-													if (find == -1)
-													{
-														find = findLines(newLines, oldLine, lineNumber.intValue(), false, Math.abs(oldLines.length -
-															newLines.length) + 1);
-													}
-													if (find == -1) continue;
-													lineNumber = new Integer(find + 1);
-													try
-													{
-														if (type.equals(ScriptMarkerFactory.LINE_BREAKPOINT_MARKER_ID))
-														{
-															BreakpointUtils.addLineBreakpoint((ITextEditor)openEditor, lineNumber.intValue());
-														}
-														else if (type.equals(ScriptMarkerFactory.WATCHPOINT_MARKER_ID))
-														{
-															String fieldName = (String)map.get(ScriptWatchpoint.FIELD_NAME);
-															BreakpointUtils.addWatchPoint((ITextEditor)openEditor, lineNumber.intValue(), fieldName);
-														}
-														else
-														{
-															String methodName = (String)map.get(ScriptMethodEntryBreakpoint.METHOD_NAME);
-															BreakpointUtils.addMethodEntryBreakpoint((ITextEditor)openEditor, lineNumber.intValue(), methodName);
-														}
-														IMarker[] markers = scriptFile.findMarkers(type, true, IResource.DEPTH_INFINITE);
-														for (IMarker marker : markers)
-														{
-															Object o = marker.getAttribute(IMarker.LINE_NUMBER);
-															if (o != null && o.equals(lineNumber))
-															{
-																marker.setAttribute(IBreakpoint.ENABLED, map.get(IBreakpoint.ENABLED));
-																marker.setAttribute(AbstractScriptBreakpoint.HIT_COUNT,
-																	map.get(AbstractScriptBreakpoint.HIT_COUNT));
-																marker.setAttribute(AbstractScriptBreakpoint.EXPRESSION,
-																	map.get(AbstractScriptBreakpoint.EXPRESSION));
-																marker.setAttribute(AbstractScriptBreakpoint.EXPRESSION_STATE,
-																	map.get(AbstractScriptBreakpoint.EXPRESSION_STATE));
-																marker.setAttribute(AbstractScriptBreakpoint.HIT_VALUE,
-																	map.get(AbstractScriptBreakpoint.HIT_VALUE));
-																marker.setAttribute(AbstractScriptBreakpoint.HIT_CONDITION,
-																	map.get(AbstractScriptBreakpoint.HIT_CONDITION));
-																if (type.equals(ScriptMarkerFactory.METHOD_ENTRY_MARKER_ID))
-																{
-																	marker.setAttribute(ScriptMethodEntryBreakpoint.BREAK_ON_ENTRY,
-																		map.get(ScriptMethodEntryBreakpoint.BREAK_ON_ENTRY));
-																	marker.setAttribute(ScriptMethodEntryBreakpoint.BREAK_ON_EXIT,
-																		map.get(ScriptMethodEntryBreakpoint.BREAK_ON_EXIT));
-																}
-																else if (type.equals(ScriptMarkerFactory.WATCHPOINT_MARKER_ID))
-																{
-																	marker.setAttribute(ScriptWatchpoint.ACCESS, map.get(ScriptWatchpoint.ACCESS));
-																	marker.setAttribute(ScriptWatchpoint.MODIFICATION, map.get(ScriptWatchpoint.MODIFICATION));
-																}
-																breakpoint = breakPointManager.getBreakpoint(marker);
-																breakPointManager.fireBreakpointChanged(breakpoint);
-																break;
-
-															}
-														}
-													}
-													catch (CoreException e)
-													{
-														ServoyLog.logError(e);
-													}
-												}
-
-											}
-										}
-									}
-									else
-									{
-										if (scriptFile.exists()) // special check to handle the new format.
-										{
-											scriptFile.setContents(Utils.getUTF8EncodedStream(newContent), IResource.FORCE, null);
-										}
-
-									}
+									textEdit.apply(document);
 								}
 								catch (Exception e)
 								{
 									ServoyLog.logError(e);
 								}
-							}
 
-						}
-						catch (CoreException e)
-						{
-							ServoyLog.logError("Could not read scriptfile " + scriptFile.getFullPath().toString(), e);
-						}
-						catch (IOException e)
-						{
-							ServoyLog.logError("Could not read scriptfile " + scriptFile.getFullPath().toString(), e);
-						}
-						finally
-						{
-							Utils.closeInputStream(is);
+								if (!dirty)
+								{
+									if (openEditor != null)
+									{
+										openEditor.doSave(monitor);
+									}
+									else
+									{
+										try
+										{
+											textFileBuffer.commit(monitor, true);
+										}
+										catch (CoreException e)
+										{
+											ServoyLog.logError(e);
+										}
+									}
+								}
+							}
+							finally
+							{
+								try
+								{
+									textFileBufferManager.disconnect(scriptFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
+								}
+								catch (CoreException e)
+								{
+									ServoyLog.logError(e);
+								}
+							}
 						}
 					}
 					return Status.OK_STATUS;
-				}
-
-				int findLines(String[] lines, String line, int start, boolean up, int maxLines)
-				{
-					int find = -1;
-					if (up)
-					{
-						int min = Math.min(lines.length, start + maxLines);
-						for (int i = start; i < min; i++)
-						{
-							if (lines[i].equals(line)) return i;
-						}
-					}
-					else
-					{
-						int min = Math.max(0, start - maxLines);
-						for (int i = Math.min(lines.length - 1, start); i >= min; i--)
-						{
-							if (lines[i].equals(line)) return i;
-						}
-
-					}
-					return find;
 				}
 			};
 

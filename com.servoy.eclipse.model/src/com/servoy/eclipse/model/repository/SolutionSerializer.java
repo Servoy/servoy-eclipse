@@ -58,6 +58,7 @@ import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -161,7 +162,8 @@ public class SolutionSerializer
 	public static final String MEDIAS_DIR = "medias"; //$NON-NLS-1$
 	public static final String FUNCTION_KEYWORD = "function"; //$NON-NLS-1$
 	public static final String VAR_KEYWORD = "var"; //$NON-NLS-1$
-	public static final String SV_COMMENT = "/**"; //$NON-NLS-1$
+	public static final String SV_COMMENT_START = "/**"; //$NON-NLS-1$
+	public static final String SV_COMMENT_END = "*/"; //$NON-NLS-1$
 	public static final String PROP_ITEMS = "items"; //$NON-NLS-1$
 	public static final String PROP_NAME = "name"; //$NON-NLS-1$
 	public static final String PROP_TYPEID = "typeid"; //$NON-NLS-1$
@@ -452,6 +454,99 @@ public class SolutionSerializer
 			p instanceof TableNode || p instanceof IScriptProvider || p instanceof IVariable);
 	}
 
+	public static String getComment(IPersist persist, final IDeveloperRepository repository)
+	{
+		if (persist instanceof ScriptVariable)
+		{
+			return getCommentImpl(persist, repository, ((ScriptVariable)persist).getComment());
+		}
+		else if (persist instanceof ScriptMethod)
+		{
+			String comment = ((ScriptMethod)persist).getRuntimeProperty(IScriptProvider.COMMENT);
+			if ("".equals(comment)) comment = null; //$NON-NLS-1$
+			if (comment == null)
+			{
+				String declaration = ((ScriptMethod)persist).getDeclaration();
+				int commentStart = declaration.indexOf(SV_COMMENT_START);
+				if (commentStart != -1)
+				{
+					int commentEnd = declaration.indexOf(SV_COMMENT_END, commentStart);
+					comment = declaration.substring(commentStart, commentEnd + 2);
+				}
+			}
+			return getCommentImpl(persist, repository, comment);
+		}
+		throw new IllegalArgumentException("Persist must be an ScriptMethod or Variable " + persist); //$NON-NLS-1$
+	}
+
+	/**
+	 * @param variable
+	 * @param repository
+	 */
+	private static String getCommentImpl(IPersist persist, final IDeveloperRepository repository, String currentComment)
+	{
+		ServoyJSONObject obj;
+		try
+		{
+			obj = generateJSONObject(persist, false, repository);
+			obj.setNewLines(false);
+			obj.remove("methodCode"); //$NON-NLS-1$
+			obj.remove("declaration"); //$NON-NLS-1$
+			obj.remove(PROP_NAME);
+			obj.remove("defaultValue"); //$NON-NLS-1$
+			obj.remove(SolutionDeserializer.COMMENT_JSON_ATTRIBUTE);
+			obj.remove(SolutionDeserializer.LINE_NUMBER_OFFSET_JSON_ATTRIBUTE);
+			StringBuilder sb = new StringBuilder();
+			if (currentComment == null)
+			{
+				generateDefaultJSDoc(obj, sb, persist instanceof AbstractScriptProvider ? (AbstractScriptProvider)persist : null);
+			}
+			else
+			{
+				sb.append(currentComment);
+				replacePropertiesTag(obj, sb, persist instanceof AbstractScriptProvider ? (AbstractScriptProvider)persist : null);
+			}
+			if (persist instanceof ScriptVariable)
+			{
+				generateJSDocScriptVariableType((ScriptVariable)persist, sb);
+			}
+
+			return sb.toString();
+		}
+		catch (RepositoryException e)
+		{
+			ServoyLog.logError("Error generation json for: " + persist, e); //$NON-NLS-1$
+		}
+		return null;
+	}
+
+	/**
+	 * @param persist
+	 * @param sb
+	 */
+	private static void generateJSDocScriptVariableType(ScriptVariable variable, StringBuilder sb)
+	{
+		int type = Column.mapToDefaultType(variable.getVariableType());
+		// Add the "@type" tag.
+		String jsType = variable.getSerializableRuntimeProperty(IScriptProvider.TYPE);
+		ArgumentType argumentType = ArgumentType.convertFromColumnType(type, jsType);
+		if (argumentType != ArgumentType.Object)
+		{
+			int index = sb.lastIndexOf(TYPEKEY);
+			if (index != -1)
+			{
+				int lineEnd = sb.indexOf("\n", index); //$NON-NLS-1$
+				sb.replace(index + TYPEKEY.length() + 1, lineEnd, argumentType.getName());
+			}
+			else
+			{
+				int startComment = sb.indexOf(SV_COMMENT_START);
+				int lineEnd = sb.indexOf("\n", startComment); //$NON-NLS-1$
+				sb.insert(lineEnd, "\n * " + TYPEKEY + " " + argumentType.getName() + "\n *"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+		}
+	}
+
 	//returns CharSequence,byte[] or JSONObject(=internal for relation items, work on parent!)
 	public static Object serializePersist(IPersist persist, boolean forceRecursive, final IDeveloperRepository repository)
 	{
@@ -519,25 +614,7 @@ public class SolutionSerializer
 					{
 						generateDefaultJSDoc(obj, sb, null);
 					}
-					int type = Column.mapToDefaultType(sv.getVariableType());
-					// Add the "@type" tag.
-					String jsType = sv.getSerializableRuntimeProperty(IScriptProvider.TYPE);
-					ArgumentType argumentType = ArgumentType.convertFromColumnType(type, jsType);
-					if (argumentType != ArgumentType.Object)
-					{
-						int index = sb.lastIndexOf(TYPEKEY);
-						if (index != -1)
-						{
-							int lineEnd = sb.indexOf("\n", index); //$NON-NLS-1$
-							sb.replace(index + TYPEKEY.length() + 1, lineEnd, argumentType.getName());
-						}
-						else
-						{
-							int startComment = sb.indexOf(SV_COMMENT);
-							int lineEnd = sb.indexOf("\n", startComment); //$NON-NLS-1$
-							sb.insert(lineEnd, "\n * " + TYPEKEY + " " + argumentType.getName() + "\n *"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						}
-					}
+					generateJSDocScriptVariableType(sv, sb);
 					sb.append(VAR_KEYWORD);
 					sb.append(' ');
 					sb.append(sv.getName());
@@ -546,6 +623,7 @@ public class SolutionSerializer
 //						sb.append(':');
 //						sb.append(jsType);
 //					}
+					int type = Column.mapToDefaultType(sv.getVariableType());
 					String val = sv.getDefaultValue();
 					if (type == IColumnTypes.TEXT)
 					{
@@ -585,7 +663,7 @@ public class SolutionSerializer
 	@SuppressWarnings("nls")
 	private static void replacePropertiesTag(ServoyJSONObject obj, StringBuilder sb, AbstractScriptProvider abstractScriptProvider)
 	{
-		if (sb.toString().trim().startsWith(SV_COMMENT))
+		if (sb.toString().trim().startsWith(SV_COMMENT_START))
 		{
 			int endComment = sb.indexOf("*/");
 			if (endComment == -1) return;
@@ -628,7 +706,7 @@ public class SolutionSerializer
 	@SuppressWarnings("nls")
 	private static void generateDefaultJSDoc(ServoyJSONObject obj, StringBuilder sb, AbstractScriptProvider abstractScriptProvider)
 	{
-		sb.append(SV_COMMENT);
+		sb.append(SV_COMMENT_START);
 		sb.append("\n");
 
 		if (generateParams(sb, abstractScriptProvider))
@@ -645,7 +723,7 @@ public class SolutionSerializer
 		{
 			sb.append(" *");
 		}
-		sb.append("\n */\n"); //$NON-NLS-1$
+		sb.append("\n " + SV_COMMENT_END + "\n"); //$NON-NLS-1$
 	}
 
 	/**
