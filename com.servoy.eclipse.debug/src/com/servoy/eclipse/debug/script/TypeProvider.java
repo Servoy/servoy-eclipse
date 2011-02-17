@@ -125,6 +125,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addType("JSDataSet", JSDataSet.class);
 		addType(IExecutingEnviroment.TOPLEVEL_SERVOY_EXCEPTION, ServoyException.class);
 		addAnonymousClassType("Controller", JSForm.class);
+		addAnonymousClassType("currentcontroller", JSForm.class);
 		addAnonymousClassType("application", JSApplication.class);
 		addAnonymousClassType("security", JSSecurity.class);
 		addAnonymousClassType("i18n", JSI18N.class);

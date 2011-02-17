@@ -76,7 +76,7 @@ public class ElementResolver implements IElementResolver
 		typeNameCreators.put("solutionModel", new SimpleNameTypeNameCreator("solutionModel"));
 		typeNameCreators.put("databaseManager", new SimpleNameTypeNameCreator("databaseManager"));
 		typeNameCreators.put("controller", new SimpleNameTypeNameCreator("Controller"));
-		typeNameCreators.put("currentcontroller", new SimpleNameTypeNameCreator("Controller"));
+		typeNameCreators.put("currentcontroller", new SimpleNameTypeNameCreator("currentcontroller"));
 
 		typeNameCreators.put("foundset", new FoundsetTypeNameCreator());
 		typeNameCreators.put("plugins", new SimpleNameTypeNameCreator("Plugins"));
