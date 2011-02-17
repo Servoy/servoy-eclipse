@@ -124,11 +124,11 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	{
 		addType("JSDataSet", JSDataSet.class);
 		addType(IExecutingEnviroment.TOPLEVEL_SERVOY_EXCEPTION, ServoyException.class);
+		addType(JSSecurity.class.getSimpleName(), JSSecurity.class);
 
 		addAnonymousClassType("Controller", JSForm.class);
 		addAnonymousClassType("currentcontroller", JSForm.class);
 		addAnonymousClassType("application", JSApplication.class);
-		addAnonymousClassType("security", JSSecurity.class);
 		addAnonymousClassType("i18n", JSI18N.class);
 		addAnonymousClassType("history", HistoryProvider.class);
 		addAnonymousClassType("utils", JSUtils.class);
@@ -292,7 +292,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		synchronized (this)
 		{
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class));
-			addType(JSSecurity.class.getSimpleName(), JSSecurity.class);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class));
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class));
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class));
