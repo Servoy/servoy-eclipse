@@ -67,14 +67,14 @@ public class ElementResolver implements IElementResolver
 
 	public ElementResolver()
 	{
-		typeNameCreators.put("application", new SimpleNameTypeNameCreator("JSApplication"));
-		typeNameCreators.put("security", new SimpleNameTypeNameCreator("JSSecurity"));
-		typeNameCreators.put("i18n", new SimpleNameTypeNameCreator("JSI18N"));
-		typeNameCreators.put("history", new SimpleNameTypeNameCreator("JSHistory"));
-		typeNameCreators.put("utils", new SimpleNameTypeNameCreator("JSUtils"));
-		typeNameCreators.put("jsunit", new SimpleNameTypeNameCreator("JSUnit"));
-		typeNameCreators.put("solutionModel", new SimpleNameTypeNameCreator("JSSolutionModel"));
-		typeNameCreators.put("databaseManager", new SimpleNameTypeNameCreator("JSDatabaseManager"));
+		typeNameCreators.put("application", new SimpleNameTypeNameCreator("application"));
+		typeNameCreators.put("security", new SimpleNameTypeNameCreator("security"));
+		typeNameCreators.put("i18n", new SimpleNameTypeNameCreator("i18n"));
+		typeNameCreators.put("history", new SimpleNameTypeNameCreator("history"));
+		typeNameCreators.put("utils", new SimpleNameTypeNameCreator("utils"));
+		typeNameCreators.put("jsunit", new SimpleNameTypeNameCreator("jsunit"));
+		typeNameCreators.put("solutionModel", new SimpleNameTypeNameCreator("solutionModel"));
+		typeNameCreators.put("databaseManager", new SimpleNameTypeNameCreator("databaseManager"));
 		typeNameCreators.put("controller", new SimpleNameTypeNameCreator("Controller"));
 		typeNameCreators.put("currentcontroller", new SimpleNameTypeNameCreator("Controller"));
 

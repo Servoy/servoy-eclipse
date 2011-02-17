@@ -125,14 +125,14 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addType("JSDataSet", JSDataSet.class);
 		addType(IExecutingEnviroment.TOPLEVEL_SERVOY_EXCEPTION, ServoyException.class);
 		addAnonymousClassType("Controller", JSForm.class);
-		addAnonymousClassType("JSApplication", JSApplication.class);
-		addAnonymousClassType("JSSecurity", JSSecurity.class);
-		addAnonymousClassType("JSI18N", JSI18N.class);
-		addAnonymousClassType("JSHistory", HistoryProvider.class);
-		addAnonymousClassType("JSUtils", JSUtils.class);
-		addAnonymousClassType("JSUnit", JSUnitAssertFunctions.class);
-		addAnonymousClassType("JSSolutionModel", JSSolutionModel.class);
-		addAnonymousClassType("JSDatabaseManager", JSDatabaseManager.class);
+		addAnonymousClassType("application", JSApplication.class);
+		addAnonymousClassType("security", JSSecurity.class);
+		addAnonymousClassType("i18n", JSI18N.class);
+		addAnonymousClassType("history", HistoryProvider.class);
+		addAnonymousClassType("utils", JSUtils.class);
+		addAnonymousClassType("jsunit", JSUnitAssertFunctions.class);
+		addAnonymousClassType("solutionModel", JSSolutionModel.class);
+		addAnonymousClassType("databaseManager", JSDatabaseManager.class);
 		addAnonymousClassType("servoyDeveloper", JSDeveloperSolutionModel.class);
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
