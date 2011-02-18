@@ -1634,15 +1634,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					}
 					else
 					{
-						Object type = TYPES.get(params[j].getName());
-						if ((!type.equals("Object") && !type.equals("String")) || paramNames == null) //$NON-NLS-1$//$NON-NLS-2$
-						{
-							sbParamsString.append(type);
-						}
-						else
-						{
-							addspace = false;
-						}
+//						Object type = TYPES.get(params[j].getName());
+//						if ((!type.equals("Object") && !type.equals("String")) || paramNames == null) //$NON-NLS-1$//$NON-NLS-2$
+//						{
+//							sbParamsString.append(type);
+//						}
+//						else
+//						{
+						addspace = false;
+//						}
 					}
 				}
 				if (paramNames != null)

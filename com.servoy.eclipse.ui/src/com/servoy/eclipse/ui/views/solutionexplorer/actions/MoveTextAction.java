@@ -156,7 +156,9 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 			txt = NewMethodAction.format(txt, (IFile)ed.getEditorInput().getAdapter(IFile.class), caretOffset).trim();
 		}
 		st.replaceTextRange(textSelection.x, textSelection.y, txt);
-		st.setCaretOffset(textSelection.x + txt.length());
+		int index = txt.indexOf('(');
+		if (index == -1) st.setCaretOffset(textSelection.x + txt.length());
+		else st.setCaretOffset(textSelection.x + index + 1);
 		st.showSelection();
 		st.forceFocus();
 	}
