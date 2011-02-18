@@ -318,10 +318,11 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		Set<String> names = getTypeNames(prefix);
 		if (prefix != null)
 		{
-			if (Record.JS_RECORD.startsWith(prefix)) names.add(Record.JS_RECORD);
-			if (FoundSet.JS_FOUNDSET.startsWith(prefix)) names.add(FoundSet.JS_FOUNDSET);
-			if ("Form".startsWith(prefix)) names.add("Form");
-			if ("Continuation".startsWith(prefix)) names.add("Continuation");
+			String prefixLower = prefix.toLowerCase();
+			if (Record.JS_RECORD.toLowerCase().startsWith(prefixLower)) names.add(Record.JS_RECORD);
+			if (FoundSet.JS_FOUNDSET.toLowerCase().startsWith(prefixLower)) names.add(FoundSet.JS_FOUNDSET);
+			if ("form".startsWith(prefixLower)) names.add("Form");
+			if ("continuation".startsWith(prefixLower)) names.add("Continuation");
 		}
 		else
 		{
