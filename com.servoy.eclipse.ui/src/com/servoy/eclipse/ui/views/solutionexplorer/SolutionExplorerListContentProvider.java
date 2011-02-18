@@ -155,6 +155,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	static
 	{
 		TYPES.put("double", "Number"); //$NON-NLS-1$ //$NON-NLS-2$
+		TYPES.put("boolean", "Boolean"); //$NON-NLS-1$ //$NON-NLS-2$
 		TYPES.put("float", "Number"); //$NON-NLS-1$ //$NON-NLS-2$
 		TYPES.put("int", "Number"); //$NON-NLS-1$ //$NON-NLS-2$
 		TYPES.put("long", "Number"); //$NON-NLS-1$ //$NON-NLS-2$
