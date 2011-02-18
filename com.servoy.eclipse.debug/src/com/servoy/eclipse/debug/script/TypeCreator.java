@@ -302,25 +302,60 @@ public abstract class TypeCreator
 
 		for (Class< ? > element : allReturnedTypes)
 		{
+			boolean constant = false;
+			JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(element, null);
+			if (javaMembers != null)
+			{
+				Object[] members = javaMembers.getIds(false);
+				ArrayList<String> al = new ArrayList<String>(members.length);
+				for (Object el : members)
+				{
+					al.add((String)el);
+				}
+				if (javaMembers instanceof InstanceJavaMembers)
+				{
+					al.removeAll(((InstanceJavaMembers)javaMembers).getGettersAndSettersToHide());
+				}
+				else
+				{
+					al.removeAll(objectMethods);
+				}
+				// skip constants only classes
+				constant = al.size() == 0;
+			}
+
 			if (IPrefixedConstantsObject.class.isAssignableFrom(element))
 			{
 				try
 				{
 					IPrefixedConstantsObject constants = (IPrefixedConstantsObject)element.newInstance();
-					addType(constants.getPrefix(), element);
+					if (constant)
+					{
+						addAnonymousClassType(constants.getPrefix(), element);
+						ElementResolver.registerConstantType(constants.getPrefix(), constants.getPrefix());
+					}
+					else
+					{
+						addType(constants.getPrefix(), element);
+					}
 				}
 				catch (Exception e)
 				{
 					ServoyLog.logError(e);
 				}
 			}
-			else if (IConstantsObject.class.isAssignableFrom(element))
+			else if (IConstantsObject.class.isAssignableFrom(element) || IJavaScriptType.class.isAssignableFrom(element))
 			{
-				addType(element.getSimpleName(), element);
-			}
-			else if (IJavaScriptType.class.isAssignableFrom(element))
-			{
-				addType(element.getSimpleName(), element);
+				if (constant)
+				{
+					addAnonymousClassType(element.getSimpleName(), element);
+					ElementResolver.registerConstantType(element.getSimpleName(), element.getSimpleName());
+				}
+				else
+				{
+					addType(element.getSimpleName(), element);
+				}
+
 			}
 		}
 	}

@@ -34,6 +34,7 @@ import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Property;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
+import org.eclipse.dltk.javascript.typeinfo.model.TypeRef;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -61,6 +62,13 @@ import com.servoy.j2db.persistence.Table;
 @SuppressWarnings("nls")
 public class ElementResolver implements IElementResolver
 {
+	private static final Map<String, String> constantTypeNames = new HashMap<String, String>();
+
+	public static void registerConstantType(String name, String typeName)
+	{
+		constantTypeNames.put(name, typeName);
+	}
+
 	private final Map<String, ITypeNameCreator> typeNameCreators = new HashMap<String, ElementResolver.ITypeNameCreator>();
 	private final Set<String> noneGlobalNames = new HashSet<String>();
 	private final Set<String> noneCalcNames = new HashSet<String>();
@@ -94,6 +102,7 @@ public class ElementResolver implements IElementResolver
 		noneCalcNames.add("forms");
 
 	}
+
 
 	public Set<String> listGlobals(ITypeInfoContext context, String prefix)
 	{
@@ -205,6 +214,7 @@ public class ElementResolver implements IElementResolver
 	{
 		Set<String> names = new HashSet<String>(typeNameCreators.keySet());
 		names.addAll(typeNameCreators.keySet());
+		names.addAll(constantTypeNames.keySet());
 		if (prefix != null && !"".equals(prefix.trim()))
 		{
 			String lowerCasePrefix = prefix.toLowerCase();
@@ -389,7 +399,13 @@ public class ElementResolver implements IElementResolver
 
 		if (type != null)
 		{
-			return TypeCreator.createProperty(name, readOnly, TypeUtil.ref(type), type.getDescription(), image, resource);
+			TypeRef typeRef = TypeUtil.ref(type);
+			if (constantTypeNames.containsKey(name))
+			{
+				typeRef.setStatic(true);
+				image = TypeCreator.CONSTANT;
+			}
+			return TypeCreator.createProperty(name, readOnly, typeRef, type.getDescription(), image, resource);
 		}
 		return null;
 	}
@@ -404,7 +420,7 @@ public class ElementResolver implements IElementResolver
 	{
 		ITypeNameCreator nameCreator = typeNameCreators.get(name);
 		if (nameCreator != null) return nameCreator.getTypeName(context, name);
-		return null;
+		return constantTypeNames.get(name);
 	}
 
 	private class ElementsTypeNameCreator implements ITypeNameCreator
