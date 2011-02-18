@@ -1601,7 +1601,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			for (int j = 0; j < params.length; j++)
 			{
-				boolean addspace = true;
 				if (params.length == 1 && params[0].isArray())
 				{
 					if (paramNames == null)
@@ -1620,35 +1619,13 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						break;
 					}
 				}
-				else
-				{
-					if (paramNames != null && paramNames[j].startsWith("[")) //$NON-NLS-1$
-					{
-						sbParamsString.append("["); //$NON-NLS-1$
-						paramNames[j] = paramNames[j].substring(1);
-					}
-					if (params[j].isArray())
-					{
-						sbParamsString.append(TYPES.get(params[j].getComponentType().getName()));
-						sbParamsString.append("[]"); //$NON-NLS-1$
-					}
-					else
-					{
-//						Object type = TYPES.get(params[j].getName());
-//						if ((!type.equals("Object") && !type.equals("String")) || paramNames == null) //$NON-NLS-1$//$NON-NLS-2$
-//						{
-//							sbParamsString.append(type);
-//						}
-//						else
-//						{
-						addspace = false;
-//						}
-					}
-				}
 				if (paramNames != null)
 				{
-					if (addspace) sbParamsString.append(" "); //$NON-NLS-1$
 					sbParamsString.append(paramNames[j]);
+				}
+				else
+				{
+					sbParamsString.append(TYPES.get(params[j].getName()).toLowerCase());
 				}
 				if (j < params.length - 1) sbParamsString.append(", "); //$NON-NLS-1$
 			}

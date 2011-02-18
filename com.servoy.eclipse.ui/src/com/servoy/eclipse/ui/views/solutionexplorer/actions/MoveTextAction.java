@@ -24,6 +24,7 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -157,10 +158,18 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 		}
 		st.replaceTextRange(textSelection.x, textSelection.y, txt);
 		int index = txt.indexOf('(');
-		if (index == -1) st.setCaretOffset(textSelection.x + txt.length());
+		if (index == -1 || replacePrefix) st.setCaretOffset(textSelection.x + txt.length());
 		else st.setCaretOffset(textSelection.x + index + 1);
 		st.showSelection();
 		st.forceFocus();
+		if (!replacePrefix)
+		{
+			ISourceViewer scriptSourceViewer = editor.getScriptSourceViewer();
+			if (scriptSourceViewer instanceof ITextOperationTarget)
+			{
+				((ITextOperationTarget)scriptSourceViewer).doOperation(ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION);
+			}
+		}
 	}
 
 	/**
