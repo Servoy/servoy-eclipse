@@ -34,7 +34,7 @@
       </arguments>
     </methodtemplate>
   </event>
-  <event name="onChangeMethodID">
+  <event name="onTabChangeMethodID">
     <methodtemplate name="onTabChange" addtodo="true">
       <description><![CDATA[Callback method when the user changes tab in a tab panel or divider position in split pane]]></description>
       <arguments>
