@@ -380,7 +380,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 			}
 		});
 		List<ISupportTabSeq> selected = new ArrayList<ISupportTabSeq>();
-		Iterator<ISupportTabSeq> iterator = editor.getFlattenedForm().getFieldsByTabOrder();
+		Iterator<ISupportTabSeq> iterator = editor.getFlattenedForm().getTabSeqElementsByTabOrder();
 		for (int i = 0; iterator.hasNext(); i++)
 		{
 			ISupportTabSeq tabSeq = iterator.next();
