@@ -58,9 +58,9 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.IApplication;
 import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
@@ -107,6 +107,7 @@ import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.ui.IScriptRenderMethods;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ITagResolver;
@@ -164,6 +165,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		TYPES.put(FormScope.class.getName(), "Form"); //$NON-NLS-1$
 		TYPES.put("org.mozilla.javascript.NativeArray", "Array"); //$NON-NLS-1$ //$NON-NLS-2$
 		TYPES.put("JSWindowImpl$JSWindow", "JSWindow"); //$NON-NLS-1$ //$NON-NLS-2$
+		TYPES.put("IScriptRenderMethods", IScriptRenderMethods.JS_RENDERABLE); //$NON-NLS-1$
 		Method[] methods = Object.class.getMethods();
 		for (Method method : methods)
 		{
