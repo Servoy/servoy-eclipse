@@ -106,7 +106,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		Label copypasteOffsetLabel = new Label(composite, SWT.NONE);
 		copypasteOffsetLabel.setText("Copy/Paste offset");
-		copypasteOffsetLabel.setBounds(0, 32, 107, 20);
+		copypasteOffsetLabel.setBounds(0, 32, 112, 20);
 
 		Label metricsLabel = new Label(composite, SWT.NONE);
 		metricsLabel.setText("Ruler Metrics");
@@ -125,23 +125,23 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 				new DesignerPreferences().saveCoolbarLayout(null);
 			}
 		});
-		resetToolbarsButton.setBounds(349, 2, 68, 23);
+		resetToolbarsButton.setBounds(334, 2, 83, 23);
 		resetToolbarsButton.setText("Show all");
 
 		copyPasteOffsetSpinner = new Spinner(composite, SWT.BORDER);
 		copyPasteOffsetSpinner.setValues(0, 0, 100, 0, 1, 5);
-		copyPasteOffsetSpinner.setBounds(109, 29, 125, 20);
+		copyPasteOffsetSpinner.setBounds(114, 29, 125, 30);
 
 		Group grpAlignmentSettings = new Group(composite, SWT.NONE);
 		grpAlignmentSettings.setText("Guide Settings");
-		grpAlignmentSettings.setBounds(0, 394, 431, 246);
+		grpAlignmentSettings.setBounds(0, 394, 431, 266);
 
 		snapToGridRadio = new Button(grpAlignmentSettings, SWT.RADIO);
 		snapToGridRadio.setBounds(10, 50, 108, 26);
 		snapToGridRadio.setText("Grid Guides");
 
 		snapToAlignmentRadio = new Button(grpAlignmentSettings, SWT.RADIO);
-		snapToAlignmentRadio.setBounds(10, 109, 137, 26);
+		snapToAlignmentRadio.setBounds(10, 114, 137, 26);
 		snapToAlignmentRadio.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -153,42 +153,42 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		snapToAlignmentRadio.setText("Alignment Guides");
 
 		anchorCheck = new Button(grpAlignmentSettings, SWT.CHECK);
-		anchorCheck.setBounds(19, 210, 175, 26);
+		anchorCheck.setBounds(19, 230, 175, 26);
 		anchorCheck.setText("Enable Smart Anchoring");
 
 		Label lblOffsets = new Label(grpAlignmentSettings, SWT.NONE);
-		lblOffsets.setBounds(86, 144, 88, 20);
+		lblOffsets.setBounds(86, 158, 88, 20);
 		lblOffsets.setText("Small offset");
 
 		alignmentSmallDistanceSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
-		alignmentSmallDistanceSpinner.setBounds(20, 141, 60, 20);
+		alignmentSmallDistanceSpinner.setBounds(20, 151, 60, 30);
 
 		alignmentMediumDistanceSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
-		alignmentMediumDistanceSpinner.setBounds(20, 162, 60, 20);
+		alignmentMediumDistanceSpinner.setBounds(20, 177, 60, 30);
 
 		alignmentLargeDistanceSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
-		alignmentLargeDistanceSpinner.setBounds(20, 184, 60, 20);
+		alignmentLargeDistanceSpinner.setBounds(20, 204, 60, 30);
 
 		Label lblMediumOffset = new Label(grpAlignmentSettings, SWT.NONE);
 		lblMediumOffset.setText("Medium offset");
-		lblMediumOffset.setBounds(86, 165, 94, 20);
+		lblMediumOffset.setBounds(86, 184, 94, 30);
 
 		Label lblLargeOffset = new Label(grpAlignmentSettings, SWT.NONE);
 		lblLargeOffset.setText("Large offset");
-		lblLargeOffset.setBounds(86, 187, 108, 20);
+		lblLargeOffset.setBounds(86, 211, 108, 20);
 
 		guideSizeSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
-		guideSizeSpinner.setBounds(20, 82, 60, 20);
+		guideSizeSpinner.setBounds(20, 82, 60, 30);
 
 		Label guideSizeLabel = new Label(grpAlignmentSettings, SWT.NONE);
-		guideSizeLabel.setBounds(86, 78, 88, 20);
+		guideSizeLabel.setBounds(86, 88, 88, 20);
 		guideSizeLabel.setText("Guide size");
 
 		alignmentThresholdSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
-		alignmentThresholdSpinner.setBounds(186, 162, 60, 20);
+		alignmentThresholdSpinner.setBounds(186, 177, 60, 30);
 
 		Label lblThreshold = new Label(grpAlignmentSettings, SWT.NONE);
-		lblThreshold.setBounds(252, 164, 169, 20);
+		lblThreshold.setBounds(252, 183, 169, 20);
 		lblThreshold.setText("Snap to Guide Threshold");
 
 		snapToNoneRadio = new Button(grpAlignmentSettings, SWT.RADIO);
@@ -204,33 +204,33 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		snapToNoneRadio.setText("None");
 
 		alignmentIndentSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
-		alignmentIndentSpinner.setBounds(186, 141, 60, 20);
+		alignmentIndentSpinner.setBounds(186, 151, 60, 30);
 
 		Label indentLabel = new Label(grpAlignmentSettings, SWT.NONE);
-		indentLabel.setBounds(252, 144, 128, 14);
+		indentLabel.setBounds(252, 158, 128, 14);
 		indentLabel.setText("Indent offset");
 		guideSizeSpinner.setValues(0, 3, 100, 0, 5, 20);
 
 		Group grpResizing = new Group(composite, SWT.NONE);
 		grpResizing.setText("Keyboard resize/move step sizes");
-		grpResizing.setBounds(0, 646, 431, 73);
+		grpResizing.setBounds(0, 666, 431, 93);
 
 		Label stepsizeLabel = new Label(grpResizing, SWT.NONE);
-		stepsizeLabel.setBounds(10, 24, 60, 20);
+		stepsizeLabel.setBounds(10, 29, 65, 20);
 		stepsizeLabel.setText("Small step");
 		stepsizeLabel.setToolTipText("Move: Ctrl-Arrows\r\nResize : Ctrl-Shift-Arrows");
 
 		stepSizeSpinner = new Spinner(grpResizing, SWT.BORDER);
-		stepSizeSpinner.setBounds(70, 21, 60, 20);
+		stepSizeSpinner.setBounds(80, 21, 60, 30);
 		stepSizeSpinner.setValues(0, 1, 100, 0, 1, 5);
 
 		Label lblLargeStep = new Label(grpResizing, SWT.NONE);
 		lblLargeStep.setToolTipText("Move: Ctrl-Alt-Arrows\r\nResize: Alt-Shift-Arrows");
 		lblLargeStep.setText("Large step");
-		lblLargeStep.setBounds(10, 46, 60, 20);
+		lblLargeStep.setBounds(10, 61, 65, 20);
 
 		largeStepSizeSpinner = new Spinner(grpResizing, SWT.BORDER);
-		largeStepSizeSpinner.setBounds(70, 43, 60, 20);
+		largeStepSizeSpinner.setBounds(80, 53, 60, 30);
 		largeStepSizeSpinner.setValues(0, 1, 100, 0, 1, 5);
 
 		Group grpFeedbackSettings = new Group(composite, SWT.NONE);
@@ -238,11 +238,11 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		grpFeedbackSettings.setBounds(0, 82, 430, 312);
 
 		alignmentFeedbackCheck = new Button(grpFeedbackSettings, SWT.CHECK);
-		alignmentFeedbackCheck.setBounds(10, 130, 303, 26);
+		alignmentFeedbackCheck.setBounds(10, 145, 303, 26);
 		alignmentFeedbackCheck.setText("Alignment Guides");
 
 		Label lblGuideColor = new Label(grpFeedbackSettings, SWT.NONE);
-		lblGuideColor.setBounds(74, 162, 88, 20);
+		lblGuideColor.setBounds(74, 187, 88, 20);
 		lblGuideColor.setText("Guide color");
 
 		gridFeedbackCheck = new Button(grpFeedbackSettings, SWT.CHECK);
@@ -251,21 +251,21 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		gridColorViewer = new ColorSelectViewer(grpFeedbackSettings, SWT.NONE);
 		Control gridColorControl = gridColorViewer.getControl();
-		gridColorControl.setBounds(10, 55, 60, 20);
+		gridColorControl.setBounds(10, 55, 60, 25);
 
 		Label gridColorLabel = new Label(grpFeedbackSettings, SWT.NONE);
 		gridColorLabel.setBounds(74, 55, 85, 20);
 		gridColorLabel.setText("Grid color");
 
 		gridPointsizeSpinner = new Spinner(grpFeedbackSettings, SWT.BORDER);
-		gridPointsizeSpinner.setBounds(10, 81, 60, 20);
+		gridPointsizeSpinner.setBounds(10, 86, 60, 30);
 
 		Label gridPointSizeLabel = new Label(grpFeedbackSettings, SWT.NONE);
-		gridPointSizeLabel.setBounds(74, 85, 124, 20);
+		gridPointSizeLabel.setBounds(74, 90, 124, 20);
 		gridPointSizeLabel.setText("Grid point size");
 
 		gridSizeSpinner = new Spinner(grpFeedbackSettings, SWT.BORDER);
-		gridSizeSpinner.setBounds(10, 104, 60, 20);
+		gridSizeSpinner.setBounds(10, 114, 60, 30);
 		gridSizeSpinner.setValues(0, 3, 100, 0, 5, 20);
 		snapToGridRadio.addSelectionListener(new SelectionAdapter()
 		{
@@ -277,23 +277,23 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		});
 
 		Label gridDefaultLabel = new Label(grpFeedbackSettings, SWT.NONE);
-		gridDefaultLabel.setBounds(74, 107, 155, 14);
+		gridDefaultLabel.setBounds(74, 117, 155, 14);
 		gridDefaultLabel.setText("Point distance");
 
 		alignmentGuidecolorSelectViewer = new ColorSelectViewer(grpFeedbackSettings, 0);
 		Control control = alignmentGuidecolorSelectViewer.getControl();
-		control.setBounds(10, 162, 60, 20);
+		control.setBounds(10, 177, 60, 27);
 
 		anchorFeedbackCheck = new Button(grpFeedbackSettings, SWT.CHECK);
-		anchorFeedbackCheck.setBounds(10, 188, 324, 26);
+		anchorFeedbackCheck.setBounds(10, 203, 324, 26);
 		anchorFeedbackCheck.setText("Show anchoring feedback");
 
 		sameSizeFeedbackCheck = new Button(grpFeedbackSettings, SWT.CHECK);
-		sameSizeFeedbackCheck.setBounds(10, 220, 324, 26);
+		sameSizeFeedbackCheck.setBounds(10, 235, 324, 26);
 		sameSizeFeedbackCheck.setText("Show same-size feedback");
 
 		paintPagebreaksCheck = new Button(grpFeedbackSettings, SWT.CHECK);
-		paintPagebreaksCheck.setBounds(10, 254, 303, 26);
+		paintPagebreaksCheck.setBounds(10, 269, 303, 26);
 		paintPagebreaksCheck.setText("Paint page breaks");
 
 		showRulersCheck = new Button(composite, SWT.CHECK);
