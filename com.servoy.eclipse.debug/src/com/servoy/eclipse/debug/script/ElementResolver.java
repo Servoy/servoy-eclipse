@@ -29,8 +29,10 @@ import org.eclipse.dltk.javascript.typeinference.IValueCollection;
 import org.eclipse.dltk.javascript.typeinference.ValueCollectionFactory;
 import org.eclipse.dltk.javascript.typeinfo.IElementResolver;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
+import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
+import org.eclipse.dltk.javascript.typeinfo.model.Method;
 import org.eclipse.dltk.javascript.typeinfo.model.Property;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
@@ -168,6 +170,7 @@ public class ElementResolver implements IElementResolver
 			{
 				typeNames.removeAll(noneCalcNames);
 				typeNames.add("globals");
+				typeNames.add("getDataSource");
 				try
 				{
 					Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(calcTable);
@@ -357,35 +360,41 @@ public class ElementResolver implements IElementResolver
 					if (table != null)
 					{
 						IDataProvider provider = null; //form.getScriptVariable(name);
-						if (provider == null)
+						try
 						{
-							try
+							Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(table);
+							if (allDataProvidersForTable != null)
 							{
-								Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(table);
-								if (allDataProvidersForTable != null)
+								provider = allDataProvidersForTable.get(name);
+								image = TypeCreator.COLUMN_IMAGE;
+								if (provider instanceof AggregateVariable)
 								{
-									provider = allDataProvidersForTable.get(name);
-									image = TypeCreator.COLUMN_IMAGE;
-									if (provider instanceof AggregateVariable)
-									{
-										image = TypeCreator.COLUMN_AGGR_IMAGE;
-									}
-									else if (provider instanceof ScriptCalculation)
-									{
-										image = TypeCreator.COLUMN_CALC_IMAGE;
-									}
+									image = TypeCreator.COLUMN_AGGR_IMAGE;
+								}
+								else if (provider instanceof ScriptCalculation)
+								{
+									image = TypeCreator.COLUMN_CALC_IMAGE;
 								}
 							}
-							catch (Exception e)
-							{
-								ServoyLog.logError(e);
-							}
 						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+
 						if (provider != null)
 						{
 							readOnly = false;
 							type = TypeCreator.getDataProviderType(context, provider);
 							resource = provider;
+						}
+						else if (name.equals("getDataSource"))
+						{
+							Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+							method.setName(name);
+							method.setType(TypeUtil.ref(ITypeNames.STRING));
+							method.setAttribute(TypeCreator.IMAGE_DESCRIPTOR, TypeCreator.METHOD);
+							return method;
 						}
 					}
 				}
