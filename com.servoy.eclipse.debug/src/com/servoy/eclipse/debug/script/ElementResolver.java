@@ -78,7 +78,7 @@ public class ElementResolver implements IElementResolver
 	public ElementResolver()
 	{
 		typeNameCreators.put("application", new SimpleNameTypeNameCreator("application"));
-		typeNameCreators.put("security", new SimpleNameTypeNameCreator("JSSecurity"));
+		typeNameCreators.put("security", new SimpleNameTypeNameCreator("security"));
 		typeNameCreators.put("i18n", new SimpleNameTypeNameCreator("i18n"));
 		typeNameCreators.put("history", new SimpleNameTypeNameCreator("history"));
 		typeNameCreators.put("utils", new SimpleNameTypeNameCreator("utils"));
@@ -102,7 +102,6 @@ public class ElementResolver implements IElementResolver
 		noneCalcNames.add("history");
 		noneCalcNames.add("jsunit");
 		noneCalcNames.add("forms");
-
 	}
 
 
