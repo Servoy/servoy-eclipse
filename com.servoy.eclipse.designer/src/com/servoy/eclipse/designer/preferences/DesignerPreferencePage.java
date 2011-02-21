@@ -130,7 +130,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		copyPasteOffsetSpinner = new Spinner(composite, SWT.BORDER);
 		copyPasteOffsetSpinner.setValues(0, 0, 100, 0, 1, 5);
-		copyPasteOffsetSpinner.setBounds(114, 29, 125, 30);
+		copyPasteOffsetSpinner.setBounds(114, 29, 125, 26);
 
 		Group grpAlignmentSettings = new Group(composite, SWT.NONE);
 		grpAlignmentSettings.setText("Guide Settings");
@@ -161,13 +161,13 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		lblOffsets.setText("Small offset");
 
 		alignmentSmallDistanceSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
-		alignmentSmallDistanceSpinner.setBounds(20, 151, 60, 30);
+		alignmentSmallDistanceSpinner.setBounds(20, 151, 60, 26);
 
 		alignmentMediumDistanceSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
-		alignmentMediumDistanceSpinner.setBounds(20, 177, 60, 30);
+		alignmentMediumDistanceSpinner.setBounds(20, 177, 60, 26);
 
 		alignmentLargeDistanceSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
-		alignmentLargeDistanceSpinner.setBounds(20, 204, 60, 30);
+		alignmentLargeDistanceSpinner.setBounds(20, 204, 60, 26);
 
 		Label lblMediumOffset = new Label(grpAlignmentSettings, SWT.NONE);
 		lblMediumOffset.setText("Medium offset");
@@ -178,14 +178,14 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		lblLargeOffset.setBounds(86, 211, 108, 20);
 
 		guideSizeSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
-		guideSizeSpinner.setBounds(20, 82, 60, 30);
+		guideSizeSpinner.setBounds(20, 82, 60, 26);
 
 		Label guideSizeLabel = new Label(grpAlignmentSettings, SWT.NONE);
-		guideSizeLabel.setBounds(86, 88, 88, 20);
+		guideSizeLabel.setBounds(86, 88, 88, 26);
 		guideSizeLabel.setText("Guide size");
 
 		alignmentThresholdSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
-		alignmentThresholdSpinner.setBounds(186, 177, 60, 30);
+		alignmentThresholdSpinner.setBounds(186, 177, 60, 26);
 
 		Label lblThreshold = new Label(grpAlignmentSettings, SWT.NONE);
 		lblThreshold.setBounds(252, 183, 169, 20);
@@ -204,7 +204,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		snapToNoneRadio.setText("None");
 
 		alignmentIndentSpinner = new Spinner(grpAlignmentSettings, SWT.BORDER);
-		alignmentIndentSpinner.setBounds(186, 151, 60, 30);
+		alignmentIndentSpinner.setBounds(186, 151, 60, 26);
 
 		Label indentLabel = new Label(grpAlignmentSettings, SWT.NONE);
 		indentLabel.setBounds(252, 158, 128, 14);
@@ -221,7 +221,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		stepsizeLabel.setToolTipText("Move: Ctrl-Arrows\r\nResize : Ctrl-Shift-Arrows");
 
 		stepSizeSpinner = new Spinner(grpResizing, SWT.BORDER);
-		stepSizeSpinner.setBounds(80, 21, 60, 30);
+		stepSizeSpinner.setBounds(80, 21, 60, 26);
 		stepSizeSpinner.setValues(0, 1, 100, 0, 1, 5);
 
 		Label lblLargeStep = new Label(grpResizing, SWT.NONE);
@@ -230,7 +230,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		lblLargeStep.setBounds(10, 61, 65, 20);
 
 		largeStepSizeSpinner = new Spinner(grpResizing, SWT.BORDER);
-		largeStepSizeSpinner.setBounds(80, 53, 60, 30);
+		largeStepSizeSpinner.setBounds(80, 53, 60, 26);
 		largeStepSizeSpinner.setValues(0, 1, 100, 0, 1, 5);
 
 		Group grpFeedbackSettings = new Group(composite, SWT.NONE);
@@ -258,14 +258,14 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		gridColorLabel.setText("Grid color");
 
 		gridPointsizeSpinner = new Spinner(grpFeedbackSettings, SWT.BORDER);
-		gridPointsizeSpinner.setBounds(10, 86, 60, 30);
+		gridPointsizeSpinner.setBounds(10, 86, 60, 26);
 
 		Label gridPointSizeLabel = new Label(grpFeedbackSettings, SWT.NONE);
 		gridPointSizeLabel.setBounds(74, 90, 124, 20);
 		gridPointSizeLabel.setText("Grid point size");
 
 		gridSizeSpinner = new Spinner(grpFeedbackSettings, SWT.BORDER);
-		gridSizeSpinner.setBounds(10, 114, 60, 30);
+		gridSizeSpinner.setBounds(10, 114, 60, 26);
 		gridSizeSpinner.setValues(0, 3, 100, 0, 5, 20);
 		snapToGridRadio.addSelectionListener(new SelectionAdapter()
 		{
