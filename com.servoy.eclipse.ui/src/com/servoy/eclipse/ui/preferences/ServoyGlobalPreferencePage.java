@@ -46,10 +46,10 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	public static final boolean SAVE_EDITOR_STATE_DEFAULT = true;
 	public static final boolean OPEN_FIRST_FORM_DESIGNER_DEFAULT = true;
 
-	private Label enhancedSecurityLabel;
 	private Button securityChangeButton;
 	private Button saveEditorStateButton;
 	private Button openFirstFormDesignerButton;
+	private Label enhancedSecurityLabel;
 
 	public ServoyGlobalPreferencePage()
 	{
@@ -83,31 +83,38 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		rootGridData.horizontalAlignment = GridData.FILL;
 		rootContainer.setLayoutData(rootGridData);
 
-		Group securityInfoContainer = new Group(rootContainer, SWT.NONE);
-		securityInfoContainer.setText("Security Information");
-		GridLayout securityInfoLayout = new GridLayout();
-		securityInfoLayout.numColumns = 2;
-		securityInfoContainer.setLayout(securityInfoLayout);
-
-		GridData securityInfoGridData = new GridData();
-		securityInfoGridData.verticalAlignment = GridData.FILL;
-		securityInfoGridData.horizontalAlignment = GridData.FILL;
-		securityInfoContainer.setLayoutData(securityInfoGridData);
-
-		enhancedSecurityLabel = new Label(securityInfoContainer, SWT.NONE);
-		enhancedSecurityLabel.setText("loading...");
-
-		securityChangeButton = new Button(securityInfoContainer, SWT.NONE);
-		securityChangeButton.setText("Change");
-		securityChangeButton.addSelectionListener(new SelectionAdapter()
+		if (!new DeveloperPreferences(ServoyModel.getSettings()).getEnhancedSecurity())
 		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
+			Group securityInfoContainer = new Group(rootContainer, SWT.NONE);
+			securityInfoContainer.setText("Security Information");
+			GridLayout securityInfoLayout = new GridLayout();
+			securityInfoLayout.numColumns = 2;
+			securityInfoContainer.setLayout(securityInfoLayout);
+
+			GridData securityInfoGridData = new GridData();
+			securityInfoGridData.verticalAlignment = GridData.FILL;
+			securityInfoGridData.horizontalAlignment = GridData.FILL;
+			securityInfoContainer.setLayoutData(securityInfoGridData);
+
+			enhancedSecurityLabel = new Label(securityInfoContainer, SWT.NONE);
+			enhancedSecurityLabel.setText("Servoy Application Server NOT is running with Enhanced Security, this is strongly discouraged");
+			enhancedSecurityLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
+
+			securityChangeButton = new Button(securityInfoContainer, SWT.NONE);
+			securityChangeButton.setText("Change");
+			securityChangeButton.addSelectionListener(new SelectionAdapter()
 			{
-				new DeveloperPreferences(ServoyModel.getSettings()).setEnhancedSecurity(true);
-				initializeFields();
-			}
-		});
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					new DeveloperPreferences(ServoyModel.getSettings()).setEnhancedSecurity(true);
+
+					enhancedSecurityLabel.setText("Servoy Application Server is running with Enhanced Security");
+					enhancedSecurityLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+					securityChangeButton.setVisible(false);
+				}
+			});
+		}
 
 		Group optionsContainer = new Group(rootContainer, SWT.NONE);
 		optionsContainer.setText("Form Editor Options");
@@ -134,19 +141,6 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 
 	protected void initializeFields()
 	{
-		if (new DeveloperPreferences(ServoyModel.getSettings()).getEnhancedSecurity())
-		{
-			enhancedSecurityLabel.setText("Servoy Application Server is running with Enhanced Security");
-			enhancedSecurityLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-			securityChangeButton.setVisible(false);
-		}
-		else
-		{
-			enhancedSecurityLabel.setText("Servoy Application Server NOT is running with Enhanced Security, this is strongly discouraged");
-			enhancedSecurityLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
-			securityChangeButton.setVisible(true);
-		}
-
 		DesignerPreferences prefs = new DesignerPreferences();
 
 		saveEditorStateButton.setSelection(prefs.getSaveEditorState());
