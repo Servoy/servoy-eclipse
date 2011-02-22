@@ -400,10 +400,6 @@ public class ElementResolver implements IElementResolver
 
 			}
 		}
-		else if (type != null)
-		{
-			image = (ImageDescriptor)type.getAttribute(TypeCreator.IMAGE_DESCRIPTOR);
-		}
 
 		if (type != null)
 		{

@@ -136,7 +136,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addAnonymousClassType("databaseManager", JSDatabaseManager.class);
 		addAnonymousClassType("servoyDeveloper", JSDeveloperSolutionModel.class);
 		addAnonymousClassType("security", JSSecurity.class);
-		ElementResolver.registerConstantType("JSSecurity", "security");
+		addAnonymousClassType("JSSecurity", JSSecurity.class);
+		ElementResolver.registerConstantType("JSSecurity", "JSSecurity");
 
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
@@ -471,7 +472,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			if (fullTypeName.equals(FoundSet.JS_FOUNDSET))
 			{
 				type = TypeProvider.this.createType(context, fullTypeName, FoundSet.class);
-				type.setAttribute(IMAGE_DESCRIPTOR, FOUNDSET_IMAGE);
+				//type.setAttribute(IMAGE_DESCRIPTOR, FOUNDSET_IMAGE);
 
 				Property alldataproviders = TypeInfoModelFactory.eINSTANCE.createProperty();
 				alldataproviders.setName("alldataproviders");
@@ -862,7 +863,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				members.add(createProperty(context, "foundset", true, FoundSet.JS_FOUNDSET, FOUNDSET_IMAGE));
 				members.add(createProperty(context, "elements", true, "Elements", ELEMENTS));
 
-				type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
+				//type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
 				// quickly add this one to the static types.
 				context.markInvariant(type);
 			}

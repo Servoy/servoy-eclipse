@@ -70,6 +70,7 @@ import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
+import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
@@ -90,6 +91,7 @@ import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.ui.IScriptRenderMethods;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -399,8 +401,12 @@ public abstract class TypeCreator
 
 		fill(context, members, cls, typeName);
 
-		ImageDescriptor desc = IconProvider.instance().descriptor(cls);
-		type.setAttribute(IMAGE_DESCRIPTOR, desc);
+		if (cls != ServoyException.class && !IFoundSet.class.isAssignableFrom(cls))
+		{
+			ImageDescriptor desc = IconProvider.instance().descriptor(cls);
+			System.err.println(cls + "::" + desc);
+			type.setAttribute(IMAGE_DESCRIPTOR, desc);
+		}
 		if (IDeprecated.class.isAssignableFrom(cls))
 		{
 			type.setDeprecated(true);
