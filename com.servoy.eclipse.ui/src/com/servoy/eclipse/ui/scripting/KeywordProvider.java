@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.keyword.IKeywordCategory;
 import org.eclipse.dltk.core.keyword.IKeywordProvider;
+import org.eclipse.dltk.javascript.core.JSKeywordCategory;
 
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 
@@ -44,8 +45,20 @@ public class KeywordProvider implements IKeywordProvider
 	{
 	}
 
+	/**
+	 * @test
+	 * @see test
+	 */
 	public String[] getKeywords(IKeywordCategory category, ISourceModule module)
 	{
-		return keywords;
+		if (category == JSKeywordCategory.CODE)
+		{
+			return keywords;
+		}
+		else if (category == JSKeywordCategory.JS_DOC_TAG)
+		{
+			return new String[] { "@AllowToRunInFind" };
+		}
+		return null;
 	}
 }
