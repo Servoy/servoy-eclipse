@@ -404,7 +404,6 @@ public abstract class TypeCreator
 		if (cls != ServoyException.class && !IFoundSet.class.isAssignableFrom(cls))
 		{
 			ImageDescriptor desc = IconProvider.instance().descriptor(cls);
-			System.err.println(cls + "::" + desc);
 			type.setAttribute(IMAGE_DESCRIPTOR, desc);
 		}
 		if (IDeprecated.class.isAssignableFrom(cls))
