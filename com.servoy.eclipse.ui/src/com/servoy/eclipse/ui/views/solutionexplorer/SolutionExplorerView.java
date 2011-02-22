@@ -339,7 +339,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private MoveTextAction moveCode;
 
-	private SearchAction searchAction;
+	private SearchAction searchTreeAction;
+	private SearchAction searchListAction;
 
 	private OverrideMethodAction overrideMethod;
 
@@ -1992,7 +1993,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		manager.add(copyAction);
 		manager.add(pasteAction);
 		manager.add(new Separator());
-		if (searchAction.isEnabled()) manager.add(searchAction);
+		if (searchTreeAction.isEnabled()) manager.add(searchTreeAction);
 		manager.add(new Separator());
 		manager.add(fRefreshAction);
 		manager.add(expandNodeAction);
@@ -2010,7 +2011,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (editVariableAction.isEnabled()) manager.add(editVariableAction);
 		if (debugMethodAction.isMethodSelected()) manager.add(debugMethodAction);
 		if (openSqlEditorAction.isEnabled()) manager.add(openSqlEditorAction);
-		if (searchAction.isEnabled()) manager.add(searchAction);
+		if (searchListAction.isEnabled()) manager.add(searchListAction);
 
 		manager.add(new Separator());
 		if (newActionInListPrimary.isEnabled()) manager.add(newActionInListPrimary);
@@ -2179,7 +2180,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	{
 		moveSample = new MoveTextAction(this, true);
 		moveCode = new MoveTextAction(this, false);
-		searchAction = new SearchAction();
+		searchListAction = new SearchAction();
+		searchTreeAction = new SearchAction();
 		moveFormAction = new MovePersistAction(getSite().getShell());
 		duplicateFormAction = new DuplicatePersistAction(getSite().getShell());
 		renameFormAction = new RenamePersistAction();
@@ -2254,8 +2256,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
-		newActionInTreeSecondary.registerAction(UserNodeType.FORM, new OpenWizardAction(NewFormWizard.class,
-			Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form")); //$NON-NLS-1$ //$NON-NLS-2$
+		newActionInTreeSecondary.registerAction(UserNodeType.FORM,
+			new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form")); //$NON-NLS-1$ //$NON-NLS-2$
 		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION, newForm);
 
 		newActionInListPrimary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
@@ -2377,7 +2379,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		list.addSelectionChangedListener(debugMethodAction);
 		list.addSelectionChangedListener(newActionInListSecondary);
 		list.addSelectionChangedListener(renameMediaAction);
-		list.addSelectionChangedListener(searchAction);
+		list.addSelectionChangedListener(searchListAction);
 		list.addSelectionChangedListener(movePersistAction);
 		list.addSelectionChangedListener(duplicatePersistAction);
 		list.addSelectionChangedListener(copyTable);
@@ -2393,7 +2395,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		tree.addSelectionChangedListener(newActionInListPrimary);
 
 		tree.addSelectionChangedListener(openActionInTree);
-		tree.addSelectionChangedListener(searchAction);
+		tree.addSelectionChangedListener(searchTreeAction);
 		tree.addSelectionChangedListener(deleteActionInTree);
 		tree.addSelectionChangedListener(addAsModuleAction);
 		tree.addSelectionChangedListener(renameSolutionAction);

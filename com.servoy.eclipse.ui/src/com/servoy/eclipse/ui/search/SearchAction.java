@@ -51,7 +51,7 @@ public class SearchAction extends Action implements ISelectionChangedListener
 	 */
 	public SearchAction()
 	{
-		setText("Search References"); //$NON-NLS-1$
+		setText("Search for References"); //$NON-NLS-1$
 	}
 
 	/*
