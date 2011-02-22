@@ -19,6 +19,7 @@ package com.servoy.eclipse.debug.script;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1038,6 +1039,10 @@ public abstract class TypeCreator
 		else if (object instanceof BeanProperty)
 		{
 			returnType = ((BeanProperty)object).getGetter().getReturnType();
+		}
+		else if (object instanceof Field)
+		{
+			returnType = ((Field)object).getType();
 		}
 		return getReturnType(returnType);
 	}
