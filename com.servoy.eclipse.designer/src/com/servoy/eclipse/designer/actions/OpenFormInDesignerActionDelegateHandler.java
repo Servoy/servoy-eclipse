@@ -23,6 +23,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -41,7 +42,9 @@ public class OpenFormInDesignerActionDelegateHandler extends AbstractHandler
 {
 	public Object execute(ExecutionEvent event) throws ExecutionException
 	{
-		ISelection selection = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().getSelection();
+		Form form = null;
+		IWorkbenchPage activePage = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage();
+		ISelection selection = activePage.getSelection();
 		if (selection != null & selection instanceof IStructuredSelection)
 		{
 			IStructuredSelection strucSelection = (IStructuredSelection)selection;
@@ -54,10 +57,18 @@ public class OpenFormInDesignerActionDelegateHandler extends AbstractHandler
 					SimpleUserNode node = (SimpleUserNode)element;
 					if (node.getRealObject() instanceof Form)
 					{
-						EditorUtil.openFormDesignEditor((Form)node.getRealObject());
+						form = (Form)node.getRealObject();
 					}
 				}
 			}
+		}
+		else
+		{
+			form = EditorUtil.getForm(activePage.getActiveEditor());
+		}
+		if (form != null)
+		{
+			return EditorUtil.openFormDesignEditor(form);
 		}
 		return null;
 	}
