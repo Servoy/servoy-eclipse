@@ -52,6 +52,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.editors.TabbedEditor;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -75,7 +76,8 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  */
 
-public class VisualFormEditor extends MultiPageEditorPart implements CommandStackListener, IActiveProjectListener, IPersistChangeListener, IShowEditorInput
+public class VisualFormEditor extends MultiPageEditorPart implements CommandStackListener, IActiveProjectListener, IPersistChangeListener, IShowEditorInput,
+	TabbedEditor
 {
 	private static final String COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.context";
 
@@ -108,6 +110,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	private VisualFormEditorDesignPage graphicaleditor = null;
 	private VisualFormEditorPartsPage partseditor = null;
 	private VisualFormEditorTabSequencePage tabseditor = null;
+	private int tabsEditorIndex;
 	private VisualFormEditorSecurityPage seceditor = null;
 	private boolean closing = false;
 
@@ -710,7 +713,8 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	private void createTabsPage()
 	{
 		tabseditor = new VisualFormEditorTabSequencePage(this, getContainer(), SWT.NONE);
-		setPageText(addPage(tabseditor), "Tab sequence");
+		tabsEditorIndex = addPage(tabseditor);
+		setPageText(tabsEditorIndex, "Tab sequence");
 	}
 
 	private void createSecPage()
@@ -810,5 +814,17 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 			this.type = type;
 		}
 
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.editors.TabbedEditor#changeActiveTab(java.lang.String)
+	 */
+	public void changeActiveTab(String tabName)
+	{
+		// TODO Auto-generated method stub
+		setActivePage(tabsEditorIndex);
+		setFocus();
 	}
 }

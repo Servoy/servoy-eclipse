@@ -64,20 +64,22 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
+import com.servoy.eclipse.ui.dialogs.FormContentProvider;
+import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
-import com.servoy.eclipse.ui.dialogs.FormContentProvider;
 import com.servoy.eclipse.ui.dialogs.FormContentProvider.FormListOptions;
-import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.editors.BeanCustomCellEditor;
 import com.servoy.eclipse.ui.editors.DataProviderCellEditor;
-import com.servoy.eclipse.ui.editors.DataProviderCellEditor.DataProviderValueEditor;
 import com.servoy.eclipse.ui.editors.FontCellEditor;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
 import com.servoy.eclipse.ui.editors.PageFormatEditor;
 import com.servoy.eclipse.ui.editors.SortCellEditor;
+import com.servoy.eclipse.ui.editors.TabSeqDialogCellEditor;
 import com.servoy.eclipse.ui.editors.TagsAndI18NTextCellEditor;
+import com.servoy.eclipse.ui.editors.DataProviderCellEditor.DataProviderValueEditor;
+import com.servoy.eclipse.ui.editors.TabSeqDialogCellEditor.TabSeqDialogValueEditor;
 import com.servoy.eclipse.ui.labelproviders.ArrayLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
@@ -113,7 +115,6 @@ import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
-import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
@@ -151,6 +152,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.query.ISQLJoin;
 import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.util.ComponentFactoryHelper;
@@ -2240,7 +2242,13 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	{
 		if ("tabSeq".equals(name))
 		{
-			return new PropertyController<String, Integer>(id, displayName);
+			return new PropertyController<String, String>(id, displayName, null, null, new ICellEditorFactory()
+			{
+				public CellEditor createPropertyEditor(Composite parent)
+				{
+					return new TabSeqDialogCellEditor(parent, null, new TabSeqDialogValueEditor(), true, SWT.NONE);
+				}
+			});
 		}
 		if ("verticalAlignment".equals(name))
 		{
