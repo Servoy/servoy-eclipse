@@ -2248,7 +2248,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			{
 				public CellEditor createPropertyEditor(Composite parent)
 				{
-					return new TabSeqDialogCellEditor(parent, null, new TabSeqDialogValueEditor(), true, SWT.NONE);
+					if (context instanceof Form) return new TabSeqDialogCellEditor(parent, null, new TabSeqDialogValueEditor((Form)context), true, SWT.NONE);
+					else return new TabSeqDialogCellEditor(parent, null, new TabSeqDialogValueEditor(null), true, SWT.NONE);
 				}
 			});
 		}

@@ -25,7 +25,10 @@ package com.servoy.eclipse.ui.editors;
  * @author alorincz
  *
  */
-public interface TabbedEditor
+public interface ITabbedEditor
 {
+
+	public static final String VFE_TABSEQ_PAGE = "Tab sequence";
+
 	public void changeActiveTab(String tabName);
 }

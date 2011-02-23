@@ -54,7 +54,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.editors.TabbedEditor;
+import com.servoy.eclipse.ui.editors.ITabbedEditor;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -79,7 +79,7 @@ import com.servoy.j2db.util.Utils;
  */
 
 public class VisualFormEditor extends MultiPageEditorPart implements CommandStackListener, IActiveProjectListener, IPersistChangeListener, IShowEditorInput,
-	TabbedEditor
+	ITabbedEditor
 {
 	private static final String COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.context";
 
@@ -102,8 +102,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	public static final RequestType REQ_PLACE_TEMPLATE = new RequestType(RequestType.TYPE_TEMPLATE);
 	public static final String REQ_DISTRIBUTE = "VFE_DISTRIBUTE"; //$NON-NLS-1$
 	public static final String REQ_SET_PROPERTY = "VFE_SET_PROPERTY"; //$NON-NLS-1$
-	public static final String VFE_TABSEQ_PAGE_ID = "Tab sequence";
-	public static final String VFE_TABSEQ_PAGE = "Tab sequence";
+	public static final String VFE_PAGE_ID = "PageID";
 
 	private Form form; // The working model.
 	private Form flattenedForm;
@@ -716,7 +715,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	private void createTabsPage()
 	{
 		tabseditor = new VisualFormEditorTabSequencePage(this, getContainer(), SWT.NONE);
-		tabseditor.setData(VFE_TABSEQ_PAGE_ID, VFE_TABSEQ_PAGE);
+		tabseditor.setData(VFE_PAGE_ID, ITabbedEditor.VFE_TABSEQ_PAGE);
 		setPageText(addPage(tabseditor), "Tab sequence");
 	}
 
@@ -829,7 +828,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		CTabItem[] items = ((CTabFolder)getContainer()).getItems();
 		for (int i = 0; i < items.length; i++)
 		{
-			if (tabName.equals(items[i].getControl().getData(VFE_TABSEQ_PAGE_ID)))
+			if (tabName.equals(items[i].getControl().getData(VFE_PAGE_ID)))
 			{
 				setActivePage(i);
 				setFocus();

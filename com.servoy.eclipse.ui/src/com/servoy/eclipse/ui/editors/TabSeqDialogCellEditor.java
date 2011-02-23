@@ -21,7 +21,9 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PlatformUI;
+
+import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.Form;
 
 
 /**
@@ -60,6 +62,12 @@ public class TabSeqDialogCellEditor extends DialogCellEditor
 
 	public static class TabSeqDialogValueEditor implements IValueEditor<Object>
 	{
+		private final Form form;
+
+		public TabSeqDialogValueEditor(Form form)
+		{
+			this.form = form;
+		}
 
 		/*
 		 * (non-Javadoc)
@@ -78,10 +86,11 @@ public class TabSeqDialogCellEditor extends DialogCellEditor
 		 */
 		public void openEditor(Object value)
 		{
-			IEditorPart editorRef = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
-			if (editorRef instanceof TabbedEditor)
+			if (form == null) return;
+			IEditorPart editorRef = EditorUtil.openFormDesignEditor(form);
+			if (editorRef instanceof ITabbedEditor)
 			{
-				((TabbedEditor)editorRef).changeActiveTab("Tab sequence");
+				((ITabbedEditor)editorRef).changeActiveTab("Tab sequence");
 			}
 		}
 
