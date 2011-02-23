@@ -31,6 +31,8 @@ import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.commands.CommandStackListener;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -100,6 +102,8 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	public static final RequestType REQ_PLACE_TEMPLATE = new RequestType(RequestType.TYPE_TEMPLATE);
 	public static final String REQ_DISTRIBUTE = "VFE_DISTRIBUTE"; //$NON-NLS-1$
 	public static final String REQ_SET_PROPERTY = "VFE_SET_PROPERTY"; //$NON-NLS-1$
+	public static final String VFE_TABSEQ_PAGE_ID = "Tab sequence";
+	public static final String VFE_TABSEQ_PAGE = "Tab sequence";
 
 	private Form form; // The working model.
 	private Form flattenedForm;
@@ -110,7 +114,6 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	private VisualFormEditorDesignPage graphicaleditor = null;
 	private VisualFormEditorPartsPage partseditor = null;
 	private VisualFormEditorTabSequencePage tabseditor = null;
-	private int tabsEditorIndex;
 	private VisualFormEditorSecurityPage seceditor = null;
 	private boolean closing = false;
 
@@ -321,8 +324,8 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 					}
 					if (marker.getAttribute(IMarker.CHAR_START, -1) != -1)
 					{
-						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(),
-							Utils.getAsInteger(marker.getAttribute(IMarker.CHAR_START, -1)));
+						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(), Utils.getAsInteger(marker.getAttribute(
+							IMarker.CHAR_START, -1)));
 					}
 					if (elementUuid != null)
 					{
@@ -712,9 +715,13 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 
 	private void createTabsPage()
 	{
+//		tabseditor = new VisualFormEditorTabSequencePage(this, getContainer(), SWT.NONE);
+//		tabsEditorIndex = addPage(tabseditor);
+//		setPageText(tabsEditorIndex, "Tab sequence");
+
 		tabseditor = new VisualFormEditorTabSequencePage(this, getContainer(), SWT.NONE);
-		tabsEditorIndex = addPage(tabseditor);
-		setPageText(tabsEditorIndex, "Tab sequence");
+		tabseditor.setData(VFE_TABSEQ_PAGE_ID, VFE_TABSEQ_PAGE);
+		setPageText(addPage(tabseditor), "Tab sequence");
 	}
 
 	private void createSecPage()
@@ -823,8 +830,18 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	 */
 	public void changeActiveTab(String tabName)
 	{
+		CTabItem[] items = ((CTabFolder)getContainer()).getItems();
+		for (int i = 0; i < items.length; i++)
+		{
+			if (tabName.equals(items[i].getControl().getData(VFE_TABSEQ_PAGE_ID)))
+			{
+				setActivePage(i);
+				setFocus();
+				return;
+			}
+		}
 		// TODO Auto-generated method stub
-		setActivePage(tabsEditorIndex);
-		setFocus();
+//		setActivePage(tabsEditorIndex);
+//		setFocus();
 	}
 }

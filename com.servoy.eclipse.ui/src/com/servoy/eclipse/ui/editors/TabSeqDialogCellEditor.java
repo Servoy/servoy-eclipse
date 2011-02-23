@@ -81,7 +81,7 @@ public class TabSeqDialogCellEditor extends DialogCellEditor
 			IEditorPart editorRef = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
 			if (editorRef instanceof TabbedEditor)
 			{
-				((TabbedEditor)editorRef).changeActiveTab(null);
+				((TabbedEditor)editorRef).changeActiveTab("Tab sequence");
 			}
 		}
 
