@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.TableColumn;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.NameComparator;
@@ -176,8 +177,15 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 
 	public void userGroupChanged()
 	{
-		tableViewer.setInput(ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getGroups(
-			ApplicationServerSingleton.get().getClientId()));
+		UIUtils.runInUI(new Runnable()
+		{
+			public void run()
+			{
+				tableViewer.setInput(ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getGroups(
+					ApplicationServerSingleton.get().getClientId()));
+
+			}
+		}, true);
 	}
 
 	@Override
