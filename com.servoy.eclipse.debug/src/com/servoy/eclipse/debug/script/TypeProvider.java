@@ -407,7 +407,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				type.setAttribute(IMAGE_DESCRIPTOR, FORMS);
 
 				EList<Member> members = type.getMembers();
-				members.add(createProperty(context, "allnames", true, "Array<String>", "All form names as an array", SPECIAL_PROPERTY));
+				members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "All form names as an array", SPECIAL_PROPERTY));
 				members.add(createProperty(context, "length", true, "Number", "Number of forms", PROPERTY));
 
 				// special array lookup property so that forms[xxx]. does code complete.
@@ -511,11 +511,11 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 					{
 						if (memberType.getName().equals(Record.JS_RECORD))
 						{
-							overwrittenMembers.add(clone(context, member, Record.JS_RECORD + '<' + config + '>'));
+							overwrittenMembers.add(clone(member, context.getTypeRef(Record.JS_RECORD + '<' + config + '>')));
 						}
 						else if (memberType.getName().equals("Array<" + Record.JS_RECORD + ">"))
 						{
-							overwrittenMembers.add(clone(context, member, "Array<" + Record.JS_RECORD + '<' + config + ">>"));
+							overwrittenMembers.add(clone(member, TypeUtil.arrayOf(Record.JS_RECORD + '<' + config + ">")));
 						}
 						else if (memberType.getName().equals(FoundSet.JS_FOUNDSET))
 						{
@@ -528,17 +528,18 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 									Relation relation = fs.getRelation(config);
 									if (relation != null)
 									{
-										overwrittenMembers.add(clone(context, member, FoundSet.JS_FOUNDSET + '<' + relation.getForeignDataSource() + '>'));
+										overwrittenMembers.add(clone(member,
+											context.getTypeRef(FoundSet.JS_FOUNDSET + '<' + relation.getForeignDataSource() + '>')));
 									}
 									else
 									{
-										overwrittenMembers.add(clone(context, member, FoundSet.JS_FOUNDSET + '<' + config + '>'));
+										overwrittenMembers.add(clone(member, context.getTypeRef(FoundSet.JS_FOUNDSET + '<' + config + '>')));
 									}
 								}
 							}
 							else
 							{
-								overwrittenMembers.add(clone(context, member, FoundSet.JS_FOUNDSET + '<' + config + '>'));
+								overwrittenMembers.add(clone(member, context.getTypeRef(FoundSet.JS_FOUNDSET + '<' + config + '>')));
 							}
 						}
 					}
@@ -553,7 +554,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		 * @param config
 		 * @return
 		 */
-		protected final Member clone(ITypeInfoContext context, Member member, String typeName)
+		protected final Member clone(Member member, JSType type)
 		{
 			Member clone = null;
 			if (member instanceof Property)
@@ -584,13 +585,13 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			clone.setVisible(member.isVisible());
 			clone.setDescription(member.getDescription());
 			clone.setName(member.getName());
-			if (typeName == null)
+			if (type == null)
 			{
 				clone.setType(member.getType());
 			}
 			else
 			{
-				clone.setType(context.getTypeRef(typeName));
+				clone.setType(type);
 			}
 
 			return clone;
@@ -752,7 +753,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 					{
 						if (memberType.getName().equals(FoundSet.JS_FOUNDSET))
 						{
-							overwrittenMembers.add(clone(context, member, FoundSet.JS_FOUNDSET + '<' + config + '>'));
+							overwrittenMembers.add(clone(member, context.getTypeRef(FoundSet.JS_FOUNDSET + '<' + config + '>')));
 						}
 					}
 				}
@@ -777,7 +778,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			type.setAttribute(IMAGE_DESCRIPTOR, PLUGINS);
 
 			EList<Member> members = type.getMembers();
-			members.add(createProperty(context, "allnames", true, "Array<String>", "All form names as an array", SPECIAL_PROPERTY));
+			members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "All form names as an array", SPECIAL_PROPERTY));
 			members.add(createProperty(context, "length", true, "Number", "Number of forms", PROPERTY));
 
 
@@ -852,11 +853,11 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 				EList<Member> members = type.getMembers();
 
-				members.add(createProperty(context, "allnames", true, "Array<String>", SPECIAL_PROPERTY));
-				members.add(createProperty(context, "alldataproviders", true, "Array<String>", SPECIAL_PROPERTY));
-				members.add(createProperty(context, "allmethods", true, "Array<String>", SPECIAL_PROPERTY));
-				members.add(createProperty(context, "allrelations", true, "Array<String>", SPECIAL_PROPERTY));
-				members.add(createProperty(context, "allvariables", true, "Array<String>", SPECIAL_PROPERTY));
+				members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "Array with all the names in this form scope", SPECIAL_PROPERTY));
+				members.add(createProperty("alldataproviders", true, TypeUtil.arrayOf("String"), "Array with all the dataprovider names", SPECIAL_PROPERTY));
+				members.add(createProperty("allmethods", true, TypeUtil.arrayOf("String"), "Array with all the method names", SPECIAL_PROPERTY));
+				members.add(createProperty("allrelations", true, TypeUtil.arrayOf("String"), "Array with all the relation names", SPECIAL_PROPERTY));
+				members.add(createProperty("allvariables", true, TypeUtil.arrayOf("String"), "Array with all the variable names", SPECIAL_PROPERTY));
 
 				// controller and foundset and elements
 				members.add(createProperty(context, "controller", true, "Controller", IconProvider.instance().descriptor(JSForm.class)));
@@ -899,31 +900,31 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						if (ds == null && !FormEncapsulation.hideFoundset(formToUse)) continue;
 						String foundsetType = FoundSet.JS_FOUNDSET;
 						if (ds != null) foundsetType += '<' + ds + '>';
-						Member clone = clone(context, member, foundsetType);
+						Member clone = clone(member, context.getTypeRef(foundsetType));
 						overwrittenMembers.add(clone);
 						clone.setVisible(!FormEncapsulation.hideFoundset(formToUse));
 					}
 					else if (member.getName().equals("controller") && FormEncapsulation.hideController(formToUse))
 					{
-						Member clone = clone(context, member, null);
+						Member clone = clone(member, null);
 						overwrittenMembers.add(clone);
 						clone.setVisible(false);
 					}
 					else if (member.getName().equals("alldataproviders") && FormEncapsulation.hideDataproviders(formToUse))
 					{
-						Member clone = clone(context, member, null);
+						Member clone = clone(member, null);
 						overwrittenMembers.add(clone);
 						clone.setVisible(false);
 					}
 					else if (member.getName().equals("allrelations") && FormEncapsulation.hideDataproviders(formToUse))
 					{
-						Member clone = clone(context, member, null);
+						Member clone = clone(member, null);
 						overwrittenMembers.add(clone);
 						clone.setVisible(false);
 					}
 					else if (member.getName().equals("elements"))
 					{
-						Member clone = clone(context, member, "Elements<" + config + '>');
+						Member clone = clone(member, context.getTypeRef("Elements<" + config + '>'));
 						overwrittenMembers.add(clone);
 						clone.setVisible(!FormEncapsulation.hideElements(formToUse));
 					}
@@ -1227,7 +1228,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			if (typeName.equals("Elements"))
 			{
 				EList<Member> members = type.getMembers();
-				members.add(createProperty(context, "allnames", true, "Array<String>", SPECIAL_PROPERTY));
+				members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "Array with all the element names", SPECIAL_PROPERTY));
 				members.add(createProperty(context, "length", true, "Number", PROPERTY));
 				Property arrayProp = createProperty(context, "[]", true, "BaseComponent", PROPERTY);
 				arrayProp.setVisible(false);
