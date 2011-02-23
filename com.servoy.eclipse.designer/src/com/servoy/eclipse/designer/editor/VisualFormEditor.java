@@ -715,10 +715,6 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 
 	private void createTabsPage()
 	{
-//		tabseditor = new VisualFormEditorTabSequencePage(this, getContainer(), SWT.NONE);
-//		tabsEditorIndex = addPage(tabseditor);
-//		setPageText(tabsEditorIndex, "Tab sequence");
-
 		tabseditor = new VisualFormEditorTabSequencePage(this, getContainer(), SWT.NONE);
 		tabseditor.setData(VFE_TABSEQ_PAGE_ID, VFE_TABSEQ_PAGE);
 		setPageText(addPage(tabseditor), "Tab sequence");
@@ -840,8 +836,5 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 				return;
 			}
 		}
-		// TODO Auto-generated method stub
-//		setActivePage(tabsEditorIndex);
-//		setFocus();
 	}
 }
