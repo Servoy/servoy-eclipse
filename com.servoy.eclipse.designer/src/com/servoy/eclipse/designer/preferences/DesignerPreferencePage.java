@@ -82,6 +82,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	private Button gridFeedbackCheck;
 	private Button paintPagebreaksCheck;
 	private Button showRulersCheck;
+	private ColorSelectViewer sameHeightWidthIndicatorColor;
 
 	public void init(IWorkbench workbench)
 	{
@@ -134,7 +135,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		Group grpAlignmentSettings = new Group(composite, SWT.NONE);
 		grpAlignmentSettings.setText("Guide Settings");
-		grpAlignmentSettings.setBounds(0, 394, 431, 266);
+		grpAlignmentSettings.setBounds(0, 424, 431, 266);
 
 		snapToGridRadio = new Button(grpAlignmentSettings, SWT.RADIO);
 		snapToGridRadio.setBounds(10, 50, 108, 26);
@@ -213,7 +214,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		Group grpResizing = new Group(composite, SWT.NONE);
 		grpResizing.setText("Keyboard resize/move step sizes");
-		grpResizing.setBounds(0, 666, 431, 93);
+		grpResizing.setBounds(0, 696, 431, 93);
 
 		Label stepsizeLabel = new Label(grpResizing, SWT.NONE);
 		stepsizeLabel.setBounds(10, 29, 65, 20);
@@ -235,7 +236,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		Group grpFeedbackSettings = new Group(composite, SWT.NONE);
 		grpFeedbackSettings.setText("Feedback Settings");
-		grpFeedbackSettings.setBounds(0, 82, 430, 312);
+		grpFeedbackSettings.setBounds(0, 82, 430, 342);
 
 		alignmentFeedbackCheck = new Button(grpFeedbackSettings, SWT.CHECK);
 		alignmentFeedbackCheck.setBounds(10, 145, 303, 26);
@@ -291,9 +292,25 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		sameSizeFeedbackCheck = new Button(grpFeedbackSettings, SWT.CHECK);
 		sameSizeFeedbackCheck.setBounds(10, 235, 324, 26);
 		sameSizeFeedbackCheck.setText("Show same-size feedback");
+		sameSizeFeedbackCheck.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				sameHeightWidthIndicatorColor.setEnabled(sameSizeFeedbackCheck.getSelection());
+			}
+		});
+
+		sameHeightWidthIndicatorColor = new ColorSelectViewer(grpFeedbackSettings, SWT.NONE);
+		Control sameHeightWidthIndicatorColorControl = sameHeightWidthIndicatorColor.getControl();
+		sameHeightWidthIndicatorColorControl.setBounds(10, 264, 60, 25);
+
+		Label sameHeightWidthIndicatorColorLabel = new Label(grpFeedbackSettings, SWT.NONE);
+		sameHeightWidthIndicatorColorLabel.setBounds(74, 266, 190, 20);
+		sameHeightWidthIndicatorColorLabel.setText("Same height/width indicator");
 
 		paintPagebreaksCheck = new Button(grpFeedbackSettings, SWT.CHECK);
-		paintPagebreaksCheck.setBounds(10, 269, 303, 26);
+		paintPagebreaksCheck.setBounds(10, 299, 303, 26);
 		paintPagebreaksCheck.setText("Paint page breaks");
 
 		showRulersCheck = new Button(composite, SWT.CHECK);
@@ -322,6 +339,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		gridColorViewer.setEnabled(state);
 		gridPointsizeSpinner.setEnabled(state);
 		gridSizeSpinner.setEnabled(state);
+		sameHeightWidthIndicatorColor.setEnabled(sameSizeFeedbackCheck.getSelection());
 	}
 
 	protected void initializeFields()
@@ -331,6 +349,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		gridPointsizeSpinner.setSelection(prefs.getGridPointSize());
 		gridSizeSpinner.setSelection(prefs.getGridSize());
 		gridColorViewer.setSelection(new StructuredSelection(prefs.getGridColor()));
+		sameHeightWidthIndicatorColor.setSelection(new StructuredSelection(prefs.getSameHeightWidthIndicatorColor()));
 		alignmentGuidecolorSelectViewer.setSelection(new StructuredSelection(prefs.getAlignmentGuideColor()));
 		snapToGridRadio.setSelection(prefs.getGridSnapTo());
 		snapToAlignmentRadio.setSelection(prefs.getAlignmentSnapTo());
@@ -364,6 +383,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		prefs.setGridPointSize(gridPointsizeSpinner.getSelection());
 		prefs.setGridSize(gridSizeSpinner.getSelection());
 		prefs.setGridColor((RGB)((IStructuredSelection)gridColorViewer.getSelection()).getFirstElement());
+		prefs.setSameHeightWidthIndicatorColor((RGB)((IStructuredSelection)sameHeightWidthIndicatorColor.getSelection()).getFirstElement());
 		prefs.setAlignmentGuideColor((RGB)((IStructuredSelection)alignmentGuidecolorSelectViewer.getSelection()).getFirstElement());
 		prefs.setFeedbackAlignment(alignmentFeedbackCheck.getSelection());
 		prefs.setFeedbackGrid(gridFeedbackCheck.getSelection());
@@ -394,6 +414,8 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		gridPointsizeSpinner.setSelection(DesignerPreferences.GRID_POINTSIZE_DEFAULT);
 		gridSizeSpinner.setSelection(DesignerPreferences.GRID_SIZE_DEFAULT);
 		gridColorViewer.setSelection(new StructuredSelection(ColorResource.ColorAwt2Rgb(PersistHelper.createColor(DesignerPreferences.GRID_COLOR_DEFAULT))));
+		sameHeightWidthIndicatorColor.setSelection(new StructuredSelection(
+			ColorResource.ColorAwt2Rgb(PersistHelper.createColor(DesignerPreferences.SAME_HEIGHT_WIDTH_INDICATOR_COLOR_DEFAULT))));
 		alignmentGuidecolorSelectViewer.setSelection(new StructuredSelection(
 			ColorResource.ColorAwt2Rgb(PersistHelper.createColor(DesignerPreferences.ALIGNMENT_GUIDE_COLOR_DEFAULT))));
 		guideSizeSpinner.setSelection(DesignerPreferences.GUIDE_SIZE_DEFAULT);

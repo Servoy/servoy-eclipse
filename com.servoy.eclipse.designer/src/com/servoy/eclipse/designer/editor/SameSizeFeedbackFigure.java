@@ -18,7 +18,6 @@
 package com.servoy.eclipse.designer.editor;
 
 import org.eclipse.draw2d.Border;
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
@@ -27,6 +26,8 @@ import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.geometry.Rectangle;
 
 import com.servoy.eclipse.designer.util.AbsoluteLocator;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.resource.ColorResource;
 
 /**
  * Feedback figure for elements that have the same width or height
@@ -96,7 +97,9 @@ public class SameSizeFeedbackFigure extends Figure
 	public void paintFigure(Graphics g)
 	{
 		Rectangle r = getBounds();
-		g.setBackgroundColor(ColorConstants.darkBlue);
+		DesignerPreferences dp = new DesignerPreferences();
+		g.setBackgroundColor(ColorResource.INSTANCE.getColor(dp.getSameHeightWidthIndicatorColor()));
+		g.setForegroundColor(ColorResource.INSTANCE.getColor(dp.getSameHeightWidthIndicatorColor()));
 
 		g.setLineWidth(2);
 

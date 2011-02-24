@@ -58,6 +58,7 @@ public class DesignerPreferences
 	public static final String ALIGNMENT_DISTANCES_SETTING = "alignmentDistances";
 	public static final String GUIDE_SIZE_SETTING = "guidesize";
 	public static final String GRID_COLOR_SETTING = "gridcolor";
+	public static final String SAME_HEIGHT_WIDTH_INDICATOR_COLOR_SETTING = "sameHeightWidthColor";
 	public static final String ALIGNMENT_GUIDE_COLOR_SETTING = "alignmentguidecolor";
 	public static final String GRID_SIZE_SETTING = "gridsize";
 	public static final String GRID_POINTSIZE_SETTING = "pointsize";
@@ -88,6 +89,7 @@ public class DesignerPreferences
 	public static final int GUIDE_SIZE_DEFAULT = 10;
 	public static final int GRID_SIZE_DEFAULT = 10;
 	public static final String GRID_COLOR_DEFAULT = "#b4b4b4";
+	public static final String SAME_HEIGHT_WIDTH_INDICATOR_COLOR_DEFAULT = "#00007f";
 	public static final String ALIGNMENT_GUIDE_COLOR_DEFAULT = "#8eacc3";
 	public static final int GRID_POINTSIZE_DEFAULT = 2;
 	public static final String SNAPTO_DEFAULT = SNAP_TO_ALIGMNENT;
@@ -309,9 +311,20 @@ public class DesignerPreferences
 		return ColorResource.ColorAwt2Rgb(PersistHelper.createColor(getProperty(GRID_COLOR_SETTING, GRID_COLOR_DEFAULT)));
 	}
 
+	public RGB getSameHeightWidthIndicatorColor()
+	{
+		return ColorResource.ColorAwt2Rgb(PersistHelper.createColor(getProperty(SAME_HEIGHT_WIDTH_INDICATOR_COLOR_SETTING,
+			SAME_HEIGHT_WIDTH_INDICATOR_COLOR_DEFAULT)));
+	}
+
 	public void setGridColor(RGB rgb)
 	{
 		setProperty(GRID_COLOR_SETTING, PersistHelper.createColorString(ColorResource.ColoRgb2Awt(rgb)));
+	}
+
+	public void setSameHeightWidthIndicatorColor(RGB rgb)
+	{
+		setProperty(SAME_HEIGHT_WIDTH_INDICATOR_COLOR_SETTING, PersistHelper.createColorString(ColorResource.ColoRgb2Awt(rgb)));
 	}
 
 	public RGB getAlignmentGuideColor()
