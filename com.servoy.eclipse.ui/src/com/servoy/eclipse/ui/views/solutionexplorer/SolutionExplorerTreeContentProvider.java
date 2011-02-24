@@ -61,8 +61,8 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EnableServerAction;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.IApplication;
 import com.servoy.j2db.FormManager.HistoryProvider;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
@@ -1017,35 +1017,37 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			node.add(elementsNode);
 			addFormElementsChildren(elementsNode);
 
-			PlatformSimpleUserNode columnsNode = null;
-			try
+			if (f.getDataSource() != null)
 			{
-				columnsNode = new PlatformSimpleUserNode(Messages.TreeStrings_selectedrecord, UserNodeType.TABLE_COLUMNS, f.getTable(), f,
-					uiActivator.loadImageFromBundle("selected_record.gif"));
-				columnsNode.parent = formNode;
-				node.add(columnsNode);
-			}
-			catch (DbcpException e)
-			{
-				ServoyLog.logInfo("Cannot create 'selectedrecord' node for " + formNode.getName() + ": " + e.getMessage());
-				disableServer(f.getServerName());
-			}
+				PlatformSimpleUserNode columnsNode = null;
+				try
+				{
+					columnsNode = new PlatformSimpleUserNode(Messages.TreeStrings_selectedrecord, UserNodeType.TABLE_COLUMNS, f.getTable(), f,
+						uiActivator.loadImageFromBundle("selected_record.gif"));
+					columnsNode.parent = formNode;
+					node.add(columnsNode);
+				}
+				catch (DbcpException e)
+				{
+					ServoyLog.logInfo("Cannot create 'selectedrecord' node for " + formNode.getName() + ": " + e.getMessage());
+					disableServer(f.getServerName());
+				}
 
-			PlatformSimpleUserNode relationsNode = new PlatformSimpleUserNode(Messages.TreeStrings_relations, UserNodeType.RELATIONS, f, f,
-				uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
-			relationsNode.parent = formNode;
-			node.add(relationsNode);
-			addFormRelationsNodeChildren(relationsNode);
+				PlatformSimpleUserNode relationsNode = new PlatformSimpleUserNode(Messages.TreeStrings_relations, UserNodeType.RELATIONS, f, f,
+					uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
+				relationsNode.parent = formNode;
+				node.add(relationsNode);
+				addFormRelationsNodeChildren(relationsNode);
 
-			// columns & relations not allowed in login solution
-			if (activeSolutionNode != null &&
-				((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
-				solutionOfCalculation == null)
-			{
-				if (columnsNode != null) columnsNode.hide();
-				relationsNode.hide();
+				// columns & relations not allowed in login solution
+				if (activeSolutionNode != null &&
+					((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
+					solutionOfCalculation == null)
+				{
+					if (columnsNode != null) columnsNode.hide();
+					relationsNode.hide();
+				}
 			}
-
 			formNode.setChildren(node.toArray(new PlatformSimpleUserNode[node.size()]));
 		}
 		catch (RepositoryException e)
