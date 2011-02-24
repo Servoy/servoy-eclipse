@@ -152,8 +152,16 @@ public class ActiveEditorTracker implements IPartListener
 									int cursorOffset = delimiter.length() + 1;
 									IStructuredDocumentRegion documentRegion = ((IStructuredDocument)viewer.getDocument()).getRegionAtCharacterOffset(offset);
 									ITextRegion region = documentRegion.getRegionAtCharacterOffset(offset);
+									if (region == null)
+									{
+										region = documentRegion.getFirstRegion();
+									}
 									int textOffset = (offset > 0 && !isSpecialDelimiterRegion(region)) ? (offset - 1) : offset;
 									ITextRegion targetRegion = documentRegion.getRegionAtCharacterOffset(textOffset);
+									if (targetRegion == null)
+									{
+										targetRegion = documentRegion.getFirstRegion();
+									}
 									String text = "";
 									if (targetRegion != null) text = documentRegion.getText(targetRegion).trim();
 									int replacementOffset = (offset - text.length()) > 0 ? (offset - text.length()) : 0;
