@@ -67,11 +67,11 @@ public class SameSizeFeedbackFigure extends Figure
 	 */
 	public static Locator getLocator(String type, IFigure referenceFigure)
 	{
-		if (SAME_WIDTH.equals(type))
+		if (SAME_HEIGHT.equals(type))
 		{
 			return new AbsoluteLocator(referenceFigure, true, 2, true, 3);
 		}
-		if (SAME_HEIGHT.equals(type))
+		if (SAME_WIDTH.equals(type))
 		{
 			return new AbsoluteLocator(referenceFigure, false, -4, true, 1);
 		}
@@ -83,11 +83,11 @@ public class SameSizeFeedbackFigure extends Figure
 	 */
 	protected void init()
 	{
-		if (SAME_WIDTH.equals(type))
+		if (SAME_HEIGHT.equals(type))
 		{
 			setPreferredSize(5, 10);
 		}
-		else if (SAME_HEIGHT.equals(type))
+		else if (SAME_WIDTH.equals(type))
 		{
 			setPreferredSize(10, 5);
 		}
@@ -98,19 +98,25 @@ public class SameSizeFeedbackFigure extends Figure
 	{
 		Rectangle r = getBounds();
 		DesignerPreferences dp = new DesignerPreferences();
-		g.setBackgroundColor(ColorResource.INSTANCE.getColor(dp.getSameHeightWidthIndicatorColor()));
 		g.setForegroundColor(ColorResource.INSTANCE.getColor(dp.getSameHeightWidthIndicatorColor()));
 
 		g.setLineWidth(2);
 
-		if (SAME_WIDTH.equals(type))
+		if (SAME_HEIGHT.equals(type))
 		{
 			g.drawLine(r.x + r.width - 2, r.y, r.x + r.width - 2, r.y + r.height - 2);
+			g.drawPoint(r.x + r.width - 4, r.y);
+			g.drawPoint(r.x + r.width - 1, r.y);
+			g.drawPoint(r.x + r.width - 4, r.y + r.height - 3);
+			g.drawPoint(r.x + r.width - 1, r.y + r.height - 3);
 		}
-		else if (SAME_HEIGHT.equals(type))
+		else if (SAME_WIDTH.equals(type))
 		{
 			g.drawLine(r.x, r.y + r.height - 2, r.x + r.width, r.y + r.height - 2);
+			g.drawPoint(r.x, r.y + r.height - 4);
+			g.drawPoint(r.x, r.y + r.height - 1);
+			g.drawPoint(r.x + r.width - 1, r.y + r.height - 4);
+			g.drawPoint(r.x + r.width - 1, r.y + r.height - 1);
 		}
-
 	}
 }
