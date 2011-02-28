@@ -289,7 +289,11 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	 */
 	private static final String DIALOGSTORE_RATIO = "SolutionExplorerView.ratio"; //$NON-NLS-1$
 
-	private static final String DIALOGSTORE_VIEWORIENTATION = "SolutionExplorerView.orientation"; //$NON-NLS-1$
+	public static final String DIALOGSTORE_VIEWORIENTATION = "SolutionExplorerView.orientation";
+
+	public static final String USE_OPEN_AS_DEFAULT = "SolutionExplorerView.useOpenAsDefaultAction";
+
+	public static final String INCLUDE_ENTRIES_FROM_MODULES = "SolutionExplorerView.includeEntriedFromModules";
 
 	/**
 	 * This orientation tells the view to put the list (outline) part of the view under the tree.
@@ -1014,6 +1018,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	{
 		saveSplitterRatio();
 		fDialogSettings.put(DIALOGSTORE_VIEWORIENTATION, fCurrentOrientation);
+		fDialogSettings.put(USE_OPEN_AS_DEFAULT, openModeToggleButton.getSelection());
+		fDialogSettings.put(INCLUDE_ENTRIES_FROM_MODULES, includeModulesToggleButton.getSelection());
 	}
 
 	private void saveSplitterRatio()
@@ -1865,13 +1871,24 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	{
 		openModeToggleButton = new MenuItem(lowertbmenu, SWT.CHECK);
 		openModeToggleButton.setText("Use 'open' as default action"); //$NON-NLS-1$
-		openModeToggleButton.setSelection(true);
+		openModeToggleButton.setSelection(fDialogSettings.getBoolean(USE_OPEN_AS_DEFAULT));
+		openModeToggleButton.addSelectionListener(new SelectionListener()
+		{
 
-		boolean includeModules = false;
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+			}
+
+			public void widgetSelected(SelectionEvent e)
+			{
+				fDialogSettings.put(USE_OPEN_AS_DEFAULT, openModeToggleButton.getSelection());
+			}
+		});
+
 		includeModulesToggleButton = new MenuItem(lowertbmenu, SWT.CHECK);
 		includeModulesToggleButton.setText("Include entries from modules"); //$NON-NLS-1$
-		includeModulesToggleButton.setSelection(includeModules);
-		((SolutionExplorerListContentProvider)list.getContentProvider()).setIncludeModules(includeModules);
+		includeModulesToggleButton.setSelection(fDialogSettings.getBoolean(INCLUDE_ENTRIES_FROM_MODULES));
+		((SolutionExplorerListContentProvider)list.getContentProvider()).setIncludeModules(fDialogSettings.getBoolean(INCLUDE_ENTRIES_FROM_MODULES));
 		includeModulesToggleButton.addSelectionListener(new SelectionListener()
 		{
 
@@ -1883,6 +1900,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			{
 				((SolutionExplorerListContentProvider)list.getContentProvider()).setIncludeModules(includeModulesToggleButton.getSelection());
 				refreshList();
+				fDialogSettings.put(INCLUDE_ENTRIES_FROM_MODULES, includeModulesToggleButton.getSelection());
 			}
 		});
 	}
@@ -2256,8 +2274,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
-		newActionInTreeSecondary.registerAction(UserNodeType.FORM,
-			new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form")); //$NON-NLS-1$ //$NON-NLS-2$
+		newActionInTreeSecondary.registerAction(UserNodeType.FORM, new OpenWizardAction(NewFormWizard.class,
+			Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form")); //$NON-NLS-1$ //$NON-NLS-2$
 		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION, newForm);
 
 		newActionInListPrimary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
@@ -2469,12 +2487,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				boolean isGlobals = (doubleClickedItem.getType() == UserNodeType.GLOBALS_ITEM);
 				openActionInTree.selectionChanged(new SelectionChangedEvent(tree, new StructuredSelection(doubleClickedItem)));
 				Preferences store = Activator.getDefault().getPluginPreferences();
-				String option = store.getString(SolutionExplorerPreferences.DOUBLE_CLICK_ACTION);
-				boolean optionDefined = (SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM.equals(option)) ||
-					(SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_SCRIPT.equals(option));
-				if (isForm && (ctrlPressed || optionDefined))
+				String formDblClickOption = store.getString(SolutionExplorerPreferences.FORM_DOUBLE_CLICK_ACTION);
+				String globalsDblClickOption = store.getString(SolutionExplorerPreferences.GLOBALS_DOUBLE_CLICK_ACTION);
+				boolean formDblClickOptionDefined = (SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(formDblClickOption)) ||
+					(SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_SCRIPT.equals(formDblClickOption));
+				boolean globalsDblClickOptionDefined = (SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT.equals(globalsDblClickOption));
+				if (isForm && (ctrlPressed || formDblClickOptionDefined))
 				{
-					if (ctrlPressed || SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM.equals(option))
+					if (ctrlPressed || SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(formDblClickOption))
 					{
 						EditorUtil.openFormDesignEditor((Form)doubleClickedItem.getRealObject());
 					}
@@ -2483,7 +2503,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						EditorUtil.openScriptEditor((Form)doubleClickedItem.getRealObject(), true);
 					}
 				}
-				else if (isGlobals && (ctrlPressed || SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_SCRIPT.equals(option)))
+				else if (isGlobals && (ctrlPressed || globalsDblClickOptionDefined))
 				{
 					EditorUtil.openScriptEditor((Solution)doubleClickedItem.getRealObject(), true);
 				}
@@ -2877,5 +2897,17 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		}
 
 		return null;
+	}
+
+	public void setIncludeModulesOption(boolean includeModulesOptionStatus)
+	{
+		((SolutionExplorerListContentProvider)list.getContentProvider()).setIncludeModules(includeModulesOptionStatus);
+		refreshList();
+		includeModulesToggleButton.setSelection(includeModulesOptionStatus);
+	}
+
+	public void setOpenAsDefaultOption(boolean openAsdefaultOptionStatus)
+	{
+		openModeToggleButton.setSelection(openAsdefaultOptionStatus);
 	}
 }
