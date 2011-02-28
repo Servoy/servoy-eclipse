@@ -58,6 +58,7 @@ import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
@@ -475,6 +476,10 @@ public class SolutionSerializer
 				}
 			}
 			return getCommentImpl(persist, repository, comment);
+		}
+		else if (persist instanceof ScriptCalculation)
+		{
+			return getCommentImpl(persist, repository, null);
 		}
 		throw new IllegalArgumentException("Persist must be an ScriptMethod or Variable " + persist); //$NON-NLS-1$
 	}

@@ -143,6 +143,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
@@ -1995,6 +1996,10 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 									else if (parent instanceof Solution)
 									{
 										persist = ((Solution)parent).getScriptMethod(name);
+									}
+									else if (parent instanceof TableNode)
+									{
+										persist = ((TableNode)parent).getScriptCalculation(name);
 									}
 								}
 								if (persist != null)
