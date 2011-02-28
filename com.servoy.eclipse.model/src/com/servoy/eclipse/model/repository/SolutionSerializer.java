@@ -58,8 +58,6 @@ import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.ScriptCalculation;
-import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -461,13 +459,13 @@ public class SolutionSerializer
 		{
 			return getCommentImpl(persist, repository, ((ScriptVariable)persist).getComment());
 		}
-		else if (persist instanceof ScriptMethod)
+		else if (persist instanceof AbstractScriptProvider)
 		{
-			String comment = ((ScriptMethod)persist).getRuntimeProperty(IScriptProvider.COMMENT);
+			String comment = ((AbstractScriptProvider)persist).getRuntimeProperty(IScriptProvider.COMMENT);
 			if ("".equals(comment)) comment = null; //$NON-NLS-1$
 			if (comment == null)
 			{
-				String declaration = ((ScriptMethod)persist).getDeclaration();
+				String declaration = ((AbstractScriptProvider)persist).getDeclaration();
 				int commentStart = declaration.indexOf(SV_COMMENT_START);
 				if (commentStart != -1)
 				{
@@ -477,11 +475,7 @@ public class SolutionSerializer
 			}
 			return getCommentImpl(persist, repository, comment);
 		}
-		else if (persist instanceof ScriptCalculation)
-		{
-			return getCommentImpl(persist, repository, null);
-		}
-		throw new IllegalArgumentException("Persist must be an ScriptMethod or Variable " + persist); //$NON-NLS-1$
+		throw new IllegalArgumentException("Persist must be an ScriptMethod/Calc or Variable " + persist); //$NON-NLS-1$
 	}
 
 	/**

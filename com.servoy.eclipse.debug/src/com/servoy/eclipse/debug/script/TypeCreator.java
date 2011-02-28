@@ -655,7 +655,7 @@ public abstract class TypeCreator
 			case IColumnTypes.TEXT :
 				type = context.getType("String");
 				break;
-			case IColumnTypes.MEDIA :
+			default :
 				type = context.getType("Object");
 				break;
 		}
