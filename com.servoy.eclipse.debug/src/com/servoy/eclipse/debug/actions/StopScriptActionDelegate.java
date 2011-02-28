@@ -75,7 +75,6 @@ public class StopScriptActionDelegate implements IViewActionDelegate, IDebugCont
 		if (stackFrame != null && stackFrame.isSuspended())
 		{
 			IScriptEvaluationResult syncEvaluate = stackFrame.getScriptThread().getEvaluationEngine().syncEvaluate("!stop_current_script!", stackFrame);
-			System.err.println(syncEvaluate);
 			if ("!stopped!".equals(syncEvaluate.getValue().getRawValue()))
 			{
 				try
