@@ -21,8 +21,6 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -41,9 +39,11 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenSqlEditorAction;
 public class SolutionExplorerPreferences extends PreferencePage implements IWorkbenchPreferencePage
 {
 	private Button chAutomaticPerspectiveSwitch;
-	private Button chOpenFormEditor;
-	private Button chOpenFormScriptEditor;
-	private Button chOpenGlobalScriptEditor;
+	private Button rdOpenFormEditor;
+	private Button rdOpenFormScriptEditor;
+	private Button rdExpandFormTree;
+	private Button rdOpenGlobalScriptEditor;
+	private Button rdExpandGlobalsTree;
 	private Button rdVerticalAlignement;
 	private Button rdHorizontalAlignement;
 	private Button rdAutomaticAlignement;
@@ -85,14 +85,28 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 		chAutomaticPerspectiveSwitch = new Button(cp, SWT.CHECK);
 		chAutomaticPerspectiveSwitch.setText("Activate SQL Explorer perspective on 'Open SQL Editor'");
 
-		chOpenFormEditor = new Button(cp, SWT.CHECK);
-		chOpenFormEditor.setText("Double click on form in Solution Explorer View opens Form Editor");
+		Group solexFormGroup = new Group(cp, SWT.NONE);
+		solexFormGroup.setText("Form double click operation");
+		solexFormGroup.setLayout(new GridLayout(1, true));
 
-		chOpenFormScriptEditor = new Button(cp, SWT.CHECK);
-		chOpenFormScriptEditor.setText("Double click on form in Solution Explorer View opens Script Editor");
+		rdOpenFormEditor = new Button(solexFormGroup, SWT.RADIO);
+		rdOpenFormEditor.setText("Double click on Form in Solution Explorer View opens Form Editor");
 
-		chOpenGlobalScriptEditor = new Button(cp, SWT.CHECK);
-		chOpenGlobalScriptEditor.setText("Double click on globals in Solution Explorer View opens Script Editor");
+		rdOpenFormScriptEditor = new Button(solexFormGroup, SWT.RADIO);
+		rdOpenFormScriptEditor.setText("Double click on Form in Solution Explorer View opens Script Editor");
+
+		rdExpandFormTree = new Button(solexFormGroup, SWT.RADIO);
+		rdExpandFormTree.setText("Double click on Form in Solution Explorer View expands tree");
+
+		Group solexGlobalsGroup = new Group(cp, SWT.NONE);
+		solexGlobalsGroup.setText("Globals double click operation");
+		solexGlobalsGroup.setLayout(new GridLayout(1, true));
+
+		rdOpenGlobalScriptEditor = new Button(solexGlobalsGroup, SWT.RADIO);
+		rdOpenGlobalScriptEditor.setText("Double click on Globals in Solution Explorer View opens Script Editor");
+
+		rdExpandGlobalsTree = new Button(solexGlobalsGroup, SWT.RADIO);
+		rdExpandGlobalsTree.setText("Double click on Globals in Solution Explorer View expands tree");
 
 		Preferences store = Activator.getDefault().getPluginPreferences();
 		String option = store.getString(OpenSqlEditorAction.AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY);
@@ -101,47 +115,51 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 		option = store.getString(FORM_DOUBLE_CLICK_ACTION);
 		if (DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(option))
 		{
-			chOpenFormEditor.setSelection(true);
+			rdOpenFormEditor.setSelection(true);
+		}
+		else if (DOUBLE_CLICK_OPEN_FORM_SCRIPT.equals(option))
+		{
+			rdOpenFormEditor.setSelection(false);
 		}
 		else
 		{
-			chOpenFormEditor.setSelection(false);
+			rdExpandFormTree.setSelection(true);
 		}
 
 		if (DOUBLE_CLICK_OPEN_FORM_SCRIPT.equals(option))
 		{
-			chOpenFormScriptEditor.setSelection(true);
+			rdOpenFormScriptEditor.setSelection(true);
 		}
 		else
 		{
-			chOpenFormScriptEditor.setSelection(false);
+			rdOpenFormScriptEditor.setSelection(false);
 		}
 
-		chOpenFormEditor.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				if (chOpenFormEditor.getSelection()) chOpenFormScriptEditor.setSelection(false);
-			}
-		});
-		chOpenFormScriptEditor.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				if (chOpenFormScriptEditor.getSelection()) chOpenFormEditor.setSelection(false);
-			}
-		});
+//		rdOpenFormEditor.addSelectionListener(new SelectionAdapter()
+//		{
+//			@Override
+//			public void widgetSelected(SelectionEvent e)
+//			{
+//				if (rdOpenFormEditor.getSelection()) rdOpenFormScriptEditor.setSelection(false);
+//			}
+//		});
+//		rdOpenFormScriptEditor.addSelectionListener(new SelectionAdapter()
+//		{
+//			@Override
+//			public void widgetSelected(SelectionEvent e)
+//			{
+//				if (rdOpenFormScriptEditor.getSelection()) rdOpenFormEditor.setSelection(false);
+//			}
+//		});
 
 		option = store.getString(GLOBALS_DOUBLE_CLICK_ACTION);
 		if (DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT.equals(option))
 		{
-			chOpenGlobalScriptEditor.setSelection(true);
+			rdOpenGlobalScriptEditor.setSelection(true);
 		}
 		else
 		{
-			chOpenGlobalScriptEditor.setSelection(false);
+			rdExpandGlobalsTree.setSelection(true);
 		}
 
 		Group solexAlignementGroup = new Group(cp, SWT.NONE);
@@ -187,7 +205,6 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 		chIncludeModules.setText("Include modules");
 		chIncludeModules.setSelection(listViewOption);
 
-
 		return cp;
 	}
 
@@ -209,11 +226,11 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 			store.setValue(OpenSqlEditorAction.AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY, MessageDialogWithToggle.NEVER);
 		}
 
-		if (chOpenFormEditor.getSelection())
+		if (rdOpenFormEditor.getSelection())
 		{
 			store.setValue(FORM_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_OPEN_FORM_EDITOR);
 		}
-		else if (chOpenFormScriptEditor.getSelection())
+		else if (rdOpenFormScriptEditor.getSelection())
 		{
 			store.setValue(FORM_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_OPEN_FORM_SCRIPT);
 		}
@@ -222,7 +239,7 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 			store.setValue(FORM_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_EXPAND_FORM_TREE);
 		}
 
-		if (chOpenGlobalScriptEditor.getSelection())
+		if (rdOpenGlobalScriptEditor.getSelection())
 		{
 			store.setValue(GLOBALS_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT);
 		}
@@ -300,9 +317,11 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 	{
 		super.performDefaults();
 		chAutomaticPerspectiveSwitch.setSelection(false);
-		chOpenFormEditor.setSelection(false);
-		chOpenFormScriptEditor.setSelection(false);
-		chOpenGlobalScriptEditor.setSelection(false);
+		rdOpenFormEditor.setSelection(false);
+		rdOpenFormScriptEditor.setSelection(false);
+		rdExpandFormTree.setSelection(true);
+		rdOpenGlobalScriptEditor.setSelection(false);
+		rdExpandGlobalsTree.setSelection(true);
 		rdAutomaticAlignement.setSelection(true);
 		rdVerticalAlignement.setSelection(false);
 		rdHorizontalAlignement.setSelection(false);
