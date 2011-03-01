@@ -86,27 +86,27 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 		chAutomaticPerspectiveSwitch.setText("Activate SQL Explorer perspective on 'Open SQL Editor'");
 
 		Group solexFormGroup = new Group(cp, SWT.NONE);
-		solexFormGroup.setText("Form double click operation");
+		solexFormGroup.setText("Form node double click operation");
 		solexFormGroup.setLayout(new GridLayout(1, true));
 
 		rdOpenFormEditor = new Button(solexFormGroup, SWT.RADIO);
-		rdOpenFormEditor.setText("Double click on Form in Solution Explorer View opens Form Editor");
+		rdOpenFormEditor.setText("Open Form Editor");
 
 		rdOpenFormScriptEditor = new Button(solexFormGroup, SWT.RADIO);
-		rdOpenFormScriptEditor.setText("Double click on Form in Solution Explorer View opens Script Editor");
+		rdOpenFormScriptEditor.setText("Open Script Editor");
 
 		rdExpandFormTree = new Button(solexFormGroup, SWT.RADIO);
-		rdExpandFormTree.setText("Double click on Form in Solution Explorer View expands tree");
+		rdExpandFormTree.setText("Expand tree");
 
 		Group solexGlobalsGroup = new Group(cp, SWT.NONE);
-		solexGlobalsGroup.setText("Globals double click operation");
+		solexGlobalsGroup.setText("Globals node double click operation");
 		solexGlobalsGroup.setLayout(new GridLayout(1, true));
 
 		rdOpenGlobalScriptEditor = new Button(solexGlobalsGroup, SWT.RADIO);
-		rdOpenGlobalScriptEditor.setText("Double click on Globals in Solution Explorer View opens Script Editor");
+		rdOpenGlobalScriptEditor.setText("Open Script Editor");
 
 		rdExpandGlobalsTree = new Button(solexGlobalsGroup, SWT.RADIO);
-		rdExpandGlobalsTree.setText("Double click on Globals in Solution Explorer View expands tree");
+		rdExpandGlobalsTree.setText("Expand tree");
 
 		Preferences store = Activator.getDefault().getPluginPreferences();
 		String option = store.getString(OpenSqlEditorAction.AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY);
@@ -134,23 +134,6 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 		{
 			rdOpenFormScriptEditor.setSelection(false);
 		}
-
-//		rdOpenFormEditor.addSelectionListener(new SelectionAdapter()
-//		{
-//			@Override
-//			public void widgetSelected(SelectionEvent e)
-//			{
-//				if (rdOpenFormEditor.getSelection()) rdOpenFormScriptEditor.setSelection(false);
-//			}
-//		});
-//		rdOpenFormScriptEditor.addSelectionListener(new SelectionAdapter()
-//		{
-//			@Override
-//			public void widgetSelected(SelectionEvent e)
-//			{
-//				if (rdOpenFormScriptEditor.getSelection()) rdOpenFormEditor.setSelection(false);
-//			}
-//		});
 
 		option = store.getString(GLOBALS_DOUBLE_CLICK_ACTION);
 		if (DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT.equals(option))
