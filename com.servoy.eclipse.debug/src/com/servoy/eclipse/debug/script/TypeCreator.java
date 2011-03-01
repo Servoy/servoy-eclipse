@@ -718,6 +718,10 @@ public abstract class TypeCreator
 					{
 						vararg = true;
 					}
+					else if (optional)
+					{
+						name = name.substring(1, name.length() - 1);
+					}
 					parameters[i] = new ScriptParameter(name, null, optional, vararg);
 				}
 			}

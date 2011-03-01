@@ -778,8 +778,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			type.setAttribute(IMAGE_DESCRIPTOR, PLUGINS);
 
 			EList<Member> members = type.getMembers();
-			members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "All form names as an array", SPECIAL_PROPERTY));
-			members.add(createProperty(context, "length", true, "Number", "Number of forms", PROPERTY));
+			members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "All plugin names as an array", SPECIAL_PROPERTY));
+			members.add(createProperty(context, "length", true, "Number", "Number of plugins", PROPERTY));
 
 
 			IPluginManager pluginManager = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getPluginManager();
