@@ -326,6 +326,7 @@ public class ElementResolver implements IElementResolver
 		boolean readOnly = true;
 		ImageDescriptor image = null;
 		Object resource = null;
+		boolean hideAllowed = false;
 		if (type == null && name.indexOf('.') == -1)
 		{
 			if (fs != null)
@@ -373,6 +374,7 @@ public class ElementResolver implements IElementResolver
 								else if (provider instanceof ScriptCalculation)
 								{
 									image = TypeCreator.COLUMN_CALC_IMAGE;
+									hideAllowed = true;
 								}
 							}
 						}
@@ -409,7 +411,9 @@ public class ElementResolver implements IElementResolver
 				typeRef.setStatic(true);
 				image = TypeCreator.CONSTANT;
 			}
-			return TypeCreator.createProperty(name, readOnly, typeRef, type.getDescription(), image, resource);
+			Property property = TypeCreator.createProperty(name, readOnly, typeRef, type.getDescription(), image, resource);
+			property.setHideAllowed(hideAllowed);
+			return property;
 		}
 		return null;
 	}
