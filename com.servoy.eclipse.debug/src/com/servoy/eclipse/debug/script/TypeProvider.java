@@ -208,8 +208,9 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 	private static JSType getJSType(Class< ? > type, ITypeInfoContext context)
 	{
-		if (type != null && type != Object.class && type != Void.class && type != void.class)
+		if (type != null && type != Void.class && type != void.class)
 		{
+			if (type == Object.class) return context.getTypeRef(ITypeNames.OBJECT);
 			if (type.isArray())
 			{
 				Class< ? > componentType = type.getComponentType();

@@ -1056,7 +1056,7 @@ public abstract class TypeCreator
 	 */
 	private static Class< ? > getReturnType(Class< ? > returnType)
 	{
-		if (returnType == null || returnType.isArray()) return returnType;
+		if (returnType == Object.class || returnType == null || returnType.isArray()) return returnType;
 		if (!returnType.isAssignableFrom(Void.class) && !returnType.isAssignableFrom(void.class))
 		{
 			if (returnType.isAssignableFrom(Record.class))
