@@ -37,6 +37,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -71,13 +72,9 @@ public class NewPostgresDbAction extends Action implements ISelectionChangedList
 		if (sel.size() == 1)
 		{
 			SimpleUserNode node = (SimpleUserNode)sel.getFirstElement();
-			if (node.getRealObject() instanceof IServerInternal)
+			if (node.getRealType() == UserNodeType.SERVERS)
 			{
-				IServerInternal s = (IServerInternal)node.getRealObject();
-				if (s.getConfig().isPostgresDriver())
-				{
-					state = true;
-				}
+				state = true;
 			}
 		}
 		setEnabled(state);
