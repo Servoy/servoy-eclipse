@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
 import org.eclipse.dltk.javascript.typeinference.IValueCollection;
 import org.eclipse.dltk.javascript.typeinference.ValueCollectionFactory;
 import org.eclipse.dltk.javascript.typeinfo.IMemberEvaluator;
@@ -63,7 +64,13 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				{
 					String scriptPath = SolutionSerializer.getScriptPath(superForm, false);
 					IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
-					superCollections.add(getValueCollection(file));
+					IValueCollection vc = getValueCollection(file);
+					Set<String> children = vc.getDirectChildren();
+					for (String child : children)
+					{
+						vc.getChild(child).setAttribute(IReferenceAttributes.HIDE_ALLOWED, Boolean.TRUE);
+					}
+					superCollections.add(vc);
 					superForm = fs.getForm(superForm.getExtendsFormID());
 				}
 				for (int i = superCollections.size(); --i >= 0;)
