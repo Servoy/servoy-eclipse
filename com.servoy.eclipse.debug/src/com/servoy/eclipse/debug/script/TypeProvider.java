@@ -126,16 +126,14 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addType(IExecutingEnviroment.TOPLEVEL_SERVOY_EXCEPTION, ServoyException.class);
 
 		addAnonymousClassType("Controller", JSForm.class);
-		addAnonymousClassType("currentcontroller", JSForm.class);
-		addAnonymousClassType("application", JSApplication.class);
-		addAnonymousClassType("i18n", JSI18N.class);
-		addAnonymousClassType("history", HistoryProvider.class);
-		addAnonymousClassType("utils", JSUtils.class);
-		addAnonymousClassType("jsunit", JSUnitAssertFunctions.class);
-		addAnonymousClassType("solutionModel", JSSolutionModel.class);
-		addAnonymousClassType("databaseManager", JSDatabaseManager.class);
-		addAnonymousClassType("servoyDeveloper", JSDeveloperSolutionModel.class);
-		addAnonymousClassType("security", JSSecurity.class);
+		addAnonymousClassType("JSApplication", JSApplication.class);
+		addAnonymousClassType("JSI18N", JSI18N.class);
+		addAnonymousClassType("HistoryProvider", HistoryProvider.class);
+		addAnonymousClassType("JSUtils", JSUtils.class);
+		addAnonymousClassType("JSUnit", JSUnitAssertFunctions.class);
+		addAnonymousClassType("JSSolutionModel", JSSolutionModel.class);
+		addAnonymousClassType("JSDatabaseManager", JSDatabaseManager.class);
+		addAnonymousClassType("JSDeveloperSolutionModel", JSDeveloperSolutionModel.class);
 		addAnonymousClassType("JSSecurity", JSSecurity.class);
 		ElementResolver.registerConstantType("JSSecurity", "JSSecurity");
 
@@ -203,6 +201,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			context.markInvariant(type);
 			return type;
 		}
+		System.err.println(typeName);
 		return super.getType(context, typeName);
 	}
 
@@ -699,22 +698,27 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 					dataproviderType = context.getType("InvisibleDataproviders<" + fs.getSolution().getName() + "/" + table.getServerName() + "/" +
 						table.getName() + ">");
 				}
-				Type compositeType = TypeInfoModelFactory.eINSTANCE.createCompositeType(members, relationsType, dataproviderType);
+				Type compositeType = TypeInfoModelFactory.eINSTANCE.createType();
 				compositeType.setName(fullTypeName);
 				compositeType.setKind(TypeKind.JAVA);
 				compositeType.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
 				compositeType.setSuperType(superType);
+
+				compositeType.getMembers().addAll(members);
+				EList<Type> traits = compositeType.getTraits();
+				traits.add(dataproviderType);
+				traits.add(relationsType);
 				return compositeType;
 			}
 			else
 			{
-				Type compositeType = TypeInfoModelFactory.eINSTANCE.createType();
-				compositeType.getMembers().addAll(members);
-				compositeType.setName(fullTypeName);
-				compositeType.setKind(TypeKind.JAVA);
-				compositeType.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
-				compositeType.setSuperType(superType);
-				return compositeType;
+				Type type = TypeInfoModelFactory.eINSTANCE.createType();
+				type.getMembers().addAll(members);
+				type.setName(fullTypeName);
+				type.setKind(TypeKind.JAVA);
+				type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
+				type.setSuperType(superType);
+				return type;
 
 			}
 		}
