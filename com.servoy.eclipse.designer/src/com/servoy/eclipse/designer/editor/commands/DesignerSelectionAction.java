@@ -111,11 +111,15 @@ public abstract class DesignerSelectionAction extends SelectionAction
 		Map<EditPart, Request> requests = null;
 		for (EditPart editPart : selected)
 		{
-			if (requests == null)
+			Request request = createRequest(editPart);
+			if (request != null)
 			{
-				requests = new HashMap<EditPart, Request>(selected.size());
+				if (requests == null)
+				{
+					requests = new HashMap<EditPart, Request>(selected.size());
+				}
+				requests.put(editPart, request);
 			}
-			requests.put(editPart, createRequest(editPart));
 		}
 		return requests;
 	}
