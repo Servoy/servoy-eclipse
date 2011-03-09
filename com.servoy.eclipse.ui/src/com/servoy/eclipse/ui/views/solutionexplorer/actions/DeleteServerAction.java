@@ -47,8 +47,8 @@ public class DeleteServerAction extends Action implements ISelectionChangedListe
 	public DeleteServerAction(SolutionExplorerView viewer)
 	{
 		this.viewer = viewer;
-		setText("Delete server");
-		setToolTipText("Delete server");
+		setText("Delete database");
+		setToolTipText("Delete database");
 	}
 
 	@Override

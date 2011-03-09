@@ -54,6 +54,8 @@ public class NewPostgresDbAction extends Action implements ISelectionChangedList
 {
 	private final SolutionExplorerView viewer;
 
+	private boolean displayAction;
+
 	/**
 	 * Creates a new action for the given solution view.
 	 * 
@@ -62,6 +64,7 @@ public class NewPostgresDbAction extends Action implements ISelectionChangedList
 	public NewPostgresDbAction(SolutionExplorerView sev)
 	{
 		viewer = sev;
+		displayAction = false;
 
 		setText("Create PostgreSQL Database");
 		setToolTipText(getText());
@@ -77,7 +80,20 @@ public class NewPostgresDbAction extends Action implements ISelectionChangedList
 			SimpleUserNode node = (SimpleUserNode)sel.getFirstElement();
 			if (node.getRealType() == UserNodeType.SERVERS)
 			{
-				state = true;
+				displayAction = true;
+				ServerConfig[] serverConfigs = ServoyModel.getServerManager().getServerConfigs();
+				for (ServerConfig sc : serverConfigs)
+				{
+					if (sc.getServerUrl().contains("postgresql"))
+					{
+						state = true;
+						break;
+					}
+				}
+			}
+			else
+			{
+				displayAction = false;
 			}
 		}
 		setEnabled(state);
@@ -91,9 +107,12 @@ public class NewPostgresDbAction extends Action implements ISelectionChangedList
 		for (ServerConfig sc : serverConfigs)
 		{
 			String serverURL = sc.getServerUrl();
-			serverURL = serverURL.replaceFirst(".*//", "");
-			serverURL = serverURL.replaceFirst("/.*", "");
-			serverMap.put(serverURL, sc);
+			if (serverURL.contains("postgresql"))
+			{
+				serverURL = serverURL.replaceFirst(".*//", "");
+				serverURL = serverURL.replaceFirst("/.*", "");
+				serverMap.put(serverURL, sc);
+			}
 		}
 
 		if (serverMap.isEmpty())
@@ -236,5 +255,10 @@ public class NewPostgresDbAction extends Action implements ISelectionChangedList
 				MessageDialog.openError(viewer.getSite().getShell(), "Error", message);
 			}
 		});
+	}
+
+	public boolean getDisplayAction()
+	{
+		return displayAction;
 	}
 }

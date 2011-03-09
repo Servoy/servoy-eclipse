@@ -43,7 +43,9 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -54,6 +56,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.ImmutableObjectObservable;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnTypes;
@@ -455,6 +458,15 @@ public class ServerEditor extends EditorPart
 
 			// manually trigger a build here as it doesn't modify files on disk
 			servoyModel.buildActiveProjectsInJob();
+
+			IViewReference solexRef = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findViewReference(SolutionExplorerView.PART_ID);
+			SolutionExplorerView solexView = null;
+			if (solexRef != null)
+			{
+				solexView = (SolutionExplorerView)solexRef.getView(false);
+				if (serverConfig.getServerUrl().contains("postgresql")) solexView.enablePostgresDBCreation();
+				else if (serverConfig.getServerUrl().contains("sybase")) solexView.enableSybaseDBCreation();
+			}
 		}
 		catch (Exception e)
 		{
