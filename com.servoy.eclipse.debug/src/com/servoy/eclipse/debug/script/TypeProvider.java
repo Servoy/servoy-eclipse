@@ -201,7 +201,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			context.markInvariant(type);
 			return type;
 		}
-		System.err.println(typeName);
 		return super.getType(context, typeName);
 	}
 
