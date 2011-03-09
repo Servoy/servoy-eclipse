@@ -33,6 +33,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
@@ -106,8 +107,10 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 				{
 					try
 					{
-						boolean isActive = ServoyModelManager.getServoyModelManager().getServoyModel().isModuleActive(servoyProject.getProject().getName());
+						String oldName = servoyProject.getProject().getName();
+						boolean isActive = ServoyModelManager.getServoyModelManager().getServoyModel().isModuleActive(oldName);
 						ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+						ServoyProject[] activeProjects = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 						if (isActive)
 						{
 							ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(null, false);
@@ -125,6 +128,28 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 						servoyProject.getSolution().getSolutionMetaData().setProtectionPassword(protectionPassword);
 						if (isActive)
 						{
+							for (ServoyProject module : activeProjects)
+							{
+								String[] modulesNames = ModelUtils.getTokenElements(module.getEditingSolution().getModulesNames(), ",", true);
+								if (modulesNames != null && modulesNames.length > 0)
+								{
+									boolean changed = false;
+									for (int i = 0; i < modulesNames.length; i++)
+									{
+										if (oldName.equals(modulesNames[i]))
+										{
+											changed = true;
+											modulesNames[i] = name;
+										}
+									}
+									if (changed)
+									{
+										String modulesTokenized = ModelUtils.getTokenValue(modulesNames, ",");
+										module.getEditingSolution().setModulesNames(modulesTokenized);
+										repository.updateNodesInWorkspace(new IPersist[] { module.getEditingSolution() }, false);
+									}
+								}
+							}
 							if (activeProject.getEditingSolution().getName().equals(name))
 							{
 								ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(
