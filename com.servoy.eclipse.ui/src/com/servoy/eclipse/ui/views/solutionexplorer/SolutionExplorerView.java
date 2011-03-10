@@ -2232,6 +2232,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction newTable = new NewTableAction(this);
 		newDatabase = new NewPostgresDbAction(this);
 		newSybaseDatabase = new NewSybaseDbAction(this);
+		ServoyModel.getServerManager().addServerConfigListener(new SoltuionExplorerServerConfigSync());
 		duplicateServer = new DuplicateServerAction(this);
 		enableServer = new EnableServerAction(getSite().getShell());
 		toggleFormCommandsActions = new ToggleFormCommandsAction(this);
