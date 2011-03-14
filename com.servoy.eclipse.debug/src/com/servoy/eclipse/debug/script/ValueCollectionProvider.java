@@ -170,7 +170,10 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				try
 				{
 					collection = ValueCollectionFactory.createValueCollection(file, false);
-					scriptCache.put(file, new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()), collection));
+					if (file.getName().equals("globals.js"))
+					{
+						scriptCache.put(file, new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()), collection));
+					}
 				}
 				finally
 				{
