@@ -47,15 +47,14 @@ import com.servoy.j2db.util.DataSourceUtils;
 
 public class DatasourceController extends PropertyController<String, TableWrapper>
 {
-	private final TableContentProvider.TableListOptions tableListOptions;
+	private final Object input;
 	private final String title;
 
-	public DatasourceController(String id, String displayName, String title, boolean readOnly, TableContentProvider.TableListOptions tableListOptions,
-		ILabelProvider labelProvider)
+	public DatasourceController(String id, String displayName, String title, boolean readOnly, Object input, ILabelProvider labelProvider)
 	{
 		super(id, displayName, null, labelProvider, null);
 		this.title = title;
-		this.tableListOptions = tableListOptions;
+		this.input = input;
 		setReadonly(readOnly);
 		setSupportsReadonly(true);
 	}
@@ -88,7 +87,7 @@ public class DatasourceController extends PropertyController<String, TableWrappe
 	{
 		final Shell shell = parent.getShell();
 		ListSelectCellEditor.ListSelectControlFactory i18nControlFactory = null;
-		if (tableListOptions.type == TableListOptions.TableListType.I18N)
+		if (input instanceof TableListOptions && ((TableListOptions)input).type == TableListOptions.TableListType.I18N)
 		{
 			i18nControlFactory = new ListSelectCellEditor.ListSelectControlFactory()
 			{
@@ -136,6 +135,6 @@ public class DatasourceController extends PropertyController<String, TableWrappe
 			};
 		}
 		return new ListSelectCellEditor(parent, title, new TableContentProvider(), DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY, TableValueEditor.INSTANCE,
-			isReadOnly(), tableListOptions, SWT.NONE, i18nControlFactory, "serverTableDialog");
+			isReadOnly(), input, SWT.NONE, i18nControlFactory, "serverTableDialog");
 	}
 }

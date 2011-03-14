@@ -64,6 +64,7 @@ import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
@@ -158,6 +159,7 @@ import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.query.ISQLJoin;
 import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.util.ComponentFactoryHelper;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.IDelegate;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.SafeArrayList;
@@ -461,8 +463,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				// Add a wrapper that checks readonly of the other pd in isCompatibleWith()
 				pd = new DelegatePropertyController(pd, pd.getId());
 			}
-			((IPropertyController)pd).setReadonly(readOnly ||
-				(persist instanceof Form && ((Form)persist).getExtendsFormID() > 0 && pd.getId().equals("dataSource")));
 
 			if (propertyDescriptor.valueObject == persist &&
 				RepositoryHelper.hideForProperties(propertyDescriptor.propertyDescriptor.getName(), persist.getClass(), persist))
@@ -1275,9 +1275,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		 */
 
 		String name = propertyDescriptor.propertyDescriptor.getName();
-
-
-		IPropertyDescriptor retval = getGeneralPropertyDescriptor(id, displayName, name, flattenedForm, flattenedEditingSolution);
+		IPropertyDescriptor retval = getGeneralPropertyDescriptor(id, displayName, name, flattenedEditingSolution);
 		if (retval != null)
 		{
 			return retval;
@@ -2179,15 +2177,41 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 	}
 
-	private IPropertyDescriptor getGeneralPropertyDescriptor(final String id, String displayName, String name, final Form form,
-		final FlattenedSolution flattenedEditingSolution)
+	private IPropertyDescriptor getGeneralPropertyDescriptor(final String id, String displayName, String name, FlattenedSolution flattenedEditingSolution)
 	{
 		// Some properties apply to both persists and beans
 
 		if (name.equals("dataSource"))
 		{
-			// cannot change table when we have a super-form
-			boolean propertyReadOnly = (persist instanceof Form && ((Form)persist).getExtendsFormID() > 0);
+			// cannot change table when we have a super-form that already has a data source
+			boolean propertyReadOnly = false;
+			if (!readOnly && persist instanceof Form && ((Form)persist).getExtendsFormID() > 0)
+			{
+				Form flattenedSuperForm = null;
+				try
+				{
+					flattenedSuperForm = flattenedEditingSolution.getFlattenedForm(flattenedEditingSolution.getForm(((Form)persist).getExtendsFormID()));
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+				propertyReadOnly = flattenedSuperForm == null /* superform not found? make readonly for safety */
+					|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
+
+				if (propertyReadOnly && flattenedSuperForm != null && ((Form)persist).getDataSource() != null &&
+					!((Form)persist).getDataSource().equals(flattenedSuperForm.getDataSource()))
+				{
+					// current form has invalid data source (overrides with different value), allow user to correct
+					String[] dbServernameTablename = DataSourceUtils.getDBServernameTablename(flattenedSuperForm.getDataSource());
+					if (dbServernameTablename != null)
+					{
+						return new DatasourceController(id, displayName, "Select table", false,
+							new Object[] { TableContentProvider.TABLE_NONE, new TableWrapper(dbServernameTablename[0], dbServernameTablename[1]) },
+							DatasourceLabelProvider.INSTANCE_NO_IMAGE_FULLY_QUALIFIED);
+					}
+				}
+			}
 			return new DatasourceController(id, displayName, "Select table", readOnly || propertyReadOnly, new TableContentProvider.TableListOptions(
 				TableListOptions.TableListType.ALL, true), DatasourceLabelProvider.INSTANCE_NO_IMAGE_FULLY_QUALIFIED);
 		}
@@ -3093,6 +3117,34 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		{
 			return new LoginSolutionPropertyController(id, displayName);
 		}
+
+		if ("location".equals(name))
+		{
+			return new PropertyController<java.awt.Point, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Point>()
+			{
+				@Override
+				public Object convertProperty(Object id, java.awt.Point value)
+				{
+					return new ComplexProperty<java.awt.Point>(value)
+					{
+						@Override
+						public IPropertySource getPropertySource()
+						{
+							PointPropertySource pointPropertySource = new PointPropertySource(this);
+							pointPropertySource.setReadonly(readOnly);
+							return pointPropertySource;
+						}
+					};
+				}
+			}, PointPropertySource.getLabelProvider(), new ICellEditorFactory()
+			{
+				public CellEditor createPropertyEditor(Composite parent)
+				{
+					return PointPropertySource.createPropertyEditor(parent);
+				}
+			});
+		}
+
 		return null;
 	}
 
