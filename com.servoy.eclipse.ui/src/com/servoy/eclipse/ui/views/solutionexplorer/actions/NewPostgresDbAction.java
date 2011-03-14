@@ -28,10 +28,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
@@ -39,8 +36,6 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.eclipse.ui.node.SimpleUserNode;
-import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -50,7 +45,7 @@ import com.servoy.j2db.util.ITransactionConnection;
 import com.servoy.j2db.util.IdentDocumentValidator;
 import com.servoy.j2db.util.Utils;
 
-public class NewPostgresDbAction extends Action implements ISelectionChangedListener
+public class NewPostgresDbAction extends Action //implements ISelectionChangedListener
 {
 	private final SolutionExplorerView viewer;
 
@@ -71,32 +66,20 @@ public class NewPostgresDbAction extends Action implements ISelectionChangedList
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("Server.gif"));
 	}
 
-	public void selectionChanged(SelectionChangedEvent event)
+	public boolean setEnabledStatus()
 	{
-		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
-		boolean state = false;
-		if (sel.size() == 1)
+		displayAction = false;
+		ServerConfig[] serverConfigs = ServoyModel.getServerManager().getServerConfigs();
+		for (ServerConfig sc : serverConfigs)
 		{
-			SimpleUserNode node = (SimpleUserNode)sel.getFirstElement();
-			if (node.getRealType() == UserNodeType.SERVERS)
+			if (sc.isEnabled() && sc.isPostgresDriver())
 			{
 				displayAction = true;
-				ServerConfig[] serverConfigs = ServoyModel.getServerManager().getServerConfigs();
-				for (ServerConfig sc : serverConfigs)
-				{
-					if (sc.getServerUrl().contains("postgresql"))
-					{
-						state = true;
-						break;
-					}
-				}
-			}
-			else
-			{
-				displayAction = false;
+				break;
 			}
 		}
-		setEnabled(state);
+
+		return displayAction;
 	}
 
 	@Override

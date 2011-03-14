@@ -373,7 +373,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private MovePersistAction moveFormAction;
 	private RenamePersistAction renameFormAction;
 
-	private NewPostgresDbAction newDatabase;
+	private NewPostgresDbAction newPostgresqlDatabase;
 	private NewSybaseDbAction newSybaseDatabase;
 
 	private DuplicateServerAction duplicateServer;
@@ -1954,12 +1954,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (removeSolutionProtectionAction.isEnabled()) manager.add(removeSolutionProtectionAction);
 		if (duplicateServer.isEnabled()) manager.add(duplicateServer);
 
-		if (newDatabase.getDisplayAction() || newSybaseDatabase.getDisplayAction())
+		if (selectedTreeNode.getRealType() == UserNodeType.SERVERS)
 		{
 			MenuManager createDBSubmenu = new MenuManager("Create new database", "newDatabase"); //$NON-NLS-1$ //$NON-NLS-2$
 
-			createDBSubmenu.add(newDatabase);
+			createDBSubmenu.add(newPostgresqlDatabase);
+			newPostgresqlDatabase.setEnabled(newPostgresqlDatabase.getDisplayAction());
 			createDBSubmenu.add(newSybaseDatabase);
+			newSybaseDatabase.setEnabled(newSybaseDatabase.getDisplayAction());
 			manager.add(createDBSubmenu);
 		}
 
@@ -2230,8 +2232,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction newVariable = new NewVariableAction(this);
 		IAction newValueList = new NewValueListAction(this);
 		IAction newTable = new NewTableAction(this);
-		newDatabase = new NewPostgresDbAction(this);
+		newPostgresqlDatabase = new NewPostgresDbAction(this);
+		newPostgresqlDatabase.setEnabledStatus();
 		newSybaseDatabase = new NewSybaseDbAction(this);
+		newSybaseDatabase.setEnabledStatus();
 		ServoyModel.getServerManager().addServerConfigListener(new SoltuionExplorerServerConfigSync());
 		duplicateServer = new DuplicateServerAction(this);
 		enableServer = new EnableServerAction(getSite().getShell());
@@ -2440,8 +2444,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		tree.addSelectionChangedListener(updateServoySequencesAction);
 		tree.addSelectionChangedListener(duplicateServer);
 		tree.addSelectionChangedListener(enableServer);
-		tree.addSelectionChangedListener(newDatabase);
-		tree.addSelectionChangedListener(newSybaseDatabase);
+//		tree.addSelectionChangedListener(newDatabase);
+//		tree.addSelectionChangedListener(newSybaseDatabase);
 		tree.addSelectionChangedListener(toggleFormCommandsActions);
 		tree.addSelectionChangedListener(expandNodeAction);
 
@@ -2922,11 +2926,11 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	public void enablePostgresDBCreation()
 	{
-		newDatabase.setEnabled(true);
+		newPostgresqlDatabase.setEnabledStatus();
 	}
 
 	public void enableSybaseDBCreation()
 	{
-		newSybaseDatabase.setEnabled(true);
+		newSybaseDatabase.setEnabledStatus();
 	}
 }

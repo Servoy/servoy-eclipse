@@ -40,8 +40,6 @@ public class SoltuionExplorerServerConfigSync implements IServerConfigListener
 	 */
 	public void serverConfigurationChanged(ServerConfig oldServerConfig, ServerConfig newServerConfig)
 	{
-		if (newServerConfig == null) return;
-
 		try
 		{
 			IViewReference solexRef = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findViewReference(SolutionExplorerView.PART_ID);
@@ -49,8 +47,8 @@ public class SoltuionExplorerServerConfigSync implements IServerConfigListener
 			if (solexRef != null)
 			{
 				solexView = (SolutionExplorerView)solexRef.getView(false);
-				if (newServerConfig.getServerUrl().contains("postgresql")) solexView.enablePostgresDBCreation();
-				else if (newServerConfig.getServerUrl().contains("sybase")) solexView.enableSybaseDBCreation();
+				solexView.enablePostgresDBCreation();
+				solexView.enableSybaseDBCreation();
 			}
 		}
 		catch (Exception e)
