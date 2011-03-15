@@ -675,7 +675,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 				setFormName(formName);
 				fillStyleCombo();
-				fillTemplateCombo();
+				fillTemplateCombo(settings.get("templatename"));
 				fillProjectCombo();
 
 				formNameField.setFocus();
@@ -686,7 +686,9 @@ public class NewFormWizard extends Wizard implements INewWizard
 				TableWrapper tw = getTableWrapper();
 				settings.put("servername", tw == null ? null : tw.getServerName()); //$NON-NLS-1$
 				settings.put("tablename", tw == null ? null : tw.getTableName()); //$NON-NLS-1$
-				settings.put("style", style != null ? style.getName() : null); //$NON-NLS-1$
+				settings.put("style", style == null ? null : style.getName()); //$NON-NLS-1$
+				Template template = getTemplate();
+				settings.put("templatename", template == null ? null : template.getName()); //$NON-NLS-1$
 			}
 		}
 
@@ -728,11 +730,12 @@ public class NewFormWizard extends Wizard implements INewWizard
 			}
 		}
 
-		public void fillTemplateCombo()
+		public void fillTemplateCombo(String templateName)
 		{
 			List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
 			List<Object> formTemplates = new ArrayList<Object>(templates.size() + 1);
 			formTemplates.add(SELECTION_NONE);
+			Object selected = SELECTION_NONE;
 			for (IRootObject template : templates)
 			{
 				try
@@ -741,6 +744,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 					if (template instanceof Template && new ServoyJSONObject(((Template)template).getContent(), false).has(Template.PROP_FORM))
 					{
 						formTemplates.add(template);
+						if (template.getName().equals(templateName))
+						{
+							selected = template;
+						}
 					}
 				}
 				catch (JSONException e)
@@ -749,7 +756,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 			}
 			templateNameCombo.setInput(formTemplates.toArray());
-			templateNameCombo.setSelection(new StructuredSelection(SELECTION_NONE));
+			templateNameCombo.setSelection(new StructuredSelection(selected));
 		}
 
 		/**
