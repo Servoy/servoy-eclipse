@@ -94,6 +94,7 @@ import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.Template;
@@ -825,9 +826,9 @@ public class NewFormWizard extends Wizard implements INewWizard
 					JSONObject formObject = json.getJSONObject(Template.PROP_FORM);
 
 					// dataSource
-					if (formObject.has("dataSource"))
+					if (formObject.has(StaticContentSpecLoader.PROPERTY_DATASOURCE.getPropertyName()))
 					{
-						String[] stn = DataSourceUtils.getDBServernameTablename(formObject.getString("dataSource"));
+						String[] stn = DataSourceUtils.getDBServernameTablename(formObject.getString(StaticContentSpecLoader.PROPERTY_DATASOURCE.getPropertyName()));
 						if (stn != null)
 						{
 							dataSourceViewer.setSelection(new StructuredSelection(new TableWrapper(stn[0], stn[1])));
@@ -841,23 +842,28 @@ public class NewFormWizard extends Wizard implements INewWizard
 					}
 
 					// extendsFormID
-					int extendsFormID;
-					if (formObject.has("extendsFormID"))
+					int extendsFormID = Form.NAVIGATOR_DEFAULT;
+					if (formObject.has(StaticContentSpecLoader.PROPERTY_EXTENDSFORMID.getPropertyName()) &&
+						!String.valueOf(Form.NAVIGATOR_DEFAULT).equals(formObject.getString(StaticContentSpecLoader.PROPERTY_EXTENDSFORMID.getPropertyName())))
 					{
-						UUID uuid = UUID.fromString(formObject.getString("extendsFormID"));
-						extendsFormID = repository.getElementIdForUUID(uuid);
-					}
-					else
-					{
-						extendsFormID = Form.NAVIGATOR_DEFAULT;
+						try
+						{
+							UUID uuid = UUID.fromString(formObject.getString(StaticContentSpecLoader.PROPERTY_EXTENDSFORMID.getPropertyName()));
+							extendsFormID = repository.getElementIdForUUID(uuid);
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logWarning("could not parse uuid", e);
+						}
 					}
 					extendsFormViewer.setSelection(new StructuredSelection(new Integer(extendsFormID)));
 
 					// styleName
 					Style templateStyle = null;
-					if (formObject.has("styleName"))
+					if (formObject.has(StaticContentSpecLoader.PROPERTY_STYLENAME.getPropertyName()))
 					{
-						templateStyle = (Style)repository.getActiveRootObject(formObject.getString("styleName"), IRepository.STYLES);
+						templateStyle = (Style)repository.getActiveRootObject(
+							formObject.getString(StaticContentSpecLoader.PROPERTY_STYLENAME.getPropertyName()), IRepository.STYLES);
 					}
 					styleNameCombo.setSelection(new StructuredSelection(templateStyle == null ? Messages.LabelDefault : templateStyle));
 				}
