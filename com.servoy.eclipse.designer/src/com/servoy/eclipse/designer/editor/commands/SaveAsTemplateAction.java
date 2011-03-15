@@ -155,11 +155,7 @@ public class SaveAsTemplateAction extends SelectionAction
 					Iterator<IFormElement> elements = ((FormElementGroup)model).getElements();
 					while (elements.hasNext())
 					{
-						IFormElement next = elements.next();
-						if (next instanceof IPersist)
-						{
-							persists.add((IPersist)next);
-						}
+						persists.add(elements.next());
 					}
 				}
 				else if (model instanceof IPersist)
@@ -168,12 +164,15 @@ public class SaveAsTemplateAction extends SelectionAction
 				}
 			}
 		}
+
+		int resourceType = StringResource.ELEMENTS_TEMPLATE;
 		if (form == null && persists.size() > 0)
 		{
 			form = (Form)persists.get(0).getAncestor(IRepository.FORMS);
 		}
 		else if (form != null && persists.size() == 0)
 		{
+			resourceType = StringResource.FORM_TEMPLATE;
 			// just the form, add all non-script children
 			Iterator<IPersist> allObjects = form.getAllObjects();
 			while (allObjects.hasNext())
@@ -210,8 +209,8 @@ public class SaveAsTemplateAction extends SelectionAction
 				// overwrite
 				template = existingTemplate;
 			}
-			template.setResourceType(StringResource.FORM_TEMPLATE);
-			template.setContent(ElementFactory.createTemplateContent(repository, form, persists));
+			template.setResourceType(resourceType);
+			template.setContent(ElementFactory.createTemplateContent(repository, form, persists, resourceType));
 			repository.updateRootObject(template);
 		}
 		catch (JSONException e)

@@ -89,6 +89,7 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
@@ -712,15 +713,19 @@ public class ElementFactory
 		return portal;
 	}
 
-	public static String createTemplateContent(EclipseRepository repository, Form form, List<IPersist> persists) throws JSONException, RepositoryException
+	public static String createTemplateContent(EclipseRepository repository, Form form, List<IPersist> persists, int templateType) throws JSONException,
+		RepositoryException
 	{
 		java.awt.Point location = Utils.getBounds(persists.iterator()).getLocation();
 
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
 
 		JSONObject json = new JSONObject();
-		json.put(Template.PROP_FORM,
-			cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, repository), null));
+		if (templateType == StringResource.FORM_TEMPLATE)
+		{
+			json.put(Template.PROP_FORM,
+				cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, repository), null));
+		}
 		json.put(Template.PROP_LOCATION, PersistHelper.createPointString(location));
 		JSONArray elements = new JSONArray();
 

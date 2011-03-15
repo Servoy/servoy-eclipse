@@ -50,6 +50,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -729,10 +730,26 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		public void fillTemplateCombo()
 		{
-			Object[] none = new Object[] { SELECTION_NONE };
 			List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
-			templateNameCombo.setInput(Utils.arrayJoin(none, templates.toArray()));
-			templateNameCombo.setSelection(new StructuredSelection(none));
+			List<Object> formTemplates = new ArrayList<Object>(templates.size() + 1);
+			formTemplates.add(SELECTION_NONE);
+			for (IRootObject template : templates)
+			{
+				try
+				{
+					// only select form templates
+					if (template instanceof Template && new ServoyJSONObject(((Template)template).getContent(), false).has(Template.PROP_FORM))
+					{
+						formTemplates.add(template);
+					}
+				}
+				catch (JSONException e)
+				{
+					ServoyLog.logError("Could not read template '" + template.getName() + "'", e);
+				}
+			}
+			templateNameCombo.setInput(formTemplates.toArray());
+			templateNameCombo.setSelection(new StructuredSelection(SELECTION_NONE));
 		}
 
 		/**
