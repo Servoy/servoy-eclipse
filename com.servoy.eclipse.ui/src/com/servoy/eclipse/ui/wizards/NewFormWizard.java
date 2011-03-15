@@ -92,7 +92,6 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
-import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
@@ -239,97 +238,98 @@ public class NewFormWizard extends Wizard implements INewWizard
 	public boolean performFinish()
 	{
 		IDialogSettings settings = getDialogSettings();
-		settings.put("placeHorizontal", dataProviderWizardPage.optionsGroup.isPlaceHorizontal());
-		settings.put("placeAsLabels", dataProviderWizardPage.optionsGroup.isPlaceAsLabels());
-		settings.put("placeLabels", dataProviderWizardPage.optionsGroup.isPlaceWithLabels());
-		settings.put("fillText", dataProviderWizardPage.optionsGroup.isFillText());
-		settings.put("fillName", dataProviderWizardPage.optionsGroup.isFillName());
+		settings.put("placeHorizontal", dataProviderWizardPage.optionsGroup.isPlaceHorizontal()); //$NON-NLS-1$
+		settings.put("placeAsLabels", dataProviderWizardPage.optionsGroup.isPlaceAsLabels()); //$NON-NLS-1$
+		settings.put("placeLabels", dataProviderWizardPage.optionsGroup.isPlaceWithLabels()); //$NON-NLS-1$
+		settings.put("fillText", dataProviderWizardPage.optionsGroup.isFillText()); //$NON-NLS-1$
+		settings.put("fillName", dataProviderWizardPage.optionsGroup.isFillName()); //$NON-NLS-1$
 
-		final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		final ServoyProject activeProject = servoyModel.getActiveProject();
-		if (activeProject != null)
+		TableWrapper tw = newFormWizardPage.getTableWrapper();
+		settings.put("servername", tw == null ? null : tw.getServerName()); //$NON-NLS-1$
+		settings.put("tablename", tw == null ? null : tw.getTableName()); //$NON-NLS-1$
+		Style style = newFormWizardPage.getStyle();
+		settings.put("style", style == null ? null : style.getName()); //$NON-NLS-1$
+		Template template = newFormWizardPage.getTemplate();
+		settings.put("templatename", template == null ? null : template.getName()); //$NON-NLS-1$
+
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		ServoyProject activeProject = servoyModel.getActiveProject();
+		if (activeProject == null)
 		{
-			// create the new form
-			Form form;
-			if (servoyProject.getEditingSolution() != null)
+			return false;
+		}
+
+		// create the new form
+		if (servoyProject.getEditingSolution() == null)
+		{
+			MessageDialog.openError(getShell(), "Cannot create form",
+				"Cannot get the Servoy Solution from the selected Servoy Project.\nThe form will not be created.");
+			return false;
+		}
+
+		try
+		{
+			// create empty form
+			String dataSource = DataSourceUtils.createDBTableDataSource(newFormWizardPage.getServerName(), newFormWizardPage.getTableName());
+			Form form = servoyProject.getEditingSolution().createNewForm(servoyModel.getNameValidator(), style, newFormWizardPage.getFormName(), dataSource,
+				true, new Dimension(640/* width */, 480/* height */));
+
+			if (template == null)
 			{
-				try
-				{
-					// create empty form
-					String dataSource = DataSourceUtils.createDBTableDataSource(newFormWizardPage.getServerName(), newFormWizardPage.getTableName());
-					IValidateName validator = servoyModel.getNameValidator();
-					form = servoyProject.getEditingSolution().createNewForm(validator, newFormWizardPage.getStyle(), newFormWizardPage.getFormName(),
-						dataSource, true, new Dimension(640/* width */, 480/* height */));
-
-					Template template = newFormWizardPage.getTemplate();
-					if (template == null)
-					{
-						// create default form, most is already set in createNewForm
-						form.createNewPart(Part.BODY, 480/* height */);
-					}
-					else
-					{
-						// create form from template
-						ElementFactory.applyTemplate(form, new TemplateElementHolder(template), null, true);
-
-						// set overriden values, selected by the user
-						form.setName(newFormWizardPage.getFormName());
-						form.setDataSource(dataSource);
-						form.setStyleName(newFormWizardPage.getStyle() == null ? null : newFormWizardPage.getStyle().getName());
-					}
-
-					// use superform selected by user
-					Form superForm = newFormWizardPage.getSuperForm();
-					if (superForm == null)
-					{
-						form.setExtendsFormID(0);
-					}
-					else
-					{
-						// just inherit everything
-						form.copyPropertiesMap(null, true);
-						form.setExtendsFormID(superForm.getID());
-						form.setName(newFormWizardPage.getFormName());
-					}
-
-					// add selected data providers
-					Object[] dataProviders = dataProviderWizardPage.getDataProviders();
-					if (dataProviders != null && dataProviders.length > 0)
-					{
-						DesignerPreferences designerPreferences = new DesignerPreferences();
-						ElementFactory.createFields(form, dataProviders, dataProviderWizardPage.optionsGroup.isPlaceAsLabels(),
-							dataProviderWizardPage.optionsGroup.isPlaceWithLabels(), dataProviderWizardPage.optionsGroup.isPlaceHorizontal(),
-							dataProviderWizardPage.optionsGroup.isFillText(), dataProviderWizardPage.optionsGroup.isFillName(),
-							designerPreferences.getGridSnapTo() ? new SnapToGridFieldPositioner(designerPreferences) : null,
-							dataProviderWizardPage.optionsGroup.isPlaceHorizontal() ? new Point(0, 0) : new Point(60, 70));
-
-						if (dataProviderWizardPage.optionsGroup.isPlaceHorizontal())
-						{
-							form.setView(FormController.LOCKED_TABLE_VIEW);
-						}
-					}
-
-					// save
-					servoyProject.saveEditingSolutionNodes(new IPersist[] { form }, true);
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-					return false;
-				}
+				// create default form, most is already set in createNewForm
+				form.createNewPart(Part.BODY, 480/* height */);
 			}
 			else
 			{
-				MessageDialog.openError(getShell(), "Cannot create form",
-					"Cannot get the Servoy Solution from the selected Servoy Project.\nThe form will not be created.");
-				return false;
+				// create form from template
+				ElementFactory.applyTemplate(form, new TemplateElementHolder(template), null, true);
+
+				// set overridden values, selected by the user
+				form.setName(newFormWizardPage.getFormName());
+				form.setDataSource(dataSource);
+				form.setStyleName(style == null ? null : style.getName());
 			}
+
+			// use superform selected by user
+			Form superForm = newFormWizardPage.getSuperForm();
+			if (superForm == null)
+			{
+				form.setExtendsFormID(0);
+			}
+			else
+			{
+				// just inherit everything
+				form.copyPropertiesMap(null, true);
+				form.setExtendsFormID(superForm.getID());
+				form.setName(newFormWizardPage.getFormName());
+			}
+
+			// add selected data providers
+			Object[] dataProviders = dataProviderWizardPage.getDataProviders();
+			if (dataProviders != null && dataProviders.length > 0)
+			{
+				DesignerPreferences designerPreferences = new DesignerPreferences();
+				ElementFactory.createFields(form, dataProviders, dataProviderWizardPage.optionsGroup.isPlaceAsLabels(),
+					dataProviderWizardPage.optionsGroup.isPlaceWithLabels(), dataProviderWizardPage.optionsGroup.isPlaceHorizontal(),
+					dataProviderWizardPage.optionsGroup.isFillText(), dataProviderWizardPage.optionsGroup.isFillName(), designerPreferences.getGridSnapTo()
+						? new SnapToGridFieldPositioner(designerPreferences) : null, dataProviderWizardPage.optionsGroup.isPlaceHorizontal() ? new Point(0, 0)
+						: new Point(60, 70));
+
+				if (dataProviderWizardPage.optionsGroup.isPlaceHorizontal())
+				{
+					form.setView(FormController.LOCKED_TABLE_VIEW);
+				}
+			}
+
+			// save
+			servoyProject.saveEditingSolutionNodes(new IPersist[] { form }, true);
 
 			// open newly created form in the editor (as new editor)
 			return EditorUtil.openFormDesignEditor(form, true) != null;
 		}
-		else
+		catch (RepositoryException e)
 		{
+			ServoyLog.logError(e);
 			return false;
 		}
 	}
@@ -644,9 +644,9 @@ public class NewFormWizard extends Wizard implements INewWizard
 		public void setVisible(boolean visible)
 		{
 			super.setVisible(visible);
-			IDialogSettings settings = getDialogSettings();
 			if (visible)
 			{
+				IDialogSettings settings = getDialogSettings();
 				String serverName = settings.get("servername");
 				String tableName = settings.get("tablename");
 				if (!Utils.stringIsEmpty(serverName) && !Utils.stringIsEmpty(tableName) && dataSourceViewer.getSelection().isEmpty())
@@ -680,15 +680,6 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 				formNameField.setFocus();
 				setPageComplete(validatePage());
-			}
-			else
-			{
-				TableWrapper tw = getTableWrapper();
-				settings.put("servername", tw == null ? null : tw.getServerName()); //$NON-NLS-1$
-				settings.put("tablename", tw == null ? null : tw.getTableName()); //$NON-NLS-1$
-				settings.put("style", style == null ? null : style.getName()); //$NON-NLS-1$
-				Template template = getTemplate();
-				settings.put("templatename", template == null ? null : template.getName()); //$NON-NLS-1$
 			}
 		}
 
