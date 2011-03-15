@@ -102,7 +102,6 @@ import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.IdentDocumentValidator;
 import com.servoy.j2db.util.ServoyJSONObject;
-import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -516,7 +515,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			extendsFormViewer = new TreeSelectViewer(topLevel, SWT.NONE);
 			extendsFormViewer.setTitleText("Select super form");
 
-			FlattenedSolution flattenedSolution = servoyProject.getEditingFlattenedSolution();
+			final FlattenedSolution flattenedSolution = servoyProject.getEditingFlattenedSolution();
 			extendsFormViewer.setContentProvider(new FormContentProvider(flattenedSolution, null));
 			extendsFormViewer.setInput(new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, false, true, false));
 			extendsFormViewer.setLabelProvider(new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedSolution, true),
@@ -573,7 +572,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				{
 					try
 					{
-						handleTemplateSelected();
+						handleTemplateSelected(flattenedSolution);
 					}
 					catch (Exception e)
 					{
@@ -827,7 +826,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			dataSourceViewer.setButtonText((superForm == null || superForm.getDataSource() == null) ? TreeSelectViewer.DEFAULT_BUTTON_TEXT : "");
 		}
 
-		private void handleTemplateSelected() throws Exception
+		private void handleTemplateSelected(FlattenedSolution flattenedSolution) throws Exception
 		{
 			// copy a few properties from the template to the page
 			Template template = getTemplate();
@@ -858,17 +857,12 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 					// extendsFormID
 					int extendsFormID = Form.NAVIGATOR_DEFAULT;
-					if (formObject.has(StaticContentSpecLoader.PROPERTY_EXTENDSFORMID.getPropertyName()) &&
-						!String.valueOf(Form.NAVIGATOR_DEFAULT).equals(formObject.getString(StaticContentSpecLoader.PROPERTY_EXTENDSFORMID.getPropertyName())))
+					if (formObject.has(StaticContentSpecLoader.PROPERTY_EXTENDSFORMID.getPropertyName()))
 					{
-						try
+						Form form = flattenedSolution.getForm(formObject.getString(StaticContentSpecLoader.PROPERTY_EXTENDSFORMID.getPropertyName()));
+						if (form != null)
 						{
-							UUID uuid = UUID.fromString(formObject.getString(StaticContentSpecLoader.PROPERTY_EXTENDSFORMID.getPropertyName()));
-							extendsFormID = repository.getElementIdForUUID(uuid);
-						}
-						catch (Exception e)
-						{
-							ServoyLog.logWarning("could not parse uuid", e);
+							extendsFormID = form.getID();
 						}
 					}
 					extendsFormViewer.setSelection(new StructuredSelection(new Integer(extendsFormID)));
