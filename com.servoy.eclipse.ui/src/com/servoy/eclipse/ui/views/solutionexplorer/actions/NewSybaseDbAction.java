@@ -52,11 +52,9 @@ import com.servoy.j2db.util.ITransactionConnection;
 import com.servoy.j2db.util.IdentDocumentValidator;
 import com.servoy.j2db.util.Utils;
 
-public class NewSybaseDbAction extends Action //implements ISelectionChangedListener
+public class NewSybaseDbAction extends Action
 {
 	private final SolutionExplorerView viewer;
-
-	private boolean displayAction;
 
 	/**
 	 * Creates a new action for the given solution view.
@@ -66,7 +64,6 @@ public class NewSybaseDbAction extends Action //implements ISelectionChangedList
 	public NewSybaseDbAction(SolutionExplorerView sev)
 	{
 		viewer = sev;
-		displayAction = false;
 
 		setText("Create Sybase Database");
 		setToolTipText(getText());
@@ -75,19 +72,20 @@ public class NewSybaseDbAction extends Action //implements ISelectionChangedList
 
 	public boolean setEnabledStatus()
 	{
-		displayAction = false;
+		boolean state = false;
 		ServerConfig[] serverConfigs = ServoyModel.getServerManager().getServerConfigs();
 		for (ServerConfig sc : serverConfigs)
 		{
 			if (sc.isEnabled() && sc.isSybaseDriver())
 			{
-				displayAction = true;
+				state = true;
 				break;
 			}
 		}
-		setEnabled(displayAction);
 
-		return displayAction;
+		setEnabled(state);
+
+		return state;
 	}
 
 	@Override
@@ -300,7 +298,7 @@ public class NewSybaseDbAction extends Action //implements ISelectionChangedList
 									serverUrl = "jdbc:sybase:Tds:localhost:2638?ServiceName=" + name + "&CHARSET=utf8"; //$NON-NLS-1$ //$NON-NLS-2$
 								}
 
-								IServerManagerInternal serverManager = ServoyModel.getServerManager();
+								final IServerManagerInternal serverManager = ServoyModel.getServerManager();
 								String configName = name;
 								for (int i = 1; serverManager.getServerConfig(configName) != null && i < 100; i++)
 								{
@@ -311,11 +309,19 @@ public class NewSybaseDbAction extends Action //implements ISelectionChangedList
 									origConfig.getDriver(), origConfig.getCatalog(), origConfig.getSchema(), origConfig.getMaxActive(),
 									origConfig.getMaxIdle(), origConfig.getMaxPreparedStatementsIdle(), origConfig.getConnectionValidationType(),
 									origConfig.getValidationQuery(), null, true, false);
-								serverManager.saveServerConfig(null, serverConfig);
+
 								Display.getDefault().asyncExec(new Runnable()
 								{
 									public void run()
 									{
+										try
+										{
+											serverManager.saveServerConfig(null, serverConfig);
+										}
+										catch (Exception e)
+										{
+											ServoyLog.logError(e);
+										}
 										EditorUtil.openServerEditor(serverConfig);
 									}
 								});
@@ -354,10 +360,5 @@ public class NewSybaseDbAction extends Action //implements ISelectionChangedList
 				MessageDialog.openError(viewer.getSite().getShell(), "Error", message);
 			}
 		});
-	}
-
-	public boolean getDisplayAction()
-	{
-		return displayAction;
 	}
 }

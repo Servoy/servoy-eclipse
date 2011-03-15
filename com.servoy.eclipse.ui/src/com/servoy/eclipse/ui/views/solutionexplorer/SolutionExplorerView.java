@@ -1959,9 +1959,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			MenuManager createDBSubmenu = new MenuManager("Create new database", "newDatabase"); //$NON-NLS-1$ //$NON-NLS-2$
 
 			createDBSubmenu.add(newPostgresqlDatabase);
-			newPostgresqlDatabase.setEnabled(newPostgresqlDatabase.getDisplayAction());
 			createDBSubmenu.add(newSybaseDatabase);
-			newSybaseDatabase.setEnabled(newSybaseDatabase.getDisplayAction());
 			manager.add(createDBSubmenu);
 		}
 

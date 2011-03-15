@@ -45,11 +45,9 @@ import com.servoy.j2db.util.ITransactionConnection;
 import com.servoy.j2db.util.IdentDocumentValidator;
 import com.servoy.j2db.util.Utils;
 
-public class NewPostgresDbAction extends Action //implements ISelectionChangedListener
+public class NewPostgresDbAction extends Action
 {
 	private final SolutionExplorerView viewer;
-
-	private boolean displayAction;
 
 	/**
 	 * Creates a new action for the given solution view.
@@ -59,7 +57,6 @@ public class NewPostgresDbAction extends Action //implements ISelectionChangedLi
 	public NewPostgresDbAction(SolutionExplorerView sev)
 	{
 		viewer = sev;
-		displayAction = false;
 
 		setText("Create PostgreSQL Database");
 		setToolTipText(getText());
@@ -68,18 +65,18 @@ public class NewPostgresDbAction extends Action //implements ISelectionChangedLi
 
 	public boolean setEnabledStatus()
 	{
-		displayAction = false;
+		boolean state = false;
 		ServerConfig[] serverConfigs = ServoyModel.getServerManager().getServerConfigs();
 		for (ServerConfig sc : serverConfigs)
 		{
 			if (sc.isEnabled() && sc.isPostgresDriver())
 			{
-				displayAction = true;
+				state = true;
 				break;
 			}
 		}
-
-		return displayAction;
+		setEnabled(state);
+		return state;
 	}
 
 	@Override
@@ -190,7 +187,7 @@ public class NewPostgresDbAction extends Action //implements ISelectionChangedLi
 								serverUrl = "jdbc:postgresql://localhost/" + name;
 							}
 
-							IServerManagerInternal serverManager = ServoyModel.getServerManager();
+							final IServerManagerInternal serverManager = ServoyModel.getServerManager();
 							String configName = name;
 							for (int i = 1; serverManager.getServerConfig(configName) != null && i < 100; i++)
 							{
@@ -201,11 +198,18 @@ public class NewPostgresDbAction extends Action //implements ISelectionChangedLi
 								origConfig.getDriver(), origConfig.getCatalog(), origConfig.getSchema(), origConfig.getMaxActive(), origConfig.getMaxIdle(),
 								origConfig.getMaxPreparedStatementsIdle(), origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null,
 								true, false);
-							serverManager.saveServerConfig(null, serverConfig);
 							Display.getDefault().asyncExec(new Runnable()
 							{
 								public void run()
 								{
+									try
+									{
+										serverManager.saveServerConfig(null, serverConfig);
+									}
+									catch (Exception e)
+									{
+										ServoyLog.logError(e);
+									}
 									EditorUtil.openServerEditor(serverConfig);
 								}
 							});
@@ -238,10 +242,5 @@ public class NewPostgresDbAction extends Action //implements ISelectionChangedLi
 				MessageDialog.openError(viewer.getSite().getShell(), "Error", message);
 			}
 		});
-	}
-
-	public boolean getDisplayAction()
-	{
-		return displayAction;
 	}
 }
