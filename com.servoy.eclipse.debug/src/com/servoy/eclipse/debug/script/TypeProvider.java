@@ -1269,13 +1269,9 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 									if (!Utils.stringIsEmpty(formElement.getName()))
 									{
 										Class< ? > persistClass = ElementUtil.getPersistScriptClass(application, persist);
-										if (persistClass != null && formElement instanceof Bean && ((Bean)formElement).getBeanClassName() != null)
+										if (persistClass != null && formElement instanceof Bean)
 										{
-											int index = ((Bean)formElement).getBeanClassName().lastIndexOf('.');
-											if (index != -1)
-											{
-												typeNames.put(persistClass.getSimpleName(), ((Bean)formElement).getBeanClassName().substring(index + 1));
-											}
+											typeNames.put(persistClass.getSimpleName(), persistClass.getSimpleName());
 										}
 										members.add(createProperty(formElement.getName(), true, getElementType(context, persistClass), null, PROPERTY));
 									}
