@@ -354,7 +354,7 @@ public class I18nComposite extends Composite
 
 
 		String filterColumn = null;
-		String filterValue = null;
+		Object filterValue = null;
 		if (application instanceof IMessagesCallback)
 		{
 			filterColumn = ((IMessagesCallback)application).getI18NColumnNameFilter();
@@ -443,7 +443,7 @@ public class I18nComposite extends Composite
 	public void refresh()
 	{
 		String filterColumn = null;
-		String filterValue = null;
+		Object filterValue = null;
 		if (application instanceof IMessagesCallback)
 		{
 			filterColumn = ((IMessagesCallback)application).getI18NColumnNameFilter();

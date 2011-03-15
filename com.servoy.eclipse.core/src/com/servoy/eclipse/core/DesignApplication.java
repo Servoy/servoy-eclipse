@@ -761,7 +761,7 @@ public class DesignApplication implements IApplication, IMessagesCallback
 		getClient().reportWarningInStatus(s);
 	}
 
-	public void setI18NMessagesFilter(String columnname, String value)
+	public void setI18NMessagesFilter(String columnname, Object value)
 	{
 		getClient().setI18NMessagesFilter(columnname, value);
 	}
@@ -857,7 +857,7 @@ public class DesignApplication implements IApplication, IMessagesCallback
 	/**
 	 * @see com.servoy.j2db.IMessagesCallback#getI18NColumnValueFilter()
 	 */
-	public String getI18NColumnValueFilter()
+	public Object getI18NColumnValueFilter()
 	{
 		if (getClient() instanceof IMessagesCallback)
 		{
