@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -62,8 +61,10 @@ import org.eclipse.gef.ui.parts.ScrollingGraphicalViewer;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.CoolBarManager;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.ToolBarContributionItem;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -75,18 +76,15 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.CoolBar;
-import org.eclipse.swt.widgets.CoolItem;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -138,7 +136,6 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.CoolbarLayout;
-import com.servoy.eclipse.ui.util.ActionToolItem;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -170,11 +167,11 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	private final VisualFormEditor editorPart;
 	private PaletteRoot paletteModel;
 	private FormRulerComposite rulerComposite;
-	private CoolBar coolBar;
+	private CoolBarManager coolBarManager;
 	private List<String> hiddenBars;
 	private MenuManager toolbarMenuManager;
 	private final Map<String, List<IAction>> toolBarActions = new LinkedHashMap<String, List<IAction>>();
-	private final Map<String, CoolItem> toolbarCoolItems = new HashMap<String, CoolItem>();
+	private final Map<String, ToolBarContributionItem> toolbarContributionItems = new HashMap<String, ToolBarContributionItem>();
 	private final Map<String, IAction> toolMenuBarActions = new HashMap<String, IAction>();
 
 	private Runnable selectionChangedHandler;
@@ -615,8 +612,16 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 	protected void saveCoolbarLayout()
 	{
+		coolBarManager.update(false);
+		CoolBar coolBar = coolBarManager.getControl();
+		IContributionItem[] items = coolBarManager.getItems();
+		String[] ids = new String[items.length];
+		for (int i = 0; i < items.length; i++)
+		{
+			ids[i] = items[i].getId();
+		}
 		new DesignerPreferences().saveCoolbarLayout(new CoolbarLayout(coolBar.getItemOrder(), coolBar.getWrapIndices(), coolBar.getItemSizes(),
-			hiddenBars.toArray(new String[hiddenBars.size()])));
+			hiddenBars.toArray(new String[hiddenBars.size()]), ids));
 	}
 
 
@@ -730,14 +735,14 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 			@Override
 			public void run()
 			{
-				if (!hiddenBars.remove(bar))
+				if (hiddenBars.remove(bar))
 				{
-					hiddenBars.add(bar);
-					createCoolItem(bar);
+					createContributionItem(bar);
 				}
 				else
 				{
-					disposeCoolItem(bar);
+					hiddenBars.add(bar);
+					disposeContributionItem(bar);
 				}
 				saveCoolbarLayout();
 			}
@@ -746,96 +751,94 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		return action;
 	}
 
-	private void createCoolItem(String bar)
+	private void createContributionItem(final String bar)
 	{
-		if (!toolbarCoolItems.containsKey(bar))
+		if (!toolbarContributionItems.containsKey(bar))
 		{
 			ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
-			CoolItem item = new CoolItem(coolBar, SWT.NONE);
-			ToolBar toolBar = toolBarManager.createControl(coolBar);
-			item.setControl(toolBar);
+			ToolBarContributionItem item = new ToolBarContributionItem(toolBarManager, bar);
+			coolBarManager.add(item);
 
-			toolBarManager.setContextMenuManager(getToolbarMenuManager());
 			for (IAction action : toolBarActions.get(bar))
 			{
-				new ActionToolItem(toolBar, action);
+				toolBarManager.add(action);
 			}
 
-			toolBar.pack();
-			Point size = toolBar.getSize();
-
-			Point preferred = item.computeSize(size.x, size.y);
-			item.setPreferredSize(preferred);
-			item.setMinimumSize(preferred);
-
-			toolbarCoolItems.put(bar, item);
+			toolbarContributionItems.put(bar, item);
 		}
 	}
 
-	private void disposeCoolItem(String bar)
+	private void disposeContributionItem(String bar)
 	{
-		CoolItem item = toolbarCoolItems.remove(bar);
+		ToolBarContributionItem item = toolbarContributionItems.remove(bar);
 		if (item != null)
 		{
-			item.dispose();
+			coolBarManager.remove(item);
 		}
 	}
 
 	protected void refreshToolBars()
 	{
-		if (coolBar == null)
-		{
-			return;
-		}
-
 		CoolbarLayout coolbarLayout = new DesignerPreferences().getCoolbarLayout();
 
-		hiddenBars = coolbarLayout == null ? new ArrayList<String>() : new ArrayList<String>(Arrays.asList(coolbarLayout.hiddenBars));
-
-		for (Entry<String, List<IAction>> entry : toolBarActions.entrySet())
+		if (coolbarLayout == null)
 		{
-			String bar = entry.getKey();
+			// reset
+			coolBarManager.removeAll();
+			toolbarContributionItems.clear();
+			hiddenBars = new ArrayList<String>();
+			coolBarManager.update(false);
+		}
+		else
+		{
+			hiddenBars = new ArrayList<String>(Arrays.asList(coolbarLayout.hiddenBars));
+		}
 
+		// determine the order to create the items
+		List<String> bars = new ArrayList<String>();
+		if (coolbarLayout != null && coolBarManager.isEmpty())
+		{
+			// use order from coolbarLayout
+			for (String id : coolbarLayout.ids)
+			{
+				bars.add(id);
+			}
+		}
+		// add default order (duplicates will be ignored later)
+		bars.addAll(toolBarActions.keySet());
+
+		// create or dispose items
+		for (String bar : bars)
+		{
 			boolean visible = !hiddenBars.contains(bar);
-			toolMenuBarActions.get(bar).setChecked(visible);
+			if (toolMenuBarActions.containsKey(bar))
+			{
+				toolMenuBarActions.get(bar).setChecked(visible);
+			}
 
 			if (visible)
 			{
-				createCoolItem(bar);
+				createContributionItem(bar);
 			}
 			else
 			{
-				disposeCoolItem(bar);
+				disposeContributionItem(bar);
 			}
 		}
 
-		try
+		coolBarManager.update(false);
+
+		if (coolbarLayout != null)
 		{
-			if (coolbarLayout == null)
+			try
 			{
-				// generate default layout:
-				int[] itemOrder = new int[toolBarActions.size()];
-				Point[] sizes = new Point[toolBarActions.size()];
-				int i = 0;
-				for (String bar : toolBarActions.keySet())
-				{
-					itemOrder[i] = i;
-					CoolItem item = toolbarCoolItems.get(bar);
-					sizes[i] = item == null ? new Point(0, 0) : item.getControl().getSize();
-					i++;
-				}
-				coolBar.setItemLayout(itemOrder, new int[0], sizes);
+				coolBarManager.getControl().setItemLayout(coolbarLayout.itemOrder, coolbarLayout.wrapIndices, coolbarLayout.sizes);
 			}
-			else
+			catch (IllegalArgumentException e)
 			{
-				coolBar.setItemLayout(coolbarLayout.itemOrder, coolbarLayout.wrapIndices, coolbarLayout.sizes);
+				// ignore, layout not applicable to current coolbar
 			}
 		}
-		catch (IllegalArgumentException e)
-		{
-			// ignore, layout not applicable to current coolbar
-		}
-		coolBar.layout();
 	}
 
 	@Override
@@ -850,9 +853,9 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		Composite c = new Composite(parent, SWT.NONE);
 		c.setLayout(new org.eclipse.swt.layout.FormLayout());
 
-		CoolBarManager coolBarManager = new CoolBarManager(SWT.WRAP | SWT.FLAT);
+		coolBarManager = new CoolBarManager(SWT.WRAP | SWT.FLAT);
 		coolBarManager.setContextMenuManager(getToolbarMenuManager());
-		coolBar = coolBarManager.createControl(c);
+		CoolBar coolBar = coolBarManager.createControl(c);
 
 		FormData formData = new FormData();
 		formData.left = new FormAttachment(0);
@@ -863,7 +866,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		{
 			public void handleEvent(Event event)
 			{
-				coolBar.getParent().layout();
+				coolBarManager.getControl().getParent().layout();
 			}
 		});
 		coolBar.addListener(SWT.MouseUp, new Listener()
@@ -885,8 +888,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		composite.setLayout(new FillLayout());
 
 		fillToolbar();
-
-		refreshToolBars();
 
 		super.createPartControl(composite);
 	}

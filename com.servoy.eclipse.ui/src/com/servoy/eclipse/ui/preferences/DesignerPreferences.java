@@ -462,36 +462,37 @@ public class DesignerPreferences
 		if (coolbarLayout == null)
 		{
 			removeProperty(FORM_COOLBAR_LAYOUT_SETTING);
-			save();
-			return;
 		}
-
-		Map<String, Object> map = new HashMap<String, Object>();
-		if (coolbarLayout.itemOrder.length > 0) map.put("itemOrder", coolbarLayout.itemOrder);
-		if (coolbarLayout.wrapIndices.length > 0) map.put("wrapIndices", coolbarLayout.wrapIndices);
-		if (coolbarLayout.hiddenBars.length > 0) map.put("hiddenBars", coolbarLayout.hiddenBars);
-		if (coolbarLayout.sizes.length > 0)
+		else
 		{
-			int[] sizesX = new int[coolbarLayout.sizes.length];
-			int[] sizesY = new int[coolbarLayout.sizes.length];
-			for (int i = 0; i < coolbarLayout.sizes.length; i++)
+			Map<String, Object> map = new HashMap<String, Object>();
+			if (coolbarLayout.itemOrder.length > 0) map.put("itemOrder", coolbarLayout.itemOrder);
+			if (coolbarLayout.wrapIndices.length > 0) map.put("wrapIndices", coolbarLayout.wrapIndices);
+			if (coolbarLayout.hiddenBars.length > 0) map.put("hiddenBars", coolbarLayout.hiddenBars);
+			if (coolbarLayout.ids.length > 0) map.put("ids", coolbarLayout.ids);
+			if (coolbarLayout.sizes.length > 0)
 			{
-				sizesX[i] = coolbarLayout.sizes[i].x;
-				sizesY[i] = coolbarLayout.sizes[i].y;
+				int[] sizesX = new int[coolbarLayout.sizes.length];
+				int[] sizesY = new int[coolbarLayout.sizes.length];
+				for (int i = 0; i < coolbarLayout.sizes.length; i++)
+				{
+					sizesX[i] = coolbarLayout.sizes[i].x;
+					sizesY[i] = coolbarLayout.sizes[i].y;
+				}
+				map.put("sizesX", sizesX);
+				map.put("sizesY", sizesY);
 			}
-			map.put("sizesX", sizesX);
-			map.put("sizesY", sizesY);
-		}
 
-		JSONSerializer serializer = new JSONSerializer();
-		try
-		{
-			serializer.registerDefaultSerializers();
-			setProperty(FORM_COOLBAR_LAYOUT_SETTING, serializer.toJSON(map));
-		}
-		catch (Exception e)
-		{
-			ServoyLog.logError(e);
+			JSONSerializer serializer = new JSONSerializer();
+			try
+			{
+				serializer.registerDefaultSerializers();
+				setProperty(FORM_COOLBAR_LAYOUT_SETTING, serializer.toJSON(map));
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
 		}
 		save();
 	}
@@ -529,7 +530,8 @@ public class DesignerPreferences
 					sizes[i] = new Point(sizesX[i].intValue(), sizesY[i].intValue());
 				}
 				String[] hiddenBars = (String[])map.get("hiddenBars");
-				return new CoolbarLayout(itemOrder, wrapIndices, sizes, hiddenBars == null ? new String[0] : hiddenBars);
+				String[] ids = (String[])map.get("ids");
+				return new CoolbarLayout(itemOrder, wrapIndices, sizes, hiddenBars == null ? new String[0] : hiddenBars, ids == null ? new String[0] : ids);
 			}
 			catch (Exception e)
 			{
@@ -545,13 +547,15 @@ public class DesignerPreferences
 		public final int[] wrapIndices;
 		public final Point[] sizes;
 		public final String[] hiddenBars;
+		public final String[] ids;
 
-		public CoolbarLayout(int[] itemOrder, int[] wrapIndices, Point[] sizes, String[] hiddenBars)
+		public CoolbarLayout(int[] itemOrder, int[] wrapIndices, Point[] sizes, String[] hiddenBars, String[] ids)
 		{
 			this.itemOrder = itemOrder;
 			this.wrapIndices = wrapIndices;
 			this.sizes = sizes;
 			this.hiddenBars = hiddenBars;
+			this.ids = ids;
 		}
 	}
 
