@@ -12,6 +12,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ScriptVariable;
 
 /**
  * Implementation for a com.servoy.eclipse.model extension point.
@@ -23,7 +24,7 @@ public class OpenWithEditor implements IMarkerAttributeContributor
 	public void contributeToMarker(IMarker marker, IPersist persist)
 	{
 		String contentTypeIdentifier = null;
-		if (persist.getAncestor(IRepository.FORMS) != null)
+		if (persist.getAncestor(IRepository.FORMS) != null && !(persist instanceof ScriptVariable))
 		{
 			contentTypeIdentifier = PersistEditorInput.FORM_RESOURCE_ID;
 		}
@@ -41,8 +42,10 @@ public class OpenWithEditor implements IMarkerAttributeContributor
 			{
 				if (ModelUtils.isUIRunning())
 				{
-					marker.setAttribute(IDE.EDITOR_ID_ATTR, PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-						Platform.getContentTypeManager().getContentType(contentTypeIdentifier)).getId());
+					marker.setAttribute(
+						IDE.EDITOR_ID_ATTR,
+						PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+							Platform.getContentTypeManager().getContentType(contentTypeIdentifier)).getId());
 				}
 				marker.setAttribute("elementUuid", persist.getUUID().toString()); //$NON-NLS-1$
 			}
