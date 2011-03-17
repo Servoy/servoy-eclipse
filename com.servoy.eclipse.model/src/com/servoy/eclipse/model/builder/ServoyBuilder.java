@@ -76,10 +76,10 @@ import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
-import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
@@ -1096,13 +1096,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																		// for now only add it on both if there is 1, just skip the rest.
 																		if (lst.size() == 1)
 																		{
-																			ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(other.getUUID(),
+																			ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(
+																				other.getUUID(),
 																				SolutionSerializer.getRelativePath(p, false) +
 																					SolutionSerializer.getFileName(p, false));
 																			addMarker(moduleProject, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR,
 																				IMarker.PRIORITY_HIGH, null, other);
 																		}
-																		ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(p.getUUID(),
+																		ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(
+																			p.getUUID(),
 																			SolutionSerializer.getRelativePath(other, false) +
 																				SolutionSerializer.getFileName(other, false));
 																		addMarker(moduleProject, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR,
@@ -1651,50 +1653,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									{
 										ServoyMarker mk = MarkerMessages.FormDerivedFormDifferentTable.fill(form.getName(), superForm.getName());
 										addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, form);
-									}
-									Iterator<ScriptVariable> iterator = form.getScriptVariables(false);
-									ScriptVariable childVariable = null;
-									ScriptVariable parentVariable = null;
-									while (iterator.hasNext())
-									{
-										childVariable = iterator.next();
-										boolean redefined = false;
-
-										List<Integer> forms = new ArrayList<Integer>();
-										forms.add(Integer.valueOf(form.getID()));
-										Form superFormVisitor = superForm;
-										while (!redefined && superFormVisitor != null)
-										{
-											if (forms.contains(Integer.valueOf(superFormVisitor.getID()))) break;
-											forms.add(Integer.valueOf(superFormVisitor.getID()));
-
-											Iterator<ScriptVariable> superIterator = superFormVisitor.getScriptVariables(false);
-											while (superIterator.hasNext())
-											{
-												parentVariable = superIterator.next();
-												if (childVariable.getName().equals(parentVariable.getName()))
-												{
-													redefined = true;
-													break;
-												}
-											}
-
-											if (superFormVisitor.getExtendsFormID() > 0)
-											{
-												superFormVisitor = flattenedSolution.getForm(superFormVisitor.getExtendsFormID());
-											}
-											else
-											{
-												superFormVisitor = null;
-											}
-										}
-
-										if (redefined)
-										{
-											ServoyMarker mk = MarkerMessages.FormDerivedFormRedefinedVariable.fill(form.getName(), childVariable.getName());
-											addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null,
-												childVariable);
-										}
 									}
 
 									List<Integer> forms = new ArrayList<Integer>();
