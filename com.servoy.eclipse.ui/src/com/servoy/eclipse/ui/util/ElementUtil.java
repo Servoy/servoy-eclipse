@@ -60,6 +60,7 @@ import com.servoy.j2db.ui.IScriptDataPasswordMethods;
 import com.servoy.j2db.ui.IScriptFieldMethods;
 import com.servoy.j2db.ui.IScriptMediaInputFieldMethods;
 import com.servoy.j2db.ui.IScriptPortalComponentMethods;
+import com.servoy.j2db.ui.IScriptRectMethods;
 import com.servoy.j2db.ui.IScriptScriptButtonMethods;
 import com.servoy.j2db.ui.IScriptScriptLabelMethods;
 import com.servoy.j2db.ui.IScriptSplitPaneMethods;
@@ -357,6 +358,10 @@ public class ElementUtil
 		else if (persist instanceof Portal)
 		{
 			return IScriptPortalComponentMethods.class;
+		}
+		else if (persist instanceof RectShape)
+		{
+			return IScriptRectMethods.class;
 		}
 		return null;
 
