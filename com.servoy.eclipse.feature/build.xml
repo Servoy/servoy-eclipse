@@ -144,7 +144,7 @@
 		<property name="feature.base" value="${feature.temp.folder}"/>
 		<delete dir="${feature.temp.folder}"/>
 		<mkdir dir="${feature.temp.folder}"/>
-		<mkdir dir="${feature.temp.folder}/features/com.servoy.eclipse.feature_6.0.0.1205"/>
+		<mkdir dir="${feature.temp.folder}/features/com.servoy.eclipse.feature_6.0.0.1206"/>
 		<antcall target="gather.bin.parts" inheritAll="false">
 			<param name="os" value="*"/>
 			<param name="feature.base" value="${feature.temp.folder}"/>
@@ -153,7 +153,7 @@
 			<param name="arch" value="*"/>
 			<param name="nl" value="*"/>
 		</antcall>
-		<jar destfile="${feature.destination}/com.servoy.eclipse.feature_6.0.0.1205.jar" basedir="${feature.temp.folder}/features/com.servoy.eclipse.feature_6.0.0.1205"/>
+		<jar destfile="${feature.destination}/com.servoy.eclipse.feature_6.0.0.1206.jar" basedir="${feature.temp.folder}/features/com.servoy.eclipse.feature_6.0.0.1206"/>
 		<delete dir="${feature.temp.folder}"/>
 	</target>
 
@@ -165,7 +165,7 @@
 				<include name="feature.properties"/>
 			</fileset>
 		</copy>
-		<eclipse.idReplacer featureFilePath="${feature.temp.folder}/feature.xml"  selfVersion="6.0.0.1205" featureIds="com.servoy.css.core:0.0.0,1.0.0.201003231300,org.eclipse.dltk.core.servoy:0.0.0,3.0.0.201103081811,org.eclipse.dltk.javascript.servoy:0.0.0,3.0.0.201103081811,org.eclipse.draw2d:0.0.0,3.6.1.v20100908-1100-4507w31211A2403131,org.eclipse.gef:0.0.0,3.6.1.v20100908-1100-777B181A3Bz-6B663E7974242," pluginIds="com.servoy.eclipse.core:0.0.0,6.0.0.1205,com.servoy.eclipse.debug:0.0.0,6.0.0.1205,com.servoy.eclipse.designer:0.0.0,6.0.0.1205,com.servoy.eclipse.team:0.0.0,6.0.0.1205,com.servoy.eclipse.ui:0.0.0,6.0.0.1205,com.servoy.eclipse.appserver:0.0.0,6.0.0.1205,com.servoy.eclipse.jsunit:0.0.0,6.0.0.1205,com.servoy.eclipse.profiler:0.0.0,6.0.0.1205,org.eclipse.dltk.javascript.rhino:0.0.0,6.0.0.1205,j2db_documentation:0.0.0,6.0.0.1205,j2db_tunnel:0.0.0,6.0.0.1205,j2db_runtime:0.0.0,6.0.0.1205,j2db_server:0.0.0,6.0.0.1205,servoy_debug:0.0.0,6.0.0.1205,servoy_headless_client:0.0.0,6.0.0.1205,servoy_shared:0.0.0,6.0.0.1205,servoy_smart_client:0.0.0,6.0.0.1205,com.servoy.eclipse.model:0.0.0,6.0.0.1205,com.servoy.eclipse.exporter:0.0.0,6.0.0.1205,"/>
+		<eclipse.idReplacer featureFilePath="${feature.temp.folder}/feature.xml"  selfVersion="6.0.0.1206" featureIds="com.servoy.css.core:0.0.0,1.0.0.201003231300,org.eclipse.dltk.core.servoy:0.0.0,3.0.0.201103151830,org.eclipse.dltk.javascript.servoy:0.0.0,3.0.0.201103151830,org.eclipse.draw2d:0.0.0,3.6.1.v20100908-1100-4507w31211A2403131,org.eclipse.gef:0.0.0,3.6.1.v20100908-1100-777B181A3Bz-6B663E7974242," pluginIds="com.servoy.eclipse.core:0.0.0,6.0.0.1206,com.servoy.eclipse.debug:0.0.0,6.0.0.1206,com.servoy.eclipse.designer:0.0.0,6.0.0.1206,com.servoy.eclipse.team:0.0.0,6.0.0.1206,com.servoy.eclipse.ui:0.0.0,6.0.0.1206,com.servoy.eclipse.appserver:0.0.0,6.0.0.1206,com.servoy.eclipse.jsunit:0.0.0,6.0.0.1206,com.servoy.eclipse.profiler:0.0.0,6.0.0.1206,org.eclipse.dltk.javascript.rhino:0.0.0,6.0.0.1206,j2db_documentation:0.0.0,6.0.0.1206,j2db_tunnel:0.0.0,6.0.0.1206,j2db_runtime:0.0.0,6.0.0.1206,j2db_server:0.0.0,6.0.0.1206,servoy_debug:0.0.0,6.0.0.1206,servoy_headless_client:0.0.0,6.0.0.1206,servoy_shared:0.0.0,6.0.0.1206,servoy_smart_client:0.0.0,6.0.0.1206,com.servoy.eclipse.model:0.0.0,6.0.0.1206,com.servoy.eclipse.exporter:0.0.0,6.0.0.1206,"/>
 		<eclipse.gatherFeature 
 		   metadataRepository="${p2.build.repo}"
 		   artifactRepository="${p2.build.repo}"
@@ -175,18 +175,18 @@
 	</target>
 
 	<target name="gather.bin.parts" depends="init" if="feature.base">
-		<mkdir dir="${feature.base}/features/com.servoy.eclipse.feature_6.0.0.1205"/>
+		<mkdir dir="${feature.base}/features/com.servoy.eclipse.feature_6.0.0.1206"/>
 		<antcall target="children">
 			<param name="target" value="gather.bin.parts"/>
 			<param name="destination.temp.folder" value="${feature.base}/plugins"/>
 		</antcall>
-		<copy todir="${feature.base}/features/com.servoy.eclipse.feature_6.0.0.1205" failonerror="true" overwrite="false">
+		<copy todir="${feature.base}/features/com.servoy.eclipse.feature_6.0.0.1206" failonerror="true" overwrite="false">
 			<fileset dir="${basedir}">
 				<include name="feature.xml"/>
 				<include name="feature.properties"/>
 			</fileset>
 		</copy>
-		<eclipse.idReplacer featureFilePath="${feature.base}/features/com.servoy.eclipse.feature_6.0.0.1205/feature.xml"  selfVersion="6.0.0.1205" featureIds="com.servoy.css.core:0.0.0,1.0.0.201003231300,org.eclipse.dltk.core.servoy:0.0.0,3.0.0.201103081811,org.eclipse.dltk.javascript.servoy:0.0.0,3.0.0.201103081811,org.eclipse.draw2d:0.0.0,3.6.1.v20100908-1100-4507w31211A2403131,org.eclipse.gef:0.0.0,3.6.1.v20100908-1100-777B181A3Bz-6B663E7974242," pluginIds="com.servoy.eclipse.core:0.0.0,6.0.0.1205,com.servoy.eclipse.debug:0.0.0,6.0.0.1205,com.servoy.eclipse.designer:0.0.0,6.0.0.1205,com.servoy.eclipse.team:0.0.0,6.0.0.1205,com.servoy.eclipse.ui:0.0.0,6.0.0.1205,com.servoy.eclipse.appserver:0.0.0,6.0.0.1205,com.servoy.eclipse.jsunit:0.0.0,6.0.0.1205,com.servoy.eclipse.profiler:0.0.0,6.0.0.1205,org.eclipse.dltk.javascript.rhino:0.0.0,6.0.0.1205,j2db_documentation:0.0.0,6.0.0.1205,j2db_tunnel:0.0.0,6.0.0.1205,j2db_runtime:0.0.0,6.0.0.1205,j2db_server:0.0.0,6.0.0.1205,servoy_debug:0.0.0,6.0.0.1205,servoy_headless_client:0.0.0,6.0.0.1205,servoy_shared:0.0.0,6.0.0.1205,servoy_smart_client:0.0.0,6.0.0.1205,com.servoy.eclipse.model:0.0.0,6.0.0.1205,com.servoy.eclipse.exporter:0.0.0,6.0.0.1205,"/>
+		<eclipse.idReplacer featureFilePath="${feature.base}/features/com.servoy.eclipse.feature_6.0.0.1206/feature.xml"  selfVersion="6.0.0.1206" featureIds="com.servoy.css.core:0.0.0,1.0.0.201003231300,org.eclipse.dltk.core.servoy:0.0.0,3.0.0.201103151830,org.eclipse.dltk.javascript.servoy:0.0.0,3.0.0.201103151830,org.eclipse.draw2d:0.0.0,3.6.1.v20100908-1100-4507w31211A2403131,org.eclipse.gef:0.0.0,3.6.1.v20100908-1100-777B181A3Bz-6B663E7974242," pluginIds="com.servoy.eclipse.core:0.0.0,6.0.0.1206,com.servoy.eclipse.debug:0.0.0,6.0.0.1206,com.servoy.eclipse.designer:0.0.0,6.0.0.1206,com.servoy.eclipse.team:0.0.0,6.0.0.1206,com.servoy.eclipse.ui:0.0.0,6.0.0.1206,com.servoy.eclipse.appserver:0.0.0,6.0.0.1206,com.servoy.eclipse.jsunit:0.0.0,6.0.0.1206,com.servoy.eclipse.profiler:0.0.0,6.0.0.1206,org.eclipse.dltk.javascript.rhino:0.0.0,6.0.0.1206,j2db_documentation:0.0.0,6.0.0.1206,j2db_tunnel:0.0.0,6.0.0.1206,j2db_runtime:0.0.0,6.0.0.1206,j2db_server:0.0.0,6.0.0.1206,servoy_debug:0.0.0,6.0.0.1206,servoy_headless_client:0.0.0,6.0.0.1206,servoy_shared:0.0.0,6.0.0.1206,servoy_smart_client:0.0.0,6.0.0.1206,com.servoy.eclipse.model:0.0.0,6.0.0.1206,com.servoy.eclipse.exporter:0.0.0,6.0.0.1206,"/>
 		<antcall target="rootFiles">
 			<param name="rootTarget" value="rootFiles${os}_${ws}_${arch}"/>
 		</antcall>
@@ -212,7 +212,7 @@
 			<param name="nl" value="*"/>
 			<param name="include.children" value="true"/>
 		</antcall>
-		<zip destfile="${feature.destination}/com.servoy.eclipse.feature_6.0.0.1205.bin.dist.zip" basedir="${feature.temp.folder}" filesonly="false" whenempty="skip" update="false"/>
+		<zip destfile="${feature.destination}/com.servoy.eclipse.feature_6.0.0.1206.bin.dist.zip" basedir="${feature.temp.folder}" filesonly="false" whenempty="skip" update="false"/>
 		<delete dir="${feature.temp.folder}"/>
 	</target>
 
@@ -221,10 +221,10 @@
 		<mkdir dir="${feature.temp.folder}"/>
 		<antcall target="all.children">
 			<param name="target" value="gather.sources"/>
-			<param name="destination.temp.folder" value="${feature.temp.folder}/plugins/com.servoy.eclipse.feature.source_6.0.0.1205/src"/>
+			<param name="destination.temp.folder" value="${feature.temp.folder}/plugins/com.servoy.eclipse.feature.source_6.0.0.1206/src"/>
 			<param name="include.children" value="true"/>
 		</antcall>
-		<zip destfile="${feature.destination}/com.servoy.eclipse.feature_6.0.0.1205.src.zip" basedir="${feature.temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="${feature.destination}/com.servoy.eclipse.feature_6.0.0.1206.src.zip" basedir="${feature.temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${feature.temp.folder}"/>
 	</target>
 
@@ -236,15 +236,15 @@
 			<param name="destination.temp.folder" value="${feature.temp.folder}/plugins"/>
 			<param name="include.children" value="true"/>
 		</antcall>
-		<zip destfile="${feature.destination}/com.servoy.eclipse.feature_6.0.0.1205.log.zip" basedir="${feature.temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="${feature.destination}/com.servoy.eclipse.feature_6.0.0.1206.log.zip" basedir="${feature.temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${feature.temp.folder}"/>
 	</target>
 
 	<target name="clean" depends="init" description="Clean the feature: com.servoy.eclipse.feature of all the zips, jars and logs created.">
-		<delete file="${feature.destination}/com.servoy.eclipse.feature_6.0.0.1205.jar"/>
-		<delete file="${feature.destination}/com.servoy.eclipse.feature_6.0.0.1205.bin.dist.zip"/>
-		<delete file="${feature.destination}/com.servoy.eclipse.feature_6.0.0.1205.log.zip"/>
-		<delete file="${feature.destination}/com.servoy.eclipse.feature_6.0.0.1205.src.zip"/>
+		<delete file="${feature.destination}/com.servoy.eclipse.feature_6.0.0.1206.jar"/>
+		<delete file="${feature.destination}/com.servoy.eclipse.feature_6.0.0.1206.bin.dist.zip"/>
+		<delete file="${feature.destination}/com.servoy.eclipse.feature_6.0.0.1206.log.zip"/>
+		<delete file="${feature.destination}/com.servoy.eclipse.feature_6.0.0.1206.src.zip"/>
 		<delete dir="${feature.temp.folder}"/>
 		<antcall target="all.children">
 			<param name="target" value="clean"/>
@@ -261,7 +261,7 @@
 	<target name="gather.sources">
 		<antcall target="children">
 			<param name="target" value="gather.sources"/>
-			<param name="destination.temp.folder" value="${feature.temp.folder}/plugins/com.servoy.eclipse.feature.source_6.0.0.1205/src"/>
+			<param name="destination.temp.folder" value="${feature.temp.folder}/plugins/com.servoy.eclipse.feature.source_6.0.0.1206/src"/>
 		</antcall>
 	</target>
 
