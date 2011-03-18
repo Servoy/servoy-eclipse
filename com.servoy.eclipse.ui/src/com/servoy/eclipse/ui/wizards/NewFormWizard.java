@@ -291,17 +291,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			// use superform selected by user
 			Form superForm = newFormWizardPage.getSuperForm();
-			if (superForm == null)
-			{
-				form.setExtendsFormID(0);
-			}
-			else
-			{
-				// just inherit everything
-				form.copyPropertiesMap(null, true);
-				form.setExtendsFormID(superForm.getID());
-				form.setName(newFormWizardPage.getFormName());
-			}
+			form.setExtendsFormID(superForm == null ? 0 : superForm.getID());
 
 			// add selected data providers
 			Object[] dataProviders = dataProviderWizardPage.getDataProviders();
