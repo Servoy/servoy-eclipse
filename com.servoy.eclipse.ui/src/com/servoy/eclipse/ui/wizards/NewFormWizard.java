@@ -58,7 +58,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Activator;
@@ -837,12 +836,6 @@ public class NewFormWizard extends Wizard implements INewWizard
 						{
 							dataSourceViewer.setSelection(new StructuredSelection(new TableWrapper(stn[0], stn[1])));
 						}
-					}
-
-					// name
-					if (!formNameTyped && formObject.has(SolutionSerializer.PROP_NAME))
-					{
-						setFormName(formObject.getString(SolutionSerializer.PROP_NAME));
 					}
 
 					// extendsFormID
