@@ -67,12 +67,15 @@ public class ValueCollectionProvider implements IMemberEvaluator
 					String scriptPath = SolutionSerializer.getScriptPath(superForm, false);
 					IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
 					IValueCollection vc = getValueCollection(file);
-					Set<String> children = vc.getDirectChildren();
-					for (String child : children)
+					if (vc != null)
 					{
-						vc.getChild(child).setAttribute(IReferenceAttributes.HIDE_ALLOWED, Boolean.TRUE);
+						Set<String> children = vc.getDirectChildren();
+						for (String child : children)
+						{
+							vc.getChild(child).setAttribute(IReferenceAttributes.HIDE_ALLOWED, Boolean.TRUE);
+						}
+						superCollections.add(vc);
 					}
-					superCollections.add(vc);
 					superForm = fs.getForm(superForm.getExtendsFormID());
 				}
 				for (int i = superCollections.size(); --i >= 0;)
