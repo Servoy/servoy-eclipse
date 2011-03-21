@@ -48,8 +48,8 @@ import org.json.JSONObject;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.MarkerMessages;
-import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IUnexpectedSituationHandler;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.IFileAccess;
@@ -383,57 +383,35 @@ public class DataModelManager implements IColumnInfoManager
 				InputStream source = new ByteArrayInputStream(out.getBytes("UTF8"));
 				IFile file = getDBIFile(t.getServerName(), t.getName());
 				writingMarkerFreeDBIFile = file;
-//				boolean fileContentsWritten = false;
 				if (file.exists())
 				{
 					int differenceType = differences.getDifferenceTypeForTable(t);
+					if (differenceType == TableDifference.COLUMN_CONFLICT || differenceType == TableDifference.COLUMN_MISSING_FROM_DB ||
+						differenceType == TableDifference.COLUMN_MISSING_FROM_DBI_FILE)
+					{
+						for (IUnexpectedSituationHandler e : ModelUtils.<IUnexpectedSituationHandler>getExtensions(IUnexpectedSituationHandler.EXTENSION_ID))
+						{
+							// if the user chose 'Yes' for example, write the contents
+							if (!e.allowUnexpectedDBIWrite(t))
+							{
+								// disallowed
+								return;
+							}
+						}
+					}
+
 					if (differenceType != -1)
 					{
 						writingMarkerFreeDBIFile = null;
 					}
-					if (differenceType == TableDifference.COLUMN_CONFLICT || differenceType == TableDifference.COLUMN_MISSING_FROM_DB ||
-						differenceType == TableDifference.COLUMN_MISSING_FROM_DBI_FILE)
-					{
-						// a .dbi file that has difference markers is about to be overwritten with information from memory;
-						// in order to avoid an accidental overwrite; ask registered unexpected situation handlers
-						boolean doThis = true;
-						List<IUnexpectedSituationHandler> l = ModelUtils.getExtensions(IUnexpectedSituationHandler.EXTENSION_ID);
-						for (IUnexpectedSituationHandler e : l)
-						{
-							doThis = doThis && e.allowUnexpectedDBIWrite(t);
-						}
 
-						if (doThis)
-						{
-							// if the user chose 'Yes' for example, write the contents
-							file.setContents(source, true, false, null);
-//							fileContentsWritten = true;
-						}
-					}
-					else
-					{
-						file.setContents(source, true, false, null);
-//						fileContentsWritten = true;
-					}
+					file.setContents(source, true, false, null);
 				}
 				else
 				{
 					writingMarkerFreeDBIFile = null; // do not inhibit reload of dbi file - because we could have error markers saying that the file does not exist - and they need to be cleared
 					ResourcesUtils.createFileAndParentContainers(file, source, true);
-//					fileContentsWritten = true;
 				}
-//				if (fileContentsWritten)
-//				{
-//					// remove changed flag for column infos that were written to file
-//					for (Column c : t.getColumns())
-//					{
-//						ColumnInfo ci = c.getColumnInfo();
-//						if (ci != null && c.getExistInDB()) // null would be strange here - but safer to check
-//						{
-//							ci.flagStored();
-//						}
-//					}
-//				}
 			}
 			finally
 			{
