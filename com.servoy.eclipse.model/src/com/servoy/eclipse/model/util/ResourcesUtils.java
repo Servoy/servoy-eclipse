@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.core.IScriptProjectFilenames;
 
 /**
  * Utility class for eclipse IResource operations.
@@ -32,6 +33,9 @@ import org.eclipse.core.runtime.Path;
  */
 public class ResourcesUtils
 {
+
+	public static String BUILDPATH_FILE = IScriptProjectFilenames.BUILDPATH_FILENAME;
+	public static String STP_DIR = ".stp"; //$NON-NLS-1$
 
 	/**
 	 * Creates the given file, and it's parent containers (if they do not already exist).

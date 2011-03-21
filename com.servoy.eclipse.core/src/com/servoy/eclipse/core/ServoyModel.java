@@ -112,6 +112,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.Messages;
@@ -1159,7 +1160,8 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 			try
 			{
 				List<IBuildpathEntry> buildPaths = new ArrayList<IBuildpathEntry>();
-				buildPaths.add(DLTKCore.newSourceEntry(sp.getProject().getFullPath()));
+				buildPaths.add(DLTKCore.newSourceEntry(sp.getProject().getFullPath(), new IPath[] { new Path(ResourcesUtils.STP_DIR + "/"), new Path(
+					SolutionSerializer.MEDIAS_DIR + "/").append("/") }));
 				String[] moduleNames = ModelUtils.getTokenElements(sp.getSolution().getModulesNames(), ",", true);
 				Arrays.sort(moduleNames);
 				// test all build paths

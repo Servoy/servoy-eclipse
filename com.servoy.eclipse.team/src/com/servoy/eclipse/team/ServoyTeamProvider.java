@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.team;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.rmi.UnmarshalException;
 import java.util.ArrayList;
@@ -75,6 +74,7 @@ import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.RepositorySettingsDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.team.subscriber.SolutionMergeContext;
@@ -106,9 +106,6 @@ public class ServoyTeamProvider extends RepositoryProvider implements IServoyTea
 
 	public static final String RESOURCE_PREFIX = "servoy_";
 	public static final String RESOURCE_SUFFIX = "_resources";
-
-	private static final String BASE_DIR = ".stp";
-	private static final String SCRIPT_BUILDPATH = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><buildpath><buildpathentry excluding=\".stp/\" kind=\"src\" path=\"\"/></buildpath>";
 
 	private RepositoryOperations repositoryOperations;
 	private IOFileAccess baseFileAccess;
@@ -183,15 +180,15 @@ public class ServoyTeamProvider extends RepositoryProvider implements IServoyTea
 	public void setProject(final IProject project)
 	{
 		super.setProject(project);
-		baseFileAccess = new IOFileAccess(new File(project.getLocation().toFile(), ServoyTeamProvider.BASE_DIR));
+		baseFileAccess = new IOFileAccess(new File(project.getLocation().toFile(), ResourcesUtils.STP_DIR));
 		File baseFile = baseFileAccess.toFile();
 		if (!baseFile.exists())
 		{
 			WorkspaceFileAccess baseWSFileAccess = new WorkspaceFileAccess(project.getWorkspace());
 			try
 			{
-				baseWSFileAccess.createFolder(project.getFullPath().append(ServoyTeamProvider.BASE_DIR).toOSString());
-				project.getFolder(ServoyTeamProvider.BASE_DIR).setDerived(true);
+				baseWSFileAccess.createFolder(project.getFullPath().append(ResourcesUtils.STP_DIR).toOSString());
+				project.getFolder(ResourcesUtils.STP_DIR).setDerived(true);
 			}
 			catch (Exception ex)
 			{
@@ -201,13 +198,8 @@ public class ServoyTeamProvider extends RepositoryProvider implements IServoyTea
 		}
 		try
 		{
-			IResource jsBuildPath = getProject().findMember(".buildpath");
-			if (jsBuildPath == null)
-			{
-				jsBuildPath = getProject().getFile(".buildpath");
-				((IFile)jsBuildPath).create(new ByteArrayInputStream(SCRIPT_BUILDPATH.getBytes()), false, null);
-			}
-			if (!jsBuildPath.isTeamPrivateMember())
+			IResource jsBuildPath = getProject().findMember(ResourcesUtils.BUILDPATH_FILE);
+			if (jsBuildPath != null && !jsBuildPath.isTeamPrivateMember())
 			{
 				jsBuildPath.setTeamPrivateMember(true);
 			}
@@ -289,7 +281,7 @@ public class ServoyTeamProvider extends RepositoryProvider implements IServoyTea
 		}
 		try
 		{
-			IResource jsBuildPath = getProject().findMember(".buildpath");
+			IResource jsBuildPath = getProject().findMember(ResourcesUtils.BUILDPATH_FILE);
 			if (jsBuildPath != null)
 			{
 				jsBuildPath.setTeamPrivateMember(false);
