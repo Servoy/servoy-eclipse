@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.editors;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.ChangeEvent;
@@ -388,10 +389,10 @@ public class ServerEditor extends EditorPart
 		ServerConfig serverConfig = inputConfig == null ? ServerConfig.TEMPLATES.get(ServerConfig.EMPTY_TEMPLATE_NAME) : inputConfig;
 		oldServerName = inputConfig == null ? null : inputConfig.getServerName();
 
-		serverConfigObservable = new ImmutableObjectObservable(
+		serverConfigObservable = new ImmutableObjectObservable<ServerConfig>(
 			serverConfig,
-			new Class[] { String.class, String.class, String.class, String.class, String.class, String.class, String.class, int.class, int.class, int.class, int.class, String.class, String.class, boolean.class, boolean.class },
-			new String[] { "serverName", "userName", "password", "serverUrl", "driver", "catalog", "schema", "maxActive", "maxIdle", "maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", "skipSysTables" });
+			new Class[] { String.class, String.class, String.class, String.class, Map.class, String.class, String.class, String.class, int.class, int.class, int.class, int.class, String.class, String.class, boolean.class, boolean.class, String.class },
+			new String[] { "serverName", "userName", "password", "serverUrl", "connectionProperties", "driver", "catalog", "schema", "maxActive", "maxIdle", "maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", "skipSysTables", "dialectClass" });
 
 		serverConfigObservable.setPropertyValue("serverName", serverInput.getName());
 		if (serverInput.getIsNew()) flagModified();

@@ -306,9 +306,9 @@ public class NewSybaseDbAction extends Action
 								}
 								serverManager.getServerConfig(name);
 								final ServerConfig serverConfig = new ServerConfig(configName, origConfig.getUserName(), origConfig.getPassword(), serverUrl,
-									origConfig.getDriver(), origConfig.getCatalog(), origConfig.getSchema(), origConfig.getMaxActive(),
-									origConfig.getMaxIdle(), origConfig.getMaxPreparedStatementsIdle(), origConfig.getConnectionValidationType(),
-									origConfig.getValidationQuery(), null, true, false);
+									origConfig.getConnectionProperties(), origConfig.getDriver(), origConfig.getCatalog(), origConfig.getSchema(),
+									origConfig.getMaxActive(), origConfig.getMaxIdle(), origConfig.getMaxPreparedStatementsIdle(),
+									origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false, origConfig.getDialectClass());
 
 								Display.getDefault().asyncExec(new Runnable()
 								{
