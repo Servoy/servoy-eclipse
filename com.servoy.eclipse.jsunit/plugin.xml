@@ -86,6 +86,21 @@
             priority="low">
       </content-type>
    </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="com.servoy.eclipse.jsunit.JavaScript"
+            name="JavaScript">
+      </category>
+      <view
+            category="com.servoy.eclipse.jsunit.JavaScript"
+            class="org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart"
+            icon="icons/junit.gif"
+            id="org.eclipse.jdt.junit.ResultView"
+            name="JUnit"
+            restorable="true">
+      </view>
+   </extension>
    <!--extension
          point="org.eclipse.debug.ui.launchShortcuts">
       <shortcut

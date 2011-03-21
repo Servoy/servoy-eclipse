@@ -52,6 +52,7 @@ public class DesignPerspective implements IPerspectiveFactory
 
 	protected static final String[] actionIds = { "org.eclipse.debug.ui.launchActionSet", "org.eclipse.ui.externaltools.ExternalToolsSet" }; //$NON-NLS-1$ //$NON-NLS-2$
 	protected static final String[] activityIds = { "com.servoy.eclipse.activities.javaDevelopment", "com.servoy.eclipse.activities.antDevelopment", "org.eclipse.team.cvs", "org.eclipse.antDevelopment", "org.eclipse.javaDevelopment", "org.eclipse.plugInDevelopment", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk", "com.servoy.eclipse.activities.edit", "org.eclipse.equinox.p2.ui.sdk.classicUpdate" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ 
+	public static final String TestRunnerViewPart_NAME = "org.eclipse.jdt.junit.ResultView"; //this field is copied from TestRunnerViewPart.NAME which is an eclipse internal class and cannot be referenced.
 
 	@SuppressWarnings("restriction")
 	public void createInitialLayout(IPageLayout layout)
@@ -71,7 +72,7 @@ public class DesignPerspective implements IPerspectiveFactory
 		temporaryActivities.add("org.eclipse.javaDevelopment"); //$NON-NLS-1$
 		temporaryActivities.add("com.servoy.eclipse.activities.javaDevelopment"); //$NON-NLS-1$
 		workbenchActivitySupport.setEnabledActivityIds(temporaryActivities);
-		right.addView("org.eclipse.jdt.junit.ResultView");// TestRunnerViewPart.NAME //$NON-NLS-1$
+		right.addView(TestRunnerViewPart_NAME);
 		workbenchActivitySupport.setEnabledActivityIds(enabledActivities);
 
 		IFolderLayout bottom = layout.createFolder("bottom", IPageLayout.BOTTOM, 0.8f, editorArea); //$NON-NLS-1$
@@ -126,7 +127,7 @@ public class DesignPerspective implements IPerspectiveFactory
 		layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
 		layout.addShowViewShortcut(IConsoleConstants.ID_CONSOLE_VIEW);
 		layout.addShowViewShortcut(IPageLayout.ID_PROP_SHEET);
-		layout.addShowViewShortcut("org.eclipse.jdt.junit.ResultView");
+		layout.addShowViewShortcut(TestRunnerViewPart_NAME);
 	}
 
 	protected void addNewWizards(IPageLayout layout)
