@@ -61,8 +61,8 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EnableServerAction;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
@@ -222,7 +222,16 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 		PlatformSimpleUserNode application = new PlatformSimpleUserNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, null,
 			IconProvider.instance().image(JSApplication.class));
+
 		addReturnTypeNodes(application, ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes());
+		PlatformSimpleUserNode exceptions = new PlatformSimpleUserNode(Messages.TreeStrings_ServoyException, UserNodeType.EXCEPTIONS, null, null);
+		addReturnTypeNodes(exceptions, new ServoyException(0).getAllReturnedTypes());
+		exceptions.parent = application;
+
+		SimpleUserNode[] applicationChildren = application.children;
+		application.children = new SimpleUserNode[applicationChildren.length + 1];
+		System.arraycopy(applicationChildren, 0, application.children, 1, applicationChildren.length);
+		application.children[0] = exceptions;
 
 		resources = new PlatformSimpleUserNode(Messages.TreeStrings_Resources, UserNodeType.RESOURCES, null, uiActivator.loadImageFromBundle("resources.png"));
 
@@ -278,10 +287,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		i18n = new PlatformSimpleUserNode(Messages.TreeStrings_i18n, UserNodeType.I18N, null, IconProvider.instance().image(JSI18N.class));
 		addReturnTypeNodes(i18n, ScriptObjectRegistry.getScriptObjectForClass(JSI18N.class).getAllReturnedTypes());
 
-		PlatformSimpleUserNode exceptions = new PlatformSimpleUserNode(Messages.TreeStrings_ServoyException, UserNodeType.EXCEPTIONS, null,
-			IconProvider.instance().image(ServoyException.class));
-		addReturnTypeNodes(exceptions, new ServoyException(0).getAllReturnedTypes());
-
 		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.gif"));
 		final PlatformSimpleUserNode plugins = new PlatformSimpleUserNode(Messages.TreeStrings_Plugins, UserNodeType.PLUGINS, null,
 			uiActivator.loadImageFromBundle("plugin.gif"));
@@ -289,7 +294,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 		resources.children = new PlatformSimpleUserNode[] { servers, stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode };
 
-		invisibleRootNode.children = new PlatformSimpleUserNode[] { resources, allSolutionsNode, activeSolutionNode, jslib, application, solutionModel, databaseManager, utils, history, security, i18n, exceptions, jsunit, plugins };
+		invisibleRootNode.children = new PlatformSimpleUserNode[] { resources, allSolutionsNode, activeSolutionNode, jslib, application, solutionModel, databaseManager, utils, history, security, i18n, jsunit, plugins };
 		jslib.parent = invisibleRootNode;
 		application.parent = invisibleRootNode;
 		resources.parent = invisibleRootNode;
@@ -301,7 +306,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		solutionModel.parent = invisibleRootNode;
 		security.parent = invisibleRootNode;
 		i18n.parent = invisibleRootNode;
-		exceptions.parent = invisibleRootNode;
 		jsunit.parent = invisibleRootNode;
 		servers.parent = resources;
 		plugins.parent = invisibleRootNode;
