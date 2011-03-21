@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.property;
 
 import java.awt.Dimension;
@@ -184,7 +184,17 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			}
 			else
 			{
-				context = AbstractRepository.searchPersist(servoyProject.getEditingSolution(), context);
+				ServoyProject parentProject = servoyProject;
+				if (!servoyProject.getSolution().getName().equals(context.getRootObject().getName()))
+				{
+					parentProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(context.getRootObject().getName());
+				}
+				if (parentProject == null)
+				{
+					ServoyLog.logError("Cannot find Servoy project for persist " + context, null); //$NON-NLS-1$
+					return null;
+				}
+				context = AbstractRepository.searchPersist(parentProject.getEditingSolution(), context);
 			}
 
 			if (key == IPersist.class)
