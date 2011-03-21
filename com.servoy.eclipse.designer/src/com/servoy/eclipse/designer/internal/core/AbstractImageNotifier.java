@@ -122,7 +122,7 @@ public abstract class AbstractImageNotifier implements IImageNotifier, IImageLis
 					{
 						isWaitingStart = false;
 						ServoyLog.logError(e);
-						((DesignApplication)application).getEditLabel().remove(label); // normally done in imageChanged()
+						if (label != null) ((DesignApplication)application).getEditLabel().remove(label); // normally done in imageChanged()
 					}
 				}
 			});
