@@ -172,7 +172,17 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			}
 			else
 			{
-				context = AbstractRepository.searchPersist(servoyProject.getEditingSolution(), context);
+				ServoyProject parentProject = servoyProject;
+				if (!servoyProject.getSolution().getName().equals(context.getRootObject().getName()))
+				{
+					parentProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(context.getRootObject().getName());
+				}
+				if (parentProject == null)
+				{
+					ServoyLog.logError("Cannot find Servoy project for persist " + context, null); //$NON-NLS-1$
+					return null;
+				}
+				context = AbstractRepository.searchPersist(parentProject.getEditingSolution(), context);
 			}
 
 			if (key == IPersist.class)
