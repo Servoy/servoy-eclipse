@@ -49,7 +49,6 @@ public class ViewerTogglePropertyAction extends Action
 		this.property = property;
 		setToolTipText(tooltip);
 		setId(actionId);
-		setActionDefinitionId(actionId);
 		setImageDescriptor(imageDescriptor);
 		setChecked(isChecked());
 	}
