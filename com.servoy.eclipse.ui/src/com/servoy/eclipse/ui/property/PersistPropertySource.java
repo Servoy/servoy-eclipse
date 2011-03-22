@@ -1702,92 +1702,100 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		{
 			throw new RuntimeException("Cannot reset read-only property");
 		}
-		init();
-
-		// recursively process a.b.c properties
-		if (id instanceof String)
+		try
 		{
-			String propId = (String)id;
-			int dot = propId.indexOf('.');
-			if (dot > 0)
+			init();
+
+			// recursively process a.b.c properties
+			if (id instanceof String)
 			{
-				Object propertyValue = getPropertyValue(propId.substring(0, dot));
-				if (propertyValue instanceof IAdaptable)
+				String propId = (String)id;
+				int dot = propId.indexOf('.');
+				if (dot > 0)
 				{
-					IPropertySource propertySource = (IPropertySource)((IAdaptable)propertyValue).getAdapter(IPropertySource.class);
-					if (propertySource != null)
+					Object propertyValue = getPropertyValue(propId.substring(0, dot));
+					if (propertyValue instanceof IAdaptable)
 					{
-						propertySource.resetPropertyValue(propId.substring(dot + 1));
-						return;
+						IPropertySource propertySource = (IPropertySource)((IAdaptable)propertyValue).getAdapter(IPropertySource.class);
+						if (propertySource != null)
+						{
+							propertySource.resetPropertyValue(propId.substring(dot + 1));
+							return;
+						}
 					}
 				}
 			}
-		}
 
-		IPropertyDescriptor pd = propertyDescriptors.get(id);
-		if (pd == null)
-		{
-			pd = hiddenPropertyDescriptors.get(id);
-		}
-		while (pd instanceof IDelegate && !(pd instanceof IPropertySetter))
-		{
-			Object delegate = ((IDelegate)pd).getDelegate();
-			if (delegate instanceof IPropertyDescriptor)
+			IPropertyDescriptor pd = propertyDescriptors.get(id);
+			if (pd == null)
 			{
-				pd = (IPropertyDescriptor)delegate;
+				pd = hiddenPropertyDescriptors.get(id);
 			}
-			else
+			while (pd instanceof IDelegate && !(pd instanceof IPropertySetter))
 			{
-				break;
-			}
-		}
-		if (pd instanceof IPropertySetter)
-		{
-			((IPropertySetter)pd).resetPropertyValue(this);
-			return;
-		}
-
-		if (getBeansProperties().get(id) != null)
-		{
-			createOverrideElementIfNeeded();
-
-			if (persist instanceof AbstractBase)
-			{
-				((AbstractBase)persist).clearProperty((String)id);
-				if (!((AbstractBase)persist).hasOverrideProperties())
+				Object delegate = ((IDelegate)pd).getDelegate();
+				if (delegate instanceof IPropertyDescriptor)
 				{
-					// last property was reset, remove overriding persist
-					IPersist superPersist = ((AbstractBase)persist).getSuperPersist();
-					try
-					{
-						((IDeveloperRepository)((AbstractBase)persist).getRootObject().getRepository()).deleteObject(persist);
-						persist.getParent().removeChild(persist);
-						persist = superPersist;
-						beansProperties = null;
-						propertyDescriptors = null;
-						hiddenPropertyDescriptors = null;
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
+					pd = (IPropertyDescriptor)delegate;
+				}
+				else
+				{
+					break;
 				}
 			}
-			else
+			if (pd instanceof IPropertySetter)
 			{
-				setPersistPropertyValue(id, getDefaultPersistValue(id));
+				((IPropertySetter)pd).resetPropertyValue(this);
+				return;
 			}
 
-			if ("groupID".equals(id))
+			if (getBeansProperties().get(id) != null)
 			{
-				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persist.getParent(), true);
+				createOverrideElementIfNeeded();
+
+				if (persist instanceof AbstractBase)
+				{
+					((AbstractBase)persist).clearProperty((String)id);
+					if (((AbstractBase)persist).isOverrideElement() && !((AbstractBase)persist).hasOverrideProperties())
+					{
+						// last property was reset, remove overriding persist
+						IPersist superPersist = ((AbstractBase)persist).getSuperPersist();
+						try
+						{
+							((IDeveloperRepository)((AbstractBase)persist).getRootObject().getRepository()).deleteObject(persist);
+							persist.getParent().removeChild(persist);
+							persist = superPersist;
+							beansProperties = null;
+							propertyDescriptors = null;
+							hiddenPropertyDescriptors = null;
+						}
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+				}
+				else
+				{
+					setPersistPropertyValue(id, getDefaultPersistValue(id));
+				}
+
+				if ("groupID".equals(id))
+				{
+					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persist.getParent(), true);
+				}
+				else
+				{
+					// fire persist change recursively if the style is changed
+					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persist,
+						"styleName".equals(id) || "extendsFormID".equals(id));
+				}
 			}
-			else
-			{
-				// fire persist change recursively if the style is changed
-				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persist,
-					"styleName".equals(id) || "extendsFormID".equals(id));
-			}
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("Could not rest set property value for id " + id + " on object " + persist, e);
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not reset property", e.getMessage());
 		}
 	}
 
@@ -1854,8 +1862,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			}
 			catch (Exception e)
 			{
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not update property", e.getMessage());
 				ServoyLog.logError("Could not set property value for id " + id + " on object " + beanPropertyDescriptor.valueObject, e);
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not update property", e.getMessage());
 			}
 
 			if ("groupID".equals(id))
@@ -1873,8 +1881,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 	/**
 	 * Create an override element of the current element if this is the first override
+	 * @throws RepositoryException 
 	 */
-	private boolean createOverrideElementIfNeeded()
+	private boolean createOverrideElementIfNeeded() throws RepositoryException
 	{
 		IPersist overridePersist = ElementUtil.getOverridePersist(context, persist);
 		if (overridePersist == persist)
@@ -1897,64 +1906,72 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			throw new RuntimeException("Cannot save read-only property");
 		}
 
-		createOverrideElementIfNeeded();
-		init();
-
-		// recursively process a.b.c properties
-		if (id instanceof String)
+		try
 		{
-			String propId = (String)id;
-			int dot = propId.indexOf('.');
-			if (dot > 0)
+			createOverrideElementIfNeeded();
+			init();
+
+			// recursively process a.b.c properties
+			if (id instanceof String)
 			{
-				String subPropId = propId.substring(0, dot);
-				Object propertyValue = getPropertyValue(subPropId);
-				if (propertyValue instanceof IAdaptable)
+				String propId = (String)id;
+				int dot = propId.indexOf('.');
+				if (dot > 0)
 				{
-					IPropertySource propertySource = (IPropertySource)((IAdaptable)propertyValue).getAdapter(IPropertySource.class);
-					if (propertySource != null)
+					String subPropId = propId.substring(0, dot);
+					Object propertyValue = getPropertyValue(subPropId);
+					if (propertyValue instanceof IAdaptable)
 					{
-						propertySource.setPropertyValue(propId.substring(dot + 1), value);
-						setPropertyValue(subPropId, propertyValue);
-						return;
+						IPropertySource propertySource = (IPropertySource)((IAdaptable)propertyValue).getAdapter(IPropertySource.class);
+						if (propertySource != null)
+						{
+							propertySource.setPropertyValue(propId.substring(dot + 1), value);
+							setPropertyValue(subPropId, propertyValue);
+							return;
+						}
 					}
 				}
 			}
-		}
 
-		Object val = value;
-		IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
-		if (propertyDescriptor == null)
-		{
-			propertyDescriptor = hiddenPropertyDescriptors.get(id);
-		}
-		while (propertyDescriptor instanceof IDelegate && !(propertyDescriptor instanceof IPropertySetter))
-		{
-			Object delegate = ((IDelegate)propertyDescriptor).getDelegate();
-			if (delegate instanceof IPropertyDescriptor)
+			Object val = value;
+			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
+			if (propertyDescriptor == null)
 			{
-				propertyDescriptor = (IPropertyDescriptor)delegate;
+				propertyDescriptor = hiddenPropertyDescriptors.get(id);
+			}
+			while (propertyDescriptor instanceof IDelegate && !(propertyDescriptor instanceof IPropertySetter))
+			{
+				Object delegate = ((IDelegate)propertyDescriptor).getDelegate();
+				if (delegate instanceof IPropertyDescriptor)
+				{
+					propertyDescriptor = (IPropertyDescriptor)delegate;
+				}
+				else
+				{
+					break;
+				}
+			}
+			if (propertyDescriptor instanceof IPropertySetter)
+			{
+				((IPropertySetter)propertyDescriptor).setProperty(this, value);
 			}
 			else
 			{
-				break;
-			}
-		}
-		if (propertyDescriptor instanceof IPropertySetter)
-		{
-			((IPropertySetter)propertyDescriptor).setProperty(this, value);
-		}
-		else
-		{
-			if (propertyDescriptor instanceof IPropertyController)
-			{
-				IPropertyConverter propertyConverter = ((IPropertyController)propertyDescriptor).getConverter();
-				if (propertyConverter != null)
+				if (propertyDescriptor instanceof IPropertyController)
 				{
-					val = propertyConverter.convertValue(id, value);
+					IPropertyConverter propertyConverter = ((IPropertyController)propertyDescriptor).getConverter();
+					if (propertyConverter != null)
+					{
+						val = propertyConverter.convertValue(id, value);
+					}
 				}
+				setPersistPropertyValue(id, val);
 			}
-			setPersistPropertyValue(id, val);
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("Could not set property value for id " + id + " on object " + persist, e);
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not update property", e.getMessage());
 		}
 	}
 

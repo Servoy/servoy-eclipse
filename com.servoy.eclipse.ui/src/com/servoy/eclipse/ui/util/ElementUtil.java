@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFactory;
@@ -41,6 +41,7 @@ import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
@@ -195,48 +196,54 @@ public class ElementUtil
 		return false;
 	}
 
-	public static IPersist getOverridePersist(IPersist context, IPersist persist)
+	/**
+	 * Get or create the persist object that is used to override properties in the context form.
+	 * <p>
+	 * When the context form is a subform of the persist's parent, use (create when non-existent) an empty
+	 * clone of the persist and add it to the context form.
+	 * @param context form
+	 * @param persist
+	 * @return
+	 * @throws RepositoryException 
+	 */
+	public static IPersist getOverridePersist(IPersist context, IPersist persist) throws RepositoryException
 	{
-		if (persist instanceof AbstractBase && context instanceof Form && persist.getAncestor(IRepository.FORMS) != context)
+		IPersist ancestorForm = persist.getAncestor(IRepository.FORMS);
+		if (!(persist instanceof AbstractBase)//
+			||
+			!(context instanceof Form) //
+			|| ancestorForm == null // persist is something else, like a relation or a solution
+			|| ancestorForm == context // already in same form
+			|| !ModelUtils.getEditingFlattenedSolution(context).getFormHierarchy((Form)context).contains(ancestorForm)// check that the persist is in a parent form of the context
+		)
 		{
-			IPersist newPersist = AbstractRepository.searchPersist((Form)context, persist.getUUID());
-			if (newPersist == null)
+			// no override
+			return persist;
+		}
+
+		IPersist newPersist = AbstractRepository.searchPersist((Form)context, persist.getUUID());
+		if (newPersist == null)
+		{
+			// override does not exist yet, create it
+			ISupportChilds parent = (Form)context;
+			if (!(persist.getParent() instanceof Form))
 			{
-				ISupportChilds parent = (Form)context;
-				if (!(persist.getParent() instanceof Form))
+				parent = null;
+				parent = (ISupportChilds)AbstractRepository.searchPersist((Form)context, persist.getParent().getUUID());
+				if (parent == null)
 				{
-					parent = null;
-					parent = (ISupportChilds)AbstractRepository.searchPersist((Form)context, persist.getParent().getUUID());
-					if (parent == null)
-					{
-						try
-						{
-							parent = (ISupportChilds)((AbstractBase)persist.getParent()).cloneObj((Form)context, false, null, false, false);
-							((AbstractBase)parent).resetUUID(persist.getParent().getUUID());
-							((AbstractBase)parent).copyPropertiesMap(null, true);
-							((AbstractBase)parent).putOverrideProperty(((Form)persist.getAncestor(IRepository.FORMS)).getName());
-						}
-						catch (Exception ex)
-						{
-							ServoyLog.logError(ex);
-						}
-					}
-				}
-				try
-				{
-					newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false);
-					((AbstractBase)newPersist).resetUUID(persist.getUUID());
-					((AbstractBase)newPersist).copyPropertiesMap(null, true);
-					((AbstractBase)newPersist).putOverrideProperty(((Form)persist.getAncestor(IRepository.FORMS)).getName());
-				}
-				catch (Exception ex)
-				{
-					ServoyLog.logError(ex);
+					parent = (ISupportChilds)((AbstractBase)persist.getParent()).cloneObj((Form)context, false, null, false, false);
+					((AbstractBase)parent).resetUUID(persist.getParent().getUUID());
+					((AbstractBase)parent).copyPropertiesMap(null, true);
+					((AbstractBase)parent).putOverrideProperty(((Form)ancestorForm).getName());
 				}
 			}
-			return newPersist;
+			newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false);
+			((AbstractBase)newPersist).resetUUID(persist.getUUID());
+			((AbstractBase)newPersist).copyPropertiesMap(null, true);
+			((AbstractBase)newPersist).putOverrideProperty(((Form)ancestorForm).getName());
 		}
-		return persist;
+		return newPersist;
 	}
 
 	private static Map<String, WeakReference<Class< ? >>> beanClassCache = new ConcurrentHashMap<String, WeakReference<Class< ? >>>();
