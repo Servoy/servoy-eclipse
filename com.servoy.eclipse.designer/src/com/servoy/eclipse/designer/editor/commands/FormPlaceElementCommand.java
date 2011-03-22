@@ -137,9 +137,9 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 		}
 		models = null;
 		alternativeParent = null;
-		parent = (ISupportChilds)ElementUtil.getOverridePersist(context, parent);
 		try
 		{
+			parent = (ISupportChilds)ElementUtil.getOverridePersist(context, parent);
 			models = placeElements(getNextLocation());
 			// set data in request.getExtendedData map as properties in the created persists
 			if (models != null)
@@ -609,11 +609,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 				Iterator<IFormElement> elements = ((FormElementGroup)model).getElements();
 				while (elements.hasNext())
 				{
-					IFormElement element = elements.next();
-					if (element instanceof IPersist)
-					{
-						toDelete.add((IPersist)element);
-					}
+					toDelete.add(elements.next());
 				}
 			}
 		}
