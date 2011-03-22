@@ -181,8 +181,8 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 			if (((RequestType)requestType).type == RequestType.TYPE_TAB)
 			{
 				setLabel("place tabpanel");
-				return ElementFactory.createTabs(application, parent, (Object[])object, location, TabPanel.DEFAULT,
-					(String)objectProperties.get(ElementFactory.NAME_HINT_PROPERTY));
+				return ElementFactory.createTabs(application, parent, (Object[])object, location, TabPanel.DEFAULT, objectProperties == null ? null
+					: (String)objectProperties.get(ElementFactory.NAME_HINT_PROPERTY));
 			}
 
 			if (parent instanceof ISupportFormElements)
@@ -449,6 +449,12 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 			}
 			origLocations.put((ISupportBounds)persist, supportBounds.getLocation());
 			return toArrAy(persist);
+		}
+
+		if (draggedPersist instanceof Form && parent instanceof Form)
+		{
+			return ElementFactory.createTabs(application, parent, new Object[] { new ElementFactory.RelatedForm(null, (Form)draggedPersist) }, location,
+				TabPanel.DEFAULT, "tab_" + ((Form)draggedPersist).getName());
 		}
 
 		ServoyLog.logWarning("place object: dropped object not supported: " + draggedPersist.getClass().getName(), null);

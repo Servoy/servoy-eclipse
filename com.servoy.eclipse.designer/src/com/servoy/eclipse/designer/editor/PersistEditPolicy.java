@@ -100,15 +100,16 @@ class PersistEditPolicy extends ComponentEditPolicy
 
 		if (VisualFormEditor.REQ_DROP_LINK.equals(request.getType()) && request instanceof DataRequest)
 		{
-
-			if (((DataRequest)request).getData() instanceof IDragData[] && ((IDragData[])(((DataRequest)request).getData())).length > 0)
+			if (((DataRequest)request).getData() instanceof IDragData[] && ((IDragData[])((DataRequest)request).getData()).length > 0)
 			{
-				if (((IDragData[])(((DataRequest)request).getData()))[0] instanceof PersistDragData &&
-					(persist instanceof Field || persist instanceof GraphicalComponent || persist instanceof ISupportMedia))
+				IDragData dragData = ((IDragData[])((DataRequest)request).getData())[0];
+				if (dragData instanceof PersistDragData &&
+					(persist instanceof Field || persist instanceof GraphicalComponent || persist instanceof ISupportMedia) ||
+					(((PersistDragData)dragData).type == IRepository.FORMS && persist.getAncestor(IRepository.TABPANELS) != null))
 				{
 					return createDropPersistCommand((DataRequest)request);
 				}
-				if (((IDragData[])(((DataRequest)request).getData()))[0] instanceof DataProviderDragData && persist instanceof ISupportDataProviderID)
+				if (dragData instanceof DataProviderDragData && persist instanceof ISupportDataProviderID)
 				{
 					return createDropColumnCommand((DataRequest)request);
 				}
@@ -178,13 +179,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 			return command;
 		}
 
-		command = super.getCommand(request);
-		if (command != null)
-		{
-			return command;
-		}
-
-		return null;
+		return super.getCommand(request);
 	}
 
 	@Override
@@ -193,20 +188,39 @@ class PersistEditPolicy extends ComponentEditPolicy
 		Object model = getHost().getModel();
 		if (VisualFormEditor.REQ_DROP_LINK.equals(request.getType()) && request instanceof DataRequest)
 		{
-			if (((DataRequest)request).getData() instanceof IDragData[])
+			if (((DataRequest)request).getData() instanceof IDragData[] && ((IDragData[])((DataRequest)request).getData()).length > 0)
 			{
-				IDragData[] dragData = (IDragData[])((DataRequest)request).getData();
-				if (dragData.length > 0 && dragData[0] instanceof PersistDragData &&
-					(model instanceof Field || model instanceof GraphicalComponent || model instanceof ISupportMedia))
+				IDragData dragData = ((IDragData[])((DataRequest)request).getData())[0];
+				if (dragData instanceof PersistDragData)
 				{
-					return true;
+					if (((PersistDragData)dragData).type == IRepository.METHODS && (model instanceof Field || model instanceof GraphicalComponent))
+					{
+						return true;
+					}
+					if (((PersistDragData)dragData).type == IRepository.MEDIA && model instanceof ISupportMedia && model instanceof IPersist)
+					{
+						return true;
+					}
+					if (((PersistDragData)dragData).type == IRepository.VALUELISTS && model instanceof Field)
+					{
+						return true;
+					}
+					if (((PersistDragData)dragData).type == IRepository.FORMS && model instanceof IPersist &&
+						((IPersist)model).getAncestor(IRepository.TABPANELS) != null)
+					{
+						// drop form on tabpanel
+						IPersist form = ((IPersist)model).getAncestor(IRepository.FORMS);
+						return form != null && !form.getUUID().equals(((PersistDragData)dragData).uuid); // cannot drop form onto itself
+					}
 				}
-				if (dragData.length > 0 && dragData[0] instanceof DataProviderDragData && model instanceof ISupportDataProviderID)
+
+				else if (dragData instanceof DataProviderDragData && model instanceof ISupportDataProviderID)
 				{
-					return true;
+					return createDropColumnCommand((DataRequest)request) != null;
 				}
 			}
-			if (((DataRequest)request).getData() instanceof TemplateElementHolder)
+
+			else if (((DataRequest)request).getData() instanceof TemplateElementHolder)
 			{
 				TemplateElementHolder templateHolder = (TemplateElementHolder)((DataRequest)request).getData();
 				List<JSONObject> templateElements = templateHolder == null ? null : ElementFactory.getTemplateElements(templateHolder.template,
@@ -290,6 +304,12 @@ class PersistEditPolicy extends ComponentEditPolicy
 					return SetValueCommand.createSetvalueCommand("Drag-n-drop value list", new PersistPropertySource((IPersist)child,
 						(IPersist)(formEditPart == null ? null : formEditPart.getModel()), false),
 						StaticContentSpecLoader.PROPERTY_VALUELISTID.getPropertyName(), new Integer(persist.getID()));
+				}
+				if (persist instanceof Form && child instanceof IPersist && ((IPersist)child).getAncestor(IRepository.TABPANELS) != null)
+				{
+					return new FormPlaceElementCommand(application, (TabPanel)((IPersist)child).getAncestor(IRepository.TABPANELS),
+						new Object[] { new ElementFactory.RelatedForm(null, (Form)persist) }, VisualFormEditor.REQ_PLACE_TAB, null, null,
+						dropRequest.getlocation().getSWTPoint(), (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 				}
 			}
 			catch (RepositoryException e)

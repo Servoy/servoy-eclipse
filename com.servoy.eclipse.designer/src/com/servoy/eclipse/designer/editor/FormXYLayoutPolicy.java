@@ -43,6 +43,7 @@ import com.servoy.eclipse.designer.editor.commands.FormPlaceFieldCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlacePortalCommand;
 import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.eclipse.designer.property.SetValueCommand;
+import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.IApplication;
@@ -375,7 +376,24 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 	@Override
 	public boolean understandsRequest(Request request)
 	{
-		return VisualFormEditor.REQ_DROP_COPY.equals(request.getType());
+		if (VisualFormEditor.REQ_DROP_COPY.equals(request.getType()) && request instanceof CreateElementRequest)
+		{
+			RequestTypeCreationFactory factory = (RequestTypeCreationFactory)((CreateElementRequest)request).getFactory();
+			if (factory.getData() instanceof Object[])
+			{
+				for (Object o : (Object[])factory.getData())
+				{
+					if (o instanceof PersistDragData && ((IPersist)getHost().getModel()).getUUID().equals(((PersistDragData)o).uuid))
+					{
+						// cannot drop form onto itself
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override

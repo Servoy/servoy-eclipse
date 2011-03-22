@@ -20,6 +20,7 @@ import java.awt.Dimension;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
@@ -31,8 +32,10 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Template;
 
 /**
@@ -62,18 +65,23 @@ public class DragDataAdapterFactory implements IAdapterFactory
 				return new DataProviderDragData(null, null, sv.getDataProviderID(), null, null);
 			}
 
-			if (obj instanceof IPersist)
+			if (obj instanceof IPersist && !(obj instanceof Solution) && !(obj instanceof Relation))
 			{
 				IPersist persist = (IPersist)obj;
 				int width = 80, height = 20;
+				Dimension size = null;
 				if (persist instanceof Template)
 				{
-					Dimension size = ElementFactory.getTemplateBoundsize(new TemplateElementHolder((Template)persist));
-					if (size != null)
-					{
-						width = size.width;
-						height = size.height;
-					}
+					size = ElementFactory.getTemplateBoundsize(new TemplateElementHolder((Template)persist));
+				}
+				else if (persist instanceof Form)
+				{
+					size = ElementFactory.calculateFormSize(Activator.getDefault().getDesignClient(), (Form)persist);
+				}
+				if (size != null)
+				{
+					width = size.width;
+					height = size.height;
 				}
 				return new PersistDragData(persist.getRootObject().getName(), persist.getUUID(), persist.getTypeID(), width, height, -1);
 			}

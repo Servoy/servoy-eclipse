@@ -1318,6 +1318,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				return UserNodeComparer.equals(obj, b);
 			}
 		};
+
+		tree.addDragSupport(DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK, new Transfer[] { FormElementTransfer.getInstance() },
+			new UserNodeListDragSourceListener(tree, FormElementTransfer.getInstance()));
 	}
 
 	private void initTreeViewer()
