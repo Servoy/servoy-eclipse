@@ -47,7 +47,6 @@ public abstract class ViewerDropdownPropertyAction extends Action implements Dis
 		this.diagramViewer = diagramViewer;
 		setToolTipText(tooltip);
 		setId(actionId);
-		setActionDefinitionId(actionId);
 		setImageDescriptor(imageDescriptor);
 	}
 
