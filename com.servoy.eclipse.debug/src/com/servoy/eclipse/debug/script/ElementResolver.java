@@ -123,15 +123,8 @@ public class ElementResolver implements IElementResolver
 			Form formToUse = form;
 			if (form.getExtendsFormID() > 0)
 			{
-				try
-				{
-					formToUse = fs.getFlattenedForm(form);
-					typeNames.add("_super");
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError("Cant get super flattened form for " + form, e);
-				}
+				formToUse = fs.getFlattenedForm(form);
+				typeNames.add("_super");
 			}
 			try
 			{

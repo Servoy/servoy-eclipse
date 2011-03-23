@@ -133,6 +133,7 @@ import com.servoy.eclipse.designer.property.UndoablePersistPropertySourceProvide
 import com.servoy.eclipse.designer.property.UndoablePropertySheetEntry;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.CoolbarLayout;
@@ -497,7 +498,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	{
 		GraphicalViewer viewer = getGraphicalViewer();
 
-		if (editorPart.getFlattenedForm() != null)
+		if (editorPart.getForm() != null)
 		{
 			viewer.addDropTargetListener(new FormElementTransferDropTarget(getGraphicalViewer()));
 			viewer.addDropTargetListener(new PaletteItemTransferDropTargetListener(getGraphicalViewer()));

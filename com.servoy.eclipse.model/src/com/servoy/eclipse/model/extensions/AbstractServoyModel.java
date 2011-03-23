@@ -192,24 +192,32 @@ public abstract class AbstractServoyModel implements IServoyModel
 		return dataModelManager;
 	}
 
+	protected FlattenedSolution createFlattenedSolution()
+	{
+		return new FlattenedSolution();
+	}
+
 	public FlattenedSolution getFlattenedSolution()
 	{
 		if (flattenedSolution == null)
 		{
-			flattenedSolution = new FlattenedSolution();
+			flattenedSolution = createFlattenedSolution();
 
-			try
+			if (getActiveProject() != null && getActiveProject().getSolution() != null)
 			{
-				if (getActiveProject() == null || getActiveProject().getSolution() == null) return flattenedSolution; // projects might give deserialize exceptions => solution is null
-				flattenedSolution.setSolution(getActiveProject().getSolution().getSolutionMetaData(), true, true, getActiveSolutionHandler());
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-			}
-			catch (RemoteException e)
-			{
-				ServoyLog.logError(e);
+				// projects might give deserialize exceptions => solution is null
+				try
+				{
+					flattenedSolution.setSolution(getActiveProject().getSolution().getSolutionMetaData(), true, true, getActiveSolutionHandler());
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+				catch (RemoteException e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
 		}
 		return flattenedSolution;

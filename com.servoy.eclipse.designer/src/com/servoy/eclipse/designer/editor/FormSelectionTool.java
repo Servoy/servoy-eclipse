@@ -244,7 +244,7 @@ public class FormSelectionTool extends PanningSelectionTool
 			return false;
 		}
 
-		ISupportTabSeq next = findNextField(field, editorPart.getFlattenedForm().getTabSeqElementsByTabOrder(), (e.stateMask & SWT.SHIFT) == 0);
+		ISupportTabSeq next = findNextField(field, ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).getTabSeqElementsByTabOrder(), (e.stateMask & SWT.SHIFT) == 0);
 		if (next == null)
 		{
 			return false;

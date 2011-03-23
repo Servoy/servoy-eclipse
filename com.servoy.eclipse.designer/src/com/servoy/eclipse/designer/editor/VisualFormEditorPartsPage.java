@@ -373,8 +373,8 @@ public class VisualFormEditorPartsPage extends Composite
 
 	protected void fillPartsSection()
 	{
-		Form flattenedForm = editor.getFlattenedForm();
-		if (flattenedForm == null) return;
+		if (editor.getForm() == null) return;
+		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm());
 
 		// preserve selection when possible
 		ISelection currentPartsSelection = currentParts.getSelection();
@@ -724,7 +724,7 @@ public class VisualFormEditorPartsPage extends Composite
 		{
 			FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(editor.getForm());
 			dialog = new DataProviderDialog(getShell(), DataProviderLabelProvider.INSTANCE_HIDEPREFIX, editor.getForm(), flattenedSolution,
-				editor.getFlattenedForm().getTable(), new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, false, false, false,
+					flattenedSolution.getFlattenedForm(editor.getForm()).getTable(), new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, false, false, false,
 					INCLUDE_RELATIONS.NESTED, false, true, null), null, SWT.MULTI, "Select Group-by fields");
 			if (dialog.open() == SWT.CANCEL)
 			{

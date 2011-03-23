@@ -312,112 +312,105 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	{
 		if (propertyDescriptors == null)
 		{
+			FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist);
+			Form flattenedForm = flattenedEditingSolution.getFlattenedForm(persist);
+
+			java.beans.BeanInfo info = null;
+			Object valueObject = null;
 			try
 			{
-				FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist);
-				Form flattenedForm = flattenedEditingSolution.getFlattenedForm(persist);
-
-				java.beans.BeanInfo info = null;
-				Object valueObject = null;
-				try
+				if (persist instanceof Bean) //step into the bean instance
 				{
-					if (persist instanceof Bean) //step into the bean instance
-					{
-						try
-						{
-							FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
-							valueObject = DesignComponentFactory.getBeanDesignInstance(Activator.getDefault().getDesignClient(), editingFlattenedSolution,
-								(Bean)persist, (Form)persist.getAncestor(IRepository.FORMS));
-						}
-						catch (Exception e)
-						{
-							ServoyLog.logError("Could not instantiate bean " + persist, e);
-						}
-						if (valueObject instanceof InvisibleBean) //step into the invisible bean instance
-						{
-							valueObject = ((InvisibleBean)valueObject).getDelegate();
-						}
-					}
-					else
-					{
-						valueObject = persist;
-					}
-					if (valueObject != null)
-					{
-						info = java.beans.Introspector.getBeanInfo(valueObject.getClass());
-					}
-				}
-				catch (java.beans.IntrospectionException e)
-				{
-					ServoyLog.logError(e);
-				}
-				java.beans.PropertyDescriptor[] properties;
-				if (info != null)
-				{
-					properties = info.getPropertyDescriptors();
-				}
-				else
-				{
-					properties = new java.beans.PropertyDescriptor[0];
-				}
-
-				propertyDescriptors = new HashMap<Object, IPropertyDescriptor>();
-				hiddenPropertyDescriptors = new HashMap<Object, IPropertyDescriptor>();
-				beansProperties = new HashMap<Object, PropertyDescriptorWrapper>();
-
-				for (java.beans.PropertyDescriptor element : properties)
-				{
-					registerProperty(new PropertyDescriptorWrapper(element, valueObject), flattenedForm, flattenedEditingSolution);
-				}
-				if (valueObject == persist)
-				{
-					// check for pseudo properties
-					String[] pseudoPropertyNames = getPseudoPropertyNames(persist.getClass());
-					if (pseudoPropertyNames != null)
-					{
-						for (String propName : pseudoPropertyNames)
-						{
-							IPropertyDescriptor desc;
-							try
-							{
-								desc = getPropertiesPropertyDescriptor(propName, getDisplayName(propName), propName, flattenedForm, flattenedEditingSolution);
-								if (desc != null)
-								{
-									setCategory(desc, PropertyCategory.createPropertyCategory(propName));
-									propertyDescriptors.put(propName, desc);
-								}
-							}
-							catch (RepositoryException e)
-							{
-								ServoyLog.logError(e);
-							}
-						}
-					}
-				}
-				else
-				{
-					// bean: use size, location and name descriptors from the persist (Bean)
 					try
 					{
-						for (java.beans.PropertyDescriptor element : java.beans.Introspector.getBeanInfo(persist.getClass()).getPropertyDescriptors())
+						FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
+						valueObject = DesignComponentFactory.getBeanDesignInstance(Activator.getDefault().getDesignClient(), editingFlattenedSolution,
+							(Bean)persist, (Form)persist.getAncestor(IRepository.FORMS));
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError("Could not instantiate bean " + persist, e);
+					}
+					if (valueObject instanceof InvisibleBean) //step into the invisible bean instance
+					{
+						valueObject = ((InvisibleBean)valueObject).getDelegate();
+					}
+				}
+				else
+				{
+					valueObject = persist;
+				}
+				if (valueObject != null)
+				{
+					info = java.beans.Introspector.getBeanInfo(valueObject.getClass());
+				}
+			}
+			catch (java.beans.IntrospectionException e)
+			{
+				ServoyLog.logError(e);
+			}
+			java.beans.PropertyDescriptor[] properties;
+			if (info != null)
+			{
+				properties = info.getPropertyDescriptors();
+			}
+			else
+			{
+				properties = new java.beans.PropertyDescriptor[0];
+			}
+
+			propertyDescriptors = new HashMap<Object, IPropertyDescriptor>();
+			hiddenPropertyDescriptors = new HashMap<Object, IPropertyDescriptor>();
+			beansProperties = new HashMap<Object, PropertyDescriptorWrapper>();
+
+			for (java.beans.PropertyDescriptor element : properties)
+			{
+				registerProperty(new PropertyDescriptorWrapper(element, valueObject), flattenedForm, flattenedEditingSolution);
+			}
+			if (valueObject == persist)
+			{
+				// check for pseudo properties
+				String[] pseudoPropertyNames = getPseudoPropertyNames(persist.getClass());
+				if (pseudoPropertyNames != null)
+				{
+					for (String propName : pseudoPropertyNames)
+					{
+						IPropertyDescriptor desc;
+						try
 						{
-							registerProperty(new PropertyDescriptorWrapper(element, persist), flattenedForm, flattenedEditingSolution);
-							if (propertyDescriptors.containsKey(element.getName()))
+							desc = getPropertiesPropertyDescriptor(propName, getDisplayName(propName), propName, flattenedForm, flattenedEditingSolution);
+							if (desc != null)
 							{
-								// if same property is defined in bean and persist, override with persist version
-								propertyDescriptors.remove(BEAN_PROPERTY_PREFIX_DOT + element.getName());
+								setCategory(desc, PropertyCategory.createPropertyCategory(propName));
+								propertyDescriptors.put(propName, desc);
 							}
 						}
-					}
-					catch (IntrospectionException e)
-					{
-						ServoyLog.logError(e);
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError(e);
+						}
 					}
 				}
 			}
-			catch (RepositoryException ex)
+			else
 			{
-				ServoyLog.logError(ex);
+				// bean: use size, location and name descriptors from the persist (Bean)
+				try
+				{
+					for (java.beans.PropertyDescriptor element : java.beans.Introspector.getBeanInfo(persist.getClass()).getPropertyDescriptors())
+					{
+						registerProperty(new PropertyDescriptorWrapper(element, persist), flattenedForm, flattenedEditingSolution);
+						if (propertyDescriptors.containsKey(element.getName()))
+						{
+							// if same property is defined in bean and persist, override with persist version
+							propertyDescriptors.remove(BEAN_PROPERTY_PREFIX_DOT + element.getName());
+						}
+					}
+				}
+				catch (IntrospectionException e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
 		}
 	}
@@ -2204,15 +2197,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			boolean propertyReadOnly = false;
 			if (!readOnly && persist instanceof Form && ((Form)persist).getExtendsFormID() > 0)
 			{
-				Form flattenedSuperForm = null;
-				try
-				{
-					flattenedSuperForm = flattenedEditingSolution.getFlattenedForm(flattenedEditingSolution.getForm(((Form)persist).getExtendsFormID()));
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-				}
+				Form flattenedSuperForm = flattenedEditingSolution.getFlattenedForm(flattenedEditingSolution.getForm(((Form)persist).getExtendsFormID()));
 				propertyReadOnly = flattenedSuperForm == null /* superform not found? make readonly for safety */
 					|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
 

@@ -84,7 +84,7 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 	@Override
 	protected List<Object> getModelChildren()
 	{
-		Form flattenedForm = editorPart.getFlattenedForm();
+		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm());
 		List<Object> list = new ArrayList<Object>();
 
 		list.add(new BorderModel(flattenedForm)); // A separate editpart to show the form border and resize handles
@@ -303,13 +303,6 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		public void mouseUp(MouseEvent e)
 		{
 		}
-	}
-
-	@Override
-	protected void refreshChildren()
-	{
-		editorPart.refreshFlattenedForm();
-		super.refreshChildren();
 	}
 
 	@Override

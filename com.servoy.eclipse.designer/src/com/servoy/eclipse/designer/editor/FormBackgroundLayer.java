@@ -73,8 +73,8 @@ public class FormBackgroundLayer extends FreeformLayer
 	{
 		super.paintFigure(graphics);
 
-		Form flattenedForm = editorPart.getFlattenedForm();
-		if (flattenedForm == null) return;
+		if (editorPart.getForm() == null) return;
+		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm());
 		if (flattenedForm.getTransparent())
 		{
 			paintTransparencyFormPattern(graphics, flattenedForm);
@@ -190,7 +190,7 @@ public class FormBackgroundLayer extends FreeformLayer
 		{
 			return;
 		}
-		Form flattenedForm = editorPart.getFlattenedForm();
+		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm());
 		if (flattenedForm == null) return;
 
 		String defaultPageFormat = flattenedForm.getDefaultPageFormat();

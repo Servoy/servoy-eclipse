@@ -29,7 +29,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.editors.MethodCellEditor;
@@ -45,7 +44,6 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.MethodTemplate;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.SafeArrayList;
 import com.servoy.j2db.util.Utils;
@@ -259,16 +257,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 				if (MethodDialog.METHOD_DEFAULT.equals(mwa) && persist instanceof Form && ((Form)persist).getExtendsFormID() > 0)
 				{
 					// look for method in superform
-					Form flattenedForm;
-					try
-					{
-						flattenedForm = ModelUtils.getEditingFlattenedSolution(persist).getFlattenedForm(persist);
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-						return new IPropertyDescriptor[0];
-					}
+					Form flattenedForm = ModelUtils.getEditingFlattenedSolution(persist).getFlattenedForm(persist);
 					Object propertyValue = new PersistPropertySource(flattenedForm, null, false).getPropertyValue(methodKey);
 					methodId = ((ComplexProperty<MethodWithArguments>)propertyValue).getValue().methodId;
 				}

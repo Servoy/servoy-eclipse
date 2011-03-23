@@ -65,6 +65,7 @@ import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.dnd.IDragData;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.views.IndexedListViewer;
 import com.servoy.eclipse.ui.views.IndexedStructuredSelection;
@@ -380,7 +381,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 			}
 		});
 		List<ISupportTabSeq> selected = new ArrayList<ISupportTabSeq>();
-		Iterator<ISupportTabSeq> iterator = editor.getFlattenedForm().getTabSeqElementsByTabOrder();
+		Iterator<ISupportTabSeq> iterator = ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm()).getTabSeqElementsByTabOrder();
 		for (int i = 0; iterator.hasNext(); i++)
 		{
 			ISupportTabSeq tabSeq = iterator.next();

@@ -878,18 +878,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
 				Form form = fs.getForm(config);
 				if (form == null) return context.getKnownType("Form");
-				Form formToUse = form;
-				try
-				{
-					if (form.getExtendsFormID() > 0)
-					{
-						formToUse = fs.getFlattenedForm(form);
-					}
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-				}
+				Form formToUse = fs.getFlattenedForm(form);
 				String ds = formToUse.getDataSource();
 				if (cachedSuperTypeTemplateType == null)
 				{

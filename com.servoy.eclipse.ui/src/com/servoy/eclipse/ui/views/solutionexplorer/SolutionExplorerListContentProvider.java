@@ -58,9 +58,9 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.IApplication;
 import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
@@ -950,17 +950,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 			if (flatSolution != null)
 			{
-				try
+				Form flatForm = flatSolution.getFlattenedForm(f);
+				if (flatForm != null)
 				{
-					Form flatForm = flatSolution.getFlattenedForm(f);
-					if (flatForm != null)
-					{
-						form = flatForm;
-					}
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
+					form = flatForm;
 				}
 			}
 			Iterator<ScriptMethod> it = form.getScriptMethods(true);
@@ -1016,17 +1009,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 			if (flatSolution != null)
 			{
-				try
+				Form flatForm = flatSolution.getFlattenedForm(form);
+				if (flatForm != null)
 				{
-					Form flatForm = flatSolution.getFlattenedForm(form);
-					if (flatForm != null)
-					{
-						form = flatForm;
-					}
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
+					form = flatForm;
 				}
 			}
 			TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.ARRAY, null, dlm, "allvariables", form, null);

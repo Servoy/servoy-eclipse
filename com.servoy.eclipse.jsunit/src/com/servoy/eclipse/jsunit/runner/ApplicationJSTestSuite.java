@@ -279,16 +279,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		while (it.hasNext())
 		{
 			Form form = it.next();
-			TestIdentifier formTestIdentifier = null;
-			try
-			{
-				formTestIdentifier = addFormTests(flattenedSolution.getFlattenedForm(form), testCode);
-			}
-			catch (RepositoryException e)
-			{
-				Debug.log("Cannot get flat form for " + solution.getName() + " - " + form.getName() + "; using normal form.", e);
-				formTestIdentifier = addFormTests(form, testCode);
-			}
+			TestIdentifier formTestIdentifier = addFormTests(flattenedSolution.getFlattenedForm(form), testCode);
 			if (formTestIdentifier != null)
 			{
 				allFormTestNames.add(formTestIdentifier);

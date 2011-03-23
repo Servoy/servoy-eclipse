@@ -489,7 +489,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 			if (editingFlattenedSolution == null)
 			{
 				if (getEditingSolution() == null) return null;
-				editingFlattenedSolution = new FlattenedSolution();
+				editingFlattenedSolution = new FlattenedSolution(true); // flattened form cache will be flushed by ServoyModel when persists change.model
 			}
 			if (editingFlattenedSolution.getSolution() == null)
 			{

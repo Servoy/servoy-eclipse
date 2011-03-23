@@ -1337,6 +1337,11 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		return refreshJob;
 	}
 
+	@Override
+	protected FlattenedSolution createFlattenedSolution()
+	{
+		return new FlattenedSolution(true); // flattened form cache will be flushed when persists changes
+	}
 
 	public void revertEditingPersist(ServoyProject sp, IPersist persist) throws RepositoryException
 	{
@@ -1376,6 +1381,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 
 		if (realSolution)
 		{
+			getFlattenedSolution().flushFlattenedFormCache();
 			synchronized (fireRealPersistchangesJob)
 			{
 				realOutstandingChanges.addAll(changes);
@@ -1386,6 +1392,10 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		else
 		{
 			// editing solution
+			for (IPersist changed : changes)
+			{
+				getEditingFlattenedSolution(changed).flushFlattenedFormCache();
+			}
 			firePersistsChangedEx(false, changes);
 		}
 	}

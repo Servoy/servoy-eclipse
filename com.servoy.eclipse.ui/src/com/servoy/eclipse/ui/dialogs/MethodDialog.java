@@ -197,14 +197,7 @@ public class MethodDialog extends TreeSelectDialog
 				Form form = (Form)persist.getAncestor(IRepository.FORMS);
 				if (form != null)
 				{
-					try
-					{
-						scriptMethods = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form).getScriptMethods(true);
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
+					scriptMethods = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form).getScriptMethods(true);
 				}
 			}
 

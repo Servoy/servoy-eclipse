@@ -22,6 +22,7 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.editparts.GridLayer;
 import org.eclipse.swt.graphics.Color;
 
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.persistence.Form;
@@ -44,8 +45,8 @@ public class DottedGridLayer extends GridLayer
 	@Override
 	protected void paintGrid(Graphics g)
 	{
-		Form flattenedForm = editorPart.getFlattenedForm();
-		if (flattenedForm == null) return;
+		if (editorPart.getForm() == null) return;
+		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm());
 
 		java.awt.Dimension size = flattenedForm.getSize();
 		if (size == null) return;

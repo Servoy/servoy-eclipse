@@ -105,7 +105,6 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	public static final String VFE_PAGE_ID = "PageID";
 
 	private Form form; // The working model.
-	private Form flattenedForm;
 	private ServoyProject servoyProject; // the solution wrapper
 
 	private IContextActivation activateContext;
@@ -249,33 +248,6 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		return form;
 	}
 
-	public Form getFlattenedForm()
-	{
-		if (flattenedForm == null)
-		{
-			try
-			{
-				FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
-				if (editingFlattenedSolution == null)
-				{
-					ServoyLog.logError("Could not get project for form " + form, null);
-					return null;
-				}
-				flattenedForm = editingFlattenedSolution.getFlattenedForm(form);
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError("Could not create flattened form for form " + form, e);
-			}
-		}
-		return flattenedForm;
-	}
-
-	public void refreshFlattenedForm()
-	{
-		flattenedForm = null;
-	}
-
 	private final CommandStack dummyCommandStack = new CommandStack()
 	{
 		@Override
@@ -323,8 +295,8 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 					}
 					if (marker.getAttribute(IMarker.CHAR_START, -1) != -1)
 					{
-						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(), Utils.getAsInteger(marker.getAttribute(
-							IMarker.CHAR_START, -1)));
+						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(),
+							Utils.getAsInteger(marker.getAttribute(IMarker.CHAR_START, -1)));
 					}
 					if (elementUuid != null)
 					{
@@ -606,7 +578,6 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 			}
 		}
 
-		refreshFlattenedForm();
 		if (full_refresh)
 		{
 			// refresh all

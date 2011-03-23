@@ -53,6 +53,7 @@ import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.designer.property.PropertyDirectEditManager;
 import com.servoy.eclipse.designer.property.PropertyDirectEditManager.PropertyCellEditorLocator;
 import com.servoy.eclipse.designer.property.PropertyDirectEditPolicy;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
@@ -131,8 +132,8 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 
 	protected void updateFigure(Part part, PartFigure fig)
 	{
-		Form flattenedForm = editorPart.getFlattenedForm();
-		if (flattenedForm == null) return;
+		if (editorPart.getForm() == null) return;
+		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm());
 
 		fig.setText(part.getEditorName());
 		Dimension dim = fig.getMinimumSize(0, 0);
@@ -178,8 +179,7 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 	// If the form changed width we have to refresh
 	public void persistChanges(Collection<IPersist> changes)
 	{
-		Form flattenedForm = editorPart.getFlattenedForm();
-		if (flattenedForm != null)
+		if (editorPart.getForm() != null)
 		{
 			Display.getDefault().asyncExec(new Runnable()
 			{

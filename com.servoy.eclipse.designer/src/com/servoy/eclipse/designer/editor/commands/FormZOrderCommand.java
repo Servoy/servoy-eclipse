@@ -21,12 +21,10 @@ import java.awt.Dimension;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
@@ -77,16 +75,7 @@ public class FormZOrderCommand extends BaseRestorableCommand implements ISupport
 	@Override
 	public void execute()
 	{
-		Dimension min_max;
-		try
-		{
-			min_max = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form).getMinMaxUsedFormIndex();
-		}
-		catch (RepositoryException e)
-		{
-			ServoyLog.logError(e);
-			return;
-		}
+		Dimension min_max = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form).getMinMaxUsedFormIndex();
 		int indexFirstToUse = 0;
 		if (VisualFormEditor.REQ_SEND_TO_BACK.equals(requestType))
 		{
