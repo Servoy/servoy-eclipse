@@ -1186,39 +1186,39 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 		private ElementsScopeCreator()
 		{
-			typeNames.put(IScriptScriptButtonMethods.class.getSimpleName(), "Button");
-			typeNames.put(IScriptDataButtonMethods.class.getSimpleName(), "Button");
-			addType("Button", IScriptScriptButtonMethods.class);
-			typeNames.put(IScriptScriptLabelMethods.class.getSimpleName(), "Label");
-			typeNames.put(IScriptDataLabelMethods.class.getSimpleName(), "Label");
-			addType("Label", IScriptScriptLabelMethods.class);
-			typeNames.put(IScriptDataPasswordMethods.class.getSimpleName(), "Password");
-			addType("Password", IScriptDataPasswordMethods.class);
-			typeNames.put(IScriptTextEditorMethods.class.getSimpleName(), "HtmlArea");
-			addType("HtmlArea", IScriptTextEditorMethods.class);
-			typeNames.put(IScriptTextAreaMethods.class.getSimpleName(), "TextArea");
-			addType("TextArea", IScriptTextAreaMethods.class);
-			typeNames.put(IScriptChoiceMethods.class.getSimpleName(), "Checks");
-			addType("Checks", IScriptChoiceMethods.class);
-			typeNames.put(IScriptCheckBoxMethods.class.getSimpleName(), "CheckBox");
-			addType("CheckBox", IScriptCheckBoxMethods.class);
-			typeNames.put(IScriptChoiceMethods.class.getSimpleName(), "Radios");
-			addType("Radios", IScriptChoiceMethods.class);
-			typeNames.put(IScriptDataComboboxMethods.class.getSimpleName(), "ComboBox");
-			addType("ComboBox", IScriptDataComboboxMethods.class);
-			typeNames.put(IScriptDataCalendarMethods.class.getSimpleName(), "Calendar");
-			addType("Calendar", IScriptDataCalendarMethods.class);
-			typeNames.put(IScriptMediaInputFieldMethods.class.getSimpleName(), "MediaField");
-			addType("MediaField", IScriptMediaInputFieldMethods.class);
-			typeNames.put(IScriptFieldMethods.class.getSimpleName(), "TypeAhead");
-			typeNames.put(IScriptFieldMethods.class.getSimpleName(), "TextField");
-			addType("TextField", IScriptFieldMethods.class);
-			typeNames.put(IDepricatedScriptTabPanelMethods.class.getSimpleName(), "TabPanel");
-			addType("TabPanel", IDepricatedScriptTabPanelMethods.class);
-			typeNames.put(IScriptSplitPaneMethods.class.getSimpleName(), "SplitPane");
-			addType("SplitPane", IScriptSplitPaneMethods.class);
-			typeNames.put(IScriptPortalComponentMethods.class.getSimpleName(), "Portal");
-			addType("Portal", IScriptPortalComponentMethods.class);
+			typeNames.put(IScriptScriptButtonMethods.class.getSimpleName(), "RuntimeButton");
+			typeNames.put(IScriptDataButtonMethods.class.getSimpleName(), "RuntimeButton");
+			addType("RuntimeButton", IScriptScriptButtonMethods.class);
+			typeNames.put(IScriptScriptLabelMethods.class.getSimpleName(), "RuntimeLabel");
+			typeNames.put(IScriptDataLabelMethods.class.getSimpleName(), "RuntimeLabel");
+			addType("RuntimeLabel", IScriptScriptLabelMethods.class);
+			typeNames.put(IScriptDataPasswordMethods.class.getSimpleName(), "RuntimePassword");
+			addType("RuntimePassword", IScriptDataPasswordMethods.class);
+			typeNames.put(IScriptTextEditorMethods.class.getSimpleName(), "RuntimeHtmlArea");
+			addType("RuntimeHtmlArea", IScriptTextEditorMethods.class);
+			typeNames.put(IScriptTextAreaMethods.class.getSimpleName(), "RuntimeTextArea");
+			addType("RuntimeTextArea", IScriptTextAreaMethods.class);
+			typeNames.put(IScriptChoiceMethods.class.getSimpleName(), "RuntimeChecks");
+			addType("RuntimeChecks", IScriptChoiceMethods.class);
+			typeNames.put(IScriptCheckBoxMethods.class.getSimpleName(), "RuntimeCheckBox");
+			addType("RuntimeCheckBox", IScriptCheckBoxMethods.class);
+			typeNames.put(IScriptChoiceMethods.class.getSimpleName(), "RuntimeRadios");
+			addType("RuntimeRadios", IScriptChoiceMethods.class);
+			typeNames.put(IScriptDataComboboxMethods.class.getSimpleName(), "RuntimeComboBox");
+			addType("RuntimeComboBox", IScriptDataComboboxMethods.class);
+			typeNames.put(IScriptDataCalendarMethods.class.getSimpleName(), "RuntimeCalendar");
+			addType("RuntimeCalendar", IScriptDataCalendarMethods.class);
+			typeNames.put(IScriptMediaInputFieldMethods.class.getSimpleName(), "RuntimeMediaField");
+			addType("RuntimeMediaField", IScriptMediaInputFieldMethods.class);
+			typeNames.put(IScriptFieldMethods.class.getSimpleName(), "RuntimeTypeAhead");
+			typeNames.put(IScriptFieldMethods.class.getSimpleName(), "RuntimeTextField");
+			addType("RuntimeTextField", IScriptFieldMethods.class);
+			typeNames.put(IDepricatedScriptTabPanelMethods.class.getSimpleName(), "RuntimeTabPanel");
+			addType("RuntimeTabPanel", IDepricatedScriptTabPanelMethods.class);
+			typeNames.put(IScriptSplitPaneMethods.class.getSimpleName(), "RuntimeSplitPane");
+			addType("RuntimeSplitPane", IScriptSplitPaneMethods.class);
+			typeNames.put(IScriptPortalComponentMethods.class.getSimpleName(), "RuntimePortal");
+			addType("RuntimePortal", IScriptPortalComponentMethods.class);
 
 			addAnonymousClassType("BaseComponent", IScriptBaseMethods.class);
 		}
@@ -1304,8 +1304,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			{
 				Debug.log("no element name found for " + cls.getSimpleName()); // TODO make trace, this will always be hit by beans.
 				name = cls.getSimpleName();
+				addAnonymousClassType(name, cls);
 			}
-			addAnonymousClassType(name, cls);
 			return context.getTypeRef(name);
 		}
 
