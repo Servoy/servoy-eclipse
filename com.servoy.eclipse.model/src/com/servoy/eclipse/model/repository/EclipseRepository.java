@@ -350,7 +350,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 
 	private final Map<UUID, Integer> foreignElementUUIDs = new HashMap<UUID, Integer>();
 
-	public void loadForeignElementsIDs(final IRootObject rootObject)
+	public void loadForeignElementsIDs(final IPersist rootObject)
 	{
 		rootObject.acceptVisitor(new IPersistVisitor()
 		{
@@ -696,9 +696,9 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 									WorkspaceUserManager.SECURITY_FILE_EXTENSION;
 								if (wsa.exists(oldSecFileRelativePath))
 								{
-									wsa.move(oldSecFileRelativePath, fileFromPath.getLeft() +
-										fileToName.substring(0, fileToName.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) +
-										WorkspaceUserManager.SECURITY_FILE_EXTENSION);
+									wsa.move(oldSecFileRelativePath,
+										fileFromPath.getLeft() + fileToName.substring(0, fileToName.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) +
+											WorkspaceUserManager.SECURITY_FILE_EXTENSION);
 								}
 							}
 						}

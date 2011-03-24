@@ -27,6 +27,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -67,11 +68,14 @@ public class JSDeveloperSolutionModel
 		Solution solutionCopy = state.getFlattenedSolution().getSolutionCopy();
 		try
 		{
+			EclipseRepository eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
+			eclipseRepository.loadForeignElementsIDs(solutionCopy);
 			List<IPersist> allObjectsAsList = solutionCopy.getAllObjectsAsList();
 			for (IPersist persist : allObjectsAsList)
 			{
 				SolutionSerializer.writePersist(persist, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
 			}
+			eclipseRepository.clearForeignElementsIds();
 		}
 		catch (RepositoryException e)
 		{
@@ -105,7 +109,10 @@ public class JSDeveloperSolutionModel
 				Form frm = solutionCopy.getForm(name);
 				if (frm == null) throw new IllegalArgumentException("JSForm is not a solution model created/altered form"); //$NON-NLS-1$
 
+				EclipseRepository eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
+				eclipseRepository.loadForeignElementsIDs(frm);
 				SolutionSerializer.writePersist(frm, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
+				eclipseRepository.clearForeignElementsIds();
 			}
 			catch (RepositoryException e)
 			{
