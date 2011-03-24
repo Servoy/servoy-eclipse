@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -162,6 +164,12 @@ public class ProfilerView extends ViewPart
 
 		private final List<AggregateData> callees = new ArrayList<AggregateData>();
 
+		private HashMap<String, DataCallProfileData> dataCallProfileDataMap;
+
+		private Long queryTime;
+
+		private Integer queryCount;
+
 		private int innerFunctionLineStart = -1;
 
 		/**
@@ -174,6 +182,10 @@ public class ProfilerView extends ViewPart
 			if (pd.isInnerFunction() && pd.getLineNumbers() != null && pd.getLineNumbers().length > 0)
 			{
 				this.innerFunctionLineStart = pd.getLineNumbers()[0];
+			}
+			if (pd.getDataCallProfileDatas() != null && !pd.getDataCallProfileDatas().isEmpty())
+			{
+				dataCallProfileDataMap = new HashMap<String, DataCallProfileData>();
 			}
 			add(pd);
 		}
@@ -197,6 +209,24 @@ public class ProfilerView extends ViewPart
 				time += pd.getTime();
 				ownTime += pd.getOwnTime();
 				count++;
+
+				for (DataCallProfileData dataCallProfileData : pd.getDataCallProfileDatas())
+				{
+					DataCallProfileData oldDataCallProfileData = dataCallProfileDataMap.get(dataCallProfileData.getQuery());
+					if (oldDataCallProfileData != null)
+					{
+						DataCallProfileData newDataCallProfileData = new DataCallProfileData(oldDataCallProfileData.getName(),
+							oldDataCallProfileData.getDatasource(), oldDataCallProfileData.getTransactionId(), 0, oldDataCallProfileData.getTime() +
+								dataCallProfileData.getTime(), oldDataCallProfileData.getQuery(), oldDataCallProfileData.getArgumentString(),
+							dataCallProfileData.getCount() + oldDataCallProfileData.getCount());
+						dataCallProfileDataMap.put(oldDataCallProfileData.getQuery(), newDataCallProfileData);
+					}
+					else
+					{
+						dataCallProfileDataMap.put(dataCallProfileData.getQuery(), dataCallProfileData);
+					}
+				}
+
 				if (pd.getParent() != null)
 				{
 					AggregateData parent = new AggregateData(pd.getParent());
@@ -316,6 +346,12 @@ public class ProfilerView extends ViewPart
 			}
 			sb.append("</aggregatedata>");
 		}
+
+		public Collection<DataCallProfileData> getDataCallProfileDataMap()
+		{
+			if (dataCallProfileDataMap != null) return dataCallProfileDataMap.values();
+			else return null;
+		}
 	}
 
 	private static final class AggregateDataComparator implements Comparator<AggregateData>
@@ -331,6 +367,15 @@ public class ProfilerView extends ViewPart
 			return (int)(o2.ownTime - o1.ownTime);
 		}
 
+	}
+
+	private static class DataCallProfileDataAggregate extends DataCallProfileData
+	{
+		public DataCallProfileDataAggregate(String name, String datasource, String transaction_id, long startTime, long endTime, String query,
+			String argumentString, int count)
+		{
+			super(name, datasource, transaction_id, startTime, endTime, query, argumentString, count);
+		}
 	}
 
 	/**
@@ -354,7 +399,9 @@ public class ProfilerView extends ViewPart
 
 	private Action doubleClickAction;
 
-	private MethodCallContentProvider contentProvider;
+	private MethodCallContentProvider methodCallContentProvider;
+
+	private DataCallContentProvider dataCallContentProvider;
 
 	private TreeColumn argsColumn;
 
@@ -491,8 +538,32 @@ public class ProfilerView extends ViewPart
 		}
 	}
 
-	class DataCallContentProvider implements IStructuredContentProvider
+	class DataCallContentProvider implements IStructuredContentProvider, IProfileListener
 	{
+
+		private final List<AggregateData> aggregateData = new ArrayList<AggregateData>();
+
+		private boolean aggregateView = false;
+
+		public void addProfileData(ProfileData profileData)
+		{
+			AggregateData ad = new AggregateData(profileData);
+			int index = aggregateData.indexOf(ad);
+			if (index != -1)
+			{
+				ad = aggregateData.get(index);
+				ad.add(profileData);
+			}
+			else
+			{
+				aggregateData.add(ad);
+			}
+			ProfileData[] children = profileData.getChildren();
+			for (ProfileData pd : children)
+			{
+				addProfileData(pd);
+			}
+		}
 
 		/*
 		 * (non-Javadoc)
@@ -525,8 +596,56 @@ public class ProfilerView extends ViewPart
 			{
 				return ((ProfileData)inputElement).getDataCallProfileDatas().toArray();
 			}
+			else if (inputElement instanceof AggregateData)
+			{
+				if (aggregateView)
+				{
+					AggregateData ad = (AggregateData)inputElement;
+					int adIndex = aggregateData.indexOf(ad);
+					if (adIndex >= 0)
+					{
+						Collection<DataCallProfileData> dataCallProfilecollection = aggregateData.get(adIndex).getDataCallProfileDataMap();
+						if (dataCallProfilecollection != null)
+						{
+							DataCallProfileDataAggregate[] dataCallArray = new DataCallProfileDataAggregate[dataCallProfilecollection.size()];
+							int index = 0;
+							for (DataCallProfileData dataCallProfileData : dataCallProfilecollection)
+							{
+								dataCallArray[index] = new DataCallProfileDataAggregate(dataCallProfileData.getName(), dataCallProfileData.getDatasource(),
+									dataCallProfileData.getTransactionId(), 0, dataCallProfileData.getTime(), dataCallProfileData.getQuery(),
+									dataCallProfileData.getArgumentString(), dataCallProfileData.getCount());
+								index++;
+							}
+
+							return dataCallArray;
+						}
+					}
+				}
+			}
 
 			return new Object[0];
+		}
+
+		void toggleAggregateView()
+		{
+			if (aggregateView)
+			{
+				arguments.setText("Arguments");
+			}
+			else
+			{
+				arguments.setText("Count");
+
+			}
+			aggregateView = !aggregateView;
+			Display.getDefault().asyncExec(new Runnable()
+			{
+
+				public void run()
+				{
+					sqlDataViewer.refresh();
+				}
+			});
 		}
 
 	}
@@ -574,6 +693,8 @@ public class ProfilerView extends ViewPart
 			if (element instanceof ProfileData)
 			{
 				ProfileData pd = (ProfileData)element;
+				String sourceName;
+				IFile file;
 				switch (columnIndex)
 				{
 					case 0 :
@@ -583,7 +704,20 @@ public class ProfilerView extends ViewPart
 						{
 							lineStart = "#" + lineNumbers[0];
 						}
-						return pd.isInnerFunction() ? pd.getMethodName() + " (innerfunction" + lineStart + ")" : pd.getMethodName();
+
+						String printedMethodName = "";
+						file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(pd.getSourceName()));
+						if (file.getName().equals("globals.js"))
+						{
+							printedMethodName = "globals.";
+							printedMethodName = printedMethodName + pd.getMethodName() + "[" + file.getProject().getName() + "]";
+						}
+						else
+						{
+							printedMethodName = printedMethodName + pd.getMethodName() + "[" + file.getName().replace(".js", "") + "]";
+						}
+
+						return pd.isInnerFunction() ? printedMethodName + " (innerfunction" + lineStart + ")" : printedMethodName;
 					case 1 :
 						return Long.toString(pd.getOwnTime());
 					case 2 :
@@ -592,8 +726,8 @@ public class ProfilerView extends ViewPart
 						return pd.getArgs();
 					case 4 :
 					{
-						String sourceName = pd.getSourceName();
-						IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(sourceName));
+						sourceName = pd.getSourceName();
+						file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(sourceName));
 						return file.getProject().getName() + '/' + file.getProjectRelativePath().toPortableString();
 					}
 				}
@@ -604,7 +738,19 @@ public class ProfilerView extends ViewPart
 				switch (columnIndex)
 				{
 					case 0 :
-						return pd.getInnerFunctionLineStart() == -1 ? pd.getMethodName() : pd.getMethodName() + "#" + pd.getInnerFunctionLineStart();
+						String printedMethodName = "";
+						IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(pd.getSourceName()));
+						if (file.getName().equals("globals.js"))
+						{
+							printedMethodName = "globals.";
+							printedMethodName = printedMethodName + pd.getMethodName() + "[" + file.getProject().getName() + "]";
+						}
+						else
+						{
+							printedMethodName = printedMethodName + pd.getMethodName() + "[" + file.getName().replace(".js", "") + "]";
+						}
+
+						return pd.getInnerFunctionLineStart() == -1 ? printedMethodName : printedMethodName + "#" + pd.getInnerFunctionLineStart();
 					case 1 :
 						return Long.toString(pd.getOwnTime());
 					case 2 :
@@ -669,7 +815,27 @@ public class ProfilerView extends ViewPart
 		@SuppressWarnings("nls")
 		public String getColumnText(Object element, int columnIndex)
 		{
-			if (element instanceof DataCallProfileData)
+
+			if (element instanceof DataCallProfileDataAggregate)
+			{
+				DataCallProfileDataAggregate pd = (DataCallProfileDataAggregate)element;
+				switch (columnIndex)
+				{
+					case 0 :
+						return pd.getName();
+					case 1 :
+						return Long.toString(pd.getTime());
+					case 2 :
+						return pd.getQuery();
+					case 3 :
+						return (new Integer(pd.getCount())).toString();
+					case 4 :
+						return pd.getDatasource();
+					case 5 :
+						return pd.getTransactionId();
+				}
+			}
+			else if (element instanceof DataCallProfileData)
 			{
 				DataCallProfileData pd = (DataCallProfileData)element;
 				switch (columnIndex)
@@ -688,23 +854,7 @@ public class ProfilerView extends ViewPart
 						return pd.getTransactionId();
 				}
 			}
-			else if (element instanceof AggregateData)
-			{
-				AggregateData pd = (AggregateData)element;
-				switch (columnIndex)
-				{
-					case 0 :
-						return pd.getInnerFunctionLineStart() == -1 ? pd.getMethodName() : pd.getMethodName() + "#" + pd.getInnerFunctionLineStart();
-					case 1 :
-						return Long.toString(pd.getOwnTime());
-					case 2 :
-						return Long.toString(pd.getTime());
-					case 3 :
-						return Integer.toString(pd.getCount());
-					case 4 :
-						return pd.getSourceName();
-				}
-			}
+
 			return null;
 		}
 
@@ -795,7 +945,7 @@ public class ProfilerView extends ViewPart
 		int transactionTableColumnWidth = getSavedState(TRANSACTION_TABLE_COLUMN_WIDTH_SETTING, TRANSACTION_TABLE_COLUMN_WIDTH_DEFAULT);
 		int[] sashFormWeights = new int[] { getSavedState(TREE_WIDTH_SETTING, TREE_WIDTH_DEFAULT), getSavedState(TABLE_WIDTH_SETTING, TABLE_WIDTH_DEFAULT) };
 
-		contentProvider = new MethodCallContentProvider();
+		methodCallContentProvider = new MethodCallContentProvider();
 
 		tree = methodCallViewer.getTree();
 		tree.setHeaderVisible(true);
@@ -826,7 +976,7 @@ public class ProfilerView extends ViewPart
 		fileColumn.setResizable(true);
 		fileColumn.setWidth(fileColumnWidth);
 
-		methodCallViewer.setContentProvider(contentProvider);
+		methodCallViewer.setContentProvider(methodCallContentProvider);
 		methodCallViewer.setLabelProvider(new MethodCallLabelProvider());
 		// viewer.setSorter(new NameSorter());
 		methodCallViewer.setInput(getViewSite());
@@ -867,8 +1017,9 @@ public class ProfilerView extends ViewPart
 		transaction.setResizable(true);
 
 
+		dataCallContentProvider = new DataCallContentProvider();
 		sqlDataViewer.setLabelProvider(new DataCallLabelProvider());
-		sqlDataViewer.setContentProvider(new DataCallContentProvider());
+		sqlDataViewer.setContentProvider(dataCallContentProvider);
 		sqlDataViewer.setInput(getViewSite());
 
 		methodCallViewer.addSelectionChangedListener(new ISelectionChangedListener()
@@ -913,7 +1064,8 @@ public class ProfilerView extends ViewPart
 	{
 		super.dispose();
 
-		RemoteDebugScriptEngine.deregisterProfileListener(contentProvider);
+		RemoteDebugScriptEngine.deregisterProfileListener(methodCallContentProvider);
+		RemoteDebugScriptEngine.deregisterProfileListener(dataCallContentProvider);
 	}
 
 	private void hookContextMenu()
@@ -987,10 +1139,11 @@ public class ProfilerView extends ViewPart
 			@Override
 			public void run()
 			{
-				contentProvider.invisibleRoot.clear();
-				if (contentProvider.aggregateView)
+				methodCallContentProvider.invisibleRoot.clear();
+				if (methodCallContentProvider.aggregateView)
 				{
-					contentProvider.aggregateData.clear();
+					methodCallContentProvider.aggregateData.clear();
+					dataCallContentProvider.aggregateData.clear();
 				}
 				methodCallViewer.refresh();
 			}
@@ -1016,7 +1169,8 @@ public class ProfilerView extends ViewPart
 			@Override
 			public void run()
 			{
-				contentProvider.toggleAggregateView();
+				methodCallContentProvider.toggleAggregateView();
+				dataCallContentProvider.toggleAggregateView();
 			}
 		};
 		toggleAggregateView.setText("Aggregate View");
@@ -1030,7 +1184,8 @@ public class ProfilerView extends ViewPart
 			{
 				if (toggleProfile.isChecked())
 				{
-					RemoteDebugScriptEngine.registerProfileListener(contentProvider);
+					RemoteDebugScriptEngine.registerProfileListener(methodCallContentProvider);
+					RemoteDebugScriptEngine.registerProfileListener(dataCallContentProvider);
 					toggleProfile.setText("Stop profiling");
 					toggleProfile.setToolTipText("Stop profiling");
 				}
@@ -1038,7 +1193,8 @@ public class ProfilerView extends ViewPart
 				{
 					toggleProfile.setText("Start profiling");
 					toggleProfile.setToolTipText("Start profiling");
-					RemoteDebugScriptEngine.deregisterProfileListener(contentProvider);
+					RemoteDebugScriptEngine.deregisterProfileListener(methodCallContentProvider);
+					RemoteDebugScriptEngine.deregisterProfileListener(dataCallContentProvider);
 				}
 			}
 		};
@@ -1161,7 +1317,7 @@ public class ProfilerView extends ViewPart
 	 */
 	protected void exportData()
 	{
-		final boolean exportAggregate = contentProvider.aggregateView;
+		final boolean exportAggregate = methodCallContentProvider.aggregateView;
 		Job job = new Job("generating export")
 		{
 			@Override
@@ -1170,7 +1326,7 @@ public class ProfilerView extends ViewPart
 				final StringBuilder sb = new StringBuilder(200);
 				if (exportAggregate)
 				{
-					List<AggregateData> aggregateData = contentProvider.aggregateData;
+					List<AggregateData> aggregateData = methodCallContentProvider.aggregateData;
 					for (AggregateData ad : aggregateData)
 					{
 						ad.toXML(sb);
@@ -1178,7 +1334,7 @@ public class ProfilerView extends ViewPart
 				}
 				else
 				{
-					List<ProfileData> invisibleRoot = contentProvider.invisibleRoot;
+					List<ProfileData> invisibleRoot = methodCallContentProvider.invisibleRoot;
 					for (ProfileData profileData : invisibleRoot)
 					{
 						profileData.toXML(sb);
