@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -140,6 +141,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
+		addScopeType("JSDataSet", new JSDataSetCreator());
 		addScopeType("Form", new FormScopeCreator());
 		addScopeType("Elements", new ElementsScopeCreator());
 		addScopeType("Plugins", new PluginsScopeCreator());
@@ -344,8 +346,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		if (index != -1 && (typeNameClassName.indexOf('>', index)) != -1)
 		{
 			String classType = typeNameClassName.substring(0, index);
-			Type type = createType(context, classType, typeNameClassName);
-			if (type == null) type = createDynamicType(context, classType, typeNameClassName);
+			Type type = createDynamicType(context, classType, typeNameClassName);
+			if (type == null) type = createType(context, classType, typeNameClassName);
 			return type;
 		}
 		return super.createDynamicType(context, typeNameClassName, fullTypeName);
@@ -724,6 +726,53 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 	}
 
+	private class JSDataSetCreator implements IScopeTypeCreator
+	{
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.servoy.eclipse.debug.script.TypeCreator.IScopeTypeCreator#createType(org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext,
+		 * java.lang.String)
+		 */
+		public Type createType(ITypeInfoContext context, String fullTypeName)
+		{
+			Type type = context.getType("JSDataSet");
+			int index = fullTypeName.indexOf('<');
+			if (index != -1 && fullTypeName.endsWith(">"))
+			{
+				String recordType = fullTypeName.substring(index + 1, fullTypeName.length() - 1);
+				if (recordType.startsWith("{") && recordType.endsWith("}")) recordType = recordType.substring(1, recordType.length() - 1);
+				Type t = TypeInfoModelFactory.eINSTANCE.createType();
+				t.setName(fullTypeName);
+				t.setKind(TypeKind.JAVA);
+				t.setSuperType(type);
+				type = t;
+
+				EList<Member> members = t.getMembers();
+				StringTokenizer st = new StringTokenizer(recordType, ",");
+				while (st.hasMoreTokens())
+				{
+					String typeName = "Object";
+					String propertyName = st.nextToken();
+					int typeSeparator = propertyName.indexOf(':');
+					if (typeSeparator != -1)
+					{
+						typeName = propertyName.substring(typeSeparator + 1);
+						propertyName = propertyName.substring(0, typeSeparator);
+					}
+
+					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+					property.setName(propertyName);
+					property.setType(TypeUtil.ref(typeName));
+					members.add(property);
+				}
+			}
+			return type;
+		}
+
+	}
+
 
 	private class RecordCreator extends FoundSetCreator
 	{
@@ -879,6 +928,12 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				Form form = fs.getForm(config);
 				if (form == null) return context.getKnownType("Form");
 				Form formToUse = fs.getFlattenedForm(form);
+				Type superForm = context.getType("Form");
+				if (form.getExtendsFormID() > 0)
+				{
+					Form extendsForm = fs.getForm(form.getExtendsFormID());
+					if (extendsForm != null) superForm = context.getType("Form<" + extendsForm.getName() + '>');
+				}
 				String ds = formToUse.getDataSource();
 				if (cachedSuperTypeTemplateType == null)
 				{
@@ -922,8 +977,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						clone.setVisible(!FormEncapsulation.hideElements(formToUse));
 					}
 				}
-				type = getCombinedType(context, typeName, ds, overwrittenMembers, context.getType("Form"), FORM_IMAGE,
-					!FormEncapsulation.hideDataproviders(formToUse));
+				type = getCombinedType(context, typeName, ds, overwrittenMembers, superForm, FORM_IMAGE, !FormEncapsulation.hideDataproviders(formToUse));
+				if (type != null) type.setAttribute(LAZY_VALUECOLLECTION, form);
 			}
 			return type;
 		}
