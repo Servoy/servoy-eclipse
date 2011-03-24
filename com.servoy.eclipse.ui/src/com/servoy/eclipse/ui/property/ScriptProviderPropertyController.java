@@ -78,7 +78,7 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 
 				try
 				{
-					FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
+					FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persist, context);
 					int methodId = -1;
 
 					// try global method

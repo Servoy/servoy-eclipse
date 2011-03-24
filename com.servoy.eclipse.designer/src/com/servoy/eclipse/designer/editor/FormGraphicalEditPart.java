@@ -41,7 +41,6 @@ import com.servoy.eclipse.designer.editor.FormBorderGraphicalEditPart.BorderMode
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
-import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.SnapToGridFieldPositioner;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -210,17 +209,17 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		}
 		if (child instanceof Part)
 		{
-			return new FormPartGraphicalEditPart(application, editorPart, (Part)child, ElementUtil.isInheritedFormElement(form, child));
+			return new FormPartGraphicalEditPart(application, editorPart, (Part)child, ModelUtils.isInheritedFormElement(form, child));
 		}
 		if (child instanceof Tab)
 		{
-			return new TabFormGraphicalEditPart(application, (Tab)child, ElementUtil.isInheritedFormElement(form, child));
+			return new TabFormGraphicalEditPart(application, (Tab)child, ModelUtils.isInheritedFormElement(form, child));
 		}
 		if (child instanceof FormElementGroup)
 		{
 			return new GroupGraphicalEditPart(application, editorPart, form, (FormElementGroup)child);
 		}
-		return new PersistGraphicalEditPart(application, (IPersist)child, form, ElementUtil.isInheritedFormElement(form, child));
+		return new PersistGraphicalEditPart(application, (IPersist)child, form, ModelUtils.isInheritedFormElement(form, child));
 	}
 
 	@Override

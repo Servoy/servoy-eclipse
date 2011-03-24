@@ -44,21 +44,23 @@ public class MediaPropertyController<P> extends PropertyController<P, Integer>
 {
 
 	private final IPersist persist;
+	private final IPersist context;
 	private final boolean includeNone;
 
 	public MediaPropertyController(Object id, String displayName, IPersist persist, IPersist context, boolean includeNone)
 	{
 		super(id, displayName);
 		this.persist = persist;
+		this.context = context;
 		this.includeNone = includeNone;
-		setLabelProvider(new SolutionContextDelegateLabelProvider(new MediaLabelProvider(ModelUtils.getEditingFlattenedSolution(persist)), context));
+		setLabelProvider(new SolutionContextDelegateLabelProvider(new MediaLabelProvider(ModelUtils.getEditingFlattenedSolution(persist, context)), context));
 		setSupportsReadonly(true);
 	}
 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist);
+		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist, context);
 		return new ListSelectCellEditor(parent, "Select image", new MediaContentProvider(flattenedEditingSolution), getLabelProvider(),
 			new IValueEditor<Integer>()
 			{

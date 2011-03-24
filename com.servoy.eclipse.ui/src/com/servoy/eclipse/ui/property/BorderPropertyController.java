@@ -72,6 +72,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 
 	public static HashMap<BorderType, Border> defaultBorderValues = new HashMap<BorderType, Border>();
 	private final IPersist persist;
+	private final IPersist context;
 
 	final static ComboboxPropertyController<BorderType> comboboxController = new ComboboxPropertyController<BorderType>("BORDER_TYPE", "borderTypes",
 		new ComboboxPropertyModel<BorderType>(BorderType.values()), Messages.LabelUnresolved);
@@ -83,11 +84,12 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 	 */
 	private final IPropertySource propertySource;
 
-	public BorderPropertyController(String id, String displayName, IPropertySource propertySource, IPersist persist)
+	public BorderPropertyController(String id, String displayName, IPropertySource propertySource, IPersist persist, IPersist context)
 	{
 		super(id, displayName);
 		this.propertySource = propertySource;
 		this.persist = persist;
+		this.context = context;
 		populateDefaultBorderValuesMap();
 	}
 
@@ -170,7 +172,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 				propertySource = new LineBorderPropertySource((ComplexProperty<LineBorder>)complexProperty);
 				break;
 			case Title :
-				propertySource = new TitledBorderPropertySource(persist, (ComplexProperty<TitledBorder>)complexProperty);
+				propertySource = new TitledBorderPropertySource(persist, context, (ComplexProperty<TitledBorder>)complexProperty);
 				break;
 			case Matte :
 				propertySource = new MatteBorderPropertySource((ComplexProperty<MatteBorder>)complexProperty);
@@ -924,12 +926,14 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			Messages.LabelUnresolved);
 
 		private final IPersist persist;
+		private final IPersist context;
 		private IPropertyDescriptor[] propertyDescriptors = null;
 
-		public TitledBorderPropertySource(IPersist persist, ComplexProperty<TitledBorder> complexProperty)
+		public TitledBorderPropertySource(IPersist persist, IPersist context, ComplexProperty<TitledBorder> complexProperty)
 		{
 			super(complexProperty);
 			this.persist = persist;
+			this.context = context;
 		}
 
 		@Override
@@ -939,8 +943,9 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			{
 				try
 				{
-					final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist);
-					final Form form = (Form)persist.getAncestor(IRepository.FORMS);
+					final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist, context);
+					final Form form = ModelUtils.isInheritedFormElement(context, persist) ? (Form)context.getAncestor(IRepository.FORMS)
+						: (Form)persist.getAncestor(IRepository.FORMS);
 					final Table table = form == null ? null : form.getTable();
 					propertyDescriptors = new IPropertyDescriptor[] { new PropertyDescriptor(TITLE, "title text")
 					{

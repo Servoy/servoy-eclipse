@@ -68,13 +68,13 @@ public class RelationPropertyController extends PropertyController<String, Objec
 	@Override
 	protected IPropertyConverter<String, Object> createConverter()
 	{
-		return new RelationNameConverter(ModelUtils.getEditingFlattenedSolution(persist));
+		return new RelationNameConverter(ModelUtils.getEditingFlattenedSolution(persist, context));
 	}
 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist);
+		FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist, context);
 		final RelationContentProvider.RelationListOptions relationListOptions = new RelationContentProvider.RelationListOptions(primaryTable, foreignTable,
 			incudeNone, includeNested);
 		ListSelectCellEditor editor = new ListSelectCellEditor(parent, "Select relation", new RelationContentProvider(flattenedEditingSolution),

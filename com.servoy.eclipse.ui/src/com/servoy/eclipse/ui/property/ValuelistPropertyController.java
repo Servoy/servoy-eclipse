@@ -46,13 +46,15 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 {
 	private final boolean includeNone;
 	private final IPersist persist;
+	private final IPersist context;
 
 	public ValuelistPropertyController(Object id, String displayName, IPersist persist, IPersist context, boolean includeNone)
 	{
 		super(id, displayName);
 		this.persist = persist;
+		this.context = context;
 		this.includeNone = includeNone;
-		setLabelProvider(new SolutionContextDelegateLabelProvider(new ValuelistLabelProvider(ModelUtils.getEditingFlattenedSolution(persist)), context));
+		setLabelProvider(new SolutionContextDelegateLabelProvider(new ValuelistLabelProvider(ModelUtils.getEditingFlattenedSolution(persist, context)), context));
 		setSupportsReadonly(true);
 	}
 
@@ -60,7 +62,7 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 	public CellEditor createPropertyEditor(Composite parent)
 	{
 
-		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist);
+		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist, context);
 		return new ListSelectCellEditor(parent, "Select value list", new ValuelistContentProvider(flattenedEditingSolution), getLabelProvider(),
 			new ValueListValueEditor(flattenedEditingSolution), isReadOnly(), new ValuelistContentProvider.ValuelistListOptions(includeNone), SWT.NONE,
 			new ListSelectControlFactory()
@@ -76,7 +78,7 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 				{
 					AddValueListButtonComposite buttons = new AddValueListButtonComposite(composite, SWT.NONE);
 					buttons.setDialog(dialog);
-					buttons.setPersist(persist);
+					buttons.setPersist(ModelUtils.isInheritedFormElement(context, persist) ? context : persist);
 					return buttons;
 				}
 			}, "valuelistDialog"); //$NON-NLS-1$

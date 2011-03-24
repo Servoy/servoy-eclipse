@@ -24,6 +24,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.designer.property.PersistContext;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.labelproviders.IPersistLabelProvider;
@@ -110,7 +111,7 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 	public Color getForeground(Object element)
 	{
 		if (element instanceof PersistContext &&
-			ElementUtil.isInheritedFormElement(((PersistContext)element).getContext(), ((PersistContext)element).getPersist()))
+			ModelUtils.isInheritedFormElement(((PersistContext)element).getContext(), ((PersistContext)element).getPersist()))
 		{
 			// inherited elements
 			return Display.getCurrent().getSystemColor(SWT.COLOR_RED);

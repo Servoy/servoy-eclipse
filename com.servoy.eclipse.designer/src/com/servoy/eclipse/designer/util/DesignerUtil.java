@@ -27,7 +27,7 @@ import org.eclipse.gef.EditPart;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
-import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -90,7 +90,7 @@ public class DesignerUtil
 				EditPart object = (EditPart)selectedEditParts.get(i);
 				EditPart parent = object.getParent();
 				if (parent != null && parent.getModel() instanceof IPersist &&
-					ElementUtil.isInheritedFormElement((IPersist)parent.getModel(), object.getModel())) return true;
+					ModelUtils.isInheritedFormElement((IPersist)parent.getModel(), object.getModel())) return true;
 			}
 		}
 		return false;

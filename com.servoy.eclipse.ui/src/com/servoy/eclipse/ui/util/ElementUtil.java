@@ -17,7 +17,6 @@
 package com.servoy.eclipse.ui.util;
 
 import java.lang.ref.WeakReference;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,9 +30,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
@@ -161,39 +158,6 @@ public class ElementUtil
 		}
 
 		return null;
-	}
-
-	public static boolean isInheritedFormElement(IPersist context, Object element)
-	{
-		if (element instanceof Form)
-		{
-			return false;
-		}
-		if (context instanceof Form && element instanceof IPersist && (((IPersist)element).getAncestor(IRepository.FORMS) != context))
-		{
-			if (element instanceof IPersist && (((IPersist)element).getAncestor(IRepository.FORMS) != context))
-			{
-				// child of super-form, readonly
-				return true;
-			}
-		}
-		if (element instanceof FormElementGroup)
-		{
-			Iterator<IFormElement> elements = ((FormElementGroup)element).getElements();
-			while (elements.hasNext())
-			{
-				if (isInheritedFormElement(context, elements.next()))
-				{
-					return true;
-				}
-			}
-		}
-		if (element instanceof AbstractBase)
-		{
-			return ((AbstractBase)element).isOverrideElement();
-		}
-		// child of this form, not of a inherited form
-		return false;
 	}
 
 	/**

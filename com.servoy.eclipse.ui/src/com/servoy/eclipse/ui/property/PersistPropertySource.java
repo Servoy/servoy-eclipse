@@ -312,8 +312,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	{
 		if (propertyDescriptors == null)
 		{
-			FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist);
-			Form flattenedForm = flattenedEditingSolution.getFlattenedForm(persist);
+			FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist, context);
+			Form flattenedForm = flattenedEditingSolution.getFlattenedForm(ModelUtils.isInheritedFormElement(context, persist) ? context : persist);
 
 			java.beans.BeanInfo info = null;
 			Object valueObject = null;
@@ -323,7 +323,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				{
 					try
 					{
-						FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
+						FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist, context);
 						valueObject = DesignComponentFactory.getBeanDesignInstance(Activator.getDefault().getDesignClient(), editingFlattenedSolution,
 							(Bean)persist, (Form)persist.getAncestor(IRepository.FORMS));
 					}
@@ -814,7 +814,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 						{
 							if (value == null) return null;
 
-							FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
+							FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persist, context);
 							Iterator<ScriptMethod> scriptMethods = null;
 							if (value.getFormName() != null)
 							{
@@ -1253,7 +1253,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 		if (propertyDescriptor.propertyDescriptor.getPropertyType() == Border.class)
 		{
-			return new BorderPropertyController(id, displayName, this, persist);
+			return new BorderPropertyController(id, displayName, this, persist, context);
 		}
 
 		if (propertyDescriptor.propertyDescriptor.getPropertyType() == boolean.class ||
@@ -2292,7 +2292,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 		if (name.equals("borderType"))
 		{
-			final BorderPropertyController borderPropertyController = new BorderPropertyController(id, displayName, this, persist);
+			final BorderPropertyController borderPropertyController = new BorderPropertyController(id, displayName, this, persist, context);
 			borderPropertyController.setReadonly(readOnly);
 
 			// BorderPropertyController handles Border objects, the property is a String.
@@ -3058,7 +3058,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					{
 						public String isValid(Object value)
 						{
-							if (ElementUtil.isInheritedFormElement(context, persist))
+							if (ModelUtils.isInheritedFormElement(context, persist))
 							{
 								return "Cannot change name of an override element.";
 							}
