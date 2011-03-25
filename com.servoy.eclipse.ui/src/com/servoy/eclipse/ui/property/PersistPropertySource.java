@@ -313,7 +313,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		if (propertyDescriptors == null)
 		{
 			FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist, context);
-			Form flattenedForm = flattenedEditingSolution.getFlattenedForm(ModelUtils.isInheritedFormElement(context, persist) ? context : persist);
+			Form form = (Form)(ModelUtils.isInheritedFormElement(context, persist) ? context : persist).getAncestor(IRepository.FORMS);
 
 			java.beans.BeanInfo info = null;
 			Object valueObject = null;
@@ -321,16 +321,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			{
 				if (persist instanceof Bean) //step into the bean instance
 				{
-					try
-					{
-						FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist, context);
-						valueObject = DesignComponentFactory.getBeanDesignInstance(Activator.getDefault().getDesignClient(), editingFlattenedSolution,
-							(Bean)persist, (Form)persist.getAncestor(IRepository.FORMS));
-					}
-					catch (Exception e)
-					{
-						ServoyLog.logError("Could not instantiate bean " + persist, e);
-					}
+					valueObject = DesignComponentFactory.getBeanDesignInstance(Activator.getDefault().getDesignClient(), flattenedEditingSolution,
+						(Bean)persist, form);
 					if (valueObject instanceof InvisibleBean) //step into the invisible bean instance
 					{
 						valueObject = ((InvisibleBean)valueObject).getDelegate();
@@ -365,7 +357,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 			for (java.beans.PropertyDescriptor element : properties)
 			{
-				registerProperty(new PropertyDescriptorWrapper(element, valueObject), flattenedForm, flattenedEditingSolution);
+				registerProperty(new PropertyDescriptorWrapper(element, valueObject), flattenedEditingSolution, form);
 			}
 			if (valueObject == persist)
 			{
@@ -378,7 +370,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 						IPropertyDescriptor desc;
 						try
 						{
-							desc = getPropertiesPropertyDescriptor(propName, getDisplayName(propName), propName, flattenedForm, flattenedEditingSolution);
+							desc = getPropertiesPropertyDescriptor(propName, getDisplayName(propName), propName, flattenedEditingSolution, form);
 							if (desc != null)
 							{
 								setCategory(desc, PropertyCategory.createPropertyCategory(propName));
@@ -399,7 +391,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				{
 					for (java.beans.PropertyDescriptor element : java.beans.Introspector.getBeanInfo(persist.getClass()).getPropertyDescriptors())
 					{
-						registerProperty(new PropertyDescriptorWrapper(element, persist), flattenedForm, flattenedEditingSolution);
+						registerProperty(new PropertyDescriptorWrapper(element, persist), flattenedEditingSolution, form);
 						if (propertyDescriptors.containsKey(element.getName()))
 						{
 							// if same property is defined in bean and persist, override with persist version
@@ -424,16 +416,16 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		return null;
 	}
 
-	private void registerProperty(PropertyDescriptorWrapper propertyDescriptor, Form flattenedForm, FlattenedSolution flattenedEditingSolution)
+	private void registerProperty(PropertyDescriptorWrapper propertyDescriptor, FlattenedSolution flattenedEditingSolution, Form form)
 	{
 		IPropertyDescriptor pd = null;
 		IPropertyDescriptor combinedPropertyDesciptor = null;
 		try
 		{
-			pd = createPropertyDescriptor(propertyDescriptor, flattenedForm, flattenedEditingSolution);
+			pd = createPropertyDescriptor(propertyDescriptor, flattenedEditingSolution, form);
 			if (propertyDescriptor.valueObject == persist)
 			{
-				combinedPropertyDesciptor = createCombinedPropertyDescriptor(propertyDescriptor);
+				combinedPropertyDesciptor = createCombinedPropertyDescriptor(propertyDescriptor, form);
 			}
 		}
 		catch (RepositoryException e)
@@ -529,8 +521,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		return beansProperties;
 	}
 
-	protected IPropertyDescriptor createPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor, Form flattenedForm,
-		FlattenedSolution flattenedEditingSolution) throws RepositoryException
+	protected IPropertyDescriptor createPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor, FlattenedSolution flattenedEditingSolution, Form form)
+		throws RepositoryException
 	{
 
 		if ((propertyDescriptor.propertyDescriptor.getReadMethod() == null) || propertyDescriptor.propertyDescriptor.getWriteMethod() == null ||
@@ -553,7 +545,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			id = BEAN_PROPERTY_PREFIX_DOT + propertyDescriptor.propertyDescriptor.getName();
 		}
 		IPropertyDescriptor desc = getPropertyDescriptor(propertyDescriptor, id, getDisplayName(propertyDescriptor.propertyDescriptor.getName()), category,
-			flattenedForm, flattenedEditingSolution);
+			flattenedEditingSolution, form);
 		setCategory(desc, category);
 		if (desc != null //
 			&&
@@ -595,10 +587,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 	}
 
-	protected IPropertyDescriptor createCombinedPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor)
+	protected IPropertyDescriptor createCombinedPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor, Form form)
 	{
 		PropertyCategory category = PropertyCategory.createPropertyCategory(propertyDescriptor.propertyDescriptor.getName());
-		IPropertyDescriptor desc = getCombinedPropertyDescriptor(propertyDescriptor, getDisplayName(propertyDescriptor.propertyDescriptor.getName()), category);
+		IPropertyDescriptor desc = getCombinedPropertyDescriptor(propertyDescriptor, getDisplayName(propertyDescriptor.propertyDescriptor.getName()), category,
+			form);
 		if (desc instanceof org.eclipse.ui.views.properties.PropertyDescriptor)
 		{
 			((org.eclipse.ui.views.properties.PropertyDescriptor)desc).setCategory(category.name());
@@ -616,7 +609,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	}
 
 	private IPropertyDescriptor getPropertyDescriptor(final PropertyDescriptorWrapper propertyDescriptor, final String id, String displayName,
-		PropertyCategory category, final Form flattenedForm, final FlattenedSolution flattenedEditingSolution) throws RepositoryException
+		PropertyCategory category, final FlattenedSolution flattenedEditingSolution, final Form form) throws RepositoryException
 	{
 		/*
 		 * Category based property controllers.
@@ -624,8 +617,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 		if (category == PropertyCategory.Events || category == PropertyCategory.Commands)
 		{
-			return new MethodPropertyController<Integer>(id, displayName, persist, context, true, category == PropertyCategory.Commands, flattenedForm != null,
-				true)
+			return new MethodPropertyController<Integer>(id, displayName, persist, context, true, category == PropertyCategory.Commands, form != null, true)
 			{
 				@Override
 				protected IPropertyConverter<Integer, Object> createConverter()
@@ -800,7 +792,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				propertyEditorHint = null;
 			}
 
-			if (propertyEditorHint != null && flattenedForm != null)
+			if (propertyEditorHint != null && form != null)
 			{
 				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.method)
 				{
@@ -918,12 +910,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				{
 					// String property, select a data provider
 					Table table = null;
-
 					try
 					{
-						table = flattenedForm.getTable();
+						table = flattenedEditingSolution.getFlattenedForm(form).getTable();
 					}
-					catch (Exception ex)
+					catch (RepositoryException ex)
 					{
 						ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
 						return null;
@@ -981,7 +972,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 						{
 							public CellEditor createPropertyEditor(Composite parent)
 							{
-								return new DataProviderCellEditor(parent, labelProviderHidePrefix, new DataProviderValueEditor(converter), flattenedForm,
+								return new DataProviderCellEditor(parent, labelProviderHidePrefix, new DataProviderValueEditor(converter), form,
 									flattenedEditingSolution, readOnly, options, converter);
 							}
 						});
@@ -994,13 +985,13 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				{
 					// String property, select a relation
 					Table primaryTable = null;
-					if (flattenedForm != null)
+					if (form != null)
 					{
 						try
 						{
-							primaryTable = flattenedForm.getTable();
+							primaryTable = flattenedEditingSolution.getFlattenedForm(form).getTable();
 						}
-						catch (Exception ex)
+						catch (RepositoryException ex)
 						{
 							ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
 						}
@@ -1124,7 +1115,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					Object option = propertyEditorHint.getOption(PropertyEditorOption.styleLookupName);
 					if (option instanceof String)
 					{
-						return createStyleClassPropertyController(id, displayName, (String)option);
+						return createStyleClassPropertyController(id, displayName, (String)option, form);
 					}
 				}
 			}
@@ -1275,7 +1266,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 		if (category == PropertyCategory.Properties) // name based props for IPersists only (not beans)
 		{
-			retval = getPropertiesPropertyDescriptor(id, displayName, name, flattenedForm, flattenedEditingSolution);
+			retval = getPropertiesPropertyDescriptor(id, displayName, name, flattenedEditingSolution, form);
 			if (retval != null)
 			{
 				return retval;
@@ -1352,11 +1343,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	 * @param styleLookupname
 	 * @return
 	 */
-	public ComboboxPropertyController<String> createStyleClassPropertyController(String id, String displayName, final String styleLookupname)
+	public ComboboxPropertyController<String> createStyleClassPropertyController(String id, String displayName, final String styleLookupname, Form form)
 	{
-		StyleClassesComboboxModel model = new StyleClassesComboboxModel((Form)persist.getAncestor(IRepository.FORMS), styleLookupname);
+		StyleClassesComboboxModel model = new StyleClassesComboboxModel(form, styleLookupname);
 		return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved, new ComboboxDelegateValueEditor<String>(
-			new StyleClassValueEditor((Form)persist.getAncestor(IRepository.FORMS), persist), model))
+			new StyleClassValueEditor(form, persist), model))
 		{
 			@Override
 			protected String getWarningMessage()
@@ -1379,7 +1370,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	 * @param category
 	 * @return
 	 */
-	private IPropertyDescriptor getCombinedPropertyDescriptor(final PropertyDescriptorWrapper propertyDescriptor, String displayName, PropertyCategory category)
+	private IPropertyDescriptor getCombinedPropertyDescriptor(final PropertyDescriptorWrapper propertyDescriptor, String displayName,
+		PropertyCategory category, Form form)
 	{
 		if (propertyDescriptor.valueObject == persist) // name based props for IPersists only
 		{
@@ -1387,7 +1379,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 			if (name.equals("containsFormID"))
 			{
-				return new RelatedTabController("containsForm", "containsForm", "Select tab form", readOnly, (Form)persist.getAncestor(IRepository.FORMS),
+				return new RelatedTabController("containsForm", "containsForm", "Select tab form", readOnly, form,
 					ModelUtils.getEditingFlattenedSolution(persist));
 			}
 		}
@@ -2265,8 +2257,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		return null;
 	}
 
-	private IPropertyDescriptor getPropertiesPropertyDescriptor(final String id, String displayName, String name, final Form flattenedForm,
-		final FlattenedSolution flattenedEditingSolution) throws RepositoryException
+	private IPropertyDescriptor getPropertiesPropertyDescriptor(final String id, String displayName, String name,
+		final FlattenedSolution flattenedEditingSolution, final Form form) throws RepositoryException
 	{
 		if ("tabSeq".equals(name))
 		{
@@ -2357,13 +2349,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			}
 			else
 			{
-				if (flattenedForm == null) return null;
-
+				if (form == null) return null;
 				try
 				{
-					table = flattenedForm.getTable();
+					table = flattenedEditingSolution.getFlattenedForm(form).getTable();
 				}
-				catch (Exception ex)
+				catch (RepositoryException ex)
 				{
 					ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
 					return null;
@@ -2386,7 +2377,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				{
 					public CellEditor createPropertyEditor(Composite parent)
 					{
-						return new DataProviderCellEditor(parent, labelProviderHidePrefix, new DataProviderValueEditor(converter), flattenedForm,
+						return new DataProviderCellEditor(parent, labelProviderHidePrefix, new DataProviderValueEditor(converter), form,
 							flattenedEditingSolution, readOnly, options, converter);
 					}
 				});
@@ -2397,13 +2388,13 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		if (name.equals("relationName"))
 		{
 			Table primaryTable = null;
-			if (flattenedForm != null)
+			if (form != null)
 			{
 				try
 				{
-					primaryTable = flattenedForm.getTable();
+					primaryTable = flattenedEditingSolution.getFlattenedForm(form).getTable();
 				}
-				catch (Exception ex)
+				catch (RepositoryException ex)
 				{
 					ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
 				}
@@ -2419,7 +2410,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					{
 						foreignTable = tabForm.getTable();
 					}
-					catch (Exception ex)
+					catch (RepositoryException ex)
 					{
 						ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
 					}
@@ -2440,7 +2431,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 		if (name.endsWith("rowBGColorCalculation"))
 		{
-			if (flattenedForm == null) return null;
+			if (form == null) return null;
 			Table table = null;
 			if (persist instanceof Portal)
 			{
@@ -2454,7 +2445,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			{
 				try
 				{
-					table = flattenedForm.getTable();
+					table = flattenedEditingSolution.getFlattenedForm(form).getTable();
 				}
 				catch (RepositoryException e)
 				{
@@ -2709,8 +2700,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 		if (name.equals("labelFor"))
 		{
-			if (flattenedForm != null)
+			if (form != null)
 			{
+				Form flattenedForm = flattenedEditingSolution.getFlattenedForm(form);
 				int bodyStart = -1, bodyEnd = -1;
 				if (flattenedForm.getView() == FormController.TABLE_VIEW || flattenedForm.getView() == FormController.LOCKED_TABLE_VIEW)
 				{
@@ -2795,14 +2787,13 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 		if (name.equals("extendsFormID"))
 		{
-			if (flattenedForm == null) return null;
+			if (form == null) return null;
 			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, true), context);
 			PropertyDescriptor pd = new PropertyDescriptor(id, displayName)
 			{
 				@Override
 				public CellEditor createPropertyEditor(Composite parent)
 				{
-					Form form = flattenedEditingSolution.getForm(flattenedForm.getID());
 					return new ListSelectCellEditor(parent, "Select parent form", new FormContentProvider(flattenedEditingSolution, form), formLabelProvider,
 						new FormValueEditor(flattenedEditingSolution), readOnly, new FormContentProvider.FormListOptions(
 							FormListOptions.FormListType.HIERARCHY, null, false, true, false), SWT.NONE, null, "parentFormDialog")
@@ -2860,7 +2851,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 		if (name.equals("styleClass"))
 		{
-			return createStyleClassPropertyController(id, displayName, StyleClassesComboboxModel.getStyleLookupname(persist));
+			return createStyleClassPropertyController(id, displayName, StyleClassesComboboxModel.getStyleLookupname(persist), form);
 		}
 
 		if (name.equals("styleName"))
@@ -2966,9 +2957,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					}
 				};
 			}
-			else if (flattenedForm != null)
+			else if (form != null)
 			{
-				tableDisplay = flattenedForm;
+				tableDisplay = flattenedEditingSolution.getFlattenedForm(form);
 			}
 			else if (persist instanceof Relation)
 			{
@@ -3008,13 +2999,13 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		if (name.equals("text") || name.equals("toolTipText") || name.equals("titleText"))
 		{
 			Table table = null;
-			if (flattenedForm != null)
+			if (form != null)
 			{
 				try
 				{
-					table = flattenedForm.getTable();
+					table = flattenedEditingSolution.getFlattenedForm(form).getTable();
 				}
-				catch (Exception ex)
+				catch (RepositoryException ex)
 				{
 					ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
 				}
@@ -3110,7 +3101,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			{
 				public CellEditor createPropertyEditor(Composite parent)
 				{
-					return new PageFormatEditor(parent, flattenedForm, "Page Setup", PageFormatLabelProvider.INSTANCE);
+					return new PageFormatEditor(parent, "Page Setup", PageFormatLabelProvider.INSTANCE);
 				}
 			});
 		}

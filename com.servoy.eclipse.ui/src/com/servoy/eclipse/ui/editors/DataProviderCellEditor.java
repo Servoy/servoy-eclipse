@@ -55,7 +55,14 @@ public class DataProviderCellEditor extends DialogCellEditor
 	/**
 	 * Creates a new dataprovider cell editor parented under the given control.
 	 * 
-	 * @param parent the parent control
+	 * @param parent
+	 * @param labelProvider
+	 * @param valueEditor
+	 * @param form plain form, not flattened
+	 * @param flattenedSolution
+	 * @param readOnly
+	 * @param input
+	 * @param converter
 	 */
 	public DataProviderCellEditor(Composite parent, ILabelProvider labelProvider, IValueEditor<Object> valueEditor, Form form,
 		FlattenedSolution flattenedSolution, boolean readOnly, DataProviderOptions input, DataProviderConverter converter)
