@@ -512,7 +512,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 			{
 				try
 				{
-					IPersist child = AbstractRepository.searchPersist(flattenedSolution.getSolution(), changed);
+					IPersist child = flattenedSolution.searchPersist(changed);
 
 					if (changed instanceof FlattenedTabPanel || changed instanceof FlattenedPortal) child = changed;
 					// is it the form itself ?
