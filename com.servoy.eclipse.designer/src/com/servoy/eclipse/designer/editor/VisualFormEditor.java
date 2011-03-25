@@ -535,25 +535,40 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 					}
 					else
 					{
+
 						// is it a removed child?
 						if (child == null)
 						{
 							full_refresh = true;
 						}
-						else if (changed.getParent() != null)
+						else
 						{
-							// is it a part of this form?
-							if (changed instanceof Part && formUuids.contains(changed.getParent().getUUID()))
-							{
-								full_refresh = true;
-							}
-							// is it a tab in this form (tab figure is child of the form)
-							else if (changed instanceof Tab && changed.getParent().getParent() != null &&
-								formUuids.contains(changed.getParent().getParent().getUUID()))
-							{
-								full_refresh = true;
-							}
 							changedChildren.add(child);
+						}
+
+						// is it a part of this form?
+						// or is it a tab in this form (tab figure is child of the form)
+						if ((changed instanceof Part || changed instanceof Tab))
+						{
+							full_refresh = true;
+						}
+					}
+
+					if (formParent != form)
+					{
+						// this form may contain an overridden element, mark that as changed as well
+						// Note: have to search by UUID here, otherwise changed.getParent() is used in the equals as well
+						IPersist override = AbstractRepository.searchPersist(form, changed.getUUID());
+						if (override != null)
+						{
+							changedChildren.add(override);
+						}
+
+						// is it a part of this form?
+						// or is it a tab in this form (tab figure is child of the form)
+						if (override instanceof Part || override instanceof Tab)
+						{
+							full_refresh = true;
 						}
 					}
 				}
