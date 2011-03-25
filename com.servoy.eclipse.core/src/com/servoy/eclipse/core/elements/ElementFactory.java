@@ -27,9 +27,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -457,7 +457,11 @@ public class ElementFactory
 					labeldim.width = placeHorizontal ? 140 /* field width */: 80;
 					label.setSize(labeldim);
 
-					if (fillName) label.setLabelFor(name);
+					if (fillName)
+					{
+						label.setLabelFor(name);
+						label.setName(name + "_label"); //$NON-NLS-1$
+					}
 
 					if (placeHorizontal)
 					{
@@ -723,8 +727,8 @@ public class ElementFactory
 		JSONObject json = new JSONObject();
 		if (templateType == StringResource.FORM_TEMPLATE)
 		{
-			json.put(Template.PROP_FORM,
-				cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, repository), null));
+			json.put(Template.PROP_FORM, cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false,
+				repository), null));
 		}
 		json.put(Template.PROP_LOCATION, PersistHelper.createPointString(location));
 		JSONArray elements = new JSONArray();
@@ -875,8 +879,8 @@ public class ElementFactory
 				IPersist persist = SolutionDeserializer.deserializePersist(repository, parent, persist_json_map, object, null, null, null, false);
 				for (Map.Entry<IPersist, JSONObject> entry : persist_json_map.entrySet())
 				{
-					SolutionDeserializer.setPersistValues(repository, entry.getKey(),
-						resolveCleanedProperties((Form)entry.getKey().getAncestor(IRepository.FORMS), entry.getValue()));
+					SolutionDeserializer.setPersistValues(repository, entry.getKey(), resolveCleanedProperties((Form)entry.getKey().getAncestor(
+						IRepository.FORMS), entry.getValue()));
 				}
 				persists.put(persist, name);
 			}
