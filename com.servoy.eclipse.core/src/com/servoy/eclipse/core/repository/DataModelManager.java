@@ -309,7 +309,8 @@ public class DataModelManager implements IColumnInfoManager
 	{
 		Table t = c.getTable();
 		c.removeColumnInfo();
-		updateAllColumnInfo(t);
+		// should only write the dbi once, not for every column; make sure updateAllColumnInfo is called at the end
+		//updateAllColumnInfo(t);
 	}
 
 	public void serializeAllColumnInfo(Table t, IFileAccess fileAccess, String projectName) throws RepositoryException
