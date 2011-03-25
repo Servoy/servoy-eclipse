@@ -1127,10 +1127,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 		if (propertyDescriptor.propertyDescriptor.getPropertyType() == java.awt.Dimension.class)
 		{
-			java.awt.Dimension dimension = null;
-			if (propertyDescriptor.propertyDescriptor.getName().equals("intercellSpacing")) dimension = new Dimension(1, 1);
-			else dimension = new Dimension(0, 0);
-			final Dimension defaultDimension = dimension;
+			final java.awt.Dimension defaultDimension = propertyDescriptor.propertyDescriptor.getName().equals("intercellSpacing") ? new Dimension(1, 1)
+				: new Dimension(0, 0);
 			return new PropertyController<java.awt.Dimension, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Dimension>()
 			{
 				@Override

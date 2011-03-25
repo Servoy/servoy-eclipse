@@ -53,8 +53,8 @@ public class DimensionPropertySource extends ComplexPropertySource<java.awt.Dime
 	public IPropertyDescriptor[] createPropertyDescriptors()
 	{
 		// make sure sub-properties are sorted in defined order
-		return PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { new NumberTypePropertyDescriptor(NumberCellEditor.DOUBLE, WIDTH,
-			WIDTH), new NumberTypePropertyDescriptor(NumberCellEditor.DOUBLE, HEIGHT, HEIGHT) });
+		return PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, WIDTH,
+			WIDTH), new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, HEIGHT, HEIGHT) });
 	}
 
 	@Override
@@ -63,22 +63,15 @@ public class DimensionPropertySource extends ComplexPropertySource<java.awt.Dime
 		java.awt.Dimension dim = getEditableValue();
 		if (dim == null)
 		{
-			if (WIDTH.equals(id))
-			{
-				return new Double(defaultDimension.getWidth());
-			}
-			if (HEIGHT.equals(id))
-			{
-				return new Double(defaultDimension.getHeight());
-			}
+			dim = defaultDimension;
 		}
 		if (WIDTH.equals(id))
 		{
-			return new Double(dim.getWidth());
+			return Integer.valueOf((int)dim.getWidth());
 		}
 		if (HEIGHT.equals(id))
 		{
-			return new Double(dim.getHeight());
+			return Integer.valueOf((int)dim.getHeight());
 		}
 		return null;
 	}
@@ -88,11 +81,11 @@ public class DimensionPropertySource extends ComplexPropertySource<java.awt.Dime
 	{
 		if (WIDTH.equals(id))
 		{
-			return new Double(140);
+			return Integer.valueOf((int)Math.ceil(defaultDimension.getWidth()));
 		}
 		if (HEIGHT.equals(id))
 		{
-			return new Double(20);
+			return Integer.valueOf((int)Math.ceil(defaultDimension.getHeight()));
 		}
 		return super.resetComplexPropertyValue(id);
 	}
@@ -103,11 +96,11 @@ public class DimensionPropertySource extends ComplexPropertySource<java.awt.Dime
 		java.awt.Dimension dim = (getEditableValue() == null) ? defaultDimension : getEditableValue();
 		if (WIDTH.equals(id))
 		{
-			dim.setSize(((Double)v).doubleValue(), dim.getHeight());
+			dim.setSize(((Integer)v).intValue(), dim.getHeight());
 		}
 		if (HEIGHT.equals(id))
 		{
-			dim.setSize(dim.getWidth(), ((Double)v).doubleValue());
+			dim.setSize(dim.getWidth(), ((Integer)v).intValue());
 		}
 		return dim;
 	}

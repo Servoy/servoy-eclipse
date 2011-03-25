@@ -48,8 +48,8 @@ public class PointPropertySource extends ComplexPropertySource<java.awt.Point>
 	@Override
 	public IPropertyDescriptor[] createPropertyDescriptors()
 	{
-		return new IPropertyDescriptor[] { new NumberTypePropertyDescriptor(NumberCellEditor.DOUBLE, X, X), new NumberTypePropertyDescriptor(
-			NumberCellEditor.DOUBLE, Y, Y) };
+		return new IPropertyDescriptor[] { new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, X, X), new NumberTypePropertyDescriptor(
+			NumberCellEditor.INTEGER, Y, Y) };
 	}
 
 	@Override
@@ -58,15 +58,15 @@ public class PointPropertySource extends ComplexPropertySource<java.awt.Point>
 		java.awt.Point pnt = getEditableValue();
 		if (pnt == null)
 		{
-			return new Double(0);
+			return Integer.valueOf(0);
 		}
 		if (X.equals(id))
 		{
-			return new Double(pnt.getX());
+			return Integer.valueOf((int)pnt.getX());
 		}
 		if (Y.equals(id))
 		{
-			return new Double(pnt.getY());
+			return Integer.valueOf((int)pnt.getY());
 		}
 		return null;
 	}
@@ -74,7 +74,7 @@ public class PointPropertySource extends ComplexPropertySource<java.awt.Point>
 	@Override
 	public Object resetComplexPropertyValue(Object id)
 	{
-		return new Double(0);
+		return Integer.valueOf(0);
 	}
 
 	@Override
@@ -83,11 +83,11 @@ public class PointPropertySource extends ComplexPropertySource<java.awt.Point>
 		java.awt.Point pnt = (getEditableValue() == null) ? new java.awt.Point(0, 0) : getEditableValue();
 		if (X.equals(id))
 		{
-			pnt.setLocation(((Double)v).doubleValue(), pnt.getY());
+			pnt.setLocation(((Integer)v).intValue(), pnt.getY());
 		}
 		if (Y.equals(id))
 		{
-			pnt.setLocation(pnt.getX(), ((Double)v).doubleValue());
+			pnt.setLocation(pnt.getX(), ((Integer)v).intValue());
 		}
 		return pnt;
 	}
