@@ -309,7 +309,8 @@ public class DataModelManager implements IColumnInfoManager
 	{
 		Table t = c.getTable();
 		c.removeColumnInfo();
-		updateAllColumnInfo(t);
+		// should only write the dbi once, not for every column; make sure updateAllColumnInfo is called at the end
+		//updateAllColumnInfo(t);
 	}
 
 	public void serializeAllColumnInfo(Table t, IFileAccess fileAccess, String projectName) throws RepositoryException
@@ -389,7 +390,7 @@ public class DataModelManager implements IColumnInfoManager
 					if (differenceType == TableDifference.COLUMN_CONFLICT || differenceType == TableDifference.COLUMN_MISSING_FROM_DB ||
 						differenceType == TableDifference.COLUMN_MISSING_FROM_DBI_FILE)
 					{
-						for (IUnexpectedSituationHandler e : ModelUtils.<IUnexpectedSituationHandler>getExtensions(IUnexpectedSituationHandler.EXTENSION_ID))
+						for (IUnexpectedSituationHandler e : ModelUtils.<IUnexpectedSituationHandler> getExtensions(IUnexpectedSituationHandler.EXTENSION_ID))
 						{
 							// if the user chose 'Yes' for example, write the contents
 							if (!e.allowUnexpectedDBIWrite(t))
