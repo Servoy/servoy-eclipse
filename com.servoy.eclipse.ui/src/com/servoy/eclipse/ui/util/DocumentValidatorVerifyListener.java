@@ -26,10 +26,10 @@ import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.util.ValidatingDocument;
-import com.servoy.j2db.util.ValidatingDocument.IDocumentValidator;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 import com.servoy.j2db.util.docvalidator.NumberDocumentValidator;
+import com.servoy.j2db.util.docvalidator.ValidatingDocument;
+import com.servoy.j2db.util.docvalidator.ValidatingDocument.IDocumentValidator;
 
 /**
  * Verify listener that uses document validators for validating changes.
