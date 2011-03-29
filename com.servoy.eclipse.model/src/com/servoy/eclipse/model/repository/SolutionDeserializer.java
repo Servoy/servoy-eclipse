@@ -878,27 +878,32 @@ public class SolutionDeserializer
 
 			for (VariableDeclaration field : variables)
 			{
-				String comment = null;
-				if (field.getDocumentation() != null) comment = field.getDocumentation().getText();
+				Comment comment = field.getDocumentation();
+				if (comment == null && field.getParent() instanceof VariableStatement)
+				{
+					comment = ((VariableStatement)field.getParent()).getDocumentation();
+				}
 				int start = (field.getParent() instanceof VariableStatement) ? field.getParent().sourceStart() - 1 : field.sourceStart() - 1;
 
 				boolean newField = true;
 				JSONObject json = null;
+				String commentString = "";
 				if (comment != null)
 				{
-					int prop_idx = comment.indexOf(SolutionSerializer.PROPERTIESKEY);
+					commentString = comment.getText();
+					int prop_idx = commentString.indexOf(SolutionSerializer.PROPERTIESKEY);
 					if (prop_idx != -1)
 					{
-						int prop_newline_idx = comment.indexOf('}', prop_idx);
-						if (prop_newline_idx < comment.length() && prop_newline_idx >= prop_idx + SolutionSerializer.PROPERTIESKEY.length())
+						int prop_newline_idx = commentString.indexOf('}', prop_idx);
+						if (prop_newline_idx < commentString.length() && prop_newline_idx >= prop_idx + SolutionSerializer.PROPERTIESKEY.length())
 						{
-							String sobj = comment.substring(prop_idx + SolutionSerializer.PROPERTIESKEY.length(), prop_newline_idx + 1);
+							String sobj = commentString.substring(prop_idx + SolutionSerializer.PROPERTIESKEY.length(), prop_newline_idx + 1);
 							json = new ServoyJSONObject(sobj, false);
 							newField = false;
 						}
 						else
 						{
-							ServoyLog.logError("Invalid properties comment, ignoring:\n" + comment, null); //$NON-NLS-1$
+							ServoyLog.logError("Invalid properties comment, ignoring:\n" + comment.getText(), null); //$NON-NLS-1$
 						}
 					}
 				}
@@ -911,13 +916,13 @@ public class SolutionDeserializer
 				json.put(SolutionSerializer.PROP_NAME, ident.getName());
 				Expression code = field.getInitializer();
 				Type type = field.getType();
-				if (type == null && comment != null && comment.length() > 0)
+				if (type == null && commentString.length() > 0)
 				{
-					int typeIndex = comment.indexOf(SolutionSerializer.TYPEKEY);
+					int typeIndex = commentString.indexOf(SolutionSerializer.TYPEKEY);
 					if (typeIndex != -1)
 					{
-						int newLine = comment.indexOf('\n', typeIndex);
-						String typeName = comment.substring(typeIndex + SolutionSerializer.TYPEKEY.length(), newLine).trim();
+						int newLine = commentString.indexOf('\n', typeIndex);
+						String typeName = commentString.substring(typeIndex + SolutionSerializer.TYPEKEY.length(), newLine).trim();
 						json.putOpt(JS_TYPE_JSON_ATTRIBUTE, typeName);
 						int servoyType = getServoyType(typeName);
 						if (servoyType == IColumnTypes.NUMBER)
@@ -1069,7 +1074,7 @@ public class SolutionDeserializer
 				}
 
 				json.put(LINE_NUMBER_OFFSET_JSON_ATTRIBUTE, linenr);
-				json.put(COMMENT_JSON_ATTRIBUTE, comment);
+				json.put(COMMENT_JSON_ATTRIBUTE, commentString);
 				json.put(CHANGED_JSON_ATTRIBUTE, markAsChanged);
 				jsonObjects.add(json);
 			}
