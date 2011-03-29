@@ -55,7 +55,7 @@ import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
-import com.servoy.j2db.util.IdentDocumentValidator;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 public class NewMethodWizard extends Wizard implements INewWizard
 {

@@ -48,7 +48,7 @@ import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Template;
-import com.servoy.j2db.util.IdentDocumentValidator;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * An action to save some group of elements as template.

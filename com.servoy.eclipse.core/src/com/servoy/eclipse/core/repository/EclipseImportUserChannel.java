@@ -42,8 +42,8 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.IdentDocumentValidator;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
 
 public class EclipseImportUserChannel implements IXMLImportUserChannel

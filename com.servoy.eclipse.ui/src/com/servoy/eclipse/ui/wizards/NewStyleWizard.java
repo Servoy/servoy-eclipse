@@ -68,7 +68,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Style;
-import com.servoy.j2db.util.IdentDocumentValidator;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Wizard used in order to create a new Servoy style. Will optionally create new resource project (for styles & other info).

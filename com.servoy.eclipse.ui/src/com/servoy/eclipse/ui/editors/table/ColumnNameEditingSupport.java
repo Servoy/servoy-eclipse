@@ -29,9 +29,9 @@ import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IValidateName;
-import com.servoy.j2db.util.IdentDocumentValidator;
-import com.servoy.j2db.util.LengthDocumentValidator;
 import com.servoy.j2db.util.ValidatingDocument.IDocumentValidator;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
+import com.servoy.j2db.util.docvalidator.LengthDocumentValidator;
 
 public class ColumnNameEditingSupport extends EditingSupport
 {

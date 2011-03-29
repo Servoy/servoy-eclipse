@@ -34,7 +34,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.util.IdentDocumentValidator;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 public class RenamePersistAction extends Action implements ISelectionChangedListener
 {

@@ -32,8 +32,8 @@ import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.util.IdentDocumentValidator;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 public class RenamePersistQuickFix implements IMarkerResolution
 {

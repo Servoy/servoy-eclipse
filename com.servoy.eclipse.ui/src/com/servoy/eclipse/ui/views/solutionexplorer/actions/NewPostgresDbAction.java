@@ -42,8 +42,8 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.util.ITransactionConnection;
-import com.servoy.j2db.util.IdentDocumentValidator;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 public class NewPostgresDbAction extends Action
 {

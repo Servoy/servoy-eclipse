@@ -41,7 +41,7 @@ import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.util.IdentDocumentValidator;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Action to create a new valuelist depending on the selection of a solution view.

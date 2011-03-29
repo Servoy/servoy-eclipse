@@ -131,7 +131,6 @@ import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.IdentDocumentValidator;
 import com.servoy.j2db.util.IntHashMap;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
@@ -140,6 +139,7 @@ import com.servoy.j2db.util.ScriptingUtils;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Builds Servoy projects. Adds problem markers where needed.

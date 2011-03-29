@@ -35,9 +35,9 @@ import org.eclipse.swt.widgets.Text;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.j2db.persistence.Column;
-import com.servoy.j2db.util.IdentDocumentValidator;
-import com.servoy.j2db.util.LengthDocumentValidator;
 import com.servoy.j2db.util.ValidatingDocument.IDocumentValidator;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
+import com.servoy.j2db.util.docvalidator.LengthDocumentValidator;
 
 public class ColumnAutoEnterDBSeqComposite extends Composite
 {

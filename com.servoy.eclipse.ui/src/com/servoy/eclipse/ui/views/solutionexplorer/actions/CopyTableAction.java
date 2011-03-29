@@ -52,7 +52,7 @@ import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.util.IdentDocumentValidator;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 public class CopyTableAction extends Action implements ISelectionChangedListener
 {

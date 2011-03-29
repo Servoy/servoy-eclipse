@@ -41,8 +41,8 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.util.IdentDocumentValidator;
 import com.servoy.j2db.util.ValidatingDocument.IDocumentValidator;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 public class CalculationNameEditingSupport extends EditingSupport
 {

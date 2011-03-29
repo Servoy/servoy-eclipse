@@ -83,9 +83,9 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
-import com.servoy.j2db.util.IdentDocumentValidator;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Action to create a new form/global method depending on the selection of a solution view.

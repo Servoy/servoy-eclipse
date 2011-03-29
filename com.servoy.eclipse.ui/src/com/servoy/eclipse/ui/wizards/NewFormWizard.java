@@ -99,9 +99,9 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.util.DataSourceUtils;
-import com.servoy.j2db.util.IdentDocumentValidator;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Create new form.
