@@ -625,7 +625,7 @@ public class DesignApplication implements IApplication, IMessagesCallback
 
 	public IToolbarPanel getToolbarPanel()
 	{
-		return getClient().getToolbarPanel();
+		return null;
 	}
 
 	public IUserManager getUserManager()
