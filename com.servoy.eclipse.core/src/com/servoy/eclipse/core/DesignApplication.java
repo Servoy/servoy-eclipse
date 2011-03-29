@@ -89,12 +89,10 @@ import com.servoy.j2db.util.toolbar.IToolbarPanel;
 
 /**
  * @author jcompagner
- * 
  */
 @SuppressWarnings("nls")
 public class DesignApplication implements IApplication, IMessagesCallback
 {
-
 	private IApplication client;
 	private SwingItemFactory itemFactory;
 	private volatile IFoundSetManagerInternal foundSetManager;
@@ -223,7 +221,12 @@ public class DesignApplication implements IApplication, IMessagesCallback
 
 	public JMenu getExportMenu()
 	{
-		return getClient().getExportMenu();
+		return null;
+	}
+
+	public JMenu getImportMenu()
+	{
+		return null;
 	}
 
 	public FlattenedSolution getFlattenedSolution()
@@ -455,11 +458,6 @@ public class DesignApplication implements IApplication, IMessagesCallback
 		return key;
 	}
 
-	public JMenu getImportMenu()
-	{
-		return getClient().getImportMenu();
-	}
-
 	public ItemFactory getItemFactory()
 	{
 		if (itemFactory == null)
@@ -493,7 +491,7 @@ public class DesignApplication implements IApplication, IMessagesCallback
 
 	public JFrame getMainApplicationFrame()
 	{
-		return getClient().getMainApplicationFrame();
+		return null;
 	}
 
 	public IModeManager getModeManager()
@@ -657,7 +655,7 @@ public class DesignApplication implements IApplication, IMessagesCallback
 
 	public Window getWindow(String name)
 	{
-		return getClient().getWindow(name);
+		return null;
 	}
 
 	public void handleException(String servoyMsg, Exception e)
@@ -718,7 +716,7 @@ public class DesignApplication implements IApplication, IMessagesCallback
 
 	public void registerWindow(String name, Window d)
 	{
-		getClient().registerWindow(name, d);
+		//nop;
 	}
 
 	public void releaseGUI()
@@ -882,5 +880,10 @@ public class DesignApplication implements IApplication, IMessagesCallback
 	public JSWindowManager getJSWindowManager()
 	{
 		return getClient().getJSWindowManager();
+	}
+
+	public void looseFocus()
+	{
+		getClient().looseFocus();
 	}
 }
