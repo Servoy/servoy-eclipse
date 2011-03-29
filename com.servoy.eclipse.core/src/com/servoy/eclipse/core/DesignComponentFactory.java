@@ -48,7 +48,7 @@ import com.servoy.j2db.ui.IComponent;
 import com.servoy.j2db.ui.ILabel;
 import com.servoy.j2db.ui.IStandardLabel;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.gui.OrientationApplier;
+import com.servoy.j2db.util.OrientationApplier;
 
 /**
  * Component factory for use in design more
