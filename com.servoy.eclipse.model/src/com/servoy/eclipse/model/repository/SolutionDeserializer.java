@@ -859,8 +859,6 @@ public class SolutionDeserializer
 				}
 			}
 
-			List<Comment> comments = script.getComments();
-
 			ArrayList<Line> lines = new ArrayList<Line>();
 			int counter = 0;
 			Line currentLine = new Line(0, 0);
@@ -881,17 +879,9 @@ public class SolutionDeserializer
 			for (VariableDeclaration field : variables)
 			{
 				String comment = null;
+				if (field.getDocumentation() != null) comment = field.getDocumentation().getText();
 				int start = (field.getParent() instanceof VariableStatement) ? field.getParent().sourceStart() - 1 : field.sourceStart() - 1;
-				for (int i = 0; i < comments.size(); i++)
-				{
-					Comment cmt = comments.get(i);
-					if (cmt.sourceEnd() == start)
-					{
-						comment = cmt.getText();
-						comments.remove(i);
-						break;
-					}
-				}
+
 				boolean newField = true;
 				JSONObject json = null;
 				if (comment != null)
@@ -1087,17 +1077,7 @@ public class SolutionDeserializer
 			for (FunctionStatement function : functionss)
 			{
 				String comment = null;
-				int start = function.sourceStart() - 1;
-				for (int i = 0; i < comments.size(); i++)
-				{
-					Comment cmt = comments.get(i);
-					if (cmt.sourceEnd() == start)
-					{
-						comment = cmt.getText();
-						comments.remove(i);
-						break;
-					}
-				}
+				if (function.getDocumentation() != null) comment = function.getDocumentation().getText();
 				JSONObject json = null;
 				if (comment != null)
 				{
