@@ -276,7 +276,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 						st.append("\n"); // for some reason this must be separately //$NON-NLS-1$
 						// added
 						st.append(code);
-						st.setCaretOffset(st.getCharCount() - 3);
+						st.setCaretOffset(st.getText().lastIndexOf('}') - 1);
 						st.showSelection();
 
 						if (!wasDirty)
