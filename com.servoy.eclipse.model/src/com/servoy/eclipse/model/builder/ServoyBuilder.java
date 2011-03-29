@@ -1587,6 +1587,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							Form form = (Form)o;
 							Table table = null;
+							String path = form.getSerializableRuntimeProperty(IScriptProvider.FILENAME);
+							if (path != null && !path.endsWith(SolutionSerializer.getFileName(form, false)))
+							{
+								ServoyMarker mk = MarkerMessages.FormFileNameInconsistent.fill(form.getName(), path);
+								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, form);
+							}
 							if (!missingServers.containsKey(form.getServerName()))
 							{
 								try

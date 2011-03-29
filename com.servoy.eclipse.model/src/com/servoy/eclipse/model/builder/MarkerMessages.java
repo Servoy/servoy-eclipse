@@ -245,6 +245,9 @@ public class MarkerMessages
 	public static ServoyMarker FormTableNotAccessible = new ServoyMarker(
 		"Form \"{0}\" is based on table \"{1}\" which is not accessible.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
+	public static ServoyMarker FormFileNameInconsistent = new ServoyMarker(
+		"Form \"{0}\" is saved on disk in a file with different name( \"{1}\" ).", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+
 	/**
 	 * This means that when using form inheritance a cycle was introduced in the dependency relation of some forms. This is not allowed.
 	 */
