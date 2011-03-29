@@ -278,6 +278,7 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 
 	public static final int CI_NAME = 0;
 	public static final int CI_PASSWORD = 1;
+	public static final int CI_UID = 2;
 	public static final int CI_GROUP = -1;
 
 	private void initDataBindings()
@@ -290,10 +291,15 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 		passwordColumn.setText("Password");
 		passwordColumn.setToolTipText("Doubleclick cell to edit");
 
+		TreeColumn uidColumn = new TreeColumn(usersTree, SWT.LEFT, CI_UID);
+		uidColumn.setText("Uid");
+		uidColumn.setToolTipText("Doubleclick cell to edit");
+
 		TreeColumnLayout layout = new TreeColumnLayout();
 		treeContainer.setLayout(layout);
 		layout.setColumnData(nameColumn, new ColumnWeightData(20, 50, true));
 		layout.setColumnData(passwordColumn, new ColumnWeightData(20, 50, true));
+		layout.setColumnData(uidColumn, new ColumnWeightData(40, 50, true));
 
 		TableColumn groupColumn = new TableColumn(groupTable, SWT.NONE, 0);
 		groupColumn.setText("Group name");
@@ -315,15 +321,22 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 				final TreeItem item = usersTree.getItem(new Point(event.x, event.y));
 				if (item != null)
 				{
-					boolean editUserName = item.getBounds(CI_NAME).contains(new Point(event.x, event.y));
+					boolean editPassword = item.getBounds(CI_PASSWORD).contains(new Point(event.x, event.y));
 
 					final Text text;
 					final int columnCount;
-					if (editUserName)
+					if (!editPassword)
 					{
 						text = new Text(usersTree, SWT.NONE);
-						text.setText(item.getText());
-						columnCount = CI_NAME;
+						if (item.getBounds(CI_NAME).contains(new Point(event.x, event.y)))
+						{
+							columnCount = CI_NAME;
+						}
+						else
+						{
+							columnCount = CI_UID;
+						}
+						text.setText(item.getText(columnCount));
 					}
 					else
 					{

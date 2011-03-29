@@ -39,6 +39,7 @@ public class SecurityModel
 	private final ArrayList<String> deletedUsers;
 	private final Map<String, String> editedUserNames;
 	private final Map<String, String> editedPasswords;
+	private final Map<String, String> editedUids;
 	private final Map<String, ArrayList<String>> addedGroupsToUser;
 	private final Map<String, ArrayList<String>> deletedGroupsFromUser;
 
@@ -50,6 +51,7 @@ public class SecurityModel
 		deletedUsers = new ArrayList<String>();
 		editedUserNames = new HashMap<String, String>();
 		editedPasswords = new HashMap<String, String>();
+		editedUids = new HashMap<String, String>();
 		addedGroupsToUser = new HashMap<String, ArrayList<String>>();
 		deletedGroupsFromUser = new HashMap<String, ArrayList<String>>();
 	}
@@ -94,7 +96,8 @@ public class SecurityModel
 	{
 		String originalName = getOriginalUserName(userName);
 		if (column == SecurityEditor.CI_NAME) editedUserNames.put(originalName, newElement);
-		else editedPasswords.put(originalName, newElement);
+		else if (column == SecurityEditor.CI_PASSWORD) editedPasswords.put(originalName, newElement);
+		else editedUids.put(originalName, newElement);
 	}
 
 	public void modifyUserGroup(String user, String group, boolean add)
@@ -137,13 +140,16 @@ public class SecurityModel
 		for (int i = 0; i < usersNr; i++)
 		{
 			String userName = users.getRow(i)[1].toString();
+			String uid = users.getRow(i)[0].toString();
 			if (!deletedUsers.contains(userName))
 			{
 				TreeItem item = new TreeItem(tree, SWT.NONE);
 				String modifiedUserName = userName;
+				String modifiedUid = uid;
 				if (editedUserNames.containsKey(userName)) modifiedUserName = editedUserNames.get(userName);
+				if (editedUids.containsKey(userName)) modifiedUid = editedUids.get(userName);
 				if (selectedUser != null && selectedUser.equals(modifiedUserName)) keptSelection = item;
-				item.setText(new String[] { modifiedUserName, "password" });
+				item.setText(new String[] { modifiedUserName, "password", modifiedUid });
 				boolean found = false;
 				if (group != null)
 				{
@@ -197,7 +203,7 @@ public class SecurityModel
 			String modifiedUserName = user;
 			if (editedUserNames.containsKey(user)) modifiedUserName = editedUserNames.get(user);
 			if (selectedUser != null && selectedUser.equals(modifiedUserName)) keptSelection = item;
-			item.setText(new String[] { modifiedUserName, "password" });
+			item.setText(new String[] { modifiedUserName, "password", "" });
 			boolean found = false;
 			if (group != null)
 			{
@@ -225,6 +231,15 @@ public class SecurityModel
 	public boolean isColumnValid(String text, int column)
 	{
 		if (column == SecurityEditor.CI_PASSWORD && text != null && text.length() > 0) return true;
+		if (column == SecurityEditor.CI_UID && text != null && text.length() > 0)
+		{
+			if (ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getUserIdByUID(ApplicationServerSingleton.get().getClientId(),
+				text) == -1)
+			{
+				// uid is unique
+				return true;
+			}
+		}
 		if (column == SecurityEditor.CI_NAME && text != null && text.length() > 0)
 		{
 			int id = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getUserIdByUserName(
@@ -253,20 +268,41 @@ public class SecurityModel
 		try
 		{
 			EclipseUserManager manager = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager();
+			String clientId = ApplicationServerSingleton.get().getClientId();
 			for (String group : newGroups)
 			{
-				manager.createGroup(ApplicationServerSingleton.get().getClientId(), group);
+				manager.createGroup(clientId, group);
 			}
 			for (String user : newUsers)
 			{
-				manager.createUser(ApplicationServerSingleton.get().getClientId(), user, "password", null, false);
+				manager.createUser(clientId, user, "password", null, false);
 			}
 			Iterator<String> iterator = editedPasswords.keySet().iterator();
 			while (iterator.hasNext())
 			{
 				String userName = iterator.next();
-				manager.setPassword(ApplicationServerSingleton.get().getClientId(),
-					manager.getUserUID(ApplicationServerSingleton.get().getClientId(), userName), editedPasswords.get(userName));
+				manager.setPassword(clientId, manager.getUserUID(clientId, userName), editedPasswords.get(userName));
+			}
+			iterator = editedUids.keySet().iterator();
+			while (iterator.hasNext())
+			{
+				String userName = iterator.next();
+				String[] groups = manager.getUserGroups(clientId, manager.getUserUID(clientId, userName));
+				if (groups != null && groups.length > 0)
+				{
+					for (String group : groups)
+					{
+						manager.removeUserFromGroup(clientId, manager.getUserIdByUserName(clientId, userName), manager.getGroupId(clientId, group));
+					}
+				}
+				manager.setUserUID(clientId, manager.getUserUID(clientId, userName), editedUids.get(userName));
+				if (groups != null && groups.length > 0)
+				{
+					for (String group : groups)
+					{
+						manager.addUserToGroup(clientId, manager.getUserIdByUserName(clientId, userName), manager.getGroupId(clientId, group));
+					}
+				}
 			}
 			iterator = addedGroupsToUser.keySet().iterator();
 			while (iterator.hasNext())
@@ -277,9 +313,7 @@ public class SecurityModel
 				{
 					for (String group : groups)
 					{
-						manager.addUserToGroup(ApplicationServerSingleton.get().getClientId(), manager.getUserIdByUserName(
-							ApplicationServerSingleton.get().getClientId(), userName),
-							manager.getGroupId(ApplicationServerSingleton.get().getClientId(), group));
+						manager.addUserToGroup(clientId, manager.getUserIdByUserName(clientId, userName), manager.getGroupId(clientId, group));
 					}
 				}
 			}
@@ -292,9 +326,7 @@ public class SecurityModel
 				{
 					for (String group : groups)
 					{
-						manager.removeUserFromGroup(ApplicationServerSingleton.get().getClientId(), manager.getUserIdByUserName(
-							ApplicationServerSingleton.get().getClientId(), userName),
-							manager.getGroupId(ApplicationServerSingleton.get().getClientId(), group));
+						manager.removeUserFromGroup(clientId, manager.getUserIdByUserName(clientId, userName), manager.getGroupId(clientId, group));
 					}
 				}
 			}
@@ -302,18 +334,16 @@ public class SecurityModel
 			while (iterator.hasNext())
 			{
 				String userName = iterator.next();
-				manager.changeUserName(ApplicationServerSingleton.get().getClientId(), manager.getUserUID(ApplicationServerSingleton.get().getClientId(),
-					userName), editedUserNames.get(userName));
+				manager.changeUserName(clientId, manager.getUserUID(clientId, userName), editedUserNames.get(userName));
 			}
 			for (String user : deletedUsers)
 			{
-				manager.deleteUser(ApplicationServerSingleton.get().getClientId(), manager.getUserIdByUserName(ApplicationServerSingleton.get().getClientId(),
-					user));
+				manager.deleteUser(clientId, manager.getUserIdByUserName(clientId, user));
 			}
 
 			for (String group : deletedGroups)
 			{
-				manager.deleteGroup(ApplicationServerSingleton.get().getClientId(), manager.getGroupId(ApplicationServerSingleton.get().getClientId(), group));
+				manager.deleteGroup(clientId, manager.getGroupId(clientId, group));
 			}
 			newGroups.clear();
 			newUsers.clear();
