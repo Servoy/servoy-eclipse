@@ -24,6 +24,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFactory;
+import com.servoy.j2db.dataprocessing.IValueList;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -58,6 +59,7 @@ import com.servoy.j2db.ui.IScriptDataPasswordMethods;
 import com.servoy.j2db.ui.IScriptFieldMethods;
 import com.servoy.j2db.ui.IScriptMediaInputFieldMethods;
 import com.servoy.j2db.ui.IScriptPortalComponentMethods;
+import com.servoy.j2db.ui.IScriptRadioMethods;
 import com.servoy.j2db.ui.IScriptRectMethods;
 import com.servoy.j2db.ui.IScriptScriptButtonMethods;
 import com.servoy.j2db.ui.IScriptScriptLabelMethods;
@@ -254,23 +256,16 @@ public class ElementUtil
 				case Field.TEXT_AREA :
 					return IScriptTextAreaMethods.class;
 				case Field.CHECKS :
-					if (field.getValuelistID() > 0)
-					{
-//						IValueList list = getRealValueList(application, valuelist, true, type, format, field.getDataProviderID());
-//						if (!(valuelist.getValueListType() == ValueList.DATABASE_VALUES && valuelist.getDatabaseValuesType() == ValueList.RELATED_VALUES) &&
-//							list.getSize() == 1 && valuelist.getAddEmptyValue() != ValueList.EMPTY_VALUE_ALWAYS)
-//						{
-//							fl = application.getItemFactory().createDataCheckBox(getWebID(field), application.getI18NMessageIfPrefixed(field.getText()), list);
-//						}
-//						else
-						// 0 or >1
-						return IScriptChoiceMethods.class;
-					}
-					else
+					if (isSingle(application, field))
 					{
 						return IScriptCheckBoxMethods.class;
 					}
+					return IScriptChoiceMethods.class;
 				case Field.RADIOS :
+					if (isSingle(application, field))
+					{
+						return IScriptRadioMethods.class;
+					}
 					return IScriptChoiceMethods.class;
 				case Field.COMBOBOX :
 					return IScriptDataComboboxMethods.class;
@@ -336,6 +331,33 @@ public class ElementUtil
 		}
 		return null;
 
+	}
+
+	/**
+	 * @param application
+	 * @param field
+	 * @return
+	 */
+	private static boolean isSingle(IApplication application, Field field)
+	{
+		if (field.getValuelistID() > 0)
+		{
+			ValueList valuelist = application.getFlattenedSolution().getValueList(field.getValuelistID());
+			if (!(valuelist.getValueListType() == ValueList.DATABASE_VALUES && valuelist.getDatabaseValuesType() == ValueList.RELATED_VALUES) &&
+				(valuelist.getAddEmptyValue() != ValueList.EMPTY_VALUE_ALWAYS))
+			{
+				IValueList realValueList = ComponentFactory.getRealValueList(application, valuelist, false, 0, null, null);
+				if (realValueList != null && realValueList.getSize() == 1)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		else
+		{
+			return true;
+		}
 	}
 
 }

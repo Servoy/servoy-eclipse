@@ -106,6 +106,7 @@ import com.servoy.j2db.ui.IScriptDataPasswordMethods;
 import com.servoy.j2db.ui.IScriptFieldMethods;
 import com.servoy.j2db.ui.IScriptMediaInputFieldMethods;
 import com.servoy.j2db.ui.IScriptPortalComponentMethods;
+import com.servoy.j2db.ui.IScriptRadioMethods;
 import com.servoy.j2db.ui.IScriptScriptButtonMethods;
 import com.servoy.j2db.ui.IScriptScriptLabelMethods;
 import com.servoy.j2db.ui.IScriptSplitPaneMethods;
@@ -143,6 +144,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
 		addScopeType("JSDataSet", new JSDataSetCreator());
 		addScopeType("Form", new FormScopeCreator());
+		addScopeType("RuntimeForm", new FormScopeCreator());
 		addScopeType("Elements", new ElementsScopeCreator());
 		addScopeType("Plugins", new PluginsScopeCreator());
 		addScopeType("Forms", new FormsScopeCreator());
@@ -326,6 +328,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			if (Record.JS_RECORD.toLowerCase().startsWith(prefixLower)) names.add(Record.JS_RECORD);
 			if (FoundSet.JS_FOUNDSET.toLowerCase().startsWith(prefixLower)) names.add(FoundSet.JS_FOUNDSET);
 			if ("form".startsWith(prefixLower)) names.add("Form");
+			if ("runtimeform".startsWith(prefixLower)) names.add("RuntimeForm");
 			if ("continuation".startsWith(prefixLower)) names.add("Continuation");
 		}
 		else
@@ -333,6 +336,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			names.add(Record.JS_RECORD);
 			names.add(FoundSet.JS_FOUNDSET);
 			names.add("Form");
+			names.add("RuntimeForm");
 			names.add("Continuation");
 		}
 		return names;
@@ -898,7 +902,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		public Type createType(ITypeInfoContext context, String typeName)
 		{
 			Type type;
-			if (typeName.equals("Form"))
+			if (typeName.equals("Form") || typeName.equals("RuntimeForm"))
 			{
 				type = TypeInfoModelFactory.eINSTANCE.createType();
 				type.setName(typeName);
@@ -1240,6 +1244,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			addType("RuntimePassword", IScriptDataPasswordMethods.class);
 			typeNames.put(IScriptTextEditorMethods.class.getSimpleName(), "RuntimeHtmlArea");
 			addType("RuntimeHtmlArea", IScriptTextEditorMethods.class);
+			addType("RuntimeRtfArea", IScriptTextEditorMethods.class);
 			typeNames.put(IScriptTextAreaMethods.class.getSimpleName(), "RuntimeTextArea");
 			addType("RuntimeTextArea", IScriptTextAreaMethods.class);
 			typeNames.put(IScriptChoiceMethods.class.getSimpleName(), "RuntimeChecks");
@@ -1248,6 +1253,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			addType("RuntimeCheckBox", IScriptCheckBoxMethods.class);
 			typeNames.put(IScriptChoiceMethods.class.getSimpleName(), "RuntimeRadios");
 			addType("RuntimeRadios", IScriptChoiceMethods.class);
+			typeNames.put(IScriptRadioMethods.class.getSimpleName(), "RuntimeRadio");
+			addType("RuntimeRadio", IScriptRadioMethods.class);
 			typeNames.put(IScriptDataComboboxMethods.class.getSimpleName(), "RuntimeComboBox");
 			addType("RuntimeComboBox", IScriptDataComboboxMethods.class);
 			typeNames.put(IScriptDataCalendarMethods.class.getSimpleName(), "RuntimeCalendar");
