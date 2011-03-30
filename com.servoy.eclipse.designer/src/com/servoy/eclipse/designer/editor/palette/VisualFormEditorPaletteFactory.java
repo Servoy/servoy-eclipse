@@ -354,11 +354,6 @@ public class VisualFormEditorPaletteFactory
 		{
 			icon = Activator.loadImageDescriptorFromBundle("SELECT16.png");
 			displayType = Field.COMBOBOX;
-			setProperty(
-				extendedData,
-				StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT,
-				PersistPropertySource.HORIZONTAL_ALIGNMENT_CONTROLLER.getConverter().convertProperty(
-					StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT.getPropertyName(), Integer.valueOf(SwingConstants.LEFT)));
 		}
 
 		else if (ELEMENTS_RADIOS_ID.equals(id))
