@@ -18,10 +18,8 @@ package com.servoy.eclipse.core;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Window;
 import java.awt.print.PageFormat;
 import java.net.URL;
-import java.net.URLStreamHandler;
 import java.rmi.Remote;
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -57,7 +55,6 @@ import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.FoundSetManager;
 import com.servoy.j2db.dataprocessing.IClientHost;
 import com.servoy.j2db.dataprocessing.IDataServer;
-import com.servoy.j2db.dataprocessing.IDisplay;
 import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.IFoundSetInternal;
 import com.servoy.j2db.dataprocessing.IFoundSetListener;
@@ -85,7 +82,6 @@ import com.servoy.j2db.util.RendererParentWrapper;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
-import com.servoy.j2db.util.toolbar.IToolbarPanel;
 
 /**
  * @author jcompagner
@@ -108,14 +104,6 @@ public class DesignApplication implements IApplication, IMessagesCallback
 	{
 	}
 
-	public void addURLStreamHandler(String protocolName, URLStreamHandler handler)
-	{
-		//nop
-	}
-
-	/**
-	 * @return
-	 */
 	IApplication getClient()
 	{
 		if (client == null)
@@ -209,9 +197,9 @@ public class DesignApplication implements IApplication, IMessagesCallback
 		return getClient().getDataServer();
 	}
 
-	public DataServerProxy proxyDataServer()
+	public DataServerProxy getDataServerProxy()
 	{
-		return getClient().proxyDataServer();
+		return getClient().getDataServerProxy();
 	}
 
 	public IClientHost getClientHost()
@@ -623,11 +611,6 @@ public class DesignApplication implements IApplication, IMessagesCallback
 		return TimeZone.getDefault();
 	}
 
-	public IToolbarPanel getToolbarPanel()
-	{
-		return null;
-	}
-
 	public IUserManager getUserManager()
 	{
 		return getClient().getUserManager();
@@ -651,11 +634,6 @@ public class DesignApplication implements IApplication, IMessagesCallback
 	public String getUserUID()
 	{
 		return getClient().getUserUID();
-	}
-
-	public Window getWindow(String name)
-	{
-		return null;
 	}
 
 	public void handleException(String servoyMsg, Exception e)
@@ -712,11 +690,6 @@ public class DesignApplication implements IApplication, IMessagesCallback
 	public void output(Object msg, int level)
 	{
 		getClient().output(msg, level);
-	}
-
-	public void registerWindow(String name, Window d)
-	{
-		//nop;
 	}
 
 	public void releaseGUI()
@@ -804,11 +777,6 @@ public class DesignApplication implements IApplication, IMessagesCallback
 		getClient().setUserProperty(name, value);
 	}
 
-	public void updateInsertMode(IDisplay display)
-	{
-		getClient().updateInsertMode(display);
-	}
-
 	public JComponent getEditLabel()
 	{
 		return ((J2DBClient)getClient()).getEditLabel();
@@ -871,11 +839,6 @@ public class DesignApplication implements IApplication, IMessagesCallback
 	{
 		refreshI18NMessages();
 	}
-
-//	public Rectangle getWindowBounds(String windowName)
-//	{
-//		return getClient().getWindowBounds(windowName);
-//	}
 
 	public JSWindowManager getJSWindowManager()
 	{
