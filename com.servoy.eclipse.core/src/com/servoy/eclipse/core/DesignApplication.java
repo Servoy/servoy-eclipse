@@ -17,7 +17,6 @@
 package com.servoy.eclipse.core;
 
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.print.PageFormat;
@@ -82,6 +81,7 @@ import com.servoy.j2db.smart.dataui.SwingItemFactory;
 import com.servoy.j2db.ui.ItemFactory;
 import com.servoy.j2db.util.ITaskExecuter;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.RendererParentWrapper;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
@@ -110,7 +110,7 @@ public class DesignApplication implements IApplication, IMessagesCallback
 
 	public void addURLStreamHandler(String protocolName, URLStreamHandler handler)
 	{
-		getClient().addURLStreamHandler(protocolName, handler);
+		//nop
 	}
 
 	/**
@@ -551,7 +551,7 @@ public class DesignApplication implements IApplication, IMessagesCallback
 		return pluginManager;
 	}
 
-	public Container getPrintingRendererParent()
+	public RendererParentWrapper getPrintingRendererParent()
 	{
 		return getClient().getPrintingRendererParent();
 	}
