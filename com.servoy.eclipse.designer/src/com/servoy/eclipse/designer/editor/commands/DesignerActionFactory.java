@@ -86,6 +86,48 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
+	public static final String BRING_TO_FRONT_ONE_STEP_TEXT = "Send to back one step";
+	public static final String BRING_TO_FRONT_ONE_STEP_TOOLTIP = "Send selected objects to back one step";
+	public static final ImageDescriptor BRING_TO_FRONT_ONE_STEP_IMAGE = Activator.loadImageDescriptorFromBundle("sendtoback.gif");//$NON-NLS-1$
+	public static final ActionFactory BRING_TO_FRONT_ONE_STEP = new ActionFactory("bring-to-front-one-step") {//$NON-NLS-1$
+
+		@Override
+		public IWorkbenchAction create(IWorkbenchWindow window)
+		{
+			if (window == null)
+			{
+				throw new IllegalArgumentException();
+			}
+			RetargetAction action = new RetargetAction(getId(), BRING_TO_FRONT_ONE_STEP_TEXT);
+			action.setToolTipText(BRING_TO_FRONT_ONE_STEP_TOOLTIP);
+			window.getPartService().addPartListener(action);
+//			action.setActionDefinitionId("org.eclipse.ui.edit." + getId()); //$NON-NLS-1$
+			action.setImageDescriptor(BRING_TO_FRONT_ONE_STEP_IMAGE);
+			return action;
+		}
+	};
+
+	public static final String SEND_TO_BACK_ONE_STEP_TEXT = "Send to back";
+	public static final String SEND_TO_BACK_ONE_STEP_TOOLTIP = "Send selected objects to back";
+	public static final ImageDescriptor SEND_TO_BACK_ONE_STEP_IMAGE = Activator.loadImageDescriptorFromBundle("sendtoback.gif");//$NON-NLS-1$
+	public static final ActionFactory SEND_TO_BACK_ONE_STEP = new ActionFactory("send-to-back-one-step") {//$NON-NLS-1$
+
+		@Override
+		public IWorkbenchAction create(IWorkbenchWindow window)
+		{
+			if (window == null)
+			{
+				throw new IllegalArgumentException();
+			}
+			RetargetAction action = new RetargetAction(getId(), SEND_TO_BACK_ONE_STEP_TEXT);
+			action.setToolTipText(SEND_TO_BACK_ONE_STEP_TOOLTIP);
+			window.getPartService().addPartListener(action);
+//			action.setActionDefinitionId("org.eclipse.ui.edit." + getId()); //$NON-NLS-1$
+			action.setImageDescriptor(SEND_TO_BACK_ONE_STEP_IMAGE);
+			return action;
+		}
+	};
+
 	public static final String SELECT_FEEDBACK_TEXT = "Select feedback mode";
 	public static final String SELECT_FEEDBACK_TOOLTIP = SELECT_FEEDBACK_TEXT;
 	public static final ImageDescriptor SELECT_FEEDBACK_IMAGE = Activator.loadImageDescriptorFromBundle("grid.gif");//$NON-NLS-1$

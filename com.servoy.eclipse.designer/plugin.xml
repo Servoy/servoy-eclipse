@@ -422,6 +422,18 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+T">
       </key>
+      <key
+            commandId="com.servoy.eclipse.designer.sendtobackonestep"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M2+]">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.bringtofrontonestep"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M2+[">
+      </key>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -562,6 +574,18 @@
       </command>
       <command
             categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.ZOrderActionDelegateHandler$ToFrontOneStep"
+            id="com.servoy.eclipse.designer.bringtofrontonestep"
+            name="Bring to front one step">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.ZOrderActionDelegateHandler$ToBackOneStep"
+            id="com.servoy.eclipse.designer.sendtobackonestep"
+            name="Send to back one step">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
             defaultHandler="com.servoy.eclipse.designer.editor.commands.TabSequenceActionDelegateHandler"
             id="com.servoy.eclipse.designer.settabseq"
             name="Set Tab Sequence">
@@ -676,7 +700,7 @@
          <action
                class="com.servoy.eclipse.designer.editor.commands.ZOrderActionDelegateHandler$ToBack"
                definitionId="com.servoy.eclipse.designer.sendtoback"
-               icon="icons/sendtoback.gif"
+               icon="icons/send_to_back.png"
                id="com.servoy.eclipse.designer.action.sendtoback"
                label="Send to back"
                menubarPath="group.z.order"
@@ -686,12 +710,32 @@
          <action
                class="com.servoy.eclipse.designer.editor.commands.ZOrderActionDelegateHandler$ToFront"
                definitionId="com.servoy.eclipse.designer.bringtofront"
-               icon="icons/bringtofront.gif"
+               icon="icons/bring_to_front.png"
                id="com.servoy.eclipse.designer.action.bringtofront"
                label="Bring to front"
                menubarPath="group.z.order"
                style="push"
                tooltip="Bring elements to the front">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.ZOrderActionDelegateHandler$ToBackOneStep"
+               definitionId="com.servoy.eclipse.designer.sendtobackonestep"
+               icon="icons/send_backward.png"
+               id="com.servoy.eclipse.designer.action.sendtobackonestep"
+               label="Send to back one step"
+               menubarPath="group.z.order"
+               style="push"
+               tooltip="Send elements to the back one layer">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.ZOrderActionDelegateHandler$ToFrontOneStep"
+               definitionId="com.servoy.eclipse.designer.bringtofrontonestep"
+               icon="icons/bring_forward.png"
+               id="com.servoy.eclipse.designer.action.bringtofrontonestep"
+               label="Bring to front one step"
+               menubarPath="group.z.order"
+               style="push"
+               tooltip="Bring elements to the front one layer">
          </action>
          <action
                class="com.servoy.eclipse.designer.editor.commands.TabSequenceActionDelegateHandler"

@@ -51,9 +51,9 @@ import org.eclipse.gef.ui.actions.SaveAction;
 import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.gef.ui.actions.UndoAction;
 import org.eclipse.gef.ui.palette.FlyoutPaletteComposite;
-import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.palette.PaletteViewer;
 import org.eclipse.gef.ui.palette.PaletteViewerProvider;
+import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.palette.customize.PaletteCustomizerDialog;
 import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
 import org.eclipse.gef.ui.parts.GraphicalViewerKeyHandler;
@@ -109,7 +109,6 @@ import com.servoy.eclipse.designer.editor.commands.AddFieldAction;
 import com.servoy.eclipse.designer.editor.commands.AddPortalAction;
 import com.servoy.eclipse.designer.editor.commands.AddSplitpaneAction;
 import com.servoy.eclipse.designer.editor.commands.AddTabpanelAction;
-import com.servoy.eclipse.designer.editor.commands.BringToFrontAction;
 import com.servoy.eclipse.designer.editor.commands.CopyAction;
 import com.servoy.eclipse.designer.editor.commands.CutAction;
 import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
@@ -119,7 +118,6 @@ import com.servoy.eclipse.designer.editor.commands.PasteAction;
 import com.servoy.eclipse.designer.editor.commands.SameHeightAction;
 import com.servoy.eclipse.designer.editor.commands.SameWidthAction;
 import com.servoy.eclipse.designer.editor.commands.SaveAsTemplateAction;
-import com.servoy.eclipse.designer.editor.commands.SendToBackAction;
 import com.servoy.eclipse.designer.editor.commands.SetTabSequenceAction;
 import com.servoy.eclipse.designer.editor.commands.UngroupAction;
 import com.servoy.eclipse.designer.editor.palette.PaletteItemTransferDropTargetListener;
@@ -133,7 +131,6 @@ import com.servoy.eclipse.designer.property.UndoablePersistPropertySourceProvide
 import com.servoy.eclipse.designer.property.UndoablePropertySheetEntry;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.CoolbarLayout;
@@ -390,14 +387,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		getSelectionActions().add(action.getId());
 
 		action = new DirectEditAction(editorPart);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new BringToFrontAction(editorPart);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new SendToBackAction(editorPart);
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
 

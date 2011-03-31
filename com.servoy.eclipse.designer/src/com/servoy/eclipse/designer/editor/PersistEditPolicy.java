@@ -36,11 +36,10 @@ import com.servoy.eclipse.designer.editor.commands.DataRequest;
 import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceFieldCommand;
-import com.servoy.eclipse.designer.editor.commands.FormZOrderCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
+import com.servoy.eclipse.dnd.IDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
-import com.servoy.eclipse.dnd.IDragData;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
@@ -162,9 +161,15 @@ class PersistEditPolicy extends ComponentEditPolicy
 				request.getExtendedData(), null, null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 		}
 
-		else if (VisualFormEditor.REQ_BRING_TO_FRONT.equals(request.getType()) || VisualFormEditor.REQ_SEND_TO_BACK.equals(request.getType()))
+		else if ((VisualFormEditor.REQ_BRING_TO_FRONT.equals(request.getType()) || VisualFormEditor.REQ_SEND_TO_BACK.equals(request.getType()) ||
+			VisualFormEditor.REQ_BRING_TO_FRONT_ONE_STEP.equals(request.getType()) || VisualFormEditor.REQ_SEND_TO_BACK_ONE_STEP.equals(request.getType())))
 		{
-			command = new FormZOrderCommand(request.getType(), (Form)formEditPart.getModel(), new IPersist[] { persist });
+			if (request instanceof SetPropertyRequest)
+			{
+				SetPropertyRequest setPropertyRequest = (SetPropertyRequest)request;
+				command = SetValueCommand.createSetvalueCommand(setPropertyRequest.getName(), new PersistPropertySource(persist, formEditPart != null
+					? (Form)formEditPart.getModel() : null, false), setPropertyRequest.getPropertyId(), setPropertyRequest.getValue());
+			}
 		}
 
 		else if ((VisualFormEditor.REQ_SET_PROPERTY.equals(request.getType()) && request instanceof SetPropertyRequest))
@@ -239,8 +244,9 @@ class PersistEditPolicy extends ComponentEditPolicy
 		{
 			return true;
 		}
-		if ((VisualFormEditor.REQ_BRING_TO_FRONT.equals(request.getType()) || VisualFormEditor.REQ_SEND_TO_BACK.equals(request.getType()) &&
-			request instanceof GroupRequest))
+		if ((VisualFormEditor.REQ_BRING_TO_FRONT.equals(request.getType()) || VisualFormEditor.REQ_SEND_TO_BACK.equals(request.getType()) ||
+			VisualFormEditor.REQ_BRING_TO_FRONT_ONE_STEP.equals(request.getType()) || VisualFormEditor.REQ_SEND_TO_BACK_ONE_STEP.equals(request.getType())) &&
+			request instanceof GroupRequest)
 		{
 			return true;
 		}

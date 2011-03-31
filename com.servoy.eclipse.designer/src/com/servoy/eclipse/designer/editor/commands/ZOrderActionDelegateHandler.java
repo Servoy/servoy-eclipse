@@ -16,8 +16,13 @@
  */
 package com.servoy.eclipse.designer.editor.commands;
 
-import org.eclipse.gef.EditPart;
+import java.util.List;
+import java.util.Map;
 
+import org.eclipse.gef.EditPart;
+import org.eclipse.gef.Request;
+
+import com.servoy.eclipse.designer.actions.ZOrderAction;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 
@@ -45,12 +50,51 @@ public abstract class ZOrderActionDelegateHandler extends DesignerSelectionActio
 		{
 			super(VisualFormEditor.REQ_BRING_TO_FRONT);
 		}
+
+		@Override
+		protected Map<EditPart, Request> createRequests(List<EditPart> selected)
+		{
+			return ZOrderAction.createZOrderRequests(VisualFormEditor.REQ_BRING_TO_FRONT, selected);
+		}
 	}
 	public static class ToBack extends ZOrderActionDelegateHandler
 	{
 		public ToBack()
 		{
 			super(VisualFormEditor.REQ_SEND_TO_BACK);
+		}
+
+		@Override
+		protected Map<EditPart, Request> createRequests(List<EditPart> selected)
+		{
+			return ZOrderAction.createZOrderRequests(VisualFormEditor.REQ_SEND_TO_BACK, selected);
+		}
+	}
+
+	public static class ToFrontOneStep extends ZOrderActionDelegateHandler
+	{
+		public ToFrontOneStep()
+		{
+			super(VisualFormEditor.REQ_BRING_TO_FRONT_ONE_STEP);
+		}
+
+		@Override
+		protected Map<EditPart, Request> createRequests(List<EditPart> selected)
+		{
+			return ZOrderAction.createZOrderRequests(VisualFormEditor.REQ_BRING_TO_FRONT_ONE_STEP, selected);
+		}
+	}
+	public static class ToBackOneStep extends ZOrderActionDelegateHandler
+	{
+		public ToBackOneStep()
+		{
+			super(VisualFormEditor.REQ_SEND_TO_BACK_ONE_STEP);
+		}
+
+		@Override
+		protected Map<EditPart, Request> createRequests(List<EditPart> selected)
+		{
+			return ZOrderAction.createZOrderRequests(VisualFormEditor.REQ_SEND_TO_BACK_ONE_STEP, selected);
 		}
 	}
 }
