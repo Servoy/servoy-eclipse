@@ -18,10 +18,14 @@ package com.servoy.eclipse.core;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Window;
 import java.awt.print.PageFormat;
 import java.net.URL;
+import java.net.URLStreamHandler;
 import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.text.MessageFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -46,6 +50,7 @@ import com.servoy.j2db.IFormManager;
 import com.servoy.j2db.ILAFManager;
 import com.servoy.j2db.IMessagesCallback;
 import com.servoy.j2db.IModeManager;
+import com.servoy.j2db.ISmartClientApplication;
 import com.servoy.j2db.JSWindowManager;
 import com.servoy.j2db.Messages;
 import com.servoy.j2db.cmd.ICmdManager;
@@ -55,6 +60,7 @@ import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.FoundSetManager;
 import com.servoy.j2db.dataprocessing.IClientHost;
 import com.servoy.j2db.dataprocessing.IDataServer;
+import com.servoy.j2db.dataprocessing.IDisplay;
 import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.IFoundSetInternal;
 import com.servoy.j2db.dataprocessing.IFoundSetListener;
@@ -82,12 +88,13 @@ import com.servoy.j2db.util.RendererParentWrapper;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.toolbar.IToolbarPanel;
 
 /**
  * @author jcompagner
  */
 @SuppressWarnings("nls")
-public class DesignApplication implements IApplication, IMessagesCallback
+public class DesignApplication implements ISmartClientApplication, IMessagesCallback
 {
 	private IApplication client;
 	private SwingItemFactory itemFactory;
@@ -848,5 +855,148 @@ public class DesignApplication implements IApplication, IMessagesCallback
 	public void looseFocus()
 	{
 		getClient().looseFocus();
+	}
+
+	/**
+	 * @see com.servoy.j2db.ISmartClientApplication#addURLStreamHandler(java.lang.String, java.net.URLStreamHandler)
+	 */
+	public void addURLStreamHandler(String protocolName, URLStreamHandler handler)
+	{
+
+	}
+
+	/**
+	 *  
+	 * @see com.servoy.j2db.ISmartClientApplication#registerWindow(java.lang.String, java.awt.Window)
+	 */
+	public void registerWindow(String name, Window d)
+	{
+
+	}
+
+	/**
+	 * 
+	 * @see com.servoy.j2db.ISmartClientApplication#getWindow(java.lang.String)
+	 */
+	public Window getWindow(String name)
+	{
+		return null;
+	}
+
+	/**
+	 * 
+	 * @see com.servoy.j2db.ISmartClientApplication#getToolbarPanel()
+	 */
+	public IToolbarPanel getToolbarPanel()
+	{
+		return null;
+	}
+
+	/**
+	 * 
+	 * @see com.servoy.j2db.ISmartClientApplication#showI18NDialog(java.lang.String, java.lang.String)
+	 */
+	public String showI18NDialog(String preselect_key, String preselect_language)
+	{
+		return null;
+	}
+
+	/**
+	 * 
+	 * @see com.servoy.j2db.ISmartClientApplication#showCalendar(java.lang.String, java.util.Date)
+	 */
+	public Date showCalendar(String pattern, Date date)
+	{
+		return null;
+	}
+
+	/**
+	 * 
+	 * @see com.servoy.j2db.ISmartClientApplication#showColorChooser(java.lang.String)
+	 */
+	public String showColorChooser(String originalColor)
+	{
+		return null;
+	}
+
+	/**
+	 * 
+	 * @see com.servoy.j2db.ISmartClientApplication#showFontChooser(java.lang.String)
+	 */
+	public String showFontChooser(String font)
+	{
+		return null;
+	}
+
+	/**
+	 * 
+	 * @see com.servoy.j2db.ISmartClientApplication#beep()
+	 */
+	public void beep()
+	{
+
+	}
+
+	/**
+	 * 
+	 * @see com.servoy.j2db.ISmartClientApplication#setClipboardContent(java.lang.String)
+	 */
+	public void setClipboardContent(String string)
+	{
+
+	}
+
+	/**
+	 * 
+	 * @see com.servoy.j2db.ISmartClientApplication#getClipboardString()
+	 */
+	public String getClipboardString()
+	{
+		return null;
+	}
+
+	/**
+	 * 
+	 * @see com.servoy.j2db.ISmartClientApplication#setNumpadEnterAsFocusNextEnabled(boolean)
+	 */
+	public void setNumpadEnterAsFocusNextEnabled(boolean enabled)
+	{
+
+	}
+
+	/**
+	 * 
+	 * @see com.servoy.j2db.ISmartClientApplication#exportObject(java.rmi.Remote)
+	 */
+	public int exportObject(Remote object) throws RemoteException
+	{
+		return 0;
+	}
+
+	/**
+	 * 
+	 * @see com.servoy.j2db.ISmartClientApplication#setPaintTableImmediately(boolean)
+	 */
+	public void setPaintTableImmediately(boolean b)
+	{
+
+	}
+
+	/**
+	 * 
+	 * @see com.servoy.j2db.ISmartClientApplication#getPaintTableImmediately()
+	 */
+	public int getPaintTableImmediately()
+	{
+		return 0;
+	}
+
+	/**
+	 * 
+	 * @see com.servoy.j2db.ISmartClientApplication#updateInsertModeIcon(com.servoy.j2db.dataprocessing.IDisplay)
+	 */
+	public void updateInsertModeIcon(IDisplay display)
+	{
+
 	}
 }
