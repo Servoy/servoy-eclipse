@@ -721,7 +721,7 @@
                definitionId="com.servoy.eclipse.designer.sendtobackonestep"
                icon="icons/send_backward.png"
                id="com.servoy.eclipse.designer.action.sendtobackonestep"
-               label="Send to back one step"
+               label="Send backward"
                menubarPath="com.servoy.eclipse.designer.zordermenu/com.servoy.eclipse.designer.zorder"
                style="push"
                tooltip="Send elements to the back one layer">
@@ -731,7 +731,7 @@
                definitionId="com.servoy.eclipse.designer.bringtofrontonestep"
                icon="icons/bring_forward.png"
                id="com.servoy.eclipse.designer.action.bringtofrontonestep"
-               label="Bring to front one step"
+               label="Bring forward"
                menubarPath="com.servoy.eclipse.designer.zordermenu/com.servoy.eclipse.designer.zorder"
                style="push"
                tooltip="Bring elements to the front one layer">
@@ -756,7 +756,7 @@
          </action>
          <menu
                id="com.servoy.eclipse.designer.zordermenu"
-               label="Layering"
+               label="Arrange"
                path="group.z.order">
             <groupMarker
                   name="com.servoy.eclipse.designer.zorder">
