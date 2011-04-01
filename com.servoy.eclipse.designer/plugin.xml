@@ -426,13 +426,13 @@
             commandId="com.servoy.eclipse.designer.sendtobackonestep"
             contextId="com.servoy.eclipse.designer.context"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+M2+]">
+            sequence="]">
       </key>
       <key
             commandId="com.servoy.eclipse.designer.bringtofrontonestep"
             contextId="com.servoy.eclipse.designer.context"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+M2+[">
+            sequence="[">
       </key>
    </extension>
    <extension
@@ -626,8 +626,7 @@
                definitionId="com.servoy.eclipse.designer.anchorLeft"
                id="com.servoy.eclipse.designer.action.anchorLeft"
                label="Anchor Left"
-               menubarPath="group.anchoring"
-               style="toggle"
+               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchor"
                tooltip="Toggle Left Anchoring">
          </action>
          <action
@@ -635,7 +634,7 @@
                definitionId="com.servoy.eclipse.designer.anchorBottom"
                id="com.servoy.eclipse.designer.action.anchorBottom"
                label="Anchor Bottom"
-               menubarPath="group.anchoring"
+               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchor"
                style="toggle"
                tooltip="Toggle Bottom Anchoring">
          </action>
@@ -644,7 +643,7 @@
                definitionId="com.servoy.eclipse.designer.anchorRight"
                id="com.servoy.eclipse.designer.action.anchorRight"
                label="Anchor Right"
-               menubarPath="group.anchoring"
+               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchor"
                style="toggle"
                tooltip="Toggle Right Anchoring">
          </action>
@@ -653,7 +652,7 @@
                definitionId="com.servoy.eclipse.designer.anchorTop"
                id="com.servoy.eclipse.designer.action.anchorTop"
                label="Anchor Top"
-               menubarPath="group.anchoring"
+               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchor"
                style="toggle"
                tooltip="Toggle Top Anchoring">
          </action>
@@ -703,7 +702,7 @@
                icon="icons/send_to_back.png"
                id="com.servoy.eclipse.designer.action.sendtoback"
                label="Send to back"
-               menubarPath="group.z.order"
+               menubarPath="com.servoy.eclipse.designer.zordermenu/com.servoy.eclipse.designer.zorder"
                style="push"
                tooltip="Send elements to the back">
          </action>
@@ -713,7 +712,7 @@
                icon="icons/bring_to_front.png"
                id="com.servoy.eclipse.designer.action.bringtofront"
                label="Bring to front"
-               menubarPath="group.z.order"
+               menubarPath="com.servoy.eclipse.designer.zordermenu/com.servoy.eclipse.designer.zorder"
                style="push"
                tooltip="Bring elements to the front">
          </action>
@@ -723,7 +722,7 @@
                icon="icons/send_backward.png"
                id="com.servoy.eclipse.designer.action.sendtobackonestep"
                label="Send to back one step"
-               menubarPath="group.z.order"
+               menubarPath="com.servoy.eclipse.designer.zordermenu/com.servoy.eclipse.designer.zorder"
                style="push"
                tooltip="Send elements to the back one layer">
          </action>
@@ -733,7 +732,7 @@
                icon="icons/bring_forward.png"
                id="com.servoy.eclipse.designer.action.bringtofrontonestep"
                label="Bring to front one step"
-               menubarPath="group.z.order"
+               menubarPath="com.servoy.eclipse.designer.zordermenu/com.servoy.eclipse.designer.zorder"
                style="push"
                tooltip="Bring elements to the front one layer">
          </action>
@@ -755,6 +754,22 @@
                menubarPath="show.ext"
                tooltip="Set designer preferences">
          </action>
+         <menu
+               id="com.servoy.eclipse.designer.zordermenu"
+               label="Layering"
+               path="group.z.order">
+            <groupMarker
+                  name="com.servoy.eclipse.designer.zorder">
+            </groupMarker>
+         </menu>
+         <menu
+               id="com.servoy.eclipse.designer.anchormenu"
+               label="Anchoring"
+               path="group.anchoring">
+            <groupMarker
+                  name="com.servoy.eclipse.designer.anchor">
+            </groupMarker>
+         </menu>
       </viewerContribution>
    </extension>
       <extension
