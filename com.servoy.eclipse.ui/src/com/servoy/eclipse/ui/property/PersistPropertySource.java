@@ -610,7 +610,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	public IPropertyDescriptor[] getPropertyDescriptors()
 	{
 		init();
-		return PropertyController.applySequencePropertyComparator(propertyDescriptors.values().toArray(new IPropertyDescriptor[propertyDescriptors.size()]));
+		IPropertyDescriptor[] descs = propertyDescriptors.values().toArray(new IPropertyDescriptor[propertyDescriptors.size()]);
+		if (persist instanceof Bean)
+		{
+			return PropertyController.applySequencePropertyComparator(descs);
+		}
+		return descs;
 	}
 
 	public IPropertyDescriptor getPropertyDescriptor(Object id)
