@@ -315,7 +315,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			}
 		});
 
-		LOGIN_SOLUTION_CONTROLLER = new LoginSolutionPropertyController("loginSolutionName", RepositoryHelper.getDisplayName("encapsulation", Solution.class));
+		LOGIN_SOLUTION_CONTROLLER = new LoginSolutionPropertyController("loginSolutionName", RepositoryHelper.getDisplayName("loginSolutionName",
+			Solution.class));
 		COMMA_SEPARATED_CONTROLLER = new PropertyController<String, Object[]>("groupbyDataProviderIDs", RepositoryHelper.getDisplayName(
 			"groupbyDataProviderIDs", Part.class), new StringTokenizerConverter(",", true), null, null);
 
