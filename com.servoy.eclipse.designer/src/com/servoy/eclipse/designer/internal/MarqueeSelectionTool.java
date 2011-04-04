@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.internal;
 
 import java.util.ArrayList;
@@ -46,6 +46,7 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.designer.util.EditpartDistanceComparator;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 
 /**
  * A Tool which selects multiple objects inside a rectangular area of a Graphical Viewer. If the SHIFT key is pressed at the beginning of the drag, the enclosed
@@ -188,6 +189,7 @@ public class MarqueeSelectionTool extends AbstractTool
 
 	private void calculateNewSelection(Collection newSelections, Collection deselections)
 	{
+		boolean marqueeSelectOuter = new DesignerPreferences().getMarqueeSelectOuter();
 		Rectangle marqueeRect = getMarqueeSelectionRectangle();
 		for (Iterator itr = getAllChildren().iterator(); itr.hasNext();)
 		{
@@ -206,7 +208,10 @@ public class MarqueeSelectionTool extends AbstractTool
 				figure.translateToRelative(relMarqueeRect.setBounds(marqueeRect));
 				included = ((PolylineConnection)figure).getPoints().intersects(relMarqueeRect);
 			}
-			else included = marqueeRect.contains(r);
+			else
+			{
+				included = marqueeSelectOuter ? marqueeRect.contains(r) : marqueeRect.intersects(r);
+			}
 
 			if (included)
 			{

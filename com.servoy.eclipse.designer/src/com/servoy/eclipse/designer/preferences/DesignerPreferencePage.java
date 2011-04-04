@@ -51,7 +51,6 @@ import com.servoy.j2db.util.PersistHelper;
  */
 public class DesignerPreferencePage extends PreferencePage implements IWorkbenchPreferencePage
 {
-
 	public static final String DESIGNER_PREFERENCES_ID = "com.servoy.eclipse.ui.designer";
 
 	public DesignerPreferencePage()
@@ -83,6 +82,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	private Button gridFeedbackCheck;
 	private Button paintPagebreaksCheck;
 	private Button showRulersCheck;
+	private Button marqueeSelectOuterCheck;
 	private ColorSelectViewer sameHeightWidthIndicatorColor;
 
 	public void init(IWorkbench workbench)
@@ -94,10 +94,8 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	{
 		initializeDialogUnits(parent);
 
-
 		Composite rootPanel = new Composite(parent, SWT.NONE);
 		rootPanel.setLayout(new GridLayout(1, true));
-
 
 		Composite formEditingToolbarPanel = new Composite(rootPanel, SWT.NONE);
 		formEditingToolbarPanel.setLayout(new GridLayout(2, false));
@@ -126,17 +124,19 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		copyPasteOffsetSpinner = new Spinner(copyPastePanel, SWT.BORDER);
 		copyPasteOffsetSpinner.setValues(0, 0, 100, 0, 1, 5);
 
+		Composite selectOptionsPanel = new Composite(rootPanel, SWT.NONE);
+		selectOptionsPanel.setLayout(new GridLayout(1, false));
+		selectOptionsPanel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
-		GridData rulerMetricsPanelGridData = new GridData();
-		rulerMetricsPanelGridData.horizontalAlignment = GridData.FILL;
+		marqueeSelectOuterCheck = new Button(selectOptionsPanel, SWT.CHECK);
+		marqueeSelectOuterCheck.setText("Marquee selects only elements fully in lasso"); //$NON-NLS-1$
 
 		Composite rulerMetricsPanel = new Composite(rootPanel, SWT.NONE);
 		rulerMetricsPanel.setLayout(new GridLayout(2, false));
-		rulerMetricsPanel.setLayoutData(rulerMetricsPanelGridData);
+		rulerMetricsPanel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		showRulersCheck = new Button(rulerMetricsPanel, SWT.CHECK);
 		showRulersCheck.setText("Show rulers"); //$NON-NLS-1$
-
 		GridData metricsPanelGridData = new GridData(SWT.END, SWT.CENTER, true, true);
 
 		Composite metricsComboPanel = new Composite(rulerMetricsPanel, SWT.NONE);
@@ -149,17 +149,13 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		metricsCombo = new ComboViewer(metricsComboPanel);
 		metricsCombo.setContentProvider(new ArrayContentProvider());
 		metricsCombo.setLabelProvider(new LabelProvider());
-		metricsCombo.setInput(new ObjectWrapper[] { new ObjectWrapper("pixels", new Integer(DesignerPreferences.PX)), new ObjectWrapper("centimeters", //$NON-NLS-1$//$NON-NLS-2$
-			new Integer(DesignerPreferences.CM)), new ObjectWrapper("inches", new Integer(DesignerPreferences.IN)) }); //$NON-NLS-1$
-
-
-		GridData grpFeedbackSettingsGridData = new GridData();
-		grpFeedbackSettingsGridData.horizontalAlignment = GridData.FILL;
+		metricsCombo.setInput(new ObjectWrapper[] { new ObjectWrapper("pixels", Integer.valueOf(DesignerPreferences.PX)), new ObjectWrapper("centimeters", //$NON-NLS-1$//$NON-NLS-2$
+			Integer.valueOf(DesignerPreferences.CM)), new ObjectWrapper("inches", Integer.valueOf(DesignerPreferences.IN)) }); //$NON-NLS-1$
 
 		Group grpFeedbackSettings = new Group(rootPanel, SWT.NONE);
 		grpFeedbackSettings.setText("Feedback Settings"); //$NON-NLS-1$
 		grpFeedbackSettings.setLayout(new GridLayout(1, false));
-		grpFeedbackSettings.setLayoutData(grpFeedbackSettingsGridData);
+		grpFeedbackSettings.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		gridFeedbackCheck = new Button(grpFeedbackSettings, SWT.CHECK);
 		gridFeedbackCheck.setText("Grid Guides"); //$NON-NLS-1$
@@ -225,14 +221,10 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		paintPagebreaksCheck = new Button(grpFeedbackSettings, SWT.CHECK);
 		paintPagebreaksCheck.setText("Paint page breaks"); //$NON-NLS-1$
 
-
-		GridData grpAlignmentSettingsGridData = new GridData();
-		grpAlignmentSettingsGridData.horizontalAlignment = GridData.FILL;
-
 		Group grpAlignmentSettings = new Group(rootPanel, SWT.NONE);
 		grpAlignmentSettings.setText("Guide Settings"); //$NON-NLS-1$
 		grpAlignmentSettings.setLayout(new GridLayout(1, false));
-		grpAlignmentSettings.setLayoutData(grpAlignmentSettingsGridData);
+		grpAlignmentSettings.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		snapToNoneRadio = new Button(grpAlignmentSettings, SWT.RADIO);
 		snapToNoneRadio.addSelectionListener(new SelectionAdapter()
@@ -328,13 +320,10 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		anchorCheck.setText("Enable Smart Anchoring"); //$NON-NLS-1$
 
 
-		GridData grpResizingGridData = new GridData();
-		grpResizingGridData.horizontalAlignment = GridData.FILL;
-
 		Group grpResizing = new Group(rootPanel, SWT.NONE);
 		grpResizing.setText("Keyboard resize/move step sizes"); //$NON-NLS-1$
 		grpResizing.setLayout(new GridLayout(1, false));
-		grpResizing.setLayoutData(grpResizingGridData);
+		grpResizing.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		Composite smallStepPanel = new Composite(grpResizing, SWT.NONE);
 		smallStepPanel.setLayout(new GridLayout(2, false));
@@ -413,6 +402,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		anchorFeedbackCheck.setSelection(prefs.getShowAnchorFeedback());
 		paintPagebreaksCheck.setSelection(prefs.getPaintPageBreaks());
 		showRulersCheck.setSelection(prefs.getShowRulers());
+		marqueeSelectOuterCheck.setSelection(prefs.getMarqueeSelectOuter());
 	}
 
 	@Override
@@ -442,6 +432,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		prefs.setShowAnchorFeedback(anchorFeedbackCheck.getSelection());
 		prefs.setPaintPageBreaks(paintPagebreaksCheck.getSelection());
 		prefs.setShowRulers(showRulersCheck.getSelection());
+		prefs.setMarqueeSelectOuter(marqueeSelectOuterCheck.getSelection());
 
 		prefs.save();
 
@@ -480,6 +471,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		anchorFeedbackCheck.setSelection(DesignerPreferences.SHOW_ANCHORING_DEFAULT);
 		paintPagebreaksCheck.setSelection(DesignerPreferences.PAINT_PAGEBREAKS_DEFAULT);
 		showRulersCheck.setSelection(DesignerPreferences.SHOW_RULERS_DEFAULT);
+		marqueeSelectOuterCheck.setSelection(DesignerPreferences.MARQUEE_SELECT_OUTER_DEFAULT);
 
 		setEnabledState();
 		super.performDefaults();
@@ -487,7 +479,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 	private void setMetricsComboValue(int metrics)
 	{
-		Integer metricsValue = new Integer(metrics);
+		Integer metricsValue = Integer.valueOf(metrics);
 		for (ObjectWrapper ow : (ObjectWrapper[])metricsCombo.getInput())
 		{
 			if (ow.getType().equals(metricsValue))

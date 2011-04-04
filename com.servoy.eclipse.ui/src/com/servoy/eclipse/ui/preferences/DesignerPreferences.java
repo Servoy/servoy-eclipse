@@ -75,6 +75,7 @@ public class DesignerPreferences
 	public static final String PALETTE_CUSTOMIZATION_SETTING = "paletteCustomization";
 	public static final String PAINT_PAGEBREAKS_SETTING = "paintPageBreaks";
 	public static final String SHOW_RULERS_SETTING = "showRulers";
+	public static final String MARQUEE_SELECT_OUTER_SETTING = "marqueeSelectOuter";
 
 	public static final String SNAP_TO_ALIGMNENT = "alignment";
 	public static final String SNAP_TO_GRID = "grid";
@@ -104,6 +105,7 @@ public class DesignerPreferences
 	public static final int METRICS_DEFAULT = PX;
 	public static final boolean PAINT_PAGEBREAKS_DEFAULT = false;
 	public static final boolean SHOW_RULERS_DEFAULT = true;
+	public static final boolean MARQUEE_SELECT_OUTER_DEFAULT = true;
 
 	protected final IEclipsePreferences eclipsePreferences;
 
@@ -283,6 +285,16 @@ public class DesignerPreferences
 	public void setShowRulers(boolean showRulers)
 	{
 		setProperty(SHOW_RULERS_SETTING, showRulers);
+	}
+
+	public boolean getMarqueeSelectOuter()
+	{
+		return getProperty(MARQUEE_SELECT_OUTER_SETTING, MARQUEE_SELECT_OUTER_DEFAULT);
+	}
+
+	public void setMarqueeSelectOuter(boolean outer)
+	{
+		setProperty(MARQUEE_SELECT_OUTER_SETTING, outer);
 	}
 
 	public static boolean isGuideSetting(String key)
