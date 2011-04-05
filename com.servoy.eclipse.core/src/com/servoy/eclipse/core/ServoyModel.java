@@ -2055,8 +2055,8 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 								IDocument document = textFileBuffer.getDocument();
 
 								FileEditorInput editorInput = new FileEditorInput(scriptFile);
-								final IEditorPart openEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(editorInput);
-
+								final IEditorPart openEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow() == null ? null
+									: PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(editorInput);
 
 								boolean dirty = openEditor != null ? openEditor.isDirty() : textFileBuffer.isDirty();
 

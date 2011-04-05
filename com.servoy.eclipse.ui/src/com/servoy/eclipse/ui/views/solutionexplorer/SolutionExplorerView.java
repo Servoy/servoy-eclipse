@@ -1362,8 +1362,11 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					{
 						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshContent(persist);
 					}
-					((SolutionExplorerListContentProvider)list.getContentProvider()).persistChanges(changes);
-					((SolutionExplorerListContentProvider)list.getContentProvider()).refreshContent();
+					if (list.getContentProvider() != null)
+					{
+						((SolutionExplorerListContentProvider)list.getContentProvider()).persistChanges(changes);
+						((SolutionExplorerListContentProvider)list.getContentProvider()).refreshContent();
+					}
 				}
 			};
 			servoyModel.addPersistChangeListener(true, persistChangeListener);
@@ -2288,8 +2291,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
-		newActionInTreeSecondary.registerAction(UserNodeType.FORM, new OpenWizardAction(NewFormWizard.class,
-			Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form")); //$NON-NLS-1$ //$NON-NLS-2$
+		newActionInTreeSecondary.registerAction(UserNodeType.FORM,
+			new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form")); //$NON-NLS-1$ //$NON-NLS-2$
 		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION, newForm);
 
 		newActionInListPrimary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
