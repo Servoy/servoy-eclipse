@@ -419,12 +419,15 @@ public class ElementUtil
 		for (IFormElement groupElement : groupElements)
 		{
 			List<IFormElement> elementList = getOverlappingFormElements(form, groupElement);
-			for (IFormElement fe : elementList)
+			if (elementList != null)
 			{
-				if (!uuids.contains(fe.getUUID()))
+				for (IFormElement fe : elementList)
 				{
-					uuids.add(fe.getUUID());
-					overlapingElements.add(fe);
+					if (!uuids.contains(fe.getUUID()))
+					{
+						uuids.add(fe.getUUID());
+						overlapingElements.add(fe);
+					}
 				}
 			}
 		}
