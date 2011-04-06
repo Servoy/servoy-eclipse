@@ -86,10 +86,6 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	// edit request types
 	public static final String REQ_COPY = "VFE_COPY"; //$NON-NLS-1$
 	public static final String REQ_CUT = "VFE_CUT"; //$NON-NLS-1$
-	public static final String REQ_BRING_TO_FRONT = "VFE_BRING_TO_FRONT"; //$NON-NLS-1$
-	public static final String REQ_SEND_TO_BACK = "VFE_SEND_TO_BACK"; //$NON-NLS-1$
-	public static final String REQ_BRING_TO_FRONT_ONE_STEP = "VFE_BRING_TO_FRONT_ONE_STEP"; //$NON-NLS-1$
-	public static final String REQ_SEND_TO_BACK_ONE_STEP = "VFE_SEND_TO_BACK_ONE_STEP"; //$NON-NLS-1$
 	public static final String REQ_PASTE = "VFE_PASTE"; //$NON-NLS-1$
 	public static final RequestType REQ_DROP_COPY = new RequestType();
 	public static final String REQ_DROP_LINK = "VFE_DROP_LINK"; //$NON-NLS-1$
@@ -297,8 +293,8 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 					}
 					if (marker.getAttribute(IMarker.CHAR_START, -1) != -1)
 					{
-						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(),
-							Utils.getAsInteger(marker.getAttribute(IMarker.CHAR_START, -1)));
+						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(), Utils.getAsInteger(marker.getAttribute(
+							IMarker.CHAR_START, -1)));
 					}
 					if (elementUuid != null)
 					{

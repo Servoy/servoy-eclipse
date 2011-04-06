@@ -23,7 +23,7 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 
 import com.servoy.eclipse.designer.actions.ZOrderAction;
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.actions.ZOrderAction.ZOrderType;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 
 /**
@@ -48,26 +48,26 @@ public abstract class ZOrderActionDelegateHandler extends DesignerSelectionActio
 	{
 		public ToFront()
 		{
-			super(VisualFormEditor.REQ_BRING_TO_FRONT);
+			super(ZOrderType.Z_ORDER_BRING_TO_FRONT);
 		}
 
 		@Override
 		protected Map<EditPart, Request> createRequests(List<EditPart> selected)
 		{
-			return ZOrderAction.createZOrderRequests(VisualFormEditor.REQ_BRING_TO_FRONT, selected);
+			return ZOrderAction.createZOrderRequests(ZOrderType.Z_ORDER_BRING_TO_FRONT, selected);
 		}
 	}
 	public static class ToBack extends ZOrderActionDelegateHandler
 	{
 		public ToBack()
 		{
-			super(VisualFormEditor.REQ_SEND_TO_BACK);
+			super(ZOrderType.Z_ORDER_SEND_TO_BACK);
 		}
 
 		@Override
 		protected Map<EditPart, Request> createRequests(List<EditPart> selected)
 		{
-			return ZOrderAction.createZOrderRequests(VisualFormEditor.REQ_SEND_TO_BACK, selected);
+			return ZOrderAction.createZOrderRequests(ZOrderType.Z_ORDER_SEND_TO_BACK, selected);
 		}
 	}
 
@@ -75,26 +75,26 @@ public abstract class ZOrderActionDelegateHandler extends DesignerSelectionActio
 	{
 		public ToFrontOneStep()
 		{
-			super(VisualFormEditor.REQ_BRING_TO_FRONT_ONE_STEP);
+			super(ZOrderType.Z_ORDER_BRING_TO_FRONT_ONE_STEP);
 		}
 
 		@Override
 		protected Map<EditPart, Request> createRequests(List<EditPart> selected)
 		{
-			return ZOrderAction.createZOrderRequests(VisualFormEditor.REQ_BRING_TO_FRONT_ONE_STEP, selected);
+			return ZOrderAction.createZOrderRequests(ZOrderType.Z_ORDER_BRING_TO_FRONT_ONE_STEP, selected);
 		}
 	}
 	public static class ToBackOneStep extends ZOrderActionDelegateHandler
 	{
 		public ToBackOneStep()
 		{
-			super(VisualFormEditor.REQ_SEND_TO_BACK_ONE_STEP);
+			super(ZOrderType.Z_ORDER_SEND_TO_BACK_ONE_STEP);
 		}
 
 		@Override
 		protected Map<EditPart, Request> createRequests(List<EditPart> selected)
 		{
-			return ZOrderAction.createZOrderRequests(VisualFormEditor.REQ_SEND_TO_BACK_ONE_STEP, selected);
+			return ZOrderAction.createZOrderRequests(ZOrderType.Z_ORDER_SEND_TO_BACK_ONE_STEP, selected);
 		}
 	}
 }

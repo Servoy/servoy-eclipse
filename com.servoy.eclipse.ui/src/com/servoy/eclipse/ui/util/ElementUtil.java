@@ -16,7 +16,14 @@
  */
 package com.servoy.eclipse.ui.util;
 
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.lang.ref.WeakReference;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,7 +38,9 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
@@ -43,6 +52,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.plugins.IClientPluginAccess;
@@ -67,6 +77,7 @@ import com.servoy.j2db.ui.IScriptSplitPaneMethods;
 import com.servoy.j2db.ui.IScriptTextAreaMethods;
 import com.servoy.j2db.ui.IScriptTextEditorMethods;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.UUID;
 
 /**
  * Utilities for elements and label providers.
@@ -76,6 +87,21 @@ import com.servoy.j2db.util.Debug;
 
 public class ElementUtil
 {
+	private static final class FormElementComparator implements Comparator<IFormElement>
+	{
+		public final static FormElementComparator INSTANCE = new FormElementComparator();
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+		 */
+		public int compare(IFormElement o1, IFormElement o2)
+		{
+			return o1.getFormIndex() - o2.getFormIndex();
+		}
+	}
+
 	public static String getPersistImageName(IPersist persist)
 	{
 		if (persist instanceof BaseComponent)
@@ -360,4 +386,115 @@ public class ElementUtil
 		}
 	}
 
+	public static List<IFormElement> getAllOverlappingFormElements(Form form, IFormElement formElement)
+	{
+		List<IFormElement> overlapingElements = new LinkedList<IFormElement>();
+		List<IFormElement> groupElements = new LinkedList<IFormElement>();
+		List<UUID> uuids = new LinkedList<UUID>();
+
+		groupElements.add(formElement);
+		String groupID = (String)((BaseComponent)formElement).getProperty(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName());
+		if (groupID != null)
+		{
+			Iterator<IPersist> it = form.getAllObjects();
+			while (it.hasNext())
+			{
+				IPersist element = it.next();
+				if (element instanceof BaseComponent)
+				{
+					BaseComponent itFormElement = (BaseComponent)element;
+					if (element.getUUID() == formElement.getUUID())
+					{
+						continue;
+					}
+					String elementGroupID = (String)((BaseComponent)element).getProperty(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName());
+					if (elementGroupID != null && elementGroupID.equals(groupID))
+					{
+						groupElements.add(itFormElement);
+					}
+				}
+			}
+		}
+
+		for (IFormElement groupElement : groupElements)
+		{
+			List<IFormElement> elementList = getOverlappingFormElements(form, groupElement);
+			for (IFormElement fe : elementList)
+			{
+				if (!uuids.contains(fe.getUUID()))
+				{
+					uuids.add(fe.getUUID());
+					overlapingElements.add(fe);
+				}
+			}
+		}
+
+		return overlapingElements;
+	}
+
+	public static List<IFormElement> getOverlappingFormElements(Form form, IFormElement formElement)
+	{
+		List<IFormElement> overlapingElements = new LinkedList<IFormElement>();
+
+		Dimension formElementDimension = null;
+		Point formElementUpLeft = null;
+
+		formElementDimension = formElement.getSize();
+		formElementUpLeft = formElement.getLocation();
+
+		Rectangle formElementRectangle = new Rectangle(formElementDimension);
+		formElementRectangle.setLocation(formElementUpLeft);
+
+		Iterator<IPersist> it = form.getAllObjects();
+		while (it.hasNext())
+		{
+			IPersist element = it.next();
+			if (element instanceof IFormElement)
+			{
+				IFormElement itFormElement = (IFormElement)element;
+				if (element.getUUID() == (formElement).getUUID())
+				{
+					continue;
+				}
+				Dimension elementDimension = itFormElement.getSize();
+				Point elementUpLeft = itFormElement.getLocation();
+
+				Rectangle elementRectangle = new Rectangle(elementDimension);
+				elementRectangle.setLocation(elementUpLeft);
+
+				if (elementRectangle.intersects(formElementRectangle))
+				{
+					overlapingElements.add((IFormElement)element);
+				}
+			}
+		}
+
+
+		if (overlapingElements.size() != 0) return overlapingElements;
+
+		return null;
+	}
+
+	public static IFormElement getElementWithHighestZIndex(FormElementGroup formElementgroup)
+	{
+		int highestFormIndex = -1000000;
+		IFormElement formElement = null;
+		Iterator<IFormElement> groupElementIterator = (formElementgroup).getElements();
+		while (groupElementIterator.hasNext())
+		{
+			IFormElement fe = groupElementIterator.next();
+			if (fe.getFormIndex() > highestFormIndex)
+			{
+				highestFormIndex = fe.getFormIndex();
+				formElement = fe;
+			}
+		}
+
+		return formElement;
+	}
+
+//	public static List<IFormElements> getElementsWithInGroup()
+//	{
+//		
+//	}
 }

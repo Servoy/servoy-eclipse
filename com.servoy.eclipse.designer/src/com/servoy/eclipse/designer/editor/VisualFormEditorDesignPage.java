@@ -104,6 +104,8 @@ import com.servoy.eclipse.designer.actions.DistributeRequest;
 import com.servoy.eclipse.designer.actions.SelectFeedbackmodeAction;
 import com.servoy.eclipse.designer.actions.SelectSnapmodeAction;
 import com.servoy.eclipse.designer.actions.ViewerTogglePropertyAction;
+import com.servoy.eclipse.designer.actions.ZOrderAction;
+import com.servoy.eclipse.designer.actions.ZOrderAction.ZOrderType;
 import com.servoy.eclipse.designer.dnd.FormElementTransferDropTarget;
 import com.servoy.eclipse.designer.editor.commands.AddFieldAction;
 import com.servoy.eclipse.designer.editor.commands.AddPortalAction;
@@ -155,6 +157,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	public static final String COOLBAR_SAMESIZE = "same size";
 	public static final String COOLBAR_TOGGLE = "toggle";
 	public static final String COOLBAR_ELEMENTS = "elements";
+	public static final String COOLBAR_LAYERING = "layering";
 
 	/**
 	 * A viewer property indicating whether inherited elements are hidden. The value must  be a Boolean.
@@ -477,6 +480,22 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		action = new AddFieldAction(editorPart);
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
+
+		action = new ZOrderAction(editorPart, ZOrderType.Z_ORDER_BRING_TO_FRONT);
+		getActionRegistry().registerAction(action);
+		getSelectionActions().add(action.getId());
+
+		action = new ZOrderAction(editorPart, ZOrderType.Z_ORDER_BRING_TO_FRONT_ONE_STEP);
+		getActionRegistry().registerAction(action);
+		getSelectionActions().add(action.getId());
+
+		action = new ZOrderAction(editorPart, ZOrderType.Z_ORDER_SEND_TO_BACK);
+		getActionRegistry().registerAction(action);
+		getSelectionActions().add(action.getId());
+
+		action = new ZOrderAction(editorPart, ZOrderType.Z_ORDER_SEND_TO_BACK_ONE_STEP);
+		getActionRegistry().registerAction(action);
+		getSelectionActions().add(action.getId());
 	}
 
 	/**
@@ -565,8 +584,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 	protected void fillToolbar()
 	{
-		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.BRING_TO_FRONT.getId()));
-		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.SEND_TO_BACK.getId()));
 		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.SET_TAB_SEQUENCE.getId()));
 		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.GROUP.getId()));
 		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.UNGROUP.getId()));
@@ -593,6 +610,11 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_PORTAL.getId()));
 		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_SPLITPANE.getId()));
 		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_TAB.getId()));
+
+		addToolbarAction(COOLBAR_LAYERING, getActionRegistry().getAction(ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP));
+		addToolbarAction(COOLBAR_LAYERING, getActionRegistry().getAction(ZOrderAction.ID_Z_ORDER_SEND_TO_BACK_ONE_STEP));
+		addToolbarAction(COOLBAR_LAYERING, getActionRegistry().getAction(ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT));
+		addToolbarAction(COOLBAR_LAYERING, getActionRegistry().getAction(ZOrderAction.ID_Z_ORDER_SEND_TO_BACK));
 	}
 
 	private void refreshRulers()

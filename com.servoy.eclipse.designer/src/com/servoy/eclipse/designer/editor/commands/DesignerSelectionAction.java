@@ -66,7 +66,7 @@ public abstract class DesignerSelectionAction extends SelectionAction
 	 * @param objects The objects selected.
 	 * @return The command to work the selected objects.
 	 */
-	protected final Command createCommand(List objects)
+	protected Command createCommand(List objects)
 	{
 		if (objects.isEmpty()) return null;
 		if (!(objects.get(0) instanceof EditPart)) return null;

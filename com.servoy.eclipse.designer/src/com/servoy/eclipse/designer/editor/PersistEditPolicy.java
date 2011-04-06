@@ -160,18 +160,6 @@ class PersistEditPolicy extends ComponentEditPolicy
 			command = new FormPlaceElementCommand(application, (TabPanel)persist, ((DataRequest)request).getData(), request.getType(),
 				request.getExtendedData(), null, null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 		}
-
-		else if ((VisualFormEditor.REQ_BRING_TO_FRONT.equals(request.getType()) || VisualFormEditor.REQ_SEND_TO_BACK.equals(request.getType()) ||
-			VisualFormEditor.REQ_BRING_TO_FRONT_ONE_STEP.equals(request.getType()) || VisualFormEditor.REQ_SEND_TO_BACK_ONE_STEP.equals(request.getType())))
-		{
-			if (request instanceof SetPropertyRequest)
-			{
-				SetPropertyRequest setPropertyRequest = (SetPropertyRequest)request;
-				command = SetValueCommand.createSetvalueCommand(setPropertyRequest.getName(), new PersistPropertySource(persist, formEditPart != null
-					? (Form)formEditPart.getModel() : null, false), setPropertyRequest.getPropertyId(), setPropertyRequest.getValue());
-			}
-		}
-
 		else if ((VisualFormEditor.REQ_SET_PROPERTY.equals(request.getType()) && request instanceof SetPropertyRequest))
 		{
 			SetPropertyRequest setPropertyRequest = (SetPropertyRequest)request;
@@ -241,12 +229,6 @@ class PersistEditPolicy extends ComponentEditPolicy
 			return true;
 		}
 		if (VisualFormEditor.REQ_PLACE_TAB.equals(request.getType()) && model instanceof TabPanel)
-		{
-			return true;
-		}
-		if ((VisualFormEditor.REQ_BRING_TO_FRONT.equals(request.getType()) || VisualFormEditor.REQ_SEND_TO_BACK.equals(request.getType()) ||
-			VisualFormEditor.REQ_BRING_TO_FRONT_ONE_STEP.equals(request.getType()) || VisualFormEditor.REQ_SEND_TO_BACK_ONE_STEP.equals(request.getType())) &&
-			request instanceof GroupRequest)
 		{
 			return true;
 		}

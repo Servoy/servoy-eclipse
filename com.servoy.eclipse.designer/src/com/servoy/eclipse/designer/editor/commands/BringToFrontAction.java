@@ -30,7 +30,8 @@ public class BringToFrontAction extends DesignerSelectionAction
 
 	public BringToFrontAction(IWorkbenchPart part)
 	{
-		super(part, VisualFormEditor.REQ_BRING_TO_FRONT);
+//		super(part, VisualFormEditor.REQ_BRING_TO_FRONT);
+		super(part, "bring_to_front");
 	}
 
 	@Override

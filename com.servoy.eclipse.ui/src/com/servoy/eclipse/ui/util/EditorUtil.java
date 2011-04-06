@@ -48,6 +48,7 @@ import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IFileEditorMapping;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -251,10 +252,14 @@ public class EditorUtil
 		if (media == null) return null;
 		try
 		{
+			IFileEditorMapping[] fem = PlatformUI.getWorkbench().getEditorRegistry().getFileEditorMappings();
 			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
 				new PersistEditorInput(media.getName(), media.getRootObject().getName(), media.getUUID()),
-				PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType(PersistEditorInput.MEDIA_RESOURCE_ID)).getId());
+				PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor("vulcano_eolie.jpg").getId());
+//			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
+//				new PersistEditorInput(media.getName(), media.getRootObject().getName(), media.getUUID()),
+//				PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+//					Platform.getContentTypeManager().getContentType(PersistEditorInput.MEDIA_RESOURCE_ID)).getId());
 		}
 		catch (PartInitException ex)
 		{

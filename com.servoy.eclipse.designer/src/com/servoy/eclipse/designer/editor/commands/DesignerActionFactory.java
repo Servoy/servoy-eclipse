@@ -23,6 +23,7 @@ import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.RetargetAction;
 
 import com.servoy.eclipse.designer.Activator;
+import com.servoy.eclipse.designer.actions.ZOrderAction;
 
 
 /**
@@ -46,8 +47,9 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String BRING_TO_FRONT_TEXT = "Bring to front";
 	public static final String BRING_TO_FRONT_TOOLTIP = "Bring selected objects to front";
-	public static final ImageDescriptor BRING_TO_FRONT_IMAGE = Activator.loadImageDescriptorFromBundle("bringtofront.gif");//$NON-NLS-1$
-	public static final ActionFactory BRING_TO_FRONT = new ActionFactory("bring-to-front") {//$NON-NLS-1$
+	public static final ImageDescriptor BRING_TO_FRONT_IMAGE = Activator.loadImageDescriptorFromBundle("bring_to_front.png");//$NON-NLS-1$
+	public static final ActionFactory BRING_TO_FRONT = new ActionFactory(ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT)
+	{//$NON-NLS-1$
 
 		@Override
 		public IWorkbenchAction create(IWorkbenchWindow window)
@@ -67,7 +69,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String SEND_TO_BACK_TEXT = "Send to back";
 	public static final String SEND_TO_BACK_TOOLTIP = "Send selected objects to back";
-	public static final ImageDescriptor SEND_TO_BACK_IMAGE = Activator.loadImageDescriptorFromBundle("sendtoback.gif");//$NON-NLS-1$
+	public static final ImageDescriptor SEND_TO_BACK_IMAGE = Activator.loadImageDescriptorFromBundle("send_to_back.png");//$NON-NLS-1$
 	public static final ActionFactory SEND_TO_BACK = new ActionFactory("send-to-back") {//$NON-NLS-1$
 
 		@Override
@@ -86,9 +88,9 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
-	public static final String BRING_TO_FRONT_ONE_STEP_TEXT = "Send to back one step";
-	public static final String BRING_TO_FRONT_ONE_STEP_TOOLTIP = "Send selected objects to back one step";
-	public static final ImageDescriptor BRING_TO_FRONT_ONE_STEP_IMAGE = Activator.loadImageDescriptorFromBundle("sendtoback.gif");//$NON-NLS-1$
+	public static final String BRING_TO_FRONT_ONE_STEP_TEXT = "Bring forward one step";
+	public static final String BRING_TO_FRONT_ONE_STEP_TOOLTIP = "Bring selected objects forward one step";
+	public static final ImageDescriptor BRING_TO_FRONT_ONE_STEP_IMAGE = Activator.loadImageDescriptorFromBundle("bring_forward.png");//$NON-NLS-1$
 	public static final ActionFactory BRING_TO_FRONT_ONE_STEP = new ActionFactory("bring-to-front-one-step") {//$NON-NLS-1$
 
 		@Override
@@ -107,9 +109,9 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
-	public static final String SEND_TO_BACK_ONE_STEP_TEXT = "Send to back";
-	public static final String SEND_TO_BACK_ONE_STEP_TOOLTIP = "Send selected objects to back";
-	public static final ImageDescriptor SEND_TO_BACK_ONE_STEP_IMAGE = Activator.loadImageDescriptorFromBundle("sendtoback.gif");//$NON-NLS-1$
+	public static final String SEND_TO_BACK_ONE_STEP_TEXT = "Send to back one step";
+	public static final String SEND_TO_BACK_ONE_STEP_TOOLTIP = "Send selected objects backward one step";
+	public static final ImageDescriptor SEND_TO_BACK_ONE_STEP_IMAGE = Activator.loadImageDescriptorFromBundle("send_backward.png");//$NON-NLS-1$
 	public static final ActionFactory SEND_TO_BACK_ONE_STEP = new ActionFactory("send-to-back-one-step") {//$NON-NLS-1$
 
 		@Override
