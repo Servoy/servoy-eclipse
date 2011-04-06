@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +36,6 @@ import com.servoy.eclipse.designer.editor.commands.DesignerSelectionAction;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.util.ElementUtil;
-import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
@@ -45,7 +43,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.UUID;
 
 /**
- * Action responsible for handling the layering adjustements:
+ * Action responsible for handling the layering adjustments:
  *  - bring forward (one layer)
  *  - send backward (one layer)
  *  - bring to front
@@ -56,32 +54,10 @@ import com.servoy.j2db.util.UUID;
  */
 public class ZOrderAction extends DesignerSelectionAction
 {
-	public enum ZOrderType
-	{
-		Z_ORDER_BRING_TO_FRONT, Z_ORDER_SEND_TO_BACK, Z_ORDER_BRING_TO_FRONT_ONE_STEP, Z_ORDER_SEND_TO_BACK_ONE_STEP
-	}
-
-	private final ZOrderType zOrderType;
-
 	public static final String ID_Z_ORDER_BRING_TO_FRONT = "z_order_bring_to_front";
 	public static final String ID_Z_ORDER_SEND_TO_BACK = "z_order_send_to_back";
 	public static final String ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP = "z_order_bring_to_front_one_step";
 	public static final String ID_Z_ORDER_SEND_TO_BACK_ONE_STEP = "z_order_send_to_back_one_step";
-
-	private static final class FormElementComparator implements Comparator<IFormElement>
-	{
-		public final static FormElementComparator INSTANCE = new FormElementComparator();
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-		 */
-		public int compare(IFormElement o1, IFormElement o2)
-		{
-			return o1.getFormIndex() - o2.getFormIndex();
-		}
-	}
 
 	private static final class AdjustedFormElementComparator implements Comparator<AdjustedFormElement>
 	{
@@ -111,49 +87,62 @@ public class ZOrderAction extends DesignerSelectionAction
 		}
 
 		@Override
-		public boolean equals(Object afe)
+		public int hashCode()
 		{
-			if (afe instanceof AdjustedFormElement) return (this.formElement.getUUID()).equals(((AdjustedFormElement)afe).formElement.getUUID());
-			else return false;
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((formElement == null) ? 0 : formElement.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj) return true;
+			if (obj == null) return false;
+			if (getClass() != obj.getClass()) return false;
+			AdjustedFormElement other = (AdjustedFormElement)obj;
+			if (formElement == null)
+			{
+				if (other.formElement != null) return false;
+			}
+			else if (!formElement.equals(other.formElement)) return false;
+			return true;
 		}
 	}
 
-
-	public ZOrderAction(IWorkbenchPart part, Object requestType)
+	public ZOrderAction(IWorkbenchPart part, String zOrderId)
 	{
-		super(part, requestType);
-		initAction((ZOrderType)requestType);
-		zOrderType = (ZOrderType)requestType;
+		super(part, VisualFormEditor.REQ_SET_PROPERTY);
+		setId(zOrderId);
+		initAction();
 	}
 
-	public void initAction(ZOrderType requestType)
+	public void initAction()
 	{
-		switch (requestType)
+		if (ID_Z_ORDER_BRING_TO_FRONT.equals(getId()))
 		{
-			case Z_ORDER_BRING_TO_FRONT :
-				setText(DesignerActionFactory.BRING_TO_FRONT_TEXT);
-				setToolTipText(DesignerActionFactory.BRING_TO_FRONT_TOOLTIP);
-				setImageDescriptor(DesignerActionFactory.BRING_TO_FRONT_IMAGE);
-				setId(ID_Z_ORDER_BRING_TO_FRONT);
-				break;
-			case Z_ORDER_BRING_TO_FRONT_ONE_STEP :
-				setText(DesignerActionFactory.BRING_TO_FRONT_ONE_STEP_TEXT);
-				setToolTipText(DesignerActionFactory.BRING_TO_FRONT_ONE_STEP_TOOLTIP);
-				setImageDescriptor(DesignerActionFactory.BRING_TO_FRONT_ONE_STEP_IMAGE);
-				setId(ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP);
-				break;
-			case Z_ORDER_SEND_TO_BACK :
-				setText(DesignerActionFactory.SEND_TO_BACK_TEXT);
-				setToolTipText(DesignerActionFactory.SEND_TO_BACK_TOOLTIP);
-				setImageDescriptor(DesignerActionFactory.SEND_TO_BACK_IMAGE);
-				setId(ID_Z_ORDER_SEND_TO_BACK);
-				break;
-			case Z_ORDER_SEND_TO_BACK_ONE_STEP :
-				setText(DesignerActionFactory.SEND_TO_BACK_ONE_STEP_TEXT);
-				setToolTipText(DesignerActionFactory.SEND_TO_BACK_ONE_STEP_TOOLTIP);
-				setImageDescriptor(DesignerActionFactory.SEND_TO_BACK_ONE_STEP_IMAGE);
-				setId(ID_Z_ORDER_SEND_TO_BACK_ONE_STEP);
-				break;
+			setText(DesignerActionFactory.BRING_TO_FRONT_TEXT);
+			setToolTipText(DesignerActionFactory.BRING_TO_FRONT_TOOLTIP);
+			setImageDescriptor(DesignerActionFactory.BRING_TO_FRONT_IMAGE);
+		}
+		else if (ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP.equals(getId()))
+		{
+			setText(DesignerActionFactory.BRING_TO_FRONT_ONE_STEP_TEXT);
+			setToolTipText(DesignerActionFactory.BRING_TO_FRONT_ONE_STEP_TOOLTIP);
+			setImageDescriptor(DesignerActionFactory.BRING_TO_FRONT_ONE_STEP_IMAGE);
+		}
+		else if (ID_Z_ORDER_SEND_TO_BACK.equals(getId()))
+		{
+			setText(DesignerActionFactory.SEND_TO_BACK_TEXT);
+			setToolTipText(DesignerActionFactory.SEND_TO_BACK_TOOLTIP);
+			setImageDescriptor(DesignerActionFactory.SEND_TO_BACK_IMAGE);
+		}
+		else if (ID_Z_ORDER_SEND_TO_BACK_ONE_STEP.equals(getId()))
+		{
+			setText(DesignerActionFactory.SEND_TO_BACK_ONE_STEP_TEXT);
+			setToolTipText(DesignerActionFactory.SEND_TO_BACK_ONE_STEP_TOOLTIP);
+			setImageDescriptor(DesignerActionFactory.SEND_TO_BACK_ONE_STEP_IMAGE);
 		}
 	}
 
@@ -166,25 +155,25 @@ public class ZOrderAction extends DesignerSelectionAction
 	@Override
 	protected Map<EditPart, Request> createRequests(List<EditPart> selected)
 	{
-		return createZOrderRequests(zOrderType, selected);
+		return createZOrderRequests(getId(), selected);
 	}
 
-	protected static LinkedList<AdjustedFormElement> calculateNewZOrder(Form form, Object[] models, ZOrderType requestType)
+	protected static List<AdjustedFormElement> calculateNewZOrder(Form form, List<Object> models, String zOrderId)
 	{
 		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
 		/*
 		 * This is useful when multiple elements are selected. When one object from models is adjusted others from that array may be modified, and this map is
 		 * used to avoid modifying it several times
 		 */
-		HashMap<UUID, AdjustedFormElement> uuidToFormElementMap = new HashMap<UUID, AdjustedFormElement>();
+		Map<UUID, AdjustedFormElement> uuidToFormElementMap = new HashMap<UUID, AdjustedFormElement>();
 
-		List<Object> newModelsList = new LinkedList<Object>();
+		List<IFormElement> newModelsList = new ArrayList<IFormElement>();
 		for (Object model : models)
 		{
 			if (model instanceof IFormElement)
 			{
 				uuidToFormElementMap.put(((IFormElement)model).getUUID(), new AdjustedFormElement((IFormElement)model, true));
-				newModelsList.add(model);
+				newModelsList.add((IFormElement)model);
 			}
 			else if (model instanceof FormElementGroup)
 			{
@@ -201,284 +190,273 @@ public class ZOrderAction extends DesignerSelectionAction
 			}
 		}
 
-		Object[] modelsArray = newModelsList.toArray();
+		List<AdjustedFormElement> returnList = new ArrayList<AdjustedFormElement>();
 
-		LinkedList<AdjustedFormElement> returnList = new LinkedList<AdjustedFormElement>();
-
-		for (Object model : modelsArray)
+		for (IFormElement formElement : newModelsList)
 		{
-			if (model instanceof IFormElement)
+			/*
+			 * Check to see if the element isn't already adjusted
+			 */
+			if (!uuidToFormElementMap.get(formElement.getUUID()).needsAdjustement) continue;
+
+			/*
+			 * Get the overlapping elements, if no overlapping elements exist then continue with the next model object
+			 */
+			List<IFormElement> tmpOverlappingElements = ElementUtil.getAllOverlappingFormElements(flattenedForm, formElement);
+			if (tmpOverlappingElements == null || tmpOverlappingElements.isEmpty())
 			{
-				IFormElement formElement = (IFormElement)model;
+				uuidToFormElementMap.get(formElement.getUUID()).needsAdjustement = false;
+				continue;
+			}
 
-				/*
-				 * Check to see if the element isn't already adjusted
-				 */
-				if (!uuidToFormElementMap.get(((IFormElement)model).getUUID()).needsAdjustement) continue;
-
-				/*
-				 * Get the overlapping elements, if no overlapping elements exist then continue with the next model object
-				 */
-				List<IFormElement> tmpOverlappingElements = ElementUtil.getAllOverlappingFormElements(flattenedForm, formElement);
-				if (tmpOverlappingElements == null || tmpOverlappingElements.isEmpty())
+			/*
+			 * Create a new list using the list above transforming the elements to AdjustedFormElement
+			 */
+			List<AdjustedFormElement> overlappingElements = new ArrayList<AdjustedFormElement>();
+			for (IFormElement bc : tmpOverlappingElements)
+			{
+				if (uuidToFormElementMap.get(bc.getUUID()) != null)
 				{
-					uuidToFormElementMap.get(((IFormElement)model).getUUID()).needsAdjustement = false;
-					continue;
-				}
-
-				/*
-				 * Create a new list using the list above transforming the elements to AdjustedFormElement
-				 */
-				LinkedList<AdjustedFormElement> overlappingElements = new LinkedList<AdjustedFormElement>();
-				for (IFormElement bc : tmpOverlappingElements)
-				{
-					if (uuidToFormElementMap.get(bc.getUUID()) != null) overlappingElements.add(new AdjustedFormElement(bc,
-						uuidToFormElementMap.get(bc.getUUID()).needsAdjustement));
-					else overlappingElements.add(new AdjustedFormElement(bc, false));
-				}
-
-				/*
-				 * Add the current formElement to the list
-				 */
-				overlappingElements.add(new AdjustedFormElement(formElement, true));
-
-				/*
-				 * Add the other group members (if any) to the list and their overlapping elements
-				 */
-				String modelGroupID = (String)((BaseComponent)formElement).getProperty(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName());
-				if (modelGroupID != null)
-				{
-					for (Object groupMember : modelsArray)
-					{
-						if (groupMember instanceof BaseComponent)
-						{
-							String groupMemberGroupID = (String)((BaseComponent)groupMember).getProperty(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName());
-							if (groupMemberGroupID != null && groupMemberGroupID.equals(modelGroupID))
-							{
-								AdjustedFormElement afe = new AdjustedFormElement((BaseComponent)groupMember, true);
-								if (!overlappingElements.contains(afe)) overlappingElements.add(afe);
-							}
-						}
-					}
-				}
-
-				Collections.sort(overlappingElements, AdjustedFormElementComparator.INSTANCE);
-				/*
-				 * Order the elements from overlappingElements
-				 */
-				LinkedList<AdjustedFormElement> orderedElements = overlappingElements;
-
-				for (int index = 0; index < orderedElements.size(); index++)
-				{
-					orderedElements.get(index).layerNumber = index;
-				}
-
-				/*
-				 * Adjust the form indexes to the new values
-				 */
-				LinkedList<AdjustedFormElement> newOrderedElements = new LinkedList<AdjustedFormElement>();
-				if (ZOrderType.Z_ORDER_SEND_TO_BACK.equals(requestType))
-				{
-					for (int index = 0; index <= orderedElements.size() - 1; index++)
-					{
-						AdjustedFormElement current = orderedElements.get(index);
-						if (current.needsAdjustement)
-						{
-							newOrderedElements.add(current);
-						}
-					}
-
-					for (int index = 0; index <= orderedElements.size() - 1; index++)
-					{
-						AdjustedFormElement current = orderedElements.get(index);
-						if (!current.needsAdjustement)
-						{
-							newOrderedElements.add(current);
-						}
-					}
-				}
-				else if (ZOrderType.Z_ORDER_BRING_TO_FRONT.equals(requestType))
-				{
-					for (int index = 0; index <= orderedElements.size() - 1; index++)
-					{
-						AdjustedFormElement current = orderedElements.get(index);
-						if (!current.needsAdjustement)
-						{
-							newOrderedElements.add(current);
-						}
-					}
-
-					for (int index = 0; index <= orderedElements.size() - 1; index++)
-					{
-						AdjustedFormElement current = orderedElements.get(index);
-						if (current.needsAdjustement)
-						{
-							newOrderedElements.add(current);
-						}
-					}
-				}
-				else if (ZOrderType.Z_ORDER_SEND_TO_BACK_ONE_STEP.equals(requestType))
-				{
-					ArrayList<Integer> layerNumberList = new ArrayList<Integer>();
-
-					for (AdjustedFormElement abc : orderedElements)
-					{
-						if (abc.needsAdjustement)
-						{
-							abc.layerNumber--;
-							layerNumberList.add(new Integer(abc.layerNumber));
-						}
-					}
-
-					for (int index = 0; index < orderedElements.size(); index++)
-					{
-						AdjustedFormElement abc = orderedElements.get(index);
-						if (!abc.needsAdjustement)
-						{
-							if (layerNumberList.contains(new Integer(abc.layerNumber)))
-							{
-								for (int increment = 1;; increment++)
-								{
-									if (!layerNumberList.contains(new Integer(abc.layerNumber + increment)))
-									{
-										abc.layerNumber += increment;
-										layerNumberList.add(new Integer(abc.layerNumber));
-										break;
-									}
-								}
-							}
-							else layerNumberList.add(new Integer(abc.layerNumber));
-						}
-					}
-
-					AdjustedFormElement[] tmpNewOrderedElements = new AdjustedFormElement[orderedElements.size() + 1];
-					for (int index = 0; index < orderedElements.size(); index++)
-					{
-						AdjustedFormElement abc = orderedElements.get(index);
-						tmpNewOrderedElements[abc.layerNumber + 1] = abc;
-					}
-
-					for (int index = tmpNewOrderedElements.length - 1; index >= 0; index--)
-					{
-						if (tmpNewOrderedElements[index] != null)
-						{
-							String currentGroupID = (String)((BaseComponent)tmpNewOrderedElements[index].formElement).getProperty(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName());
-							newOrderedElements.add(0, tmpNewOrderedElements[index]);
-							if (currentGroupID == null) continue;
-							else
-							{
-								for (int backwardIndex = index - 1; backwardIndex >= 0; backwardIndex--)
-								{
-									if (tmpNewOrderedElements[backwardIndex] != null)
-									{
-										String backwardGroupID = (String)((BaseComponent)tmpNewOrderedElements[backwardIndex].formElement).getProperty(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName());
-										if (backwardGroupID != null && backwardGroupID.equals(currentGroupID))
-										{
-											newOrderedElements.add(0, tmpNewOrderedElements[backwardIndex]);
-											tmpNewOrderedElements[backwardIndex] = null;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-				else if (ZOrderType.Z_ORDER_BRING_TO_FRONT_ONE_STEP.equals(requestType))
-				{
-					ArrayList<Integer> layerNumberList = new ArrayList<Integer>();
-
-					for (AdjustedFormElement abc : orderedElements)
-					{
-						if (abc.needsAdjustement)
-						{
-							abc.layerNumber++;
-							layerNumberList.add(new Integer(abc.layerNumber));
-						}
-					}
-
-					for (int index = 0; index < orderedElements.size(); index++)
-					{
-						AdjustedFormElement abc = orderedElements.get(index);
-						if (!abc.needsAdjustement)
-						{
-							if (layerNumberList.contains(new Integer(abc.layerNumber)))
-							{
-								for (int decrement = 1;; decrement++)
-								{
-									if (!layerNumberList.contains(new Integer(abc.layerNumber - decrement)))
-									{
-										abc.layerNumber -= decrement;
-										layerNumberList.add(new Integer(abc.layerNumber));
-										break;
-									}
-								}
-							}
-							else layerNumberList.add(new Integer(abc.layerNumber));
-						}
-					}
-
-					AdjustedFormElement[] tmpNewOrderedElements = new AdjustedFormElement[orderedElements.size() + 1];
-					for (int index = 0; index < orderedElements.size(); index++)
-					{
-						AdjustedFormElement abc = orderedElements.get(index);
-						tmpNewOrderedElements[abc.layerNumber] = abc;
-					}
-
-					for (int index = 0; index <= tmpNewOrderedElements.length - 1; index++)
-					{
-						if (tmpNewOrderedElements[index] != null)
-						{
-							String currentGroupID = (String)((BaseComponent)tmpNewOrderedElements[index].formElement).getProperty(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName());
-							newOrderedElements.add(tmpNewOrderedElements[index]);
-							if (currentGroupID == null) continue;
-							else
-							{
-								for (int forwardIndex = index + 1; forwardIndex <= tmpNewOrderedElements.length - 1; forwardIndex++)
-								{
-									if (tmpNewOrderedElements[forwardIndex] != null)
-									{
-										String forwardGroupID = (String)((BaseComponent)tmpNewOrderedElements[forwardIndex].formElement).getProperty(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName());
-										if (forwardGroupID != null && forwardGroupID.equals(currentGroupID))
-										{
-											newOrderedElements.add(tmpNewOrderedElements[forwardIndex]);
-											tmpNewOrderedElements[forwardIndex] = null;
-										}
-									}
-								}
-							}
-						}
-					}
-
+					overlappingElements.add(new AdjustedFormElement(bc, uuidToFormElementMap.get(bc.getUUID()).needsAdjustement));
 				}
 				else
 				{
-					continue;
+					overlappingElements.add(new AdjustedFormElement(bc, false));
+				}
+			}
+
+			/*
+			 * Add the current formElement to the list
+			 */
+			overlappingElements.add(new AdjustedFormElement(formElement, true));
+
+			/*
+			 * Add the other group members (if any) to the list and their overlapping elements
+			 */
+			String modelGroupID = formElement.getGroupID();
+			if (modelGroupID != null)
+			{
+				for (IFormElement groupMember : newModelsList)
+				{
+					if (modelGroupID.equals(groupMember.getGroupID()))
+					{
+						AdjustedFormElement afe = new AdjustedFormElement(groupMember, true);
+						if (!overlappingElements.contains(afe)) overlappingElements.add(afe);
+					}
+				}
+			}
+
+			Collections.sort(overlappingElements, AdjustedFormElementComparator.INSTANCE);
+			/*
+			 * Order the elements from overlappingElements
+			 */
+			List<AdjustedFormElement> orderedElements = overlappingElements;
+
+			for (int index = 0; index < orderedElements.size(); index++)
+			{
+				orderedElements.get(index).layerNumber = index;
+			}
+
+			/*
+			 * Adjust the form indexes to the new values
+			 */
+			List<AdjustedFormElement> newOrderedElements = new ArrayList<AdjustedFormElement>();
+
+
+			if (ID_Z_ORDER_SEND_TO_BACK.equals(zOrderId))
+			{
+				for (int index = 0; index <= orderedElements.size() - 1; index++)
+				{
+					AdjustedFormElement current = orderedElements.get(index);
+					if (current.needsAdjustement)
+					{
+						newOrderedElements.add(current);
+					}
 				}
 
-				for (int index = 0; index < newOrderedElements.size(); index++)
+				for (int index = 0; index <= orderedElements.size() - 1; index++)
 				{
-					newOrderedElements.get(index).layerNumber = index;
-					newOrderedElements.get(index).needsAdjustement = false;
-					uuidToFormElementMap.put(newOrderedElements.get(index).formElement.getUUID(), newOrderedElements.get(index));
-					returnList.add(newOrderedElements.get(index));
+					AdjustedFormElement current = orderedElements.get(index);
+					if (!current.needsAdjustement)
+					{
+						newOrderedElements.add(current);
+					}
 				}
+			}
+			else if (ID_Z_ORDER_BRING_TO_FRONT.equals(zOrderId))
+			{
+				for (int index = 0; index <= orderedElements.size() - 1; index++)
+				{
+					AdjustedFormElement current = orderedElements.get(index);
+					if (!current.needsAdjustement)
+					{
+						newOrderedElements.add(current);
+					}
+				}
+
+				for (int index = 0; index <= orderedElements.size() - 1; index++)
+				{
+					AdjustedFormElement current = orderedElements.get(index);
+					if (current.needsAdjustement)
+					{
+						newOrderedElements.add(current);
+					}
+				}
+			}
+			else if (ID_Z_ORDER_SEND_TO_BACK_ONE_STEP.equals(zOrderId))
+			{
+				List<Integer> layerNumberList = new ArrayList<Integer>();
+
+				for (AdjustedFormElement abc : orderedElements)
+				{
+					if (abc.needsAdjustement)
+					{
+						abc.layerNumber--;
+						layerNumberList.add(new Integer(abc.layerNumber));
+					}
+				}
+
+				for (int index = 0; index < orderedElements.size(); index++)
+				{
+					AdjustedFormElement abc = orderedElements.get(index);
+					if (!abc.needsAdjustement)
+					{
+						if (layerNumberList.contains(new Integer(abc.layerNumber)))
+						{
+							for (int increment = 1;; increment++)
+							{
+								if (!layerNumberList.contains(new Integer(abc.layerNumber + increment)))
+								{
+									abc.layerNumber += increment;
+									layerNumberList.add(new Integer(abc.layerNumber));
+									break;
+								}
+							}
+						}
+						else
+						{
+							layerNumberList.add(new Integer(abc.layerNumber));
+						}
+					}
+				}
+
+				AdjustedFormElement[] tmpNewOrderedElements = new AdjustedFormElement[orderedElements.size() + 1];
+				for (AdjustedFormElement abc : orderedElements)
+				{
+					tmpNewOrderedElements[abc.layerNumber + 1] = abc;
+				}
+
+				for (int index = tmpNewOrderedElements.length - 1; index >= 0; index--)
+				{
+					if (tmpNewOrderedElements[index] != null)
+					{
+						String currentGroupID = tmpNewOrderedElements[index].formElement.getGroupID();
+						newOrderedElements.add(0, tmpNewOrderedElements[index]);
+						if (currentGroupID != null)
+						{
+							for (int backwardIndex = index - 1; backwardIndex >= 0; backwardIndex--)
+							{
+								if (tmpNewOrderedElements[backwardIndex] != null &&
+									currentGroupID.equals(tmpNewOrderedElements[backwardIndex].formElement.getGroupID()))
+								{
+									newOrderedElements.add(0, tmpNewOrderedElements[backwardIndex]);
+									tmpNewOrderedElements[backwardIndex] = null;
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP.equals(zOrderId))
+			{
+				List<Integer> layerNumberList = new ArrayList<Integer>();
+
+				for (AdjustedFormElement abc : orderedElements)
+				{
+					if (abc.needsAdjustement)
+					{
+						abc.layerNumber++;
+						layerNumberList.add(new Integer(abc.layerNumber));
+					}
+				}
+
+				for (AdjustedFormElement abc : orderedElements)
+				{
+					if (!abc.needsAdjustement)
+					{
+						if (layerNumberList.contains(new Integer(abc.layerNumber)))
+						{
+							for (int decrement = 1;; decrement++)
+							{
+								if (!layerNumberList.contains(new Integer(abc.layerNumber - decrement)))
+								{
+									abc.layerNumber -= decrement;
+									layerNumberList.add(new Integer(abc.layerNumber));
+									break;
+								}
+							}
+						}
+						else
+						{
+							layerNumberList.add(new Integer(abc.layerNumber));
+						}
+					}
+				}
+
+				AdjustedFormElement[] tmpNewOrderedElements = new AdjustedFormElement[orderedElements.size() + 1];
+				for (AdjustedFormElement abc : orderedElements)
+				{
+					tmpNewOrderedElements[abc.layerNumber] = abc;
+				}
+
+				for (int index = 0; index <= tmpNewOrderedElements.length - 1; index++)
+				{
+					if (tmpNewOrderedElements[index] != null)
+					{
+						String currentGroupID = tmpNewOrderedElements[index].formElement.getGroupID();
+						newOrderedElements.add(tmpNewOrderedElements[index]);
+						if (currentGroupID != null)
+						{
+							for (int forwardIndex = index + 1; forwardIndex <= tmpNewOrderedElements.length - 1; forwardIndex++)
+							{
+								if (tmpNewOrderedElements[forwardIndex] != null &&
+									currentGroupID.equals(tmpNewOrderedElements[forwardIndex].formElement.getGroupID()))
+								{
+									newOrderedElements.add(tmpNewOrderedElements[forwardIndex]);
+									tmpNewOrderedElements[forwardIndex] = null;
+								}
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				continue;
+			}
+
+			for (int index = 0; index < newOrderedElements.size(); index++)
+			{
+				newOrderedElements.get(index).layerNumber = index;
+				newOrderedElements.get(index).needsAdjustement = false;
+				uuidToFormElementMap.put(newOrderedElements.get(index).formElement.getUUID(), newOrderedElements.get(index));
+				returnList.add(newOrderedElements.get(index));
 			}
 		}
 
 		return returnList;
 	}
 
-	public static Map<EditPart, Request> createZOrderRequests(ZOrderType requestType, List<EditPart> selected)
+	public static Map<EditPart, Request> createZOrderRequests(String zOrderId, List<EditPart> selected)
 	{
 		if (selected == null || selected.isEmpty()) return null;
 
 
-		Map<EditPart, Request> requests = new HashMap<EditPart, Request>();
+		Map<EditPart, Request> requests = null;
 
-		List<Object> models = new LinkedList<Object>();
+		List<Object> models = new ArrayList<Object>();
 
 		EditPart firstEditPart = selected.get(0);
-		Map editPartMap = firstEditPart.getViewer().getEditPartRegistry();
 
 		EditPart formEditPart = firstEditPart.getParent();
 		while (formEditPart != null && !(formEditPart.getModel() instanceof Form))
@@ -490,7 +468,6 @@ public class ZOrderAction extends DesignerSelectionAction
 
 		for (EditPart editPart : selected)
 		{
-
 			if (editPart instanceof GraphicalEditPart)
 			{
 				models.add(editPart.getModel());
@@ -499,17 +476,22 @@ public class ZOrderAction extends DesignerSelectionAction
 
 		if (models.isEmpty()) return null;
 
-		LinkedList<AdjustedFormElement> orderedList = calculateNewZOrder((Form)formEditPart.getModel(), models.toArray(), requestType);
-		if (orderedList != null && !orderedList.isEmpty())
+		Map<Object, EditPart> editPartMap = firstEditPart.getViewer().getEditPartRegistry();
+
+		List<AdjustedFormElement> orderedList = calculateNewZOrder((Form)formEditPart.getModel(), models, zOrderId);
+		if (orderedList != null)
 		{
 			for (AdjustedFormElement abc : orderedList)
 			{
-				requests.put((EditPart)editPartMap.get(abc.formElement), new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY,
-					StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), abc.layerNumber, "")); //$NON-NLS-1$
+				if (requests == null)
+				{
+					requests = new HashMap<EditPart, Request>();
+				}
+				requests.put(editPartMap.get(abc.formElement), new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY,
+					StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), Integer.valueOf(abc.layerNumber), "")); //$NON-NLS-1$
 			}
 		}
 
-		if (requests.isEmpty()) return null;
-		else return requests;
+		return requests;
 	}
 }

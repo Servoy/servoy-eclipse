@@ -23,7 +23,7 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 
 import com.servoy.eclipse.designer.actions.ZOrderAction;
-import com.servoy.eclipse.designer.actions.ZOrderAction.ZOrderType;
+import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 
 /**
@@ -33,9 +33,18 @@ import com.servoy.eclipse.designer.util.DesignerUtil;
  */
 public abstract class ZOrderActionDelegateHandler extends DesignerSelectionActionDelegateHandler
 {
-	public ZOrderActionDelegateHandler(Object requestType)
+	private final String zOrderId;
+
+	public ZOrderActionDelegateHandler(String zOrderId)
 	{
-		super(requestType);
+		super(VisualFormEditor.REQ_SET_PROPERTY);
+		this.zOrderId = zOrderId;
+	}
+
+	@Override
+	protected Map<EditPart, Request> createRequests(List<EditPart> selected)
+	{
+		return ZOrderAction.createZOrderRequests(zOrderId, selected);
 	}
 
 	@Override
@@ -48,26 +57,14 @@ public abstract class ZOrderActionDelegateHandler extends DesignerSelectionActio
 	{
 		public ToFront()
 		{
-			super(ZOrderType.Z_ORDER_BRING_TO_FRONT);
-		}
-
-		@Override
-		protected Map<EditPart, Request> createRequests(List<EditPart> selected)
-		{
-			return ZOrderAction.createZOrderRequests(ZOrderType.Z_ORDER_BRING_TO_FRONT, selected);
+			super(ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT);
 		}
 	}
 	public static class ToBack extends ZOrderActionDelegateHandler
 	{
 		public ToBack()
 		{
-			super(ZOrderType.Z_ORDER_SEND_TO_BACK);
-		}
-
-		@Override
-		protected Map<EditPart, Request> createRequests(List<EditPart> selected)
-		{
-			return ZOrderAction.createZOrderRequests(ZOrderType.Z_ORDER_SEND_TO_BACK, selected);
+			super(ZOrderAction.ID_Z_ORDER_SEND_TO_BACK);
 		}
 	}
 
@@ -75,26 +72,14 @@ public abstract class ZOrderActionDelegateHandler extends DesignerSelectionActio
 	{
 		public ToFrontOneStep()
 		{
-			super(ZOrderType.Z_ORDER_BRING_TO_FRONT_ONE_STEP);
-		}
-
-		@Override
-		protected Map<EditPart, Request> createRequests(List<EditPart> selected)
-		{
-			return ZOrderAction.createZOrderRequests(ZOrderType.Z_ORDER_BRING_TO_FRONT_ONE_STEP, selected);
+			super(ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP);
 		}
 	}
 	public static class ToBackOneStep extends ZOrderActionDelegateHandler
 	{
 		public ToBackOneStep()
 		{
-			super(ZOrderType.Z_ORDER_SEND_TO_BACK_ONE_STEP);
-		}
-
-		@Override
-		protected Map<EditPart, Request> createRequests(List<EditPart> selected)
-		{
-			return ZOrderAction.createZOrderRequests(ZOrderType.Z_ORDER_SEND_TO_BACK_ONE_STEP, selected);
+			super(ZOrderAction.ID_Z_ORDER_SEND_TO_BACK_ONE_STEP);
 		}
 	}
 }

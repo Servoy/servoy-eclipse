@@ -20,10 +20,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartViewer;
@@ -37,8 +38,8 @@ import com.servoy.eclipse.designer.actions.SetPropertyRequest;
 import com.servoy.eclipse.designer.editor.GroupGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.util.ElementUtil;
-import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
@@ -183,10 +184,8 @@ public class GroupAction extends DesignerSelectionAction
 
 	protected static Map<EditPart, Request> createZOrderRequests(List<EditPart> selected)
 	{
-		Map<EditPart, Request> requests = new HashMap<EditPart, Request>();
-
 		EditPart firstEditPart = selected.get(0);
-		Map editPartMap = firstEditPart.getViewer().getEditPartRegistry();
+		Map<Object, EditPart> editPartMap = firstEditPart.getViewer().getEditPartRegistry();
 
 		EditPart formEditPart = firstEditPart.getParent();
 		while (formEditPart != null && !(formEditPart.getModel() instanceof Form))
@@ -196,81 +195,117 @@ public class GroupAction extends DesignerSelectionAction
 
 		if (formEditPart == null) return null;
 
-		List<BaseComponent> groupModels = new LinkedList<BaseComponent>();
-		List<UUID> groupUUIDList = new LinkedList<UUID>();
+		Form flattenedForm = ModelUtils.getEditingFlattenedSolution((Form)formEditPart.getModel()).getFlattenedForm((Form)formEditPart.getModel());
 
-		int highestIndexOfGroup = -1000000;
+		List<IFormElement> groupModels = null;
+		Set<UUID> groupUUIDSet = null;
+
+		IFormElement highestIndexOfGroupElement = null;
 
 		for (EditPart editPart : selected)
 		{
-			if (editPart instanceof GraphicalEditPart && editPart.getModel() instanceof BaseComponent)
+			if (editPart instanceof GraphicalEditPart && editPart.getModel() instanceof IFormElement)
 			{
-				groupModels.add((BaseComponent)editPart.getModel());
-				groupUUIDList.add(((BaseComponent)editPart.getModel()).getUUID());
-				highestIndexOfGroup = (highestIndexOfGroup < ((BaseComponent)editPart.getModel()).getFormIndex())
-					? ((BaseComponent)editPart.getModel()).getFormIndex() : highestIndexOfGroup;
+				if (groupModels == null)
+				{
+					groupModels = new ArrayList<IFormElement>();
+					groupUUIDSet = new HashSet<UUID>();
+				}
+				IFormElement model = (IFormElement)editPart.getModel();
+				groupModels.add(model);
+				groupUUIDSet.add(model.getUUID());
+				if (highestIndexOfGroupElement == null || highestIndexOfGroupElement.getFormIndex() < model.getFormIndex())
+				{
+					highestIndexOfGroupElement = model;
+				}
 			}
 		}
 
-		if (groupModels.isEmpty()) return null;
-		Collections.sort(groupModels, FormElementComparator.INSTANCE);
-
-		List<BaseComponent> higherModels = new LinkedList<BaseComponent>();
-		List<UUID> higherUUIDList = new LinkedList<UUID>();
-		List<BaseComponent> lowerModels = new LinkedList<BaseComponent>();
-		List<UUID> lowerUUIDList = new LinkedList<UUID>();
-
-		for (BaseComponent bc : groupModels)
+		if (groupModels == null) return null;
+		if (groupModels.size() > 1)
 		{
-			List<IFormElement> overlappingElements = ElementUtil.getOverlappingFormElements((Form)formEditPart.getModel(), bc);
+			Collections.sort(groupModels, FormElementComparator.INSTANCE);
+		}
+
+		List<IFormElement> higherModels = null;
+		Set<UUID> higherUUIDSet = null;
+		List<IFormElement> lowerModels = null;
+		Set<UUID> lowerUUIDSet = null;
+
+		for (IFormElement bc : groupModels)
+		{
+			List<IFormElement> overlappingElements = ElementUtil.getOverlappingFormElements(flattenedForm, bc);
 			if (overlappingElements != null && !overlappingElements.isEmpty())
 			{
-				for (IFormElement fe : overlappingElements)
+				for (IFormElement overlapping : overlappingElements)
 				{
-					if (fe instanceof BaseComponent)
+					if (overlapping.getFormIndex() >= highestIndexOfGroupElement.getFormIndex() && !groupUUIDSet.contains(overlapping.getUUID()))
 					{
-						BaseComponent feToBc = (BaseComponent)fe;
-						if (feToBc.getFormIndex() >= highestIndexOfGroup && !higherUUIDList.contains(feToBc.getUUID()) &&
-							!groupUUIDList.contains(feToBc.getUUID()))
+						if (higherModels == null)
 						{
-							higherModels.add(feToBc);
-							higherUUIDList.add(feToBc.getUUID());
+							higherModels = new ArrayList<IFormElement>();
+							higherUUIDSet = new HashSet<UUID>();
 						}
-						else if (feToBc.getFormIndex() < highestIndexOfGroup && !lowerUUIDList.contains(feToBc.getUUID()) &&
-							!groupUUIDList.contains(feToBc.getUUID()))
+						if (higherUUIDSet.add(overlapping.getUUID()))
 						{
-							lowerModels.add(feToBc);
-							lowerUUIDList.add(feToBc.getUUID());
+							higherModels.add(overlapping);
+						}
+					}
+					else if (overlapping.getFormIndex() < highestIndexOfGroupElement.getFormIndex() && !groupUUIDSet.contains(overlapping.getUUID()))
+					{
+						if (lowerModels == null)
+						{
+							lowerModels = new ArrayList<IFormElement>();
+							lowerUUIDSet = new HashSet<UUID>();
+						}
+						if (lowerUUIDSet.add(overlapping.getUUID()))
+						{
+							lowerModels.add(overlapping);
 						}
 					}
 				}
 			}
 		}
 
-		Collections.sort(higherModels, FormElementComparator.INSTANCE);
-		Collections.sort(lowerModels, FormElementComparator.INSTANCE);
-
-		List<BaseComponent> models = new LinkedList<BaseComponent>();
 		int index = 0;
-		for (BaseComponent bc : lowerModels)
+		Map<EditPart, Request> requests = new HashMap<EditPart, Request>();
+		if (lowerModels != null)
 		{
-			requests.put((EditPart)editPartMap.get(bc), new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY,
-				StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), index++, "")); //$NON-NLS-1$
-			System.out.println(bc.getProperty(StaticContentSpecLoader.PROPERTY_NAME.getPropertyName()) + " " + index);
+			if (lowerModels.size() > 1)
+			{
+				Collections.sort(lowerModels, FormElementComparator.INSTANCE);
+			}
+
+			for (IFormElement bc : lowerModels)
+			{
+				requests.put(
+					editPartMap.get(bc),
+					new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
+						Integer.valueOf(index++), "")); //$NON-NLS-1$
+			}
 		}
 
-		for (BaseComponent bc : groupModels)
+		for (IFormElement bc : groupModels)
 		{
-			requests.put((EditPart)editPartMap.get(bc), new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY,
-				StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), index++, "")); //$NON-NLS-1$
-			System.out.println(bc.getProperty(StaticContentSpecLoader.PROPERTY_NAME.getPropertyName()) + " " + index);
+			requests.put(
+				editPartMap.get(bc),
+				new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
+					Integer.valueOf(index++), "")); //$NON-NLS-1$
 		}
 
-		for (BaseComponent bc : higherModels)
+		if (higherModels != null)
 		{
-			requests.put((EditPart)editPartMap.get(bc), new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY,
-				StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), index++, "")); //$NON-NLS-1$
-			System.out.println(bc.getProperty(StaticContentSpecLoader.PROPERTY_NAME.getPropertyName()) + " " + index);
+			if (higherModels.size() > 1)
+			{
+				Collections.sort(higherModels, FormElementComparator.INSTANCE);
+			}
+			for (IFormElement bc : higherModels)
+			{
+				requests.put(
+					editPartMap.get(bc),
+					new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
+						Integer.valueOf(index++), "")); //$NON-NLS-1$
+			}
 		}
 
 		return requests;

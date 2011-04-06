@@ -51,9 +51,9 @@ import org.eclipse.gef.ui.actions.SaveAction;
 import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.gef.ui.actions.UndoAction;
 import org.eclipse.gef.ui.palette.FlyoutPaletteComposite;
+import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.palette.PaletteViewer;
 import org.eclipse.gef.ui.palette.PaletteViewerProvider;
-import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.palette.customize.PaletteCustomizerDialog;
 import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
 import org.eclipse.gef.ui.parts.GraphicalViewerKeyHandler;
@@ -105,7 +105,6 @@ import com.servoy.eclipse.designer.actions.SelectFeedbackmodeAction;
 import com.servoy.eclipse.designer.actions.SelectSnapmodeAction;
 import com.servoy.eclipse.designer.actions.ViewerTogglePropertyAction;
 import com.servoy.eclipse.designer.actions.ZOrderAction;
-import com.servoy.eclipse.designer.actions.ZOrderAction.ZOrderType;
 import com.servoy.eclipse.designer.dnd.FormElementTransferDropTarget;
 import com.servoy.eclipse.designer.editor.commands.AddFieldAction;
 import com.servoy.eclipse.designer.editor.commands.AddPortalAction;
@@ -481,19 +480,19 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
 
-		action = new ZOrderAction(editorPart, ZOrderType.Z_ORDER_BRING_TO_FRONT);
+		action = new ZOrderAction(editorPart, ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT);
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
 
-		action = new ZOrderAction(editorPart, ZOrderType.Z_ORDER_BRING_TO_FRONT_ONE_STEP);
+		action = new ZOrderAction(editorPart, ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP);
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
 
-		action = new ZOrderAction(editorPart, ZOrderType.Z_ORDER_SEND_TO_BACK);
+		action = new ZOrderAction(editorPart, ZOrderAction.ID_Z_ORDER_SEND_TO_BACK);
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
 
-		action = new ZOrderAction(editorPart, ZOrderType.Z_ORDER_SEND_TO_BACK_ONE_STEP);
+		action = new ZOrderAction(editorPart, ZOrderAction.ID_Z_ORDER_SEND_TO_BACK_ONE_STEP);
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
 	}

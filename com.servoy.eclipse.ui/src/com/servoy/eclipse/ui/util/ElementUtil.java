@@ -16,15 +16,15 @@
  */
 package com.servoy.eclipse.ui.util;
 
-import java.awt.Dimension;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -52,7 +52,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
-import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.plugins.IClientPluginAccess;
@@ -386,109 +385,93 @@ public class ElementUtil
 		}
 	}
 
-	public static List<IFormElement> getAllOverlappingFormElements(Form form, IFormElement formElement)
+	public static List<IFormElement> getAllOverlappingFormElements(Form flattenedForm, IFormElement formElement)
 	{
-		List<IFormElement> overlapingElements = new LinkedList<IFormElement>();
-		List<IFormElement> groupElements = new LinkedList<IFormElement>();
-		List<UUID> uuids = new LinkedList<UUID>();
-
-		groupElements.add(formElement);
-		String groupID = (String)((BaseComponent)formElement).getProperty(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName());
-		if (groupID != null)
+		String groupID = formElement.getGroupID();
+		if (groupID == null)
 		{
-			Iterator<IPersist> it = form.getAllObjects();
-			while (it.hasNext())
-			{
-				IPersist element = it.next();
-				if (element instanceof BaseComponent)
-				{
-					BaseComponent itFormElement = (BaseComponent)element;
-					if (element.getUUID() == formElement.getUUID())
-					{
-						continue;
-					}
-					String elementGroupID = (String)((BaseComponent)element).getProperty(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName());
-					if (elementGroupID != null && elementGroupID.equals(groupID))
-					{
-						groupElements.add(itFormElement);
-					}
-				}
-			}
+			return getOverlappingFormElements(flattenedForm, formElement);
 		}
 
-		for (IFormElement groupElement : groupElements)
-		{
-			List<IFormElement> elementList = getOverlappingFormElements(form, groupElement);
-			if (elementList != null)
-			{
-				for (IFormElement fe : elementList)
-				{
-					if (!uuids.contains(fe.getUUID()))
-					{
-						uuids.add(fe.getUUID());
-						overlapingElements.add(fe);
-					}
-				}
-			}
-		}
-
-		return overlapingElements;
-	}
-
-	public static List<IFormElement> getOverlappingFormElements(Form form, IFormElement formElement)
-	{
-		List<IFormElement> overlapingElements = new LinkedList<IFormElement>();
-
-		Dimension formElementDimension = null;
-		Point formElementUpLeft = null;
-
-		formElementDimension = formElement.getSize();
-		formElementUpLeft = formElement.getLocation();
-
-		Rectangle formElementRectangle = new Rectangle(formElementDimension);
-		formElementRectangle.setLocation(formElementUpLeft);
-
-		Iterator<IPersist> it = form.getAllObjects();
+		List<IFormElement> overlappingElements = null;
+		Set<UUID> uuids = null;
+		Iterator<IPersist> it = flattenedForm.getAllObjects();
 		while (it.hasNext())
 		{
 			IPersist element = it.next();
 			if (element instanceof IFormElement)
 			{
 				IFormElement itFormElement = (IFormElement)element;
-				if (element.getUUID() == (formElement).getUUID())
+				String elementGroupID = itFormElement.getGroupID();
+				if (elementGroupID != null && elementGroupID.equals(groupID))
 				{
-					continue;
-				}
-				Dimension elementDimension = itFormElement.getSize();
-				Point elementUpLeft = itFormElement.getLocation();
-
-				Rectangle elementRectangle = new Rectangle(elementDimension);
-				elementRectangle.setLocation(elementUpLeft);
-
-				if (elementRectangle.intersects(formElementRectangle))
-				{
-					overlapingElements.add((IFormElement)element);
+					List<IFormElement> elementList = getOverlappingFormElements(flattenedForm, itFormElement);
+					if (elementList != null)
+					{
+						for (IFormElement fe : elementList)
+						{
+							if (uuids == null)
+							{
+								uuids = new HashSet<UUID>();
+							}
+							if (uuids.add(fe.getUUID()))
+							{
+								if (overlappingElements == null)
+								{
+									overlappingElements = new ArrayList<IFormElement>();
+								}
+								overlappingElements.add(fe);
+							}
+						}
+					}
 				}
 			}
 		}
 
+		return overlappingElements;
+	}
 
-		if (overlapingElements.size() != 0) return overlapingElements;
+	public static List<IFormElement> getOverlappingFormElements(Form flattenedForm, IFormElement formElement)
+	{
+		List<IFormElement> overlappingElements = null;
 
-		return null;
+		Rectangle formElementRectangle = new Rectangle(formElement.getLocation(), formElement.getSize());
+
+		Iterator<IPersist> it = flattenedForm.getAllObjects();
+		while (it.hasNext())
+		{
+			IPersist element = it.next();
+			if (element instanceof IFormElement)
+			{
+				IFormElement itFormElement = (IFormElement)element;
+				if (element.getUUID().equals(formElement.getUUID()))
+				{
+					continue;
+				}
+
+				if (new Rectangle(itFormElement.getLocation(), itFormElement.getSize()).intersects(formElementRectangle))
+				{
+					if (overlappingElements == null)
+					{
+						overlappingElements = new ArrayList<IFormElement>();
+					}
+					overlappingElements.add((IFormElement)element);
+				}
+			}
+		}
+
+		return overlappingElements;
 	}
 
 	public static IFormElement getElementWithHighestZIndex(FormElementGroup formElementgroup)
 	{
-		int highestFormIndex = -1000000;
 		IFormElement formElement = null;
-		Iterator<IFormElement> groupElementIterator = (formElementgroup).getElements();
+		Iterator<IFormElement> groupElementIterator = formElementgroup.getElements();
 		while (groupElementIterator.hasNext())
 		{
 			IFormElement fe = groupElementIterator.next();
-			if (fe.getFormIndex() > highestFormIndex)
+			if (formElement == null || fe.getFormIndex() > formElement.getFormIndex())
 			{
-				highestFormIndex = fe.getFormIndex();
 				formElement = fe;
 			}
 		}
@@ -496,8 +479,4 @@ public class ElementUtil
 		return formElement;
 	}
 
-//	public static List<IFormElements> getElementsWithInGroup()
-//	{
-//		
-//	}
 }
