@@ -57,7 +57,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.equinox.p2.ui,
  org.eclipse.equinox.p2.operations,
  org.eclipse.team.ui,
- org.eclipse.core.filesystem;bundle-version="1.3.1"
+ org.eclipse.core.filesystem
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.ui,com.servoy.eclipse.ui.actions,com
  .servoy.eclipse.ui.dialogs,com.servoy.eclipse.ui.editors,com.servoy.ec
