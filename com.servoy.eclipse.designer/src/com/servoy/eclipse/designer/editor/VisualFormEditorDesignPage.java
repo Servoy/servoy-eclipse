@@ -51,9 +51,9 @@ import org.eclipse.gef.ui.actions.SaveAction;
 import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.gef.ui.actions.UndoAction;
 import org.eclipse.gef.ui.palette.FlyoutPaletteComposite;
-import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.palette.PaletteViewer;
 import org.eclipse.gef.ui.palette.PaletteViewerProvider;
+import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.palette.customize.PaletteCustomizerDialog;
 import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
 import org.eclipse.gef.ui.parts.GraphicalViewerKeyHandler;
@@ -678,6 +678,8 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 									.append(location.x).append(',').append(location.y)//
 									.append(' ')//
 									.append(size.width).append('x').append(size.height)//
+									.append(' ')//
+									.append(location.x + size.width).append(',').append(location.y + size.height)//
 									.append(')');
 								}
 							}
