@@ -368,6 +368,8 @@ public class ElementUtil
 		if (field.getValuelistID() > 0)
 		{
 			ValueList valuelist = application.getFlattenedSolution().getValueList(field.getValuelistID());
+			if (valuelist == null) return true;
+
 			if (!(valuelist.getValueListType() == ValueList.DATABASE_VALUES && valuelist.getDatabaseValuesType() == ValueList.RELATED_VALUES) &&
 				(valuelist.getAddEmptyValue() != ValueList.EMPTY_VALUE_ALWAYS))
 			{
