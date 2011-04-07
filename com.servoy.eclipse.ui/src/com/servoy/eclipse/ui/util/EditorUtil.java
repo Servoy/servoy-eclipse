@@ -262,7 +262,10 @@ public class EditorUtil
 			IFileStore fileOnLocalDisk = org.eclipse.core.filesystem.EFS.getLocalFileSystem().getStore(fileToOpen.toURI());
 
 			IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(fileOnLocalDisk.getName());
+			if (desc == null) desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+				Platform.getContentTypeManager().getContentType(PersistEditorInput.MEDIA_RESOURCE_ID));
 			IEditorInput editorInput;
+
 			if (desc.getId().equals("com.servoy.eclipse.ui.editors.MediaViewer")) editorInput = new PersistEditorInput(media.getName(),
 				media.getRootObject().getName(), media.getUUID());
 			else editorInput = new FileStoreEditorInput(fileOnLocalDisk);
