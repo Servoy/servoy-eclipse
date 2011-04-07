@@ -220,18 +220,16 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		jsxml.parent = jslib;
 		jsxmllist.parent = jslib;
 
+
 		PlatformSimpleUserNode application = new PlatformSimpleUserNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, null,
 			IconProvider.instance().image(JSApplication.class));
 
-		addReturnTypeNodes(application, ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes());
-		PlatformSimpleUserNode exceptions = new PlatformSimpleUserNode(Messages.TreeStrings_ServoyException, UserNodeType.EXCEPTIONS, null, null);
-		addReturnTypeNodes(exceptions, new ServoyException(0).getAllReturnedTypes());
-		exceptions.parent = application;
-
-		SimpleUserNode[] applicationChildren = application.children;
-		application.children = new SimpleUserNode[applicationChildren.length + 1];
-		System.arraycopy(applicationChildren, 0, application.children, 1, applicationChildren.length);
-		application.children[0] = exceptions;
+		Class[] applicationClasses1 = ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes();
+		Class[] applicationClasses2 = new ServoyException(0).getAllReturnedTypes();
+		Class[] applicationClasses = new Class[applicationClasses1.length + applicationClasses2.length];
+		System.arraycopy(applicationClasses1, 0, applicationClasses, 0, applicationClasses1.length);
+		System.arraycopy(applicationClasses2, 0, applicationClasses, applicationClasses1.length, applicationClasses2.length);
+		addReturnTypeNodes(application, applicationClasses);
 
 		resources = new PlatformSimpleUserNode(Messages.TreeStrings_Resources, UserNodeType.RESOURCES, null, uiActivator.loadImageFromBundle("resources.png"));
 
@@ -311,7 +309,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		plugins.parent = invisibleRootNode;
 		modulesOfActiveSolution.parent = activeSolutionNode;
 
-		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, utils, history, security, i18n, exceptions, jsunit, plugins };
+		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, utils, history, security, i18n, /* exceptions, */jsunit, plugins };
 		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode };
 
 		// we want to load the plugins node in a background low prio job so that it will expand fast
@@ -841,6 +839,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		{
 			List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 			List<PlatformSimpleUserNode> constantsChildren = new ArrayList<PlatformSimpleUserNode>();
+			List<PlatformSimpleUserNode> exceptionsChildren = new ArrayList<PlatformSimpleUserNode>();
 			for (Class< ? > cls : clss)
 			{
 				if (cls != null && !IDeprecated.class.isAssignableFrom(cls))
@@ -868,12 +867,38 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					{
 						constantsChildren.add(n);
 					}
+					else if (ServoyException.class.isAssignableFrom(cls))
+					{
+						exceptionsChildren.add(n);
+					}
 					else
 					{
 						children.add(n);
 					}
 					n.parent = node;
 				}
+			}
+
+			PlatformSimpleUserNode constants = null;
+			if (constantsChildren.size() > 0)
+			{
+				children.add(constants = new PlatformSimpleUserNode("Constants", UserNodeType.RETURNTYPE_CONSTANT));
+			}
+
+			if (constants != null)
+			{
+				constants.children = constantsChildren.toArray(new PlatformSimpleUserNode[constantsChildren.size()]);
+			}
+
+			PlatformSimpleUserNode exceptions = null;
+			if (exceptionsChildren.size() > 0)
+			{
+				children.add(exceptions = new PlatformSimpleUserNode(Messages.TreeStrings_ServoyException, UserNodeType.EXCEPTIONS, null, null));
+			}
+
+			if (exceptions != null)
+			{
+				exceptions.children = exceptionsChildren.toArray(new PlatformSimpleUserNode[exceptionsChildren.size()]);
 			}
 			if (children.size() > 0)
 			{
@@ -885,16 +910,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					}
 				});
 			}
-			PlatformSimpleUserNode constants = null;
-			if (constantsChildren.size() > 0)
-			{
-				children.add(0, constants = new PlatformSimpleUserNode("Constants", UserNodeType.RETURNTYPE_CONSTANT));
-			}
 			node.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
-			if (constants != null)
-			{
-				constants.children = constantsChildren.toArray(new PlatformSimpleUserNode[constantsChildren.size()]);
-			}
 		}
 	}
 
