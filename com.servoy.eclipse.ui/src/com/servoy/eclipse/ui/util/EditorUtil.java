@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IWorkspace;
@@ -45,6 +46,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorDescriptor;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IEditorSite;
@@ -55,6 +57,7 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -251,10 +254,19 @@ public class EditorUtil
 		if (media == null) return null;
 		try
 		{
-			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-				new PersistEditorInput(media.getName(), media.getRootObject().getName(), media.getUUID()),
-				PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType(PersistEditorInput.MEDIA_RESOURCE_ID)).getId());
+			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+
+			String filePath = media.getSerializableRuntimeProperty(IScriptProvider.FILENAME) + System.getProperty("file.separator") + media.getName();
+
+			File fileToOpen = new File(filePath);
+			IFileStore fileOnLocalDisk = org.eclipse.core.filesystem.EFS.getLocalFileSystem().getStore(fileToOpen.toURI());
+
+			IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(fileOnLocalDisk.getName());
+			IEditorInput editorInput;
+			if (desc.getId().equals("com.servoy.eclipse.ui.editors.MediaViewer")) editorInput = new PersistEditorInput(media.getName(),
+				media.getRootObject().getName(), media.getUUID());
+			else editorInput = new FileStoreEditorInput(fileOnLocalDisk);
+			return page.openEditor(editorInput, desc.getId());
 		}
 		catch (PartInitException ex)
 		{
