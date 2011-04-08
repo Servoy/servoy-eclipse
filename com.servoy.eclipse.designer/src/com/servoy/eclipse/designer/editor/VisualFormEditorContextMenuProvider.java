@@ -104,6 +104,6 @@ class VisualFormEditorContextMenuProvider extends MenuManager implements IMenuLi
 		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.COPY.getId()));
 		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.PASTE.getId()));
 		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.DELETE.getId()));
-		menu.appendToGroup(DesignerActionFactory.GROUP_ACTIONS, actionRegistry.getAction(DesignerActionFactory.SAVE_AS_TEMPLATE.getId()));
+		menu.appendToGroup(IWorkbenchActionConstants.SAVE_EXT, actionRegistry.getAction(DesignerActionFactory.SAVE_AS_TEMPLATE.getId()));
 	}
 }

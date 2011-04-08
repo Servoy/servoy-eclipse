@@ -347,8 +347,9 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.NORTH | IAnchorConstants.EAST));
 		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.SOUTH | IAnchorConstants.EAST));
 		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.SOUTH | IAnchorConstants.WEST));
-		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.NORTH | IAnchorConstants.WEST | IAnchorConstants.SOUTH |
-			IAnchorConstants.EAST));
+		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.EAST | IAnchorConstants.WEST));
+		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.NORTH | IAnchorConstants.SOUTH));
+		menuManager.add(new SetAnchoringAction(container.getEditorPart(), getHost(), IAnchorConstants.ALL));
 	}
 
 	protected void removeSameSizeFeedback()

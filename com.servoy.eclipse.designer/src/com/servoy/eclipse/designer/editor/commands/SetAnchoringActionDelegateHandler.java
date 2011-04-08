@@ -62,6 +62,20 @@ public abstract class SetAnchoringActionDelegateHandler extends SetPropertyActio
 		}
 	}
 
+	public static class SetAnchoringRightLeft extends SetAnchoringActionDelegateHandler
+	{
+		public SetAnchoringRightLeft()
+		{
+			super(IAnchorConstants.EAST | IAnchorConstants.WEST);
+		}
+	}
+	public static class SetAnchoringTopBottom extends SetAnchoringActionDelegateHandler
+	{
+		public SetAnchoringTopBottom()
+		{
+			super(IAnchorConstants.NORTH | IAnchorConstants.SOUTH);
+		}
+	}
 	public static class SetAnchoringTopRightLeftBottom extends SetAnchoringActionDelegateHandler
 	{
 		public SetAnchoringTopRightLeftBottom()

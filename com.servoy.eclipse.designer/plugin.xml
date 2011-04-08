@@ -562,6 +562,18 @@
       </command>
       <command
             categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.SetAnchoringActionDelegateHandler$SetAnchoringRightLeft"
+            id="com.servoy.eclipse.designer.anchorRightLeft"
+            name="Set Anchor Right,Left">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.SetAnchoringActionDelegateHandler$SetAnchoringTopBottom"
+            id="com.servoy.eclipse.designer.anchorTopBottom"
+            name="Set Anchor Top,Bottom">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
             defaultHandler="com.servoy.eclipse.designer.editor.commands.SetAnchoringActionDelegateHandler$SetAnchoringTopRightLeftBottom"
             id="com.servoy.eclipse.designer.anchorTopRightLeftBottom"
             name="Set Anchor Top,Right,Left,Bottom">
@@ -639,7 +651,7 @@
       <extension
          point="org.eclipse.ui.popupMenus">
       <viewerContribution
-            id="com.servoy.eclipse.designer.editor.DesignerPreferences"
+            id="com.servoy.eclipse.designer.editor.FormDesignerContext"
             targetID="#FormDesignerContext">
          <action
                class="com.servoy.eclipse.designer.editor.commands.RevertFormActionDelegateHandler"
@@ -694,6 +706,24 @@
                menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchorset"
                style="push"
                tooltip="Set Top,Right,Left,Bottom Anchoring">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.SetAnchoringActionDelegateHandler$SetAnchoringTopBottom"
+               definitionId="com.servoy.eclipse.designer.anchorTopBottom"
+               id="com.servoy.eclipse.designer.action.anchorTopBottom"
+               label="Top,Bottom"
+               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchorset"
+               style="push"
+               tooltip="Set Top,Bottom Anchoring">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.SetAnchoringActionDelegateHandler$SetAnchoringRightLeft"
+               definitionId="com.servoy.eclipse.designer.anchorRightLeft"
+               id="com.servoy.eclipse.designer.action.anchorRightLeft"
+               label="Right,Left"
+               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchorset"
+               style="push"
+               tooltip="Set Right,Left Anchoring">
          </action>
          <action
                class="com.servoy.eclipse.designer.editor.commands.SetAnchoringActionDelegateHandler$SetAnchoringLeftBottom"
@@ -810,22 +840,22 @@
                tooltip="Bring elements to the front one layer">
          </action>
          <action
-               class="com.servoy.eclipse.designer.editor.commands.TabSequenceActionDelegateHandler"
-               definitionId="com.servoy.eclipse.designer.settabseq"
-               icon="icons/th_horizontal.gif"
-               id="com.servoy.eclipse.designer.action.settabseq"
-               label="Set Tab Sequence"
-               menubarPath="group.actions"
-               style="push"
-               tooltip="Set Tab Sequence of selected elements">
-         </action>
-         <action
                class="com.servoy.eclipse.designer.actions.ShowDesignerPreferencesActionDelegate"
                definitionId="com.servoy.eclipse.designer.command.showDesignerPrefences"
                id="com.servoy.eclipse.designer.showDesignerPrefences"
                label="Preferences..."
                menubarPath="show.ext"
                tooltip="Set designer preferences">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.TabSequenceActionDelegateHandler"
+               definitionId="com.servoy.eclipse.designer.settabseq"
+               icon="icons/th_horizontal.gif"
+               id="com.servoy.eclipse.designer.action.settabseq"
+               label="Set Tab Sequence"
+               menubarPath="group.elements"
+               style="push"
+               tooltip="Set Tab Sequence of selected elements">
          </action>
          <menu
                id="com.servoy.eclipse.designer.zordermenu"
