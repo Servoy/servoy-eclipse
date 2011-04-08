@@ -171,10 +171,9 @@ public class DesignerPreferences
 		return key.substring(DESIGNER_SETTINGS_PREFIX.length());
 	}
 
-	public static boolean isRulersSetting(String key)
+	public static boolean isMetricsSetting(String key)
 	{
-		String keyPostfix = getKeyPostfix(key);
-		return METRICS_SETTING.equals(keyPostfix) || SHOW_RULERS_SETTING.equals(keyPostfix);
+		return METRICS_SETTING.equals(getKeyPostfix(key));
 	}
 
 	public int getMetrics()
@@ -310,12 +309,6 @@ public class DesignerPreferences
 	public void setGuideSize(int guideSize)
 	{
 		setProperty(GUIDE_SIZE_SETTING, guideSize);
-	}
-
-	public static boolean isGridSetting(String key)
-	{
-		String setting = getKeyPostfix(key);
-		return GRID_POINTSIZE_SETTING.equals(setting) || GRID_COLOR_SETTING.equals(setting) || GRID_SIZE_SETTING.equals(setting);
 	}
 
 	public RGB getGridColor()

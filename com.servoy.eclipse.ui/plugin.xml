@@ -352,9 +352,9 @@
                class="com.servoy.eclipse.ui.actions.OpenFormInClientActionDelegate"
                id="com.servoy.eclipse.ui.openFormInClient"
                definitionId="com.servoy.eclipse.ui.OpenFormInClientAction"
-               label="Open form in client"
+               label="Open in Debug Client"
                style="push"
-               tooltip="Open form in client">
+               tooltip="Open form in Debug Client">
          </action>
       </actionSet>
       <actionSet
@@ -478,9 +478,9 @@
         </command>
         <command
               categoryId="com.servoy.eclipse.ui"
-              description="Open form in client"
+              description="Open in Debug Client"
               id="com.servoy.eclipse.ui.OpenFormInClientAction"
-              name="Open form in client">
+              name="Open in Debug Client">
         </command>
          <category
               id="com.servoy.eclipse.ui"
@@ -605,11 +605,11 @@
                enablesFor="1"
                icon="icons/showform.gif"
                id="com.servoy.eclipse.ui.OpenFormInClientAction"
-               label="Open form in client"
+               label="Open in Debug Client"
                menubarPath="open.ext"
                state="false"
                style="push"
-               tooltip="Open form in client">
+               tooltip="Open form in Debug Client">
          </action>
          <visibility>
             <objectClass

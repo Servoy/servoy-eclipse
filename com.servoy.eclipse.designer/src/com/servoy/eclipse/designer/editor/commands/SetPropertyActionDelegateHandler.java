@@ -16,50 +16,77 @@
  */
 package com.servoy.eclipse.designer.editor.commands;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
-import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.designer.actions.SetPropertyRequest;
+import com.servoy.eclipse.designer.editor.VisualFormEditor;
 
 /**
  * Base action class to toggle change a boolean property of selected objects.
  * 
  * @author rgansevles
  */
-public abstract class ToggleCheckboxActionDelegateHandler extends SetPropertyActionDelegateHandler
+public abstract class SetPropertyActionDelegateHandler extends DesignerSelectionActionDelegateHandler
 {
-	public ToggleCheckboxActionDelegateHandler(String propertyId, String name)
+	private final String propertyId;
+	private final String name;
+	private final Object value;
+
+	public SetPropertyActionDelegateHandler(String propertyId, String name, Object value)
 	{
-		super(propertyId, name, null);
+		super(VisualFormEditor.REQ_SET_PROPERTY);
+		this.propertyId = propertyId;
+		this.name = name;
+		this.value = value;
+	}
+
+	/**
+	 * @return the propertyId
+	 */
+	public String getPropertyId()
+	{
+		return propertyId;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName()
+	{
+		return name;
+	}
+
+	/**
+	 * @return the value
+	 */
+	public Object getValue()
+	{
+		return value;
 	}
 
 	@Override
-	protected Boolean calculateChecked()
+	protected Map<EditPart, Request> createRequests(List<EditPart> objects)
 	{
-		for (Object sel : getSelection().toArray())
-		{
-			IPropertySource propertySource = (IPropertySource)Platform.getAdapterManager().getAdapter(sel, IPropertySource.class);
-			if (propertySource instanceof PersistPropertySource)
-			{
-				if (((PersistPropertySource)propertySource).getPropertyDescriptor(getPropertyId()) != null)
-				{
-					return (Boolean)propertySource.getPropertyValue(getPropertyId());
-				}
-			}
-		}
-
-		return Boolean.FALSE;
+		return createSetPropertyRequests(objects, getValue());
 	}
 
-	@Override
 	protected Map<EditPart, Request> createSetPropertyRequests(List<EditPart> objects, Object newval)
 	{
-		// toggle current checked value
-		return super.createSetPropertyRequests(objects, Boolean.valueOf(!calculateChecked().booleanValue()));
+		// set all editparts to the same value
+		Map<EditPart, Request> requests = null;
+		for (EditPart editPart : objects)
+		{
+			if (requests == null)
+			{
+				requests = new HashMap<EditPart, Request>(objects.size());
+			}
+			requests.put(editPart, new SetPropertyRequest(requestType, propertyId, newval, name));
+		}
+		return requests;
 	}
 }

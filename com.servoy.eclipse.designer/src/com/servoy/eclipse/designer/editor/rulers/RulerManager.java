@@ -41,28 +41,20 @@ public class RulerManager
 		this.viewer = viewer;
 	}
 
-	public void refreshRulers(boolean showRulers)
+	public void refreshRulers()
 	{
-		viewer.setProperty(RulerProvider.PROPERTY_RULER_VISIBILITY, Boolean.valueOf(showRulers));
 		refreshRuler(true);
 		refreshRuler(false);
 	}
 
 	private void refreshRuler(boolean horizontal)
 	{
-		if (Boolean.TRUE.equals(viewer.getProperty(RulerProvider.PROPERTY_RULER_VISIBILITY)))
-		{
-			viewer.setProperty(horizontal ? RulerProvider.PROPERTY_HORIZONTAL_RULER : RulerProvider.PROPERTY_VERTICAL_RULER, new FormRulerProvider(this,
-				horizontal));
-		}
+		viewer.setProperty(horizontal ? RulerProvider.PROPERTY_HORIZONTAL_RULER : RulerProvider.PROPERTY_VERTICAL_RULER,
+			new FormRulerProvider(this, horizontal));
 	}
 
 	public List<RulerGuide> getGuides(boolean horizontal)
 	{
-		if (!Boolean.TRUE.equals(viewer.getProperty(RulerProvider.PROPERTY_RULER_VISIBILITY)))
-		{
-			return Collections.<RulerGuide> emptyList();
-		}
 		List<RulerGuide> guides = addedGuides[horizontal ? 0 : 1];
 		return guides == null ? Collections.<RulerGuide> emptyList() : guides;
 	}

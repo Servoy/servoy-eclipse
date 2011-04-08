@@ -138,61 +138,61 @@
                definitionId="com.servoy.eclipse.designer.action.applyTemplateAction"
                icon="icons/template.gif"
                id="com.servoy.eclipse.designer.action.applyTemplateAction"
-               label="Place Template..."
+               label="Place Template Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
-               tooltip="Place Template..."/>
+               tooltip="Place Template Wizard"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddTabActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addTabAction"
                icon="icons/tabs.gif"
                id="com.servoy.eclipse.designer.action.addTabAction"
-               label="Place TabPanel..."
+               label="Place TabPanel Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
-               tooltip="Place TabPanel..."/>
+               tooltip="Place TabPanel Wizard"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddSplitPaneActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addSplitPaneAction"
                icon="icons/split.gif"
                id="com.servoy.eclipse.designer.action.addSplitPaneAction"
-               label="Place SplitPane..."
+               label="Place SplitPane Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
-               tooltip="Place SplitPane..."/>               
+               tooltip="Place SplitPane Wizard"/>               
          <action
                class="com.servoy.eclipse.designer.actions.AddMediaActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addMedaAction"
                icon="icons/image.gif"
                id="com.servoy.eclipse.designer.action.addMedaAction"
-               label="Place Image..."
+               label="Place Image Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
-               tooltip="Place Image..."/>
+               tooltip="Place Image Wizard"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddBeanActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addBeanAction"
                icon="icons/bean.gif"
                id="com.servoy.eclipse.designer.action.addBeanAction"
-               label="Place Bean..."
+               label="Place Bean Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
-               tooltip="Place Bean..."/>
+               tooltip="Place Bean Wizard"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddPortalActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addPortalAction"
                icon="icons/portal.gif"
                id="com.servoy.eclipse.designer.action.addPortalAction"
-               label="Place Portal..."
+               label="Place Portal Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
-               tooltip="Place Portal..."/>
+               tooltip="Place Portal Wizard"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddButtonActionDelegate"
                icon="icons/button.gif"
@@ -208,11 +208,11 @@
                definitionId="com.servoy.eclipse.designer.action.addFieldAction"
                icon="icons/field.gif"
                id="com.servoy.eclipse.designer.action.addFieldAction"
-               label="Place Field..."
+               label="Place Field Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
-               tooltip="Place Field..."/>
+               tooltip="Place Field Wizard"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddLabelActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addLabelAction"
@@ -516,25 +516,55 @@
             categoryId="com.servoy.eclipse.designer.category"
             defaultHandler="com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler$ToggleAnchoringTop"
             id="com.servoy.eclipse.designer.anchorTop"
-            name="Anchor Top">
+            name="Toggle Anchor Top">
       </command>
       <command
             categoryId="com.servoy.eclipse.designer.category"
             defaultHandler="com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler$ToggleAnchoringRight"
             id="com.servoy.eclipse.designer.anchorRight"
-            name="Anchor Right">
+            name="Toggle Anchor Right">
       </command>
       <command
             categoryId="com.servoy.eclipse.designer.category"
             defaultHandler="com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler$ToggleAnchoringBottom"
             id="com.servoy.eclipse.designer.anchorBottom"
-            name="Anchor Bottom">
+            name="Toggle Anchor Bottom">
       </command>
       <command
             categoryId="com.servoy.eclipse.designer.category"
             defaultHandler="com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler$ToggleAnchoringLeft"
             id="com.servoy.eclipse.designer.anchorLeft"
-            name="Anchor Left">
+            name="Toggle Anchor Left">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.SetAnchoringActionDelegateHandler$SetAnchoringTopLeft"
+            id="com.servoy.eclipse.designer.anchorTopLeft"
+            name="Set Anchor Top,Left">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.SetAnchoringActionDelegateHandler$SetAnchoringTopRight"
+            id="com.servoy.eclipse.designer.anchorTopRight"
+            name="Set Anchor Top,Right">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.SetAnchoringActionDelegateHandler$SetAnchoringRightBottom"
+            id="com.servoy.eclipse.designer.anchorRightBottom"
+            name="Set Anchor Right,Bottom">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.SetAnchoringActionDelegateHandler$SetAnchoringLeftBottom"
+            id="com.servoy.eclipse.designer.anchorLeftBottom"
+            name="Set Anchor Left,Bottom">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.SetAnchoringActionDelegateHandler$SetAnchoringTopRightLeftBottom"
+            id="com.servoy.eclipse.designer.anchorTopRightLeftBottom"
+            name="Set Anchor Top,Right,Left,Bottom">
       </command>
       <command
             categoryId="com.servoy.eclipse.designer.category"
@@ -625,16 +655,16 @@
                class="com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler$ToggleAnchoringLeft"
                definitionId="com.servoy.eclipse.designer.anchorLeft"
                id="com.servoy.eclipse.designer.action.anchorLeft"
-               label="Anchor Left"
-               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchor"
+               label="Left"
+               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchortoggle"
                tooltip="Toggle Left Anchoring">
          </action>
          <action
                class="com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler$ToggleAnchoringBottom"
                definitionId="com.servoy.eclipse.designer.anchorBottom"
                id="com.servoy.eclipse.designer.action.anchorBottom"
-               label="Anchor Bottom"
-               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchor"
+               label="Bottom"
+               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchortoggle"
                style="toggle"
                tooltip="Toggle Bottom Anchoring">
          </action>
@@ -642,8 +672,8 @@
                class="com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler$ToggleAnchoringRight"
                definitionId="com.servoy.eclipse.designer.anchorRight"
                id="com.servoy.eclipse.designer.action.anchorRight"
-               label="Anchor Right"
-               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchor"
+               label="Right"
+               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchortoggle"
                style="toggle"
                tooltip="Toggle Right Anchoring">
          </action>
@@ -651,10 +681,55 @@
                class="com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler$ToggleAnchoringTop"
                definitionId="com.servoy.eclipse.designer.anchorTop"
                id="com.servoy.eclipse.designer.action.anchorTop"
-               label="Anchor Top"
-               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchor"
+               label="Top"
+               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchortoggle"
                style="toggle"
                tooltip="Toggle Top Anchoring">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.SetAnchoringActionDelegateHandler$SetAnchoringTopRightLeftBottom"
+               definitionId="com.servoy.eclipse.designer.anchorTopRightLeftBottom"
+               id="com.servoy.eclipse.designer.action.anchorTopRightLeftBottom"
+               label="Top,Right,Left,Bottom"
+               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchorset"
+               style="push"
+               tooltip="Set Top,Right,Left,Bottom Anchoring">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.SetAnchoringActionDelegateHandler$SetAnchoringLeftBottom"
+               definitionId="com.servoy.eclipse.designer.anchorLeftBottom"
+               id="com.servoy.eclipse.designer.action.anchorLeftBottom"
+               label="Left,Bottom"
+               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchorset"
+               style="push"
+               tooltip="Set Left,Bottom Anchoring">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.SetAnchoringActionDelegateHandler$SetAnchoringRightBottom"
+               definitionId="com.servoy.eclipse.designer.anchorRightBottom"
+               id="com.servoy.eclipse.designer.action.anchorRightBottom"
+               label="Right,Bottom"
+               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchorset"
+               style="push"
+               tooltip="Set Right,Bottom Anchoring">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.SetAnchoringActionDelegateHandler$SetAnchoringTopRight"
+               definitionId="com.servoy.eclipse.designer.anchorTopRight"
+               id="com.servoy.eclipse.designer.action.anchorTopRight"
+               label="Top,Right"
+               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchorset"
+               style="push"
+               tooltip="Set Top,Right Anchoring">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.SetAnchoringActionDelegateHandler$SetAnchoringTopLeft"
+               definitionId="com.servoy.eclipse.designer.anchorTopLeft"
+               id="com.servoy.eclipse.designer.action.anchorTopLeft"
+               label="Top,Left"
+               menubarPath="com.servoy.eclipse.designer.anchormenu/com.servoy.eclipse.designer.anchorset"
+               style="push"
+               tooltip="Set Top,Left Anchoring">
          </action>
          <action
                class="com.servoy.eclipse.designer.editor.commands.ToggleGroupingActionDelegateHandler$Ungroup"
@@ -662,9 +737,7 @@
                icon="icons/ungroup.gif"
                id="com.servoy.eclipse.designer.action.ungroup"
                label="Ungroup"
-               menubarPath="group.grouping"
-               style="push"
-               tooltip="Ungroup elements">
+               menubarPath="com.servoy.eclipse.designer.groupingmenu/com.servoy.eclipse.designer.grouping">
          </action>
          <action
                class="com.servoy.eclipse.designer.editor.commands.ToggleGroupingActionDelegateHandler$Group"
@@ -672,7 +745,7 @@
                icon="icons/group.gif"
                id="com.servoy.eclipse.designer.action.group"
                label="Group"
-               menubarPath="group.grouping"
+               menubarPath="com.servoy.eclipse.designer.groupingmenu/com.servoy.eclipse.designer.grouping"
                style="push"
                tooltip="Group elements">
          </action>
@@ -682,7 +755,7 @@
                icon="icons/same_height.gif"
                id="com.servoy.eclipse.designer.action.sameheight"
                label="Same Height"
-               menubarPath="group.samesize"
+               menubarPath="com.servoy.eclipse.designer.sizingmenu/com.servoy.eclipse.designer.sizing"
                style="push"
                tooltip="Set elements same height">
          </action>
@@ -692,7 +765,7 @@
                icon="icons/same_width.gif"
                id="com.servoy.eclipse.designer.action.samewidth"
                label="Same Width"
-               menubarPath="group.samesize"
+               menubarPath="com.servoy.eclipse.designer.sizingmenu/com.servoy.eclipse.designer.sizing"
                style="push"
                tooltip="Set elements same width">
          </action>
@@ -742,7 +815,7 @@
                icon="icons/th_horizontal.gif"
                id="com.servoy.eclipse.designer.action.settabseq"
                label="Set Tab Sequence"
-               menubarPath="org.eclipse.gef.group.rest"
+               menubarPath="group.actions"
                style="push"
                tooltip="Set Tab Sequence of selected elements">
          </action>
@@ -757,7 +830,7 @@
          <menu
                id="com.servoy.eclipse.designer.zordermenu"
                label="Arrange"
-               path="group.z.order">
+               path="group.elements">
             <groupMarker
                   name="com.servoy.eclipse.designer.zorder">
             </groupMarker>
@@ -765,9 +838,31 @@
          <menu
                id="com.servoy.eclipse.designer.anchormenu"
                label="Anchoring"
-               path="group.anchoring">
+               path="group.elements">
             <groupMarker
-                  name="com.servoy.eclipse.designer.anchor">
+                  name="com.servoy.eclipse.designer.anchortoggle">
+            </groupMarker>
+            <separator
+                  name="com.servoy.eclipse.designer.separator1">
+            </separator>
+            <groupMarker
+                  name="com.servoy.eclipse.designer.anchorset">
+            </groupMarker>
+         </menu>
+         <menu
+               id="com.servoy.eclipse.designer.groupingmenu"
+               label="Grouping"
+               path="group.elements">
+            <groupMarker
+                  name="com.servoy.eclipse.designer.grouping">
+            </groupMarker>
+         </menu>
+         <menu
+               id="com.servoy.eclipse.designer.sizingmenu"
+               label="Sizing"
+               path="group.elements">
+            <groupMarker
+                  name="com.servoy.eclipse.designer.sizing">
             </groupMarker>
          </menu>
       </viewerContribution>

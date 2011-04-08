@@ -16,24 +16,22 @@
  */
 package com.servoy.eclipse.designer.editor;
 
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import org.eclipse.draw2d.FreeformLayer;
-import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.LayeredPane;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.geometry.Insets;
 import org.eclipse.gef.AutoexposeHelper;
 import org.eclipse.gef.DragTracker;
-import org.eclipse.gef.LayerConstants;
 import org.eclipse.gef.Request;
+import org.eclipse.gef.editparts.AbstractEditPart;
 import org.eclipse.gef.editparts.FreeformGraphicalRootEditPart;
 import org.eclipse.gef.editparts.GridLayer;
 import org.eclipse.gef.editparts.GuideLayer;
 
 import com.servoy.eclipse.designer.internal.MarqueeDragTracker;
-import com.servoy.eclipse.ui.Activator;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 
 /**
  * Root pane for forms, add datarender-layer.
@@ -48,20 +46,21 @@ public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart
 	 */
 	public static final String SELECTED_ELEMENT_FEEDBACK_LAYER = "Feedback Layer for selected element"; //$NON-NLS-1$
 
+	/**
+	 * The layer that prints the form background.
+	 */
+	public static final String FORM_BACKGROUND_LAYER = "Layer for form background"; //$NON-NLS-1$
+
 	private final VisualFormEditor editorPart;
 
-	protected final IPreferenceChangeListener preferenceChangeListener = new IPreferenceChangeListener()
+	private final PropertyChangeListener viewerPropertyChangeListener = new PropertyChangeListener()
 	{
-
-		public void preferenceChange(PreferenceChangeEvent event)
+		public void propertyChange(PropertyChangeEvent evt)
 		{
-			if (DesignerPreferences.isGridSetting(event.getKey()))
+			String property = evt.getPropertyName();
+			if (FormBackgroundLayer.PROPERTY_PAINT_PAGEBREAKS.equals(property))
 			{
-				IFigure gridLayer = getLayer(LayerConstants.GRID_LAYER);
-				if (gridLayer != null)
-				{
-					gridLayer.repaint();
-				}
+				getLayer(FORM_BACKGROUND_LAYER).repaint();
 			}
 		}
 	};
@@ -69,13 +68,12 @@ public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart
 	public FormGraphicalRootEditPart(VisualFormEditor editorPart)
 	{
 		this.editorPart = editorPart;
-		Activator.getDefault().getEclipsePreferences().addPreferenceChangeListener(preferenceChangeListener);
 	}
 
 	@Override
 	protected void createLayers(LayeredPane layeredPane)
 	{
-		layeredPane.add(new FormBackgroundLayer(editorPart));
+		layeredPane.add(new FormBackgroundLayer(editorPart), FORM_BACKGROUND_LAYER);
 		layeredPane.add(createGridLayer(), GRID_LAYER);
 		layeredPane.add(getPrintableLayers(), PRINTABLE_LAYERS);
 
@@ -106,6 +104,26 @@ public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart
 		return new MarqueeDragTracker();
 	}
 
+	/**
+	 * @see org.eclipse.gef.editparts.AbstractEditPart#register()
+	 */
+	@Override
+	protected void register()
+	{
+		super.register();
+		getViewer().addPropertyChangeListener(viewerPropertyChangeListener);
+	}
+
+	/**
+	 * @see AbstractEditPart#unregister()
+	 */
+	@Override
+	protected void unregister()
+	{
+		getViewer().removePropertyChangeListener(viewerPropertyChangeListener);
+		super.unregister();
+	}
+
 	@Override
 	public Object getAdapter(Class adapter)
 	{
@@ -116,12 +134,5 @@ public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart
 	public VisualFormEditor getEditorPart()
 	{
 		return editorPart;
-	}
-
-	@Override
-	public void deactivate()
-	{
-		Activator.getDefault().getEclipsePreferences().removePreferenceChangeListener(preferenceChangeListener);
-		super.deactivate();
 	}
 }

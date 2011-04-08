@@ -18,9 +18,11 @@ package com.servoy.eclipse.designer.actions;
 
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.SnapToGrid;
+import org.eclipse.gef.rulers.RulerProvider;
 import org.eclipse.swt.widgets.Menu;
 
 import com.servoy.eclipse.designer.editor.AlignmentfeedbackEditPolicy;
+import com.servoy.eclipse.designer.editor.FormBackgroundLayer;
 import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
 
 /**
@@ -45,9 +47,12 @@ public class SelectFeedbackmodeAction extends ViewerDropdownPropertyAction
 	@Override
 	protected void fillMenu(Menu menu)
 	{
-		add(new ViewerTogglePropertyAction(diagramViewer, "Show anchoring", AlignmentfeedbackEditPolicy.PROPERTY_ANCHOR_FEEDBACK_VISIBLE));
-		add(new ViewerTogglePropertyAction(diagramViewer, "Show alignment", AlignmentfeedbackEditPolicy.PROPERTY_ALIGMENT_FEEDBACK_VISIBLE));
-		add(new ViewerTogglePropertyAction(diagramViewer, "Show same-size indicators", AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_VISIBLE));
-		add(new ViewerTogglePropertyAction(diagramViewer, "Show grid", SnapToGrid.PROPERTY_GRID_VISIBLE));
+		add(new ViewerTogglePropertyAction(diagramViewer, "Selected Element Anchoring Indicator", AlignmentfeedbackEditPolicy.PROPERTY_ANCHOR_FEEDBACK_VISIBLE));
+		add(new ViewerTogglePropertyAction(diagramViewer, "Selected Element Alignment Guide", AlignmentfeedbackEditPolicy.PROPERTY_ALIGMENT_FEEDBACK_VISIBLE));
+		add(new ViewerTogglePropertyAction(diagramViewer, "Selected Element Same Size Indicator",
+			AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_VISIBLE));
+		add(new ViewerTogglePropertyAction(diagramViewer, "Grid", SnapToGrid.PROPERTY_GRID_VISIBLE));
+		add(new ViewerTogglePropertyAction(diagramViewer, "Page Breaks", FormBackgroundLayer.PROPERTY_PAINT_PAGEBREAKS));
+		add(new ViewerTogglePropertyAction(diagramViewer, "Rulers", RulerProvider.PROPERTY_RULER_VISIBILITY));
 	}
 }

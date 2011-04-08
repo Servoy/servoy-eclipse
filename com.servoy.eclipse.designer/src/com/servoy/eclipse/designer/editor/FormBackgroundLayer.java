@@ -28,6 +28,7 @@ import org.eclipse.draw2d.FigureUtilities;
 import org.eclipse.draw2d.FreeformLayer;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
@@ -35,7 +36,6 @@ import org.eclipse.swt.graphics.RGB;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
@@ -54,6 +54,12 @@ public class FormBackgroundLayer extends FreeformLayer
 {
 	private static final Color TRANSPARENT_PATTERN_EVEN = ColorResource.INSTANCE.getColor(new RGB(0xf0, 0xf0, 0xf0));
 	private static final Color TRANSPARENT_PATTERN_ODD = ColorConstants.white;
+
+	/**
+	 * A viewer property indicating whether page breaks should be painted in the form editor. The value must  be a Boolean.
+	 */
+	public static final String PROPERTY_PAINT_PAGEBREAKS = "FormBackground.paintPageBreaks"; //$NON-NLS-1$
+
 
 	public static final int TRANSPARENT_PATTERN_SIZE = 14;
 
@@ -186,10 +192,11 @@ public class FormBackgroundLayer extends FreeformLayer
 	 */
 	protected void paintPagebreaks(Graphics graphics)
 	{
-		if (!new DesignerPreferences().getPaintPageBreaks())
+		if (!Boolean.TRUE.equals(((GraphicalViewer)editorPart.getAdapter(GraphicalViewer.class)).getProperty(PROPERTY_PAINT_PAGEBREAKS)))
 		{
 			return;
 		}
+
 		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm());
 		if (flattenedForm == null) return;
 

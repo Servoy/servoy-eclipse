@@ -35,10 +35,8 @@ import com.servoy.eclipse.designer.actions.ZOrderAction;
 @SuppressWarnings("nls")
 public abstract class DesignerActionFactory extends ActionFactory
 {
-	public static final String GROUP_ANCHORING = "group.anchoring";
-	public static final String GROUP_Z_ORDER = "group.z.order";
-	public static final String GROUP_GROUPING = "group.grouping";
-	public static final String GROUP_SAMESIZE = "group.samesize";
+	public static final String GROUP_ELEMENTS = "group.elements";
+	public static final String GROUP_ACTIONS = "group.actions";
 
 	protected DesignerActionFactory(String actionId)
 	{
@@ -88,8 +86,8 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
-	public static final String BRING_TO_FRONT_ONE_STEP_TEXT = "Bring forward one step";
-	public static final String BRING_TO_FRONT_ONE_STEP_TOOLTIP = "Bring selected objects forward one step";
+	public static final String BRING_TO_FRONT_ONE_STEP_TEXT = "Bring forward";
+	public static final String BRING_TO_FRONT_ONE_STEP_TOOLTIP = "Bring selected objects forward";
 	public static final ImageDescriptor BRING_TO_FRONT_ONE_STEP_IMAGE = Activator.loadImageDescriptorFromBundle("bring_forward.png");//$NON-NLS-1$
 	public static final ActionFactory BRING_TO_FRONT_ONE_STEP = new ActionFactory("bring-to-front-one-step") {//$NON-NLS-1$
 
@@ -109,8 +107,8 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
-	public static final String SEND_TO_BACK_ONE_STEP_TEXT = "Send to back one step";
-	public static final String SEND_TO_BACK_ONE_STEP_TOOLTIP = "Send selected objects backward one step";
+	public static final String SEND_TO_BACK_ONE_STEP_TEXT = "Send backward";
+	public static final String SEND_TO_BACK_ONE_STEP_TOOLTIP = "Send selected objects backward";
 	public static final ImageDescriptor SEND_TO_BACK_ONE_STEP_IMAGE = Activator.loadImageDescriptorFromBundle("send_backward.png");//$NON-NLS-1$
 	public static final ActionFactory SEND_TO_BACK_ONE_STEP = new ActionFactory("send-to-back-one-step") {//$NON-NLS-1$
 
@@ -130,7 +128,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
-	public static final String SELECT_FEEDBACK_TEXT = "Select feedback mode";
+	public static final String SELECT_FEEDBACK_TEXT = "Visual Feedback Options";
 	public static final String SELECT_FEEDBACK_TOOLTIP = SELECT_FEEDBACK_TEXT;
 	public static final ImageDescriptor SELECT_FEEDBACK_IMAGE = Activator.loadImageDescriptorFromBundle("grid.gif");//$NON-NLS-1$
 	public static final ActionFactory SELECT_FEEDBACK = new ActionFactory("select-feedback-mode") {//$NON-NLS-1$
@@ -172,7 +170,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
-	public static final String SELECT_SNAPMODE_TEXT = "Select snap mode";
+	public static final String SELECT_SNAPMODE_TEXT = "Element Placement Guide Options";
 	public static final String SELECT_SNAPMODE_TOOLTIP = SELECT_SNAPMODE_TEXT;
 	public static final ImageDescriptor SELECT_SNAPTMODE_IMAGE = Activator.loadImageDescriptorFromBundle("snaptogrid.gif");//$NON-NLS-1$
 	public static final ActionFactory SELECT_SNAPMODE = new ActionFactory("select-snapmode") {//$NON-NLS-1$
@@ -403,8 +401,8 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
-	public static final String SAME_WIDTH_TEXT = "Set same width";
-	public static final String SAME_WIDTH_TOOLTIP = SAME_WIDTH_TEXT;
+	public static final String SAME_WIDTH_TEXT = "Same width";
+	public static final String SAME_WIDTH_TOOLTIP = "Set same width";
 	public static final ImageDescriptor SAME_WIDTH_IMAGE = Activator.loadImageDescriptorFromBundle("same_width.gif");
 	public static final ActionFactory SAME_WIDTH = new ActionFactory("same-width") {//$NON-NLS-1$
 
@@ -423,8 +421,8 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
-	public static final String SAME_HEIGHT_TEXT = "Set same height";
-	public static final String SAME_HEIGHT_TOOLTIP = SAME_HEIGHT_TEXT;
+	public static final String SAME_HEIGHT_TEXT = "Same height";
+	public static final String SAME_HEIGHT_TOOLTIP = "Set same height";
 	public static final ImageDescriptor SAME_HEIGHT_IMAGE = Activator.loadImageDescriptorFromBundle("same_height.gif");
 	public static final ActionFactory SAME_HEIGHT = new ActionFactory("same-height") {//$NON-NLS-1$
 
@@ -443,7 +441,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
-	public static final String ADD_TAB_TEXT = "Place TabPanel...";
+	public static final String ADD_TAB_TEXT = "Place TabPanel Wizard";
 	public static final String ADD_TAB_TOOLTIP = ADD_TAB_TEXT;
 	public static final ImageDescriptor ADD_TAB_IMAGE = Activator.loadImageDescriptorFromBundle("tabs.gif");
 	public static final ActionFactory ADD_TAB = new ActionFactory("place-tabpanel") {//$NON-NLS-1$
@@ -463,7 +461,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
-	public static final String ADD_SPLITPANE_TEXT = "Place SplitPane...";
+	public static final String ADD_SPLITPANE_TEXT = "Place SplitPane Wizard";
 	public static final String ADD_SPLITPANE_TOOLTIP = ADD_SPLITPANE_TEXT;
 	public static final ImageDescriptor ADD_SPLITPANE_IMAGE = Activator.loadImageDescriptorFromBundle("split.gif");
 	public static final ActionFactory ADD_SPLITPANE = new ActionFactory("place-splitpane") {//$NON-NLS-1$
@@ -483,7 +481,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
-	public static final String ADD_PORTAL_TEXT = "Place Portal...";
+	public static final String ADD_PORTAL_TEXT = "Place Portal Wizard";
 	public static final String ADD_PORTAL_TOOLTIP = ADD_PORTAL_TEXT;
 	public static final ImageDescriptor ADD_PORTAL_IMAGE = Activator.loadImageDescriptorFromBundle("portal.gif");
 	public static final ActionFactory ADD_PORTAL = new ActionFactory("place-portal") {//$NON-NLS-1$
@@ -503,7 +501,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
-	public static final String ADD_FIELD_TEXT = "Place Field...";
+	public static final String ADD_FIELD_TEXT = "Place Field Wizard";
 	public static final String ADD_FIELD_TOOLTIP = ADD_FIELD_TEXT;
 	public static final ImageDescriptor ADD_FIELD_IMAGE = Activator.loadImageDescriptorFromBundle("field.gif");
 	public static final ActionFactory ADD_FIELD = new ActionFactory("place-field") {//$NON-NLS-1$

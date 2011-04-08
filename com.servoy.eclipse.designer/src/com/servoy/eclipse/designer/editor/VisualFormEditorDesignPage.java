@@ -41,6 +41,7 @@ import org.eclipse.gef.SnapToGrid;
 import org.eclipse.gef.dnd.TemplateTransferDragSourceListener;
 import org.eclipse.gef.internal.ui.palette.PaletteSelectionTool;
 import org.eclipse.gef.palette.PaletteRoot;
+import org.eclipse.gef.rulers.RulerProvider;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.actions.DeleteAction;
 import org.eclipse.gef.ui.actions.DirectEditAction;
@@ -51,9 +52,9 @@ import org.eclipse.gef.ui.actions.SaveAction;
 import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.gef.ui.actions.UndoAction;
 import org.eclipse.gef.ui.palette.FlyoutPaletteComposite;
+import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.palette.PaletteViewer;
 import org.eclipse.gef.ui.palette.PaletteViewerProvider;
-import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.palette.customize.PaletteCustomizerDialog;
 import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
 import org.eclipse.gef.ui.parts.GraphicalViewerKeyHandler;
@@ -150,13 +151,14 @@ import com.servoy.j2db.persistence.Part;
 
 public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 {
-	public static final String COOLBAR_REORGANIZE = "reorganize";
-	public static final String COOLBAR_ALIGN = "align";
-	public static final String COOLBAR_DISTRIBUTE = "distribute";
-	public static final String COOLBAR_SAMESIZE = "same size";
-	public static final String COOLBAR_TOGGLE = "toggle";
-	public static final String COOLBAR_ELEMENTS = "elements";
-	public static final String COOLBAR_LAYERING = "layering";
+	public static final String COOLBAR_ACTIONS = "Actions";
+	public static final String COOLBAR_ALIGN = "Alignment";
+	public static final String COOLBAR_DISTRIBUTE = "Distribution";
+	public static final String COOLBAR_SAMESIZE = "Sizing";
+	public static final String COOLBAR_PREFS = "Editor Preferences";
+	public static final String COOLBAR_ELEMENTS = "Place Element Wizards";
+	public static final String COOLBAR_LAYERING = "Layering";
+	public static final String COOLBAR_GROUPING = "Grouping";
 
 	/**
 	 * A viewer property indicating whether inherited elements are hidden. The value must  be a Boolean.
@@ -179,14 +181,13 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 	protected final IPreferenceChangeListener preferenceChangeListener = new IPreferenceChangeListener()
 	{
-
 		public void preferenceChange(PreferenceChangeEvent event)
 		{
 			if (DesignerPreferences.isGuideSetting(event.getKey()))
 			{
 				applyGuidePreferences();
 			}
-			else if (DesignerPreferences.isRulersSetting(event.getKey()))
+			else if (DesignerPreferences.isMetricsSetting(event.getKey()))
 			{
 				refreshRulers();
 			}
@@ -548,6 +549,8 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		viewer.setProperty(AlignmentfeedbackEditPolicy.PROPERTY_ANCHOR_FEEDBACK_VISIBLE, Boolean.valueOf(designerPreferences.getShowAnchorFeedback()));
 		viewer.setProperty(AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_VISIBLE, Boolean.valueOf(designerPreferences.getShowSameSizeFeedback()));
 		viewer.setProperty(AlignmentfeedbackEditPolicy.PROPERTY_ALIGMENT_FEEDBACK_VISIBLE, Boolean.valueOf(designerPreferences.getFeedbackAlignment()));
+		viewer.setProperty(FormBackgroundLayer.PROPERTY_PAINT_PAGEBREAKS, Boolean.valueOf(designerPreferences.getPaintPageBreaks()));
+		viewer.setProperty(RulerProvider.PROPERTY_RULER_VISIBILITY, Boolean.valueOf(designerPreferences.getShowRulers()));
 		applyGuidePreferences();
 
 		// Show rulers
@@ -563,9 +566,9 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 			DesignerActionFactory.TOGGLE_HIDE_INHERITED_TOOLTIP, DesignerActionFactory.TOGGLE_HIDE_INHERITED_IMAGE, PROPERTY_HIDE_INHERITED);
 		getActionRegistry().registerAction(action);
 
-		addToolbarAction(COOLBAR_TOGGLE, getActionRegistry().getAction(DesignerActionFactory.SELECT_FEEDBACK.getId()));
-		addToolbarAction(COOLBAR_TOGGLE, getActionRegistry().getAction(DesignerActionFactory.SELECT_SNAPMODE.getId()));
-		addToolbarAction(COOLBAR_TOGGLE, getActionRegistry().getAction(DesignerActionFactory.TOGGLE_HIDE_INHERITED.getId()));
+		addToolbarAction(COOLBAR_PREFS, getActionRegistry().getAction(DesignerActionFactory.SELECT_FEEDBACK.getId()));
+		addToolbarAction(COOLBAR_PREFS, getActionRegistry().getAction(DesignerActionFactory.SELECT_SNAPMODE.getId()));
+		addToolbarAction(COOLBAR_PREFS, getActionRegistry().getAction(DesignerActionFactory.TOGGLE_HIDE_INHERITED.getId()));
 
 		refreshToolBars();
 
@@ -583,10 +586,18 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 	protected void fillToolbar()
 	{
-		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.SET_TAB_SEQUENCE.getId()));
-		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.GROUP.getId()));
-		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.UNGROUP.getId()));
-		addToolbarAction(COOLBAR_REORGANIZE, getActionRegistry().getAction(DesignerActionFactory.SAVE_AS_TEMPLATE.getId()));
+		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_FIELD.getId()));
+		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_PORTAL.getId()));
+		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_SPLITPANE.getId()));
+		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_TAB.getId()));
+
+		addToolbarAction(COOLBAR_LAYERING, getActionRegistry().getAction(ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP));
+		addToolbarAction(COOLBAR_LAYERING, getActionRegistry().getAction(ZOrderAction.ID_Z_ORDER_SEND_TO_BACK_ONE_STEP));
+		addToolbarAction(COOLBAR_LAYERING, getActionRegistry().getAction(ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT));
+		addToolbarAction(COOLBAR_LAYERING, getActionRegistry().getAction(ZOrderAction.ID_Z_ORDER_SEND_TO_BACK));
+
+		addToolbarAction(COOLBAR_GROUPING, getActionRegistry().getAction(DesignerActionFactory.GROUP.getId()));
+		addToolbarAction(COOLBAR_GROUPING, getActionRegistry().getAction(DesignerActionFactory.UNGROUP.getId()));
 
 		addToolbarAction(COOLBAR_ALIGN, getActionRegistry().getAction(GEFActionConstants.ALIGN_LEFT));
 		addToolbarAction(COOLBAR_ALIGN, getActionRegistry().getAction(GEFActionConstants.ALIGN_RIGHT));
@@ -605,20 +616,13 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		addToolbarAction(COOLBAR_SAMESIZE, getActionRegistry().getAction(DesignerActionFactory.SAME_WIDTH.getId()));
 		addToolbarAction(COOLBAR_SAMESIZE, getActionRegistry().getAction(DesignerActionFactory.SAME_HEIGHT.getId()));
 
-		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_FIELD.getId()));
-		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_PORTAL.getId()));
-		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_SPLITPANE.getId()));
-		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_TAB.getId()));
-
-		addToolbarAction(COOLBAR_LAYERING, getActionRegistry().getAction(ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP));
-		addToolbarAction(COOLBAR_LAYERING, getActionRegistry().getAction(ZOrderAction.ID_Z_ORDER_SEND_TO_BACK_ONE_STEP));
-		addToolbarAction(COOLBAR_LAYERING, getActionRegistry().getAction(ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT));
-		addToolbarAction(COOLBAR_LAYERING, getActionRegistry().getAction(ZOrderAction.ID_Z_ORDER_SEND_TO_BACK));
+		addToolbarAction(COOLBAR_ACTIONS, getActionRegistry().getAction(DesignerActionFactory.SET_TAB_SEQUENCE.getId()));
+		addToolbarAction(COOLBAR_ACTIONS, getActionRegistry().getAction(DesignerActionFactory.SAVE_AS_TEMPLATE.getId()));
 	}
 
 	private void refreshRulers()
 	{
-		rulerManager.refreshRulers(new DesignerPreferences().getShowRulers());
+		rulerManager.refreshRulers();
 	}
 
 	protected void saveCoolbarLayout()
@@ -991,7 +995,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	{
 		RootEditPart rootEditPart = getGraphicalViewer().getRootEditPart();
 		rootEditPart.getContents().refresh();
-		refreshRulers();
 		Iterator childrenEditPartsIte = rootEditPart.getContents().getChildren().iterator();
 		while (childrenEditPartsIte.hasNext())
 		{
@@ -1038,7 +1041,6 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		if (full_refresh)
 		{
 			rootEditPart.getContents().refresh();
-			refreshRulers();
 		}
 
 		if (editParts != null)

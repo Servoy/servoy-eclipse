@@ -47,23 +47,20 @@ public class ModifyAnchoringAction extends SetPropertyAction
 		if (AnchorPropertySource.TOP.equals(anchoringProperty))
 		{
 			setText("Top");
-			setToolTipText("Anchor " + getText());
 		}
 		if (AnchorPropertySource.RIGHT.equals(anchoringProperty))
 		{
 			setText("Right");
-			setToolTipText("Anchor " + getText());
 		}
 		if (AnchorPropertySource.BOTTOM.equals(anchoringProperty))
 		{
 			setText("Bottom");
-			setToolTipText("Anchor " + getText());
 		}
 		if (AnchorPropertySource.LEFT.equals(anchoringProperty))
 		{
 			setText("Left");
-			setToolTipText("Anchor " + getText());
 		}
+		setToolTipText("Anchor " + getText());
 	}
 
 }

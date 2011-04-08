@@ -68,7 +68,7 @@ public class SelectSnapmodeAction extends ViewerDropdownPropertyAction
 					!Boolean.TRUE.equals(diagramViewer.getProperty(SnapToElementAlignment.PROPERTY_ALIGNMENT_ENABLED));
 			}
 		});
-		add(new Action("Grid", IAction.AS_CHECK_BOX)
+		add(new Action("Grid Guides", IAction.AS_CHECK_BOX)
 		{
 			@Override
 			public void run()
@@ -82,7 +82,7 @@ public class SelectSnapmodeAction extends ViewerDropdownPropertyAction
 				return Boolean.TRUE.equals(diagramViewer.getProperty(SnapToGrid.PROPERTY_GRID_ENABLED));
 			}
 		});
-		add(new Action("Alignment", IAction.AS_CHECK_BOX)
+		add(new Action("Alignment Guides", IAction.AS_CHECK_BOX)
 		{
 			@Override
 			public void run()
