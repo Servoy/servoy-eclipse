@@ -63,6 +63,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.StringMatcher;
 import com.servoy.eclipse.ui.editors.relation.DataProviderEditingSupport;
 import com.servoy.eclipse.ui.editors.relation.DatasourceSelectComposite;
 import com.servoy.eclipse.ui.editors.relation.OperatorEditingSupport;
@@ -83,7 +84,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.util.Pair;
-import com.servoy.j2db.util.StringMatcher;
 import com.servoy.j2db.util.Utils;
 
 public class RelationEditor extends PersistEditor

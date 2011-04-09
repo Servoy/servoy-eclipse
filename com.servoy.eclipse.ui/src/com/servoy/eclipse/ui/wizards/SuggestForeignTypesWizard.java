@@ -79,6 +79,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.StringMatcher;
 import com.servoy.eclipse.ui.editors.table.ColumnLabelProvider;
 import com.servoy.eclipse.ui.util.IColumnComparator;
 import com.servoy.eclipse.ui.util.ITableComparator;
@@ -96,7 +97,6 @@ import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.ISQLCondition;
-import com.servoy.j2db.util.StringMatcher;
 
 public class SuggestForeignTypesWizard extends Wizard
 {
