@@ -20,6 +20,7 @@ import java.awt.Rectangle;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -52,6 +53,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.plugins.IClientPluginAccess;
@@ -479,6 +481,123 @@ public class ElementUtil
 		}
 
 		return formElement;
+	}
+
+	public static HashMap<UUID, BaseComponent> getNeighbours(Form form, HashMap<UUID, BaseComponent> foundList, HashMap<UUID, BaseComponent> elementsToVisit)
+	{
+		if (form == null || foundList == null || elementsToVisit == null || elementsToVisit.isEmpty()) return null;
+
+		HashMap<UUID, BaseComponent> newFoundList = new HashMap<UUID, BaseComponent>(foundList);
+
+		HashMap<UUID, BaseComponent> newElements = new HashMap<UUID, BaseComponent>();
+
+		HashMap<UUID, BaseComponent> returnList = null;
+
+		Iterator<IPersist> it = form.getAllObjects();
+		while (it.hasNext())
+		{
+			IPersist element = it.next();
+			if (element instanceof BaseComponent)
+			{
+				if (newFoundList.containsKey(element.getUUID())) continue;
+				for (BaseComponent bc : elementsToVisit.values())
+				{
+					if (elementsIntersect(element, bc))
+					{
+						newFoundList.put(element.getUUID(), (BaseComponent)element);
+						newElements.put(element.getUUID(), (BaseComponent)element);
+						List<BaseComponent> groupMemebers = getGroupMembers(form, (BaseComponent)element);
+						if (groupMemebers == null) break;
+						for (BaseComponent neighbour : groupMemebers)
+						{
+							if (!newFoundList.containsKey(neighbour.getUUID()))
+							{
+								newFoundList.put(neighbour.getUUID(), neighbour);
+								newElements.put(neighbour.getUUID(), neighbour);
+							}
+						}
+						break;
+					}
+				}
+			}
+		}
+
+		if (!newElements.isEmpty()) returnList = getNeighbours(form, newFoundList, newElements);
+		else returnList = newFoundList;
+
+		return returnList;
+	}
+
+	public static HashMap<UUID, BaseComponent> getImmediateNeighbours(Form form, HashMap<UUID, BaseComponent> elementsToVisit)
+	{
+		if (elementsToVisit == null || form == null || elementsToVisit.isEmpty()) return null;
+
+		HashMap<UUID, BaseComponent> returnList = new HashMap<UUID, BaseComponent>(elementsToVisit);
+
+		Iterator<IPersist> it = form.getAllObjects();
+		while (it.hasNext())
+		{
+			IPersist element = it.next();
+			if (element instanceof BaseComponent)
+			{
+				for (BaseComponent bc : elementsToVisit.values())
+				{
+					if (elementsIntersect(element, bc))
+					{
+						if (!returnList.containsKey(element.getUUID())) returnList.put(element.getUUID(), (BaseComponent)element);
+						List<BaseComponent> groupMemebers = getGroupMembers(form, (BaseComponent)element);
+						if (groupMemebers != null)
+						{
+							for (BaseComponent neighbour : groupMemebers)
+							{
+								if (!returnList.containsKey(neighbour.getUUID())) returnList.put(neighbour.getUUID(), neighbour);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return returnList;
+	}
+
+	public static List<BaseComponent> getGroupMembers(Form form, BaseComponent element)
+	{
+		String groupID = (String)element.getProperty(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName());
+		if (groupID == null) return null;
+
+		ArrayList<BaseComponent> returnList = new ArrayList<BaseComponent>();
+
+		Iterator<IPersist> it = form.getAllObjects();
+		while (it.hasNext())
+		{
+			IPersist currentElement = it.next();
+			if (currentElement instanceof BaseComponent)
+			{
+				String currentGroupID = (String)(((BaseComponent)currentElement).getProperty(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName()));
+				if (currentGroupID != null && !currentElement.getUUID().equals(element) && currentGroupID.equals(groupID)) returnList.add((BaseComponent)currentElement);
+			}
+		}
+
+		return returnList;
+	}
+
+	public static boolean elementsIntersect(IPersist e1, IPersist e2)
+	{
+		IFormElement element1;
+		IFormElement element2;
+		if (e1 instanceof IFormElement) element1 = (IFormElement)e1;
+		else return false;
+		if (e2 instanceof IFormElement) element2 = (IFormElement)e2;
+		else return false;
+
+		Rectangle element1Rectangle = new Rectangle(element1.getSize());
+		element1Rectangle.setLocation(element1.getLocation());
+
+		Rectangle element2Rectangle = new Rectangle(element2.getSize());
+		element2Rectangle.setLocation(element2.getLocation());
+
+		return element1Rectangle.intersects(element2Rectangle);
 	}
 
 }
