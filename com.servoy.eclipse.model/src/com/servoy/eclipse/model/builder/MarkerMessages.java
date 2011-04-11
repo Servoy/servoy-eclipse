@@ -208,8 +208,6 @@ public class MarkerMessages
 		"Form access found in calculation \"{0}\". This is not supported.", ServoyBuilder.CALCULATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker CalculationInTableFormAccess = new ServoyMarker(
 		"Form access found in calculation \"{0}\" from table \"{1}\". This is not supported.", ServoyBuilder.CALCULATION_MARKER_TYPE); //$NON-NLS-1$
-	public static ServoyMarker CalculationUndeclaredVariable = new ServoyMarker(
-		"Calculation \"{0}\" contains an undeclared variable \"{1}\" which may lead to unexpected results (in tableview). Declare the variable first.", ServoyBuilder.CALCULATION_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker PropertyTargetNotFound = new ServoyMarker(
 		"Property \"{0}\" is linked to an entity that does not exist.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$

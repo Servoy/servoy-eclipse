@@ -12,6 +12,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 
 /**
@@ -24,7 +25,7 @@ public class OpenWithEditor implements IMarkerAttributeContributor
 	public void contributeToMarker(IMarker marker, IPersist persist)
 	{
 		String contentTypeIdentifier = null;
-		if (persist.getAncestor(IRepository.FORMS) != null && !(persist instanceof ScriptVariable))
+		if (persist.getAncestor(IRepository.FORMS) != null && !(persist instanceof ScriptVariable) && !(persist instanceof ScriptMethod))
 		{
 			contentTypeIdentifier = PersistEditorInput.FORM_RESOURCE_ID;
 		}

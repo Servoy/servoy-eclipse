@@ -54,18 +54,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.ast.ASTNode;
-import org.eclipse.dltk.ast.ASTVisitor;
-import org.eclipse.dltk.compiler.problem.IProblem;
-import org.eclipse.dltk.compiler.problem.IProblemReporter;
-import org.eclipse.dltk.javascript.ast.Expression;
-import org.eclipse.dltk.javascript.ast.FunctionStatement;
-import org.eclipse.dltk.javascript.ast.GetArrayItemExpression;
-import org.eclipse.dltk.javascript.ast.Identifier;
-import org.eclipse.dltk.javascript.ast.Script;
-import org.eclipse.dltk.javascript.ast.Statement;
-import org.eclipse.dltk.javascript.ast.VoidExpression;
-import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -135,7 +123,6 @@ import com.servoy.j2db.util.IntHashMap;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.RoundHalfUpDecimalFormat;
-import com.servoy.j2db.util.ScriptingUtils;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -149,20 +136,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static int MAX_EXCEPTIONS = 25;
 	public static int MIN_FIELD_LENGTH = 1000;
 	public static int exceptionCount = 0;
-	private final JavaScriptParser javascriptParser = new JavaScriptParser();
-	private final IProblemReporter dummyReporter = new IProblemReporter()
-	{
-		public void reportProblem(IProblem problem)
-		{
-			// do nothing
-		}
-
-		public Object getAdapter(Class adapter)
-		{
-			return null;
-		}
-
-	};
 
 	class ServoyDeltaVisitor implements IResourceDeltaVisitor
 	{
@@ -1826,41 +1799,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									}
 
 								}
-								StringBuilder sb = new StringBuilder();
-								sb.append(SolutionSerializer.FUNCTION_KEYWORD);
-								sb.append(' ');
-								sb.append(calc.getDisplayName());
-								sb.append("()\n{\n"); //$NON-NLS-1$
-								String source = calc.getSource();
-								if (source != null && source.trim().length() > 0)
-								{
-									sb.append(source);
-									sb.append('\n');
-								}
-								sb.append("}\n"); //$NON-NLS-1$
-								String[] variables = ScriptingUtils.getGlobalVariables(sb.toString());
-								if (variables != null && variables.length > 0)
-								{
-									try
-									{
-										Table table = calc.getTable();
-										for (String name : variables)
-										{
-											if (table.getColumn(name) == null)
-											{
-												Integer lineNumber = Integer.valueOf(calc.getLineNumberOffset());
-												ServoyMarker mk = MarkerMessages.CalculationUndeclaredVariable.fill(calc.getName(), name);
-												addMarker(project, mk.getType(), mk.getText(), lineNumber == null ? -1 : lineNumber.intValue(),
-													IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, calc);
-											}
-
-										}
-									}
-									catch (Exception ex)
-									{
-										Debug.trace(ex);
-									}
-								}
 							}
 
 						}
@@ -2626,44 +2564,19 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			(eventMethod.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS) == null || eventMethod.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS).length == 0) &&
 			eventMethod.getDeclaration().contains("arguments"))
 		{
-			final Script script = javascriptParser.parse(eventMethod.getDeclaration(), dummyReporter);
-			List<Statement> statements = script.getStatements();
-			if (statements != null && statements.size() == 1 && (statements.get(0) instanceof VoidExpression))
+			int offset = ScriptingUtils.getArgumentsUsage(eventMethod.getDeclaration());
+			if (offset >= 0)
 			{
-				Expression exp = ((VoidExpression)statements.get(0)).getExpression();
-				if (exp instanceof FunctionStatement)
+				ServoyMarker mk = MarkerMessages.MethodEventParameters;
+				IMarker marker = addMarker(project, mk.getType(), mk.getText(), eventMethod.getLineNumberOffset() + offset, IMarker.SEVERITY_WARNING,
+					IMarker.PRIORITY_NORMAL, null, eventMethod);
+				try
 				{
-					FunctionStatement function = (FunctionStatement)exp;
-					final int functionStart = function.sourceStart();
-					try
-					{
-						final String functionCode = eventMethod.getDeclaration();
-						function.getBody().traverse(new ASTVisitor()
-						{
-							@Override
-							public boolean visitGeneral(ASTNode node) throws Exception
-							{
-								if (node instanceof GetArrayItemExpression && (((GetArrayItemExpression)node).getArray() instanceof Identifier) &&
-									"arguments".equals(((Identifier)((GetArrayItemExpression)node).getArray()).getName()))
-								{
-									ServoyMarker mk = MarkerMessages.MethodEventParameters;
-									int offset = 0;
-									for (int i = functionStart; i < node.sourceStart(); i++)
-									{
-										if (functionCode.charAt(i) == '\n') offset++;
-									}
-									IMarker marker = addMarker(project, mk.getType(), mk.getText(), eventMethod.getLineNumberOffset() + offset,
-										IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, eventMethod);
-									marker.setAttribute("EventName", eventName); //$NON-NLS-1$
-								}
-								return true;
-							}
-						});
-					}
-					catch (Exception e)
-					{
-						ServoyLog.logError(e);
-					}
+					marker.setAttribute("EventName", eventName); //$NON-NLS-1$
+				}
+				catch (Exception ex)
+				{
+					ServoyLog.logError(ex);
 				}
 			}
 		}
