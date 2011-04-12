@@ -187,7 +187,11 @@ public class ColumnComposite extends Composite
 			{
 				Point pt = new Point(event.x, event.y);
 				TableItem item = tableViewer.getTable().getItem(pt);
-				if (item != null && item.getBounds(CI_DELETE).contains(pt))
+				if (item != null && (event.stateMask & SWT.MOD1) > 0 && tableViewer.getTable().getSelection() != null)
+				{
+					tableViewer.getTable().deselectAll();
+				}
+				else if (item != null && item.getBounds(CI_DELETE).contains(pt))
 				{
 					if (t.getTableType() != ITable.TABLE)
 					{
