@@ -125,7 +125,8 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	{
 		if (importI18NPolicy == null)
 		{
-			final I18NDialog dialog = new I18NDialog(shell, "Import I18N data", null, "Do you wish to import the I18N data contained in the import?", //$NON-NLS-2$
+			final I18NDialog dialog = new I18NDialog(shell,
+				"Import I18N data", null, "Do you wish to import the I18N data contained in the import(updates and inserts)?", //$NON-NLS-2$
 				MessageDialog.NONE, new String[] { "Yes", "No" }, 0); //$NON-NLS-1$
 			Display.getDefault().syncExec(new Runnable()
 			{
@@ -485,7 +486,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		protected Control createCustomArea(Composite parent)
 		{
 			insertNewKeysButton = new Button(parent, SWT.CHECK);
-			insertNewKeysButton.setText("Insert new keys only");
+			insertNewKeysButton.setText("Insert new keys only(inserts only, no updates)");
 			GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
 			insertNewKeysButton.setLayoutData(gridData);
 
