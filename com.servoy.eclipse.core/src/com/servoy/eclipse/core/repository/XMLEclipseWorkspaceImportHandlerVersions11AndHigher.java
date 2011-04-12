@@ -727,13 +727,13 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 	public void handleI18NImport(ImportInfo importInfo, String i18nServerName, String i18nTableName, TreeMap<String, MessageEntry> messages) throws Exception
 	{
 		m.setTaskName("Importing i18n for table '" + i18nTableName + "'");
-		boolean insetNewI18NKeysOnly = getUserChannel().getInsertNewI18NKeysOnly();
+		boolean insertNewI18NKeysOnly = getUserChannel().getInsertNewI18NKeysOnly();
 		IFileAccess workspaceDir = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 		TreeMap<String, MessageEntry> currentMessages = EclipseMessages.readMessages(i18nServerName, i18nTableName, workspaceDir);
 
 		for (Map.Entry<String, MessageEntry> entry : messages.entrySet())
 		{
-			if (!currentMessages.containsKey(entry.getKey()) || !insetNewI18NKeysOnly) currentMessages.put(entry.getKey(), entry.getValue());
+			if (!currentMessages.containsKey(entry.getKey()) || !insertNewI18NKeysOnly) currentMessages.put(entry.getKey(), entry.getValue());
 		}
 
 		EclipseMessages.writeMessages(i18nServerName, i18nTableName, currentMessages, workspaceDir);
