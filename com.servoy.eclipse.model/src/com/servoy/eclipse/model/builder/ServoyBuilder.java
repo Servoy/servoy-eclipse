@@ -1347,9 +1347,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 															null, o);
 													}
 												}
-												if (((dataProvider instanceof ScriptVariable && ((ScriptVariable)dataProvider).getVariableType() == IColumnTypes.MEDIA) ||
-													(dataProvider instanceof AggregateVariable && ((AggregateVariable)dataProvider).getType() == IColumnTypes.MEDIA) ||
-													(dataProvider instanceof ScriptCalculation && ((ScriptCalculation)dataProvider).getType() == IColumnTypes.MEDIA) || (dataProvider instanceof Column && Column.mapToDefaultType(((Column)dataProvider).getType()) == IColumnTypes.MEDIA) &&
+												if (((dataProvider instanceof ScriptVariable &&
+													((ScriptVariable)dataProvider).getVariableType() == IColumnTypes.MEDIA && ((ScriptVariable)dataProvider).getSerializableRuntimeProperty(IScriptProvider.TYPE) == null) ||
+													(dataProvider instanceof AggregateVariable &&
+														((AggregateVariable)dataProvider).getType() == IColumnTypes.MEDIA && ((AggregateVariable)dataProvider).getSerializableRuntimeProperty(IScriptProvider.TYPE) == null) ||
+													(dataProvider instanceof ScriptCalculation &&
+														((ScriptCalculation)dataProvider).getType() == IColumnTypes.MEDIA && ((ScriptCalculation)dataProvider).getSerializableRuntimeProperty(IScriptProvider.TYPE) == null) || (dataProvider instanceof Column && Column.mapToDefaultType(((Column)dataProvider).getType()) == IColumnTypes.MEDIA) &&
 													((Column)dataProvider).getColumnInfo() != null &&
 													((Column)dataProvider).getColumnInfo().getConverterName() == null) &&
 													field.getDisplayType() != Field.IMAGE_MEDIA)
