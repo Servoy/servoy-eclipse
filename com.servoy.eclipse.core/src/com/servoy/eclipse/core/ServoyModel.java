@@ -715,7 +715,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 					}
 
 					progressMonitor.worked(1);
-					progressMonitor.subTask("Anouncing activation intent...");
+					progressMonitor.subTask("Announcing activation intent...");
 					ReturnValueRunnable uiRunnable = new ReturnValueRunnable()
 					{
 						public void run()
