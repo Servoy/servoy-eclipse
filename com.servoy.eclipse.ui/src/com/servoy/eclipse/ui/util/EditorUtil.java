@@ -20,6 +20,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.filesystem.IFileStore;
@@ -76,11 +78,13 @@ import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.editors.TableEditor;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
+import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumn;
@@ -674,5 +678,23 @@ public class EditorUtil
 		{
 			((IEditorSite)site).getActionBars().getStatusLineManager().setMessage(message);
 		}
+	}
+
+	/*
+	 * Get the table columns in order as configured in the preferences.
+	 */
+	public static Iterator<Column> getTableColumns(Table table)
+	{
+		if (table == null)
+		{
+			return Collections.<Column> emptyList().iterator();
+		}
+		if (new DesignerPreferences().getShowColumnsInDbOrder())
+		{
+			// columns as they appear in the database
+			return table.getColumns().iterator();
+		}
+		// columns sorted by name (PK always first)
+		return table.getColumnsSortedByName();
 	}
 }

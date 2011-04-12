@@ -47,6 +47,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.resource.FontResource;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.FlattenedSolution;
@@ -611,7 +612,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			if (lst == null)
 			{
 				lst = new ArrayList<Column>();
-				Iterator<Column> columns = t.getColumnsSortedByName();
+				Iterator<Column> columns = EditorUtil.getTableColumns(t);
 				while (columns.hasNext())
 				{
 					Column column = columns.next();

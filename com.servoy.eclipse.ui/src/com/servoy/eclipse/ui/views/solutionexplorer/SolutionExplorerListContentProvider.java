@@ -56,6 +56,7 @@ import com.servoy.eclipse.ui.node.TreeBuilder;
 import com.servoy.eclipse.ui.node.UserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController.JSForm;
@@ -898,7 +899,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		modulesOfSolution.put(solution.getName(), solution);
 		TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.ARRAY, prefix, dlm, "alldataproviders", null, null);
 
-		Iterator<Column> cols = table.getColumnsSortedByName();
+		Iterator<Column> cols = EditorUtil.getTableColumns(table);
 		while (cols.hasNext())
 		{
 			Column c = cols.next();

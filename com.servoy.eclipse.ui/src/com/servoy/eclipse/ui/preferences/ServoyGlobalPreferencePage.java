@@ -43,17 +43,12 @@ import com.servoy.j2db.debug.DeveloperPreferences;
  */
 public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkbenchPreferencePage
 {
-	public static final boolean SAVE_EDITOR_STATE_DEFAULT = true;
-	public static final boolean OPEN_FIRST_FORM_DESIGNER_DEFAULT = true;
-
 	private Button securityChangeButton;
+	private Button toolbarsInFormWindowButton;
 	private Button saveEditorStateButton;
 	private Button openFirstFormDesignerButton;
+	private Button showColumnsInDbOrderButton;
 	private Label enhancedSecurityLabel;
-
-	public ServoyGlobalPreferencePage()
-	{
-	}
 
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
@@ -74,27 +69,15 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 
 		Composite rootContainer = new Composite(parent, SWT.NONE);
 
-		GridLayout layout = new GridLayout();
-		layout.numColumns = 1;
-		rootContainer.setLayout(layout);
-
-		GridData rootGridData = new GridData();
-		rootGridData.verticalAlignment = GridData.FILL;
-		rootGridData.horizontalAlignment = GridData.FILL;
-		rootContainer.setLayoutData(rootGridData);
+		rootContainer.setLayout(new GridLayout(1, false));
+		rootContainer.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
 		if (!new DeveloperPreferences(ServoyModel.getSettings()).getEnhancedSecurity())
 		{
 			Group securityInfoContainer = new Group(rootContainer, SWT.NONE);
 			securityInfoContainer.setText("Security Information");
-			GridLayout securityInfoLayout = new GridLayout();
-			securityInfoLayout.numColumns = 2;
-			securityInfoContainer.setLayout(securityInfoLayout);
-
-			GridData securityInfoGridData = new GridData();
-			securityInfoGridData.verticalAlignment = GridData.FILL;
-			securityInfoGridData.horizontalAlignment = GridData.FILL;
-			securityInfoContainer.setLayoutData(securityInfoGridData);
+			securityInfoContainer.setLayout(new GridLayout(2, false));
+			securityInfoContainer.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
 			enhancedSecurityLabel = new Label(securityInfoContainer, SWT.NONE);
 			enhancedSecurityLabel.setText("Servoy Application Server NOT is running with Enhanced Security, this is strongly discouraged");
@@ -116,23 +99,42 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 			});
 		}
 
-		Group optionsContainer = new Group(rootContainer, SWT.NONE);
-		optionsContainer.setText("Form Editor Options");
+		// Form editor options
+		Group formEditorOptionsContainer = new Group(rootContainer, SWT.NONE);
+		formEditorOptionsContainer.setText("Form Editor Options");
+		formEditorOptionsContainer.setLayout(new GridLayout(2, false));
+		formEditorOptionsContainer.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
-		GridLayout optionsLayout = new GridLayout();
-		optionsLayout.numColumns = 1;
-		optionsContainer.setLayout(optionsLayout);
+		toolbarsInFormWindowButton = new Button(formEditorOptionsContainer, SWT.CHECK);
+		toolbarsInFormWindowButton.setText("Show Form Editing Toolbars inside Form Editor"); //$NON-NLS-1$
 
-		GridData optionsGridData = new GridData();
-		optionsGridData.verticalAlignment = GridData.FILL;
-		optionsGridData.horizontalAlignment = GridData.FILL;
-		optionsContainer.setLayoutData(optionsGridData);
+		Button resetToolbarsButton = new Button(formEditorOptionsContainer, SWT.NONE);
+		resetToolbarsButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				new DesignerPreferences().saveCoolbarLayout(null);
+			}
+		});
+		resetToolbarsButton.setText("Show all"); //$NON-NLS-1$
 
-		saveEditorStateButton = new Button(optionsContainer, SWT.CHECK);
+		saveEditorStateButton = new Button(formEditorOptionsContainer, SWT.CHECK);
 		saveEditorStateButton.setText("Re-open Form Editors at startup");
+		new Label(formEditorOptionsContainer, SWT.NONE); // dummy
 
-		openFirstFormDesignerButton = new Button(optionsContainer, SWT.CHECK);
+		openFirstFormDesignerButton = new Button(formEditorOptionsContainer, SWT.CHECK);
 		openFirstFormDesignerButton.setText("Open the first form designer on activating a solution");
+		new Label(formEditorOptionsContainer, SWT.NONE); // dummy
+
+		// Wizard options
+		Group wizardOptionsContainer = new Group(rootContainer, SWT.NONE);
+		wizardOptionsContainer.setText("Wizard options");
+		wizardOptionsContainer.setLayout(new GridLayout(1, false));
+		wizardOptionsContainer.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
+
+		showColumnsInDbOrderButton = new Button(wizardOptionsContainer, SWT.CHECK);
+		showColumnsInDbOrderButton.setText("Show table columns in database defined order");
 
 		initializeFields();
 
@@ -143,15 +145,19 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	{
 		DesignerPreferences prefs = new DesignerPreferences();
 
+		toolbarsInFormWindowButton.setSelection(prefs.getFormToolsOnMainToolbar());
 		saveEditorStateButton.setSelection(prefs.getSaveEditorState());
 		openFirstFormDesignerButton.setSelection(prefs.getOpenFirstFormDesigner());
+		showColumnsInDbOrderButton.setSelection(prefs.getShowColumnsInDbOrder());
 	}
 
 	@Override
 	protected void performDefaults()
 	{
-		saveEditorStateButton.setSelection(ServoyGlobalPreferencePage.SAVE_EDITOR_STATE_DEFAULT);
-		openFirstFormDesignerButton.setSelection(ServoyGlobalPreferencePage.OPEN_FIRST_FORM_DESIGNER_DEFAULT);
+		toolbarsInFormWindowButton.setSelection(DesignerPreferences.FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT);
+		saveEditorStateButton.setSelection(DesignerPreferences.SAVE_EDITOR_STATE_DEFAULT);
+		openFirstFormDesignerButton.setSelection(DesignerPreferences.OPEN_FIRST_FORM_DESIGNER_DEFAULT);
+		showColumnsInDbOrderButton.setSelection(DesignerPreferences.SHOW_COLUMNS_IN_DB_ORDER_DEFAULT);
 
 		super.performDefaults();
 	}
@@ -161,8 +167,10 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	{
 		DesignerPreferences prefs = new DesignerPreferences();
 
+		prefs.setFormToolsOnMainToolbar(toolbarsInFormWindowButton.getSelection());
 		prefs.setSaveEditorState(saveEditorStateButton.getSelection());
 		prefs.setOpenFirstFormDesigner(openFirstFormDesignerButton.getSelection());
+		prefs.setShowColumnsInDbOrder(showColumnsInDbOrderButton.getSelection());
 
 		prefs.save();
 

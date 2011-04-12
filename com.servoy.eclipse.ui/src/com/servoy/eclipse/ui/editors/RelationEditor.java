@@ -71,6 +71,7 @@ import com.servoy.eclipse.ui.editors.relation.OptionsComposite;
 import com.servoy.eclipse.ui.editors.relation.RelationItemLabelProvider;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -668,7 +669,7 @@ public class RelationEditor extends PersistEditor
 			}
 			if (t != null)
 			{
-				Iterator<Column> cols = t.getColumnsSortedByName();
+				Iterator<Column> cols = EditorUtil.getTableColumns(t);
 				while (cols.hasNext())
 				{
 					// stored calcs are shown in calculations section

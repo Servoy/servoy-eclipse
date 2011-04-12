@@ -68,6 +68,7 @@ public class DesignerPreferences
 	public static final String ANCHOR_SETTING = "anchor";
 	public static final String SAVE_EDITOR_STATE_SETTING = "saveEditorState";
 	public static final String OPEN_FIRST_FORM_DESIGNER_SETTING = "openFirstFormDesigner";
+	public static final String SHOW_COLUMNS_IN_DB_ORDER_SETTING = "showColumnsInDbOrder";
 	public static final String FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING = "formToolsOnMainToolbar";
 	public static final String FORM_COOLBAR_LAYOUT_SETTING = "formCoolBarLayout";
 	public static final String SHOW_SAME_SIZE_SETTING = "showSameSizeFeedback";
@@ -99,6 +100,7 @@ public class DesignerPreferences
 	public static final boolean ANCHOR_DEFAULT = false;
 	public static final boolean SAVE_EDITOR_STATE_DEFAULT = true;
 	public static final boolean OPEN_FIRST_FORM_DESIGNER_DEFAULT = true;
+	public static final boolean SHOW_COLUMNS_IN_DB_ORDER_DEFAULT = false;
 	public static final boolean SHOW_SAME_SIZE_DEFAULT = true;
 	public static final boolean SHOW_ANCHORING_DEFAULT = true;
 	public static final boolean FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT = true;
@@ -420,6 +422,16 @@ public class DesignerPreferences
 	public void setOpenFirstFormDesigner(boolean openFirstFormDesigner)
 	{
 		setProperty(OPEN_FIRST_FORM_DESIGNER_SETTING, openFirstFormDesigner);
+	}
+
+	public boolean getShowColumnsInDbOrder()
+	{
+		return getProperty(SHOW_COLUMNS_IN_DB_ORDER_SETTING, SHOW_COLUMNS_IN_DB_ORDER_DEFAULT);
+	}
+
+	public void setShowColumnsInDbOrder(boolean showColumnsInDbOrder)
+	{
+		setProperty(SHOW_COLUMNS_IN_DB_ORDER_SETTING, showColumnsInDbOrder);
 	}
 
 	public boolean getShowSameSizeFeedback()

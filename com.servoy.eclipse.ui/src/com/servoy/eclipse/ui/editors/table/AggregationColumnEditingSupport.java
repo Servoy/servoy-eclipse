@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
 
 import java.util.Iterator;
@@ -32,6 +32,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.Table;
@@ -121,11 +122,11 @@ public class AggregationColumnEditingSupport extends EditingSupport
 			int index = 0;
 			try
 			{
-				Iterator it = table.getColumnsSortedByName();
+				Iterator<Column> it = EditorUtil.getTableColumns(table);
 				int i = 0;
 				while (it.hasNext())
 				{
-					Column column = (Column)it.next();
+					Column column = it.next();
 					if (column.getDataProviderID().equals(dataProviderId))
 					{
 						index = i;
@@ -158,12 +159,11 @@ public class AggregationColumnEditingSupport extends EditingSupport
 		columns = new String[table.getColumnCount()];
 		try
 		{
-			Iterator it = table.getColumnsSortedByName();
+			Iterator<Column> it = EditorUtil.getTableColumns(table);
 			int i = 0;
 			while (it.hasNext())
 			{
-				Column element = (Column)it.next();
-				columns[i++] = element.getName();
+				columns[i++] = it.next().getName();
 			}
 		}
 		catch (Exception e)

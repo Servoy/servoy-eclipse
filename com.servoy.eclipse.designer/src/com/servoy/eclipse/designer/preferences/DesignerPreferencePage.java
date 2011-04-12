@@ -68,7 +68,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	private ComboViewer metricsCombo;
 	private Button snapToGridRadio;
 	private Button anchorCheck;
-	private Button toolbarsInFormWindowButton;
 	private Button snapToAlignmentRadio;
 	private Spinner alignmentThresholdSpinner;
 	private Spinner alignmentIndentSpinner;
@@ -96,24 +95,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		Composite rootPanel = new Composite(parent, SWT.NONE);
 		rootPanel.setLayout(new GridLayout(1, true));
-
-		Composite formEditingToolbarPanel = new Composite(rootPanel, SWT.NONE);
-		formEditingToolbarPanel.setLayout(new GridLayout(2, false));
-
-		toolbarsInFormWindowButton = new Button(formEditingToolbarPanel, SWT.CHECK);
-		toolbarsInFormWindowButton.setText("Show Form Editing Toolbars inside Form Editor"); //$NON-NLS-1$
-
-		Button resetToolbarsButton = new Button(formEditingToolbarPanel, SWT.NONE);
-		resetToolbarsButton.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				new DesignerPreferences().saveCoolbarLayout(null);
-			}
-		});
-		resetToolbarsButton.setText("Show all"); //$NON-NLS-1$
-
 
 		Composite copyPastePanel = new Composite(rootPanel, SWT.NONE);
 		copyPastePanel.setLayout(new GridLayout(2, false));
@@ -385,7 +366,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		snapToNoneRadio.setSelection(prefs.getNoneSnapTo());
 		alignmentFeedbackCheck.setSelection(prefs.getFeedbackAlignment());
 		gridFeedbackCheck.setSelection(prefs.getFeedbackGrid());
-		toolbarsInFormWindowButton.setSelection(prefs.getFormToolsOnMainToolbar());
 		guideSizeSpinner.setSelection(prefs.getGuideSize());
 		copyPasteOffsetSpinner.setSelection(prefs.getCopyPasteOffset());
 		alignmentThresholdSpinner.setSelection(prefs.getAlignmentThreshold());
@@ -419,7 +399,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		prefs.setFeedbackGrid(gridFeedbackCheck.getSelection());
 		prefs.setSnapTo(snapToGridRadio.getSelection(), snapToAlignmentRadio.getSelection());
 		prefs.setAnchor(anchorCheck.getSelection());
-		prefs.setFormToolsOnMainToolbar(toolbarsInFormWindowButton.getSelection());
 		prefs.setGuideSize(guideSizeSpinner.getSelection());
 		prefs.setCopyPasteOffset(copyPasteOffsetSpinner.getSelection());
 		prefs.setAlignmentThreshold(alignmentThresholdSpinner.getSelection());
@@ -457,7 +436,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		anchorCheck.setSelection(DesignerPreferences.ANCHOR_DEFAULT);
 		snapToAlignmentRadio.setSelection(DesignerPreferences.SNAPTO_DEFAULT.equals(DesignerPreferences.SNAP_TO_ALIGMNENT));
 		snapToNoneRadio.setSelection(DesignerPreferences.SNAPTO_DEFAULT.equals(DesignerPreferences.SNAP_TO_NONE));
-		toolbarsInFormWindowButton.setSelection(DesignerPreferences.FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT);
 		copyPasteOffsetSpinner.setSelection(DesignerPreferences.COPY_PASTE_OFFSET_DEFAULT);
 		alignmentThresholdSpinner.setSelection(DesignerPreferences.ALIGNMENT_THRESHOLD_DEFAULT);
 		alignmentIndentSpinner.setSelection(DesignerPreferences.ALIGNMENT_INDENT_DEFAULT);

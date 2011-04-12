@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
 
 import java.util.Iterator;
@@ -35,6 +35,7 @@ import org.eclipse.swt.custom.CCombo;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -125,11 +126,10 @@ public class CalculationNameEditingSupport extends EditingSupport
 		columns = new String[table.getColumnCount() + 1];
 		columns[0] = "type_here";
 		int i = 1;
-		Iterator<Column> it = table.getColumnsSortedByName();
+		Iterator<Column> it = EditorUtil.getTableColumns(table);
 		while (it.hasNext())
 		{
-			Column column = it.next();
-			columns[i++] = column.getName();
+			columns[i++] = it.next().getName();
 		}
 	}
 
