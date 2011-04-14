@@ -1091,11 +1091,13 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		private ElementsScopeCreator()
 		{
 			typeNames.put(IScriptScriptButtonMethods.class.getSimpleName(), "RuntimeButton");
-			typeNames.put(IScriptDataButtonMethods.class.getSimpleName(), "RuntimeButton");
 			addType("RuntimeButton", IScriptScriptButtonMethods.class);
+			typeNames.put(IScriptDataButtonMethods.class.getSimpleName(), "RuntimeDataButton");
+			addType("RuntimeDataButton", IScriptScriptButtonMethods.class);
 			typeNames.put(IScriptScriptLabelMethods.class.getSimpleName(), "RuntimeLabel");
-			typeNames.put(IScriptDataLabelMethods.class.getSimpleName(), "RuntimeLabel");
 			addType("RuntimeLabel", IScriptScriptLabelMethods.class);
+			typeNames.put(IScriptDataLabelMethods.class.getSimpleName(), "RuntimeDataLabel");
+			addType("RuntimeDataLabel", IScriptScriptLabelMethods.class);
 			typeNames.put(IScriptDataPasswordMethods.class.getSimpleName(), "RuntimePassword");
 			addType("RuntimePassword", IScriptDataPasswordMethods.class);
 			typeNames.put(IScriptTextEditorMethods.class.getSimpleName(), "RuntimeHtmlArea");
