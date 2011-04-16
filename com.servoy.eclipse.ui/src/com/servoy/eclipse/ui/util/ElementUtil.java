@@ -21,11 +21,9 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -39,7 +37,6 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
@@ -53,7 +50,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
-import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.plugins.IClientPluginAccess;
@@ -389,52 +385,6 @@ public class ElementUtil
 		}
 	}
 
-	public static List<IFormElement> getAllOverlappingFormElements(Form flattenedForm, IFormElement formElement)
-	{
-		String groupID = formElement.getGroupID();
-		if (groupID == null)
-		{
-			return getOverlappingFormElements(flattenedForm, formElement);
-		}
-
-		List<IFormElement> overlappingElements = null;
-		Set<UUID> uuids = null;
-		Iterator<IPersist> it = flattenedForm.getAllObjects();
-		while (it.hasNext())
-		{
-			IPersist element = it.next();
-			if (element instanceof IFormElement)
-			{
-				IFormElement itFormElement = (IFormElement)element;
-				String elementGroupID = itFormElement.getGroupID();
-				if (elementGroupID != null && elementGroupID.equals(groupID))
-				{
-					List<IFormElement> elementList = getOverlappingFormElements(flattenedForm, itFormElement);
-					if (elementList != null)
-					{
-						for (IFormElement fe : elementList)
-						{
-							if (uuids == null)
-							{
-								uuids = new HashSet<UUID>();
-							}
-							if (uuids.add(fe.getUUID()))
-							{
-								if (overlappingElements == null)
-								{
-									overlappingElements = new ArrayList<IFormElement>();
-								}
-								overlappingElements.add(fe);
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return overlappingElements;
-	}
-
 	public static List<IFormElement> getOverlappingFormElements(Form flattenedForm, IFormElement formElement)
 	{
 		List<IFormElement> overlappingElements = null;
@@ -467,48 +417,32 @@ public class ElementUtil
 		return overlappingElements;
 	}
 
-	public static IFormElement getElementWithHighestZIndex(FormElementGroup formElementgroup)
-	{
-		IFormElement formElement = null;
-		Iterator<IFormElement> groupElementIterator = formElementgroup.getElements();
-		while (groupElementIterator.hasNext())
-		{
-			IFormElement fe = groupElementIterator.next();
-			if (formElement == null || fe.getFormIndex() > formElement.getFormIndex())
-			{
-				formElement = fe;
-			}
-		}
-
-		return formElement;
-	}
-
-	public static HashMap<UUID, BaseComponent> getNeighbours(Form form, HashMap<UUID, BaseComponent> foundList, HashMap<UUID, BaseComponent> elementsToVisit)
+	public static HashMap<UUID, IFormElement> getNeighbours(Form form, HashMap<UUID, IFormElement> foundList, HashMap<UUID, IFormElement> elementsToVisit)
 	{
 		if (form == null || foundList == null || elementsToVisit == null || elementsToVisit.isEmpty()) return null;
 
-		HashMap<UUID, BaseComponent> newFoundList = new HashMap<UUID, BaseComponent>(foundList);
+		HashMap<UUID, IFormElement> newFoundList = new HashMap<UUID, IFormElement>(foundList);
 
-		HashMap<UUID, BaseComponent> newElements = new HashMap<UUID, BaseComponent>();
+		HashMap<UUID, IFormElement> newElements = new HashMap<UUID, IFormElement>();
 
-		HashMap<UUID, BaseComponent> returnList = null;
+		HashMap<UUID, IFormElement> returnList = null;
 
 		Iterator<IPersist> it = form.getAllObjects();
 		while (it.hasNext())
 		{
 			IPersist element = it.next();
-			if (element instanceof BaseComponent)
+			if (element instanceof IFormElement)
 			{
 				if (newFoundList.containsKey(element.getUUID())) continue;
-				for (BaseComponent bc : elementsToVisit.values())
+				for (IFormElement bc : elementsToVisit.values())
 				{
 					if (elementsIntersect(element, bc))
 					{
-						newFoundList.put(element.getUUID(), (BaseComponent)element);
-						newElements.put(element.getUUID(), (BaseComponent)element);
-						List<BaseComponent> groupMemebers = getGroupMembers(form, (BaseComponent)element);
+						newFoundList.put(element.getUUID(), (IFormElement)element);
+						newElements.put(element.getUUID(), (IFormElement)element);
+						List<IFormElement> groupMemebers = getGroupMembers(form, (IFormElement)element);
 						if (groupMemebers == null) break;
-						for (BaseComponent neighbour : groupMemebers)
+						for (IFormElement neighbour : groupMemebers)
 						{
 							if (!newFoundList.containsKey(neighbour.getUUID()))
 							{
@@ -528,27 +462,27 @@ public class ElementUtil
 		return returnList;
 	}
 
-	public static HashMap<UUID, BaseComponent> getImmediateNeighbours(Form form, HashMap<UUID, BaseComponent> elementsToVisit)
+	public static HashMap<UUID, IFormElement> getImmediateNeighbours(Form form, HashMap<UUID, IFormElement> elementsToVisit)
 	{
 		if (elementsToVisit == null || form == null || elementsToVisit.isEmpty()) return null;
 
-		HashMap<UUID, BaseComponent> returnList = new HashMap<UUID, BaseComponent>(elementsToVisit);
+		HashMap<UUID, IFormElement> returnList = new HashMap<UUID, IFormElement>(elementsToVisit);
 
 		Iterator<IPersist> it = form.getAllObjects();
 		while (it.hasNext())
 		{
 			IPersist element = it.next();
-			if (element instanceof BaseComponent)
+			if (element instanceof IFormElement)
 			{
-				for (BaseComponent bc : elementsToVisit.values())
+				for (IFormElement bc : elementsToVisit.values())
 				{
 					if (elementsIntersect(element, bc))
 					{
-						if (!returnList.containsKey(element.getUUID())) returnList.put(element.getUUID(), (BaseComponent)element);
-						List<BaseComponent> groupMemebers = getGroupMembers(form, (BaseComponent)element);
+						if (!returnList.containsKey(element.getUUID())) returnList.put(element.getUUID(), (IFormElement)element);
+						List<IFormElement> groupMemebers = getGroupMembers(form, (IFormElement)element);
 						if (groupMemebers != null)
 						{
-							for (BaseComponent neighbour : groupMemebers)
+							for (IFormElement neighbour : groupMemebers)
 							{
 								if (!returnList.containsKey(neighbour.getUUID())) returnList.put(neighbour.getUUID(), neighbour);
 							}
@@ -561,20 +495,20 @@ public class ElementUtil
 		return returnList;
 	}
 
-	public static List<BaseComponent> getGroupMembers(Form form, BaseComponent element)
+	public static List<IFormElement> getGroupMembers(Form form, IFormElement element)
 	{
-		String groupID = (String)element.getProperty(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName());
+		String groupID = element.getGroupID();
 		if (groupID == null) return null;
 
-		ArrayList<BaseComponent> returnList = new ArrayList<BaseComponent>();
+		ArrayList<IFormElement> returnList = new ArrayList<IFormElement>();
 
 		Iterator<IPersist> it = form.getAllObjects();
 		while (it.hasNext())
 		{
 			IPersist currentElement = it.next();
-			if (currentElement instanceof BaseComponent)
+			if (currentElement instanceof IFormElement)
 			{
-				String currentGroupID = (String)(((BaseComponent)currentElement).getProperty(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName()));
+				String currentGroupID = ((IFormElement)currentElement).getGroupID();
 				if (currentGroupID != null && !currentElement.getUUID().equals(element) && currentGroupID.equals(groupID)) returnList.add((BaseComponent)currentElement);
 			}
 		}

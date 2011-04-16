@@ -38,7 +38,6 @@ import com.servoy.eclipse.designer.editor.commands.DesignerSelectionAction;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.util.ElementUtil;
-import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
@@ -46,16 +45,16 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.UUID;
 
 /**
- * @author lorand
+ * @author alorincz
  *
  */
 public class ZOrderAction extends DesignerSelectionAction
 {
 
-	public static final String ID_Z_ORDER_BRING_TO_FRONT = "z_order_bring_to_front";
-	public static final String ID_Z_ORDER_SEND_TO_BACK = "z_order_send_to_back";
-	public static final String ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP = "z_order_bring_to_front_one_step";
-	public static final String ID_Z_ORDER_SEND_TO_BACK_ONE_STEP = "z_order_send_to_back_one_step";
+	public static final String ID_Z_ORDER_BRING_TO_FRONT = "z_order_bring_to_front"; //$NON-NLS-1$
+	public static final String ID_Z_ORDER_SEND_TO_BACK = "z_order_send_to_back"; //$NON-NLS-1$
+	public static final String ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP = "z_order_bring_to_front_one_step"; //$NON-NLS-1$
+	public static final String ID_Z_ORDER_SEND_TO_BACK_ONE_STEP = "z_order_send_to_back_one_step"; //$NON-NLS-1$
 
 	private static class OrderableElement
 	{
@@ -68,10 +67,10 @@ public class ZOrderAction extends DesignerSelectionAction
 		public OrderableElement(Object element, boolean needsAdjustement)
 		{
 			this.element = element;
-			if (element instanceof BaseComponent)
+			if (element instanceof IFormElement)
 			{
-				this.zIndex = ((BaseComponent)element).getFormIndex();
-				id = ((BaseComponent)element).getUUID();
+				this.zIndex = ((IFormElement)element).getFormIndex();
+				id = ((IFormElement)element).getUUID();
 				nrOfSubElements = 1;
 			}
 			else if (element instanceof FormElementGroup)
@@ -84,7 +83,7 @@ public class ZOrderAction extends DesignerSelectionAction
 					if (fe.getFormIndex() > zIndex)
 					{
 						this.zIndex = fe.getFormIndex();
-						id = ((BaseComponent)fe).getUUID();
+						id = (fe).getUUID();
 					}
 					nrOfSubElements++;
 				}
@@ -95,29 +94,29 @@ public class ZOrderAction extends DesignerSelectionAction
 		@Override
 		public boolean equals(Object o)
 		{
-			if (o instanceof BaseComponent && element instanceof BaseComponent) return ((BaseComponent)element).getUUID().equals(((BaseComponent)o).getUUID());
+			if (o instanceof IFormElement && element instanceof IFormElement) return ((IFormElement)element).getUUID().equals(((IFormElement)o).getUUID());
 			else if (o instanceof FormElementGroup && element instanceof FormElementGroup) return ((FormElementGroup)element).getGroupID().equals(
 				((FormElementGroup)o).getGroupID());
 
 			return false;
 		}
 
-		public HashMap<UUID, BaseComponent> getElements()
+		public HashMap<UUID, IFormElement> getElements()
 		{
-			HashMap<UUID, BaseComponent> returnList = null;
-			if (element instanceof BaseComponent)
+			HashMap<UUID, IFormElement> returnList = null;
+			if (element instanceof IFormElement)
 			{
-				returnList = new HashMap<UUID, BaseComponent>(1);
-				returnList.put(((BaseComponent)element).getUUID(), (BaseComponent)element);
+				returnList = new HashMap<UUID, IFormElement>(1);
+				returnList.put(((IFormElement)element).getUUID(), (IFormElement)element);
 			}
 			else if (element instanceof FormElementGroup)
 			{
-				returnList = new HashMap<UUID, BaseComponent>();
+				returnList = new HashMap<UUID, IFormElement>();
 				Iterator<IFormElement> it = ((FormElementGroup)element).getElements();
 				while (it.hasNext())
 				{
 					IFormElement fe = it.next();
-					returnList.put(fe.getUUID(), (BaseComponent)fe);
+					returnList.put(fe.getUUID(), fe);
 				}
 			}
 
@@ -282,7 +281,7 @@ public class ZOrderAction extends DesignerSelectionAction
 
 		for (Object o : models)
 		{
-			if (o instanceof BaseComponent || o instanceof FormElementGroup)
+			if (o instanceof IFormElement || o instanceof FormElementGroup)
 			{
 				OrderableElement oe = new OrderableElement(o, true);
 				elementsToAdjust.put(oe.id, oe);
@@ -293,7 +292,7 @@ public class ZOrderAction extends DesignerSelectionAction
 		{
 			if (!oe.needsAdjustement) continue;
 
-			HashMap<UUID, BaseComponent> neighbours = ElementUtil.getNeighbours(flattenedForm, oe.getElements(), oe.getElements());
+			HashMap<UUID, IFormElement> neighbours = ElementUtil.getNeighbours(flattenedForm, oe.getElements(), oe.getElements());
 
 			ArrayList<OrderableElement> unorderedNeighbours = groupElements(neighbours, form);
 			Collections.sort(unorderedNeighbours, OrdarableElementZOrderComparator.INSTANCE);
@@ -322,19 +321,11 @@ public class ZOrderAction extends DesignerSelectionAction
 				tmpAdjustedElements = orderForBringForward(unorderedNeighbours);
 			}
 
-//			int index = 0;
-//			for (OrderableElement ae : tmpAdjustedElements)
-//			{
-//				if (elementsToAdjust.containsKey(ae.id)) ae.needsAdjustement = false;
-//				ae.zIndex = index++;
-//				adjustedElements.add(ae);
-//			}
-
 			int index = 0;
 			for (OrderableElement ae : tmpAdjustedElements)
 			{
 				if (elementsToAdjust.containsKey(ae.id)) ae.needsAdjustement = false;
-				if (ae.element instanceof BaseComponent) ae.zIndex = index++;
+				if (ae.element instanceof IFormElement) ae.zIndex = index++;
 				else
 				{
 					ae.zIndex = index + ae.nrOfSubElements - 1;
@@ -347,18 +338,18 @@ public class ZOrderAction extends DesignerSelectionAction
 		return adjustedElements;
 	}
 
-	private static ArrayList<OrderableElement> groupElements(HashMap<UUID, BaseComponent> elementList, Form form)
+	private static ArrayList<OrderableElement> groupElements(HashMap<UUID, IFormElement> elementList, Form form)
 	{
 		if (elementList == null) return null;
 
 		ArrayList<OrderableElement> returnList = new ArrayList<OrderableElement>();
 
-		List<BaseComponent> simpleElements = new ArrayList<BaseComponent>();
+		List<IFormElement> simpleElements = new ArrayList<IFormElement>();
 		Set<String> groupsSet = new LinkedHashSet<String>();
 
-		for (BaseComponent bc : elementList.values())
+		for (IFormElement bc : elementList.values())
 		{
-			String groupID = (String)bc.getProperty(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName());
+			String groupID = bc.getGroupID();
 			if (groupID == null) simpleElements.add(bc);
 			else
 			{
@@ -366,7 +357,7 @@ public class ZOrderAction extends DesignerSelectionAction
 			}
 		}
 
-		for (BaseComponent bc : simpleElements)
+		for (IFormElement bc : simpleElements)
 		{
 			OrderableElement oe = new OrderableElement(bc, false);
 			returnList.add(oe);
@@ -421,25 +412,25 @@ public class ZOrderAction extends DesignerSelectionAction
 				{
 					requests = new HashMap<EditPart, Request>();
 				}
-				if (oe.element instanceof BaseComponent) requests.put(editPartMap.get(oe.element), new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY,
+				if (oe.element instanceof IFormElement) requests.put(editPartMap.get(oe.element), new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY,
 					StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), Integer.valueOf(oe.zIndex), "")); //$NON-NLS-1$
 				else
 				{
-					ArrayList<BaseComponent> groupElements = new ArrayList<BaseComponent>(oe.getElements().values());
-					Collections.sort(groupElements, new Comparator<BaseComponent>()
+					ArrayList<IFormElement> groupElements = new ArrayList<IFormElement>(oe.getElements().values());
+					Collections.sort(groupElements, new Comparator<IFormElement>()
 					{
 						/*
 						 * (non-Javadoc)
 						 * 
 						 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 						 */
-						public int compare(BaseComponent o1, BaseComponent o2)
+						public int compare(IFormElement o1, IFormElement o2)
 						{
 							return o1.getFormIndex() - o2.getFormIndex();
 						}
 					});
 					int index = oe.zIndex - oe.nrOfSubElements + 1;
-					for (BaseComponent bc : groupElements)
+					for (IFormElement bc : groupElements)
 					{
 						requests.put(editPartMap.get(bc), new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY,
 							StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), Integer.valueOf(index++), "")); //$NON-NLS-1$
