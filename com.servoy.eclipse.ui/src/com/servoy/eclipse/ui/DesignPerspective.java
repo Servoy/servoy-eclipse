@@ -18,7 +18,6 @@ package com.servoy.eclipse.ui;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -65,15 +64,6 @@ public class DesignPerspective implements IPerspectiveFactory
 		IFolderLayout right = layout.createFolder("right", IPageLayout.RIGHT, 0.8f, editorArea); //$NON-NLS-1$
 		right.addView(IPageLayout.ID_OUTLINE);
 		right.addView(IPageLayout.ID_PROP_SHEET);
-		IWorkbenchActivitySupport workbenchActivitySupport = PlatformUI.getWorkbench().getActivitySupport();
-		Set<String> enabledActivityIds = workbenchActivitySupport.getActivityManager().getEnabledActivityIds();
-		Set<String> enabledActivities = enabledActivityIds;
-		Set<String> temporaryActivities = new LinkedHashSet<String>();
-		temporaryActivities.add("org.eclipse.javaDevelopment"); //$NON-NLS-1$
-		temporaryActivities.add("com.servoy.eclipse.activities.javaDevelopment"); //$NON-NLS-1$
-		workbenchActivitySupport.setEnabledActivityIds(temporaryActivities);
-		right.addView(TestRunnerViewPart_NAME);
-		workbenchActivitySupport.setEnabledActivityIds(enabledActivities);
 
 		IFolderLayout bottom = layout.createFolder("bottom", IPageLayout.BOTTOM, 0.8f, editorArea); //$NON-NLS-1$
 		bottom.addView(IPageLayout.ID_PROBLEM_VIEW);
