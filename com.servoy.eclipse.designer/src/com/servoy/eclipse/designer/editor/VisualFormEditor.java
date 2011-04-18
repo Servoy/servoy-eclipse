@@ -100,7 +100,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	public static final RequestType REQ_PLACE_TEMPLATE = new RequestType(RequestType.TYPE_TEMPLATE);
 	public static final String REQ_DISTRIBUTE = "VFE_DISTRIBUTE"; //$NON-NLS-1$
 	public static final String REQ_SET_PROPERTY = "VFE_SET_PROPERTY"; //$NON-NLS-1$
-	public static final String VFE_PAGE_ID = "PageID";
+	public static final String VFE_PAGE_ID = "PageID"; //$NON-NLS-1$
 
 	private Form form; // The working model.
 	private ServoyProject servoyProject; // the solution wrapper
@@ -114,12 +114,12 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	private boolean closing = false;
 
 	@Override
-	public void init(IEditorSite site, IEditorInput input) throws PartInitException
+	public void init(IEditorSite site, IEditorInput editorInput) throws PartInitException
 	{
-		final IPersist filePersist;
+		IEditorInput input = editorInput;
 		if (input instanceof FileEditorInput)
 		{
-			filePersist = SolutionDeserializer.findPersistFromFile(((FileEditorInput)input).getFile());
+			IPersist filePersist = SolutionDeserializer.findPersistFromFile(((FileEditorInput)input).getFile());
 			if (filePersist != null)
 			{
 				Form f = (Form)filePersist.getAncestor(IRepository.FORMS);
@@ -129,14 +129,11 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 				}
 			}
 		}
-		else
-		{
-			filePersist = null;
-		}
+
 		// Check input.
 		if (!(input instanceof PersistEditorInput))
 		{
-			throw new PartInitException(getClass().getName() + " does not support input " + input.getClass());
+			throw new PartInitException(getClass().getName() + " does not support input " + input.getClass() + " of " + input);
 		}
 
 		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(this);
@@ -293,8 +290,8 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 					}
 					if (marker.getAttribute(IMarker.CHAR_START, -1) != -1)
 					{
-						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(), Utils.getAsInteger(marker.getAttribute(
-							IMarker.CHAR_START, -1)));
+						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(),
+							Utils.getAsInteger(marker.getAttribute(IMarker.CHAR_START, -1)));
 					}
 					if (elementUuid != null)
 					{
