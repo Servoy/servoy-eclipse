@@ -74,13 +74,13 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.plugins.ClientPluginAccessProvider;
 import com.servoy.j2db.plugins.IPluginAccess;
 import com.servoy.j2db.plugins.IPluginManager;
-import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IApplicationServer;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.smart.J2DBClient;
 import com.servoy.j2db.smart.dataui.SwingItemFactory;
+import com.servoy.j2db.smart.plugins.PluginManager;
 import com.servoy.j2db.ui.ItemFactory;
 import com.servoy.j2db.util.ITaskExecuter;
 import com.servoy.j2db.util.PersistHelper;
@@ -530,7 +530,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 					pluginManager = new PluginManager(this)
 					{
 						/**
-						 * @see com.servoy.j2db.plugins.PluginManager#checkIfInitialized()
+						 * @see com.servoy.j2db.smart.plugins.PluginManager#checkIfInitialized()
 						 */
 						@Override
 						protected void checkIfInitialized()

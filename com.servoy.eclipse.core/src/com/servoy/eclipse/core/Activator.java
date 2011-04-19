@@ -94,11 +94,11 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.MethodTemplatesFactory;
 import com.servoy.j2db.plugins.IMethodTemplatesProvider;
-import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
 import com.servoy.j2db.smart.J2DBClient;
+import com.servoy.j2db.smart.plugins.PluginManager;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
