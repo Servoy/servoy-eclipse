@@ -30,8 +30,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.wicket.Request;
@@ -96,6 +96,7 @@ import org.eclipse.ui.progress.UIJob;
 
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
+import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
@@ -841,6 +842,13 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 													}
 												}
 												references.add(editorReference);
+											}
+											else if (editorInput instanceof PersistEditorInput)
+											{
+												if (!((PersistEditorInput)editorInput).getSolutionName().equals(activeProject.toString()))
+												{
+													references.add(editorReference);
+												}
 											}
 										}
 										catch (PartInitException e)
