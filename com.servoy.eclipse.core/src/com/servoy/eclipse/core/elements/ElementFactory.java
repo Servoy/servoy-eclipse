@@ -27,9 +27,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -563,8 +563,36 @@ public class ElementFactory
 			return null;
 		}
 		Dimension maxDimension = null;
-		java.awt.Point tabspos = tabPanel.getLocation();
-		tabspos = new java.awt.Point(tabspos.x, tabspos.y + 30);
+		java.awt.Point tabspos;
+		// look at the positions of the existing tabls to add more
+		Iterator<IPersist> existingTabs = tabPanel.getTabs();
+		java.awt.Point loc1 = null;
+		java.awt.Point loc2 = null;
+		while (existingTabs.hasNext())
+		{
+			loc1 = loc2;
+			loc2 = ((Tab)existingTabs.next()).getLocation();
+		}
+		if (loc2 == null)
+		{
+			// no other tabs yet
+			java.awt.Point tabloc = tabPanel.getLocation();
+			tabspos = new java.awt.Point(tabloc.x - 80, tabloc.y + 30);
+		}
+		else
+		{
+			if (loc1 == null)
+			{
+				// only 1 tab, start from that one
+				tabspos = loc2;
+			}
+			else
+			{
+				// follow the line of the last 2 existing tabs
+				tabspos = new java.awt.Point(2 * loc2.x - loc1.x - 80, 2 * loc2.y - loc1.y);
+			}
+		}
+
 		if (relatedForms != null)
 		{
 			for (Object element : relatedForms)
@@ -574,9 +602,9 @@ public class ElementFactory
 					RelatedForm rf = (RelatedForm)element;
 					try
 					{
+						tabspos = new java.awt.Point(tabspos.x + 80, tabspos.y);
 						Tab tab = tabPanel.createNewTab(rf.form.getName(), Utils.stringJoin(rf.relations, '.'), rf.form);
 						tab.setLocation(tabspos);
-						tabspos = new java.awt.Point(tabspos.x + 80, tabspos.y);
 						tab.setSize(new java.awt.Dimension(80, 20));
 						if (tabs != null)
 						{
@@ -727,8 +755,8 @@ public class ElementFactory
 		JSONObject json = new JSONObject();
 		if (templateType == StringResource.FORM_TEMPLATE)
 		{
-			json.put(Template.PROP_FORM, cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false,
-				repository), null));
+			json.put(Template.PROP_FORM,
+				cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, repository), null));
 		}
 		json.put(Template.PROP_LOCATION, PersistHelper.createPointString(location));
 		JSONArray elements = new JSONArray();
@@ -879,8 +907,8 @@ public class ElementFactory
 				IPersist persist = SolutionDeserializer.deserializePersist(repository, parent, persist_json_map, object, null, null, null, false);
 				for (Map.Entry<IPersist, JSONObject> entry : persist_json_map.entrySet())
 				{
-					SolutionDeserializer.setPersistValues(repository, entry.getKey(), resolveCleanedProperties((Form)entry.getKey().getAncestor(
-						IRepository.FORMS), entry.getValue()));
+					SolutionDeserializer.setPersistValues(repository, entry.getKey(),
+						resolveCleanedProperties((Form)entry.getKey().getAncestor(IRepository.FORMS), entry.getValue()));
 				}
 				persists.put(persist, name);
 			}
