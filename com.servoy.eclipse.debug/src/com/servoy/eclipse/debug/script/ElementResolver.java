@@ -31,12 +31,12 @@ import org.eclipse.dltk.javascript.typeinfo.IElementResolver;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
+import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Method;
 import org.eclipse.dltk.javascript.typeinfo.model.Property;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
-import org.eclipse.dltk.javascript.typeinfo.model.TypeRef;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -271,7 +271,7 @@ public class ElementResolver implements IElementResolver
 			if (globalsValueCollection != null)
 			{
 				IValueCollection collection = ValueCollectionFactory.createScopeValueCollection();
-				ValueCollectionFactory.copyInto(collection, globalsValueCollection);
+				ValueCollectionFactory.copyInto(collection, ValueCollectionFactory.makeImmutable(globalsValueCollection));
 				collection = ValueCollectionProvider.getGlobalModulesValueCollection(context, fs, collection);
 				if (collection != null)
 				{
@@ -398,11 +398,15 @@ public class ElementResolver implements IElementResolver
 
 		if (type != null)
 		{
-			TypeRef typeRef = TypeUtil.ref(type);
+			JSType typeRef = null;
 			if (constantTypeNames.containsKey(name))
 			{
-				typeRef.setStatic(true);
+				typeRef = TypeUtil.classType(type);
 				image = TypeCreator.CONSTANT;
+			}
+			else
+			{
+				typeRef = TypeUtil.ref(type);
 			}
 			Property property = TypeCreator.createProperty(name, readOnly, typeRef, type.getDescription(), image, resource);
 			property.setHideAllowed(hideAllowed);

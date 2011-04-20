@@ -35,6 +35,7 @@ import javax.swing.Icon;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
 import org.eclipse.dltk.javascript.typeinfo.ITypeProvider;
+import org.eclipse.dltk.javascript.typeinfo.TypeMode;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
@@ -170,8 +171,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	 * 
 	 * @see com.servoy.eclipse.debug.script.TypeCreator#getType(org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext, java.lang.String)
 	 */
-	@Override
-	public Type getType(ITypeInfoContext context, String typeName)
+	public Type getType(ITypeInfoContext context, TypeMode mode, String typeName)
 	{
 		if (typeName.startsWith("Packages.") || typeName.startsWith("java.") || typeName.startsWith("javax."))
 		{
@@ -201,7 +201,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVASCRIPT);
-			type.setSuperType(context.getKnownType("Function"));
+			type.setSuperType(context.getKnownType("Function", mode));
 			context.markInvariant(type);
 			return type;
 		}
@@ -319,7 +319,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		super.initalize();
 	}
 
-	public Set<String> listTypes(ITypeInfoContext context, String prefix)
+	public Set<String> listTypes(ITypeInfoContext context, TypeMode mode, String prefix)
 	{
 		Set<String> names = getTypeNames(prefix);
 		if (prefix != null)
@@ -766,7 +766,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				FlattenedSolution fs = getFlattenedSolution(context);
 				String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
 				Form form = fs.getForm(config);
-				if (form == null) return context.getKnownType("Form");
+				if (form == null) return context.getKnownType("Form", TypeMode.CODE);
 				Form formToUse = fs.getFlattenedForm(form);
 				Type superForm = context.getType("Form");
 				if (form.getExtendsFormID() > 0)
@@ -1129,7 +1129,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			typeNames.put(IScriptPortalComponentMethods.class.getSimpleName(), "RuntimePortal");
 			addType("RuntimePortal", IScriptPortalComponentMethods.class);
 
-			addAnonymousClassType("BaseComponent", IScriptBaseMethods.class);
+			addAnonymousClassType("RuntimeComponent", IScriptBaseMethods.class);
 		}
 
 		public Type createType(ITypeInfoContext context, String typeName)
@@ -1143,7 +1143,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				EList<Member> members = type.getMembers();
 				members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "Array with all the element names", SPECIAL_PROPERTY));
 				members.add(createProperty(context, "length", true, "Number", PROPERTY));
-				Property arrayProp = createProperty(context, "[]", true, "BaseComponent", PROPERTY);
+				Property arrayProp = createProperty(context, "[]", true, "RuntimeComponent", PROPERTY);
 				arrayProp.setVisible(false);
 				members.add(arrayProp);
 				// quickly add this one to the static types.
