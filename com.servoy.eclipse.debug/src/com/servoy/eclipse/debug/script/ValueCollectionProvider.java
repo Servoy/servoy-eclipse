@@ -42,7 +42,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			String scriptPath = SolutionSerializer.getScriptPath(form, false);
 			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
 			collection = ValueCollectionFactory.createValueCollection();
-			ValueCollectionFactory.copyInto(collection, getValueCollection(file));
+			ValueCollectionFactory.copyInto(collection, ValueCollectionFactory.makeImmutable(getValueCollection(file)));
 			return getSuperFormContext(context, form, collection);
 		}
 		return null;
@@ -53,6 +53,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	 * @param form
 	 * @param formCollection
 	 */
+	@SuppressWarnings("restriction")
 	private IValueCollection getSuperFormContext(ITypeInfoContext context, Form form, IValueCollection formCollection)
 	{
 		if (form.getExtendsFormID() > 0)
@@ -81,7 +82,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				}
 				for (int i = superCollections.size(); --i >= 0;)
 				{
-					ValueCollectionFactory.copyInto(superForms, superCollections.get(i));
+					ValueCollectionFactory.copyInto(superForms, ValueCollectionFactory.makeImmutable(superCollections.get(i)));
 				}
 				if (formCollection != null) ValueCollectionFactory.copyInto(superForms, formCollection);
 				return superForms;
@@ -107,7 +108,8 @@ public class ValueCollectionProvider implements IMemberEvaluator
 					IValueCollection globalsValeuCollection = getGlobalModulesValueCollection(context, fs, ValueCollectionFactory.createValueCollection());
 					if (fullGlobalScope.get().booleanValue())
 					{
-						ValueCollectionFactory.copyInto(globalsValeuCollection, getValueCollection((IFile)context.getModelElement().getResource()));
+						ValueCollectionFactory.copyInto(globalsValeuCollection,
+							ValueCollectionFactory.makeImmutable(getValueCollection((IFile)context.getModelElement().getResource())));
 					}
 					return globalsValeuCollection;
 				}
@@ -141,7 +143,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				IValueCollection moduleCollection = getValueCollection(file);
 				if (moduleCollection != null)
 				{
-					ValueCollectionFactory.copyInto(collection, moduleCollection);
+					ValueCollectionFactory.copyInto(collection, ValueCollectionFactory.makeImmutable(moduleCollection));
 				}
 			}
 		}
