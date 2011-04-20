@@ -52,7 +52,6 @@ import org.eclipse.dltk.javascript.ast.ObjectInitializer;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.Statement;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
-import org.eclipse.dltk.javascript.ast.Type;
 import org.eclipse.dltk.javascript.ast.UnaryOperation;
 import org.eclipse.dltk.javascript.ast.VariableDeclaration;
 import org.eclipse.dltk.javascript.ast.VariableStatement;
@@ -806,7 +805,6 @@ public class SolutionDeserializer
 		{
 			List<JSONObject> jsonObjects = new ArrayList<JSONObject>();
 			JavaScriptParser parser = new JavaScriptParser();
-			parser.setTypeInformationEnabled(true);
 			final ArrayList<IProblem> problems = new ArrayList<IProblem>();
 			IProblemReporter reporter = new IProblemReporter()
 			{
@@ -915,8 +913,7 @@ public class SolutionDeserializer
 				Identifier ident = field.getIdentifier();
 				json.put(SolutionSerializer.PROP_NAME, ident.getName());
 				Expression code = field.getInitializer();
-				Type type = field.getType();
-				if (type == null && commentString.length() > 0)
+				if (commentString.length() > 0)
 				{
 					int typeIndex = commentString.indexOf(SolutionSerializer.TYPEKEY);
 					if (typeIndex != -1)
@@ -980,11 +977,7 @@ public class SolutionDeserializer
 					}
 					else if (code instanceof NullExpression)
 					{
-						if (type != null)
-						{
-							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(type.getName()));
-						}
-						else if (newField)
+						if (newField)
 						{
 							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
 						}
@@ -1050,12 +1043,6 @@ public class SolutionDeserializer
 						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
 					}
 					json.put("defaultValue", value_part); //$NON-NLS-1$
-				}
-				else if (type != null)
-				{
-					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(type.getName()));
-					json.putOpt(JS_TYPE_JSON_ATTRIBUTE, type.getName());
-					json.put("defaultValue", "");
 				}
 				else
 				{
@@ -1146,12 +1133,6 @@ public class SolutionDeserializer
 						break;
 					}
 				}
-				Type type = function.getReturnType();
-				if (type != null)
-				{
-					json.putOpt(JS_TYPE_JSON_ATTRIBUTE, type.getName());
-				}
-
 
 				json.put(ARGUMENTS_JSON_ATTRIBUTE, (Object)function.getArguments());
 				json.put(LINE_NUMBER_OFFSET_JSON_ATTRIBUTE, linenr);
@@ -1479,7 +1460,7 @@ public class SolutionDeserializer
 //									continue outer;
 //								}
 //							}
-							ArgumentType argumentType = ArgumentType.valueOf(argument.getType() != null ? argument.getType().getName() : null);
+							ArgumentType argumentType = ArgumentType.valueOf(null);
 							methodArguments[i] = new MethodArgument(name, argumentType, null); // TODO: parse description
 						}
 					}

@@ -107,6 +107,7 @@ import com.servoy.eclipse.ui.util.FilteredEntity;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.ContentSpec;
+import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.I18NUtil;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -120,7 +121,6 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
-import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.property.I18NMessagesModel;
 import com.servoy.j2db.property.I18NMessagesModel.I18NMessagesModelEntry;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
@@ -720,7 +720,6 @@ public class I18NExternalizeDialog extends Dialog
 			{
 				String jsContent = workspaceFileAccess.getUTF8Contents(jsPath);
 				JavaScriptParser parser = new JavaScriptParser();
-				parser.setTypeInformationEnabled(true);
 				final ArrayList<IProblem> problems = new ArrayList<IProblem>();
 				IProblemReporter reporter = new IProblemReporter()
 				{
