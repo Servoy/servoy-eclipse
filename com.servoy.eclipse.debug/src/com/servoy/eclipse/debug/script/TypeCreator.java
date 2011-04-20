@@ -516,7 +516,26 @@ public abstract class TypeCreator
 								{
 									Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
 									parameter.setName(param.getName());
-									if (param.getType() != null) parameter.setType(context.getTypeRef(SolutionExplorerListContentProvider.TYPES.get(param.getType())));
+									if (param.getType() != null)
+									{
+										String paramType = param.getType();
+										if (paramType.endsWith("[]"))
+										{
+											String componentType = paramType.substring(0, paramType.length() - 2);
+											if (ITypeNames.OBJECT.equals(componentType))
+											{
+												parameter.setType(context.getTypeRef(ITypeNames.ARRAY));
+											}
+											else
+											{
+												parameter.setType(TypeUtil.arrayOf(context.getTypeRef(SolutionExplorerListContentProvider.TYPES.get(componentType))));
+											}
+										}
+										else
+										{
+											parameter.setType(context.getTypeRef(SolutionExplorerListContentProvider.TYPES.get(paramType)));
+										}
+									}
 									parameter.setKind(param.isOptional() ? param.isVarArgs() ? ParameterKind.VARARGS : ParameterKind.OPTIONAL
 										: ParameterKind.NORMAL);
 									parameters.add(parameter);
