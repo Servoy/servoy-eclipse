@@ -833,9 +833,9 @@ public class DesignApplication implements IApplication, IMessagesCallback
 	}
 
 
-	public boolean showURL(String url, String target, String target_options, int timeout_ms)
+	public boolean showURL(String url, String target, String target_options, int timeout_ms, boolean closeDialogs)
 	{
-		return getClient().showURL(url, target, target_options, timeout_ms);
+		return getClient().showURL(url, target, target_options, timeout_ms, closeDialogs);
 	}
 
 	/**
