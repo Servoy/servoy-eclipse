@@ -61,8 +61,9 @@ public class ValueListSearch extends AbstractPersistSearch
 		TextSearchEngine.create().search(scope, collector, Pattern.compile(valueList.getUUID().toString()), monitor);
 
 		scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.js" }, true);
-		TextSearchEngine.create().search(scope, collector, Pattern.compile("getValueList.*\"" + valueList.getName() + "\""), monitor);
-		TextSearchEngine.create().search(scope, collector, Pattern.compile("getValueList.*'" + valueList.getName() + "'"), monitor);
+		TextSearchEngine.create().search(scope, collector, Pattern.compile("etValueList.*\"" + valueList.getName() + "\""), monitor);
+		TextSearchEngine.create().search(scope, collector, Pattern.compile("etValueList.*'" + valueList.getName() + "'"), monitor);
+
 
 		return Status.OK_STATUS;
 	}
