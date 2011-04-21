@@ -231,7 +231,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			{
 				return context.getTypeRef(ITypeNames.NUMBER);
 			}
-			else if (type == String.class)
+			else if (type == String.class || type == CharSequence.class)
 			{
 				return context.getTypeRef(ITypeNames.STRING);
 			}
@@ -277,7 +277,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			for (int i = 0; i < parameterTypes.length; i++)
 			{
 				Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
-				parameter.setName(parameterTypes[i].getSimpleName() + " arg" + i);
+				parameter.setName("arg" + i);
 				parameter.setType(getJSType(parameterTypes[i], context));
 				parameters.add(parameter);
 			}
