@@ -23,6 +23,8 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 
 import com.servoy.eclipse.designer.actions.ZOrderAction;
+import com.servoy.eclipse.designer.editor.BasePersistGraphicalEditPart;
+import com.servoy.eclipse.designer.editor.GroupGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 
@@ -39,6 +41,18 @@ public abstract class ZOrderActionDelegateHandler extends DesignerSelectionActio
 	{
 		super(VisualFormEditor.REQ_SET_PROPERTY);
 		this.zOrderId = zOrderId;
+	}
+
+	@Override
+	protected boolean calculateEnabled()
+	{
+		List selectedObjects = getSelectedObjects();
+		for (Object o : selectedObjects)
+		{
+			if (o instanceof BasePersistGraphicalEditPart || o instanceof GroupGraphicalEditPart) return true;
+		}
+
+		return false;
 	}
 
 	@Override

@@ -32,6 +32,8 @@ import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.ui.IWorkbenchPart;
 
+import com.servoy.eclipse.designer.editor.BasePersistGraphicalEditPart;
+import com.servoy.eclipse.designer.editor.GroupGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
 import com.servoy.eclipse.designer.editor.commands.DesignerSelectionAction;
@@ -493,5 +495,17 @@ public class ZOrderAction extends DesignerSelectionAction
 	protected Map<EditPart, Request> createRequests(List<EditPart> selected)
 	{
 		return createZOrderRequests(getId(), selected);
+	}
+
+	@Override
+	protected boolean calculateEnabled()
+	{
+		List selectedObjects = getSelectedObjects();
+		for (Object o : selectedObjects)
+		{
+			if (o instanceof BasePersistGraphicalEditPart || o instanceof GroupGraphicalEditPart) return true;
+		}
+
+		return false;
 	}
 }
