@@ -33,6 +33,7 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.util.Pair;
 
 /**
  * Label provider for Servoy form in outline view.
@@ -55,17 +56,23 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 		{
 			return Activator.getDefault().loadImageFromBundle("element.gif");
 		}
+		if (element instanceof Pair)
+		{
+			return (Image)((Pair)element).getRight();
+		}
 		if (element instanceof PersistContext)
 		{
-			String image = ElementUtil.getPersistImageName(((PersistContext)element).getPersist());
-			if (image == null)
+			Pair<String, Image> elementNameAndImage = ElementUtil.getPersistNameAndImage(((PersistContext)element).getPersist());
+			String imageName = elementNameAndImage.getLeft();
+			if (imageName == null)
 			{
-				image = "element.gif";
+				imageName = "element.gif";
 			}
-			Image img = Activator.getDefault().loadImageFromOldLocation(image);
+			else return elementNameAndImage.getRight();
+			Image img = Activator.getDefault().loadImageFromOldLocation(imageName);
 			if (img == null)
 			{
-				img = Activator.getDefault().loadImageFromBundle(image);
+				img = Activator.getDefault().loadImageFromBundle(imageName);
 			}
 			return img;
 		}
@@ -86,6 +93,10 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 		if (element == FormOutlineContentProvider.ELEMENTS)
 		{
 			return "elements";
+		}
+		if (element instanceof Pair)
+		{
+			return (String)((Pair)element).getLeft();
 		}
 		if (element instanceof PersistContext)
 		{

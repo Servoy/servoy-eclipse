@@ -19,16 +19,16 @@ package com.servoy.eclipse.designer.outline;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.graphics.Image;
 
 import com.servoy.eclipse.designer.property.PersistContext;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
@@ -40,6 +40,7 @@ import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SortedList;
 
 /**
@@ -64,41 +65,62 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 	{
 		if (parentElement == ELEMENTS || parentElement == PARTS)
 		{
+			HashSet<Object> availableCategories = null;
 			try
 			{
 				Form flattenedForm = (Form)getFlattenedWhenForm(form);
-				List<Object> nodes = new ArrayList<Object>();
-				Set<FormElementGroup> groups = new HashSet<FormElementGroup>();
 				if (flattenedForm != null)
 				{
+					availableCategories = new HashSet<Object>();
 					for (IPersist persist : flattenedForm.getAllObjectsAsList())
 					{
 						if (persist instanceof ScriptVariable || persist instanceof IScriptProvider)
 						{
 							continue;
 						}
-						if (parentElement == ELEMENTS && persist instanceof IFormElement && ((IFormElement)persist).getGroupID() != null)
+						if (parentElement == ELEMENTS && persist instanceof IFormElement)
 						{
-							FormElementGroup group = new FormElementGroup(((IFormElement)persist).getGroupID(), ModelUtils.getEditingFlattenedSolution(form),
-								form);
-							if (groups.add(group))
-							{
-								nodes.add(group);
-							}
-							continue;
+							availableCategories.add(ElementUtil.getPersistNameAndImage(persist));
 						}
-						if ((parentElement == PARTS) != (persist instanceof Part))
+						if ((parentElement == PARTS) && (persist instanceof Part))
 						{
-							continue;
+							availableCategories.add(new PersistContext(persist, form));
 						}
-						nodes.add(new PersistContext(persist, form));
 					}
 				}
-				return (parentElement == ELEMENTS) ? new SortedList(PersistContextNameComparator.INSTANCE, nodes).toArray() : nodes.toArray();
+				return availableCategories.toArray();
 			}
 			catch (RepositoryException e)
 			{
-				ServoyLog.logError("Could not create flattened form for form " + form, e);
+				ServoyLog.logError("Could not create flattened form for form " + form, e); //$NON-NLS-1$
+			}
+		}
+		else if (parentElement instanceof Pair)
+		{
+			try
+			{
+				Form flattenedForm = (Form)getFlattenedWhenForm(form);
+				List<Object> nodes = new ArrayList<Object>();
+				if (flattenedForm != null)
+				{
+					for (IPersist persist : flattenedForm.getAllObjectsAsList())
+					{
+						if (persist instanceof ScriptVariable || persist instanceof IScriptProvider || persist instanceof Part)
+						{
+							continue;
+						}
+						if (persist instanceof IFormElement)
+						{
+							Pair<String, Image> nameAndImage = ElementUtil.getPersistNameAndImage(persist);
+							if (nameAndImage.equals(parentElement)) nodes.add(new PersistContext(persist, form));
+						}
+					}
+				}
+				return new SortedList(PersistContextNameComparator.INSTANCE, nodes).toArray();
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError("Could not create flattened form for form " + form, e); //$NON-NLS-1$
 			}
 		}
 		else if (parentElement instanceof PersistContext && ((PersistContext)parentElement).getPersist() instanceof AbstractBase)
@@ -110,20 +132,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			}
 			return list.toArray();
 		}
-		else if (parentElement instanceof FormElementGroup)
-		{
-			List<PersistContext> list = new ArrayList<PersistContext>();
-			Iterator<IFormElement> elements = ((FormElementGroup)parentElement).getElements();
-			while (elements.hasNext())
-			{
-				IFormElement element = elements.next();
-				if (element instanceof IPersist)
-				{
-					list.add(new PersistContext((IPersist)element, form));
-				}
-			}
-			return new SortedList(PersistContextNameComparator.INSTANCE, list).toArray();
-		}
+
 		return null;
 	}
 
@@ -134,19 +143,16 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			IPersist persist = ((PersistContext)element).getPersist();
 			if (persist != null)
 			{
-				if (persist instanceof IFormElement && ((IFormElement)persist).getGroupID() != null)
-				{
-					return new FormElementGroup(((IFormElement)persist).getGroupID(), ModelUtils.getEditingFlattenedSolution(persist),
-						(Form)persist.getParent());
-				}
-
 				if (persist.getParent() == form)
 				{
 					if (persist instanceof Part)
 					{
 						return PARTS;
 					}
-					return ELEMENTS;
+					else if (persist instanceof IFormElement)
+					{
+						return ElementUtil.getPersistNameAndImage(persist);
+					}
 				}
 				// form element of sub element (Tab panel)
 				try
@@ -159,6 +165,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 				}
 			}
 		}
+		else if (element instanceof Pair) return ELEMENTS;
 		return null;
 	}
 
@@ -169,7 +176,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
 			if (editingFlattenedSolution == null)
 			{
-				ServoyLog.logError("Could not get project for form " + persist, null);
+				ServoyLog.logError("Could not get project for form " + persist, null); //$NON-NLS-1$
 				return null;
 			}
 			return editingFlattenedSolution.getFlattenedForm(persist);
@@ -181,6 +188,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 	{
 		return element == ELEMENTS ||
 			element == PARTS ||
+			element instanceof Pair ||
 			element instanceof FormElementGroup ||
 			(element instanceof PersistContext && ((PersistContext)element).getPersist() instanceof AbstractBase && (((AbstractBase)((PersistContext)element).getPersist())).getAllObjects().hasNext());
 	}

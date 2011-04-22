@@ -26,7 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.swt.graphics.Image;
+
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFactory;
@@ -74,6 +77,7 @@ import com.servoy.j2db.ui.IScriptSplitPaneMethods;
 import com.servoy.j2db.ui.IScriptTextAreaMethods;
 import com.servoy.j2db.ui.IScriptTextEditorMethods;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -97,6 +101,25 @@ public class ElementUtil
 		{
 			return o1.getFormIndex() - o2.getFormIndex();
 		}
+	}
+
+	public static Pair<String, Image> getPersistNameAndImage(IPersist persist)
+	{
+		String name = getPersistImageName(persist);
+		Image image = null;
+		if (name != null)
+		{
+			image = Activator.getDefault().loadImageFromOldLocation(name);
+			if (image == null)
+			{
+				image = Activator.getDefault().loadImageFromBundle(name);
+			}
+
+			name = name.substring(0, name.lastIndexOf('.'));
+			if (name.lastIndexOf('s') != name.length() - 1) name = name + 's';
+		}
+
+		return new Pair<String, Image>(name, image);
 	}
 
 	public static String getPersistImageName(IPersist persist)
