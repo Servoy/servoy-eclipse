@@ -357,6 +357,42 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		return super.createDynamicType(context, typeNameClassName, fullTypeName);
 	}
 
+	/**
+	 * @param recordType
+	 * @return
+	 */
+	private static Type getRecordType(String type)
+	{
+		String recordType = type;
+		if (recordType.startsWith("{") && recordType.endsWith("}"))
+		{
+			recordType = recordType.substring(1, recordType.length() - 1);
+		}
+		Type t = TypeInfoModelFactory.eINSTANCE.createType();
+		t.setKind(TypeKind.JAVA);
+
+		EList<Member> members = t.getMembers();
+		StringTokenizer st = new StringTokenizer(recordType, ",");
+		while (st.hasMoreTokens())
+		{
+			String typeName = "Object";
+			String propertyName = st.nextToken();
+			int typeSeparator = propertyName.indexOf(':');
+			if (typeSeparator != -1)
+			{
+				typeName = propertyName.substring(typeSeparator + 1);
+				propertyName = propertyName.substring(0, typeSeparator);
+			}
+
+			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+			property.setName(propertyName);
+			property.setType(TypeUtil.ref(typeName));
+			members.add(property);
+		}
+		return t;
+	}
+
+
 	private class GlobalScopeCreator implements IScopeTypeCreator
 	{
 		/**
@@ -585,31 +621,10 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			if (index != -1 && fullTypeName.endsWith(">"))
 			{
 				String recordType = fullTypeName.substring(index + 1, fullTypeName.length() - 1);
-				if (recordType.startsWith("{") && recordType.endsWith("}")) recordType = recordType.substring(1, recordType.length() - 1);
-				Type t = TypeInfoModelFactory.eINSTANCE.createType();
+				Type t = getRecordType(recordType);
 				t.setName(fullTypeName);
-				t.setKind(TypeKind.JAVA);
 				t.setSuperType(type);
 				type = t;
-
-				EList<Member> members = t.getMembers();
-				StringTokenizer st = new StringTokenizer(recordType, ",");
-				while (st.hasMoreTokens())
-				{
-					String typeName = "Object";
-					String propertyName = st.nextToken();
-					int typeSeparator = propertyName.indexOf(':');
-					if (typeSeparator != -1)
-					{
-						typeName = propertyName.substring(typeSeparator + 1);
-						propertyName = propertyName.substring(0, typeSeparator);
-					}
-
-					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
-					property.setName(propertyName);
-					property.setType(TypeUtil.ref(typeName));
-					members.add(property);
-				}
 			}
 			return type;
 		}
@@ -1460,6 +1475,16 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			traits.add(dataproviderType);
 			traits.add(relationsType);
 			return compositeType;
+		}
+		else if (config.startsWith("{") && config.endsWith("}"))
+		{
+			Type type = getRecordType(config);
+			type.setName(fullTypeName);
+			type.setKind(TypeKind.JAVA);
+			type.getMembers().addAll(members);
+			type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
+			type.setSuperType(superType);
+			return type;
 		}
 		else
 		{
