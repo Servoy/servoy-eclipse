@@ -32,8 +32,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProjectNature;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
@@ -42,6 +48,7 @@ import org.eclipse.dltk.javascript.ast.ArrayInitializer;
 import org.eclipse.dltk.javascript.ast.BooleanLiteral;
 import org.eclipse.dltk.javascript.ast.CallExpression;
 import org.eclipse.dltk.javascript.ast.Comment;
+import org.eclipse.dltk.javascript.ast.ConstStatement;
 import org.eclipse.dltk.javascript.ast.DecimalLiteral;
 import org.eclipse.dltk.javascript.ast.Expression;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
@@ -62,6 +69,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.model.builder.ErrorKeeper;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -839,6 +847,7 @@ public class SolutionDeserializer
 
 			ArrayList<VariableDeclaration> variables = new ArrayList<VariableDeclaration>();
 			ArrayList<FunctionStatement> functionss = new ArrayList<FunctionStatement>();
+			final ArrayList<ConstStatement> constants = new ArrayList<ConstStatement>();
 			List<Statement> statements = script.getStatements();
 			for (ASTNode node : statements)
 			{
@@ -853,9 +862,33 @@ public class SolutionDeserializer
 					{
 						functionss.add((FunctionStatement)exp);
 					}
-
+				}
+				else if (node instanceof ConstStatement)
+				{
+					constants.add((ConstStatement)node);
 				}
 			}
+
+			final IFile resource = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(Path.fromOSString(file.getAbsolutePath()));
+			WorkspaceJob job = new WorkspaceJob("constant variable marker checks")
+			{
+
+				@Override
+				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+				{
+					ServoyBuilder.deleteMarkers(resource, ServoyBuilder.CONSTANTS_USED_MARKER_TYPE);
+
+					for (Statement consts : constants)
+					{
+						ServoyBuilder.addMarker(resource, ServoyBuilder.CONSTANTS_USED_MARKER_TYPE, "Constants are not supported", consts.sourceEnd(),
+							IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, resource.getProjectRelativePath().toString());
+					}
+					return org.eclipse.core.runtime.Status.OK_STATUS;
+				}
+			};
+			job.setRule(resource);
+			job.setSystem(true);
+			job.schedule();
 
 			ArrayList<Line> lines = new ArrayList<Line>();
 			int counter = 0;

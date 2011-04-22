@@ -246,6 +246,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION = _PREFIX + ".formWithDatasourceInLoginSolution"; //$NON-NLS-1$
 	public static final String MULTIPLE_METHODS_ON_SAME_ELEMENT = _PREFIX + ".multipleMethodsInfo"; //$NON-NLS-1$
 	public static final String UNRESOLVED_RELATION_UUID = _PREFIX + ".unresolvedRelationUuid"; //$NON-NLS-1$
+	public static final String CONSTANTS_USED_MARKER_TYPE = _PREFIX + ".constantsUsed"; //$NON-NLS-1$
 
 	private SAXParserFactory parserFactory;
 	private final HashSet<String> referencedProjectsSet = new HashSet<String>();
