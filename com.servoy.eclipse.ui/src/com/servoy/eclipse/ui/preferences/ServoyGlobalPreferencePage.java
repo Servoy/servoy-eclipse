@@ -48,6 +48,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private Button saveEditorStateButton;
 	private Button openFirstFormDesignerButton;
 	private Button showColumnsInDbOrderButton;
+	private Button showColumnsInAlphabeticOrderButton;
 	private Label enhancedSecurityLabel;
 
 	/*
@@ -133,8 +134,15 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		wizardOptionsContainer.setLayout(new GridLayout(1, false));
 		wizardOptionsContainer.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
-		showColumnsInDbOrderButton = new Button(wizardOptionsContainer, SWT.CHECK);
-		showColumnsInDbOrderButton.setText("Show table columns in database defined order");
+		Group columnsOrderGroup = new Group(wizardOptionsContainer, SWT.NONE);
+		columnsOrderGroup.setText("Show table columns");
+		columnsOrderGroup.setLayout(new GridLayout(1, true));
+
+		showColumnsInAlphabeticOrderButton = new Button(columnsOrderGroup, SWT.RADIO);
+		showColumnsInAlphabeticOrderButton.setText("in alphabetic order (key columns first)");
+
+		showColumnsInDbOrderButton = new Button(columnsOrderGroup, SWT.RADIO);
+		showColumnsInDbOrderButton.setText("in database defined order");
 
 		initializeFields();
 
@@ -149,6 +157,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		saveEditorStateButton.setSelection(prefs.getSaveEditorState());
 		openFirstFormDesignerButton.setSelection(prefs.getOpenFirstFormDesigner());
 		showColumnsInDbOrderButton.setSelection(prefs.getShowColumnsInDbOrder());
+		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
 	}
 
 	@Override
@@ -158,6 +167,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		saveEditorStateButton.setSelection(DesignerPreferences.SAVE_EDITOR_STATE_DEFAULT);
 		openFirstFormDesignerButton.setSelection(DesignerPreferences.OPEN_FIRST_FORM_DESIGNER_DEFAULT);
 		showColumnsInDbOrderButton.setSelection(DesignerPreferences.SHOW_COLUMNS_IN_DB_ORDER_DEFAULT);
+		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
 
 		super.performDefaults();
 	}
