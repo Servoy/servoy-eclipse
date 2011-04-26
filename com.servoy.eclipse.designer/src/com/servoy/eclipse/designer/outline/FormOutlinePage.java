@@ -24,6 +24,7 @@ import java.util.List;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.ui.actions.ActionRegistry;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -72,6 +73,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 	public void createControl(Composite parent)
 	{
 		super.createControl(parent);
+
 		getTreeViewer().setContentProvider(new FormOutlineContentProvider(form));
 		getTreeViewer().setLabelProvider(new FormContextDelegateLabelProvider(FormOutlineLabelprovider.INSTANCE, form));
 		getTreeViewer().setInput(form);
@@ -174,4 +176,11 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 		}
 	}
 
+	@Override
+	public void setActionBars(IActionBars actionBars)
+	{
+		super.setActionBars(actionBars);
+		IMenuManager menuManager = actionBars.getMenuManager();
+		menuManager.add(GroupedOutlineViewToggleAction.addListener(getTreeViewer()));
+	}
 }

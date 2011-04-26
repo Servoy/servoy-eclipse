@@ -19,8 +19,12 @@ package com.servoy.eclipse.designer.outline;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
@@ -55,13 +59,89 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 	public static final Object PARTS = new Object();
 
 	private final Form form;
+	private static boolean displayType;
 
 	public FormOutlineContentProvider(Form form)
 	{
 		this.form = form;
+		IEclipsePreferences preferences = new InstanceScope().getNode("com.servoy.eclipse.designer"); //$NON-NLS-1$
+		displayType = preferences.getBoolean("OutlineViewMode", false); //$NON-NLS-1$
 	}
 
 	public Object[] getChildren(Object parentElement)
+	{
+		if (displayType) return getChildrenGrouped(parentElement);
+		else return getChildrenNonGrouped(parentElement);
+	}
+
+	public Object[] getChildrenNonGrouped(Object parentElement)
+	{
+		if (parentElement == ELEMENTS || parentElement == PARTS)
+		{
+			try
+			{
+				Form flattenedForm = (Form)getFlattenedWhenForm(form);
+				List<Object> nodes = new ArrayList<Object>();
+				Set<FormElementGroup> groups = new HashSet<FormElementGroup>();
+				if (flattenedForm != null)
+				{
+					for (IPersist persist : flattenedForm.getAllObjectsAsList())
+					{
+						if (persist instanceof ScriptVariable || persist instanceof IScriptProvider)
+						{
+							continue;
+						}
+						if (parentElement == ELEMENTS && persist instanceof IFormElement && ((IFormElement)persist).getGroupID() != null)
+						{
+							FormElementGroup group = new FormElementGroup(((IFormElement)persist).getGroupID(), ModelUtils.getEditingFlattenedSolution(form),
+								form);
+							if (groups.add(group))
+							{
+								nodes.add(group);
+							}
+							continue;
+						}
+						if ((parentElement == PARTS) != (persist instanceof Part))
+						{
+							continue;
+						}
+						nodes.add(new PersistContext(persist, form));
+					}
+				}
+				return (parentElement == ELEMENTS) ? new SortedList(PersistContextNameComparator.INSTANCE, nodes).toArray() : nodes.toArray();
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError("Could not create flattened form for form " + form, e);
+			}
+		}
+		else if (parentElement instanceof PersistContext && ((PersistContext)parentElement).getPersist() instanceof AbstractBase)
+		{
+			List<PersistContext> list = new ArrayList<PersistContext>();
+			for (IPersist persist : ((AbstractBase)((PersistContext)parentElement).getPersist()).getAllObjectsAsList())
+			{
+				list.add(new PersistContext(persist, ((PersistContext)parentElement).getContext()));
+			}
+			return list.toArray();
+		}
+		else if (parentElement instanceof FormElementGroup)
+		{
+			List<PersistContext> list = new ArrayList<PersistContext>();
+			Iterator<IFormElement> elements = ((FormElementGroup)parentElement).getElements();
+			while (elements.hasNext())
+			{
+				IFormElement element = elements.next();
+				if (element instanceof IPersist)
+				{
+					list.add(new PersistContext(element, form));
+				}
+			}
+			return new SortedList(PersistContextNameComparator.INSTANCE, list).toArray();
+		}
+		return null;
+	}
+
+	public Object[] getChildrenGrouped(Object parentElement)
 	{
 		if (parentElement == ELEMENTS || parentElement == PARTS)
 		{
@@ -137,6 +217,47 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 	}
 
 	public Object getParent(Object element)
+	{
+		if (displayType) return getGroupedParent(element);
+		else return getParentNonGrouped(element);
+	}
+
+	public Object getParentNonGrouped(Object element)
+	{
+		if (element instanceof PersistContext)
+		{
+			IPersist persist = ((PersistContext)element).getPersist();
+			if (persist != null)
+			{
+				if (persist instanceof IFormElement && ((IFormElement)persist).getGroupID() != null)
+				{
+					return new FormElementGroup(((IFormElement)persist).getGroupID(), ModelUtils.getEditingFlattenedSolution(persist),
+						(Form)persist.getParent());
+				}
+
+				if (persist.getParent() == form)
+				{
+					if (persist instanceof Part)
+					{
+						return PARTS;
+					}
+					return ELEMENTS;
+				}
+				// form element of sub element (Tab panel)
+				try
+				{
+					return new PersistContext(getFlattenedWhenForm(persist.getParent()), ((PersistContext)element).getContext());
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		}
+		return null;
+	}
+
+	public Object getGroupedParent(Object element)
 	{
 		if (element instanceof PersistContext)
 		{
@@ -229,5 +350,15 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			if (name2 == null) return -1;
 			return name1.compareToIgnoreCase(name2);
 		}
+	}
+
+	public static void setDisplayType(boolean grouped)
+	{
+		displayType = grouped;
+	}
+
+	public static boolean getDisplayType()
+	{
+		return displayType;
 	}
 }
