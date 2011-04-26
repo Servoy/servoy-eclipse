@@ -34,6 +34,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProjectNature;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -870,25 +871,41 @@ public class SolutionDeserializer
 			}
 
 			final IFile resource = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(Path.fromOSString(file.getAbsolutePath()));
-			WorkspaceJob job = new WorkspaceJob("constant variable marker checks")
+			boolean runJob = constants.size() > 0;
+			if (!runJob && resource.exists() && resource.getProject().isOpen())
 			{
-
-				@Override
-				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+				try
 				{
-					ServoyBuilder.deleteMarkers(resource, ServoyBuilder.CONSTANTS_USED_MARKER_TYPE);
-
-					for (Statement consts : constants)
-					{
-						ServoyBuilder.addMarker(resource, ServoyBuilder.CONSTANTS_USED_MARKER_TYPE, "Constants are not supported", consts.sourceEnd(),
-							IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, resource.getProjectRelativePath().toString());
-					}
-					return org.eclipse.core.runtime.Status.OK_STATUS;
+					IMarker[] currentMarkers = resource.findMarkers(ServoyBuilder.CONSTANTS_USED_MARKER_TYPE, false, IResource.DEPTH_INFINITE);
+					runJob = currentMarkers != null ? currentMarkers.length > 0 : false;
 				}
-			};
-			job.setRule(resource);
-			job.setSystem(true);
-			job.schedule();
+				catch (CoreException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+			if (runJob)
+			{
+				WorkspaceJob job = new WorkspaceJob("constant variable marker checks")
+				{
+
+					@Override
+					public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+					{
+						ServoyBuilder.deleteMarkers(resource, ServoyBuilder.CONSTANTS_USED_MARKER_TYPE);
+
+						for (Statement consts : constants)
+						{
+							ServoyBuilder.addMarker(resource, ServoyBuilder.CONSTANTS_USED_MARKER_TYPE, "Constants are not supported", consts.sourceEnd(),
+								IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, resource.getProjectRelativePath().toString());
+						}
+						return org.eclipse.core.runtime.Status.OK_STATUS;
+					}
+				};
+				job.setRule(resource);
+				job.setSystem(true);
+				job.schedule();
+			}
 
 			ArrayList<Line> lines = new ArrayList<Line>();
 			int counter = 0;
