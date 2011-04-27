@@ -550,7 +550,35 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 					String solutionName = (String)servoyProject.getSolution().getProperty(StaticContentSpecLoader.PROPERTY_TITLETEXT.getPropertyName());
 					if (solutionName == null) solutionName = servoyProject.getSolution().getName();
-					node.setToolTipText(solutionName + "(" + SolutionMetaData.solutionTypeNames[servoyProject.getSolution().getSolutionType() - 1] + ")"); //$NON-NLS-1$
+					String projectType = null;
+					switch (servoyProject.getSolution().getSolutionType())
+					{
+						case SolutionMetaData.SOLUTION :
+							projectType = SolutionMetaData.solutionTypeNames[0];
+							break;
+						case SolutionMetaData.MODULE :
+							projectType = SolutionMetaData.solutionTypeNames[1];
+							break;
+						case SolutionMetaData.WEB_CLIENT_ONLY :
+							projectType = SolutionMetaData.solutionTypeNames[2];
+							break;
+						case SolutionMetaData.SMART_CLIENT_ONLY :
+							projectType = SolutionMetaData.solutionTypeNames[3];
+							break;
+						case SolutionMetaData.LOGIN_SOLUTION :
+							projectType = SolutionMetaData.solutionTypeNames[4];
+							break;
+						case SolutionMetaData.AUTHENTICATOR :
+							projectType = SolutionMetaData.solutionTypeNames[5];
+							break;
+						case SolutionMetaData.PRE_IMPORT_HOOK :
+							projectType = SolutionMetaData.solutionTypeNames[6];
+							break;
+						case SolutionMetaData.POST_IMPORT_HOOK :
+							projectType = SolutionMetaData.solutionTypeNames[7];
+							break;
+					}
+					node.setToolTipText(solutionName + "(" + projectType + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				else
 				{
@@ -562,7 +590,36 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 					String solutionName = (String)servoyProject.getSolution().getProperty(StaticContentSpecLoader.PROPERTY_TITLETEXT.getPropertyName());
 					if (solutionName == null) solutionName = servoyProject.getSolution().getName();
-					node.setToolTipText(solutionName + "(" + SolutionMetaData.solutionTypeNames[servoyProject.getSolution().getSolutionType() - 1] + ")"); //$NON-NLS-1$
+					String projectType = null;
+
+					switch (servoyProject.getSolution().getSolutionType())
+					{
+						case SolutionMetaData.SOLUTION :
+							projectType = SolutionMetaData.solutionTypeNames[0];
+							break;
+						case SolutionMetaData.MODULE :
+							projectType = SolutionMetaData.solutionTypeNames[1];
+							break;
+						case SolutionMetaData.WEB_CLIENT_ONLY :
+							projectType = SolutionMetaData.solutionTypeNames[2];
+							break;
+						case SolutionMetaData.SMART_CLIENT_ONLY :
+							projectType = SolutionMetaData.solutionTypeNames[3];
+							break;
+						case SolutionMetaData.LOGIN_SOLUTION :
+							projectType = SolutionMetaData.solutionTypeNames[4];
+							break;
+						case SolutionMetaData.AUTHENTICATOR :
+							projectType = SolutionMetaData.solutionTypeNames[5];
+							break;
+						case SolutionMetaData.PRE_IMPORT_HOOK :
+							projectType = SolutionMetaData.solutionTypeNames[6];
+							break;
+						case SolutionMetaData.POST_IMPORT_HOOK :
+							projectType = SolutionMetaData.solutionTypeNames[7];
+							break;
+					}
+					node.setToolTipText(solutionName + "(" + projectType + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		}
@@ -588,8 +645,35 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			String solutionName = (String)((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getProperty(
 				StaticContentSpecLoader.PROPERTY_TITLETEXT.getPropertyName());
 			if (solutionName == null) solutionName = ((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getName();
-			activeSolutionNode.setToolTipText(solutionName +
-				"(" + SolutionMetaData.solutionTypeNames[((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() - 1] + ")"); //$NON-NLS-1$
+			String projectType = null;
+			switch (((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType())
+			{
+				case SolutionMetaData.SOLUTION :
+					projectType = SolutionMetaData.solutionTypeNames[0];
+					break;
+				case SolutionMetaData.MODULE :
+					projectType = SolutionMetaData.solutionTypeNames[1];
+					break;
+				case SolutionMetaData.WEB_CLIENT_ONLY :
+					projectType = SolutionMetaData.solutionTypeNames[2];
+					break;
+				case SolutionMetaData.SMART_CLIENT_ONLY :
+					projectType = SolutionMetaData.solutionTypeNames[3];
+					break;
+				case SolutionMetaData.LOGIN_SOLUTION :
+					projectType = SolutionMetaData.solutionTypeNames[4];
+					break;
+				case SolutionMetaData.AUTHENTICATOR :
+					projectType = SolutionMetaData.solutionTypeNames[5];
+					break;
+				case SolutionMetaData.PRE_IMPORT_HOOK :
+					projectType = SolutionMetaData.solutionTypeNames[6];
+					break;
+				case SolutionMetaData.POST_IMPORT_HOOK :
+					projectType = SolutionMetaData.solutionTypeNames[7];
+					break;
+			}
+			activeSolutionNode.setToolTipText(solutionName + "(" + projectType + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		else
 		{
