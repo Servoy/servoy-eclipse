@@ -83,6 +83,7 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.scripting.IDeprecated;
@@ -546,6 +547,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					node.setEnabled(false);
 					allSolutionChildren.add(node);
 					node.parent = allSolutionsNode;
+
+					String solutionName = (String)servoyProject.getSolution().getProperty(StaticContentSpecLoader.PROPERTY_TITLETEXT.getPropertyName());
+					if (solutionName == null) solutionName = servoyProject.getSolution().getName();
+					node.setToolTipText(solutionName + "(" + SolutionMetaData.solutionTypeNames[servoyProject.getSolution().getSolutionType() - 1] + ")"); //$NON-NLS-1$
 				}
 				else
 				{
@@ -554,6 +559,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					node.setEnabled(false);
 					allSolutionChildren.add(node);
 					node.parent = allSolutionsNode;
+
+					String solutionName = (String)servoyProject.getSolution().getProperty(StaticContentSpecLoader.PROPERTY_TITLETEXT.getPropertyName());
+					if (solutionName == null) solutionName = servoyProject.getSolution().getName();
+					node.setToolTipText(solutionName + "(" + SolutionMetaData.solutionTypeNames[servoyProject.getSolution().getSolutionType() - 1] + ")"); //$NON-NLS-1$
 				}
 			}
 		}
@@ -575,6 +584,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				else databaseManager.unhide();
 			}
 			activeSolutionNode.setDisplayName(name);
+
+			String solutionName = (String)((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getProperty(
+				StaticContentSpecLoader.PROPERTY_TITLETEXT.getPropertyName());
+			if (solutionName == null) solutionName = ((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getName();
+			activeSolutionNode.setToolTipText(solutionName +
+				"(" + SolutionMetaData.solutionTypeNames[((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() - 1] + ")"); //$NON-NLS-1$
 		}
 		else
 		{
