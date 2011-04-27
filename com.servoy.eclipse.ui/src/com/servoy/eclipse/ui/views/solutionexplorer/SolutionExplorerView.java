@@ -1613,13 +1613,16 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					if (problemDecorator != null)
 					{
 						IMarkerDelta[] markersDelta = event.findMarkerDeltas(IMarker.PROBLEM, true);
-						ArrayList<IResource> changedProblemResources = new ArrayList<IResource>();
+						HashSet<IResource> changedProblemResources = new HashSet<IResource>();
 						for (IMarkerDelta md : markersDelta)
 						{
 							IResource r = md.getResource();
 							do
 							{
-								if (changedProblemResources.indexOf(r) == -1) changedProblemResources.add(r);
+								if (!changedProblemResources.add(r))
+								{
+									break;
+								}
 								r = r.getParent();
 							}
 							while (r.getType() != IResource.ROOT);

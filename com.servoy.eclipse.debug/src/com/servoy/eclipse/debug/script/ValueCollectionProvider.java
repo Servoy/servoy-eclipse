@@ -42,7 +42,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			String scriptPath = SolutionSerializer.getScriptPath(form, false);
 			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
 			collection = ValueCollectionFactory.createValueCollection();
-			ValueCollectionFactory.copyInto(collection, ValueCollectionFactory.makeImmutable(getValueCollection(file)));
+			ValueCollectionFactory.copyInto(collection, getValueCollection(file, true));
 			return getSuperFormContext(context, form, collection);
 		}
 		return null;
@@ -68,7 +68,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				{
 					String scriptPath = SolutionSerializer.getScriptPath(superForm, false);
 					IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
-					IValueCollection vc = getValueCollection(file);
+					IValueCollection vc = getValueCollection(file, false);
 					if (vc != null)
 					{
 						Set<String> children = vc.getDirectChildren();
@@ -108,8 +108,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 					IValueCollection globalsValeuCollection = getGlobalModulesValueCollection(context, fs, ValueCollectionFactory.createValueCollection());
 					if (fullGlobalScope.get().booleanValue())
 					{
-						ValueCollectionFactory.copyInto(globalsValeuCollection,
-							ValueCollectionFactory.makeImmutable(getValueCollection((IFile)context.getModelElement().getResource())));
+						ValueCollectionFactory.copyInto(globalsValeuCollection, getValueCollection((IFile)context.getModelElement().getResource(), true));
 					}
 					return globalsValeuCollection;
 				}
@@ -140,10 +139,10 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			{
 				ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(module.getName());
 				IFile file = project.getProject().getFile("globals.js"); //$NON-NLS-1$
-				IValueCollection moduleCollection = getValueCollection(file);
+				IValueCollection moduleCollection = getValueCollection(file, true);
 				if (moduleCollection != null)
 				{
-					ValueCollectionFactory.copyInto(collection, ValueCollectionFactory.makeImmutable(moduleCollection));
+					ValueCollectionFactory.copyInto(collection, moduleCollection);
 				}
 			}
 		}
@@ -159,7 +158,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		}
 	};
 
-	public static IValueCollection getValueCollection(IFile file)
+	public static IValueCollection getValueCollection(IFile file, boolean makeImmutable)
 	{
 		IValueCollection collection = null;
 		try
@@ -178,10 +177,15 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				try
 				{
 					collection = ValueCollectionFactory.createValueCollection(file, false);
-					if (file.getName().equals("globals.js"))
+					if (makeImmutable)
 					{
-						scriptCache.put(file, new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()), collection));
+						collection = ValueCollectionFactory.makeImmutable(collection);
+						if (file.getName().equals("globals.js"))
+						{
+							scriptCache.put(file, new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()), collection));
+						}
 					}
+
 				}
 				finally
 				{
