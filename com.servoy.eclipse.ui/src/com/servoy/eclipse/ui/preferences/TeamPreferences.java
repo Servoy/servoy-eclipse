@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.preferences;
 
 import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -37,6 +38,9 @@ public class TeamPreferences extends PreferencePage implements IWorkbenchPrefere
 {
 	public static final String AUTOMATIC_RESOURCE_SYNCH_PROPERTY = "automaticResourcesSynch";
 	public static final String AUTOMATIC_MODULES_SYNCH_PROPERTY = "automaticModulesSynch";
+
+	public static boolean DEFAULT_AUTOMATIC_RESOURCE_SYNCH = true;
+	public static boolean DEFAULT_AUTOMATIC_MODULES_SYNCH = true;
 
 	private Button chAutomaticResourceSynch;
 	private Button chAutomaticModulesSynch;
@@ -105,23 +109,22 @@ public class TeamPreferences extends PreferencePage implements IWorkbenchPrefere
 
 	private void initializeValues()
 	{
-		Preferences store = Activator.getDefault().getPluginPreferences();
-		chAutomaticResourceSynch.setSelection(store.getBoolean(AUTOMATIC_RESOURCE_SYNCH_PROPERTY));
-		chAutomaticModulesSynch.setSelection(store.getBoolean(AUTOMATIC_MODULES_SYNCH_PROPERTY));
+		IEclipsePreferences eclipsePreferences = Activator.getDefault().getEclipsePreferences();
+		chAutomaticResourceSynch.setSelection(eclipsePreferences.getBoolean(AUTOMATIC_RESOURCE_SYNCH_PROPERTY, DEFAULT_AUTOMATIC_RESOURCE_SYNCH));
+		chAutomaticModulesSynch.setSelection(eclipsePreferences.getBoolean(AUTOMATIC_MODULES_SYNCH_PROPERTY, DEFAULT_AUTOMATIC_MODULES_SYNCH));
 
-		store = com.servoy.eclipse.core.Activator.getDefault().getPluginPreferences();
+		Preferences store = com.servoy.eclipse.core.Activator.getDefault().getPluginPreferences();
 		warnWhenUsingOtherTeamProvidersWithInProcessRep.setSelection(store.getBoolean(TeamShareMonitor.WARN_ON_NON_IN_PROCESS_TEAM_SHARE));
 	}
 
 	private void storeValues()
 	{
-		Preferences store = Activator.getDefault().getPluginPreferences();
-		store.setValue(AUTOMATIC_RESOURCE_SYNCH_PROPERTY, chAutomaticResourceSynch.getSelection());
-		store.setValue(AUTOMATIC_MODULES_SYNCH_PROPERTY, chAutomaticModulesSynch.getSelection());
-		Activator.getDefault().savePluginPreferences();
+		IEclipsePreferences eclipsePreferences = Activator.getDefault().getEclipsePreferences();
+		eclipsePreferences.putBoolean(AUTOMATIC_RESOURCE_SYNCH_PROPERTY, chAutomaticResourceSynch.getSelection());
+		eclipsePreferences.putBoolean(AUTOMATIC_MODULES_SYNCH_PROPERTY, chAutomaticModulesSynch.getSelection());
 
 		TeamShareMonitor tsm = ServoyModelManager.getServoyModelManager().getServoyModel().getTeamShareMonitor();
-		store = com.servoy.eclipse.core.Activator.getDefault().getPluginPreferences();
+		Preferences store = com.servoy.eclipse.core.Activator.getDefault().getPluginPreferences();
 		if (tsm != null)
 		{
 			tsm.setAllowWarningDialog(warnWhenUsingOtherTeamProvidersWithInProcessRep.getSelection());
@@ -136,22 +139,23 @@ public class TeamPreferences extends PreferencePage implements IWorkbenchPrefere
 
 	private void initializeDefaults()
 	{
-		Preferences store = Activator.getDefault().getPluginPreferences();
-		chAutomaticResourceSynch.setSelection(store.getDefaultBoolean(AUTOMATIC_RESOURCE_SYNCH_PROPERTY));
-		chAutomaticModulesSynch.setSelection(store.getDefaultBoolean(AUTOMATIC_MODULES_SYNCH_PROPERTY));
+		chAutomaticResourceSynch.setSelection(DEFAULT_AUTOMATIC_RESOURCE_SYNCH);
+		chAutomaticModulesSynch.setSelection(DEFAULT_AUTOMATIC_MODULES_SYNCH);
 
-		store = com.servoy.eclipse.core.Activator.getDefault().getPluginPreferences();
+		Preferences store = com.servoy.eclipse.core.Activator.getDefault().getPluginPreferences();
 		warnWhenUsingOtherTeamProvidersWithInProcessRep.setSelection(store.getDefaultBoolean(TeamShareMonitor.WARN_ON_NON_IN_PROCESS_TEAM_SHARE));
 	}
 
 	public static boolean isAutomaticResourceSynch()
 	{
 		ServoyResourcesProject servoyResourceProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
-		return Activator.getDefault().getPluginPreferences().getBoolean(AUTOMATIC_RESOURCE_SYNCH_PROPERTY) && servoyResourceProject != null;
+		IEclipsePreferences eclipsePreferences = Activator.getDefault().getEclipsePreferences();
+		return eclipsePreferences.getBoolean(AUTOMATIC_RESOURCE_SYNCH_PROPERTY, DEFAULT_AUTOMATIC_RESOURCE_SYNCH) && servoyResourceProject != null;
 	}
 
 	public static boolean isAutomaticModulesSynch()
 	{
-		return Activator.getDefault().getPluginPreferences().getBoolean(AUTOMATIC_MODULES_SYNCH_PROPERTY);
+		IEclipsePreferences eclipsePreferences = Activator.getDefault().getEclipsePreferences();
+		return eclipsePreferences.getBoolean(AUTOMATIC_MODULES_SYNCH_PROPERTY, DEFAULT_AUTOMATIC_MODULES_SYNCH);
 	}
 }

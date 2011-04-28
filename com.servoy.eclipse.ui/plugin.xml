@@ -275,7 +275,7 @@
             category="com.servoy.eclipse.ui.preference"
             class="com.servoy.eclipse.ui.preferences.TeamPreferences"
             id="com.servoy.eclipse.ui.team"
-            name="Team">
+            name="Team Development">
       </page>
       <page
             category="com.servoy.eclipse.ui.preference"
