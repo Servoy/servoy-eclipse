@@ -273,6 +273,12 @@
       </page>
       <page
             category="com.servoy.eclipse.ui.preference"
+            class="com.servoy.eclipse.ui.preferences.TeamPreferences"
+            id="com.servoy.eclipse.ui.team"
+            name="Team">
+      </page>
+      <page
+            category="com.servoy.eclipse.ui.preference"
             class="com.servoy.eclipse.ui.preferences.SolutionExplorerPreferences"
             id="com.servoy.eclipse.ui.solutionExplorer"
             name="Solution Explorer">

@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.team.core.RepositoryProvider;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.IServoyTeamProvider;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
@@ -42,6 +41,7 @@ import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.ui.actions.Openable;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.preferences.TeamPreferences;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Solution;
@@ -74,9 +74,9 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 					{
 						RepositoryProvider solutionRP = RepositoryProvider.getProvider(projectNature.getProject());
 
-						if (solutionRP instanceof IServoyTeamProvider)
+						if (solutionRP != null)
 						{
-							if (((IServoyTeamProvider)solutionRP).isAutomaticResourceSynch())
+							if (TeamPreferences.isAutomaticResourceSynch())
 							{
 								ServoyResourcesProject servoyResourcesProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 
@@ -88,7 +88,7 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 								}
 							}
 
-							if (((IServoyTeamProvider)solutionRP).isAutomaticModulesSynch())
+							if (TeamPreferences.isAutomaticModulesSynch())
 							{
 								ServoyProject[] servoyModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 
