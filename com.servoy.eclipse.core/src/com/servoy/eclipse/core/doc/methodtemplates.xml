@@ -11,7 +11,7 @@
     </methodtemplate>
   </event>
   <event name="onAfterDeleteMethodID">
-    <methodtemplate name="afterDeleteRecord" addtodo="true">
+    <methodtemplate name="afterRecordDelete" addtodo="true">
       <description><![CDATA[Record after-delete trigger]]></description>
       <arguments>
         <methodargument name="record" type="JSRecord"><![CDATA[record that is deleted]]></methodargument>
@@ -19,7 +19,7 @@
     </methodtemplate>
   </event>
   <event name="onAfterInsertMethodID">
-    <methodtemplate name="afterInsertRecord" addtodo="true">
+    <methodtemplate name="afterRecordInsert" addtodo="true">
       <description><![CDATA[Record after-insert trigger]]></description>
       <arguments>
         <methodargument name="record" type="JSRecord"><![CDATA[record that is inserted]]></methodargument>
@@ -27,7 +27,7 @@
     </methodtemplate>
   </event>
   <event name="onAfterUpdateMethodID">
-    <methodtemplate name="afterUpdateRecord" addtodo="true">
+    <methodtemplate name="afterRecordUpdate" addtodo="true">
       <description><![CDATA[Record after-update trigger]]></description>
       <arguments>
         <methodargument name="record" type="JSRecord"><![CDATA[record that is updated]]></methodargument>
