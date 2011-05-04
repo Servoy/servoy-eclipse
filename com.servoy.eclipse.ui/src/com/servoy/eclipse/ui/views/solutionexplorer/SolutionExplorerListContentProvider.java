@@ -95,7 +95,7 @@ import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.scripting.DeclaringClassJavaMembers;
 import com.servoy.j2db.scripting.FormScope;
-import com.servoy.j2db.scripting.GroupScriptObject;
+import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.IPrefixedConstantsObject;
@@ -554,7 +554,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			else if (type == UserNodeType.FORM_ELEMENTS_GROUP)
 			{
 				Object[] real = (Object[])un.getRealObject();
-				lm = getJSMethods(GroupScriptObject.class, "elements." + ((FormElementGroup)real[0]).getGroupID(), null,
+				lm = getJSMethods(RuntimeGroup.class, "elements." + ((FormElementGroup)real[0]).getGroupID(), null,
 					UserNodeType.FORM_ELEMENTS_ITEM_METHOD, null, null);// TODO fix multiple anonymous groups
 			}
 			else if (type == UserNodeType.FORM_ELEMENTS_ITEM)

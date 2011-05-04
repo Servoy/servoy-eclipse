@@ -85,7 +85,7 @@ import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IPluginManager;
-import com.servoy.j2db.scripting.GroupScriptObject;
+import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.JSApplication;
@@ -1205,7 +1205,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 										String groupName = FormElementGroup.getName(formElement.getGroupID());
 										if (groupName != null)
 										{
-											members.add(createProperty(groupName, true, getElementType(context, GroupScriptObject.class), null, PROPERTY));
+											members.add(createProperty(groupName, true, getElementType(context, RuntimeGroup.class), null, PROPERTY));
 										}
 									}
 								}
