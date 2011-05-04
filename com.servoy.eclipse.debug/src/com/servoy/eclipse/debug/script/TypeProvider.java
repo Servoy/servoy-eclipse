@@ -87,7 +87,8 @@ import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IPluginManager;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
-import com.servoy.j2db.scripting.IScriptObject;
+import com.servoy.j2db.scripting.IReturnedTypesProvider;
+import com.servoy.j2db.scripting.IScriptable;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSSecurity;
@@ -308,7 +309,12 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			{
 				try
 				{
-					registerConstantsForScriptObject(clientPlugin.getScriptObject());
+					// for now cast to deprecated interface
+					IScriptable scriptObject = clientPlugin.getScriptObject();
+					if (scriptObject instanceof IReturnedTypesProvider)
+					{
+						registerConstantsForScriptObject((IReturnedTypesProvider)scriptObject);
+					}
 				}
 				catch (Throwable e)
 				{
@@ -697,9 +703,10 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			List<IClientPlugin> clientPlugins = pluginManager.getPlugins(IClientPlugin.class);
 			for (IClientPlugin clientPlugin : clientPlugins)
 			{
-				IScriptObject scriptObject = null;
+				IScriptable scriptObject = null;
 				try
 				{
+					// for now cast to deprecated interface
 					scriptObject = clientPlugin.getScriptObject();
 				}
 				catch (Throwable t)

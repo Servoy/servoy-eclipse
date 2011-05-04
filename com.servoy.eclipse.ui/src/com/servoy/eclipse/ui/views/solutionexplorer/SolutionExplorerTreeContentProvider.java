@@ -61,8 +61,8 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EnableServerAction;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.IApplication;
 import com.servoy.j2db.FormManager.HistoryProvider;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
@@ -833,7 +833,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				IClientPlugin plugin = it.next();
 				try
 				{
-					IScriptObject scriptObject = plugin.getScriptObject();
+					// for now cast to deprecated interface
+					IScriptObject scriptObject = (IScriptObject)plugin.getScriptObject();
 					if (scriptObject != null)
 					{
 						Icon icon = plugin.getImage();

@@ -121,7 +121,8 @@ public class DesignComponentFactory extends ComponentFactory
 							else splitPane.getSplitPane().setRightComponent(label);
 						}
 
-						splitPane.js_setDividerLocation((orient == TabPanel.SPLIT_HORIZONTAL ? splitPane.getSize().width / 2 : splitPane.getSize().height / 2));
+						splitPane.setRuntimeDividerLocation((orient == TabPanel.SPLIT_HORIZONTAL ? splitPane.getSize().width / 2
+							: splitPane.getSize().height / 2));
 						retval = splitPane;
 					}
 					else
