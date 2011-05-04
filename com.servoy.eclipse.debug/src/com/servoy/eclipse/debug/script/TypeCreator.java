@@ -1046,7 +1046,7 @@ public abstract class TypeCreator
 				{
 					doc = Utils.stringReplace(doc, "\n", "<br/>"); //$NON-NLS-1$ //$NON-NLS-2$
 					doc = Utils.stringReplace(doc, "%%prefix%%", ""); //$NON-NLS-1$ //$NON-NLS-2$
-					doc = Utils.stringReplace(doc, "%%elementName%%", name); //$NON-NLS-1$
+					doc = Utils.stringReplace(doc, "%%elementName%%", "elements.elem"); //$NON-NLS-1$
 				}
 			}
 			docCache.putIfAbsent(cacheKey, doc);
