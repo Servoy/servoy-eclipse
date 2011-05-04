@@ -18,6 +18,8 @@ package com.servoy.eclipse.designer.editor;
 
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -65,7 +67,17 @@ public class GroupGraphicalEditPart extends AbstractGraphicalEditPart implements
 	@Override
 	protected List<IFormElement> getModelChildren()
 	{
-		return Utils.asList(getGroup().getElements());
+		List<IFormElement> returnList = Utils.asList(getGroup().getElements());
+		Collections.sort(returnList, new Comparator<IFormElement>()
+		{
+
+			public int compare(IFormElement o1, IFormElement o2)
+			{
+				return o1.getFormIndex() - o2.getFormIndex();
+			}
+
+		});
+		return returnList;
 	}
 
 	@Override
