@@ -88,7 +88,9 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.scripting.IDeprecated;
 import com.servoy.j2db.scripting.IPrefixedConstantsObject;
+import com.servoy.j2db.scripting.IReturnedTypesProvider;
 import com.servoy.j2db.scripting.IScriptObject;
+import com.servoy.j2db.scripting.IScriptable;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSI18N;
@@ -834,7 +836,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				try
 				{
 					// for now cast to deprecated interface
-					IScriptObject scriptObject = (IScriptObject)plugin.getScriptObject();
+					IScriptable scriptObject = plugin.getScriptObject();
 					if (scriptObject != null)
 					{
 						Icon icon = plugin.getImage();
@@ -854,8 +856,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						{
 							plugins.add(node);
 							node.parent = pluginNode;
-							Class< ? >[] clss = scriptObject.getAllReturnedTypes();
-							addReturnTypeNodes(node, clss);
+							if (scriptObject instanceof IReturnedTypesProvider)
+							{
+								Class< ? >[] clss = ((IReturnedTypesProvider)scriptObject).getAllReturnedTypes();
+								addReturnTypeNodes(node, clss);
+							}
 						}
 					}
 				}
