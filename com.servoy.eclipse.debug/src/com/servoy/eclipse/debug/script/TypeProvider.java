@@ -85,7 +85,6 @@ import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IPluginManager;
-import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.IReturnedTypesProvider;
 import com.servoy.j2db.scripting.IScriptable;
@@ -94,6 +93,7 @@ import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
+import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.ui.IDepricatedScriptTabPanelMethods;
@@ -706,8 +706,11 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				IScriptable scriptObject = null;
 				try
 				{
-					// for now cast to deprecated interface
-					scriptObject = clientPlugin.getScriptObject();
+					Method method = clientPlugin.getClass().getMethod("getScriptObject", (Class[])null);
+					if (method != null)
+					{
+						scriptObject = (IScriptable)method.invoke(clientPlugin, (Object[])null);
+					}
 				}
 				catch (Throwable t)
 				{

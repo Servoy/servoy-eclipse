@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -835,8 +836,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				IClientPlugin plugin = it.next();
 				try
 				{
-					// for now cast to deprecated interface
-					IScriptable scriptObject = plugin.getScriptObject();
+					IScriptable scriptObject = null;
+					Method method = plugin.getClass().getMethod("getScriptObject", (Class[])null);
+					if (method != null)
+					{
+						scriptObject = (IScriptable)method.invoke(plugin, (Object[])null);
+					}
 					if (scriptObject != null)
 					{
 						Icon icon = plugin.getImage();
