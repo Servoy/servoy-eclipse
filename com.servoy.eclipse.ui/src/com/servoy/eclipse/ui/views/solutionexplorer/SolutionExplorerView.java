@@ -190,7 +190,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.EditSecurityAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EditVariableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EnableServerAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ExpandNodeAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NCreateFromDBAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NReadFromDBAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NExternalizeAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NWriteToDBAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportMediaAction;
@@ -2261,7 +2261,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		importSolutionAction = new OpenWizardAction(ImportSolutionWizard.class, Activator.loadImageDescriptorFromOldLocations("import_wiz.gif"), //$NON-NLS-1$
 			"Import solution"); //$NON-NLS-1$
 		i18nExternalizeAction = new I18NExternalizeAction();
-		i18nCreateFromDBAction = new I18NCreateFromDBAction();
+		i18nCreateFromDBAction = new I18NReadFromDBAction();
 		i18nWriteToDBAction = new I18NWriteToDBAction();
 
 		suggestForeignTypes = new SuggestForeignTypesAction(this);

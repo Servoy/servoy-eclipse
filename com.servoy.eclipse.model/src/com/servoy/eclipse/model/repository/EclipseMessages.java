@@ -279,7 +279,7 @@ public class EclipseMessages implements ICustomMessageLoader
 	}
 
 	// write project solution & its modules i18n files to the resource project
-	public static void writeProjectI18NFiles(final ServoyProject servoyProject, final boolean overwriteExisting)
+	public static void writeProjectI18NFiles(final ServoyProject servoyProject, final boolean overwriteExisting, final boolean onlyUpdateExisting)
 	{
 
 		WorkspaceJob writingI18NJob = new WorkspaceJob("Writing project I18N files")
@@ -307,7 +307,7 @@ public class EclipseMessages implements ICustomMessageLoader
 									ApplicationServerSingleton.get().getDeveloperRepository(), ApplicationServerSingleton.get().getDataServer(),
 									ApplicationServerSingleton.get().getClientId(), serverTableNames[0], serverTableNames[1]);
 								writeMessages(serverTableNames[0], serverTableNames[1], messages, new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()),
-									resourceProject.getProject(), false, overwriteExisting);
+									resourceProject.getProject(), false, overwriteExisting, onlyUpdateExisting);
 							}
 						}
 					}
@@ -338,11 +338,12 @@ public class EclipseMessages implements ICustomMessageLoader
 	public static void writeMessages(String i18nServer, String i18nTable, TreeMap<String, I18NUtil.MessageEntry> messages, final IFileAccess workspaceDir,
 		IProject resourceProject) throws RepositoryException
 	{
-		writeMessages(i18nServer, i18nTable, messages, workspaceDir, resourceProject, true, true);
+		writeMessages(i18nServer, i18nTable, messages, workspaceDir, resourceProject, true, true, false);
 	}
 
 	private synchronized static void writeMessages(String i18nServer, String i18nTable, TreeMap<String, I18NUtil.MessageEntry> messages,
-		final IFileAccess workspaceDir, IProject resourceProject, boolean bDeleteUnnecessaryI18NFiles, boolean overwriteExisting) throws RepositoryException
+		final IFileAccess workspaceDir, IProject resourceProject, boolean bDeleteUnnecessaryI18NFiles, boolean overwriteExisting, boolean onlyUpdateExisting)
+		throws RepositoryException
 	{
 		final HashMap<String, Properties> languagesOutput = new HashMap<String, Properties>();
 
@@ -392,7 +393,7 @@ public class EclipseMessages implements ICustomMessageLoader
 				messageFilePath = resourceProject.getFullPath().append(MESSAGES_DIR).append(i18nServer + "." + i18nTable + langExt + MESSAGES_EXTENSION); //$NON-NLS-1$
 
 				String relativeFilePath = messageFilePath.toOSString();
-				if (!workspaceDir.exists(relativeFilePath))
+				if (!onlyUpdateExisting && !workspaceDir.exists(relativeFilePath))
 				{
 					ByteArrayOutputStream bos = new ByteArrayOutputStream();
 					languageOutputEntry.getValue().store(bos, null);
@@ -412,6 +413,28 @@ public class EclipseMessages implements ICustomMessageLoader
 						workspaceDir.setContents(relativeFilePath, cutFirstLine(bos.toByteArray()));
 						bos.close();
 					}
+				}
+				else if (onlyUpdateExisting)
+				{
+					Properties oldMessages = new Properties();
+					oldMessages.load(new ByteArrayInputStream(workspaceDir.getContents(relativeFilePath)));
+
+					Properties newMessages = languageOutputEntry.getValue();
+					for (Enumeration<Object> e = newMessages.keys(); e.hasMoreElements();)
+					{
+						Object newMessageKey = e.nextElement();
+						if (oldMessages.containsKey(newMessageKey))
+						{
+							Object newMessageValue = newMessages.get(newMessageKey);
+							if (newMessageValue != null) oldMessages.put(newMessageKey, newMessageValue);
+						}
+					}
+
+					ByteArrayOutputStream bos = new ByteArrayOutputStream();
+					oldMessages.store(bos, null);
+					// cut first line conaining current date
+					workspaceDir.setContents(relativeFilePath, cutFirstLine(bos.toByteArray()));
+					bos.close();
 				}
 			}
 

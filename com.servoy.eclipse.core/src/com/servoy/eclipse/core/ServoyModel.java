@@ -30,8 +30,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.wicket.Request;
@@ -228,7 +228,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				{
 					ServoyResourcesProject resourceProject = aProject.getResourcesProject();
 					if (resourceProject != null && resourceProject.getProject().findMember(EclipseMessages.MESSAGES_DIR) == null) EclipseMessages.writeProjectI18NFiles(
-						aProject, false);
+						aProject, false, false);
 
 				}
 			}
@@ -312,7 +312,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 							});
 						}
 
-						EclipseMessages.writeProjectI18NFiles(activeProject, false);
+						EclipseMessages.writeProjectI18NFiles(activeProject, false, false);
 						buildProjects(Arrays.asList(getServoyProjects()));
 					}
 					catch (Exception ex)
@@ -324,7 +324,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				{
 					try
 					{
-						EclipseMessages.writeProjectI18NFiles(activeProject, false);
+						EclipseMessages.writeProjectI18NFiles(activeProject, false, false);
 					}
 					catch (Exception ex)
 					{
@@ -360,7 +360,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 									{
 										try
 										{
-											EclipseMessages.writeProjectI18NFiles(toProject, false);
+											EclipseMessages.writeProjectI18NFiles(toProject, false, false);
 											ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(toProject, true);
 										}
 										catch (Exception ex)

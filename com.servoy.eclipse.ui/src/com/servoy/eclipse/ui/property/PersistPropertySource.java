@@ -2009,7 +2009,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					{
 						I18NMessagesUtil.showDatasourceWarning();
 						ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-						EclipseMessages.writeProjectI18NFiles(servoyProject, false);
+						EclipseMessages.writeProjectI18NFiles(servoyProject, false, false);
 					}
 				}
 

@@ -27,6 +27,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.MessageDialogWithToggle;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -65,12 +68,18 @@ public class I18NWriteToDBAction extends Action
 		{
 			String i18nServer = activeProject.getSolution().getI18nServerName();
 			String i18nTable = activeProject.getSolution().getI18nTableName();
-			if (i18nServer != null && i18nTable != null &&
-				MessageDialog.openConfirm(UIUtils.getActiveShell(), "Write I18N to DB", "All existing messages in the database tables will be overwritten!")) writeI18NToDB(activeProject);
+			if (i18nServer != null && i18nTable != null)
+			{
+				MessageDialogWithToggle dlg = MessageDialogWithToggle.open(MessageDialog.CONFIRM, UIUtils.getActiveShell(), "Write I18N to DB",
+					"All existing messages in the database tables will be overwritten, unless you check to only insert new keys.", "Only insert new keys",
+					false, null, null, SWT.NONE);
+
+				if (dlg.getReturnCode() == Window.OK) writeI18NToDB(activeProject, dlg.getToggleState());
+			}
 		}
 	}
 
-	private void writeI18NToDB(final ServoyProject servoyProject)
+	private void writeI18NToDB(final ServoyProject servoyProject, final boolean onlyInsertNewKeys)
 	{
 		WorkspaceJob writingI18NJob = new WorkspaceJob("Writing I18N files to database tables")
 		{
@@ -98,7 +107,8 @@ public class I18NWriteToDBAction extends Action
 					try
 					{
 						TreeMap<String, I18NUtil.MessageEntry> messages = EclipseMessages.readMessages(serverTableNames[0], serverTableNames[1], workspace);
-						I18NUtil.writeMessagesToRepository(serverTableNames[0], serverTableNames[1], repository, dataServer, clientID, messages, false, false);
+						I18NUtil.writeMessagesToRepository(serverTableNames[0], serverTableNames[1], repository, dataServer, clientID, messages,
+							onlyInsertNewKeys, onlyInsertNewKeys);
 					}
 					catch (final Exception ex)
 					{

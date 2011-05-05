@@ -54,9 +54,9 @@ import com.servoy.eclipse.ui.dialogs.I18NExternalizeDialog;
 import com.servoy.eclipse.ui.dialogs.I18NServerTableDialog;
 import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
+import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
-import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.IControlFactory;
@@ -168,7 +168,7 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 						try
 						{
 							activeProject.saveEditingSolutionNodes(new IPersist[] { activeProject.getEditingSolution() }, false);
-							EclipseMessages.writeProjectI18NFiles(activeProject, false);
+							EclipseMessages.writeProjectI18NFiles(activeProject, false, false);
 							i18nDetails = new String[] { tableWrapper.getServerName(), tableWrapper.getTableName() };
 						}
 						catch (Exception e)
