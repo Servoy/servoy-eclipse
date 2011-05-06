@@ -46,13 +46,15 @@ public class I18NReadFromDBAction extends Action
 		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 		if (activeProject != null)
 		{
+
+
 			MessageDialogWithToggle dlg = MessageDialogWithToggle.open(MessageDialog.CONFIRM, UIUtils.getActiveShell(), "Read I18N from DB",
-				"All existing messages in the workspace will be overwritten, unless you check to only update values.", "Only update values", false, null, null,
-				SWT.NONE);
+				"This will insert new and replace exiting keys from the database into the workspace.",
+				"Delete keys from workspace that are not in the database", false, null, null, SWT.NONE);
 			if (dlg.getReturnCode() == Window.OK)
 			{
-				boolean onlyUpdateValues = dlg.getToggleState();
-				EclipseMessages.writeProjectI18NFiles(activeProject, !onlyUpdateValues, onlyUpdateValues);
+				boolean deleteNonExistingKeys = dlg.getToggleState();
+				EclipseMessages.writeProjectI18NFiles(activeProject, true, deleteNonExistingKeys);
 			}
 		}
 	}

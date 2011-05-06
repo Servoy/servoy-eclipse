@@ -71,15 +71,15 @@ public class I18NWriteToDBAction extends Action
 			if (i18nServer != null && i18nTable != null)
 			{
 				MessageDialogWithToggle dlg = MessageDialogWithToggle.open(MessageDialog.CONFIRM, UIUtils.getActiveShell(), "Write I18N to DB",
-					"All existing messages in the database tables will be overwritten, unless you check to only insert new keys.", "Only insert new keys",
-					false, null, null, SWT.NONE);
+					"This will insert new and replace exiting keys from the workspace into the database.",
+					"Delete keys from database that are not in the workspace", false, null, null, SWT.NONE);
 
 				if (dlg.getReturnCode() == Window.OK) writeI18NToDB(activeProject, dlg.getToggleState());
 			}
 		}
 	}
 
-	private void writeI18NToDB(final ServoyProject servoyProject, final boolean onlyInsertNewKeys)
+	private void writeI18NToDB(final ServoyProject servoyProject, final boolean deleteNonExistingKeys)
 	{
 		WorkspaceJob writingI18NJob = new WorkspaceJob("Writing I18N files to database tables")
 		{
@@ -107,8 +107,8 @@ public class I18NWriteToDBAction extends Action
 					try
 					{
 						TreeMap<String, I18NUtil.MessageEntry> messages = EclipseMessages.readMessages(serverTableNames[0], serverTableNames[1], workspace);
-						I18NUtil.writeMessagesToRepository(serverTableNames[0], serverTableNames[1], repository, dataServer, clientID, messages,
-							onlyInsertNewKeys, onlyInsertNewKeys);
+						I18NUtil.writeMessagesToRepository(serverTableNames[0], serverTableNames[1], repository, dataServer, clientID, messages, false,
+							!deleteNonExistingKeys);
 					}
 					catch (final Exception ex)
 					{
