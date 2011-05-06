@@ -307,13 +307,17 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			List<IClientPlugin> lst = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getPluginManager().getPlugins(IClientPlugin.class);
 			for (IClientPlugin clientPlugin : lst)
 			{
+				// for now cast to deprecated interface
 				try
 				{
-					// for now cast to deprecated interface
-					IScriptable scriptObject = clientPlugin.getScriptObject();
-					if (scriptObject instanceof IReturnedTypesProvider)
+					Method method = clientPlugin.getClass().getMethod("getScriptObject", (Class[])null);
+					if (method != null)
 					{
-						registerConstantsForScriptObject((IReturnedTypesProvider)scriptObject);
+						IScriptable scriptObject = (IScriptable)method.invoke(clientPlugin, (Object[])null);
+						if (scriptObject instanceof IReturnedTypesProvider)
+						{
+							registerConstantsForScriptObject((IReturnedTypesProvider)scriptObject);
+						}
 					}
 				}
 				catch (Throwable e)
