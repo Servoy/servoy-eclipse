@@ -30,7 +30,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
  * @author rgansevles
  * 
  */
-public class MovePartCommand extends BaseRestorableCommand
+public class MovePartCommand extends BaseRestorableCommand implements ISupportModels
 {
 	/** Stores the new size and location. */
 	private final int newHeight;
@@ -73,5 +73,10 @@ public class MovePartCommand extends BaseRestorableCommand
 	public void execute()
 	{
 		setPropertyValue(new PersistPropertySource(part, context, false), StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(newHeight));
+	}
+
+	public Object[] getModels()
+	{
+		return new Object[] { part };
 	}
 }
