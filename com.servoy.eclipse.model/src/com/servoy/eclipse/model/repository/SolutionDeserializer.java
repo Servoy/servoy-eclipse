@@ -18,6 +18,7 @@ package com.servoy.eclipse.model.repository;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -90,6 +91,7 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
@@ -251,6 +253,7 @@ public class SolutionDeserializer
 				}
 
 			});
+
 			DataSourceCollectorVisitor datasourceCollector = new DataSourceCollectorVisitor();
 			solution.acceptVisitor(datasourceCollector);
 
@@ -262,16 +265,24 @@ public class SolutionDeserializer
 					IServer s = repository.getServer(serverName);
 					if (s != null)
 					{
-						serverProxies.put(serverName, new ServerProxy(s));
+						serverProxies.put(serverName, new ServerProxy(s)
+						{
+							@Override
+							public ITable getTable(String tableName) throws RepositoryException, RemoteException
+							{
+								// do not use the caching, in developer a table may have been deleted, proxies are needed for databasemanager.getServerNames() in developer
+								return server.getTable(tableName);
+							}
+						});
 					}
 				}
 				catch (Exception e)
 				{
 					ServoyLog.logError(e);
 				}
-			}
 
-			solution.setServerProxies(serverProxies);
+				solution.setServerProxies(serverProxies);
+			}
 
 			return changedFilesCopy; // what remains of the day
 		}
