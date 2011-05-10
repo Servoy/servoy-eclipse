@@ -1369,7 +1369,12 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		clone.setName(member.getName());
 		if (type == null)
 		{
-			clone.setType(member.getType());
+			if (member.getDirectType() != null)
+			{
+				TypeRef typeRef = TypeInfoModelFactory.eINSTANCE.createTypeRef();
+				typeRef.setTarget(member.getDirectType());
+				clone.setType(typeRef);
+			}
 		}
 		else
 		{
@@ -1388,7 +1393,12 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		Parameter clone = TypeInfoModelFactory.eINSTANCE.createParameter();
 		clone.setKind(parameter.getKind());
 		clone.setName(parameter.getName());
-		clone.setType(parameter.getType());
+		if (parameter.getDirectType() != null)
+		{
+			TypeRef typeRef = TypeInfoModelFactory.eINSTANCE.createTypeRef();
+			typeRef.setTarget(parameter.getDirectType());
+			clone.setType(typeRef);
+		}
 		return clone;
 	}
 
@@ -1455,7 +1465,12 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			try
 			{
 				Relation relation = fs.getRelation(config);
-				if (relation != null && relation.isValid()) table = relation.getForeignTable();
+				if (relation != null && relation.isValid())
+				{
+					table = relation.getForeignTable();
+					superType = context.getType(superType.getName() + '<' + table.getDataSource() + '>');
+					table = null;
+				}
 			}
 			catch (RepositoryException e)
 			{
