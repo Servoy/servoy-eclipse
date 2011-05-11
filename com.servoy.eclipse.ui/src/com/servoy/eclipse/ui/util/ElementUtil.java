@@ -35,7 +35,6 @@ import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IValueList;
 import com.servoy.j2db.persistence.AbstractBase;
-import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
@@ -43,6 +42,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.Media;
@@ -232,28 +232,51 @@ public class ElementUtil
 			// no override
 			return persist;
 		}
+		while (((AbstractBase)persist).getSuperPersist() != null)
+		{
+			persist = ((AbstractBase)persist).getSuperPersist();
+		}
+		final IPersist parentPersist = persist;
+		IPersist newPersist = (IPersist)context.acceptVisitor(new IPersistVisitor()
+		{
+			public Object visit(IPersist o)
+			{
+				if (((AbstractBase)o).getExtendsID() == parentPersist.getID())
+				{
+					return o;
+				}
+				return CONTINUE_TRAVERSAL;
+			}
+		});
 
-		IPersist newPersist = AbstractRepository.searchPersist((Form)context, persist.getUUID());
 		if (newPersist == null)
 		{
 			// override does not exist yet, create it
 			ISupportChilds parent = (Form)context;
-			if (!(persist.getParent() instanceof Form))
+			if (!(parentPersist.getParent() instanceof Form))
 			{
 				parent = null;
-				parent = (ISupportChilds)AbstractRepository.searchPersist((Form)context, persist.getParent().getUUID());
+				parent = (ISupportChilds)context.acceptVisitor(new IPersistVisitor()
+				{
+					public Object visit(IPersist o)
+					{
+						if (((AbstractBase)o).getExtendsID() == parentPersist.getParent().getID())
+						{
+							return o;
+						}
+						return CONTINUE_TRAVERSAL;
+					}
+				});
 				if (parent == null)
 				{
 					parent = (ISupportChilds)((AbstractBase)persist.getParent()).cloneObj((Form)context, false, null, false, false);
-					((AbstractBase)parent).resetUUID(persist.getParent().getUUID());
 					((AbstractBase)parent).copyPropertiesMap(null, true);
-					((AbstractBase)parent).putOverrideProperty(((Form)ancestorForm).getName());
+					((AbstractBase)parent).setExtendsID(parentPersist.getParent().getID());
 				}
 			}
 			newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false);
-			((AbstractBase)newPersist).resetUUID(persist.getUUID());
 			((AbstractBase)newPersist).copyPropertiesMap(null, true);
-			((AbstractBase)newPersist).putOverrideProperty(((Form)ancestorForm).getName());
+			((AbstractBase)newPersist).setExtendsID(parentPersist.getID());
 		}
 		return newPersist;
 	}

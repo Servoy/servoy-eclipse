@@ -689,7 +689,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			&&
 			// skip some specific properties
 			!(persist instanceof Form && StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(id)) &&
-			!StaticContentSpecLoader.PROPERTY_EXTENDSFORMID.getPropertyName().equals(id))
+			!StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName().equals(id))
 		{
 			return new DelegatePropertyController(desc, id)
 			{
@@ -1960,7 +1960,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				{
 					// fire persist change recursively if the style is changed
 					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persist,
-						"styleName".equals(id) || "extendsFormID".equals(id));
+						"styleName".equals(id) || "extendsID".equals(id));
 				}
 			}
 		}
@@ -2060,8 +2060,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			else
 			{
 				// fire persist change recursively if the style is changed
-				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persist,
-					"styleName".equals(id) || "extendsFormID".equals(id));
+				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persist, "styleName".equals(id) || "extendsID".equals(id));
 			}
 		}
 	}
@@ -2888,7 +2887,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return pd;
 		}
 
-		if (name.equals("extendsFormID"))
+		if (name.equals("extendsID"))
 		{
 			if (form == null) return null;
 			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, true), context);

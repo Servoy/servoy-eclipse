@@ -103,7 +103,7 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 					continue;
 				}
 
-				if (o instanceof AbstractBase && ((AbstractBase)o).isOverrideElement() && ((AbstractBase)o).getSuperPersist() == null)
+				if (o instanceof AbstractBase && ((AbstractBase)o).isOverrideOrphanElement())
 				{
 					// skip orphaned overrides
 					continue;

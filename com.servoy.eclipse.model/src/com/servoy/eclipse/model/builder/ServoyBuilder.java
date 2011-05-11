@@ -111,6 +111,7 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.Table;
@@ -1000,36 +1001,33 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												{
 													elementIdPersistMap.put(p.getID(), p);
 													List<IPersist> lst = theMakeSureNoDuplicateUUIDsAreFound.get(p.getUUID());
-													if (!((AbstractBase)p).isOverrideElement())
+													if (lst == null)
 													{
-														if (lst == null)
-														{
-															lst = new ArrayList<IPersist>(3);
-															lst.add(p);
-															theMakeSureNoDuplicateUUIDsAreFound.put(p.getUUID(), lst);
+														lst = new ArrayList<IPersist>(3);
+														lst.add(p);
+														theMakeSureNoDuplicateUUIDsAreFound.put(p.getUUID(), lst);
 
-															if (((AbstractBase)p).getRuntimeProperty(SolutionDeserializer.POSSIBLE_DUPLICATE_UUID) != null)
-															{
-																checkDuplicateUUID(p, project);
-															}
+														if (((AbstractBase)p).getRuntimeProperty(SolutionDeserializer.POSSIBLE_DUPLICATE_UUID) != null)
+														{
+															checkDuplicateUUID(p, project);
 														}
-														else
-														{
-															IPersist other = lst.get(0);
+													}
+													else
+													{
+														IPersist other = lst.get(0);
 
-															// for now only add it on both if there is 1, just skip the rest.
-															if (lst.size() == 1)
-															{
-																ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(other.getUUID(),
-																	SolutionSerializer.getRelativePath(p, false) + SolutionSerializer.getFileName(p, false));
-																addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR,
-																	IMarker.PRIORITY_HIGH, null, other);
-															}
-															ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(p.getUUID(),
-																SolutionSerializer.getRelativePath(other, false) + SolutionSerializer.getFileName(other, false));
+														// for now only add it on both if there is 1, just skip the rest.
+														if (lst.size() == 1)
+														{
+															ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(other.getUUID(),
+																SolutionSerializer.getRelativePath(p, false) + SolutionSerializer.getFileName(p, false));
 															addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_HIGH,
-																null, p);
+																null, other);
 														}
+														ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(p.getUUID(),
+															SolutionSerializer.getRelativePath(other, false) + SolutionSerializer.getFileName(other, false));
+														addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_HIGH, null,
+															p);
 													}
 													return IPersistVisitor.CONTINUE_TRAVERSAL;
 												}
@@ -1050,40 +1048,37 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 															public Object visit(IPersist p)
 															{
 																elementIdPersistMap.put(p.getID(), p);
-																if (!((AbstractBase)p).isOverrideElement())
+																List<IPersist> lst = theMakeSureNoDuplicateUUIDsAreFound.get(p.getUUID());
+																if (lst == null)
 																{
-																	List<IPersist> lst = theMakeSureNoDuplicateUUIDsAreFound.get(p.getUUID());
-																	if (lst == null)
+																	lst = new ArrayList<IPersist>(3);
+																	lst.add(p);
+																	theMakeSureNoDuplicateUUIDsAreFound.put(p.getUUID(), lst);
+																	if (((AbstractBase)p).getRuntimeProperty(SolutionDeserializer.POSSIBLE_DUPLICATE_UUID) != null)
 																	{
-																		lst = new ArrayList<IPersist>(3);
-																		lst.add(p);
-																		theMakeSureNoDuplicateUUIDsAreFound.put(p.getUUID(), lst);
-																		if (((AbstractBase)p).getRuntimeProperty(SolutionDeserializer.POSSIBLE_DUPLICATE_UUID) != null)
-																		{
-																			checkDuplicateUUID(p, moduleProject);
-																		}
+																		checkDuplicateUUID(p, moduleProject);
 																	}
-																	else
-																	{
-																		IPersist other = lst.get(0);
+																}
+																else
+																{
+																	IPersist other = lst.get(0);
 
-																		// for now only add it on both if there is 1, just skip the rest.
-																		if (lst.size() == 1)
-																		{
-																			ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(
-																				other.getUUID(),
-																				SolutionSerializer.getRelativePath(p, false) +
-																					SolutionSerializer.getFileName(p, false));
-																			addMarker(moduleProject, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR,
-																				IMarker.PRIORITY_HIGH, null, other);
-																		}
+																	// for now only add it on both if there is 1, just skip the rest.
+																	if (lst.size() == 1)
+																	{
 																		ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(
-																			p.getUUID(),
-																			SolutionSerializer.getRelativePath(other, false) +
-																				SolutionSerializer.getFileName(other, false));
+																			other.getUUID(),
+																			SolutionSerializer.getRelativePath(p, false) +
+																				SolutionSerializer.getFileName(p, false));
 																		addMarker(moduleProject, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR,
-																			IMarker.PRIORITY_HIGH, null, p);
+																			IMarker.PRIORITY_HIGH, null, other);
 																	}
+																	ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(
+																		p.getUUID(),
+																		SolutionSerializer.getRelativePath(other, false) +
+																			SolutionSerializer.getFileName(other, false));
+																	addMarker(moduleProject, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR,
+																		IMarker.PRIORITY_HIGH, null, p);
 																}
 																return IPersistVisitor.CONTINUE_TRAVERSAL;
 															}
@@ -1093,7 +1088,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											}
 										}
 										final IPersist foundPersist = elementIdPersistMap.get(element_id);
-										if (foundPersist == null)
+										if (foundPersist == null && !element.getName().equals(StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName()))
 										{
 											String elementName = null;
 											String inForm = null;

@@ -75,6 +75,7 @@ import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.AbstractPersistFactory;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AbstractScriptProvider;
 import com.servoy.j2db.persistence.ArgumentType;
@@ -1542,6 +1543,13 @@ public class SolutionDeserializer
 			}
 
 			setPersistValues(repository, retval, obj);
+			if (((AbstractBase)retval).hasOverrideCustomProperty())
+			{
+				((AbstractBase)retval).removeOverrideCustomProperty();
+				UUID uuid = retval.getUUID();
+				((AbstractBase)retval).resetUUID();
+				((AbstractBase)retval).setExtendsID(((AbstractPersistFactory)repository).getElementIdForUUID(uuid));
+			}
 			if (useFilesForDirtyMark) handleChanged(obj, retval);
 		}
 	}

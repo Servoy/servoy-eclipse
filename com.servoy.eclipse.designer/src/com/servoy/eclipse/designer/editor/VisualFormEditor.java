@@ -57,13 +57,16 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.ITabbedEditor;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.FlattenedTabPanel;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Style;
@@ -351,6 +354,33 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	{
 		try
 		{
+			List<IPersist> removes = new ArrayList<IPersist>();
+			for (IPersist ip : form.getAllObjectsAsList())
+			{
+				if (((AbstractBase)ip).isOverrideOrphanElement())
+				{
+					removes.add(ip);
+				}
+				else if (ip instanceof ISupportChilds)
+				{
+					List<IPersist> removes2 = new ArrayList<IPersist>();
+					for (IPersist child : ((AbstractBase)ip).getAllObjectsAsList())
+					{
+						if (((AbstractBase)child).isOverrideOrphanElement())
+						{
+							removes2.add(child);
+						}
+					}
+					for (IPersist child : removes2)
+					{
+						((AbstractBase)ip).removeChild(child);
+					}
+				}
+			}
+			for (IPersist ip : removes)
+			{
+				form.removeChild(ip);
+			}
 			servoyProject.saveEditingSolutionNodes(new IPersist[] { form }, true);
 			seceditor.saveSecurityElements();
 			graphicaleditor.doSave(monitor); // for marking the command stack
@@ -499,7 +529,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		}
 
 		Collection<IPersist> changes = replaceValuelistWithFields(changedPersists);
-		for (IPersist changed : changes)
+		for (final IPersist changed : changes)
 		{
 			// is it a child of the current form hierarchy?
 			IPersist formParent = changed.getAncestor(IRepository.FORMS);
@@ -551,9 +581,18 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 
 					if (formParent != form)
 					{
-						// this form may contain an overridden element, mark that as changed as well
-						// Note: have to search by UUID here, otherwise changed.getParent() is used in the equals as well
-						IPersist override = AbstractRepository.searchPersist(form, changed.getUUID());
+						IPersist override = (IPersist)form.acceptVisitor(new IPersistVisitor()
+						{
+							public Object visit(IPersist o)
+							{
+								if (changed.getID() == ((AbstractBase)o).getExtendsID() ||
+									(((AbstractBase)changed).getExtendsID() > 0 && ((AbstractBase)changed).getExtendsID() == ((AbstractBase)o).getExtendsID()))
+								{
+									return o;
+								}
+								return CONTINUE_TRAVERSAL;
+							}
+						});
 						if (override != null)
 						{
 							changedChildren.add(override);

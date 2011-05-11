@@ -41,7 +41,7 @@ public class PartTypeLabelProvider extends LabelProvider
 			String text = Part.getDisplayName(((Part)value).getPartType());
 			if (((Part)value).isOverrideElement())
 			{
-				text += " (" + Messages.LabelInherited + ")";
+				text += " (" + Messages.LabelOverride + ")";
 			}
 			return text;
 		}
