@@ -46,6 +46,7 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
@@ -120,7 +121,8 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 				}
 				else
 				{
-					list.add(o);
+					// don't use FlattenedTabPanel or FlattenedPortal for model, use the wrapped tabpanel/portal
+					list.add(o instanceof IFlattenedPersistWrapper ? ((IFlattenedPersistWrapper< ? >)o).getWrappedPersist() : o);
 					Iterator<IPersist> subElements = null;
 					if (o instanceof TabPanel)
 					{
