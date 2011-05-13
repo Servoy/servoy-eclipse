@@ -35,8 +35,13 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.util.Utils;
 
+/**
+ * Action to rename media.
+ * 
+ * @author lvostinar
+ *
+ */
 public class RenameMediaAction extends Action implements ISelectionChangedListener
 {
 	private final SolutionExplorerView viewer;
@@ -56,7 +61,6 @@ public class RenameMediaAction extends Action implements ISelectionChangedListen
 		setText("Rename media item");
 		setToolTipText(getText());
 	}
-
 
 	public void selectionChanged(SelectionChangedEvent event)
 	{
@@ -81,25 +85,30 @@ public class RenameMediaAction extends Action implements ISelectionChangedListen
 	public void run()
 	{
 		if (solution == null) return;
-		InputDialog nameDialog = new InputDialog(viewer.getViewSite().getShell(), "Rename media item", "Supply a new media name", selectedMediaName, new IInputValidator()
+		InputDialog nameDialog = new InputDialog(viewer.getViewSite().getShell(), "Rename media item", "Supply a new media name", selectedMediaName,
+			new IInputValidator()
 			{
-
 				public String isValid(String newText)
 				{
 					if (newText.length() == 0)
 					{
+						return "";
+					}
+					if (newText.indexOf('\\') >= 0 || newText.indexOf('/') >= 0 || newText.indexOf(' ') >= 0)
+					{
 						return "Invalid new media name";
 					}
+
+					// ok
 					return null;
 				}
 			});
 		int res = nameDialog.open();
 		if (res == Window.OK)
 		{
-			String name = Utils.stringReplace(nameDialog.getValue(), " ", "_");
 			ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName());
 			Media selectedMediaItem = project.getEditingSolution().getMedia(selectedMediaName);
-			selectedMediaItem.setName(name);
+			selectedMediaItem.setName(nameDialog.getValue());
 			try
 			{
 				project.saveEditingSolutionNodes(new IPersist[] { selectedMediaItem }, true);
