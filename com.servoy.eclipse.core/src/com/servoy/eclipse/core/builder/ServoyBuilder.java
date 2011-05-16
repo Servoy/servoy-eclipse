@@ -2670,7 +2670,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										IDataProvider dataProvider = servoyModel.getFlattenedSolution().getGlobalDataProvider(lookup);
 										if (dataProvider == null)
 										{
-											invalid = true;
+											if (servoyModel.getFlattenedSolution().getScriptMethod(lookup) == null)
+											{
+												invalid = true;
+											}
 										}
 									}
 									else

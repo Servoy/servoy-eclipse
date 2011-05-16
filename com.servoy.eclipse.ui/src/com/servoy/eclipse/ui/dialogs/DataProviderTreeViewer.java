@@ -74,6 +74,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 	public static final String CALCULATIONS = "calculations"; //$NON-NLS-1$
 	public static final String FORM_VARIABLES = "form variables"; //$NON-NLS-1$
 	public static final String GLOBALS = "globals"; //$NON-NLS-1$
+	public static final String GLOBAL_METHODS = "global methods"; //$NON-NLS-1$
 	public static final String AGGREGATES = "aggregates"; //$NON-NLS-1$
 	public static final String RELATIONS = "relations"; //$NON-NLS-1$
 	public static final Object[] EMPTY_ARRAY = new Object[0];

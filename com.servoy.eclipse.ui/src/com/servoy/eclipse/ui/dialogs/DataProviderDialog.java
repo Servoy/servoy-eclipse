@@ -20,6 +20,7 @@ package com.servoy.eclipse.ui.dialogs;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
@@ -43,6 +44,7 @@ public class DataProviderDialog extends TreeSelectDialog
 	private final DataProviderOptions input;
 	private final IPersist persist;
 	private final ILabelProvider labelProvider;
+	private ITreeContentProvider contentProvider = null;
 
 	/**
 	 * Creates a new dataprovider dialog editor parented under the given shell.
@@ -65,9 +67,9 @@ public class DataProviderDialog extends TreeSelectDialog
 	@Override
 	protected FilteredTreeViewer createFilteredTreeViewer(Composite parent)
 	{
-		DataProviderTreeViewer dataProviderTreeViewer = new DataProviderTreeViewer(parent, labelProvider, new DataProviderContentProvider(persist,
-			flattenedSolution, table), input, true, true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_LEAFS),
-			treeStyle);
+		DataProviderTreeViewer dataProviderTreeViewer = new DataProviderTreeViewer(parent, labelProvider, contentProvider != null ? contentProvider
+			: new DataProviderContentProvider(persist, flattenedSolution, table), input, true, true, TreePatternFilter.getSavedFilterMode(
+			getDialogBoundsSettings(), TreePatternFilter.FILTER_LEAFS), treeStyle);
 		return dataProviderTreeViewer;
 	}
 
@@ -75,6 +77,17 @@ public class DataProviderDialog extends TreeSelectDialog
 	public IDialogSettings getDataProvideDialogSettings()
 	{
 		return this.getDialogBoundsSettings();
+	}
+
+	public void setContentProvider(ITreeContentProvider contentProvider)
+	{
+		this.contentProvider = contentProvider;
+	}
+
+	@Override
+	public void refreshTree()
+	{
+		getTreeViewer().setInput(getTreeViewer().getInput());
 	}
 
 }
