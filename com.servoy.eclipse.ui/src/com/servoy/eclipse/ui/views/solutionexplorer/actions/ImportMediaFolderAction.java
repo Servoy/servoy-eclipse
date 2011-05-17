@@ -109,7 +109,7 @@ public class ImportMediaFolderAction extends ImportMediaAction implements ISelec
 					monitor.beginTask("Importing Media Folder", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
 					try
 					{
-						addFiles(solution, filterPath, fileNames);
+						addMediaFiles(solution, filterPath, fileNames);
 					}
 					catch (RepositoryException e)
 					{

@@ -88,6 +88,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
@@ -158,6 +159,7 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeComparer;
+import com.servoy.eclipse.ui.node.UserNodeFileDropTargetListener;
 import com.servoy.eclipse.ui.node.UserNodeListDragSourceListener;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -190,8 +192,8 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.EditSecurityAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EditVariableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EnableServerAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ExpandNodeAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NReadFromDBAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NExternalizeAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NReadFromDBAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NWriteToDBAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportMediaAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportMediaFolderAction;
@@ -1199,6 +1201,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		list.addDragSupport(DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK, new Transfer[] { FormElementTransfer.getInstance() },
 			new UserNodeListDragSourceListener(list, FormElementTransfer.getInstance()));
 
+		list.addDropSupport(DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT, new Transfer[] { FileTransfer.getInstance() },
+			new UserNodeFileDropTargetListener(list));
+
 		list.addDoubleClickListener(new IDoubleClickListener()
 		{
 			public void doubleClick(DoubleClickEvent event)
@@ -1321,6 +1326,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		tree.addDragSupport(DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK, new Transfer[] { FormElementTransfer.getInstance() },
 			new UserNodeListDragSourceListener(tree, FormElementTransfer.getInstance()));
+
+		tree.addDropSupport(DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT, new Transfer[] { FileTransfer.getInstance() },
+			new UserNodeFileDropTargetListener(tree));
 	}
 
 	private void initTreeViewer()

@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
@@ -33,7 +33,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -104,7 +103,7 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 		}
 		try
 		{
-			addFiles(solution, filterPath, fileNames);
+			addMediaFiles(solution, filterPath, fileNames);
 		}
 		catch (RepositoryException e)
 		{
@@ -117,43 +116,73 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 		}
 	}
 
-	protected static void addFiles(Solution solution, String directory, String[] fileNames) throws IOException, RepositoryException
+	/**
+	 * Add media files to an editing solution
+	 * 
+	 * @param editingSolution
+	 * @param directory null when filenames are absolute
+	 * @param fileNames
+	 * @throws IOException
+	 * @throws RepositoryException
+	 */
+	public static void addMediaFiles(Solution editingSolution, String directory, String[] fileNames) throws IOException, RepositoryException
 	{
 		List<IPersist> nodesToSave = new ArrayList<IPersist>(fileNames.length + 1);
-		EclipseRepository repository = (EclipseRepository)solution.getRepository();
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		EclipseRepository repository = (EclipseRepository)editingSolution.getRepository();
 		for (String fileName : fileNames)
 		{
-			File file = new File(directory, fileName);
-			if (file.exists())
-			{
-				ByteArrayOutputStream baos = new ByteArrayOutputStream((int)file.length());
-				FileInputStream fis = new FileInputStream(file);
-				BufferedInputStream bis = new BufferedInputStream(fis);
-				Utils.streamCopy(bis, baos);
-				byte[] media_data = baos.toByteArray();
-
-				String mime = ImageLoader.getContentType(media_data);
-				if (mime == null)
-				{
-					repository.getContentType(fileName);
-				}
-				String name = Utils.stringReplace(fileName, " ", "_");
-				Media media = solution.getMedia(name);
-				if (media == null)
-				{
-					media = solution.createNewMedia(servoyModel.getNameValidator(), name);
-				}
-				// Save the media in the repository.
-				media.setMimeType(mime);
-				media.setPermMediaData(media_data);
-				media.flagChanged();
-				repository.copyPersistIntoSolution(media, solution, true);
-				nodesToSave.add(media);
-
-			}
+			File file = directory == null ? new File(fileName) : new File(directory, fileName);
+			addFiles(nodesToSave, repository, editingSolution, file);
 		}
-		nodesToSave.add(solution);
-		servoyModel.getServoyProject(solution.getName()).saveEditingSolutionNodes(nodesToSave.toArray(new IPersist[nodesToSave.size()]), false);
+		nodesToSave.add(editingSolution);
+		ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(editingSolution.getName()).saveEditingSolutionNodes(
+			nodesToSave.toArray(new IPersist[nodesToSave.size()]), false);
+	}
+
+	private static void addFiles(List<IPersist> nodesToSave, EclipseRepository repository, Solution editingSolution, File file) throws IOException,
+		RepositoryException
+	{
+		if (file == null || !file.exists())
+		{
+			return;
+		}
+
+		if (file.isDirectory())
+		{
+			final String[] fileNames = file.list();
+			if (fileNames != null)
+			{
+				for (String fileName : fileNames)
+				{
+					addFiles(nodesToSave, repository, editingSolution, new File(file, fileName));
+				}
+			}
+			return;
+		}
+
+		// a plain file
+		ByteArrayOutputStream baos = new ByteArrayOutputStream((int)file.length());
+		FileInputStream fis = new FileInputStream(file);
+		BufferedInputStream bis = new BufferedInputStream(fis);
+		Utils.streamCopy(bis, baos);
+		byte[] media_data = baos.toByteArray();
+
+		String mime = ImageLoader.getContentType(media_data);
+		if (mime == null)
+		{
+			repository.getContentType(file.getName());
+		}
+		String name = Utils.stringReplace(file.getName(), " ", "_");
+		Media media = editingSolution.getMedia(name);
+		if (media == null)
+		{
+			media = editingSolution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), name);
+		}
+		// Save the media in the repository.
+		media.setMimeType(mime);
+		media.setPermMediaData(media_data);
+		media.flagChanged();
+		repository.copyPersistIntoSolution(media, editingSolution, true);
+		nodesToSave.add(media);
 	}
 }
