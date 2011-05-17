@@ -24,13 +24,18 @@ import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.value.AbstractObservableValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.databinding.swt.SWTObservables;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
@@ -45,7 +50,9 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.EditorPart;
+import org.eclipse.ui.part.FileEditorInput;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -135,7 +142,27 @@ public class ServerEditor extends EditorPart
 
 		driverField = new Combo(comp, SWT.BORDER);
 		UIUtils.setDefaultVisibleItemCount(driverField);
+		driverField.addModifyListener(new ModifyListener()
+		{
 
+			public void modifyText(ModifyEvent e)
+			{
+				String driver = driverField.getText();
+				if (isExistingDriver(driver))
+				{
+					driverField.setForeground(new Color(Display.getCurrent(), 0, 0, 0));
+				}
+				else
+				{
+					driverField.setForeground(new Color(Display.getCurrent(), 255, 0, 0));
+				}
+			}
+		});
+		String driver = ((ServerEditorInput)getEditorInput()).getServerConfig().getDriver();
+		if (!isExistingDriver(driver))
+		{
+			driverField.setForeground(new Color(Display.getCurrent(), 255, 0, 0));
+		}
 		Label catalogLabel;
 		catalogLabel = new Label(comp, SWT.RIGHT);
 		catalogLabel.setText("Catalog");
@@ -710,6 +737,20 @@ public class ServerEditor extends EditorPart
 	@Override
 	public void doSaveAs()
 	{
+	}
+
+	private boolean isExistingDriver(String driver)
+	{
+		boolean existing = false;
+		for (String name : ServoyModel.getServerManager().getKnownDriverClassNames())
+		{
+			if (name.equals(driver))
+			{
+				existing = true;
+				break;
+			}
+		}
+		return existing;
 	}
 
 	private void logTableButtonEnabling()

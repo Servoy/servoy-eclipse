@@ -460,4 +460,6 @@ public class MarkerMessages
 	public static ServoyMarker MethodEventParameters = new ServoyMarker(
 		"Event parameter is passed to event method, make sure it is used with right type (change method signature).", ServoyBuilder.EVENT_METHOD_MARKER_TYPE); //$NON-NLS-1$
 
+	public static ServoyMarker MissingDriver = new ServoyMarker("Server \"{0}\" has invalid/missing driver ( \"{1}\" ).", ServoyBuilder.MISSING_DRIVER); //$NON-NLS-1$
+
 }

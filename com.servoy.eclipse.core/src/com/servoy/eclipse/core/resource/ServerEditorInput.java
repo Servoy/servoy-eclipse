@@ -31,6 +31,8 @@ import com.servoy.j2db.persistence.ServerConfig;
 public class ServerEditorInput implements IEditorInput
 {
 	public static final String SERVER_RESOURCE_ID = "com.servoy.eclipse.core.resource.server";
+	public static final String EDITOR_ID = "com.servoy.eclipse.ui.editors.ServerEditor"; //$NON-NLS-1$
+
 	private final ServerConfig serverConfig;
 	private boolean isNew = false;
 

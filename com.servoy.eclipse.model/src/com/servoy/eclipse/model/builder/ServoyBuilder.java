@@ -248,6 +248,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String MULTIPLE_METHODS_ON_SAME_ELEMENT = _PREFIX + ".multipleMethodsInfo"; //$NON-NLS-1$
 	public static final String UNRESOLVED_RELATION_UUID = _PREFIX + ".unresolvedRelationUuid"; //$NON-NLS-1$
 	public static final String CONSTANTS_USED_MARKER_TYPE = _PREFIX + ".constantsUsed"; //$NON-NLS-1$
+	public static final String MISSING_DRIVER = _PREFIX + ".missingDriver"; //$NON-NLS-1$
 
 	private SAXParserFactory parserFactory;
 	private final HashSet<String> referencedProjectsSet = new HashSet<String>();
@@ -941,6 +942,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, DEPRECATED_PROPERTY_USAGE);
 		deleteMarkers(project, MULTIPLE_METHODS_ON_SAME_ELEMENT);
 		deleteMarkers(project, UNRESOLVED_RELATION_UUID);
+		deleteMarkers(project, MISSING_DRIVER);
 
 		final ServoyProject servoyProject = getServoyProject(project);
 		boolean active = isActiveSolutionOrModule(servoyProject);
@@ -954,6 +956,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				addDeserializeProblemMarkers(servoyProject);
 				refreshDBIMarkers();
 				checkPersistDuplication();
+				addDriverProblemMarker(project);
 				servoyProject.getSolution().acceptVisitor(new IPersistVisitor()
 				{
 					private final ServoyProject[] modules = getSolutionModules(servoyProject);
@@ -2465,6 +2468,42 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
+	private void addDriverProblemMarker(IProject project)
+	{
+		ServoyProject activeProject = getServoyModel().getActiveProject();
+		if (activeProject != null && activeProject.getProject().getName().equals(project.getName()))
+		{
+			String[] array = ApplicationServerSingleton.get().getServerManager().getServerNames(true, false, false, true);
+			for (String server_name : array)
+			{
+				IServerInternal server = (IServerInternal)ApplicationServerSingleton.get().getServerManager().getServer(server_name, true, false);
+				boolean existing = false;
+				for (String name : ApplicationServerSingleton.get().getServerManager().getKnownDriverClassNames())
+				{
+					if (name.equals(server.getConfig().getDriver()))
+					{
+						existing = true;
+						break;
+					}
+				}
+				if (!existing)
+				{
+					ServoyMarker mk = MarkerMessages.MissingDriver.fill(server_name, server.getConfig().getDriver());
+					IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, null);
+					try
+					{
+						marker.setAttribute("serverName", server_name); //$NON-NLS-1$
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+			}
+
+		}
+	}
+
 	public void refreshDBIMarkers()
 	{
 		// do not delete or add dbi marker here
@@ -3332,7 +3371,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				marker.setAttribute(IMarker.LOCATION, location);
 			}
 
-			if (persist != null)
+			if (persist != null || type.equals(MISSING_DRIVER))
 			{
 				addExtensionMarkerAttributes(marker, persist);
 			}

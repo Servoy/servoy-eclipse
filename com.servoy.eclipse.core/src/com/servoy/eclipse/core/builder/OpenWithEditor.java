@@ -7,6 +7,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.core.resource.ServerEditorInput;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -25,17 +27,28 @@ public class OpenWithEditor implements IMarkerAttributeContributor
 	public void contributeToMarker(IMarker marker, IPersist persist)
 	{
 		String contentTypeIdentifier = null;
-		if (persist.getAncestor(IRepository.FORMS) != null && !(persist instanceof ScriptVariable) && !(persist instanceof ScriptMethod))
+		try
 		{
-			contentTypeIdentifier = PersistEditorInput.FORM_RESOURCE_ID;
+			if (marker.getType().equals(ServoyBuilder.MISSING_DRIVER))
+			{
+				contentTypeIdentifier = ServerEditorInput.SERVER_RESOURCE_ID;
+			}
+			else if (persist.getAncestor(IRepository.FORMS) != null && !(persist instanceof ScriptVariable) && !(persist instanceof ScriptMethod))
+			{
+				contentTypeIdentifier = PersistEditorInput.FORM_RESOURCE_ID;
+			}
+			else if (persist.getAncestor(IRepository.RELATIONS) != null)
+			{
+				contentTypeIdentifier = PersistEditorInput.RELATION_RESOURCE_ID;
+			}
+			else if (persist.getAncestor(IRepository.VALUELISTS) != null)
+			{
+				contentTypeIdentifier = PersistEditorInput.VALUELIST_RESOURCE_ID;
+			}
 		}
-		else if (persist.getAncestor(IRepository.RELATIONS) != null)
+		catch (CoreException e1)
 		{
-			contentTypeIdentifier = PersistEditorInput.RELATION_RESOURCE_ID;
-		}
-		else if (persist.getAncestor(IRepository.VALUELISTS) != null)
-		{
-			contentTypeIdentifier = PersistEditorInput.VALUELIST_RESOURCE_ID;
+			ServoyLog.logError(e1);
 		}
 		if (contentTypeIdentifier != null)
 		{
@@ -48,7 +61,10 @@ public class OpenWithEditor implements IMarkerAttributeContributor
 						PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
 							Platform.getContentTypeManager().getContentType(contentTypeIdentifier)).getId());
 				}
-				marker.setAttribute("elementUuid", persist.getUUID().toString()); //$NON-NLS-1$
+				if (persist != null)
+				{
+					marker.setAttribute("elementUuid", persist.getUUID().toString()); //$NON-NLS-1$
+				}
 			}
 			catch (CoreException e)
 			{
