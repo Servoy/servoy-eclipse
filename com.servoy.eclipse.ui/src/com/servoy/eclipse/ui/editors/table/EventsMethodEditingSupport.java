@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
 
 import java.util.Iterator;
@@ -33,9 +33,9 @@ import com.servoy.eclipse.ui.editors.MethodCellEditor;
 import com.servoy.eclipse.ui.editors.table.EventsComposite.EventNode;
 import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
+import com.servoy.eclipse.ui.property.MethodPropertyController.MethodValueEditor;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
-import com.servoy.eclipse.ui.property.MethodPropertyController.MethodValueEditor;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
@@ -105,7 +105,7 @@ public class EventsMethodEditingSupport extends EditingSupport
 			}
 			else
 			{
-				tableNode = node.getSolution().createNewTableNode(table.getServerName(), table.getName());
+				tableNode = node.getSolution().createNewTableNode(table.getDataSource());
 			}
 			PersistPropertySource persistProperties = new PersistPropertySource(tableNode, node.getSolution(), false);
 			persistProperties.setPropertyValue(node.getType().getProperty(), value);
