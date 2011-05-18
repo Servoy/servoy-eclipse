@@ -165,9 +165,9 @@
                tooltip="Place SplitPane Wizard"/>               
          <action
                class="com.servoy.eclipse.designer.actions.AddMediaActionDelegate"
-               definitionId="com.servoy.eclipse.designer.action.addMedaAction"
+               definitionId="com.servoy.eclipse.designer.action.addMediaAction"
                icon="icons/image.gif"
-               id="com.servoy.eclipse.designer.action.addMedaAction"
+               id="com.servoy.eclipse.designer.action.addMediaAction"
                label="Place Image Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
@@ -316,7 +316,7 @@
             sequence="ALT+M1+S">
       </key>      
       <key
-            commandId="com.servoy.eclipse.designer.action.addMedaAction"
+            commandId="com.servoy.eclipse.designer.action.addMediaAction"
             contextId="com.servoy.eclipse.designer.context"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="ALT+M1+I">
@@ -468,7 +468,7 @@
       </command>      
       <command
             categoryId="com.servoy.eclipse.designer.category"
-            id="com.servoy.eclipse.designer.action.addMedaAction"
+            id="com.servoy.eclipse.designer.action.addMediaAction"
             description="Place Image"
             name="Place Image">
       </command>
