@@ -1141,7 +1141,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, o);
 											}
 										}
-										else if (foundPersist instanceof Form && !StaticContentSpecLoader.PROPERTY_EXTENDSID.equals(element.getName()) &&
+										else if (foundPersist instanceof Form &&
+											!StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName().equals(element.getName()) &&
 											!formCanBeInstantiated(((Form)foundPersist), flattenedSolution, formsAbstractChecked))
 										{
 											ServoyMarker mk = MarkerMessages.PropertyFormCannotBeInstantiated.fill(element.getName());
