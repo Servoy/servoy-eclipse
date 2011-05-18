@@ -16,26 +16,10 @@
  */
 package com.servoy.eclipse.designer.actions;
 
-import org.eclipse.gef.EditPart;
-import org.eclipse.gef.Request;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IWorkbenchPart;
 
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
-import com.servoy.eclipse.designer.editor.commands.DataRequest;
-import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.ui.dialogs.MediaContentProvider;
-import com.servoy.eclipse.ui.dialogs.MediaPreview;
-import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
-import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
-import com.servoy.eclipse.ui.labelproviders.MediaLabelProvider;
-import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
-import com.servoy.eclipse.ui.util.IControlFactory;
-import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.IPersist;
+import com.servoy.eclipse.designer.editor.commands.AddMediaAction;
+import com.servoy.eclipse.designer.editor.commands.DesignerToolbarAction;
 
 /**
  * Present the user available images via a dialog.
@@ -45,41 +29,11 @@ import com.servoy.j2db.persistence.IPersist;
  * @author rgansevles
  * 
  */
-public class AddMediaActionDelegate extends AbstractEditpartActionDelegate
+public class AddMediaActionDelegate extends BaseToolbarActionDelegate
 {
-	public AddMediaActionDelegate()
-	{
-		super(VisualFormEditor.REQ_PLACE_MEDIA);
-	}
-
 	@Override
-	protected Request createRequest(EditPart editPart)
+	protected DesignerToolbarAction createToolbarAction(IWorkbenchPart part)
 	{
-		if (!(editPart.getModel() instanceof IPersist))
-		{
-			return null;
-		}
-
-		final FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution((IPersist)editPart.getModel());
-		final TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS, new MediaContentProvider(
-			flattenedSolution), new SolutionContextDelegateLabelProvider(new MediaLabelProvider(flattenedSolution), flattenedSolution.getSolution()), null,
-			null, SWT.NONE, "Select image", new MediaContentProvider.MediaListOptions(false), null, false, TreeSelectDialog.MEDIA_DIALOG, null);
-		dialog.setOptionsAreaFactory(new IControlFactory()
-		{
-			public Control createControl(Composite composite)
-			{
-				return new MediaPreview(composite, SWT.NONE, flattenedSolution, dialog.getTreeViewer(), dialog.getDialogBoundsSettings());
-			}
-		});
-		dialog.open();
-
-		if (dialog.getReturnCode() == Window.CANCEL)
-		{
-			return null;
-		}
-
-		// single selection
-		return new DataRequest(getRequestType(),
-			flattenedSolution.getMedia(((Integer)((IStructuredSelection)dialog.getSelection()).getFirstElement()).intValue()));
+		return new AddMediaAction(part);
 	}
 }

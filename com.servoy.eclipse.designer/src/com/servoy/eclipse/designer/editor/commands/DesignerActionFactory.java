@@ -523,4 +523,24 @@ public abstract class DesignerActionFactory extends ActionFactory
 			return action;
 		}
 	};
+
+	public static final String ADD_MEDIA_TEXT = "Place Image Wizard";
+	public static final String ADD_MEDIA_TOOLTIP = ADD_MEDIA_TEXT;
+	public static final ImageDescriptor ADD_MEDIA_IMAGE = Activator.loadImageDescriptorFromBundle("image.gif");
+	public static final ActionFactory ADD_MEDIA = new ActionFactory("place-image") {//$NON-NLS-1$
+
+		@Override
+		public IWorkbenchAction create(IWorkbenchWindow window)
+		{
+			if (window == null)
+			{
+				throw new IllegalArgumentException();
+			}
+			RetargetAction action = new RetargetAction(getId(), ADD_MEDIA_TEXT);
+			action.setToolTipText(ADD_MEDIA_TOOLTIP);
+			window.getPartService().addPartListener(action);
+			action.setImageDescriptor(ADD_MEDIA_IMAGE);
+			return action;
+		}
+	};
 }

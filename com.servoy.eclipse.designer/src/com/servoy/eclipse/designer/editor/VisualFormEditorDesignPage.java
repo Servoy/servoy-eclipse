@@ -108,6 +108,7 @@ import com.servoy.eclipse.designer.actions.ViewerTogglePropertyAction;
 import com.servoy.eclipse.designer.actions.ZOrderAction;
 import com.servoy.eclipse.designer.dnd.FormElementTransferDropTarget;
 import com.servoy.eclipse.designer.editor.commands.AddFieldAction;
+import com.servoy.eclipse.designer.editor.commands.AddMediaAction;
 import com.servoy.eclipse.designer.editor.commands.AddPortalAction;
 import com.servoy.eclipse.designer.editor.commands.AddSplitpaneAction;
 import com.servoy.eclipse.designer.editor.commands.AddTabpanelAction;
@@ -477,6 +478,10 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
 
+		action = new AddMediaAction(editorPart);
+		getActionRegistry().registerAction(action);
+		getSelectionActions().add(action.getId());
+
 		action = new AddFieldAction(editorPart);
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
@@ -587,6 +592,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	protected void fillToolbar()
 	{
 		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_FIELD.getId()));
+		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_MEDIA.getId()));
 		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_PORTAL.getId()));
 		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_SPLITPANE.getId()));
 		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_TAB.getId()));
