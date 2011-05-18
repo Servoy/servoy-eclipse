@@ -290,7 +290,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			// use superform selected by user
 			Form superForm = newFormWizardPage.getSuperForm();
-			form.setExtendsFormID(superForm == null ? 0 : superForm.getID());
+			form.setExtendsID(superForm == null ? 0 : superForm.getID());
 
 			// add selected data providers
 			Object[] dataProviders = dataProviderWizardPage.getDataProviders();
@@ -840,9 +840,18 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 					// extendsFormID
 					int extendsFormID = Form.NAVIGATOR_DEFAULT;
+					String formExtendsName = null;
 					if (formObject.has(StaticContentSpecLoader.PROPERTY_EXTENDSFORMID.getPropertyName()))
 					{
-						Form form = flattenedSolution.getForm(formObject.getString(StaticContentSpecLoader.PROPERTY_EXTENDSFORMID.getPropertyName()));
+						formExtendsName = formObject.getString(StaticContentSpecLoader.PROPERTY_EXTENDSFORMID.getPropertyName());
+					}
+					else if (formObject.has(StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName()))
+					{
+						formExtendsName = formObject.getString(StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName());
+					}
+					if (formExtendsName != null)
+					{
+						Form form = flattenedSolution.getForm(formExtendsName);
 						if (form != null)
 						{
 							extendsFormID = form.getID();

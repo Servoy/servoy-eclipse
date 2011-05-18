@@ -89,6 +89,7 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
@@ -780,6 +781,8 @@ public class ElementFactory
 		// remove some properties
 		object.remove(SolutionSerializer.PROP_UUID);
 
+		int typeId = object.optInt(SolutionSerializer.PROP_TYPEID);
+
 		// adjust location, make relative to base
 		if (base != null && object.has("location")) //$NON-NLS-1$
 		{
@@ -816,7 +819,7 @@ public class ElementFactory
 					}
 				}
 			}
-			else if (key.endsWith("FormID")) //$NON-NLS-1$
+			else if (key.endsWith("FormID") || (typeId == IRepository.FORMS && StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName().equals(key))) //$NON-NLS-1$
 			{
 				// replace form references with their string name to be resolved when template is applied
 				UUID uuid;
