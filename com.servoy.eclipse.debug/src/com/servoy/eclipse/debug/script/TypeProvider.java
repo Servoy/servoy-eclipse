@@ -206,6 +206,16 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			context.markInvariant(type);
 			return type;
 		}
+		else if (typeName.equals("byte"))
+		{
+			// special supprot for byte type (mostly used in Array<byte>)
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVASCRIPT);
+			type.setSuperType(context.getKnownType("Object", mode));
+			context.markInvariant(type);
+			return type;
+		}
 		return super.getType(context, typeName);
 	}
 

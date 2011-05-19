@@ -741,7 +741,20 @@ public abstract class TypeCreator
 					{
 						name = name.substring(1, name.length() - 1);
 					}
-					parameters[i] = new ScriptParameter(name, null, optional, vararg);
+					String type = null;
+					if (removeOptional && i < member.getParameterTypes().length)
+					{
+						Class< ? > paramClass = member.getParameterTypes()[i];
+						if (paramClass.isArray())
+						{
+							type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getComponentType().getName()) + "[]";
+						}
+						else
+						{
+							type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getName());
+						}
+					}
+					parameters[i] = new ScriptParameter(name, type, optional, vararg);
 				}
 			}
 			else if (memberParamLength == parameterNames.length)
@@ -1096,6 +1109,10 @@ public abstract class TypeCreator
 			else if (returnType.isPrimitive() || Number.class.isAssignableFrom(returnType))
 			{
 				if (returnType.isAssignableFrom(boolean.class)) return Boolean.class;
+				if (returnType.isAssignableFrom(byte.class))
+				{
+					return byte.class;
+				}
 				return Number.class;
 			}
 			else if (returnType == Object.class || returnType == String.class || Date.class.isAssignableFrom(returnType))
