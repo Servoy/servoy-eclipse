@@ -290,8 +290,12 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			// use superform selected by user
 			Form superForm = newFormWizardPage.getSuperForm();
+			if (superForm != null && template == null)
+			{
+				form.clearProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
+				form.clearProperty(StaticContentSpecLoader.PROPERTY_SHOWINMENU.getPropertyName());
+			}
 			form.setExtendsID(superForm == null ? 0 : superForm.getID());
-
 			// add selected data providers
 			Object[] dataProviders = dataProviderWizardPage.getDataProviders();
 			if (dataProviders != null && dataProviders.length > 0)
