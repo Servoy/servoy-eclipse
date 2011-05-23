@@ -70,6 +70,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ErrorKeeper;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -572,11 +573,12 @@ public class SolutionDeserializer
 	 * @param parent
 	 * @param scriptObjects
 	 */
-	private void testDuplicates(ISupportChilds parent, List<JSONObject> scriptObjects)
+	private void testDuplicates(final ISupportChilds parent, List<JSONObject> scriptObjects)
 	{
-		if (scriptObjects != null)
+		if (scriptObjects != null && scriptObjects.size() > 0)
 		{
 			HashMap<String, JSONObject> uuidToJson = new HashMap<String, JSONObject>(scriptObjects.size());
+			final HashMap<UUID, JSONObject> noParentDuplicates = new HashMap<UUID, JSONObject>(scriptObjects.size());
 			for (JSONObject object : scriptObjects)
 			{
 				if (object.has(SolutionSerializer.PROP_UUID) && object.has(SolutionSerializer.PROP_NAME))
@@ -585,9 +587,11 @@ public class SolutionDeserializer
 					JSONObject duplicate = uuidToJson.put(uuid, object);
 					if (duplicate != null)
 					{
+						UUID uuidObject = UUID.fromString(uuid);
+						noParentDuplicates.remove(uuidObject);
 						try
 						{
-							IPersist persist = parent.getChild(UUID.fromString(uuid));
+							IPersist persist = parent.getChild(uuidObject);
 							if (persist instanceof ISupportName)
 							{
 								String name = ((ISupportName)persist).getName();
@@ -613,6 +617,50 @@ public class SolutionDeserializer
 						{
 							ServoyLog.logError(e);
 						}
+					}
+					else
+					{
+						noParentDuplicates.put(UUID.fromString(uuid), object);
+					}
+				}
+			}
+			if (noParentDuplicates.size() > 0 && ServoyModelFinder.getServoyModel().getActiveProject() != null)
+			{
+				ServoyProject[] projects = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
+				if (projects.length > 0)
+				{
+					for (ServoyProject servoyProject : projects)
+					{
+						Solution solution = servoyProject.getSolution();
+						if (solution == null) continue;
+						solution.acceptVisitor(new IPersistVisitor()
+						{
+							public Object visit(IPersist o)
+							{
+								if ((o instanceof IScriptProvider || o instanceof IVariable) && o.getParent() != parent)
+								{
+									JSONObject jsonObject = noParentDuplicates.get(o.getUUID());
+									if (jsonObject != null)
+									{
+										try
+										{
+											jsonObject.put(SolutionSerializer.PROP_UUID, UUID.randomUUID().toString());
+											noParentDuplicates.remove(o.getUUID());
+										}
+										catch (JSONException e)
+										{
+											ServoyLog.logError(e);
+										}
+									}
+								}
+								else if (o instanceof Solution || o instanceof Form || o instanceof TableNode)
+								{
+									return noParentDuplicates.size() == 0 ? null : IPersistVisitor.CONTINUE_TRAVERSAL;
+								}
+								return noParentDuplicates.size() == 0 ? null : IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+							}
+						});
+						if (noParentDuplicates.size() == 0) break;
 					}
 				}
 			}
