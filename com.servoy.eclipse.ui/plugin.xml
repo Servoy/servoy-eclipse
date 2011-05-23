@@ -725,6 +725,14 @@
             activityId="com.servoy.eclipse.activities.dltk"
             pattern="org\.eclipse\.dltk\..*/.*openMethod.*">
       </activityPatternBinding>
+ 	  <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.dltk"
+            pattern="org\.eclipse\.dltk\.ui\.edit\.text\.script\.open\.type\.hierarchy">
+      </activityPatternBinding>
+      <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.dltk"
+            pattern="org\.eclipse\.dltk\.ui\.edit\.text\.script\.open\.hierarchy">
+      </activityPatternBinding>      
       <activityPatternBinding
             activityId="com.servoy.eclipse.activities.xml"
             pattern="org\.eclipse\.wst\.xml\..*/.*">
