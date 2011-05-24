@@ -133,11 +133,23 @@ public class SolutionDeserializer
 	private final IDeveloperRepository repository;
 	private final ErrorKeeper<File, Exception> errorKeeper;
 	private static final Map<UUID, HashSet<UUID>> alreadyUsedUUID = new HashMap<UUID, HashSet<UUID>>(16, 0.9f);
+	private final File jsFile;
+	private final String jsContent;
 
 	public SolutionDeserializer(IDeveloperRepository repository, ErrorKeeper<File, Exception> errorKeeper)
 	{
 		this.repository = repository;
 		this.errorKeeper = errorKeeper;
+		this.jsFile = null;
+		this.jsContent = null;
+	}
+
+	public SolutionDeserializer(IDeveloperRepository repository, ErrorKeeper<File, Exception> errorKeeper, File jsFile, String jsContent)
+	{
+		this.repository = repository;
+		this.errorKeeper = errorKeeper;
+		this.jsFile = jsFile;
+		this.jsContent = jsContent;
 	}
 
 	public static JSONObject getJSONObject(String content)
@@ -848,7 +860,11 @@ public class SolutionDeserializer
 	@SuppressWarnings("nls")
 	private List<JSONObject> parseJSFile(File file, boolean markAsChanged) throws JSONException
 	{
-		String fileContent = Utils.getTXTFileContent(file, Charset.forName("UTF8")); //$NON-NLS-1$
+		String fileContent = jsContent;
+		if (jsFile != file)
+		{
+			fileContent = Utils.getTXTFileContent(file, Charset.forName("UTF8")); //$NON-NLS-1$
+		}
 		if (fileContent == null) return Collections.<JSONObject> emptyList();
 
 		StringBuilder sbfileContent = null;

@@ -318,4 +318,11 @@
             name="Servoy Active Solution Filter">
       </problemFilter>
    </extension>
+   <extension
+         point="org.eclipse.dltk.ui.saveParticipants">
+      <saveParticipant
+            class="com.servoy.eclipse.core.repository.JavaScriptFilePostSaveListener"
+            nature="org.eclipse.dltk.javascript.core.nature">
+      </saveParticipant>
+   </extension>
 </plugin>

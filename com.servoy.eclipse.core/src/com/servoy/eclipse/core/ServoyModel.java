@@ -1814,9 +1814,135 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 			changedFiles.add(fileRd.getResource().getLocation().toFile());
 		}
 
+		changedFiles.removeAll(ignoreOnceFiles);
+		ignoreOnceFiles.clear();
+		if (changedFiles.size() == 0)
+		{
+			return;
+		}
+
 		final ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName());
+		final IContainer workspace = project.getParent();
 
 		SolutionDeserializer sd = new SolutionDeserializer(getDeveloperRepository(), servoyProject);
+		final Set<ISupportChilds> changedScriptParents = handleChangedFiles(project, solution, changedFiles, servoyProject, workspace, sd);
+		// Regenerate script files for parents that have changed script elements.
+		if (changedScriptParents.size() > 0)
+		{
+			final Job job = new UIJob("Check changed script files")
+			{
+
+				@Override
+				public IStatus runInUIThread(IProgressMonitor monitor)
+				{
+					//if (true) return Status.OK_STATUS;
+					for (ISupportChilds parent : changedScriptParents)
+					{
+						final IFile scriptFile = workspace.getFile(new Path(SolutionSerializer.getScriptPath(parent, false)));
+						MultiTextEdit textEdit = getScriptFileChanges(parent, scriptFile);
+
+						if (textEdit.getChildrenSize() > 0)
+						{
+							// ignore the next time once. So that it won't be parsed again.
+							addIgnoreFile(scriptFile.getLocation().toFile());
+
+							ITextFileBufferManager textFileBufferManager = FileBuffers.getTextFileBufferManager();
+							try
+							{
+								textFileBufferManager.connect(scriptFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
+							}
+							catch (CoreException e)
+							{
+								ServoyLog.logError(e);
+								continue;
+							}
+
+							try
+							{
+								ITextFileBuffer textFileBuffer = textFileBufferManager.getTextFileBuffer(scriptFile.getFullPath(), LocationKind.IFILE);
+								IDocument document = textFileBuffer.getDocument();
+
+								FileEditorInput editorInput = new FileEditorInput(scriptFile);
+								final IEditorPart openEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow() == null ? null
+									: PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(editorInput);
+
+								boolean dirty = openEditor != null ? openEditor.isDirty() : textFileBuffer.isDirty();
+
+								try
+								{
+									textEdit.apply(document);
+								}
+								catch (Exception e)
+								{
+									ServoyLog.logError(e);
+								}
+
+								if (!dirty)
+								{
+									if (openEditor != null)
+									{
+										openEditor.doSave(monitor);
+									}
+									else
+									{
+										try
+										{
+											textFileBuffer.commit(monitor, true);
+										}
+										catch (CoreException e)
+										{
+											ServoyLog.logError(e);
+										}
+									}
+								}
+							}
+							finally
+							{
+								try
+								{
+									textFileBufferManager.disconnect(scriptFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
+								}
+								catch (CoreException e)
+								{
+									ServoyLog.logError(e);
+								}
+							}
+						}
+					}
+					return Status.OK_STATUS;
+				}
+			};
+
+			job.setUser(false);
+			job.setSystem(true);
+			job.setRule(getWorkspace().getRoot());
+			// Schedule the job in the UI thread, the job is only scheduled when the UI thread is released (may be held by
+			// EclipseRepository.updateNodesInWorkspace())
+			// deadlock situation: scriptjob is waits for UI thread but keeps workspace rule, second job in EclipseRepository.updateNodesInWorkspace
+			// is not started because of rule conflicting and main thread (in EclipseRepository.updateNodesInWorkspace) hold UI thread and waits for second job to finish (latch)
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					job.schedule();
+				}
+			});
+		}
+	}
+
+	/**
+	 * @param project
+	 * @param solution
+	 * @param changedFiles
+	 * @param servoyProject
+	 * @param workspace
+	 * @param sd
+	 * @return
+	 * @throws RepositoryException
+	 */
+	public Set<ISupportChilds> handleChangedFiles(IProject project, Solution solution, List<File> changedFiles, final ServoyProject servoyProject,
+		final IContainer workspace, SolutionDeserializer sd) throws RepositoryException
+	{
 		List<IPersist> strayCats = new ArrayList<IPersist>();
 		String oldModules = solution.getModulesNames();
 		List<File> nonvistedFiles = sd.updateSolution(project.getLocation().toFile(), solution, changedFiles, strayCats, false, false);
@@ -1864,7 +1990,6 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 			}
 		});
 
-		final IContainer workspace = project.getParent();
 		File wsDir = workspace.getLocation().toFile();
 
 		boolean securityInfoChanged = false;
@@ -1970,164 +2095,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		{
 			fireActiveProjectUpdated(IActiveProjectListener.SECURITY_INFO_CHANGED);
 		}
-		// Regenerate script files for parents that have changed script elements.
-		if (changedScriptParents.size() > 0)
-		{
-			final Job job = new UIJob("Check changed script files")
-			{
-
-				@Override
-				public IStatus runInUIThread(IProgressMonitor monitor)
-				{
-					//if (true) return Status.OK_STATUS;
-					for (ISupportChilds parent : changedScriptParents)
-					{
-						final IFile scriptFile = workspace.getFile(new Path(SolutionSerializer.getScriptPath(parent, false)));
-						MultiTextEdit textEdit = new MultiTextEdit();
-
-						Script parse = JavaScriptParserUtil.parse(DLTKCore.createSourceModuleFrom(scriptFile));
-						List<Statement> statements = parse.getStatements();
-						for (Statement statement : statements)
-						{
-							if (statement instanceof VoidExpression)
-							{
-								IPersist persist = null;
-								Expression expression = ((VoidExpression)statement).getExpression();
-								if (expression instanceof VariableStatement)
-								{
-									VariableDeclaration decl = ((VariableStatement)expression).getVariables().get(0);
-
-									if (parent instanceof Form)
-									{
-										persist = ((Form)parent).getScriptVariable(decl.getVariableName());
-									}
-									else if (parent instanceof Solution)
-									{
-										persist = ((Solution)parent).getScriptVariable(decl.getVariableName());
-									}
-								}
-								else if (expression instanceof FunctionStatement)
-								{
-									String name = ((FunctionStatement)expression).getName().getName();
-									if (parent instanceof Form)
-									{
-										persist = ((Form)parent).getScriptMethod(name);
-									}
-									else if (parent instanceof Solution)
-									{
-										persist = ((Solution)parent).getScriptMethod(name);
-									}
-									else if (parent instanceof TableNode)
-									{
-										persist = ((TableNode)parent).getScriptCalculation(name);
-									}
-								}
-								if (persist != null)
-								{
-									Comment documentation = expression.getDocumentation();
-									String comment = SolutionSerializer.getComment(persist, getDeveloperRepository());
-									if (documentation == null || !documentation.getText().equals(comment.trim()))
-									{
-										if (documentation == null)
-										{
-											if (!comment.endsWith("\n")) comment += "\n";
-											textEdit.addChild(new InsertEdit(statement.sourceStart(), comment));
-										}
-										else
-										{
-											textEdit.addChild(new ReplaceEdit(documentation.sourceStart(), documentation.sourceEnd() -
-												documentation.sourceStart(), comment.trim()));
-										}
-									}
-								}
-
-							}
-						}
-
-						if (textEdit.getChildrenSize() > 0)
-						{
-							ITextFileBufferManager textFileBufferManager = FileBuffers.getTextFileBufferManager();
-							try
-							{
-								textFileBufferManager.connect(scriptFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
-							}
-							catch (CoreException e)
-							{
-								ServoyLog.logError(e);
-								continue;
-							}
-
-							try
-							{
-								ITextFileBuffer textFileBuffer = textFileBufferManager.getTextFileBuffer(scriptFile.getFullPath(), LocationKind.IFILE);
-								IDocument document = textFileBuffer.getDocument();
-
-								FileEditorInput editorInput = new FileEditorInput(scriptFile);
-								final IEditorPart openEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow() == null ? null
-									: PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(editorInput);
-
-								boolean dirty = openEditor != null ? openEditor.isDirty() : textFileBuffer.isDirty();
-
-								try
-								{
-									textEdit.apply(document);
-								}
-								catch (Exception e)
-								{
-									ServoyLog.logError(e);
-								}
-
-								if (!dirty)
-								{
-									if (openEditor != null)
-									{
-										openEditor.doSave(monitor);
-									}
-									else
-									{
-										try
-										{
-											textFileBuffer.commit(monitor, true);
-										}
-										catch (CoreException e)
-										{
-											ServoyLog.logError(e);
-										}
-									}
-								}
-							}
-							finally
-							{
-								try
-								{
-									textFileBufferManager.disconnect(scriptFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
-								}
-								catch (CoreException e)
-								{
-									ServoyLog.logError(e);
-								}
-							}
-						}
-					}
-					return Status.OK_STATUS;
-				}
-			};
-
-			job.setUser(false);
-			job.setSystem(true);
-			job.setRule(getWorkspace().getRoot());
-			// Schedule the job in the UI thread, the job is only scheduled when the UI thread is released (may be held by
-			// EclipseRepository.updateNodesInWorkspace())
-			// deadlock situation: scriptjob is waits for UI thread but keeps workspace rule, second job in EclipseRepository.updateNodesInWorkspace
-			// is not started because of rule conflicting and main thread (in EclipseRepository.updateNodesInWorkspace) hold UI thread and waits for second job to finish (latch)
-			Display.getDefault().asyncExec(new Runnable()
-			{
-				public void run()
-				{
-					job.schedule();
-				}
-			});
-		}
+		return changedScriptParents;
 	}
 
 	public boolean isActiveProject(String name)
@@ -2623,5 +2591,85 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 			}
 		};
 		updateServoyWorkingSet.schedule();
+	}
+
+	/**
+	 * @param parent
+	 * @param scriptFile
+	 * @return
+	 */
+	public MultiTextEdit getScriptFileChanges(ISupportChilds parent, final IFile scriptFile)
+	{
+		MultiTextEdit textEdit = new MultiTextEdit();
+
+		Script parse = JavaScriptParserUtil.parse(DLTKCore.createSourceModuleFrom(scriptFile));
+		List<Statement> statements = parse.getStatements();
+		for (Statement statement : statements)
+		{
+			if (statement instanceof VoidExpression)
+			{
+				IPersist persist = null;
+				Expression expression = ((VoidExpression)statement).getExpression();
+				if (expression instanceof VariableStatement)
+				{
+					VariableDeclaration decl = ((VariableStatement)expression).getVariables().get(0);
+
+					if (parent instanceof Form)
+					{
+						persist = ((Form)parent).getScriptVariable(decl.getVariableName());
+					}
+					else if (parent instanceof Solution)
+					{
+						persist = ((Solution)parent).getScriptVariable(decl.getVariableName());
+					}
+				}
+				else if (expression instanceof FunctionStatement)
+				{
+					String name = ((FunctionStatement)expression).getName().getName();
+					if (parent instanceof Form)
+					{
+						persist = ((Form)parent).getScriptMethod(name);
+					}
+					else if (parent instanceof Solution)
+					{
+						persist = ((Solution)parent).getScriptMethod(name);
+					}
+					else if (parent instanceof TableNode)
+					{
+						persist = ((TableNode)parent).getScriptCalculation(name);
+					}
+				}
+				if (persist != null)
+				{
+					Comment documentation = expression.getDocumentation();
+					String comment = SolutionSerializer.getComment(persist, getDeveloperRepository());
+					if (documentation == null || !documentation.getText().equals(comment.trim()))
+					{
+						if (documentation == null)
+						{
+							if (!comment.endsWith("\n")) comment += "\n";
+							textEdit.addChild(new InsertEdit(statement.sourceStart(), comment));
+						}
+						else
+						{
+							textEdit.addChild(new ReplaceEdit(documentation.sourceStart(), documentation.sourceEnd() - documentation.sourceStart(),
+								comment.trim()));
+						}
+					}
+				}
+
+			}
+		}
+		return textEdit;
+	}
+
+	private final List<File> ignoreOnceFiles = Collections.synchronizedList(new ArrayList<File>());
+
+	/**
+	 * @param file
+	 */
+	public void addIgnoreFile(File file)
+	{
+		ignoreOnceFiles.add(file);
 	}
 }
