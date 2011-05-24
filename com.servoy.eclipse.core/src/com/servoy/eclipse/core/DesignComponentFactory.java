@@ -106,7 +106,7 @@ public class DesignComponentFactory extends ComponentFactory
 					}
 					else if (orient == TabPanel.SPLIT_HORIZONTAL || orient == TabPanel.SPLIT_VERTICAL)
 					{
-						SpecialSplitPane splitPane = new SpecialSplitPane(application, orient, true);
+						SpecialSplitPane splitPane = new SpecialSplitPane(application, null /* no scriptable */, orient, true);
 						applyBasicComponentProperties(application, splitPane, (BaseComponent)meta,
 							getStyleForBasicComponent(application, (BaseComponent)meta, form));
 
