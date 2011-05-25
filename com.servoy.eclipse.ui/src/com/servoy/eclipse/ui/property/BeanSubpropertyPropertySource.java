@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.property;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -181,7 +182,11 @@ public class BeanSubpropertyPropertySource extends ComplexPropertySource<Object>
 		// try default constructor for type.
 		try
 		{
-			return propertyDescriptor.getPropertyType().newInstance();
+			int modifiers = propertyDescriptor.getPropertyType().getModifiers();
+			if ((modifiers & Modifier.PUBLIC) != 0 && (modifiers & Modifier.ABSTRACT) == 0)
+			{
+				return propertyDescriptor.getPropertyType().newInstance();
+			}
 		}
 		catch (Exception e)
 		{
