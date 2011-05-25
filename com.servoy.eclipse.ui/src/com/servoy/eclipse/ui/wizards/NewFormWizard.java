@@ -27,6 +27,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -508,11 +509,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			extendsFormViewer = new TreeSelectViewer(topLevel, SWT.NONE);
 			extendsFormViewer.setTitleText("Select super form");
 
-			final FlattenedSolution flattenedSolution = servoyProject.getEditingFlattenedSolution();
-			extendsFormViewer.setContentProvider(new FormContentProvider(flattenedSolution, null));
-			extendsFormViewer.setInput(new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, false, true, false));
-			extendsFormViewer.setLabelProvider(new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedSolution, true),
-				flattenedSolution.getSolution()));
+			updateExtendsFormViewer(servoyProject.getEditingFlattenedSolution());
 			extendsFormViewer.addStatusChangedListener(new IStatusChangedListener()
 			{
 				public void statusChanged(boolean valid)
@@ -565,7 +562,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				{
 					try
 					{
-						handleTemplateSelected(flattenedSolution);
+						handleTemplateSelected(servoyProject.getEditingFlattenedSolution());
 					}
 					catch (Exception e)
 					{
@@ -627,6 +624,17 @@ public class NewFormWizard extends Wizard implements INewWizard
 			{
 				extendsFormViewer.setSelection(new StructuredSelection(new Integer(Form.NAVIGATOR_NONE)));
 			}
+		}
+
+		/**
+		 * @param flattenedSolution
+		 */
+		public void updateExtendsFormViewer(final FlattenedSolution flattenedSolution)
+		{
+			extendsFormViewer.setContentProvider(new FormContentProvider(flattenedSolution, null));
+			extendsFormViewer.setInput(new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false));
+			extendsFormViewer.setLabelProvider(new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedSolution, true),
+				flattenedSolution.getSolution()));
 		}
 
 		/*
@@ -797,8 +805,6 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			if (superForm == null || superForm.getDataSource() == null)
 			{
-				// project combo can now have everything again.
-				fillProjectCombo();
 				dataSourceViewer.setEditable(true);
 			}
 			else
@@ -807,14 +813,6 @@ public class NewFormWizard extends Wizard implements INewWizard
 				dataSourceViewer.setSelection(new StructuredSelection(new TableWrapper(superForm.getServerName(), superForm.getTableName())));
 				dataSourceViewer.setEditable(false);
 				styleNameCombo.setSelection(new StructuredSelection(superForm.getStyleName() == null ? "" : superForm.getStyleName()));
-
-				// projectCombo should only display the solution or a module
-				// of the selected extend form.
-				projectCombo.setInput(getReferringProjects(superForm));
-
-				// select the solution of the extend form.
-				projectCombo.setSelection(new StructuredSelection(ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
-					superForm.getSolution().getName())));
 			}
 			dataSourceViewer.setButtonText((superForm == null || superForm.getDataSource() == null) ? TreeSelectViewer.DEFAULT_BUTTON_TEXT : "");
 		}
@@ -882,6 +880,12 @@ public class NewFormWizard extends Wizard implements INewWizard
 			if (selection.size() == 1)
 			{
 				servoyProject = ((ServoyProject)selection.getFirstElement());
+			}
+			if (servoyProject != null)
+			{
+				ISelection sel = extendsFormViewer.getSelection();
+				updateExtendsFormViewer(servoyProject.getEditingFlattenedSolution());
+				extendsFormViewer.setSelection(sel);
 			}
 			setPageComplete(validatePage());
 		}
