@@ -2887,7 +2887,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return pd;
 		}
 
-		if (name.equals("extendsID"))
+		if (name.equals("extendsID") && persist instanceof Form)
 		{
 			if (form == null) return null;
 			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, true), context);
@@ -2907,7 +2907,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 							if (returnValue != null)
 							{
 								Form f = (Form)persist;
-								if (!Utils.equalObjects(new Integer(f.getExtendsFormID()), returnValue))
+								if (!Utils.equalObjects(new Integer(f.getExtendsID()), returnValue))
 								{
 									List<IPersist> overridePersists = new ArrayList<IPersist>();
 									for (IPersist child : f.getAllObjectsAsList())
