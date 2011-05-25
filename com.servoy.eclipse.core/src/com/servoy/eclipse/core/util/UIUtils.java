@@ -504,6 +504,7 @@ public class UIUtils
 		}
 		catch (InterruptedException e)
 		{
+			return false;
 		}
 		return pg.getColorModel().hasAlpha();
 	}
