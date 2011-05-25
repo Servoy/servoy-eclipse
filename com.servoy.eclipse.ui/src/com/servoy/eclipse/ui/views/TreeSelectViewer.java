@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.views;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -51,9 +52,9 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
-import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.layout.grouplayout.GroupLayout.ParallelGroup;
 import org.eclipse.swt.layout.grouplayout.GroupLayout.SequentialGroup;
+import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -680,7 +681,43 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 		{
 			text.addModifyListener(textModifyListener);
 		}
-		setValid(!getEditable() || getSelectionFilter().select(getValue()));
+		Object value = getValue();
+		boolean isValid = !getEditable() || getSelectionFilter().select(value);
+		// if valid and value is not null, check if the value can be resolved through the content provider.
+		if (isValid && value != null)
+		{
+			isValid = false;
+			Object parent = getContentProvider().getParent(value);
+			List<Object> path = new ArrayList<Object>();
+			path.add(value);
+			while (parent != null)
+			{
+				path.add(parent);
+				parent = getContentProvider().getParent(parent);
+			}
+			Object[] elements = getContentProvider().getElements(getInput());
+			for (int i = path.size(); --i >= 0;)
+			{
+				Object x = path.get(i);
+				for (Object object : elements)
+				{
+					if (x.equals(object))
+					{
+						if (i == 0)
+						{
+							isValid = true;
+						}
+						else
+						{
+							elements = getContentProvider().getChildren(x);
+						}
+						break;
+					}
+				}
+
+			}
+		}
+		setValid(isValid);
 	}
 
 	@Override
