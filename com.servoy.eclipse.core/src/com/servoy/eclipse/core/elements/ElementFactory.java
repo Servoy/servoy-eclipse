@@ -757,7 +757,7 @@ public class ElementFactory
 		if (templateType == StringResource.FORM_TEMPLATE)
 		{
 			json.put(Template.PROP_FORM,
-				cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, repository), null));
+				cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, false, repository), null));
 		}
 		json.put(Template.PROP_LOCATION, PersistHelper.createPointString(location));
 		JSONArray elements = new JSONArray();
@@ -768,7 +768,7 @@ public class ElementFactory
 
 		for (IPersist persist : array)
 		{
-			ServoyJSONObject object = SolutionSerializer.generateJSONObject(persist, true, repository);
+			ServoyJSONObject object = SolutionSerializer.generateJSONObject(persist, true, true, repository);
 			elements.put(cleanTemplateElement(repository, flattenedSolution, form, object, location));
 		}
 		json.put(Template.PROP_ELEMENTS, elements);

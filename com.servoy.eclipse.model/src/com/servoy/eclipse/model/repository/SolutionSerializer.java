@@ -61,6 +61,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
@@ -487,7 +488,7 @@ public class SolutionSerializer
 		ServoyJSONObject obj;
 		try
 		{
-			obj = generateJSONObject(persist, false, repository);
+			obj = generateJSONObject(persist, false, false, repository);
 			obj.setNewLines(false);
 			obj.remove("methodCode"); //$NON-NLS-1$
 			obj.remove("declaration"); //$NON-NLS-1$
@@ -562,7 +563,7 @@ public class SolutionSerializer
 			ServoyJSONObject obj;
 			try
 			{
-				obj = generateJSONObject(persist, forceRecursive, repository);
+				obj = generateJSONObject(persist, forceRecursive, false, repository);
 			}
 			catch (RepositoryException e)
 			{
@@ -755,14 +756,40 @@ public class SolutionSerializer
 	}
 
 	/**
+	 * Get the persist values as map, when makeFlattened is true, the map will contain all super-propewrties as well.
+	 * 
+	 * @param persist
+	 * @param repository
+	 * @param makeFlattened
+	 * @return
+	 * @throws RepositoryException
+	 */
+	public static Map<String, Object> getPersistAsValueMap(IPersist persist, IDeveloperRepository repository, boolean makeFlattened) throws RepositoryException
+	{
+		Map<String, Object> property_values = repository.getPersistAsValueMap(persist);
+		if (makeFlattened && persist instanceof AbstractBase)
+		{
+			IPersist superPersist = ((AbstractBase)persist).getSuperPersist();
+			if (superPersist != null)
+			{
+				Map<String, Object> flattened_property_values = getPersistAsValueMap(superPersist, repository, makeFlattened);
+				flattened_property_values.putAll(property_values);
+				return flattened_property_values;
+			}
+		}
+		return property_values;
+	}
+
+	/**
 	 * @param persist
 	 * @param repository
 	 * @return
 	 * @throws RepositoryException
 	 */
-	public static ServoyJSONObject generateJSONObject(IPersist persist, boolean forceRecursive, IDeveloperRepository repository) throws RepositoryException
+	public static ServoyJSONObject generateJSONObject(IPersist persist, boolean forceRecursive, boolean makeFlattened, IDeveloperRepository repository)
+		throws RepositoryException
 	{
-		Map<String, Object> property_values = repository.getPersistAsValueMap(persist);
+		Map<String, Object> property_values = getPersistAsValueMap(persist, repository, makeFlattened);
 
 		ContentSpec cs = repository.getContentSpec();
 		Iterator<ContentSpec.Element> iterator = cs.getPropertiesForObjectType(persist.getTypeID());
@@ -773,6 +800,12 @@ public class SolutionSerializer
 			if (element.isMetaData() || element.isDeprecated() || !property_values.containsKey(element.getName())) continue;
 
 			String propertyName = element.getName();
+			if (makeFlattened && StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName().equals(propertyName) && element.getTypeID() != IRepository.FORMS)
+			{
+				property_values.remove(propertyName);
+				continue; // we flattened the properties, ignore extends property
+			}
+
 			Object propertyObjectValue = property_values.get(propertyName);
 			boolean isBoolean = (propertyObjectValue instanceof Boolean);
 			boolean isNumber = (propertyObjectValue instanceof Number && element.getTypeID() != IRepository.ELEMENTS);//element_id for elements type becomes uuid
@@ -806,7 +839,8 @@ public class SolutionSerializer
 			while (it.hasNext())
 			{
 				child = it.next();
-				if (!(child instanceof IScriptProvider || child instanceof IVariable)) itemsArrayList.add(generateJSONObject(child, forceRecursive, repository));
+				if (!(child instanceof IScriptProvider || child instanceof IVariable)) itemsArrayList.add(generateJSONObject(child, forceRecursive,
+					makeFlattened, repository));
 			}
 			if (itemsArrayList.size() > 0)
 			{

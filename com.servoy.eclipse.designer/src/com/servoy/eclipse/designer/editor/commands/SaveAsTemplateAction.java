@@ -35,7 +35,6 @@ import org.json.JSONException;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
-import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Form;
@@ -76,7 +75,6 @@ public class SaveAsTemplateAction extends SelectionAction
 	@Override
 	protected boolean calculateEnabled()
 	{
-		if (DesignerUtil.containsInheritedElement(getSelectedObjects())) return false;
 		return getSelection() != null && !getSelection().isEmpty();
 	}
 
@@ -192,7 +190,7 @@ public class SaveAsTemplateAction extends SelectionAction
 			return;
 		}
 
-		persists = completeHierarchy(form, persists);
+		persists = completeContainment(form, persists);
 
 		ServoyModelManager.getServoyModelManager().getServoyModel();
 		EclipseRepository repository = (EclipseRepository)ServoyModel.getDeveloperRepository();
@@ -233,7 +231,7 @@ public class SaveAsTemplateAction extends SelectionAction
 	 * @param persists
 	 * @return
 	 */
-	private List<IPersist> completeHierarchy(Form form, List<IPersist> persists)
+	private List<IPersist> completeContainment(Form form, List<IPersist> persists)
 	{
 		List<IPersist> retval = new ArrayList<IPersist>();
 
@@ -242,13 +240,13 @@ public class SaveAsTemplateAction extends SelectionAction
 		{
 			if (persist != form)
 			{
-				while (persist.getParent() != form)
+				while (persist != null && !(persist instanceof Form) /* can be another form in case of inherited elements */)
 				{
+					if (!retval.contains(persist))
+					{
+						retval.add(persist);
+					}
 					persist = persist.getParent();
-				}
-				if (!retval.contains(persist))
-				{
-					retval.add(persist);
 				}
 			}
 		}
