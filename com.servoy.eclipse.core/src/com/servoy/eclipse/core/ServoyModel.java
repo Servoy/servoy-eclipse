@@ -1248,17 +1248,16 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 	 */
 	public void firePersistChanged(boolean realSolution, Object obj, boolean recursive)
 	{
+		flushFlattenedFormCache(realSolution); // looking up elements in firePersistChangedInternal may use out-of-date flattened forms
 		firePersistChangedInternal(realSolution, obj, recursive, new HashSet<Integer>());
 	}
 
-	public void firePersistChangedInternal(boolean realSolution, Object obj, boolean recursive, Set<Integer> visited)
+	private void firePersistChangedInternal(boolean realSolution, Object obj, boolean recursive, Set<Integer> visited)
 	{
 		// Protect against cycle in form extends relation.
-		if (obj instanceof IPersist)
+		if (obj instanceof IPersist && !visited.add(new Integer(((IPersist)obj).getID())))
 		{
-			Integer id = new Integer(((IPersist)obj).getID());
-			if (visited.contains(id)) return;
-			visited.add(id);
+			return;
 		}
 
 		List<IPersist> changed;
@@ -1377,6 +1376,22 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		firePersistsChanged(false, changed);
 	}
 
+	private void flushFlattenedFormCache(boolean realSolution)
+	{
+		if (realSolution)
+		{
+			getFlattenedSolution().flushFlattenedFormCache();
+		}
+		else
+		{
+			// editing solution, flush all flattened form caches in all servoy projects
+			for (ServoyProject project : getModulesOfActiveProject())
+			{
+				project.getEditingFlattenedSolution().flushFlattenedFormCache();
+			}
+		}
+	}
+
 	/**
 	 * Notify listeners of changes to persists. Changes can be notified for the real solutions or the editing solutions.
 	 * 
@@ -1387,9 +1402,9 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 	{
 		if (changes.size() == 0) return;
 
+		flushFlattenedFormCache(realSolution);
 		if (realSolution)
 		{
-			getFlattenedSolution().flushFlattenedFormCache();
 			synchronized (fireRealPersistchangesJob)
 			{
 				realOutstandingChanges.addAll(changes);
@@ -1399,11 +1414,6 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		}
 		else
 		{
-			// editing solution, flush all flattened form caches in all servoy projects
-			for (ServoyProject project : getModulesOfActiveProject())
-			{
-				project.getEditingFlattenedSolution().flushFlattenedFormCache();
-			}
 			firePersistsChangedEx(false, changes);
 		}
 	}
