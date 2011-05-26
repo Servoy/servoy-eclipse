@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.labelproviders;
 
 import org.eclipse.jface.viewers.LabelProvider;
@@ -25,6 +25,7 @@ import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 
 /**
@@ -39,12 +40,21 @@ public class RelatedFormsLabelProvider extends LabelProvider
 	public static final RelatedFormsLabelProvider INSTANCE_NO_IMAGE = new RelatedFormsLabelProvider(false);
 
 	private final boolean showImage;
+	private final Solution solution;
 
 	public RelatedFormsLabelProvider(boolean showImage)
 	{
 		this.showImage = showImage;
+		this.solution = null;
 	}
 
+	public RelatedFormsLabelProvider(boolean showImage, Solution solution)
+	{
+		this.showImage = showImage;
+		this.solution = solution;
+	}
+
+	@SuppressWarnings("nls")
 	@Override
 	public String getText(Object element)
 	{
@@ -58,11 +68,16 @@ public class RelatedFormsLabelProvider extends LabelProvider
 		}
 		if (element instanceof RelatedForm)
 		{
-			if (((RelatedForm)element).form == null)
+			Form form = ((RelatedForm)element).form;
+			if (form == null)
 			{
 				return RelationLabelProvider.INSTANCE_LAST_NAME_ONLY.getText(((RelatedForm)element).relations);
 			}
-			return getText(((RelatedForm)element).form);
+			if (solution != null && form.getSolution() != solution)
+			{
+				return getText(form) + " [" + form.getSolution().getName() + "]";
+			}
+			return getText(form);
 		}
 
 		if (element instanceof Table)

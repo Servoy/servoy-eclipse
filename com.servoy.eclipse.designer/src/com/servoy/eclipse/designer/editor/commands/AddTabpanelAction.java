@@ -73,8 +73,8 @@ public class AddTabpanelAction extends DesignerToolbarAction
 				return super.hasChildren(element) && !RelationContentProvider.NONE.equals(element);
 			}
 		};
-		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, true, TreePatternFilter.FILTER_LEAFS, contentProvider,
-			RelatedFormsLabelProvider.INSTANCE, null, new LeafnodesSelectionFilter(contentProvider), SWT.MULTI, getDialogTitle(), form, null, false,
+		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, true, TreePatternFilter.FILTER_LEAFS, contentProvider, new RelatedFormsLabelProvider(
+			true, form.getSolution()), null, new LeafnodesSelectionFilter(contentProvider), SWT.MULTI, getDialogTitle(), form, null, false,
 			TreeSelectDialog.TAB_DIALOG, null);
 		dialog.open();
 
