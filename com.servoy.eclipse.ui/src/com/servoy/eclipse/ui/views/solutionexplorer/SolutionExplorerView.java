@@ -125,10 +125,12 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.TextActionHandler;
+import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
@@ -467,6 +469,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private IAction i18nCreateFromDBAction;
 	private IAction i18nWriteToDBAction;
 	private I18NChangeListener i18nChangeListener;
+
+	private IAction filePropertiesAction;
 
 	//copy table action
 	private CopyTableAction copyTable;
@@ -2035,6 +2039,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		manager.add(cutAction);
 		manager.add(copyAction);
 		manager.add(pasteAction);
+
 		manager.add(new Separator());
 		if (searchTreeAction.isEnabled()) manager.add(searchTreeAction);
 		manager.add(new Separator());
@@ -2043,6 +2048,12 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		manager.add(collapseTreeAction);
 		manager.add(new Separator());
 		drillDownAdapter.addNavigationActions(manager);
+
+		if (selectedTreeNode != null && (selectedTreeNode.getType() == UserNodeType.SOLUTION || selectedTreeNode.getType() == UserNodeType.SOLUTION_ITEM))
+		{
+			manager.add(new Separator());
+			manager.add(filePropertiesAction);
+		}
 	}
 
 	private void fillListContextMenu(IMenuManager manager)
@@ -2219,6 +2230,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private void createActions()
 	{
 		moveSample = new MoveTextAction(this, true);
@@ -2475,6 +2487,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		fToggleOrientationActions = new OrientationAction[] { new OrientationAction(this, VIEW_ORIENTATION_VERTICAL), new OrientationAction(this,
 			VIEW_ORIENTATION_HORIZONTAL), new OrientationAction(this, VIEW_ORIENTATION_AUTOMATIC) };
+
+		filePropertiesAction = new PropertyDialogAction(getSite(), getSite().getSelectionProvider());
+		filePropertiesAction.setActionDefinitionId(IWorkbenchCommandConstants.FILE_PROPERTIES);
 	}
 
 	private void hookTreeDoubleClickAction()

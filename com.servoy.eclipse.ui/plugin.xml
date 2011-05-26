@@ -516,6 +516,16 @@
       <factory
             adaptableType="com.servoy.eclipse.ui.node.SimpleUserNode"
             class="com.servoy.eclipse.ui.views.solutionexplorer.SimpleUserNodeAdapterFactory">
+            <adapter type="org.eclipse.ui.model.IWorkbenchAdapter"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.eclipse.ui.node.SimpleUserNode"
+            class="com.servoy.eclipse.ui.views.solutionexplorer.SimpleUserNodeAdapterFactory">
+            <adapter type="org.eclipse.core.resources.IProject"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.eclipse.ui.node.SimpleUserNode"
+            class="com.servoy.eclipse.ui.views.solutionexplorer.SimpleUserNodeAdapterFactory">
             <adapter type="org.eclipse.core.resources.IResource"/>
       </factory>
       <factory

@@ -29,7 +29,9 @@ import org.eclipse.core.resources.mapping.ModelProvider;
 import org.eclipse.core.resources.mapping.ResourceMapping;
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.team.core.RepositoryProvider;
+import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -218,7 +220,7 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 			IPersist persist = null;
 			SimpleUserNode userNode = (SimpleUserNode)adaptableObject;
 			UserNodeType type = userNode.getType();
-			if (type == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE || userNode.isEnabled())
+			if (type == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE || type == UserNodeType.SOLUTION_ITEM || userNode.isEnabled())
 			{
 				Object realObject = userNode.getRealObject();
 				if (realObject instanceof ServoyProject)
@@ -360,6 +362,25 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 				}
 			}
 		}
+		else if (adapterType == IProject.class)
+		{
+			if (adaptableObject instanceof SimpleUserNode)
+			{
+				Object realObject = ((SimpleUserNode)adaptableObject).getRealObject();
+				if (realObject instanceof ServoyProject)
+				{
+					return ((ServoyProject)realObject).getProject();
+				}
+			}
+		}
+		else if (adapterType == IWorkbenchAdapter.class)
+		{
+			if (adaptableObject instanceof SimpleUserNode)
+			{
+				IResource resource = (IResource)Platform.getAdapterManager().getAdapter(adaptableObject, IResource.class);
+				if (resource != null) return Platform.getAdapterManager().getAdapter(resource, IWorkbenchAdapter.class);
+			}
+		}
 
 		return null;
 	}
@@ -391,7 +412,7 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 
 	public Class[] getAdapterList()
 	{
-		return new Class[] { ResourceMapping.class, IResource.class, Openable.class };
+		return new Class[] { ResourceMapping.class, IResource.class, Openable.class, IProject.class, IWorkbenchAdapter.class };
 	}
 
 }
