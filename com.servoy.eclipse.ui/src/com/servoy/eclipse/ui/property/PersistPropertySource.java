@@ -758,7 +758,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		/*
 		 * Category based property controllers.
 		 */
-
 		if (category == PropertyCategory.Events || category == PropertyCategory.Commands)
 		{
 			return new MethodPropertyController<Integer>(id, displayName, persistContext, true, category == PropertyCategory.Commands, form != null, true)
@@ -771,7 +770,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 						public MethodWithArguments convertProperty(Object id, Integer value)
 						{
 							SafeArrayList<Object> args = null;
-							if (persistContext.getPersist() instanceof AbstractBase)
+							if (persistContext != null && persistContext.getPersist() instanceof AbstractBase)
 							{
 								List<Object> instanceArgs = ((AbstractBase)persistContext.getPersist()).getInstanceMethodArguments(id.toString());
 								if (instanceArgs != null)
@@ -784,12 +783,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 						public Integer convertValue(Object id, MethodWithArguments value)
 						{
-							setInstancMethodArguments(persistContext.getPersist(), id, value.arguments);
+							if (persistContext != null) setInstancMethodArguments(persistContext.getPersist(), id, value.arguments);
 							return new Integer(value.methodId);
 						}
 					};
 
-					if (persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getExtendsID() > 0)
+					if (persistContext != null && persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getExtendsID() > 0)
 					{
 						// convert to the actual method called according to form inheritance
 						id2MethodsWithArgumentConverter = new ChainedPropertyConverter<Integer, MethodWithArguments, MethodWithArguments>(
@@ -1363,7 +1362,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		if (propertyDescriptor.propertyDescriptor.getPropertyType() == java.awt.Font.class)
 		{
 			final IDefaultValue<String> getLastPaintedFont;
-			if (persistContext.getPersist() instanceof AbstractBase)
+			if (persistContext != null && persistContext.getPersist() instanceof AbstractBase)
 			{
 				getLastPaintedFont = new IDefaultValue<String>()
 				{
@@ -2399,7 +2398,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		{
 			// cannot change table when we have a super-form that already has a data source
 			boolean propertyReadOnly = false;
-			if (!readOnly && persistContext.getPersist() instanceof Form && ((Form)persistContext.getPersist()).getExtendsID() > 0)
+			if (!readOnly && persistContext != null && persistContext.getPersist() instanceof Form && ((Form)persistContext.getPersist()).getExtendsID() > 0)
 			{
 				Form flattenedSuperForm = flattenedEditingSolution.getFlattenedForm(flattenedEditingSolution.getForm(((Form)persistContext.getPersist()).getExtendsID()));
 				propertyReadOnly = flattenedSuperForm == null /* superform not found? make readonly for safety */
@@ -2873,7 +2872,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		{
 			return MNEMONIC_CONTROLLER;
 		}
-		if (name.endsWith("navigatorID"))
+		if (name.endsWith("navigatorID") && persistContext != null && persistContext.getPersist() instanceof Form)
 		{
 			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, false),
 				persistContext.getContext());
@@ -2910,7 +2909,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return pd;
 		}
 
-		if (name.equals("extendsID") && persistContext.getPersist() instanceof Form)
+		if (name.equals("extendsID") && persistContext != null && persistContext.getPersist() instanceof Form)
 		{
 			if (form == null) return null;
 			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, true),
@@ -3058,7 +3057,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		if (name.endsWith("initialSort"))
 		{
 			final ITableDisplay tableDisplay;
-			if (persistContext.getPersist() instanceof Portal)
+			if (persistContext != null && persistContext.getPersist() instanceof Portal)
 			{
 				tableDisplay = new ITableDisplay()
 				{
