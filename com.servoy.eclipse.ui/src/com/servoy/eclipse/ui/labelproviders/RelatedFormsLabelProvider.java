@@ -25,7 +25,7 @@ import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Table;
 
 /**
@@ -34,27 +34,18 @@ import com.servoy.j2db.persistence.Table;
  * @author rgansevles
  * 
  */
-public class RelatedFormsLabelProvider extends LabelProvider
+public class RelatedFormsLabelProvider extends LabelProvider implements IPersistLabelProvider
 {
 	public static final RelatedFormsLabelProvider INSTANCE = new RelatedFormsLabelProvider(true);
 	public static final RelatedFormsLabelProvider INSTANCE_NO_IMAGE = new RelatedFormsLabelProvider(false);
 
 	private final boolean showImage;
-	private final Solution solution;
 
 	public RelatedFormsLabelProvider(boolean showImage)
 	{
 		this.showImage = showImage;
-		this.solution = null;
 	}
 
-	public RelatedFormsLabelProvider(boolean showImage, Solution solution)
-	{
-		this.showImage = showImage;
-		this.solution = solution;
-	}
-
-	@SuppressWarnings("nls")
 	@Override
 	public String getText(Object element)
 	{
@@ -68,16 +59,11 @@ public class RelatedFormsLabelProvider extends LabelProvider
 		}
 		if (element instanceof RelatedForm)
 		{
-			Form form = ((RelatedForm)element).form;
-			if (form == null)
+			if (((RelatedForm)element).form == null)
 			{
 				return RelationLabelProvider.INSTANCE_LAST_NAME_ONLY.getText(((RelatedForm)element).relations);
 			}
-			if (solution != null && form.getSolution() != solution)
-			{
-				return getText(form) + " [" + form.getSolution().getName() + "]";
-			}
-			return getText(form);
+			return getText(((RelatedForm)element).form);
 		}
 
 		if (element instanceof Table)
@@ -115,4 +101,14 @@ public class RelatedFormsLabelProvider extends LabelProvider
 		}
 		return super.getImage(element);
 	}
+
+	public IPersist getPersist(Object value)
+	{
+		if (value instanceof RelatedForm)
+		{
+			return ((RelatedForm)value).form;
+		}
+		return null;
+	}
+
 }

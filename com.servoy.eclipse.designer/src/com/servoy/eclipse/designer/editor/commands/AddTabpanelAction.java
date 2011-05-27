@@ -29,6 +29,7 @@ import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.labelproviders.RelatedFormsLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.RelatedFormsContentProvider;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
@@ -73,9 +74,9 @@ public class AddTabpanelAction extends DesignerToolbarAction
 				return super.hasChildren(element) && !RelationContentProvider.NONE.equals(element);
 			}
 		};
-		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, true, TreePatternFilter.FILTER_LEAFS, contentProvider, new RelatedFormsLabelProvider(
-			true, form.getSolution()), null, new LeafnodesSelectionFilter(contentProvider), SWT.MULTI, getDialogTitle(), form, null, false,
-			TreeSelectDialog.TAB_DIALOG, null);
+		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, true, TreePatternFilter.FILTER_LEAFS, contentProvider,
+			new SolutionContextDelegateLabelProvider(RelatedFormsLabelProvider.INSTANCE, form), null, new LeafnodesSelectionFilter(contentProvider), SWT.MULTI,
+			getDialogTitle(), form, null, false, TreeSelectDialog.TAB_DIALOG, null);
 		dialog.open();
 
 		if (dialog.getReturnCode() == Window.CANCEL)
