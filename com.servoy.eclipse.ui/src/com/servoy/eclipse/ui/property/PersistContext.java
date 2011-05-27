@@ -14,7 +14,7 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
-package com.servoy.eclipse.designer.property;
+package com.servoy.eclipse.ui.property;
 
 import com.servoy.j2db.persistence.IPersist;
 
@@ -31,20 +31,35 @@ public class PersistContext
 	private final IPersist persist;
 	private final IPersist context;
 
-	public PersistContext(IPersist persist, IPersist context)
+	private PersistContext(IPersist persist, IPersist context)
 	{
 		this.persist = persist;
 		this.context = context;
 	}
 
+	/**
+	 * @return the persist, never null
+	 */
 	public IPersist getPersist()
 	{
 		return persist;
 	}
 
+	/**
+	 * @return the context, persist when context is null
+	 */
 	public IPersist getContext()
 	{
-		return context;
+		return context == null ? persist : context;
+	}
+
+	public static PersistContext create(IPersist persist, IPersist context)
+	{
+		if (persist == null)
+		{
+			return null;
+		}
+		return new PersistContext(persist, context);
 	}
 
 	@Override
@@ -80,6 +95,6 @@ public class PersistContext
 	@Override
 	public String toString()
 	{
-		return "PersistContext(" + (persist == null ? "NULL" : persist.toString()) + ", " + (context == null ? "NULL" : context.toString()) + ')';
+		return "PersistContext(" + persist.toString() + ", " + (context == null ? "NULL" : context.toString()) + ')';
 	}
 }

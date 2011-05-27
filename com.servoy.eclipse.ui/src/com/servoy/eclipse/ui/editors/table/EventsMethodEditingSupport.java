@@ -35,6 +35,7 @@ import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.MethodPropertyController.MethodValueEditor;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
@@ -142,9 +143,9 @@ public class EventsMethodEditingSupport extends EditingSupport
 		if (!node.isSolution())
 		{
 			Solution solution = node.getSolution();
-			editor = new MethodCellEditor(((TreeViewer)getViewer()).getTree(), new SolutionContextDelegateLabelProvider(new MethodLabelProvider(solution,
-				solution, false, true), solution), new MethodValueEditor(solution, null), solution, node.getType().getProperty(), false, false, true, false,
-				true);
+			PersistContext persistContext = PersistContext.create(solution, null);
+			editor = new MethodCellEditor(((TreeViewer)getViewer()).getTree(), new SolutionContextDelegateLabelProvider(new MethodLabelProvider(persistContext,
+				false, true), solution), new MethodValueEditor(persistContext), persistContext, node.getType().getProperty(), false, false, true, false, true);
 		}
 		return editor;
 	}

@@ -56,12 +56,12 @@ import com.servoy.eclipse.ui.labelproviders.CombinedLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.IDataProvider;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationList;
 import com.servoy.j2db.persistence.Table;
@@ -82,13 +82,13 @@ public class TagsAndI18NTextDialog extends Dialog
 	public static final String[] STANDARD_TAGS_ON_RELATION = new String[] { "maxRecordIndex", "lazyMaxRecordIndex" };
 
 	private final FlattenedSolution flattenedSolution;
-	private final IPersist persist;
+	private final PersistContext persistContext;
 
-	public TagsAndI18NTextDialog(Shell shell, IPersist persist, FlattenedSolution flattenedSolution, Table table, Object value, String title,
+	public TagsAndI18NTextDialog(Shell shell, PersistContext persistContext, FlattenedSolution flattenedSolution, Table table, Object value, String title,
 		IApplication application)
 	{
 		super(shell);
-		this.persist = persist;
+		this.persistContext = persistContext;
 		this.flattenedSolution = flattenedSolution;
 		this.table = table;
 		this.application = application;
@@ -112,10 +112,11 @@ public class TagsAndI18NTextDialog extends Dialog
 
 		final Composite composite_1 = new Composite(sashForm, SWT.NONE);
 		dpTree = new DataProviderTreeViewer(composite_1, new CombinedLabelProvider(StandardTagsLabelProvider.INSTANCE_HIDEPREFIX,
-			new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(DataProviderLabelProvider.INSTANCE_HIDEPREFIX, persist), persist)),
-			new CombinedTreeContentProvider(new DataProviderContentProvider(persist, flattenedSolution, table), StandardTagsContentProvider.INSTANCE),
-			new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true, INCLUDE_RELATIONS.NESTED, true, true, null), true,
-			true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
+			new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(DataProviderLabelProvider.INSTANCE_HIDEPREFIX,
+				persistContext.getContext()), persistContext.getContext())), new CombinedTreeContentProvider(new DataProviderContentProvider(persistContext,
+			flattenedSolution, table), StandardTagsContentProvider.INSTANCE), new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true,
+			true, true, true, INCLUDE_RELATIONS.NESTED, true, true, null), true, true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(),
+			TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
 
 		addButton = new Button(composite_1, SWT.NONE);
 		addButton.setText(">>");

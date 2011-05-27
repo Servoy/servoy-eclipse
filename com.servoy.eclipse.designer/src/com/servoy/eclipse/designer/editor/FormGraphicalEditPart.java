@@ -211,17 +211,17 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		}
 		if (child instanceof Part)
 		{
-			return new FormPartGraphicalEditPart(application, editorPart, (Part)child, ModelUtils.isInheritedFormElement(form, child));
+			return new FormPartGraphicalEditPart(application, editorPart, (Part)child, ModelUtils.isInheritedFormElement(child, form));
 		}
 		if (child instanceof Tab)
 		{
-			return new TabFormGraphicalEditPart(application, (Tab)child, ModelUtils.isInheritedFormElement(form, child));
+			return new TabFormGraphicalEditPart(application, (Tab)child, ModelUtils.isInheritedFormElement(child, form));
 		}
 		if (child instanceof FormElementGroup)
 		{
 			return new GroupGraphicalEditPart(application, editorPart, form, (FormElementGroup)child);
 		}
-		return new PersistGraphicalEditPart(application, (IPersist)child, form, ModelUtils.isInheritedFormElement(form, child));
+		return new PersistGraphicalEditPart(application, (IPersist)child, form, ModelUtils.isInheritedFormElement(child, form));
 	}
 
 	@Override

@@ -62,11 +62,11 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
-import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
-import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderNodeWrapper;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider.UnresolvedDataProvider;
+import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderNodeWrapper;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
+import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.editors.AddMethodButtonsComposite;
 import com.servoy.eclipse.ui.editors.table.ColumnDetailsComposite.NotSameValidator;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
@@ -226,7 +226,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 								return method;
 							}
 						};
-						buttons.setPersist(ColumnAutoEnterComposite.this.flattenedSolution.getSolution(), "getLookupValue");
+						buttons.setContext(ColumnAutoEnterComposite.this.flattenedSolution.getSolution(), "getLookupValue");
 						buttons.setDialog(dialog);
 						return buttons;
 					}
@@ -453,8 +453,8 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 
 		bindingContext.bindValue(customValueTextObserveWidget, getCICustomValueObserveValue,
 			new UpdateValueStrategy().setAfterGetValidator(new NotSameValidator(getCICustomValueObserveValue)), null);
-		bindingContext.bindValue(lookUpValueSelectObserveWidget, getCILookUpValueObserveValue, new UpdateValueStrategy().setConverter(
-			DataProvider2LookupValueConverter.INSTANCE).setAfterGetValidator(new LookupValueValidator(column)),
+		bindingContext.bindValue(lookUpValueSelectObserveWidget, getCILookUpValueObserveValue,
+			new UpdateValueStrategy().setConverter(DataProvider2LookupValueConverter.INSTANCE).setAfterGetValidator(new LookupValueValidator(column)),
 			new UpdateValueStrategy().setConverter(new LookupValue2DataProviderConverter(flattenedSolution, column.getTable())));
 
 		BindingHelper.addGlobalChangeListener(bindingContext, new IChangeListener()

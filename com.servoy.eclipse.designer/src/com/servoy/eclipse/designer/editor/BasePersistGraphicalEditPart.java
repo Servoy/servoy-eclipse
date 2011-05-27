@@ -17,6 +17,7 @@
 package com.servoy.eclipse.designer.editor;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.draw2d.geometry.Dimension;
@@ -38,7 +39,11 @@ import com.servoy.eclipse.designer.editor.commands.SelectModelsCommandWrapper;
 import com.servoy.eclipse.designer.internal.MarqueeDragTracker;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.Portal;
+import com.servoy.j2db.persistence.TabPanel;
 
 /**
  * Base class for editparts with persist model.
@@ -66,9 +71,35 @@ public abstract class BasePersistGraphicalEditPart extends AbstractGraphicalEdit
 		if (command == null)
 		{
 			// delegate to parent element.
-			// note: do not use getHost().getParent().getCommand(request) here, the editpart
 			// parent of a Tab or Portal field edit part is not the TabPanel/Portal edit part, but the Form edit part
-			EditPart parentEditPart = (EditPart)getViewer().getEditPartRegistry().get(getPersist().getParent());
+			EditPart parentEditPart = getParent();
+			if (parentEditPart.getModel() != getPersist().getParent() && !(parentEditPart.getModel() instanceof Form))
+			{
+				// the editpart hierarchy is not the same as persist hierarchy, find the editpart that has the model parent.
+
+				// In case of a form, the parentEditPart is ok (inherited element on subform)
+
+				// In case of a Tab/Portal element, find the TabPanel/Portal
+				if (getPersist().getParent() instanceof TabPanel || getPersist().getParent() instanceof Portal)
+				{
+					for (EditPart ep : (List<EditPart>)parentEditPart.getChildren())
+					{
+						if (ep.getModel() instanceof ISupportChilds) // TabPanel or Portal
+						{
+							Iterator<IPersist> it = ((ISupportChilds)ep.getModel()).getAllObjects();
+							while (it.hasNext())
+							{
+								if (it.next().equals(getModel()))
+								{
+									parentEditPart = ep;
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+
 			if (parentEditPart != null)
 			{
 				return parentEditPart.getCommand(request);

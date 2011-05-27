@@ -52,18 +52,16 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 {
 	public static final UnresolvedMethodWithArguments NONE = new UnresolvedMethodWithArguments(null);
 
-	private final IPersist persist;
-	private final IPersist context;
+	private final PersistContext persistContext;
 	private final Table table;
 
-	public ScriptProviderPropertyController(String id, String displayName, Table table, IPersist persist, IPersist context)
+	public ScriptProviderPropertyController(String id, String displayName, Table table, PersistContext persistContext)
 	{
 		super(id, displayName);
 		this.table = table;
-		this.context = context;
-		this.persist = persist;
-		setLabelProvider(new SolutionContextDelegateLabelProvider(new ScriptProviderCellEditor.ScriptDialog.ScriptDialogLabelProvider(persist, context, table,
-			true), context));
+		this.persistContext = persistContext;
+		setLabelProvider(new SolutionContextDelegateLabelProvider(new ScriptProviderCellEditor.ScriptDialog.ScriptDialogLabelProvider(persistContext, table,
+			true), persistContext.getContext()));
 		setSupportsReadonly(true);
 	}
 
@@ -78,7 +76,7 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 
 				try
 				{
-					FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persist, context);
+					FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
 					int methodId = -1;
 
 					// try global method
@@ -104,6 +102,7 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 						}
 					}
 
+					IPersist persist = persistContext.getPersist();
 					if (methodId != -1)
 					{
 						SafeArrayList<Object> args = null;
@@ -120,7 +119,7 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 							@Override
 							public IPropertySource getPropertySource()
 							{
-								return new MethodPropertySource(this, persist, context, table, getId().toString(), isReadOnly());
+								return new MethodPropertySource(this, persistContext, table, getId().toString(), isReadOnly());
 							}
 						};
 					}
@@ -151,8 +150,8 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 				}
 				if (mwa != null)
 				{
-					MethodPropertyController.setInstancMethodArguments(persist, id, mwa.arguments);
-					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persist, context, table, mwa.methodId);
+					MethodPropertyController.setInstancMethodArguments(persistContext.getPersist(), id, mwa.arguments);
+					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), table, mwa.methodId);
 					if (scriptProvider != null)
 					{
 						return scriptProvider.getParent() instanceof IRootObject ? ScriptVariable.GLOBAL_DOT_PREFIX + scriptProvider.getDisplayName()
@@ -167,6 +166,6 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		return new ScriptProviderCellEditor(parent, table, persist, context, getId().toString(), isReadOnly());
+		return new ScriptProviderCellEditor(parent, table, persistContext, getId().toString(), isReadOnly());
 	}
 }

@@ -30,6 +30,7 @@ import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.property.DataProviderConverter;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.FlattenedForm;
@@ -79,8 +80,8 @@ public class DataProviderCellEditor extends DialogCellEditor
 	{
 		try
 		{
-			DataProviderDialog dialog = new DataProviderDialog(cellEditorWindow.getShell(), getLabelProvider(), form, flattenedSolution,
-				flattenedSolution.getFlattenedForm(form).getTable(), input, getSelection(), SWT.NONE, "Select Data Provider");
+			DataProviderDialog dialog = new DataProviderDialog(cellEditorWindow.getShell(), getLabelProvider(), PersistContext.create(form, null),
+				flattenedSolution, flattenedSolution.getFlattenedForm(form).getTable(), input, getSelection(), SWT.NONE, "Select Data Provider");
 			dialog.open();
 
 			if (dialog.getReturnCode() != Window.CANCEL)

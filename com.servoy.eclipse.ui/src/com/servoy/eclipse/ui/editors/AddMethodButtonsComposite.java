@@ -36,8 +36,7 @@ import com.servoy.j2db.persistence.ScriptMethod;
  */
 public class AddMethodButtonsComposite extends Composite
 {
-
-	private IPersist persist;
+	private IPersist context;
 	private String methodKey;
 
 	private TreeSelectDialog dialog;
@@ -59,7 +58,7 @@ public class AddMethodButtonsComposite extends Composite
 			@Override
 			public void widgetSelected(final SelectionEvent e)
 			{
-				ScriptMethod method = createMethod(persist.getAncestor(IRepository.FORMS));
+				ScriptMethod method = createMethod(context.getAncestor(IRepository.FORMS));
 				if (method != null)
 				{
 					dialog.refreshTree();
@@ -77,7 +76,7 @@ public class AddMethodButtonsComposite extends Composite
 			@Override
 			public void widgetSelected(final SelectionEvent e)
 			{
-				ScriptMethod method = createMethod(persist.getAncestor(IRepository.SOLUTIONS));
+				ScriptMethod method = createMethod(context.getAncestor(IRepository.SOLUTIONS));
 				if (method != null)
 				{
 					dialog.refreshTree();
@@ -106,11 +105,11 @@ public class AddMethodButtonsComposite extends Composite
 	/**
 	 * @param form
 	 */
-	public void setPersist(IPersist persist, String methodKey)
+	public void setContext(IPersist context, String methodKey)
 	{
-		this.persist = persist;
+		this.context = context;
 		this.methodKey = methodKey;
-		addFormMethodButton.setEnabled(persist.getAncestor(IRepository.FORMS) != null);
+		addFormMethodButton.setEnabled(context.getAncestor(IRepository.FORMS) != null);
 	}
 
 	/**

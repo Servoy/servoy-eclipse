@@ -29,9 +29,9 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 
-import com.servoy.eclipse.designer.property.PersistContext;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -105,7 +105,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 						{
 							continue;
 						}
-						nodes.add(new PersistContext(persist, form));
+						nodes.add(PersistContext.create(persist, form));
 					}
 				}
 				return (parentElement == ELEMENTS) ? new SortedList(PersistContextNameComparator.INSTANCE, nodes).toArray() : nodes.toArray();
@@ -120,7 +120,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			List<PersistContext> list = new ArrayList<PersistContext>();
 			for (IPersist persist : ((AbstractBase)((PersistContext)parentElement).getPersist()).getAllObjectsAsList())
 			{
-				list.add(new PersistContext(persist, ((PersistContext)parentElement).getContext()));
+				list.add(PersistContext.create(persist, ((PersistContext)parentElement).getContext()));
 			}
 			return list.toArray();
 		}
@@ -130,11 +130,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			Iterator<IFormElement> elements = ((FormElementGroup)parentElement).getElements();
 			while (elements.hasNext())
 			{
-				IFormElement element = elements.next();
-				if (element instanceof IPersist)
-				{
-					list.add(new PersistContext(element, form));
-				}
+				list.add(PersistContext.create(elements.next(), form));
 			}
 			return new SortedList(PersistContextNameComparator.INSTANCE, list).toArray();
 		}
@@ -164,7 +160,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 						}
 						if ((parentElement == PARTS) && (persist instanceof Part))
 						{
-							availableCategories.add(new PersistContext(persist, form));
+							availableCategories.add(PersistContext.create(persist, form));
 						}
 					}
 				}
@@ -192,7 +188,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 						if (persist instanceof IFormElement)
 						{
 							Pair<String, Image> nameAndImage = ElementUtil.getPersistNameAndImage(persist);
-							if (nameAndImage.equals(parentElement)) nodes.add(new PersistContext(persist, form));
+							if (nameAndImage.equals(parentElement)) nodes.add(PersistContext.create(persist, form));
 						}
 					}
 				}
@@ -208,7 +204,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			List<PersistContext> list = new ArrayList<PersistContext>();
 			for (IPersist persist : ((AbstractBase)((PersistContext)parentElement).getPersist()).getAllObjectsAsList())
 			{
-				list.add(new PersistContext(persist, ((PersistContext)parentElement).getContext()));
+				list.add(PersistContext.create(persist, ((PersistContext)parentElement).getContext()));
 			}
 			return list.toArray();
 		}
@@ -246,7 +242,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 				// form element of sub element (Tab panel)
 				try
 				{
-					return new PersistContext(getFlattenedWhenForm(persist.getParent()), ((PersistContext)element).getContext());
+					return PersistContext.create(getFlattenedWhenForm(persist.getParent()), ((PersistContext)element).getContext());
 				}
 				catch (RepositoryException e)
 				{
@@ -278,7 +274,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 				// form element of sub element (Tab panel)
 				try
 				{
-					return new PersistContext(getFlattenedWhenForm(persist.getParent()), ((PersistContext)element).getContext());
+					return PersistContext.create(getFlattenedWhenForm(persist.getParent()), ((PersistContext)element).getContext());
 				}
 				catch (RepositoryException e)
 				{

@@ -78,6 +78,7 @@ import com.servoy.eclipse.ui.labelproviders.FormLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.IStatusChangedListener;
@@ -1057,7 +1058,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 					table = (Table)server.getTable(newFormWizardPage.getTableName());
 				}
 				Form superForm = newFormWizardPage.getSuperForm();
-				((DataProviderContentProvider)treeViewer.getContentProvider()).setTable(table, superForm);
+				((DataProviderContentProvider)treeViewer.getContentProvider()).setTable(table, PersistContext.create(superForm, null));
 				treeViewer.setLabelProvider(new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(
 					DataProviderLabelProvider.INSTANCE_HIDEPREFIX, superForm), superForm));
 				treeViewer.refreshTree();

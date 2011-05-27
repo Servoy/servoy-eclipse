@@ -36,6 +36,7 @@ import com.servoy.eclipse.ui.editors.PersistEditor;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.DimensionPropertySource;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PointPropertySource;
 import com.servoy.eclipse.ui.property.RetargetToEditorPersistProperties;

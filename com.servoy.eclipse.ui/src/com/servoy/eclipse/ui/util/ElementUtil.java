@@ -30,6 +30,7 @@ import org.eclipse.swt.graphics.Image;
 
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFactory;
@@ -218,8 +219,10 @@ public class ElementUtil
 	 * @return
 	 * @throws RepositoryException 
 	 */
-	public static IPersist getOverridePersist(IPersist context, IPersist persist) throws RepositoryException
+	public static IPersist getOverridePersist(PersistContext persistContext) throws RepositoryException
 	{
+		IPersist persist = persistContext.getPersist();
+		IPersist context = persistContext.getContext();
 		IPersist ancestorForm = persist.getAncestor(IRepository.FORMS);
 		if (!(persist instanceof AbstractBase)//
 			||

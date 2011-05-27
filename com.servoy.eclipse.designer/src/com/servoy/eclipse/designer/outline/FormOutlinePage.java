@@ -40,9 +40,9 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.designer.property.PersistContext;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -121,7 +121,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 					IPersist f = persist.getAncestor(IRepository.FORMS);
 					if (f != null && formHierarchy.contains(f))
 					{
-						persistContexts.add(new PersistContext(persist, form));
+						persistContexts.add(PersistContext.create(persist, form));
 					}
 				}
 			}

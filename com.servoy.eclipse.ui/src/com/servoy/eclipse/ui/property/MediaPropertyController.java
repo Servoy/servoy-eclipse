@@ -31,7 +31,6 @@ import com.servoy.eclipse.ui.labelproviders.MediaLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.IPersist;
 
 /**
  * Property controller for selecting media in Properties view.
@@ -43,24 +42,23 @@ import com.servoy.j2db.persistence.IPersist;
 public class MediaPropertyController<P> extends PropertyController<P, Integer>
 {
 
-	private final IPersist persist;
-	private final IPersist context;
+	private final PersistContext persistContext;
 	private final boolean includeNone;
 
-	public MediaPropertyController(Object id, String displayName, IPersist persist, IPersist context, boolean includeNone)
+	public MediaPropertyController(Object id, String displayName, PersistContext persistContext, boolean includeNone)
 	{
 		super(id, displayName);
-		this.persist = persist;
-		this.context = context;
+		this.persistContext = persistContext;
 		this.includeNone = includeNone;
-		setLabelProvider(new SolutionContextDelegateLabelProvider(new MediaLabelProvider(ModelUtils.getEditingFlattenedSolution(persist, context)), context));
+		setLabelProvider(new SolutionContextDelegateLabelProvider(new MediaLabelProvider(ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(),
+			persistContext.getContext())), persistContext.getContext()));
 		setSupportsReadonly(true);
 	}
 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist, context);
+		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
 		return new ListSelectCellEditor(parent, "Select image", new MediaContentProvider(flattenedEditingSolution), getLabelProvider(),
 			new IValueEditor<Integer>()
 			{

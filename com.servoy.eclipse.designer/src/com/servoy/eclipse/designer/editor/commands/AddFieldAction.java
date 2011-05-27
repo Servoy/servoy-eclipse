@@ -37,6 +37,7 @@ import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.IControlFactory;
 import com.servoy.eclipse.ui.views.PlaceFieldOptionGroup;
 import com.servoy.j2db.FlattenedSolution;
@@ -69,7 +70,7 @@ public class AddFieldAction extends DesignerToolbarAction
 		Table table = null;
 		DataProviderOptions input;
 		Form form = null;
-		Portal portal = (Portal)getModel(editPart, IRepository.PORTALS);
+		Portal portal = (Portal)getContext(editPart, IRepository.PORTALS);
 		if (portal != null && portal.getRelationName() != null)
 		{
 			flattenedSolution = ModelUtils.getEditingFlattenedSolution(portal);
@@ -84,7 +85,7 @@ public class AddFieldAction extends DesignerToolbarAction
 		}
 		else
 		{
-			form = (Form)getModel(editPart, IRepository.FORMS);
+			form = (Form)getContext(editPart, IRepository.FORMS);
 			flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
 
 			try
@@ -100,7 +101,8 @@ public class AddFieldAction extends DesignerToolbarAction
 		}
 
 		DataProviderDialog dialog = new DataProviderDialog(getShell(), new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(
-			DataProviderLabelProvider.INSTANCE_HIDEPREFIX, form), form), form, flattenedSolution, table, input, null, SWT.MULTI, "Select Data Providers");
+			DataProviderLabelProvider.INSTANCE_HIDEPREFIX, form), form), PersistContext.create(form, null), flattenedSolution, table, input, null, SWT.MULTI,
+			"Select Data Providers");
 
 		IDialogSettings settings = dialog.getDataProvideDialogSettings();
 		final boolean isPlaceHorizontal = settings.getBoolean("placeHorizontal");

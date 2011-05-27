@@ -65,11 +65,11 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.MethodDialog;
+import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodListOptions;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
+import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
 import com.servoy.eclipse.ui.dialogs.SortDialog;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
-import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodListOptions;
-import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.editors.valuelist.ValueListDPSelectionComposite;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
@@ -77,11 +77,12 @@ import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.ValuelistLabelProvider;
+import com.servoy.eclipse.ui.property.MethodPropertyController.MethodValueEditor;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.RelationPropertyController;
 import com.servoy.eclipse.ui.property.TableValueEditor;
 import com.servoy.eclipse.ui.property.ValuelistPropertyController;
-import com.servoy.eclipse.ui.property.MethodPropertyController.MethodValueEditor;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.IControlFactory;
@@ -288,7 +289,7 @@ public class ValueListEditor extends PersistEditor
 			}
 		};
 
-		globalMethodSelect = new TreeSelectViewer(comp, SWT.NONE, new MethodValueEditor(getValueList(), getValueList()))
+		globalMethodSelect = new TreeSelectViewer(comp, SWT.NONE, new MethodValueEditor(PersistContext.create(getValueList(), null)))
 		{
 			@Override
 			public IStructuredSelection openDialogBox(Control cellEditorWindow)
@@ -300,7 +301,7 @@ public class ValueListEditor extends PersistEditor
 					public Control createControl(Composite composite)
 					{
 						AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(composite, SWT.NONE);
-						buttons.setPersist(getValueList(), "valueListGlobalMethod"); //$NON-NLS-1$
+						buttons.setContext(getValueList(), "valueListGlobalMethod"); //$NON-NLS-1$
 						buttons.setDialog(dialog);
 						return buttons;
 					}
@@ -315,8 +316,8 @@ public class ValueListEditor extends PersistEditor
 			}
 		};
 		globalMethodSelect.setContentProvider(new GlobalMethodListContentProvider(getValueList()));
-		globalMethodSelect.setLabelProvider(new SolutionContextDelegateLabelProvider(new MethodLabelProvider(getValueList(), getValueList(), false, false),
-			getValueList()));
+		globalMethodSelect.setLabelProvider(new SolutionContextDelegateLabelProvider(new MethodLabelProvider(PersistContext.create(getValueList(), null),
+			false, false), getValueList()));
 		globalMethodSelect.setInput(new MethodListOptions(false, false, false, true));
 		globalMethodSelect.setEditable(true);
 		Control globalMethodSelectControl = globalMethodSelect.getControl();
@@ -662,78 +663,78 @@ public class ValueListEditor extends PersistEditor
 
 		m_bindingContext = new DataBindingContext();
 		//
-		m_bindingContext.bindValue(fallbackValueListObserveWidget, fallbackValueListObserveValue, new UpdateValueStrategy().setConverter(new Converter(
-			Integer.class, Integer.class)
-		{
-			public Object convert(Object fromObject)
+		m_bindingContext.bindValue(fallbackValueListObserveWidget, fallbackValueListObserveValue,
+			new UpdateValueStrategy().setConverter(new Converter(Integer.class, Integer.class)
 			{
-				return fromObject == null ? new Integer(0) : fromObject;
-			}
-		}), new UpdateValueStrategy());
+				public Object convert(Object fromObject)
+				{
+					return fromObject == null ? new Integer(0) : fromObject;
+				}
+			}), new UpdateValueStrategy());
 
 		m_bindingContext.bindValue(nameFieldTextObserveWidget, getValueListNameObserveValue, null, null);
-		m_bindingContext.bindValue(customValuesTextObserveWidget, getValueListCustomValuesObserveValue, new UpdateValueStrategy().setConverter(new Converter(
-			String.class, String.class)
-		{
-			public Object convert(Object fromObject)
+		m_bindingContext.bindValue(customValuesTextObserveWidget, getValueListCustomValuesObserveValue,
+			new UpdateValueStrategy().setConverter(new Converter(String.class, String.class)
 			{
-				if ("".equals(fromObject)) return null; //$NON-NLS-1$
-				return fromObject;
-			}
-		}), new UpdateValueStrategy().setConverter(new Converter(String.class, String.class)
-		{
-			/**
-			 * @see org.eclipse.core.databinding.conversion.IConverter#convert(java.lang.Object)
-			 */
-			public Object convert(Object fromObject)
-			{
-				if (fromObject == null) return ""; //$NON-NLS-1$
-				if (getValueList().getValueListType() == ValueList.GLOBAL_METHOD_VALUES)
+				public Object convert(Object fromObject)
 				{
-					return ""; //$NON-NLS-1$
-				}
-				return fromObject;
-			}
-		}));
-		m_bindingContext.bindValue(globalMethodtObserveWidget, getValueListCustomValuesObserveValue, new UpdateValueStrategy().setConverter(new Converter(
-			String.class, String.class)
-		{
-			public Object convert(Object fromObject)
-			{
-				if ("".equals(fromObject)) return null; //$NON-NLS-1$
-				if (fromObject instanceof String) return fromObject;
-				if (fromObject instanceof MethodWithArguments)
-				{
-					FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(getPersist());
-					ScriptMethod scriptMethod = fs.getScriptMethod(((MethodWithArguments)fromObject).methodId);
-					if (scriptMethod != null)
-					{
-						return ScriptVariable.GLOBAL_DOT_PREFIX + scriptMethod.getName();
-					}
-				}
-				return null;
-			}
-		}), new UpdateValueStrategy().setConverter(new Converter(String.class, String.class)
-		{
-			/**
-			 * @see org.eclipse.core.databinding.conversion.IConverter#convert(java.lang.Object)
-			 */
-			public Object convert(Object fromObject)
-			{
-				if (fromObject == null) return null;
-				if (getValueList().getValueListType() != ValueList.GLOBAL_METHOD_VALUES)
-				{
+					if ("".equals(fromObject)) return null; //$NON-NLS-1$
 					return fromObject;
 				}
-				FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(getPersist());
-				ScriptMethod scriptMethod = fs.getScriptMethod(fromObject.toString().substring(ScriptVariable.GLOBAL_DOT_PREFIX.length()));
-				if (scriptMethod != null)
+			}), new UpdateValueStrategy().setConverter(new Converter(String.class, String.class)
+			{
+				/**
+				 * @see org.eclipse.core.databinding.conversion.IConverter#convert(java.lang.Object)
+				 */
+				public Object convert(Object fromObject)
 				{
-					return new MethodWithArguments(scriptMethod.getID());
+					if (fromObject == null) return ""; //$NON-NLS-1$
+					if (getValueList().getValueListType() == ValueList.GLOBAL_METHOD_VALUES)
+					{
+						return ""; //$NON-NLS-1$
+					}
+					return fromObject;
 				}
-				return new MethodWithArguments.UnresolvedMethodWithArguments(fromObject.toString());
-			}
-		}));
+			}));
+		m_bindingContext.bindValue(globalMethodtObserveWidget, getValueListCustomValuesObserveValue,
+			new UpdateValueStrategy().setConverter(new Converter(String.class, String.class)
+			{
+				public Object convert(Object fromObject)
+				{
+					if ("".equals(fromObject)) return null; //$NON-NLS-1$
+					if (fromObject instanceof String) return fromObject;
+					if (fromObject instanceof MethodWithArguments)
+					{
+						FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(getPersist());
+						ScriptMethod scriptMethod = fs.getScriptMethod(((MethodWithArguments)fromObject).methodId);
+						if (scriptMethod != null)
+						{
+							return ScriptVariable.GLOBAL_DOT_PREFIX + scriptMethod.getName();
+						}
+					}
+					return null;
+				}
+			}), new UpdateValueStrategy().setConverter(new Converter(String.class, String.class)
+			{
+				/**
+				 * @see org.eclipse.core.databinding.conversion.IConverter#convert(java.lang.Object)
+				 */
+				public Object convert(Object fromObject)
+				{
+					if (fromObject == null) return null;
+					if (getValueList().getValueListType() != ValueList.GLOBAL_METHOD_VALUES)
+					{
+						return fromObject;
+					}
+					FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(getPersist());
+					ScriptMethod scriptMethod = fs.getScriptMethod(fromObject.toString().substring(ScriptVariable.GLOBAL_DOT_PREFIX.length()));
+					if (scriptMethod != null)
+					{
+						return new MethodWithArguments(scriptMethod.getID());
+					}
+					return new MethodWithArguments.UnresolvedMethodWithArguments(fromObject.toString());
+				}
+			}));
 		m_bindingContext.bindValue(sortingDefinitionSelectObserveWidget, getValueListSortOpotionsObserveValue, null, null);
 		m_bindingContext.bindValue(allowEmptyFieldTextObserveWidget, getValueListAllowEmptyValueObserveValue,
 			new UpdateValueStrategy().setConverter(new Converter(boolean.class, int.class)

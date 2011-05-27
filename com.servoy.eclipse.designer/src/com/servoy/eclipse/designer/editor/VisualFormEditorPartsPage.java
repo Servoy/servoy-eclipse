@@ -61,6 +61,7 @@ import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.property.PartTypeLabelProvider;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.views.IndexedListViewer;
 import com.servoy.eclipse.ui.views.IndexedStructuredSelection;
@@ -723,9 +724,9 @@ public class VisualFormEditorPartsPage extends Composite
 		try
 		{
 			FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(editor.getForm());
-			dialog = new DataProviderDialog(getShell(), DataProviderLabelProvider.INSTANCE_HIDEPREFIX, editor.getForm(), flattenedSolution,
-					flattenedSolution.getFlattenedForm(editor.getForm()).getTable(), new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, false, false, false,
-					INCLUDE_RELATIONS.NESTED, false, true, null), null, SWT.MULTI, "Select Group-by fields");
+			dialog = new DataProviderDialog(getShell(), DataProviderLabelProvider.INSTANCE_HIDEPREFIX, PersistContext.create(editor.getForm(), null),
+				flattenedSolution, flattenedSolution.getFlattenedForm(editor.getForm()).getTable(), new DataProviderTreeViewer.DataProviderOptions(false, true,
+					false, false, false, false, false, false, INCLUDE_RELATIONS.NESTED, false, true, null), null, SWT.MULTI, "Select Group-by fields");
 			if (dialog.open() == SWT.CANCEL)
 			{
 				return;

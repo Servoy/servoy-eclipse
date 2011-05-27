@@ -28,6 +28,7 @@ import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
@@ -46,15 +47,13 @@ import com.servoy.j2db.persistence.Template;
 public class ApplyTemplatePropertiesCommand extends BaseRestorableCommand
 {
 	private final TemplateElementHolder templateHolder;
-	private final IPersist persist;
-	private final IPersist context;
+	private final PersistContext persistContext;
 
-	public ApplyTemplatePropertiesCommand(TemplateElementHolder template, IPersist persist, IPersist context)
+	public ApplyTemplatePropertiesCommand(TemplateElementHolder template, PersistContext persistContext)
 	{
 		super("Apply template");
 		this.templateHolder = template;
-		this.persist = persist;
-		this.context = context;
+		this.persistContext = persistContext;
 	}
 
 	@Override
@@ -68,7 +67,7 @@ public class ApplyTemplatePropertiesCommand extends BaseRestorableCommand
 	@Override
 	public void execute()
 	{
-		saveState(persist);
+		saveState(persistContext.getPersist());
 
 		// elements
 		List<JSONObject> elements = ElementFactory.getTemplateElements(templateHolder.template, templateHolder.element);
@@ -81,15 +80,15 @@ public class ApplyTemplatePropertiesCommand extends BaseRestorableCommand
 		{
 			JSONObject json = elements.get(0);
 
-			IDeveloperRepository repository = (IDeveloperRepository)persist.getRootObject().getRepository();
-			Map<String, Object> propertyValues = SolutionDeserializer.getPropertyValuesForJsonObject(repository, persist,
-				ElementFactory.resolveCleanedProperties((Form)persist.getAncestor(IRepository.FORMS), json));
+			IDeveloperRepository repository = (IDeveloperRepository)persistContext.getPersist().getRootObject().getRepository();
+			Map<String, Object> propertyValues = SolutionDeserializer.getPropertyValuesForJsonObject(repository, persistContext.getPersist(),
+				ElementFactory.resolveCleanedProperties((Form)persistContext.getPersist().getAncestor(IRepository.FORMS), json));
 			propertyValues.remove(Template.PROP_LOCATION);
 
-			IPersist newPersist = ElementUtil.getOverridePersist(context, persist);
-			if (newPersist == persist)
+			IPersist newPersist = ElementUtil.getOverridePersist(persistContext);
+			if (newPersist == persistContext.getPersist())
 			{
-				save(persist, getState(persist));
+				save(persistContext.getPersist(), getState(persistContext.getPersist()));
 			}
 			else
 			{

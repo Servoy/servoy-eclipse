@@ -129,7 +129,6 @@ import com.servoy.eclipse.designer.editor.palette.VisualFormEditorPaletteFactory
 import com.servoy.eclipse.designer.editor.rulers.FormRulerComposite;
 import com.servoy.eclipse.designer.editor.rulers.RulerManager;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
-import com.servoy.eclipse.designer.property.PersistContext;
 import com.servoy.eclipse.designer.property.UndoablePersistPropertySourceProvider;
 import com.servoy.eclipse.designer.property.UndoablePropertySheetEntry;
 import com.servoy.eclipse.designer.util.DesignerUtil;
@@ -137,6 +136,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.CoolbarLayout;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.j2db.persistence.FormElementGroup;

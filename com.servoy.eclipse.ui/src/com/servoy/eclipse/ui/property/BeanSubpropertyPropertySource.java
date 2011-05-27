@@ -95,9 +95,9 @@ public class BeanSubpropertyPropertySource extends ComplexPropertySource<Object>
 						{
 							editableValue = createNewValue();
 						}
-						IPropertyDescriptor pd = PersistPropertySource.createPropertyDescriptor(this, element.getName(), null /* persist */, null /* context */,
-							readOnly, new PropertyDescriptorWrapper(element, editableValue), element.getDisplayName(), PropertyCategory.Beans,
-							flattenedEditingSolution, form);
+						IPropertyDescriptor pd = PersistPropertySource.createPropertyDescriptor(this, element.getName(), null /* persistContext */, readOnly,
+							new PropertyDescriptorWrapper(element, editableValue), element.getDisplayName(), PropertyCategory.Beans, flattenedEditingSolution,
+							form);
 						if (pd != null)
 						{
 							beansProperties.put(element.getName(), element);

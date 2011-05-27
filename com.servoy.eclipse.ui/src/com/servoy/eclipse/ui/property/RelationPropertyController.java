@@ -31,7 +31,6 @@ import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 
@@ -48,38 +47,36 @@ public class RelationPropertyController extends PropertyController<String, Objec
 	private final Table foreignTable;
 	private final boolean incudeNone;
 	private final boolean includeNested;
-	private final IPersist persist;
-	private final IPersist context;
+	private final PersistContext persistContext;
 
-	public RelationPropertyController(Object id, String displayName, IPersist persist, IPersist context, Table primaryTable, Table foreignTable,
-		boolean incudeNone, boolean includeNested)
+	public RelationPropertyController(Object id, String displayName, PersistContext persistContext, Table primaryTable, Table foreignTable, boolean incudeNone,
+		boolean includeNested)
 	{
 		super(id, displayName);
-		this.persist = persist;
-		this.context = context;
+		this.persistContext = persistContext;
 		this.primaryTable = primaryTable;
 		this.foreignTable = foreignTable;
 		this.incudeNone = incudeNone;
 		this.includeNested = includeNested;
-		setLabelProvider(new SolutionContextDelegateLabelProvider(RelationLabelProvider.INSTANCE_ALL_NO_IMAGE, context));
+		setLabelProvider(new SolutionContextDelegateLabelProvider(RelationLabelProvider.INSTANCE_ALL_NO_IMAGE, persistContext.getContext()));
 		setSupportsReadonly(true);
 	}
 
 	@Override
 	protected IPropertyConverter<String, Object> createConverter()
 	{
-		return new RelationNameConverter(ModelUtils.getEditingFlattenedSolution(persist, context));
+		return new RelationNameConverter(ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext()));
 	}
 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist, context);
+		FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
 		final RelationContentProvider.RelationListOptions relationListOptions = new RelationContentProvider.RelationListOptions(primaryTable, foreignTable,
 			incudeNone, includeNested);
 		ListSelectCellEditor editor = new ListSelectCellEditor(parent, "Select relation", new RelationContentProvider(flattenedEditingSolution),
-			new SolutionContextDelegateLabelProvider(RelationLabelProvider.INSTANCE_LAST_NAME_ONLY, context), RelationValueEditor.INSTANCE, isReadOnly(),
-			relationListOptions, SWT.NONE, null, "selectRelationDialog"); //$NON-NLS-1$
+			new SolutionContextDelegateLabelProvider(RelationLabelProvider.INSTANCE_LAST_NAME_ONLY, persistContext.getContext()), RelationValueEditor.INSTANCE,
+			isReadOnly(), relationListOptions, SWT.NONE, null, "selectRelationDialog"); //$NON-NLS-1$
 		editor.setShowFilterMenu(true);
 
 		editor.setSelectionFilter(new IFilter()

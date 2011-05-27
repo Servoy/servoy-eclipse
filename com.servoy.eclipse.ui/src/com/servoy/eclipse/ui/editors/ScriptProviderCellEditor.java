@@ -49,6 +49,7 @@ import com.servoy.eclipse.ui.labelproviders.IPersistLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.ScriptProviderPropertyController;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -73,18 +74,16 @@ import com.servoy.j2db.persistence.Table;
 public class ScriptProviderCellEditor extends DialogCellEditor
 {
 	private final Table table;
-	private final IPersist persist;
+	private final PersistContext persistContext;
 
-	private final IPersist context;
 	private final String methodKey;
 
-	public ScriptProviderCellEditor(Composite parent, Table table, IPersist persist, IPersist context, String methodKey, boolean readOnly)
+	public ScriptProviderCellEditor(Composite parent, Table table, PersistContext persistContext, String methodKey, boolean readOnly)
 	{
-		super(parent, new SolutionContextDelegateLabelProvider(new ScriptDialogLabelProvider(persist, context, table, true), persist),
-			new ScriptProviderValueEditor(persist, table), readOnly, SWT.NONE);
+		super(parent, new SolutionContextDelegateLabelProvider(new ScriptDialogLabelProvider(persistContext, table, true), persistContext.getContext()),
+			new ScriptProviderValueEditor(persistContext.getPersist(), table), readOnly, SWT.NONE);
 		this.table = table;
-		this.persist = persist;
-		this.context = context;
+		this.persistContext = persistContext;
 		this.methodKey = methodKey;
 	}
 
@@ -92,7 +91,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 	public Object openDialogBox(Control cellEditorWindow)
 	{
 
-		final ScriptDialog dialog = new ScriptDialog(cellEditorWindow.getShell(), persist, context, table, getSelection(), SWT.NONE, "Select script");
+		final ScriptDialog dialog = new ScriptDialog(cellEditorWindow.getShell(), persistContext, table, getSelection(), SWT.NONE, "Select script");
 
 		dialog.setOptionsAreaFactory(new IControlFactory()
 		{
@@ -100,7 +99,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 			{
 				AddScriptProviderButtonsComposite buttons = new AddScriptProviderButtonsComposite(composite, methodKey, SWT.NONE);
 				buttons.setTable(table);
-				buttons.setPersist(persist);
+				buttons.setPersist(persistContext.getPersist());
 				buttons.setDialog(dialog);
 				return buttons;
 			}
@@ -121,17 +120,17 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 		private static final String CALCULATIONS = "calculations";
 		private static final String GLOBAL_METHODS = "global methods";
 
-		ScriptDialog(Shell shell, IPersist persist, IPersist context, Table table, ISelection selection, int treeStyle, String title)
+		ScriptDialog(Shell shell, PersistContext persistContext, Table table, ISelection selection, int treeStyle, String title)
 		{
 			super(shell, true, false, TreePatternFilter.FILTER_LEAFS,
 			// content provider
-				new ScriptTreeContentProvider(table, persist),
+				new ScriptTreeContentProvider(table, persistContext),
 				// label provider
-				new SolutionContextDelegateLabelProvider(new ScriptDialogLabelProvider(persist, context, table, false), persist),
+				new SolutionContextDelegateLabelProvider(new ScriptDialogLabelProvider(persistContext, table, false), persistContext.getContext()),
 				// ViewerComparator
 				null,
 				// selection filter
-				new LeafnodesSelectionFilter(new ScriptTreeContentProvider(table, persist)),
+				new LeafnodesSelectionFilter(new ScriptTreeContentProvider(table, persistContext)),
 				// tree style
 				treeStyle,
 				// title
@@ -170,12 +169,12 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 		public static class ScriptTreeContentProvider extends ArrayContentProvider implements ITreeContentProvider, IKeywordChecker
 		{
 			private final Table table;
-			private final IPersist persist;
+			private final PersistContext persistContext;
 
-			public ScriptTreeContentProvider(Table table, IPersist persist)
+			public ScriptTreeContentProvider(Table table, PersistContext persistContext)
 			{
 				this.table = table;
-				this.persist = persist;
+				this.persistContext = persistContext;
 			}
 
 			@Override
@@ -191,7 +190,8 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 				{
 					if (ScriptDialog.CALCULATIONS == parentElement && table != null)
 					{
-						Iterator<ScriptCalculation> calcs = ModelUtils.getEditingFlattenedSolution(persist).getScriptCalculations(table, true);
+						Iterator<ScriptCalculation> calcs = ModelUtils.getEditingFlattenedSolution(persistContext.getContext()).getScriptCalculations(table,
+							true);
 						while (calcs.hasNext())
 						{
 							children.add(new MethodWithArguments(calcs.next().getID()));
@@ -200,7 +200,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 
 					if (ScriptDialog.GLOBAL_METHODS == parentElement)
 					{
-						Iterator<ScriptMethod> scriptMethodsIte = ModelUtils.getEditingFlattenedSolution(persist).getScriptMethods(true);
+						Iterator<ScriptMethod> scriptMethodsIte = ModelUtils.getEditingFlattenedSolution(persistContext.getContext()).getScriptMethods(true);
 						while (scriptMethodsIte.hasNext())
 						{
 							children.add(new MethodWithArguments(scriptMethodsIte.next().getID()));
@@ -219,7 +219,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 			{
 				if (value instanceof MethodWithArguments)
 				{
-					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persist, null, table, ((MethodWithArguments)value).methodId);
+					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persistContext.getContext(), null, table, ((MethodWithArguments)value).methodId);
 					if (scriptProvider instanceof ScriptCalculation)
 					{
 						return ScriptDialog.CALCULATIONS;
@@ -275,14 +275,12 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 		{
 			private static final Image globalMethodsImage = Activator.getDefault().loadImageFromBundle("global_method.gif"); //$NON-NLS-1$
 			private final boolean showPrefix;
-			private final IPersist persist;
-			private final IPersist context;
+			private final PersistContext persistContext;
 			private final Table table;
 
-			public ScriptDialogLabelProvider(IPersist persist, IPersist context, Table table, boolean showPrefix)
+			public ScriptDialogLabelProvider(PersistContext persistContext, Table table, boolean showPrefix)
 			{
-				this.persist = persist;
-				this.context = context;
+				this.persistContext = persistContext;
 				this.table = table;
 				this.showPrefix = showPrefix;
 			}
@@ -303,7 +301,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 				}
 				if (value instanceof MethodWithArguments)
 				{
-					return MethodLabelProvider.getMethodText((MethodWithArguments)value, persist, context, table, showPrefix, false);
+					return MethodLabelProvider.getMethodText((MethodWithArguments)value, persistContext, table, showPrefix, false);
 				}
 
 				return value.toString();
@@ -354,7 +352,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 			{
 				if (value instanceof MethodWithArguments)
 				{
-					return ModelUtils.getScriptMethod(persist, context, table, ((MethodWithArguments)value).methodId);
+					return ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), table, ((MethodWithArguments)value).methodId);
 				}
 				return null;
 			}

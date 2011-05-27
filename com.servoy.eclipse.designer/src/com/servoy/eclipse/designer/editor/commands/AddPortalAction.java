@@ -32,6 +32,7 @@ import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.IControlFactory;
 import com.servoy.eclipse.ui.views.PlaceFieldOptionGroup;
 import com.servoy.j2db.FlattenedSolution;
@@ -58,7 +59,7 @@ public class AddPortalAction extends DesignerToolbarAction
 	@Override
 	public Request createRequest(EditPart editPart)
 	{
-		Form form = (Form)getModel(editPart, IRepository.FORMS);
+		Form form = (Form)getContext(editPart, IRepository.FORMS);
 		if (form == null)
 		{
 			return null;
@@ -81,9 +82,9 @@ public class AddPortalAction extends DesignerToolbarAction
 			return null;
 		}
 
-		DataProviderDialog dialog = new DataProviderDialog(getShell(), DataProviderLabelProvider.INSTANCE_HIDEPREFIX, form, editingFlattenedSolution, table,
-			new DataProviderTreeViewer.DataProviderOptions(false, false, false, true, false, false, false, false, INCLUDE_RELATIONS.NESTED, true, false, null),
-			null, SWT.MULTI, "Select Data Providers");
+		DataProviderDialog dialog = new DataProviderDialog(getShell(), DataProviderLabelProvider.INSTANCE_HIDEPREFIX, PersistContext.create(form, null),
+			editingFlattenedSolution, table, new DataProviderTreeViewer.DataProviderOptions(false, false, false, true, false, false, false, false,
+				INCLUDE_RELATIONS.NESTED, true, false, null), null, SWT.MULTI, "Select Data Providers");
 		dialog.setOptionsAreaFactory(new IControlFactory()
 		{
 			public Control createControl(Composite composite)

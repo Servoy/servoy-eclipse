@@ -27,6 +27,7 @@ import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.MethodWithArguments.UnresolvedMethodWithArguments;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -45,18 +46,16 @@ import com.servoy.j2db.persistence.Table;
 
 public class MethodLabelProvider extends LabelProvider implements IFontProvider, IPersistLabelProvider
 {
-	private final IPersist persist;
-	private final IPersist context;
+	private final PersistContext persistContext;
 	private final boolean showPrefix;
 	private final boolean showNoneForDefault;
 
-	public MethodLabelProvider(IPersist persist, IPersist context, boolean showPrefix, boolean showNoneForDefault)
+	public MethodLabelProvider(PersistContext persistContext, boolean showPrefix, boolean showNoneForDefault)
 	{
 		this.showPrefix = showPrefix;
 		this.showNoneForDefault = showNoneForDefault;
-		if (persist == null) throw new NullPointerException();
-		this.persist = persist;
-		this.context = context;
+		if (persistContext == null) throw new NullPointerException();
+		this.persistContext = persistContext;
 	}
 
 	@Override
@@ -72,10 +71,10 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 		{
 			mwa = (MethodWithArguments)value;
 		}
-		return getMethodText(mwa, persist, context, null, showPrefix, showNoneForDefault);
+		return getMethodText(mwa, persistContext, null, showPrefix, showNoneForDefault);
 	}
 
-	public static String getMethodText(MethodWithArguments mwa, IPersist persist, IPersist context, Table table, boolean showPrefix, boolean showNoneForDefault)
+	public static String getMethodText(MethodWithArguments mwa, PersistContext persistContext, Table table, boolean showPrefix, boolean showNoneForDefault)
 	{
 		if (MethodDialog.METHOD_DEFAULT.equals(mwa))
 		{
@@ -92,7 +91,7 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 			return UnresolvedValue.getUnresolvedMessage(((UnresolvedMethodWithArguments)mwa).unresolvedValue);
 		}
 
-		IScriptProvider sm = ModelUtils.getScriptMethod(persist, context, table, mwa.methodId);
+		IScriptProvider sm = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), table, mwa.methodId);
 		if (sm == null)
 		{
 			return Messages.LabelUnresolved;
@@ -144,6 +143,6 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 		{
 			mwa = (MethodWithArguments)value;
 		}
-		return ModelUtils.getScriptMethod(persist, context, null, mwa.methodId);
+		return ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), null, mwa.methodId);
 	}
 }

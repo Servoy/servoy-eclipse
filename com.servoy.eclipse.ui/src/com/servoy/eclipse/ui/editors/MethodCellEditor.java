@@ -28,8 +28,8 @@ import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodListOptions;
 import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodTreeContentProvider;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.IControlFactory;
-import com.servoy.j2db.persistence.IPersist;
 
 /**
  * A cell editor that manages a method field.
@@ -39,7 +39,7 @@ import com.servoy.j2db.persistence.IPersist;
  */
 public class MethodCellEditor extends DialogCellEditor
 {
-	private final IPersist persist;
+	private final PersistContext persistContext;
 	private final boolean includeNone;
 	private final boolean includeDefault;
 	private final boolean includeFormMethods;
@@ -53,11 +53,11 @@ public class MethodCellEditor extends DialogCellEditor
 	 * 
 	 * @param parent the parent control
 	 */
-	public MethodCellEditor(Composite parent, ILabelProvider labelProvider, IValueEditor<MethodWithArguments> valueEditor, IPersist persist, Object id,
-		boolean readOnly, boolean includeNone, boolean includeDefault, boolean includeFormMethods, boolean includeGlobalMethods)
+	public MethodCellEditor(Composite parent, ILabelProvider labelProvider, IValueEditor<MethodWithArguments> valueEditor, PersistContext persistContext,
+		Object id, boolean readOnly, boolean includeNone, boolean includeDefault, boolean includeFormMethods, boolean includeGlobalMethods)
 	{
 		super(parent, labelProvider, valueEditor, readOnly, SWT.NONE);
-		this.persist = persist;
+		this.persistContext = persistContext;
 		this.labelProvider = labelProvider;
 		this.id = id;
 		this.includeNone = includeNone;
@@ -70,14 +70,14 @@ public class MethodCellEditor extends DialogCellEditor
 	@Override
 	public MethodWithArguments openDialogBox(Control cellEditorWindow)
 	{
-		final MethodDialog dialog = new MethodDialog(cellEditorWindow.getShell(), labelProvider, new MethodTreeContentProvider(persist), getSelection(),
+		final MethodDialog dialog = new MethodDialog(cellEditorWindow.getShell(), labelProvider, new MethodTreeContentProvider(persistContext), getSelection(),
 			new MethodListOptions(includeNone, includeDefault, includeFormMethods, includeGlobalMethods), SWT.NONE, "Select Method", this.valueEditor);
 		dialog.setOptionsAreaFactory(new IControlFactory()
 		{
 			public Control createControl(Composite composite)
 			{
 				AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(composite, SWT.NONE);
-				buttons.setPersist(persist, id.toString());
+				buttons.setContext(persistContext.getContext(), id.toString());
 				buttons.setDialog(dialog);
 				return buttons;
 			}

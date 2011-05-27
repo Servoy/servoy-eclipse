@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.GraphicalEditPart;
@@ -39,6 +40,7 @@ import com.servoy.eclipse.designer.editor.GroupGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
@@ -278,6 +280,11 @@ public class GroupAction extends DesignerSelectionAction
 
 			for (IFormElement bc : lowerModels)
 			{
+				if (editPartMap.get(bc) == null)
+				{
+					ServoyLog.log(IStatus.WARNING, IStatus.OK, "Could not find editpart for: " + bc, null);
+					continue;
+				}
 				requests.put(
 					editPartMap.get(bc),
 					new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
@@ -287,6 +294,11 @@ public class GroupAction extends DesignerSelectionAction
 
 		for (IFormElement bc : groupModels)
 		{
+			if (editPartMap.get(bc) == null)
+			{
+				ServoyLog.log(IStatus.WARNING, IStatus.OK, "Could not find editpart for: " + bc, null);
+				continue;
+			}
 			requests.put(
 				editPartMap.get(bc),
 				new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
@@ -301,6 +313,11 @@ public class GroupAction extends DesignerSelectionAction
 			}
 			for (IFormElement bc : higherModels)
 			{
+				if (editPartMap.get(bc) == null)
+				{
+					ServoyLog.log(IStatus.WARNING, IStatus.OK, "Could not find editpart for: " + bc, null);
+					continue;
+				}
 				requests.put(
 					editPartMap.get(bc),
 					new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),

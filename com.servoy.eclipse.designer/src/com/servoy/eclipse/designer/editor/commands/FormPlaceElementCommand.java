@@ -49,6 +49,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
@@ -139,7 +140,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 		alternativeParent = null;
 		try
 		{
-			parent = (ISupportChilds)ElementUtil.getOverridePersist(context, parent);
+			parent = (ISupportChilds)ElementUtil.getOverridePersist(PersistContext.create(parent, context));
 			models = placeElements(getNextLocation());
 			// set data in request.getExtendedData map as properties in the created persists
 			if (models != null)

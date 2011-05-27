@@ -23,13 +23,13 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.TableViewer;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.editors.MethodCellEditor;
 import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
 import com.servoy.eclipse.ui.property.MethodPropertyController.MethodValueEditor;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.MapEntryValueEditor.IRelayEditorProvider;
 import com.servoy.j2db.dataprocessing.IPropertyDescriptor;
 import com.servoy.j2db.dataprocessing.IPropertyDescriptorProvider;
@@ -38,8 +38,6 @@ import com.servoy.j2db.persistence.Solution;
 
 class RelayEditorProvider implements IRelayEditorProvider
 {
-	ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-
 	private IPropertyDescriptorProvider propertyProvider;
 
 	private ComboBoxCellEditor comboCellEditor;
@@ -60,10 +58,11 @@ class RelayEditorProvider implements IRelayEditorProvider
 					MethodCellEditor methodCellEditor = methodCellEditors.get(key);
 					if (methodCellEditor == null)
 					{
-						Solution solution = servoyModel.getFlattenedSolution().getSolution();
-						MethodLabelProvider methodLabelProvider = new MethodLabelProvider(solution, solution, false, false);
-						methodCellEditor = new MethodCellEditor(parent.getTable(), methodLabelProvider, new MethodValueEditor(solution, null), solution, key,
-							false, true, false, false, true);
+						Solution solution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution();
+						PersistContext persistContext = PersistContext.create(solution, null);
+						MethodLabelProvider methodLabelProvider = new MethodLabelProvider(persistContext, false, false);
+						methodCellEditor = new MethodCellEditor(parent.getTable(), methodLabelProvider, new MethodValueEditor(persistContext), persistContext,
+							key, false, true, false, false, true);
 						methodCellEditors.put(key, methodCellEditor);
 					}
 					return methodCellEditor;
@@ -111,7 +110,8 @@ class RelayEditorProvider implements IRelayEditorProvider
 					realValue = value instanceof MethodWithArguments ? value : MethodDialog.METHOD_NONE;
 					if (value instanceof String)
 					{
-						ScriptMethod scriptMethod = servoyModel.getFlattenedSolution().getScriptMethod((String)value);
+						ScriptMethod scriptMethod = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getScriptMethod(
+							(String)value);
 						if (scriptMethod != null)
 						{
 							realValue = new MethodWithArguments(scriptMethod.getID());
@@ -158,7 +158,8 @@ class RelayEditorProvider implements IRelayEditorProvider
 				{
 					if (value instanceof MethodWithArguments)
 					{
-						ScriptMethod scriptMethod = servoyModel.getFlattenedSolution().getScriptMethod(((MethodWithArguments)value).methodId);
+						ScriptMethod scriptMethod = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getScriptMethod(
+							((MethodWithArguments)value).methodId);
 						if (scriptMethod != null)
 						{
 							realValue = scriptMethod.getName();

@@ -44,6 +44,7 @@ import com.servoy.eclipse.ui.editors.RelationEditor;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.DataProviderConverter;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -152,10 +153,10 @@ public class DataProviderEditingSupport extends EditingSupport
 						provider = DataProviderConverter.getDataProvider(flattenedEditingSolution, null, table, dataProviders[valueIndex.intValue()]);
 					}
 					DataProviderDialog dialog = new DataProviderDialog(re.getSite().getShell(), new SolutionContextDelegateLabelProvider(
-						DataProviderLabelProvider.INSTANCE_HIDEPREFIX, re.getPersist()), re.getPersist(), flattenedEditingSolution, table,
-						new DataProviderTreeViewer.DataProviderOptions(false, true, includeGlobalsAndCalcs, false, false, includeGlobalsAndCalcs, false, false,
-							INCLUDE_RELATIONS.NO, false, true, null), provider != null ? new StructuredSelection(provider) : null, SWT.NONE,
-						"Select Data Provider");
+						DataProviderLabelProvider.INSTANCE_HIDEPREFIX, re.getPersist()), PersistContext.create(re.getPersist(), null),
+						flattenedEditingSolution, table, new DataProviderTreeViewer.DataProviderOptions(false, true, includeGlobalsAndCalcs, false, false,
+							includeGlobalsAndCalcs, false, false, INCLUDE_RELATIONS.NO, false, true, null), provider != null
+							? new StructuredSelection(provider) : null, SWT.NONE, "Select Data Provider");
 					dialog.open();
 
 					if (dialog.getReturnCode() != Window.CANCEL)

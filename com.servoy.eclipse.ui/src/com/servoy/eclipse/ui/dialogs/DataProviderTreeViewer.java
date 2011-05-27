@@ -46,6 +46,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
@@ -57,7 +58,6 @@ import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationList;
@@ -178,7 +178,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			}
 		}
 
-		private IPersist persist;
+		private PersistContext persistContext;
 		private final FlattenedSolution flattenedSolution;
 		private Table table;
 
@@ -189,17 +189,17 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		private final Map<Table, Map<String, ScriptCalculation>> calculationsCache = new HashMap<Table, Map<String, ScriptCalculation>>();
 		private final Map<Table, List<Column>> columnCache = new HashMap<Table, List<Column>>();
 
-		public DataProviderContentProvider(IPersist persist, FlattenedSolution flattenedSolution, Table table)
+		public DataProviderContentProvider(PersistContext persistContext, FlattenedSolution flattenedSolution, Table table)
 		{
-			this.persist = persist;
+			this.persistContext = persistContext;
 			this.flattenedSolution = flattenedSolution;
 			this.table = table;
 		}
 
-		public void setTable(Table table, IPersist persist)
+		public void setTable(Table table, PersistContext persistContext)
 		{
 			this.table = table;
-			this.persist = persist;
+			this.persistContext = persistContext;
 		}
 
 		/*
@@ -253,7 +253,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					}
 
 					// form variables
-					if (options.includeFormVariables && persist != null && persist.getAncestor(IRepository.FORMS) != null)
+					if (options.includeFormVariables && persistContext != null && persistContext.getContext().getAncestor(IRepository.FORMS) != null)
 					{
 						input.add(new DataProviderNodeWrapper(FORM_VARIABLES, (RelationList)null));
 					}
@@ -364,7 +364,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 
 				if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).node == FORM_VARIABLES)
 				{
-					Form flattenedForm = ModelUtils.getEditingFlattenedSolution(persist).getFlattenedForm(persist);
+					Form flattenedForm = ModelUtils.getEditingFlattenedSolution(persistContext.getContext()).getFlattenedForm(persistContext.getContext());
 					if (flattenedForm != null)
 					{
 						Iterator<ScriptVariable> formVariables = flattenedForm.getScriptVariables(true);

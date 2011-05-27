@@ -152,7 +152,7 @@ public class ModelUtils
 
 	public static FlattenedSolution getEditingFlattenedSolution(IPersist persist, IPersist context)
 	{
-		return getEditingFlattenedSolution(isInheritedFormElement(context, persist) ? context : persist);
+		return getEditingFlattenedSolution(isInheritedFormElement(persist, context) ? context : persist);
 	}
 
 	/**
@@ -275,7 +275,7 @@ public class ModelUtils
 		uiRunning = running;
 	}
 
-	public static boolean isInheritedFormElement(IPersist context, Object element)
+	public static boolean isInheritedFormElement(Object element, IPersist context)
 	{
 		if (element instanceof Form)
 		{
@@ -294,7 +294,7 @@ public class ModelUtils
 			Iterator<IFormElement> elements = ((FormElementGroup)element).getElements();
 			while (elements.hasNext())
 			{
-				if (isInheritedFormElement(context, elements.next()))
+				if (isInheritedFormElement(elements.next(), context))
 				{
 					return true;
 				}

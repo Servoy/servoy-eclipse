@@ -37,12 +37,13 @@ import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceFieldCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
-import com.servoy.eclipse.dnd.IDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
+import com.servoy.eclipse.dnd.IDragData;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Field;
@@ -335,7 +336,8 @@ class PersistEditPolicy extends ComponentEditPolicy
 		Object child = getHost().getModel();
 		if (child instanceof IPersist)
 		{
-			return new ApplyTemplatePropertiesCommand((TemplateElementHolder)dropRequest.getData(), (IPersist)child, (IPersist)getHost().getParent().getModel());
+			return new ApplyTemplatePropertiesCommand((TemplateElementHolder)dropRequest.getData(), PersistContext.create((IPersist)child,
+				(IPersist)getHost().getParent().getModel()));
 		}
 
 		return null;

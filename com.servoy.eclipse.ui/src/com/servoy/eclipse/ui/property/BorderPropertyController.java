@@ -50,7 +50,6 @@ import com.servoy.eclipse.ui.labelproviders.TextCutoffLabelProvider;
 import com.servoy.eclipse.ui.util.ModifiedComboBoxCellEditor;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
@@ -71,8 +70,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 	}
 
 	public static HashMap<BorderType, Border> defaultBorderValues = new HashMap<BorderType, Border>();
-	private final IPersist persist;
-	private final IPersist context;
+	private final PersistContext persistContext;
 
 	final static ComboboxPropertyController<BorderType> comboboxController = new ComboboxPropertyController<BorderType>("BORDER_TYPE", "borderTypes",
 		new ComboboxPropertyModel<BorderType>(BorderType.values()), Messages.LabelUnresolved);
@@ -84,12 +82,11 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 	 */
 	private final IPropertySource propertySource;
 
-	public BorderPropertyController(String id, String displayName, IPropertySource propertySource, IPersist persist, IPersist context)
+	public BorderPropertyController(String id, String displayName, IPropertySource propertySource, PersistContext persistContext)
 	{
 		super(id, displayName);
 		this.propertySource = propertySource;
-		this.persist = persist;
-		this.context = context;
+		this.persistContext = persistContext;
 		populateDefaultBorderValuesMap();
 	}
 
@@ -172,7 +169,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 				propertySource = new LineBorderPropertySource((ComplexProperty<LineBorder>)complexProperty);
 				break;
 			case Title :
-				propertySource = new TitledBorderPropertySource(persist, context, (ComplexProperty<TitledBorder>)complexProperty);
+				propertySource = new TitledBorderPropertySource(persistContext, (ComplexProperty<TitledBorder>)complexProperty);
 				break;
 			case Matte :
 				propertySource = new MatteBorderPropertySource((ComplexProperty<MatteBorder>)complexProperty);
@@ -925,15 +922,13 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 				new String[] { Messages.LabelDefault, Messages.PostionABOVETOP, Messages.PostionTOP, Messages.PostionBELOWTOP, Messages.PostionABOVEBOTTOM, Messages.PostionBOTTOM, Messages.PostionBELOWBOTTOM }),
 			Messages.LabelUnresolved);
 
-		private final IPersist persist;
-		private final IPersist context;
+		private final PersistContext persistContext;
 		private IPropertyDescriptor[] propertyDescriptors = null;
 
-		public TitledBorderPropertySource(IPersist persist, IPersist context, ComplexProperty<TitledBorder> complexProperty)
+		public TitledBorderPropertySource(PersistContext persistContext, ComplexProperty<TitledBorder> complexProperty)
 		{
 			super(complexProperty);
-			this.persist = persist;
-			this.context = context;
+			this.persistContext = persistContext;
 		}
 
 		@Override
@@ -943,16 +938,17 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			{
 				try
 				{
-					final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist, context);
-					final Form form = ModelUtils.isInheritedFormElement(context, persist) ? (Form)context.getAncestor(IRepository.FORMS)
-						: (Form)persist.getAncestor(IRepository.FORMS);
+					final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(),
+						persistContext.getContext());
+					final Form form = ModelUtils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext())
+						? (Form)persistContext.getContext().getAncestor(IRepository.FORMS) : (Form)persistContext.getPersist().getAncestor(IRepository.FORMS);
 					final Table table = form == null ? null : form.getTable();
 					propertyDescriptors = new IPropertyDescriptor[] { new PropertyDescriptor(TITLE, "title text")
 					{
 						@Override
 						public CellEditor createPropertyEditor(Composite parent)
 						{
-							return new TagsAndI18NTextCellEditor(parent, persist, flattenedEditingSolution, TextCutoffLabelProvider.DEFAULT, table,
+							return new TagsAndI18NTextCellEditor(parent, persistContext, flattenedEditingSolution, TextCutoffLabelProvider.DEFAULT, table,
 								"Edit text property", Activator.getDefault().getDesignClient());
 						}
 

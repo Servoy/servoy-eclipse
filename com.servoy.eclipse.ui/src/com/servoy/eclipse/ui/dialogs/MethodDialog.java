@@ -38,17 +38,16 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.labelproviders.DelegateLabelProvider;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.IDelegate;
@@ -119,12 +118,12 @@ public class MethodDialog extends TreeSelectDialog
 
 	public static class MethodTreeContentProvider extends ArrayContentProvider implements ITreeContentProvider, IKeywordChecker
 	{
-		private final IPersist persist;
+		private final PersistContext persistContext;
 		private Map<Object, Object> parents;
 
-		public MethodTreeContentProvider(IPersist persist)
+		public MethodTreeContentProvider(PersistContext persistContext)
 		{
-			this.persist = persist;
+			this.persistContext = persistContext;
 		}
 
 		@Override
@@ -192,9 +191,14 @@ public class MethodDialog extends TreeSelectDialog
 		{
 			Iterator<ScriptMethod> scriptMethods = null;
 
+			IPersist context = persistContext.getContext();
+			if (context == null)
+			{
+				context = persistContext.getPersist();
+			}
 			if (FORM_METHODS == parentElement)
 			{
-				Form form = (Form)persist.getAncestor(IRepository.FORMS);
+				Form form = (Form)context.getAncestor(IRepository.FORMS);
 				if (form != null)
 				{
 					scriptMethods = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form).getScriptMethods(true);
@@ -203,7 +207,7 @@ public class MethodDialog extends TreeSelectDialog
 
 			else if (GLOBAL_METHODS == parentElement)
 			{
-				Solution solution = (Solution)persist.getAncestor(IRepository.SOLUTIONS);
+				Solution solution = (Solution)context.getAncestor(IRepository.SOLUTIONS);
 				Object[] children = getChildren(solution);
 				Solution[] modules = ModelUtils.getEditingFlattenedSolution(solution).getModules();
 				return Utils.arrayInsert(children, modules, children == null ? 0 : children.length, modules == null ? 0 : modules.length);

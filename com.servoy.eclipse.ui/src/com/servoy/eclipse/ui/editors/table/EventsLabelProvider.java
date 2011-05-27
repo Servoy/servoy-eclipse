@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
 
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -25,6 +25,7 @@ import org.eclipse.ui.ide.IDE.SharedImages;
 import com.servoy.eclipse.ui.editors.table.EventsComposite.EventNode;
 import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
+import com.servoy.eclipse.ui.property.PersistContext;
 
 public class EventsLabelProvider extends LabelProvider implements ITableLabelProvider
 {
@@ -56,7 +57,7 @@ public class EventsLabelProvider extends LabelProvider implements ITableLabelPro
 					else return node.getName();
 				case EventsComposite.CI_METHOD :
 					if (node.isSolution()) return "";
-					else return new SolutionContextDelegateLabelProvider(new MethodLabelProvider(node.getSolution(), node.getSolution(), true, true),
+					else return new SolutionContextDelegateLabelProvider(new MethodLabelProvider(PersistContext.create(node.getSolution(), null), true, true),
 						node.getSolution()).getText(node.getMethodWithArguments());
 				default :
 					return columnIndex + ": " + element;

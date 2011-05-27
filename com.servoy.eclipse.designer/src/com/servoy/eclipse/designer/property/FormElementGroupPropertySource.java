@@ -40,6 +40,7 @@ import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.DimensionPropertySource;
 import com.servoy.eclipse.ui.property.ICellEditorFactory;
 import com.servoy.eclipse.ui.property.IModelSavePropertySource;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PointPropertySource;
 import com.servoy.eclipse.ui.property.PropertyCategory;
@@ -212,7 +213,7 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 			group.getName());
 		if (id instanceof Integer)
 		{
-			return new PersistContext(group.getElement(((Integer)id).intValue()), null);
+			return PersistContext.create(group.getElement(((Integer)id).intValue()), null);
 		}
 		return null;
 	}

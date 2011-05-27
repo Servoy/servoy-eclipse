@@ -90,7 +90,7 @@ public class DesignerUtil
 				EditPart object = (EditPart)selectedEditParts.get(i);
 				EditPart parent = object.getParent();
 				if (parent != null && parent.getModel() instanceof IPersist &&
-					ModelUtils.isInheritedFormElement((IPersist)parent.getModel(), object.getModel())) return true;
+					ModelUtils.isInheritedFormElement(object.getModel(), (IPersist)parent.getModel())) return true;
 			}
 		}
 		return false;

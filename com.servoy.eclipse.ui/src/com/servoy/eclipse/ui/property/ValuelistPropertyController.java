@@ -33,7 +33,6 @@ import com.servoy.eclipse.ui.labelproviders.ValuelistLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
-import com.servoy.j2db.persistence.IPersist;
 
 /**
  * Property controller for selecting value list in Properties view.
@@ -45,16 +44,15 @@ import com.servoy.j2db.persistence.IPersist;
 public class ValuelistPropertyController<P> extends PropertyController<P, Integer>
 {
 	private final boolean includeNone;
-	private final IPersist persist;
-	private final IPersist context;
+	private final PersistContext persistContext;
 
-	public ValuelistPropertyController(Object id, String displayName, IPersist persist, IPersist context, boolean includeNone)
+	public ValuelistPropertyController(Object id, String displayName, PersistContext persistContext, boolean includeNone)
 	{
 		super(id, displayName);
-		this.persist = persist;
-		this.context = context;
+		this.persistContext = persistContext;
 		this.includeNone = includeNone;
-		setLabelProvider(new SolutionContextDelegateLabelProvider(new ValuelistLabelProvider(ModelUtils.getEditingFlattenedSolution(persist, context)), context));
+		setLabelProvider(new SolutionContextDelegateLabelProvider(new ValuelistLabelProvider(ModelUtils.getEditingFlattenedSolution(
+			persistContext.getPersist(), persistContext.getContext())), persistContext.getContext()));
 		setSupportsReadonly(true);
 	}
 
@@ -62,7 +60,7 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 	public CellEditor createPropertyEditor(Composite parent)
 	{
 
-		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persist, context);
+		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
 		return new ListSelectCellEditor(parent, "Select value list", new ValuelistContentProvider(flattenedEditingSolution), getLabelProvider(),
 			new ValueListValueEditor(flattenedEditingSolution), isReadOnly(), new ValuelistContentProvider.ValuelistListOptions(includeNone), SWT.NONE,
 			new ListSelectControlFactory()
@@ -78,7 +76,8 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 				{
 					AddValueListButtonComposite buttons = new AddValueListButtonComposite(composite, SWT.NONE);
 					buttons.setDialog(dialog);
-					buttons.setPersist(ModelUtils.isInheritedFormElement(context, persist) ? context : persist);
+					buttons.setPersist(ModelUtils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext())
+						? persistContext.getContext() : persistContext.getPersist());
 					return buttons;
 				}
 			}, "valuelistDialog"); //$NON-NLS-1$

@@ -47,27 +47,35 @@ public abstract class DesignerToolbarAction extends DesignerSelectionAction
 	public boolean calculateEnabled(List< ? > selectedObjects)
 	{
 		return selectedObjects != null && selectedObjects.size() == 1 && selectedObjects.get(0) instanceof EditPart &&
-			getModel((EditPart)selectedObjects.get(0), IRepository.FORMS) != null;
+			getContext((EditPart)selectedObjects.get(0), IRepository.FORMS) != null;
 	}
 
-	protected IPersist getModel(EditPart editPart, int typeId)
+	/**
+	 * Get context model of selected type.
+	 * 
+	 * @param editPart
+	 * @param typeId
+	 * @return
+	 */
+	protected IPersist getContext(EditPart editPart, int typeId)
 	{
+		// Follow editpart hierarchy, not persist hierarchy, in case of an inherited element persist.getParent() is the
+		// super form but we are looking for the form that the editpart is shown in (the subform) 
 		EditPart ep = editPart;
-		while (!(ep instanceof IPersistEditPart))
+		while (ep != null)
 		{
-			if (ep == null)
+			if (ep instanceof IPersistEditPart)
 			{
-				return null;
-
+				IPersist persist = ((IPersistEditPart)ep).getPersist();
+				if (persist != null && persist.getTypeID() == typeId)
+				{
+					return persist;
+				}
 			}
 			ep = ep.getParent();
 		}
-		IPersist persist = ((IPersistEditPart)ep).getPersist();
-		if (persist == null)
-		{
-			return null;
-		}
-		return persist.getAncestor(typeId);
+
+		return null;
 	}
 
 }

@@ -50,7 +50,7 @@ public class AddTabpanelAction extends DesignerToolbarAction
 	@Override
 	public Request createRequest(EditPart editPart)
 	{
-		Form form = (Form)getModel(editPart, IRepository.FORMS);
+		Form form = (Form)getContext(editPart, IRepository.FORMS);
 		if (form == null)
 		{
 			return null;

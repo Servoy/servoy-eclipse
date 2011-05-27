@@ -13,11 +13,10 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
 
 /**
@@ -28,20 +27,18 @@ import com.servoy.j2db.persistence.IScriptProvider;
  */
 public class FormInheritenceMethodConverter implements IPropertyConverter<MethodWithArguments, MethodWithArguments>
 {
-	private final IPersist persist;
-	private final IPersist context;
+	private final PersistContext persistContext;
 
-	public FormInheritenceMethodConverter(IPersist persist, IPersist context)
+	public FormInheritenceMethodConverter(PersistContext persistContext)
 	{
-		this.persist = persist;
-		this.context = context;
+		this.persistContext = persistContext;
 	}
 
 	public MethodWithArguments convertProperty(Object id, MethodWithArguments value)
 	{
-		if (context != null && value != null)
+		if (value != null)
 		{
-			IScriptProvider scriptMethod = ModelUtils.getScriptMethod(persist, context, null, value.methodId);
+			IScriptProvider scriptMethod = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), null, value.methodId);
 			if (scriptMethod != null)
 			{
 				return new MethodWithArguments(scriptMethod.getID(), value.arguments);
