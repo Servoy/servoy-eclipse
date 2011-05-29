@@ -191,6 +191,7 @@ public class MethodDialog extends TreeSelectDialog
 		{
 			Iterator<ScriptMethod> scriptMethods = null;
 
+			Form form = null;
 			IPersist context = persistContext.getContext();
 			if (context == null)
 			{
@@ -198,7 +199,7 @@ public class MethodDialog extends TreeSelectDialog
 			}
 			if (FORM_METHODS == parentElement)
 			{
-				Form form = (Form)context.getAncestor(IRepository.FORMS);
+				form = (Form)context.getAncestor(IRepository.FORMS);
 				if (form != null)
 				{
 					scriptMethods = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form).getScriptMethods(true);
@@ -224,7 +225,16 @@ public class MethodDialog extends TreeSelectDialog
 				List<MethodWithArguments> lst = new ArrayList<MethodWithArguments>();
 				while (scriptMethods.hasNext())
 				{
-					MethodWithArguments mwa = new MethodWithArguments(scriptMethods.next().getID());
+					ScriptMethod sm = scriptMethods.next();
+					if (form != null)
+					{
+						if (form != sm.getParent() && sm.isPrivate()) continue;
+					}
+					else if (sm.isPrivate())
+					{
+						continue;
+					}
+					MethodWithArguments mwa = new MethodWithArguments(sm.getID());
 					lst.add(mwa);
 				}
 				return lst.toArray();

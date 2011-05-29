@@ -25,6 +25,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
 import org.eclipse.dltk.javascript.typeinference.IValueCollection;
 import org.eclipse.dltk.javascript.typeinference.ValueCollectionFactory;
 import org.eclipse.dltk.javascript.typeinfo.IElementResolver;
@@ -254,6 +255,7 @@ public class ElementResolver implements IElementResolver
 		return calcTable;
 	}
 
+	@SuppressWarnings("restriction")
 	public Member resolveElement(ITypeInfoContext context, String name)
 	{
 		if (TypeCreator.BASE_TYPES.contains(name)) return null;
@@ -289,14 +291,15 @@ public class ElementResolver implements IElementResolver
 		else if ("_super".equals(name))
 		{
 			Form form = TypeCreator.getForm(context);
-			if (form != null && form.getExtendsFormID() > 0)
+			if (form != null && form.getExtendsID() > 0)
 			{
 				if (fs != null)
 				{
-					Form superForm = fs.getForm(form.getExtendsFormID());
+					Form superForm = fs.getForm(form.getExtendsID());
 					Property property = TypeCreator.createProperty(context, "_super", true, null, TypeCreator.FORM_IMAGE);
 					property.setDescription(TypeCreator.getDoc("_super", com.servoy.j2db.documentation.scripting.docs.Form.class, "", null));
 					property.setAttribute(TypeCreator.LAZY_VALUECOLLECTION, superForm);
+					property.setAttribute(IReferenceAttributes.SUPER_SCOPE, Boolean.TRUE);
 					return property;
 				}
 			}

@@ -10,9 +10,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
+import org.eclipse.dltk.internal.javascript.ti.IValueProvider;
 import org.eclipse.dltk.javascript.typeinference.IValueCollection;
+import org.eclipse.dltk.javascript.typeinference.IValueReference;
 import org.eclipse.dltk.javascript.typeinference.ValueCollectionFactory;
 import org.eclipse.dltk.javascript.typeinfo.IMemberEvaluator;
+import org.eclipse.dltk.javascript.typeinfo.IModelBuilder.IMember;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
 
@@ -32,6 +35,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	private static final Map<IFile, Pair<Long, IValueCollection>> scriptCache = new ConcurrentHashMap<IFile, Pair<Long, IValueCollection>>();
 
 
+	@SuppressWarnings("restriction")
 	public IValueCollection valueOf(ITypeInfoContext context, Element member)
 	{
 		IValueCollection collection = (IValueCollection)member.getAttribute(TypeCreator.VALUECOLLECTION);
@@ -43,7 +47,12 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
 			collection = ValueCollectionFactory.createValueCollection();
 			ValueCollectionFactory.copyInto(collection, getValueCollection(file, true));
-			return getSuperFormContext(context, form, collection);
+			collection = getSuperFormContext(context, form, collection);
+			if (member.getAttribute(IReferenceAttributes.SUPER_SCOPE) != null)
+			{
+				((IValueProvider)collection).getValue().setAttribute(IReferenceAttributes.SUPER_SCOPE, Boolean.TRUE);
+			}
+			return collection;
 		}
 		return null;
 	}
@@ -56,13 +65,13 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	@SuppressWarnings("restriction")
 	private IValueCollection getSuperFormContext(ITypeInfoContext context, Form form, IValueCollection formCollection)
 	{
-		if (form.getExtendsFormID() > 0)
+		if (form.getExtendsID() > 0)
 		{
 			FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
 			if (fs != null)
 			{
 				IValueCollection superForms = ValueCollectionFactory.createScopeValueCollection();
-				Form superForm = fs.getForm(form.getExtendsFormID());
+				Form superForm = fs.getForm(form.getExtendsID());
 				List<IValueCollection> superCollections = new ArrayList<IValueCollection>();
 				while (superForm != null)
 				{
@@ -74,11 +83,18 @@ public class ValueCollectionProvider implements IMemberEvaluator
 						Set<String> children = vc.getDirectChildren();
 						for (String child : children)
 						{
-							vc.getChild(child).setAttribute(IReferenceAttributes.HIDE_ALLOWED, Boolean.TRUE);
+							IValueReference chld = vc.getChild(child);
+							chld.setAttribute(IReferenceAttributes.HIDE_ALLOWED, Boolean.TRUE);
+							Object attribute = chld.getAttribute(IReferenceAttributes.PARAMETERS);
+							if (attribute == null) attribute = chld.getAttribute(IReferenceAttributes.VARIABLE);
+							if (attribute instanceof IMember && ((IMember)attribute).isPrivate())
+							{
+								chld.setAttribute(IReferenceAttributes.PRIVATE, Boolean.TRUE);
+							}
 						}
 						superCollections.add(vc);
 					}
-					superForm = fs.getForm(superForm.getExtendsFormID());
+					superForm = fs.getForm(superForm.getExtendsID());
 				}
 				for (int i = superCollections.size(); --i >= 0;)
 				{

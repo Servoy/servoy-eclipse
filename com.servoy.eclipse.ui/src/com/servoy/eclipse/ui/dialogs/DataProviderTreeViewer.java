@@ -367,11 +367,14 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					Form flattenedForm = ModelUtils.getEditingFlattenedSolution(persistContext.getContext()).getFlattenedForm(persistContext.getContext());
 					if (flattenedForm != null)
 					{
+						Form currentForm = (Form)persistContext.getContext().getAncestor(IRepository.FORMS);
 						Iterator<ScriptVariable> formVariables = flattenedForm.getScriptVariables(true);
 						if (formVariables.hasNext() && children == null) children = new ArrayList<Object>(10);
 						while (formVariables.hasNext())
 						{
-							children.add(formVariables.next());
+							ScriptVariable sv = formVariables.next();
+							if (sv.getParent() != currentForm && sv.isPrivate()) continue;
+							children.add(sv);
 						}
 					}
 				}
@@ -382,7 +385,8 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					if (globals.hasNext() && children == null) children = new ArrayList<Object>(10);
 					while (globals.hasNext())
 					{
-						children.add(globals.next());
+						ScriptVariable sv = globals.next();
+						if (!sv.isPrivate()) children.add(sv);
 					}
 				}
 

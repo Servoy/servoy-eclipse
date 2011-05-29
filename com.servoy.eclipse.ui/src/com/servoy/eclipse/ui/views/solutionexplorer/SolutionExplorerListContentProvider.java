@@ -95,7 +95,6 @@ import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.scripting.DeclaringClassJavaMembers;
 import com.servoy.j2db.scripting.FormScope;
-import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.IPrefixedConstantsObject;
@@ -106,6 +105,7 @@ import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
+import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.ui.IScriptRenderMethods;
@@ -554,8 +554,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			else if (type == UserNodeType.FORM_ELEMENTS_GROUP)
 			{
 				Object[] real = (Object[])un.getRealObject();
-				lm = getJSMethods(RuntimeGroup.class, "elements." + ((FormElementGroup)real[0]).getGroupID(), null,
-					UserNodeType.FORM_ELEMENTS_ITEM_METHOD, null, null);// TODO fix multiple anonymous groups
+				lm = getJSMethods(RuntimeGroup.class, "elements." + ((FormElementGroup)real[0]).getGroupID(), null, UserNodeType.FORM_ELEMENTS_ITEM_METHOD,
+					null, null);// TODO fix multiple anonymous groups
 			}
 			else if (type == UserNodeType.FORM_ELEMENTS_ITEM)
 			{
@@ -968,6 +968,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				else
 				{
+					if (sm.isPrivate()) continue;
+
 					nodeText = sm.getName() + " [" + ((Form)sm.getParent()).getName() + "]";
 				}
 				dlm.add(new UserNode(nodeText, UserNodeType.FORM_METHOD, sm.getName() + "();", "//Method call\n%%prefix%%" + sm.getName() + "()", sm.getName() +
@@ -1029,6 +1031,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				else
 				{
+					if (var.isPrivate()) continue;
+
 					nodeText = var.getName() + " [" + ((Form)var.getParent()).getName() + "]";
 				}
 				dlm.add(new UserNode(nodeText, UserNodeType.FORM_VARIABLE_ITEM, var.getDataProviderID(), "%%prefix%%" + var.getDataProviderID(),

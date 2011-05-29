@@ -494,6 +494,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		private Button okButton;
 		private boolean outputPrivateTag;
 		private Button createPrivateButton;
+		private final IPersist parent;
 
 		/**
 		 * @param parentShell
@@ -512,16 +513,20 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 					return validateMethodName(parent, newText);
 				}
 			});
+			this.parent = parent;
 		}
 
 		@SuppressWarnings("nls")
 		@Override
-		protected void createButtonsForButtonBar(Composite parent)
+		protected void createButtonsForButtonBar(Composite compositeParent)
 		{
 			// create OK and Cancel buttons by default
-			okButton = createButton(parent, IDialogConstants.OK_ID, "Create public", true);
-			createPrivateButton = createButton(parent, IDialogConstants.PROCEED_ID, "Create private", false);
-			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+			okButton = createButton(compositeParent, IDialogConstants.OK_ID, "Create public", true);
+			if (!(this.parent instanceof Solution))
+			{
+				createPrivateButton = createButton(compositeParent, IDialogConstants.PROCEED_ID, "Create private", false);
+			}
+			createButton(compositeParent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 			//do this here because setting the text will set enablement on the ok
 			// button
 			Text text = getText();
