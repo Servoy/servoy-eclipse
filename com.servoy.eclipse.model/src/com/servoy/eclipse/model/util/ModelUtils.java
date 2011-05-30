@@ -19,9 +19,12 @@ package com.servoy.eclipse.model.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.WeakHashMap;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -50,6 +53,7 @@ import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.FixedStyleSheet;
+import com.servoy.j2db.util.Pair;
 
 public class ModelUtils
 {
@@ -109,6 +113,11 @@ public class ModelUtils
 		return null;
 	}
 
+	/**
+	 * Weak cache for style classes per lookupname.
+	 */
+	private final static WeakHashMap<FixedStyleSheet, Map<Pair<String, String>, String[]>> styleClassesCache = new WeakHashMap<FixedStyleSheet, Map<Pair<String, String>, String[]>>();
+
 	public static String[] getStyleClasses(Style style, String lookupName, String formStyleClass)
 	{
 		if (lookupName == null || lookupName.length() == 0 || style == null)
@@ -116,14 +125,21 @@ public class ModelUtils
 			return new String[0];
 		}
 
-		FixedStyleSheet styleSheet = ComponentFactory.getCSSStyle(style);
-		String[] styleClassess = styleSheet.getCachedStyleClasses(lookupName, formStyleClass);
-		if (styleClassess == null)
+		FixedStyleSheet styleSheet = ComponentFactory.getCSSStyle(null, style);
+		Map<Pair<String, String>, String[]> map = styleClassesCache.get(styleSheet);
+		if (map == null)
 		{
-			styleClassess = calculateStyleClasses(styleSheet, lookupName, formStyleClass);
-			styleSheet.setCachedStyleClasses(lookupName, formStyleClass, styleClassess);
+			map = new HashMap<Pair<String, String>, String[]>();
+			styleClassesCache.put(styleSheet, map);
 		}
-		return styleClassess;
+
+		String[] styleClasses = map.get(new Pair<String, String>(lookupName, formStyleClass));
+		if (styleClasses == null)
+		{
+			styleClasses = calculateStyleClasses(styleSheet, lookupName, formStyleClass);
+			map.put(new Pair<String, String>(lookupName, formStyleClass), styleClasses);
+		}
+		return styleClasses;
 	}
 
 	private static String[] calculateStyleClasses(FixedStyleSheet styleSheet, String lookupName, String formStyleClass)
@@ -162,7 +178,7 @@ public class ModelUtils
 					}
 				}
 			}
-			if (!styleExist && lookupName.equals("check") || lookupName.equals("combobox") || lookupName.equals("radio"))
+			if (!styleExist && (lookupName.equals("check") || lookupName.equals("combobox") || lookupName.equals("radio")))
 			{
 				lookupName = "field"; //$NON-NLS-1$
 				matchedFormPrefix = matchedFormPrefixField;

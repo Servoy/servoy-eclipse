@@ -2198,7 +2198,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		{
 			for (IPersist style : modifiedStyleList)
 			{
-				ComponentFactory.flushStyle((Style)style);
+				ComponentFactory.flushStyle(null, (Style)style);
 			}
 			firePersistsChanged(true, modifiedStyleList);
 			firePersistsChanged(false, modifiedStyleList);

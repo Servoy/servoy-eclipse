@@ -160,7 +160,7 @@ public class FormBackgroundLayer extends FreeformLayer
 	public static java.awt.Color getFormBackground(Form form)
 	{
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
-		FixedStyleSheet styleSheet = ComponentFactory.getCSSStyle(flattenedSolution.getStyleForForm(form, null));
+		FixedStyleSheet styleSheet = ComponentFactory.getCSSStyle(null, flattenedSolution.getStyleForForm(form, null));
 		java.awt.Color background = null;
 		if (styleSheet != null)
 		{
