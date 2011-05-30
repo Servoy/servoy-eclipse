@@ -71,7 +71,6 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.DBValueList;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractScriptProvider;
@@ -2882,16 +2881,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								else if (o instanceof Form) styleClass = ((Form)o).getStyleClass();
 								if (styleClass != null)
 								{
-									String lookupName = null;
-									if (o instanceof BaseComponent)
-									{
-										lookupName = ComponentFactory.getLookupName((BaseComponent)o);
-									}
-									else if (o instanceof Form)
-									{
-										lookupName = "form"; //$NON-NLS-1$
-									}
-									String[] classes = ModelUtils.getStyleClasses(finalStyle, lookupName);
+									String[] classes = ModelUtils.getStyleClasses(finalStyle, ModelUtils.getStyleLookupname(o), form.getStyleClass());
 									List<String> styleClasses = Arrays.asList(classes);
 									if (!styleClasses.contains(styleClass))
 									{

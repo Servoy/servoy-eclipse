@@ -35,6 +35,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
@@ -95,45 +96,97 @@ public class ModelUtils
 		return sb.toString();
 	}
 
-	public static String[] getStyleClasses(Style style, String lookupName)
+	public static String getStyleLookupname(IPersist persist)
+	{
+		if (persist instanceof BaseComponent)
+		{
+			return ComponentFactory.getLookupName((BaseComponent)persist);
+		}
+		if (persist instanceof Form)
+		{
+			return "form"; //$NON-NLS-1$
+		}
+		return null;
+	}
+
+	public static String[] getStyleClasses(Style style, String lookupName, String formStyleClass)
+	{
+		if (lookupName == null || lookupName.length() == 0 || style == null)
+		{
+			return new String[0];
+		}
+
+		FixedStyleSheet styleSheet = ComponentFactory.getCSSStyle(style);
+		String[] styleClassess = styleSheet.getCachedStyleClasses(lookupName, formStyleClass);
+		if (styleClassess == null)
+		{
+			styleClassess = calculateStyleClasses(styleSheet, lookupName, formStyleClass);
+			styleSheet.setCachedStyleClasses(lookupName, formStyleClass, styleClassess);
+		}
+		return styleClassess;
+	}
+
+	private static String[] calculateStyleClasses(FixedStyleSheet styleSheet, String lookupName, String formStyleClass)
 	{
 		List<String> styleClasses = new ArrayList<String>();
-		if (style != null)
+		boolean matchedFormPrefix = false;
+		String formPrefix = "form"; //$NON-NLS-1$
+		if (formStyleClass != null)
 		{
-			FixedStyleSheet styleSheet = ComponentFactory.getCSSStyle(style);
+			formPrefix += "." + formStyleClass; //$NON-NLS-1$
+		}
 
-			if (lookupName != null && (lookupName.equals("check") || lookupName.equals("combobox") || lookupName.equals("radio")))
-			{
-				boolean styleExist = false;
-				Enumeration selectors = styleSheet.getStyleNames();
-				while (selectors.hasMoreElements())
-				{
-					String styleName = (String)selectors.nextElement();
-					if (styleName.startsWith(lookupName))
-					{
-						styleExist = true;
-						break;
-					}
-				}
-				if (!styleExist) lookupName = "field";
-			}
-
+		if (!lookupName.equals("form"))
+		{
+			boolean styleExist = false;
+			boolean matchedFormPrefixField = false;
 			Enumeration< ? > selectors = styleSheet.getStyleNames();
 			while (selectors.hasMoreElements())
 			{
-				String styleName = (String)selectors.nextElement();
-				int index = styleName.indexOf(".");
-				if (index > 0)
+				String[] styleParts = ((String)selectors.nextElement()).split("\\p{Space}+?"); //$NON-NLS-1$
+				if (styleParts.length <= 2 && (styleParts.length == 1 || styleParts[0].equals(formPrefix)))
 				{
-					if (lookupName == null || styleName.startsWith(lookupName))
+					String styleName = styleParts[styleParts.length - 1];
+					if (styleName.startsWith(lookupName + '.'))
 					{
-						styleName = styleName.substring(index + 1);
-						styleClasses.add(styleName);
+						matchedFormPrefix |= styleParts.length == 2; // found a match with form prefix, skip root matches 
+						styleExist = true;
+					}
+					else if (styleName.startsWith("field."))
+					{
+						matchedFormPrefixField |= styleParts.length == 2;
 					}
 				}
 			}
-			Collections.sort(styleClasses);
+			if (!styleExist && lookupName.equals("check") || lookupName.equals("combobox") || lookupName.equals("radio"))
+			{
+				lookupName = "field"; //$NON-NLS-1$
+				matchedFormPrefix = matchedFormPrefixField;
+			}
 		}
+
+		Enumeration< ? > selectors = styleSheet.getStyleNames();
+		while (selectors.hasMoreElements())
+		{
+			String selector = (String)selectors.nextElement();
+			String[] styleParts = selector.split("\\p{Space}+?"); //$NON-NLS-1$
+			String styleName = styleParts[styleParts.length - 1];
+			if ((matchedFormPrefix && styleParts.length == 1) // found a match with form prefix, skip root matches 
+				||
+				styleParts.length > 2 || !styleName.startsWith(lookupName) || (styleParts.length == 2 && !styleParts[0].equals(formPrefix)))
+			{
+				continue;
+			}
+
+			int index = styleName.indexOf('.');
+			if (index == lookupName.length() && styleName.startsWith(lookupName))
+			{
+				styleClasses.add(styleName.substring(index + 1));
+			}
+		}
+
+		Collections.sort(styleClasses);
+
 		return styleClasses.toArray(new String[styleClasses.size()]);
 	}
 

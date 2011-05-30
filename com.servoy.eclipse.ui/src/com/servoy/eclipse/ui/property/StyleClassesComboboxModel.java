@@ -23,10 +23,7 @@ import java.util.List;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.component.ComponentFactory;
-import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Style;
 
 /**
@@ -78,25 +75,12 @@ public class StyleClassesComboboxModel implements IComboboxPropertyModel<String>
 
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
 		Style style = flattenedSolution.getStyleForForm(form, null);
-		String[] classes = ModelUtils.getStyleClasses(style, lookupName);
+		String[] classes = ModelUtils.getStyleClasses(style, lookupName, form.getStyleClass());
 		if (classes != null && classes.length > 0)
 		{
 			styleClasses.addAll(Arrays.asList(classes));
 		}
 		styleClasses.add(0, null);
 		return styleClasses.toArray(new String[styleClasses.size()]);
-	}
-
-	public static String getStyleLookupname(IPersist persist)
-	{
-		if (persist instanceof BaseComponent)
-		{
-			return ComponentFactory.getLookupName((BaseComponent)persist);
-		}
-		if (persist instanceof Form)
-		{
-			return "form"; //$NON-NLS-1$
-		}
-		return null;
 	}
 }

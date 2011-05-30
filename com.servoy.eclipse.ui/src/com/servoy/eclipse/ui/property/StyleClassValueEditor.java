@@ -46,10 +46,12 @@ public class StyleClassValueEditor implements IValueEditor<String>
 		Style style = ModelUtils.getEditingFlattenedSolution(form).getStyleForForm(form, null);
 		if (style != null)
 		{
-			String lookup = StyleClassesComboboxModel.getStyleLookupname(persist);
-			if (value == null) value = lookup;
-			else value = lookup + "." + value;
-			EditorUtil.openStyleEditor(style, value);
+			String lookup = ModelUtils.getStyleLookupname(persist);
+			if (value != null)
+			{
+				lookup = lookup + '.' + value;
+			}
+			EditorUtil.openStyleEditor(style, lookup);
 		}
 	}
 

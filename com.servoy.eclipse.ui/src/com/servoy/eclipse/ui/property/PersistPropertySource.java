@@ -2976,8 +2976,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 		if (name.equals("styleClass"))
 		{
-			return createStyleClassPropertyController(persistContext.getPersist(), id, displayName,
-				StyleClassesComboboxModel.getStyleLookupname(persistContext.getPersist()), form);
+			return createStyleClassPropertyController(persistContext.getPersist(), id, displayName, ModelUtils.getStyleLookupname(persistContext.getPersist()),
+				form);
 		}
 
 		if (name.equals("styleName"))
