@@ -686,35 +686,38 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 		// if valid and value is not null, check if the value can be resolved through the content provider.
 		if (isValid && value != null)
 		{
-			isValid = false;
-			Object parent = getContentProvider().getParent(value);
-			List<Object> path = new ArrayList<Object>();
-			path.add(value);
-			while (parent != null)
+			ITreeContentProvider contentProvider = getContentProvider();
+			if (contentProvider != null) // can be null for instances that have their own dialog
 			{
-				path.add(parent);
-				parent = getContentProvider().getParent(parent);
-			}
-			Object[] elements = getContentProvider().getElements(getInput());
-			for (int i = path.size(); --i >= 0;)
-			{
-				Object x = path.get(i);
-				for (Object object : elements)
+				isValid = false;
+				Object parent = contentProvider.getParent(value);
+				List<Object> path = new ArrayList<Object>();
+				path.add(value);
+				while (parent != null)
 				{
-					if (x.equals(object))
+					path.add(parent);
+					parent = contentProvider.getParent(parent);
+				}
+				Object[] elements = contentProvider.getElements(getInput());
+				for (int i = path.size(); --i >= 0;)
+				{
+					Object x = path.get(i);
+					for (Object object : elements)
 					{
-						if (i == 0)
+						if (x.equals(object))
 						{
-							isValid = true;
+							if (i == 0)
+							{
+								isValid = true;
+							}
+							else
+							{
+								elements = contentProvider.getChildren(x);
+							}
+							break;
 						}
-						else
-						{
-							elements = getContentProvider().getChildren(x);
-						}
-						break;
 					}
 				}
-
 			}
 		}
 		setValid(isValid);
