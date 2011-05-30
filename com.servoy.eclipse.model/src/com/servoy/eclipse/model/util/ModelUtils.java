@@ -147,12 +147,16 @@ public class ModelUtils
 				if (styleParts.length <= 2 && (styleParts.length == 1 || styleParts[0].equals(formPrefix)))
 				{
 					String styleName = styleParts[styleParts.length - 1];
-					if (styleName.startsWith(lookupName + '.'))
+					if (styleName.equals(lookupName))
 					{
 						matchedFormPrefix |= styleParts.length == 2; // found a match with form prefix, skip root matches 
 						styleExist = true;
 					}
-					else if (styleName.startsWith("field."))
+					else if (styleName.startsWith(lookupName + '.'))
+					{
+						styleExist = true;
+					}
+					else if (styleName.equals("field"))
 					{
 						matchedFormPrefixField |= styleParts.length == 2;
 					}
