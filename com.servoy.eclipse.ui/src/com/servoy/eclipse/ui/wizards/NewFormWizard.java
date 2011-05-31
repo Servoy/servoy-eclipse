@@ -226,7 +226,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 	@Override
 	public IDialogSettings getDialogSettings()
 	{
-		return EditorUtil.getDialogSettings("newFormWizard"); //$NON-NLS-1$
+		return EditorUtil.getDialogSettings("newFormWizard"); //$NON-NLS-1$  
 	}
 
 	/*
@@ -297,7 +297,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				form.clearProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
 				form.clearProperty(StaticContentSpecLoader.PROPERTY_SHOWINMENU.getPropertyName());
 			}
-			form.setExtendsID(superForm == null ? 0 : superForm.getID());
+			form.setExtendsID(superForm == null ? Form.NAVIGATOR_NONE : superForm.getID());
 			// add selected data providers
 			Object[] dataProviders = dataProviderWizardPage.getDataProviders();
 			if (dataProviders != null && dataProviders.length > 0)
@@ -676,7 +676,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 				setFormName(formName);
 				fillStyleCombo();
-				fillTemplateCombo(settings.get("templatename"));
+				fillTemplateCombo(superForm == null ? settings.get("templatename") : null);
 				fillProjectCombo();
 
 				formNameField.setFocus();
@@ -726,8 +726,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 		{
 			List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
 			List<Object> formTemplates = new ArrayList<Object>(templates.size() + 1);
-			formTemplates.add(SELECTION_NONE);
-			Object selected = SELECTION_NONE;
+			Object selected;
+			formTemplates.add(selected = SELECTION_NONE);
 			for (IRootObject template : templates)
 			{
 				try
@@ -842,7 +842,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 					}
 
 					// extendsFormID
-					int extendsFormID = Form.NAVIGATOR_DEFAULT;
+					int extendsFormID = Form.NAVIGATOR_NONE;
 					String formExtendsName = null;
 					if (formObject.has(StaticContentSpecLoader.PROPERTY_EXTENDSFORMID.getPropertyName()))
 					{
