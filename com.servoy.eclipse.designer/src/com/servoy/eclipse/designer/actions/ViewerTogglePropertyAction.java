@@ -17,47 +17,52 @@
 package com.servoy.eclipse.designer.actions;
 
 import org.eclipse.gef.GraphicalViewer;
-import org.eclipse.jface.action.Action;
+import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.part.WorkbenchPart;
 
 /**
  * Base class for actions that toggle an editor setting (like snap-to-gid) in form designer.
  * 
  * @author rgansevles
  */
-public class ViewerTogglePropertyAction extends Action
+public class ViewerTogglePropertyAction extends SelectionAction
 {
 	private final GraphicalViewer diagramViewer;
 	private final String property;
 
-	public ViewerTogglePropertyAction(GraphicalViewer diagramViewer, String text, String property)
+	public ViewerTogglePropertyAction(WorkbenchPart workbenchPart, GraphicalViewer diagramViewer, String text, String property)
 	{
-		this(diagramViewer, null, text, null, null, property);
+		this(workbenchPart, diagramViewer, null, text, null, null, property);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param diagramViewer the GraphicalViewer whose grid enablement and visibility properties are to be toggled
+	 * @param diagramViewer the GraphicalViewer whose properties are to be toggled
 	 */
-	public ViewerTogglePropertyAction(GraphicalViewer diagramViewer, String actionId, String text, String tooltip, ImageDescriptor imageDescriptor,
-		String property)
+	public ViewerTogglePropertyAction(WorkbenchPart workbenchPart, GraphicalViewer diagramViewer, String actionId, String text, String tooltip,
+		ImageDescriptor imageDescriptor, String property)
 	{
-		super(text, IAction.AS_CHECK_BOX);
+		super(workbenchPart, IAction.AS_CHECK_BOX);
 		this.diagramViewer = diagramViewer;
 		this.property = property;
+		setText(text);
 		setToolTipText(tooltip);
 		setId(actionId);
 		setImageDescriptor(imageDescriptor);
-		setChecked(isChecked());
+		setChecked(calculateChecked());
 	}
 
-	/**
-	 * @see org.eclipse.jface.action.IAction#isChecked()
-	 */
 	@Override
-	public boolean isChecked()
+	protected boolean calculateEnabled()
+	{
+		return true;
+	}
+
+
+	public boolean calculateChecked()
 	{
 		return Boolean.TRUE.equals(diagramViewer.getProperty(property));
 	}
@@ -68,7 +73,8 @@ public class ViewerTogglePropertyAction extends Action
 	@Override
 	public void run()
 	{
-		diagramViewer.setProperty(property, Boolean.valueOf(!isChecked()));
+		boolean newValue = !calculateChecked();
+		diagramViewer.setProperty(property, Boolean.valueOf(newValue));
+		setChecked(newValue);
 	}
-
 }

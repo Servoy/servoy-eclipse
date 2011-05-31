@@ -561,15 +561,24 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		// Show rulers
 		refreshRulers();
 
-		Action action = new SelectFeedbackmodeAction(viewer);
+		Action action = new SelectFeedbackmodeAction(editorPart, viewer);
 		getActionRegistry().registerAction(action);
 
 		action = new SelectSnapmodeAction(viewer);
 		getActionRegistry().registerAction(action);
 
-		action = new ViewerTogglePropertyAction(viewer, DesignerActionFactory.TOGGLE_HIDE_INHERITED.getId(), DesignerActionFactory.TOGGLE_HIDE_INHERITED_TEXT,
-			DesignerActionFactory.TOGGLE_HIDE_INHERITED_TOOLTIP, DesignerActionFactory.TOGGLE_HIDE_INHERITED_IMAGE, PROPERTY_HIDE_INHERITED);
+		action = new ViewerTogglePropertyAction(editorPart, viewer, DesignerActionFactory.TOGGLE_HIDE_INHERITED.getId(),
+			DesignerActionFactory.TOGGLE_HIDE_INHERITED_TEXT, DesignerActionFactory.TOGGLE_HIDE_INHERITED_TOOLTIP,
+			DesignerActionFactory.TOGGLE_HIDE_INHERITED_IMAGE, PROPERTY_HIDE_INHERITED)
+		{
+			@Override
+			protected boolean calculateEnabled()
+			{
+				return editorPart.getForm().getExtendsID() > 0;
+			}
+		};
 		getActionRegistry().registerAction(action);
+		getSelectionActions().add(action.getId());
 
 		addToolbarAction(COOLBAR_PREFS, getActionRegistry().getAction(DesignerActionFactory.SELECT_FEEDBACK.getId()));
 		addToolbarAction(COOLBAR_PREFS, getActionRegistry().getAction(DesignerActionFactory.SELECT_SNAPMODE.getId()));

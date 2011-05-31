@@ -20,6 +20,7 @@ import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.SnapToGrid;
 import org.eclipse.gef.rulers.RulerProvider;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.part.WorkbenchPart;
 
 import com.servoy.eclipse.designer.editor.AlignmentfeedbackEditPolicy;
 import com.servoy.eclipse.designer.editor.FormBackgroundLayer;
@@ -33,26 +34,31 @@ import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
 
 public class SelectFeedbackmodeAction extends ViewerDropdownPropertyAction
 {
+	private final WorkbenchPart workbenchPart;
+
 	/**
 	 * Constructor
 	 * 
 	 * @param diagramViewer the GraphicalViewer whose feedback mode is to be toggled
 	 */
-	public SelectFeedbackmodeAction(GraphicalViewer diagramViewer)
+	public SelectFeedbackmodeAction(WorkbenchPart workbenchPart, GraphicalViewer diagramViewer)
 	{
 		super(diagramViewer, DesignerActionFactory.SELECT_FEEDBACK.getId(), DesignerActionFactory.SELECT_FEEDBACK_TEXT,
 			DesignerActionFactory.SELECT_FEEDBACK_TOOLTIP, DesignerActionFactory.SELECT_FEEDBACK_IMAGE);
+		this.workbenchPart = workbenchPart;
 	}
 
 	@Override
 	protected void fillMenu(Menu menu)
 	{
-		add(new ViewerTogglePropertyAction(diagramViewer, "Selected Element Anchoring Indicator", AlignmentfeedbackEditPolicy.PROPERTY_ANCHOR_FEEDBACK_VISIBLE));
-		add(new ViewerTogglePropertyAction(diagramViewer, "Selected Element Alignment Guide", AlignmentfeedbackEditPolicy.PROPERTY_ALIGMENT_FEEDBACK_VISIBLE));
-		add(new ViewerTogglePropertyAction(diagramViewer, "Selected Element Same Size Indicator",
+		add(new ViewerTogglePropertyAction(workbenchPart, diagramViewer, "Selected Element Anchoring Indicator",
+			AlignmentfeedbackEditPolicy.PROPERTY_ANCHOR_FEEDBACK_VISIBLE));
+		add(new ViewerTogglePropertyAction(workbenchPart, diagramViewer, "Selected Element Alignment Guide",
+			AlignmentfeedbackEditPolicy.PROPERTY_ALIGMENT_FEEDBACK_VISIBLE));
+		add(new ViewerTogglePropertyAction(workbenchPart, diagramViewer, "Selected Element Same Size Indicator",
 			AlignmentfeedbackEditPolicy.PROPERTY_SAME_SIZE_FEEDBACK_VISIBLE));
-		add(new ViewerTogglePropertyAction(diagramViewer, "Grid", SnapToGrid.PROPERTY_GRID_VISIBLE));
-		add(new ViewerTogglePropertyAction(diagramViewer, "Page Breaks", FormBackgroundLayer.PROPERTY_PAINT_PAGEBREAKS));
-		add(new ViewerTogglePropertyAction(diagramViewer, "Rulers", RulerProvider.PROPERTY_RULER_VISIBILITY));
+		add(new ViewerTogglePropertyAction(workbenchPart, diagramViewer, "Grid", SnapToGrid.PROPERTY_GRID_VISIBLE));
+		add(new ViewerTogglePropertyAction(workbenchPart, diagramViewer, "Page Breaks", FormBackgroundLayer.PROPERTY_PAINT_PAGEBREAKS));
+		add(new ViewerTogglePropertyAction(workbenchPart, diagramViewer, "Rulers", RulerProvider.PROPERTY_RULER_VISIBILITY));
 	}
 }
