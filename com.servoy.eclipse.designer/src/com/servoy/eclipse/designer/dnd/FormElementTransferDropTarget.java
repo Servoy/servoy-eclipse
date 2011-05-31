@@ -22,6 +22,7 @@ import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.Request;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.editor.CreateElementRequest;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
@@ -38,9 +39,9 @@ import com.servoy.eclipse.ui.node.UserNodeListDragSourceListener;
  */
 public class FormElementTransferDropTarget extends ElementTransferDropTarget
 {
-	public FormElementTransferDropTarget(EditPartViewer viewer)
+	public FormElementTransferDropTarget(EditPartViewer viewer, IWorkbenchPart workbenchPart)
 	{
-		super(viewer, FormElementTransfer.getInstance());
+		super(viewer, FormElementTransfer.getInstance(), workbenchPart);
 	}
 
 	@Override

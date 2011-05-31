@@ -23,6 +23,8 @@ import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -38,10 +40,12 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportMediaAction;
 public class UserNodeFileDropTargetListener extends ViewerDropAdapter
 {
 	private ServoyProject project;
+	private final IWorkbenchPart workbenchPart;
 
-	public UserNodeFileDropTargetListener(Viewer viewer)
+	public UserNodeFileDropTargetListener(Viewer viewer, IWorkbenchPart workbenchPart)
 	{
 		super(viewer);
+		this.workbenchPart = workbenchPart;
 	}
 
 
@@ -82,6 +86,9 @@ public class UserNodeFileDropTargetListener extends ViewerDropAdapter
 		{
 			try
 			{
+				// active the part that was dropped on
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(workbenchPart);
+
 				ImportMediaAction.addMediaFiles(project.getEditingSolution(), null, (String[])data);
 				return true;
 			}

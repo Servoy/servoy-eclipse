@@ -1206,7 +1206,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			new UserNodeListDragSourceListener(list, FormElementTransfer.getInstance()));
 
 		list.addDropSupport(DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT, new Transfer[] { FileTransfer.getInstance() },
-			new UserNodeFileDropTargetListener(list));
+			new UserNodeFileDropTargetListener(list, this));
 
 		list.addDoubleClickListener(new IDoubleClickListener()
 		{
@@ -1332,7 +1332,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			new UserNodeListDragSourceListener(tree, FormElementTransfer.getInstance()));
 
 		tree.addDropSupport(DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT, new Transfer[] { FileTransfer.getInstance() },
-			new UserNodeFileDropTargetListener(tree));
+			new UserNodeFileDropTargetListener(tree, this));
 	}
 
 	private void initTreeViewer()

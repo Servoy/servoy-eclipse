@@ -25,6 +25,7 @@ import org.eclipse.gef.Request;
 import org.eclipse.gef.dnd.TemplateTransfer;
 import org.eclipse.gef.requests.CreationFactory;
 import org.eclipse.swt.dnd.DND;
+import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.dnd.ElementTransferDropTarget;
@@ -44,9 +45,9 @@ public class PaletteItemTransferDropTargetListener extends ElementTransferDropTa
 	/**
 	 * @param viewer
 	 */
-	public PaletteItemTransferDropTargetListener(EditPartViewer viewer)
+	public PaletteItemTransferDropTargetListener(EditPartViewer viewer, IWorkbenchPart workbenchPart)
 	{
-		super(viewer, TemplateTransfer.getInstance());
+		super(viewer, TemplateTransfer.getInstance(), workbenchPart);
 	}
 
 	@Override

@@ -31,6 +31,8 @@ import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.SelectModelsCommandWrapper;
@@ -45,10 +47,12 @@ import com.servoy.eclipse.designer.property.SetValueCommand;
 public class ElementTransferDropTarget extends AbstractTransferDropTargetListener
 {
 	private SnapToHelper helper;
+	private final IWorkbenchPart workbenchPart;
 
-	public ElementTransferDropTarget(EditPartViewer viewer, Transfer xfer)
+	public ElementTransferDropTarget(EditPartViewer viewer, Transfer xfer, IWorkbenchPart workbenchPart)
 	{
 		super(viewer, xfer);
+		this.workbenchPart = workbenchPart;
 	}
 
 	@Override
@@ -69,6 +73,8 @@ public class ElementTransferDropTarget extends AbstractTransferDropTargetListene
 	protected void handleDrop()
 	{
 		super.handleDrop();
+		// active the part that was dropped on
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(workbenchPart);
 		final Request targetRequest = getTargetRequest();
 		Display.getDefault().asyncExec(new Runnable()
 		{

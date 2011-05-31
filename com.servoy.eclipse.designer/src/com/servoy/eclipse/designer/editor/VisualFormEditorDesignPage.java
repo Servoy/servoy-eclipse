@@ -513,8 +513,8 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 		if (editorPart.getForm() != null)
 		{
-			viewer.addDropTargetListener(new FormElementTransferDropTarget(getGraphicalViewer()));
-			viewer.addDropTargetListener(new PaletteItemTransferDropTargetListener(getGraphicalViewer()));
+			viewer.addDropTargetListener(new FormElementTransferDropTarget(getGraphicalViewer(), editorPart));
+			viewer.addDropTargetListener(new PaletteItemTransferDropTargetListener(getGraphicalViewer(), editorPart));
 
 			getEditorSite().getShell().getDisplay().asyncExec(new Runnable()
 			{
