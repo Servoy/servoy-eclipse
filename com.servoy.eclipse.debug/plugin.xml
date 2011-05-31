@@ -146,6 +146,9 @@
       <evaluator
             class="com.servoy.eclipse.debug.script.ValueCollectionProvider">
       </evaluator>
+      <nodeHandler
+            class="com.servoy.eclipse.debug.script.CalculationsTypeInferenceHandlerFactory">
+      </nodeHandler>
    </extension>
    <extension
          point="org.eclipse.dltk.javascript.ui.typeInfoLabelProvider">
