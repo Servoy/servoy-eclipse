@@ -164,7 +164,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		TYPES.put("IRecordInternal", Record.JS_RECORD); //$NON-NLS-1$
 		TYPES.put("IFoundSetInternal", FoundSet.JS_FOUNDSET); //$NON-NLS-1$
 		TYPES.put("FoundSet", FoundSet.JS_FOUNDSET); //$NON-NLS-1$
-		TYPES.put(FormScope.class.getName(), "Form"); //$NON-NLS-1$
+		TYPES.put(FormScope.class.getSimpleName(), "Form"); //$NON-NLS-1$
 		TYPES.put("org.mozilla.javascript.NativeArray", "Array"); //$NON-NLS-1$ //$NON-NLS-2$
 		TYPES.put("JSWindowImpl$JSWindow", "JSWindow"); //$NON-NLS-1$ //$NON-NLS-2$
 		TYPES.put("IScriptRenderMethods", IScriptRenderMethods.JS_RENDERABLE); //$NON-NLS-1$

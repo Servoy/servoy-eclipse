@@ -81,6 +81,7 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.scripting.FormScope;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IDeprecated;
 import com.servoy.j2db.scripting.IJavaScriptType;
@@ -89,7 +90,6 @@ import com.servoy.j2db.scripting.IReturnedTypesProvider;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
-import com.servoy.j2db.ui.IScriptRenderMethods;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
@@ -283,19 +283,6 @@ public abstract class TypeCreator
 		}
 		return type;
 	}
-
-	/**
-	 * @param typeName
-	 * @return
-	 */
-	private String getRealName(String typeName)
-	{
-		if ("Record".equals(typeName)) return Record.JS_RECORD;
-		if ("FoundSet".equals(typeName)) return FoundSet.JS_FOUNDSET;
-		if (IScriptRenderMethods.class.getSimpleName().equals(typeName)) return IScriptRenderMethods.JS_RENDERABLE;
-		return typeName;
-	}
-
 
 	protected final void registerConstantsForScriptObject(IReturnedTypesProvider scriptObject)
 	{
@@ -630,7 +617,7 @@ public abstract class TypeCreator
 			return context.getTypeRef(ITypeNames.ARRAY);
 		}
 
-		String typeName = getRealName(memberReturnType.getSimpleName());
+		String typeName = SolutionExplorerListContentProvider.TYPES.get(memberReturnType.getSimpleName());
 		addAnonymousClassType(typeName, memberReturnType);
 		return context.getTypeRef(typeName);
 	}
