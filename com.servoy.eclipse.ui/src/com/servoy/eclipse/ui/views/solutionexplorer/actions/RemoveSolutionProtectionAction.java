@@ -90,24 +90,27 @@ public class RemoveSolutionProtectionAction extends Action implements ISelection
 			Solution solution = selectedSolutionProject.getEditingSolution();
 			String inputPassword = UIUtils.showPasswordDialog(shell, "Solution '" + solution.getName() + "' is password protected",
 				"Please enter protection password for solution : '" + solution.getName() + "'", "", null);
-			inputPassword = ApplicationServerSingleton.get().calculateProtectionPassword(solution.getSolutionMetaData(), inputPassword);
-			if (inputPassword.equals(solution.getProtectionPassword()))
+			if (inputPassword != null)
 			{
-				solution.getSolutionMetaData().setProtectionPassword(
-					ApplicationServerSingleton.get().calculateProtectionPassword(solution.getSolutionMetaData(), null));
-				try
+				inputPassword = ApplicationServerSingleton.get().calculateProtectionPassword(solution.getSolutionMetaData(), inputPassword);
+				if (inputPassword.equals(solution.getProtectionPassword()))
 				{
-					selectedSolutionProject.saveEditingSolutionNodes(new IPersist[] { solution }, false);
-					setEnabled(false);
+					solution.getSolutionMetaData().setProtectionPassword(
+						ApplicationServerSingleton.get().calculateProtectionPassword(solution.getSolutionMetaData(), null));
+					try
+					{
+						selectedSolutionProject.saveEditingSolutionNodes(new IPersist[] { solution }, false);
+						setEnabled(false);
+					}
+					catch (RepositoryException ex)
+					{
+						MessageDialog.openError(shell, "Writing on disk failed", ex.getMessage());
+					}
 				}
-				catch (RepositoryException ex)
+				else
 				{
-					MessageDialog.openError(shell, "Writing on disk failed", ex.getMessage());
+					MessageDialog.openError(shell, "Wrong Password", "Password is not correct.");
 				}
-			}
-			else
-			{
-				MessageDialog.openError(shell, "Wrong Password", "Password is not correct.");
 			}
 
 		}
