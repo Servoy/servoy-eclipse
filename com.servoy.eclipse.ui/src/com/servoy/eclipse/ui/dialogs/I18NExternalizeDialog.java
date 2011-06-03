@@ -170,9 +170,12 @@ public class I18NExternalizeDialog extends Dialog
 			i18nProjects = new ArrayList<ServoyProject>();
 			ServoyProject[] allProjects = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 			String projectI18NDatasource = project.getSolution().getI18nDataSource();
-			for (ServoyProject sp : allProjects)
+			if (projectI18NDatasource != null)
 			{
-				if (projectI18NDatasource.equals(sp.getSolution().getI18nDataSource())) i18nProjects.add(sp);
+				for (ServoyProject sp : allProjects)
+				{
+					if (projectI18NDatasource.equals(sp.getSolution().getI18nDataSource())) i18nProjects.add(sp);
+				}
 			}
 		}
 		return i18nProjects;
