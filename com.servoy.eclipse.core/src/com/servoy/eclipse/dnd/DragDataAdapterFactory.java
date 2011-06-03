@@ -32,11 +32,13 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Template;
+import com.servoy.j2db.util.ImageLoader;
 
 /**
  * Factory for adapters for the IDragData.
@@ -78,7 +80,11 @@ public class DragDataAdapterFactory implements IAdapterFactory
 				{
 					size = ElementFactory.calculateFormSize(Activator.getDefault().getDesignClient(), (Form)persist);
 				}
-				if (size != null)
+				else if (persist instanceof Media)
+				{
+					size = ImageLoader.getSize(((Media)persist).getMediaData());
+				}
+				if (size != null && size.width > 0 && size.height > 0)
 				{
 					width = size.width;
 					height = size.height;
