@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.team.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
@@ -182,6 +182,12 @@ public abstract class SolutionOperation extends ModelOperation
 		// solutions, and during this the solutions ids are loaded into the singleton
 		// so synch on ws root
 		return ResourcesPlugin.getWorkspace().getRoot();
+	}
+
+	@Override
+	protected String getJobName()
+	{
+		return getTaskName();
 	}
 
 	/*
