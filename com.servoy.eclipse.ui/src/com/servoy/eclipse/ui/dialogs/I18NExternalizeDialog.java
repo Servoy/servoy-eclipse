@@ -95,6 +95,7 @@ import com.servoy.eclipse.ui.util.FilteredEntity;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.ContentSpec;
+import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.I18NUtil;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -107,7 +108,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.property.I18NMessagesModel;
 import com.servoy.j2db.property.I18NMessagesModel.I18NMessagesModelEntry;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
@@ -154,9 +154,12 @@ public class I18NExternalizeDialog extends Dialog
 			i18nProjects = new ArrayList<ServoyProject>();
 			ServoyProject[] allProjects = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 			String projectI18NDatasource = project.getSolution().getI18nDataSource();
-			for (ServoyProject sp : allProjects)
+			if (projectI18NDatasource != null)
 			{
-				if (projectI18NDatasource.equals(sp.getSolution().getI18nDataSource())) i18nProjects.add(sp);
+				for (ServoyProject sp : allProjects)
+				{
+					if (projectI18NDatasource.equals(sp.getSolution().getI18nDataSource())) i18nProjects.add(sp);
+				}
 			}
 		}
 		return i18nProjects;
