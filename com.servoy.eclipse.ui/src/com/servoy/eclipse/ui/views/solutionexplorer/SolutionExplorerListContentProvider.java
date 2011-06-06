@@ -1639,6 +1639,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			if (tooltip == null) tooltip = ""; //$NON-NLS-1$
 
 			MemberBox method = getBestMatchingMethod(name, njm, scriptObject);
+
+			boolean methodIsOverloaded = isMethodNameOverloaded(name, njm);
+			if (methodIsOverloaded) method = getBestOverloadedMatch(njm);
+
 			StringBuffer sbParamsString = new StringBuffer();
 
 			Class[] params = method.getParameterTypes();
@@ -1707,6 +1711,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				if (j < params.length - 1) sbParamsString.append(", "); //$NON-NLS-1$
 			}
 
+			if (methodIsOverloaded) sbParamsString = makeProperOptionalArgs(njm.getMethods(), sbParamsString);
+
 			Class returnType = method.getReturnType();
 			StringBuffer returnTypeStringBuffer = new StringBuffer();
 			while (returnType.isArray())
@@ -1726,6 +1732,57 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				tooltip = tmp + "<br><pre>" + tooltip + "</pre></body></html>"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			return tooltip;
+		}
+
+
+		private boolean isMethodNameOverloaded(String name, NativeJavaMethod njm)
+		{
+			MemberBox[] methods = njm.getMethods();
+			if (methods.length > 1) return true;
+			else return false;
+		}
+
+		private MemberBox getBestOverloadedMatch(NativeJavaMethod njm)
+		{
+			// Only the first method!!!!!!!
+			MemberBox[] methods = njm.getMethods();
+			MemberBox method = methods[0];
+			for (int j = 1; j < methods.length; j++)
+			{
+				if (method.getParameterTypes().length < methods[j].getParameterTypes().length)
+				{
+					method = methods[j];
+				}
+			}
+
+			//return method with max number of args
+			return method;
+		}
+
+		private StringBuffer makeProperOptionalArgs(MemberBox[] methods, StringBuffer sbParamsString)
+		{
+			MemberBox baseMethod = methods[0];
+			for (int j = 1; j < methods.length; j++)
+			{
+				if (baseMethod.getParameterTypes().length > methods[j].getParameterTypes().length)
+				{
+					baseMethod = methods[j];
+				}
+			}
+
+			int paramsNo = baseMethod.getParameterTypes().length;//min no of params
+			String[] sp = sbParamsString.toString().split(",");//max no of params
+
+			String res = "";
+			for (int i = 0; i < sp.length; i++)
+			{
+				sp[i] = sp[i].trim();
+				if (i >= paramsNo) sp[i] = "[" + sp[i] + "]";
+				if (i < sp.length - 1) res = res + sp[i] + ", ";
+			}
+			res = res + sp[sp.length - 1];
+
+			return new StringBuffer(res);
 		}
 
 		private MemberBox getBestMatchingMethod(String name, NativeJavaMethod njm, IScriptObject scriptObject)
@@ -1749,17 +1806,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 			}
 
-			// Only the first method!!!!!!!
-			MemberBox[] methods = njm.getMethods();
-			MemberBox method = methods[0];
-			for (int j = 1; j < methods.length; j++)
-			{
-				if (method.getParameterTypes().length < methods[j].getParameterTypes().length)
-				{
-					method = methods[j];
-				}
-			}
-			return method;
+			return getBestOverloadedMatch(njm);
 		}
 	}
 
