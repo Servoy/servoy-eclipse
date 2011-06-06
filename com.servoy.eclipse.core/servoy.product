@@ -21,6 +21,10 @@ and will be prosecuted to the maximum extent possible under law.
    </aboutInfo>
 
    <configIni use="default">
+      <linux>/com.servoy.eclipse.core/config.ini</linux>
+      <macosx>/com.servoy.eclipse.core/config.ini</macosx>
+      <solaris>/com.servoy.eclipse.core/config.ini</solaris>
+      <win32>/com.servoy.eclipse.core/config.ini</win32>
    </configIni>
 
    <launcherArgs>
