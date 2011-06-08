@@ -25,10 +25,12 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DragSourceListener;
+import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 
 import com.servoy.eclipse.dnd.IDragData;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.j2db.persistence.Media;
 
 /**
  * @author jcompagner
@@ -37,6 +39,7 @@ import com.servoy.eclipse.ui.Activator;
 public class UserNodeListDragSourceListener implements DragSourceListener
 {
 	public static IDragData[] dragObjects;
+	private String textDrag = null;
 
 	private final ISelectionProvider list;
 	private final Transfer transfer;
@@ -53,6 +56,7 @@ public class UserNodeListDragSourceListener implements DragSourceListener
 	public void dragFinished(DragSourceEvent event)
 	{
 		dragObjects = null;
+		textDrag = null;
 	}
 
 	/**
@@ -63,6 +67,10 @@ public class UserNodeListDragSourceListener implements DragSourceListener
 		if (dragObjects != null && transfer.isSupportedType(event.dataType))
 		{
 			event.data = dragObjects;
+		}
+		else if (textDrag != null && TextTransfer.getInstance().isSupportedType(event.dataType))
+		{
+			event.data = textDrag;
 		}
 	}
 
@@ -87,6 +95,12 @@ public class UserNodeListDragSourceListener implements DragSourceListener
 					{
 						lst.add(dragObject);
 					}
+					if (real instanceof Media)
+					{
+						if (textDrag != null) textDrag += ", "; //$NON-NLS-1$
+						else textDrag = ""; //$NON-NLS-1$
+						textDrag += "media:///" + ((Media)real).getName(); //$NON-NLS-1$
+					}
 				}
 			}
 		}
@@ -97,6 +111,6 @@ public class UserNodeListDragSourceListener implements DragSourceListener
 			event.image = Activator.getDefault().loadImageFromBundle("empty.png");
 		}
 
-		event.doit = dragObjects != null;
+		event.doit = (dragObjects != null) || (textDrag != null);
 	}
 }
