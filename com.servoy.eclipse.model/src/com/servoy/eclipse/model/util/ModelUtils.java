@@ -26,13 +26,6 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.WeakHashMap;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.Platform;
-
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.FlattenedSolution;
@@ -301,39 +294,6 @@ public class ModelUtils
 		}
 
 		return sm;
-	}
-
-	public static <T> List<T> getExtensions(String extensionID)
-	{
-		List<T> ts = new ArrayList<T>();
-		IExtensionRegistry reg = Platform.getExtensionRegistry();
-		IExtensionPoint ep = reg.getExtensionPoint(extensionID);
-		IExtension[] extensions = ep.getExtensions();
-
-		for (IExtension extension : extensions)
-		{
-			IConfigurationElement[] ces = extension.getConfigurationElements();
-			for (IConfigurationElement ce : ces)
-			{
-				try
-				{
-					T t = (T)ce.createExecutableExtension("class"); //$NON-NLS-1$
-					if (t != null)
-					{
-						ts.add(t);
-					}
-				}
-				catch (CoreException e)
-				{
-					ServoyLog.logError("Could not load extension (extension point " + extensionID + ", " + ce.getAttribute("class") + ")", e);
-				}
-				catch (ClassCastException e)
-				{
-					ServoyLog.logError("Extension class has wrong type (extension point " + extensionID + ", " + ce.getAttribute("class") + ")", e);
-				}
-			}
-		}
-		return ts;
 	}
 
 	private static boolean uiRunning = true;

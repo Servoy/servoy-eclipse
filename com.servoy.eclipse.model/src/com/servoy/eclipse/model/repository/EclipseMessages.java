@@ -50,7 +50,7 @@ import com.servoy.eclipse.model.extensions.IUnexpectedSituationHandler;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.IFileAccess;
-import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.ICustomMessageLoader;
@@ -316,7 +316,7 @@ public class EclipseMessages implements ICustomMessageLoader
 				catch (final Exception ex)
 				{
 					ServoyLog.logError(ex);
-					List<IUnexpectedSituationHandler> l = ModelUtils.getExtensions(IUnexpectedSituationHandler.EXTENSION_ID);
+					List<IUnexpectedSituationHandler> l = ResourcesUtils.getExtensions(IUnexpectedSituationHandler.EXTENSION_ID);
 					for (IUnexpectedSituationHandler ush : l)
 					{
 						ush.cannotWriteI18NFiles(ex);

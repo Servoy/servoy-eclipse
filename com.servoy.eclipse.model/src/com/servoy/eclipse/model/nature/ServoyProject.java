@@ -39,6 +39,7 @@ import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IUnexpectedSituationHandler;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.AbstractActiveSolutionHandler;
 import com.servoy.j2db.FlattenedSolution;
@@ -104,7 +105,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 		}
 		else
 		{
-			List<IUnexpectedSituationHandler> l = ModelUtils.getExtensions(IUnexpectedSituationHandler.EXTENSION_ID);
+			List<IUnexpectedSituationHandler> l = ResourcesUtils.getExtensions(IUnexpectedSituationHandler.EXTENSION_ID);
 			for (IUnexpectedSituationHandler e : l)
 			{
 				e.cannotFindRepository();

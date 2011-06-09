@@ -53,7 +53,6 @@ import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IUnexpectedSituationHandler;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.IFileAccess;
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.UpdateMarkersJob;
@@ -390,7 +389,7 @@ public class DataModelManager implements IColumnInfoManager
 					if (differenceType == TableDifference.COLUMN_CONFLICT || differenceType == TableDifference.COLUMN_MISSING_FROM_DB ||
 						differenceType == TableDifference.COLUMN_MISSING_FROM_DBI_FILE)
 					{
-						for (IUnexpectedSituationHandler e : ModelUtils.<IUnexpectedSituationHandler> getExtensions(IUnexpectedSituationHandler.EXTENSION_ID))
+						for (IUnexpectedSituationHandler e : ResourcesUtils.<IUnexpectedSituationHandler> getExtensions(IUnexpectedSituationHandler.EXTENSION_ID))
 						{
 							// if the user chose 'Yes' for example, write the contents
 							if (!e.allowUnexpectedDBIWrite(t))
