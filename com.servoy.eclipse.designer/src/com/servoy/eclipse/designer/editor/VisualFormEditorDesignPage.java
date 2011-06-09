@@ -813,6 +813,8 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 	{
 		CoolbarLayout coolbarLayout = new DesignerPreferences().getCoolbarLayout();
 
+		if (coolBarManager == null && !new DesignerPreferences().getFormToolsOnMainToolbar()) return;
+
 		if (coolbarLayout == null)
 		{
 			// reset
