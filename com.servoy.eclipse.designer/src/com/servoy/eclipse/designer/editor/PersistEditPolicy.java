@@ -104,8 +104,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 			{
 				IDragData dragData = ((IDragData[])((DataRequest)request).getData())[0];
 				if (dragData instanceof PersistDragData &&
-					(persist instanceof Field || persist instanceof GraphicalComponent || persist instanceof ISupportMedia) ||
-					(((PersistDragData)dragData).type == IRepository.FORMS && persist.getAncestor(IRepository.TABPANELS) != null))
+					((persist instanceof Field || persist instanceof GraphicalComponent || persist instanceof ISupportMedia) || (((PersistDragData)dragData).type == IRepository.FORMS && persist.getAncestor(IRepository.TABPANELS) != null)))
 				{
 					return createDropPersistCommand((DataRequest)request);
 				}
