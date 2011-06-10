@@ -45,6 +45,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Display;
 
+import com.servoy.eclipse.designer.editor.FormGraphicalEditPart;
 import com.servoy.eclipse.designer.util.EditpartDistanceComparator;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 
@@ -208,7 +209,7 @@ public class MarqueeSelectionTool extends AbstractTool
 				figure.translateToRelative(relMarqueeRect.setBounds(marqueeRect));
 				included = ((PolylineConnection)figure).getPoints().intersects(relMarqueeRect);
 			}
-			else
+			else if (!(child instanceof FormGraphicalEditPart)) // form should not be selected via marquee
 			{
 				included = marqueeSelectOuter ? marqueeRect.contains(r) : marqueeRect.intersects(r);
 			}
