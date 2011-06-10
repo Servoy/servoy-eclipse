@@ -16,9 +16,12 @@
  */
 package com.servoy.eclipse.designer.editor.commands;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.gef.EditPart;
+import org.eclipse.gef.Request;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.property.IPersistEditPart;
@@ -46,8 +49,34 @@ public abstract class DesignerToolbarAction extends DesignerSelectionAction
 
 	public boolean calculateEnabled(List< ? > selectedObjects)
 	{
-		return selectedObjects != null && selectedObjects.size() == 1 && selectedObjects.get(0) instanceof EditPart &&
+		return selectedObjects != null && selectedObjects.size() >= 1 && selectedObjects.get(0) instanceof EditPart &&
 			getContext((EditPart)selectedObjects.get(0), IRepository.FORMS) != null;
+	}
+
+	/*
+	 * When multiple objects are selected on a form, the AddFieldAction, AddMediaAction, AddPortalAction, AddTabPanelAction and AddSplitPaneAction should be
+	 * executed once, no matter how many items are selected on the form.
+	 * 
+	 * @see com.servoy.eclipse.designer.editor.commands.DesignerSelectionAction#createRequests(java.util.List)
+	 */
+	@Override
+	protected Map<EditPart, Request> createRequests(List<EditPart> selected)
+	{
+		Map<EditPart, Request> requests = null;
+		for (EditPart editPart : selected)
+		{
+			Request request = createRequest(editPart);
+			if (request != null)
+			{
+				if (requests == null)
+				{
+					requests = new HashMap<EditPart, Request>(selected.size());
+				}
+				requests.put(editPart, request);
+				break;
+			}
+		}
+		return requests;
 	}
 
 	/**
