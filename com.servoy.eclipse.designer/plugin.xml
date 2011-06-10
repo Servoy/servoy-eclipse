@@ -65,12 +65,12 @@
             <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
       </factory>
       <factory
-            adaptableType="com.servoy.eclipse.designer.property.PersistContext"
+            adaptableType="com.servoy.eclipse.ui.property.PersistContext"
             class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
             <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
       </factory>
       <factory
-            adaptableType="com.servoy.eclipse.designer.property.PersistContext"
+            adaptableType="com.servoy.eclipse.ui.property.PersistContext"
             class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
             <adapter type="com.servoy.j2db.persistence.IPersist"/>
       </factory>
