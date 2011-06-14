@@ -160,6 +160,7 @@ public class SolutionSerializer
 	public static final String SOLUTION_SETTINGS = "solution_settings" + JSON_DEFAULT_FILE_EXTENSION; //$NON-NLS-1$
 	public static final String ROOT_METADATA = "rootmetadata" + JSON_DEFAULT_FILE_EXTENSION; //$NON-NLS-1$
 	public static final String MEDIAS_DIR = "medias"; //$NON-NLS-1$
+	public static final String MEDIAS_FILE = MEDIAS_DIR + JSON_DEFAULT_FILE_EXTENSION;
 	public static final String FUNCTION_KEYWORD = "function"; //$NON-NLS-1$
 	public static final String VAR_KEYWORD = "var"; //$NON-NLS-1$
 	public static final String SV_COMMENT_START = "/**"; //$NON-NLS-1$
@@ -360,7 +361,7 @@ public class SolutionSerializer
 			if (node instanceof Media || recursive && node instanceof Solution)
 			{
 				//custom list in one file for all medias
-				String fmedias = node.getRootObject().getName() + '/' + MEDIAS_DIR + JSON_DEFAULT_FILE_EXTENSION;
+				String fmedias = node.getRootObject().getName() + '/' + MEDIAS_FILE;
 				boolean existsFMedias = fileAccess.exists(fmedias);
 				if (!existsFMedias || overwriteExisting)
 				{

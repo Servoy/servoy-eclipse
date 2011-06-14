@@ -344,8 +344,7 @@ public class SolutionDeserializer
 				{
 					// root metadata and medias are read elsewhere
 					if (dir.equals(solutionDir) &&
-						(file.equals(SolutionSerializer.MEDIAS_DIR) ||
-							file.equals(SolutionSerializer.MEDIAS_DIR + SolutionSerializer.JSON_DEFAULT_FILE_EXTENSION) || file.equals(SolutionSerializer.ROOT_METADATA)))
+						(file.equals(SolutionSerializer.MEDIAS_DIR) || file.equals(SolutionSerializer.MEDIAS_FILE) || file.equals(SolutionSerializer.ROOT_METADATA)))
 					{
 						continue;
 					}
@@ -784,7 +783,7 @@ public class SolutionDeserializer
 	{
 		if (dir.exists())
 		{
-			File fmediasobjects = new File(dir, SolutionSerializer.MEDIAS_DIR + SolutionSerializer.JSON_DEFAULT_FILE_EXTENSION);
+			File fmediasobjects = new File(dir, SolutionSerializer.MEDIAS_FILE);
 			if (!readAll && (changedFiles == null /* || !changedFiles.contains(fmediasobjects) */)) // it is possible that only the media content has been updated
 			{
 				// no changes in medias

@@ -886,7 +886,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				public boolean accept(File pathname)
 				{
-					return SolutionSerializer.isJSONFile(pathname.getName()) && pathname.isFile();
+					return SolutionSerializer.isJSONFile(pathname.getName()) && pathname.isFile() && !pathname.getName().equals(SolutionSerializer.MEDIAS_FILE);
 				}
 			});
 			String persistFile = ((AbstractBase)persist).getSerializableRuntimeProperty(IScriptProvider.FILENAME);
