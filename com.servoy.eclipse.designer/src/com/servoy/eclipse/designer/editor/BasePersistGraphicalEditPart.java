@@ -40,6 +40,7 @@ import com.servoy.eclipse.designer.internal.MarqueeDragTracker;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.Portal;
@@ -98,6 +99,13 @@ public abstract class BasePersistGraphicalEditPart extends AbstractGraphicalEdit
 						}
 					}
 				}
+
+				// in case of element group, use the group's parent.
+				else if (parentEditPart.getModel() instanceof FormElementGroup)
+				{
+					parentEditPart = parentEditPart.getParent();
+				}
+
 			}
 
 			if (parentEditPart != null)
