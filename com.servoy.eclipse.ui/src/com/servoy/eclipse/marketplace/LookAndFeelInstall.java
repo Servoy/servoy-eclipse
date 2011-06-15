@@ -25,11 +25,11 @@ import org.w3c.dom.Node;
  * @author gabi
  *
  */
-public class LookAndFellInstall extends InstallItem
+public class LookAndFeelInstall extends InstallItem
 {
 	private static final String destinationDir = "lafs"; //$NON-NLS-1$
 
-	public LookAndFellInstall(Node entryNode)
+	public LookAndFeelInstall(Node entryNode)
 	{
 		super(entryNode);
 	}

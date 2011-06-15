@@ -73,7 +73,7 @@ public class InstallPackage
 			}
 			else if (INSTALL_TYPE_LOOK_AND_FEEL.equals(type))
 			{
-				installItem = new LookAndFellInstall(installEntryNode);
+				installItem = new LookAndFeelInstall(installEntryNode);
 			}
 			else if (INSTALL_TYPE_UPDATE_URL.equals(type))
 			{
