@@ -68,7 +68,7 @@ public class RelatedFormsLabelProvider extends LabelProvider implements IPersist
 
 		if (element instanceof Table)
 		{
-			return ((Table)element).getName();
+			return ((Table)element).getName() + "[" + ((Table)element).getServerName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		return super.getText(element);

@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.property;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -41,7 +42,6 @@ import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.util.StringComparator;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -52,6 +52,26 @@ import com.servoy.j2db.util.Utils;
  */
 public class RelatedFormsContentProvider extends CachingContentProvider implements ISearchKeyAdapter, IKeywordChecker
 {
+	private static class TableComparator implements Comparator<Table>
+	{
+		public static final TableComparator INSTANCE = new TableComparator();
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+		 */
+		public int compare(Table o1, Table o2)
+		{
+			if (o1 == null && o2 == null) return 0;
+			if (o1 == null) return -1;
+			if (o2 == null) return 1;
+			String o1Name = o1.getServerName() + "." + o1.getName(); //$NON-NLS-1$
+			String o2Name = o2.getServerName() + "." + o2.getName(); //$NON-NLS-1$
+			return o1Name.compareToIgnoreCase(o2Name);
+		}
+	}
+
 	private final Form rootForm;
 	private final FlattenedSolution flattenedSolution;
 
@@ -194,7 +214,7 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 			if (Messages.LabelUnrelated == parentElement)
 			{
 				boolean includeNoTable = false;
-				TreeSet<Table> tableSet = new TreeSet<Table>(StringComparator.INSTANCE);
+				TreeSet<Table> tableSet = new TreeSet<Table>(TableComparator.INSTANCE);
 				Iterator<Form> forms = flattenedSolution.getForms(true);
 				while (forms.hasNext())
 				{
