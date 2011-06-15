@@ -44,6 +44,8 @@ import org.mozilla.javascript.ScriptableObject;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.doc.IParameter;
+import com.servoy.eclipse.core.doc.XMLScriptObjectAdapter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -1657,11 +1659,31 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					paramNames = null;
 				}
 			}
+
+			//trying to get parameter names
+			if (paramNames == null && scriptObject instanceof XMLScriptObjectAdapter)
+			{
+				XMLScriptObjectAdapter xmlsa = (XMLScriptObjectAdapter)scriptObject;
+				IParameter[] ipar = xmlsa.getParameters(name, method.getParameterTypes());
+				if (ipar != null)
+				{
+					paramNames = new String[ipar.length];
+					for (int idx = 0; idx < paramNames.length; idx++)
+					{
+						paramNames[idx] = ipar[idx].getName();
+					}
+				}
+			}
+
 			for (int j = 0; j < params.length; j++)
 			{
-				boolean addspace = true;
 				if (params.length == 1 && params[0].isArray())
 				{
+					String str = Arrays.asList(params[0]).get(0).getCanonicalName();
+					int start = str.lastIndexOf(".");
+					int end = str.indexOf("[");
+					String ttype = str.substring(start + 1, end);
+
 					if (paramNames == null)
 					{
 						sbParamsString.append(TYPES.get(params[j].getComponentType().getName()));
@@ -1671,8 +1693,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					{
 						for (int k = 0; k < paramNames.length; k++)
 						{
-							sbParamsString.append(" "); //$NON-NLS-1$
-							sbParamsString.append(paramNames[k]);
+							if (sbParamsString.length() != 0) sbParamsString.append(" "); //$NON-NLS-1$ 
+							if (paramNames[k].startsWith("[")) sbParamsString.append("[" + TYPES.get(ttype) + " " + paramNames[k].substring(1)); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+							else sbParamsString.append(TYPES.get(ttype) + " " + paramNames[k]); //$NON-NLS-1$
 							if (k < paramNames.length - 1) sbParamsString.append(", "); //$NON-NLS-1$
 						}
 						break;
@@ -1693,19 +1716,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					else
 					{
 						Object type = TYPES.get(params[j].getName());
-						if ((!type.equals("Object") && !type.equals("String")) || paramNames == null) //$NON-NLS-1$//$NON-NLS-2$
-						{
-							sbParamsString.append(type);
-						}
-						else
-						{
-							addspace = false;
-						}
+						sbParamsString.append(type);
 					}
 				}
 				if (paramNames != null)
 				{
-					if (addspace) sbParamsString.append(" "); //$NON-NLS-1$
+					sbParamsString.append(" "); //$NON-NLS-1$
 					sbParamsString.append(paramNames[j]);
 				}
 				if (j < params.length - 1) sbParamsString.append(", "); //$NON-NLS-1$
@@ -1733,7 +1749,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			return tooltip;
 		}
-
 
 		private boolean isMethodNameOverloaded(String name, NativeJavaMethod njm)
 		{
