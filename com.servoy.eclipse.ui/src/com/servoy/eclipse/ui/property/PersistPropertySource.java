@@ -2003,7 +2003,13 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				{
 					beanPropertyDescriptor = getBeansProperties().get(id);
 				}
-				if ("name".equals(id) && beanPropertyDescriptor.valueObject instanceof ISupportUpdateableName)
+				boolean isInheritedValue = (value == null && persistContext.getPersist() instanceof AbstractBase &&
+					beanPropertyDescriptor.valueObject == persistContext.getPersist() && ((AbstractBase)persistContext.getPersist()).getSuperPersist() != null && ((AbstractBase)((AbstractBase)persistContext.getPersist()).getSuperPersist()).getProperty((String)id) != null);
+				if (value == null && !isInheritedValue)
+				{
+					((AbstractBase)beanPropertyDescriptor.valueObject).clearProperty((String)id);
+				}
+				else if ("name".equals(id) && beanPropertyDescriptor.valueObject instanceof ISupportUpdateableName)
 				{
 					if (value instanceof String || value == null)
 					{
@@ -2027,7 +2033,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 						EclipseMessages.writeProjectI18NFiles(servoyProject, false, false);
 					}
 				}
-
 				if (persistContext.getPersist() instanceof Bean)
 				{
 					if (beanPropertyDescriptor.valueObject == persistContext.getPersist())

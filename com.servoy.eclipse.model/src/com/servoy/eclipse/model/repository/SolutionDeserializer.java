@@ -648,7 +648,7 @@ public class SolutionDeserializer
 						{
 							public Object visit(IPersist o)
 							{
-								if ((o instanceof IScriptProvider || o instanceof IVariable) && o.getParent() != parent)
+								if ((o instanceof IScriptProvider || o instanceof IVariable) && !o.getParent().equals(parent))
 								{
 									JSONObject jsonObject = noParentDuplicates.get(o.getUUID());
 									if (jsonObject != null)
