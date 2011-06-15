@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -98,6 +99,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 			}
 			if (modules.size() == 0) return null;
 
+			Collections.sort(modules);
 			String[] moduleNames = modules.toArray(new String[] { });
 			final OptionDialog optionDialog = new OptionDialog(shell, "Select destination module", null, "Select module where to move " + persistString + " " +
 				((ISupportName)persist).getName(), MessageDialog.INFORMATION, new String[] { "OK", "Cancel" }, 0, moduleNames, 0);
