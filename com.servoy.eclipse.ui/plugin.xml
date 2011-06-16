@@ -432,6 +432,19 @@
             </separator>
          </menu>
       </actionSet>
+      <actionSet
+            id="com.servoy.eclipse.ui.ServoyAdmin"
+            label="Servoy Admin Page"
+            visible="true">
+         <action
+               class="com.servoy.eclipse.ui.actions.OpenAdminPage"
+               id="com.servoy.eclipse.ui.openAdminPage"
+               label="Servoy Admin Page"
+               menubarPath="help/intro"
+               style="push"
+               tooltip="Open Servoy Admin Page">
+         </action>
+      </actionSet>
    </extension>
      <extension
            point="org.eclipse.ui.ide.markerResolution">
