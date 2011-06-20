@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
 import org.eclipse.dltk.internal.javascript.ti.IValueProvider;
@@ -116,25 +117,29 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	{
 		if (context.getModelElement() != null)
 		{
-			if (context.getModelElement().getResource().getName().endsWith("globals.js"))
+			IResource resource = context.getModelElement().getResource();
+			if (resource != null)
 			{
-				FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
-				if (fs != null)
+				if (resource.getName().endsWith("globals.js"))
 				{
-					IValueCollection globalsValeuCollection = getGlobalModulesValueCollection(context, fs, ValueCollectionFactory.createValueCollection());
-					if (fullGlobalScope.get().booleanValue())
+					FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
+					if (fs != null)
 					{
-						ValueCollectionFactory.copyInto(globalsValeuCollection, getValueCollection((IFile)context.getModelElement().getResource(), true));
+						IValueCollection globalsValeuCollection = getGlobalModulesValueCollection(context, fs, ValueCollectionFactory.createValueCollection());
+						if (fullGlobalScope.get().booleanValue())
+						{
+							ValueCollectionFactory.copyInto(globalsValeuCollection, getValueCollection((IFile)resource, true));
+						}
+						return globalsValeuCollection;
 					}
-					return globalsValeuCollection;
 				}
-			}
-			else
-			{
-				Form form = TypeCreator.getForm(context);
-				if (form != null)
+				else
 				{
-					return getSuperFormContext(context, form, null);
+					Form form = TypeCreator.getForm(context);
+					if (form != null)
+					{
+						return getSuperFormContext(context, form, null);
+					}
 				}
 			}
 		}
