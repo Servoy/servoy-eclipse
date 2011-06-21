@@ -196,5 +196,28 @@
          </view>
       </perspectiveExtension>
    </extension>
+     <extension
+           point="org.eclipse.dltk.core.problemFactory">
+        <problemCategory
+              id="deprecated"
+              nature="org.eclipse.dltk.javascript.core.nature"
+              scope="@SuppressWarnings">
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#DEPRECATED_FUNCTION
+           </problem>
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#DEPRECATED_PROPERTY
+           </problem>
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#DEPRECATED_VARIABLE
+           </problem>
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#DEPRECATED_TYPE
+           </problem>
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#DEPRECATED_METHOD
+           </problem>
+        </problemCategory>
+     </extension>
    
 </plugin>
