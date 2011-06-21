@@ -81,7 +81,6 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ScriptMethod;
-import com.servoy.j2db.scripting.FormScope;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IDeprecated;
 import com.servoy.j2db.scripting.IJavaScriptType;
@@ -90,6 +89,7 @@ import com.servoy.j2db.scripting.IReturnedTypesProvider;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
+import com.servoy.j2db.ui.IScriptBaseMethods;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
@@ -398,6 +398,10 @@ public abstract class TypeCreator
 		{
 			type.setDeprecated(true);
 			type.setVisible(false);
+		}
+		if (IScriptBaseMethods.class.isAssignableFrom(cls) && cls != IScriptBaseMethods.class)
+		{
+			type.setSuperType(context.getType("RuntimeComponent"));
 		}
 		return type;
 	}

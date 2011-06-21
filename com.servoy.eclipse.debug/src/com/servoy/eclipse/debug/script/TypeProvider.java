@@ -1168,7 +1168,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			typeNames.put(IScriptPortalComponentMethods.class.getSimpleName(), "RuntimePortal");
 			addType("RuntimePortal", IScriptPortalComponentMethods.class);
 
-			addAnonymousClassType("RuntimeComponent", IScriptBaseMethods.class);
+			addType("RuntimeComponent", IScriptBaseMethods.class);
 		}
 
 		public Type createType(ITypeInfoContext context, String typeName)

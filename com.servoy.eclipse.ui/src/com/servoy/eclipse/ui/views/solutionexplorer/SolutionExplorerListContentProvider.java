@@ -170,6 +170,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		TYPES.put("org.mozilla.javascript.NativeArray", "Array"); //$NON-NLS-1$ //$NON-NLS-2$
 		TYPES.put("JSWindowImpl$JSWindow", "JSWindow"); //$NON-NLS-1$ //$NON-NLS-2$
 		TYPES.put("IScriptRenderMethods", IScriptRenderMethods.JS_RENDERABLE); //$NON-NLS-1$
+		TYPES.put("IComponent", "RuntimeComponent"); //$NON-NLS-1$ //$NON-NLS-2$
 		Method[] methods = Object.class.getMethods();
 		for (Method method : methods)
 		{
