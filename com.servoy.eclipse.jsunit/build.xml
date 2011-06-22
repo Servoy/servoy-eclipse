@@ -7,7 +7,7 @@
 	<property name="basearch" value="${arch}"/>
 	<property name="basenl" value="${nl}"/>
 	<property name="bundleId" value="com.servoy.eclipse.jsunit"/>
-	<property name="bundleVersion" value="6.0.0.1212"/>
+	<property name="bundleVersion" value="6.0.0.1213"/>
 	<property name="p2.publishonerror" value="false"/>
 
 	<!-- Compiler settings. -->
@@ -42,7 +42,7 @@
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="pluginTemp" value="${basedir}"/>
-		<condition property="build.result.folder" value="${pluginTemp}/com.servoy.eclipse.jsunit_6.0.0.1212"		>
+		<condition property="build.result.folder" value="${pluginTemp}/com.servoy.eclipse.jsunit_6.0.0.1213"		>
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="build.result.folder" value="${basedir}"/>
@@ -72,7 +72,7 @@
 		<antcall target="gather.bin.parts">
 			<param name="destination.temp.folder" value="${temp.folder}/"/>
 		</antcall>
-		<jar destfile="${plugin.destination}/com.servoy.eclipse.jsunit_6.0.0.1212.jar" basedir="${temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1212" filesetmanifest="merge"/>
+		<jar destfile="${plugin.destination}/com.servoy.eclipse.jsunit_6.0.0.1213.jar" basedir="${temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1213" filesetmanifest="merge"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
@@ -281,26 +281,26 @@
 			
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.debug/@dot"/>
 			
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.parser_3.0.0.201106031955.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core_3.0.0.201106031955.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.parser_3.0.0.201106211807.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core_3.0.0.201106211807.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.emf.ecore_2.6.1.v20100914-1218.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.emf.common_2.6.0.v20100914-1218.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.emf.ecore.xmi_2.5.0.v20100521-1846.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.antlr.runtime_3.0.0.v200803061811.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.console.ui_3.0.0.201106031955.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.console_3.0.0.201106031955.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.launching_3.0.0.201106031955.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.debug_3.0.0.201106031955.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.ui_3.0.0.201106031955.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.ui_3.0.0.201106031955.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core.manipulation_3.0.0.201106031955.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.core_3.0.0.201106031955.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.core.manipulation_3.0.0.201106031955.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.console.ui_3.0.0.201106211807.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.console_3.0.0.201106211807.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.launching_3.0.0.201106211807.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.debug_3.0.0.201106211807.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.ui_3.0.0.201106211807.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.ui_3.0.0.201106211807.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core.manipulation_3.0.0.201106211807.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.core_3.0.0.201106211807.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.core.manipulation_3.0.0.201106211807.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.emf.ecore.change_2.5.1.v20100907-1643.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.launching_3.0.0.201106031955.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.debug_3.0.0.201106031955.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.debug.ui_3.0.0.201106031955.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.jsjdtdebugger_3.0.0.201106031955.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.launching_3.0.0.201106211807.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.debug_3.0.0.201106211807.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.debug.ui_3.0.0.201106211807.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.jsjdtdebugger_3.0.0.201106211807.jar"/>
 			<pathelement path="../com.servoy.eclipse.model/bin/"/>
 			
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model/@dot"/>
@@ -397,10 +397,10 @@
 			
 			<pathelement path="../com.servoy.eclipse.ui/swt-grouplayout.jar"/>
 			
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.debug.ui_3.0.0.201106031955.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.debug.ui_3.0.0.201106211807.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.databinding.beans_1.2.100.I20100601-0800.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.formatter_3.0.0.201106031955.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.formatter_3.0.0.201106031955.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.formatter_3.0.0.201106211807.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.formatter_3.0.0.201106211807.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.browser_3.3.1.r36_20101216.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.externaltools_3.2.0.v20100427.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.externaltools_1.0.1.v20100831_r361.jar"/>
@@ -459,28 +459,28 @@
 	</target>
 
 	<target name="checkCompilationResults" if="compilation.error.occured">
-		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.jsunit_6.0.0.1212${line.separator}compilation.error.occured=${compilation.error.occured}"/>
-		<eclipse.logCompileError bundle="com.servoy.eclipse.jsunit_6.0.0.1212" log="${compilation.prereq.log}">
+		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.jsunit_6.0.0.1213${line.separator}compilation.error.occured=${compilation.error.occured}"/>
+		<eclipse.logCompileError bundle="com.servoy.eclipse.jsunit_6.0.0.1213" log="${compilation.prereq.log}">
 			<include name="C:/Users/Administrator/trunk_workspace/com.servoy.eclipse.appserver/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.appserver_6.0.0.1212/compilation.problem"/>
-			<include name="C:/Users/Administrator/trunk_workspace/com.servoy.eclipse.debug/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.debug_6.0.0.1212/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.appserver_6.0.0.1213/compilation.problem"/>
 			<include name="C:/Users/Administrator/trunk_workspace/servoy_headless_client/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_headless_client_6.0.0.1212/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_headless_client_6.0.0.1213/compilation.problem"/>
 			<include name="C:/Users/Administrator/trunk_workspace/com.servoy.eclipse.model/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.model_6.0.0.1212/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.model_6.0.0.1213/compilation.problem"/>
 			<include name="C:/Users/Administrator/trunk_workspace/com.servoy.eclipse.ui/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.ui_6.0.0.1212/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.ui_6.0.0.1213/compilation.problem"/>
 			<include name="C:/Users/Administrator/trunk_workspace/com.servoy.eclipse.core/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.core_6.0.0.1212/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.core_6.0.0.1213/compilation.problem"/>
+			<include name="C:/Users/Administrator/trunk_workspace/com.servoy.eclipse.debug/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.debug_6.0.0.1213/compilation.problem"/>
 			<include name="C:/Users/Administrator/trunk_workspace/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
-			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_6.0.0.1212/compilation.problem"/>
+			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_6.0.0.1213/compilation.problem"/>
 			<include name="C:/Users/Administrator/trunk_workspace/servoy_debug/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_debug_6.0.0.1212/compilation.problem"/>
-			<include name="C:/Users/Administrator/trunk_workspace/servoy_smart_client/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_smart_client_6.0.0.1212/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_debug_6.0.0.1213/compilation.problem"/>
 			<include name="C:/Users/Administrator/trunk_workspace/servoy_shared/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_shared_6.0.0.1212/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_shared_6.0.0.1213/compilation.problem"/>
+			<include name="C:/Users/Administrator/trunk_workspace/servoy_smart_client/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_smart_client_6.0.0.1213/compilation.problem"/>
 			<include name="C:/Users/Administrator/trunk_workspace/eclipse_target/compile_target/optional/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/compilation.problem"/>
 			<include name="${pluginTemp}/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/compilation.problem"/>
 		</eclipse.logCompileError>
@@ -492,7 +492,7 @@
 	</target>
 
 	<target name="publish.bin.parts" depends="init" if="p2.publish.parts" unless="compilation.problem.marker.exists">
-		<mkdir dir="${build.result.folder}/com.servoy.eclipse.jsunit_6.0.0.1212"/>
+		<mkdir dir="${build.result.folder}/com.servoy.eclipse.jsunit_6.0.0.1213"/>
 		<copy todir="${build.result.folder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="META-INF/MANIFEST.MF"/>
@@ -516,13 +516,13 @@
 	</target>
 
 	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1212"/>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1212" failonerror="true" overwrite="false">
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1213"/>
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1213" failonerror="true" overwrite="false">
 			<fileset dir="${build.result.folder}/@dot">
 				<include name="**"/>
 			</fileset>
 		</copy>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1212" failonerror="true" overwrite="true">
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1213" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="META-INF/"/>
 				<include name="plugin.xml"/>
@@ -531,7 +531,7 @@
 			</fileset>
 		</copy>
 		<antcall target="apitools.generation">
-			<param name="target.folder" value="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1212"/>
+			<param name="target.folder" value="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1213"/>
 			<param name="projectLocation" value="${basedir}"/>
 			<param name="binary.folders" value="${build.result.folder}/@dot;C:\Users\Administrator\trunk_workspace\com.servoy.eclipse.jsunit/jsunit-1.3.jar"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
@@ -542,10 +542,10 @@
 	</target>
 
 	<target name="gather.sources" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1212"/>
-		<copy file="${build.result.folder}/src.zip" todir="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1212" failonerror="false" overwrite="false"/>
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1213"/>
+		<copy file="${build.result.folder}/src.zip" todir="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1213" failonerror="false" overwrite="false"/>
 		<antcall target="copy.src.includes">
-			<param name="source.destination.folder" value="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1212"/>
+			<param name="source.destination.folder" value="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1213"/>
 		</antcall>
 	</target>
 
@@ -562,8 +562,8 @@
 	</target>
 
 	<target name="gather.logs" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1212"/>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1212" failonerror="false" overwrite="false">
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1213"/>
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.jsunit_6.0.0.1213" failonerror="false" overwrite="false">
 			<fileset dir="${build.result.folder}">
 				<include name="@dot${logExtension}"/>
 			</fileset>
@@ -573,8 +573,8 @@
 	<target name="clean" depends="init" description="Clean the plug-in: com.servoy.eclipse.jsunit of all the zips, jars and logs created.">
 		<delete dir="${build.result.folder}/@dot"/>
 		<delete file="${build.result.folder}/src.zip"/>
-		<delete file="${plugin.destination}/com.servoy.eclipse.jsunit_6.0.0.1212.jar"/>
-		<delete file="${plugin.destination}/com.servoy.eclipse.jsunit_6.0.0.1212.zip"/>
+		<delete file="${plugin.destination}/com.servoy.eclipse.jsunit_6.0.0.1213.jar"/>
+		<delete file="${plugin.destination}/com.servoy.eclipse.jsunit_6.0.0.1213.zip"/>
 		<delete dir="${temp.folder}"/>
 		<delete file="${compilation.problem.marker}" quiet="true"/>
 	</target>
@@ -600,7 +600,7 @@
 				<include name="**/*.bin${logExtension}"/>
 			</fileset>
 		</delete>
-		<zip destfile="${plugin.destination}/com.servoy.eclipse.jsunit_6.0.0.1212.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="${plugin.destination}/com.servoy.eclipse.jsunit_6.0.0.1213.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
