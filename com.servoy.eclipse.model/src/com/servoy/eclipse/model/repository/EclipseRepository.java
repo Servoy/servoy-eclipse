@@ -95,7 +95,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 
 	public EclipseRepository(IServerManagerInternal sm, Settings settings)
 	{
-		super(sm);
+		super(sm, true);
 		wsa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 		this.settings = settings;
 	}
