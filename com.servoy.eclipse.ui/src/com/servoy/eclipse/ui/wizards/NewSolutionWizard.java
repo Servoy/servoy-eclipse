@@ -206,7 +206,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				ServoyProject newProject = servoyModel.getServoyProject(page1.getNewSolutionName());
 				if (newProject != null)
 				{
-					if (page1.getSolutionType() == SolutionMetaData.MODULE && activeEditingSolution != null)
+					if ((page1.getSolutionType() == SolutionMetaData.MODULE || page1.getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK || page1.getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK) &&
+						activeEditingSolution != null)
 					{
 						String modules = activeEditingSolution.getModulesNames();
 						if (modules == null) modules = "";
