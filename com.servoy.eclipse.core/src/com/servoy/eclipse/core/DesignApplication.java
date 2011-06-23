@@ -51,7 +51,7 @@ import com.servoy.j2db.ILAFManager;
 import com.servoy.j2db.IMessagesCallback;
 import com.servoy.j2db.IModeManager;
 import com.servoy.j2db.ISmartClientApplication;
-import com.servoy.j2db.JSWindowManager;
+import com.servoy.j2db.RuntimeWindowManager;
 import com.servoy.j2db.Messages;
 import com.servoy.j2db.cmd.ICmdManager;
 import com.servoy.j2db.dataprocessing.ClientInfo;
@@ -847,9 +847,9 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		refreshI18NMessages();
 	}
 
-	public JSWindowManager getJSWindowManager()
+	public RuntimeWindowManager getRuntimeWindowManager()
 	{
-		return getClient().getJSWindowManager();
+		return getClient().getRuntimeWindowManager();
 	}
 
 	public void looseFocus()
