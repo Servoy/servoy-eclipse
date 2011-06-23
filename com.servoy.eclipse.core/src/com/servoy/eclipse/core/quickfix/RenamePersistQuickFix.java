@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.quickfix;
 
 import org.eclipse.core.resources.IMarker;
@@ -31,6 +31,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
 import com.servoy.j2db.persistence.IValidateName;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
@@ -73,16 +74,32 @@ public class RenamePersistQuickFix implements IMarkerResolution
 			{
 				try
 				{
-					IPersist persist = servoyProject.getEditingPersist(id);
-					if (persist instanceof ISupportUpdateableName)
+					final IPersist persist = servoyProject.getEditingPersist(id);
+					if (persist instanceof ISupportUpdateableName || persist instanceof Media)
 					{
 						InputDialog dialog = new InputDialog(Display.getCurrent().getActiveShell(), "Rename element", "Input a new name for element '" +
 							((ISupportName)persist).getName() + "' from solution '" + servoyProject.getSolution().getName() + "'.", "", new IInputValidator()
 						{
 							public String isValid(String newText)
 							{
-								boolean valid = IdentDocumentValidator.isJavaIdentifier(newText);
-								return valid ? null : (newText.length() == 0 ? "" : "Invalid name");
+								if (!(persist instanceof Media))
+								{
+									boolean valid = IdentDocumentValidator.isJavaIdentifier(newText);
+									return valid ? null : (newText.length() == 0 ? "" : "Invalid name");
+								}
+								else
+								{
+									if (newText.length() == 0)
+									{
+										return "";
+									}
+									if (newText.indexOf('\\') >= 0 || newText.indexOf('/') >= 0 || newText.indexOf(' ') >= 0)
+									{
+										return "Invalid new media name";
+									}
+									// ok
+									return null;
+								}
 							}
 						});
 
@@ -93,14 +110,21 @@ public class RenamePersistQuickFix implements IMarkerResolution
 						IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 						try
 						{
-							((ISupportUpdateableName)persist).updateName(validator, name);
+							if (persist instanceof ISupportUpdateableName)
+							{
+								((ISupportUpdateableName)persist).updateName(validator, name);
+							}
+							else if (persist instanceof Media)
+							{
+								((Media)persist).setName(name);
+							}
 						}
 						catch (RepositoryException e)
 						{
 							MessageDialog.openError(Display.getCurrent().getActiveShell(), "Wrong name", e.getMessage());
 							return;
 						}
-						servoyProject.saveEditingSolutionNodes(new IPersist[] { persist }, false);
+						servoyProject.saveEditingSolutionNodes(new IPersist[] { persist }, (persist instanceof Media) ? true : false);
 					}
 				}
 				catch (Exception e)

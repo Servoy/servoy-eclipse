@@ -62,6 +62,10 @@ public class OpenWithEditor implements IMarkerAttributeContributor
 			{
 				contentTypeIdentifier = PersistEditorInput.VALUELIST_RESOURCE_ID;
 			}
+			else if (persist.getAncestor(IRepository.MEDIA) != null)
+			{
+				contentTypeIdentifier = PersistEditorInput.MEDIA_RESOURCE_ID;
+			}
 		}
 		catch (CoreException e1)
 		{

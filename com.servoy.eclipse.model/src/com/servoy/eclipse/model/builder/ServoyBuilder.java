@@ -559,8 +559,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private static final Integer METHOD_DUPLICATION = new Integer(1);
 	private static final Integer FORM_DUPLICATION = new Integer(2);
 	private static final Integer RELATION_DUPLICATION = new Integer(3);
+	private static final Integer VALUELIST_DUPLICATION = new Integer(4);
+	private static final Integer MEDIA_DUPLICATION = new Integer(5);
 
-	private void addDuplicatePersist(IPersist persist, Map<String, Map<Integer, Set<ISupportChilds>>> duplicationMap, IProject project)
+	private void addDuplicatePersist(final IPersist persist, Map<String, Map<Integer, Set<ISupportChilds>>> duplicationMap, final IProject project)
 	{
 		if (persist instanceof IScriptProvider || persist instanceof ScriptVariable)
 		{
@@ -701,8 +703,39 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				parents.add(persist.getParent());
 			}
+			final Map<String, Set<IPersist>> formElementsByName = new HashMap<String, Set<IPersist>>();
+			persist.acceptVisitor(new IPersistVisitor()
+			{
+				public Object visit(IPersist o)
+				{
+					if (o instanceof ISupportName && ((ISupportName)o).getName() != null)
+					{
+						Set<IPersist> duplicates = formElementsByName.get(((ISupportName)o).getName());
+						if (duplicates != null)
+						{
+							for (IPersist duplicatePersist : duplicates)
+							{
+								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
+									"form element", ((ISupportName)o).getName(), ((Form)persist).getName()); //$NON-NLS-1$
+								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, duplicatePersist);
+
+								mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(), ((Form)persist).getName()); //$NON-NLS-1$								
+								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, o);
+							}
+						}
+						else
+						{
+							duplicates = new HashSet<IPersist>();
+							duplicates.add(o);
+						}
+						formElementsByName.put(((ISupportName)o).getName(), duplicates);
+					}
+					if (o instanceof Form) return IPersistVisitor.CONTINUE_TRAVERSAL;
+					else return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+				}
+			});
 		}
-		if (persist instanceof Relation)
+		if (persist instanceof Relation || persist instanceof ValueList || persist instanceof Media)
 		{
 			String name = ((ISupportName)persist).getName();
 			if (name != null)
@@ -713,7 +746,16 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					persistSet = new HashMap<Integer, Set<ISupportChilds>>();
 					duplicationMap.put(name, persistSet);
 				}
-				Set<ISupportChilds> parentSet = persistSet.get(RELATION_DUPLICATION);
+				Integer type = RELATION_DUPLICATION;
+				if (persist instanceof ValueList)
+				{
+					type = VALUELIST_DUPLICATION;
+				}
+				else if (persist instanceof Media)
+				{
+					type = MEDIA_DUPLICATION;
+				}
+				Set<ISupportChilds> parentSet = persistSet.get(type);
 				if (parentSet != null)
 				{
 					String parentsName = ""; //$NON-NLS-1$
@@ -726,15 +768,42 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						if (parent instanceof Solution)
 						{
 							Solution solution = (Solution)parent;
-							Relation duplicateRelation = solution.getRelation(name);
-							if (!((Relation)persist).contentEquals(duplicateRelation))
+							if (persist instanceof Relation)
 							{
-								if (duplicateRelation != null)
+								Relation duplicateRelation = solution.getRelation(name);
+								if (!((Relation)persist).contentEquals(duplicateRelation))
 								{
-									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("relation", name, parentsName); //$NON-NLS-1$
-									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, duplicateRelation);
+									if (duplicateRelation != null)
+									{
+										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("relation", name, parentsName); //$NON-NLS-1$
+										addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null,
+											duplicateRelation);
+									}
+									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("relation", name, solution.getName()); //$NON-NLS-1$								
+									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, persist);
 								}
-								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("relation", name, solution.getName()); //$NON-NLS-1$								
+							}
+							else if (persist instanceof ValueList)
+							{
+								ValueList duplicateValuelist = solution.getValueList(name);
+								if (duplicateValuelist != null)
+								{
+									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("valuelist", name, parentsName); //$NON-NLS-1$
+									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null,
+										duplicateValuelist);
+								}
+								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("valuelist", name, solution.getName()); //$NON-NLS-1$								
+								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, persist);
+							}
+							else if (persist instanceof Media)
+							{
+								Media duplicateMedia = solution.getMedia(name);
+								if (duplicateMedia != null)
+								{
+									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("media", name, parentsName); //$NON-NLS-1$
+									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, duplicateMedia);
+								}
+								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("media", name, solution.getName()); //$NON-NLS-1$								
 								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, persist);
 							}
 						}
@@ -744,7 +813,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				if (parents == null)
 				{
 					parents = new HashSet<ISupportChilds>();
-					persistSet.put(RELATION_DUPLICATION, parents);
+					persistSet.put(type, parents);
 				}
 				parents.add(persist.getParent());
 			}
@@ -3388,11 +3457,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 			else if (type.equals(DUPLICATE_NAME_MARKER_TYPE))
 			{
-				if (persist instanceof Relation || persist instanceof Form)
-				{
-					marker.setAttribute("Uuid", persist.getUUID().toString()); //$NON-NLS-1$
-					marker.setAttribute("SolutionName", persist.getRootObject().getName()); //$NON-NLS-1$
-				}
+				marker.setAttribute("Uuid", persist.getUUID().toString()); //$NON-NLS-1$
+				marker.setAttribute("SolutionName", persist.getRootObject().getName()); //$NON-NLS-1$
 			}
 
 			return marker;
