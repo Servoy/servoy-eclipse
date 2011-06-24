@@ -749,6 +749,11 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		getClient().setLocale(locale);
 	}
 
+	public void setTimeZone(TimeZone zone)
+	{
+		getClient().setTimeZone(zone);
+	}
+
 	public void setPageFormat(PageFormat currentPageFormat)
 	{
 		getClient().setPageFormat(currentPageFormat);
