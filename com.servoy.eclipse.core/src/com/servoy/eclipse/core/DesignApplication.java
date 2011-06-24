@@ -51,8 +51,8 @@ import com.servoy.j2db.ILAFManager;
 import com.servoy.j2db.IMessagesCallback;
 import com.servoy.j2db.IModeManager;
 import com.servoy.j2db.ISmartClientApplication;
-import com.servoy.j2db.RuntimeWindowManager;
 import com.servoy.j2db.Messages;
+import com.servoy.j2db.RuntimeWindowManager;
 import com.servoy.j2db.cmd.ICmdManager;
 import com.servoy.j2db.dataprocessing.ClientInfo;
 import com.servoy.j2db.dataprocessing.DataServerProxy;
@@ -422,11 +422,11 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 			if (properties == null)
 			{
 				properties = new Properties();
-				Messages.loadMessagesFromDatabase(null, getClientInfo().getClientId(), getSettings(), getClient().getDataServer(), getRepository(), properties,
-					locale);
+				Messages.loadMessagesFromDatabaseInternal(null, getClientInfo().getClientId(), getSettings(), getClient().getDataServer(), getRepository(),
+					properties, locale);
 				if (getSolution() != null) //must be sure that solution is loaded, app might retrieve system messages, before solution loaded!
 				{
-					Messages.loadMessagesFromDatabase(getSolution().getI18nDataSource(), getClientInfo().getClientId(), getSettings(),
+					Messages.loadMessagesFromDatabaseInternal(getSolution().getI18nDataSource(), getClientInfo().getClientId(), getSettings(),
 						getClient().getDataServer(), getRepository(), properties, locale);
 					messages.put(locale, properties);
 				}
@@ -739,7 +739,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		getClient().reportWarningInStatus(s);
 	}
 
-	public void setI18NMessagesFilter(String columnname, Object value)
+	public void setI18NMessagesFilter(String columnname, String[] value)
 	{
 		getClient().setI18NMessagesFilter(columnname, value);
 	}
@@ -830,7 +830,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	/**
 	 * @see com.servoy.j2db.IMessagesCallback#getI18NColumnValueFilter()
 	 */
-	public Object getI18NColumnValueFilter()
+	public String[] getI18NColumnValueFilter()
 	{
 		if (getClient() instanceof IMessagesCallback)
 		{
