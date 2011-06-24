@@ -93,7 +93,7 @@ public class VisualFormEditorPaletteFactory
 	private static final String ELEMENTS_PASSWORD_ID = "password field";
 	private static final String ELEMENTS_RTF_AREA_ID = "rtf area";
 	private static final String ELEMENTS_HTML_AREA_ID = "html area";
-	private static final String ELEMENTS_IMAGE_MEDIA_ID = "image field";
+	private static final String ELEMENTS_IMAGE_MEDIA_ID = "media field";
 	private static final String ELEMENTS_TYPE_AHEAD_ID = "type ahead";
 	private static final String ELEMENTS_PORTAL_ID = "portal";
 	private static final String[] ELEMENTS_IDS = new String[] {
