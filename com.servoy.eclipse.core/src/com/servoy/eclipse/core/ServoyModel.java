@@ -1167,9 +1167,32 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 			if (scriptProject == null) return;
 			try
 			{
+				boolean added = false;
 				List<IBuildpathEntry> buildPaths = new ArrayList<IBuildpathEntry>();
-				buildPaths.add(DLTKCore.newSourceEntry(sp.getProject().getFullPath(), new IPath[] { new Path(ResourcesUtils.STP_DIR + "/"), new Path(
-					SolutionSerializer.MEDIAS_DIR + "/").append("/") }));
+				IBuildpathEntry[] rawBuildpath = scriptProject.getRawBuildpath();
+				for (IBuildpathEntry entry : rawBuildpath)
+				{
+					if (entry.getEntryKind() == IBuildpathEntry.BPE_SOURCE)
+					{
+						List<IPath> lst = Arrays.asList(entry.getExclusionPatterns());
+						if (!lst.contains(new Path(ResourcesUtils.STP_DIR + "/")))
+						{
+							lst.add(new Path(ResourcesUtils.STP_DIR + "/"));
+						}
+						if (!lst.contains(new Path(SolutionSerializer.MEDIAS_DIR + "/")))
+						{
+							lst.add(new Path(SolutionSerializer.MEDIAS_DIR + "/"));
+						}
+						buildPaths.add(DLTKCore.newSourceEntry(sp.getProject().getFullPath(), lst.toArray(new IPath[lst.size()])));
+						added = true;
+						break;
+					}
+				}
+				if (!added)
+				{
+					buildPaths.add(DLTKCore.newSourceEntry(sp.getProject().getFullPath(), new IPath[] { new Path(ResourcesUtils.STP_DIR + "/"), new Path(
+						SolutionSerializer.MEDIAS_DIR + "/") }));
+				}
 				String[] moduleNames = ModelUtils.getTokenElements(sp.getSolution().getModulesNames(), ",", true);
 				Arrays.sort(moduleNames);
 				// test all build paths
