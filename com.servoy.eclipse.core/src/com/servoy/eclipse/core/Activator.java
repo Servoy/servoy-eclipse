@@ -263,7 +263,8 @@ public class Activator extends Plugin
 			{
 				try
 				{
-					if (!ApplicationServerSingleton.get().hasDeveloperLicense())
+					if (!ApplicationServerSingleton.get().hasDeveloperLicense() &&
+						Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showStartPage", "true")))
 					{
 						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(StartPageBrowserEditor.INPUT,
 							StartPageBrowserEditor.STARTPAGE_BROWSER_EDITOR_ID);
@@ -287,7 +288,7 @@ public class Activator extends Plugin
 					{
 						if (part instanceof ViewIntroAdapterPart)
 						{
-							showFirstCheatSheet();
+//							showFirstCheatSheet();
 						}
 					}
 
@@ -781,7 +782,6 @@ public class Activator extends Plugin
 
 	private void showFirstCheatSheet()
 	{
-//		final String cheatSheetId = params.getProperty("cheatSheetId", "com.servoy.eclipse.ui.cheatsheet.firstcontact");
 		final String cheatSheetId = "com.servoy.eclipse.ui.cheatsheet.firstcontact"; //$NON-NLS-1$
 		Display.getDefault().syncExec(new Runnable()
 		{
@@ -792,8 +792,6 @@ public class Activator extends Plugin
 				{
 					for (IViewReference vw : page.getViewReferences())
 						page.setPartState(vw, IWorkbenchPage.STATE_MINIMIZED);
-//					for (IEditorReference ed : page.getEditorReferences())
-//						page.setPartState(ed, IWorkbenchPage.STATE_MINIMIZED);
 
 					new OpenCheatSheetAction(cheatSheetId).run();
 
@@ -803,6 +801,5 @@ public class Activator extends Plugin
 				}
 			}
 		});
-
 	}
 }

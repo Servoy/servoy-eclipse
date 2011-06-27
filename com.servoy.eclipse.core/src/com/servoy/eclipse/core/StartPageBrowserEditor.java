@@ -30,15 +30,18 @@ import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURLParser;
 import org.eclipse.ui.part.EditorPart;
 
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+
 /**
  * Editor used to show the Servoy Marketplace. 
  *  
  * @author pbakker
  */
+@SuppressWarnings("nls")
 public class StartPageBrowserEditor extends EditorPart
 {
-	public static final String STARTPAGE_BROWSER_EDITOR_ID = "com.servoy.eclipse.core.StartPageBrowserEditor"; //$NON-NLS-1$
-	public static final String STARTPAGE_URL = "http://servoy.com/i"; //$NON-NLS-1$
+	public static final String STARTPAGE_BROWSER_EDITOR_ID = "com.servoy.eclipse.core.StartPageBrowserEditor";
+	public static final String STARTPAGE_URL = "http://servoy.com/i";
 	public static final StartPageBrowserEditorInput INPUT = new StartPageBrowserEditorInput();
 
 	private Browser browser;
@@ -96,7 +99,7 @@ public class StartPageBrowserEditor extends EditorPart
 	public void createPartControl(Composite parent)
 	{
 		browser = new Browser(parent, SWT.NONE);
-		browser.setUrl(STARTPAGE_URL);
+		browser.setUrl(STARTPAGE_URL + "?dl=" + (ApplicationServerSingleton.get().hasDeveloperLicense()));
 		browser.addLocationListener(new LocationAdapter()
 		{
 			@Override
