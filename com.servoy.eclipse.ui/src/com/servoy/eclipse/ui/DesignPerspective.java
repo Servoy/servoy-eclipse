@@ -46,26 +46,30 @@ import com.servoy.eclipse.ui.wizards.NewStyleWizard;
 import com.servoy.eclipse.ui.wizards.NewValueListWizard;
 import com.servoy.j2db.util.Utils;
 
+@SuppressWarnings("nls")
 public class DesignPerspective implements IPerspectiveFactory
 {
 
-	protected static final String[] actionIds = { "org.eclipse.debug.ui.launchActionSet", "org.eclipse.ui.externaltools.ExternalToolsSet" }; //$NON-NLS-1$ //$NON-NLS-2$
-	protected static final String[] activityIds = { "com.servoy.eclipse.activities.javaDevelopment", "com.servoy.eclipse.activities.antDevelopment", "org.eclipse.team.cvs", "org.eclipse.antDevelopment", "org.eclipse.javaDevelopment", "org.eclipse.plugInDevelopment", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk", "com.servoy.eclipse.activities.edit", "org.eclipse.equinox.p2.ui.sdk.classicUpdate" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ 
+	protected static final String[] actionIds = { "org.eclipse.debug.ui.launchActionSet", "org.eclipse.ui.externaltools.ExternalToolsSet" };
+	protected static final String[] activityIds = { "com.servoy.eclipse.activities.javaDevelopment", "com.servoy.eclipse.activities.antDevelopment", "org.eclipse.team.cvs", "org.eclipse.antDevelopment", "org.eclipse.javaDevelopment", "org.eclipse.plugInDevelopment", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk", "com.servoy.eclipse.activities.edit", "org.eclipse.equinox.p2.ui.sdk.classicUpdate" };
 	public static final String TestRunnerViewPart_NAME = "org.eclipse.jdt.junit.ResultView"; //this field is copied from TestRunnerViewPart.NAME which is an eclipse internal class and cannot be referenced.
 
 	@SuppressWarnings("restriction")
 	public void createInitialLayout(IPageLayout layout)
 	{
+		//maximize window, it start too small first time
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setMaximized(true);
+
 		String editorArea = layout.getEditorArea();
-		IFolderLayout left = layout.createFolder("left", IPageLayout.LEFT, 0.21f, editorArea); //$NON-NLS-1$
+		IFolderLayout left = layout.createFolder("left", IPageLayout.LEFT, 0.21f, editorArea);
 		left.addView(SolutionExplorerView.PART_ID);
 //		left.addView(IPageLayout.ID_RES_NAV);//move to synchronize perspective only
 
-		IFolderLayout right = layout.createFolder("right", IPageLayout.RIGHT, 0.8f, editorArea); //$NON-NLS-1$
+		IFolderLayout right = layout.createFolder("right", IPageLayout.RIGHT, 0.8f, editorArea);
 		right.addView(IPageLayout.ID_OUTLINE);
 		right.addView(IPageLayout.ID_PROP_SHEET);
 
-		IFolderLayout bottom = layout.createFolder("bottom", IPageLayout.BOTTOM, 0.8f, editorArea); //$NON-NLS-1$
+		IFolderLayout bottom = layout.createFolder("bottom", IPageLayout.BOTTOM, 0.8f, editorArea);
 		bottom.addView(IPageLayout.ID_PROBLEM_VIEW);
 		bottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);//move to debug perspective only
 		bottom.addView(IPageLayout.ID_TASK_LIST);
@@ -108,7 +112,7 @@ public class DesignPerspective implements IPerspectiveFactory
 		setContentsOfShowViewMenu(layout);
 		addNewWizards(layout);
 
-		layout.addPerspectiveShortcut("org.eclipse.debug.ui.DebugPerspective"); //$NON-NLS-1$
+		layout.addPerspectiveShortcut("org.eclipse.debug.ui.DebugPerspective");
 	}
 
 	protected void setContentsOfShowViewMenu(IPageLayout layout)
