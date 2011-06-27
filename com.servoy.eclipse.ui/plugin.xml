@@ -251,6 +251,11 @@
 	  		id="com.servoy.eclipse.marketplace.MarketplaceBrowserEditor"
       		name="Servoy Marketplace">
       </editor>
+      <editor
+	  		class="com.servoy.eclipse.core.StartPageBrowserEditor"
+	  		id="com.servoy.eclipse.core.StartPageBrowserEditor"
+      		name="StartPage">
+      </editor>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">
