@@ -108,8 +108,6 @@ import com.servoy.j2db.util.Utils;
  */
 public class Activator extends Plugin
 {
-	private static final String ISERVOY_URL = "http://www.servoy.com/i"; //$NON-NLS-1$
-
 	private volatile boolean defaultAccessed = false;
 
 	private Boolean sqlExplorerLoaded = null;
@@ -117,7 +115,6 @@ public class Activator extends Plugin
 	private DesignApplication designClient;
 
 	private IDesignerCallback designerCallback;
-
 
 	/**
 	 * @author jcompagner
@@ -267,7 +264,8 @@ public class Activator extends Plugin
 				{
 					if (!ApplicationServerSingleton.get().hasDeveloperLicense())
 					{
-						PlatformUI.getWorkbench().getBrowserSupport().createBrowser(null).openURL(new URL(ISERVOY_URL));
+						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(StartPageBrowserEditor.INPUT,
+							StartPageBrowserEditor.STARTPAGE_BROWSER_EDITOR_ID);
 					}
 				}
 				catch (Exception e)
