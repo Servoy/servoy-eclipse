@@ -1174,7 +1174,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				{
 					if (entry.getEntryKind() == IBuildpathEntry.BPE_SOURCE)
 					{
-						List<IPath> lst = Arrays.asList(entry.getExclusionPatterns());
+						List<IPath> lst = new ArrayList<IPath>(Arrays.asList(entry.getExclusionPatterns()));
 						if (!lst.contains(new Path(ResourcesUtils.STP_DIR + "/")))
 						{
 							lst.add(new Path(ResourcesUtils.STP_DIR + "/"));
