@@ -85,6 +85,7 @@ import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.IDesignerCallback;
 import com.servoy.j2db.dataprocessing.IColumnConverter;
 import com.servoy.j2db.dataprocessing.IColumnValidator;
+import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IMethodTemplate;
@@ -351,6 +352,12 @@ public class Activator extends Plugin
 		super.stop(context);
 		if (ModelUtils.isUIRunning())
 		{
+			IApplication debugReadyClient = getDebugClientHandler().getDebugReadyClient();
+			if (debugReadyClient != null && debugReadyClient.getScriptEngine() instanceof RemoteDebugScriptEngine &&
+				((RemoteDebugScriptEngine)debugReadyClient.getScriptEngine()).isAWTSuspendedRunningScript())
+			{
+				((RemoteDebugScriptEngine)debugReadyClient.getScriptEngine()).getDebugger().close();
+			}
 			SwingUtilities.invokeAndWait(new Runnable() // wait until webserver is stopped for case of
 			// restart (webserver cannot re-start when port is still in use, this may even cause a freeze after restart)
 			{
