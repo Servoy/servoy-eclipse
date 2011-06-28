@@ -855,6 +855,11 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		return x11handler.getUserChannel();
 	}
 
+	public void executePreImport(ImportInfo importInfo, IRootObject[] rootObjects, ImportTransactable importTransactable) throws RepositoryException
+	{
+		x11handler.executePreImport(importInfo, rootObjects, importTransactable);
+	}
+
 	public void importingDone(ImportInfo importInfo, IRootObject[] rootObjects, ImportTransactable importTransactable) throws RepositoryException
 	{
 		x11handler.importingDone(importInfo, rootObjects, importTransactable);
