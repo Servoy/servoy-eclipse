@@ -384,8 +384,11 @@ public class SolutionDeserializer
 								}
 								else
 								{
-									// old structure parsing									
-									testDuplicates(parent, scriptObjects);
+									// old structure parsing
+									if (!readAll)
+									{
+										testDuplicates(parent, scriptObjects);
+									}
 									if (scriptObjects != null)
 									{
 										jsonObjects.addAll(scriptObjects);
@@ -477,8 +480,10 @@ public class SolutionDeserializer
 						if (parentForm != null)
 						{
 							List<JSONObject> childrenJSObjects = childrenJSObjectMapEntry.getValue();
-							testDuplicates(parentForm, childrenJSObjects);
-
+							if (!readAll)
+							{
+								testDuplicates(parentForm, childrenJSObjects);
+							}
 							if (childrenJSObjects != null)
 							{
 								scriptFiles.add(jsFile);
