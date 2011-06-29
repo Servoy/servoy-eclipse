@@ -343,12 +343,15 @@ public class ColumnComposite extends Composite
 	static final int CI_SEQUENCE_TYPE = 5;
 	static final int CI_DELETE = 6;
 
+	private ColumnNameEditingSupport nameEditor = null;
+
 	private void createTableColumns(final Table table)
 	{
 		final TableColumn nameColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_NAME);
 		nameColumn.setText("Name");
 		TableViewerColumn nameViewerColumn = new TableViewerColumn(tableViewer, nameColumn);
-		nameViewerColumn.setEditingSupport(new ColumnNameEditingSupport(tableViewer));
+		nameEditor = new ColumnNameEditingSupport(tableViewer);
+		nameViewerColumn.setEditingSupport(nameEditor);
 
 		copyColumnNameAction = new CopyColumnNameAction(tableViewer.getTable().getDisplay());//getSite().getShell().getDisplay());
 		MenuManager menuMgr = new MenuManager("#PopupMenu"); //$NON-NLS-1$
@@ -603,6 +606,10 @@ public class ColumnComposite extends Composite
 		if (columnDetailsComposite != null)
 		{
 			columnDetailsComposite.checkValidState();
+		}
+		if (nameEditor != null)
+		{
+			nameEditor.checkValidState();
 		}
 	}
 }

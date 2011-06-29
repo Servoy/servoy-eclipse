@@ -20,6 +20,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -29,6 +30,7 @@ import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IValidateName;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 import com.servoy.j2db.util.docvalidator.LengthDocumentValidator;
 import com.servoy.j2db.util.docvalidator.ValidatingDocument.IDocumentValidator;
@@ -71,6 +73,7 @@ public class ColumnNameEditingSupport extends EditingSupport
 			}
 			catch (final Exception e)
 			{
+				wrongName = value.toString();
 				Display.getDefault().asyncExec(new Runnable()
 				{
 					public void run()
@@ -121,5 +124,22 @@ public class ColumnNameEditingSupport extends EditingSupport
 	private boolean isUrl(String name)
 	{
 		return (name != null && name.toLowerCase().contains("url"));
+	}
+
+	@Override
+	protected void initializeCellEditorValue(CellEditor cellEditor, ViewerCell cell)
+	{
+		super.initializeCellEditorValue(cellEditor, cell);
+		wrongName = null;
+	}
+
+	private String wrongName = null;
+
+	public void checkValidState() throws RepositoryException
+	{
+		if (wrongName != null)
+		{
+			throw new RepositoryException("Invalid column name: " + wrongName);
+		}
 	}
 }
