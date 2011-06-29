@@ -97,6 +97,10 @@ public class VisualFormEditorPaletteFactory
 	private static final String ELEMENTS_TYPE_AHEAD_ID = "type ahead";
 	private static final String ELEMENTS_PORTAL_ID = "portal";
 	private static final String[] ELEMENTS_IDS = new String[] {
+	/* */ELEMENTS_BUTTON_ID,
+	/* */ELEMENTS_RADIOS_ID,
+	/* */ELEMENTS_CHECKS_ID,
+	/* */ELEMENTS_LABEL_ID,
 	/* */ELEMENTS_TEXT_FIELD_ID,
 	/* */ELEMENTS_TEXT_AREA_ID,
 	/* */ELEMENTS_HTML_AREA_ID,
@@ -106,10 +110,6 @@ public class VisualFormEditorPaletteFactory
 	/* */ELEMENTS_IMAGE_MEDIA_ID,
 	/* */ELEMENTS_COMBOBOX_ID,
 	/* */ELEMENTS_TYPE_AHEAD_ID,
-	/* */ELEMENTS_RADIOS_ID,
-	/* */ELEMENTS_CHECKS_ID,
-	/* */ELEMENTS_LABEL_ID,
-	/* */ELEMENTS_BUTTON_ID,
 	/* */ELEMENTS_PORTAL_ID
 	/* */};
 
