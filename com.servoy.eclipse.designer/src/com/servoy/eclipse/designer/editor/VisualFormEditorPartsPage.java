@@ -405,8 +405,11 @@ public class VisualFormEditorPartsPage extends Composite
 		while (it.hasNext())
 		{
 			Part p = it.next();
-			currentPartList.add(p);
-			currentTypes.add(new Integer(p.getPartType()));
+			if (!p.isOverrideOrphanElement())
+			{
+				currentPartList.add(p);
+				currentTypes.add(new Integer(p.getPartType()));
+			}
 		}
 		currentParts.setInput(currentPartList);
 
