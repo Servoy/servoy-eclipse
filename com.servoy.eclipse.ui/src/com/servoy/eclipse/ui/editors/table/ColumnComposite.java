@@ -50,6 +50,7 @@ import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Scrollable;
 import org.eclipse.swt.widgets.TabFolder;
@@ -127,7 +128,7 @@ public class ColumnComposite extends Composite
 				ISelection sel = tableViewer.getSelection();
 				if (sel instanceof IStructuredSelection)
 				{
-					Object first = ((IStructuredSelection)sel).getFirstElement();
+					final Object first = ((IStructuredSelection)sel).getFirstElement();
 					if (first instanceof Column)
 					{
 						Column c = (Column)first;
@@ -168,6 +169,13 @@ public class ColumnComposite extends Composite
 						if (b) propagateSelection(c);
 						tableViewer.getTable().setToolTipText(c.getNote());
 
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							public void run()
+							{
+								tableViewer.reveal(first);
+							}
+						});
 					}
 					else
 					{
