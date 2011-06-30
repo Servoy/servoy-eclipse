@@ -108,7 +108,6 @@ public class ElementSettingsEditingSupport extends EditingSupport implements IOb
 			boolean right = Boolean.parseBoolean(value.toString());
 			model.setRight(right, persist, mask);
 			changeSupport.fireEvent(new ChangeEvent(ElementSettingsEditingSupport.this));
-			getViewer().update(element, null);
 		}
 
 	}

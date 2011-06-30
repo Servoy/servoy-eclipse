@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportName;
@@ -77,7 +78,15 @@ public class ElementSettingsLabelProvider extends LabelProvider implements ITabl
 
 	public String getColumnText(Object element, int columnIndex)
 	{
-		if (columnIndex == VisualFormEditorSecurityPage.CI_NAME) return ((ISupportName)element).getName();
+		if (columnIndex == VisualFormEditorSecurityPage.CI_NAME)
+		{
+			String name = ((ISupportName)element).getName();
+			if (((IPersist)element).getAncestor(IRepository.FORMS) != model.getForm())
+			{
+				name += " [" + ((Form)((IPersist)element).getAncestor(IRepository.FORMS)).getName() + "]";
+			}
+			return name;
+		}
 		return null;
 	}
 }

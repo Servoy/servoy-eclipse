@@ -25,10 +25,13 @@ import java.util.Map;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager.SecurityInfo;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.UUID;
 
@@ -42,9 +45,11 @@ public class ElementSettingsModel
 {
 	private String currentGroup;
 	private final Map<String, Map<UUID, Integer>> securityInfo;
+	private final Form form;
 
-	public ElementSettingsModel()
+	public ElementSettingsModel(Form form)
 	{
+		this.form = form;
 		securityInfo = new HashMap<String, Map<UUID, Integer>>();
 	}
 
@@ -70,10 +75,8 @@ public class ElementSettingsModel
 		}
 		else
 		{
-			Form form = null;
-			if (element instanceof Form) form = (Form)element;
-			else form = (Form)element.getAncestor(IRepository.FORMS);
-			List<SecurityInfo> infos = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getSecurityInfos(currentGroup, form);
+			Form parent = (Form)element.getAncestor(IRepository.FORMS);
+			List<SecurityInfo> infos = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getSecurityInfos(currentGroup, parent);
 			if (infos != null)
 			{
 				Iterator<SecurityInfo> iterator = infos.iterator();
@@ -98,6 +101,18 @@ public class ElementSettingsModel
 		if (hasRight) access = access | mask;
 		else access = access & (~mask);
 		UUID uuid = element.getUUID();
+		try
+		{
+			element = ElementUtil.getOverridePersist(PersistContext.create(element, form));
+			if (!uuid.equals(element.getUUID()))
+			{
+				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, element.getAncestor(IRepository.FORMS), false);
+			}
+		}
+		catch (RepositoryException ex)
+		{
+			ServoyLog.logError(ex);
+		}
 		Map<UUID, Integer> currentGroupSecurityInfo = securityInfo.get(currentGroup);
 		if (currentGroupSecurityInfo == null)
 		{
@@ -105,10 +120,10 @@ public class ElementSettingsModel
 			securityInfo.put(currentGroup, currentGroupSecurityInfo);
 		}
 		currentGroupSecurityInfo.remove(uuid);
-		currentGroupSecurityInfo.put(uuid, new Integer(access));
+		currentGroupSecurityInfo.put(element.getUUID(), new Integer(access));
 	}
 
-	public void saveSecurityElements(Form form)
+	public void saveSecurityElements()
 	{
 		try
 		{
@@ -162,4 +177,8 @@ public class ElementSettingsModel
 		return false;
 	}
 
+	public Form getForm()
+	{
+		return form;
+	}
 }

@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
@@ -73,7 +74,7 @@ public class VisualFormEditorSecurityPage extends Composite
 		super(parent, style);
 		setLayout(new FillLayout());
 		this.editor = formEditor;
-		model = new ElementSettingsModel();
+		model = new ElementSettingsModel(formEditor.getForm());
 
 		TableColumnLayout elementslayout = new TableColumnLayout();
 		TableColumnLayout layout = new TableColumnLayout();
@@ -190,6 +191,7 @@ public class VisualFormEditorSecurityPage extends Composite
 		{
 			public void handleChange(ChangeEvent event)
 			{
+				setElements();
 				editor.flagModified();
 			}
 		});
@@ -198,6 +200,7 @@ public class VisualFormEditorSecurityPage extends Composite
 		{
 			public void handleChange(ChangeEvent event)
 			{
+				setElements();
 				editor.flagModified();
 			}
 		});
@@ -257,7 +260,7 @@ public class VisualFormEditorSecurityPage extends Composite
 	private void setElements()
 	{
 		List<IPersist> formElements = new ArrayList<IPersist>();
-		Iterator<IPersist> it = editor.getForm().getAllObjects();
+		Iterator<IPersist> it = ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm()).getAllObjects();
 		while (it.hasNext())
 		{
 			IPersist elem = it.next();
@@ -272,7 +275,7 @@ public class VisualFormEditorSecurityPage extends Composite
 
 	public void saveSecurityElements()
 	{
-		model.saveSecurityElements(editor.getForm());
+		model.saveSecurityElements();
 	}
 
 }
