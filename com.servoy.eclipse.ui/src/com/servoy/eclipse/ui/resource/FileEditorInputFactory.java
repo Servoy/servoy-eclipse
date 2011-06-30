@@ -42,7 +42,7 @@ public class FileEditorInputFactory extends org.eclipse.ui.part.FileEditorInputF
 			@Override
 			public IPersistableElement getPersistable()
 			{
-				if (new DesignerPreferences().getSaveEditorState())
+				if (!(new DesignerPreferences().getCloseEditorOnExit()))
 				{
 					return super.getPersistable();
 				}

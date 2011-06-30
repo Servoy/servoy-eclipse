@@ -66,7 +66,7 @@ public class DesignerPreferences
 	public static final String FEEDBACK_ALIGNMENT_SETTING = "feedBackAlignment";
 	public static final String FEEDBACK_GRID_SETTING = "feedBackGrid";
 	public static final String ANCHOR_SETTING = "anchor";
-	public static final String SAVE_EDITOR_STATE_SETTING = "saveEditorState";
+	public static final String CLOSE_EDITORS_ON_EXIT_SETTING = "saveEditorState";
 	public static final String OPEN_FIRST_FORM_DESIGNER_SETTING = "openFirstFormDesigner";
 	public static final String SHOW_COLUMNS_IN_DB_ORDER_SETTING = "showColumnsInDbOrder";
 	public static final String FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING = "formToolsOnMainToolbar";
@@ -98,7 +98,7 @@ public class DesignerPreferences
 	public static final boolean FEEDBACK_ALIGNMENT_DEFAULT = true;
 	public static final boolean FEEDBACK_GRID_DEFAULT = false;
 	public static final boolean ANCHOR_DEFAULT = false;
-	public static final boolean SAVE_EDITOR_STATE_DEFAULT = true;
+	public static final boolean CLOSE_EDITORS_ON_EXIT_DEFAULT = false;
 	public static final boolean OPEN_FIRST_FORM_DESIGNER_DEFAULT = true;
 	public static final boolean SHOW_COLUMNS_IN_DB_ORDER_DEFAULT = false;
 	public static final boolean SHOW_SAME_SIZE_DEFAULT = true;
@@ -404,14 +404,14 @@ public class DesignerPreferences
 		setProperty(FEEDBACK_ALIGNMENT_SETTING, feedbackAlignment);
 	}
 
-	public boolean getSaveEditorState()
+	public boolean getCloseEditorOnExit()
 	{
-		return getProperty(SAVE_EDITOR_STATE_SETTING, SAVE_EDITOR_STATE_DEFAULT);
+		return getProperty(CLOSE_EDITORS_ON_EXIT_SETTING, CLOSE_EDITORS_ON_EXIT_DEFAULT);
 	}
 
-	public void setSaveEditorState(boolean saveEditorState)
+	public void setCloseEditorsOnExit(boolean saveEditorState)
 	{
-		setProperty(SAVE_EDITOR_STATE_SETTING, saveEditorState);
+		setProperty(CLOSE_EDITORS_ON_EXIT_SETTING, saveEditorState);
 	}
 
 	public boolean getOpenFirstFormDesigner()

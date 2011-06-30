@@ -29,7 +29,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.internal.util.PrefUtil;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.ui.Activator;
@@ -45,7 +47,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 {
 	private Button securityChangeButton;
 	private Button toolbarsInFormWindowButton;
-	private Button saveEditorStateButton;
+	private Button closeEditorOnExitButton;
 	private Button openFirstFormDesignerButton;
 	private Button showColumnsInDbOrderButton;
 	private Button showColumnsInAlphabeticOrderButton;
@@ -120,8 +122,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		});
 		resetToolbarsButton.setText("Show all"); //$NON-NLS-1$
 
-		saveEditorStateButton = new Button(formEditorOptionsContainer, SWT.CHECK);
-		saveEditorStateButton.setText("Re-open Form Editors at startup");
+		closeEditorOnExitButton = new Button(formEditorOptionsContainer, SWT.CHECK);
+		closeEditorOnExitButton.setText("Close Editors at shutdown");
 		new Label(formEditorOptionsContainer, SWT.NONE); // dummy
 
 		openFirstFormDesignerButton = new Button(formEditorOptionsContainer, SWT.CHECK);
@@ -154,7 +156,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		DesignerPreferences prefs = new DesignerPreferences();
 
 		toolbarsInFormWindowButton.setSelection(prefs.getFormToolsOnMainToolbar());
-		saveEditorStateButton.setSelection(prefs.getSaveEditorState());
+		closeEditorOnExitButton.setSelection(prefs.getCloseEditorOnExit());
 		openFirstFormDesignerButton.setSelection(prefs.getOpenFirstFormDesigner());
 		showColumnsInDbOrderButton.setSelection(prefs.getShowColumnsInDbOrder());
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
@@ -164,7 +166,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	protected void performDefaults()
 	{
 		toolbarsInFormWindowButton.setSelection(DesignerPreferences.FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT);
-		saveEditorStateButton.setSelection(DesignerPreferences.SAVE_EDITOR_STATE_DEFAULT);
+		closeEditorOnExitButton.setSelection(DesignerPreferences.CLOSE_EDITORS_ON_EXIT_DEFAULT);
+		PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.CLOSE_EDITORS_ON_EXIT, DesignerPreferences.CLOSE_EDITORS_ON_EXIT_DEFAULT);
 		openFirstFormDesignerButton.setSelection(DesignerPreferences.OPEN_FIRST_FORM_DESIGNER_DEFAULT);
 		showColumnsInDbOrderButton.setSelection(DesignerPreferences.SHOW_COLUMNS_IN_DB_ORDER_DEFAULT);
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
@@ -178,7 +181,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		DesignerPreferences prefs = new DesignerPreferences();
 
 		prefs.setFormToolsOnMainToolbar(toolbarsInFormWindowButton.getSelection());
-		prefs.setSaveEditorState(saveEditorStateButton.getSelection());
+		prefs.setCloseEditorsOnExit(closeEditorOnExitButton.getSelection());
+		PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.CLOSE_EDITORS_ON_EXIT, closeEditorOnExitButton.getSelection());
 		prefs.setOpenFirstFormDesigner(openFirstFormDesignerButton.getSelection());
 		prefs.setShowColumnsInDbOrder(showColumnsInDbOrderButton.getSelection());
 

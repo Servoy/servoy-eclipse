@@ -199,7 +199,7 @@ public class EditorInputFactory implements IElementFactory, IAdapterFactory
 
 	public Object getAdapter(Object adaptableObject, Class adapterType)
 	{
-		if (new DesignerPreferences().getSaveEditorState())
+		if (!(new DesignerPreferences().getCloseEditorOnExit()))
 		{
 			if (adaptableObject instanceof PersistEditorInput)
 			{
