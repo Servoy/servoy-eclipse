@@ -28,10 +28,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.dbcp.DbcpException;
 import org.eclipse.core.resources.IFile;
@@ -354,7 +355,7 @@ public class EclipseUserManager implements IUserManager
 
 	private final List<GroupSecurityInfo> groupInfos = new SortedList<GroupSecurityInfo>(NameComparator.INSTANCE); //group names
 	private final List<User> allDefinedUsers = new SortedList<User>();
-	private final Map<String, List<String>> userGroups = new HashMap<String, List<String>>(); //groupname -> list of user_uids
+	private final Map<String, List<String>> userGroups = new ConcurrentHashMap<String, List<String>>(); //groupname -> list of user_uids
 
 	private int writeMode = WRITE_MODE_AUTOMATIC;
 	protected IProject resourcesProject;
