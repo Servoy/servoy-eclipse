@@ -11,7 +11,7 @@
    </description>
 
    <copyright url="http://www.servoy.com/developer/copyright.html">
-      Copyright &#xA9; 1997-2011 Servoy BV. All rights reserved.
+      Copyright © 1997-2011 Servoy BV. All rights reserved.
 Visit http://www.servoy.com
 This computer program is protected by copyright law and international
 treaties.
@@ -837,6 +837,28 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
 
    <plugin
          id="com.servoy.eclipse.exporter"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.transforms.hook"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.transforms.xslt"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.transforms.xslt.plugin"
          download-size="0"
          install-size="0"
          version="0.0.0"

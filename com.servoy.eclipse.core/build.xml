@@ -470,6 +470,7 @@
 				<include name="intro/"/>
 				<include name="plugin_customization.ini"/>
 				<include name="cssprofile/"/>
+				<include name="config.ini"/>
 			</fileset>
 		</copy>
 		<antcall target="apitools.generation">
