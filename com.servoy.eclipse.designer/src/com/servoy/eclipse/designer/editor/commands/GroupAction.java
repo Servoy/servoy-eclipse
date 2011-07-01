@@ -135,7 +135,7 @@ public class GroupAction extends DesignerSelectionAction
 	@Override
 	protected Command createCommand(List objects)
 	{
-		if (objects.isEmpty()) return null;
+		if (objects.size() <= 1) return null;
 		if (!(objects.get(0) instanceof EditPart)) return null;
 
 		Map<EditPart, Request> requests = createGroupingRequests(objects);
