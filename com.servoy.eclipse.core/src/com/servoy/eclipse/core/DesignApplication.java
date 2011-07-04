@@ -706,7 +706,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 
 	public void reportError(Component parentComponent, String msg, Object detail)
 	{
-		getClient().reportError(parentComponent, msg, detail);
+		((ISmartClientApplication)getClient()).reportError(parentComponent, msg, detail);
 	}
 
 	public void reportError(String msg, Object detail)
@@ -716,7 +716,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 
 	public void reportInfo(Component parentComponent, String msg, String title)
 	{
-		getClient().reportInfo(parentComponent, msg, title);
+		((ISmartClientApplication)getClient()).reportInfo(parentComponent, msg, title);
 	}
 
 	public void reportInfo(String msg)
