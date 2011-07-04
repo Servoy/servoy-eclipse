@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core;
 
 import java.io.File;
@@ -57,6 +57,7 @@ import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.util.UUID;
@@ -315,6 +316,10 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 							((AbstractBase)src).getSerializableRuntimeProperty(IScriptProvider.LINENUMBER));
 						((AbstractBase)dest).setSerializableRuntimeProperty(IScriptProvider.FILENAME,
 							((AbstractBase)src).getSerializableRuntimeProperty(IScriptProvider.FILENAME));
+					}
+					if (src instanceof ScriptVariable)
+					{
+						((ScriptVariable)dest).setComment(((ScriptVariable)src).getComment());
 					}
 					editingSolution.clearEditingState(dest);
 
