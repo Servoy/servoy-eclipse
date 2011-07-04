@@ -170,14 +170,14 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		boolean override = false;
 		MethodArgument[] superArguments = null;
 		String methodName = forcedMethodName;
-		boolean addPrivateFlag = false;
+		int tagToOutput = 0;
 		if (methodName == null)
 		{
-			Pair<String, Boolean> methodNameAndPrivateFlag = askForMethodName(methodType, parent, methodKey, shell);
+			Pair<String, Integer> methodNameAndPrivateFlag = askForMethodName(methodType, parent, methodKey, shell);
 			if (methodNameAndPrivateFlag != null)
 			{
 				methodName = methodNameAndPrivateFlag.getLeft();
-				addPrivateFlag = methodNameAndPrivateFlag.getRight().booleanValue();
+				tagToOutput = methodNameAndPrivateFlag.getRight().intValue();
 			}
 		}
 
@@ -251,7 +251,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 						file.create(new ByteArrayInputStream(new byte[0]), true, null);
 					}
 
-					String declaration = template.getMethodDeclaration(met.getName(), null, addPrivateFlag);
+					String declaration = template.getMethodDeclaration(met.getName(), null, tagToOutput);
 
 					declaration = format(declaration, file, 0);
 
@@ -448,7 +448,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 	}
 
 	@SuppressWarnings("nls")
-	private static Pair<String, Boolean> askForMethodName(String methodType, final IPersist parent, String methodKey, Shell shell)
+	private static Pair<String, Integer> askForMethodName(String methodType, final IPersist parent, String methodKey, Shell shell)
 	{
 		String defaultName = ""; //$NON-NLS-1$
 		if (methodKey != null)
@@ -480,8 +480,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		dialog.setBlockOnOpen(true);
 		dialog.open();
 
-		return (dialog.getReturnCode() == Window.CANCEL) ? null : new Pair<String, Boolean>(dialog.getValue(), dialog.outputPrivateTag ? Boolean.TRUE
-			: Boolean.FALSE);
+		return (dialog.getReturnCode() == Window.CANCEL) ? null : new Pair<String, Integer>(dialog.getValue(), Integer.valueOf(dialog.tagToOutput));
 	}
 
 
@@ -492,8 +491,9 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 	private static final class NewMethodInputDialog extends InputDialog
 	{
 		private Button okButton;
-		private boolean outputPrivateTag;
+		private int tagToOutput;
 		private Button createPrivateButton;
+		private Button createProtectedButton;
 		private final IPersist parent;
 
 		/**
@@ -525,6 +525,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 			if (!(this.parent instanceof Solution))
 			{
 				createPrivateButton = createButton(compositeParent, IDialogConstants.PROCEED_ID, "Create private", false);
+				createProtectedButton = createButton(compositeParent, IDialogConstants.IGNORE_ID, "Create protected", false);
 			}
 			createButton(compositeParent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 			//do this here because setting the text will set enablement on the ok
@@ -557,9 +558,9 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		@Override
 		protected void buttonPressed(int buttonId)
 		{
-			if (buttonId == IDialogConstants.PROCEED_ID)
+			if (buttonId == IDialogConstants.PROCEED_ID || buttonId == IDialogConstants.IGNORE_ID)
 			{
-				outputPrivateTag = true;
+				tagToOutput = buttonId == IDialogConstants.PROCEED_ID ? MethodTemplate.PRIVATE_TAG : MethodTemplate.PROTECTED_TAG;
 				super.buttonPressed(IDialogConstants.OK_ID);
 			}
 			else
@@ -578,6 +579,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		{
 			super.setErrorMessage(errorMessage);
 			if (createPrivateButton != null) createPrivateButton.setEnabled(errorMessage == null);
+			if (createProtectedButton != null) createProtectedButton.setEnabled(errorMessage == null);
 		}
 	}
 
