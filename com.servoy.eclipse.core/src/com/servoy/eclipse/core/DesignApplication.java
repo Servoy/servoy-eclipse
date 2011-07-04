@@ -82,7 +82,6 @@ import com.servoy.j2db.smart.J2DBClient;
 import com.servoy.j2db.smart.dataui.SwingItemFactory;
 import com.servoy.j2db.smart.plugins.PluginManager;
 import com.servoy.j2db.ui.ItemFactory;
-import com.servoy.j2db.util.ITaskExecuter;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.RendererParentWrapper;
 import com.servoy.j2db.util.ServoyException;
@@ -601,11 +600,6 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	{
 		ServoyProject ap = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 		return ap != null ? ap.getEditingSolution() : null;
-	}
-
-	public ITaskExecuter getThreadPool()
-	{
-		return getClient().getThreadPool();
 	}
 
 	public ScheduledExecutorService getScheduledExecutor()
