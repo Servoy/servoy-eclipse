@@ -218,6 +218,46 @@
               org.eclipse.dltk.javascript.core.JavaScriptProblems#DEPRECATED_METHOD
            </problem>
         </problemCategory>
+        <problemCategory
+              id="undeclared"
+              nature="org.eclipse.dltk.javascript.core.nature"
+              scope="@SuppressWarnings">
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#UNDECLARED_VARIABLE
+           </problem>
+        </problemCategory>
+        <problemCategory
+              id="hides"
+              nature="org.eclipse.dltk.javascript.core.nature"
+              scope="@SuppressWarnings">
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#PARAMETER_HIDES_VARIABLE
+           </problem>
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#PARAMETER_HIDES_FUNCTION
+           </problem>
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#VAR_HIDES_PARAMETER
+           </problem>
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#VAR_HIDES_PROPERTY
+           </problem>
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#VAR_HIDES_METHOD
+           </problem>
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#VAR_HIDES_FUNCTION
+           </problem>
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#FUNCTION_HIDES_VARIABLE
+           </problem>
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#FUNCTION_HIDES_FUNCTION
+           </problem>
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#DUPLICATE_VAR_DECLARATION
+           </problem>
+        </problemCategory>
      </extension>
    
 </plugin>
