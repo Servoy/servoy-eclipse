@@ -52,6 +52,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.DesignApplication;
 import com.servoy.eclipse.core.JSDeveloperSolutionModel;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -64,6 +65,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
@@ -83,7 +85,9 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.plugins.IBeanClassProvider;
 import com.servoy.j2db.plugins.IClientPlugin;
+import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.plugins.IPluginManager;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.IReturnedTypesProvider;
@@ -306,6 +310,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	@Override
 	protected void initalize()
 	{
+		DesignApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
 		synchronized (this)
 		{
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class));
@@ -314,7 +319,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class));
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(ServoyException.class));
 
-			List<IClientPlugin> lst = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getPluginManager().getPlugins(IClientPlugin.class);
+			List<IClientPlugin> lst = application.getPluginManager().getPlugins(IClientPlugin.class);
 			for (IClientPlugin clientPlugin : lst)
 			{
 				// for now cast to deprecated interface
@@ -334,6 +339,29 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				{
 					Debug.error("error registering constants for client plugin ", e); //$NON-NLS-1$
 				}
+			}
+		}
+		IBeanClassProvider beanManager = (IBeanClassProvider)application.getBeanManager();
+		Class< ? >[] allBeanClasses = beanManager.getAllBeanClasses();
+		for (Class< ? > beanClass : allBeanClasses)
+		{
+			if (IServoyBeanFactory.class.isAssignableFrom(beanClass))
+			{
+				try
+				{
+					IServoyBeanFactory beanFactory = (IServoyBeanFactory)beanClass.newInstance();
+					Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(), (IClientPluginAccess)application.getPluginAccess(),
+						new Object[] { "developer", "developer", null });
+					addType(beanClass.getSimpleName(), beanInstance.getClass());
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("error creating bean for in the js type provider", e);
+				}
+			}
+			else
+			{
+				addType(beanClass.getSimpleName(), beanClass);
 			}
 		}
 		super.initalize();
@@ -808,9 +836,9 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				if (form == null) return context.getKnownType("Form", TypeMode.CODE);
 				Form formToUse = fs.getFlattenedForm(form);
 				Type superForm = context.getType("Form");
-				if (form.getExtendsFormID() > 0)
+				if (form.getExtendsID() > 0)
 				{
-					Form extendsForm = fs.getForm(form.getExtendsFormID());
+					Form extendsForm = fs.getForm(form.getExtendsID());
 					if (extendsForm != null) superForm = context.getType("Form<" + extendsForm.getName() + '>');
 				}
 
@@ -852,35 +880,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			}
 			return type;
 		}
-
-		/**
-		 * @param context
-		 * @param typeName
-		 * @return
-		 */
-		private Type createBaseFormType(ITypeInfoContext context, String typeName)
-		{
-			Type type;
-			type = TypeInfoModelFactory.eINSTANCE.createType();
-			type.setName(typeName);
-			type.setKind(TypeKind.JAVA);
-
-			EList<Member> members = type.getMembers();
-
-			members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "Array with all the names in this form scope", SPECIAL_PROPERTY));
-			members.add(createProperty("alldataproviders", true, TypeUtil.arrayOf("String"), "Array with all the dataprovider names", SPECIAL_PROPERTY));
-			members.add(createProperty("allmethods", true, TypeUtil.arrayOf("String"), "Array with all the method names", SPECIAL_PROPERTY));
-			members.add(createProperty("allrelations", true, TypeUtil.arrayOf("String"), "Array with all the relation names", SPECIAL_PROPERTY));
-			members.add(createProperty("allvariables", true, TypeUtil.arrayOf("String"), "Array with all the variable names", SPECIAL_PROPERTY));
-
-			// controller and foundset and elements
-			Property controller = createProperty(context, "controller", true, "Controller", IconProvider.instance().descriptor(JSForm.class));
-			System.err.println("controller form type: " + controller.getType());
-			members.add(controller);
-			members.add(createProperty(context, "foundset", true, FoundSet.JS_FOUNDSET, FOUNDSET_IMAGE));
-			members.add(createProperty(context, "elements", true, "Elements", ELEMENTS));
-			return type;
-		}
 	}
 	private static class InvisibleRelationsScopeCreator extends RelationsScopeCreator
 	{
@@ -905,7 +904,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
 
-			Object[] fsAndTable = getFlattenedSolutonAndTable(context, typeName);
+			Object[] fsAndTable = getFlattenedSolutonAndTable(typeName);
 			if (fsAndTable != null)
 			{
 				FlattenedSolution fs = (FlattenedSolution)fsAndTable[0];
@@ -963,7 +962,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
 
-			Object[] fsAndTable = getFlattenedSolutonAndTable(context, typeName);
+			Object[] fsAndTable = getFlattenedSolutonAndTable(typeName);
 			if (fsAndTable != null)
 			{
 				if (fsAndTable.length > 1)
@@ -1053,7 +1052,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 	}
 
-	private static Object[] getFlattenedSolutonAndTable(ITypeInfoContext context, String typeName)
+	private static Object[] getFlattenedSolutonAndTable(String typeName)
 	{
 		if (typeName.endsWith(">"))
 		{
@@ -1202,7 +1201,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						{
 							EList<Member> members = type.getMembers();
 							Form formToUse = form;
-							if (form.getExtendsFormID() > 0)
+							if (form.getExtendsID() > 0)
 							{
 								formToUse = fs.getFlattenedForm(form);
 							}
@@ -1219,8 +1218,13 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 										Class< ? > persistClass = ElementUtil.getPersistScriptClass(application, persist);
 										if (persistClass != null && formElement instanceof Bean)
 										{
-											typeNames.put(persistClass.getSimpleName(), persistClass.getSimpleName());
-											addAnonymousClassType(persistClass.getSimpleName(), persistClass);
+											String beanClassName = ((Bean)formElement).getBeanClassName();
+											if (beanClassName != null)
+											{
+												// map the persist class that is registered in the initialize() method under the beanclassname under that same name.
+												// So SwingDBTreeView class/name points to "DBTreeView" which points to that class again of the class types 
+												typeNames.put(persistClass.getSimpleName(), beanClassName.substring(beanClassName.lastIndexOf('.') + 1));
+											}
 										}
 										members.add(createProperty(formElement.getName(), true, getElementType(context, persistClass), null, PROPERTY));
 									}
