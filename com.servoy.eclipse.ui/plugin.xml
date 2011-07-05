@@ -743,6 +743,14 @@
       </activityPatternBinding>
       <activityPatternBinding
             activityId="com.servoy.eclipse.activities.dltk"
+            pattern="org\.eclipse\.dltk\..*/org\.eclipse\.dltk\.debug\.ui\.dbgpLogView">
+      </activityPatternBinding>
+      <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.dltk"
+            pattern="org\.eclipse\.dltk\..*/org\.eclipse\.dltk\.javascript\.console\.ui\.internal\.preferences\.JavaScriptConsolePreferences">
+      </activityPatternBinding>
+      <activityPatternBinding
+            activityId="com.servoy.eclipse.activities.dltk"
             pattern="org\.eclipse\.dltk\..*/.*Wizard.*">
       </activityPatternBinding>
       <activityPatternBinding
@@ -753,10 +761,10 @@
             activityId="com.servoy.eclipse.activities.dltk"
             pattern="org\.eclipse\.dltk\..*/.*openMethod.*">
       </activityPatternBinding>
-	  <activityPatternBinding
+      <activityPatternBinding
             activityId="com.servoy.eclipse.activities.dltk"
             pattern="org\.eclipse\.dltk\.ui/org\.eclipse\.dltk\.ui\.TypeHierarchy">
-      </activityPatternBinding>      
+      </activityPatternBinding>    
  	  <activityPatternBinding
             activityId="com.servoy.eclipse.activities.dltk"
             pattern="org\.eclipse\.dltk\.ui\.edit\.text\.script\.open\.type\.hierarchy">
