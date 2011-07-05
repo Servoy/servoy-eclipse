@@ -149,7 +149,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	 * 
 	 * @see com.servoy.j2db.IApplication#getOSName()
 	 */
-	public String getOSName()
+	public String getClientOSName()
 	{
 		return System.getProperty("os.name"); //$NON-NLS-1$
 	}
