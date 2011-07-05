@@ -204,6 +204,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.LinkWithEditorAction
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.LoadRelationsAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.MovePersistAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.MoveTextAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.NavigationToggleAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewPostgresDbAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewRelationAction;
@@ -240,6 +241,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.SelectAllAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.SuggestForeignTypesAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.SynchronizeTablesAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ToggleFormCommandsAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.TreeHandlingToggleAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.UpdateServoySequencesAction;
 import com.servoy.eclipse.ui.wizards.ExportSolutionWizard;
 import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
@@ -299,6 +301,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	public static final String USE_OPEN_AS_DEFAULT = "SolutionExplorerView.useOpenAsDefaultAction";
 
 	public static final String INCLUDE_ENTRIES_FROM_MODULES = "SolutionExplorerView.includeEntriedFromModules";
+
+	public static final String DIALOGSTORE_CONTEXT_MENU_NAVIGATION = "SolutionExplorerView.contextMenuNavigation";
+
+	public static final String DIALOGSTORE_CONTEXT_MENU_TREE_HANDLING = "SolutionExplorerView.contextMenuTreeNavigation";
 
 	/**
 	 * This orientation tells the view to put the list (outline) part of the view under the tree.
@@ -483,6 +489,16 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private ILabelProviderListener labelProviderListener;
 
+	/*
+	 * Enable/disable Go Home, Go Into and Go Into actions from the solex tree context menu
+	 */
+	private boolean treeContextMenuNavigationEnabled = false;
+
+	/*
+	 * Enable/disable Refresh View, Expand and Collapse tree actions from the solex tree context menu
+	 */
+	private boolean treeContextMenuTreeHandlingEnabled = false;
+
 	class ViewLabelProvider extends ColumnLabelProvider
 	{
 		private Image null_image = null;
@@ -643,6 +659,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		initializeEditmenuActions();
 		createActions();
+
+		treeContextMenuNavigationEnabled = fDialogSettings.getBoolean(DIALOGSTORE_CONTEXT_MENU_NAVIGATION);
+		treeContextMenuTreeHandlingEnabled = fDialogSettings.getBoolean(DIALOGSTORE_CONTEXT_MENU_TREE_HANDLING);
 
 		hookContextMenu();
 		hookTreeDoubleClickAction();
@@ -1936,6 +1955,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		}
 		viewMenu.add(layoutSubMenu);
 		viewMenu.add(new Separator());
+		viewMenu.add(new NavigationToggleAction(this, treeContextMenuNavigationEnabled));
+		viewMenu.add(new TreeHandlingToggleAction(this, treeContextMenuTreeHandlingEnabled));
 	}
 
 	private void fillTreeContextMenu(IMenuManager manager)
@@ -2043,18 +2064,36 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		manager.add(new Separator());
 		if (searchTreeAction.isEnabled()) manager.add(searchTreeAction);
-		manager.add(new Separator());
-		manager.add(fRefreshAction);
-		manager.add(expandNodeAction);
-		manager.add(collapseTreeAction);
-		manager.add(new Separator());
-		drillDownAdapter.addNavigationActions(manager);
+		if (treeContextMenuTreeHandlingEnabled)
+		{
+			manager.add(new Separator());
+			manager.add(fRefreshAction);
+			manager.add(expandNodeAction);
+			manager.add(collapseTreeAction);
+		}
+		if (treeContextMenuNavigationEnabled)
+		{
+			manager.add(new Separator());
+			drillDownAdapter.addNavigationActions(manager);
+		}
 
 		if (selectedTreeNode != null && (selectedTreeNode.getType() == UserNodeType.SOLUTION || selectedTreeNode.getType() == UserNodeType.SOLUTION_ITEM))
 		{
 			manager.add(new Separator());
 			manager.add(filePropertiesAction);
 		}
+	}
+
+	public void showContextMenuNavigationGroup(boolean show)
+	{
+		treeContextMenuNavigationEnabled = show;
+		fDialogSettings.put(DIALOGSTORE_CONTEXT_MENU_NAVIGATION, show);
+	}
+
+	public void showContextMenuTreeHandling(boolean show)
+	{
+		treeContextMenuTreeHandlingEnabled = show;
+		fDialogSettings.put(DIALOGSTORE_CONTEXT_MENU_TREE_HANDLING, show);
 	}
 
 	private void fillListContextMenu(IMenuManager manager)
@@ -2481,6 +2520,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		fRefreshAction = new RefreshAction(this);
 		collapseTreeAction = new CollapseTreeAction(tree);
+		collapseTreeAction.setId("collapseTreeAction");
 		selectAllActionInTree = new SelectAllAction(tree);
 		selectAllActionInlist = new SelectAllAction(list);
 
