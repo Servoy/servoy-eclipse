@@ -178,7 +178,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private final Object pluginsBackgroundLoadLock = new Object();
 
-	private final List<String> unreachableServers = new ArrayList();
+	private final List<String> unreachableServers = new ArrayList<String>();
 
 	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
@@ -187,7 +187,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	SolutionExplorerTreeContentProvider(SolutionExplorerView v)
 	{
 		view = v;
-		invisibleRootNode = new PlatformSimpleUserNode("root", UserNodeType.ARRAY);
+		invisibleRootNode = new PlatformSimpleUserNode("root", UserNodeType.ARRAY); //$NON-NLS-1$
 
 		PlatformSimpleUserNode jslib = new PlatformSimpleUserNode(Messages.TreeStrings_JSLib, UserNodeType.JSLIB, null, IconProvider.instance().image(
 			JSLib.class));
@@ -228,33 +228,33 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		PlatformSimpleUserNode application = new PlatformSimpleUserNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, null,
 			IconProvider.instance().image(JSApplication.class));
 
-		Class[] applicationClasses1 = ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes();
-		Class[] applicationClasses2 = new ServoyException(0).getAllReturnedTypes();
-		Class[] applicationClasses = new Class[applicationClasses1.length + applicationClasses2.length];
+		Class< ? >[] applicationClasses1 = ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes();
+		Class< ? >[] applicationClasses2 = new ServoyException(0).getAllReturnedTypes();
+		Class< ? >[] applicationClasses = new Class[applicationClasses1.length + applicationClasses2.length];
 		System.arraycopy(applicationClasses1, 0, applicationClasses, 0, applicationClasses1.length);
 		System.arraycopy(applicationClasses2, 0, applicationClasses, applicationClasses1.length, applicationClasses2.length);
 		addReturnTypeNodes(application, applicationClasses);
 
-		resources = new PlatformSimpleUserNode(Messages.TreeStrings_Resources, UserNodeType.RESOURCES, null, uiActivator.loadImageFromBundle("resources.png"));
+		resources = new PlatformSimpleUserNode(Messages.TreeStrings_Resources, UserNodeType.RESOURCES, null, uiActivator.loadImageFromBundle("resources.png")); //$NON-NLS-1$
 
-		stylesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Styles, UserNodeType.STYLES, null, uiActivator.loadImageFromBundle("styles.gif"));
+		stylesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Styles, UserNodeType.STYLES, null, uiActivator.loadImageFromBundle("styles.gif")); //$NON-NLS-1$
 		stylesNode.parent = resources;
 
 		userGroupSecurityNode = new PlatformSimpleUserNode(Messages.TreeStrings_UserGroupSecurity, UserNodeType.USER_GROUP_SECURITY, null,
-			uiActivator.loadImageFromBundle("lock.gif"));
+			uiActivator.loadImageFromBundle("lock.gif")); //$NON-NLS-1$
 		userGroupSecurityNode.parent = resources;
 
-		i18nFilesNode = new PlatformSimpleUserNode(Messages.TreeStrings_I18NFiles, UserNodeType.I18N_FILES, null, uiActivator.loadImageFromBundle("i18n.gif"));
+		i18nFilesNode = new PlatformSimpleUserNode(Messages.TreeStrings_I18NFiles, UserNodeType.I18N_FILES, null, uiActivator.loadImageFromBundle("i18n.gif")); //$NON-NLS-1$
 		i18nFilesNode.parent = resources;
 
 		templatesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Templates, UserNodeType.TEMPLATES, null,
-			uiActivator.loadImageFromBundle("template.gif"));
+			uiActivator.loadImageFromBundle("template.gif")); //$NON-NLS-1$
 		templatesNode.parent = resources;
 
 		activeSolutionNode = new PlatformSimpleUserNode(Messages.TreeStrings_NoActiveSolution, UserNodeType.SOLUTION, null,
-			Messages.SolutionExplorerView_activeSolution, null, uiActivator.loadImageFromBundle("solution.gif"));
+			Messages.SolutionExplorerView_activeSolution, null, uiActivator.loadImageFromBundle("solution.gif")); //$NON-NLS-1$
 		modulesOfActiveSolution = new PlatformSimpleUserNode(Messages.TreeStrings_Modules, UserNodeType.MODULES, null,
-			uiActivator.loadImageFromBundle("modules.gif"));
+			uiActivator.loadImageFromBundle("modules.gif")); //$NON-NLS-1$
 
 		allSolutionsNode = new PlatformSimpleUserNode(Messages.TreeStrings_AllSolutions, UserNodeType.ALL_SOLUTIONS, null,
 			PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
@@ -277,7 +277,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		PlatformSimpleUserNode jsunit = new PlatformSimpleUserNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, null, IconProvider.instance().image(
 			JSUnitAssertFunctions.class));
 
-		solutionModel = new PlatformSimpleUserNode("SolutionModel", UserNodeType.SOLUTION_MODEL, null, IconProvider.instance().image(JSSolutionModel.class));
+		solutionModel = new PlatformSimpleUserNode(Messages.TreeStrings_SolutionModel, UserNodeType.SOLUTION_MODEL, null, IconProvider.instance().image(
+			JSSolutionModel.class));
 
 		addReturnTypeNodes(solutionModel, ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class).getAllReturnedTypes());
 
@@ -289,9 +290,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		i18n = new PlatformSimpleUserNode(Messages.TreeStrings_i18n, UserNodeType.I18N, null, IconProvider.instance().image(JSI18N.class));
 		addReturnTypeNodes(i18n, ScriptObjectRegistry.getScriptObjectForClass(JSI18N.class).getAllReturnedTypes());
 
-		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.gif"));
+		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.gif")); //$NON-NLS-1$
 		final PlatformSimpleUserNode plugins = new PlatformSimpleUserNode(Messages.TreeStrings_Plugins, UserNodeType.PLUGINS, null,
-			uiActivator.loadImageFromBundle("plugin.gif"));
+			uiActivator.loadImageFromBundle("plugin.gif")); //$NON-NLS-1$
 
 
 		resources.children = new PlatformSimpleUserNode[] { servers, stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode };
@@ -705,7 +706,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 				catch (Exception e)
 				{
-					ServoyLog.logWarning("Cannot create the children of node " + un.getName(), e);
+					ServoyLog.logWarning("Cannot create the children of node " + un.getName(), e); //$NON-NLS-1$
 				}
 			}
 			else
@@ -759,15 +760,15 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private void addServersNodeChildren(PlatformSimpleUserNode serversNode)
 	{
-		ArrayList<PlatformSimpleUserNode> servers = new ArrayList<PlatformSimpleUserNode>();
+		List<PlatformSimpleUserNode> servers = new ArrayList<PlatformSimpleUserNode>();
 		IServerManagerInternal handler = ServoyModel.getServerManager();
 		String[] array = handler.getServerNames(false, false, true, true);
 		for (String server_name : array)
 		{
 			IServerInternal serverObj = (IServerInternal)handler.getServer(server_name, false, false);
-			Pair serverInfo = new Pair(server_name, serverObj);
+			Pair<String, IServerInternal> serverInfo = new Pair<String, IServerInternal>(server_name, serverObj);
 
-			Object image = uiActivator.loadImageFromBundle("server.gif");
+			Object image = uiActivator.loadImageFromBundle("server.gif"); //$NON-NLS-1$
 			String tooltip = serverObj.toHTML();
 
 
@@ -777,26 +778,26 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				{
 					if (serverObj.getName().equals(serverInfo.getLeft()))
 					{
-						image = uiActivator.loadImageFromBundle("server.gif");
+						image = uiActivator.loadImageFromBundle("server.gif"); //$NON-NLS-1$
 					}
 					else
 					{
-						image = uiActivator.loadImageFromBundle("serverDuplicate.gif");
+						image = uiActivator.loadImageFromBundle("serverDuplicate.gif"); //$NON-NLS-1$
 						tooltip = "Duplicate of " + serverObj.getName(); //$NON-NLS-1$
 					}
 				}
 				else
 				{
-					image = uiActivator.loadImageFromBundle("serverError.gif");
+					image = uiActivator.loadImageFromBundle("serverError.gif"); //$NON-NLS-1$
 				}
 			}
 			else
 			{
-				image = uiActivator.loadImageFromBundle("serverDisabled.gif");
+				image = uiActivator.loadImageFromBundle("serverDisabled.gif"); //$NON-NLS-1$
 			}
 
 
-			PlatformSimpleUserNode node = new PlatformSimpleUserNode(server_name, UserNodeType.SERVER, "", tooltip, serverObj, image);
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(server_name, UserNodeType.SERVER, "", tooltip, serverObj, image); //$NON-NLS-1$
 			servers.add(node);
 			node.parent = serversNode;
 			if (serverObj.getConfig().isEnabled() && serverObj.isValid())
@@ -837,7 +838,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				try
 				{
 					IScriptable scriptObject = null;
-					Method method = plugin.getClass().getMethod("getScriptObject", (Class[])null);
+					Method method = plugin.getClass().getMethod("getScriptObject", (Class[])null); //$NON-NLS-1$
 					if (method != null)
 					{
 						scriptObject = (IScriptable)method.invoke(plugin, (Object[])null);
@@ -853,7 +854,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						}
 						if (image == null)
 						{
-							image = uiActivator.loadImageFromBundle("plugin_conn.gif");
+							image = uiActivator.loadImageFromBundle("plugin_conn.gif"); //$NON-NLS-1$
 						}
 
 						PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName(), UserNodeType.PLUGIN, scriptObject, image);
@@ -871,9 +872,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 				catch (Throwable e)
 				{
-					ServoyLog.logError("Error loading plugin " + plugin.getName() + " exception: ", e);
+					ServoyLog.logError("Error loading plugin " + plugin.getName() + " exception: ", e); //$NON-NLS-1$ //$NON-NLS-2$
 					PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName() + " (not loaded!)", UserNodeType.PLUGIN, null, null,
-						e.toString(), null, uiActivator.loadImageFromBundle("warning.gif"));
+						e.toString(), null, uiActivator.loadImageFromBundle("warning.gif")); //$NON-NLS-1$
 					plugins.add(node);
 					node.parent = pluginNode;
 				}
@@ -886,7 +887,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		}
 	}
 
-	private void addReturnTypeNodes(PlatformSimpleUserNode node, Class[] clss)
+	private void addReturnTypeNodes(PlatformSimpleUserNode node, Class< ? >[] clss)
 	{
 		if (clss != null)
 		{
@@ -976,12 +977,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			if (solutionOfCalculation == null)
 			{
 				globalsFolder = new PlatformSimpleUserNode(Messages.TreeStrings_Globals, UserNodeType.GLOBALS_ITEM, solution,
-					uiActivator.loadImageFromBundle("globe.gif"));
+					uiActivator.loadImageFromBundle("globe.gif")); //$NON-NLS-1$
 			}
 			else
 			{
 				globalsFolder = new PlatformSimpleUserNode(Messages.TreeStrings_Globals, UserNodeType.GLOBALS_ITEM_CALCULATION_MODE, solution,
-					uiActivator.loadImageFromBundle("globe.gif"));
+					uiActivator.loadImageFromBundle("globe.gif")); //$NON-NLS-1$
 			}
 			addGlobalsNodeChildren(globalsFolder, solution);
 
@@ -991,11 +992,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			if (solutionOfCalculation == null)
 			{
 				allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.ALL_RELATIONS, solution,
-					uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
+					uiActivator.loadImageFromOldLocation("relationsoverview.gif")); //$NON-NLS-1$
 				allRelations.parent = projectNode;
 			}
 			valuelists = new PlatformSimpleUserNode(Messages.TreeStrings_ValueLists, UserNodeType.VALUELISTS, solution,
-				uiActivator.loadImageFromBundle("valuelists.gif"));
+				uiActivator.loadImageFromBundle("valuelists.gif")); //$NON-NLS-1$
 			media = new PlatformSimpleUserNode(Messages.TreeStrings_Media, UserNodeType.MEDIA, solution, uiActivator.loadImageFromBundle("image.gif"));
 
 			globalsFolder.parent = projectNode;
@@ -1006,9 +1007,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			{
 				// in case of calculation editor
 				PlatformSimpleUserNode dataProvidersNode = new PlatformSimpleUserNode(Messages.TreeStrings_DataProviders, UserNodeType.TABLE_COLUMNS,
-					tableOfCalculation, solution, uiActivator.loadImageFromBundle("selected_record.gif"));
+					tableOfCalculation, solution, uiActivator.loadImageFromBundle("selected_record.gif")); //$NON-NLS-1$
 				allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.RELATIONS, tableOfCalculation,
-					uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
+					uiActivator.loadImageFromOldLocation("relationsoverview.gif")); //$NON-NLS-1$
 				addRelationsNodeChildren(allRelations, solution, (Table)tableOfCalculation, UserNodeType.CALC_RELATION);
 
 				dataProvidersNode.parent = projectNode;
@@ -1031,16 +1032,16 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	private void addGlobalsNodeChildren(PlatformSimpleUserNode globalsFolder, Solution solution)
 	{
 		PlatformSimpleUserNode globalVariables = new PlatformSimpleUserNode(Messages.TreeStrings_variables, UserNodeType.GLOBAL_VARIABLES, solution,
-			uiActivator.loadImageFromBundle("global_variabletree.gif"));
+			uiActivator.loadImageFromBundle("global_variabletree.gif")); //$NON-NLS-1$
 		globalVariables.parent = globalsFolder;
 
 		PlatformSimpleUserNode currentForm = new PlatformSimpleUserNode(Messages.TreeStrings_currentcontroller, UserNodeType.CURRENT_FORM, null,
-			uiActivator.loadImageFromBundle("formula.gif"));
+			uiActivator.loadImageFromBundle("formula.gif")); //$NON-NLS-1$
 		if (solutionOfCalculation != null) currentForm.hide();
 		currentForm.parent = globalsFolder;
 
 		PlatformSimpleUserNode globalRelations = new PlatformSimpleUserNode(Messages.TreeStrings_relations, UserNodeType.GLOBALRELATIONS, solution,
-			uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
+			uiActivator.loadImageFromOldLocation("relationsoverview.gif")); //$NON-NLS-1$
 		addGlobalRelationsNodeChildren(globalRelations);
 		globalRelations.parent = globalsFolder;
 		globalsFolder.children = new PlatformSimpleUserNode[] { currentForm, globalVariables, globalRelations };
@@ -1056,12 +1057,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	{
 		Solution solution = (Solution)formsNode.getRealObject();
 		List<PlatformSimpleUserNode> forms = new ArrayList<PlatformSimpleUserNode>();
-		Iterator it = solution.getForms(null, true);
+		Iterator<Form> it = solution.getForms(null, true);
 		while (it.hasNext())
 		{
-			Form f = (Form)it.next();
-			PlatformSimpleUserNode node = new PlatformSimpleUserNode(f.getName(), UserNodeType.FORM, f.getName(), f.getDataSource() == null
-				? "No table" : ("Server: " + f.getServerName() + ", Table: " + f.getTableName()), f, uiActivator.loadImageFromBundle("designer.gif")); //$NON-NLS-1$
+			Form f = it.next();
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(f.getName(), UserNodeType.FORM, f.getName(), f.getDataSource() == null ? "No table"
+				: ("Server: " + f.getServerName() + ", Table: " + f.getTableName()), f, uiActivator.loadImageFromBundle("designer.gif")); //$NON-NLS-3$
 			forms.add(node);
 			node.parent = formsNode;
 		}
@@ -1075,17 +1076,17 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		{
 			List<PlatformSimpleUserNode> node = new ArrayList<PlatformSimpleUserNode>();
 			PlatformSimpleUserNode functionsNode = new PlatformSimpleUserNode(Messages.TreeStrings_controller, UserNodeType.FORM_CONTROLLER, f,
-				uiActivator.loadImageFromBundle("formula.gif"));
+				uiActivator.loadImageFromBundle("formula.gif")); //$NON-NLS-1$
 			functionsNode.parent = formNode;
 			node.add(functionsNode);
 
 			PlatformSimpleUserNode variables = new PlatformSimpleUserNode(Messages.TreeStrings_variables, UserNodeType.FORM_VARIABLES, f,
-				uiActivator.loadImageFromBundle("form_variabletree.gif"));
+				uiActivator.loadImageFromBundle("form_variabletree.gif")); //$NON-NLS-1$
 			variables.parent = formNode;
 			node.add(variables);
 
 			PlatformSimpleUserNode elementsNode = new PlatformSimpleUserNode(Messages.TreeStrings_elements, UserNodeType.FORM_ELEMENTS, f,
-				uiActivator.loadImageFromBundle("elements.gif"));
+				uiActivator.loadImageFromBundle("elements.gif")); //$NON-NLS-1$
 			elementsNode.parent = formNode;
 			node.add(elementsNode);
 			addFormElementsChildren(elementsNode);
@@ -1096,7 +1097,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				try
 				{
 					columnsNode = new PlatformSimpleUserNode(Messages.TreeStrings_selectedrecord, UserNodeType.TABLE_COLUMNS, f.getTable(), f,
-						uiActivator.loadImageFromBundle("selected_record.gif"));
+						uiActivator.loadImageFromBundle("selected_record.gif")); //$NON-NLS-1$
 					columnsNode.parent = formNode;
 					node.add(columnsNode);
 				}
@@ -1107,7 +1108,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 
 				PlatformSimpleUserNode relationsNode = new PlatformSimpleUserNode(Messages.TreeStrings_relations, UserNodeType.RELATIONS, f, f,
-					uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
+					uiActivator.loadImageFromOldLocation("relationsoverview.gif")); //$NON-NLS-1$
 				relationsNode.parent = formNode;
 				node.add(relationsNode);
 				addFormRelationsNodeChildren(relationsNode);
@@ -1138,7 +1139,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				if (MessageDialog.openConfirm(view.getSite().getShell(), "Disable server", "Cannot connect to server " + serverName +
 					". Do you want to disable it?"))
 				{
-					ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 					IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(serverName, true, false);
 					if (server != null)
 					{
@@ -1183,18 +1183,18 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				if (!inspectedForms.contains(parentForm))
 				{
 					parentElementsNode = new PlatformSimpleUserNode(parentForm.getName(), UserNodeType.FORM_ELEMENTS_INHERITED, null,
-						uiActivator.loadImageFromBundle("elements.gif"));
+						uiActivator.loadImageFromBundle("elements.gif")); //$NON-NLS-1$
 
 					addFormElementsChildren(parentElementsNode, inspectedForms, originalForm, parentForm);
 				}
 				else
 				{
-					ServoyLog.logWarning("Cycle detected in form hierarchy - at form " + parentForm.getName(), null);
+					ServoyLog.logWarning("Cycle detected in form hierarchy - at form " + parentForm.getName(), null); //$NON-NLS-1$
 				}
 			}
 			else
 			{
-				ServoyLog.logWarning("Parent of extended form " + ancestorForm.getName() + " not found", null);
+				ServoyLog.logWarning("Parent of extended form " + ancestorForm.getName() + " not found", null); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		List<PlatformSimpleUserNode> elements = new SortedList<PlatformSimpleUserNode>(StringComparator.INSTANCE);
@@ -1262,10 +1262,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				if (element instanceof Portal)
 				{
 					// find named child elements
-					Iterator portalElementIterator = ((Portal)element).getAllObjects();
+					Iterator<IPersist> portalElementIterator = ((Portal)element).getAllObjects();
 					while (portalElementIterator.hasNext())
 					{
-						Object oo = portalElementIterator.next();
+						IPersist oo = portalElementIterator.next();
 						if (oo instanceof IFormElement)
 						{
 							IFormElement portalElement = (IFormElement)oo;
@@ -1352,8 +1352,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			{
 				// show all sub-types
 				String className = beanClass.getSimpleName();
-				node = new PlatformSimpleUserNode(bean.getName() + " (" + className + ")", UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { bean, beanClass },
-					bean.getParent(), uiActivator.loadImageFromBundle("element.gif"));
+				node = new PlatformSimpleUserNode(bean.getName() + " (" + className + ')', UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { bean, beanClass }, //$NON-NLS-1$
+					bean.getParent(), uiActivator.loadImageFromBundle("element.gif")); //$NON-NLS-1$
 				node.setDeveloperFeedback(new SimpleDeveloperFeedback(bean.getName() + ".", null, null)); //$NON-NLS-1$
 
 				Class< ? > superClass = beanClass.getSuperclass();
@@ -1363,7 +1363,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				{
 					className = superClass.getSimpleName();
 					currentClassNode = new PlatformSimpleUserNode(className, UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { bean, superClass },
-						bean.getParent(), uiActivator.loadImageFromBundle("element.gif"));
+						bean.getParent(), uiActivator.loadImageFromBundle("element.gif")); //$NON-NLS-1$
 					currentClassNode.setDeveloperFeedback(new SimpleDeveloperFeedback(bean.getName() + ".", null, null)); //$NON-NLS-1$
 					currentClassNode.parent = parentClassNode;
 					parentClassNode.children = new PlatformSimpleUserNode[] { currentClassNode };
@@ -1375,7 +1375,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			{
 				// do not show subtypes
 				node = new PlatformSimpleUserNode(bean.getName(), UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { bean, null }, bean.getParent(),
-					uiActivator.loadImageFromBundle("element.gif"));
+					uiActivator.loadImageFromBundle("element.gif")); //$NON-NLS-1$
 				node.setDeveloperFeedback(new SimpleDeveloperFeedback(bean.getName() + ".", null, null)); //$NON-NLS-1$
 			}
 
@@ -1388,9 +1388,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		}
 		catch (Throwable e)
 		{
-			ServoyLog.logWarning("Solution explorer cannot create bean " + bean.getName(), e);
+			ServoyLog.logWarning("Solution explorer cannot create bean " + bean.getName(), e); //$NON-NLS-1$
 			node = new PlatformSimpleUserNode(bean.getName(), UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { bean, null }, bean.getParent(),
-				uiActivator.loadImageFromBundle("element.gif"));
+				uiActivator.loadImageFromBundle("element.gif")); //$NON-NLS-1$
 			node.setDeveloperFeedback(new SimpleDeveloperFeedback(bean.getName() + ".", null, null)); //$NON-NLS-1$
 		}
 		return node;
@@ -1402,10 +1402,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		try
 		{
 			List<PlatformSimpleUserNode> rels = new ArrayList<PlatformSimpleUserNode>();
-			Iterator it = solution.getRelations(null, true, true); // returns all global relations
+			Iterator<Relation> it = solution.getRelations(null, true, true); // returns all global relations
 			while (it.hasNext())
 			{
-				Relation r = (Relation)it.next();
+				Relation r = it.next();
 				PlatformSimpleUserNode un = new PlatformSimpleUserNode(r.getName(), UserNodeType.RELATION, r,
 					uiActivator.loadImageFromBundle("global_relation.gif")); //$NON-NLS-1$
 				un.parent = globalRelations;
@@ -1428,7 +1428,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		}
 		catch (DbcpException e)
 		{
-			ServoyLog.logInfo("Cannot create " + formRelationsNode.getName() + " node: " + e.getMessage());
+			ServoyLog.logInfo("Cannot create " + formRelationsNode.getName() + " node: " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 			disableServer(f.getServerName());
 		}
 		catch (RepositoryException e)
@@ -1558,7 +1558,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						}
 						catch (RepositoryException e)
 						{
-							ServoyLog.logWarning("Exception while trying to refresh relation: " + persist, e);
+							ServoyLog.logWarning("Exception while trying to refresh relation: " + persist, e); //$NON-NLS-1$
 						}
 
 					}
@@ -1608,7 +1608,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 				else
 				{
-					ServoyLog.logWarning("Cycle in form hierarchy at form " + childForm.getName(), null);
+					ServoyLog.logWarning("Cycle in form hierarchy at form " + childForm.getName(), null); //$NON-NLS-1$
 				}
 			}
 		}
@@ -1675,7 +1675,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		for (int i = invisibleRootNode.children.length - 1; i >= 0; i--)
 		{
 			SimpleUserNode node = invisibleRootNode.children[i];
-
 			if (cm.hide(node.getName()))
 			{
 				node.hide();
@@ -1695,11 +1694,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			this.solutionOfCalculation = null;
 			this.tableOfCalculation = null;
 
-			CalculationModeHandler cm = CalculationModeHandler.getInstance();
 			for (int i = invisibleRootNode.children.length - 1; i >= 0; i--)
 			{
-				SimpleUserNode node = invisibleRootNode.children[i];
-				node.unhide();
+				invisibleRootNode.children[i].unhide();
 			}
 			addSolutionProjects(ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProjects());
 			view.refreshTreeNodeFromModel(null);
@@ -1830,7 +1827,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	{
 		if (activeSolutionNode.getRealObject() != null)
 		{
-			ArrayList al = new ArrayList();
+			List<PlatformSimpleUserNode> al = new ArrayList<PlatformSimpleUserNode>();
 			if (findNode(activeSolutionNode, uuid, al))
 			{
 				Collections.reverse(al);
@@ -1845,33 +1842,37 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	 * @param uuid
 	 * @return
 	 */
-	private boolean findNode(PlatformSimpleUserNode startNode, UUID uuid, List lst)
+	private boolean findNode(PlatformSimpleUserNode startNode, UUID uuid, List<PlatformSimpleUserNode> lst)
 	{
 		Object realObject = startNode.getRealObject();
 
-		if (realObject instanceof IPersist)
+		boolean found = realObject instanceof IPersist && ((IPersist)realObject).getUUID().equals(uuid);
+
+		if (!found && realObject instanceof Object[] && ((Object[])realObject).length > 0)
 		{
-			if (((IPersist)realObject).getUUID().equals(uuid))
-			{
-				lst.add(startNode);
-				return true;
-			}
+			found = ((Object[])realObject)[0] instanceof IPersist && ((IPersist)((Object[])realObject)[0]).getUUID().equals(uuid);
 		}
-		Object[] elements = getElements(startNode);
-		if (elements != null)
+
+		if (!found)
 		{
-			for (Object element : elements)
+			Object[] elements = getElements(startNode);
+			if (elements != null)
 			{
-				if (element instanceof PlatformSimpleUserNode)
+				for (Object element : elements)
 				{
-					if (findNode((PlatformSimpleUserNode)element, uuid, lst))
+					if (element instanceof PlatformSimpleUserNode && findNode((PlatformSimpleUserNode)element, uuid, lst))
 					{
-						return true;
+						found = true;
+						break;
 					}
 				}
 			}
 		}
-		return false;
+		if (found)
+		{
+			lst.add(startNode);
+		}
+		return found;
 	}
 
 	public Object getNodeForPersist(IPersist currentActiveEditorPersist)

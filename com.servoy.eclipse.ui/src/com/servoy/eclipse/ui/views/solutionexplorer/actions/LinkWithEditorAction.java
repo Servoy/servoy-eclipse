@@ -18,13 +18,22 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.io.File;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.IContentProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreePath;
@@ -45,6 +54,7 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
+import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServer;
@@ -85,171 +95,208 @@ public class LinkWithEditorAction extends Action
 	{
 		IContentProvider contentProvider = tree.getContentProvider();
 		IEditorPart activeEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
-		if (activeEditor != null && contentProvider instanceof SolutionExplorerTreeContentProvider)
+		if (activeEditor == null || !(contentProvider instanceof SolutionExplorerTreeContentProvider))
 		{
-			UUID uuid = null;
+			return;
+		}
+
+		// find the persists from the selection
+		List<IPersist> persists = new ArrayList<IPersist>();
+		ISelectionProvider selectionProvider = activeEditor.getSite().getSelectionProvider();
+		ISelection selection = selectionProvider == null ? null : selectionProvider.getSelection();
+		if (selection instanceof IStructuredSelection)
+		{
+			Iterator< ? > iterator = ((IStructuredSelection)selection).iterator();
+			while (iterator.hasNext())
+			{
+				Object obj = iterator.next();
+				IPersist persist = (IPersist)Platform.getAdapterManager().getAdapter(obj, IPersist.class);
+				if (persist instanceof BaseComponent && ((BaseComponent)persist).getName() != null)
+				{
+					persists.add(persist);
+				}
+			}
+		}
+
+		if (persists.size() == 0)
+		{
+			// none found, go via the editor
 			IPersist persist = (IPersist)activeEditor.getAdapter(IPersist.class);
-			IFile file = null;
 			if (persist != null)
 			{
-				uuid = persist.getUUID();
+				persists.add(persist);
+			}
+		}
+
+		Map<UUID, IFile> files = new HashMap<UUID, IFile>();
+
+		if (persists.size() > 0)
+		{
+			for (IPersist persist : persists)
+			{
+				UUID uuid = persist.getUUID();
 				Pair<String, String> pathPair = SolutionSerializer.getFilePath(persist, true);
 				Path path = new Path(pathPair.getLeft() + pathPair.getRight());
-				file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+				IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+				if (file != null)
+				{
+					files.put(uuid, file);
+				}
+			}
+		}
+		else
+		{
+			IFile file = (IFile)activeEditor.getEditorInput().getAdapter(IFile.class);
+			if (file != null)
+			{
+				File f = file.getRawLocation().toFile();
+				File workspace = file.getWorkspace().getRoot().getLocation().toFile();
+				File parentFile = SolutionSerializer.getParentFile(workspace, f);
+				if (parentFile != null)
+				{
+					UUID uuid = SolutionDeserializer.getUUID(parentFile);
+					if (uuid != null)
+					{
+						files.put(uuid, file);
+					}
+				}
+				else if (file.getName().endsWith(".css")) //$NON-NLS-1$
+				{
+					PlatformSimpleUserNode styleNode = ((SolutionExplorerTreeContentProvider)contentProvider).getStylesNode();
+					tree.setSelection(new StructuredSelection(styleNode), true);
+					Object[] elements = ((IStructuredContentProvider)list.getContentProvider()).getElements(list.getInput());
+					if (elements != null)
+					{
+						String styleName = file.getName().substring(0, file.getName().length() - 4);
+						for (Object element : elements)
+						{
+							Object realObject = ((SimpleUserNode)element).getRealObject();
+							if (realObject instanceof Style && ((Style)realObject).getName().equals(styleName))
+							{
+								list.setSelection(new StructuredSelection(element), true);
+								break;
+							}
+						}
+					}
+
+				}
 			}
 			else
 			{
-				file = (IFile)activeEditor.getEditorInput().getAdapter(IFile.class);
-				if (file != null)
+				String serverName = null;
+				Table table = null;
+				ServerConfig config = (ServerConfig)activeEditor.getAdapter(ServerConfig.class);
+				if (config == null)
 				{
-					File f = file.getRawLocation().toFile();
-					File workspace = file.getWorkspace().getRoot().getLocation().toFile();
-					File parentFile = SolutionSerializer.getParentFile(workspace, f);
-					if (parentFile != null)
+					table = (Table)activeEditor.getAdapter(Table.class);
+					if (table != null)
 					{
-						uuid = SolutionDeserializer.getUUID(parentFile);
-					}
-					else if (file.getName().endsWith(".css")) //$NON-NLS-1$
-					{
-						PlatformSimpleUserNode styleNode = ((SolutionExplorerTreeContentProvider)contentProvider).getStylesNode();
-						tree.setSelection(new StructuredSelection(styleNode), true);
-						Object[] elements = ((IStructuredContentProvider)list.getContentProvider()).getElements(list.getInput());
-						if (elements != null)
-						{
-							String styleName = file.getName().substring(0, file.getName().length() - 4);
-							for (Object element : elements)
-							{
-								Object realObject = ((SimpleUserNode)element).getRealObject();
-								if (realObject instanceof Style && ((Style)realObject).getName().equals(styleName))
-								{
-									list.setSelection(new StructuredSelection(element), true);
-									break;
-								}
-							}
-						}
-
+						serverName = table.getServerName();
 					}
 				}
 				else
 				{
-					String serverName = null;
-					Table table = null;
-					ServerConfig config = (ServerConfig)activeEditor.getAdapter(ServerConfig.class);
-					if (config == null)
-					{
-						table = (Table)activeEditor.getAdapter(Table.class);
-						if (table != null)
-						{
-							serverName = table.getServerName();
-						}
-					}
-					else
-					{
-						serverName = config.getServerName();
-					}
+					serverName = config.getServerName();
+				}
 
-					if (serverName != null)
+				if (serverName != null)
+				{
+					PlatformSimpleUserNode servers = ((SolutionExplorerTreeContentProvider)contentProvider).getServers();
+					SimpleUserNode[] children = (SimpleUserNode[])((SolutionExplorerTreeContentProvider)contentProvider).getChildren(servers);
+					if (children != null)
 					{
-						PlatformSimpleUserNode servers = ((SolutionExplorerTreeContentProvider)contentProvider).getServers();
-						SimpleUserNode[] children = (SimpleUserNode[])((SolutionExplorerTreeContentProvider)contentProvider).getChildren(servers);
-						if (children != null)
+						for (SimpleUserNode child : children)
 						{
-							for (SimpleUserNode child : children)
+							try
 							{
-								try
+								if (serverName.equals(((IServer)child.getRealObject()).getName()))
 								{
-									if (serverName.equals(((IServer)child.getRealObject()).getName()))
+									tree.setSelection(new TreeSelection(new TreePath(new Object[] { servers, child })), true);
+									if (table != null)
 									{
-										tree.setSelection(new TreeSelection(new TreePath(new Object[] { servers, child })), true);
-										if (table != null)
+										Object[] elements = ((IStructuredContentProvider)list.getContentProvider()).getElements(list.getInput());
+										if (elements != null)
 										{
-											Object[] elements = ((IStructuredContentProvider)list.getContentProvider()).getElements(list.getInput());
-											if (elements != null)
+											for (Object element : elements)
 											{
-												for (Object element : elements)
+												Object realObject = ((SimpleUserNode)element).getRealObject();
+												if (realObject instanceof TableWrapper && ((TableWrapper)realObject).getTableName().equals(table.getName()))
 												{
-													Object realObject = ((SimpleUserNode)element).getRealObject();
-													if (realObject instanceof TableWrapper && ((TableWrapper)realObject).getTableName().equals(table.getName()))
-													{
-														list.setSelection(new StructuredSelection(element), true);
-														break;
-													}
+													list.setSelection(new StructuredSelection(element), true);
+													break;
 												}
 											}
+										}
 
-										}
-										break;
-									}
-								}
-								catch (RemoteException e)
-								{
-									ServoyLog.logError(e);
-								}
-							}
-						}
-					}
-				}
-			}
-			if (uuid != null)
-			{
-				TreePath path = ((SolutionExplorerTreeContentProvider)contentProvider).getTreePath(uuid);
-				if (path != null)
-				{
-					TreePath realPath = path;
-					tree.expandToLevel(path.getLastSegment(), 1);
-					if (path.getLastSegment() instanceof SimpleUserNode)
-					{
-						SimpleUserNode node = (SimpleUserNode)path.getLastSegment();
-						if (node.children != null && node.children.length > 0)
-						{
-							path = path.createChildPath(node.children[node.children.length - 1]);
-						}
-					}
-					tree.setSelection(new TreeSelection(path), true);
-					if (realPath != path)
-					{
-						tree.setSelection(new TreeSelection(realPath), true);
-					}
-				}
-				else if (persist instanceof ValueList)
-				{
-					Solution solution = (Solution)persist.getAncestor(IRepository.SOLUTIONS);
-					if (solution != null)
-					{
-						PlatformSimpleUserNode solutionNode = ((SolutionExplorerTreeContentProvider)contentProvider).getSolutionNode(solution.getName());
-						if (solutionNode != null && solutionNode.children != null)
-						{
-							for (SimpleUserNode child : solutionNode.children)
-							{
-								if (child.getType() == UserNodeType.VALUELISTS)
-								{
-									tree.setSelection(new StructuredSelection(child), true);
-									Object[] elements = ((IStructuredContentProvider)list.getContentProvider()).getElements(list.getInput());
-									if (elements != null)
-									{
-										for (Object element : elements)
-										{
-											Object realObject = ((SimpleUserNode)element).getRealObject();
-											if (realObject instanceof IPersist && ((IPersist)realObject).getUUID().equals(uuid))
-											{
-												list.setSelection(new StructuredSelection(element), true);
-												break;
-											}
-										}
 									}
 									break;
 								}
 							}
+							catch (RemoteException e)
+							{
+								ServoyLog.logError(e);
+							}
 						}
 					}
 				}
-				IViewPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(IPageLayout.ID_RES_NAV);
-				if (part instanceof ISetSelectionTarget && file != null)
+			}
+		}
+
+		if (persists.size() == 1 && persists.get(0) instanceof ValueList)
+		{
+			ValueList valueList = (ValueList)persists.get(0);
+			Solution solution = (Solution)valueList.getAncestor(IRepository.SOLUTIONS);
+			if (solution != null)
+			{
+				PlatformSimpleUserNode solutionNode = ((SolutionExplorerTreeContentProvider)contentProvider).getSolutionNode(solution.getName());
+				if (solutionNode != null && solutionNode.children != null)
 				{
-					((ISetSelectionTarget)part).selectReveal(new StructuredSelection(file));
+					for (SimpleUserNode child : solutionNode.children)
+					{
+						if (child.getType() == UserNodeType.VALUELISTS)
+						{
+							tree.setSelection(new StructuredSelection(child), true);
+							Object[] elements = ((IStructuredContentProvider)list.getContentProvider()).getElements(list.getInput());
+							if (elements != null)
+							{
+								for (Object element : elements)
+								{
+									Object realObject = ((SimpleUserNode)element).getRealObject();
+									if (realObject instanceof IPersist && ((IPersist)realObject).getUUID().equals(valueList.getUUID()))
+									{
+										list.setSelection(new StructuredSelection(element), true);
+										break;
+									}
+								}
+							}
+							break;
+						}
+					}
 				}
 			}
 		}
-	}
+		else if (files.size() > 0)
+		{
+			List<TreePath> paths = new ArrayList<TreePath>();
+			for (UUID uuid : files.keySet())
+			{
+				TreePath path = ((SolutionExplorerTreeContentProvider)contentProvider).getTreePath(uuid);
+				if (path != null)
+				{
+					tree.expandToLevel(path, 1);
+					paths.add(path);
+				}
+			}
+			tree.setSelection(new TreeSelection(paths.toArray(new TreePath[paths.size()])), true);
+		}
 
+		if (files.size() > 0)
+		{
+			IViewPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(IPageLayout.ID_RES_NAV);
+			if (part instanceof ISetSelectionTarget)
+			{
+				((ISetSelectionTarget)part).selectReveal(new StructuredSelection(files.values().toArray()));
+			}
+		}
+	}
 }
