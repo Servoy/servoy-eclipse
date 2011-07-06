@@ -258,7 +258,7 @@ public class WorkspaceUserManager implements IUserManager
 	public static class GroupSecurityInfo implements ISupportName
 	{
 		public String groupName;
-		public Map<CharSequence, List<SecurityInfo>> tableSecurity = new HashMap<CharSequence, List<SecurityInfo>>();//servername.tablename -> SecurityInfos 
+		public Map<String, List<SecurityInfo>> tableSecurity = new HashMap<String, List<SecurityInfo>>();//servername.tablename -> SecurityInfos 
 		public Map<UUID, List<SecurityInfo>> formSecurity = new HashMap<UUID, List<SecurityInfo>>();//form_uuid -> SecurityInfos
 
 		/**
@@ -1538,17 +1538,17 @@ public class WorkspaceUserManager implements IUserManager
 		for (String group : groups)
 		{
 			GroupSecurityInfo gsi = getGroupSecurityInfo(group);
-			Iterator<Entry<CharSequence, List<SecurityInfo>>> it3 = gsi.tableSecurity.entrySet().iterator();
+			Iterator<Entry<String, List<SecurityInfo>>> it3 = gsi.tableSecurity.entrySet().iterator();
 			while (it3.hasNext())
 			{
-				Entry<CharSequence, List<SecurityInfo>> entry = it3.next();
-				CharSequence s_t = entry.getKey();
+				Entry<String, List<SecurityInfo>> entry = it3.next();
+				String s_t = entry.getKey();
 				List<SecurityInfo> lsi = entry.getValue();
 				Iterator<SecurityInfo> it2 = lsi.iterator();
 				while (it2.hasNext())
 				{
 					SecurityInfo si = it2.next();
-					CharSequence cid = Utils.getDotQualitfied(s_t, si.element_uid);
+					String cid = Utils.getDotQualitfied(s_t, si.element_uid);
 					Object value = retval.get(cid);
 					if (value instanceof Integer)
 					{
@@ -2204,8 +2204,8 @@ public class WorkspaceUserManager implements IUserManager
 						ServoyLog.logError("Cannot find form with UUID " + formUUID + " for delete group", null); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				}
-				Set<CharSequence> tablesUsingThisGroup = gsi.tableSecurity.keySet();
-				for (CharSequence tableString : tablesUsingThisGroup)
+				Set<String> tablesUsingThisGroup = gsi.tableSecurity.keySet();
+				for (String tableString : tablesUsingThisGroup)
 				{
 					TableWrapper t = getTable(tableString.toString());
 					if (t != null)
