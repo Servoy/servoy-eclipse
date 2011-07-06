@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
@@ -206,8 +206,8 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		{
 			Form itForm = it.next();
 
-			int extendedFormId = itForm.getExtendsFormID();
-			if (extendedFormId != 0)
+			int extendedFormId = itForm.getExtendsID();
+			if (extendedFormId > 0)
 			{
 				Integer itExtendsFormID = new Integer(extendedFormId);
 
@@ -306,10 +306,10 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		{
 			Form form = it.next();
 
-			if (form.getExtendsFormID() != 0)
+			if (form.getExtendsID() > 0)
 			{
 				int id = form.getID();
-				int extendedFormId = form.getExtendsFormID();
+				int extendedFormId = form.getExtendsID();
 
 				if (!idInFormsToDelete(id, formsToDelete) && idInFormsToDelete(extendedFormId, formsToDelete)) return false;
 			}

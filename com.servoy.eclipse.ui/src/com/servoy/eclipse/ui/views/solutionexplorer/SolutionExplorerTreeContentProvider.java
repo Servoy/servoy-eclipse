@@ -1175,9 +1175,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 		// see if this form extends another form and if so add the parent's elements
 		PlatformSimpleUserNode parentElementsNode = null;
-		if (ancestorForm.getExtendsFormID() != 0)
+		if (ancestorForm.getExtendsID() > 0)
 		{
-			Form parentForm = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getForm(ancestorForm.getExtendsFormID());
+			Form parentForm = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getForm(ancestorForm.getExtendsID());
 			if (parentForm != null)
 			{
 				if (!inspectedForms.contains(parentForm))
