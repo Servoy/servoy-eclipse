@@ -499,6 +499,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	 */
 	private boolean treeContextMenuTreeHandlingEnabled = false;
 
+	private NavigationToggleAction navigationToggleAction = null;
+
+	private TreeHandlingToggleAction treeHandlingToggleAction = null;
+
 	class ViewLabelProvider extends ColumnLabelProvider
 	{
 		private Image null_image = null;
@@ -1955,8 +1959,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		}
 		viewMenu.add(layoutSubMenu);
 		viewMenu.add(new Separator());
-		viewMenu.add(new NavigationToggleAction(this, treeContextMenuNavigationEnabled));
-		viewMenu.add(new TreeHandlingToggleAction(this, treeContextMenuTreeHandlingEnabled));
+		navigationToggleAction = new NavigationToggleAction(this, treeContextMenuNavigationEnabled);
+		viewMenu.add(navigationToggleAction);
+		treeHandlingToggleAction = new TreeHandlingToggleAction(this, treeContextMenuTreeHandlingEnabled);
+		viewMenu.add(treeHandlingToggleAction);
 	}
 
 	private void fillTreeContextMenu(IMenuManager manager)
@@ -2087,12 +2093,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	public void showContextMenuNavigationGroup(boolean show)
 	{
 		treeContextMenuNavigationEnabled = show;
+		navigationToggleAction.setChecked(show);
 		fDialogSettings.put(DIALOGSTORE_CONTEXT_MENU_NAVIGATION, show);
 	}
 
 	public void showContextMenuTreeHandling(boolean show)
 	{
 		treeContextMenuTreeHandlingEnabled = show;
+		treeHandlingToggleAction.setChecked(show);
 		fDialogSettings.put(DIALOGSTORE_CONTEXT_MENU_TREE_HANDLING, show);
 	}
 
