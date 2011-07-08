@@ -47,6 +47,8 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 	private Button rdVerticalAlignement;
 	private Button rdHorizontalAlignement;
 	private Button rdAutomaticAlignement;
+	private Button navigationContextMenu;
+	private Button treeHandlingContextMenu;
 	private Button chOpenAsDefaultAction;
 	private Button chIncludeModules;
 
@@ -172,6 +174,19 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 			rdAutomaticAlignement.setSelection(true);
 		}
 
+		Group solexTreeViewGroup = new Group(cp, SWT.NONE);
+		solexTreeViewGroup.setText("Solution Explorer Tree View");
+		solexTreeViewGroup.setLayout(new GridLayout(1, true));
+
+		navigationContextMenu = new Button(solexTreeViewGroup, SWT.CHECK);
+		navigationContextMenu.setText("Show Navigation Group In Context Menu");
+
+		treeHandlingContextMenu = new Button(solexTreeViewGroup, SWT.CHECK);
+		treeHandlingContextMenu.setText("Show Tree Handling Group In Context Menu");
+
+		navigationContextMenu.setSelection(solexDialogSettings.getBoolean(SolutionExplorerView.DIALOGSTORE_CONTEXT_MENU_NAVIGATION));
+		treeHandlingContextMenu.setSelection(solexDialogSettings.getBoolean(SolutionExplorerView.DIALOGSTORE_CONTEXT_MENU_TREE_HANDLING));
+
 		Group solexListViewerGroup = new Group(cp, SWT.NONE);
 		solexListViewerGroup.setText("Solution Explorer List Viewer Options");
 		solexListViewerGroup.setLayout(new GridLayout(1, true));
@@ -274,6 +289,24 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 
 		if (solexView != null)
 		{
+			solexView.showContextMenuNavigationGroup(navigationContextMenu.getSelection());
+		}
+		else
+		{
+			solexDialogSettings.put(SolutionExplorerView.DIALOGSTORE_CONTEXT_MENU_NAVIGATION, navigationContextMenu.getSelection());
+		}
+
+		if (solexView != null)
+		{
+			solexView.showContextMenuTreeHandling(treeHandlingContextMenu.getSelection());
+		}
+		else
+		{
+			solexDialogSettings.put(SolutionExplorerView.DIALOGSTORE_CONTEXT_MENU_TREE_HANDLING, treeHandlingContextMenu.getSelection());
+		}
+
+		if (solexView != null)
+		{
 			solexView.setOpenAsDefaultOption(chOpenAsDefaultAction.getSelection());
 		}
 		else
@@ -308,6 +341,8 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 		rdAutomaticAlignement.setSelection(true);
 		rdVerticalAlignement.setSelection(false);
 		rdHorizontalAlignement.setSelection(false);
+		navigationContextMenu.setSelection(false);
+		treeHandlingContextMenu.setSelection(false);
 		IViewReference solexRef = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findViewReference(SolutionExplorerView.PART_ID);
 		SolutionExplorerView solexView = null;
 		if (solexRef != null)
@@ -316,12 +351,16 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 			solexView.setOrientation(SolutionExplorerView.VIEW_ORIENTATION_AUTOMATIC);
 			solexView.setOpenAsDefaultOption(true);
 			solexView.setIncludeModulesOption(false);
+			solexView.showContextMenuNavigationGroup(false);
+			solexView.showContextMenuTreeHandling(false);
 		}
 		else
 		{
 			solexDialogSettings.put(SolutionExplorerView.DIALOGSTORE_VIEWORIENTATION, SolutionExplorerView.VIEW_ORIENTATION_AUTOMATIC);
 			solexDialogSettings.put(SolutionExplorerView.USE_OPEN_AS_DEFAULT, true);
 			solexDialogSettings.put(SolutionExplorerView.INCLUDE_ENTRIES_FROM_MODULES, false);
+			solexDialogSettings.put(SolutionExplorerView.DIALOGSTORE_CONTEXT_MENU_NAVIGATION, false);
+			solexDialogSettings.put(SolutionExplorerView.DIALOGSTORE_CONTEXT_MENU_TREE_HANDLING, false);
 		}
 	}
 
