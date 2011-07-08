@@ -803,38 +803,42 @@ public class SolutionDeserializer
 
 			File mediasDir = new File(dir, SolutionSerializer.MEDIAS_DIR);
 			String mediasobjects = Utils.getTXTFileContent(fmediasobjects);
+
 			if (mediasobjects != null)
 			{
-				JSONArray array = new JSONArray(mediasobjects);
-				for (int i = 0; i < array.length(); i++)
+				try
 				{
-					if (!array.isNull(i))
+					JSONArray array = new JSONArray(mediasobjects);
+					for (int i = 0; i < array.length(); i++)
 					{
-						JSONObject obj = array.getJSONObject(i);
-						String name = obj.has(SolutionSerializer.PROP_NAME) ? obj.getString(SolutionSerializer.PROP_NAME) : null;
-						if (name != null)
+						if (!array.isNull(i))
 						{
-							boolean newMedia = parent.getMedia(name) == null;
-							IPersist persist = deserializePersist(repository, parent, persist_json_map, obj, strayCats, mediasDir, new HashSet<UUID>(0),
-								useFilesForDirtyMark);
-							if (persist instanceof Media)
+							JSONObject obj = array.getJSONObject(i);
+							String name = obj.has(SolutionSerializer.PROP_NAME) ? obj.getString(SolutionSerializer.PROP_NAME) : null;
+							if (name != null)
 							{
-								File mf = new File(mediasDir, name);
-								if (mf.exists())
+								boolean newMedia = parent.getMedia(name) == null;
+								IPersist persist = deserializePersist(repository, parent, persist_json_map, obj, strayCats, mediasDir, new HashSet<UUID>(0),
+									useFilesForDirtyMark);
+								if (persist instanceof Media)
 								{
-									mediaUUIDS.add(persist.getUUID());
-									boolean changed = newMedia || isChangedFile(dir, mf, changedFiles);
-									if (readAll || changed)
+									File mf = new File(mediasDir, name);
+									if (mf.exists())
 									{
-										((Media)persist).setPermMediaData(Utils.getFileContent(mf));
-										if (obj.has(SolutionSerializer.PROP_MIME_TYPE)) ((Media)persist).setMimeType(obj.getString(SolutionSerializer.PROP_MIME_TYPE));
-										obj.put(CHANGED_JSON_ATTRIBUTE, changed);
-										if (changed)
+										mediaUUIDS.add(persist.getUUID());
+										boolean changed = newMedia || isChangedFile(dir, mf, changedFiles);
+										if (readAll || changed)
 										{
-											persist.flagChanged();
-											if (changedFiles != null)
+											((Media)persist).setPermMediaData(Utils.getFileContent(mf));
+											if (obj.has(SolutionSerializer.PROP_MIME_TYPE)) ((Media)persist).setMimeType(obj.getString(SolutionSerializer.PROP_MIME_TYPE));
+											obj.put(CHANGED_JSON_ATTRIBUTE, changed);
+											if (changed)
 											{
-												changedFiles.remove(mf);
+												persist.flagChanged();
+												if (changedFiles != null)
+												{
+													changedFiles.remove(mf);
+												}
 											}
 										}
 									}
@@ -842,6 +846,12 @@ public class SolutionDeserializer
 							}
 						}
 					}
+				}
+				catch (JSONException jsonex)
+				{
+					if (fmediasobjects != null && errorKeeper != null) errorKeeper.addError(fmediasobjects, jsonex);
+					ServoyLog.logError("Could not read medias.obj file " + fmediasobjects, jsonex); //$NON-NLS-1$
+					return;
 				}
 			}
 
