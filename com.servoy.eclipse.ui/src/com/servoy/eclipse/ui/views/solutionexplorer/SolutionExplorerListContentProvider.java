@@ -44,8 +44,6 @@ import org.mozilla.javascript.ScriptableObject;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.doc.IParameter;
-import com.servoy.eclipse.core.doc.XMLScriptObjectAdapter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -68,6 +66,8 @@ import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
+import com.servoy.j2db.documentation.IParameter;
+import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
 import com.servoy.j2db.documentation.scripting.docs.FormElements;
 import com.servoy.j2db.documentation.scripting.docs.Forms;
 import com.servoy.j2db.documentation.scripting.docs.Globals;
@@ -1268,6 +1268,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
 
+		IScriptObject adapter = ScriptObjectRegistry.getAdapterIfAny(scriptObject);
+
 		if (real instanceof IConstantsObject || (real instanceof Class< ? > && IConstantsObject.class.isAssignableFrom((Class< ? >)real)))
 		{
 			String constantsElementName = null;
@@ -1293,10 +1295,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 			for (Object element : arrays)
 			{
-				if (scriptObject != null)
+				if (adapter != null)
 				{
-					if (scriptObject.isDeprecated((String)element)) continue;
-					if (scriptObject.isDeprecated(constantsElementName + (String)element)) continue;
+					if (adapter.isDeprecated((String)element)) continue;
+					if (adapter.isDeprecated(constantsElementName + (String)element)) continue;
 
 					dlm.add(new UserNode((String)element, actionType, new FieldFeedback((String)element, constantsElementName, resolver, scriptObject, ijm),
 						real, uiActivator.loadImageFromBundle("constant.gif")));
@@ -1326,10 +1328,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			String name = (String)element;
 
-			if (scriptObject != null)
+			if (adapter != null)
 			{
-				if (scriptObject.isDeprecated(name)) continue;
-				if (scriptObject.isDeprecated(elementName + name)) continue;
+				if (adapter.isDeprecated(name)) continue;
+				if (adapter.isDeprecated(elementName + name)) continue;
 
 			}
 			Object bp = ijm.getField(name, false);
@@ -1364,10 +1366,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 			}
 
-			if (scriptObject != null)
+			if (adapter != null)
 			{
-				if (scriptObject.isDeprecated(id)) continue;
-				if (scriptObject.isDeprecated(elementName + id)) continue;
+				if (adapter.isDeprecated(id)) continue;
+				if (adapter.isDeprecated(elementName + id)) continue;
 			}
 
 			NativeJavaMethod njm = ijm.getMethod(id, false);
@@ -1548,7 +1550,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			this.name = name;
 			this.prefix = prefix;
 			this.resolver = resolver;
-			this.scriptObject = scriptObject;
+			this.scriptObject = ScriptObjectRegistry.getAdapterIfAny(scriptObject);
 			this.njm = njm;
 
 		}

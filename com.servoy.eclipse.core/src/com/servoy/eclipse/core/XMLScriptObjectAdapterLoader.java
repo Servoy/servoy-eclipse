@@ -19,44 +19,50 @@ package com.servoy.eclipse.core;
 import java.net.URL;
 import java.util.Date;
 
-import com.servoy.eclipse.core.doc.IDocumentationManager;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
-import com.servoy.eclipse.core.doc.IObjectDocumentation;
-import com.servoy.eclipse.core.doc.XMLScriptObjectAdapter;
 import com.servoy.j2db.documentation.DocumentationUtil;
+import com.servoy.j2db.documentation.IDocumentationManager;
+import com.servoy.j2db.documentation.IObjectDocumentation;
+import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 
 public class XMLScriptObjectAdapterLoader
 {
 	private static IDocumentationManager docManager;
+	private static boolean coreLoaded = false;
 
-	static
+	public static void loadCoreDocumentationFromXML()
 	{
-		URL url = XMLScriptObjectAdapterLoader.class.getResource("doc/servoydoc.xml"); //$NON-NLS-1$
-		IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
-		if (documentationManagerProvider != null)
+		if (!coreLoaded)
 		{
-			docManager = documentationManagerProvider.fromXML(url);
+			URL url = XMLScriptObjectAdapterLoader.class.getResource("doc/servoydoc.xml"); //$NON-NLS-1$
+			IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
+			if (documentationManagerProvider != null)
+			{
+				docManager = documentationManagerProvider.fromXML(url, null);
+			}
+			loadDocumentationFromXML(null, docManager);
+			coreLoaded = true;
 		}
 	}
 
-	public static void loadDocumentationFromXML()
+	public static void loadDocumentationFromXML(ClassLoader loader, IDocumentationManager docmgr)
 	{
 		Date start = new Date();
 
-		if (docManager != null)
+		if (docmgr != null)
 		{
 			int succeeded = 0;
 			int failed = 0;
-			for (IObjectDocumentation objDoc : docManager.getObjects().values())
+			for (IObjectDocumentation objDoc : docmgr.getObjects().values())
 			{
 				try
 				{
-					Class< ? > clazz = DocumentationUtil.loadClass(objDoc.getQualifiedName());
-					XMLScriptObjectAdapter adapter = new XMLScriptObjectAdapter(objDoc);
+					Class< ? > clazz = DocumentationUtil.loadClass(loader, objDoc.getQualifiedName());
 					// see if there are already return types that the class itself specifies (to be exactly the same as a real client)
 					IScriptObject scriptObjectForClass = ScriptObjectRegistry.getScriptObjectForClass(clazz);
+					XMLScriptObjectAdapter adapter = new XMLScriptObjectAdapter(objDoc, scriptObjectForClass);
 					if (scriptObjectForClass != null)
 					{
 						Class< ? >[] allReturnedTypes = scriptObjectForClass.getAllReturnedTypes();
@@ -91,4 +97,19 @@ public class XMLScriptObjectAdapterLoader
 		return null;
 	}
 
+	@SuppressWarnings("nls")
+	public static String getPluginDocXMLForClass(Class< ? > clz)
+	{
+		String clzCanonical = clz.getCanonicalName().replace(".", "/");
+		int idx = clzCanonical.lastIndexOf("/");
+		String docFileName = "servoy-doc.xml";
+		if (idx >= 0)
+		{
+			return clzCanonical.substring(0, idx + 1) + docFileName;
+		}
+		else
+		{
+			return docFileName;
+		}
+	}
 }

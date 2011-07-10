@@ -17,7 +17,10 @@
 
 package com.servoy.eclipse.core.doc;
 
+import java.io.InputStream;
 import java.net.URL;
+
+import com.servoy.j2db.documentation.IDocumentationManager;
 
 /**
  * Extension point interface for documentation manager.
@@ -26,7 +29,9 @@ public interface IDocumentationManagerProvider
 {
 	static final String EXTENSION_ID = "com.servoy.eclipse.core.docmanager"; //$NON-NLS-1$
 
-	public IDocumentationManager fromXML(String path);
+	public IDocumentationManager fromXML(String path, ClassLoader loader);
 
-	public IDocumentationManager fromXML(URL url);
+	public IDocumentationManager fromXML(URL url, ClassLoader loader);
+
+	public IDocumentationManager fromXML(InputStream is, ClassLoader loader);
 }

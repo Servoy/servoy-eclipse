@@ -16,11 +16,16 @@
  */
 package com.servoy.eclipse.core;
 
+import java.io.File;
+import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import javax.swing.SwingUtilities;
 
@@ -86,6 +91,7 @@ import com.servoy.j2db.IDesignerCallback;
 import com.servoy.j2db.dataprocessing.IColumnConverter;
 import com.servoy.j2db.dataprocessing.IColumnValidator;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
+import com.servoy.j2db.documentation.IDocumentationManager;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IMethodTemplate;
@@ -100,6 +106,7 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
 import com.servoy.j2db.smart.J2DBClient;
 import com.servoy.j2db.smart.plugins.PluginManager;
+import com.servoy.j2db.util.JarManager.Extension;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
@@ -526,7 +533,7 @@ public class Activator extends Plugin
 	{
 		defaultAccessed = true;
 
-		XMLScriptObjectAdapterLoader.loadDocumentationFromXML();
+		XMLScriptObjectAdapterLoader.loadCoreDocumentationFromXML();
 		MethodTemplatesLoader.loadMethodTemplatesFromXML();
 
 		// install servoy model listeners in separate job, when ServoyModel is created in bundle.activator thread
@@ -684,9 +691,12 @@ public class Activator extends Plugin
 			}.schedule();
 		}
 
+		// Try to load documentation XML from plugin jars.
+		PluginManager pluginManager = (PluginManager)getDesignClient().getPluginManager();
+		loadDocumentationProvidersForPlugins(pluginManager);
+
 		// Visit all column validators/converters and let them add any method templates to
 		// MethodTemplate.
-		PluginManager pluginManager = (PluginManager)getDesignClient().getPluginManager();
 		Map<String, IColumnConverter> converters = pluginManager.getColumnConverterManager().getConverters();
 		for (IColumnConverter conv : converters.values())
 		{
@@ -778,6 +788,41 @@ public class Activator extends Plugin
 			}
 		}
 		return docManagerpProvider;
+	}
+
+	/**
+	 * Tries to load documentation XMLs for available client plugins.
+	 */
+	private static void loadDocumentationProvidersForPlugins(PluginManager pluginManager)
+	{
+		IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
+		if (documentationManagerProvider != null)
+		{
+			for (Extension ext : pluginManager.loadClientPluginDefs())
+			{
+				URL url = ext.jarUrl;
+				try
+				{
+					File urlFile = new File(new URI(url.toExternalForm()));
+					ZipFile zf = new ZipFile(urlFile);
+					String docXMLPath = XMLScriptObjectAdapterLoader.getPluginDocXMLForClass(ext.instanceClass);
+					if (docXMLPath != null)
+					{
+						ZipEntry docEntry = zf.getEntry(docXMLPath);
+						if (docEntry != null)
+						{
+							InputStream is = zf.getInputStream(docEntry);
+							IDocumentationManager mgr = documentationManagerProvider.fromXML(is, pluginManager.getClassLoader());
+							XMLScriptObjectAdapterLoader.loadDocumentationFromXML(pluginManager.getClassLoader(), mgr);
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("Cannot access JAR file '" + url.toExternalForm() + "' for loading plugin documentation XML.", e);
+				}
+			}
+		}
 	}
 
 	private void showFirstCheatSheet()

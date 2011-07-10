@@ -25,10 +25,10 @@ import java.util.SortedSet;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.XMLScriptObjectAdapterLoader;
-import com.servoy.eclipse.core.doc.IDocumentationManager;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
-import com.servoy.eclipse.core.doc.IFunctionDocumentation;
-import com.servoy.eclipse.core.doc.IObjectDocumentation;
+import com.servoy.j2db.documentation.IDocumentationManager;
+import com.servoy.j2db.documentation.IFunctionDocumentation;
+import com.servoy.j2db.documentation.IObjectDocumentation;
 
 public class TreeBuilder
 {
@@ -43,7 +43,7 @@ public class TreeBuilder
 			IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
 			if (documentationManagerProvider != null)
 			{
-				docManager = documentationManagerProvider.fromXML(url);
+				docManager = documentationManagerProvider.fromXML(url, null);
 			}
 			docManagerLoaded = true;
 		}
