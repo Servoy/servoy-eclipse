@@ -975,8 +975,21 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 					nodeText = sm.getName() + " [" + ((Form)sm.getParent()).getName() + "]";
 				}
+				Image icon = null;
+				if (sm.isPrivate())
+				{
+					icon = uiActivator.loadImageFromBundle("private_method.gif"); //$NON-NLS-1$
+				}
+				else if (sm.isProtected())
+				{
+					icon = uiActivator.loadImageFromBundle("protected_method.gif"); //$NON-NLS-1$
+				}
+				else
+				{
+					icon = uiActivator.loadImageFromBundle("form_method.gif"); //$NON-NLS-1$
+				}
 				dlm.add(new UserNode(nodeText, UserNodeType.FORM_METHOD, sm.getName() + "();", "//Method call\n%%prefix%%" + sm.getName() + "()", sm.getName() +
-					"()", sm, uiActivator.loadImageFromBundle("form_method.gif")));
+					"()", sm, icon));
 			}
 		}
 		catch (Exception e)
