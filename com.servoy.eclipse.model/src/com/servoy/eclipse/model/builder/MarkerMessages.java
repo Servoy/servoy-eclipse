@@ -272,6 +272,12 @@ public class MarkerMessages
 		"Editable combobox has attached a valuelist that contains real values. This is not supported.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
+	 * The labelfor element used by a label cannot be found.
+	 */
+	public static ServoyMarker FormLabelForElementNotFound = new ServoyMarker(
+		"Label in form \"{0}\" has labelfor property \"{1}\" that does not exist.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+
+	/**
 	 * This means that inside a portal you placed an element which is based on a relation sequence that is different from the relation sequence of the portal.
 	 * This is not supported.
 	 */

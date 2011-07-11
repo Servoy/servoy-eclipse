@@ -84,6 +84,7 @@ import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
@@ -1036,7 +1037,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					private final Map<Form, Boolean> formsAbstractChecked = new HashMap<Form, Boolean>();
 					private final Set<UUID> methodsParsed = new HashSet<UUID>();
 
-					public Object visit(IPersist o)
+					public Object visit(final IPersist o)
 					{
 						checkCancel();
 
@@ -2126,6 +2127,23 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 									}
 								}
+							}
+						}
+						if (o instanceof GraphicalComponent && ((GraphicalComponent)o).getLabelFor() != null)
+						{
+							Object labelFor = o.getParent().acceptVisitor(new IPersistVisitor()
+							{
+								public Object visit(IPersist persist)
+								{
+									if (persist instanceof ISupportName && ((GraphicalComponent)o).getLabelFor().equals(((ISupportName)persist).getName())) return persist;
+									return IPersistVisitor.CONTINUE_TRAVERSAL;
+								}
+							});
+							if (labelFor == null)
+							{
+								ServoyMarker mk = MarkerMessages.FormLabelForElementNotFound.fill(((Form)o.getAncestor(IRepository.FORMS)).getName(),
+									((GraphicalComponent)o).getLabelFor());
+								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, o);
 							}
 						}
 						checkDeprecatedPropertyUsage(o, project);
