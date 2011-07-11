@@ -372,6 +372,12 @@ public class MarkerMessages
 		"Element in form \"{0}\" has dataprovider \"{1}\" that does not exist.", ServoyBuilder.INVALID_DATAPROVIDERID); //$NON-NLS-1$
 
 	/**
+	 * The labelfor element used by a label cannot be found.
+	 */
+	public static ServoyMarker FormLabelForElementNotFound = new ServoyMarker(
+		"Label in form \"{0}\" has labelfor property \"{1}\" that does not exist.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+
+	/**
 	 * The dataprovider used by an element cannot be found. This can happen for example if the structure of a database is changed and columns are deleted or renamed.
 	 */
 	public static ServoyMarker FormIncompatibleElementType = new ServoyMarker(
