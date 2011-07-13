@@ -258,6 +258,17 @@
               org.eclipse.dltk.javascript.core.JavaScriptProblems#DUPLICATE_VAR_DECLARATION
            </problem>
         </problemCategory>
+        <problemCategory
+              id="wrongparameters"
+              nature="org.eclipse.dltk.javascript.core.nature"
+              scope="@SuppressWarnings">
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#WRONG_PARAMETERS
+           </problem>
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#WRONG_JAVA_PARAMETERS
+           </problem>
+        </problemCategory>
      </extension>
    
 </plugin>
