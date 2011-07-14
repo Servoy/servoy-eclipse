@@ -2129,7 +2129,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								}
 							}
 						}
-						if (o instanceof GraphicalComponent && ((GraphicalComponent)o).getLabelFor() != null)
+						if (o instanceof GraphicalComponent && ((GraphicalComponent)o).getLabelFor() != null &&
+							!"".equals(((GraphicalComponent)o).getLabelFor()))
 						{
 							Object labelFor = o.getParent().acceptVisitor(new IPersistVisitor()
 							{
