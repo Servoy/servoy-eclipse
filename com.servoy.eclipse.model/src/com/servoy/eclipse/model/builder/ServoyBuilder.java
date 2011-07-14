@@ -709,7 +709,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				public Object visit(IPersist o)
 				{
-					if (!(o instanceof ScriptVariable) && !(o instanceof ScriptMethod) && o instanceof ISupportName && ((ISupportName)o).getName() != null)
+					if (!(o instanceof ScriptVariable) && !(o instanceof ScriptMethod) && !(o instanceof Form) && o instanceof ISupportName &&
+						((ISupportName)o).getName() != null)
 					{
 						Set<IPersist> duplicates = formElementsByName.get(((ISupportName)o).getName());
 						if (duplicates != null)
