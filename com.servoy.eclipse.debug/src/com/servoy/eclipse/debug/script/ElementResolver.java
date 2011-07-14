@@ -93,8 +93,10 @@ public class ElementResolver implements IElementResolver
 		typeNameCreators.put("plugins", new SimpleNameTypeNameCreator("Plugins"));
 		typeNameCreators.put("elements", new ElementsTypeNameCreator());
 		typeNameCreators.put("forms", new FormsNameCreator());
+		typeNameCreators.put("alldataproviders", new SimpleNameTypeNameCreator("Array"));
 
 		noneGlobalNames.add("controller");
+		noneGlobalNames.add("alldataproviders");
 		noneGlobalNames.add("foundset");
 		noneGlobalNames.add("elements");
 
