@@ -49,6 +49,7 @@
 		<xs:attribute name="publicName" type="xs:string" use="required" />
 		<xs:attribute name="qualifiedName" type="xs:string" use="required" />
 		<xs:attribute name="scriptingName" type="xs:string" use="optional" />
+		<xs:attribute name="extendsComponent" type="xs:string" use="optional" />
 		<xs:attribute name="deprecated" type="xs:boolean" use="optional" />
 	</xs:complexType>
 
