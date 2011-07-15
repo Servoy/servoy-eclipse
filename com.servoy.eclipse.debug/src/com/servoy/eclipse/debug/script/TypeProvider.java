@@ -1145,8 +1145,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			addType("RuntimeTextArea", IScriptTextAreaMethods.class);
 			typeNames.put(IScriptChoiceMethods.class.getSimpleName(), "RuntimeChecks");
 			addType("RuntimeChecks", IScriptChoiceMethods.class);
-			typeNames.put(IScriptCheckBoxMethods.class.getSimpleName(), "RuntimeCheckBox");
-			addType("RuntimeCheckBox", IScriptCheckBoxMethods.class);
+			typeNames.put(IScriptCheckBoxMethods.class.getSimpleName(), "RuntimeCheck");
+			addType("RuntimeCheck", IScriptCheckBoxMethods.class);
 			typeNames.put(IScriptChoiceMethods.class.getSimpleName(), "RuntimeRadios");
 			addType("RuntimeRadios", IScriptChoiceMethods.class);
 			typeNames.put(IScriptRadioMethods.class.getSimpleName(), "RuntimeRadio");
@@ -1155,8 +1155,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			addType("RuntimeComboBox", IScriptDataComboboxMethods.class);
 			typeNames.put(IScriptDataCalendarMethods.class.getSimpleName(), "RuntimeCalendar");
 			addType("RuntimeCalendar", IScriptDataCalendarMethods.class);
-			typeNames.put(IScriptMediaInputFieldMethods.class.getSimpleName(), "RuntimeMediaField");
-			addType("RuntimeMediaField", IScriptMediaInputFieldMethods.class);
+			typeNames.put(IScriptMediaInputFieldMethods.class.getSimpleName(), "RuntimeImageMedia");
+			addType("RuntimeImageMedia", IScriptMediaInputFieldMethods.class);
 			typeNames.put(IScriptFieldMethods.class.getSimpleName(), "RuntimeTypeAhead");
 			typeNames.put(IScriptFieldMethods.class.getSimpleName(), "RuntimeTextField");
 			addType("RuntimeTextField", IScriptFieldMethods.class);
