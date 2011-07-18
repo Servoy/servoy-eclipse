@@ -1,0 +1,115 @@
+/* 
+ * Default Styling for all Servoy objects
+ */
+form {
+	background-color: #F3F5F8;
+	border: 0px solid;
+}
+
+tabpanel {
+	border: 0px solid;
+}
+
+label, button, field, combobox, check, radio {
+	font-family: "Trebuchet MS", Helvetica, sans-serif;
+	font-size: 10px;
+}
+
+field, combobox {
+	background-color: #FFF;
+	color: #000;
+	border: 2px ridge #FFF;
+	margin-left: 3px;
+	margin-right: 3px;
+}
+
+combobox {}
+
+check {}
+
+radio {}
+
+label {
+	color: #727784;
+}
+
+label.fieldlabel {
+	text-align: right;
+	font-size: 8px;
+}
+
+label.title {
+	font-size: 12px;
+}
+
+button {}
+
+portal {}
+
+/* Example of odd/even/selected row styling in grids (Portals and TableViews)*/
+odd, even, selected {
+	background-color: #FFF;
+	color: #5C5C5D;
+}
+
+odd {
+	background-color: #F5F7F9;
+}
+
+even {}
+
+selected {
+	background-color: #d4d4d4;
+	color: #FFF;
+}
+
+/* 
+ * Example of additional grid styling (Portals and TableViews)
+ * The gridheader and gridcell style classes needs to be set on resp. the header labels and the cell elements of TableView's and Portals
+ */
+label.gridheader,
+field.gridcell,
+check.gridcell,
+radio.gridcell,
+combobox.gridcell,
+label.gridcell,
+button.gridcell {
+	border: 0px solid #C9CACA;
+	border-right-width: 1px;
+	margin-left: 5px;
+	margin-right: 3px;
+}
+
+label.gridheader {
+	text-align: left;
+	color: #5C5C5D;
+}
+
+tabpanel.grid { /*Style for a TabPanel that contains just a TableView*/
+	border: 1px solid #C9CACA;
+}
+
+/*
+ * Example style for the main form of a solution
+ */
+form.main {
+	background-color: #667281	
+}
+
+/* 
+ * Example of how to define custom styling for a form with a specific StyleClass
+ * These styles are applied to form and its element on forms on which the StyleClass is set to "detail"
+ */
+form.detail {
+}
+
+form.detail field.pk { /*Style for Fields having a StyleClass "pk" on a form having StyleClass ""detail*/
+	background-color: #5B6B7B;
+	color: #FFF;
+	border: 0px solid #FFF;
+	border-left-width: 1px; /*This makes the field appear the same width when left aligned with a field that has a 2px ridge border*/
+}
+
+tabpanel.detail { /*StyleClass for a tabpanel in which a detail form is displayed*/
+	border: 3px solid #FFF;	
+}

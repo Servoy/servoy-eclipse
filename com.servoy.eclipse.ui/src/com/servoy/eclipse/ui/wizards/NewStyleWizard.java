@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.wizards;
 
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -68,6 +70,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Style;
+import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
@@ -75,6 +78,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
  * 
  * @author acostescu
  */
+@SuppressWarnings("nls")
 public class NewStyleWizard extends Wizard implements INewWizard
 {
 	public static final String ID = "com.servoy.eclipse.ui.NewStyleWizard"; //$NON-NLS-1$
@@ -163,63 +167,10 @@ public class NewStyleWizard extends Wizard implements INewWizard
 		}
 	}
 
-	public static String getSampleStyleContent()
+	public String getSampleStyleContent()
 	{
-		StringBuffer sample = new StringBuffer();
-		sample.append("field\n{\n");
-		sample.append("	background-color: #e9e8e8;\n");
-		sample.append("	border-style: inset;\n");
-		sample.append("	font: 11pt \"Verdana\";\n");
-		sample.append("	text-align: left;\n");
-		sample.append("	margin: 1px 2px 1px 1px;\n");
-		sample.append("}\n");
-		sample.append("check\n{\n");
-		sample.append("	background-color: #eeeeee;\n");
-		sample.append("	border-style: empty;\n");
-		sample.append("	font: bold 10pt \"Verdana\";\n");
-		sample.append("}\n");
-		sample.append("radio\n{\n");
-		sample.append("	background-color: #dddddd;\n");
-		sample.append("	border-style: empty;\n");
-		sample.append("	font: bold 10pt \"Verdana\";\n");
-		sample.append("}\n");
-		sample.append("combobox\n{\n");
-		sample.append("	color: #0000ff;\n");
-		sample.append("	font: italic 10pt \"Verdana\";\n");
-		sample.append("}\n");
-		sample.append("portal\n{\n");
-		sample.append("	background-color: #cccccc;\n");
-		sample.append("	border-style: inset;\n");
-		sample.append("}\n");
-		sample.append("tabpanel\n{\n");
-		sample.append("	background-color: #cceecc;\n");
-		sample.append("	border-style: inset;\n");
-		sample.append("}\n");
-		sample.append("form\n{\n");
-		sample.append("	background-color: #ddeecc;\n");
-		sample.append("	border-style: inset;\n");
-		sample.append("}\n");
-		sample.append("label\n{\n");
-		sample.append("	color: #993300;\n");
-		sample.append("	border-style: solid;\n");
-		sample.append("	font: bold 10pt Verdana;\n");
-		sample.append("}\n");
-		sample.append("label.mytext\n{\n");
-		sample.append("	color: red;\n");
-		sample.append("	border-style: solid;\n");
-		sample.append("	vertical-align: middle;\n");
-		sample.append("	font: bold italic 10pt Verdana;\n");
-		sample.append("	border-width: 1px 1px 1px 1px;\n");
-		sample.append("	border-color: #111111 #111111 #111111 #111111;\n");
-		sample.append("	margin: 2px 2px 2px 2px;\n");
-		sample.append("}\n");
-		sample.append("button\n{\n");
-		sample.append("	color: red;\n");
-		sample.append("	margin: 10px 10px 0px 0px;\n");
-		sample.append("	font: bold 11pt \"Verdana\";\n");
-		sample.append("}");
-
-		return sample.toString();
+		InputStream is = this.getClass().getResourceAsStream("default_style.css");
+		return Utils.getTXTFileContent(is, Charset.defaultCharset());
 	}
 
 	@Override
@@ -338,9 +289,6 @@ public class NewStyleWizard extends Wizard implements INewWizard
 
 	public class NewStyleWizardPage extends WizardPage implements Listener, IValidator
 	{
-		private static final String NEW_RESOURCE_PROJECT = "1";
-		private static final String EXISTING_RESOURCE_PROJECT = "2";
-
 		private String styleName;
 		private Text styleNameField;
 		private ServoyResourcesProject defaultResourceProjectToUse;
