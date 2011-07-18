@@ -101,6 +101,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 						Set<String> children = vc.getDirectChildren();
 						for (String child : children)
 						{
+							if (form.getScriptMethod(child) != null || form.getScriptVariable(child) != null) continue;
 							IValueReference chld = vc.getChild(child);
 							chld.setAttribute(IReferenceAttributes.HIDE_ALLOWED, Boolean.TRUE);
 							Object attribute = chld.getAttribute(IReferenceAttributes.PARAMETERS);
