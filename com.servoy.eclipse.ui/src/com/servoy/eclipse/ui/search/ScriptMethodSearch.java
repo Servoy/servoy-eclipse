@@ -70,6 +70,13 @@ public class ScriptMethodSearch extends DLTKSearchEngineSearch
 		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm", "*.tbl" }, true);
 		TextSearchEngine.create().search(scope, collector, Pattern.compile(method.getUUID().toString()), monitor);
 
+		if (method.getParent() instanceof Solution)
+		{
+			// bgcolor usage
+			scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm" }, true);
+			TextSearchEngine.create().search(scope, collector, Pattern.compile(method.getPrefixedName()), monitor);
+		}
+
 		String scriptPath = SolutionSerializer.getScriptPath(method, false);
 		IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
 		ISourceModule sourceModule = DLTKCore.createSourceModuleFrom(file);
