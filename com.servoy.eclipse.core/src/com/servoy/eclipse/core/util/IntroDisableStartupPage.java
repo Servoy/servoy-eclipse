@@ -17,23 +17,20 @@
 
 package com.servoy.eclipse.core.util;
 
-import java.util.Properties;
-
+import org.eclipse.jface.action.Action;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.intro.IIntroSite;
-import org.eclipse.ui.intro.config.IIntroAction;
 
 import com.servoy.j2db.util.Settings;
 
 /**
  * Helper class to stop showing startPage
  * @author jblok
- *
  */
 @SuppressWarnings("nls")
-public class IntroDisableStartupPage implements IIntroAction
+public class IntroDisableStartupPage extends Action
 {
-	public void run(IIntroSite site, Properties params)
+	@Override
+	public void run()
 	{
 		Display.getDefault().asyncExec(new Runnable()
 		{
@@ -43,5 +40,4 @@ public class IntroDisableStartupPage implements IIntroAction
 			}
 		});
 	}
-
 }
