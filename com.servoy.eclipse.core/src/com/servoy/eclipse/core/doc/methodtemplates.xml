@@ -175,7 +175,7 @@ Return true if drop has been performed successfully, otherwise false.]]></descri
   </event>
   <event name="onElementFocusGainedMethodID">
     <methodtemplate name="onElementFocusGained" type="Boolean" addtodo="true">
-      <description><![CDATA[Handle focus element gaining focus]]></description>
+      <description><![CDATA[Handle focus gained event of an element on the form. Return false when the focus gained event of the element itself shouldn't be triggered.]]></description>
       <code><![CDATA[return true]]></code>
       <arguments>
         <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
@@ -184,7 +184,7 @@ Return true if drop has been performed successfully, otherwise false.]]></descri
   </event>
   <event name="onElementFocusLostMethodID">
     <methodtemplate name="onElementFocusLost" type="Boolean" addtodo="true">
-      <description><![CDATA[Handle focus element loosing focus]]></description>
+      <description><![CDATA[Handle focus lost event of an element on the form. Return false when the focus lost event of the element itself shouldn't be triggered.]]></description>
       <code><![CDATA[return true]]></code>
       <arguments>
         <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
@@ -244,18 +244,16 @@ return true]]></code>
     </methodtemplate>
   </event>
   <event name="onFocusGainedMethodID">
-    <methodtemplate name="onFocusGained" type="Boolean" addtodo="true">
-      <description><![CDATA[Handle focus element gaining focus]]></description>
-      <code><![CDATA[return true]]></code>
+    <methodtemplate name="onFocusGained" addtodo="true">
+      <description><![CDATA[Handle focus gained event of the element]]></description>
       <arguments>
         <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
   <event name="onFocusLostMethodID">
-    <methodtemplate name="onFocusLost" type="Boolean" addtodo="true">
-      <description><![CDATA[Handle focus element loosing focus]]></description>
-      <code><![CDATA[return true]]></code>
+    <methodtemplate name="onFocusLost" addtodo="true">
+      <description><![CDATA[Handle focus lost event of the element]]></description>
       <arguments>
         <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
       </arguments>
