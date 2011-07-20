@@ -693,6 +693,10 @@ public class ProfilerView extends ViewPart
 			if (element instanceof ProfileData)
 			{
 				ProfileData pd = (ProfileData)element;
+				if (pd.getMethodName().equals("<eval>") && pd.getSourceName().equals("internal_anon"))
+				{
+					pd = pd.getChildren()[0];
+				}
 				String sourceName;
 				IFile file;
 				switch (columnIndex)
