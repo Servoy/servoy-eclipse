@@ -513,7 +513,11 @@ public abstract class TypeCreator
 										if (paramType.endsWith("[]"))
 										{
 											String componentType = paramType.substring(0, paramType.length() - 2);
-											if (ITypeNames.OBJECT.equals(componentType))
+											if (param.isVarArgs())
+											{
+												parameter.setType(context.getTypeRef(componentType));
+											}
+											else if (ITypeNames.OBJECT.equals(componentType))
 											{
 												parameter.setType(context.getTypeRef(ITypeNames.ARRAY));
 											}
@@ -527,7 +531,7 @@ public abstract class TypeCreator
 											parameter.setType(context.getTypeRef(SolutionExplorerListContentProvider.TYPES.get(paramType)));
 										}
 									}
-									parameter.setKind(param.isOptional() ? param.isVarArgs() ? ParameterKind.VARARGS : ParameterKind.OPTIONAL
+									parameter.setKind(param.isVarArgs() ? ParameterKind.VARARGS : param.isOptional() ? ParameterKind.OPTIONAL
 										: ParameterKind.NORMAL);
 									parameters.add(parameter);
 								}
