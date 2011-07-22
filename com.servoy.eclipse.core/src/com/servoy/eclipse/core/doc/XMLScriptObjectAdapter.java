@@ -97,12 +97,14 @@ public class XMLScriptObjectAdapter implements ITypedScriptObject
 				String name = argDoc.getName();
 				String type = argDoc.getType() != null ? argDoc.getType().getSimpleName() : "Object";
 				boolean optional = argDoc.isOptional();
-				// TODO VARARGS!
 				boolean varargs = false;
-				if (params.length == argTypes.length && i == params.length - 1)
-				{
-					varargs = argTypes[i].isArray() && !argTypes[i].getComponentType().isPrimitive();
-				}
+				// TODO VARARGS! this can't be enabled because of foundset.setSelectedIndex() is then seen as a varargs (which it isn't)
+				// and also security.login(string,object,String[]) can't somehow be used as a varargs.. so security.login('name','x','group1','group2');
+				// so i guess the type should say if it is a varags or not..
+//				if (params.length == argTypes.length && i == params.length - 1)
+//				{
+//					varargs = argTypes[i].isArray() && !argTypes[i].getComponentType().isPrimitive();
+//				}
 				params[i++] = new ScriptParameter(name, type, optional, varargs);
 			}
 			return params;
