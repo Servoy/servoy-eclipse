@@ -39,8 +39,6 @@
 			<pseudo-class name="active" enabled="false"/>
 			<property name="background" enabled="false"/>
 			<property name="background-attachment" enabled="false"/>
-			<property name="background-position" enabled="false"/>
-			<property name="background-repeat" enabled="false" />
 			<property name="clear" enabled="false"/>
 			<property name="display" enabled="false"/>
 			<property name="float" enabled="false"/>
@@ -77,7 +75,7 @@
 		<property-def name="background-image" inherited="no" category="colorandbackground">
 	        <keyword name="mediaurl"/>
 	    </property-def>
-    	
+
     	<property-def name="border-top-width" category="box">
 			<number name="pxunit"/>
 		</property-def>
