@@ -876,7 +876,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 			{
 				case CUT :
 				case DELETE :
-				case PASTE :
+//				case PASTE :
 				case SHIFT_LEFT :
 				case SHIFT_RIGHT :
 				case PREFIX :
