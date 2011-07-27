@@ -862,17 +862,42 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					if (solution.getLoginSolutionName() != null)
 					{
 						// login form will be ignored
-						addDeprecatedPropertyUsageMarker(persist, project, "loginFormID", "Solution '" + solution.getName() +
-							"' has a loginForm property set which is overridden by the loginSolutionName property.");
+						addDeprecatedPropertyUsageMarker(persist, project, StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(), "Solution '" +
+							solution.getName() + "' has a loginForm property set which is overridden by the loginSolutionName property.");
 					}
 					else if (solution.getSolutionType() != SolutionMetaData.WEB_CLIENT_ONLY)
 					{
 						// loginForm is deprecated
-						addDeprecatedPropertyUsageMarker(
-							persist,
-							project,
-							"loginFormID", "Solution '" + solution.getName() + "' has a loginForm property set which is deprecated, use loginSolutionName property instead."); //$NON-NLS-1$ //$NON-NLS-2$
+						addDeprecatedPropertyUsageMarker(persist, project, StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
+							"Solution '" + solution.getName() + "' has a loginForm property set which is deprecated, use loginSolutionName property instead."); //$NON-NLS-1$ //$NON-NLS-2$
 					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		}
+
+		if (persist instanceof Form || persist instanceof Portal)
+		{
+			String rowBgColorCalculation = null;
+			String type = "Form"; //$NON-NLS-1$
+			if (persist instanceof Form)
+			{
+				rowBgColorCalculation = ((Form)persist).getRowBGColorCalculation();
+			}
+			else
+			{
+				rowBgColorCalculation = ((Portal)persist).getRowBGColorCalculation();
+				type = "Portal";//$NON-NLS-1$
+			}
+			if (rowBgColorCalculation != null)
+			{
+				try
+				{
+					addDeprecatedPropertyUsageMarker(persist, project, StaticContentSpecLoader.PROPERTY_ROWBGCOLORCALCULATION.getPropertyName(), type +
+						" '" + ((ISupportName)persist).getName() + "' has rowBGColorCalculation property set which is deprecated, use onRender event instead."); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				catch (Exception e)
 				{
@@ -882,7 +907,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private void addDeprecatedPropertyUsageMarker(IPersist persist, IProject project, String propertName, String message) throws CoreException
+	private void addDeprecatedPropertyUsageMarker(IPersist persist, IProject project, String propertyName, String message) throws CoreException
 	{
 		if (message != null)
 		{
@@ -891,8 +916,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString()); //$NON-NLS-1$
 				marker.setAttribute("SolutionName", project.getName()); //$NON-NLS-1$
-				marker.setAttribute("PropertyName", propertName); //$NON-NLS-1$
-				marker.setAttribute("DisplayName", RepositoryHelper.getDisplayName(propertName, persist.getClass())); //$NON-NLS-1$
+				marker.setAttribute("PropertyName", propertyName); //$NON-NLS-1$
+				marker.setAttribute("DisplayName", RepositoryHelper.getDisplayName(propertyName, persist.getClass())); //$NON-NLS-1$
 			}
 		}
 	}
