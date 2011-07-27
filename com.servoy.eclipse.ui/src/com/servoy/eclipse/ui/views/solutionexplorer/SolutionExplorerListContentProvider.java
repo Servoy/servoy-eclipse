@@ -1689,6 +1689,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 			}
 
+			boolean appendSqrBracket = true;
 			for (int j = 0; j < params.length; j++)
 			{
 				if (params.length == 1 && params[0].isArray())
@@ -1721,6 +1722,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					{
 						sbParamsString.append("["); //$NON-NLS-1$
 						paramNames[j] = paramNames[j].substring(1);
+						appendSqrBracket = false;
 					}
 					if (params[j].isArray())
 					{
@@ -1741,7 +1743,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				if (j < params.length - 1) sbParamsString.append(", "); //$NON-NLS-1$
 			}
 
-			if (methodIsOverloaded) sbParamsString = makeProperOptionalArgs(njm.getMethods(), sbParamsString);
+			if (methodIsOverloaded && appendSqrBracket) sbParamsString = makeProperOptionalArgs(njm.getMethods(), sbParamsString);
 
 			Class returnType = method.getReturnType();
 			StringBuffer returnTypeStringBuffer = new StringBuffer();
