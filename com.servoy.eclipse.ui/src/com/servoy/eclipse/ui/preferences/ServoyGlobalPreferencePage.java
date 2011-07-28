@@ -127,7 +127,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		new Label(formEditorOptionsContainer, SWT.NONE); // dummy
 
 		openFirstFormDesignerButton = new Button(formEditorOptionsContainer, SWT.CHECK);
-		openFirstFormDesignerButton.setText("Open the first form designer on activating a solution");
+		openFirstFormDesignerButton.setText("Open Solution's main Form in Form Editor on Solution activation");
 		new Label(formEditorOptionsContainer, SWT.NONE); // dummy
 
 		// Wizard options
