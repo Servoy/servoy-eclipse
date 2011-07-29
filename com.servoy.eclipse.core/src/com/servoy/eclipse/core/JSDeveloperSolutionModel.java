@@ -33,6 +33,7 @@ import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.ClientState;
+import com.servoy.j2db.IForm;
 import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -136,6 +137,10 @@ public class JSDeveloperSolutionModel
 		else if (form instanceof JSForm)
 		{
 			name = ((JSForm)form).js_getName();
+		}
+		else if (form instanceof IForm)
+		{
+			name = ((IForm)form).getName();
 		}
 		if (name != null)
 		{
