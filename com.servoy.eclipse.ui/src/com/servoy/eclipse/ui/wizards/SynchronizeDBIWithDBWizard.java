@@ -49,6 +49,7 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -260,8 +261,8 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					page1 = new SplitInThreeWizardPage<IServerInternal, String>(
 						"Missing tables",
 						"Database information files (.dbi from resources project) can point to tables that do not exist in the database.\nYou can choose to create those tables according to the information or delete the unwanted information files.",
-						"Ignore", "Create table", "Delete .dbi", "Ignore all", "Create all", "Delete all", foundMissingTables, comparator, serverImage,
-						tableImage);
+						"Ignore", "Create table", "Delete .dbi", "Ignore all/multiselection", "Create all/multiselection", "Delete all/multiselection",
+						foundMissingTables, comparator, serverImage, tableImage);
 				}
 				else
 				{
@@ -272,8 +273,8 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					page2 = new SplitInThreeWizardPage<IServerInternal, String>(
 						"Missing database information files",
 						"Tables in the database can lack an associated database information file (.dbi in the resources project).\nYou can choose to create the database information file or delete the table from the database.",
-						"Ignore", "Create .dbi", "Delete table", "Ignore all", "Create all", "Delete all", foundSupplementalTables, comparator, serverImage,
-						tableImage);
+						"Ignore", "Create .dbi", "Delete table", "Ignore all/multiselection", "Create all/multiselection", "Delete all/multiselection",
+						foundSupplementalTables, comparator, serverImage, tableImage);
 				}
 				else
 				{
@@ -810,7 +811,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 
 			// set up components
 			Composite treeComposite = new Composite(topLevel, SWT.NONE);
-			treeViewer = new TreeViewer(treeComposite, SWT.BORDER | SWT.FULL_SELECTION);
+			treeViewer = new TreeViewer(treeComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
 
 			Tree tree = treeViewer.getTree();
 			tree.setLinesVisible(true);
@@ -871,11 +872,15 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			allInSet2.setText(allSet2Label);
 			allInSet3.setText(allSet3Label);
 
+			allInSet1.setToolTipText("Affects multiple selection or all elements(if single selection)");
+			allInSet2.setToolTipText("Affects multiple selection or all elements(if single selection)");
+			allInSet3.setToolTipText("Affects multiple selection or all elements(if single selection)");
+
 			allInSet1.addSelectionListener(new SelectionListener()
 			{
 				public void widgetDefaultSelected(SelectionEvent e)
 				{
-					moveAllToSet(SET1);
+					moveAllOrMultiSelectionToSet(SET1);
 				}
 
 				public void widgetSelected(SelectionEvent e)
@@ -887,7 +892,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			{
 				public void widgetDefaultSelected(SelectionEvent e)
 				{
-					moveAllToSet(SET2);
+					moveAllOrMultiSelectionToSet(SET2);
 				}
 
 				public void widgetSelected(SelectionEvent e)
@@ -899,7 +904,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			{
 				public void widgetDefaultSelected(SelectionEvent e)
 				{
-					moveAllToSet(SET3);
+					moveAllOrMultiSelectionToSet(SET3);
 				}
 
 				public void widgetSelected(SelectionEvent e)
@@ -939,12 +944,29 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			allInSet3.setLayoutData(fd);
 		}
 
-		private void moveAllToSet(int set)
+		private void moveAllOrMultiSelectionToSet(int set)
 		{
-			for (Pair<T1, T2> p : initialPairs)
+			ISelection selection = treeViewer.getSelection();
+			if (selection instanceof IStructuredSelection && ((IStructuredSelection)selection).size() > 1)
 			{
-				contentProvider.setSet(p, set);
+				Iterator it = ((IStructuredSelection)selection).iterator();
+				while (it.hasNext())
+				{
+					Object element = it.next();
+					if (element instanceof Pair)
+					{
+						contentProvider.setSet(element, set);
+					}
+				}
 			}
+			else
+			{
+				for (Pair<T1, T2> p : initialPairs)
+				{
+					contentProvider.setSet(p, set);
+				}
+			}
+
 			treeViewer.refresh();
 		}
 
