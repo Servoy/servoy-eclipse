@@ -171,16 +171,19 @@ public class HandleDBIMarkersWizard extends Wizard
 				{
 					for (IMarker marker : markers)
 					{
-						String serverName = (String)marker.getAttribute(TableDifference.ATTRIBUTE_SERVERNAME);
-						if (serverName != null)
+						if (marker.getType().equals(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE))
 						{
-							for (IServerInternal server : servers)
+							String serverName = (String)marker.getAttribute(TableDifference.ATTRIBUTE_SERVERNAME);
+							if (serverName != null)
 							{
-								if (serverName.equals(server.getName()) && marker.exists())
+								for (IServerInternal server : servers)
 								{
-									if (!set) return true;
-									serverMarkers.add(marker);
-									break;
+									if (serverName.equals(server.getName()) && marker.exists())
+									{
+										if (!set) return true;
+										serverMarkers.add(marker);
+										break;
+									}
 								}
 							}
 						}
