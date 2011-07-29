@@ -57,7 +57,9 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -77,6 +79,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -450,6 +453,21 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 											}
 										}, false);
 									}
+									UIUtils.runInUI(new Runnable()
+									{
+										public void run()
+										{
+											HandleDBIMarkersWizard wizard = new HandleDBIMarkersWizard(servers);
+											int returnCode = Window.OK;
+											while (returnCode == Window.OK && wizard.hasMarkers(false))
+											{
+												WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard);
+												dialog.create();
+												returnCode = dialog.open();
+												wizard = new HandleDBIMarkersWizard(servers);
+											}
+										}
+									}, false);
 								}
 								finally
 								{
