@@ -253,6 +253,7 @@
       </editor>
       <editor
 	  		class="com.servoy.eclipse.core.StartPageBrowserEditor"
+	  		icon="icons/servoy_donut16x16.png"
 	  		id="com.servoy.eclipse.core.StartPageBrowserEditor"
       		name="StartPage">
       </editor>
@@ -436,6 +437,19 @@
                   name="Choosers">
             </separator>
          </menu>
+      </actionSet>
+      <actionSet
+            id="com.servoy.eclipse.ui.StartPage"
+            label="StartPage"
+            visible="true">
+         <action
+               class="com.servoy.eclipse.ui.actions.OpenStartPage"
+               id="com.servoy.eclipse.ui.openStartPage"
+               label="Servoy Developer Startpage"
+               menubarPath="help/intro"
+               style="push"
+               tooltip="Open Start Page">
+         </action>
       </actionSet>
       <actionSet
             id="com.servoy.eclipse.ui.ServoyAdmin"

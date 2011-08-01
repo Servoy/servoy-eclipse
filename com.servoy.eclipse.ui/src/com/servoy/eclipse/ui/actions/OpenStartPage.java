@@ -23,18 +23,11 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.marketplace.MarketplaceBrowserEditor;
+import com.servoy.eclipse.core.StartPageBrowserEditor;
 import com.servoy.eclipse.model.util.ServoyLog;
 
-public class OpenMarketplace implements IWorkbenchWindowActionDelegate
+public class OpenStartPage implements IWorkbenchWindowActionDelegate
 {
-	protected String deepLink = null;
-
-	public OpenMarketplace()
-	{
-
-	}
-
 	public void dispose()
 	{
 	}
@@ -48,16 +41,11 @@ public class OpenMarketplace implements IWorkbenchWindowActionDelegate
 		try
 		{
 			IWorkbenchPage activePage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-			MarketplaceBrowserEditor p = (MarketplaceBrowserEditor)activePage.openEditor(MarketplaceBrowserEditor.INPUT,
-				MarketplaceBrowserEditor.MARKETPLACE_BROWSER_EDITOR_ID);
-			if (deepLink != null)
-			{
-				p.deepLink("&m=deepLinkProduct&a=" + deepLink); //$NON-NLS-1$
-			}
+			activePage.openEditor(StartPageBrowserEditor.INPUT, StartPageBrowserEditor.STARTPAGE_BROWSER_EDITOR_ID);
 		}
 		catch (Exception e)
 		{
-			ServoyLog.logError("Failed to open Marketplace browser.", e); //$NON-NLS-1$
+			ServoyLog.logError("Failed to open StartPage browser.", e); //$NON-NLS-1$
 		}
 	}
 

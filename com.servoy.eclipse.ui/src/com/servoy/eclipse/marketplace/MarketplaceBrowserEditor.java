@@ -58,6 +58,7 @@ public class MarketplaceBrowserEditor extends EditorPart
 	public static final MarketplaceBrowserEditorInput INPUT = new MarketplaceBrowserEditorInput();
 
 	private Browser browser;
+	private String url;
 
 	/*
 	 * @see org.eclipse.ui.part.EditorPart#doSave(org.eclipse.core.runtime.IProgressMonitor)
@@ -112,8 +113,9 @@ public class MarketplaceBrowserEditor extends EditorPart
 	public void createPartControl(Composite parent)
 	{
 		browser = new Browser(parent, SWT.NONE);
-		browser.setUrl(
-			new StringBuffer(MARKETPLACE_URL).append("&a=&").append(PARAM_SERVOY_VERSION).append("=").append(ClientVersion.getBundleVersion()).append("&").append(PARAM_MARKETPLACE_XML_VERSION).append("=").append(MARKETPLACE_XML_VERSION).append("&").append(PARAM_PLATFORM).append("=").append(Utils.getPlatformAsString()).toString(), null, new String[] { "Cache-Control: no-cache" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+		url = new StringBuffer(MARKETPLACE_URL).append("&").append(PARAM_SERVOY_VERSION).append("=").append(ClientVersion.getBundleVersion()).append("&").append(PARAM_MARKETPLACE_XML_VERSION).append("=").append(MARKETPLACE_XML_VERSION).append("&").append(PARAM_PLATFORM).append("=").append(Utils.getPlatformAsString()).toString(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+		browser.setUrl(url, null, new String[] { "Cache-Control: no-cache" }); //$NON-NLS-1$
+
 		browser.addLocationListener(new LocationAdapter()
 		{
 			@Override
@@ -217,5 +219,10 @@ public class MarketplaceBrowserEditor extends EditorPart
 			super.configureShell(shell);
 			shell.setText("Servoy Marketplace - Installing " + installName + " ...");
 		}
+	}
+
+	public void deepLink(String deeplinkParam)
+	{
+		browser.setUrl(url.concat(deeplinkParam).toString());
 	}
 }

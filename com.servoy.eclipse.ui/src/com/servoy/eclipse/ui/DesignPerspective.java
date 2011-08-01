@@ -28,6 +28,7 @@ import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.activities.IActivityManager;
 import org.eclipse.ui.activities.IWorkbenchActivitySupport;
@@ -57,15 +58,12 @@ public class DesignPerspective implements IPerspectiveFactory
 	@SuppressWarnings("restriction")
 	public void createInitialLayout(IPageLayout layout)
 	{
-		//maximize window, it start too small first time
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setMaximized(true);
-
 		String editorArea = layout.getEditorArea();
-		IFolderLayout left = layout.createFolder("left", IPageLayout.LEFT, 0.21f, editorArea);
+		IFolderLayout left = layout.createFolder("left", IPageLayout.LEFT, 0.29f, editorArea);//0.21f
 		left.addView(SolutionExplorerView.PART_ID);
 //		left.addView(IPageLayout.ID_RES_NAV);//move to synchronize perspective only
 
-		IFolderLayout right = layout.createFolder("right", IPageLayout.RIGHT, 0.8f, editorArea);
+		IFolderLayout right = layout.createFolder("right", IPageLayout.RIGHT, 0.65f, editorArea);//0.8f
 		right.addView(IPageLayout.ID_OUTLINE);
 		right.addView(IPageLayout.ID_PROP_SHEET);
 
@@ -75,6 +73,13 @@ public class DesignPerspective implements IPerspectiveFactory
 		bottom.addView(IPageLayout.ID_TASK_LIST);
 		bottom.addView(IPageLayout.ID_BOOKMARKS);
 		bottom.addView(NewSearchUI.SEARCH_VIEW_ID);
+
+		//maximize window on first launch, it start too small first time
+		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		if (page == null || !page.getPerspective().getId().toString().equals("com.servoy.eclipse.ui.DesignPerspective"))
+		{
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setMaximized(true);
+		}
 
 		/* Remove redundant activities (including fake ones created by us) to reduce UI clutter. */
 		IWorkbenchActivitySupport was = PlatformUI.getWorkbench().getActivitySupport();

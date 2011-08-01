@@ -31,6 +31,7 @@ import org.eclipse.ui.internal.intro.impl.model.url.IntroURLParser;
 import org.eclipse.ui.part.EditorPart;
 
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.util.Settings;
 
 /**
  * Editor used to show the Servoy Marketplace. 
@@ -41,7 +42,8 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 public class StartPageBrowserEditor extends EditorPart
 {
 	public static final String STARTPAGE_BROWSER_EDITOR_ID = "com.servoy.eclipse.core.StartPageBrowserEditor";
-	public static final String STARTPAGE_URL = "http://servoy.com/i";
+	public static final String STARTPAGE_URL = "http://www.servoy.com/developer/6xx_intro/startpage.html";
+	
 	public static final StartPageBrowserEditorInput INPUT = new StartPageBrowserEditorInput();
 
 	private Browser browser;
@@ -99,7 +101,17 @@ public class StartPageBrowserEditor extends EditorPart
 	public void createPartControl(Composite parent)
 	{
 		browser = new Browser(parent, SWT.NONE);
-		browser.setUrl(STARTPAGE_URL + "?dl=" + (ApplicationServerSingleton.get().hasDeveloperLicense()));
+		String url = STARTPAGE_URL + "?dl=" + (ApplicationServerSingleton.get().hasDeveloperLicense());
+		String showOnStartup = Settings.getInstance().getProperty("servoy.developer.showStartPage");
+		if (showOnStartup == null || showOnStartup.equals("false"))
+		{
+			url += "&show=false";
+		}
+		else
+		{
+			url += "&show=true";
+		}
+		browser.setUrl(url, null, new String[] { "Cache-Control: no-cache" });
 		browser.addLocationListener(new LocationAdapter()
 		{
 			@Override

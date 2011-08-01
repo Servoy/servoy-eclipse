@@ -263,7 +263,7 @@ public class Activator extends Plugin
 			{
 				try
 				{
-					if (!ApplicationServerSingleton.get().hasDeveloperLicense() &&
+					if (!ApplicationServerSingleton.get().hasDeveloperLicense() ||
 						Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showStartPage", "true")))
 					{
 						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(StartPageBrowserEditor.INPUT,
