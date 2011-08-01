@@ -34,8 +34,9 @@
 
 	<extension point="org.eclipse.ui.intro"> 
 	    <intro
-	        class="org.eclipse.ui.intro.config.CustomizableIntroPart"
-	        id="com.servoy.eclipse.core.config"> 
+           class="org.eclipse.ui.intro.config.CustomizableIntroPart"
+           icon="icons/servoy_donut16x16.png"
+           id="com.servoy.eclipse.core.config"> 
 	    </intro>
 	    <introProductBinding
 	        introId="com.servoy.eclipse.core.config"
