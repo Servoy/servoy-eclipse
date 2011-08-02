@@ -23,10 +23,11 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.IStartPageAction;
 import com.servoy.eclipse.marketplace.MarketplaceBrowserEditor;
 import com.servoy.eclipse.model.util.ServoyLog;
 
-public class OpenMarketplace implements IWorkbenchWindowActionDelegate
+public class OpenMarketplace implements IWorkbenchWindowActionDelegate, IStartPageAction
 {
 	protected String deepLink = null;
 
@@ -45,14 +46,19 @@ public class OpenMarketplace implements IWorkbenchWindowActionDelegate
 
 	public void run(IAction action)
 	{
+		runAction(null);
+	}
+
+	public void runAction(String param)
+	{
 		try
 		{
 			IWorkbenchPage activePage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 			MarketplaceBrowserEditor p = (MarketplaceBrowserEditor)activePage.openEditor(MarketplaceBrowserEditor.INPUT,
 				MarketplaceBrowserEditor.MARKETPLACE_BROWSER_EDITOR_ID);
-			if (deepLink != null)
+			if (param != null)
 			{
-				p.deepLink("&m=deepLinkProduct&a=" + deepLink); //$NON-NLS-1$
+				p.deepLink("&m=deepLinkProduct&a=" + param); //$NON-NLS-1$
 			}
 		}
 		catch (Exception e)
@@ -64,5 +70,4 @@ public class OpenMarketplace implements IWorkbenchWindowActionDelegate
 	public void selectionChanged(IAction action, ISelection selection)
 	{
 	}
-
 }
