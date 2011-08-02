@@ -99,7 +99,7 @@ public class UserNodeListDragSourceListener implements DragSourceListener
 					{
 						if (textDrag != null) textDrag += ", "; //$NON-NLS-1$
 						else textDrag = ""; //$NON-NLS-1$
-						textDrag += "media:///" + ((Media)real).getName(); //$NON-NLS-1$
+						textDrag += "\"media:///" + ((Media)real).getName() + '"'; //$NON-NLS-1$
 					}
 				}
 			}
