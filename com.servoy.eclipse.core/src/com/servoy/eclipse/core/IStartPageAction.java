@@ -15,16 +15,14 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.ui.actions;
+package com.servoy.eclipse.core;
 
 /**
- * @author pbakker
+ * Interface that must be implemented by start page actions
+ * @author gboros
  *
  */
-public class OpenMarketplaceWithSolutions extends OpenMarketplace
+public interface IStartPageAction
 {
-	public OpenMarketplaceWithSolutions()
-	{
-		super.deepLink = "zg3d62r5t|TYPE"; //$NON-NLS-1$
-	}
+	public void runAction(String param);
 }

@@ -22,10 +22,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.internal.intro.impl.model.loader.ModelLoaderUtil;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURLParser;
 import org.eclipse.ui.part.EditorPart;
@@ -43,7 +46,7 @@ public class StartPageBrowserEditor extends EditorPart
 {
 	public static final String STARTPAGE_BROWSER_EDITOR_ID = "com.servoy.eclipse.core.StartPageBrowserEditor";
 	public static final String STARTPAGE_URL = "http://www.servoy.com/developer/6xx_intro/startpage.html";
-	
+
 	public static final StartPageBrowserEditorInput INPUT = new StartPageBrowserEditorInput();
 
 	private Browser browser;
@@ -126,11 +129,29 @@ public class StartPageBrowserEditor extends EditorPart
 					// stop URL first.
 					event.doit = false;
 					// execute the action embedded in the IntroURL
-					IntroURL introURL = parser.getIntroURL();
-					introURL.execute();
-					return;
-				}
+					final IntroURL introURL = parser.getIntroURL();
+					if (IntroURL.RUN_ACTION.equals(introURL.getAction()))
+					{
+						String pluginId = introURL.getParameter(IntroURL.KEY_PLUGIN_ID);
+						String className = introURL.getParameter(IntroURL.KEY_CLASS);
 
+						final Object actionObject = ModelLoaderUtil.createClassInstance(pluginId, className);
+
+						if (actionObject instanceof IStartPageAction)
+						{
+							Display display = Display.getCurrent();
+							BusyIndicator.showWhile(display, new Runnable()
+							{
+								public void run()
+								{
+									((IStartPageAction)actionObject).runAction(introURL.getParameter("a"));
+								}
+							});
+							return;
+						}
+					}
+					introURL.execute();
+				}
 			}
 		});
 	}
