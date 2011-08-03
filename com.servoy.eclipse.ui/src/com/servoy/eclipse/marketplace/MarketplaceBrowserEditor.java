@@ -225,4 +225,9 @@ public class MarketplaceBrowserEditor extends EditorPart
 	{
 		browser.setUrl(url.concat(deeplinkParam).toString());
 	}
+
+	public void executeDeepLink(String deeplinkParam)
+	{
+		browser.execute("executeMPDeepLink(\"" + deeplinkParam + "\");"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
 }

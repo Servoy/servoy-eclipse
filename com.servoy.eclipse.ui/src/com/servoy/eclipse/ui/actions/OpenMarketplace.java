@@ -54,11 +54,20 @@ public class OpenMarketplace implements IWorkbenchWindowActionDelegate, IStartPa
 		try
 		{
 			IWorkbenchPage activePage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-			MarketplaceBrowserEditor p = (MarketplaceBrowserEditor)activePage.openEditor(MarketplaceBrowserEditor.INPUT,
-				MarketplaceBrowserEditor.MARKETPLACE_BROWSER_EDITOR_ID);
-			if (param != null)
+			MarketplaceBrowserEditor p = (MarketplaceBrowserEditor)activePage.findEditor(MarketplaceBrowserEditor.INPUT);
+			if (p == null)
+			{ //MarketPlaceEditor not already showing in the Active window, so opening with deeplink in launch URL
+				p = (MarketplaceBrowserEditor)activePage.openEditor(MarketplaceBrowserEditor.INPUT, MarketplaceBrowserEditor.MARKETPLACE_BROWSER_EDITOR_ID);
+				if (param != null)
+				{
+					p.deepLink("&m=deepLinkProduct&a=" + param); //$NON-NLS-1$
+				}
+			}
+			else
+			//MarketPlace already opened, so calling the deeplink through a exposed callback method in the Web Client solution, after which the MarketPlace editor is activated
 			{
-				p.deepLink("&m=deepLinkProduct&a=" + param); //$NON-NLS-1$
+				p.executeDeepLink(param);
+				activePage.openEditor(MarketplaceBrowserEditor.INPUT, MarketplaceBrowserEditor.MARKETPLACE_BROWSER_EDITOR_ID);
 			}
 		}
 		catch (Exception e)
