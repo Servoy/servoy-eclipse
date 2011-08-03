@@ -311,7 +311,7 @@ public class ElementResolver implements IElementResolver
 		String typeName = getTypeName(context, name);
 		if ("servoyDeveloper".equals(name))
 		{
-			typeName = "servoyDeveloper";
+			typeName = "JSDeveloperSolutionModel";
 		}
 		if (typeName != null)
 		{
