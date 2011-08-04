@@ -39,10 +39,12 @@ public class ColumnNameEditingSupport extends EditingSupport
 {
 	private final VerifyingTextCellEditor editor;
 	private final TableViewer tableViewer;
+	private final boolean realName;
 
-	public ColumnNameEditingSupport(TableViewer tv)
+	public ColumnNameEditingSupport(TableViewer tv, boolean realName)
 	{
 		super(tv);
+		this.realName = realName;
 		tableViewer = tv;
 		editor = new VerifyingTextCellEditor(tv.getTable());
 		editor.addVerifyListener(new DocumentValidatorVerifyListener(
@@ -59,16 +61,26 @@ public class ColumnNameEditingSupport extends EditingSupport
 			try
 			{
 				IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-				pi.updateName(nameValidator, value.toString());
-				if (isEmail(value.toString()))
+				if (realName)
 				{
-					pi.setType(IColumnTypes.TEXT);
-					pi.setLenght(254);
+					pi.updateName(nameValidator, value.toString());
 				}
-				else if (isUrl(value.toString()))
+				else
 				{
-					pi.setType(IColumnTypes.TEXT);
-					pi.setLenght(2048);
+					pi.updateDataProviderID(nameValidator, value.toString());
+				}
+				if (realName)
+				{
+					if (isEmail(value.toString()))
+					{
+						pi.setType(IColumnTypes.TEXT);
+						pi.setLenght(254);
+					}
+					else if (isUrl(value.toString()))
+					{
+						pi.setType(IColumnTypes.TEXT);
+						pi.setLenght(2048);
+					}
 				}
 			}
 			catch (final Exception e)
@@ -78,9 +90,10 @@ public class ColumnNameEditingSupport extends EditingSupport
 				{
 					public void run()
 					{
-						MessageDialog.openError(Display.getDefault().getActiveShell(), "Error setting name on the column", e.getMessage()); //$NON-NLS-1$
-						tableViewer.editElement(element, ColumnComposite.CI_NAME);
-						editor.setValue(((Column)element).getName());
+						MessageDialog.openError(Display.getDefault().getActiveShell(),
+							"Error setting " + (realName ? "name" : "dataproviderID") + " on the column", e.getMessage()); //$NON-NLS-1$
+						tableViewer.editElement(element, (realName ? ColumnComposite.CI_NAME : ColumnComposite.CI_DATAPROVIDER_ID));
+						editor.setValue((realName ? ((Column)element).getName() : ((Column)element).getDataProviderID()));
 					}
 				});
 				ServoyLog.logError(e);
@@ -95,7 +108,7 @@ public class ColumnNameEditingSupport extends EditingSupport
 		if (element instanceof Column)
 		{
 			Column pi = (Column)element;
-			return pi.getName();
+			return realName ? pi.getSQLName() : pi.getDataProviderID();
 		}
 		return null;
 	}
@@ -109,6 +122,7 @@ public class ColumnNameEditingSupport extends EditingSupport
 	@Override
 	protected boolean canEdit(Object element)
 	{
+		if (!realName) return true;
 		if (element instanceof Column && editor != null)
 		{
 			return !((Column)element).getExistInDB();

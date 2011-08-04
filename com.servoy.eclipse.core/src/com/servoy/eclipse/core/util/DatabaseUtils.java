@@ -215,6 +215,7 @@ public final class DatabaseUtils
 					columnInfo.setPreSequenceChars(columnInfoDef.preSequenceChars);
 					columnInfo.setPostSequenceChars(columnInfoDef.postSequenceChars);
 					columnInfo.setSequenceStepSize(columnInfoDef.sequenceStepSize);
+					columnInfo.setDataProviderID(columnInfoDef.dataProviderID);
 					column.setFlags(columnInfoDef.flags);
 
 					columnInfo.flagChanged();

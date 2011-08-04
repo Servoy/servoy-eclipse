@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
 
 import com.servoy.j2db.persistence.Column;
@@ -82,6 +82,11 @@ public class ColumnInfoBean
 	public String getDescription()
 	{
 		return columnInfo.getDescription();
+	}
+
+	public String getDataProviderID()
+	{
+		return columnInfo.getDataProviderID();
 	}
 
 	public String getElementTemplateProperties()
@@ -217,6 +222,11 @@ public class ColumnInfoBean
 	public void setDescription(String s)
 	{
 		columnInfo.setDescription(s);
+	}
+
+	public void setDataProviderID(String s)
+	{
+		columnInfo.setDataProviderID(s);
 	}
 
 	public void setElementTemplateProperties(String s)

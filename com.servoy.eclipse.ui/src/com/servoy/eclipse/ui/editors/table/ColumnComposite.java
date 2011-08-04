@@ -199,7 +199,7 @@ public class ColumnComposite extends Composite
 				{
 					tableViewer.getTable().deselectAll();
 				}
-				else if (item != null && item.getBounds(CI_DELETE).contains(pt))
+				else if (item != null && item.getBounds(getDeleteColumnIndex()).contains(pt))
 				{
 					if (t.getTableType() != ITable.TABLE)
 					{
@@ -293,25 +293,53 @@ public class ColumnComposite extends Composite
 			}
 		});
 
+		final Button displayDataProviderID = new Button(container, SWT.CHECK);
+		displayDataProviderID.setText("Display DataProviderID");
+		displayDataProviderID.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				TableColumnLayout layout = getTableLayout();
+				if (displayDataProviderID.getSelection())
+				{
+					final TableColumn dataProviderIDColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_DATAPROVIDER_ID);
+					dataProviderIDColumn.setText("DataProviderID");
+					TableViewerColumn dataProviderIDViewerColumn = new TableViewerColumn(tableViewer, dataProviderIDColumn);
+					dataProviderIDViewerColumn.setEditingSupport(new ColumnNameEditingSupport(tableViewer, false));
+					setDeleteColumnIndex(7);
+					layout.setColumnData(dataProviderIDColumn, new ColumnWeightData(20, 50, true));
+				}
+				else
+				{
+					tableViewer.getTable().getColumn(CI_DATAPROVIDER_ID).dispose();
+					setDeleteColumnIndex(6);
+				}
+				tableContainer.setLayout(layout);
+				tableViewer.setLabelProvider(tableViewer.getLabelProvider());
+				tableViewer.refresh();
+				tableContainer.layout(true);
+			}
+		});
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
 				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582, Short.MAX_VALUE).add(
 					GroupLayout.LEADING, tabFolder, GroupLayout.PREFERRED_SIZE, 582, Short.MAX_VALUE).add(
-					groupLayout.createSequentialGroup().add(addButton).addPreferredGap(LayoutStyle.RELATED))).addContainerGap()));
+					groupLayout.createSequentialGroup().add(displayDataProviderID).addPreferredGap(LayoutStyle.RELATED).add(addButton))).addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			GroupLayout.TRAILING,
 			groupLayout.createSequentialGroup().addContainerGap().add(tableContainer, GroupLayout.PREFERRED_SIZE, 185, Short.MAX_VALUE).addPreferredGap(
-				LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(addButton)).add(tabFolder, GroupLayout.PREFERRED_SIZE,
-				GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap()));
+				LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(displayDataProviderID).add(addButton)).add(tabFolder,
+				GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap()));
 
 		tableLayout.setHorizontalGroup(tableLayout.createParallelGroup(GroupLayout.TRAILING).add(
 			tableLayout.createSequentialGroup().addContainerGap().add(
 				tableLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582, Short.MAX_VALUE).add(
-					tableLayout.createSequentialGroup().add(addButton).addPreferredGap(LayoutStyle.RELATED))).addContainerGap()));
+					tableLayout.createSequentialGroup().add(displayDataProviderID).addPreferredGap(LayoutStyle.RELATED).add(addButton))).addContainerGap()));
 		tableLayout.setVerticalGroup(tableLayout.createParallelGroup(GroupLayout.LEADING).add(
 			GroupLayout.TRAILING,
 			tableLayout.createSequentialGroup().addContainerGap().add(tableContainer, GroupLayout.PREFERRED_SIZE, 185, Short.MAX_VALUE).addPreferredGap(
-				LayoutStyle.RELATED).add(tableLayout.createParallelGroup(GroupLayout.BASELINE).add(addButton)).addContainerGap()));
+				LayoutStyle.RELATED).add(tableLayout.createParallelGroup(GroupLayout.BASELINE).add(displayDataProviderID).add(addButton)).addContainerGap()));
 		container.setLayout(tableLayout);
 		//
 
@@ -345,20 +373,28 @@ public class ColumnComposite extends Composite
 
 	static final int CI_NAME = 0;
 	static final int CI_TYPE = 1;
-	static final int CI_LENGHT = 2;
+	static final int CI_LENGTH = 2;
 	static final int CI_ROW_IDENT = 3;
 	static final int CI_ALLOW_NULL = 4;
 	static final int CI_SEQUENCE_TYPE = 5;
-	static final int CI_DELETE = 6;
+	static final int CI_DATAPROVIDER_ID = 6;
+	private int CI_DELETE = 6;
 
 	private ColumnNameEditingSupport nameEditor = null;
+	private TableColumn nameColumn;
+	private TableColumn typeColumn;
+	private TableColumn lengthColumn;
+	private TableColumn rowIdentColumn;
+	private TableColumn allowNullColumn;
+	private TableColumn seqType;
+	private TableColumn delColumn;
 
 	private void createTableColumns(final Table table)
 	{
-		final TableColumn nameColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_NAME);
+		nameColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_NAME);
 		nameColumn.setText("Name");
 		TableViewerColumn nameViewerColumn = new TableViewerColumn(tableViewer, nameColumn);
-		nameEditor = new ColumnNameEditingSupport(tableViewer);
+		nameEditor = new ColumnNameEditingSupport(tableViewer, true);
 		nameViewerColumn.setEditingSupport(nameEditor);
 
 		copyColumnNameAction = new CopyColumnNameAction(tableViewer.getTable().getDisplay());//getSite().getShell().getDisplay());
@@ -368,34 +404,34 @@ public class ColumnComposite extends Composite
 		nameViewerColumn.getViewer().getControl().setMenu(menu);
 		nameViewerColumn.getViewer().addSelectionChangedListener(copyColumnNameAction);
 
-		final TableColumn typeColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_TYPE);
+		typeColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_TYPE);
 		typeColumn.setText("Type");
 		TableViewerColumn typeViewerColumn = new TableViewerColumn(tableViewer, typeColumn);
 		typeViewerColumn.setEditingSupport(new ColumnTypeEditingSupport(tableViewer));
 
-		final TableColumn lengthColumn = new TableColumn(tableViewer.getTable(), SWT.TRAIL, CI_LENGHT);
+		lengthColumn = new TableColumn(tableViewer.getTable(), SWT.TRAIL, CI_LENGTH);
 		lengthColumn.setText("Length");
 		TableViewerColumn lengthViewerColumn = new TableViewerColumn(tableViewer, lengthColumn);
 		lengthViewerColumn.setEditingSupport(new ColumnLengthEditingSupport(tableViewer));
 
-		final TableColumn rowIdentColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_ROW_IDENT);
+		rowIdentColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_ROW_IDENT);
 		rowIdentColumn.setText("Row Ident");
 		TableViewerColumn rowIdentViewerColumn = new TableViewerColumn(tableViewer, rowIdentColumn);
 		rowIdentViewerColumn.setEditingSupport(new ColumnRowIdentEditingSupport(table, tableViewer));
 
-		final TableColumn allowNullColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_ALLOW_NULL);
+		allowNullColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_ALLOW_NULL);
 		allowNullColumn.setText("Allow Null");
 		TableViewerColumn allowNullViewerColumn = new TableViewerColumn(tableViewer, allowNullColumn);
 		allowNullViewerColumn.setEditingSupport(new ColumnAllowNullEditingSupport(tableViewer));
 
 
-		final TableColumn seqType = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_SEQUENCE_TYPE);
+		seqType = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_SEQUENCE_TYPE);
 		seqType.setText("Sequence Type");
 		TableViewerColumn seqTypeViewerColumn = new TableViewerColumn(tableViewer, seqType);
 		ColumnSeqTypeEditingSupport editingSupport = new ColumnSeqTypeEditingSupport(tableViewer, table);
 		seqTypeViewerColumn.setEditingSupport(editingSupport);
 
-		final TableColumn delColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_DELETE);
+		delColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, getDeleteColumnIndex());
 		delColumn.setToolTipText("Delete column");
 
 		editingSupport.addChangeListener(new IChangeListener()
@@ -415,6 +451,19 @@ public class ColumnComposite extends Composite
 			}
 		});
 
+
+		tableContainer.setLayout(getTableLayout());
+
+		tableViewer.setLabelProvider(new ColumnLabelProvider(new Color(tableViewer.getTable().getShell().getDisplay(), 255, 127, 0), this));
+		tableViewer.setSorter(new ColumnsSorter(
+			tableViewer,
+			new TableColumn[] { nameColumn, typeColumn, lengthColumn, rowIdentColumn, allowNullColumn },
+			new Comparator[] { NameComparator.INSTANCE, ColumnTypeComparator.INSTANCE, ColumnLengthComparator.INSTANCE, ColumnRowIdentComparator.INSTANCE, ColumnAllowNullComparator.INSTANCE }));
+
+	}
+
+	private TableColumnLayout getTableLayout()
+	{
 		final TableColumnLayout layout = new TableColumnLayout()
 		{
 			public boolean attachedListener = false;
@@ -478,7 +527,6 @@ public class ColumnComposite extends Composite
 				}
 			}
 		};
-		tableContainer.setLayout(layout);
 		layout.setColumnData(nameColumn, new ColumnWeightData(20, 50, true));
 		layout.setColumnData(typeColumn, new ColumnWeightData(10, 25, true));
 		layout.setColumnData(lengthColumn, new ColumnWeightData(10, 25, true));
@@ -486,14 +534,7 @@ public class ColumnComposite extends Composite
 		layout.setColumnData(allowNullColumn, new ColumnPixelData(70, true));
 		layout.setColumnData(seqType, new ColumnWeightData(10, 25, true));
 		layout.setColumnData(delColumn, new ColumnPixelData(20, false));
-
-
-		tableViewer.setLabelProvider(new ColumnLabelProvider(new Color(tableViewer.getTable().getShell().getDisplay(), 255, 127, 0)));
-		tableViewer.setSorter(new ColumnsSorter(
-			tableViewer,
-			new TableColumn[] { nameColumn, typeColumn, lengthColumn, rowIdentColumn, allowNullColumn },
-			new Comparator[] { NameComparator.INSTANCE, ColumnTypeComparator.INSTANCE, ColumnLengthComparator.INSTANCE, ColumnRowIdentComparator.INSTANCE, ColumnAllowNullComparator.INSTANCE }));
-
+		return layout;
 	}
 
 	protected void initDataBindings(Table t)
@@ -619,5 +660,15 @@ public class ColumnComposite extends Composite
 		{
 			nameEditor.checkValidState();
 		}
+	}
+
+	private void setDeleteColumnIndex(int cI_DELETE)
+	{
+		CI_DELETE = cI_DELETE;
+	}
+
+	public int getDeleteColumnIndex()
+	{
+		return CI_DELETE;
 	}
 }

@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
 
 import org.eclipse.jface.viewers.ITableColorProvider;
@@ -38,11 +38,13 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 	public static final Image FALSE_RADIO = Activator.getDefault().loadImageFromBundle("radio_off.gif"); //$NON-NLS-1$
 
 	private Color color = null;
+	private ColumnComposite columnComposite;
 
-	public ColumnLabelProvider(Color color)
+	public ColumnLabelProvider(Color color, ColumnComposite columnComposite)
 	{
 		super();
 		this.color = color;
+		this.columnComposite = columnComposite;
 	}
 
 	public ColumnLabelProvider()
@@ -64,7 +66,7 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 				return FALSE_IMAGE;
 			}
 		}
-		else if (columnIndex == ColumnComposite.CI_DELETE)
+		else if (columnComposite != null && columnIndex == columnComposite.getDeleteColumnIndex())
 		{
 			return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 		}
@@ -78,13 +80,17 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 	public String getColumnText(Object element, int columnIndex)
 	{
 		Column info = (Column)element;
+		if (columnComposite != null && columnIndex == columnComposite.getDeleteColumnIndex())
+		{
+			return "";
+		}
 		switch (columnIndex)
 		{
 			case ColumnComposite.CI_NAME :
 				return info.getName();
 			case ColumnComposite.CI_TYPE :
 				return info.getTypeAsString();
-			case ColumnComposite.CI_LENGHT :
+			case ColumnComposite.CI_LENGTH :
 				return info.getScale() > 0 ? info.getLength() + "," + info.getScale() : Integer.toString(info.getLength());
 			case ColumnComposite.CI_ROW_IDENT :
 				return Column.getFlagsString(info.getRowIdentType());
@@ -93,8 +99,8 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 				//return (info.getAllowNull() ? "yes" : "no");
 			case ColumnComposite.CI_SEQUENCE_TYPE :
 				return ColumnInfo.getSeqDisplayTypeString(info.getSequenceType());
-			case ColumnComposite.CI_DELETE :
-				return "";
+			case ColumnComposite.CI_DATAPROVIDER_ID :
+				return info.getDataProviderID();
 			default :
 				return columnIndex + ": " + element;
 		}
