@@ -169,16 +169,18 @@ public class HandleDBIMarkersWizard extends Wizard
 				IMarker[] markers = resourcesProject.getProject().findMarkers(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
 				if (markers != null && markers.length > 0)
 				{
+					IMarkerResolutionGenerator generator = new ServoyQuickFixGenerator();
 					for (IMarker marker : markers)
 					{
-						if (marker.getType().equals(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE))
+						String serverName = (String)marker.getAttribute(TableDifference.ATTRIBUTE_SERVERNAME);
+						if (serverName != null)
 						{
-							String serverName = (String)marker.getAttribute(TableDifference.ATTRIBUTE_SERVERNAME);
-							if (serverName != null)
+							for (IServerInternal server : servers)
 							{
-								for (IServerInternal server : servers)
+								if (serverName.equals(server.getName()) && marker.exists())
 								{
-									if (serverName.equals(server.getName()) && marker.exists())
+									IMarkerResolution[] resolutions = generator.getResolutions(marker);
+									if (resolutions != null && resolutions.length > 0)
 									{
 										if (!set) return true;
 										serverMarkers.add(marker);
@@ -187,6 +189,7 @@ public class HandleDBIMarkersWizard extends Wizard
 								}
 							}
 						}
+
 					}
 				}
 			}
