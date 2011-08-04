@@ -521,6 +521,7 @@ public class DataModelManager implements IColumnInfoManager
 					ci.setDefaultFormat(cid.defaultFormat);
 					ci.setElementTemplateProperties(cid.elementTemplateProperties);
 					ci.setDataProviderID(cid.dataProviderID);
+					ci.setContainsMetaData(cid.containsMetaData);
 					c.setColumnInfo(ci);
 					c.setFlags(cid.flags); // updates rowident columns in Table as well
 				}
@@ -600,6 +601,7 @@ public class DataModelManager implements IColumnInfoManager
 				cid.elementTemplateProperties = cobj.has("elementTemplateProperties") ? cobj.optString("elementTemplateProperties") : null;
 				cid.flags = cobj.has("flags") ? cobj.optInt("flags") : 0;
 				cid.dataProviderID = cobj.has("dataProviderID") ? cobj.optString("dataProviderID") : null;
+				cid.containsMetaData = cobj.has("containsMetaData") ? cobj.optInt("containsMetaData") : null;
 				if (!tableInfo.columnInfoDefSet.contains(cid))
 				{
 					tableInfo.columnInfoDefSet.add(cid);
@@ -674,6 +676,7 @@ public class DataModelManager implements IColumnInfoManager
 			cid.validatorName = ci.getValidatorName();
 			cid.defaultFormat = ci.getDefaultFormat();
 			cid.dataProviderID = ci.getDataProviderID();
+			cid.containsMetaData = ci.getContainsMetaData();
 			cid.elementTemplateProperties = ci.getElementTemplateProperties();
 		}
 		return cid;
@@ -726,6 +729,7 @@ public class DataModelManager implements IColumnInfoManager
 			obj.putOpt("validatorName", cid.validatorName);
 			obj.putOpt("defaultFormat", cid.defaultFormat);
 			obj.putOpt("dataProviderID", cid.dataProviderID);
+			obj.putOpt("containsMetaData", cid.containsMetaData);
 			obj.putOpt("elementTemplateProperties", cid.elementTemplateProperties);
 			carray.put(obj);
 		}
