@@ -149,6 +149,9 @@
       <nodeHandler
             class="com.servoy.eclipse.debug.script.CalculationsTypeInferenceHandlerFactory">
       </nodeHandler>
+      <runtimeTypeFactory
+            class="com.servoy.eclipse.debug.script.JavaClassRuntimeTypeFactory">
+      </runtimeTypeFactory>
    </extension>
    <extension
          point="org.eclipse.dltk.javascript.ui.typeInfoLabelProvider">

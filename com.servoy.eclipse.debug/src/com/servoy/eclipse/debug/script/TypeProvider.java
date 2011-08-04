@@ -41,6 +41,7 @@ import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Parameter;
 import org.eclipse.dltk.javascript.typeinfo.model.Property;
+import org.eclipse.dltk.javascript.typeinfo.model.SimpleType;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
@@ -126,6 +127,9 @@ import com.servoy.j2db.util.Utils;
 @SuppressWarnings("nls")
 public class TypeProvider extends TypeCreator implements ITypeProvider
 {
+	public static final String JAVA_CLASS = "JAVA_CLASS";
+
+
 	private final ConcurrentHashMap<String, Boolean> ignorePackages = new ConcurrentHashMap<String, Boolean>();
 
 	public TypeProvider()
@@ -264,6 +268,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(name);
 		type.setKind(TypeKind.JAVA);
+		type.setAttribute(JAVA_CLASS, clz);
 
 		Method[] methods = clz.getMethods();
 		Field[] fields = clz.getFields();
@@ -1249,7 +1254,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			return type;
 		}
 
-		private TypeRef getElementType(ITypeInfoContext context, Class< ? > cls)
+		private SimpleType getElementType(ITypeInfoContext context, Class< ? > cls)
 		{
 			if (cls == null) return null;
 			String name = typeNames.get(cls.getSimpleName());

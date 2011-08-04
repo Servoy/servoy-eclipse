@@ -45,6 +45,7 @@ import org.eclipse.dltk.javascript.typeinfo.model.Method;
 import org.eclipse.dltk.javascript.typeinfo.model.Parameter;
 import org.eclipse.dltk.javascript.typeinfo.model.ParameterKind;
 import org.eclipse.dltk.javascript.typeinfo.model.Property;
+import org.eclipse.dltk.javascript.typeinfo.model.SimpleType;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
@@ -915,7 +916,7 @@ public abstract class TypeCreator
 	public static Property createProperty(ITypeInfoContext context, String name, boolean readonly, String typeName, String description, ImageDescriptor image,
 		Object resource)
 	{
-		TypeRef type = null;
+		SimpleType type = null;
 		if (typeName != null)
 		{
 			type = context.getTypeRef(typeName);
@@ -926,7 +927,7 @@ public abstract class TypeCreator
 
 	public static Property createProperty(ITypeInfoContext context, String name, boolean readonly, String typeName, ImageDescriptor image)
 	{
-		TypeRef type = null;
+		SimpleType type = null;
 		if (typeName != null)
 		{
 			type = context.getTypeRef(typeName);
