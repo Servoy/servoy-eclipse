@@ -2005,7 +2005,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				}
 				boolean isInheritedValue = (value == null && persistContext.getPersist() instanceof AbstractBase &&
 					beanPropertyDescriptor.valueObject == persistContext.getPersist() && ((AbstractBase)persistContext.getPersist()).getSuperPersist() != null && ((AbstractBase)((AbstractBase)persistContext.getPersist()).getSuperPersist()).getProperty((String)id) != null);
-				if (value == null && !isInheritedValue)
+				if (beanPropertyDescriptor.valueObject instanceof AbstractBase && value == null && !isInheritedValue)
 				{
 					((AbstractBase)beanPropertyDescriptor.valueObject).clearProperty((String)id);
 				}
