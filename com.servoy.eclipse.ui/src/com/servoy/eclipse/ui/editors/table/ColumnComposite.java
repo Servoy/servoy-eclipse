@@ -378,7 +378,7 @@ public class ColumnComposite extends Composite
 	static final int CI_ALLOW_NULL = 4;
 	static final int CI_SEQUENCE_TYPE = 5;
 	static final int CI_DATAPROVIDER_ID = 6;
-	private int CI_DELETE = 6;
+	private int deleteColumnIndex = 6;
 
 	private ColumnNameEditingSupport nameEditor = null;
 	private TableColumn nameColumn;
@@ -662,13 +662,13 @@ public class ColumnComposite extends Composite
 		}
 	}
 
-	private void setDeleteColumnIndex(int cI_DELETE)
+	private void setDeleteColumnIndex(int deleteColumnIndex)
 	{
-		CI_DELETE = cI_DELETE;
+		this.deleteColumnIndex = deleteColumnIndex;
 	}
 
 	public int getDeleteColumnIndex()
 	{
-		return CI_DELETE;
+		return deleteColumnIndex;
 	}
 }
