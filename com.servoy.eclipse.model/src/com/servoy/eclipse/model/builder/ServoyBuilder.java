@@ -83,6 +83,7 @@ import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.Field;
+import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IColumnTypes;
@@ -2158,19 +2159,39 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						if (o instanceof GraphicalComponent && ((GraphicalComponent)o).getLabelFor() != null &&
 							!"".equals(((GraphicalComponent)o).getLabelFor()))
 						{
-							Object labelFor = o.getParent().acceptVisitor(new IPersistVisitor()
+							IPersist parent = null;
+							if (o.getParent() instanceof Form)
 							{
-								public Object visit(IPersist persist)
+								parent = flattenedSolution.getFlattenedForm(o);
+							}
+							else if (o.getParent() instanceof Portal)
+							{
+								parent = new FlattenedPortal((Portal)o.getParent());
+							}
+							if (parent != null)
+							{
+								final IPersist finalParent = parent;
+								Object labelFor = parent.acceptVisitor(new IPersistVisitor()
 								{
-									if (persist instanceof ISupportName && ((GraphicalComponent)o).getLabelFor().equals(((ISupportName)persist).getName())) return persist;
-									return IPersistVisitor.CONTINUE_TRAVERSAL;
+									public Object visit(IPersist persist)
+									{
+										if (persist instanceof ISupportName && ((GraphicalComponent)o).getLabelFor().equals(((ISupportName)persist).getName())) return persist;
+										if (persist == finalParent)
+										{
+											return IPersistVisitor.CONTINUE_TRAVERSAL;
+										}
+										else
+										{
+											return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+										}
+									}
+								});
+								if (labelFor == null)
+								{
+									ServoyMarker mk = MarkerMessages.FormLabelForElementNotFound.fill(((Form)o.getAncestor(IRepository.FORMS)).getName(),
+										((GraphicalComponent)o).getLabelFor());
+									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, o);
 								}
-							});
-							if (labelFor == null)
-							{
-								ServoyMarker mk = MarkerMessages.FormLabelForElementNotFound.fill(((Form)o.getAncestor(IRepository.FORMS)).getName(),
-									((GraphicalComponent)o).getLabelFor());
-								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, o);
 							}
 						}
 						checkDeprecatedPropertyUsage(o, project);
