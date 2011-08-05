@@ -412,6 +412,9 @@ public class MarkerMessages
 	public static ServoyMarker ColumnLookupInvalid = new ServoyMarker(
 		"Table \"{0}\" has column \"{1}\" which has invalid lookup value.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 
+	public static ServoyMarker ColumnDuplicateNameDPID = new ServoyMarker(
+		"Table \"{0}\" has column \"{1}\" which has duplicate name/dataProviderID as column \"{2}\".", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
+
 	public static ServoyMarker DBIColumnMissingFromDB = new ServoyMarker(
 		"Column \"{0}\" appears in the DB information file, but it is missing from the DB table.", ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker DBIColumnMissingFromDBIFile = new ServoyMarker(

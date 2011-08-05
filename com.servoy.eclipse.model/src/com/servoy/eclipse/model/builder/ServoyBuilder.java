@@ -2873,6 +2873,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							res = getServoyModel().getDataModelManager().getDBIFile(server_name, tableName);
 						}
+						Map<String, Column> columnsByName = new HashMap<String, Column>();
+						Map<String, Column> columnsByDataProviderID = new HashMap<String, Column>();
 						for (Column column : table.getColumns())
 						{
 							if (column.getColumnInfo() != null && column.getSequenceType() == ColumnInfo.UUID_GENERATOR &&
@@ -2945,6 +2947,29 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									}
 								}
 							}
+							String columnName = column.getName();
+							String columnDataProviderID = column.getDataProviderID();
+							if (columnsByName.containsKey(columnName) || columnsByName.containsKey(columnDataProviderID) ||
+								columnsByDataProviderID.containsKey(columnName) || columnsByDataProviderID.containsKey(columnDataProviderID))
+							{
+								Column otherColumn = columnsByName.get(columnName);
+								if (otherColumn == null)
+								{
+									otherColumn = columnsByName.get(columnDataProviderID);
+								}
+								if (otherColumn == null)
+								{
+									otherColumn = columnsByDataProviderID.get(columnDataProviderID);
+								}
+								if (otherColumn == null)
+								{
+									otherColumn = columnsByDataProviderID.get(columnName);
+								}
+								ServoyMarker mk = MarkerMessages.ColumnDuplicateNameDPID.fill(tableName, column.getName(), otherColumn.getName());
+								addMarker(res, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, null);
+							}
+							columnsByName.put(columnName, column);
+							columnsByDataProviderID.put(columnDataProviderID, column);
 						}
 					}
 				}
