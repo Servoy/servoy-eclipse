@@ -602,6 +602,16 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		return ap != null ? ap.getEditingSolution() : null;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.j2db.IServiceProvider#isSolutionLoaded()
+	 */
+	public boolean isSolutionLoaded()
+	{
+		return getSolution() != null;
+	}
+
 	public ScheduledExecutorService getScheduledExecutor()
 	{
 		return getClient().getScheduledExecutor();
