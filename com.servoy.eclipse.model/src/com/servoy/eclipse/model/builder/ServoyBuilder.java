@@ -122,6 +122,7 @@ import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.FormatParser;
 import com.servoy.j2db.util.IntHashMap;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
@@ -1353,42 +1354,33 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											}
 											inForm = parentForm.getName();
 
-											if (o instanceof Field && dataProvider != null)
+											if ((o instanceof Field || o instanceof GraphicalComponent) && dataProvider != null)
 											{
-												Field field = (Field)o;
-												if (field.getFormat() != null &&
-													field.getFormat().length() > 0 &&
-													(field.getDisplayType() == Field.TEXT_FIELD || field.getDisplayType() == Field.TYPE_AHEAD || field.getDisplayType() == Field.CALENDAR))
+												String format = (o instanceof Field) ? ((Field)o).getFormat() : ((GraphicalComponent)o).getFormat();
+												if (o instanceof Field && ((Field)o).getDisplayType() != Field.TEXT_FIELD &&
+													((Field)o).getDisplayType() != Field.TYPE_AHEAD && ((Field)o).getDisplayType() != Field.CALENDAR)
 												{
-													String displayFormat = field.getFormat();
-													if (!displayFormat.startsWith("i18n:") && !displayFormat.equals("|U") && !displayFormat.equals("|L") &&
-														!displayFormat.equals("|#") && !displayFormat.equals("converter"))
+													format = null;
+												}
+												if (format != null && format.length() > 0)
+												{
+													FormatParser fp = new FormatParser(format);
+													if (fp.getDisplayFormat() != null && !fp.getDisplayFormat().startsWith("i18n:"))
 													{
-														String editFormat = field.getFormat();
-														int index = field.getFormat().indexOf("|"); //$NON-NLS-1$
-														if (index != -1)
-														{
-															displayFormat = field.getFormat().substring(0, index);
-															editFormat = field.getFormat().substring(index + 1);
-														}
-														else editFormat = null;
-														if ("raw".equals(editFormat))
-														{
-															editFormat = null;
-														}
 														int dataType = dataProvider.getDataProviderType();
 														boolean addMarker = false;
 														try
 														{
 															if (dataType == IColumnTypes.DATETIME)
 															{
-																new SimpleDateFormat(displayFormat);
-																if (editFormat != null) new SimpleDateFormat(editFormat);
+																new SimpleDateFormat(fp.getDisplayFormat());
+																if (fp.getEditFormat() != null) new SimpleDateFormat(fp.getEditFormat());
 															}
 															else if (dataType == IColumnTypes.INTEGER || dataType == IColumnTypes.NUMBER)
 															{
-																new RoundHalfUpDecimalFormat(displayFormat, Locale.getDefault());
-																if (editFormat != null) new RoundHalfUpDecimalFormat(editFormat, Locale.getDefault());
+																new RoundHalfUpDecimalFormat(fp.getDisplayFormat(), Locale.getDefault());
+																if (fp.getEditFormat() != null) new RoundHalfUpDecimalFormat(fp.getEditFormat(),
+																	Locale.getDefault());
 															}
 														}
 														catch (Exception ex)
@@ -1401,17 +1393,21 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 															ServoyMarker mk;
 															if (elementName == null)
 															{
-																mk = MarkerMessages.FormFormatInvalid.fill(inForm, field.getFormat());
+																mk = MarkerMessages.FormFormatInvalid.fill(inForm, fp.getFormat());
 															}
 															else
 															{
-																mk = MarkerMessages.FormFormatOnElementInvalid.fill(elementName, inForm, field.getFormat());
+																mk = MarkerMessages.FormFormatOnElementInvalid.fill(elementName, inForm, fp.getFormat());
 															}
 															addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING,
 																IMarker.PRIORITY_NORMAL, null, o);
 														}
 													}
 												}
+											}
+											if (o instanceof Field && dataProvider != null)
+											{
+												Field field = (Field)o;
 												if (field.getEditable() &&
 													(field.getDisplayType() == Field.HTML_AREA || field.getDisplayType() == Field.RTF_AREA) &&
 													dataProvider.getColumnWrapper() != null && dataProvider.getColumnWrapper().getColumn() instanceof Column)
