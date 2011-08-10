@@ -1390,25 +1390,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																new RoundHalfUpDecimalFormat(displayFormat, Locale.getDefault());
 																if (editFormat != null) new RoundHalfUpDecimalFormat(editFormat, Locale.getDefault());
 															}
-															else if (dataType == IColumnTypes.TEXT)
-															{
-																if (displayFormat.contains("0") || displayFormat.contains(".") || displayFormat.contains(",")) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-																{
-																	// this is probably a number or date format
-																	ServoyMarker mk = null;
-																	if (elementName == null)
-																	{
-																		mk = MarkerMessages.FormFormatIncompatible.fill(inForm, field.getFormat());
-																	}
-																	else
-																	{
-																		mk = MarkerMessages.FormFormatOnElementIncompatible.fill(elementName, inForm,
-																			field.getFormat());
-																	}
-																	addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING,
-																		IMarker.PRIORITY_NORMAL, null, o);
-																}
-															}
 														}
 														catch (Exception ex)
 														{
