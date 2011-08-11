@@ -1062,7 +1062,7 @@ public class SolutionDeserializer
 					if (typeIndex != -1)
 					{
 						int newLine = commentString.indexOf('\n', typeIndex);
-						String typeName = commentString.substring(typeIndex + SolutionSerializer.TYPEKEY.length(), newLine).trim();
+						String typeName = commentString.substring(typeIndex + SolutionSerializer.TYPEKEY.length(), newLine).replace('{', ' ').replace('}', ' ').trim();
 						json.putOpt(JS_TYPE_JSON_ATTRIBUTE, typeName);
 						int servoyType = getServoyType(typeName);
 						if (servoyType == IColumnTypes.NUMBER)
