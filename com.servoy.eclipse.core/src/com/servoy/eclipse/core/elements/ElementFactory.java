@@ -725,8 +725,9 @@ public class ElementFactory
 				if (dataProviders[r] == null) continue;
 
 				String dataProviderID = ((IDataProvider)dataProviders[r]).getDataProviderID();
-
 				IDataProvider dp = flattenedSolution.getDataproviderLookup(null, form).getDataProvider(dataProviderID);
+				if (dp == null) continue;
+
 				java.awt.Point fieldpos = new java.awt.Point(x + (r * 80), y);
 				Field field = portal.createNewField(fieldpos);
 				field.setEditable(dp.isEditable());
