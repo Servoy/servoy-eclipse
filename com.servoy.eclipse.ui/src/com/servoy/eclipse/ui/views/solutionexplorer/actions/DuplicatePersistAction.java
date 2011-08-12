@@ -115,7 +115,7 @@ public class DuplicatePersistAction extends AbstractMovePersistAction
 	@Override
 	protected void doWork(IPersist persist, Location location, IValidateName nameValidator) throws RepositoryException
 	{
-		IPersist duplicate = intelligentClonePersist(persist, location.getPersistName(), location.getServoyProject(), nameValidator);
+		IPersist duplicate = intelligentClonePersist(persist, location.getPersistName(), location.getServoyProject(), nameValidator, true);
 		EditorUtil.openPersistEditor(duplicate);
 	}
 }

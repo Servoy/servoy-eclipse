@@ -37,6 +37,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -47,6 +48,7 @@ import com.servoy.j2db.persistence.ISupportUpdateableName;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
@@ -63,6 +65,7 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 	protected final Shell shell;
 	protected UserNodeType moveType;
 	protected String persistString = null;
+	protected IPersist selectedPersist;
 
 	/**
 	 * 
@@ -118,10 +121,10 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 			}
 			selection = sel;
 		}
-		if (moveType == UserNodeType.RELATION) persistString = "relation";
-		if (moveType == UserNodeType.VALUELIST_ITEM) persistString = "valuelist";
-		if (moveType == UserNodeType.MEDIA_IMAGE) persistString = "media";
-		if (moveType == UserNodeType.FORM) persistString = "form";
+		if (moveType == UserNodeType.RELATION) persistString = "relation"; //$NON-NLS-1$
+		if (moveType == UserNodeType.VALUELIST_ITEM) persistString = "valuelist";//$NON-NLS-1$
+		if (moveType == UserNodeType.MEDIA_IMAGE) persistString = "media";//$NON-NLS-1$
+		if (moveType == UserNodeType.FORM) persistString = "form";//$NON-NLS-1$
 
 		setEnabled(state);
 	}
@@ -132,24 +135,31 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 		if (moveType == UserNodeType.RELATION) return IRepository.RELATIONS;
 		if (moveType == UserNodeType.VALUELISTS) return IRepository.VALUELISTS;
 		if (moveType == UserNodeType.MEDIA_IMAGE) return IRepository.MEDIA;
+		if (selectedPersist instanceof ScriptCalculation) return IRepository.SCRIPTCALCULATIONS;
+		if (selectedPersist instanceof AggregateVariable) return IRepository.AGGREGATEVARIABLES;
 		return -1;
+	}
+
+	public void setPersist(IPersist persist)
+	{
+		this.selectedPersist = persist;
+		if (persist instanceof ScriptCalculation) persistString = "calculation";//$NON-NLS-1$
+		if (persist instanceof AggregateVariable) persistString = "aggregation";//$NON-NLS-1$
 	}
 
 	@Override
 	public void run()
 	{
+		IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 		if (selection != null)
 		{
 			Iterator<SimpleUserNode> it = selection.iterator();
-			IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-
 			while (it.hasNext())
 			{
 				SimpleUserNode node = it.next();
 				SimpleUserNode projectNode = node.getAncestorOfType(ServoyProject.class);
 				if (projectNode != null)
 				{
-					ServoyProject sp = (ServoyProject)projectNode.getRealObject();
 					IPersist persist = (IPersist)node.getRealObject();
 					if (persist instanceof ISupportName)
 					{
@@ -161,11 +171,25 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 						catch (RepositoryException e)
 						{
 							ServoyLog.logError(e);
-							MessageDialog.openError(shell, "Cannot duplicate/move form", persistString + " " + ((ISupportName)persist).getName() +
-								"cannot be duplicated/moved. Reason:\n" + e.getMessage());
+							MessageDialog.openError(shell, "Cannot duplicate/move form", persistString + " " + ((ISupportName)persist).getName() + //$NON-NLS-1$ //$NON-NLS-2$
+								"cannot be duplicated/moved. Reason:\n" + e.getMessage()); //$NON-NLS-1$
 						}
 					}
 				}
+			}
+		}
+		if (selectedPersist instanceof ISupportName)
+		{
+			try
+			{
+				Location location = askForNewFormLocation(selectedPersist, nameValidator);
+				if (location != null) doWork(selectedPersist, location, nameValidator);
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+				MessageDialog.openError(shell, "Cannot duplicate/move form", persistString + " " + ((ISupportName)selectedPersist).getName() + //$NON-NLS-1$ //$NON-NLS-2$
+					"cannot be duplicated/moved. Reason:\n" + e.getMessage()); //$NON-NLS-1$
 			}
 		}
 	}
@@ -183,7 +207,7 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 		final ServoyProject[] activeModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 		if (activeModules.length == 0)
 		{
-			ServoyLog.logError("No active modules on duplicate/move persist?!", null);
+			ServoyLog.logError("No active modules on duplicate/move persist?!", null); //$NON-NLS-1$
 		}
 		String[] solutionNames = new String[activeModules.length];
 		String initialSolutionName = persist.getRootObject().getName();
@@ -224,7 +248,7 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 	 * @param nameValidator the name validator to be used.
 	 * @throws RepositoryException when the new form cannot be persisted.
 	 */
-	public IPersist intelligentClonePersist(IPersist persist, String newPersistName, ServoyProject servoyProject, IValidateName nameValidator)
+	public IPersist intelligentClonePersist(IPersist persist, String newPersistName, ServoyProject servoyProject, IValidateName nameValidator, boolean save)
 		throws RepositoryException
 	{
 		IPersist duplicate = duplicatePersist(persist, newPersistName, servoyProject, nameValidator);
@@ -233,14 +257,24 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 			// link the events that point to form methods to the cloned methods instead of the original form methods
 			relinkFormMethodsToEvents((Form)persist, (Form)duplicate);
 		}
-		ServoyProject sp = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(duplicate.getRootObject().getName());
-		if (sp != null)
+		if (save)
 		{
-			sp.saveEditingSolutionNodes(new IPersist[] { duplicate }, true);
-		}
-		else
-		{
-			ServoyLog.logError("Cannot find solution project for duplicated form", null);
+			ServoyProject sp = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(duplicate.getRootObject().getName());
+			if (sp != null)
+			{
+				if (duplicate.getParent() instanceof Solution)
+				{
+					sp.saveEditingSolutionNodes(new IPersist[] { duplicate }, true);
+				}
+				else
+				{
+					sp.saveEditingSolutionNodes(new IPersist[] { duplicate.getParent() }, true);
+				}
+			}
+			else
+			{
+				ServoyLog.logError("Cannot find solution project for duplicated form", null); //$NON-NLS-1$
+			}
 		}
 		return duplicate;
 	}
@@ -336,9 +370,24 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 				{
 					if (persist instanceof Media)
 					{
-						newPersistName = Utils.stringReplace(newPersistName, " ", "_");
+						newPersistName = Utils.stringReplace(newPersistName, " ", "_");//$NON-NLS-1$//$NON-NLS-2$
 					}
-					final AbstractBase clone = (AbstractBase)((AbstractBase)persist).cloneObj(destinationEditingSolution, true, nameValidator, true, false);
+					AbstractBase clone = null;
+					if (persist instanceof ScriptCalculation)
+					{
+						clone = destinationEditingSolution.createNewScriptCalculation(nameValidator, ((ScriptCalculation)persist).getTable(), newPersistName);
+						clone.copyPropertiesMap(((ScriptCalculation)persist).getPropertiesMap(), true);
+					}
+					else if (persist instanceof AggregateVariable)
+					{
+						clone = destinationEditingSolution.createNewAggregateVariable(nameValidator, ((AggregateVariable)persist).getTable(), newPersistName,
+							((AggregateVariable)persist).getType(), ((AggregateVariable)persist).getDataProviderIDToAggregate());
+						clone.copyPropertiesMap(((AggregateVariable)persist).getPropertiesMap(), true);
+					}
+					else
+					{
+						clone = (AbstractBase)((AbstractBase)persist).cloneObj(destinationEditingSolution, true, nameValidator, true, false);
+					}
 					if (clone instanceof ISupportUpdateableName)
 					{
 						((ISupportUpdateableName)clone).updateName(nameValidator, newPersistName);
@@ -348,20 +397,20 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 						((Media)clone).setName(newPersistName);
 						((Media)clone).setPermMediaData(((Media)persist).getMediaData());
 					}
-					clone.setRuntimeProperty(AbstractBase.NameChangeProperty, "");
+					clone.setRuntimeProperty(AbstractBase.NameChangeProperty, "");//$NON-NLS-1$
 					return clone;
 				}
 				else
 				{
-					ServoyLog.logError("Cannot get solution for destination solution project", null);
+					ServoyLog.logError("Cannot get solution for destination solution project", null);//$NON-NLS-1$
 				}
 			}
 		}
 		catch (Exception e)
 		{
 			ServoyLog.logError(e);
-			MessageDialog.openError(shell, "Cannot duplicate form", "Persist " + ((ISupportName)persist).getName() + "cannot be duplicated. Reason:\n" +
-				e.getMessage());
+			MessageDialog.openError(shell, "Cannot duplicate form",//$NON-NLS-1$
+				"Persist " + ((ISupportName)persist).getName() + "cannot be duplicated. Reason:\n" + e.getMessage());//$NON-NLS-1$//$NON-NLS-2$
 		}
 		return null;
 	}

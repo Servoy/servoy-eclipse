@@ -30,8 +30,8 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
+import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -228,7 +228,7 @@ public class PasteAction extends Action implements ISelectionChangedListener
 							String newName = getCopyName(f.getName(), nameValidator);
 							try
 							{
-								dfa.intelligentClonePersist(f, newName, destinationProject, nameValidator);
+								dfa.intelligentClonePersist(f, newName, destinationProject, nameValidator, true);
 							}
 							catch (RepositoryException e)
 							{

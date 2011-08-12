@@ -40,6 +40,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
@@ -51,6 +53,8 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.DuplicatePersistAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.MovePersistAction;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IDeveloperRepository;
@@ -68,6 +72,9 @@ public class CalculationsComposite extends Composite
 	private final TreeViewer treeViewer;
 	private ArrayList<Solution> rows;
 	private final Composite treeContainer;
+	private final Button removeButton;
+	private final MenuItem moveItem;
+	private final MenuItem duplicateItem;
 
 	public static final int CI_NAME = 0;
 	public static final int CI_TYPE = 1;
@@ -98,7 +105,55 @@ public class CalculationsComposite extends Composite
 		tree.setLinesVisible(true);
 		tree.setHeaderVisible(true);
 
-		final Button removeButton;
+		Menu menu = new Menu(getShell(), SWT.POP_UP);
+		MenuItem addItem = new MenuItem(menu, SWT.PUSH);
+		addItem.setText("Add calculation");
+		addItem.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				addCalculation(te);
+			}
+		});
+		moveItem = new MenuItem(menu, SWT.PUSH);
+		moveItem.setText("Move calculation");
+		moveItem.setEnabled(false);
+		moveItem.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				TreeItem[] selection = treeViewer.getTree().getSelection();
+				if (selection != null && selection.length > 0 && selection[0].getData() instanceof ScriptCalculation)
+				{
+					MovePersistAction action = new MovePersistAction(getShell());
+					action.setPersist((ScriptCalculation)selection[0].getData());
+					action.run();
+					treeViewer.refresh();
+				}
+			}
+		});
+		duplicateItem = new MenuItem(menu, SWT.PUSH);
+		duplicateItem.setText("Duplicate calculation");
+		duplicateItem.setEnabled(false);
+		duplicateItem.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				TreeItem[] selection = treeViewer.getTree().getSelection();
+				if (selection != null && selection.length > 0 && selection[0].getData() instanceof ScriptCalculation)
+				{
+					DuplicatePersistAction action = new DuplicatePersistAction(getShell());
+					action.setPersist((ScriptCalculation)selection[0].getData());
+					action.run();
+					treeViewer.refresh();
+				}
+			}
+		});
+		tree.setMenu(menu);
+
 		removeButton = new Button(container, SWT.NONE);
 		removeButton.setText("Remove");
 		removeButton.addSelectionListener(new SelectionAdapter()
@@ -141,55 +196,7 @@ public class CalculationsComposite extends Composite
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				TreeItem[] selection = treeViewer.getTree().getSelection();
-				if (selection != null && selection.length > 0)
-				{
-					IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-					String calcName = "type_here"; //$NON-NLS-1$
-					String orgName = calcName;
-					try
-					{
-						Solution solution = null;
-						if (selection[0].getData() instanceof Solution) solution = (Solution)selection[0].getData();
-						else if (selection[0].getData() instanceof ScriptCalculation)
-						{
-							solution = (Solution)((ScriptCalculation)selection[0].getData()).getAncestor(IRepository.SOLUTIONS);
-						}
-						if (solution != null)
-						{
-							ScriptCalculation calc = ModelUtils.getEditingFlattenedSolution(solution).getScriptCalculation(calcName, t);
-							int i = 1;
-							while (calc != null)
-							{
-								calcName = orgName + i;
-								i++;
-								calc = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(solution).getScriptCalculation(
-									calcName, t);
-							}
-							ScriptCalculation s = solution.createNewScriptCalculation(nameValidator, t, calcName);
-							s.setType(Column.allDefinedTypes[0]);
-							treeViewer.refresh(solution);
-							treeViewer.editElement(s, 0);
-							removeButton.setEnabled(true);
-							te.flagModified();
-						}
-					}
-					catch (RepositoryException ex)
-					{
-						ServoyLog.logError(ex);
-						MessageDialog.openError(getShell(), "Error", "Save failed: " + ex.getMessage());
-					}
-					catch (Exception e1)
-					{
-						ServoyLog.logError(e1);
-					}
-
-				}
-				else
-				{
-					MessageDialog.openError(getShell(), "Error", "You must select a solution or module where to add the calculation.");
-				}
-
+				addCalculation(te);
 			}
 		});
 
@@ -203,6 +210,11 @@ public class CalculationsComposite extends Composite
 				if (selection != null && selection.length > 0 && selection[0].getData() instanceof ScriptCalculation)
 				{
 					removeButton.setEnabled(true);
+					if (ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject().length > 1)
+					{
+						moveItem.setEnabled(true);
+						duplicateItem.setEnabled(true);
+					}
 					ScriptCalculation calculation = (ScriptCalculation)selection[0].getData();
 					if (!calculation.getName().toLowerCase().equals(calculation.getName()))
 					{
@@ -212,6 +224,8 @@ public class CalculationsComposite extends Composite
 				else
 				{
 					removeButton.setEnabled(false);
+					moveItem.setEnabled(false);
+					duplicateItem.setEnabled(false);
 				}
 			}
 		});
@@ -255,6 +269,60 @@ public class CalculationsComposite extends Composite
 			}
 		};
 		ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(false, persistListener);
+	}
+
+	private void addCalculation(TableEditor te)
+	{
+		TreeItem[] selection = treeViewer.getTree().getSelection();
+		if (selection != null && selection.length > 0)
+		{
+			IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
+			String calcName = "type_here"; //$NON-NLS-1$
+			String orgName = calcName;
+			try
+			{
+				Solution solution = null;
+				if (selection[0].getData() instanceof Solution) solution = (Solution)selection[0].getData();
+				else if (selection[0].getData() instanceof ScriptCalculation)
+				{
+					solution = (Solution)((ScriptCalculation)selection[0].getData()).getAncestor(IRepository.SOLUTIONS);
+				}
+				if (solution != null)
+				{
+					ScriptCalculation calc = ModelUtils.getEditingFlattenedSolution(solution).getScriptCalculation(calcName, te.getTable());
+					int i = 1;
+					while (calc != null)
+					{
+						calcName = orgName + i;
+						i++;
+						calc = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(solution).getScriptCalculation(calcName,
+							te.getTable());
+					}
+					ScriptCalculation s = solution.createNewScriptCalculation(nameValidator, te.getTable(), calcName);
+					s.setType(Column.allDefinedTypes[0]);
+					treeViewer.refresh(solution);
+					treeViewer.editElement(s, 0);
+					removeButton.setEnabled(true);
+					moveItem.setEnabled(true);
+					duplicateItem.setEnabled(true);
+					te.flagModified();
+				}
+			}
+			catch (RepositoryException ex)
+			{
+				ServoyLog.logError(ex);
+				MessageDialog.openError(getShell(), "Error", "Save failed: " + ex.getMessage());
+			}
+			catch (Exception e1)
+			{
+				ServoyLog.logError(e1);
+			}
+
+		}
+		else
+		{
+			MessageDialog.openError(getShell(), "Error", "You must select a solution or module where to add the calculation.");
+		}
 	}
 
 	/**

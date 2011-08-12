@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
 
 import java.util.ArrayList;
@@ -37,6 +37,8 @@ import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
@@ -45,6 +47,8 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.DuplicatePersistAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.MovePersistAction;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
@@ -59,6 +63,10 @@ import com.servoy.j2db.util.Debug;
 
 public class AggregationsComposite extends Composite
 {
+	private final Button removeButton;
+	private final MenuItem moveItem;
+	private final MenuItem duplicateItem;
+
 //	private final DataBindingContext m_bindingContext;
 	private final TreeViewer treeViewer;
 	private List<Solution> rows;
@@ -93,7 +101,55 @@ public class AggregationsComposite extends Composite
 		tree.setLinesVisible(true);
 		tree.setHeaderVisible(true);
 
-		final Button removeButton;
+		Menu menu = new Menu(getShell(), SWT.POP_UP);
+		MenuItem addItem = new MenuItem(menu, SWT.PUSH);
+		addItem.setText("Add aggregation");
+		addItem.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				addAggregation(te);
+			}
+		});
+		moveItem = new MenuItem(menu, SWT.PUSH);
+		moveItem.setText("Move Aggregation");
+		moveItem.setEnabled(false);
+		moveItem.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				TreeItem[] selection = treeViewer.getTree().getSelection();
+				if (selection != null && selection.length > 0 && selection[0].getData() instanceof AggregateVariable)
+				{
+					MovePersistAction action = new MovePersistAction(getShell());
+					action.setPersist((AggregateVariable)selection[0].getData());
+					action.run();
+					treeViewer.refresh();
+				}
+			}
+		});
+		duplicateItem = new MenuItem(menu, SWT.PUSH);
+		duplicateItem.setText("Duplicate aggregation");
+		duplicateItem.setEnabled(false);
+		duplicateItem.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				TreeItem[] selection = treeViewer.getTree().getSelection();
+				if (selection != null && selection.length > 0 && selection[0].getData() instanceof AggregateVariable)
+				{
+					DuplicatePersistAction action = new DuplicatePersistAction(getShell());
+					action.setPersist((AggregateVariable)selection[0].getData());
+					action.run();
+					treeViewer.refresh();
+				}
+			}
+		});
+		tree.setMenu(menu);
+
 		removeButton = new Button(container, SWT.NONE);
 		removeButton.setText("Remove");
 		removeButton.addSelectionListener(new SelectionAdapter()
@@ -136,11 +192,18 @@ public class AggregationsComposite extends Composite
 				TreeItem[] selection = treeViewer.getTree().getSelection();
 				if (selection != null && selection.length > 0 && selection[0].getData() instanceof AggregateVariable)
 				{
+					if (ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject().length > 1)
+					{
+						moveItem.setEnabled(true);
+						duplicateItem.setEnabled(true);
+					}
 					removeButton.setEnabled(true);
 				}
 				else
 				{
 					removeButton.setEnabled(false);
+					moveItem.setEnabled(false);
+					duplicateItem.setEnabled(false);
 				}
 			}
 		});
@@ -153,53 +216,7 @@ public class AggregationsComposite extends Composite
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				TreeItem[] selection = treeViewer.getTree().getSelection();
-				if (selection != null && selection.length > 0)
-				{
-					IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-					String agrName = "type_here"; //$NON-NLS-1$
-					int type = QueryAggregate.ALL_DEFINED_AGGREGATES[0];
-					Iterator<Column> it = t.getColumns().iterator();
-					if (it.hasNext()) //we need to make sure there is one column
-					{
-						Column column = it.next();
-						try
-						{
-							ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-							if (servoyProject != null)
-							{
-								Solution solution = null;
-								if (selection[0].getData() instanceof Solution) solution = (Solution)selection[0].getData();
-								else if (selection[0].getData() instanceof AggregateVariable)
-								{
-									solution = (Solution)((AggregateVariable)selection[0].getData()).getAncestor(IRepository.SOLUTIONS);
-								}
-								if (solution != null)
-								{
-									AggregateVariable aggregationVariable = solution.createNewAggregateVariable(nameValidator, t, agrName, type,
-										column.getDataProviderID());
-									treeViewer.refresh(solution);
-									treeViewer.editElement(aggregationVariable, 0);
-									removeButton.setEnabled(true);
-									te.flagModified();
-								}
-							}
-						}
-						catch (RepositoryException ex)
-						{
-							ServoyLog.logError(ex);
-							MessageDialog.openError(getShell(), "Error", "Save failed: " + ex.getMessage());
-						}
-						catch (Exception e1)
-						{
-							ServoyLog.logError(e1);
-						}
-					}
-				}
-				else
-				{
-					MessageDialog.openError(getShell(), "Error", "You must select a solution or module where to add the aggregate.");
-				}
+				addAggregation(te);
 			}
 		});
 		final GroupLayout groupLayout = new GroupLayout(container);
@@ -220,6 +237,57 @@ public class AggregationsComposite extends Composite
 
 		myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
+	}
+
+	private void addAggregation(TableEditor te)
+	{
+		TreeItem[] selection = treeViewer.getTree().getSelection();
+		if (selection != null && selection.length > 0)
+		{
+			IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
+			String agrName = "type_here"; //$NON-NLS-1$
+			int type = QueryAggregate.ALL_DEFINED_AGGREGATES[0];
+			Iterator<Column> it = te.getTable().getColumns().iterator();
+			if (it.hasNext()) //we need to make sure there is one column
+			{
+				Column column = it.next();
+				try
+				{
+					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+					if (servoyProject != null)
+					{
+						Solution solution = null;
+						if (selection[0].getData() instanceof Solution) solution = (Solution)selection[0].getData();
+						else if (selection[0].getData() instanceof AggregateVariable)
+						{
+							solution = (Solution)((AggregateVariable)selection[0].getData()).getAncestor(IRepository.SOLUTIONS);
+						}
+						if (solution != null)
+						{
+							AggregateVariable aggregationVariable = solution.createNewAggregateVariable(nameValidator, te.getTable(), agrName, type,
+								column.getDataProviderID());
+							treeViewer.refresh(solution);
+							treeViewer.editElement(aggregationVariable, 0);
+							removeButton.setEnabled(true);
+							te.flagModified();
+						}
+					}
+				}
+				catch (RepositoryException ex)
+				{
+					ServoyLog.logError(ex);
+					MessageDialog.openError(getShell(), "Error", "Save failed: " + ex.getMessage());
+				}
+				catch (Exception e1)
+				{
+					ServoyLog.logError(e1);
+				}
+			}
+		}
+		else
+		{
+			MessageDialog.openError(getShell(), "Error", "You must select a solution or module where to add the aggregate.");
+		}
 	}
 
 	@Override

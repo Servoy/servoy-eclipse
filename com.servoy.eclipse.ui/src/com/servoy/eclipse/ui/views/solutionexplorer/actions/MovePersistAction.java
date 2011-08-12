@@ -149,7 +149,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 		String tempName = persist.getUUID().toString();
 		String persistName = null;
 		if (persist instanceof ISupportName) persistName = ((ISupportName)persist).getName();
-		final IPersist duplicate = intelligentClonePersist(persist, tempName, location.getServoyProject(), nameValidator);
+		final IPersist duplicate = intelligentClonePersist(persist, tempName, location.getServoyProject(), nameValidator, false);
 		if (duplicate != null)
 		{
 			IRootObject rootObject = persist.getRootObject();
