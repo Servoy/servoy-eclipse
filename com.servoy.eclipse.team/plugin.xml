@@ -77,7 +77,12 @@
 			objectClass="com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode"
             id="com.servoy.eclipse.ui.views.SolutionExplorerView.tree">
 		 <visibility>
-			<objectState name="type" value="all_solutions"/>
+		 	<and>
+		 		<systemProperty name="servoy.application_server.startRepositoryAsTeamProvider" value="true"/>
+		 		<and>
+		 			<objectState name="type" value="all_solutions"/>
+		 		</and>
+		 	</and>
 		 </visibility>
 	     <action
 	           label="Checkout from Servoy repository"

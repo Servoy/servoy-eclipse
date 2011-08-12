@@ -489,6 +489,10 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 						return new EclipseUserManager();
 					}
 				});
+			// set the START_AS_TEAMPROVIDER_SETTING flag as system property, so
+			// our team plugin can use it in popupMenu enablement
+			System.setProperty(Settings.START_AS_TEAMPROVIDER_SETTING,
+				ServoyModel.getSettings().getProperty(Settings.START_AS_TEAMPROVIDER_SETTING, String.valueOf(Settings.START_AS_TEAMPROVIDER_DEFAULT)));
 		}
 		catch (Exception ex)
 		{
