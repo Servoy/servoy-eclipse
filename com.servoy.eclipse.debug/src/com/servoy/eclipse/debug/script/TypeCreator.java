@@ -671,7 +671,10 @@ public abstract class TypeCreator
 				type = context.getType("String");
 				break;
 			default :
-				type = context.getType("Object");
+				// for now don't return a type (so that anything is valid)
+				// mamybe we should return Array<byte> but then we also have to check column converters.
+				// should be in sync with TypeProvider.DataprovidersScopeCreator
+//				type = context.getType("Object");
 				break;
 		}
 		return type;
