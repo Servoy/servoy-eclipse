@@ -17,7 +17,6 @@
 package com.servoy.eclipse.model.nature;
 
 import java.io.File;
-import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -544,14 +543,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 	{
 		if (this.editingFlattenedSolution != null)
 		{
-			try
-			{
-				editingFlattenedSolution.close(null);
-			}
-			catch (IOException e)
-			{
-				ServoyLog.logError("Error closing editing flattened solution", e); //$NON-NLS-1$
-			}
+			editingFlattenedSolution.close(null);
 			// do not set editingFlattenedSolution to null, in several places a reference is kept (like in FormLabelProvider)
 			// make sure the editing flattened solution is filled ok, otherwise references to it cannot use it.
 			getEditingFlattenedSolution(loadLoginSolution, loadMainSolution);
