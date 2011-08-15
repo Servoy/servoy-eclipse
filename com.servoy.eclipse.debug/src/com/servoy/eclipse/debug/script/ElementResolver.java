@@ -386,6 +386,13 @@ public class ElementResolver implements IElementResolver
 							readOnly = false;
 							type = TypeCreator.getDataProviderType(context, provider);
 							resource = provider;
+							if (type == null)
+							{
+								// for now type can be null for media 
+								Property property = TypeCreator.createProperty(name, readOnly, null, null, image, resource);
+								property.setHideAllowed(hideAllowed);
+								return property;
+							}
 						}
 						else if (name.equals("getDataSource"))
 						{

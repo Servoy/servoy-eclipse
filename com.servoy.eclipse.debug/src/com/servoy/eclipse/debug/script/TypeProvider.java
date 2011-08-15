@@ -1030,6 +1030,12 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 					case IColumnTypes.TEXT :
 						property.setType(context.getTypeRef("String"));
 						break;
+					case IColumnTypes.MEDIA :
+						// for now don't return a type (so that anything is valid)
+						// mamybe we should return Array<byte> but then we also have to check column converters.
+						// should be in sync with TypeCreater.getDataProviderType
+//						property.setType(TypeUtil.arrayOf("byte"));
+						break;
 				}
 				ImageDescriptor image = COLUMN_IMAGE;
 				String description = "Column";
