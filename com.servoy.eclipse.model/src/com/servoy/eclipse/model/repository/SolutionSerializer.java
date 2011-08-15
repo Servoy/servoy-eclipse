@@ -537,13 +537,13 @@ public class SolutionSerializer
 			if (index != -1)
 			{
 				int lineEnd = sb.indexOf("\n", index); //$NON-NLS-1$
-				sb.replace(index + TYPEKEY.length() + 1, lineEnd, argumentType.getName());
+				sb.replace(index + TYPEKEY.length() + 1, lineEnd, '{' + argumentType.getName() + '}');
 			}
 			else
 			{
 				int startComment = sb.indexOf(SV_COMMENT_START);
 				int lineEnd = sb.indexOf("\n", startComment); //$NON-NLS-1$
-				sb.insert(lineEnd, "\n * " + TYPEKEY + " " + argumentType.getName() + "\n *"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				sb.insert(lineEnd, "\n * " + TYPEKEY + " {" + argumentType.getName() + "}\n *"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
 	}
