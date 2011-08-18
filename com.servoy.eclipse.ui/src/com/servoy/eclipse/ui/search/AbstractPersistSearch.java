@@ -19,7 +19,6 @@ package com.servoy.eclipse.ui.search;
 
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
@@ -98,35 +97,6 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 			}
 		}
 		return scopes.toArray(new IResource[scopes.size()]);
-	}
-
-
-	/**
-	 * @param project
-	 * @param scopes
-	 * @param hashSet
-	 */
-	private void searchForReferencedProjects(ServoyProject project, List<IResource> scopes, Solution referencedSolution, HashSet<Solution> processed)
-	{
-		if (processed.contains(project.getSolution())) return;
-		processed.add(project.getSolution());
-
-		Solution[] modules = project.getModules();
-
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-
-		for (Solution module : modules)
-		{
-			if (processed.contains(module)) continue;
-			if (module.equals(referencedSolution))
-			{
-				scopes.add(project.getProject());
-			}
-			else
-			{
-				searchForReferencedProjects(servoyModel.getServoyProject(module.getName()), scopes, referencedSolution, processed);
-			}
-		}
 	}
 
 	public boolean canRerun()
