@@ -527,6 +527,11 @@
      </extension>
      <extension
            point="org.eclipse.ui.bindings">
+       	<sequenceModifier
+			find="M1+M2+Z"
+			replace="M4+M2+Z"
+			platforms="cocoa,carbon">
+		</sequenceModifier>	
         <key
               commandId="com.servoy.eclipse.ui.search"
               schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
