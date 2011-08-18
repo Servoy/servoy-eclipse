@@ -77,10 +77,26 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 	{
 		List<IResource> scopes = new ArrayList<IResource>();
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		scopes.add(servoyModel.getServoyProject(sol.getName()).getProject());
-		ServoyProject currentProject = servoyModel.getActiveProject();
 
-		searchForReferencedProjects(currentProject, scopes, sol, new HashSet<Solution>());
+		// get the active solution and then all its modules (this is already flattened)
+		// this should include the start search project/solution itself.
+		ServoyProject currentProject = servoyModel.getActiveProject();
+		Solution[] allSolutions = currentProject.getModules();
+
+		for (Solution solution : allSolutions)
+		{
+			ServoyProject servoyProject = servoyModel.getServoyProject(solution.getName());
+			Solution[] modules = servoyProject.getModules();
+			for (Solution module : modules)
+			{
+				if (module.equals(sol))
+				{
+					// one module of this solution is the start solution, add this solution to the list
+					scopes.add(servoyProject.getProject());
+					break;
+				}
+			}
+		}
 		return scopes.toArray(new IResource[scopes.size()]);
 	}
 
