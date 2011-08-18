@@ -18,6 +18,10 @@
 package com.servoy.eclipse.ui.search;
 
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
@@ -71,16 +75,42 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 	 */
 	protected IResource[] getScopes(Solution sol)
 	{
+		List<IResource> scopes = new ArrayList<IResource>();
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		ServoyProject activeProject = servoyModel.getServoyProject(sol.getName());
-		Solution[] modules = activeProject.getModules();
+		scopes.add(servoyModel.getServoyProject(sol.getName()).getProject());
+		ServoyProject currentProject = servoyModel.getActiveProject();
 
-		IResource[] scopes = new IResource[modules.length];
-		for (int i = 0; i < modules.length; i++)
+		searchForReferencedProjects(currentProject, scopes, sol, new HashSet<Solution>());
+		return scopes.toArray(new IResource[scopes.size()]);
+	}
+
+
+	/**
+	 * @param project
+	 * @param scopes
+	 * @param hashSet
+	 */
+	private void searchForReferencedProjects(ServoyProject project, List<IResource> scopes, Solution referencedSolution, HashSet<Solution> processed)
+	{
+		if (processed.contains(project.getSolution())) return;
+		processed.add(project.getSolution());
+
+		Solution[] modules = project.getModules();
+
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+
+		for (Solution module : modules)
 		{
-			scopes[i] = servoyModel.getServoyProject(modules[i].getName()).getProject();
+			if (processed.contains(module)) continue;
+			if (module.equals(referencedSolution))
+			{
+				scopes.add(project.getProject());
+			}
+			else
+			{
+				searchForReferencedProjects(servoyModel.getServoyProject(module.getName()), scopes, referencedSolution, processed);
+			}
 		}
-		return scopes;
 	}
 
 	public boolean canRerun()
