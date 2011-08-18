@@ -124,6 +124,16 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		getClient().blockGUI(reason);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.j2db.IApplication#updateUI(int)
+	 */
+	public void updateUI(int time)
+	{
+		getClient().updateUI(time);
+	}
+
 	public void clearLoginForm()
 	{
 		getClient().clearLoginForm();
