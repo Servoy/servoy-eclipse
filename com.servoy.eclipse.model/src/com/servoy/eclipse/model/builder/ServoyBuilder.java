@@ -898,8 +898,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				try
 				{
-					addDeprecatedPropertyUsageMarker(persist, project, StaticContentSpecLoader.PROPERTY_ROWBGCOLORCALCULATION.getPropertyName(), type +
-						" '" + ((ISupportName)persist).getName() + "' has rowBGColorCalculation property set which is deprecated, use onRender event instead."); //$NON-NLS-1$ //$NON-NLS-2$
+					addDeprecatedPropertyUsageMarker(
+						persist,
+						project,
+						StaticContentSpecLoader.PROPERTY_ROWBGCOLORCALCULATION.getPropertyName(),
+						type +
+							" '" + ((ISupportName)persist).getName() + "' has rowBGColorCalculation property set which is deprecated, use CSS (odd/even/selected) or onRender event instead."); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				catch (Exception e)
 				{
