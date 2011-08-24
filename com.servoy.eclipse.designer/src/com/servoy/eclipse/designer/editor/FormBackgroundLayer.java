@@ -169,7 +169,7 @@ public class FormBackgroundLayer extends FreeformLayer
 			{
 				lookupname += '.' + form.getStyleClass();
 			}
-			Style style = styleSheet.getStyle(lookupname);
+			Style style = styleSheet.getRule(lookupname);
 			if (style != null)
 			{
 				background = styleSheet.getBackground(style);
