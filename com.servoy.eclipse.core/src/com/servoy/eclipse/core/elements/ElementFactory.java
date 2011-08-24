@@ -332,7 +332,7 @@ public class ElementFactory
 			{
 				lookupname += '.' + form.getStyleClass();
 			}
-			javax.swing.text.Style style = ss.getStyle(lookupname);
+			javax.swing.text.Style style = ss.getRule(lookupname);
 			if (style != null)
 			{
 				return ss.getBorder(style);
