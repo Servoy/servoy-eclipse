@@ -31,6 +31,7 @@ import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.SelectModelsCommandWrapper;
@@ -64,6 +65,14 @@ public class ElementTransferDropTarget extends AbstractTransferDropTargetListene
 	{
 		getCurrentEvent().detail = VisualFormEditor.REQ_DROP_LINK.equals(getTargetRequest().getType()) ? DND.DROP_LINK : DND.DROP_COPY;
 		super.handleDragOver();
+	}
+
+	@Override
+	protected void handleDrop()
+	{
+		super.handleDrop();
+		// active the part that was dropped on
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(workbenchPart);
 	}
 
 	@Override
