@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -77,7 +78,14 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 		getTreeViewer().setContentProvider(new FormOutlineContentProvider(form));
 		getTreeViewer().setLabelProvider(new FormContextDelegateLabelProvider(FormOutlineLabelprovider.INSTANCE, form));
 		getTreeViewer().setInput(form);
-		getTreeViewer().getTree().setMenu(viewer.getContextMenu().createContextMenu(getTreeViewer().getTree()));
+
+		// when the outline view is reparented to another shell, you cannot use the form editor context menu here
+		MenuManager menuManager = viewer.getContextMenu();
+		if (menuManager.getMenu() != null && !menuManager.getMenu().isDisposed() &&
+			getTreeViewer().getTree().getShell() == menuManager.getMenu().getParent().getShell())
+		{
+			getTreeViewer().getTree().setMenu(menuManager.createContextMenu(getTreeViewer().getTree()));
+		}
 	}
 
 	@Override
