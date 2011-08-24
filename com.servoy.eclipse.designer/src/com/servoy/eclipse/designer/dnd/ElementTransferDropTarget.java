@@ -30,13 +30,10 @@ import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.SelectModelsCommandWrapper;
-import com.servoy.eclipse.designer.property.SetValueCommand;
 
 /**
  * Base drop target for elements in the form editor.
@@ -70,45 +67,6 @@ public class ElementTransferDropTarget extends AbstractTransferDropTargetListene
 	}
 
 	@Override
-	protected void handleDrop()
-	{
-		super.handleDrop();
-		// active the part that was dropped on
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(workbenchPart);
-		final Request targetRequest = getTargetRequest();
-		Display.getDefault().asyncExec(new Runnable()
-		{
-			// select the object later, it has not been created yet
-			public void run()
-			{
-				selectAddedObject(getViewer(), targetRequest);
-			}
-		});
-	}
-
-	/*
-	 * Add the newly created object to the viewer's selected objects.
-	 */
-	protected void selectAddedObject(EditPartViewer viewer, Request targetRequest)
-	{
-		if (targetRequest instanceof CreateRequest)
-		{
-			Object model = ((CreateRequest)targetRequest).getNewObject();
-			if (model == null || viewer == null)
-			{
-				return;
-			}
-			Object editpart = viewer.getEditPartRegistry().get(model);
-			if (editpart instanceof EditPart)
-			{
-				// Force the new object to get positioned in the viewer.
-				viewer.flush();
-				viewer.select((EditPart)editpart);
-			}
-		}
-	}
-
-	@Override
 	public void dragLeave(DropTargetEvent event)
 	{
 		setCurrentEvent(event);
@@ -134,11 +92,6 @@ public class ElementTransferDropTarget extends AbstractTransferDropTargetListene
 				getSnapToHelper().snapRectangle(request, PositionConstants.NSEW, baseRect, result);
 				request.setLocation(result.getLocation());
 				request.setSize(result.getSize());
-			}
-			if (request.getSize() != null)
-			{
-				request.getExtendedData().put(SetValueCommand.REQUEST_PROPERTY_PREFIX + "size",
-					new java.awt.Dimension(request.getSize().width, request.getSize().height));
 			}
 		}
 	}

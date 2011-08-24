@@ -129,7 +129,7 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 			}
 			Point location = new Point(minx + ((ChangeBoundsRequest)request).getMoveDelta().x, miny + ((ChangeBoundsRequest)request).getMoveDelta().y);
 			return new FormPlaceElementCommand(application, (ISupportChilds)persist.getAncestor(IRepository.FORMS), objects, request.getType(),
-				request.getExtendedData(), new DefaultFieldPositioner(location), null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
+				request.getExtendedData(), new DefaultFieldPositioner(location), null, null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 		}
 		return null;
 	}
@@ -234,7 +234,7 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 			}
 
 			return new FormPlaceElementCommand(application, (ISupportChilds)pasteParent, clipboardContents, request.getType(), request.getExtendedData(),
-				fieldPositioner, null, context);
+				fieldPositioner, null, null, context);
 		}
 
 		public Command getCommand()

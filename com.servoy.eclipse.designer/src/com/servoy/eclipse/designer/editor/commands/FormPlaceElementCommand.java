@@ -16,8 +16,11 @@
  */
 package com.servoy.eclipse.designer.editor.commands;
 
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.beans.BeanInfo;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +45,7 @@ import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
+import com.servoy.eclipse.designer.property.FormElementGroupPropertySource;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
@@ -81,6 +85,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Command to place an element in the form designer.
@@ -102,6 +107,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 	private final Map<Object, Object> objectProperties;
 	private final Object requestType;
 	private final IApplication application;
+	private final org.eclipse.draw2d.geometry.Dimension size;
 
 	/**
 	 * Command to add a field.
@@ -109,10 +115,11 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 	 * @param parent
 	 * @param location
 	 * @param object
+	 * @param size 
 	 * @param
 	 */
 	public FormPlaceElementCommand(IApplication application, ISupportChilds parent, Object object, Object requestType, Map<Object, Object> objectProperties,
-		IFieldPositioner fieldPositioner, Point defaultLocation, IPersist context)
+		IFieldPositioner fieldPositioner, Point defaultLocation, org.eclipse.draw2d.geometry.Dimension size, IPersist context)
 	{
 		this.application = application;
 		this.parent = parent;
@@ -121,6 +128,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 		this.objectProperties = objectProperties;
 		this.fieldPositioner = fieldPositioner;
 		this.defaultLocation = defaultLocation;
+		this.size = size;
 		this.context = context;
 	}
 
@@ -145,13 +153,18 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 			// set data in request.getExtendedData map as properties in the created persists
 			if (models != null)
 			{
+				if (size != null)
+				{
+					// resize all created models relative to the current bounding box
+					applySizeToModels(size, models);
+				}
 				for (Object model : models)
 				{
 					if (objectProperties != null && objectProperties.size() > 0)
 					{
 						Command setPropertiesCommand = SetValueCommand.createSetPropertiesComnmand(
 							(IPropertySource)Platform.getAdapterManager().getAdapter(model, IPropertySource.class), objectProperties);
-						if (setPropertiesCommand != null)
+						if (setPropertiesCommand != null)//FIXME: why size?
 						{
 							setPropertiesCommand.execute();
 						}
@@ -163,6 +176,72 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 		catch (RepositoryException ex)
 		{
 			ServoyLog.logError(ex);
+		}
+	}
+
+	/**
+	 * @param size
+	 * @param models
+	 */
+	private static void applySizeToModels(org.eclipse.draw2d.geometry.Dimension size, Object[] models)
+	{
+		Rectangle oldBounds = Utils.getBounds(Arrays.asList(models).iterator());
+		if (size.width == oldBounds.width && size.height == oldBounds.height || oldBounds.width == 0 || oldBounds.height == 0)
+		{
+			return;
+		}
+
+		float factorW = size.width / (float)oldBounds.width;
+		float factorH = size.height / (float)oldBounds.height;
+
+		for (Object model : models)
+		{
+			if (!(model instanceof ISupportBounds))
+			{
+				continue;
+			}
+			ISupportBounds element = (ISupportBounds)model;
+
+			Dimension oldElementSize = element.getSize();
+			java.awt.Point oldElementLocation = element.getLocation();
+
+			Dimension newElementSize = new Dimension((int)(oldElementSize.width * factorW), (int)(oldElementSize.height * factorH));
+
+			int newX;
+			if (oldElementLocation.x + oldElementSize.width == oldBounds.x + oldBounds.width)
+			{
+				// element was attached to the right side, keep it there
+				newX = oldBounds.x + size.width - newElementSize.width;
+			}
+			else
+			{
+				// move relative to size factor
+				newX = oldBounds.x + (int)((oldElementLocation.x - oldBounds.x) * factorW);
+			}
+			int newY;
+			if (oldElementLocation.y + oldElementSize.height == oldBounds.y + oldBounds.height)
+			{
+				// element was attached to the bottom side, keep it there
+				newY = oldBounds.y + size.height - newElementSize.height;
+			}
+			else
+			{
+				// move relative to size factor
+				newY = oldBounds.y + (int)((oldElementLocation.y - oldBounds.y) * factorH);
+			}
+			java.awt.Point location = new java.awt.Point(newX, newY);
+
+			if (element instanceof FormElementGroup)
+			{
+				FormElementGroupPropertySource formElementGroupPropertySource = new FormElementGroupPropertySource((FormElementGroup)element, null);
+				formElementGroupPropertySource.setSize(newElementSize);
+				formElementGroupPropertySource.setLocation(location);
+			}
+			else
+			{
+				element.setSize(newElementSize);
+				element.setLocation(location);
+			}
 		}
 	}
 
@@ -237,7 +316,8 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 		if (parent instanceof Form && VisualFormEditor.REQ_PLACE_TEMPLATE.equals(requestType))
 		{
 			setLabel("place template");
-			return ElementFactory.applyTemplate((Form)parent, (TemplateElementHolder)object, location, false);
+			return ElementFactory.applyTemplate((Form)parent, (TemplateElementHolder)object, location, false,
+				new DesignerPreferences().getTemplateElementsGrouping());
 		}
 
 		if (object instanceof Object[] && ((Object[])object).length > 0)
@@ -328,7 +408,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 				{
 					setLabel("place template");
 					return ElementFactory.applyTemplate((ISupportFormElements)parent, new TemplateElementHolder((Template)template, dragData.element),
-						location, false);
+						location, false, new DesignerPreferences().getTemplateElementsGrouping());
 				}
 			}
 			ServoyLog.logWarning("place template: template " + dragData.uuid + " not found", null);

@@ -282,7 +282,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			else
 			{
 				// create form from template
-				ElementFactory.applyTemplate(form, new TemplateElementHolder(template), null, true);
+				ElementFactory.applyTemplate(form, new TemplateElementHolder(template), null, true, new DesignerPreferences().getTemplateElementsGrouping());
 
 				// set overridden values, selected by the user
 				form.setName(newFormWizardPage.getFormName());

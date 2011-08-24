@@ -857,15 +857,15 @@ public class ElementFactory
 		return object;
 	}
 
-	public static Object[] applyTemplate(ISupportFormElements parent, TemplateElementHolder templateHolder, Point location, final boolean setFormProperties)
-		throws RepositoryException
+	public static Object[] applyTemplate(ISupportFormElements parent, TemplateElementHolder templateHolder, Point location, final boolean setFormProperties,
+		boolean grouping) throws RepositoryException
 	{
 		IDeveloperRepository repository = (IDeveloperRepository)parent.getRootObject().getRepository();
 		final Map<IPersist, String> persists = new HashMap<IPersist, String>(); // created persist -> name
 		try
 		{
 			JSONObject json = new ServoyJSONObject(templateHolder.template.getContent(), false);
-
+			
 			// location
 			final java.awt.Point awtLocation;
 			if (location == null)
@@ -990,7 +990,8 @@ public class ElementFactory
 				}
 			}
 			else
-			{ // add elements to existing form
+			{
+				// add elements to existing form
 				if (persists.size() > 1 && parent instanceof Form) // group the elements if there is more than 1 and we are not setting up an entire form
 				{
 					// clear the groupID first, to make it not clash with the current template
@@ -1018,6 +1019,11 @@ public class ElementFactory
 						{
 						}
 						groupName = templateName + (i + 1);
+					}
+
+					if (!grouping)
+					{
+						return persists.keySet().toArray();
 					}
 
 					// set the group id

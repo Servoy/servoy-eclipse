@@ -57,10 +57,10 @@ public class FormPlaceFieldCommand extends FormPlaceElementCommand
 	 * @param object
 	 */
 	public FormPlaceFieldCommand(IApplication application, ISupportChilds parent, IPersist formContext, Object object, Object requestType,
-		Map<Object, Object> objectProperties, IFieldPositioner fieldPositioner, Point defaultLocation, boolean placeAsLabels, boolean placeWithLabels,
-		boolean placeHorizontal, boolean fillText, boolean fillName, IPersist context)
+		Map<Object, Object> objectProperties, IFieldPositioner fieldPositioner, Point defaultLocation, org.eclipse.draw2d.geometry.Dimension size,
+		boolean placeAsLabels, boolean placeWithLabels, boolean placeHorizontal, boolean fillText, boolean fillName, IPersist context)
 	{
-		super(application, parent, object, requestType, objectProperties, fieldPositioner, defaultLocation, context);
+		super(application, parent, object, requestType, objectProperties, fieldPositioner, defaultLocation, size, context);
 		this.formContext = formContext;
 		this.fieldPositioner = fieldPositioner;
 		this.placeAsLabels = placeAsLabels;

@@ -52,6 +52,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private Button showColumnsInDbOrderButton;
 	private Button showColumnsInAlphabeticOrderButton;
 	private Label enhancedSecurityLabel;
+	private Button groupTemplateElementsButton;
 
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
@@ -146,10 +147,18 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showColumnsInDbOrderButton = new Button(columnsOrderGroup, SWT.RADIO);
 		showColumnsInDbOrderButton.setText("in database defined order");
 
+		Group templateGroupingGroup = new Group(wizardOptionsContainer, SWT.NONE);
+		templateGroupingGroup.setText("Template Elements Grouping");
+		templateGroupingGroup.setLayout(new GridLayout(1, true));
+
+		groupTemplateElementsButton = new Button(templateGroupingGroup, SWT.CHECK);
+		groupTemplateElementsButton.setText("Group the elements of a template");
+
 		initializeFields();
 
 		return rootContainer;
 	}
+
 
 	protected void initializeFields()
 	{
@@ -160,6 +169,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		openFirstFormDesignerButton.setSelection(prefs.getOpenFirstFormDesigner());
 		showColumnsInDbOrderButton.setSelection(prefs.getShowColumnsInDbOrder());
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
+		groupTemplateElementsButton.setSelection(prefs.getTemplateElementsGrouping());
 	}
 
 	@Override
@@ -171,6 +181,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		openFirstFormDesignerButton.setSelection(DesignerPreferences.OPEN_FIRST_FORM_DESIGNER_DEFAULT);
 		showColumnsInDbOrderButton.setSelection(DesignerPreferences.SHOW_COLUMNS_IN_DB_ORDER_DEFAULT);
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
+		groupTemplateElementsButton.setSelection(DesignerPreferences.TEMPLATE_ELEMENT_GROUPING_DEFAULT);
 
 		super.performDefaults();
 	}
@@ -185,6 +196,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.CLOSE_EDITORS_ON_EXIT, closeEditorOnExitButton.getSelection());
 		prefs.setOpenFirstFormDesigner(openFirstFormDesignerButton.getSelection());
 		prefs.setShowColumnsInDbOrder(showColumnsInDbOrderButton.getSelection());
+		prefs.setTemplateElementsGrouping(groupTemplateElementsButton.getSelection());
 
 		prefs.save();
 

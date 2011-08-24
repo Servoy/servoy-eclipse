@@ -76,13 +76,13 @@ public class FormEditPolicy extends ComponentEditPolicy
 			Object data = request instanceof DataRequest ? ((DataRequest)request).getData() : null;
 			final org.eclipse.draw2d.geometry.Point location = request instanceof DataRequest ? ((DataRequest)request).getlocation() : null;
 			command = new FormPlaceElementCommand(application, form, data, request.getType(), request.getExtendedData(), fieldPositioner, location == null
-				? null : location.getSWTPoint(), form);
+				? null : location.getSWTPoint(), null, form);
 		}
 		else if (VisualFormEditor.REQ_PLACE_PORTAL.equals(request.getType()) && request instanceof DataFieldRequest)
 		{
 			DataFieldRequest dataFieldRequest = ((DataFieldRequest)request);
 			command = new FormPlacePortalCommand(application, form, dataFieldRequest.getData(), dataFieldRequest.getType(), dataFieldRequest.getExtendedData(),
-				fieldPositioner, dataFieldRequest.getlocation() == null ? null : dataFieldRequest.getlocation().getSWTPoint(), dataFieldRequest.fillText,
+				fieldPositioner, dataFieldRequest.getlocation() == null ? null : dataFieldRequest.getlocation().getSWTPoint(), null, dataFieldRequest.fillText,
 				dataFieldRequest.fillName, form);
 		}
 		else if (VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()) && request instanceof DataFieldRequest)
@@ -90,7 +90,7 @@ public class FormEditPolicy extends ComponentEditPolicy
 			DataFieldRequest dataFieldRequest = ((DataFieldRequest)request);
 			command = new FormPlaceFieldCommand(application, form, form, dataFieldRequest.getData(), dataFieldRequest.getType(),
 				dataFieldRequest.getExtendedData(), fieldPositioner, dataFieldRequest.getlocation() == null ? null
-					: dataFieldRequest.getlocation().getSWTPoint(), dataFieldRequest.placeAsLabels, dataFieldRequest.placeWithLabels,
+					: dataFieldRequest.getlocation().getSWTPoint(), null, dataFieldRequest.placeAsLabels, dataFieldRequest.placeWithLabels,
 				dataFieldRequest.placeHorizontal, dataFieldRequest.fillText, dataFieldRequest.fillName, form);
 		}
 		else if ((VisualFormEditor.REQ_COPY.equals(request.getType()) || VisualFormEditor.REQ_CUT.equals(request.getType())) && request instanceof GroupRequest)

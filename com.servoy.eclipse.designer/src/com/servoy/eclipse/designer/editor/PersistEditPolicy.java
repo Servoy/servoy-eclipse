@@ -142,7 +142,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 			{
 				DataFieldRequest dataFieldRequest = ((DataFieldRequest)request);
 				command = new FormPlaceFieldCommand(application, portal, (IPersist)formEditPart.getModel(), dataFieldRequest.getData(),
-					dataFieldRequest.getType(), dataFieldRequest.getExtendedData(), fieldPositioner, fieldsLocation, dataFieldRequest.placeAsLabels,
+					dataFieldRequest.getType(), dataFieldRequest.getExtendedData(), fieldPositioner, fieldsLocation, null, dataFieldRequest.placeAsLabels,
 					dataFieldRequest.placeWithLabels, dataFieldRequest.placeHorizontal, dataFieldRequest.fillText, dataFieldRequest.fillName,
 					(IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 			}
@@ -150,7 +150,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 			{
 				// other element
 				command = new FormPlaceElementCommand(application, portal, data, request.getType(), request.getExtendedData(), fieldPositioner, fieldsLocation,
-					(IPersist)(formEditPart == null ? null : formEditPart.getModel()));
+					null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 			}
 		}
 
@@ -158,7 +158,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 		{
 			// add tab to existing tab panel
 			command = new FormPlaceElementCommand(application, (TabPanel)persist, ((DataRequest)request).getData(), request.getType(),
-				request.getExtendedData(), null, null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
+				request.getExtendedData(), null, null, null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 		}
 		else if ((VisualFormEditor.REQ_SET_PROPERTY.equals(request.getType()) && request instanceof SetPropertyRequest))
 		{
@@ -297,7 +297,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 				{
 					return new FormPlaceElementCommand(application, (TabPanel)((IPersist)child).getAncestor(IRepository.TABPANELS),
 						new Object[] { new ElementFactory.RelatedForm(null, (Form)persist) }, VisualFormEditor.REQ_PLACE_TAB, null, null,
-						dropRequest.getlocation().getSWTPoint(), (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
+						dropRequest.getlocation().getSWTPoint(), null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 				}
 			}
 			catch (RepositoryException e)

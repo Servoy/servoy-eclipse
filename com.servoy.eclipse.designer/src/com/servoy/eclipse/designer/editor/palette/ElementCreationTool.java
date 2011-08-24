@@ -23,7 +23,6 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PrecisionRectangle;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.LayerConstants;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.SnapToHelper;
@@ -32,7 +31,6 @@ import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.gef.requests.CreationFactory;
 import org.eclipse.gef.tools.CreationTool;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.designer.editor.AlignmentFeedbackHelper;
 import com.servoy.eclipse.designer.editor.CreateElementRequest;
@@ -187,46 +185,6 @@ public class ElementCreationTool extends CreationTool
 		if (getCreateRequest() instanceof CreateElementRequest)
 		{
 			((CreateElementRequest)getCreateRequest()).setResizable(isInState(STATE_DRAG_IN_PROGRESS));
-		}
-	}
-
-	/**
-	 * Executes the current command and selects the newly created object. The
-	 * button that was released to cause this creation is passed in, but since
-	 * {@link #handleButtonDown(int)} goes into the invalid state if the button
-	 * pressed is not button 1, this will always be button 1.
-	 * 
-	 * @param button
-	 *            the button that was pressed
-	 */
-	@Override
-	protected void performCreation(int button)
-	{
-		final EditPartViewer viewer = getCurrentViewer();
-		executeCurrentCommand();
-		Display.getDefault().asyncExec(new Runnable()
-		{
-			// select the object later, it has not been created yet
-			public void run()
-			{
-				selectAddedObject(viewer);
-			}
-		});
-	}
-
-	/*
-	 * Add the newly created object to the viewer's selected objects.
-	 */
-	protected void selectAddedObject(EditPartViewer viewer)
-	{
-		final Object model = getCreateRequest().getNewObject();
-		if (model == null || viewer == null) return;
-		Object editpart = viewer.getEditPartRegistry().get(model);
-		if (editpart instanceof EditPart)
-		{
-			// Force the new object to get positioned in the viewer.
-			viewer.flush();
-			viewer.select((EditPart)editpart);
 		}
 	}
 }

@@ -260,7 +260,7 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 		}
 	}
 
-	protected void setLocation(Point p)
+	public void setLocation(Point p)
 	{
 		Point oldLocation = group.getLocation();
 		int dx = p.x - oldLocation.x;
@@ -277,7 +277,7 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 		}
 	}
 
-	protected void setSize(Dimension d)
+	public void setSize(Dimension d)
 	{
 		Rectangle oldBounds = group.getBounds();
 		if (d.width == oldBounds.width && d.height == oldBounds.height || oldBounds.width == 0 || oldBounds.height == 0)

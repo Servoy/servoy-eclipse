@@ -46,9 +46,10 @@ public class FormPlacePortalCommand extends FormPlaceElementCommand
 	 * @param object
 	 */
 	public FormPlacePortalCommand(IApplication application, ISupportFormElements parent, Object object, Object requestType,
-		Map<Object, Object> objectProperties, IFieldPositioner fieldPositioner, Point defaultLocation, boolean fillText, boolean fillName, IPersist context)
+		Map<Object, Object> objectProperties, IFieldPositioner fieldPositioner, Point defaultLocation, org.eclipse.draw2d.geometry.Dimension size,
+		boolean fillText, boolean fillName, IPersist context)
 	{
-		super(application, parent, object, requestType, objectProperties, fieldPositioner, defaultLocation, context);
+		super(application, parent, object, requestType, objectProperties, fieldPositioner, defaultLocation, size, context);
 		this.fillText = fillText;
 		this.fillName = fillName;
 	}
