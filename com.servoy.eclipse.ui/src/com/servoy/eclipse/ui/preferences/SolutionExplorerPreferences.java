@@ -343,6 +343,8 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 		rdHorizontalAlignement.setSelection(false);
 		navigationContextMenu.setSelection(false);
 		treeHandlingContextMenu.setSelection(false);
+		chOpenAsDefaultAction.setSelection(true);
+		chIncludeModules.setSelection(false);
 		IViewReference solexRef = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findViewReference(SolutionExplorerView.PART_ID);
 		SolutionExplorerView solexView = null;
 		if (solexRef != null)
