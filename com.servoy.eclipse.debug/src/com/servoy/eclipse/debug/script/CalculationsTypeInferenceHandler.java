@@ -20,7 +20,9 @@ package com.servoy.eclipse.debug.script;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
 import org.eclipse.dltk.javascript.ast.Script;
+import org.eclipse.dltk.javascript.typeinference.IValueCollection;
 import org.eclipse.dltk.javascript.typeinference.IValueReference;
+import org.eclipse.dltk.javascript.typeinference.ValueCollectionFactory;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInferenceHandler;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInferencerVisitor;
 
@@ -50,8 +52,17 @@ public class CalculationsTypeInferenceHandler implements ITypeInferenceHandler
 	{
 		if (node instanceof FunctionStatement && (((FunctionStatement)node).getParent() instanceof Script))
 		{
-			visitor.visitFunctionBody((FunctionStatement)node);
-			return visitor.peekContext().getChild(((FunctionStatement)node).getName().getName());
+			IValueCollection parent = visitor.peekContext();
+			visitor.enterContext(ValueCollectionFactory.createScopeValueCollection(parent));
+			try
+			{
+				visitor.visitFunctionBody((FunctionStatement)node);
+			}
+			finally
+			{
+				visitor.leaveContext();
+			}
+			return parent.getChild(((FunctionStatement)node).getName().getName());
 		}
 
 		return ITypeInferenceHandler.CONTINUE;
