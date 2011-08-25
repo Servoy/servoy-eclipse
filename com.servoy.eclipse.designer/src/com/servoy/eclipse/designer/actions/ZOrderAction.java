@@ -42,6 +42,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.UUID;
@@ -68,6 +69,10 @@ public class ZOrderAction extends DesignerSelectionAction
 
 		public OrderableElement(Object element, boolean needsAdjustement)
 		{
+			if (element instanceof IFlattenedPersistWrapper)
+			{
+				element = ((IFlattenedPersistWrapper)element).getWrappedPersist();
+			}
 			this.element = element;
 			if (element instanceof IFormElement)
 			{
@@ -434,8 +439,10 @@ public class ZOrderAction extends DesignerSelectionAction
 					int index = oe.zIndex - oe.nrOfSubElements + 1;
 					for (IFormElement bc : groupElements)
 					{
-						requests.put(editPartMap.get(bc), new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY,
-							StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), Integer.valueOf(index++), "")); //$NON-NLS-1$
+						requests.put(
+							editPartMap.get(bc),
+							new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
+								Integer.valueOf(index++), "")); //$NON-NLS-1$
 					}
 				}
 			}
