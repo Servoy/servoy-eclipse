@@ -764,9 +764,16 @@ public abstract class TypeCreator
 					Class< ? > paramClass = member.getParameterTypes()[i];
 					String name = null;
 					String type = null;
+					boolean optional = false;
 					if (parameterNames != null)
 					{
-						if (paramClass.isArray())
+						name = parameterNames[i];
+						if (name.startsWith("[") && name.endsWith("]"))
+						{
+							name = name.substring(1, name.length() - 1);
+							optional = true;
+						}
+						else if (paramClass.isArray())
 						{
 							type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getComponentType().getName()) + "[]";
 						}
@@ -774,12 +781,7 @@ public abstract class TypeCreator
 						{
 							type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getName());
 						}
-						name = parameterNames[i];
 
-						if (name.startsWith("[") && name.endsWith("]"))
-						{
-							name = name.substring(1, name.length() - 1);
-						}
 					}
 					else if (paramClass.isArray())
 					{
@@ -792,7 +794,7 @@ public abstract class TypeCreator
 						type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getName());
 						name = type;
 					}
-					parameters[i] = new ScriptParameter(name, type, false, false);
+					parameters[i] = new ScriptParameter(name, type, optional, false);
 				}
 			}
 		}
