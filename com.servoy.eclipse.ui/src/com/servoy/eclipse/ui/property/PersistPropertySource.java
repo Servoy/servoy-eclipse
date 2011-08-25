@@ -227,8 +227,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			new ComboboxPropertyModel<Integer>(
 				new Integer[] { new Integer(Field.TEXT_FIELD), new Integer(Field.TEXT_AREA), new Integer(Field.RTF_AREA), new Integer(Field.HTML_AREA), new Integer(
 					Field.TYPE_AHEAD), new Integer(Field.COMBOBOX), new Integer(Field.RADIOS), new Integer(Field.CHECKS), new Integer(Field.CALENDAR), new Integer(
-					Field.IMAGE_MEDIA), new Integer(Field.PASSWORD) },
-				new String[] { "TEXT_FIELD", "TEXT_AREA", "RTF_AREA", "HTML_AREA", "TYPE_AHEAD", "COMBOBOX", "RADIOS", "CHECK", "CALENDAR", "IMAGE_MEDIA", "PASSWORD" }),
+					Field.IMAGE_MEDIA), new Integer(Field.PASSWORD), new Integer(Field.LIST_BOX), new Integer(Field.MULTI_SELECTION_LIST_BOX) },
+				new String[] { "TEXT_FIELD", "TEXT_AREA", "RTF_AREA", "HTML_AREA", "TYPE_AHEAD", "COMBOBOX", "RADIOS", "CHECK", "CALENDAR", "IMAGE_MEDIA", "PASSWORD", "LISTBOX", "MULTISELECTION_LISTBOX" }),
 			Messages.LabelUnresolved);
 
 		BORDER_STRING_CONVERTER = new IPropertyConverter<String, Border>()

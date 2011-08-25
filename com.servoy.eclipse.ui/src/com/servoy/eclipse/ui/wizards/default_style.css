@@ -29,6 +29,8 @@ check {}
 
 radio {}
 
+listbox {}
+
 label {
 	color: #727784;
 }
@@ -71,6 +73,7 @@ label.gridheader,
 field.gridcell,
 check.gridcell,
 radio.gridcell,
+listbox.gridcell,
 combobox.gridcell,
 label.gridcell,
 button.gridcell {

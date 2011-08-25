@@ -96,6 +96,8 @@ public class VisualFormEditorPaletteFactory
 	private static final String ELEMENTS_IMAGE_MEDIA_ID = "media field";
 	private static final String ELEMENTS_TYPE_AHEAD_ID = "type ahead";
 	private static final String ELEMENTS_PORTAL_ID = "portal";
+	private static final String ELEMENTS_LISTBOX_ID = "listbox";
+	private static final String ELEMENTS_MULTISELECT_LISTBOX_ID = "multiselection listbox";
 	private static final String[] ELEMENTS_IDS = new String[] {
 	/* */ELEMENTS_BUTTON_ID,
 	/* */ELEMENTS_RADIOS_ID,
@@ -109,6 +111,8 @@ public class VisualFormEditorPaletteFactory
 	/* */ELEMENTS_CALENDAR_ID,
 	/* */ELEMENTS_IMAGE_MEDIA_ID,
 	/* */ELEMENTS_COMBOBOX_ID,
+	/* */ELEMENTS_LISTBOX_ID,
+	/* */ELEMENTS_MULTISELECT_LISTBOX_ID,
 	/* */ELEMENTS_TYPE_AHEAD_ID,
 	/* */ELEMENTS_PORTAL_ID
 	/* */};
@@ -392,6 +396,16 @@ public class VisualFormEditorPaletteFactory
 		{
 			icon = Activator.loadImageDescriptorFromBundle("bhdropdownlisticon.gif");
 			displayType = Field.TYPE_AHEAD;
+		}
+		else if (ELEMENTS_LISTBOX_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("listbox.png");
+			displayType = Field.LIST_BOX;
+		}
+		else if (ELEMENTS_MULTISELECT_LISTBOX_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("listbox.png");
+			displayType = Field.MULTI_SELECTION_LIST_BOX;
 		}
 
 		else if (ELEMENTS_PORTAL_ID.equals(id))

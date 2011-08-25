@@ -111,6 +111,7 @@ import com.servoy.j2db.ui.IScriptDataComboboxMethods;
 import com.servoy.j2db.ui.IScriptDataLabelMethods;
 import com.servoy.j2db.ui.IScriptDataPasswordMethods;
 import com.servoy.j2db.ui.IScriptFieldMethods;
+import com.servoy.j2db.ui.IScriptListBoxMethods;
 import com.servoy.j2db.ui.IScriptMediaInputFieldMethods;
 import com.servoy.j2db.ui.IScriptPortalComponentMethods;
 import com.servoy.j2db.ui.IScriptRadioMethods;
@@ -1177,6 +1178,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			addType("RuntimeSplitPane", IScriptSplitPaneMethods.class);
 			typeNames.put(IScriptPortalComponentMethods.class.getSimpleName(), "RuntimePortal");
 			addType("RuntimePortal", IScriptPortalComponentMethods.class);
+			typeNames.put(IScriptListBoxMethods.class.getSimpleName(), "RuntimeListBox");
+			addType("RuntimeListBox", IScriptListBoxMethods.class);
 
 			addType("RuntimeComponent", IScriptBaseMethods.class);
 		}

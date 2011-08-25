@@ -68,6 +68,7 @@ import com.servoy.j2db.ui.IScriptDataComboboxMethods;
 import com.servoy.j2db.ui.IScriptDataLabelMethods;
 import com.servoy.j2db.ui.IScriptDataPasswordMethods;
 import com.servoy.j2db.ui.IScriptFieldMethods;
+import com.servoy.j2db.ui.IScriptListBoxMethods;
 import com.servoy.j2db.ui.IScriptMediaInputFieldMethods;
 import com.servoy.j2db.ui.IScriptPortalComponentMethods;
 import com.servoy.j2db.ui.IScriptRadioMethods;
@@ -345,6 +346,9 @@ public class ElementUtil
 					return IScriptDataCalendarMethods.class;
 				case Field.IMAGE_MEDIA :
 					return IScriptMediaInputFieldMethods.class;
+				case Field.LIST_BOX :
+				case Field.MULTI_SELECTION_LIST_BOX :
+					return IScriptListBoxMethods.class;
 				default :
 					return IScriptFieldMethods.class;
 			}
