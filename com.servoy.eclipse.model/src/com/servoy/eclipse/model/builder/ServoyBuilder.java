@@ -1502,6 +1502,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							// check if not outside form
 							Form form = (Form)o.getAncestor(IRepository.FORMS);
+							form = flattenedSolution.getFlattenedForm(form);
 							if (form != null)
 							{
 								Point location = ((BaseComponent)o).getLocation();
