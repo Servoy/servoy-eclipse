@@ -103,9 +103,9 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 			});
 		}
 
-		// Form editor options
+		// Servoy Design Perspective
 		Group formEditorOptionsContainer = new Group(rootContainer, SWT.NONE);
-		formEditorOptionsContainer.setText("Form Editor Options");
+		formEditorOptionsContainer.setText("Servoy Design Perspective Options");
 		formEditorOptionsContainer.setLayout(new GridLayout(2, false));
 		formEditorOptionsContainer.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
