@@ -203,14 +203,9 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 			if (mappings.size() > 0)
 			{
 				SimpleResourceMapping[] aSimpleResourceMapping = mappings.toArray(new SimpleResourceMapping[0]);
-				Object[] aResources = new IResource[aSimpleResourceMapping.length];
-				int i = 0;
-				for (SimpleResourceMapping srMapping : aSimpleResourceMapping)
-				{
-					aResources[i++] = srMapping.getModelObject();
-				}
-				CompositeResourceMapping compositeResourceMapping = new CompositeResourceMapping(ModelProvider.RESOURCE_MODEL_PROVIDER_ID, aResources,
-					aSimpleResourceMapping);
+
+				CompositeResourceMapping compositeResourceMapping = new CompositeResourceMapping(ModelProvider.RESOURCE_MODEL_PROVIDER_ID,
+					aSimpleResourceMapping[0].getModelObject(), aSimpleResourceMapping);
 
 				return compositeResourceMapping;
 			}
