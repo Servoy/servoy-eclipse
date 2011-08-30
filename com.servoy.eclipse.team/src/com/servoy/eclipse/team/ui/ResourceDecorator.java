@@ -13,13 +13,16 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.team.ui;
 
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.mapping.ResourceMapping;
+import org.eclipse.core.resources.mapping.ResourceMappingContext;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
@@ -103,24 +106,39 @@ public class ResourceDecorator implements ILightweightLabelDecorator
 			// in case of a mapping check for all resources, and if at least one is dirty mark the mapping dirty
 			ResourceMapping resourceMapping = (ResourceMapping)Platform.getAdapterManager().getAdapter(element,
 				org.eclipse.core.resources.mapping.ResourceMapping.class);
-			if (resourceMapping != null && resourceMapping.getModelObject() instanceof IResource[])
+			if (resourceMapping != null)
 			{
-				IResource[] resources = (IResource[])resourceMapping.getModelObject();
-				ImageDescriptor mappingImg = null;
-				int rDiff;
-				for (IResource r : resources)
+				final ImageDescriptor mappingImg[] = { null };
+				try
 				{
-					if (r.getType() == IResource.ROOT) continue;
-					if ((ServoyTeamProvider)RepositoryProvider.getProvider(r.getProject(), Activator.getTypeId()) == null) continue;
-					rDiff = getDiff(r);
-					if (rDiff == IDiff.ADD || rDiff == IDiff.REMOVE || rDiff == IDiff.CHANGE)
+					resourceMapping.accept(ResourceMappingContext.LOCAL_CONTEXT, new IResourceVisitor()
 					{
-						mappingImg = IMG_DIRTY;
-						break;
-					}
-					else mappingImg = IMG_CHECKEDIN;
+
+						public boolean visit(IResource r) throws CoreException
+						{
+							if (r.getType() != IResource.ROOT && mappingImg[0] != IMG_DIRTY)
+							{
+								if ((ServoyTeamProvider)RepositoryProvider.getProvider(r.getProject(), Activator.getTypeId()) != null)
+								{
+									int rDiff = getDiff(r);
+									if (rDiff == IDiff.ADD || rDiff == IDiff.REMOVE || rDiff == IDiff.CHANGE)
+									{
+										mappingImg[0] = IMG_DIRTY;
+									}
+									else mappingImg[0] = IMG_CHECKEDIN;
+								}
+							}
+							return false;
+						}
+
+					}, null);
 				}
-				if (mappingImg != null) decoration.addOverlay(mappingImg, IDecoration.BOTTOM_RIGHT);
+				catch (CoreException ex)
+				{
+					ServoyLog.logError(ex);
+				}
+
+				if (mappingImg[0] != null) decoration.addOverlay(mappingImg[0], IDecoration.BOTTOM_RIGHT);
 			}
 		}
 	}

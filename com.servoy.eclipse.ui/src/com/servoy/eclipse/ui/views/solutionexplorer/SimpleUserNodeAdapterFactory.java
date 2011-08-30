@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.util.ArrayList;
@@ -201,14 +201,9 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 			if (mappings.size() > 0)
 			{
 				SimpleResourceMapping[] aSimpleResourceMapping = mappings.toArray(new SimpleResourceMapping[0]);
-				Object[] aResources = new IResource[aSimpleResourceMapping.length];
-				int i = 0;
-				for (SimpleResourceMapping srMapping : aSimpleResourceMapping)
-				{
-					aResources[i++] = srMapping.getModelObject();
-				}
-				CompositeResourceMapping compositeResourceMapping = new CompositeResourceMapping(ModelProvider.RESOURCE_MODEL_PROVIDER_ID, aResources,
-					aSimpleResourceMapping);
+
+				CompositeResourceMapping compositeResourceMapping = new CompositeResourceMapping(ModelProvider.RESOURCE_MODEL_PROVIDER_ID,
+					aSimpleResourceMapping[0].getModelObject(), aSimpleResourceMapping);
 
 				return compositeResourceMapping;
 			}
