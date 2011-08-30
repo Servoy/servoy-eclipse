@@ -920,6 +920,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						!(javaMembers instanceof InstanceJavaMembers && javaMembers.getMethodIds(false).size() > 0))
 					{
 						constantsChildren.add(n);
+						n.setIcon(uiActivator.loadImageFromBundle("constant.gif"));
 					}
 					else if (ServoyException.class.isAssignableFrom(cls))
 					{
@@ -936,7 +937,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			PlatformSimpleUserNode constants = null;
 			if (constantsChildren.size() > 0)
 			{
-				children.add(constants = new PlatformSimpleUserNode("Constants", UserNodeType.RETURNTYPE_CONSTANT));
+				children.add(constants = new PlatformSimpleUserNode("Constants", UserNodeType.RETURNTYPE_CONSTANT, null,
+					uiActivator.loadImageFromBundle("constant.gif")));
 			}
 
 			if (constants != null)
