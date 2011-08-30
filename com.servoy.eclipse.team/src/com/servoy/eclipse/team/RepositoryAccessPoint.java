@@ -65,14 +65,16 @@ public class RepositoryAccessPoint
 
 	private RepositoryAccessPoint(String serverAddress, String user, String passwordHash)
 	{
-		if (serverAddress == null) serverAddress = "localhost";
-		int dblDotIdx = serverAddress.indexOf(":");
+		String serverAddr = serverAddress;
+		if (serverAddr == null) serverAddr = "localhost";
+		else serverAddr = serverAddr.trim();
+		int dblDotIdx = serverAddr.indexOf(":");
 		if (dblDotIdx != -1)
 		{
-			this.serverAddress = serverAddress.substring(0, dblDotIdx);
-			if (dblDotIdx < serverAddress.length() - 1)
+			this.serverAddress = serverAddr.substring(0, dblDotIdx);
+			if (dblDotIdx < serverAddr.length() - 1)
 			{
-				String port = serverAddress.substring(dblDotIdx + 1);
+				String port = serverAddr.substring(dblDotIdx + 1);
 				try
 				{
 					this.usedRMIPort = Integer.parseInt(port);
@@ -83,7 +85,7 @@ public class RepositoryAccessPoint
 				}
 			}
 		}
-		else this.serverAddress = serverAddress;
+		else this.serverAddress = serverAddr;
 		this.user = user;
 		this.passwordHash = passwordHash;
 
@@ -94,7 +96,7 @@ public class RepositoryAccessPoint
 			usedRMIPort = Utils.getAsInteger(settings.getProperty("usedRMIRegistryPort", "1099")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
-		if (serverAddress.equals("localhost"))
+		if (serverAddr.equals("localhost"))
 		{
 			isInprocessApplicationServer = true;
 		}
