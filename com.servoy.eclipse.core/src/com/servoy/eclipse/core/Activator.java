@@ -17,6 +17,7 @@
 package com.servoy.eclipse.core;
 
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -96,6 +97,7 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.MethodTemplatesFactory;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.plugins.IMethodTemplatesProvider;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
@@ -150,23 +152,28 @@ public class Activator extends Plugin
 				ServoyLog.logError(e1);
 			}
 
-			for (final String serverName : serverNames)
+			for (String serverName : serverNames)
 			{
-				IServerInternal server = (IServerInternal)serverManager.getServer(serverName);
-				final ManagedDriver driver = new ManagedDriver(serverName);
-				try
-				{
-					driver.setJdbcDriver(serverManager.loadDriver(server.getConfig().getDriver(), server.getServerURL()));
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError(e);
-				}
-				driver.setName(serverName);
-				driver.setUrl(server.getServerURL());
-				driver.setDriverClassName(server.getConfig().getDriver());
 				Alias alias = new Alias(serverName)
 				{
+					ManagedDriver driver = new ManagedDriver(getName())
+					{
+						@Override
+						public net.sourceforge.sqlexplorer.dbproduct.SQLConnection getConnection(User user) throws java.sql.SQLException
+						{
+							IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(getId());
+							try
+							{
+								return new net.sourceforge.sqlexplorer.dbproduct.SQLConnection(user, server.getRawConnection(), this, "Servoy server: " + //$NON-NLS-1$
+									getId());
+							}
+							catch (RepositoryException e)
+							{
+								throw new SQLException(e.getMessage());
+							}
+						}
+					};
+
 					/**
 					 * @see net.sourceforge.sqlexplorer.dbproduct.Alias#getDriver()
 					 */
@@ -178,18 +185,7 @@ public class Activator extends Plugin
 				};
 				alias.setAutoLogon(true);
 				alias.setConnectAtStartup(false);
-				String userName = server.getConfig().getUserName();
-				if (userName != null && userName.trim().length() != 0)
-				{
-					User user = new User(userName, server.getConfig().getPassword());
-					user.setAutoCommit(false);
-					alias.setDefaultUser(user);
-				}
-				else
-				{
-					alias.setHasNoUserName(true);
-				}
-				alias.setUrl(server.getServerURL());
+				alias.setHasNoUserName(true);
 				try
 				{
 					aliasManager.addAlias(alias);
