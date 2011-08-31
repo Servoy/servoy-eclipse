@@ -20,6 +20,9 @@ import java.awt.Color;
 import java.awt.Component;
 
 import javax.swing.JComponent;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
+import javax.swing.ListCellRenderer;
 
 import com.servoy.eclipse.core.DesignComponentFactory;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -74,6 +77,19 @@ public class PersistImageNotifier extends AbstractImageNotifier
 			if (comp instanceof JComponent && ((JComponent)comp).isOpaque() && comp.isBackgroundSet())
 			{
 				background = comp.getBackground();
+				if (comp instanceof JScrollPane && ((JScrollPane)comp).getViewport().getView() instanceof JList)
+				{
+					ListCellRenderer renderer = ((JList)((JScrollPane)comp).getViewport().getView()).getCellRenderer();
+					if (renderer != null)
+					{
+						Component rendererComponent = renderer.getListCellRendererComponent((JList)((JScrollPane)comp).getViewport().getView(), null, 0, false,
+							false);
+						if (rendererComponent != null)
+						{
+							background = rendererComponent.getBackground();
+						}
+					}
+				}
 			}
 			((AbstractBase)persist).setRuntimeProperty(PersistPropertySource.LastPaintedBackgroundProperty, background);
 			((AbstractBase)persist).setRuntimeProperty(PersistPropertySource.LastPaintedFontProperty, comp.getFont());
