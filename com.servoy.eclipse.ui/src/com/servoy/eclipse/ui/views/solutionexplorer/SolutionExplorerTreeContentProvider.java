@@ -87,8 +87,8 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IClientPlugin;
+import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IDeprecated;
-import com.servoy.j2db.scripting.IPrefixedConstantsObject;
 import com.servoy.j2db.scripting.IReturnedTypesProvider;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.IScriptable;
@@ -916,10 +916,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					}
 					PlatformSimpleUserNode n = new PlatformSimpleUserNode(nodeName, UserNodeType.RETURNTYPE, cls, null);
 					JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(cls, null);
-					if (IPrefixedConstantsObject.class.isAssignableFrom(cls) &&
+					if (IConstantsObject.class.isAssignableFrom(cls) &&
 						!(javaMembers instanceof InstanceJavaMembers && javaMembers.getMethodIds(false).size() > 0))
 					{
 						constantsChildren.add(n);
+						n.setIcon(uiActivator.loadImageFromBundle("constant.gif"));
 					}
 					else if (ServoyException.class.isAssignableFrom(cls))
 					{
@@ -936,7 +937,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			PlatformSimpleUserNode constants = null;
 			if (constantsChildren.size() > 0)
 			{
-				children.add(constants = new PlatformSimpleUserNode("Constants", UserNodeType.RETURNTYPE_CONSTANT));
+				children.add(constants = new PlatformSimpleUserNode("Constants", UserNodeType.RETURNTYPE_CONSTANT, null,
+					uiActivator.loadImageFromBundle("constant.gif")));
 			}
 
 			if (constants != null)
