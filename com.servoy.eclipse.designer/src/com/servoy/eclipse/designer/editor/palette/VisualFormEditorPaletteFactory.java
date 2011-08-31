@@ -401,11 +401,13 @@ public class VisualFormEditorPaletteFactory
 		{
 			icon = Activator.loadImageDescriptorFromBundle("listbox.png");
 			displayType = Field.LIST_BOX;
+			size = new Dimension(140, 140);
 		}
 		else if (ELEMENTS_MULTISELECT_LISTBOX_ID.equals(id))
 		{
 			icon = Activator.loadImageDescriptorFromBundle("listbox.png");
 			displayType = Field.MULTI_SELECTION_LIST_BOX;
+			size = new Dimension(140, 140);
 		}
 
 		else if (ELEMENTS_PORTAL_ID.equals(id))
