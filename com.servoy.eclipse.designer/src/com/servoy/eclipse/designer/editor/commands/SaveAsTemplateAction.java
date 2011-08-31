@@ -28,6 +28,12 @@ import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPart;
 import org.json.JSONException;
@@ -78,6 +84,8 @@ public class SaveAsTemplateAction extends SelectionAction
 		return getSelection() != null && !getSelection().isEmpty();
 	}
 
+	private static boolean groupingState = false;
+
 	private static String askForTemplateName(Shell shell)
 	{
 		InputDialog dialog = new InputDialog(shell, "New template", "Specify a template name", null, new IInputValidator()
@@ -87,13 +95,33 @@ public class SaveAsTemplateAction extends SelectionAction
 				if (newText.length() == 0) return "";
 				return validateMethodName(newText);
 			}
-		});
+		})
+		{
+			@Override
+			protected void createButtonsForButtonBar(Composite parent)
+			{
+				groupingState = false;
+				final Button groupingButton = new Button(parent, SWT.CHECK);
+				groupingButton.setText("Group template elementes"); //$NON-NLS-1$
+				groupingButton.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true, 2, 1));
+				groupingButton.addSelectionListener(new SelectionAdapter()
+				{
+					@Override
+					public void widgetSelected(SelectionEvent e)
+					{
+						groupingState = groupingButton.getSelection();
+					}
+				});
+
+
+				super.createButtonsForButtonBar(parent);
+			}
+		};
 		dialog.setBlockOnOpen(true);
 		dialog.open();
 
 		return (dialog.getReturnCode() == Window.CANCEL) ? null : dialog.getValue();
 	}
-
 
 	protected static String validateMethodName(String templateName)
 	{
@@ -208,7 +236,7 @@ public class SaveAsTemplateAction extends SelectionAction
 				template = existingTemplate;
 			}
 			template.setResourceType(resourceType);
-			template.setContent(ElementFactory.createTemplateContent(repository, form, persists, resourceType));
+			template.setContent(ElementFactory.createTemplateContent(repository, form, persists, resourceType, groupingState));
 			repository.updateRootObject(template);
 		}
 		catch (JSONException e)

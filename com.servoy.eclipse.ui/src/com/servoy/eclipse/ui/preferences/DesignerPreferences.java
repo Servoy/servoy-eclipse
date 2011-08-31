@@ -77,7 +77,6 @@ public class DesignerPreferences
 	public static final String PAINT_PAGEBREAKS_SETTING = "paintPageBreaks";
 	public static final String SHOW_RULERS_SETTING = "showRulers";
 	public static final String MARQUEE_SELECT_OUTER_SETTING = "marqueeSelectOuter";
-	public static final String TEMPLATE_ELEMENT_GROUPING_SETTING = "templateElementGrouping";
 
 	public static final String SNAP_TO_ALIGMNENT = "alignment";
 	public static final String SNAP_TO_GRID = "grid";
@@ -109,7 +108,6 @@ public class DesignerPreferences
 	public static final boolean PAINT_PAGEBREAKS_DEFAULT = false;
 	public static final boolean SHOW_RULERS_DEFAULT = true;
 	public static final boolean MARQUEE_SELECT_OUTER_DEFAULT = true;
-	public static final boolean TEMPLATE_ELEMENT_GROUPING_DEFAULT = false;
 
 	protected final IEclipsePreferences eclipsePreferences;
 
@@ -434,16 +432,6 @@ public class DesignerPreferences
 	public void setShowColumnsInDbOrder(boolean showColumnsInDbOrder)
 	{
 		setProperty(SHOW_COLUMNS_IN_DB_ORDER_SETTING, showColumnsInDbOrder);
-	}
-
-	public boolean getTemplateElementsGrouping()
-	{
-		return getProperty(TEMPLATE_ELEMENT_GROUPING_SETTING, TEMPLATE_ELEMENT_GROUPING_DEFAULT);
-	}
-
-	public void setTemplateElementsGrouping(boolean templateElementsGrouping)
-	{
-		setProperty(TEMPLATE_ELEMENT_GROUPING_SETTING, templateElementsGrouping);
 	}
 
 	public boolean getShowSameSizeFeedback()

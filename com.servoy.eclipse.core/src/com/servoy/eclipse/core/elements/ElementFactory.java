@@ -78,6 +78,7 @@ import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.persistence.ISupportSize;
 import com.servoy.j2db.persistence.ISupportText;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
 import com.servoy.j2db.persistence.IValidateName;
@@ -747,8 +748,8 @@ public class ElementFactory
 		return portal;
 	}
 
-	public static String createTemplateContent(EclipseRepository repository, Form form, List<IPersist> persists, int templateType) throws JSONException,
-		RepositoryException
+	public static String createTemplateContent(EclipseRepository repository, Form form, List<IPersist> persists, int templateType, boolean groupingState)
+		throws JSONException, RepositoryException
 	{
 		java.awt.Point location = Utils.getBounds(persists.iterator()).getLocation();
 
@@ -770,9 +771,16 @@ public class ElementFactory
 		for (IPersist persist : array)
 		{
 			ServoyJSONObject object = SolutionSerializer.generateJSONObject(persist, true, true, repository);
+			if (persist instanceof ISupportSize) // some objects have default size programmed in the getter
+			{
+				object.put(Template.PROP_SIZE, repository.convertObjectToArgumentString(IRepository.DIMENSION, ((ISupportSize)persist).getSize()));
+			}
 			elements.put(cleanTemplateElement(repository, flattenedSolution, form, object, location));
 		}
 		json.put(Template.PROP_ELEMENTS, elements);
+
+		json.put(Template.PROP_GROUPING, groupingState);
+
 		return ServoyJSONObject.toString(json, false, true, false);
 	}
 
@@ -857,15 +865,15 @@ public class ElementFactory
 		return object;
 	}
 
-	public static Object[] applyTemplate(ISupportFormElements parent, TemplateElementHolder templateHolder, Point location, final boolean setFormProperties,
-		boolean grouping) throws RepositoryException
+	public static Object[] applyTemplate(ISupportFormElements parent, TemplateElementHolder templateHolder, Point location, final boolean setFormProperties)
+		throws RepositoryException
 	{
 		IDeveloperRepository repository = (IDeveloperRepository)parent.getRootObject().getRepository();
 		final Map<IPersist, String> persists = new HashMap<IPersist, String>(); // created persist -> name
 		try
 		{
 			JSONObject json = new ServoyJSONObject(templateHolder.template.getContent(), false);
-			
+
 			// location
 			final java.awt.Point awtLocation;
 			if (location == null)
@@ -1021,6 +1029,11 @@ public class ElementFactory
 						groupName = templateName + (i + 1);
 					}
 
+					boolean grouping = false;
+					if (json.has(Template.PROP_GROUPING))
+					{
+						grouping = json.optBoolean(Template.PROP_GROUPING);
+					}
 					if (!grouping)
 					{
 						return persists.keySet().toArray();
@@ -1081,7 +1094,7 @@ public class ElementFactory
 				{
 					size = PersistHelper.createDimension((String)object.get(Template.PROP_SIZE));
 				}
-				if (size == null || size.height == 0 || size.height == 0)
+				if (size == null || size.height == 0 || size.width == 0)
 				{
 					continue;
 				}

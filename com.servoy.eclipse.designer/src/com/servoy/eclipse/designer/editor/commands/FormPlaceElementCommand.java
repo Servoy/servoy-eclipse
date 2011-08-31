@@ -316,8 +316,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 		if (parent instanceof Form && VisualFormEditor.REQ_PLACE_TEMPLATE.equals(requestType))
 		{
 			setLabel("place template");
-			return ElementFactory.applyTemplate((Form)parent, (TemplateElementHolder)object, location, false,
-				new DesignerPreferences().getTemplateElementsGrouping());
+			return ElementFactory.applyTemplate((Form)parent, (TemplateElementHolder)object, location, false);
 		}
 
 		if (object instanceof Object[] && ((Object[])object).length > 0)
@@ -408,7 +407,7 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 				{
 					setLabel("place template");
 					return ElementFactory.applyTemplate((ISupportFormElements)parent, new TemplateElementHolder((Template)template, dragData.element),
-						location, false, new DesignerPreferences().getTemplateElementsGrouping());
+						location, false);
 				}
 			}
 			ServoyLog.logWarning("place template: template " + dragData.uuid + " not found", null);
