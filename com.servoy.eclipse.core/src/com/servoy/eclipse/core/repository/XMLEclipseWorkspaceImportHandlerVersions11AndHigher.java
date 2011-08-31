@@ -753,6 +753,12 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		x11handler.importBlobs(jarFile, blobs, importInfo, digestMap);
 	}
 
+	public void checkDatabaseInfo(ImportInfo importInfo, ImportTransactable importTransactable) throws RepositoryException
+	{
+		m.setTaskName("Checking database info");
+		x11handler.checkDatabaseInfo(importInfo, importTransactable);
+	}
+
 	public void importDatabaseInfo(ImportInfo importInfo, ImportTransactable importTransactable) throws Exception
 	{
 		m.setTaskName("Importing database info");
