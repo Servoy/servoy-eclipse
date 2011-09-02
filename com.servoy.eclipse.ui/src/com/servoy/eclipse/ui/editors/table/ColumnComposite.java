@@ -43,8 +43,8 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
@@ -65,6 +65,7 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.editors.table.actions.CopyColumnNameAction;
+import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -454,7 +455,7 @@ public class ColumnComposite extends Composite
 
 		tableContainer.setLayout(getTableLayout());
 
-		tableViewer.setLabelProvider(new ColumnLabelProvider(new Color(tableViewer.getTable().getShell().getDisplay(), 255, 127, 0), this));
+		tableViewer.setLabelProvider(new ColumnLabelProvider(ColorResource.INSTANCE.getColor(new RGB(255, 127, 0)), this));
 		tableViewer.setSorter(new ColumnsSorter(
 			tableViewer,
 			new TableColumn[] { nameColumn, typeColumn, lengthColumn, rowIdentColumn, allowNullColumn },
