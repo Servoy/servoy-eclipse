@@ -229,7 +229,7 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 		}
 
 
-		ExtendedInputDialog dialog = createDialog(persist, nameValidator, solutionNames, initialSolutionIndex);
+		ExtendedInputDialog<String> dialog = createDialog(persist, nameValidator, solutionNames, initialSolutionIndex);
 		dialog.open();
 		if (dialog.getExtendedValue() == null)
 		{
@@ -422,7 +422,7 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 	 * @param initialSolutionIndex
 	 * @return
 	 */
-	protected abstract ExtendedInputDialog createDialog(final IPersist persist, final IValidateName nameValidator, String[] solutionNames,
+	protected abstract ExtendedInputDialog<String> createDialog(final IPersist persist, final IValidateName nameValidator, String[] solutionNames,
 		int initialSolutionIndex);
 
 	protected class Location

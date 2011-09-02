@@ -133,7 +133,8 @@ public class MovePersistAction extends AbstractMovePersistAction
 	}
 
 	@Override
-	protected ExtendedInputDialog createDialog(final IPersist persist, final IValidateName nameValidator, String[] solutionNames, int initialSolutionIndex)
+	protected ExtendedInputDialog<String> createDialog(final IPersist persist, final IValidateName nameValidator, String[] solutionNames,
+		int initialSolutionIndex)
 	{
 		// do not use, renaming is too hackish
 		return null;

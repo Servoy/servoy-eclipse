@@ -75,16 +75,16 @@ import com.servoy.j2db.util.Debug;
 public class UIUtils
 {
 
-	public static abstract class ExtendedInputDialog extends InputDialog
+	public static abstract class ExtendedInputDialog<T> extends InputDialog
 	{
 		public ExtendedInputDialog(Shell parentShell, String dialogTitle, String dialogMessage, String initialTextValue, IInputValidator validator)
 		{
 			super(parentShell, dialogTitle, dialogMessage, initialTextValue, validator);
 		}
 
-		public abstract String getExtendedValue();
+		public abstract T getExtendedValue();
 	}
-	public static class InputAndListDialog extends ExtendedInputDialog
+	public static class InputAndListDialog extends ExtendedInputDialog<String>
 	{
 
 		private final String listDescriptionText;
@@ -153,7 +153,7 @@ public class UIUtils
 	/**
 	 * Input dialog with text field + combo box.
 	 */
-	public static class InputAndComboDialog extends ExtendedInputDialog
+	public static class InputAndComboDialog extends ExtendedInputDialog<String>
 	{
 
 		private final String comboDescriptionText;

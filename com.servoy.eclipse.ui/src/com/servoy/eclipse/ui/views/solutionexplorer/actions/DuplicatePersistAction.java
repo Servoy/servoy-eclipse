@@ -62,7 +62,8 @@ public class DuplicatePersistAction extends AbstractMovePersistAction
 	}
 
 	@Override
-	protected ExtendedInputDialog createDialog(final IPersist persist, final IValidateName nameValidator, String[] solutionNames, int initialSolutionIndex)
+	protected ExtendedInputDialog<String> createDialog(final IPersist persist, final IValidateName nameValidator, String[] solutionNames,
+		int initialSolutionIndex)
 	{
 		String newName = null;
 		String oldName = ((ISupportName)persist).getName();
