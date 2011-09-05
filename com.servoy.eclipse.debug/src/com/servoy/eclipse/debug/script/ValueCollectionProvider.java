@@ -19,12 +19,14 @@ package com.servoy.eclipse.debug.script;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
@@ -36,6 +38,7 @@ import org.eclipse.dltk.javascript.typeinfo.IMemberEvaluator;
 import org.eclipse.dltk.javascript.typeinfo.IModelBuilder.IMember;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
+import org.eclipse.dltk.javascript.typeinfo.model.Member;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -43,8 +46,12 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
 
 @SuppressWarnings("nls")
@@ -58,9 +65,10 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	{
 		IValueCollection collection = (IValueCollection)member.getAttribute(TypeCreator.VALUECOLLECTION);
 		if (collection != null) return collection;
-		Form form = (Form)member.getAttribute(TypeCreator.LAZY_VALUECOLLECTION);
-		if (form != null)
+		Object attribute = member.getAttribute(TypeCreator.LAZY_VALUECOLLECTION);
+		if (attribute instanceof Form)
 		{
+			Form form = (Form)attribute;
 			String scriptPath = SolutionSerializer.getScriptPath(form, false);
 			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
 			collection = ValueCollectionFactory.createValueCollection();
@@ -72,6 +80,51 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			}
 			return collection;
 		}
+
+		if (member instanceof Member && ((Member)member).getType() != null)
+		{
+			String name = ((Member)member).getType().getName();
+			if (name != null && name.startsWith(FoundSet.JS_FOUNDSET + '<') && name.endsWith(">"))
+			{
+				FlattenedSolution editingFlattenedSolution = TypeCreator.getFlattenedSolution(context);
+				if (editingFlattenedSolution != null)
+				{
+					String config = name.substring(FoundSet.JS_FOUNDSET.length() + 1, name.length() - 1);
+					// config is either a dataSource or a relation name
+
+					String[] dbServernameTablename = DataSourceUtils.getDBServernameTablename(config);
+					String dataSource = null;
+					if (dbServernameTablename == null)
+					{
+						// try relation
+						Relation relation = editingFlattenedSolution.getRelation(config);
+						if (relation != null)
+						{
+							dataSource = relation.getForeignDataSource();
+						}
+					}
+					else
+					{
+						// datasource
+						dataSource = config;
+					}
+
+					if (dataSource != null)
+					{
+						Iterator<TableNode> tableNodes = editingFlattenedSolution.getTableNodes(dataSource);
+						IValueCollection valueCollection = ValueCollectionFactory.createValueCollection();
+						while (tableNodes.hasNext())
+						{
+							TableNode tableNode = tableNodes.next();
+							IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(tableNode, false)));
+							ValueCollectionFactory.copyInto(valueCollection, getValueCollection(file, true));
+						}
+						return valueCollection;
+					}
+				}
+			}
+		}
+
 		return null;
 	}
 
@@ -139,27 +192,46 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		if (context.getModelElement() != null)
 		{
 			IResource resource = context.getModelElement().getResource();
-			if (resource != null)
+			if (resource != null && resource.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 			{
-				if (resource.getName().endsWith("globals.js"))
+				// javascript file
+				FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
+				if (fs != null)
 				{
-					FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
-					if (fs != null)
+					if (SolutionSerializer.isGlobalsJSFile(resource))
 					{
-						IValueCollection globalsValeuCollection = getGlobalModulesValueCollection(context, fs, ValueCollectionFactory.createValueCollection());
+						// globals.js
+						IValueCollection globalsValueCollection = getGlobalModulesValueCollection(fs, ValueCollectionFactory.createValueCollection());
 						if (fullGlobalScope.get().booleanValue())
 						{
-							ValueCollectionFactory.copyInto(globalsValeuCollection, getValueCollection((IFile)resource, true));
+							ValueCollectionFactory.copyInto(globalsValueCollection, getValueCollection((IFile)resource, true));
 						}
-						return globalsValeuCollection;
+						return globalsValueCollection;
 					}
-				}
-				else
-				{
-					Form form = TypeCreator.getForm(context);
-					if (form != null)
+
+					String formName = SolutionSerializer.getFormNameForJSFile(resource);
+					if (formName != null)
 					{
+						// forms/formname.js
+						Form form = fs.getForm(formName);
+						if (form == null)
+						{
+							return null;
+						}
+						// superform
 						return getSuperFormContext(context, form, null);
+					}
+
+					String[] serverTablename = SolutionSerializer.getDataSourceForCalculationJSFile(resource);
+					boolean isCalc = serverTablename != null;
+					if (!isCalc)
+					{
+						serverTablename = SolutionSerializer.getDataSourceForFoundsetJSFile(resource);
+					}
+					if (serverTablename != null)
+					{
+						return getTableNodeModulesValueCollection(fs, serverTablename[0], serverTablename[1], isCalc,
+							ValueCollectionFactory.createValueCollection());
 					}
 				}
 			}
@@ -172,7 +244,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	 * @param fs
 	 * @param collection
 	 */
-	public static IValueCollection getGlobalModulesValueCollection(ITypeInfoContext context, FlattenedSolution fs, IValueCollection collection)
+	public static IValueCollection getGlobalModulesValueCollection(FlattenedSolution fs, IValueCollection collection)
 	{
 		Solution[] modules = fs.getModules();
 		if (modules != null)
@@ -180,11 +252,39 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			for (Solution module : modules)
 			{
 				ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(module.getName());
-				IFile file = project.getProject().getFile("globals.js"); //$NON-NLS-1$
+				IFile file = project.getProject().getFile(SolutionSerializer.GLOBALS_FILE); //$NON-NLS-1$
 				IValueCollection moduleCollection = getValueCollection(file, true);
 				if (moduleCollection != null)
 				{
 					ValueCollectionFactory.copyInto(collection, moduleCollection);
+				}
+			}
+		}
+		return collection;
+	}
+
+	public static IValueCollection getTableNodeModulesValueCollection(FlattenedSolution fs, String serverName, String tableName, boolean calcs,
+		IValueCollection collection)
+	{
+		Solution[] modules = fs.getModules();
+		if (modules != null)
+		{
+			for (Solution module : modules)
+			{
+				ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(module.getName());
+				IFolder folder = project.getProject().getFolder(SolutionSerializer.DATASOURCES_DIR_NAME);
+				if (folder.exists())
+				{
+					IFolder serverFolder = folder.getFolder(serverName);
+					if (serverFolder.exists())
+					{
+						IValueCollection moduleCollection = getValueCollection(
+							serverFolder.getFile(tableName + (calcs ? SolutionSerializer.CALCULATIONS_POSTFIX : SolutionSerializer.FOUNDSET_POSTFIX)), true);
+						if (moduleCollection != null)
+						{
+							ValueCollectionFactory.copyInto(collection, moduleCollection);
+						}
+					}
 				}
 			}
 		}
@@ -222,7 +322,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 					if (makeImmutable)
 					{
 						collection = ValueCollectionFactory.makeImmutable(collection);
-						if (file.getName().equals("globals.js"))
+						if (file.getName().equals(SolutionSerializer.GLOBALS_FILE))
 						{
 							scriptCache.put(file, new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()), collection));
 						}

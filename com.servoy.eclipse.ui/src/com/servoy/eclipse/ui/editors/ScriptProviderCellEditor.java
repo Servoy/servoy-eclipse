@@ -37,7 +37,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
@@ -59,7 +58,6 @@ import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
@@ -186,30 +184,22 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 			public Object[] getChildren(Object parentElement)
 			{
 				List<Object> children = new ArrayList<Object>();
-				try
+				if (ScriptDialog.CALCULATIONS == parentElement && table != null)
 				{
-					if (ScriptDialog.CALCULATIONS == parentElement && table != null)
+					Iterator<ScriptCalculation> calcs = ModelUtils.getEditingFlattenedSolution(persistContext.getContext()).getScriptCalculations(table, true);
+					while (calcs.hasNext())
 					{
-						Iterator<ScriptCalculation> calcs = ModelUtils.getEditingFlattenedSolution(persistContext.getContext()).getScriptCalculations(table,
-							true);
-						while (calcs.hasNext())
-						{
-							children.add(new MethodWithArguments(calcs.next().getID()));
-						}
-					}
-
-					if (ScriptDialog.GLOBAL_METHODS == parentElement)
-					{
-						Iterator<ScriptMethod> scriptMethodsIte = ModelUtils.getEditingFlattenedSolution(persistContext.getContext()).getScriptMethods(true);
-						while (scriptMethodsIte.hasNext())
-						{
-							children.add(new MethodWithArguments(scriptMethodsIte.next().getID()));
-						}
+						children.add(MethodWithArguments.create(calcs.next(), null));
 					}
 				}
-				catch (RepositoryException e)
+
+				if (ScriptDialog.GLOBAL_METHODS == parentElement)
 				{
-					ServoyLog.logError(e);
+					Iterator<ScriptMethod> scriptMethodsIte = ModelUtils.getEditingFlattenedSolution(persistContext.getContext()).getScriptMethods(true);
+					while (scriptMethodsIte.hasNext())
+					{
+						children.add(MethodWithArguments.create(scriptMethodsIte.next(), null));
+					}
 				}
 
 				return children.toArray();
@@ -219,7 +209,8 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 			{
 				if (value instanceof MethodWithArguments)
 				{
-					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persistContext.getContext(), null, table, ((MethodWithArguments)value).methodId);
+					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persistContext.getContext(), null, ((MethodWithArguments)value).table,
+						((MethodWithArguments)value).methodId);
 					if (scriptProvider instanceof ScriptCalculation)
 					{
 						return ScriptDialog.CALCULATIONS;
@@ -256,12 +247,14 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 
 			public boolean canEdit(Object value)
 			{
-				return value instanceof MethodWithArguments && ModelUtils.getScriptMethod(persist, null, table, ((MethodWithArguments)value).methodId) != null;
+				return value instanceof MethodWithArguments &&
+					ModelUtils.getScriptMethod(persist, null, ((MethodWithArguments)value).table, ((MethodWithArguments)value).methodId) != null;
 			}
 
 			public void openEditor(Object value)
 			{
-				IScriptProvider scriptprovider = ModelUtils.getScriptMethod(persist, null, table, ((MethodWithArguments)value).methodId);
+				IScriptProvider scriptprovider = ModelUtils.getScriptMethod(persist, null, ((MethodWithArguments)value).table,
+					((MethodWithArguments)value).methodId);
 				if (scriptprovider instanceof IDataProvider) // it is a calculation
 				{
 					EditorUtil.openDataProviderEditor((IDataProvider)scriptprovider);
@@ -301,7 +294,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 				}
 				if (value instanceof MethodWithArguments)
 				{
-					return MethodLabelProvider.getMethodText((MethodWithArguments)value, persistContext, table, showPrefix, false);
+					return MethodLabelProvider.getMethodText((MethodWithArguments)value, persistContext, showPrefix, false);
 				}
 
 				return value.toString();
@@ -352,7 +345,8 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 			{
 				if (value instanceof MethodWithArguments)
 				{
-					return ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), table, ((MethodWithArguments)value).methodId);
+					return ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), ((MethodWithArguments)value).table,
+						((MethodWithArguments)value).methodId);
 				}
 				return null;
 			}

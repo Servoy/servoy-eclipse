@@ -45,11 +45,15 @@ import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.IDelegate;
 import com.servoy.j2db.util.Utils;
 
@@ -59,10 +63,11 @@ import com.servoy.j2db.util.Utils;
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  */
+@SuppressWarnings("nls")
 public class MethodDialog extends TreeSelectDialog
 {
-	public static final MethodWithArguments METHOD_NONE = new MethodWithArguments(-1);
-	public static final MethodWithArguments METHOD_DEFAULT = new MethodWithArguments(0);
+	public static final MethodWithArguments METHOD_NONE = new MethodWithArguments(-1, null);
+	public static final MethodWithArguments METHOD_DEFAULT = new MethodWithArguments(0, null);
 
 	// used only in the dialog, are never selected
 	public static final Object FORM_METHODS = new Object();
@@ -71,6 +76,7 @@ public class MethodDialog extends TreeSelectDialog
 	private static final Image solutionImage = Activator.getDefault().loadImageFromBundle("solution.gif");
 	private static final Image formMethodsImage = Activator.getDefault().loadImageFromBundle("designer.gif");
 	private static final Image globalMethodsImage = Activator.getDefault().loadImageFromBundle("global_method.gif");
+	private static final Image foundsetMethodsImage = Activator.getDefault().loadImageFromBundle("foundset_method.gif");
 
 	/**
 	 * Creates a new method cell dialog parented under the given shell.
@@ -80,7 +86,7 @@ public class MethodDialog extends TreeSelectDialog
 	 * @param parent the parent control
 	 */
 	public MethodDialog(Shell shell, ILabelProvider labelProvider, ITreeContentProvider contentProvider, ISelection selection,
-		Object /* MethodListOptions */input, int treeStyle, String title, IValueEditor valueEditor)
+		Object /* MethodListOptions */input, int treeStyle, String title, IValueEditor< ? > valueEditor)
 	{
 		super(shell, true, true, TreePatternFilter.FILTER_LEAFS,
 		// content provider
@@ -145,18 +151,29 @@ public class MethodDialog extends TreeSelectDialog
 					lst.add(METHOD_DEFAULT);
 				}
 
-				if (options.includeFormMethods && options.includeGlobalMethods)
+				int n = 0;
+				if (options.includeFormMethods) n++;
+				if (options.includeFoundsetMethods && options.table != null) n++;
+				if (options.includeGlobalMethods) n++;
+
+				if (n > 1)
 				{
-					lst.add(FORM_METHODS);
-					lst.add(GLOBAL_METHODS);
+					if (options.includeFormMethods) lst.add(FORM_METHODS);
+					if (options.includeFoundsetMethods && options.table != null) lst.add(options.table);
+					if (options.includeGlobalMethods) lst.add(GLOBAL_METHODS);
 				}
 				else
 				{
+					// just 1 option, load the children at top level
 					if (options.includeFormMethods)
 					{
 						lst.addAll(Arrays.asList(getChildren(FORM_METHODS)));
 					}
-					if (options.includeGlobalMethods)
+					else if (options.includeFoundsetMethods && options.table != null)
+					{
+						lst.addAll(Arrays.asList(getChildren(options.table)));
+					}
+					else if (options.includeGlobalMethods)
 					{
 						lst.addAll(Arrays.asList(getChildren(GLOBAL_METHODS)));
 					}
@@ -189,14 +206,22 @@ public class MethodDialog extends TreeSelectDialog
 
 		public Object[] getChildren(Object parentElement)
 		{
-			Iterator<ScriptMethod> scriptMethods = null;
-
-			Form form = null;
 			IPersist context = persistContext.getContext();
 			if (context == null)
 			{
 				context = persistContext.getPersist();
 			}
+
+			if (GLOBAL_METHODS == parentElement)
+			{
+				Solution solution = (Solution)context.getAncestor(IRepository.SOLUTIONS);
+				Object[] children = getChildren(solution);
+				Solution[] modules = ModelUtils.getEditingFlattenedSolution(solution).getModules();
+				return Utils.arrayInsert(children, modules, children == null ? 0 : children.length, modules == null ? 0 : modules.length);
+			}
+
+			Form form = null;
+			Iterator<ScriptMethod> scriptMethods = null;
 			if (FORM_METHODS == parentElement)
 			{
 				form = (Form)context.getAncestor(IRepository.FORMS);
@@ -206,12 +231,18 @@ public class MethodDialog extends TreeSelectDialog
 				}
 			}
 
-			else if (GLOBAL_METHODS == parentElement)
+			else if (parentElement instanceof ITable)
 			{
-				Solution solution = (Solution)context.getAncestor(IRepository.SOLUTIONS);
-				Object[] children = getChildren(solution);
-				Solution[] modules = ModelUtils.getEditingFlattenedSolution(solution).getModules();
-				return Utils.arrayInsert(children, modules, children == null ? 0 : children.length, modules == null ? 0 : modules.length);
+				// foundset methods
+				FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(context.getAncestor(IRepository.SOLUTIONS));
+				try
+				{
+					scriptMethods = editingFlattenedSolution.getFoundsetMethods((ITable)parentElement, true).iterator();
+				}
+				catch (RepositoryException e)
+				{
+					Debug.error(e);
+				}
 			}
 
 			else if (parentElement instanceof Solution)
@@ -234,7 +265,7 @@ public class MethodDialog extends TreeSelectDialog
 					{
 						continue;
 					}
-					MethodWithArguments mwa = new MethodWithArguments(sm.getID());
+					MethodWithArguments mwa = MethodWithArguments.create(sm, null);
 					lst.add(mwa);
 				}
 				return lst.toArray();
@@ -250,7 +281,7 @@ public class MethodDialog extends TreeSelectDialog
 
 		public boolean hasChildren(Object element)
 		{
-			return FORM_METHODS == element || GLOBAL_METHODS == element || element instanceof Solution;
+			return FORM_METHODS == element || GLOBAL_METHODS == element || element instanceof Solution || element instanceof ITable;
 		}
 
 		public boolean isKeyword(Object element)
@@ -275,13 +306,18 @@ public class MethodDialog extends TreeSelectDialog
 		public final boolean includeDefault;
 		public final boolean includeFormMethods;
 		public final boolean includeGlobalMethods;
+		public final boolean includeFoundsetMethods;
+		public final ITable table;
 
-		public MethodListOptions(boolean includeNone, boolean includeDefault, boolean includeFormMethods, boolean includeGlobalMethods)
+		public MethodListOptions(boolean includeNone, boolean includeDefault, boolean includeFormMethods, boolean includeGlobalMethods,
+			boolean includeFoundsetMethods, ITable table)
 		{
 			this.includeNone = includeNone;
 			this.includeDefault = includeDefault;
 			this.includeFormMethods = includeFormMethods;
 			this.includeGlobalMethods = includeGlobalMethods;
+			this.includeFoundsetMethods = includeFoundsetMethods;
+			this.table = table;
 		}
 	}
 
@@ -313,13 +349,14 @@ public class MethodDialog extends TreeSelectDialog
 		{
 			if (FORM_METHODS == value) return "form methods";
 			if (GLOBAL_METHODS == value) return "global methods";
+			if (value instanceof ITable) return "foundset methods";
 			if (value instanceof Solution) return ((Solution)value).getName();
 			return null;
 		}
 
 		public Font getFont(Object value)
 		{
-			if (FORM_METHODS == value || GLOBAL_METHODS == value || value instanceof Solution)
+			if (FORM_METHODS == value || GLOBAL_METHODS == value || value instanceof Solution || value instanceof ITable)
 			{
 				return FontResource.getDefaultFont(SWT.ITALIC, 1);
 			}
@@ -349,6 +386,7 @@ public class MethodDialog extends TreeSelectDialog
 			if (value instanceof Solution) return solutionImage;
 			if (FORM_METHODS == value) return formMethodsImage;
 			if (GLOBAL_METHODS == value) return globalMethodsImage;
+			if (value instanceof ITable) return foundsetMethodsImage;
 			return null;
 		}
 
@@ -360,7 +398,7 @@ public class MethodDialog extends TreeSelectDialog
 			Object delegate = super.getDelegate();
 			while (delegate instanceof IDelegate)
 			{
-				delegate = ((IDelegate)delegate).getDelegate();
+				delegate = ((IDelegate< ? >)delegate).getDelegate();
 			}
 			final ILabelProvider delegateLabelProvider = (ILabelProvider)delegate;
 			return new LabelProvider()

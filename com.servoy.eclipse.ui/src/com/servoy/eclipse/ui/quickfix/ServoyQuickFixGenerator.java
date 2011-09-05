@@ -29,6 +29,7 @@ import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
@@ -93,8 +94,17 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				String solName = (String)marker.getAttribute("SolutionName");
 				String eventName = (String)marker.getAttribute("EventName");
 				String uuid = (String)marker.getAttribute("Uuid");
-				return new IMarkerResolution[] { new ClearPropertyQuickFix(solName, uuid, eventName, eventName), new CreateMethodReferenceQuickFix(uuid,
-					solName, eventName, false), new CreateMethodReferenceQuickFix(uuid, solName, eventName, true) };
+				String dataSource = (String)marker.getAttribute("DataSource");
+
+				List<IMarkerResolution> resolutions = new ArrayList<IMarkerResolution>(4);
+
+				resolutions.add(new ClearPropertyQuickFix(solName, uuid, eventName, eventName));
+				resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, null, eventName, IRepository.FORMS, "form"));
+				resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, null, eventName, IRepository.SOLUTIONS, "global"));
+				if (dataSource != null) resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName, IRepository.TABLENODES,
+					"foundset"));
+
+				return resolutions.toArray(new IMarkerResolution[resolutions.size()]);
 			}
 			if (type.equals(ServoyBuilder.INVALID_DATAPROVIDERID))
 			{

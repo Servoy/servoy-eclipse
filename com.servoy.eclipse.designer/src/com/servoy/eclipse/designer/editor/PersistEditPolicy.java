@@ -279,7 +279,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 				{
 					return SetValueCommand.createSetvalueCommand("Drag-n-drop script method", new PersistPropertySource((IPersist)child,
 						(IPersist)(formEditPart == null ? null : formEditPart.getModel()), false),
-						StaticContentSpecLoader.PROPERTY_ONACTIONMETHODID.getPropertyName(), new MethodWithArguments(persist.getID()));
+						StaticContentSpecLoader.PROPERTY_ONACTIONMETHODID.getPropertyName(), MethodWithArguments.create(persist, null));
 				}
 				if (persist instanceof Media && child instanceof ISupportMedia && child instanceof IPersist)
 				{

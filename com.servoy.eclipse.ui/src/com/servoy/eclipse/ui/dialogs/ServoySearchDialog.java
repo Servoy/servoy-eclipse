@@ -49,6 +49,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
@@ -516,10 +517,14 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 			else if (persist instanceof TableNode)
 			{
 				TableNode node = (TableNode)persist;
-				List<ScriptCalculation> scriptCalculations = node.getScriptCalculations();
-				for (ScriptCalculation scriptCalculation : scriptCalculations)
+				Iterator<IPersist> allObjects = node.getAllObjects();
+				while (allObjects.hasNext())
 				{
-					contentProvider.add(scriptCalculation, itemsFilter);
+					IPersist p = allObjects.next();
+					if (p.getTypeID() == IRepository.SCRIPTCALCULATIONS || p.getTypeID() == IRepository.METHODS)
+					{
+						contentProvider.add(p, itemsFilter);
+					}
 				}
 			}
 		}

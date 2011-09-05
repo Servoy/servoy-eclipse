@@ -31,6 +31,7 @@ import org.eclipse.dltk.javascript.typeinference.ValueCollectionFactory;
 import org.eclipse.dltk.javascript.typeinfo.IElementResolver;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
+import org.eclipse.dltk.javascript.typeinfo.TypeMemberQuery;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
@@ -73,8 +74,9 @@ public class ElementResolver implements IElementResolver
 	}
 
 	private final Map<String, ITypeNameCreator> typeNameCreators = new HashMap<String, ElementResolver.ITypeNameCreator>();
-	private final Set<String> noneGlobalNames = new HashSet<String>();
+	private final Set<String> formOnlyNames = new HashSet<String>();
 	private final Set<String> noneCalcNames = new HashSet<String>();
+	private final Set<String> noneFoundsetNames = new HashSet<String>();
 
 	public ElementResolver()
 	{
@@ -95,16 +97,18 @@ public class ElementResolver implements IElementResolver
 		typeNameCreators.put("forms", new FormsNameCreator());
 		typeNameCreators.put("alldataproviders", new SimpleNameTypeNameCreator("Array"));
 
-		noneGlobalNames.add("controller");
-		noneGlobalNames.add("alldataproviders");
-		noneGlobalNames.add("foundset");
-		noneGlobalNames.add("elements");
+		formOnlyNames.add("controller");
+		formOnlyNames.add("alldataproviders");
+		formOnlyNames.add("foundset");
+		formOnlyNames.add("elements");
 
-		noneCalcNames.add("currentcontroller");
+		noneFoundsetNames.add("currentcontroller");
+		noneFoundsetNames.add("history");
+		noneFoundsetNames.add("jsunit");
+		noneFoundsetNames.add("forms");
+
+		noneCalcNames.addAll(noneFoundsetNames); // all filtered out for foundset methods is also filtered out for calcs
 		noneCalcNames.add("databaseManager");
-		noneCalcNames.add("history");
-		noneCalcNames.add("jsunit");
-		noneCalcNames.add("forms");
 	}
 
 
@@ -112,81 +116,20 @@ public class ElementResolver implements IElementResolver
 	{
 		Set<String> typeNames = getTypeNames(prefix);
 		FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
-		Form form = TypeCreator.getForm(context);
-
-		if (ValueCollectionProvider.getGenerateFullGlobalCollection())
+		IResource resource = context.getModelElement().getResource();
+		if (resource != null && fs != null)
 		{
-			typeNames.add("servoyDeveloper");
-		}
-
-
-		if (form != null)
-		{
-			typeNames.add("globals");
-			Form formToUse = form;
-			if (form.getExtendsFormID() > 0)
+			if (ValueCollectionProvider.getGenerateFullGlobalCollection())
 			{
-				formToUse = fs.getFlattenedForm(form);
-				typeNames.add("_super");
-			}
-			try
-			{
-				Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(formToUse.getTable());
-				if (allDataProvidersForTable != null)
-				{
-					typeNames.addAll(allDataProvidersForTable.keySet());
-				}
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError("Cant get dataproviders of " + form, e);
+				typeNames.add("servoyDeveloper");
 			}
 
-			try
+			IPath path = resource.getProjectRelativePath();
+			if (path.segmentCount() == 1 && path.segment(0).equals(SolutionSerializer.GLOBALS_FILE))
 			{
-				Iterator<Relation> relations = fs.getRelations(formToUse.getTable(), true, false);
-				while (relations.hasNext())
-				{
-					typeNames.add(relations.next().getName());
-				}
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError("Cant get relations of " + form, e);
-			}
-		}
-		else if (fs != null)
-		{
-			// global, remove the form only things.
-			typeNames.removeAll(noneGlobalNames);
-
-			Table calcTable = getCalculationTable(context, fs);
-			if (calcTable != null)
-			{
-				typeNames.removeAll(noneCalcNames);
-				typeNames.add("globals");
-				typeNames.add("getDataSource");
-				try
-				{
-					Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(calcTable);
-					if (allDataProvidersForTable != null)
-					{
-						typeNames.addAll(allDataProvidersForTable.keySet());
-					}
-					Iterator<Relation> relations = fs.getRelations(calcTable, true, false);
-					while (relations.hasNext())
-					{
-						typeNames.add(relations.next().getName());
-					}
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError("Cant get dataproviders of " + calcTable + " for calculations " + context.getModelElement().getResource(), e);
-				}
-
-			}
-			else
-			{
+				// globals.js
+				// global, remove the form only things.
+				typeNames.removeAll(formOnlyNames);
 				try
 				{
 					Iterator<Relation> relations = fs.getRelations(null, true, false);
@@ -197,10 +140,95 @@ public class ElementResolver implements IElementResolver
 				}
 				catch (RepositoryException e)
 				{
-					ServoyLog.logError("Cant get relations of " + form, e);
+					ServoyLog.logError("Cant get global relations", e);
+				}
+			}
+
+			else if (path.segmentCount() == 2 && path.segment(0).equals(SolutionSerializer.FORMS_DIR))
+			{
+				// forms/formname.js
+				Form form = TypeCreator.getForm(context);
+				if (form != null)
+				{
+					typeNames.add("globals");
+					Form formToUse = form;
+					if (form.getExtendsID() > 0)
+					{
+						formToUse = fs.getFlattenedForm(form);
+						typeNames.add("_super");
+					}
+					try
+					{
+						Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(formToUse.getTable());
+						if (allDataProvidersForTable != null)
+						{
+							typeNames.addAll(allDataProvidersForTable.keySet());
+						}
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError("Cant get dataproviders of " + form, e);
+					}
+
+					try
+					{
+						Iterator<Relation> relations = fs.getRelations(formToUse.getTable(), true, false);
+						while (relations.hasNext())
+						{
+							typeNames.add(relations.next().getName());
+						}
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError("Cant get relations of " + form, e);
+					}
+				}
+			}
+
+			else if (path.segmentCount() == 3 && path.segment(0).equals(SolutionSerializer.DATASOURCES_DIR_NAME))
+			{
+				// datasources/server/table_foundset.js or datasources/server/table_calculations.js
+				Table table = getDatasourceTable(context, fs);
+				if (table != null)
+				{
+					typeNames.add("globals");
+					if (path.segment(2).endsWith(SolutionSerializer.CALCULATIONS_POSTFIX))
+					{
+						// datasources/server/table_calculations.js
+						typeNames.removeAll(noneCalcNames);
+						typeNames.add("getDataSource");
+						try
+						{
+							Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(table);
+							if (allDataProvidersForTable != null)
+							{
+								typeNames.addAll(allDataProvidersForTable.keySet());
+							}
+							Iterator<Relation> relations = fs.getRelations(table, true, false);
+							while (relations.hasNext())
+							{
+								typeNames.add(relations.next().getName());
+							}
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError("Cant get dataproviders of " + table + " for file " + context.getModelElement().getResource(), e);
+						}
+					}
+					else if (path.segment(2).endsWith(SolutionSerializer.FOUNDSET_POSTFIX))
+					{
+						// datasources/server/table_foundset.js
+						typeNames.removeAll(noneFoundsetNames);
+						Type type = context.getType(FoundSet.JS_FOUNDSET + '<' + table.getDataSource() + '>');
+						for (Member member : new TypeMemberQuery(type))
+						{
+							typeNames.add(member.getName());
+						}
+					}
 				}
 			}
 		}
+
 		return typeNames;
 	}
 
@@ -231,30 +259,28 @@ public class ElementResolver implements IElementResolver
 	 * @param fs
 	 * @return
 	 */
-	private Table getCalculationTable(ITypeInfoContext context, FlattenedSolution fs)
+	private Table getDatasourceTable(ITypeInfoContext context, FlattenedSolution fs)
 	{
-		Table calcTable = null;
+		Table table = null;
 		IResource resource = context.getModelElement().getResource();
-		if (resource != null)
+		String[] serverTablename = SolutionSerializer.getDataSourceForCalculationJSFile(resource);
+		if (serverTablename == null)
 		{
-			IPath path = resource.getProjectRelativePath();
-			if (path != null && path.segmentCount() == 3 && path.segment(0).equals(SolutionSerializer.DATASOURCES_DIR_NAME) &&
-				path.segment(2).endsWith(SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT))
+			serverTablename = SolutionSerializer.getDataSourceForFoundsetJSFile(resource);
+		}
+		if (serverTablename != null)
+		{
+			try
 			{
-				String calcServerName = path.segment(1);
-				String calcTableName = path.segment(2).substring(0, path.segment(2).length() - SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length());
-				try
-				{
-					IServer server = fs.getSolution().getServer(calcServerName);
-					if (server != null) calcTable = (Table)server.getTable(calcTableName);
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError("Cant get table " + calcTableName + " for " + calcServerName + " for calculations " + resource, e);
-				}
+				IServer server = fs.getSolution().getServer(serverTablename[0]);
+				if (server != null) table = (Table)server.getTable(serverTablename[1]);
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError("Cant get table " + serverTablename[1] + " for " + serverTablename[0] + " for file " + resource, e);
 			}
 		}
-		return calcTable;
+		return table;
 	}
 
 	@SuppressWarnings("restriction")
@@ -270,13 +296,13 @@ public class ElementResolver implements IElementResolver
 				return null;
 			}
 			ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(fs.getSolution().getName());
-			IFile file = project.getProject().getFile("globals.js");
+			IFile file = project.getProject().getFile(SolutionSerializer.GLOBALS_FILE);
 			IValueCollection globalsValueCollection = ValueCollectionProvider.getValueCollection(file, true);
 			if (globalsValueCollection != null)
 			{
 				IValueCollection collection = ValueCollectionFactory.createScopeValueCollection();
 				ValueCollectionFactory.copyInto(collection, globalsValueCollection);
-				collection = ValueCollectionProvider.getGlobalModulesValueCollection(context, fs, collection);
+				collection = ValueCollectionProvider.getGlobalModulesValueCollection(fs, collection);
 				if (collection != null)
 				{
 					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
@@ -290,23 +316,22 @@ public class ElementResolver implements IElementResolver
 			}
 			return null;
 		}
-		else if ("_super".equals(name))
+
+		if ("_super".equals(name))
 		{
 			Form form = TypeCreator.getForm(context);
-			if (form != null && form.getExtendsID() > 0)
+			if (form != null && form.getExtendsID() > 0 && fs != null)
 			{
-				if (fs != null)
-				{
-					Form superForm = fs.getForm(form.getExtendsID());
-					Property property = TypeCreator.createProperty(context, "_super", true, null, TypeCreator.FORM_IMAGE);
-					property.setDescription(TypeCreator.getDoc("_super", com.servoy.j2db.documentation.scripting.docs.Form.class, "", null));
-					property.setAttribute(TypeCreator.LAZY_VALUECOLLECTION, superForm);
-					property.setAttribute(IReferenceAttributes.SUPER_SCOPE, Boolean.TRUE);
-					return property;
-				}
+				Form superForm = fs.getForm(form.getExtendsID());
+				Property property = TypeCreator.createProperty(context, "_super", true, null, TypeCreator.FORM_IMAGE);
+				property.setDescription(TypeCreator.getDoc("_super", com.servoy.j2db.documentation.scripting.docs.Form.class, "", null));
+				property.setAttribute(TypeCreator.LAZY_VALUECOLLECTION, superForm);
+				property.setAttribute(IReferenceAttributes.SUPER_SCOPE, Boolean.TRUE);
+				return property;
 			}
 			return null;
 		}
+
 		Type type = null;
 		String typeName = getTypeName(context, name);
 		if ("servoyDeveloper".equals(name))
@@ -315,8 +340,16 @@ public class ElementResolver implements IElementResolver
 		}
 		if (typeName != null)
 		{
-			if ((noneCalcNames.contains(name) || noneGlobalNames.contains(name)) && getCalculationTable(context, fs) != null)
+			if (SolutionSerializer.getDataSourceForCalculationJSFile(context.getModelElement().getResource()) != null &&
+				(noneCalcNames.contains(name) || formOnlyNames.contains(name)))
 			{
+				// hide in calc
+				return null;
+			}
+			if (SolutionSerializer.getDataSourceForFoundsetJSFile(context.getModelElement().getResource()) != null &&
+				(noneFoundsetNames.contains(name) || formOnlyNames.contains(name)))
+			{
+				// hide in foundset method
 				return null;
 			}
 			type = context.getType(typeName);
@@ -332,7 +365,7 @@ public class ElementResolver implements IElementResolver
 				Relation relation = fs.getRelation(name);
 				if (relation != null)
 				{
-					type = context.getType(FoundSet.JS_FOUNDSET + "<" + relation.getName() + ">");
+					type = context.getType(FoundSet.JS_FOUNDSET + '<' + relation.getName() + '>');
 					image = TypeCreator.RELATION_IMAGE;
 					resource = relation;
 				}
@@ -353,7 +386,7 @@ public class ElementResolver implements IElementResolver
 					}
 					else
 					{
-						table = getCalculationTable(context, fs);
+						table = getDatasourceTable(context, fs);
 					}
 					if (table != null)
 					{
@@ -394,13 +427,22 @@ public class ElementResolver implements IElementResolver
 								return property;
 							}
 						}
-						else if (name.equals("getDataSource"))
+						else if (isCalculationResource(context) && name.equals("getDataSource"))
 						{
 							Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
 							method.setName(name);
 							method.setType(TypeUtil.ref(ITypeNames.STRING));
 							method.setAttribute(TypeCreator.IMAGE_DESCRIPTOR, TypeCreator.METHOD);
 							return method;
+						}
+						else if (isFoundsetResource(context))
+						{
+							Type foundsetType = context.getType(FoundSet.JS_FOUNDSET + '<' + table.getDataSource() + '>');
+							Member member = new TypeMemberQuery(foundsetType).findMember(name);
+							if (member != null)
+							{
+								return member;
+							}
 						}
 					}
 				}
@@ -425,6 +467,31 @@ public class ElementResolver implements IElementResolver
 			return property;
 		}
 		return null;
+	}
+
+	/**
+	 * @param context
+	 * @return
+	 */
+	private boolean isCalculationResource(ITypeInfoContext context)
+	{
+		return isTableNodeResource(context, SolutionSerializer.CALCULATIONS_POSTFIX);
+	}
+
+	private boolean isFoundsetResource(ITypeInfoContext context)
+	{
+		return isTableNodeResource(context, SolutionSerializer.FOUNDSET_POSTFIX);
+	}
+
+	private boolean isTableNodeResource(ITypeInfoContext context, String postfix)
+	{
+		IResource resource = context.getModelElement().getResource();
+		if (resource != null)
+		{
+			IPath path = resource.getProjectRelativePath();
+			return path.segmentCount() == 3 && path.segment(0).equals(SolutionSerializer.DATASOURCES_DIR_NAME) && path.segment(2).endsWith(postfix);
+		}
+		return false;
 	}
 
 	/**

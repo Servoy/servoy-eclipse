@@ -82,6 +82,7 @@ import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
@@ -97,6 +98,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 	private final SolutionExplorerView viewer;
 	private final ImageDescriptor newFormMethodImage;
 	private final ImageDescriptor newGlobalMethodImage;
+
 
 	/**
 	 * Creates a new "create new method" action for the given solution view.
@@ -164,7 +166,23 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 
 	public static ScriptMethod createNewMethod(final Shell shell, IPersist parent, String methodKey, boolean activate, String forcedMethodName)
 	{
-		String methodType = parent instanceof Form ? "form" : "global"; //$NON-NLS-1$ //$NON-NLS-2$
+		String methodType;
+		if (parent instanceof Form)
+		{
+			methodType = "form";
+		}
+		else if (parent instanceof Solution)
+		{
+			methodType = "global";
+		}
+		else if (parent instanceof TableNode)
+		{
+			methodType = "foundset";
+		}
+		else
+		{
+			return null;
+		}
 		ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		boolean override = false;
@@ -193,42 +211,42 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 					// global method
 					met = ((Solution)parent).createNewGlobalScriptMethod(sm.getNameValidator(), methodName);
 				}
-				else
+				else if (parent instanceof Form)
 				{
-					// form method
-					if (parent instanceof Form)
+					Form form = (Form)parent;
+					if (form.getExtendsID() > 0)
 					{
-						Form form = (Form)parent;
-						if (form.getExtendsFormID() > 0)
+						List<Form> formHierarchy = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingFlattenedSolution().getFormHierarchy(
+							form);
+						for (Form f : formHierarchy)
 						{
-							List<Form> formHierarchy = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingFlattenedSolution().getFormHierarchy(
-								form);
-							for (Form f : formHierarchy)
+							if (f != form)
 							{
-								if (f != form)
+								ScriptMethod superMethod = f.getScriptMethod(methodName);
+								if (superMethod != null)
 								{
-									ScriptMethod superMethod = f.getScriptMethod(methodName);
-									if (superMethod != null)
+									if (forcedMethodName == null)
 									{
-										if (forcedMethodName == null)
+										MessageDialog dialog = new MessageDialog(shell, "Method already exists in the super form " + f.getName(), null, //$NON-NLS-1$
+											"Are you sure you want to override that forms method?", MessageDialog.QUESTION, //$NON-NLS-1$
+											new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
+										int returnCode = dialog.open();
+										if (returnCode > 0)
 										{
-											MessageDialog dialog = new MessageDialog(shell, "Method already exists in the super form " + f.getName(), null, //$NON-NLS-1$
-												"Are you sure you want to override that forms method?", MessageDialog.QUESTION, //$NON-NLS-1$
-												new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
-											int returnCode = dialog.open();
-											if (returnCode > 0)
-											{
-												return null;
-											}
+											return null;
 										}
-										override = true;
-										superArguments = superMethod.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
 									}
+									override = true;
+									superArguments = superMethod.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
 								}
 							}
 						}
-						met = ((Form)parent).createNewScriptMethod(sm.getNameValidator(), methodName);
 					}
+					met = ((Form)parent).createNewScriptMethod(sm.getNameValidator(), methodName);
+				}
+				else if (parent instanceof TableNode)
+				{
+					met = ((TableNode)parent).createNewFoundsetMethod(sm.getNameValidator(), methodName);
 				}
 
 				if (met != null)

@@ -375,6 +375,9 @@
       <attribute
             name="EventName">
       </attribute>
+      <attribute
+            name="DataSource">
+      </attribute>
    </extension>
    <extension
          id="com.servoy.eclipse.core.invalidSortOption"

@@ -38,10 +38,10 @@ public class FormInheritenceMethodConverter implements IPropertyConverter<Method
 	{
 		if (value != null)
 		{
-			IScriptProvider scriptMethod = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), null, value.methodId);
+			IScriptProvider scriptMethod = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), value.table, value.methodId);
 			if (scriptMethod != null)
 			{
-				return new MethodWithArguments(scriptMethod.getID(), value.arguments);
+				return MethodWithArguments.create(scriptMethod, value.arguments);
 			}
 		}
 		return value;

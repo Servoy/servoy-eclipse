@@ -19,17 +19,21 @@ package com.servoy.eclipse.ui.editors;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.grouplayout.GroupLayout;
-import org.eclipse.swt.layout.grouplayout.LayoutStyle;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.TableNode;
 
 /**
  * @author jcompagner
@@ -41,7 +45,8 @@ public class AddMethodButtonsComposite extends Composite
 
 	private TreeSelectDialog dialog;
 
-	private final Button addFormMethodButton;
+	private final Button createFoundsetMethodButton;
+	private final Button createFormMethodButton;
 
 
 	/**
@@ -51,12 +56,18 @@ public class AddMethodButtonsComposite extends Composite
 	public AddMethodButtonsComposite(Composite parent, int style)
 	{
 		super(parent, style);
+		setLayout(new GridLayout(4, false));
 
-		addFormMethodButton = new Button(this, SWT.NONE);
-		addFormMethodButton.addSelectionListener(new SelectionAdapter()
+		Button createGlobalMethodButton;
+
+		Label createMethodLabel = new Label(this, SWT.NONE);
+		createMethodLabel.setText("Create");
+
+		createFormMethodButton = new Button(this, SWT.NONE);
+		createFormMethodButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
-			public void widgetSelected(final SelectionEvent e)
+			public void widgetSelected(SelectionEvent e)
 			{
 				ScriptMethod method = createMethod(context.getAncestor(IRepository.FORMS));
 				if (method != null)
@@ -67,9 +78,42 @@ public class AddMethodButtonsComposite extends Composite
 				}
 			}
 		});
-		addFormMethodButton.setText("Create Form Method");
+		createFormMethodButton.setText("Form");
 
-		Button createGlobalMethodButton;
+		createFoundsetMethodButton = new Button(this, SWT.NONE);
+		createFoundsetMethodButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				TableNode tableNode = (TableNode)context.getAncestor(IRepository.TABLENODES);
+				if (tableNode == null)
+				{
+					// try forms table node
+					Form form = (Form)context.getAncestor(IRepository.FORMS);
+					if (form != null && form.getDataSource() != null)
+					{
+						try
+						{
+							tableNode = form.getSolution().getOrCreateTableNode(form.getDataSource());
+						}
+						catch (RepositoryException ex)
+						{
+							ServoyLog.logError(ex);
+						}
+					}
+				}
+				ScriptMethod method = createMethod(tableNode);
+				if (method != null)
+				{
+					dialog.refreshTree();
+					dialog.setSelection(getSelectionObject(method));
+					dialog.buttonBar.forceFocus();
+				}
+			}
+		});
+		createFoundsetMethodButton.setText("FoundSet");
+
 		createGlobalMethodButton = new Button(this, SWT.NONE);
 		createGlobalMethodButton.addSelectionListener(new SelectionAdapter()
 		{
@@ -85,16 +129,7 @@ public class AddMethodButtonsComposite extends Composite
 				}
 			}
 		});
-		createGlobalMethodButton.setText("Create Global Method");
-		final GroupLayout groupLayout = new GroupLayout(this);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().add(10, 10, 10).add(addFormMethodButton).addPreferredGap(LayoutStyle.RELATED).add(createGlobalMethodButton).add(
-				13, 13, 13)));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(addFormMethodButton).add(createGlobalMethodButton)).addContainerGap(
-				GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
-		setLayout(groupLayout);
+		createGlobalMethodButton.setText("Global");
 	}
 
 	private ScriptMethod createMethod(IPersist parent)
@@ -109,7 +144,9 @@ public class AddMethodButtonsComposite extends Composite
 	{
 		this.context = context;
 		this.methodKey = methodKey;
-		addFormMethodButton.setEnabled(context.getAncestor(IRepository.FORMS) != null);
+		Form form = (Form)context.getAncestor(IRepository.FORMS);
+		createFormMethodButton.setEnabled(form != null);
+		createFoundsetMethodButton.setEnabled((form != null && form.getDataSource() != null) || context.getAncestor(IRepository.TABLENODES) != null);
 	}
 
 	/**
@@ -122,6 +159,6 @@ public class AddMethodButtonsComposite extends Composite
 
 	protected Object getSelectionObject(ScriptMethod method)
 	{
-		return new MethodWithArguments(method.getID());
+		return MethodWithArguments.create(method, null);
 	}
 }

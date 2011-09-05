@@ -16,8 +16,6 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
-import java.util.Iterator;
-
 import org.eclipse.core.databinding.observable.AbstractObservable;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.ChangeSupport;
@@ -29,6 +27,7 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TreeViewer;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodListOptions;
 import com.servoy.eclipse.ui.editors.MethodCellEditor;
 import com.servoy.eclipse.ui.editors.table.EventsComposite.EventNode;
 import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
@@ -98,18 +97,9 @@ public class EventsMethodEditingSupport extends EditingSupport
 		EventNode node = (EventNode)element;
 		try
 		{
-			Iterator<TableNode> it = node.getSolution().getTableNodes(table);
-			TableNode tableNode = null;
-			if (it.hasNext())
-			{
-				tableNode = it.next();
-			}
-			else
-			{
-				tableNode = node.getSolution().createNewTableNode(table.getDataSource());
-			}
-			PersistPropertySource persistProperties = new PersistPropertySource(tableNode, node.getSolution(), false);
-			persistProperties.setPropertyValue(node.getType().getProperty(), value);
+			PersistPropertySource persistProperties = new PersistPropertySource(node.getSolution().getOrCreateTableNode(table.getDataSource()),
+				node.getSolution(), false);
+			persistProperties.setPropertyValue(node.getType().getProperty().getPropertyName(), value);
 			if (persistProperties.getPersist().isChanged())
 			{
 				changeSupport.fireEvent(new ChangeEvent(observable));
@@ -143,9 +133,20 @@ public class EventsMethodEditingSupport extends EditingSupport
 		if (!node.isSolution())
 		{
 			Solution solution = node.getSolution();
-			PersistContext persistContext = PersistContext.create(solution, null);
+			TableNode tableNode;
+			try
+			{
+				tableNode = solution.getOrCreateTableNode(table.getDataSource());
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+				return null;
+			}
+			PersistContext persistContext = PersistContext.create(tableNode, null);
 			editor = new MethodCellEditor(((TreeViewer)getViewer()).getTree(), new SolutionContextDelegateLabelProvider(new MethodLabelProvider(persistContext,
-				false, true), solution), new MethodValueEditor(persistContext), persistContext, node.getType().getProperty(), false, false, true, false, true);
+				false, true), solution), new MethodValueEditor(persistContext), persistContext, node.getType().getProperty().getPropertyName(), false,
+				new MethodListOptions(false, true, false, true, true, table));
 		}
 		return editor;
 	}

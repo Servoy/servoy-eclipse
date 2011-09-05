@@ -318,7 +318,7 @@ public class ValueListEditor extends PersistEditor
 		globalMethodSelect.setContentProvider(new GlobalMethodListContentProvider(getValueList()));
 		globalMethodSelect.setLabelProvider(new SolutionContextDelegateLabelProvider(new MethodLabelProvider(PersistContext.create(getValueList(), null),
 			false, false), getValueList()));
-		globalMethodSelect.setInput(new MethodListOptions(false, false, false, true));
+		globalMethodSelect.setInput(new MethodListOptions(false, false, false, true, false, null));
 		globalMethodSelect.setEditable(true);
 		Control globalMethodSelectControl = globalMethodSelect.getControl();
 
@@ -730,7 +730,7 @@ public class ValueListEditor extends PersistEditor
 					ScriptMethod scriptMethod = fs.getScriptMethod(fromObject.toString().substring(ScriptVariable.GLOBAL_DOT_PREFIX.length()));
 					if (scriptMethod != null)
 					{
-						return new MethodWithArguments(scriptMethod.getID());
+						return MethodWithArguments.create(scriptMethod, null);
 					}
 					return new MethodWithArguments.UnresolvedMethodWithArguments(fromObject.toString());
 				}
@@ -893,7 +893,7 @@ public class ValueListEditor extends PersistEditor
 			{
 				// if valuelist still has invalid data in it, try to correct it automatically and tell the user what was changed
 				List<Problem> problems = ServoyBuilder.checkValuelist(getValueList(), servoyModel.getFlattenedSolution(), ServoyModel.getServerManager(), true);
-				StringBuffer paf = new StringBuffer("Some problems with the contents of this valuelist were noticed and corrected:\n"); //$NON-NLS-1$
+				StringBuilder paf = new StringBuilder("Some problems with the contents of this valuelist were noticed and corrected:\n"); //$NON-NLS-1$
 				boolean autoFixes = false;
 				for (Problem problem : problems)
 				{
@@ -1175,8 +1175,7 @@ public class ValueListEditor extends PersistEditor
 			List<MethodWithArguments> lst = new ArrayList<MethodWithArguments>();
 			while (scriptMethods.hasNext())
 			{
-				MethodWithArguments mwa = new MethodWithArguments(scriptMethods.next().getID());
-				lst.add(mwa);
+				lst.add(MethodWithArguments.create(scriptMethods.next(), null));
 			}
 			return lst.toArray();
 		}

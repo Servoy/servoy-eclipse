@@ -425,8 +425,8 @@ public class SolutionDeserializer
 			Map<File, IPersist> persistFileMap = new HashMap<File, IPersist>();
 			for (JSONObject object : jsonObjects)
 			{
-				setMissingTypeOnScriptObject(object, parent);
 				File file = fileMap.get(object);
+				setMissingTypeOnScriptObject(object, parent, file);
 				IPersist persist = null;
 				try
 				{
@@ -469,31 +469,43 @@ public class SolutionDeserializer
 					else
 					{
 						// tablenode
-						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0,
-							jsFileName.length() - SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length()) +
-							SolutionSerializer.TABLENODE_FILE_EXTENSION);
+						if (jsFileName.endsWith(SolutionSerializer.CALCULATIONS_POSTFIX))
+						{
+							// calculations
+							jsonFile = new File(jsFile.getParent(), jsFileName.substring(0,
+								jsFileName.length() - SolutionSerializer.CALCULATIONS_POSTFIX.length()) +
+								SolutionSerializer.TABLENODE_FILE_EXTENSION);
+						}
+						else if (jsFileName.endsWith(SolutionSerializer.FOUNDSET_POSTFIX))
+						{
+							// foundset methods
+							jsonFile = new File(jsFile.getParent(),
+								jsFileName.substring(0, jsFileName.length() - SolutionSerializer.FOUNDSET_POSTFIX.length()) +
+									SolutionSerializer.TABLENODE_FILE_EXTENSION);
+						}
+						else jsonFile = null;
 					}
 
-					if (jsonFile.exists())
+					if (jsonFile != null && jsonFile.exists())
 					{
-						ISupportChilds parentForm = (ISupportChilds)persistFileMap.get(jsonFile);
-						if (parentForm != null)
+						ISupportChilds scriptParent = (ISupportChilds)persistFileMap.get(jsonFile);
+						if (scriptParent != null)
 						{
 							List<JSONObject> childrenJSObjects = childrenJSObjectMapEntry.getValue();
 							if (!readAll)
 							{
-								testDuplicates(parentForm, childrenJSObjects);
+								testDuplicates(scriptParent, childrenJSObjects);
 							}
 							if (childrenJSObjects != null)
 							{
 								scriptFiles.add(jsFile);
 								for (JSONObject object : childrenJSObjects)
 								{
-									setMissingTypeOnScriptObject(object, parentForm);
+									setMissingTypeOnScriptObject(object, scriptParent, jsFile);
 									IPersist persist = null;
 									try
 									{
-										persist = deserializePersist(repository, parentForm, persist_json_map, object, strayCats, jsFile, saved,
+										persist = deserializePersist(repository, scriptParent, persist_json_map, object, strayCats, jsFile, saved,
 											useFilesForDirtyMark);
 									}
 									catch (JSONException e)
@@ -511,7 +523,7 @@ public class SolutionDeserializer
 								}
 								if (jsFile != null)
 								{
-									jsParentFileMap.put(jsFile, parentForm);
+									jsParentFileMap.put(jsFile, scriptParent);
 								}
 							}
 						}
@@ -720,28 +732,27 @@ public class SolutionDeserializer
 	 */
 	private boolean hasRelatedEntries(File file, List<File> files)
 	{
-		String dirPath = null;
-
 		if (file.getName().endsWith(SolutionSerializer.FORM_FILE_EXTENSION))
 		{
-			dirPath = file.getPath().substring(0, file.getPath().length() - SolutionSerializer.FORM_FILE_EXTENSION.length()) +
-				SolutionSerializer.JS_FILE_EXTENSION;
-		}
-		else if (file.getName().endsWith(SolutionSerializer.TABLENODE_FILE_EXTENSION))
-		{
-			dirPath = file.getPath().substring(0, file.getPath().length() - SolutionSerializer.TABLENODE_FILE_EXTENSION.length()) +
-				SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT;
-		}
-		else
-		{
-			return false;
+			return containsPath(file.getPath().substring(0, file.getPath().length() - SolutionSerializer.FORM_FILE_EXTENSION.length()) +
+				SolutionSerializer.JS_FILE_EXTENSION, files);
 		}
 
-		String filePath;
+		if (file.getName().endsWith(SolutionSerializer.TABLENODE_FILE_EXTENSION))
+		{
+			String basePath = file.getPath().substring(0, file.getPath().length() - SolutionSerializer.TABLENODE_FILE_EXTENSION.length());
+			return containsPath(basePath + SolutionSerializer.CALCULATIONS_POSTFIX, files) ||
+				containsPath(basePath + SolutionSerializer.FOUNDSET_POSTFIX, files);
+		}
+
+		return false;
+	}
+
+	private static boolean containsPath(String path, List<File> files)
+	{
 		for (File f : files)
 		{
-			filePath = f.getPath();
-			if (filePath.equals(dirPath))
+			if (f.getPath().equals(path))
 			{
 				return true;
 			}
@@ -750,36 +761,37 @@ public class SolutionDeserializer
 	}
 
 
-	private void setMissingTypeOnScriptObject(JSONObject object, ISupportChilds parent) throws JSONException
+	private static void setMissingTypeOnScriptObject(JSONObject object, ISupportChilds parent, File jsFile) throws JSONException
 	{
 		if (!object.has(SolutionSerializer.PROP_TYPEID))
 		{
-			if (parent instanceof Form)
+			int typeId;
+			if (parent instanceof Form || parent instanceof Solution)
 			{
 				if (object.has("declaration")) //$NON-NLS-1$
 				{
-					object.put(SolutionSerializer.PROP_TYPEID, IRepository.METHODS);
+					typeId = IRepository.METHODS;
 				}
 				else
 				{
-					object.put(SolutionSerializer.PROP_TYPEID, IRepository.SCRIPTVARIABLES);
-				}
-			}
-			else if (parent instanceof Solution)
-			{
-				if (object.has("declaration")) //$NON-NLS-1$
-				{
-					object.put(SolutionSerializer.PROP_TYPEID, IRepository.METHODS);
-				}
-				else
-				{
-					object.put(SolutionSerializer.PROP_TYPEID, IRepository.SCRIPTVARIABLES);
+					typeId = IRepository.SCRIPTVARIABLES;
 				}
 			}
 			else if (parent instanceof TableNode)
 			{
-				object.put(SolutionSerializer.PROP_TYPEID, IRepository.SCRIPTCALCULATIONS);
+				if (jsFile.getName().endsWith(SolutionSerializer.CALCULATIONS_POSTFIX))
+				{
+					typeId = IRepository.SCRIPTCALCULATIONS;
+				}
+				else if (jsFile.getName().endsWith(SolutionSerializer.FOUNDSET_POSTFIX))
+				{
+					typeId = IRepository.METHODS;
+				}
+				else return;
 			}
+			else return;
+
+			object.put(SolutionSerializer.PROP_TYPEID, typeId);
 		}
 	}
 

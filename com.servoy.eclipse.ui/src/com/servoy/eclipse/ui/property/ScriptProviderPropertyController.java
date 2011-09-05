@@ -35,8 +35,6 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.ScriptCalculation;
-import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
@@ -77,33 +75,23 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 				try
 				{
 					FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
-					int methodId = -1;
 
 					// try global method
 					String methodName = value.startsWith(ScriptVariable.GLOBAL_DOT_PREFIX) ? value.substring(ScriptVariable.GLOBAL_DOT_PREFIX.length()) : value;
-					ScriptMethod scriptMethod = flattenedSolution.getScriptMethod(methodName);
-					if (scriptMethod != null)
-					{
-						methodId = scriptMethod.getID();
-					}
+					IPersist method = flattenedSolution.getScriptMethod(methodName);
 
-					// try calc
-					if (methodId == -1 && table != null)
+					if (method == null && table != null)
 					{
+						// try calc or foundset method
 						Iterator<TableNode> tableNodes = flattenedSolution.getTableNodes(table);
-						while (methodId == -1 && tableNodes.hasNext())
+						while (method == null && tableNodes.hasNext())
 						{
-							ScriptCalculation calc = AbstractBase.selectByName(tableNodes.next().getScriptCalculations().iterator(), value);
-							if (calc != null)
-							{
-								// it is a ScriptCalculation
-								methodId = calc.getID();
-							}
+							method = AbstractBase.selectByName(tableNodes.next().getAllObjects(), value);
 						}
 					}
 
 					IPersist persist = persistContext.getPersist();
-					if (methodId != -1)
+					if (method != null)
 					{
 						SafeArrayList<Object> args = null;
 						if (persist instanceof AbstractBase)
@@ -114,7 +102,7 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 								args = new SafeArrayList<Object>(instanceArgs);
 							}
 						}
-						return new ComplexProperty<MethodWithArguments>(new MethodWithArguments(methodId, args))
+						return new ComplexProperty<MethodWithArguments>(MethodWithArguments.create(method, args))
 						{
 							@Override
 							public IPropertySource getPropertySource()
@@ -151,7 +139,8 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 				if (mwa != null)
 				{
 					MethodPropertyController.setInstancMethodArguments(persistContext.getPersist(), id, mwa.arguments);
-					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), table, mwa.methodId);
+					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), mwa.table,
+						mwa.methodId);
 					if (scriptProvider != null)
 					{
 						return scriptProvider.getParent() instanceof IRootObject ? ScriptVariable.GLOBAL_DOT_PREFIX + scriptProvider.getDisplayName()

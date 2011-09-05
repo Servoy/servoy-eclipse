@@ -1210,18 +1210,16 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												if (inForm == null) mk = MarkerMessages.PropertyOnElementTargetNotFound.fill(element.getName(), elementName);
 												else mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(element.getName(), elementName, inForm);
 											}
-											if (BaseComponent.isEventProperty(element.getName()))
+											if (BaseComponent.isEventProperty(element.getName()) || BaseComponent.isCommandProperty(element.getName()))
 											{
 												// TODO: this is a place where the same marker appears in more than one category...
-												IMarker marker = addMarker(project, INVALID_EVENT_METHOD, mk.getText(), -1, IMarker.SEVERITY_WARNING,
-													IMarker.PRIORITY_LOW, null, o);
+												IMarker marker = addMarker(project, BaseComponent.isEventProperty(element.getName()) ? INVALID_EVENT_METHOD
+													: INVALID_COMMAND_METHOD, mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, o);
 												marker.setAttribute("EventName", element.getName()); //$NON-NLS-1$
-											}
-											else if (BaseComponent.isCommandProperty(element.getName()))
-											{
-												IMarker marker = addMarker(project, INVALID_COMMAND_METHOD, mk.getText(), -1, IMarker.SEVERITY_WARNING,
-													IMarker.PRIORITY_LOW, null, o);
-												marker.setAttribute("EventName", element.getName()); //$NON-NLS-1$
+												if (parentForm != null)
+												{
+													marker.setAttribute("DataSource", parentForm.getDataSource()); //$NON-NLS-1$
+												}
 											}
 											else
 											{
@@ -1704,9 +1702,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								exceptionCount++;
 								if (exceptionCount < MAX_EXCEPTIONS) ServoyLog.logError(ex);
 							}
-							if (form.getExtendsFormID() > 0 && flattenedSolution != null)
+							if (form.getExtendsID() > 0 && flattenedSolution != null)
 							{
-								Form superForm = flattenedSolution.getForm(form.getExtendsFormID());
+								Form superForm = flattenedSolution.getForm(form.getExtendsID());
 								if (superForm != null)
 								{
 									if (form.getDataSource() != null && superForm.getDataSource() != null &&
@@ -1721,9 +1719,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									forms.add(Integer.valueOf(superForm.getID()));
 									while (superForm != null)
 									{
-										if (superForm.getExtendsFormID() > 0)
+										if (superForm.getExtendsID() > 0)
 										{
-											superForm = flattenedSolution.getForm(superForm.getExtendsFormID());
+											superForm = flattenedSolution.getForm(superForm.getExtendsID());
 											if (superForm != null)
 											{
 												if (forms.contains(Integer.valueOf(superForm.getID())))
@@ -1991,50 +1989,29 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										boolean errorFound = false;
 										if (vl.getDataProviderID1() != null)
 										{
-											try
+											calc = flattenedSolution.getScriptCalculation(vl.getDataProviderID1(), table);
+											if (calc != null)
 											{
-												calc = flattenedSolution.getScriptCalculation(vl.getDataProviderID1(), table);
-												if (calc != null)
-												{
-													Column column = table.getColumn(vl.getDataProviderID1());
-													if (column == null) errorFound = true;
-												}
-											}
-											catch (RepositoryException e)
-											{
-												ServoyLog.logError(e);
+												Column column = table.getColumn(vl.getDataProviderID1());
+												if (column == null) errorFound = true;
 											}
 										}
 										if (vl.getDataProviderID2() != null && !errorFound)
 										{
-											try
+											calc = flattenedSolution.getScriptCalculation(vl.getDataProviderID2(), table);
+											if (calc != null)
 											{
-												calc = flattenedSolution.getScriptCalculation(vl.getDataProviderID2(), table);
-												if (calc != null)
-												{
-													Column column = table.getColumn(vl.getDataProviderID2());
-													if (column == null) errorFound = true;
-												}
-											}
-											catch (RepositoryException e)
-											{
-												ServoyLog.logError(e);
+												Column column = table.getColumn(vl.getDataProviderID2());
+												if (column == null) errorFound = true;
 											}
 										}
 										if (vl.getDataProviderID3() != null && !errorFound)
 										{
-											try
+											calc = flattenedSolution.getScriptCalculation(vl.getDataProviderID3(), table);
+											if (calc != null)
 											{
-												calc = flattenedSolution.getScriptCalculation(vl.getDataProviderID3(), table);
-												if (calc != null)
-												{
-													Column column = table.getColumn(vl.getDataProviderID3());
-													if (column == null) errorFound = true;
-												}
-											}
-											catch (RepositoryException e)
-											{
-												ServoyLog.logError(e);
+												Column column = table.getColumn(vl.getDataProviderID3());
+												if (column == null) errorFound = true;
 											}
 										}
 										if (errorFound)
@@ -2192,7 +2169,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							addBadStructureMarker(o, servoyProject, project);
 						}
 						else if (o.getTypeID() == IRepository.METHODS &&
-							(parent == null || (parent.getTypeID() != IRepository.SOLUTIONS && parent.getTypeID() != IRepository.FORMS)))
+							(parent == null || (parent.getTypeID() != IRepository.SOLUTIONS && parent.getTypeID() != IRepository.FORMS && parent.getTypeID() != IRepository.TABLENODES)))
 						{
 							addBadStructureMarker(o, servoyProject, project);
 						}
@@ -2312,7 +2289,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		Boolean canBeInstantiated = checked.get(form);
 		if (canBeInstantiated == null)
 		{
-			canBeInstantiated = new Boolean(flattenedSolution.formCanBeInstantiated(form));
+			canBeInstantiated = Boolean.valueOf(flattenedSolution.formCanBeInstantiated(form));
 			checked.put(form, canBeInstantiated);
 		}
 		return canBeInstantiated.booleanValue();
@@ -2975,7 +2952,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				final Form form = it.next();
 				String styleName = form.getStyleName();
-				if (styleName == null && form.getExtendsFormID() > 0)
+				if (styleName == null && form.getExtendsID() > 0)
 				{
 					List<Form> forms = flattenedSolution.getFormHierarchy(form);
 					for (Form parentForm : forms)

@@ -43,6 +43,7 @@ import com.servoy.eclipse.ui.editors.table.CalculationsComposite;
 import com.servoy.eclipse.ui.editors.table.ColumnComposite;
 import com.servoy.eclipse.ui.editors.table.DataComposite;
 import com.servoy.eclipse.ui.editors.table.EventsComposite;
+import com.servoy.eclipse.ui.editors.table.FoundsetMethodsComposite;
 import com.servoy.eclipse.ui.editors.table.SecurityComposite;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
@@ -76,6 +77,8 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	private CalculationsComposite calculationsComposite;
 
+	private FoundsetMethodsComposite methodsComposite;
+
 	private AggregationsComposite aggregationsComposite;
 
 	private EventsComposite eventsComposite;
@@ -92,13 +95,15 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	public static int CalculationsPageIndex = 1;
 
-	public static int AggregationsPageIndex = 2;
+	public static int MethodsPageIndex = 2;
 
-	public static int EventsPageIndex = 3;
+	public static int AggregationsPageIndex = 3;
 
-	public static int SecurityPageIndex = 4;
+	public static int EventsPageIndex = 4;
 
-	public static int DataPageIndex = 5;
+	public static int SecurityPageIndex = 5;
+
+	public static int DataPageIndex = 6;
 
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException
@@ -127,6 +132,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
 		{
 			createCalculationsPage();
+			createFoundsSetMethodsPage();
 			createAggregationsPage();
 			createEventsPage();
 			createSecurityPage();
@@ -270,6 +276,11 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			removePage(calculationsComposite);
 			this.calculationsComposite.dispose();
 		}
+		if (methodsComposite != null)
+		{
+			removePage(methodsComposite);
+			this.methodsComposite.dispose();
+		}
 		if (aggregationsComposite != null)
 		{
 			removePage(aggregationsComposite);
@@ -317,6 +328,14 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		setPageText(TableEditor.CalculationsPageIndex, "Calculations");
 	}
 
+	private void createFoundsSetMethodsPage()
+	{
+		methodsComposite = new FoundsetMethodsComposite(this, getContainer(),
+			ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(), SWT.None);
+		addPage(TableEditor.MethodsPageIndex, methodsComposite);
+		setPageText(TableEditor.MethodsPageIndex, "Methods");
+	}
+
 	@Override
 	protected void pageChange(int newPageIndex)
 	{
@@ -324,6 +343,10 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		if (newPageIndex == CalculationsPageIndex && calculationsComposite != null)
 		{
 			calculationsComposite.refresh();
+		}
+		if (newPageIndex == MethodsPageIndex && methodsComposite != null)
+		{
+			methodsComposite.refresh();
 		}
 		if (newPageIndex == DataPageIndex && dataComposite != null)
 		{
@@ -615,6 +638,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				int activePage = getActivePage();
 				disposePages();
 				createCalculationsPage();
+				createFoundsSetMethodsPage();
 				createAggregationsPage();
 				createEventsPage();
 				createDataPage();

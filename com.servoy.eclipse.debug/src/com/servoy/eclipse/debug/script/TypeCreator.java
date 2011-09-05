@@ -33,7 +33,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
@@ -827,22 +826,13 @@ public abstract class TypeCreator
 
 	public static Form getForm(ITypeInfoContext context)
 	{
-		IResource resource = context.getModelElement().getResource();
-		if (resource != null)
+		String formName = SolutionSerializer.getFormNameForJSFile(context.getModelElement().getResource());
+		if (formName != null)
 		{
-			IPath path = resource.getProjectRelativePath();
-			if (path.segmentCount() > 1 && path.segment(0).equals(SolutionSerializer.FORMS_DIR))
+			FlattenedSolution fs = getFlattenedSolution(context);
+			if (fs != null)
 			{
-				String formName = path.segment(1);
-				if (formName.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
-				{
-					formName = formName.substring(0, formName.length() - SolutionSerializer.JS_FILE_EXTENSION.length());
-				}
-				FlattenedSolution fs = getFlattenedSolution(context);
-				if (fs != null)
-				{
-					return fs.getForm(formName);
-				}
+				return fs.getForm(formName);
 			}
 		}
 		return null;

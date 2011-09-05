@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.TableViewer;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.dialogs.MethodDialog;
+import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodListOptions;
 import com.servoy.eclipse.ui.editors.MethodCellEditor;
 import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
 import com.servoy.eclipse.ui.property.MethodPropertyController.MethodValueEditor;
@@ -62,7 +63,7 @@ class RelayEditorProvider implements IRelayEditorProvider
 						PersistContext persistContext = PersistContext.create(solution, null);
 						MethodLabelProvider methodLabelProvider = new MethodLabelProvider(persistContext, false, false);
 						methodCellEditor = new MethodCellEditor(parent.getTable(), methodLabelProvider, new MethodValueEditor(persistContext), persistContext,
-							key, false, true, false, false, true);
+							key, false, new MethodListOptions(true, false, false, true, false, null));
 						methodCellEditors.put(key, methodCellEditor);
 					}
 					return methodCellEditor;
@@ -114,7 +115,7 @@ class RelayEditorProvider implements IRelayEditorProvider
 							(String)value);
 						if (scriptMethod != null)
 						{
-							realValue = new MethodWithArguments(scriptMethod.getID());
+							realValue = MethodWithArguments.create(scriptMethod, null);
 						}
 					}
 				}

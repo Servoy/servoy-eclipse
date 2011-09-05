@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -58,6 +60,7 @@ import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -95,8 +98,10 @@ public class SolutionSerializer
 	public static final String JS_FILE_EXTENSION = '.' + JS_FILE_EXTENSION_WITHOUT_DOT;
 	public static final String STYLE_FILE_EXTENSION = ".css"; //$NON-NLS-1$
 	public static final String TEMPLATE_FILE_EXTENSION = ".template"; //$NON-NLS-1$
-	public static final String CALCULATIONS_POSTFIX = "_calculations"; //$NON-NLS-1$
-	public static final String CALCULATIONS_POSTFIX_WITH_EXT = CALCULATIONS_POSTFIX + JS_FILE_EXTENSION;
+	public static final String CALCULATIONS_POSTFIX_WITHOUT_EXT = "_calculations"; //$NON-NLS-1$
+	public static final String CALCULATIONS_POSTFIX = CALCULATIONS_POSTFIX_WITHOUT_EXT + JS_FILE_EXTENSION;
+	public static final String FOUNDSET_POSTFIX_WITHOUT_EXT = "_foundset"; //$NON-NLS-1$
+	public static final String FOUNDSET_POSTFIX = FOUNDSET_POSTFIX_WITHOUT_EXT + JS_FILE_EXTENSION;
 	public static final String GLOBALS_FILE = "globals" + JS_FILE_EXTENSION; //$NON-NLS-1$
 
 	public static boolean isJSONFile(String fileName)
@@ -409,7 +414,7 @@ public class SolutionSerializer
 		obj.put(PROP_FILE_VERSION, AbstractRepository.repository_version);
 		obj.put("solutionType", new Integer(smd.getSolutionType())); //$NON-NLS-1$
 		obj.put("protectionPassword", smd.getProtectionPassword()); //$NON-NLS-1$
-		obj.put("mustAuthenticate", new Boolean(smd.getMustAuthenticate())); //$NON-NLS-1$
+		obj.put("mustAuthenticate", Boolean.valueOf(smd.getMustAuthenticate())); //$NON-NLS-1$
 		return obj.toString(true);
 	}
 
@@ -1011,22 +1016,32 @@ public class SolutionSerializer
 
 	public static String getScriptName(IPersist persist, boolean useOldName)
 	{
-		if (persist instanceof IVariable || persist instanceof IScriptProvider)
+		ISupportChilds parent;
+		if (persist instanceof ISupportChilds)
 		{
-			return getScriptName(persist.getParent(), useOldName);
+			parent = (ISupportChilds)persist;
+		}
+		else
+		{
+			parent = persist.getParent();
 		}
 
-		if (persist instanceof Solution)
+		if (parent instanceof Solution)
 		{
 			return GLOBALS_FILE;
 		}
-		if (persist instanceof Form)
+		if (parent instanceof Form)
 		{
-			return getPersistName((Form)persist, useOldName) + JS_FILE_EXTENSION;
+			return getPersistName((Form)parent, useOldName) + JS_FILE_EXTENSION;
 		}
-		if (persist instanceof TableNode)
+		if (parent instanceof TableNode)
 		{
-			return getServerNameTableName((TableNode)persist, useOldName)[1] + CALCULATIONS_POSTFIX_WITH_EXT;
+			String tablename = getServerNameTableName((TableNode)parent, useOldName)[1];
+			if (persist instanceof ScriptCalculation)
+			{
+				return tablename + CALCULATIONS_POSTFIX;
+			}
+			return tablename + FOUNDSET_POSTFIX;
 		}
 
 		return null;
@@ -1034,17 +1049,40 @@ public class SolutionSerializer
 
 	public static String getScriptPath(IPersist persist, boolean useOldName)
 	{
-		if (persist instanceof IVariable || persist instanceof IScriptProvider)
+		ISupportChilds parent;
+		if (persist instanceof ISupportChilds)
 		{
-			return getScriptPath(persist.getParent(), useOldName);
+			parent = (ISupportChilds)persist;
+		}
+		else
+		{
+			parent = persist.getParent();
 		}
 
-		if (persist instanceof Solution || persist instanceof Form || persist instanceof TableNode)
+		if (parent instanceof Solution || parent instanceof Form || parent instanceof TableNode)
 		{
-			return getRelativePath(persist, useOldName) + getScriptName(persist, useOldName);
+			return getRelativePath(parent, useOldName) + getScriptName(persist, useOldName);
 		}
 
 		return null;
+	}
+
+	public static String[] getScriptPaths(IPersist persist, boolean useOldName)
+	{
+		if (persist instanceof TableNode)
+		{
+			// has 2 script files
+			String relativePath = getRelativePath(persist, useOldName);
+			if (relativePath == null)
+			{
+				return null;
+			}
+			String tableName = getServerNameTableName((TableNode)persist, useOldName)[1];
+			return new String[] { relativePath + tableName + CALCULATIONS_POSTFIX, relativePath + tableName + FOUNDSET_POSTFIX };
+		}
+
+		String path = getScriptPath(persist, useOldName);
+		return path == null ? null : new String[] { path };
 	}
 
 	/**
@@ -1108,15 +1146,73 @@ public class SolutionSerializer
 			File dirFile = new File(file.getParent(), fileName.substring(0, fileName.length() - JS_FILE_EXTENSION.length()) + FORM_FILE_EXTENSION);
 			if (dirFile.exists()) return dirFile;
 			// is it a tablenode
-			if (fileName.endsWith(CALCULATIONS_POSTFIX_WITH_EXT))
+			if (fileName.endsWith(CALCULATIONS_POSTFIX))
 			{
-				dirFile = new File(file.getParent(), fileName.substring(0, fileName.length() - CALCULATIONS_POSTFIX_WITH_EXT.length()) +
-					TABLENODE_FILE_EXTENSION);
+				dirFile = new File(file.getParent(), fileName.substring(0, fileName.length() - CALCULATIONS_POSTFIX.length()) + TABLENODE_FILE_EXTENSION);
+				if (dirFile.exists()) return dirFile;
+			}
+			if (fileName.endsWith(FOUNDSET_POSTFIX))
+			{
+				dirFile = new File(file.getParent(), fileName.substring(0, fileName.length() - FOUNDSET_POSTFIX.length()) + TABLENODE_FILE_EXTENSION);
 				if (dirFile.exists()) return dirFile;
 			}
 		}
 		// try one level up
 		return getParentFile(workspace, dir);
+	}
+
+	public static boolean isGlobalsJSFile(IResource resource)
+	{
+		if (resource != null)
+		{
+			IPath path = resource.getProjectRelativePath();
+			return path.segmentCount() == 1 && path.segment(0).equals(SolutionSerializer.GLOBALS_FILE);
+		}
+		return false;
+	}
+
+	public static String getFormNameForJSFile(IResource resource)
+	{
+		if (resource != null)
+		{
+			IPath path = resource.getProjectRelativePath();
+			if (path.segmentCount() == 2 && path.segment(0).equals(SolutionSerializer.FORMS_DIR))
+			{
+				String jsfile = path.segment(1);
+				if (jsfile.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
+				{
+					return jsfile.substring(0, jsfile.length() - SolutionSerializer.JS_FILE_EXTENSION.length());
+				}
+			}
+		}
+		return null;
+	}
+
+	public static String[] getDataSourceForCalculationJSFile(IResource resource)
+	{
+		return getDataSourceForTablenodeJSFile(resource, SolutionSerializer.CALCULATIONS_POSTFIX);
+	}
+
+	public static String[] getDataSourceForFoundsetJSFile(IResource resource)
+	{
+		return getDataSourceForTablenodeJSFile(resource, SolutionSerializer.FOUNDSET_POSTFIX);
+	}
+
+	private static String[] getDataSourceForTablenodeJSFile(IResource resource, String postfix)
+	{
+		if (resource != null)
+		{
+			IPath path = resource.getProjectRelativePath();
+			if (path.segmentCount() == 3 && path.segment(0).equals(SolutionSerializer.DATASOURCES_DIR_NAME))
+			{
+				String jsfile = path.segment(2);
+				if (jsfile.endsWith(postfix))
+				{
+					return new String[] { path.segment(1), jsfile.substring(0, jsfile.length() - postfix.length()) };
+				}
+			}
+		}
+		return null;
 	}
 
 	private static String getPersistName(ISupportName p, boolean useOldName)

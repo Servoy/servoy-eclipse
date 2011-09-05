@@ -1,5 +1,5 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2010 Servoy BV
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2011 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -16,8 +16,6 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
-import java.util.Iterator;
-
 import org.eclipse.core.databinding.observable.AbstractObservable;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.ChangeSupport;
@@ -26,46 +24,39 @@ import org.eclipse.core.databinding.observable.IObservable;
 import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
-import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.ScriptCalculation;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 import com.servoy.j2db.util.docvalidator.ValidatingDocument.IDocumentValidator;
 
 /**
- * Edit calculation name in table editor.
+ * Edit method name in table editor.
  * 
- * @author lvostinar
+ * @author rgansevles
  *
  */
-public class CalculationNameEditingSupport extends EditingSupport
+public class MethodNameEditingSupport extends EditingSupport
 {
-	private final ComboBoxCellEditor editor;
-	private String[] columns;
-	private final Table table;
+	private final TextCellEditor editor;
 	private final IObservable observable;
 
-	public CalculationNameEditingSupport(TreeViewer viewer, Table table)
+	public MethodNameEditingSupport(TreeViewer viewer)
 	{
 		super(viewer);
-		this.table = table;
-		updateColumns();
-		editor = new ComboBoxCellEditor(viewer.getTree(), columns, SWT.NONE);
-		CCombo combo = (CCombo)editor.getControl();
-		combo.addVerifyListener(new DocumentValidatorVerifyListener(new IDocumentValidator[] { new IdentDocumentValidator(IdentDocumentValidator.TYPE_SQL) }));
+		editor = new TextCellEditor(viewer.getTree(), SWT.NONE);
+		((Text)editor.getControl()).addVerifyListener(new DocumentValidatorVerifyListener(new IDocumentValidator[] { new IdentDocumentValidator(
+			IdentDocumentValidator.TYPE_SQL) }));
 		changeSupport = new ChangeSupport(Realm.getDefault())
 		{
 			@Override
@@ -120,60 +111,32 @@ public class CalculationNameEditingSupport extends EditingSupport
 	@Override
 	protected CellEditor getCellEditor(Object element)
 	{
-		updateColumns();
-		CCombo combo = (CCombo)editor.getControl();
-		combo.setItems(columns);
 		return editor;
-	}
-
-	private void updateColumns()
-	{
-		columns = new String[table.getColumnCount() + 1];
-		columns[0] = "type_here";
-		int i = 1;
-		Iterator<Column> it = EditorUtil.getTableColumns(table);
-		while (it.hasNext())
-		{
-			columns[i++] = it.next().getName();
-		}
 	}
 
 	@Override
 	protected Object getValue(Object element)
 	{
-		if (element instanceof ScriptCalculation)
+		if (element instanceof ScriptMethod)
 		{
-			ScriptCalculation calculation = (ScriptCalculation)element;
-			String name = calculation.getName();
-			CCombo combo = (CCombo)editor.getControl();
-			for (int i = 0; i < columns.length; i++)
-			{
-				if (columns[i].equals(name))
-				{
-					return Integer.valueOf(i);
-				}
-			}
-
-			combo.removeAll();
-			combo.setItems(columns);
-			combo.setItem(0, name);
+			return ((ScriptMethod)element).getName();
 		}
-		return Integer.valueOf(0);
+		return "";
 	}
 
 	@Override
 	protected void setValue(Object element, Object value)
 	{
-		if (element instanceof ScriptCalculation)
+		if (element instanceof ScriptMethod)
 		{
 			IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-			CCombo combo = (CCombo)editor.getControl();
-			ScriptCalculation calculation = (ScriptCalculation)element;
+			ScriptMethod method = (ScriptMethod)element;
 			try
 			{
-				if (!calculation.getName().equals(combo.getText()))
+				Text text = (Text)editor.getControl();
+				if (!method.getName().equals(text.getText()))
 				{
-					calculation.updateName(nameValidator, combo.getText());
+					method.updateName(nameValidator, text.getText());
 					changeSupport.fireEvent(new ChangeEvent(observable));
 				}
 			}
@@ -185,6 +148,5 @@ public class CalculationNameEditingSupport extends EditingSupport
 
 			getViewer().update(element, null);
 		}
-
 	}
 }

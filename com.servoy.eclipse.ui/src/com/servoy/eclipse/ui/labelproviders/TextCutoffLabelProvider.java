@@ -13,11 +13,13 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.labelproviders;
 
-import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.graphics.Image;
 
 /**
  * Wrapper label provider for limiting display of too long texts; newlines are also removed.
@@ -31,16 +33,14 @@ public class TextCutoffLabelProvider extends DelegateLabelProvider
 
 	private final int maxLength;
 
-	public TextCutoffLabelProvider(ILabelProvider labelProvider, int maxLength)
+	public TextCutoffLabelProvider(IBaseLabelProvider labelProvider, int maxLength)
 	{
 		super(labelProvider);
 		this.maxLength = maxLength;
 	}
 
-	@Override
-	public String getText(Object element)
+	protected String cutoff(String text)
 	{
-		String text = super.getText(element);
 		if (text == null)
 		{
 			return null;
@@ -51,5 +51,41 @@ public class TextCutoffLabelProvider extends DelegateLabelProvider
 			return nonl;
 		}
 		return nonl.substring(0, maxLength - 3) + "...";
+	}
+
+	@Override
+	public String getText(Object element)
+	{
+		return cutoff(super.getText(element));
+	}
+
+	/**
+	 * Limiting display length for table label providers.
+	 * 
+	 * @author rgansevles
+	 *
+	 */
+	public static class TableCutoffLabelProvider extends TextCutoffLabelProvider implements ITableLabelProvider
+	{
+		public TableCutoffLabelProvider(ITableLabelProvider labelProvider, int maxLength)
+		{
+			super(labelProvider, maxLength);
+		}
+
+		@Override
+		public ITableLabelProvider getDelegate()
+		{
+			return (ITableLabelProvider)super.getDelegate();
+		}
+
+		public Image getColumnImage(Object element, int columnIndex)
+		{
+			return getDelegate().getColumnImage(element, columnIndex);
+		}
+
+		public String getColumnText(Object element, int columnIndex)
+		{
+			return cutoff(getDelegate().getColumnText(element, columnIndex));
+		}
 	}
 }

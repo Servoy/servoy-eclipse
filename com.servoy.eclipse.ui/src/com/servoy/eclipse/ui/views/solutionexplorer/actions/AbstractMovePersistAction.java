@@ -375,13 +375,14 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 					AbstractBase clone = null;
 					if (persist instanceof ScriptCalculation)
 					{
-						clone = destinationEditingSolution.createNewScriptCalculation(nameValidator, ((ScriptCalculation)persist).getTable(), newPersistName);
+						clone = destinationEditingSolution.createNewScriptCalculation(nameValidator, ((ScriptCalculation)persist).getTable().getDataSource(),
+							newPersistName);
 						clone.copyPropertiesMap(((ScriptCalculation)persist).getPropertiesMap(), true);
 					}
 					else if (persist instanceof AggregateVariable)
 					{
-						clone = destinationEditingSolution.createNewAggregateVariable(nameValidator, ((AggregateVariable)persist).getTable(), newPersistName,
-							((AggregateVariable)persist).getType(), ((AggregateVariable)persist).getDataProviderIDToAggregate());
+						clone = destinationEditingSolution.createNewAggregateVariable(nameValidator, ((AggregateVariable)persist).getTable().getDataSource(),
+							newPersistName, ((AggregateVariable)persist).getType(), ((AggregateVariable)persist).getDataProviderIDToAggregate());
 						clone.copyPropertiesMap(((AggregateVariable)persist).getPropertiesMap(), true);
 					}
 					else

@@ -140,8 +140,8 @@ public class ServoyUpdatingProject implements IProjectNature
 						resource.getParent().getParent().getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME))
 					{
 						needToDelete = true;
-						methods_js = ((IFolder)resource).findMember(resource.getName() + SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT);
-						newName = resource.getName() + SolutionSerializer.CALCULATIONS_POSTFIX;
+						methods_js = ((IFolder)resource).findMember(resource.getName() + SolutionSerializer.CALCULATIONS_POSTFIX);
+						newName = resource.getName() + SolutionSerializer.CALCULATIONS_POSTFIX_WITHOUT_EXT;
 					}
 
 					if (methods_js != null)

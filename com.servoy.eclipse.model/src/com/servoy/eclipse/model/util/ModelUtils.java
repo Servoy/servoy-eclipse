@@ -38,12 +38,11 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.FixedStyleSheet;
 import com.servoy.j2db.util.Pair;
@@ -81,7 +80,7 @@ public class ModelUtils
 			return null;
 		}
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (Object o : value)
 		{
 			if (sb.length() > 0)
@@ -230,7 +229,7 @@ public class ModelUtils
 	 * @param methodId
 	 * @return
 	 */
-	public static IScriptProvider getScriptMethod(IPersist persist, IPersist context, Table table, int methodId)
+	public static IScriptProvider getScriptMethod(IPersist persist, IPersist context, ITable table, int methodId)
 	{
 		if (methodId <= 0)
 		{
@@ -253,10 +252,10 @@ public class ModelUtils
 				while (tableNodes.hasNext())
 				{
 					TableNode tableNode = tableNodes.next();
-					ScriptCalculation calc = AbstractBase.selectById(tableNode.getScriptCalculations().iterator(), methodId);
-					if (calc != null)
+					IPersist method = AbstractBase.selectById(tableNode.getAllObjects(), methodId);
+					if (method instanceof IScriptProvider)
 					{
-						return calc;
+						return (IScriptProvider)method;
 					}
 				}
 			}

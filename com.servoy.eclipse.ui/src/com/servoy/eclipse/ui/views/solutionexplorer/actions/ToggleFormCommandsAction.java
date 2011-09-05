@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
@@ -89,11 +89,11 @@ public class ToggleFormCommandsAction extends Action implements ISelectionChange
 
 									if (methodPropertyValue.methodId == 0)
 									{
-										propertiesSource.setPropertyValue(descriptor.getId(), new MethodWithArguments(-1));
+										propertiesSource.setPropertyValue(descriptor.getId(), new MethodWithArguments(-1, null));
 									}
 									else if (methodPropertyValue.methodId == -1)
 									{
-										propertiesSource.setPropertyValue(descriptor.getId(), new MethodWithArguments(0));
+										propertiesSource.setPropertyValue(descriptor.getId(), new MethodWithArguments(0, null));
 									}
 								}
 							}

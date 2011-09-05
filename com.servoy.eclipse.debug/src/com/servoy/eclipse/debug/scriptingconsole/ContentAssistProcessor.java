@@ -57,6 +57,7 @@ import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateException;
 
 import com.servoy.eclipse.debug.script.ValueCollectionProvider;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.j2db.ClientState;
 
 /**
@@ -113,7 +114,7 @@ final class ContentAssistProcessor implements IContentAssistProcessor
 
 			String solutionName = selectedClient.getSolutionName();
 			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(solutionName);
-			final IFile file = project.getFile("globals.js"); //$NON-NLS-1$
+			final IFile file = project.getFile(SolutionSerializer.GLOBALS_FILE);
 			final IModelElement modelElement = DLTKCore.create(file);
 
 			IModuleSource source = new IModuleSource()

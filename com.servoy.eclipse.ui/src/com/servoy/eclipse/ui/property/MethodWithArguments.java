@@ -13,9 +13,14 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.SafeArrayList;
 
 /**
@@ -28,16 +33,39 @@ public class MethodWithArguments
 {
 	public final int methodId;
 	public final SafeArrayList<Object> arguments;
+	public final ITable table;
 
-	public MethodWithArguments(int methodId)
+	public MethodWithArguments(int methodId, ITable table)
 	{
-		this(methodId, null);
+		this(methodId, null, table);
 	}
 
-	public MethodWithArguments(int methodId, SafeArrayList<Object> arguments)
+	public MethodWithArguments(int methodId, SafeArrayList<Object> arguments, ITable table)
 	{
 		this.methodId = methodId;
 		this.arguments = arguments;
+		this.table = methodId > 0 ? table : null;
+	}
+
+	public static MethodWithArguments create(IPersist script, SafeArrayList<Object> arguments)
+	{
+		if (script == null)
+		{
+			return null;
+		}
+		ITable table = null;
+		if (script.getParent() instanceof TableNode)
+		{
+			try
+			{
+				table = ((TableNode)script.getParent()).getTable();
+			}
+			catch (RepositoryException e)
+			{
+				Debug.error(e);
+			}
+		}
+		return new MethodWithArguments(script.getID(), arguments, table);
 	}
 
 	@Override
@@ -46,18 +74,24 @@ public class MethodWithArguments
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + methodId;
+		result = prime * result + ((table == null) ? 0 : table.hashCode());
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj)
 	{
-		// equal on method id only
+		// equals and hashcode NOT on arguments
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		final MethodWithArguments other = (MethodWithArguments)obj;
+		MethodWithArguments other = (MethodWithArguments)obj;
 		if (methodId != other.methodId) return false;
+		if (table == null)
+		{
+			if (other.table != null) return false;
+		}
+		else if (!table.equals(other.table)) return false;
 		return true;
 	}
 

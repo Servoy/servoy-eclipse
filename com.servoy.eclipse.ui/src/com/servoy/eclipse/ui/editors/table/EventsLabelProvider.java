@@ -54,10 +54,10 @@ public class EventsLabelProvider extends LabelProvider implements ITableLabelPro
 			{
 				case EventsComposite.CI_NAME :
 					if (node.isSolution()) return node.getSolution().getName();
-					else return node.getName();
+					return node.getName();
 				case EventsComposite.CI_METHOD :
 					if (node.isSolution()) return "";
-					else return new SolutionContextDelegateLabelProvider(new MethodLabelProvider(PersistContext.create(node.getSolution(), null), true, true),
+					return new SolutionContextDelegateLabelProvider(new MethodLabelProvider(PersistContext.create(node.getSolution(), null), true, true),
 						node.getSolution()).getText(node.getMethodWithArguments());
 				default :
 					return columnIndex + ": " + element;

@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
 
 import java.util.ArrayList;
@@ -46,6 +46,8 @@ import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.StringTokenizerConverter;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.UUID;
@@ -182,46 +184,29 @@ public class EventsComposite extends Composite
 	{
 		public static enum EventNodeType
 		{
-			insertMethod, updateMethod, deleteMethod, afterInsertMethod, afterUpdateMethod, afterDeleteMethod;
-			@Override
-			public String toString()
+			onRecordCreate(StaticContentSpecLoader.PROPERTY_ONCREATEMETHODID),
+			onRecordInsert(StaticContentSpecLoader.PROPERTY_ONINSERTMETHODID),
+			onRecordUpdate(StaticContentSpecLoader.PROPERTY_ONUPDATEMETHODID),
+			onRecordDelete(StaticContentSpecLoader.PROPERTY_ONDELETEMETHODID),
+			afterRecordCreate(StaticContentSpecLoader.PROPERTY_ONAFTERCREATEMETHODID),
+			afterRecordInsert(StaticContentSpecLoader.PROPERTY_ONAFTERINSERTMETHODID),
+			afterRecordUpdate(StaticContentSpecLoader.PROPERTY_ONAFTERUPDATEMETHODID),
+			afterRecordDelete(StaticContentSpecLoader.PROPERTY_ONAFTERDELETEMETHODID),
+			onFoundsetFind(StaticContentSpecLoader.PROPERTY_ONFINDMETHODID),
+			onFoundsetAfterFind(StaticContentSpecLoader.PROPERTY_ONAFTERFINDMETHODID),
+			onFoundsetSearch(StaticContentSpecLoader.PROPERTY_ONSEARCHMETHODID),
+			onFoundsetAfterSearch(StaticContentSpecLoader.PROPERTY_ONAFTERSEARCHMETHODID);
+
+			private final TypedProperty<Integer> property;
+
+			EventNodeType(TypedProperty<Integer> property)
 			{
-				switch (this)
-				{
-					case insertMethod :
-						return "onRecordInsert";
-					case updateMethod :
-						return "onRecordUpdate";
-					case deleteMethod :
-						return "onRecordDelete";
-					case afterInsertMethod :
-						return "afterRecordInsert";
-					case afterUpdateMethod :
-						return "afterRecordUpdate";
-					case afterDeleteMethod :
-						return "afterRecordDelete";
-				}
-				return super.toString();
+				this.property = property;
 			}
 
-			protected String getProperty()
+			public TypedProperty<Integer> getProperty()
 			{
-				switch (this)
-				{
-					case insertMethod :
-						return "onInsertMethodID";
-					case updateMethod :
-						return "onUpdateMethodID";
-					case deleteMethod :
-						return "onDeleteMethodID";
-					case afterInsertMethod :
-						return "onAfterInsertMethodID";
-					case afterUpdateMethod :
-						return "onAfterUpdateMethodID";
-					case afterDeleteMethod :
-						return "onAfterDeleteMethodID";
-				}
-				return null;
+				return property;
 			}
 		}
 
@@ -257,18 +242,18 @@ public class EventsComposite extends Composite
 			{
 				ServoyLog.logError(e);
 			}
-			children.add(new EventNode(EventNodeType.insertMethod, tableNode == null ? MethodDialog.METHOD_DEFAULT : new MethodWithArguments(
-				tableNode.getOnInsertMethodID()), solution));
-			children.add(new EventNode(EventNodeType.updateMethod, tableNode == null ? MethodDialog.METHOD_DEFAULT : new MethodWithArguments(
-				tableNode.getOnUpdateMethodID()), solution));
-			children.add(new EventNode(EventNodeType.deleteMethod, tableNode == null ? MethodDialog.METHOD_DEFAULT : new MethodWithArguments(
-				tableNode.getOnDeleteMethodID()), solution));
-			children.add(new EventNode(EventNodeType.afterInsertMethod, tableNode == null ? MethodDialog.METHOD_DEFAULT : new MethodWithArguments(
-				tableNode.getOnAfterInsertMethodID()), solution));
-			children.add(new EventNode(EventNodeType.afterUpdateMethod, tableNode == null ? MethodDialog.METHOD_DEFAULT : new MethodWithArguments(
-				tableNode.getOnAfterUpdateMethodID()), solution));
-			children.add(new EventNode(EventNodeType.afterDeleteMethod, tableNode == null ? MethodDialog.METHOD_DEFAULT : new MethodWithArguments(
-				tableNode.getOnAfterDeleteMethodID()), solution));
+			try
+			{
+				for (EventNodeType tp : EventNodeType.values())
+				{
+					children.add(new EventNode(tp, tableNode == null ? MethodDialog.METHOD_DEFAULT : new MethodWithArguments(
+						((Integer)tableNode.getProperty(tp.getProperty().getPropertyName())).intValue(), tableNode.getTable()), solution));
+				}
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+			}
 		}
 
 		public MethodWithArguments getMethodWithArguments()

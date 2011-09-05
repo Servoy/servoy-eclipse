@@ -130,6 +130,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISequenceProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerConfigListener;
@@ -138,6 +139,7 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
+import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.ScriptNameValidator;
@@ -208,7 +210,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		Settings settings = getSettings();
 		Preferences pluginPreferences = Activator.getDefault().getPluginPreferences();
 		pluginPreferences.setDefault(TeamShareMonitor.WARN_ON_NON_IN_PROCESS_TEAM_SHARE, true);
-		initRepAsTeamProvider = new Boolean(Utils.getAsBoolean(settings.getProperty(Settings.START_AS_TEAMPROVIDER_SETTING,
+		initRepAsTeamProvider = Boolean.valueOf(Utils.getAsBoolean(settings.getProperty(Settings.START_AS_TEAMPROVIDER_SETTING,
 			String.valueOf(Settings.START_AS_TEAMPROVIDER_DEFAULT))));
 
 		// load in background all servers and all tables needed by current solution
@@ -239,7 +241,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				{
 					String[] moduleNames = ModelUtils.getTokenElements(activeProject.getSolution().getModulesNames(), ",", true);
 					final ArrayList<ServoyProject> modulesToUpdate = new ArrayList<ServoyProject>();
-					final StringBuffer sbUpdateModuleNames = new StringBuffer();
+					final StringBuilder sbUpdateModuleNames = new StringBuilder();
 
 					try
 					{
@@ -725,7 +727,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 					{
 						public void run()
 						{
-							returnValue = new Boolean(fireActiveProjectWillChange(project));
+							returnValue = Boolean.valueOf(fireActiveProjectWillChange(project));
 						}
 					};
 					Display.getDefault().syncExec(uiRunnable);
@@ -1862,9 +1864,9 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		final IContainer workspace = project.getParent();
 
 		SolutionDeserializer sd = new SolutionDeserializer(getDeveloperRepository(), servoyProject);
-		final Set<ISupportChilds> changedScriptParents = handleChangedFiles(project, solution, changedFiles, servoyProject, workspace, sd);
+		final Set<IPersist> changedScriptMethods = handleChangedFiles(project, solution, changedFiles, servoyProject, workspace, sd);
 		// Regenerate script files for parents that have changed script elements.
-		if (changedScriptParents.size() > 0)
+		if (changedScriptMethods.size() > 0)
 		{
 			final Job job = new UIJob("Check changed script files")
 			{
@@ -1873,9 +1875,15 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				public IStatus runInUIThread(IProgressMonitor monitor)
 				{
 					//if (true) return Status.OK_STATUS;
-					for (ISupportChilds parent : changedScriptParents)
+					Set<IFile> recreatedFiles = new HashSet<IFile>();
+					for (IPersist persist : changedScriptMethods)
 					{
-						final IFile scriptFile = workspace.getFile(new Path(SolutionSerializer.getScriptPath(parent, false)));
+						IFile scriptFile = workspace.getFile(new Path(SolutionSerializer.getScriptPath(persist, false)));
+						if (!recreatedFiles.add(scriptFile))
+						{
+							continue;
+						}
+						ISupportChilds parent = persist.getParent();
 						MultiTextEdit textEdit = getScriptFileChanges(parent, scriptFile);
 
 						if (textEdit.getChildrenSize() > 0)
@@ -1977,7 +1985,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 	 * @return
 	 * @throws RepositoryException
 	 */
-	public Set<ISupportChilds> handleChangedFiles(IProject project, Solution solution, List<File> changedFiles, final ServoyProject servoyProject,
+	public Set<IPersist> handleChangedFiles(IProject project, Solution solution, List<File> changedFiles, final ServoyProject servoyProject,
 		final IContainer workspace, SolutionDeserializer sd) throws RepositoryException
 	{
 		List<IPersist> strayCats = new ArrayList<IPersist>();
@@ -1997,7 +2005,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 
 		final LinkedHashMap<UUID, IPersist> changed = new LinkedHashMap<UUID, IPersist>();
 		final LinkedHashMap<UUID, IPersist> changedEditing = new LinkedHashMap<UUID, IPersist>();
-		final Set<ISupportChilds> changedScriptParents = new HashSet<ISupportChilds>();
+		final Set<IPersist> changedScriptMethods = new HashSet<IPersist>();
 		solution.acceptVisitor(new IPersistVisitor()
 		{
 			public Object visit(IPersist persist)
@@ -2018,9 +2026,9 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 					}
 
 					// find js-files that may have to be recreated
-					if (SolutionSerializer.getFileName(persist, false).endsWith(SolutionSerializer.JS_FILE_EXTENSION))
+					if (persist instanceof IVariable || persist instanceof IScriptProvider)
 					{
-						changedScriptParents.add(persist.getParent());
+						changedScriptMethods.add(persist);
 					}
 				}
 				return IPersistVisitor.CONTINUE_TRAVERSAL;
@@ -2132,7 +2140,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		{
 			fireActiveProjectUpdated(IActiveProjectListener.SECURITY_INFO_CHANGED);
 		}
-		return changedScriptParents;
+		return changedScriptMethods;
 	}
 
 	public boolean isActiveProject(String name)
@@ -2674,6 +2682,10 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 					else if (parent instanceof TableNode)
 					{
 						persist = ((TableNode)parent).getScriptCalculation(name);
+						if (persist == null)
+						{
+							persist = ((TableNode)parent).getFoundsetMethod(name);
+						}
 					}
 				}
 				if (persist != null)

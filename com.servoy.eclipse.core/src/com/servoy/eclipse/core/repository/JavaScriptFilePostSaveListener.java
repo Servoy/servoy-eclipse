@@ -17,8 +17,8 @@
 package com.servoy.eclipse.core.repository;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.filebuffers.FileBuffers;
@@ -45,6 +45,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.Solution;
@@ -113,14 +114,20 @@ public class JavaScriptFilePostSaveListener implements IPostSaveListener
 			final ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName());
 			final SolutionDeserializer sd = new SolutionDeserializer(ServoyModel.getDeveloperRepository(), servoyProject, file, compilationUnit.getSource());
 			final IContainer workspace = project.getParent();
-			final List<File> changedFiles = new ArrayList<File>();
-			changedFiles.add(file);
-			Set<ISupportChilds> changedScriptParents = servoyModel.handleChangedFiles(project, solution, changedFiles, servoyProject, workspace, sd);
+			Set<IPersist> changedScriptMethods = servoyModel.handleChangedFiles(project, solution, Collections.singletonList(file), servoyProject, workspace,
+				sd);
 			// add this file to the ignore once list, so that the real save will not parse it again.
 			servoyModel.addIgnoreFile(file);
-			for (ISupportChilds parent : changedScriptParents)
+			Set<IFile> recreatedFiles = new HashSet<IFile>();
+			for (IPersist persist : changedScriptMethods)
 			{
-				final IFile scriptFile = workspace.getFile(new Path(SolutionSerializer.getScriptPath(parent, false)));
+				IFile scriptFile = workspace.getFile(new Path(SolutionSerializer.getScriptPath(persist, false)));
+				if (!recreatedFiles.add(scriptFile))
+				{
+					continue;
+				}
+
+				ISupportChilds parent = persist.getParent();
 				MultiTextEdit textEdit = servoyModel.getScriptFileChanges(parent, scriptFile);
 				if (textEdit != null && textEdit.getChildrenSize() > 0)
 				{

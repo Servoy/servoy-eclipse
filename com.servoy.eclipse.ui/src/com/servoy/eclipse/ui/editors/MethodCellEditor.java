@@ -40,13 +40,10 @@ import com.servoy.eclipse.ui.util.IControlFactory;
 public class MethodCellEditor extends DialogCellEditor
 {
 	private final PersistContext persistContext;
-	private final boolean includeNone;
-	private final boolean includeDefault;
-	private final boolean includeFormMethods;
-	private final boolean includeGlobalMethods;
 	private final ILabelProvider labelProvider;
 	private final Object id;
 	private final IValueEditor valueEditor;
+	private final MethodListOptions options;
 
 	/**
 	 * Creates a new method cell editor parented under the given control.
@@ -54,16 +51,13 @@ public class MethodCellEditor extends DialogCellEditor
 	 * @param parent the parent control
 	 */
 	public MethodCellEditor(Composite parent, ILabelProvider labelProvider, IValueEditor<MethodWithArguments> valueEditor, PersistContext persistContext,
-		Object id, boolean readOnly, boolean includeNone, boolean includeDefault, boolean includeFormMethods, boolean includeGlobalMethods)
+		Object id, boolean readOnly, MethodListOptions options)
 	{
 		super(parent, labelProvider, valueEditor, readOnly, SWT.NONE);
 		this.persistContext = persistContext;
 		this.labelProvider = labelProvider;
 		this.id = id;
-		this.includeNone = includeNone;
-		this.includeDefault = includeDefault;
-		this.includeFormMethods = includeFormMethods;
-		this.includeGlobalMethods = includeGlobalMethods;
+		this.options = options;
 		this.valueEditor = valueEditor;
 	}
 
@@ -71,7 +65,7 @@ public class MethodCellEditor extends DialogCellEditor
 	public MethodWithArguments openDialogBox(Control cellEditorWindow)
 	{
 		final MethodDialog dialog = new MethodDialog(cellEditorWindow.getShell(), labelProvider, new MethodTreeContentProvider(persistContext), getSelection(),
-			new MethodListOptions(includeNone, includeDefault, includeFormMethods, includeGlobalMethods), SWT.NONE, "Select Method", this.valueEditor);
+			options, SWT.NONE, "Select Method", this.valueEditor);
 		dialog.setOptionsAreaFactory(new IControlFactory()
 		{
 			public Control createControl(Composite composite)

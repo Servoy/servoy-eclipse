@@ -122,6 +122,7 @@ import com.servoy.j2db.ui.IScriptTextAreaMethods;
 import com.servoy.j2db.ui.IScriptTextEditorMethods;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Utils;
 
@@ -573,6 +574,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			}
 			else
 			{
+				FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
 				String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 				if (cachedSuperTypeTemplateType == null)
 				{
@@ -589,16 +591,15 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						{
 							overwrittenMembers.add(TypeProvider.clone(member, context.getTypeRef(Record.JS_RECORD + '<' + config + '>')));
 						}
-						else if (memberType.getName().equals("Array<" + Record.JS_RECORD + ">"))
+						else if (memberType.getName().equals("Array<" + Record.JS_RECORD + '>'))
 						{
-							overwrittenMembers.add(TypeProvider.clone(member, TypeUtil.arrayOf(Record.JS_RECORD + '<' + config + ">")));
+							overwrittenMembers.add(TypeProvider.clone(member, TypeUtil.arrayOf(Record.JS_RECORD + '<' + config + '>')));
 						}
 						else if (memberType.getName().equals(FoundSet.JS_FOUNDSET))
 						{
 							if (member.getName().equals("unrelate"))
 							{
 								// its really a relation, unrelate it.
-								FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
 								if (fs != null)
 								{
 									Relation relation = fs.getRelation(config);
@@ -728,6 +729,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			return type;
 		}
 	}
+
 	private class PluginsScopeCreator implements IScopeTypeCreator
 	{
 		private final Map<String, Image> images = new HashMap<String, Image>();
@@ -903,40 +905,28 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 	private static class RelationsScopeCreator implements IScopeTypeCreator
 	{
-
 		public Type createType(ITypeInfoContext context, String typeName)
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
 
-			Object[] fsAndTable = getFlattenedSolutonAndTable(typeName);
-			if (fsAndTable != null)
+			Pair<FlattenedSolution, Table> fsAndTable = getFlattenedSolutonAndTable(typeName);
+			if (fsAndTable != null && fsAndTable.getLeft() != null)
 			{
-				FlattenedSolution fs = (FlattenedSolution)fsAndTable[0];
-				if (fsAndTable.length > 1)
+				FlattenedSolution fs = fsAndTable.getLeft();
+				Table table = fsAndTable.getRight();
+				if (table != null)
 				{
 					type.setSuperType(context.getType("Relations<" + fs.getSolution().getName() + '>'));
-					Table table = (Table)fsAndTable[1];
-					try
-					{
-						addRelations(context, fs, type.getMembers(), fs.getRelations(table, true, false, false), isVisible());
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
 				}
-				else
+				try
 				{
-					try
-					{
-						addRelations(context, fs, type.getMembers(), fs.getRelations(null, true, false, true), isVisible());
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
+					addRelations(context, fs, type.getMembers(), fs.getRelations(table, true, false, table == null), isVisible());
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
 				}
 			}
 
@@ -968,17 +958,16 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
 
-			Object[] fsAndTable = getFlattenedSolutonAndTable(typeName);
-			if (fsAndTable != null)
+			Pair<FlattenedSolution, Table> fsAndTable = getFlattenedSolutonAndTable(typeName);
+			if (fsAndTable != null && fsAndTable.getRight() != null)
 			{
-				if (fsAndTable.length > 1)
+				if (fsAndTable.getLeft() != null)
 				{
-					FlattenedSolution fs = (FlattenedSolution)fsAndTable[0];
-					Table table = (Table)fsAndTable[1];
-					type.setSuperType(context.getType(typeName.substring(0, typeName.indexOf('<') + 1) + table.getServerName() + "/" + table.getName() + '>'));
+					FlattenedSolution fs = fsAndTable.getLeft();
+					type.setSuperType(context.getType(typeName.substring(0, typeName.indexOf('<') + 1) + fsAndTable.getRight().getDataSource() + '>'));
 					try
 					{
-						Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(table);
+						Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(fsAndTable.getRight());
 						if (allDataProvidersForTable != null)
 						{
 							addDataProviders(allDataProvidersForTable.values().iterator(), type.getMembers(), context, isVisible(), false);
@@ -989,14 +978,13 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						ServoyLog.logError(e);
 					}
 				}
-				else if (fsAndTable.length == 1)
+				else
 				{
-					Table table = (Table)fsAndTable[0];
+					Table table = fsAndTable.getRight();
 					addDataProviders(table.getColumns().iterator(), type.getMembers(), context, isVisible(), true);
 					context.markInvariant(type, "scope:tables");
 				}
 			}
-
 
 			return type;
 		}
@@ -1061,62 +1049,44 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		{
 			return true;
 		}
-
 	}
 
-	private static Object[] getFlattenedSolutonAndTable(String typeName)
+	private static Pair<FlattenedSolution, Table> getFlattenedSolutonAndTable(String typeName)
 	{
 		if (typeName.endsWith(">"))
 		{
 			IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 			int index = typeName.indexOf('<');
-			String config = typeName.substring(index + 1, typeName.length() - 1);
-			String[] solutionServerTableNames = config.split("/");
-			if (solutionServerTableNames.length == 2)
+			if (index > 0)
 			{
-				// this is only server/table
-				try
+				String config = typeName.substring(index + 1, typeName.length() - 1);
+				int sep = config.indexOf(';');
+				if (sep > 0)
 				{
-					if (servoyModel.getFlattenedSolution().getSolution() != null)
+					// solutionName;dataSource
+					ServoyProject servoyProject = servoyModel.getServoyProject(config.substring(0, sep));
+					if (servoyProject != null && servoyModel.getFlattenedSolution().getSolution() != null)
 					{
-						IServer server = servoyModel.getFlattenedSolution().getSolution().getRepository().getServer(solutionServerTableNames[0]);
-						if (server != null)
-						{
-							Table table = (Table)server.getTable(solutionServerTableNames[1]);
-
-							if (table != null)
-							{
-								return new Object[] { table };
-							}
-						}
-					}
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError(e);
-				}
-			}
-			else
-			{
-				ServoyProject servoyProject = servoyModel.getServoyProject(solutionServerTableNames[0]);
-				if (servoyProject != null)
-				{
-					FlattenedSolution fs = servoyProject.getEditingFlattenedSolution();
-
-					if (solutionServerTableNames.length > 1 && fs.getSolution() != null)
-					{
-						// solutionName/server/table
 						try
 						{
-							IServer server = fs.getSolution().getRepository().getServer(solutionServerTableNames[1]);
-							if (server != null)
+							FlattenedSolution fs = servoyProject.getEditingFlattenedSolution();
+							String[] dbServernameTablename = DataSourceUtils.getDBServernameTablename(config.substring(sep + 1));
+							if (dbServernameTablename != null)
 							{
-								Table table = (Table)server.getTable(solutionServerTableNames[2]);
-
-								if (table != null)
+								IServer server = fs.getSolution().getRepository().getServer(dbServernameTablename[0]);
+								if (server != null)
 								{
-									return new Object[] { fs, table };
+									Table table = (Table)server.getTable(dbServernameTablename[1]);
+									if (table != null)
+									{
+										return new Pair<FlattenedSolution, Table>(fs, table);
+									}
 								}
+							}
+							else
+							{
+								// only solutionName
+								return new Pair<FlattenedSolution, Table>(fs, null);
 							}
 						}
 						catch (Exception e)
@@ -1124,15 +1094,38 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 							ServoyLog.logError(e);
 						}
 					}
-					// only solutionName
-					return new Object[] { fs };
+				}
+				else
+				{
+					// this is only dataSource
+					if (servoyModel.getFlattenedSolution().getSolution() != null)
+					{
+						String[] dbServernameTablename = DataSourceUtils.getDBServernameTablename(config);
+						if (dbServernameTablename != null)
+						{
+							try
+							{
+								IServer server = servoyModel.getFlattenedSolution().getSolution().getRepository().getServer(dbServernameTablename[0]);
+								if (server != null)
+								{
+									Table table = (Table)server.getTable(dbServernameTablename[1]);
+									if (table != null)
+									{
+										return new Pair<FlattenedSolution, Table>(null, table);
+									}
+								}
+							}
+							catch (Exception e)
+							{
+								ServoyLog.logError(e);
+							}
+						}
+					}
 				}
 			}
-
 		}
 		return null;
 	}
-
 
 	public class ElementsScopeCreator implements IScopeTypeCreator
 	{
@@ -1295,7 +1288,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				Relation relation = relations.next();
 				if (relation.isValid())
 				{
-					Property property = createProperty(relation.getName(), true, context.getTypeRef(FoundSet.JS_FOUNDSET + "<" + relation.getName() + ">"),
+					Property property = createProperty(relation.getName(), true, context.getTypeRef(FoundSet.JS_FOUNDSET + '<' + relation.getName() + '>'),
 						getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE, relation);
 					property.setVisible(visible);
 					members.add(property);
@@ -1512,14 +1505,13 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			Type dataproviderType;
 			if (visible)
 			{
-				relationsType = context.getType("Relations<" + fs.getSolution().getName() + "/" + table.getServerName() + "/" + table.getName() + ">");
-				dataproviderType = context.getType("Dataproviders<" + fs.getSolution().getName() + "/" + table.getServerName() + "/" + table.getName() + ">");
+				relationsType = context.getType("Relations<" + fs.getSolution().getName() + ';' + table.getDataSource() + '>');
+				dataproviderType = context.getType("Dataproviders<" + fs.getSolution().getName() + ';' + table.getDataSource() + '>');
 			}
 			else
 			{
-				relationsType = context.getType("InvisibleRelations<" + fs.getSolution().getName() + "/" + table.getServerName() + "/" + table.getName() + ">");
-				dataproviderType = context.getType("InvisibleDataproviders<" + fs.getSolution().getName() + "/" + table.getServerName() + "/" +
-					table.getName() + ">");
+				relationsType = context.getType("InvisibleRelations<" + fs.getSolution().getName() + ';' + table.getDataSource() + '>');
+				dataproviderType = context.getType("InvisibleDataproviders<" + fs.getSolution().getName() + ';' + table.getDataSource() + '>');
 			}
 			Type compositeType = TypeInfoModelFactory.eINSTANCE.createType();
 			compositeType.setName(fullTypeName);

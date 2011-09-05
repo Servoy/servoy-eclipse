@@ -45,77 +45,62 @@ public class CreateMethodReferenceQuickFix implements IMarkerResolution
 	private final String uuid;
 	private final String solutionName;
 	private final String eventName;
-	private final boolean globalMethod;
+	private final int parentTypeId;
+	private final String label;
+	private final String dataSource;
 
-	public CreateMethodReferenceQuickFix(String uuid, String solName, String eventName, boolean globalMethod)
+	public CreateMethodReferenceQuickFix(String uuid, String solName, String dataSource, String eventName, int parentTypeId, String label)
 	{
 		this.uuid = uuid;
 		this.solutionName = solName;
+		this.dataSource = dataSource;
 		this.eventName = eventName;
-		this.globalMethod = globalMethod;
+		this.parentTypeId = parentTypeId;
+		this.label = label;
 	}
 
 	public String getLabel()
 	{
-		if (globalMethod)
-		{
-			return "Create default global method for missing " + eventName; //$NON-NLS-1$
-		}
-		else
-		{
-			return "Create default form method for missing " + eventName; //$NON-NLS-1$
-		}
+		return "Create default " + label + " method for missing " + eventName;
 	}
 
 	public void run(IMarker marker)
 	{
-		if (uuid != null)
+		if (uuid == null) return;
+
+		UUID id = UUID.fromString(uuid);
+		ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
+		if (servoyProject == null) return;
+
+		try
 		{
-			UUID id = UUID.fromString(uuid);
-			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
-			if (servoyProject != null)
+			IPersist persist = servoyProject.getEditingPersist(id);
+			if (persist == null) return;
+
+			IPersist parent = persist.getAncestor(parentTypeId);
+			if (parent == null && parentTypeId == IRepository.TABLENODES && dataSource != null)
 			{
-				try
-				{
-					IPersist persist = servoyProject.getEditingPersist(id);
-					IPersist parent = null;
-					if (persist != null)
-					{
-						if (globalMethod)
-						{
-							parent = persist.getAncestor(IRepository.SOLUTIONS);
-						}
-						else
-						{
-							parent = persist.getAncestor(IRepository.FORMS);
-						}
-					}
-					if (parent != null)
-					{
-						MethodTemplate template = MethodTemplate.getTemplate(ScriptMethod.class, eventName);
-						if (template != null)
-						{
-							MethodArgument signature = template.getSignature();
-							if (signature != null)
-							{
-								String name = signature.getName();
-								ScriptMethod method = NewMethodAction.createNewMethod(UIUtils.getActiveShell(), parent, eventName, true, name);
-								if (method != null)
-								{
-									PropertyDescriptor descriptor = new PropertyDescriptor(eventName, persist.getClass());
-									descriptor.getWriteMethod().invoke(persist, method.getID());
-									servoyProject.saveEditingSolutionNodes(new IPersist[] { parent }, true);
-								}
-							}
-						}
-					}
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError(e);
-				}
+				parent = servoyProject.getEditingSolution().getOrCreateTableNode(dataSource);
+			}
+			if (parent == null) return;
+
+			MethodTemplate template = MethodTemplate.getTemplate(ScriptMethod.class, eventName);
+			if (template == null) return;
+
+			MethodArgument signature = template.getSignature();
+			if (signature == null) return;
+
+			ScriptMethod method = NewMethodAction.createNewMethod(UIUtils.getActiveShell(), parent, eventName, true, signature.getName());
+			if (method != null)
+			{
+				PropertyDescriptor descriptor = new PropertyDescriptor(eventName, persist.getClass());
+				descriptor.getWriteMethod().invoke(persist, new Integer(method.getID()));
+				servoyProject.saveEditingSolutionNodes(new IPersist[] { parent }, true);
 			}
 		}
-
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
 	}
 }

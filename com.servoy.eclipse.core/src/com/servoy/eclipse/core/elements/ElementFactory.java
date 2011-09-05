@@ -820,7 +820,7 @@ public class ElementFactory
 				int methodId = repository.getElementIdForUUID(uuid);
 				if (methodId > 0)
 				{
-					IScriptProvider scriptMethod = ModelUtils.getScriptMethod(form, null, null, methodId);
+					IScriptProvider scriptMethod = ModelUtils.getScriptMethod(form, null, form.getTable(), methodId);
 					if (scriptMethod != null)
 					{
 						object.put(key, scriptMethod.getParent() instanceof IRootObject ? ScriptVariable.GLOBAL_DOT_PREFIX + scriptMethod.getDisplayName()

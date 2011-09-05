@@ -22,6 +22,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.property.ComplexProperty;
@@ -31,12 +32,15 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.MethodArgument;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 
 /**
  * Label provider for methods.
@@ -71,10 +75,10 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 		{
 			mwa = (MethodWithArguments)value;
 		}
-		return getMethodText(mwa, persistContext, null, showPrefix, showNoneForDefault);
+		return getMethodText(mwa, persistContext, showPrefix, showNoneForDefault);
 	}
 
-	public static String getMethodText(MethodWithArguments mwa, PersistContext persistContext, Table table, boolean showPrefix, boolean showNoneForDefault)
+	public static String getMethodText(MethodWithArguments mwa, PersistContext persistContext, boolean showPrefix, boolean showNoneForDefault)
 	{
 		if (MethodDialog.METHOD_DEFAULT.equals(mwa))
 		{
@@ -91,13 +95,29 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 			return UnresolvedValue.getUnresolvedMessage(((UnresolvedMethodWithArguments)mwa).unresolvedValue);
 		}
 
+		ITable table = mwa.table;
+		if (table == null)
+		{
+			Form form = (Form)persistContext.getContext().getAncestor(IRepository.FORMS);
+			if (form != null)
+			{
+				try
+				{
+					table = form.getTable();
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		}
 		IScriptProvider sm = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), table, mwa.methodId);
 		if (sm == null)
 		{
 			return Messages.LabelUnresolved;
 		}
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		if (showPrefix && sm.getParent() instanceof Solution)
 		{
 			// global method
@@ -143,6 +163,6 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 		{
 			mwa = (MethodWithArguments)value;
 		}
-		return ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), null, mwa.methodId);
+		return ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), mwa.table, mwa.methodId);
 	}
 }

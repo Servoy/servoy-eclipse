@@ -72,6 +72,7 @@ import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
 import com.servoy.eclipse.ui.dialogs.FormContentProvider;
 import com.servoy.eclipse.ui.dialogs.FormContentProvider.FormListOptions;
+import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodListOptions;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.editors.BeanCustomCellEditor;
@@ -135,6 +136,7 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableDisplay;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
@@ -204,30 +206,30 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 	static
 	{
-		HORIZONTAL_ALIGNMENT_CONTROLLER = new ComboboxPropertyController<Integer>("horizontalAlignment", RepositoryHelper.getDisplayName("horizontalAlignment",
-			Field.class), new ComboboxPropertyModel<Integer>(new Integer[] { new Integer(-1), new Integer(SwingConstants.LEFT), new Integer(
-			SwingConstants.CENTER), new Integer(SwingConstants.RIGHT) },
-			new String[] { Messages.LabelDefault, Messages.AlignLeft, Messages.AlignCenter, Messages.AlignRight }), Messages.LabelUnresolved);
-		SHAPE_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>("shapeType", RepositoryHelper.getDisplayName("shapeType", RectShape.class),
-			new ComboboxPropertyModel<Integer>(new Integer[] { new Integer(RectShape.BORDER_PANEL), new Integer(RectShape.RECTANGLE), new Integer(
-				RectShape.ROUNDED_RECTANGLE), new Integer(RectShape.OVAL) }, new String[] { "BORDER_PANEL", "RECTANGLE", "ROUNDED_RECTANGLE", "OVAL" }),
-			Messages.LabelUnresolved);
+		HORIZONTAL_ALIGNMENT_CONTROLLER = new ComboboxPropertyController<Integer>(
+			"horizontalAlignment",
+			RepositoryHelper.getDisplayName("horizontalAlignment", Field.class),
+			new ComboboxPropertyModel<Integer>(
+				new Integer[] { Integer.valueOf(-1), Integer.valueOf(SwingConstants.LEFT), Integer.valueOf(SwingConstants.CENTER), Integer.valueOf(SwingConstants.RIGHT) },
+				new String[] { Messages.LabelDefault, Messages.AlignLeft, Messages.AlignCenter, Messages.AlignRight }), Messages.LabelUnresolved);
+		SHAPE_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>(
+			"shapeType",
+			RepositoryHelper.getDisplayName("shapeType", RectShape.class),
+			new ComboboxPropertyModel<Integer>(
+				new Integer[] { Integer.valueOf(RectShape.BORDER_PANEL), Integer.valueOf(RectShape.RECTANGLE), Integer.valueOf(RectShape.ROUNDED_RECTANGLE), Integer.valueOf(RectShape.OVAL) },
+				new String[] { "BORDER_PANEL", "RECTANGLE", "ROUNDED_RECTANGLE", "OVAL" }), Messages.LabelUnresolved);
 		TAB_ORIENTATION_CONTROLLER = new ComboboxPropertyController<Integer>(
 			"tabOrientation",
 			RepositoryHelper.getDisplayName("tabOrientation", TabPanel.class),
 			new ComboboxPropertyModel<Integer>(
-				new Integer[] { new Integer(TabPanel.DEFAULT), new Integer(SwingConstants.TOP), new Integer(SwingConstants.RIGHT), new Integer(
-					SwingConstants.BOTTOM), new Integer(SwingConstants.LEFT), new Integer(TabPanel.HIDE), new Integer(TabPanel.SPLIT_HORIZONTAL), new Integer(
-					TabPanel.SPLIT_VERTICAL) },
+				new Integer[] { Integer.valueOf(TabPanel.DEFAULT), Integer.valueOf(SwingConstants.TOP), Integer.valueOf(SwingConstants.RIGHT), Integer.valueOf(SwingConstants.BOTTOM), Integer.valueOf(SwingConstants.LEFT), Integer.valueOf(TabPanel.HIDE), Integer.valueOf(TabPanel.SPLIT_HORIZONTAL), Integer.valueOf(TabPanel.SPLIT_VERTICAL) },
 				new String[] { Messages.LabelDefault, Messages.AlignTop, Messages.AlignRight, Messages.AlignBottom, Messages.AlignLeft, "HIDE", "SPLIT HORIZONTAL", "SPLIT VERTICAL" }),
 			Messages.LabelUnresolved);
 		DISPLAY_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>(
 			"displayType",
 			RepositoryHelper.getDisplayName("displayType", Field.class),
 			new ComboboxPropertyModel<Integer>(
-				new Integer[] { new Integer(Field.TEXT_FIELD), new Integer(Field.TEXT_AREA), new Integer(Field.RTF_AREA), new Integer(Field.HTML_AREA), new Integer(
-					Field.TYPE_AHEAD), new Integer(Field.COMBOBOX), new Integer(Field.RADIOS), new Integer(Field.CHECKS), new Integer(Field.CALENDAR), new Integer(
-					Field.IMAGE_MEDIA), new Integer(Field.PASSWORD), new Integer(Field.LIST_BOX), new Integer(Field.MULTI_SELECTION_LIST_BOX) },
+				new Integer[] { Integer.valueOf(Field.TEXT_FIELD), Integer.valueOf(Field.TEXT_AREA), Integer.valueOf(Field.RTF_AREA), Integer.valueOf(Field.HTML_AREA), Integer.valueOf(Field.TYPE_AHEAD), Integer.valueOf(Field.COMBOBOX), Integer.valueOf(Field.RADIOS), Integer.valueOf(Field.CHECKS), Integer.valueOf(Field.CALENDAR), Integer.valueOf(Field.IMAGE_MEDIA), Integer.valueOf(Field.PASSWORD), Integer.valueOf(Field.LIST_BOX), Integer.valueOf(Field.MULTI_SELECTION_LIST_BOX) },
 				new String[] { "TEXT_FIELD", "TEXT_AREA", "RTF_AREA", "HTML_AREA", "TYPE_AHEAD", "COMBOBOX", "RADIOS", "CHECK", "CALENDAR", "IMAGE_MEDIA", "PASSWORD", "LISTBOX", "MULTISELECTION_LISTBOX" }),
 			Messages.LabelUnresolved);
 
@@ -246,13 +248,13 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		JOIN_TYPE_CONTROLLER = new ComboboxPropertyController<Integer>("joinType", RepositoryHelper.getDisplayName("joinType", Relation.class),
 			new ComboboxPropertyModel<Integer>(
 
-			new Integer[] { new Integer(ISQLJoin.INNER_JOIN), new Integer(ISQLJoin.LEFT_OUTER_JOIN) },
+			new Integer[] { Integer.valueOf(ISQLJoin.INNER_JOIN), Integer.valueOf(ISQLJoin.LEFT_OUTER_JOIN) },
 				new String[] { ISQLJoin.JOIN_TYPES_NAMES[ISQLJoin.INNER_JOIN], ISQLJoin.JOIN_TYPES_NAMES[ISQLJoin.LEFT_OUTER_JOIN] }), Messages.LabelUnresolved);
 
 		Integer[] ia = new Integer[SolutionMetaData.solutionTypes.length];
 		for (int i = 0; i < ia.length; i++)
 		{
-			ia[i] = new Integer(SolutionMetaData.solutionTypes[i]);
+			ia[i] = Integer.valueOf(SolutionMetaData.solutionTypes[i]);
 		}
 		SOLUTION_TYPE_CONTROLLER = new ComboboxPropertyController<Integer>("solutionType", RepositoryHelper.getDisplayName("solutionType", Solution.class),
 			new ComboboxPropertyModel<Integer>(ia, SolutionMetaData.solutionTypeNames), Messages.LabelUnresolved);
@@ -264,28 +266,34 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			new ComboboxPropertyModel<String>(new String[] { null, Form.SEPARATE_FLAG, Form.EMPTY_FLAG },
 				new String[] { Messages.LabelDefault, Form.SEPARATE_FLAG, Form.EMPTY_FLAG }), Messages.LabelUnresolved);
 
-		VIEW_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>("view", RepositoryHelper.getDisplayName("view", Form.class),
-			new ComboboxPropertyModel<Integer>(new Integer[] { new Integer(IForm.RECORD_VIEW), new Integer(IForm.LIST_VIEW), new Integer(
-				IForm.LOCKED_RECORD_VIEW), new Integer(FormController.LOCKED_LIST_VIEW), new Integer(FormController.LOCKED_TABLE_VIEW) },
+		VIEW_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>(
+			"view",
+			RepositoryHelper.getDisplayName("view", Form.class),
+			new ComboboxPropertyModel<Integer>(
+				new Integer[] { Integer.valueOf(IForm.RECORD_VIEW), Integer.valueOf(IForm.LIST_VIEW), Integer.valueOf(IForm.LOCKED_RECORD_VIEW), Integer.valueOf(FormController.LOCKED_LIST_VIEW), Integer.valueOf(FormController.LOCKED_TABLE_VIEW) },
 				new String[] { "Record view", "List view", "Record view (locked)", "List view (locked)", "Table view (locked)" }), Messages.LabelUnresolved);
 
 		ROTATION_CONTROLLER = new ComboboxPropertyController<Integer>("rotation", RepositoryHelper.getDisplayName("rotation", GraphicalComponent.class),
-			new ComboboxPropertyModel<Integer>(new Integer[] { new Integer(0), new Integer(90), new Integer(180), new Integer(270) }), Messages.LabelUnresolved);
+			new ComboboxPropertyModel<Integer>(new Integer[] { Integer.valueOf(0), Integer.valueOf(90), Integer.valueOf(180), Integer.valueOf(270) }),
+			Messages.LabelUnresolved);
 
 		ROLLOVER_CURSOR_CONTROLLER = new ComboboxPropertyController<Integer>("rolloverCursor", RepositoryHelper.getDisplayName("rolloverCursor",
-			GraphicalComponent.class),
-			new ComboboxPropertyModel<Integer>(new Integer[] { new Integer(Cursor.DEFAULT_CURSOR), new Integer(Cursor.HAND_CURSOR) },
-				new String[] { Messages.LabelDefault, Messages.CursorHand }), Messages.LabelUnresolved);
-		VERTICAL_ALIGNMENT_CONTROLLER = new ComboboxPropertyController<Integer>("verticalAlignment", RepositoryHelper.getDisplayName("verticalAlignment",
-			Field.class), new ComboboxPropertyModel<Integer>(new Integer[] { new Integer(-1), new Integer(SwingConstants.TOP), new Integer(
-			SwingConstants.CENTER), new Integer(SwingConstants.BOTTOM) },
-			new String[] { Messages.LabelDefault, Messages.AlignTop, Messages.AlignCenter, Messages.AlignBottom }), Messages.LabelUnresolved);
+			GraphicalComponent.class), new ComboboxPropertyModel<Integer>(
+			new Integer[] { Integer.valueOf(Cursor.DEFAULT_CURSOR), Integer.valueOf(Cursor.HAND_CURSOR) },
+			new String[] { Messages.LabelDefault, Messages.CursorHand }), Messages.LabelUnresolved);
+		VERTICAL_ALIGNMENT_CONTROLLER = new ComboboxPropertyController<Integer>(
+			"verticalAlignment",
+			RepositoryHelper.getDisplayName("verticalAlignment", Field.class),
+			new ComboboxPropertyModel<Integer>(
+				new Integer[] { Integer.valueOf(-1), Integer.valueOf(SwingConstants.TOP), Integer.valueOf(SwingConstants.CENTER), Integer.valueOf(SwingConstants.BOTTOM) },
+				new String[] { Messages.LabelDefault, Messages.AlignTop, Messages.AlignCenter, Messages.AlignBottom }), Messages.LabelUnresolved);
 
-		TEXT_ORIENTATION_CONTROLLER = new ComboboxPropertyController<Integer>("textOrientation", RepositoryHelper.getDisplayName("textOrientation",
-			Solution.class), new ComboboxPropertyModel<Integer>(new Integer[] { new Integer(Solution.TEXT_ORIENTATION_DEFAULT), new Integer(
-			Solution.TEXT_ORIENTATION_LEFT_TO_RIGHT), new Integer(Solution.TEXT_ORIENTATION_RIGHT_TO_LEFT), new Integer(
-			Solution.TEXT_ORIENTATION_LOCALE_SPECIFIC) },
-			new String[] { Messages.LabelDefault, Messages.OrientationLeftToRight, Messages.OrientationRightToLeft, Messages.OrientationLocaleSpecific }),
+		TEXT_ORIENTATION_CONTROLLER = new ComboboxPropertyController<Integer>(
+			"textOrientation",
+			RepositoryHelper.getDisplayName("textOrientation", Solution.class),
+			new ComboboxPropertyModel<Integer>(
+				new Integer[] { Integer.valueOf(Solution.TEXT_ORIENTATION_DEFAULT), Integer.valueOf(Solution.TEXT_ORIENTATION_LEFT_TO_RIGHT), Integer.valueOf(Solution.TEXT_ORIENTATION_RIGHT_TO_LEFT), Integer.valueOf(Solution.TEXT_ORIENTATION_LOCALE_SPECIFIC) },
+				new String[] { Messages.LabelDefault, Messages.OrientationLeftToRight, Messages.OrientationRightToLeft, Messages.OrientationLocaleSpecific }),
 			Messages.LabelUnresolved);
 
 		SLIDING_OPTIONS_CONTROLLER = new SlidingoptionsPropertyController("printSliding", RepositoryHelper.getDisplayName("printSliding",
@@ -760,7 +768,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		 */
 		if (category == PropertyCategory.Events || category == PropertyCategory.Commands)
 		{
-			return new MethodPropertyController<Integer>(id, displayName, persistContext, true, category == PropertyCategory.Commands, form != null, true)
+			final ITable table = form == null ? null : form.getTable();
+			return new MethodPropertyController<Integer>(id, displayName, persistContext, new MethodListOptions(true, category == PropertyCategory.Commands,
+				form != null, true, allowFoundsetMethods(persistContext, id) && table != null, table))
 			{
 				@Override
 				protected IPropertyConverter<Integer, Object> createConverter()
@@ -778,7 +788,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 									args = new SafeArrayList<Object>(instanceArgs);
 								}
 							}
-							return new MethodWithArguments(value.intValue(), args);
+							return new MethodWithArguments(value.intValue(), args, table);
 						}
 
 						public Integer convertValue(Object id, MethodWithArguments value)
@@ -971,7 +981,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 								ScriptMethod scriptMethod = AbstractBase.selectByName(scriptMethods, value.getMethodName());
 								if (scriptMethod != null)
 								{
-									return new MethodWithArguments(scriptMethod.getID(), null);
+									return MethodWithArguments.create(scriptMethod, null);
 								}
 							}
 							return new UnresolvedMethodWithArguments(value.toMethodString());
@@ -979,7 +989,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 						public FunctionDefinition convertValue(Object id, MethodWithArguments value)
 						{
-							IScriptProvider scriptMethod = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), null,
+							IScriptProvider scriptMethod = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), value.table,
 								value.methodId);
 							if (scriptMethod != null)
 							{
@@ -1002,10 +1012,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 					if (propertyType == FunctionDefinition.class)
 					{
-						return new MethodPropertyController<FunctionDefinition>(id, displayName, persistContext,
+						return new MethodPropertyController<FunctionDefinition>(id, displayName, persistContext, new MethodListOptions(
 							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)), false,
 							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeForm)),
-							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeGlobal)))
+							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeGlobal)),
+							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeFoundset)), form == null ? null : form.getTable()))
 						{
 							@Override
 							protected IPropertyConverter<FunctionDefinition, Object> createConverter()
@@ -1018,10 +1029,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					if (propertyType == String.class)
 					{
 						// chain with String to FunctionDefinition converter
-						return new MethodPropertyController<String>(id, displayName, persistContext,
+						return new MethodPropertyController<String>(id, displayName, persistContext, new MethodListOptions(
 							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)), false,
 							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeForm)),
-							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeGlobal)))
+							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeGlobal)),
+							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeFoundset)), form == null ? null : form.getTable()))
 						{
 							@Override
 							protected IPropertyConverter<String, Object> createConverter()
@@ -1174,7 +1186,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 								public Integer convertProperty(Object id, String value)
 								{
 									Form f = flattenedEditingSolution.getForm(value);
-									return new Integer(f == null ? Form.NAVIGATOR_NONE : f.getID());
+									return Integer.valueOf(f == null ? Form.NAVIGATOR_NONE : f.getID());
 								}
 
 								public String convertValue(Object id, Integer value)
@@ -1207,7 +1219,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 								public Integer convertProperty(Object id, String value)
 								{
 									ValueList vl = flattenedEditingSolution.getValueList(value);
-									return new Integer(vl == null ? ValuelistLabelProvider.VALUELIST_NONE : vl.getID());
+									return Integer.valueOf(vl == null ? ValuelistLabelProvider.VALUELIST_NONE : vl.getID());
 								}
 
 								public String convertValue(Object id, Integer value)
@@ -1238,7 +1250,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 								public Integer convertProperty(Object id, String value)
 								{
 									Media media = flattenedEditingSolution.getMedia(value);
-									return new Integer(media == null ? MediaLabelProvider.MEDIA_NONE : media.getID());
+									return Integer.valueOf(media == null ? MediaLabelProvider.MEDIA_NONE : media.getID());
 								}
 
 								public String convertValue(Object id, Integer value)
@@ -1501,6 +1513,22 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 
 		return null;
+	}
+
+	/**
+	 * For which properties should foundset methods be allowed.
+	 * 
+	 * @param persistContext 
+	 * @param id
+	 * @return
+	 */
+	private static boolean allowFoundsetMethods(PersistContext persistContext, String id)
+	{
+		if (persistContext.getPersist() instanceof Form && StaticContentSpecLoader.PROPERTY_ONLOADMETHODID.getPropertyName().equals(id))
+		{
+			return false; // in onload the foundset is not initialized yet
+		}
+		return true;
 	}
 
 	/**
@@ -2675,7 +2703,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			String[] stringTypes = new String[iTypes.length];
 			for (int i = 0; i < iTypes.length; i++)
 			{
-				integerTypes[i] = new Integer(iTypes[i]);
+				integerTypes[i] = Integer.valueOf(iTypes[i]);
 				stringTypes[i] = Column.getDisplayTypeString(iTypes[i]);
 			}
 			return new PropertySetterDelegatePropertyController<Integer, Integer>(new ComboboxPropertyController<Integer>(id, displayName,

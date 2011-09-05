@@ -87,7 +87,7 @@ public class AddScriptProviderButtonsComposite extends Composite
 					{
 						dialog.refreshTree();
 						dialog.expandCalculationNode();
-						dialog.setSelection(new MethodWithArguments(calculation.getID()));
+						dialog.setSelection(MethodWithArguments.create(calculation, null));
 					}
 				}
 			}
@@ -107,7 +107,7 @@ public class AddScriptProviderButtonsComposite extends Composite
 				{
 					dialog.refreshTree();
 					dialog.expandGlobalsNode();
-					dialog.setSelection(new MethodWithArguments(method.getID()));
+					dialog.setSelection(MethodWithArguments.create(method, null));
 				}
 			}
 		});
@@ -127,7 +127,7 @@ public class AddScriptProviderButtonsComposite extends Composite
 
 	private static ScriptCalculation createCalculation(IPersist parent, String calcName, Table table, String methodKey)
 	{
-		if (parent instanceof Solution)
+		if (parent instanceof Solution && table != null)
 		{
 			try
 			{
@@ -135,7 +135,7 @@ public class AddScriptProviderButtonsComposite extends Composite
 				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 				IValidateName nameValidator = servoyModel.getNameValidator();
-				ScriptCalculation calc = solution.createNewScriptCalculation(nameValidator, table, calcName);
+				ScriptCalculation calc = solution.createNewScriptCalculation(nameValidator, table.getDataSource(), calcName);
 				if (calc != null)
 				{
 					calc.setType(IColumnTypes.TEXT);
