@@ -16,12 +16,12 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.NameComparator;
@@ -61,8 +61,15 @@ public class TableScriptsContentProvider extends FlatTreeContentProvider
 				Iterator<TableNode> tableNodes = solution.getTableNodes(table);
 				while (tableNodes.hasNext())
 				{
-					TableNode tableNode = tableNodes.next();
-					scripts.addAll((Collection< ? extends IScriptProvider>)SortedTypeIterator.createFilteredList(tableNode.getAllObjectsAsList(), typeId));
+					Iterator<IPersist> scriptsIterator = SortedTypeIterator.createFilteredIterator(tableNodes.next().getAllObjectsAsList().iterator(), typeId);
+					while (scriptsIterator.hasNext())
+					{
+						IPersist script = scriptsIterator.next();
+						if (script instanceof IScriptProvider)
+						{
+							scripts.add((IScriptProvider)script);
+						}
+					}
 				}
 				return scripts.toArray();
 			}
