@@ -24,7 +24,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.ui.actions.SelectionAction;
-import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
@@ -38,7 +37,6 @@ import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
@@ -50,6 +48,7 @@ import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Template;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
@@ -81,15 +80,11 @@ public class SaveAsTemplateAction extends SelectionAction
 		return getSelection() != null && !getSelection().isEmpty();
 	}
 
-	private static final String TEMPLATE_GROUPING_STATE = "TemplateDialog.grouping"; //$NON-NLS-1$
+	private boolean groupTemplateElements = false;
 
 	@SuppressWarnings("nls")
-	private static String askForTemplateName(Shell shell)
+	private static Pair<String, Boolean> askForTemplateName(Shell shell, boolean grouping)
 	{
-		IDialogSettings settings = Activator.getDefault().getDialogSettings();
-		String grp = settings.get(TEMPLATE_GROUPING_STATE);
-		boolean grouping = (grp != null ? Boolean.valueOf(grp) : false);
-
 		UIUtils.InputAndCheckDialog dialog = new UIUtils.InputAndCheckDialog(shell, "New template", "Specify a template name", null, new IInputValidator()
 		{
 			public String isValid(String newText)
@@ -102,9 +97,9 @@ public class SaveAsTemplateAction extends SelectionAction
 		dialog.setBlockOnOpen(true);
 		dialog.open();
 
-		settings.put(TEMPLATE_GROUPING_STATE, dialog.getExtendedValue());
+		String name = (dialog.getReturnCode() == Window.CANCEL) ? null : dialog.getValue();
 
-		return (dialog.getReturnCode() == Window.CANCEL) ? null : dialog.getValue();
+		return new Pair<String, Boolean>(name, dialog.getExtendedValue());
 	}
 
 	@SuppressWarnings("nls")
@@ -143,7 +138,10 @@ public class SaveAsTemplateAction extends SelectionAction
 	@Override
 	public void run()
 	{
-		String templateName = askForTemplateName(getWorkbenchPart().getSite().getShell());
+		Pair<String, Boolean> result = askForTemplateName(getWorkbenchPart().getSite().getShell(), groupTemplateElements);
+		String templateName = result.getLeft();
+		groupTemplateElements = result.getRight().booleanValue();
+
 		if (templateName == null)
 		{
 			// cancelled
@@ -230,9 +228,7 @@ public class SaveAsTemplateAction extends SelectionAction
 				template = existingTemplate;
 			}
 			template.setResourceType(resourceType);
-			String grp = Activator.getDefault().getDialogSettings().get(TEMPLATE_GROUPING_STATE);
-			boolean groupingState = (grp != null ? Boolean.valueOf(grp) : false);
-			template.setContent(ElementFactory.createTemplateContent(repository, form, persists, resourceType, groupingState));
+			template.setContent(ElementFactory.createTemplateContent(repository, form, persists, resourceType, groupTemplateElements));
 			repository.updateRootObject(template);
 		}
 		catch (JSONException e)
