@@ -39,6 +39,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -217,6 +218,60 @@ public class UIUtils
 				return comboOptions[comboSelection];
 			}
 			return null;
+		}
+
+	}
+
+	public static class InputAndCheckDialog extends ExtendedInputDialog<Boolean>
+	{
+		private final String checkButtonDescription;
+		private boolean checked;
+
+		public InputAndCheckDialog(Shell parentShell, String dialogTitle, String dialogMessage, String initialValue, IInputValidator validator,
+			String checkButtonDescription, boolean initialCheck)
+		{
+			super(parentShell, dialogTitle, dialogMessage, initialValue, validator);
+			this.checkButtonDescription = checkButtonDescription;
+			this.checked = initialCheck;
+		}
+
+		@Override
+		protected Control createDialogArea(Composite parent)
+		{
+			Composite area = new Composite(parent, SWT.NONE);
+			GridLayout layout = new GridLayout();
+			layout.marginHeight = layout.marginWidth = 10;
+			area.setLayout(layout);
+
+			Control theDialogArea = super.createDialogArea(area);
+
+			final Button checkButton = new Button(area, SWT.CHECK);
+			GridData gd = new GridData();
+			gd.horizontalAlignment = GridData.FILL;
+			gd.verticalIndent = 5;
+			checkButton.setLayoutData(gd);
+			checkButton.setText(checkButtonDescription);
+			checkButton.setSelection(checked);
+
+			checkButton.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					checked = checkButton.getSelection();
+				}
+			});
+
+			layout = (GridLayout)((Composite)theDialogArea).getLayout();
+			layout.marginHeight = layout.marginWidth = 0;
+
+			return area;
+		}
+
+		@Override
+		public Boolean getExtendedValue()
+		{
+			return Boolean.valueOf(checked);
 		}
 
 	}

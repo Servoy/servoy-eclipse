@@ -24,16 +24,10 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.ui.actions.SelectionAction;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPart;
 import org.json.JSONException;
@@ -41,13 +35,16 @@ import org.json.JSONException;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -84,45 +81,33 @@ public class SaveAsTemplateAction extends SelectionAction
 		return getSelection() != null && !getSelection().isEmpty();
 	}
 
-	private static boolean groupingState = false;
+	private static final String TEMPLATE_GROUPING_STATE = "TemplateDialog.grouping"; //$NON-NLS-1$
 
+	@SuppressWarnings("nls")
 	private static String askForTemplateName(Shell shell)
 	{
-		InputDialog dialog = new InputDialog(shell, "New template", "Specify a template name", null, new IInputValidator()
+		IDialogSettings settings = Activator.getDefault().getDialogSettings();
+		String grp = settings.get(TEMPLATE_GROUPING_STATE);
+		boolean grouping = (grp != null ? Boolean.valueOf(grp) : false);
+
+		UIUtils.InputAndCheckDialog dialog = new UIUtils.InputAndCheckDialog(shell, "New template", "Specify a template name", null, new IInputValidator()
 		{
 			public String isValid(String newText)
 			{
 				if (newText.length() == 0) return "";
 				return validateMethodName(newText);
 			}
-		})
-		{
-			@Override
-			protected void createButtonsForButtonBar(Composite parent)
-			{
-				groupingState = false;
-				final Button groupingButton = new Button(parent, SWT.CHECK);
-				groupingButton.setText("Group template elementes"); //$NON-NLS-1$
-				groupingButton.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true, 2, 1));
-				groupingButton.addSelectionListener(new SelectionAdapter()
-				{
-					@Override
-					public void widgetSelected(SelectionEvent e)
-					{
-						groupingState = groupingButton.getSelection();
-					}
-				});
+		}, "Group template elements", grouping);
 
-
-				super.createButtonsForButtonBar(parent);
-			}
-		};
 		dialog.setBlockOnOpen(true);
 		dialog.open();
+
+		settings.put(TEMPLATE_GROUPING_STATE, dialog.getExtendedValue());
 
 		return (dialog.getReturnCode() == Window.CANCEL) ? null : dialog.getValue();
 	}
 
+	@SuppressWarnings("nls")
 	protected static String validateMethodName(String templateName)
 	{
 		// see if style name is OK
@@ -140,6 +125,15 @@ public class SaveAsTemplateAction extends SelectionAction
 			if (!validationResult.isOK())
 			{
 				return "The name of the template to be created is not valid: " + validationResult.getMessage();
+			}
+
+			List<IRootObject> allTemplatesList = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
+			for (IRootObject template : allTemplatesList)
+			{
+				if (templateName.toLowerCase().equals(template.getName().toLowerCase()))
+				{
+					return "A template with this name already exists. Please modify the template name.";
+				}
 			}
 		}
 		return null;
@@ -236,6 +230,8 @@ public class SaveAsTemplateAction extends SelectionAction
 				template = existingTemplate;
 			}
 			template.setResourceType(resourceType);
+			String grp = Activator.getDefault().getDialogSettings().get(TEMPLATE_GROUPING_STATE);
+			boolean groupingState = (grp != null ? Boolean.valueOf(grp) : false);
 			template.setContent(ElementFactory.createTemplateContent(repository, form, persists, resourceType, groupingState));
 			repository.updateRootObject(template);
 		}
