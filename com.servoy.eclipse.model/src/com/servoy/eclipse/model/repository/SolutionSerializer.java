@@ -100,7 +100,7 @@ public class SolutionSerializer
 	public static final String TEMPLATE_FILE_EXTENSION = ".template"; //$NON-NLS-1$
 	public static final String CALCULATIONS_POSTFIX_WITHOUT_EXT = "_calculations"; //$NON-NLS-1$
 	public static final String CALCULATIONS_POSTFIX = CALCULATIONS_POSTFIX_WITHOUT_EXT + JS_FILE_EXTENSION;
-	public static final String FOUNDSET_POSTFIX_WITHOUT_EXT = "_foundset"; //$NON-NLS-1$
+	public static final String FOUNDSET_POSTFIX_WITHOUT_EXT = "_entity"; //$NON-NLS-1$
 	public static final String FOUNDSET_POSTFIX = FOUNDSET_POSTFIX_WITHOUT_EXT + JS_FILE_EXTENSION;
 	public static final String GLOBALS_FILE = "globals" + JS_FILE_EXTENSION; //$NON-NLS-1$
 
