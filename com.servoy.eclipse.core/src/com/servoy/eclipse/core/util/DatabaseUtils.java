@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.core.util;
 
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -158,7 +159,7 @@ public final class DatabaseUtils
 			dmm.setWritesEnabled(false);
 			try
 			{
-				server.syncTableObjWithDB(table, false, true, null);
+				server.syncTableObjWithDB(table, false, false, null);
 			}
 			catch (Exception e)
 			{
@@ -222,6 +223,17 @@ public final class DatabaseUtils
 					columnInfo.flagChanged();
 				}
 			}
+
+			// createMissingDBSequences uses columninfo
+			try
+			{
+				server.createMissingDBSequences(table);
+			}
+			catch (SQLException e)
+			{
+				throw new RepositoryException("Could not create db sequences for table " + table, e); //$NON-NLS-1$ 
+			}
+
 			dmm.updateAllColumnInfo(table, writeBackLater);
 		}
 		catch (RepositoryException e)
