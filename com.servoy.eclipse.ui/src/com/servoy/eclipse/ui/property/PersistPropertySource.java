@@ -2557,8 +2557,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				{
 					return null;
 				}
-				options = new DataProviderTreeViewer.DataProviderOptions(false, false, false, true /* related calcs */, false, false, false, false,
-					INCLUDE_RELATIONS.YES, true, true, relations);
+				options = new DataProviderTreeViewer.DataProviderOptions(true, false, false, true /* related calcs */, false, false, false, false,
+					INCLUDE_RELATIONS.NESTED, false, true, relations);
 			}
 			else
 			{
