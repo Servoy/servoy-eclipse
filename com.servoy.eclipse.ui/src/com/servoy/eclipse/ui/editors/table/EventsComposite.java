@@ -26,10 +26,16 @@ import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -50,6 +56,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
 
 public class EventsComposite extends Composite
@@ -107,12 +114,55 @@ public class EventsComposite extends Composite
 	public static final int CI_NAME = 0;
 	public static final int CI_METHOD = 1;
 
+	private final class TreeColumnsSorter extends SelectionAdapter
+	{
+		private final TreeViewerNodesComparator comparator;
+		private final TreeViewer viewer;
+
+		private TreeColumnsSorter(TreeViewerNodesComparator comparator, TreeViewer viewer)
+		{
+			this.comparator = comparator;
+			this.viewer = viewer;
+		}
+
+		@Override
+		public void widgetSelected(SelectionEvent e)
+		{
+			comparator.setAscending(!comparator.isAscending());
+			viewer.getTree().setSortDirection(comparator.isAscending() ? SWT.UP : SWT.DOWN);
+
+			try
+			{
+				viewer.getTree().setRedraw(false);
+				viewer.refresh(); // trigger the compare (of Comparator)
+			}
+			catch (Exception ex)
+			{
+				Debug.log(ex);
+			}
+			finally
+			{
+				viewer.getTree().setRedraw(true);
+			}
+		}
+	}
+
+	@SuppressWarnings("nls")
 	protected void initDataBindings(Table t, final TableEditor te)
 	{
-		TreeColumn nameColumn = new TreeColumn(treeViewer.getTree(), SWT.LEFT, CI_NAME);
+		Tree tree = treeViewer.getTree();
+
+		TreeColumn nameColumn = new TreeColumn(tree, SWT.LEFT, CI_NAME);
 		nameColumn.setText("Name");
 
-		TreeColumn methodColumn = new TreeColumn(treeViewer.getTree(), SWT.LEFT, CI_METHOD);
+		TreeViewerNodesComparator comparator = new TreeViewerNodesComparator();
+		treeViewer.setComparator(comparator);
+
+		tree.setSortColumn(nameColumn);
+		tree.setSortDirection(comparator.isAscending() ? SWT.UP : SWT.DOWN);
+		nameColumn.addSelectionListener(new TreeColumnsSorter(comparator, treeViewer));
+
+		TreeColumn methodColumn = new TreeColumn(tree, SWT.LEFT, CI_METHOD);
 		methodColumn.setText("Method");
 		TreeViewerColumn methodViewerColumn = new TreeViewerColumn(treeViewer, methodColumn);
 		EventsMethodEditingSupport methodEditing = new EventsMethodEditingSupport(treeViewer, t);
@@ -178,6 +228,44 @@ public class EventsComposite extends Composite
 			}
 		}
 		treeViewer.setExpandedElements(expandedRows.toArray());
+	}
+
+	private class TreeViewerNodesComparator extends ViewerComparator
+	{
+		private boolean ascending = true;
+
+		public boolean isAscending()
+		{
+			return ascending;
+		}
+
+		public void setAscending(boolean ascending)
+		{
+			this.ascending = ascending;
+		}
+
+		@Override
+		public final int compare(Viewer viewer, Object a, Object b)
+		{
+			int result = compareColumn(viewer, a, b, 0); //only for name column (first column).. for now
+			return ascending ? result : (-1) * result;
+		}
+
+		private int compareColumn(Viewer viewer, Object a, Object b, int columnNumber)
+		{
+			IBaseLabelProvider baseLabel = ((TreeViewer)viewer).getLabelProvider();
+			if (baseLabel instanceof ITableLabelProvider)
+			{
+				ITableLabelProvider tableProvider = (ITableLabelProvider)baseLabel;
+				String e1p = tableProvider.getColumnText(a, columnNumber);
+				String e2p = tableProvider.getColumnText(b, columnNumber);
+				if (e1p != null && e2p != null)
+				{
+					return getComparator().compare(e1p, e2p);
+				}
+			}
+			return 0;
+		}
 	}
 
 	public static class EventNode
