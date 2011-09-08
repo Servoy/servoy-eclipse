@@ -28,6 +28,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportMediaAction;
 
 /**
@@ -88,8 +89,8 @@ public class UserNodeFileDropTargetListener extends ViewerDropAdapter
 			{
 				// active the part that was dropped on
 				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(workbenchPart);
-
-				ImportMediaAction.addMediaFiles(project.getEditingSolution(), null, (String[])data);
+				ImportMediaAction.addMediaFiles(project.getEditingSolution(), null, (String[])data, workbenchPart instanceof SolutionExplorerView
+					? ((SolutionExplorerView)workbenchPart).getCurrentMediaFolder() : null);
 				return true;
 			}
 			catch (final Exception e)

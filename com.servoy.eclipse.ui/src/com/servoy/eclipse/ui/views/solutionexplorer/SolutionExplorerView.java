@@ -183,6 +183,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.CopyTableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.CutAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DebugMethodAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteI18NAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteMediaAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeletePersistAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteScriptAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteServerAction;
@@ -216,6 +217,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewVariableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenFormEditorAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenI18NAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenMediaAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenMediaFolderAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenNewFormWizardAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenRelationAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenScriptAction;
@@ -503,6 +505,20 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private TreeHandlingToggleAction treeHandlingToggleAction = null;
 
+	private String currentMediaFolder;
+
+	public void setCurrentMediaFolder(String currentMediaFolder)
+	{
+		this.currentMediaFolder = currentMediaFolder;
+		((SolutionExplorerListContentProvider)list.getContentProvider()).clearMediaCache();
+		refreshList(0);
+	}
+
+	public String getCurrentMediaFolder()
+	{
+		return currentMediaFolder;
+	}
+
 	class ViewLabelProvider extends ColumnLabelProvider
 	{
 		private Image null_image = null;
@@ -627,7 +643,13 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			IStructuredSelection sel = (IStructuredSelection)e.getSelection();
 			if (sel.size() == 1)
 			{
-				list.setInput(sel.getFirstElement());
+				Object selFirstEl = sel.getFirstElement();
+				if (selFirstEl instanceof SimpleUserNode && ((SimpleUserNode)selFirstEl).getType() == UserNodeType.MEDIA)
+				{
+					currentMediaFolder = null;
+					((SolutionExplorerListContentProvider)list.getContentProvider()).clearMediaCache();
+				}
+				list.setInput(selFirstEl);
 			}
 			else
 			{
@@ -896,15 +918,29 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	 */
 	public void refreshList()
 	{
+		refreshList(-1);
+	}
+
+	public void refreshList(final int selectIndex)
+	{
 		Runnable refresher = new Runnable()
 		{
 			public void run()
 			{
 				if (list != null && list.getControl() != null && !list.getControl().isDisposed())
 				{
-					ISelection sel = list.getSelection();
+					ISelection sel = null;
+					if (selectIndex < 0) // keep old selection
+					{
+						sel = list.getSelection();
+					}
 					list.refresh();
-					list.setSelection(sel);
+					if (selectIndex >= 0)
+					{
+						Object selectedEl = list.getElementAt(selectIndex);
+						if (selectedEl != null) sel = new StructuredSelection(selectedEl);
+					}
+					list.setSelection(sel, selectIndex >= 0);
 				}
 			}
 		};
@@ -2400,6 +2436,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction openTable = new OpenTableAction(this);
 		IAction openRelation = new OpenRelationAction();
 		IAction openMedia = new OpenMediaAction();
+		IAction openMediaFolder = new OpenMediaFolderAction(this);
 		IAction openI18N = new OpenI18NAction(this);
 
 		openAction.registerAction(UserNodeType.FORM_METHOD, openScript);
@@ -2414,10 +2451,12 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		openAction.registerAction(UserNodeType.VIEW, openTable);
 		openAction.registerAction(UserNodeType.RELATION, openRelation);
 		openAction.registerAction(UserNodeType.MEDIA_IMAGE, openMedia);
+		openAction.registerAction(UserNodeType.MEDIA_FOLDER, openMediaFolder);
+		openAction.registerAction(UserNodeType.MEDIA_PARENT_FOLDER, openMediaFolder);
 		openAction.registerAction(UserNodeType.I18N_FILE_ITEM, openI18N);
 
 		deleteActionInList = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE), "Delete"); //$NON-NLS-1$
-		IAction deleteMedia = new DeletePersistAction(UserNodeType.MEDIA_IMAGE, "Delete media"); //$NON-NLS-1$
+		IAction deleteMedia = new DeleteMediaAction("Delete media"); //$NON-NLS-1$
 		IAction deleteValueList = new DeletePersistAction(UserNodeType.VALUELIST_ITEM, "Delete value list"); //$NON-NLS-1$
 		IAction deleteTable = new DeleteTableAction(getSite().getShell());
 		IAction deleteStyle = new DeletePersistAction(UserNodeType.STYLE_ITEM, "Delete style"); //$NON-NLS-1$
@@ -2436,6 +2475,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		// deleteAction.registerAction(UserNodeType.GLOBAL_ITEM, deleteVariable);
 		deleteActionInList.registerAction(UserNodeType.VALUELIST_ITEM, deleteValueList);
 		deleteActionInList.registerAction(UserNodeType.MEDIA_IMAGE, deleteMedia);
+		deleteActionInList.registerAction(UserNodeType.MEDIA_FOLDER, deleteMedia);
 		deleteActionInList.registerAction(UserNodeType.TABLE, deleteTable); /// not UserNodeType.VIEW
 		deleteActionInList.registerAction(UserNodeType.STYLE_ITEM, deleteStyle);
 		deleteActionInList.registerAction(UserNodeType.TEMPLATE_ITEM, deleteTemplate);

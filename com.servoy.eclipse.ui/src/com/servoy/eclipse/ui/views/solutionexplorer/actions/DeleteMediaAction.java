@@ -1,0 +1,168 @@
+/*
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2010 Servoy BV
+
+ This program is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Affero General Public License as published by the Free
+ Software Foundation; either version 3 of the License, or (at your option) any
+ later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License along
+ with this program; if not, see http://www.gnu.org/licenses or write to the Free
+ Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+ */
+package com.servoy.eclipse.ui.views.solutionexplorer.actions;
+
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
+
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Pair;
+
+
+/**
+ * Action to delete media files and folders
+ * 
+ * @author gboros
+ */
+
+public class DeleteMediaAction extends Action implements ISelectionChangedListener
+{
+	private List<Pair<Solution, String>> selectedMediaFolders;
+	private List<IPersist> selectedMedias;
+
+	public DeleteMediaAction(String text)
+	{
+		setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE));
+		setText(text);
+		setToolTipText(text);
+	}
+
+	public void selectionChanged(SelectionChangedEvent event)
+	{
+		selectedMediaFolders = null;
+		selectedMedias = null;
+		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
+		boolean state = (sel.size() > 0);
+		if (state)
+		{
+			Iterator<SimpleUserNode> selit = sel.iterator();
+			List<Pair<Solution, String>> selectedFolders = new ArrayList<Pair<Solution, String>>();
+			List<IPersist> selectedPersists = new ArrayList<IPersist>();
+			while (state && selit.hasNext())
+			{
+				SimpleUserNode node = selit.next();
+				UserNodeType nodeType = node.getType();
+				state = (nodeType == UserNodeType.MEDIA_FOLDER) || (nodeType == UserNodeType.MEDIA_IMAGE);
+				if (state)
+				{
+					if (nodeType == UserNodeType.MEDIA_FOLDER) selectedFolders.add((Pair<Solution, String>)node.getRealObject());
+					else selectedPersists.add((IPersist)node.getRealObject());
+				}
+			}
+			if (state)
+			{
+				selectedMediaFolders = selectedFolders;
+				selectedMedias = selectedPersists;
+			}
+		}
+		setEnabled(state);
+	}
+
+	@Override
+	public void run()
+	{
+		if (((selectedMediaFolders != null && selectedMediaFolders.size() > 0) || (selectedMedias != null && selectedMedias.size() > 0)) &&
+			MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(), "Are you sure you want to delete?")) //$NON-NLS-1$
+		{
+			if (selectedMediaFolders != null)
+			{
+				for (Pair<Solution, String> mediaFolder : selectedMediaFolders)
+				{
+					Solution rootObject = mediaFolder.getLeft();
+
+					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(rootObject.getName());
+					EclipseRepository repository = (EclipseRepository)rootObject.getRepository();
+
+					Iterator<Media> mediaIte = rootObject.getMedias(false);
+					Media media;
+					ArrayList<IPersist> deletedMedias = new ArrayList<IPersist>();
+					while (mediaIte.hasNext())
+					{
+						media = mediaIte.next();
+						if (media.getName().startsWith(mediaFolder.getRight()))
+						{
+							try
+							{
+								IPersist editingNode = servoyProject.getEditingPersist(media.getUUID());
+								repository.deleteObject(editingNode);
+								deletedMedias.add(editingNode);
+								EditorUtil.closeEditor(media);
+							}
+							catch (RepositoryException e)
+							{
+								ServoyLog.logError("Could not delete media", e); //$NON-NLS-1$
+							}
+						}
+					}
+					try
+					{
+						servoyProject.saveEditingSolutionNodes(deletedMedias.toArray(new IPersist[0]), true);
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError("Could not save editing solution when deleting media folder", e); //$NON-NLS-1$
+					}
+				}
+			}
+			if (selectedMedias != null)
+			{
+				for (IPersist media : selectedMedias)
+				{
+					IRootObject rootObject = media.getRootObject();
+					if (rootObject instanceof Solution)
+					{
+						ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(rootObject.getName());
+						EclipseRepository repository = (EclipseRepository)rootObject.getRepository();
+
+						try
+						{
+							IPersist editingNode = servoyProject.getEditingPersist(media.getUUID());
+							repository.deleteObject(editingNode);
+							servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
+							EditorUtil.closeEditor(media);
+						}
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError("Could not delete media", e); //$NON-NLS-1$
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -103,7 +103,7 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 		}
 		try
 		{
-			addMediaFiles(solution, filterPath, fileNames);
+			addMediaFiles(solution, filterPath, fileNames, viewer.getCurrentMediaFolder());
 		}
 		catch (RepositoryException e)
 		{
@@ -125,22 +125,23 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 	 * @throws IOException
 	 * @throws RepositoryException
 	 */
-	public static void addMediaFiles(Solution editingSolution, String directory, String[] fileNames) throws IOException, RepositoryException
+	public static void addMediaFiles(Solution editingSolution, String directory, String[] fileNames, String targetParentPath) throws IOException,
+		RepositoryException
 	{
 		List<IPersist> nodesToSave = new ArrayList<IPersist>(fileNames.length + 1);
 		EclipseRepository repository = (EclipseRepository)editingSolution.getRepository();
 		for (String fileName : fileNames)
 		{
 			File file = directory == null ? new File(fileName) : new File(directory, fileName);
-			addFiles(nodesToSave, repository, editingSolution, file);
+			addFiles(nodesToSave, repository, editingSolution, file, targetParentPath);
 		}
 		nodesToSave.add(editingSolution);
 		ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(editingSolution.getName()).saveEditingSolutionNodes(
 			nodesToSave.toArray(new IPersist[nodesToSave.size()]), false);
 	}
 
-	private static void addFiles(List<IPersist> nodesToSave, EclipseRepository repository, Solution editingSolution, File file) throws IOException,
-		RepositoryException
+	private static void addFiles(List<IPersist> nodesToSave, EclipseRepository repository, Solution editingSolution, File file, String targetParentPath)
+		throws IOException, RepositoryException
 	{
 		if (file == null || !file.exists())
 		{
@@ -152,9 +153,10 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 			final String[] fileNames = file.list();
 			if (fileNames != null)
 			{
+				String newParentPath = targetParentPath == null ? file.getName() + '/' : targetParentPath + file.getName() + '/';
 				for (String fileName : fileNames)
 				{
-					addFiles(nodesToSave, repository, editingSolution, new File(file, fileName));
+					addFiles(nodesToSave, repository, editingSolution, new File(file, fileName), newParentPath);
 				}
 			}
 			return;
@@ -172,7 +174,7 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 		{
 			repository.getContentType(file.getName());
 		}
-		String name = Utils.stringReplace(file.getName(), " ", "_");
+		String name = Utils.stringReplace(targetParentPath != null ? targetParentPath + file.getName() : file.getName(), " ", "_");
 		Media media = editingSolution.getMedia(name);
 		if (media == null)
 		{

@@ -16,8 +16,6 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
-import java.io.File;
-
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -85,21 +83,10 @@ public class ImportMediaFolderAction extends ImportMediaAction implements ISelec
 		if (solution == null) return;
 
 		DirectoryDialog dd = new DirectoryDialog(viewer.getSite().getShell(), SWT.OPEN | SWT.MULTI);
-		String folderName = dd.open();
+		final String folderName = dd.open();
 
 		if (folderName != null && folderName.equals("") == false)
 		{
-			File folder = new File(folderName);
-
-			final String[] fileNames = folder.list();
-
-			final String filterPath = folderName;
-
-			if (fileNames == null || fileNames.length == 0)
-			{
-				return;
-			}
-
 			Job job = new WorkspaceJob("Import Media Folder") //$NON-NLS-1$
 			{
 
@@ -109,7 +96,7 @@ public class ImportMediaFolderAction extends ImportMediaAction implements ISelec
 					monitor.beginTask("Importing Media Folder", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
 					try
 					{
-						addMediaFiles(solution, filterPath, fileNames);
+						addMediaFiles(solution, null, new String[] { folderName }, viewer.getCurrentMediaFolder());
 					}
 					catch (RepositoryException e)
 					{

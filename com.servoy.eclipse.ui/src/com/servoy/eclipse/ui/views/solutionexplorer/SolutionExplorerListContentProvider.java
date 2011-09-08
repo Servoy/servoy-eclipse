@@ -114,6 +114,7 @@ import com.servoy.j2db.ui.IScriptRenderMethods;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ITagResolver;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Text;
@@ -191,6 +192,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	public static final MethodComparator methodComparator = new MethodComparator();
 
+	private static final MediaComparator mediaComparator = new MediaComparator();
+
 	static class FieldComparator implements Comparator<Field>
 	{
 		private FieldComparator()
@@ -212,6 +215,39 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		public int compare(Method o1, Method o2)
 		{
 			return o1.getName().compareToIgnoreCase(o2.getName());
+		}
+	}
+
+	static class MediaComparator implements Comparator<SimpleUserNode>
+	{
+		private MediaComparator()
+		{
+		}
+
+		public int compare(SimpleUserNode o1, SimpleUserNode o2)
+		{
+			if (o1.getType() == o2.getType())
+			{
+				return o1.getName().compareTo(o2.getName());
+			}
+			else if (o1.getType() == UserNodeType.MEDIA_PARENT_FOLDER)
+			{
+				return -1;
+			}
+			else if (o2.getType() == UserNodeType.MEDIA_PARENT_FOLDER)
+			{
+				return 1;
+			}
+			else if (o1.getType() == UserNodeType.MEDIA_FOLDER)
+			{
+				return -1;
+			}
+			else if (o2.getType() == UserNodeType.MEDIA_FOLDER)
+			{
+				return 1;
+			}
+
+			return 0;
 		}
 	}
 
@@ -329,7 +365,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			key = key + cls.getName();
 		}
-		else if (type == UserNodeType.CURRENT_FORM || type == UserNodeType.FORM_CONTROLLER)
+		else if (type == UserNodeType.CURRENT_FORM || type == UserNodeType.FORM_CONTROLLER || type == UserNodeType.MEDIA)
 		{
 			key = type;
 		}
@@ -1099,15 +1135,41 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
 		Solution s = (Solution)un.getRealObject();
 		List<IPersist> medias = getPersists(s, UserNodeType.MEDIA);
+		String currentMediaFolder = view.getCurrentMediaFolder();
+		if (currentMediaFolder != null)
+		{
+			int parentLastIdx = currentMediaFolder.substring(0, currentMediaFolder.length() - 2).lastIndexOf('/');
+			String parentMediaFolder = parentLastIdx == -1 ? null : currentMediaFolder.substring(0, parentLastIdx + 1);
+			dlm.add(new UserNode("..", UserNodeType.MEDIA_PARENT_FOLDER, new Pair<Solution, String>(s, parentMediaFolder),
+				uiActivator.loadImageFromBundle("media_folder.gif")));
+		}
 		for (IPersist persist : medias)
 		{
 			Media media = (Media)persist;
-			String infoText = "\"media:///" + media.getName() + "\"";
-			SimpleUserNode node = new UserNode(getDisplayName(media, s), UserNodeType.MEDIA_IMAGE, new SimpleDeveloperFeedback(infoText, infoText, infoText),
-				media, uiActivator.loadImageFromBundle("image.gif"));
-			dlm.add(node);
+			String mediaName = media.getName();
+			if (currentMediaFolder == null || mediaName.startsWith(currentMediaFolder))
+			{
+				SimpleUserNode node;
+				String mediaPath = currentMediaFolder == null ? mediaName : mediaName.substring(currentMediaFolder.length());
+				int pathSepIdx = mediaPath.indexOf('/');
+				if (pathSepIdx != -1) // it is a directory
+				{
+					String dirName = mediaPath.substring(0, pathSepIdx);
+					node = new UserNode(dirName, UserNodeType.MEDIA_FOLDER, new Pair<Solution, String>(s, ((currentMediaFolder == null ? ""
+						: currentMediaFolder) + dirName + '/')), uiActivator.loadImageFromBundle("media_folder.gif"));
+				}
+				else
+				{
+					String infoText = "\"media:///" + media.getName() + "\"";
+					node = new UserNode(mediaPath, UserNodeType.MEDIA_IMAGE, new SimpleDeveloperFeedback(infoText, infoText, infoText), media,
+						uiActivator.loadImageFromBundle("image.gif"));
+				}
+				if (dlm.indexOf(node) == -1) dlm.add(node);
+			}
 		}
-		return dlm.toArray(new SimpleUserNode[dlm.size()]);
+		SimpleUserNode[] mediaA = dlm.toArray(new SimpleUserNode[dlm.size()]);
+		Arrays.sort(mediaA, mediaComparator);
+		return mediaA;
 	}
 
 	private Object[] createRelation(Relation r, boolean calcMode)
@@ -1421,6 +1483,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		leafList.clear();
 	}
 
+	public void clearMediaCache()
+	{
+		leafList.remove(UserNodeType.MEDIA);
+	}
+
 	public void refreshContent()
 	{
 		view.refreshList();
@@ -1483,6 +1550,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							}
 						}
 					}
+				}
+				if (persist instanceof Media)
+				{
+					clearMediaCache();
 				}
 				persist = persist.getParent();
 			}
