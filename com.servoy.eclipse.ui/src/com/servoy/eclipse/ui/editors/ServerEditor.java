@@ -71,6 +71,10 @@ import com.servoy.j2db.util.Settings;
 
 public class ServerEditor extends EditorPart
 {
+	public ServerEditor()
+	{
+	}
+
 	private DataBindingContext m_bindingContext;
 	private boolean modified = false;
 	private ImmutableObjectObservable<ServerConfig> serverConfigObservable;
@@ -84,6 +88,7 @@ public class ServerEditor extends EditorPart
 	private Text maxPreparedStatementsIdleField;
 	private Text maxIdleField;
 	private Text maxActiveField;
+	private Text idleTimoutField;
 	private Combo dataModel_cloneFromField;
 	private Combo schemaField;
 	private Combo catalogField;
@@ -172,6 +177,12 @@ public class ServerEditor extends EditorPart
 		maxIdleLabel.setText("Max Connections Idle");
 
 		maxIdleField = new Text(comp, SWT.BORDER);
+
+		Label idleTimoutLabel;
+		idleTimoutLabel = new Label(comp, SWT.RIGHT);
+		idleTimoutLabel.setText("Connections Idle Timeout");
+
+		idleTimoutField = new Text(comp, SWT.BORDER);
 
 		Label maxPreparedStatementsIdleLabel;
 		maxPreparedStatementsIdleLabel = new Label(comp, SWT.RIGHT);
@@ -297,20 +308,21 @@ public class ServerEditor extends EditorPart
 					190, GroupLayout.PREFERRED_SIZE).add(enabledLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(logServerLabel,
 					GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(maxPreparedStatementsIdleLabel, GroupLayout.PREFERRED_SIZE, 190,
 					GroupLayout.PREFERRED_SIZE).add(maxIdleLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(maxActiveLabel,
-					GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(schemaLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(
-					catalogLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(driverLabel, GroupLayout.PREFERRED_SIZE, 190,
-					GroupLayout.PREFERRED_SIZE).add(urlLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(passwordLabel,
-					GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(userNameLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(
-					dataModel_cloneFromLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(skipSysTablesLabel, GroupLayout.PREFERRED_SIZE,
-					190, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+					GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(idleTimoutLabel, GroupLayout.PREFERRED_SIZE, 190,
+					GroupLayout.PREFERRED_SIZE).add(schemaLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(catalogLabel,
+					GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(driverLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(
+					urlLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(passwordLabel, GroupLayout.PREFERRED_SIZE, 190,
+					GroupLayout.PREFERRED_SIZE).add(userNameLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(dataModel_cloneFromLabel,
+					GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(skipSysTablesLabel, GroupLayout.PREFERRED_SIZE, 190,
+					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(serverNameField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(userNameField,
 					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(passwordField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(urlField,
 					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(driverField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(catalogField,
 					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(schemaField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(maxActiveField,
-					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(maxIdleField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(
-					maxPreparedStatementsIdleField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(validationTypeField, GroupLayout.PREFERRED_SIZE, 161,
-					Short.MAX_VALUE).add(validationQueryField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(enabledButton, GroupLayout.PREFERRED_SIZE,
-					161, Short.MAX_VALUE).add(
+					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(maxIdleField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(idleTimoutField,
+					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(maxPreparedStatementsIdleField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(
+					validationTypeField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(validationQueryField, GroupLayout.PREFERRED_SIZE, 161,
+					Short.MAX_VALUE).add(enabledButton, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(
 					groupLayout.createSequentialGroup().add(logServerButton, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(createLogTableButton,
 						GroupLayout.PREFERRED_SIZE, 161, GroupLayout.PREFERRED_SIZE)).add(dataModel_cloneFromField, GroupLayout.PREFERRED_SIZE, 161,
 					Short.MAX_VALUE).add(skipSysTablesButton, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE)).addContainerGap()));
@@ -342,6 +354,9 @@ public class ServerEditor extends EditorPart
 				LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(maxIdleField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(maxIdleLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10,
+				10, 10).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(idleTimoutField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+					GroupLayout.PREFERRED_SIZE).add(idleTimoutLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10,
 				10, 10).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(maxPreparedStatementsIdleField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(maxPreparedStatementsIdleLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
@@ -402,8 +417,8 @@ public class ServerEditor extends EditorPart
 
 		serverConfigObservable = new ImmutableObjectObservable<ServerConfig>(
 			serverConfig,
-			new Class[] { String.class, String.class, String.class, String.class, Map.class, String.class, String.class, String.class, int.class, int.class, int.class, int.class, String.class, String.class, boolean.class, boolean.class, String.class },
-			new String[] { "serverName", "userName", "password", "serverUrl", "connectionProperties", "driver", "catalog", "schema", "maxActive", "maxIdle", "maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", "skipSysTables", "dialectClass" });
+			new Class[] { String.class, String.class, String.class, String.class, Map.class, String.class, String.class, String.class, int.class, int.class, int.class, int.class, String.class, String.class, boolean.class, boolean.class, int.class, String.class },
+			new String[] { "serverName", "userName", "password", "serverUrl", "connectionProperties", "driver", "catalog", "schema", "maxActive", "maxIdle", "maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", "skipSysTables", "idleTimeout", "dialectClass" });
 
 		serverConfigObservable.setPropertyValue("serverName", serverInput.getName());
 		if (serverInput.getIsNew()) flagModified();
@@ -503,6 +518,7 @@ public class ServerEditor extends EditorPart
 
 		maxActiveField.addVerifyListener(DocumentValidatorVerifyListener.NUMBER_VERIFIER);
 		maxIdleField.addVerifyListener(DocumentValidatorVerifyListener.NUMBER_VERIFIER);
+		idleTimoutField.addVerifyListener(DocumentValidatorVerifyListener.NUMBER_VERIFIER);
 		maxPreparedStatementsIdleField.addVerifyListener(DocumentValidatorVerifyListener.NUMBER_VERIFIER);
 
 		validationTypeField.removeAll();
@@ -602,12 +618,12 @@ public class ServerEditor extends EditorPart
 			}
 		};
 
-		//		IObservableValue getMaxActiveObserveValue = PojoObservables.observeValue(serverConfig, "maxActive");
 		IObservableValue getMaxActiveObserveValue = serverConfigObservable.observePropertyValue("maxActive");
 		IObservableValue maxActiveTextObserveWidget = SWTObservables.observeText(maxActiveField, SWT.Modify);
-//		IObservableValue getMaxIdleObserveValue = PojoObservables.observeValue(serverConfig, "maxIdle");
 		IObservableValue getMaxIdleObserveValue = serverConfigObservable.observePropertyValue("maxIdle");
 		IObservableValue maxIdleTextObserveWidget = SWTObservables.observeText(maxIdleField, SWT.Modify);
+		IObservableValue getIdleTimeoutObserveValue = serverConfigObservable.observePropertyValue("idleTimeout");
+		IObservableValue idleTimeoutTextObserveWidget = SWTObservables.observeText(idleTimoutField, SWT.Modify);
 		IObservableValue getMaxPreparedStatementsIdleObserveValue = serverConfigObservable.observePropertyValue("maxPreparedStatementsIdle");
 		IObservableValue maxPreparedStatementsIdleTextObserveWidget = SWTObservables.observeText(maxPreparedStatementsIdleField, SWT.Modify);
 		IObservableValue getValidationTypeObserveValue = new AbstractObservableValue()
@@ -663,6 +679,7 @@ public class ServerEditor extends EditorPart
 		m_bindingContext.bindValue(catalogSelectionObserveWidget, getCatalogObserveValue, null, null);
 		m_bindingContext.bindValue(schemaSelectionObserveWidget, getSchemaObserveValue, null, null);
 		m_bindingContext.bindValue(maxActiveTextObserveWidget, getMaxActiveObserveValue, null, null);
+		m_bindingContext.bindValue(idleTimeoutTextObserveWidget, getIdleTimeoutObserveValue, null, null);
 		m_bindingContext.bindValue(maxIdleTextObserveWidget, getMaxIdleObserveValue, null, null);
 		m_bindingContext.bindValue(maxPreparedStatementsIdleTextObserveWidget, getMaxPreparedStatementsIdleObserveValue, null, null);
 		m_bindingContext.bindValue(validationTypeSelectionObserveWidget, getValidationTypeObserveValue, null, null);
@@ -769,5 +786,4 @@ public class ServerEditor extends EditorPart
 			}
 		}
 	}
-
 }

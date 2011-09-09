@@ -197,7 +197,7 @@ public class NewPostgresDbAction extends Action
 							final ServerConfig serverConfig = new ServerConfig(configName, origConfig.getUserName(), origConfig.getPassword(), serverUrl,
 								origConfig.getConnectionProperties(), origConfig.getDriver(), origConfig.getCatalog(), origConfig.getSchema(),
 								origConfig.getMaxActive(), origConfig.getMaxIdle(), origConfig.getMaxPreparedStatementsIdle(),
-								origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false, origConfig.getDialectClass());
+								origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false, -1, origConfig.getDialectClass());
 							Display.getDefault().asyncExec(new Runnable()
 							{
 								public void run()
