@@ -1666,6 +1666,18 @@ public class WorkspaceUserManager implements IUserManager
 		return userGroups.containsKey(groupName) ? getId(groupName) : -1;
 	}
 
+	public String getGroupNameById(String clientId, int groupId)
+	{
+		for (GroupSecurityInfo gi : groupInfos)
+		{
+			if ((getId(gi.groupName)) == groupId)
+			{
+				return gi.groupName;
+			}
+		}
+		return null;
+	}
+
 	public IDataSet getGroups(String clientId)
 	{
 		List<Object[]> groups = new ArrayList<Object[]>();
