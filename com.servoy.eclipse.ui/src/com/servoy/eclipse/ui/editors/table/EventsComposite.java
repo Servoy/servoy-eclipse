@@ -253,6 +253,11 @@ public class EventsComposite extends Composite
 
 		private int compareColumn(Viewer viewer, Object a, Object b, int columnNumber)
 		{
+			if (a instanceof EventNode && b instanceof EventNode)
+			{
+				if (!((EventNode)a).isSolution() && !((EventNode)b).isSolution()) return 0;
+			}
+
 			IBaseLabelProvider baseLabel = ((TreeViewer)viewer).getLabelProvider();
 			if (baseLabel instanceof ITableLabelProvider)
 			{
