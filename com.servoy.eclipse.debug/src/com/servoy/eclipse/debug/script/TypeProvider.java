@@ -218,7 +218,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		}
 		else if (typeName.equals("byte"))
 		{
-			// special supprot for byte type (mostly used in Array<byte>)
+			// special support for byte type (mostly used in Array<byte>)
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVASCRIPT);

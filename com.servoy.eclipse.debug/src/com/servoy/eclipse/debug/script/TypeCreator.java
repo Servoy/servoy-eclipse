@@ -251,6 +251,7 @@ public abstract class TypeCreator
 		if (BASE_TYPES.contains(typeName) || typeName.startsWith("Array<")) return null;
 		if (!initialized) initalize();
 		String realTypeName = typeName;
+		if (realTypeName.equals("JSFoundset")) realTypeName = FoundSet.JS_FOUNDSET;
 		Type type = createType(context, realTypeName, realTypeName);
 		if (type != null)
 		{
