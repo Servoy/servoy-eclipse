@@ -35,6 +35,7 @@ import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.ClientState;
 import com.servoy.j2db.IForm;
 import com.servoy.j2db.documentation.ServoyDocumented;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -74,7 +75,12 @@ public class JSDeveloperSolutionModel
 			List<IPersist> allObjectsAsList = solutionCopy.getAllObjectsAsList();
 			for (IPersist persist : allObjectsAsList)
 			{
+				checkParent(persist);
 				SolutionSerializer.writePersist(persist, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
+				if (persist instanceof AbstractBase)
+				{
+					((AbstractBase)persist).setParent(solutionCopy);
+				}
 			}
 			eclipseRepository.clearForeignElementsIds();
 		}
@@ -110,14 +116,41 @@ public class JSDeveloperSolutionModel
 				Form frm = solutionCopy.getForm(name);
 				if (frm == null) throw new IllegalArgumentException("JSForm is not a solution model created/altered form"); //$NON-NLS-1$
 
+				checkParent(frm);
+
 				EclipseRepository eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
 				eclipseRepository.loadForeignElementsIDs(frm);
 				SolutionSerializer.writePersist(frm, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
 				eclipseRepository.clearForeignElementsIds();
+
+				frm.setParent(solutionCopy);
 			}
 			catch (RepositoryException e)
 			{
 				Debug.error(e);
+			}
+		}
+	}
+
+	/**
+	 * @param persist
+	 */
+	private void checkParent(IPersist persist)
+	{
+		IPersist realPersist = ServoyModelFinder.getServoyModel().getActiveProject().getEditingSolution().getChild(persist.getUUID());
+		if (realPersist == null)
+		{
+			// the changed form could be in a module.
+			Solution[] modules = ServoyModelFinder.getServoyModel().getActiveProject().getModules();
+			for (Solution module : modules)
+			{
+				realPersist = module.getChild(persist.getUUID());
+				if (realPersist instanceof AbstractBase)
+				{
+					// it is found in a module, now rebase the form to that parent so that it is saved in the right location
+					((AbstractBase)persist).setParent(realPersist.getParent());
+					break;
+				}
 			}
 		}
 	}
