@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -88,8 +89,6 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	private ITableListener tableListener;
 
 	private IServerListener serverListener;
-
-	private final Table templateTable = null;
 
 	public static int ColumnPageIndex = 0;
 
@@ -589,7 +588,13 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	public void flagModified()
 	{
 		isModified = true;
-		firePropertyChange(IEditorPart.PROP_DIRTY);
+		Display.getDefault().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				firePropertyChange(IEditorPart.PROP_DIRTY);
+			}
+		});
 	}
 
 	@Override
