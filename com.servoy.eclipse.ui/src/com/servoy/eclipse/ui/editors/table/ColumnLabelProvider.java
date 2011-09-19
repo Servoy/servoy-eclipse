@@ -23,12 +23,15 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.util.Utils;
 
 public class ColumnLabelProvider extends LabelProvider implements ITableLabelProvider, ITableFontProvider, ITableColorProvider
 {
@@ -39,6 +42,7 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 
 	private Color color = null;
 	private ColumnComposite columnComposite;
+	private final RGB gray = new RGB(127, 127, 127);
 
 	public ColumnLabelProvider(Color color, ColumnComposite columnComposite)
 	{
@@ -55,7 +59,8 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 
 	public Image getColumnImage(Object element, int columnIndex)
 	{
-		if (columnIndex == ColumnComposite.CI_ALLOW_NULL)
+		int delta = columnComposite.isDataProviderIdDisplayed() ? 1 : 0;
+		if (columnIndex == ColumnComposite.CI_ALLOW_NULL + delta)
 		{
 			if (((Column)element).getAllowNull())
 			{
@@ -66,43 +71,51 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 				return FALSE_IMAGE;
 			}
 		}
-		else if (columnComposite != null && columnIndex == columnComposite.getDeleteColumnIndex())
+		else if (columnComposite != null)
 		{
-			return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+			if (columnIndex == ColumnComposite.CI_DELETE + delta)
+			{
+				return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+			}
 		}
-		else
-		{
-			return null;
-		}
-
+		return null;
 	}
 
 	public String getColumnText(Object element, int columnIndex)
 	{
 		Column info = (Column)element;
-		if (columnComposite != null && columnIndex == columnComposite.getDeleteColumnIndex())
+		int delta = columnComposite.isDataProviderIdDisplayed() ? 1 : 0;
+		if (columnIndex == ColumnComposite.CI_NAME)
+		{
+			return columnComposite.isDataProviderIdDisplayed() ? info.getSQLName() : info.getName();
+		}
+		else if ((columnIndex == ColumnComposite.CI_DELETE + delta) || (columnIndex == ColumnComposite.CI_ALLOW_NULL + delta))
 		{
 			return "";
 		}
-		switch (columnIndex)
+		else if (columnIndex == ColumnComposite.CI_TYPE + delta)
 		{
-			case ColumnComposite.CI_NAME :
-				return info.getName();
-			case ColumnComposite.CI_TYPE :
-				return info.getTypeAsString();
-			case ColumnComposite.CI_LENGTH :
-				return info.getScale() > 0 ? info.getLength() + "," + info.getScale() : Integer.toString(info.getLength());
-			case ColumnComposite.CI_ROW_IDENT :
-				return Column.getFlagsString(info.getRowIdentType());
-			case ColumnComposite.CI_ALLOW_NULL :
-				return "";
-				//return (info.getAllowNull() ? "yes" : "no");
-			case ColumnComposite.CI_SEQUENCE_TYPE :
-				return ColumnInfo.getSeqDisplayTypeString(info.getSequenceType());
-			case ColumnComposite.CI_DATAPROVIDER_ID :
-				return info.getDataProviderID();
-			default :
-				return columnIndex + ": " + element;
+			return info.getTypeAsString();
+		}
+		else if (columnIndex == ColumnComposite.CI_LENGTH + delta)
+		{
+			return info.getScale() > 0 ? info.getLength() + "," + info.getScale() : Integer.toString(info.getLength());
+		}
+		else if (columnIndex == ColumnComposite.CI_ROW_IDENT + delta)
+		{
+			return Column.getFlagsString(info.getRowIdentType());
+		}
+		else if (columnIndex == ColumnComposite.CI_SEQUENCE_TYPE + delta)
+		{
+			return ColumnInfo.getSeqDisplayTypeString(info.getSequenceType());
+		}
+		else if (columnIndex == ColumnComposite.CI_DATAPROVIDER_ID)
+		{
+			return info.getDataProviderID();
+		}
+		else
+		{
+			return columnIndex + ": " + element;
 		}
 	}
 
@@ -129,6 +142,14 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 
 	public Color getForeground(Object element, int columnIndex)
 	{
+		if (columnIndex == ColumnComposite.CI_DATAPROVIDER_ID && columnComposite.isDataProviderIdDisplayed())
+		{
+			Column info = (Column)element;
+			if (Utils.equalObjects(info.getName(), info.getDataProviderID()))
+			{
+				return ColorResource.INSTANCE.getColor(gray);
+			}
+		}
 		return null;
 	}
 }

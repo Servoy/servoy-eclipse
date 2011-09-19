@@ -76,6 +76,7 @@ import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.util.Utils;
 
 public class ColumnComposite extends Composite
 {
@@ -87,6 +88,7 @@ public class ColumnComposite extends Composite
 	private final ColumnValidationComposite columnValidationComposite;
 	private final ColumnConversionComposite columnConversionComposite;
 	private final Composite tableContainer;
+	private final Button displayDataProviderID;
 
 	private CopyColumnNameAction copyColumnNameAction;
 
@@ -200,7 +202,7 @@ public class ColumnComposite extends Composite
 				{
 					tableViewer.getTable().deselectAll();
 				}
-				else if (item != null && item.getBounds(getDeleteColumnIndex()).contains(pt))
+				else if (item != null && item.getBounds(CI_DELETE).contains(pt))
 				{
 					if (t.getTableType() != ITable.TABLE)
 					{
@@ -294,32 +296,14 @@ public class ColumnComposite extends Composite
 			}
 		});
 
-		final Button displayDataProviderID = new Button(container, SWT.CHECK);
+		displayDataProviderID = new Button(container, SWT.CHECK);
 		displayDataProviderID.setText("Display DataProviderID");
 		displayDataProviderID.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				TableColumnLayout layout = getTableLayout();
-				if (displayDataProviderID.getSelection())
-				{
-					final TableColumn dataProviderIDColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_DATAPROVIDER_ID);
-					dataProviderIDColumn.setText("DataProviderID");
-					TableViewerColumn dataProviderIDViewerColumn = new TableViewerColumn(tableViewer, dataProviderIDColumn);
-					dataProviderIDViewerColumn.setEditingSupport(new ColumnNameEditingSupport(tableViewer, false));
-					setDeleteColumnIndex(7);
-					layout.setColumnData(dataProviderIDColumn, new ColumnWeightData(20, 50, true));
-				}
-				else
-				{
-					tableViewer.getTable().getColumn(CI_DATAPROVIDER_ID).dispose();
-					setDeleteColumnIndex(6);
-				}
-				tableContainer.setLayout(layout);
-				tableViewer.setLabelProvider(tableViewer.getLabelProvider());
-				tableViewer.refresh();
-				tableContainer.layout(true);
+				showDataProviderColumn();
 			}
 		});
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
@@ -352,6 +336,47 @@ public class ColumnComposite extends Composite
 		initDataBindings(t);
 
 		myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+		if (hasDataProviderSet(t))
+		{
+			displayDataProviderID.setSelection(true);
+			showDataProviderColumn();
+		}
+	}
+
+	private boolean hasDataProviderSet(Table table)
+	{
+		for (Column c : table.getColumns())
+		{
+			if (!Utils.equalObjects(c.getName(), c.getDataProviderID()))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void showDataProviderColumn()
+	{
+		TableColumnLayout layout = getTableLayout();
+		if (displayDataProviderID.getSelection())
+		{
+			final TableColumn dataProviderIDColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_DATAPROVIDER_ID);
+			dataProviderIDColumn.setText("DataProviderID");
+			TableViewerColumn dataProviderIDViewerColumn = new TableViewerColumn(tableViewer, dataProviderIDColumn);
+			dataProviderIDViewerColumn.setEditingSupport(new ColumnNameEditingSupport(tableViewer, false));
+			layout.setColumnData(dataProviderIDColumn, new ColumnWeightData(20, 50, true));
+			tableViewer.getTable().getColumn(CI_NAME).setText("SQL Name");
+		}
+		else
+		{
+			tableViewer.getTable().getColumn(CI_DATAPROVIDER_ID).dispose();
+			tableViewer.getTable().getColumn(CI_NAME).setText("Name");
+		}
+		tableContainer.setLayout(layout);
+		tableViewer.setLabelProvider(tableViewer.getLabelProvider());
+		tableViewer.refresh();
+		tableContainer.layout(true);
 	}
 
 	public void refreshSelection()
@@ -378,8 +403,8 @@ public class ColumnComposite extends Composite
 	static final int CI_ROW_IDENT = 3;
 	static final int CI_ALLOW_NULL = 4;
 	static final int CI_SEQUENCE_TYPE = 5;
-	static final int CI_DATAPROVIDER_ID = 6;
-	private int deleteColumnIndex = 6;
+	static final int CI_DELETE = 6;
+	static final int CI_DATAPROVIDER_ID = 1;
 
 	private ColumnNameEditingSupport nameEditor = null;
 	private TableColumn nameColumn;
@@ -432,7 +457,7 @@ public class ColumnComposite extends Composite
 		ColumnSeqTypeEditingSupport editingSupport = new ColumnSeqTypeEditingSupport(tableViewer, table);
 		seqTypeViewerColumn.setEditingSupport(editingSupport);
 
-		delColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, getDeleteColumnIndex());
+		delColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_DELETE);
 		delColumn.setToolTipText("Delete column");
 
 		editingSupport.addChangeListener(new IChangeListener()
@@ -663,13 +688,8 @@ public class ColumnComposite extends Composite
 		}
 	}
 
-	private void setDeleteColumnIndex(int deleteColumnIndex)
+	public boolean isDataProviderIdDisplayed()
 	{
-		this.deleteColumnIndex = deleteColumnIndex;
-	}
-
-	public int getDeleteColumnIndex()
-	{
-		return deleteColumnIndex;
+		return displayDataProviderID.getSelection();
 	}
 }
