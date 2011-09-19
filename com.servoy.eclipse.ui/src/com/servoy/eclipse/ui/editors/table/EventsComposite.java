@@ -277,7 +277,6 @@ public class EventsComposite extends Composite
 	{
 		public static enum EventNodeType
 		{
-			onRecordCreate(StaticContentSpecLoader.PROPERTY_ONCREATEMETHODID),
 			onRecordInsert(StaticContentSpecLoader.PROPERTY_ONINSERTMETHODID),
 			onRecordUpdate(StaticContentSpecLoader.PROPERTY_ONUPDATEMETHODID),
 			onRecordDelete(StaticContentSpecLoader.PROPERTY_ONDELETEMETHODID),
@@ -285,10 +284,11 @@ public class EventsComposite extends Composite
 			afterRecordInsert(StaticContentSpecLoader.PROPERTY_ONAFTERINSERTMETHODID),
 			afterRecordUpdate(StaticContentSpecLoader.PROPERTY_ONAFTERUPDATEMETHODID),
 			afterRecordDelete(StaticContentSpecLoader.PROPERTY_ONAFTERDELETEMETHODID),
-			onFoundsetFind(StaticContentSpecLoader.PROPERTY_ONFINDMETHODID),
-			onFoundsetAfterFind(StaticContentSpecLoader.PROPERTY_ONAFTERFINDMETHODID),
-			onFoundsetSearch(StaticContentSpecLoader.PROPERTY_ONSEARCHMETHODID),
-			onFoundsetAfterSearch(StaticContentSpecLoader.PROPERTY_ONAFTERSEARCHMETHODID);
+			onFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONCREATEMETHODID),
+			onFoundSetFind(StaticContentSpecLoader.PROPERTY_ONFINDMETHODID),
+			onFoundSetAfterFind(StaticContentSpecLoader.PROPERTY_ONAFTERFINDMETHODID),
+			onFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONSEARCHMETHODID),
+			onFoundSetAfterSearch(StaticContentSpecLoader.PROPERTY_ONAFTERSEARCHMETHODID);
 
 			private final TypedProperty<Integer> property;
 
