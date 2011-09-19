@@ -31,6 +31,7 @@ import org.eclipse.swt.graphics.Image;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFactory;
@@ -418,7 +419,8 @@ public class ElementUtil
 	{
 		if (field.getValuelistID() > 0)
 		{
-			ValueList valuelist = application.getFlattenedSolution().getValueList(field.getValuelistID());
+			FlattenedSolution flattenedSolution = application.getFlattenedSolution();
+			ValueList valuelist = flattenedSolution != null ? flattenedSolution.getValueList(field.getValuelistID()) : null;
 			if (valuelist == null) return true;
 
 			if (!(valuelist.getValueListType() == ValueList.DATABASE_VALUES && valuelist.getDatabaseValuesType() == ValueList.RELATED_VALUES) &&
