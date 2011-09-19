@@ -28,6 +28,7 @@ import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -103,6 +104,13 @@ public class EventsComposite extends Composite
 		//
 		initDataBindings(t, te);
 		myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+		// expand main solution node
+		Object[] treeElements = ((ITreeContentProvider)treeViewer.getContentProvider()).getElements(treeViewer.getInput());
+		if (treeElements != null && treeElements.length > 0)
+		{
+			treeViewer.setExpandedElements(new Object[] { treeElements[0] });
+		}
 	}
 
 	@Override
@@ -284,10 +292,10 @@ public class EventsComposite extends Composite
 			afterRecordUpdate(StaticContentSpecLoader.PROPERTY_ONAFTERUPDATEMETHODID),
 			afterRecordDelete(StaticContentSpecLoader.PROPERTY_ONAFTERDELETEMETHODID),
 			onFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONCREATEMETHODID),
-			afterFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONAFTERCREATEMETHODID),
 			onFoundSetFind(StaticContentSpecLoader.PROPERTY_ONFINDMETHODID),
-			afterFoundSetFind(StaticContentSpecLoader.PROPERTY_ONAFTERFINDMETHODID),
+			afterFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONAFTERCREATEMETHODID),
 			onFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONSEARCHMETHODID),
+			afterFoundSetFind(StaticContentSpecLoader.PROPERTY_ONAFTERFINDMETHODID),
 			afterFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONAFTERSEARCHMETHODID);
 
 			private final TypedProperty<Integer> property;
