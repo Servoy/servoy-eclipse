@@ -280,15 +280,15 @@ public class EventsComposite extends Composite
 			onRecordInsert(StaticContentSpecLoader.PROPERTY_ONINSERTMETHODID),
 			onRecordUpdate(StaticContentSpecLoader.PROPERTY_ONUPDATEMETHODID),
 			onRecordDelete(StaticContentSpecLoader.PROPERTY_ONDELETEMETHODID),
-			afterRecordCreate(StaticContentSpecLoader.PROPERTY_ONAFTERCREATEMETHODID),
 			afterRecordInsert(StaticContentSpecLoader.PROPERTY_ONAFTERINSERTMETHODID),
 			afterRecordUpdate(StaticContentSpecLoader.PROPERTY_ONAFTERUPDATEMETHODID),
 			afterRecordDelete(StaticContentSpecLoader.PROPERTY_ONAFTERDELETEMETHODID),
 			onFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONCREATEMETHODID),
+			afterFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONAFTERCREATEMETHODID),
 			onFoundSetFind(StaticContentSpecLoader.PROPERTY_ONFINDMETHODID),
-			onFoundSetAfterFind(StaticContentSpecLoader.PROPERTY_ONAFTERFINDMETHODID),
+			afterFoundSetFind(StaticContentSpecLoader.PROPERTY_ONAFTERFINDMETHODID),
 			onFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONSEARCHMETHODID),
-			onFoundSetAfterSearch(StaticContentSpecLoader.PROPERTY_ONAFTERSEARCHMETHODID);
+			afterFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONAFTERSEARCHMETHODID);
 
 			private final TypedProperty<Integer> property;
 
