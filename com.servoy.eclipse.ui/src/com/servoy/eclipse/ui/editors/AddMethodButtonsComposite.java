@@ -61,7 +61,7 @@ public class AddMethodButtonsComposite extends Composite
 		Button createGlobalMethodButton;
 
 		Label createMethodLabel = new Label(this, SWT.NONE);
-		createMethodLabel.setText("Create");
+		createMethodLabel.setText("Create method on");
 
 		createFormMethodButton = new Button(this, SWT.NONE);
 		createFormMethodButton.addSelectionListener(new SelectionAdapter()
