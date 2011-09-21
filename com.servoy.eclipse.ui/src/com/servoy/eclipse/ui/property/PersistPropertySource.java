@@ -105,6 +105,7 @@ import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IDefaultValue;
+import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
@@ -1242,23 +1243,28 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 						Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)))
 					{
 						@Override
-						protected IPropertyConverter<String, Integer> createConverter()
+						protected IPropertyConverter<String, MediaNode> createConverter()
 						{
-							// convert between media ids and image name
-							return new IPropertyConverter<String, Integer>()
+							// convert between media node and image name
+							return new IPropertyConverter<String, MediaNode>()
 							{
-								public Integer convertProperty(Object id, String value)
+								public MediaNode convertProperty(Object id, String value)
 								{
 									Media media = flattenedEditingSolution.getMedia(value);
-									return Integer.valueOf(media == null ? MediaLabelProvider.MEDIA_NONE : media.getID());
+									if (media != null)
+									{
+										String mediaName = media.getName();
+										return new MediaNode(mediaName, mediaName, MediaNode.TYPE.IMAGE, flattenedEditingSolution.getSolution(), null, media);
+									}
+									else
+									{
+										return MediaLabelProvider.MEDIA_NODE_NONE;
+									}
 								}
 
-								public String convertValue(Object id, Integer value)
+								public String convertValue(Object id, MediaNode value)
 								{
-									int mediaId = value.intValue();
-									if (mediaId == MediaLabelProvider.MEDIA_NONE) return null;
-									Media media = flattenedEditingSolution.getMedia(mediaId);
-									return media == null ? null : media.getName();
+									return value == null ? null : value.getName();
 								}
 							};
 						}
@@ -3004,7 +3010,36 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 		if (name.equals("rolloverImageMediaID") || name.equals("imageMediaID"))
 		{
-			return new MediaPropertyController<Integer>(id, displayName, persistContext, true);
+			return new MediaPropertyController<Integer>(id, displayName, persistContext, true)
+			{
+				@Override
+				protected IPropertyConverter<Integer, MediaNode> createConverter()
+				{
+					// convert between media node and image name
+					return new IPropertyConverter<Integer, MediaNode>()
+					{
+						public MediaNode convertProperty(Object id, Integer value)
+						{
+							Media media = flattenedEditingSolution.getMedia(value);
+							if (media != null)
+							{
+								String mediaName = media.getName();
+								return new MediaNode(mediaName, mediaName, MediaNode.TYPE.IMAGE, flattenedEditingSolution.getSolution(), null, media);
+							}
+							else
+							{
+								return MediaLabelProvider.MEDIA_NODE_NONE;
+							}
+						}
+
+						public Integer convertValue(Object id, MediaNode value)
+						{
+							return value == null || value == MediaLabelProvider.MEDIA_NODE_NONE ? Integer.valueOf(0)
+								: Integer.valueOf(value.getMedia().getID());
+						}
+					};
+				}
+			};
 		}
 
 		if (name.equals("styleClass"))

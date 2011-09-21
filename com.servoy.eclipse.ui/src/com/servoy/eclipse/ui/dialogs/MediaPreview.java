@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
 import com.servoy.eclipse.ui.editors.MediaComposite;
+import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.j2db.FlattenedSolution;
 
 /**
@@ -140,10 +141,10 @@ public class MediaPreview extends Group implements ISelectionChangedListener
 		{
 			if (!selection.isEmpty() && selection instanceof IStructuredSelection)
 			{
-				Object mediaId = ((IStructuredSelection)selection).getFirstElement();
-				if (mediaId instanceof Integer)
+				Object media = ((IStructuredSelection)selection).getFirstElement();
+				if (media instanceof MediaNode && ((MediaNode)media).getType() == MediaNode.TYPE.IMAGE)
 				{
-					mediaComposite.setMedia(flattenedSolution.getMedia(((Integer)mediaId).intValue()));
+					mediaComposite.setMedia(((MediaNode)media).getMedia());
 					return;
 				}
 			}

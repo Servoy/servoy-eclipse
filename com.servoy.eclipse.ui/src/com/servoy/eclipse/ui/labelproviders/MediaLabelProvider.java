@@ -13,13 +13,13 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.labelproviders;
 
 import org.eclipse.jface.viewers.LabelProvider;
 
 import com.servoy.eclipse.ui.Messages;
-import com.servoy.j2db.FlattenedSolution;
+import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Media;
 
@@ -31,48 +31,33 @@ import com.servoy.j2db.persistence.Media;
  */
 public class MediaLabelProvider extends LabelProvider implements IPersistLabelProvider
 {
-	public static final int MEDIA_NONE = 0;
-
-	private final FlattenedSolution flattenedSolution;
-
-	public MediaLabelProvider(FlattenedSolution flattenedSolution)
-	{
-		this.flattenedSolution = flattenedSolution;
-	}
+	public static final MediaNode MEDIA_NODE_NONE = new MediaNode(Messages.LabelNone, null, MediaNode.TYPE.IMAGE, null);
 
 	@Override
 	public String getText(Object value)
 	{
-		if (value == null)
+		if (value instanceof MediaNode)
 		{
-			return Messages.LabelNone;
+			return ((MediaNode)value).getName();
 		}
 
-		if (value instanceof Integer && ((Integer)value).intValue() == MEDIA_NONE)
-		{
-			return Messages.LabelNone;
-		}
 		Media media = (Media)getPersist(value);
 
-		if (media == null)
+		if (media != null)
 		{
-			return Messages.LabelUnresolved;
+			return media.getName();
 		}
 
-		return media.getName();
+		return Messages.LabelUnresolved;
 	}
 
 	public IPersist getPersist(Object value)
 	{
-		if (value instanceof Integer)
+		if (value instanceof MediaNode)
 		{
-			int mediaId = ((Integer)value).intValue();
-			if (mediaId == MEDIA_NONE)
-			{
-				return null;
-			}
-			return flattenedSolution.getMedia(mediaId);
+			return ((MediaNode)value).getMedia();
 		}
+
 		if (value instanceof Media)
 		{
 			return (Media)value;

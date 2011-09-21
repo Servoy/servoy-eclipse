@@ -34,6 +34,7 @@ import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.labelproviders.MediaLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.util.IControlFactory;
+import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IPersist;
 
@@ -60,8 +61,8 @@ public class AddMediaAction extends DesignerToolbarAction
 
 		final FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution((IPersist)editPart.getModel());
 		final TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS, new MediaContentProvider(
-			flattenedSolution), new SolutionContextDelegateLabelProvider(new MediaLabelProvider(flattenedSolution), flattenedSolution.getSolution()), null,
-			null, SWT.NONE, "Select image", new MediaContentProvider.MediaListOptions(false), null, false, TreeSelectDialog.MEDIA_DIALOG, null);
+			flattenedSolution), new SolutionContextDelegateLabelProvider(new MediaLabelProvider(), flattenedSolution.getSolution()), null, null, SWT.NONE,
+			"Select image", new MediaContentProvider.MediaListOptions(false), null, false, TreeSelectDialog.MEDIA_DIALOG, null);
 		dialog.setOptionsAreaFactory(new IControlFactory()
 		{
 			public Control createControl(Composite composite)
@@ -76,9 +77,15 @@ public class AddMediaAction extends DesignerToolbarAction
 			return null;
 		}
 
+		Object selection = ((IStructuredSelection)dialog.getSelection()).getFirstElement();
+		IPersist selectedMedia = null;
+		if (selection instanceof MediaNode)
+		{
+			selectedMedia = ((MediaNode)selection).getMedia();
+		}
+
 		// single selection
-		return new DataRequest(getRequestType(),
-			flattenedSolution.getMedia(((Integer)((IStructuredSelection)dialog.getSelection()).getFirstElement()).intValue()));
+		return new DataRequest(getRequestType(), selectedMedia);
 	}
 
 	/**

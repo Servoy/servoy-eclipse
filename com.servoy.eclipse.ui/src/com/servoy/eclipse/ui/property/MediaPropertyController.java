@@ -30,6 +30,7 @@ import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
 import com.servoy.eclipse.ui.labelproviders.MediaLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.j2db.FlattenedSolution;
 
 /**
@@ -39,7 +40,7 @@ import com.servoy.j2db.FlattenedSolution;
  *
  * @param <P> property type
  */
-public class MediaPropertyController<P> extends PropertyController<P, Integer>
+public class MediaPropertyController<P> extends PropertyController<P, MediaNode>
 {
 
 	private final PersistContext persistContext;
@@ -50,8 +51,7 @@ public class MediaPropertyController<P> extends PropertyController<P, Integer>
 		super(id, displayName);
 		this.persistContext = persistContext;
 		this.includeNone = includeNone;
-		setLabelProvider(new SolutionContextDelegateLabelProvider(new MediaLabelProvider(ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(),
-			persistContext.getContext())), persistContext.getContext()));
+		setLabelProvider(new SolutionContextDelegateLabelProvider(new MediaLabelProvider(), persistContext.getContext()));
 		setSupportsReadonly(true);
 	}
 
@@ -60,16 +60,16 @@ public class MediaPropertyController<P> extends PropertyController<P, Integer>
 	{
 		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
 		return new ListSelectCellEditor(parent, "Select image", new MediaContentProvider(flattenedEditingSolution), getLabelProvider(),
-			new IValueEditor<Integer>()
+			new IValueEditor<MediaNode>()
 			{
-				public void openEditor(Integer value)
+				public void openEditor(MediaNode value)
 				{
-					EditorUtil.openMediaViewer(flattenedEditingSolution.getMedia(value.intValue()));
+					EditorUtil.openMediaViewer(value.getMedia());
 				}
 
-				public boolean canEdit(Integer value)
+				public boolean canEdit(MediaNode value)
 				{
-					return value != null && value.intValue() != 0;
+					return value != null && value.getMedia() != null;
 				}
 			}, isReadOnly(), new MediaContentProvider.MediaListOptions(includeNone), SWT.NONE, new ListSelectCellEditor.ListSelectControlFactory()
 			{

@@ -16,6 +16,12 @@
  */
 package com.servoy.eclipse.ui.node;
 
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -26,10 +32,13 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportMediaAction;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.Solution;
 
 /**
  * Listener for dropping files on a viewer with SimpleUserNode nodes.
@@ -58,7 +67,8 @@ public class UserNodeFileDropTargetListener extends ViewerDropAdapter
 		{
 			// dropped on the list
 			Object input = ((ContentViewer)getViewer()).getInput();
-			if (input instanceof SimpleUserNode && ((SimpleUserNode)input).getRealType() == UserNodeType.MEDIA)
+			if (input instanceof SimpleUserNode &&
+				(((SimpleUserNode)input).getRealType() == UserNodeType.MEDIA || ((SimpleUserNode)input).getRealType() == UserNodeType.MEDIA_FOLDER))
 			{
 				targetNode = (SimpleUserNode)input;
 			}
@@ -81,33 +91,55 @@ public class UserNodeFileDropTargetListener extends ViewerDropAdapter
 	}
 
 	@Override
-	public boolean performDrop(Object data)
+	public boolean performDrop(final Object data)
 	{
 		if (project != null && data instanceof String[])
 		{
-			try
+			// active the part that was dropped on
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(workbenchPart);
+			final String targetParentPath = workbenchPart instanceof SolutionExplorerView &&
+				((SolutionExplorerView)workbenchPart).getCurrentMediaFolder() != null ? ((SolutionExplorerView)workbenchPart).getCurrentMediaFolder().getPath()
+				: null;
+			final Solution editingSolution = project.getEditingSolution();
+			Job job = new WorkspaceJob("Import Media") //$NON-NLS-1$
 			{
-				// active the part that was dropped on
-				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(workbenchPart);
-				ImportMediaAction.addMediaFiles(project.getEditingSolution(), null, (String[])data, workbenchPart instanceof SolutionExplorerView
-					? ((SolutionExplorerView)workbenchPart).getCurrentMediaFolder() : null);
-				return true;
-			}
-			catch (final Exception e)
-			{
-				ServoyLog.logError(e);
-				Display.getDefault().asyncExec(new Runnable()
+
+				@Override
+				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 				{
-					public void run()
+					monitor.beginTask("Importing Media", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+					try
 					{
-						MessageDialog.openError(Display.getDefault().getActiveShell(), "Error importing files", "Could not import files: " + e.getMessage()); //$NON-NLS-1$
+						ImportMediaAction.addMediaFiles(editingSolution, null, (String[])data, targetParentPath);
 					}
-				});
-			}
-			finally
-			{
-				project = null;
-			}
+					catch (final RepositoryException e)
+					{
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							public void run()
+							{
+								MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Could not import media files: " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+								ServoyLog.logError("Could not import media files", e); //$NON-NLS-1$
+							}
+						});
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError("Could not import media files", e); //$NON-NLS-1$
+					}
+					finally
+					{
+						monitor.done();
+					}
+					return Status.OK_STATUS;
+				}
+
+			};
+			job.setRule(ServoyModel.getWorkspace().getRoot());
+			job.setUser(true);
+			job.schedule();
+			project = null;
+			return true;
 		}
 		return false;
 	}
