@@ -16,8 +16,8 @@
  */
 package com.servoy.eclipse.ui.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,7 +28,6 @@ import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.IModelElement;
@@ -73,6 +72,7 @@ import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
@@ -135,8 +135,8 @@ public class EditorUtil
 			String elementName = (persist instanceof ISupportName) ? ((ISupportName)persist).getName() : null;
 			if (persist instanceof Form && (!globalsNodeFile.exists()))
 			{
-				// a form that has no .js; as the user wants to open the js for this form - create the file
-				globalsNodeFile.create(new ByteArrayInputStream(new byte[0]), true, null);
+				// a form that has no .js; as the user wants to open the js for this form - create the file and its folder parents
+				new WorkspaceFileAccess(ServoyModel.getWorkspace()).setContents(scriptPath, new byte[0]);
 			}
 			IModelElement parent = DLTKUIPlugin.getEditorInputModelElement(FileEditorInputFactory.createFileEditorInput(globalsNodeFile));
 			IModelElement selection = null;
@@ -165,7 +165,7 @@ public class EditorUtil
 		{
 			ServoyLog.logError(ex);
 		}
-		catch (CoreException e)
+		catch (IOException e)
 		{
 			ServoyLog.logError("Cannot create form .js file", e);
 		}

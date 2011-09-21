@@ -18,7 +18,6 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,6 +62,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -264,38 +264,24 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 				}
 				else
 				{
-					if (!file.exists())
-					{
-						// file doesn't exist, create the file
-						file.create(new ByteArrayInputStream(new byte[0]), true, null);
-					}
 					InputStream contents = null;
 					ByteArrayOutputStream baos = null;
-					ByteArrayInputStream bais = null;
 					try
 					{
-						contents = new BufferedInputStream(file.getContents(true));
+						if (file.exists())
+						{
+							contents = new BufferedInputStream(file.getContents(true));
+						}
 						baos = new ByteArrayOutputStream();
-						baos.write(code.getBytes("UTF8"));
-						baos.write("\n".getBytes("UTF8"));
+						baos.write(code.getBytes("UTF8")); //$NON-NLS-1$
+						baos.write("\n".getBytes("UTF8")); //$NON-NLS-1$//$NON-NLS-2$
 						Utils.streamCopy(contents, baos);
-						bais = new ByteArrayInputStream(baos.toByteArray());
-						file.setContents(bais, true, true, null);
+						new WorkspaceFileAccess(ServoyModel.getWorkspace()).setContents(scriptPath, baos.toByteArray()); // will also create file and parent folders if needed
 					}
 					finally
 					{
-						if (contents != null)
-						{
-							contents.close();
-						}
-						if (baos != null)
-						{
-							baos.close();
-						}
-						if (bais != null)
-						{
-							bais.close();
-						}
+						Utils.closeInputStream(contents);
+						Utils.closeOutputStream(baos);
 					}
 					EditorUtil.openScriptEditor(var, true);
 				}

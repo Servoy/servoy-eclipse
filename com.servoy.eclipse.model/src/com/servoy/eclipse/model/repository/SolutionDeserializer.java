@@ -453,7 +453,7 @@ public class SolutionDeserializer
 			// parse the forms/tablenodes js objects
 			Iterator<Entry<File, List<JSONObject>>> childrenJSObjectMapIte = childrenJSObjectMap.entrySet().iterator();
 			Entry<File, List<JSONObject>> childrenJSObjectMapEntry;
-			File jsonFile, jsFile;
+			File jsonFile = null, jsFile;
 			while (childrenJSObjectMapIte.hasNext())
 			{
 				childrenJSObjectMapEntry = childrenJSObjectMapIte.next();
@@ -461,12 +461,14 @@ public class SolutionDeserializer
 				String jsFileName = jsFile.getName();
 				if (jsFileName.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 				{
+					ISupportChilds scriptParent = null;
 					if (jsFile.getParentFile().getName().equals(SolutionSerializer.FORMS_DIR))
 					{
 						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0, jsFileName.length() - SolutionSerializer.JS_FILE_EXTENSION.length()) +
 							SolutionSerializer.FORM_FILE_EXTENSION);
 					}
-					else
+					else if (jsFile.getParentFile().getParentFile() != null &&
+						jsFile.getParentFile().getParentFile().getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME))
 					{
 						// tablenode
 						if (jsFileName.endsWith(SolutionSerializer.CALCULATIONS_POSTFIX))
@@ -483,12 +485,21 @@ public class SolutionDeserializer
 								jsFileName.substring(0, jsFileName.length() - SolutionSerializer.FOUNDSET_POSTFIX.length()) +
 									SolutionSerializer.TABLENODE_FILE_EXTENSION);
 						}
-						else jsonFile = null;
+						if (jsonFile != null && !jsonFile.exists())
+						{
+							// tbl file does not exist yet, create a table node
+							scriptParent = ((Solution)parent.getAncestor(IRepository.SOLUTIONS)).getOrCreateTableNode(DataSourceUtils.createDBTableDataSource(
+								jsFile.getParentFile().getName(),
+								jsonFile.getName().substring(0, jsonFile.getName().length() - SolutionSerializer.TABLENODE_FILE_EXTENSION.length())));
+						}
 					}
 
-					if (jsonFile != null && jsonFile.exists())
+					if (jsonFile != null) // file may not exist yet
 					{
-						ISupportChilds scriptParent = (ISupportChilds)persistFileMap.get(jsonFile);
+						if (scriptParent == null) // scriptParent may have been created when jsonfile does not exist
+						{
+							scriptParent = (ISupportChilds)persistFileMap.get(jsonFile);
+						}
 						if (scriptParent != null)
 						{
 							List<JSONObject> childrenJSObjects = childrenJSObjectMapEntry.getValue();
@@ -530,7 +541,7 @@ public class SolutionDeserializer
 						else
 						{
 							errorKeeper.addError(jsFile, new Exception("Invalid javascript file name '" + jsFile.getName() +
-								"', doesn't have a corresponding form."));
+								"', doesn't have a corresponding object."));
 						}
 					}
 				}
@@ -796,7 +807,7 @@ public class SolutionDeserializer
 	}
 
 	private void readMediasFromSolutionDir(File dir, Solution parent, Map<IPersist, JSONObject> persist_json_map, List<File> changedFiles,
-		List<IPersist> strayCats, boolean readAll, boolean useFilesForDirtyMark) throws JSONException, RepositoryException
+		List<IPersist> strayCats, boolean readAll, boolean useFilesForDirtyMark) throws RepositoryException
 	{
 		if (dir.exists())
 		{
@@ -916,15 +927,9 @@ public class SolutionDeserializer
 		{
 			List<JSONObject> jsonObjects = new ArrayList<JSONObject>();
 			JavaScriptParser parser = new JavaScriptParser();
-			final ArrayList<IProblem> problems = new ArrayList<IProblem>();
+			final List<IProblem> problems = new ArrayList<IProblem>();
 			IProblemReporter reporter = new IProblemReporter()
 			{
-
-				public Object getAdapter(Class adapter)
-				{
-					return null;
-				}
-
 				public void reportProblem(IProblem problem)
 				{
 					if (problem.isError())
@@ -948,9 +953,9 @@ public class SolutionDeserializer
 			}
 
 
-			ArrayList<VariableDeclaration> variables = new ArrayList<VariableDeclaration>();
-			ArrayList<FunctionStatement> functionss = new ArrayList<FunctionStatement>();
-			final ArrayList<ConstStatement> constants = new ArrayList<ConstStatement>();
+			List<VariableDeclaration> variables = new ArrayList<VariableDeclaration>();
+			List<FunctionStatement> functionss = new ArrayList<FunctionStatement>();
+			final List<ConstStatement> constants = new ArrayList<ConstStatement>();
 			List<Statement> statements = script.getStatements();
 			for (ASTNode node : statements)
 			{
@@ -1012,7 +1017,7 @@ public class SolutionDeserializer
 				}
 			}
 
-			ArrayList<Line> lines = new ArrayList<Line>();
+			List<Line> lines = new ArrayList<Line>();
 			int counter = 0;
 			Line currentLine = new Line(0, 0);
 			lines.add(currentLine);
@@ -1036,7 +1041,6 @@ public class SolutionDeserializer
 				{
 					comment = ((VariableStatement)field.getParent()).getDocumentation();
 				}
-				int start = (field.getParent() instanceof VariableStatement) ? field.getParent().sourceStart() - 1 : field.sourceStart() - 1;
 
 				boolean newField = true;
 				JSONObject json = null;
@@ -1597,7 +1601,8 @@ public class SolutionDeserializer
 				MethodArgument[] methodArguments = NULL;
 				if (obj.has(ARGUMENTS_JSON_ATTRIBUTE))
 				{
-					List<Argument> arguments = (List)obj.remove(ARGUMENTS_JSON_ATTRIBUTE);
+					@SuppressWarnings("unchecked")
+					List<Argument> arguments = (List<Argument>)obj.remove(ARGUMENTS_JSON_ATTRIBUTE);
 					if (arguments.size() > 0)
 					{
 						methodArguments = new MethodArgument[arguments.size()];
@@ -1756,6 +1761,7 @@ public class SolutionDeserializer
 		return uuid;
 	}
 
+	@SuppressWarnings("nls")
 	public static String getUUID(File file, int position)
 	{
 		if (!SolutionSerializer.isJSONFile(file.getName()) || position < 0)

@@ -65,6 +65,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -265,8 +266,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 					// if the file isn't there, create it here so that the formatter sees the js file.
 					if (!file.exists())
 					{
-						// file doesn't exist, create the file
-						file.create(new ByteArrayInputStream(new byte[0]), true, null);
+						// file doesn't exist, create the file and its parent directories
+						new WorkspaceFileAccess(ServoyModel.getWorkspace()).setContents(scriptPath, new byte[0]);
 					}
 
 					String declaration = template.getMethodDeclaration(met.getName(), null, tagToOutput);
