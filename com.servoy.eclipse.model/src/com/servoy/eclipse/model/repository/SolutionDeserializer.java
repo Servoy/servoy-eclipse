@@ -466,15 +466,20 @@ public class SolutionDeserializer
 						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0, jsFileName.length() - SolutionSerializer.JS_FILE_EXTENSION.length()) +
 							SolutionSerializer.FORM_FILE_EXTENSION);
 					}
-					else
+					else if (jsFileName.endsWith(SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT))
 					{
 						// tablenode
 						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0,
 							jsFileName.length() - SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length()) +
 							SolutionSerializer.TABLENODE_FILE_EXTENSION);
 					}
+					else
+					{
+						jsonFile = null;
+						errorKeeper.addError(jsFile, new Exception("Unrecognized javascript file name '" + jsFile.getName() + "'."));
+					}
 
-					if (jsonFile.exists())
+					if (jsonFile != null && jsonFile.exists())
 					{
 						ISupportChilds parentForm = (ISupportChilds)persistFileMap.get(jsonFile);
 						if (parentForm != null)
