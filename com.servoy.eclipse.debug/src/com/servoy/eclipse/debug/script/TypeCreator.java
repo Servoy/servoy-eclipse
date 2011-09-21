@@ -48,7 +48,6 @@ import org.eclipse.dltk.javascript.typeinfo.model.SimpleType;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
-import org.eclipse.dltk.javascript.typeinfo.model.TypeRef;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.mozilla.javascript.JavaMembers;
@@ -953,9 +952,9 @@ public abstract class TypeCreator
 		{
 			property.setAttribute(IMAGE_DESCRIPTOR, image);
 		}
-		else if (type instanceof TypeRef && ((TypeRef)type).getTarget().getAttribute(IMAGE_DESCRIPTOR) != null)
+		else if (type instanceof SimpleType && ((SimpleType)type).getTarget().getAttribute(IMAGE_DESCRIPTOR) != null)
 		{
-			property.setAttribute(IMAGE_DESCRIPTOR, ((TypeRef)type).getTarget().getAttribute(IMAGE_DESCRIPTOR));
+			property.setAttribute(IMAGE_DESCRIPTOR, ((SimpleType)type).getTarget().getAttribute(IMAGE_DESCRIPTOR));
 		}
 		if (resource != null)
 		{
