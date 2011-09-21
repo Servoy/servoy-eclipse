@@ -293,8 +293,8 @@ public class EventsComposite extends Composite
 			afterRecordDelete(StaticContentSpecLoader.PROPERTY_ONAFTERDELETEMETHODID),
 			onFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONCREATEMETHODID),
 			onFoundSetFind(StaticContentSpecLoader.PROPERTY_ONFINDMETHODID),
-			afterFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONAFTERCREATEMETHODID),
 			onFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONSEARCHMETHODID),
+			afterFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONAFTERCREATEMETHODID),
 			afterFoundSetFind(StaticContentSpecLoader.PROPERTY_ONAFTERFINDMETHODID),
 			afterFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONAFTERSEARCHMETHODID);
 
