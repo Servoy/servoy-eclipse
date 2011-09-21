@@ -754,7 +754,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "All plugin names as an array", SPECIAL_PROPERTY));
 			members.add(createProperty(context, "length", true, "Number", "Number of plugins", PROPERTY));
 
-
 			IPluginManager pluginManager = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getPluginManager();
 			List<IClientPlugin> clientPlugins = pluginManager.getPlugins(IClientPlugin.class);
 			for (IClientPlugin clientPlugin : clientPlugins)
@@ -780,6 +779,31 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 					property.setReadOnly(true);
 					addAnonymousClassType("Plugin<" + clientPlugin.getName() + '>', scriptObject.getClass());
 					property.setType(context.getTypeRef("Plugin<" + clientPlugin.getName() + '>'));
+
+					if (clientPlugin.getName().equals("window"))
+					{
+						Property deprecatedPluginProperty = createProperty("kioskmode", true, context.getTypeRef("Plugin<" + clientPlugin.getName() + '>'),
+							"Window plugin", null);
+						deprecatedPluginProperty.setDeprecated(true);
+						deprecatedPluginProperty.setVisible(false);
+						members.add(deprecatedPluginProperty);
+						deprecatedPluginProperty = createProperty("popupmenu", true, context.getTypeRef("Plugin<" + clientPlugin.getName() + '>'),
+							"Window plugin", null);
+						deprecatedPluginProperty.setDeprecated(true);
+						deprecatedPluginProperty.setVisible(false);
+						members.add(deprecatedPluginProperty);
+						deprecatedPluginProperty = createProperty("menubar", true, context.getTypeRef("Plugin<" + clientPlugin.getName() + '>'),
+							"Window plugin", null);
+						deprecatedPluginProperty.setDeprecated(true);
+						deprecatedPluginProperty.setVisible(false);
+						members.add(deprecatedPluginProperty);
+						deprecatedPluginProperty = createProperty("it2be_menubar", true, context.getTypeRef("Plugin<" + clientPlugin.getName() + '>'),
+							"Window plugin", null);
+						deprecatedPluginProperty.setDeprecated(true);
+						deprecatedPluginProperty.setVisible(false);
+						members.add(deprecatedPluginProperty);
+
+					}
 
 					Image clientImage = null;
 					Icon icon = clientPlugin.getImage();
