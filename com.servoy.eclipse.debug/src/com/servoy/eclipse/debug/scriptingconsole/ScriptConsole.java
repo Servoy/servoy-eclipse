@@ -403,6 +403,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 							{
 								clientsList.setSelection(new StructuredSelection(activeClients.get(0)));
 							}
+							page.updateSelectionDependentActions();
 						}
 					});
 				}
