@@ -75,7 +75,8 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 	{
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		solution = null;
-		if (sel.size() == 1 && (((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA))
+		if (sel.size() == 1 &&
+			((((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA) || (((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA_FOLDER)))
 		{
 			SimpleUserNode node = ((SimpleUserNode)sel.getFirstElement());
 			SimpleUserNode solutionNode = node.getAncestorOfType(Solution.class);
@@ -103,7 +104,7 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 		}
 		try
 		{
-			addMediaFiles(solution, filterPath, fileNames, viewer.getCurrentMediaFolder());
+			addMediaFiles(solution, filterPath, fileNames, viewer.getCurrentMediaFolder() != null ? viewer.getCurrentMediaFolder().getPath() : null);
 		}
 		catch (RepositoryException e)
 		{

@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -58,6 +59,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
@@ -114,7 +116,6 @@ import com.servoy.j2db.ui.IScriptRenderMethods;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ITagResolver;
-import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Text;
@@ -192,8 +193,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	public static final MethodComparator methodComparator = new MethodComparator();
 
-	private static final MediaComparator mediaComparator = new MediaComparator();
-
 	static class FieldComparator implements Comparator<Field>
 	{
 		private FieldComparator()
@@ -215,39 +214,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		public int compare(Method o1, Method o2)
 		{
 			return o1.getName().compareToIgnoreCase(o2.getName());
-		}
-	}
-
-	static class MediaComparator implements Comparator<SimpleUserNode>
-	{
-		private MediaComparator()
-		{
-		}
-
-		public int compare(SimpleUserNode o1, SimpleUserNode o2)
-		{
-			if (o1.getType() == o2.getType())
-			{
-				return o1.getName().compareTo(o2.getName());
-			}
-			else if (o1.getType() == UserNodeType.MEDIA_PARENT_FOLDER)
-			{
-				return -1;
-			}
-			else if (o2.getType() == UserNodeType.MEDIA_PARENT_FOLDER)
-			{
-				return 1;
-			}
-			else if (o1.getType() == UserNodeType.MEDIA_FOLDER)
-			{
-				return -1;
-			}
-			else if (o2.getType() == UserNodeType.MEDIA_FOLDER)
-			{
-				return 1;
-			}
-
-			return 0;
 		}
 	}
 
@@ -457,7 +423,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = createValueLists(un);
 			}
-			else if (type == UserNodeType.MEDIA)
+			else if (type == UserNodeType.MEDIA || type == UserNodeType.MEDIA_FOLDER)
 			{
 				lm = createMedia(un);
 			}
@@ -1132,44 +1098,25 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	private SimpleUserNode[] createMedia(SimpleUserNode un)
 	{
-		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
-		Solution s = (Solution)un.getRealObject();
-		List<IPersist> medias = getPersists(s, UserNodeType.MEDIA);
-		String currentMediaFolder = view.getCurrentMediaFolder();
-		if (currentMediaFolder != null)
+		if (un != null)
 		{
-			int parentLastIdx = currentMediaFolder.substring(0, currentMediaFolder.length() - 2).lastIndexOf('/');
-			String parentMediaFolder = parentLastIdx == -1 ? null : currentMediaFolder.substring(0, parentLastIdx + 1);
-			dlm.add(new UserNode("..", UserNodeType.MEDIA_PARENT_FOLDER, new Pair<Solution, String>(s, parentMediaFolder),
-				uiActivator.loadImageFromBundle("media_folder.gif")));
-		}
-		for (IPersist persist : medias)
-		{
-			Media media = (Media)persist;
-			String mediaName = media.getName();
-			if (currentMediaFolder == null || mediaName.startsWith(currentMediaFolder))
+			MediaNode mediaFolder = null;
+			if (un.getType() == UserNodeType.MEDIA)
 			{
-				SimpleUserNode node;
-				String mediaPath = currentMediaFolder == null ? mediaName : mediaName.substring(currentMediaFolder.length());
-				int pathSepIdx = mediaPath.indexOf('/');
-				if (pathSepIdx != -1) // it is a directory
-				{
-					String dirName = mediaPath.substring(0, pathSepIdx);
-					node = new UserNode(dirName, UserNodeType.MEDIA_FOLDER, new Pair<Solution, String>(s, ((currentMediaFolder == null ? ""
-						: currentMediaFolder) + dirName + '/')), uiActivator.loadImageFromBundle("media_folder.gif"));
-				}
-				else
-				{
-					String infoText = "\"media:///" + media.getName() + "\"";
-					node = new UserNode(mediaPath, UserNodeType.MEDIA_IMAGE, new SimpleDeveloperFeedback(infoText, infoText, infoText), media,
-						uiActivator.loadImageFromBundle("image.gif"));
-				}
-				if (dlm.indexOf(node) == -1) dlm.add(node);
+				mediaFolder = new MediaNode(null, null, MediaNode.TYPE.FOLDER, (Solution)un.getRealObject());
+			}
+			else if (un.getType() == UserNodeType.MEDIA_FOLDER)
+			{
+				mediaFolder = (MediaNode)un.getRealObject();
+			}
+
+			if (mediaFolder != null)
+			{
+				return view.createMediaFolderChildrenNodes(mediaFolder, uiActivator, EnumSet.of(MediaNode.TYPE.IMAGE));
 			}
 		}
-		SimpleUserNode[] mediaA = dlm.toArray(new SimpleUserNode[dlm.size()]);
-		Arrays.sort(mediaA, mediaComparator);
-		return mediaA;
+
+		return new SimpleUserNode[0];
 	}
 
 	private Object[] createRelation(Relation r, boolean calcMode)

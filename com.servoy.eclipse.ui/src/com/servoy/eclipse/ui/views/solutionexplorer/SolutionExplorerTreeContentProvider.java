@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -60,6 +61,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
+import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EnableServerAction;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormManager.HistoryProvider;
@@ -698,6 +700,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					{
 						addPluginsNodeChildren(un);
 					}
+					else if (type == UserNodeType.MEDIA_FOLDER)
+					{
+						addMediaFolderChildrenNodes(un);
+					}
 					if (un.children == null)
 					{
 						un.children = new PlatformSimpleUserNode[0];
@@ -747,6 +753,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				else if (un.getType() == UserNodeType.PLUGINS)
 				{
 					return true;
+				}
+				else if (un.getType() == UserNodeType.MEDIA_FOLDER)
+				{
+					return ((MediaNode)un.getRealObject()).hasChildren(EnumSet.of(MediaNode.TYPE.FOLDER));
 				}
 			}
 			else if (un.children.length > 0)
@@ -1000,6 +1010,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			valuelists = new PlatformSimpleUserNode(Messages.TreeStrings_ValueLists, UserNodeType.VALUELISTS, solution,
 				uiActivator.loadImageFromBundle("valuelists.gif")); //$NON-NLS-1$
 			media = new PlatformSimpleUserNode(Messages.TreeStrings_Media, UserNodeType.MEDIA, solution, uiActivator.loadImageFromBundle("image.gif"));
+			addMediaFolderChildrenNodes(media);
 
 			globalsFolder.parent = projectNode;
 			valuelists.parent = projectNode;
@@ -1028,6 +1039,20 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					allRelations != null) allRelations.hide();
 			}
 
+		}
+	}
+
+	private void addMediaFolderChildrenNodes(PlatformSimpleUserNode mediaFolder)
+	{
+		PlatformSimpleUserNode mediaNode = getMedia();
+		if (mediaNode != null && mediaFolder != null)
+		{
+			MediaNode folderNode = (mediaFolder.getType() == UserNodeType.MEDIA_FOLDER) ? (MediaNode)mediaFolder.getRealObject() : new MediaNode(null, null,
+				MediaNode.TYPE.FOLDER, (Solution)mediaNode.getRealObject());
+
+			mediaFolder.children = view.createMediaFolderChildrenNodes(folderNode, uiActivator, EnumSet.of(MediaNode.TYPE.FOLDER));
+			for (SimpleUserNode n : mediaFolder.children)
+				n.parent = mediaFolder;
 		}
 	}
 
@@ -1584,11 +1609,17 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					}
 					else if (persist instanceof Solution)
 					{
-						node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
-						if (node != null)
+						PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
+						if (solutionChildNode != null)
 						{
-							addFormsNodeChildren(node);
-							view.refreshTreeNodeFromModel(node);
+							addFormsNodeChildren(solutionChildNode);
+							view.refreshTreeNodeFromModel(solutionChildNode);
+						}
+						solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Media);
+						if (solutionChildNode != null)
+						{
+							addMediaFolderChildrenNodes(solutionChildNode);
+							view.refreshTreeNodeFromModel(solutionChildNode);
 						}
 					}
 				}
@@ -1795,6 +1826,35 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	public PlatformSimpleUserNode getMedia()
 	{
 		return media;
+	}
+
+	public PlatformSimpleUserNode getMediaFolderNode(MediaNode mediaFolder)
+	{
+		PlatformSimpleUserNode mediaFolderNode = null;
+		if (mediaFolder != null)
+		{
+			mediaFolderNode = findMediaFolder(getMedia(), mediaFolder);
+		}
+
+		return mediaFolderNode != null ? mediaFolderNode : getMedia();
+	}
+
+	private PlatformSimpleUserNode findMediaFolder(PlatformSimpleUserNode mediaFolderNode, MediaNode mediaFolder)
+	{
+		Object realObject = mediaFolderNode.getRealObject();
+		if (mediaFolder.equals(realObject)) return mediaFolderNode;
+
+		if (mediaFolderNode.children != null && mediaFolderNode.children.length > 0)
+		{
+			PlatformSimpleUserNode mfNode;
+			for (SimpleUserNode childNode : mediaFolderNode.children)
+			{
+				mfNode = findMediaFolder((PlatformSimpleUserNode)childNode, mediaFolder);
+				if (mfNode != null) return mfNode;
+			}
+		}
+
+		return null;
 	}
 
 	public PlatformSimpleUserNode getAllSolutionsNode()

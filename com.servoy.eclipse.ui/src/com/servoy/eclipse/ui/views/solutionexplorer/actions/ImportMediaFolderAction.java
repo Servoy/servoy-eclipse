@@ -64,7 +64,8 @@ public class ImportMediaFolderAction extends ImportMediaAction implements ISelec
 	{
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		solution = null;
-		if (sel.size() == 1 && (((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA))
+		if (sel.size() == 1 &&
+			((((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA) || (((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA_FOLDER)))
 		{
 			SimpleUserNode node = ((SimpleUserNode)sel.getFirstElement());
 			SimpleUserNode solutionNode = node.getAncestorOfType(Solution.class);
@@ -96,7 +97,8 @@ public class ImportMediaFolderAction extends ImportMediaAction implements ISelec
 					monitor.beginTask("Importing Media Folder", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
 					try
 					{
-						addMediaFiles(solution, null, new String[] { folderName }, viewer.getCurrentMediaFolder());
+						addMediaFiles(solution, null, new String[] { folderName }, viewer.getCurrentMediaFolder() != null
+							? viewer.getCurrentMediaFolder().getPath() : null);
 					}
 					catch (RepositoryException e)
 					{
@@ -118,7 +120,6 @@ public class ImportMediaFolderAction extends ImportMediaAction implements ISelec
 			job.setRule(ServoyModel.getWorkspace().getRoot());
 			job.setUser(true);
 			job.schedule();
-
 		}
 	}
 }

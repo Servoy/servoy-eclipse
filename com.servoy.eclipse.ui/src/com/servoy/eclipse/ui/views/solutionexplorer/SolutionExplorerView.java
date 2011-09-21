@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -160,7 +161,9 @@ import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.node.UserNode;
 import com.servoy.eclipse.ui.node.UserNodeComparer;
 import com.servoy.eclipse.ui.node.UserNodeFileDropTargetListener;
 import com.servoy.eclipse.ui.node.UserNodeListDragSourceListener;
@@ -171,6 +174,7 @@ import com.servoy.eclipse.ui.search.SearchAction;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.FilterDelayJob;
 import com.servoy.eclipse.ui.util.FilteredEntity;
+import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetEntry;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ActivateSolutionAction;
@@ -180,6 +184,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.CollapseTreeAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ContextAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.CopyAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.CopyTableAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.CreateMediaFolderAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.CutAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DebugMethodAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteI18NAction;
@@ -217,7 +222,6 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewVariableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenFormEditorAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenI18NAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenMediaAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenMediaFolderAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenNewFormWizardAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenRelationAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenScriptAction;
@@ -235,6 +239,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.ReloadTablesAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RemoveModuleAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RemoveSolutionProtectionAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameMediaAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameMediaFolderAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenamePersistAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameSolutionAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ReplaceServerAction;
@@ -458,6 +463,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private ImportMediaFolderAction importMediaFolder;
 
 	private RenameMediaAction renameMediaAction;
+	private RenameMediaFolderAction renameMediaFolderAction;
+	private CreateMediaFolderAction createMediaFolderAction;
 
 	private MovePersistAction movePersistAction;
 	private DuplicatePersistAction duplicatePersistAction;
@@ -505,16 +512,18 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private TreeHandlingToggleAction treeHandlingToggleAction = null;
 
-	private String currentMediaFolder;
+	private MediaNode currentMediaFolder;
 
-	public void setCurrentMediaFolder(String currentMediaFolder)
+	public void setCurrentMediaFolder(MediaNode currentMediaFolder)
 	{
 		this.currentMediaFolder = currentMediaFolder;
 		((SolutionExplorerListContentProvider)list.getContentProvider()).clearMediaCache();
+		tree.setSelection(new StructuredSelection(((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getMediaFolderNode(currentMediaFolder)),
+			true);
 		refreshList(0);
 	}
 
-	public String getCurrentMediaFolder()
+	public MediaNode getCurrentMediaFolder()
 	{
 		return currentMediaFolder;
 	}
@@ -644,9 +653,11 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			if (sel.size() == 1)
 			{
 				Object selFirstEl = sel.getFirstElement();
-				if (selFirstEl instanceof SimpleUserNode && ((SimpleUserNode)selFirstEl).getType() == UserNodeType.MEDIA)
+				if (selFirstEl instanceof SimpleUserNode &&
+					(((SimpleUserNode)selFirstEl).getType() == UserNodeType.MEDIA || ((SimpleUserNode)selFirstEl).getType() == UserNodeType.MEDIA_FOLDER))
 				{
-					currentMediaFolder = null;
+					currentMediaFolder = ((SimpleUserNode)selFirstEl).getType() == UserNodeType.MEDIA_FOLDER
+						? (MediaNode)((SimpleUserNode)selFirstEl).getRealObject() : null;
 					((SolutionExplorerListContentProvider)list.getContentProvider()).clearMediaCache();
 				}
 				list.setInput(selFirstEl);
@@ -2031,6 +2042,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			if (newActionInTreePrimary.isEnabled()) manager.add(newActionInTreePrimary);
 			if (newActionInTreeSecondary.isEnabled()) manager.add(newActionInTreeSecondary);
 		}
+
+		if (createMediaFolderAction.isEnabled()) manager.add(createMediaFolderAction);
+		if (renameMediaFolderAction.isEnabled()) manager.add(renameMediaFolderAction);
+
 		manager.add(new Separator());
 		if (toggleFormCommandsActions.isEnabled()) manager.add(toggleFormCommandsActions);
 		if (changeResourcesProjectAction.isEnabled()) manager.add(changeResourcesProjectAction);
@@ -2376,6 +2391,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction importMedia = new ImportMediaAction(this);
 		importMediaFolder = new ImportMediaFolderAction(this);
 		renameMediaAction = new RenameMediaAction(this);
+		createMediaFolderAction = new CreateMediaFolderAction(this);
+		renameMediaFolderAction = new RenameMediaFolderAction(this);
 		movePersistAction = new MovePersistAction(this.getSite().getShell());
 		duplicatePersistAction = new DuplicatePersistAction(this.getSite().getShell());
 
@@ -2388,6 +2405,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.GLOBALRELATIONS, newRelation);
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_RELATIONS, newRelation);
 		newActionInTreePrimary.registerAction(UserNodeType.MEDIA, importMedia);
+		newActionInTreePrimary.registerAction(UserNodeType.MEDIA_FOLDER, importMedia);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVER, newTable);
 		newActionInTreePrimary.registerAction(UserNodeType.FORMS, newForm);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION, newSolution);
@@ -2395,6 +2413,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.STYLES, newStyle);
 
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA, importMediaFolder);
+		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
@@ -2420,6 +2439,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInListPrimary.registerAction(UserNodeType.FORM_VARIABLES, newVariable);
 		newActionInListPrimary.registerAction(UserNodeType.VALUELISTS, newValueList);
 		newActionInListPrimary.registerAction(UserNodeType.MEDIA, importMedia);
+		newActionInListPrimary.registerAction(UserNodeType.MEDIA_FOLDER, importMedia);
 		newActionInListPrimary.registerAction(UserNodeType.SERVER, newTable);
 
 		newActionInListPrimary.registerAction(UserNodeType.STYLES, newStyle);
@@ -2436,7 +2456,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction openTable = new OpenTableAction(this);
 		IAction openRelation = new OpenRelationAction();
 		IAction openMedia = new OpenMediaAction();
-		IAction openMediaFolder = new OpenMediaFolderAction(this);
 		IAction openI18N = new OpenI18NAction(this);
 
 		openAction.registerAction(UserNodeType.FORM_METHOD, openScript);
@@ -2451,12 +2470,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		openAction.registerAction(UserNodeType.VIEW, openTable);
 		openAction.registerAction(UserNodeType.RELATION, openRelation);
 		openAction.registerAction(UserNodeType.MEDIA_IMAGE, openMedia);
-		openAction.registerAction(UserNodeType.MEDIA_FOLDER, openMediaFolder);
-		openAction.registerAction(UserNodeType.MEDIA_PARENT_FOLDER, openMediaFolder);
 		openAction.registerAction(UserNodeType.I18N_FILE_ITEM, openI18N);
 
 		deleteActionInList = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE), "Delete"); //$NON-NLS-1$
-		IAction deleteMedia = new DeleteMediaAction("Delete media"); //$NON-NLS-1$
+		IAction deleteMedia = new DeleteMediaAction("Delete media", this); //$NON-NLS-1$
 		IAction deleteValueList = new DeletePersistAction(UserNodeType.VALUELIST_ITEM, "Delete value list"); //$NON-NLS-1$
 		IAction deleteTable = new DeleteTableAction(getSite().getShell());
 		IAction deleteStyle = new DeletePersistAction(UserNodeType.STYLE_ITEM, "Delete style"); //$NON-NLS-1$
@@ -2507,6 +2524,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		deleteActionInTree.registerAction(UserNodeType.SOLUTION_ITEM, deleteSolution);
 		deleteActionInTree.registerAction(UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE, deleteSolution);
 		deleteActionInTree.registerAction(UserNodeType.SERVER, deleteServer);
+		deleteActionInTree.registerAction(UserNodeType.MEDIA_FOLDER, deleteMedia);
 
 		addAsModuleAction = new AddAsModuleAction(getSite().getShell());
 		renameSolutionAction = new RenameSolutionAction(this);
@@ -2565,6 +2583,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		tree.addSelectionChangedListener(expandNodeAction);
 
 		tree.addSelectionChangedListener(openFormEditorAction);
+
+		tree.addSelectionChangedListener(createMediaFolderAction);
+		tree.addSelectionChangedListener(renameMediaFolderAction);
 
 		fRefreshAction = new RefreshAction(this);
 		collapseTreeAction = new CollapseTreeAction(tree);
@@ -2888,6 +2909,34 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			}
 		}
 		return false;
+	}
+
+	SimpleUserNode[] createMediaFolderChildrenNodes(MediaNode mediaFolder, Activator uiActivator, EnumSet<MediaNode.TYPE> mediaNodeTypeFilter)
+	{
+		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
+		MediaNode[] mediaNodes = mediaFolder.getChildren(mediaNodeTypeFilter);
+		if (mediaNodes != null)
+		{
+			SimpleUserNode node = null;
+			for (MediaNode mediaNode : mediaNodes)
+			{
+				if (mediaNode.getType() == MediaNode.TYPE.IMAGE && mediaNodeTypeFilter.contains(MediaNode.TYPE.IMAGE))
+				{
+					String mediaInfo = mediaNode.getInfo();
+					node = new UserNode(mediaNode.getName(), UserNodeType.MEDIA_IMAGE, new SimpleDeveloperFeedback(mediaInfo, mediaInfo, mediaInfo),
+						mediaNode.getMedia(), uiActivator.loadImageFromBundle("image.gif"));
+				}
+				else if (mediaNode.getType() == MediaNode.TYPE.FOLDER && mediaNodeTypeFilter.contains(MediaNode.TYPE.FOLDER))
+				{
+					node = new PlatformSimpleUserNode(mediaNode.getName(), UserNodeType.MEDIA_FOLDER, mediaNode,
+						uiActivator.loadImageFromBundle("media_folder.gif"));
+				}
+
+				if (node != null) dlm.add(node);
+			}
+		}
+
+		return dlm.toArray(new SimpleUserNode[dlm.size()]);
 	}
 
 	/**

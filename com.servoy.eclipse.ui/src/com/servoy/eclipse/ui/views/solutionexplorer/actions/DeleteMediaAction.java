@@ -17,10 +17,12 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -32,16 +34,21 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.util.MediaNode;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.IMediaProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.util.Pair;
 
 
 /**
@@ -52,11 +59,13 @@ import com.servoy.j2db.util.Pair;
 
 public class DeleteMediaAction extends Action implements ISelectionChangedListener
 {
-	private List<Pair<Solution, String>> selectedMediaFolders;
+	private List<MediaNode> selectedMediaFolders;
 	private List<IPersist> selectedMedias;
+	private final SolutionExplorerView viewer;
 
-	public DeleteMediaAction(String text)
+	public DeleteMediaAction(String text, SolutionExplorerView viewer)
 	{
+		this.viewer = viewer;
 		setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE));
 		setText(text);
 		setToolTipText(text);
@@ -71,7 +80,7 @@ public class DeleteMediaAction extends Action implements ISelectionChangedListen
 		if (state)
 		{
 			Iterator<SimpleUserNode> selit = sel.iterator();
-			List<Pair<Solution, String>> selectedFolders = new ArrayList<Pair<Solution, String>>();
+			List<MediaNode> selectedFolders = new ArrayList<MediaNode>();
 			List<IPersist> selectedPersists = new ArrayList<IPersist>();
 			while (state && selit.hasNext())
 			{
@@ -80,7 +89,7 @@ public class DeleteMediaAction extends Action implements ISelectionChangedListen
 				state = (nodeType == UserNodeType.MEDIA_FOLDER) || (nodeType == UserNodeType.MEDIA_IMAGE);
 				if (state)
 				{
-					if (nodeType == UserNodeType.MEDIA_FOLDER) selectedFolders.add((Pair<Solution, String>)node.getRealObject());
+					if (nodeType == UserNodeType.MEDIA_FOLDER) selectedFolders.add((MediaNode)node.getRealObject());
 					else selectedPersists.add((IPersist)node.getRealObject());
 				}
 			}
@@ -101,41 +110,65 @@ public class DeleteMediaAction extends Action implements ISelectionChangedListen
 		{
 			if (selectedMediaFolders != null)
 			{
-				for (Pair<Solution, String> mediaFolder : selectedMediaFolders)
+				WorkspaceFileAccess wsa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
+				for (MediaNode mediaFolder : selectedMediaFolders)
 				{
-					Solution rootObject = mediaFolder.getLeft();
-
-					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(rootObject.getName());
-					EclipseRepository repository = (EclipseRepository)rootObject.getRepository();
-
-					Iterator<Media> mediaIte = rootObject.getMedias(false);
-					Media media;
-					ArrayList<IPersist> deletedMedias = new ArrayList<IPersist>();
-					while (mediaIte.hasNext())
+					Solution rootObject = null;
+					IMediaProvider mediaProvider = mediaFolder.getMediaProvider();
+					if (mediaProvider instanceof Solution)
 					{
-						media = mediaIte.next();
-						if (media.getName().startsWith(mediaFolder.getRight()))
+						rootObject = (Solution)mediaProvider;
+					}
+					else if (mediaProvider instanceof FlattenedSolution)
+					{
+						rootObject = ((FlattenedSolution)mediaProvider).getSolution();
+					}
+
+					if (rootObject != null)
+					{
+						ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(rootObject.getName());
+						EclipseRepository repository = (EclipseRepository)rootObject.getRepository();
+
+						Iterator<Media> mediaIte = rootObject.getMedias(false);
+						Media media;
+						ArrayList<IPersist> deletedMedias = new ArrayList<IPersist>();
+						while (mediaIte.hasNext())
 						{
-							try
+							media = mediaIte.next();
+							if (media.getName().startsWith(mediaFolder.getPath()))
 							{
-								IPersist editingNode = servoyProject.getEditingPersist(media.getUUID());
-								repository.deleteObject(editingNode);
-								deletedMedias.add(editingNode);
-								EditorUtil.closeEditor(media);
-							}
-							catch (RepositoryException e)
-							{
-								ServoyLog.logError("Could not delete media", e); //$NON-NLS-1$
+								try
+								{
+									IPersist editingNode = servoyProject.getEditingPersist(media.getUUID());
+									repository.deleteObject(editingNode);
+									deletedMedias.add(editingNode);
+									EditorUtil.closeEditor(media);
+								}
+								catch (RepositoryException e)
+								{
+									ServoyLog.logError("Could not delete media", e); //$NON-NLS-1$
+								}
 							}
 						}
-					}
-					try
-					{
-						servoyProject.saveEditingSolutionNodes(deletedMedias.toArray(new IPersist[0]), true);
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError("Could not save editing solution when deleting media folder", e); //$NON-NLS-1$
+
+						try
+						{
+							wsa.delete(rootObject.getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + mediaFolder.getPath());
+							viewer.refreshTreeCompletely();
+						}
+						catch (IOException ex)
+						{
+							ServoyLog.logError(ex);
+						}
+
+						try
+						{
+							servoyProject.saveEditingSolutionNodes(deletedMedias.toArray(new IPersist[0]), true);
+						}
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError("Could not save editing solution when deleting media folder", e); //$NON-NLS-1$
+						}
 					}
 				}
 			}
