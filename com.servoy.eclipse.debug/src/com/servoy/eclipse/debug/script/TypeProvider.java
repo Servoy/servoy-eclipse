@@ -404,9 +404,15 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		int index = typeNameClassName.indexOf('<');
 		if (index != -1 && (typeNameClassName.indexOf('>', index)) != -1)
 		{
-			String classType = typeNameClassName.substring(0, index);
-			Type type = createDynamicType(context, classType, typeNameClassName);
-			if (type == null) type = createType(context, classType, typeNameClassName);
+			String fullClassName = typeNameClassName;
+			String classType = fullClassName.substring(0, index);
+			if (classType.equals("JSFoundset"))
+			{
+				classType = FoundSet.JS_FOUNDSET;
+				fullClassName = classType + fullClassName.substring(index);
+			}
+			Type type = createDynamicType(context, classType, fullClassName);
+			if (type == null) type = createType(context, classType, fullClassName);
 			return type;
 		}
 		return super.createDynamicType(context, typeNameClassName, fullTypeName);
