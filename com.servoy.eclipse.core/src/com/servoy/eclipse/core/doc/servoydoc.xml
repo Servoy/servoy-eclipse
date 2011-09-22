@@ -3722,6 +3722,17 @@ if (etype == ELEMENT_TYPES.COMBOBOX)
      // element is a COMBOBOX element
 }]]></sample>
         </constant>
+        <constant name="FORM">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant representing a form element.]]></description>
+          <summary><![CDATA[Constant representing a form element.]]></summary>
+          <sample><![CDATA[//the return value for an element of the Form type, as returned by the following code
+var renderElementType = event.getRenderable().getElementType();
+if (renderElementType == ELEMENT_TYPES.FORM)
+{
+     // element is a type form element
+}]]></sample>
+        </constant>
         <constant name="GROUP">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant representing a Group of elements.]]></description>
@@ -4983,6 +4994,40 @@ else application.output("The calculation is not stored").]]></sample>
     </object>
     <object publicName="JSColumn" qualifiedName="com.servoy.j2db.dataprocessing.JSColumn">
       <constants>
+        <constant name="DATABASE_IDENTITY">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the sequence type of columns.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the sequence type of columns.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getSequenceType())
+{
+case JSColumn.NONE:
+	// handle column with no sequence
+break;
+
+case JSColumn.UUID_GENERATOR:
+	// handle uuid generated column
+break;
+}]]></sample>
+        </constant>
+        <constant name="DATABASE_SEQUENCE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the sequence type of columns.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the sequence type of columns.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getSequenceType())
+{
+case JSColumn.NONE:
+	// handle column with no sequence
+break;
+
+case JSColumn.UUID_GENERATOR:
+	// handle uuid generated column
+break;
+}]]></sample>
+        </constant>
         <constant name="DATETIME">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant used when setting or getting the type of columns.]]></description>
@@ -5000,6 +5045,13 @@ case JSColumn.INTEGER:
 	// handle numerical column
 break;
 }]]></sample>
+        </constant>
+        <constant name="EXCLUDED_COLUMN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the flags of columns.
+This flag identifies columns that are skipped in the sql.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the flags of columns.]]></summary>
+          <sample><![CDATA[]]></sample>
         </constant>
         <constant name="INTEGER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -5037,6 +5089,12 @@ case JSColumn.INTEGER:
 break;
 }]]></sample>
         </constant>
+        <constant name="NONE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for column information indicating unset values.]]></description>
+          <summary><![CDATA[Constant for column information indicating unset values.]]></summary>
+          <sample><![CDATA[]]></sample>
+        </constant>
         <constant name="NUMBER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant used when setting or getting the type of columns.]]></description>
@@ -5055,6 +5113,67 @@ case JSColumn.INTEGER:
 break;
 }]]></sample>
         </constant>
+        <constant name="PK_COLUMN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the row identifier type of columns.
+This value identifies columns that are defined as primary key in the database.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the row identifier type of columns.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getRowIdentifierType())
+{
+case JSColumn.NONE:
+	// handle normal column
+break;
+
+case JSColumn.PK_COLUMN:
+	// handle database pk column
+break;
+
+case JSColumn.ROWID_COLUMN:
+	// handle developer defined pk column
+break;
+}]]></sample>
+        </constant>
+        <constant name="ROWID_COLUMN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the row identifier type of columns.
+This value identifies columns that are defined as primary key by the developer (but not in the database).]]></description>
+          <summary><![CDATA[Constant used when setting or getting the row identifier type of columns.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getRowIdentifierType())
+{
+case JSColumn.NONE:
+	// handle normal column
+break;
+
+case JSColumn.PK_COLUMN:
+	// handle database pk column
+break;
+
+case JSColumn.ROWID_COLUMN:
+	// handle developer defined pk column
+break;
+}]]></sample>
+        </constant>
+        <constant name="SERVOY_SEQUENCE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the sequence type of columns.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the sequence type of columns.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getSequenceType())
+{
+case JSColumn.NONE:
+	// handle column with no sequence
+break;
+
+case JSColumn.UUID_GENERATOR:
+	// handle uuid generated column
+break;
+}]]></sample>
+        </constant>
         <constant name="TEXT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant used when setting or getting the type of columns.]]></description>
@@ -5070,6 +5189,30 @@ break;
 case JSColumn.NUMBER:
 case JSColumn.INTEGER:
 	// handle numerical column
+break;
+}]]></sample>
+        </constant>
+        <constant name="UUID_COLUMN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the flags of columns.
+This flag identifies columns whose values are treated as UUID.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the flags of columns.]]></summary>
+          <sample><![CDATA[]]></sample>
+        </constant>
+        <constant name="UUID_GENERATOR">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the sequence type of columns.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the sequence type of columns.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getSequenceType())
+{
+case JSColumn.NONE:
+	// handle column with no sequence
+break;
+
+case JSColumn.UUID_GENERATOR:
+	// handle uuid generated column
 break;
 }]]></sample>
         </constant>
@@ -5157,6 +5300,32 @@ var jsColumn = jsTable.getColumn('active')
 var quotedColumnName = jsColumn.getQuotedSQLName()
 plugins.rawSQL.executeSQL('udm',  quotedTableName,  'select * from ' + quotedTableName + ' where ' + quotedColumnName + ' = ?', [1])]]></sample>
         </function>
+        <function name="getRowIdentifierType">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int row identifier type.]]></return>
+          <description><![CDATA[Get the row identifier type of the column.
+The sequence type is one of:
+ - JSColumn.PK_COLUMN
+ - JSColumn.ROWID_COLUMN
+ - JSColumn.NONE]]></description>
+          <summary><![CDATA[Get the row identifier type of the column.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getRowIdentifierType())
+{
+case JSColumn.NONE:
+	// handle normal column
+break;
+
+case JSColumn.PK_COLUMN:
+	// handle database pk column
+break;
+
+case JSColumn.ROWID_COLUMN:
+	// handle developer defined pk column
+break;
+}]]></sample>
+        </function>
         <function name="getSQLName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String sql name]]></return>
@@ -5174,6 +5343,30 @@ var sqlName = column.getSQLName()]]></sample>
           <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
 var column = table.getColumn('customername')
 var scale = column.getScale()]]></sample>
+        </function>
+        <function name="getSequenceType">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int sequence type.]]></return>
+          <description><![CDATA[Get the sequence type of the column.
+The sequence type is one of:
+ - JSColumn.NONE
+ - JSColumn.SERVOY_SEQUENCE
+ - JSColumn.DATABASE_SEQUENCE
+ - JSColumn.DATABASE_IDENTITY
+ - JSColumn.UUID_GENERATOR;]]></description>
+          <summary><![CDATA[Get the sequence type of the column.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getSequenceType())
+{
+case JSColumn.NONE:
+	// handle column with no sequence
+break;
+
+case JSColumn.UUID_GENERATOR:
+	// handle uuid generated column
+break;
+}]]></sample>
         </function>
         <function name="getTitle">
           <argumentsTypes/>
@@ -5222,19 +5415,735 @@ var typeName = column.getTypeAsString()]]></sample>
             <see member="getType" object="com.servoy.j2db.dataprocessing.JSColumn"/>
           </sees>
         </function>
-        <function name="isRowIdentifier">
+        <function name="hasFlag">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[boolean whether flag is set.]]></return>
+          <description><![CDATA[Check a flag of the column.
+The flags are a bit pattern consisting of 1 or more of the following bits:
+ - JSColumn.UUID_COLUMN
+ - JSColumn.EXCLUDED_COLUMN]]></description>
+          <summary><![CDATA[Check a flag of the column.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+if (column.hasFlag(JSColumn.UUID_COLUMN))
+{
+   // handle uuid column
+}]]></sample>
+          <parameters>
+            <parameter name="flag" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          </parameters>
+        </function>
+        <function deprecated="true" name="isRowIdentifier">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Use column.getRowIdentifierType() != JSColumn.NONE instead.]]></description>
           <summary><![CDATA[Use column.]]></summary>
           <sample><![CDATA[]]></sample>
         </function>
-        <function name="isUUID">
+        <function deprecated="true" name="isUUID">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Use column.hasFlag(JSColumn.UUID_COLUMN) instead.]]></description>
           <summary><![CDATA[Use column.]]></summary>
           <sample><![CDATA[]]></sample>
+        </function>
+      </functions>
+    </object>
+    <object publicName="JSColumnObject" qualifiedName="com.servoy.j2db.dataprocessing.JSColumnObject">
+      <constants>
+        <constant name="DATABASE_IDENTITY">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the sequence type of columns.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the sequence type of columns.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getSequenceType())
+{
+case JSColumn.NONE:
+	// handle column with no sequence
+break;
+
+case JSColumn.UUID_GENERATOR:
+	// handle uuid generated column
+break;
+}]]></sample>
+        </constant>
+        <constant name="DATABASE_SEQUENCE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the sequence type of columns.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the sequence type of columns.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getSequenceType())
+{
+case JSColumn.NONE:
+	// handle column with no sequence
+break;
+
+case JSColumn.UUID_GENERATOR:
+	// handle uuid generated column
+break;
+}]]></sample>
+        </constant>
+        <constant name="DATETIME">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the type of columns.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the type of columns.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getType())
+{
+case JSColumn.TEXT:
+	// handle text column
+break;
+
+case JSColumn.NUMBER:
+case JSColumn.INTEGER:
+	// handle numerical column
+break;
+}]]></sample>
+        </constant>
+        <constant name="EXCLUDED_COLUMN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the flags of columns.
+This flag identifies columns that are skipped in the sql.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the flags of columns.]]></summary>
+          <sample><![CDATA[]]></sample>
+        </constant>
+        <constant name="INTEGER">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the type of columns.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the type of columns.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getType())
+{
+case JSColumn.TEXT:
+	// handle text column
+break;
+
+case JSColumn.NUMBER:
+case JSColumn.INTEGER:
+	// handle numerical column
+break;
+}]]></sample>
+        </constant>
+        <constant name="MEDIA">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the type of columns.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the type of columns.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getType())
+{
+case JSColumn.TEXT:
+	// handle text column
+break;
+
+case JSColumn.NUMBER:
+case JSColumn.INTEGER:
+	// handle numerical column
+break;
+}]]></sample>
+        </constant>
+        <constant name="NONE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for column information indicating unset values.]]></description>
+          <summary><![CDATA[Constant for column information indicating unset values.]]></summary>
+          <sample><![CDATA[]]></sample>
+        </constant>
+        <constant name="NUMBER">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the type of columns.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the type of columns.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getType())
+{
+case JSColumn.TEXT:
+	// handle text column
+break;
+
+case JSColumn.NUMBER:
+case JSColumn.INTEGER:
+	// handle numerical column
+break;
+}]]></sample>
+        </constant>
+        <constant name="PK_COLUMN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the row identifier type of columns.
+This value identifies columns that are defined as primary key in the database.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the row identifier type of columns.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getRowIdentifierType())
+{
+case JSColumn.NONE:
+	// handle normal column
+break;
+
+case JSColumn.PK_COLUMN:
+	// handle database pk column
+break;
+
+case JSColumn.ROWID_COLUMN:
+	// handle developer defined pk column
+break;
+}]]></sample>
+        </constant>
+        <constant name="ROWID_COLUMN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the row identifier type of columns.
+This value identifies columns that are defined as primary key by the developer (but not in the database).]]></description>
+          <summary><![CDATA[Constant used when setting or getting the row identifier type of columns.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getRowIdentifierType())
+{
+case JSColumn.NONE:
+	// handle normal column
+break;
+
+case JSColumn.PK_COLUMN:
+	// handle database pk column
+break;
+
+case JSColumn.ROWID_COLUMN:
+	// handle developer defined pk column
+break;
+}]]></sample>
+        </constant>
+        <constant name="SERVOY_SEQUENCE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the sequence type of columns.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the sequence type of columns.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getSequenceType())
+{
+case JSColumn.NONE:
+	// handle column with no sequence
+break;
+
+case JSColumn.UUID_GENERATOR:
+	// handle uuid generated column
+break;
+}]]></sample>
+        </constant>
+        <constant name="TEXT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the type of columns.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the type of columns.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getType())
+{
+case JSColumn.TEXT:
+	// handle text column
+break;
+
+case JSColumn.NUMBER:
+case JSColumn.INTEGER:
+	// handle numerical column
+break;
+}]]></sample>
+        </constant>
+        <constant name="UUID_COLUMN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the flags of columns.
+This flag identifies columns whose values are treated as UUID.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the flags of columns.]]></summary>
+          <sample><![CDATA[]]></sample>
+        </constant>
+        <constant name="UUID_GENERATOR">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used when setting or getting the sequence type of columns.]]></description>
+          <summary><![CDATA[Constant used when setting or getting the sequence type of columns.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getSequenceType())
+{
+case JSColumn.NONE:
+	// handle column with no sequence
+break;
+
+case JSColumn.UUID_GENERATOR:
+	// handle uuid generated column
+break;
+}]]></sample>
+        </constant>
+      </constants>
+      <properties>
+        <property name="allowNull">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Get or set the allow-null flag of a new column.
+Note that when a column is added to an existing table, allowNull will always be set.
+For a primary key column, the allowNull flag will be always off, for other columns the flag is set by default.]]></description>
+          <summary><![CDATA[Get or set the allow-null flag of a new column.]]></summary>
+          <sample><![CDATA[var server = plugins.maintenance.getServer("example_data");
+if (server)
+{
+	var table = server.createNewTable("users");
+	if (table)
+	{
+		var pk = table.createNewColumn("id", JSColumn.MEDIA, 16); // can also use (JSColumn.TEXT, 36) for UUIDs
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.setFlag(JSColumn.UUID_COLUMN, true)
+		pk.sequenceType = JSColumn.UUID_GENERATOR
+		var c = table.createNewColumn("name", JSColumn.TEXT, 100);
+		c.allowNull = false
+		table.createNewColumn("age", JSColumn.INTEGER, 0);
+		table.createNewColumn("last_login", JSColumn.DATETIME, 0);
+		var result = server.synchronizeWithDB(table);
+		if (result) application.output("Table successfully created.");
+		else application.output("Table not created.");
+	}
+}]]></sample>
+        </property>
+        <property name="rowIdentifierType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Get or set the row identifier type of the column.
+The sequence type is one of:
+ - JSColumn.PK_COLUMN
+ - JSColumn.ROWID_COLUMN
+ - JSColumn.NONE]]></description>
+          <summary><![CDATA[Get or set the row identifier type of the column.]]></summary>
+          <sample><![CDATA[var server = plugins.maintenance.getServer("example_data");
+if (server)
+{
+	// users has uuid pk
+	var table = server.createNewTable("users");
+	if (table)
+	{
+		var pk = table.createNewColumn("id", JSColumn.MEDIA, 16); // can also use <JSColumn.TEXT, 36> for UUIDs)
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.setFlag(JSColumn.UUID_COLUMN, true)
+		pk.sequenceType = JSColumn.UUID_GENERATOR
+		table.createNewColumn("name", JSColumn.TEXT, 100);
+		var result = server.synchronizeWithDB(table);
+		if (result) application.output("Table users successfully created.");
+		else application.output("Table users not created.");
+	}
+
+ // groups has database sequence pk
+	table = server.createNewTable("groups");
+	if (table)
+	{
+		pk = table.createNewColumn("id", JSColumn.INTEGER, 0);
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.sequenceType = JSColumn.DATABASE_SEQUENCE
+		pk.setDatabaseSequenceName('mygroupsequence')
+		table.createNewColumn("name", JSColumn.TEXT, 100);
+		result = server.synchronizeWithDB(table);
+		if (result) application.output("Table groups successfully created.");
+		else application.output("Table groups not created.");
+	}
+}]]></sample>
+        </property>
+        <property name="sequenceType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Get or set the sequence type of the column.
+The sequence type is one of:
+ - JSColumn.NONE
+ - JSColumn.SERVOY_SEQUENCE
+ - JSColumn.DATABASE_SEQUENCE
+ - JSColumn.DATABASE_IDENTITY
+ - JSColumn.UUID_GENERATOR;]]></description>
+          <summary><![CDATA[Get or set the sequence type of the column.]]></summary>
+          <sample><![CDATA[var server = plugins.maintenance.getServer("example_data");
+if (server)
+{
+	// users has uuid pk
+	var table = server.createNewTable("users");
+	if (table)
+	{
+		var pk = table.createNewColumn("id", JSColumn.MEDIA, 16); // can also use <JSColumn.TEXT, 36> for UUIDs)
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.setFlag(JSColumn.UUID_COLUMN, true)
+		pk.sequenceType = JSColumn.UUID_GENERATOR
+		table.createNewColumn("name", JSColumn.TEXT, 100);
+		var result = server.synchronizeWithDB(table);
+		if (result) application.output("Table users successfully created.");
+		else application.output("Table users not created.");
+	}
+
+ // groups has database sequence pk
+	table = server.createNewTable("groups");
+	if (table)
+	{
+		pk = table.createNewColumn("id", JSColumn.INTEGER, 0);
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.sequenceType = JSColumn.DATABASE_SEQUENCE
+		pk.setDatabaseSequenceName('mygroupsequence')
+		table.createNewColumn("name", JSColumn.TEXT, 100);
+		result = server.synchronizeWithDB(table);
+		if (result) application.output("Table groups successfully created.");
+		else application.output("Table groups not created.");
+	}
+}]]></sample>
+        </property>
+      </properties>
+      <functions>
+        <function name="getAllowNull">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Get or set the allow-null flag of a new column.
+Note that when a column is added to an existing table, allowNull will always be set.
+For a primary key column, the allowNull flag will be always off, for other columns the flag is set by default.]]></description>
+          <summary><![CDATA[Get or set the allow-null flag of a new column.]]></summary>
+          <sample><![CDATA[var server = plugins.maintenance.getServer("example_data");
+if (server)
+{
+	var table = server.createNewTable("users");
+	if (table)
+	{
+		var pk = table.createNewColumn("id", JSColumn.MEDIA, 16); // can also use (JSColumn.TEXT, 36) for UUIDs
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.setFlag(JSColumn.UUID_COLUMN, true)
+		pk.sequenceType = JSColumn.UUID_GENERATOR
+		var c = table.createNewColumn("name", JSColumn.TEXT, 100);
+		c.allowNull = false
+		table.createNewColumn("age", JSColumn.INTEGER, 0);
+		table.createNewColumn("last_login", JSColumn.DATETIME, 0);
+		var result = server.synchronizeWithDB(table);
+		if (result) application.output("Table successfully created.");
+		else application.output("Table not created.");
+	}
+}]]></sample>
+        </function>
+        <function name="getDataProviderID">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String dataprovider id.]]></return>
+          <description><![CDATA[Get the data provider id (name) for this column.]]></description>
+          <summary><![CDATA[Get the data provider id (name) for this column.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+var dataProviderId = column.getDataProviderID()]]></sample>
+        </function>
+        <function name="getDescription">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String column description.]]></return>
+          <description><![CDATA[Get the description property of the column.]]></description>
+          <summary><![CDATA[Get the description property of the column.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customername')
+var desc = column.getDescription()]]></sample>
+        </function>
+        <function name="getForeignType">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String foreign type.]]></return>
+          <description><![CDATA[Get the foreign type of the column.
+The foreign type can be defined design time as a foreign key reference to another table.]]></description>
+          <summary><![CDATA[Get the foreign type of the column.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+var foreignType = column.getForeignType()
+if (foreignType != null)
+{
+	var fkTable = databaseManager.getTable('example_data', foreignType)
+}]]></sample>
+          <sees>
+            <see member="mergeRecords" object="com.servoy.j2db.dataprocessing.JSDatabaseManager"/>
+          </sees>
+        </function>
+        <function name="getLength">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int column length.]]></return>
+          <description><![CDATA[Get the length of the column as reported by the JDBC driver.]]></description>
+          <summary><![CDATA[Get the length of the column as reported by the JDBC driver.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customername')
+if (column.getLength() < 10)
+{
+	 // handle short column
+}]]></sample>
+        </function>
+        <function name="getQualifiedName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String qualified column name.]]></return>
+          <description><![CDATA[Get the qualified name (including table name) of the column as known by the database.
+The name is quoted, if necessary, as defined by the actual database used.]]></description>
+          <summary><![CDATA[Get the qualified name (including table name) of the column as known by the database.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+var qualifiedSqlName = column.getQualifiedName()]]></sample>
+        </function>
+        <function name="getQuotedSQLName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[column name, quoted if needed.]]></return>
+          <description><![CDATA[Returns a quoted version of the column name, if necessary, as defined by the actual database used.]]></description>
+          <summary><![CDATA[Returns a quoted version of the column name, if necessary, as defined by the actual database used.]]></summary>
+          <sample><![CDATA[//use with the raw SQL plugin:
+//if the table name contains characters that are illegal in sql, the table name will be quoted
+var jsTable = databaseManager.getTable('udm', 'campaigns')
+var quotedTableName = jsTable.getQuotedSQLName()
+var jsColumn = jsTable.getColumn('active')
+var quotedColumnName = jsColumn.getQuotedSQLName()
+plugins.rawSQL.executeSQL('udm',  quotedTableName,  'select * from ' + quotedTableName + ' where ' + quotedColumnName + ' = ?', [1])]]></sample>
+        </function>
+        <function name="getRowIdentifierType">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Get or set the row identifier type of the column.
+The sequence type is one of:
+ - JSColumn.PK_COLUMN
+ - JSColumn.ROWID_COLUMN
+ - JSColumn.NONE]]></description>
+          <summary><![CDATA[Get or set the row identifier type of the column.]]></summary>
+          <sample><![CDATA[var server = plugins.maintenance.getServer("example_data");
+if (server)
+{
+	// users has uuid pk
+	var table = server.createNewTable("users");
+	if (table)
+	{
+		var pk = table.createNewColumn("id", JSColumn.MEDIA, 16); // can also use <JSColumn.TEXT, 36> for UUIDs)
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.setFlag(JSColumn.UUID_COLUMN, true)
+		pk.sequenceType = JSColumn.UUID_GENERATOR
+		table.createNewColumn("name", JSColumn.TEXT, 100);
+		var result = server.synchronizeWithDB(table);
+		if (result) application.output("Table users successfully created.");
+		else application.output("Table users not created.");
+	}
+
+ // groups has database sequence pk
+	table = server.createNewTable("groups");
+	if (table)
+	{
+		pk = table.createNewColumn("id", JSColumn.INTEGER, 0);
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.sequenceType = JSColumn.DATABASE_SEQUENCE
+		pk.setDatabaseSequenceName('mygroupsequence')
+		table.createNewColumn("name", JSColumn.TEXT, 100);
+		result = server.synchronizeWithDB(table);
+		if (result) application.output("Table groups successfully created.");
+		else application.output("Table groups not created.");
+	}
+}]]></sample>
+        </function>
+        <function name="getSQLName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String sql name]]></return>
+          <description><![CDATA[Get the name of the column as known by the database.]]></description>
+          <summary><![CDATA[Get the name of the column as known by the database.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+var sqlName = column.getSQLName()]]></sample>
+        </function>
+        <function name="getScale">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int column scale.]]></return>
+          <description><![CDATA[Get the scale of the column as reported by the JDBC driver.]]></description>
+          <summary><![CDATA[Get the scale of the column as reported by the JDBC driver.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customername')
+var scale = column.getScale()]]></sample>
+        </function>
+        <function name="getSequenceType">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Get or set the sequence type of the column.
+The sequence type is one of:
+ - JSColumn.NONE
+ - JSColumn.SERVOY_SEQUENCE
+ - JSColumn.DATABASE_SEQUENCE
+ - JSColumn.DATABASE_IDENTITY
+ - JSColumn.UUID_GENERATOR;]]></description>
+          <summary><![CDATA[Get or set the sequence type of the column.]]></summary>
+          <sample><![CDATA[var server = plugins.maintenance.getServer("example_data");
+if (server)
+{
+	// users has uuid pk
+	var table = server.createNewTable("users");
+	if (table)
+	{
+		var pk = table.createNewColumn("id", JSColumn.MEDIA, 16); // can also use <JSColumn.TEXT, 36> for UUIDs)
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.setFlag(JSColumn.UUID_COLUMN, true)
+		pk.sequenceType = JSColumn.UUID_GENERATOR
+		table.createNewColumn("name", JSColumn.TEXT, 100);
+		var result = server.synchronizeWithDB(table);
+		if (result) application.output("Table users successfully created.");
+		else application.output("Table users not created.");
+	}
+
+ // groups has database sequence pk
+	table = server.createNewTable("groups");
+	if (table)
+	{
+		pk = table.createNewColumn("id", JSColumn.INTEGER, 0);
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.sequenceType = JSColumn.DATABASE_SEQUENCE
+		pk.setDatabaseSequenceName('mygroupsequence')
+		table.createNewColumn("name", JSColumn.TEXT, 100);
+		result = server.synchronizeWithDB(table);
+		if (result) application.output("Table groups successfully created.");
+		else application.output("Table groups not created.");
+	}
+}]]></sample>
+        </function>
+        <function name="getTitle">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String column title.]]></return>
+          <description><![CDATA[Get the title property of the column.]]></description>
+          <summary><![CDATA[Get the title property of the column.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customername')
+var title = column.getTitle()]]></sample>
+        </function>
+        <function name="getType">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int sql type.]]></return>
+          <description><![CDATA[Get the JDBC type of the column.
+The type reported by the JDBC driver will be mapped to one of:
+ - JSColumn.DATETIME
+ - JSColumn.TEXT
+ - JSColumn.NUMBER
+ - JSColumn.INTEGER
+ - JSColumn.MEDIA]]></description>
+          <summary><![CDATA[Get the JDBC type of the column.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+switch (column.getType())
+{
+case JSColumn.TEXT:
+	// handle text column
+break;
+
+case JSColumn.NUMBER:
+case JSColumn.INTEGER:
+	// handle numerical column
+break;
+}]]></sample>
+        </function>
+        <function name="getTypeAsString">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String sql name.]]></return>
+          <description><![CDATA[Get the name JDBC type of the column.
+The same mapping as defined in JSColumn.getType() is applied.]]></description>
+          <summary><![CDATA[Get the name JDBC type of the column.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+var typeName = column.getTypeAsString()]]></sample>
+          <sees>
+            <see member="getType" object="com.servoy.j2db.dataprocessing.JSColumn"/>
+          </sees>
+        </function>
+        <function name="hasFlag">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[boolean whether flag is set.]]></return>
+          <description><![CDATA[Check a flag of the column.
+The flags are a bit pattern consisting of 1 or more of the following bits:
+ - JSColumn.UUID_COLUMN
+ - JSColumn.EXCLUDED_COLUMN]]></description>
+          <summary><![CDATA[Check a flag of the column.]]></summary>
+          <sample><![CDATA[var table = databaseManager.getTable('example_data', 'orders')
+var column = table.getColumn('customerid')
+if (column.hasFlag(JSColumn.UUID_COLUMN))
+{
+   // handle uuid column
+}]]></sample>
+          <parameters>
+            <parameter name="flag" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          </parameters>
+        </function>
+        <function deprecated="true" name="isRowIdentifier">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Use column.getRowIdentifierType() != JSColumn.NONE instead.]]></description>
+          <summary><![CDATA[Use column.]]></summary>
+          <sample><![CDATA[]]></sample>
+        </function>
+        <function deprecated="true" name="isUUID">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Use column.hasFlag(JSColumn.UUID_COLUMN) instead.]]></description>
+          <summary><![CDATA[Use column.]]></summary>
+          <sample><![CDATA[]]></sample>
+        </function>
+        <function name="setDatabaseSequenceName">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Set the database sequence name of the column, used for columns with sequence type JSColumn.DATABASE_SEQUENCE.]]></description>
+          <summary><![CDATA[Set the database sequence name of the column, used for columns with sequence type JSColumn.]]></summary>
+          <sample><![CDATA[var server = plugins.maintenance.getServer("example_data");
+if (server)
+{
+	// users has uuid pk
+	var table = server.createNewTable("users");
+	if (table)
+	{
+		var pk = table.createNewColumn("id", JSColumn.MEDIA, 16); // can also use <JSColumn.TEXT, 36> for UUIDs)
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.setFlag(JSColumn.UUID_COLUMN, true)
+		pk.sequenceType = JSColumn.UUID_GENERATOR
+		table.createNewColumn("name", JSColumn.TEXT, 100);
+		var result = server.synchronizeWithDB(table);
+		if (result) application.output("Table users successfully created.");
+		else application.output("Table users not created.");
+	}
+
+ // groups has database sequence pk
+	table = server.createNewTable("groups");
+	if (table)
+	{
+		pk = table.createNewColumn("id", JSColumn.INTEGER, 0);
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.sequenceType = JSColumn.DATABASE_SEQUENCE
+		pk.setDatabaseSequenceName('mygroupsequence')
+		table.createNewColumn("name", JSColumn.TEXT, 100);
+		result = server.synchronizeWithDB(table);
+		if (result) application.output("Table groups successfully created.");
+		else application.output("Table groups not created.");
+	}
+}]]></sample>
+        </function>
+        <function name="setFlag">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Set or clear a flag of a new column.
+The flags are a bit pattern consisting of 1 or more of the following bits:
+ - JSColumn.UUID_COLUMN;
+ - JSColumn.EXCLUDED_COLUMN;]]></description>
+          <summary><![CDATA[Set or clear a flag of a new column.]]></summary>
+          <sample><![CDATA[var server = plugins.maintenance.getServer("example_data");
+if (server)
+{
+	var table = server.createNewTable("users");
+	if (table)
+	{
+		var pk = table.createNewColumn("id", JSColumn.MEDIA, 16); // can also use (JSColumn.TEXT, 36) for UUIDs
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.setFlag(JSColumn.UUID_COLUMN, true)
+		pk.sequenceType = JSColumn.UUID_GENERATOR
+		var c = table.createNewColumn("name", JSColumn.TEXT, 100);
+		c.allowNull = false
+		table.createNewColumn("age", JSColumn.INTEGER, 0);
+		table.createNewColumn("last_login", JSColumn.DATETIME, 0);
+		var result = server.synchronizeWithDB(table);
+		if (result) application.output("Table successfully created.");
+		else application.output("Table not created.");
+	}
+}]]></sample>
+          <parameters>
+            <parameter name="flag" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the flag to set]]></description>
+            </parameter>
+            <parameter name="set" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[true for set flag, false for clear flag]]></description>
+            </parameter>
+          </parameters>
         </function>
       </functions>
     </object>
@@ -14498,7 +15407,7 @@ var serverName = jsTable.getServerName()]]></sample>
           <argumentsTypes>
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.dataprocessing.JSColumn" typecode="com.servoy.j2db.dataprocessing.JSColumn"/>
+          <return type="com.servoy.j2db.dataprocessing.JSColumnObject" typecode="com.servoy.j2db.dataprocessing.JSColumnObject"/>
           <description><![CDATA[Creates a new column in this table. The name, type and length of the new column must be specified. For specifying the
 type of the column, use the JSColumn constants. The column is not actually created in the database until this
 table is synchronized with the database using the JSServer.synchronizeWithDB method. 
