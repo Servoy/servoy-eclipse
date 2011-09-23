@@ -39,6 +39,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.util.Utils;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -72,6 +73,13 @@ public class Activator extends AbstractUIPlugin implements IStartup
 	{
 		super.start(context);
 		plugin = this;
+
+		if (Utils.getPlatform() == Utils.PLATFORM_LINUX &&
+			"com.sun.java.swing.plaf.gtk.GTKLookAndFeel".equals(System.getProperty("swing.defaultlaf", "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"))) //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		{
+			// GTK LaF causes crashes or hangs on linux in developer
+			System.setProperty("swing.defaultlaf", "javax.swing.plaf.metal.MetalLookAndFeel"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 
 		// For now disable by default the UNUSED_VARIABLE check by default.
 		// people can override this in the errors/warning preference page.
