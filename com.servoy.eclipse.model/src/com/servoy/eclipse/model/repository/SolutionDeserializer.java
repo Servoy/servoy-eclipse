@@ -453,7 +453,7 @@ public class SolutionDeserializer
 			// parse the forms/tablenodes js objects
 			Iterator<Entry<File, List<JSONObject>>> childrenJSObjectMapIte = childrenJSObjectMap.entrySet().iterator();
 			Entry<File, List<JSONObject>> childrenJSObjectMapEntry;
-			File jsonFile = null, jsFile;
+			File jsonFile, jsFile;
 			while (childrenJSObjectMapIte.hasNext())
 			{
 				childrenJSObjectMapEntry = childrenJSObjectMapIte.next();
@@ -468,7 +468,8 @@ public class SolutionDeserializer
 							SolutionSerializer.FORM_FILE_EXTENSION);
 					}
 					else if (jsFile.getParentFile().getParentFile() != null &&
-						jsFile.getParentFile().getParentFile().getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME))
+						jsFile.getParentFile().getParentFile().getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME) &&
+						(jsFileName.endsWith(SolutionSerializer.CALCULATIONS_POSTFIX) || jsFileName.endsWith(SolutionSerializer.FOUNDSET_POSTFIX)))
 					{
 						// tablenode
 						if (jsFileName.endsWith(SolutionSerializer.CALCULATIONS_POSTFIX))
@@ -478,14 +479,15 @@ public class SolutionDeserializer
 								jsFileName.length() - SolutionSerializer.CALCULATIONS_POSTFIX.length()) +
 								SolutionSerializer.TABLENODE_FILE_EXTENSION);
 						}
-						else if (jsFileName.endsWith(SolutionSerializer.FOUNDSET_POSTFIX))
+						else
+						// if (jsFileName.endsWith(SolutionSerializer.FOUNDSET_POSTFIX))
 						{
 							// foundset methods
 							jsonFile = new File(jsFile.getParent(),
 								jsFileName.substring(0, jsFileName.length() - SolutionSerializer.FOUNDSET_POSTFIX.length()) +
 									SolutionSerializer.TABLENODE_FILE_EXTENSION);
 						}
-						if (jsonFile != null && !jsonFile.exists())
+						if (!jsonFile.exists())
 						{
 							// tbl file does not exist yet, create a table node
 							scriptParent = ((Solution)parent.getAncestor(IRepository.SOLUTIONS)).getOrCreateTableNode(DataSourceUtils.createDBTableDataSource(
@@ -493,56 +495,58 @@ public class SolutionDeserializer
 								jsonFile.getName().substring(0, jsonFile.getName().length() - SolutionSerializer.TABLENODE_FILE_EXTENSION.length())));
 						}
 					}
-
-					if (jsonFile != null) // file may not exist yet
+					else
 					{
-						if (scriptParent == null) // scriptParent may have been created when jsonfile does not exist
+						errorKeeper.addError(jsFile, new Exception("Unrecognized javascript file name '" + jsFile.getName() + "'."));
+						continue;
+					}
+
+					if (scriptParent == null) // scriptParent may have been created when jsonfile does not exist
+					{
+						scriptParent = (ISupportChilds)persistFileMap.get(jsonFile);
+					}
+					if (scriptParent != null)
+					{
+						List<JSONObject> childrenJSObjects = childrenJSObjectMapEntry.getValue();
+						if (!readAll)
 						{
-							scriptParent = (ISupportChilds)persistFileMap.get(jsonFile);
+							testDuplicates(scriptParent, childrenJSObjects);
 						}
-						if (scriptParent != null)
+						if (childrenJSObjects != null)
 						{
-							List<JSONObject> childrenJSObjects = childrenJSObjectMapEntry.getValue();
-							if (!readAll)
+							scriptFiles.add(jsFile);
+							for (JSONObject object : childrenJSObjects)
 							{
-								testDuplicates(scriptParent, childrenJSObjects);
+								setMissingTypeOnScriptObject(object, scriptParent, jsFile);
+								IPersist persist = null;
+								try
+								{
+									persist = deserializePersist(repository, scriptParent, persist_json_map, object, strayCats, jsFile, saved,
+										useFilesForDirtyMark);
+								}
+								catch (JSONException e)
+								{
+									ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e); //$NON-NLS-1$ //$NON-NLS-2$
+								}
+								catch (RepositoryException e)
+								{
+									ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e); //$NON-NLS-1$//$NON-NLS-2$
+								}
+								if (persist != null)
+								{
+									saved.add(persist.getUUID());
+								}
 							}
-							if (childrenJSObjects != null)
+							if (jsFile != null)
 							{
-								scriptFiles.add(jsFile);
-								for (JSONObject object : childrenJSObjects)
-								{
-									setMissingTypeOnScriptObject(object, scriptParent, jsFile);
-									IPersist persist = null;
-									try
-									{
-										persist = deserializePersist(repository, scriptParent, persist_json_map, object, strayCats, jsFile, saved,
-											useFilesForDirtyMark);
-									}
-									catch (JSONException e)
-									{
-										ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e); //$NON-NLS-1$ //$NON-NLS-2$
-									}
-									catch (RepositoryException e)
-									{
-										ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e); //$NON-NLS-1$//$NON-NLS-2$
-									}
-									if (persist != null)
-									{
-										saved.add(persist.getUUID());
-									}
-								}
-								if (jsFile != null)
-								{
-									jsParentFileMap.put(jsFile, scriptParent);
-								}
+								jsParentFileMap.put(jsFile, scriptParent);
 							}
 						}
-						else
-						{
-							errorKeeper.addError(jsFile, new Exception("Invalid javascript file name '" + jsFile.getName() +
-								"', doesn't have a corresponding object."));
-						}
+					}
+					else
+					{
+						errorKeeper.addError(jsFile, new Exception("Invalid javascript file name '" + jsFile.getName() +
+							"', doesn't have a corresponding object."));
 					}
 				}
 			}
