@@ -103,6 +103,7 @@ import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.IPrefixedConstantsObject;
 import com.servoy.j2db.scripting.IScriptObject;
+import com.servoy.j2db.scripting.IScriptable;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSI18N;
@@ -1233,8 +1234,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				Context.exit();
 			}
 		}
-		if (o instanceof IScriptObject) return getJSMethodsViaJavaMembers(ijm, (IScriptObject)o, elementName, prefix, actionType, real, excludeMethodNames);
-		return getJSMethodsViaJavaMembers(ijm, null, elementName, prefix, actionType, real, excludeMethodNames);
+		IScriptObject so = null;
+		if (o instanceof IScriptObject)
+		{
+			so = (IScriptObject)o;
+		}
+		else if (o instanceof IScriptable)
+		{
+			so = ScriptObjectRegistry.getScriptObjectForClass(o.getClass());
+		}
+		return getJSMethodsViaJavaMembers(ijm, so, elementName, prefix, actionType, real, excludeMethodNames);
 	}
 
 	private SimpleUserNode[] getJSMethods(Class clz, String elementName, String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames)

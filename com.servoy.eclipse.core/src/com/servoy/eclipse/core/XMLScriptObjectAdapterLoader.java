@@ -48,6 +48,13 @@ import com.servoy.j2db.util.JarManager.Extension;
 @SuppressWarnings("nls")
 public class XMLScriptObjectAdapterLoader
 {
+	/**
+	 * The name of the XML file which holds documentation and other Servoy extension related info.
+	 * 
+	 * @see com.servoy.eclipse.docgenerator.parser.DocumentationXMLBuilder.EXTENSION_XML_FILE
+	 */
+	private static final String EXTENSION_XML_FILE = "servoy-extension.xml";
+
 	private static IDocumentationManager docManager;
 	private static boolean coreLoaded = false;
 
@@ -121,14 +128,13 @@ public class XMLScriptObjectAdapterLoader
 	{
 		String clzCanonical = clz.replace(".", "/");
 		int idx = clzCanonical.lastIndexOf("/");
-		String docFileName = "servoy-doc.xml";
 		if (idx >= 0)
 		{
-			return clzCanonical.substring(0, idx + 1) + docFileName;
+			return clzCanonical.substring(0, idx + 1) + EXTENSION_XML_FILE;
 		}
 		else
 		{
-			return docFileName;
+			return EXTENSION_XML_FILE;
 		}
 	}
 
