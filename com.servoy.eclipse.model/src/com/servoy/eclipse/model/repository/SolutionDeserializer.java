@@ -1067,8 +1067,19 @@ public class SolutionDeserializer
 					if (typeIndex != -1)
 					{
 						int newLine = commentString.indexOf('\n', typeIndex);
-						String typeName = commentString.substring(typeIndex + SolutionSerializer.TYPEKEY.length(), newLine).replaceFirst("\\{", " ").replaceFirst(
-							"\\}", "").trim();
+						String typeName = commentString.substring(typeIndex + SolutionSerializer.TYPEKEY.length(), newLine);
+						// remove the JSDoc {} from it, but only the first and the last one to keep Object types {x:y}
+						int index = typeName.indexOf('{');
+						if (index >= 0)
+						{
+							typeName = typeName.substring(0, index) + typeName.substring(index + 1);
+						}
+						index = typeName.lastIndexOf('}');
+						if (index >= 0)
+						{
+							typeName = typeName.substring(0, index) + typeName.substring(index + 1);
+						}
+						typeName = typeName.trim();
 						json.putOpt(JS_TYPE_JSON_ATTRIBUTE, typeName);
 						int servoyType = getServoyType(typeName);
 						if (servoyType == IColumnTypes.NUMBER)
