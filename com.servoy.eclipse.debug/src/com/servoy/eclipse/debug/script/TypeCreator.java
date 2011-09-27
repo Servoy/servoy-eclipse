@@ -752,7 +752,7 @@ public abstract class TypeCreator
 							type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getName());
 						}
 					}
-					parameters[i] = new ScriptParameter(name, type, optional, vararg);
+					parameters[i] = new ScriptParameter(name, type, member.getParameterTypes()[i], optional, vararg);
 				}
 			}
 			else if (memberParamLength == parameterNames.length)
@@ -793,7 +793,7 @@ public abstract class TypeCreator
 						type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getName());
 						name = type;
 					}
-					parameters[i] = new ScriptParameter(name, type, optional, false);
+					parameters[i] = new ScriptParameter(name, type, paramClass, optional, false);
 				}
 			}
 		}
