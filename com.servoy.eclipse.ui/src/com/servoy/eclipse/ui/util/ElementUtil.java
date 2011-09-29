@@ -61,6 +61,7 @@ import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.ui.IDepricatedScriptTabPanelMethods;
+import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
 import com.servoy.j2db.ui.IScriptCheckBoxMethods;
 import com.servoy.j2db.ui.IScriptChoiceMethods;
 import com.servoy.j2db.ui.IScriptDataButtonMethods;
@@ -396,6 +397,7 @@ public class ElementUtil
 		{
 			int orient = ((TabPanel)persist).getTabOrientation();
 			if (orient == TabPanel.SPLIT_HORIZONTAL || orient == TabPanel.SPLIT_VERTICAL) return IScriptSplitPaneMethods.class;
+			else if (orient == TabPanel.ACCORDION_PANEL) return IScriptAccordionPanelMethods.class;
 			else return IDepricatedScriptTabPanelMethods.class;
 		}
 		else if (persist instanceof Portal)

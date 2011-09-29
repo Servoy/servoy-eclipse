@@ -145,10 +145,12 @@ public class VisualFormEditorPaletteFactory
 	private static final String CONTAINERS_DEFAULT_PANEL_ID = "tabpanel";
 	private static final String CONTAINERS_TABLESS_PANEL_ID = "tabless panel";
 	private static final String CONTAINERS_SPLIT_PANE_HORIZONTAL_ID = "split pane";
+	private static final String CONTAINERS_ACCORDION_PANEL_ID = "accordion panel";
 	private static final String[] CONTAINERS_IDS = new String[] {
 	/* */CONTAINERS_DEFAULT_PANEL_ID,
 	/* */CONTAINERS_TABLESS_PANEL_ID,
-	/* */CONTAINERS_SPLIT_PANE_HORIZONTAL_ID
+	/* */CONTAINERS_SPLIT_PANE_HORIZONTAL_ID,
+	/* */CONTAINERS_ACCORDION_PANEL_ID
 	/* */};
 
 	private static PaletteCustomization getDefaultPaletteCustomization()
@@ -544,6 +546,12 @@ public class VisualFormEditorPaletteFactory
 			icon = Activator.loadImageDescriptorFromBundle("tabless.gif");
 			tabOrienation = TabPanel.HIDE;
 			nameHint = "tabless_";
+		}
+		else if (CONTAINERS_ACCORDION_PANEL_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("accordion.jpg");
+			tabOrienation = TabPanel.ACCORDION_PANEL;
+			nameHint = "accordion_";
 		}
 
 		if (icon != null)

@@ -484,6 +484,26 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
+	public static final String ADD_ACCORDION_TEXT = "Place Accordion Panel Wizard";
+	public static final String ADD_ACCORDION_TOOLTIP = ADD_ACCORDION_TEXT;
+	public static final ImageDescriptor ADD_ACCORDION_IMAGE = Activator.loadImageDescriptorFromBundle("accordion.jpg");
+	public static final ActionFactory ADD_ACCORDION = new ActionFactory("place-accordionpanel") {//$NON-NLS-1$
+
+		@Override
+		public IWorkbenchAction create(IWorkbenchWindow window)
+		{
+			if (window == null)
+			{
+				throw new IllegalArgumentException();
+			}
+			RetargetAction action = new RetargetAction(getId(), ADD_ACCORDION_TEXT);
+			action.setToolTipText(ADD_ACCORDION_TOOLTIP);
+			window.getPartService().addPartListener(action);
+			action.setImageDescriptor(ADD_ACCORDION_IMAGE);
+			return action;
+		}
+	};
+
 	public static final String ADD_PORTAL_TEXT = "Place Portal Wizard";
 	public static final String ADD_PORTAL_TOOLTIP = ADD_PORTAL_TEXT;
 	public static final ImageDescriptor ADD_PORTAL_IMAGE = Activator.loadImageDescriptorFromBundle("portal.gif");

@@ -162,7 +162,17 @@
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
                state="false"
                style="push"
-               tooltip="Place SplitPane Wizard"/>               
+               tooltip="Place SplitPane Wizard"/>
+           <action
+               class="com.servoy.eclipse.designer.actions.AddAccordionPaneActionDelegate"
+               definitionId="com.servoy.eclipse.designer.action.addAccordionPaneAction"
+               icon="icons/accordion.jpg"
+               id="com.servoy.eclipse.designer.action.addAccordionPaneAction"
+               label="Place Accordion Panel Wizard"
+               menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
+               state="false"
+               style="push"
+               tooltip="Place Accordion Panel Wizard"/>                
          <action
                class="com.servoy.eclipse.designer.actions.AddMediaActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addMediaAction"

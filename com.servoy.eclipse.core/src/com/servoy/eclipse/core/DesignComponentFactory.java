@@ -40,6 +40,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.smart.dataui.ComponentAccordionPanel;
 import com.servoy.j2db.smart.dataui.ComponentJTabbedPane;
 import com.servoy.j2db.smart.dataui.InvisibleBean;
 import com.servoy.j2db.smart.dataui.SpecialSplitPane;
@@ -124,6 +125,16 @@ public class DesignComponentFactory extends ComponentFactory
 						splitPane.setRuntimeDividerLocation((orient == TabPanel.SPLIT_HORIZONTAL ? splitPane.getSize().width / 2
 							: splitPane.getSize().height / 2));
 						retval = splitPane;
+					}
+					else if (orient == TabPanel.ACCORDION_PANEL)
+					{
+						ComponentAccordionPanel tabs = new ComponentAccordionPanel();
+						applyBasicComponentProperties(application, tabs, (BaseComponent)meta, getStyleForBasicComponent(application, (BaseComponent)meta, form));
+						tabs.setAllTabsAlignment(((TabPanel)meta).getHorizontalAlignment());
+						tabs.addTab("position example", new JLabel("form will appear here", SwingConstants.LEFT)); //$NON-NLS-2$
+						tabs.addTab("position 2", new JLabel("another form showup here", SwingConstants.CENTER));
+						tabs.addTab("position 3", new JLabel("another form showup here", SwingConstants.CENTER));
+						retval = tabs;
 					}
 					else
 					{

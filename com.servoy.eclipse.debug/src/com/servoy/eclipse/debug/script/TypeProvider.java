@@ -102,6 +102,7 @@ import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.ui.IDepricatedScriptTabPanelMethods;
+import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
 import com.servoy.j2db.ui.IScriptBaseMethods;
 import com.servoy.j2db.ui.IScriptCheckBoxMethods;
 import com.servoy.j2db.ui.IScriptChoiceMethods;
@@ -1203,6 +1204,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			addType("RuntimePortal", IScriptPortalComponentMethods.class);
 			typeNames.put(IScriptListBoxMethods.class.getSimpleName(), "RuntimeListBox");
 			addType("RuntimeListBox", IScriptListBoxMethods.class);
+			typeNames.put(IScriptAccordionPanelMethods.class.getSimpleName(), "RuntimeAccordionPanel");
+			addType("RuntimeAccordionPanel", IScriptAccordionPanelMethods.class);
 
 			addType("RuntimeComponent", IScriptBaseMethods.class);
 		}

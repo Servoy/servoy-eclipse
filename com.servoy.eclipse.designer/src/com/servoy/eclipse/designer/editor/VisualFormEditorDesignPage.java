@@ -107,6 +107,7 @@ import com.servoy.eclipse.designer.actions.SelectSnapmodeAction;
 import com.servoy.eclipse.designer.actions.ViewerTogglePropertyAction;
 import com.servoy.eclipse.designer.actions.ZOrderAction;
 import com.servoy.eclipse.designer.dnd.FormElementTransferDropTarget;
+import com.servoy.eclipse.designer.editor.commands.AddAccordionPaneAction;
 import com.servoy.eclipse.designer.editor.commands.AddFieldAction;
 import com.servoy.eclipse.designer.editor.commands.AddMediaAction;
 import com.servoy.eclipse.designer.editor.commands.AddPortalAction;
@@ -474,6 +475,10 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
 
+		action = new AddAccordionPaneAction(editorPart);
+		getActionRegistry().registerAction(action);
+		getSelectionActions().add(action.getId());
+
 		action = new AddPortalAction(editorPart);
 		getActionRegistry().registerAction(action);
 		getSelectionActions().add(action.getId());
@@ -605,6 +610,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_PORTAL.getId()));
 		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_SPLITPANE.getId()));
 		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_TAB.getId()));
+		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_ACCORDION.getId()));
 
 		addToolbarAction(COOLBAR_LAYERING, getActionRegistry().getAction(ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP));
 		addToolbarAction(COOLBAR_LAYERING, getActionRegistry().getAction(ZOrderAction.ID_Z_ORDER_SEND_TO_BACK_ONE_STEP));
