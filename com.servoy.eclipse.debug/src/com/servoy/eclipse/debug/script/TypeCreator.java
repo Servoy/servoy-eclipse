@@ -752,7 +752,8 @@ public abstract class TypeCreator
 							type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getName());
 						}
 					}
-					parameters[i] = new ScriptParameter(name, type, member.getParameterTypes()[i], optional, vararg);
+					parameters[i] = new ScriptParameter(name, type, i < member.getParameterTypes().length ? member.getParameterTypes()[i] : null, optional,
+						vararg);
 				}
 			}
 			else if (memberParamLength == parameterNames.length)
