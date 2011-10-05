@@ -179,6 +179,7 @@ import com.servoy.eclipse.ui.views.ModifiedPropertySheetEntry;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ActivateSolutionAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddAsModuleAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddModuleAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ChangeResourcesProjectAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.CollapseTreeAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ContextAction;
@@ -253,6 +254,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.UpdateServoySequence
 import com.servoy.eclipse.ui.wizards.ExportSolutionWizard;
 import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
 import com.servoy.eclipse.ui.wizards.NewFormWizard;
+import com.servoy.eclipse.ui.wizards.NewModuleWizard;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
 import com.servoy.eclipse.ui.wizards.NewStyleWizard;
 import com.servoy.j2db.FlattenedSolution;
@@ -358,6 +360,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private RenameSolutionAction renameSolutionAction;
 
 	private RemoveModuleAction removeModuleAction;
+
+	private AddModuleAction addModuleAction;
 
 	private MoveTextAction moveCode;
 
@@ -2109,6 +2113,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		manager.add(new Separator());
 		if (addAsModuleAction.isEnabled()) manager.add(addAsModuleAction);
 		if (removeModuleAction.isEnabled()) manager.add(removeModuleAction);
+		if (addModuleAction.isEnabled()) manager.add(addModuleAction);
 		if (moveFormAction.isEnabled()) manager.add(moveFormAction);
 		if (duplicateFormAction.isEnabled()) manager.add(duplicateFormAction);
 		if (renameFormAction.isEnabled()) manager.add(renameFormAction);
@@ -2374,6 +2379,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		IAction newForm = new OpenNewFormWizardAction();
 		IAction newSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadImageDescriptorFromBundle("solution_icon.gif"), "Create new solution"); //$NON-NLS-1$ //$NON-NLS-2$
+		IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("solution_module_m.gif"), "Create new module"); //$NON-NLS-1$ //$NON-NLS-2$
 		IAction newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.gif"), "Create new style"); //$NON-NLS-1$//$NON-NLS-2$
 		exportActiveSolutionAction = new OpenWizardAction(ExportSolutionWizard.class, Activator.loadImageDescriptorFromOldLocations("export_wiz.gif"), //$NON-NLS-1$
 			"Export solution"); //$NON-NLS-1$
@@ -2409,6 +2415,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.SERVER, newTable);
 		newActionInTreePrimary.registerAction(UserNodeType.FORMS, newForm);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION, newSolution);
+		newActionInTreePrimary.registerAction(UserNodeType.MODULES, newModule);
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_SOLUTIONS, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.STYLES, newStyle);
 
@@ -2529,6 +2536,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		addAsModuleAction = new AddAsModuleAction(getSite().getShell());
 		renameSolutionAction = new RenameSolutionAction(this);
 		removeModuleAction = new RemoveModuleAction(getSite().getShell());
+		addModuleAction = new AddModuleAction(getSite().getShell());
 
 		expandNodeAction = new ExpandNodeAction(tree);
 
@@ -2564,6 +2572,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		tree.addSelectionChangedListener(addAsModuleAction);
 		tree.addSelectionChangedListener(renameSolutionAction);
 		tree.addSelectionChangedListener(removeModuleAction);
+		tree.addSelectionChangedListener(addModuleAction);
 		tree.addSelectionChangedListener(setActive);
 		tree.addSelectionChangedListener(replaceActionInTree);
 		tree.addSelectionChangedListener(replaceServerAction);
