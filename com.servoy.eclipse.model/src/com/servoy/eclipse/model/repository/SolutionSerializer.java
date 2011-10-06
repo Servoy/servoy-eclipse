@@ -530,25 +530,27 @@ public class SolutionSerializer
 	 * @param persist
 	 * @param sb
 	 */
+	@SuppressWarnings("nls")
 	private static void generateJSDocScriptVariableType(ScriptVariable variable, StringBuilder sb)
 	{
 		int type = Column.mapToDefaultType(variable.getVariableType());
 		// Add the "@type" tag.
 		String jsType = variable.getSerializableRuntimeProperty(IScriptProvider.TYPE);
 		ArgumentType argumentType = ArgumentType.convertFromColumnType(type, jsType);
-		if (argumentType != ArgumentType.Object)
+		// don't replace object types see SolutionDeserializer.parseJSFile()
+		if (argumentType != ArgumentType.Object && (jsType == null || !jsType.startsWith("{{")))
 		{
 			int index = sb.lastIndexOf(TYPEKEY);
 			if (index != -1)
 			{
-				int lineEnd = sb.indexOf("\n", index); //$NON-NLS-1$
+				int lineEnd = sb.indexOf("\n", index);
 				sb.replace(index + TYPEKEY.length() + 1, lineEnd, '{' + argumentType.getName() + '}');
 			}
 			else
 			{
 				int startComment = sb.indexOf(SV_COMMENT_START);
 				int lineEnd = sb.indexOf("\n", startComment); //$NON-NLS-1$
-				sb.insert(lineEnd, "\n * " + TYPEKEY + " {" + argumentType.getName() + "}\n *"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				sb.insert(lineEnd, "\n * " + TYPEKEY + " {" + argumentType.getName() + "}\n *");
 			}
 		}
 	}

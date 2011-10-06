@@ -1082,7 +1082,15 @@ public class SolutionDeserializer
 					if (typeIndex != -1)
 					{
 						int newLine = commentString.indexOf('\n', typeIndex);
-						String typeName = commentString.substring(typeIndex + SolutionSerializer.TYPEKEY.length(), newLine).replace('{', ' ').replace('}', ' ').trim();
+						String typeName = commentString.substring(typeIndex + SolutionSerializer.TYPEKEY.length(), newLine).trim();
+						// don't touch the special object types that start with {{
+						if (!typeName.startsWith("{{"))
+						{
+							if (typeName.startsWith("{") && typeName.endsWith("}"))
+							{
+								typeName = typeName.substring(1, typeName.length() - 1);
+							}
+						}
 						json.putOpt(JS_TYPE_JSON_ATTRIBUTE, typeName);
 						int servoyType = getServoyType(typeName);
 						if (servoyType == IColumnTypes.NUMBER)
