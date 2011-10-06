@@ -23,13 +23,19 @@ import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
@@ -44,6 +50,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.editors.DialogCellEditor;
 import com.servoy.eclipse.ui.resource.FontResource;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -144,6 +151,83 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 					}
 				});
 			}
+
+			final Listener labelListener = new Listener()
+			{
+				public void handleEvent(Event event)
+				{
+					Label label = (Label)event.widget;
+					Shell shell = label.getShell();
+					switch (event.type)
+					{
+						case SWT.MouseDown :
+							Event e = new Event();
+							e.item = (TreeItem)label.getData("_TREEITEM");
+							// set the selection as if
+							// the mouse down event went through to the tree
+							tree.setSelection(new TreeItem[] { (TreeItem)e.item });
+							tree.notifyListeners(SWT.Selection, e);
+							shell.dispose();
+							tree.setFocus();
+							break;
+						case SWT.MouseExit :
+							shell.dispose();
+							break;
+					}
+				}
+			};
+
+			Listener treeListener = new Listener()
+			{
+				Shell tip = null;
+				Label label = null;
+
+				public void handleEvent(Event event)
+				{
+					switch (event.type)
+					{
+						case SWT.Dispose :
+						case SWT.KeyDown :
+						case SWT.MouseMove :
+						{
+							if (tip == null) break;
+							tip.dispose();
+							tip = null;
+							label = null;
+							break;
+						}
+						case SWT.MouseHover :
+						{
+							TreeItem item = tree.getItem(new Point(event.x, event.y));
+							if (item != null && StaticContentSpecLoader.PROPERTY_TITLETEXT.getPropertyName().equals(item.getText(0)))
+							{
+								if (tip != null && !tip.isDisposed()) tip.dispose();
+								tip = new Shell(tree.getShell(), SWT.ON_TOP | SWT.NO_FOCUS | SWT.TOOL);
+								tip.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+								FillLayout layout = new FillLayout();
+								layout.marginWidth = 2;
+								tip.setLayout(layout);
+								label = new Label(tip, SWT.NONE);
+								label.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+								label.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+								label.setData("_TREEITEM", item);
+								label.setText("Set value <empty> for no title text");
+								label.addListener(SWT.MouseExit, labelListener);
+								label.addListener(SWT.MouseDown, labelListener);
+								Point size = tip.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+								Rectangle rect = item.getBounds(0);
+								Point pt = tree.toDisplay(rect.x, rect.y);
+								tip.setBounds(pt.x, pt.y, size.x, size.y);
+								tip.setVisible(true);
+							}
+						}
+					}
+				}
+			};
+			tree.addListener(SWT.Dispose, treeListener);
+			tree.addListener(SWT.KeyDown, treeListener);
+			tree.addListener(SWT.MouseMove, treeListener);
+			tree.addListener(SWT.MouseHover, treeListener);
 
 			composite.setLayout(new FormLayout());
 
