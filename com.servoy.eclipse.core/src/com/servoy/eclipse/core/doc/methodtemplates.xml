@@ -10,6 +10,14 @@
       </arguments>
     </methodtemplate>
   </event>
+  <event name="onAfterCreateMethodID">
+    <methodtemplate name="afterFoundSetRecordCreate" addtodo="true">
+      <description><![CDATA[Record after-create trigger]]></description>
+      <arguments>
+        <methodargument name="record" type="JSRecord"><![CDATA[record that is created]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
   <event name="onAfterDeleteMethodID">
     <methodtemplate name="afterRecordDelete" addtodo="true">
       <description><![CDATA[Record after-delete trigger]]></description>
@@ -18,12 +26,24 @@
       </arguments>
     </methodtemplate>
   </event>
+  <event name="onAfterFindMethodID">
+    <methodtemplate name="afterFoundSetFind" addtodo="true">
+      <description><![CDATA[Foundset post-find trigger]]></description>
+      <code><![CDATA[]]></code>
+    </methodtemplate>
+  </event>
   <event name="onAfterInsertMethodID">
     <methodtemplate name="afterRecordInsert" addtodo="true">
       <description><![CDATA[Record after-insert trigger]]></description>
       <arguments>
         <methodargument name="record" type="JSRecord"><![CDATA[record that is inserted]]></methodargument>
       </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onAfterSearchMethodID">
+    <methodtemplate name="afterFoundSetSearch" addtodo="true">
+      <description><![CDATA[Foundset post-search trigger]]></description>
+      <code><![CDATA[]]></code>
     </methodtemplate>
   </event>
   <event name="onAfterUpdateMethodID">
@@ -50,6 +70,13 @@
       <arguments>
         <methodargument name="force" type="Boolean"><![CDATA[if false then solution close can be stopped by returning false]]></methodargument>
       </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onCreateMethodID">
+    <methodtemplate name="onFoundSetRecordCreate" type="Boolean" addtodo="true">
+      <description><![CDATA[Record pre-create trigger
+When false is returned the record a record not be created in the foundset.]]></description>
+      <code><![CDATA[]]></code>
     </methodtemplate>
   </event>
   <event name="onDataBroadcastMethodID">
@@ -118,7 +145,7 @@ return true]]></code>
     </methodtemplate>
   </event>
   <event name="onDragEndMethodID">
-    <methodtemplate name="onDragEnd" type="Number" addtodo="true">
+    <methodtemplate name="onDragEnd" addtodo="true">
       <description><![CDATA[Handle end of a drag]]></description>
       <arguments>
         <methodargument name="event" type="JSDNDEvent"><![CDATA[the event that triggered the action]]></methodargument>
@@ -202,9 +229,7 @@ if (ex instanceof ServoyException)
  var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
- var trace = "";
- if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
- else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+ var trace = servoyException.getStackTrace();
 	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
 	{
  		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
@@ -241,6 +266,13 @@ return true]]></code>
       <arguments>
         <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
       </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onFindMethodID">
+    <methodtemplate name="onFoundSetFind" type="Boolean" addtodo="true">
+      <description><![CDATA[Foundset pre-find trigger
+When false is returned the foundset will not go into find mode.]]></description>
+      <code><![CDATA[]]></code>
     </methodtemplate>
   </event>
   <event name="onFocusGainedMethodID">
@@ -381,6 +413,12 @@ return true]]></code>
   <event name="onRenderMethodID">
     <methodtemplate name="onRender" addtodo="true">
       <description><![CDATA[Called before the form component is rendered]]></description>
+      <code><![CDATA[// NOTE: a property set on the renderable, will be keept on the element only during onRender
+if (event.isRecordSelected()) {
+	event.getRenderable().fgcolor = '#00ff00';
+} else if (event.getRecordIndex() % 2) {
+	event.getRenderable().fgcolor = '#ff0000';
+}]]></code>
       <arguments>
         <methodargument name="event" type="JSRenderEvent"><![CDATA[the render event]]></methodargument>
       </arguments>
@@ -410,6 +448,17 @@ return true]]></code>
         <methodargument name="clear" type="Boolean"><![CDATA[clear last results]]></methodargument>
         <methodargument name="reduce" type="Boolean"><![CDATA[reduce search]]></methodargument>
         <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onSearchMethodID">
+    <methodtemplate name="onFoundSetSearch" type="Boolean" addtodo="true">
+      <description><![CDATA[Foundset pre-search trigger
+When false is returned the search will not be executed and the foundset will stay in find mode.]]></description>
+      <code><![CDATA[]]></code>
+      <arguments>
+        <methodargument name="clearLastResults" type="Boolean"><![CDATA[]]></methodargument>
+        <methodargument name="reduceSearch" type="Boolean"><![CDATA[]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
