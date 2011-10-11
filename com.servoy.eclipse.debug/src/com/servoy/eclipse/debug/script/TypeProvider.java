@@ -90,6 +90,21 @@ import com.servoy.j2db.plugins.IBeanClassProvider;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.plugins.IPluginManager;
+import com.servoy.j2db.querybuilder.impl.QBAggregate;
+import com.servoy.j2db.querybuilder.impl.QBColumn;
+import com.servoy.j2db.querybuilder.impl.QBColumns;
+import com.servoy.j2db.querybuilder.impl.QBCondition;
+import com.servoy.j2db.querybuilder.impl.QBFactory;
+import com.servoy.j2db.querybuilder.impl.QBGroupBy;
+import com.servoy.j2db.querybuilder.impl.QBJoin;
+import com.servoy.j2db.querybuilder.impl.QBJoins;
+import com.servoy.j2db.querybuilder.impl.QBLogicalCondition;
+import com.servoy.j2db.querybuilder.impl.QBPart;
+import com.servoy.j2db.querybuilder.impl.QBResult;
+import com.servoy.j2db.querybuilder.impl.QBSelect;
+import com.servoy.j2db.querybuilder.impl.QBSort;
+import com.servoy.j2db.querybuilder.impl.QBSorts;
+import com.servoy.j2db.querybuilder.impl.QBTableClause;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.IReturnedTypesProvider;
 import com.servoy.j2db.scripting.IScriptable;
@@ -166,6 +181,21 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addScopeType("InvisibleRelations", new InvisibleRelationsScopeCreator());
 		addScopeType("InvisibleDataproviders", new InvisibleDataprovidersScopeCreator());
 		addScopeType("Globals", new GlobalScopeCreator());
+		addScopeType(QBAggregate.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBColumn.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBCondition.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBFactory.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBGroupBy.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBJoin.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBJoins.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBLogicalCondition.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBResult.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBSelect.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBSort.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBSorts.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBTableClause.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBPart.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBColumns.class.getSimpleName(), new QueryBuilderColumnsCreator());
 	}
 
 	/*
@@ -594,13 +624,13 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 					JSType memberType = member.getType();
 					if (memberType != null)
 					{
-						if (memberType.getName().equals(Record.JS_RECORD))
-						{
-							overwrittenMembers.add(TypeProvider.clone(member, context.getTypeRef(Record.JS_RECORD + '<' + config + '>')));
-						}
-						else if (memberType.getName().equals("Array<" + Record.JS_RECORD + '>'))
+						if (memberType.getName().equals("Array<" + Record.JS_RECORD + '>'))
 						{
 							overwrittenMembers.add(TypeProvider.clone(member, TypeUtil.arrayOf(Record.JS_RECORD + '<' + config + '>')));
+						}
+						else if (memberType.getName().equals(Record.JS_RECORD) || memberType.getName().equals(QBSelect.class.getSimpleName()))
+						{
+							overwrittenMembers.add(TypeProvider.clone(member, context.getTypeRef(memberType.getName() + '<' + config + '>')));
 						}
 						else if (memberType.getName().equals(FoundSet.JS_FOUNDSET))
 						{
@@ -663,8 +693,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			type.getMembers().add(selectedIndex);
 			return type;
 		}
-
-
 	}
 
 	private class JSDataSetCreator implements IScopeTypeCreator
@@ -920,6 +948,134 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			return type;
 		}
 	}
+
+	private class QueryBuilderCreator implements IScopeTypeCreator
+	{
+		private Type cachedSuperTypeTemplateType = null;
+
+		private final Map<String, Class< ? >> qbClasses = new HashMap<String, Class< ? >>();
+
+		QueryBuilderCreator()
+		{
+			addClass(QBAggregate.class);
+			addClass(QBColumn.class);
+			addClass(QBColumns.class);
+			addClass(QBCondition.class);
+			addClass(QBFactory.class);
+			addClass(QBGroupBy.class);
+			addClass(QBJoin.class);
+			addClass(QBJoins.class);
+			addClass(QBLogicalCondition.class);
+			addClass(QBResult.class);
+			addClass(QBSelect.class);
+			addClass(QBSort.class);
+			addClass(QBSorts.class);
+			addClass(QBPart.class);
+			addClass(QBTableClause.class);
+		}
+
+		private void addClass(Class< ? > clazz)
+		{
+			qbClasses.put(clazz.getSimpleName(), clazz);
+		}
+
+		public Type createType(ITypeInfoContext context, String fullTypeName)
+		{
+			int indexOf = fullTypeName.indexOf('<');
+			if (indexOf == -1)
+			{
+				Type type = createBaseType(context, fullTypeName);
+
+				// quickly add this one to the static types.
+				context.markInvariant(type);
+				return type;
+			}
+
+			String config = fullTypeName.substring(indexOf + 1, fullTypeName.length() - 1);
+			if (cachedSuperTypeTemplateType == null)
+			{
+				cachedSuperTypeTemplateType = createBaseType(context, fullTypeName.substring(0, indexOf));
+			}
+			EList<Member> members = cachedSuperTypeTemplateType.getMembers();
+			List<Member> overwrittenMembers = new ArrayList<Member>();
+			for (Member member : members)
+			{
+				JSType memberType = member.getType();
+				if (memberType != null && qbClasses.containsKey(memberType.getName()))
+				{
+					overwrittenMembers.add(TypeProvider.clone(member, context.getTypeRef(memberType.getName() + '<' + config + '>')));
+				}
+			}
+
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.getMembers().addAll(overwrittenMembers);
+			type.setName(fullTypeName);
+			type.setKind(TypeKind.JAVA);
+//			type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
+			type.setSuperType(cachedSuperTypeTemplateType);
+			return type;
+		}
+
+		/**
+		 * @param context
+		 * @param fullTypeName
+		 * @return
+		 */
+		private Type createBaseType(ITypeInfoContext context, String fullTypeName)
+		{
+			return TypeProvider.this.createType(context, fullTypeName, qbClasses.get(fullTypeName));
+		}
+	}
+
+	private class QueryBuilderColumnsCreator implements IScopeTypeCreator
+	{
+
+		public Type createType(ITypeInfoContext context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+
+			Pair<FlattenedSolution, Table> fsAndTable = getFlattenedSolutonAndTable(typeName);
+			if (fsAndTable != null && fsAndTable.getRight() != null)
+			{
+				Table table = fsAndTable.getRight();
+				addDataProviders(table.getColumns().iterator(), type.getMembers(), table.getDataSource(), context);
+				context.markInvariant(type, "scope:qbcolumns");
+			}
+
+			return type;
+		}
+
+		private void addDataProviders(Iterator< ? extends IDataProvider> dataproviders, EList<Member> members, String dataSource, ITypeInfoContext context)
+		{
+			while (dataproviders.hasNext())
+			{
+				IDataProvider provider = dataproviders.next();
+				Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+				property.setName(provider.getDataProviderID());
+				property.setAttribute(RESOURCE, provider);
+				property.setVisible(true);
+				property.setType(context.getTypeRef(QBColumn.class.getSimpleName() + '<' + dataSource + '>'));
+				ImageDescriptor image = COLUMN_IMAGE;
+				String description = "Column";
+				if (provider instanceof AggregateVariable)
+				{
+					image = COLUMN_AGGR_IMAGE;
+					description = "Aggregate (" + ((AggregateVariable)provider).getRootObject().getName() + ")";
+				}
+				else if (provider instanceof ScriptCalculation)
+				{
+					image = COLUMN_CALC_IMAGE;
+					description = "Calculation (" + ((ScriptCalculation)provider).getRootObject().getName() + ")";
+				}
+				property.setAttribute(IMAGE_DESCRIPTOR, image);
+				property.setDescription(description.intern());
+				members.add(property);
+			}
+		}
+	}
+
 	private static class InvisibleRelationsScopeCreator extends RelationsScopeCreator
 	{
 		/*
