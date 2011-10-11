@@ -168,9 +168,11 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 	public static ScriptMethod createNewMethod(final Shell shell, IPersist parent, String methodKey, boolean activate, String forcedMethodName)
 	{
 		String methodType;
+		int tagFilter = MethodTemplate.PUBLIC_TAG;
 		if (parent instanceof Form)
 		{
 			methodType = "form";
+			tagFilter |= (MethodTemplate.PRIVATE_TAG | MethodTemplate.PROTECTED_TAG);
 		}
 		else if (parent instanceof Solution)
 		{
@@ -178,7 +180,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		}
 		else if (parent instanceof TableNode)
 		{
-			methodType = "foundset";
+			methodType = "entity";
+			tagFilter |= MethodTemplate.PRIVATE_TAG; // no protected
 		}
 		else
 		{
@@ -189,10 +192,10 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		boolean override = false;
 		MethodArgument[] superArguments = null;
 		String methodName = forcedMethodName;
-		int tagToOutput = 0;
+		int tagToOutput = MethodTemplate.PUBLIC_TAG;
 		if (methodName == null)
 		{
-			Pair<String, Integer> methodNameAndPrivateFlag = askForMethodName(methodType, parent, methodKey, shell);
+			Pair<String, Integer> methodNameAndPrivateFlag = askForMethodName(methodType, parent, methodKey, shell, tagFilter);
 			if (methodNameAndPrivateFlag != null)
 			{
 				methodName = methodNameAndPrivateFlag.getLeft();
@@ -467,7 +470,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 	}
 
 	@SuppressWarnings("nls")
-	private static Pair<String, Integer> askForMethodName(String methodType, final IPersist parent, String methodKey, Shell shell)
+	private static Pair<String, Integer> askForMethodName(String methodType, final IPersist parent, String methodKey, Shell shell, int tagFilter)
 	{
 		String defaultName = ""; //$NON-NLS-1$
 		if (methodKey != null)
@@ -495,7 +498,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 				}
 			}
 		}
-		NewMethodInputDialog dialog = new NewMethodInputDialog(shell, "New " + methodType + " method", "Specify a method name", defaultName, parent);
+		NewMethodInputDialog dialog = new NewMethodInputDialog(shell, "New " + methodType + " method", "Specify a method name", defaultName, parent, tagFilter);
 		dialog.setBlockOnOpen(true);
 		dialog.open();
 
@@ -513,7 +516,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		private int tagToOutput;
 		private Button createPrivateButton;
 		private Button createProtectedButton;
-		private final IPersist parent;
+		private final int tagFilter;
 
 		/**
 		 * @param parentShell
@@ -522,7 +525,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		 * @param initialValue
 		 * @param validator
 		 */
-		private NewMethodInputDialog(Shell parentShell, String dialogTitle, String dialogMessage, String initialValue, final IPersist parent)
+		private NewMethodInputDialog(Shell parentShell, String dialogTitle, String dialogMessage, String initialValue, final IPersist parent, int tagFilter)
 		{
 			super(parentShell, dialogTitle, dialogMessage, initialValue, new IInputValidator()
 			{
@@ -532,7 +535,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 					return validateMethodName(parent, newText);
 				}
 			});
-			this.parent = parent;
+			this.tagFilter = tagFilter;
 		}
 
 		@SuppressWarnings("nls")
@@ -540,11 +543,24 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		protected void createButtonsForButtonBar(Composite compositeParent)
 		{
 			// create OK and Cancel buttons by default
-			okButton = createButton(compositeParent, IDialogConstants.OK_ID, "Create public", true);
-			if (!(this.parent instanceof Solution))
+			if (tagFilter == MethodTemplate.PUBLIC_TAG || tagFilter == 0)
 			{
-				createPrivateButton = createButton(compositeParent, IDialogConstants.PROCEED_ID, "Create private", false);
-				createProtectedButton = createButton(compositeParent, IDialogConstants.IGNORE_ID, "Create protected", false);
+				okButton = createButton(compositeParent, IDialogConstants.OK_ID, "Create", true);
+			}
+			else
+			{
+				if ((tagFilter & MethodTemplate.PUBLIC_TAG) != 0)
+				{
+					okButton = createButton(compositeParent, IDialogConstants.OK_ID, "Create public", true);
+				}
+				if ((tagFilter & MethodTemplate.PRIVATE_TAG) != 0)
+				{
+					createPrivateButton = createButton(compositeParent, IDialogConstants.PROCEED_ID, "Create private", false);
+				}
+				if ((tagFilter & MethodTemplate.PROTECTED_TAG) != 0)
+				{
+					createProtectedButton = createButton(compositeParent, IDialogConstants.IGNORE_ID, "Create protected", false);
+				}
 			}
 			createButton(compositeParent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 			//do this here because setting the text will set enablement on the ok
@@ -584,6 +600,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 			}
 			else
 			{
+				tagToOutput = MethodTemplate.PUBLIC_TAG;
 				super.buttonPressed(buttonId);
 			}
 		}

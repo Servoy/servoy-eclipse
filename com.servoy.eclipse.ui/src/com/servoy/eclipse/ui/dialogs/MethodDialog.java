@@ -46,7 +46,6 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
@@ -207,10 +206,6 @@ public class MethodDialog extends TreeSelectDialog
 		public Object[] getChildren(Object parentElement)
 		{
 			IPersist context = persistContext.getContext();
-			if (context == null)
-			{
-				context = persistContext.getPersist();
-			}
 
 			if (GLOBAL_METHODS == parentElement)
 			{
@@ -220,21 +215,22 @@ public class MethodDialog extends TreeSelectDialog
 				return Utils.arrayInsert(children, modules, children == null ? 0 : children.length, modules == null ? 0 : modules.length);
 			}
 
-			Form form = null;
+			IPersist parent;
 			Iterator<ScriptMethod> scriptMethods = null;
 			if (FORM_METHODS == parentElement)
 			{
-				form = (Form)context.getAncestor(IRepository.FORMS);
-				if (form != null)
+				parent = context.getAncestor(IRepository.FORMS);
+				if (parent != null)
 				{
-					scriptMethods = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form).getScriptMethods(true);
+					scriptMethods = ModelUtils.getEditingFlattenedSolution(context).getFlattenedForm(parent).getScriptMethods(true);
 				}
 			}
 
 			else if (parentElement instanceof ITable)
 			{
 				// foundset methods
-				FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(context.getAncestor(IRepository.SOLUTIONS));
+				parent = context.getAncestor(IRepository.TABLENODES);
+				FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(context);
 				try
 				{
 					scriptMethods = editingFlattenedSolution.getFoundsetMethods((ITable)parentElement, true).iterator();
@@ -247,31 +243,28 @@ public class MethodDialog extends TreeSelectDialog
 
 			else if (parentElement instanceof Solution)
 			{
-				Solution solution = (Solution)parentElement;
-				scriptMethods = solution.getScriptMethods(true);
+				parent = context.getAncestor(IRepository.SOLUTIONS);
+				scriptMethods = ((Solution)parentElement).getScriptMethods(true);
 			}
 
+			else
+			{
+				return null;
+			}
+
+			List<MethodWithArguments> lst = new ArrayList<MethodWithArguments>();
 			if (scriptMethods != null)
 			{
-				List<MethodWithArguments> lst = new ArrayList<MethodWithArguments>();
 				while (scriptMethods.hasNext())
 				{
 					ScriptMethod sm = scriptMethods.next();
-					if (form != null)
+					if (parent == sm.getParent() || !sm.isPrivate())
 					{
-						if (form != sm.getParent() && sm.isPrivate()) continue;
+						lst.add(MethodWithArguments.create(sm, null));
 					}
-					else if (sm.isPrivate())
-					{
-						continue;
-					}
-					MethodWithArguments mwa = MethodWithArguments.create(sm, null);
-					lst.add(mwa);
 				}
-				return lst.toArray();
 			}
-
-			return null;
+			return lst.toArray();
 		}
 
 		public Object getParent(Object element)
@@ -349,7 +342,7 @@ public class MethodDialog extends TreeSelectDialog
 		{
 			if (FORM_METHODS == value) return "form methods";
 			if (GLOBAL_METHODS == value) return "global methods";
-			if (value instanceof ITable) return "foundset methods";
+			if (value instanceof ITable) return "entity methods";
 			if (value instanceof Solution) return ((Solution)value).getName();
 			return null;
 		}
