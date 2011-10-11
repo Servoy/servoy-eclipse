@@ -66,6 +66,7 @@ import com.servoy.j2db.dataprocessing.IFoundSetInternal;
 import com.servoy.j2db.dataprocessing.IFoundSetListener;
 import com.servoy.j2db.dataprocessing.IFoundSetManagerInternal;
 import com.servoy.j2db.dataprocessing.IGlobalValueEntry;
+import com.servoy.j2db.dataprocessing.SortColumn;
 import com.servoy.j2db.dataprocessing.SwingFoundSetFactory;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
@@ -74,6 +75,8 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.plugins.ClientPluginAccessProvider;
 import com.servoy.j2db.plugins.IPluginAccess;
 import com.servoy.j2db.plugins.IPluginManager;
+import com.servoy.j2db.query.QuerySelect;
+import com.servoy.j2db.querybuilder.IQueryBuilder;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IApplicationServer;
@@ -295,7 +298,21 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 						}
 
 						@Override
-						public IFoundSetInternal getNewFoundSet(ITable table, List defaultSortColumns) throws ServoyException
+						public IFoundSetInternal getNewFoundSet(ITable table, QuerySelect pkSelect, List<SortColumn> defaultSortColumns) throws ServoyException
+						{
+							// no foundsets in designer
+							return null;
+						}
+
+						@Override
+						public IFoundSet getFoundSet(IQueryBuilder query) throws ServoyException
+						{
+							// no foundsets in designer
+							return null;
+						}
+
+						@Override
+						public IFoundSetInternal getFoundSet(String dataSource) throws ServoyException
 						{
 							// no foundsets in designer
 							return null;
@@ -309,7 +326,8 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 						}
 
 						@Override
-						public IFoundSetInternal getNewFoundSet(String dataSource, List defaultSortColumns) throws ServoyException
+						public IFoundSetInternal getNewFoundSet(String dataSource, QuerySelect pkSelect, List<SortColumn> defaultSortColumns)
+							throws ServoyException
 						{
 							// no foundsets in designer
 							return null;
