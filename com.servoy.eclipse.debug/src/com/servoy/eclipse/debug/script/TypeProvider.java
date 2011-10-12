@@ -1000,7 +1000,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			String config = fullTypeName.substring(indexOf + 1, fullTypeName.length() - 1);
 			if (cachedSuperTypeTemplateType == null)
 			{
-				cachedSuperTypeTemplateType = createBaseType(context, fullTypeName.substring(0, indexOf));
+				cachedSuperTypeTemplateType = createType(context, fullTypeName.substring(0, indexOf));
 			}
 			EList<Member> members = cachedSuperTypeTemplateType.getMembers();
 			List<Member> overwrittenMembers = new ArrayList<Member>();
@@ -1029,7 +1029,15 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		 */
 		private Type createBaseType(ITypeInfoContext context, String fullTypeName)
 		{
-			return TypeProvider.this.createType(context, fullTypeName, qbClasses.get(fullTypeName));
+			Class< ? > cls = qbClasses.get(fullTypeName);
+			Type type = TypeProvider.this.createType(context, fullTypeName, cls);
+			String superclass = cls.getSuperclass().getSimpleName();
+			if (qbClasses.containsKey(superclass))
+			{
+				type.setSuperType(context.getType(superclass));
+			}
+			return type;
+
 		}
 	}
 
