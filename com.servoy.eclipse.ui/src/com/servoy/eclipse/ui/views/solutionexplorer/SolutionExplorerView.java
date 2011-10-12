@@ -2003,7 +2003,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (removeSolutionProtectionAction.isEnabled()) manager.add(removeSolutionProtectionAction);
 		if (duplicateServer.isEnabled()) manager.add(duplicateServer);
 
-		if (selectedTreeNode.getRealType() == UserNodeType.SERVERS)
+		if (selectedTreeNode != null && selectedTreeNode.getRealType() == UserNodeType.SERVERS)
 		{
 			MenuManager createDBSubmenu = new MenuManager("Create new database", "newDatabase"); //$NON-NLS-1$ //$NON-NLS-2$
 
