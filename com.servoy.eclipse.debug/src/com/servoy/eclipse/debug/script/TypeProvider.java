@@ -246,6 +246,10 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			{
 				return context.getTypeRef(ITypeNames.BOOLEAN);
 			}
+			else if (type == Byte.class || type == byte.class)
+			{
+				return context.getTypeRef("byte");
+			}
 			else if (Number.class.isAssignableFrom(type) || type.isPrimitive())
 			{
 				return context.getTypeRef(ITypeNames.NUMBER);
