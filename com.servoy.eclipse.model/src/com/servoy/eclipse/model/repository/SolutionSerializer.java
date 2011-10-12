@@ -469,7 +469,7 @@ public class SolutionSerializer
 			{
 				String declaration = ((AbstractScriptProvider)persist).getDeclaration();
 				int commentStart = declaration.indexOf(SV_COMMENT_START);
-				if (commentStart != -1)
+				if (commentStart != -1 && declaration.lastIndexOf(FUNCTION_KEYWORD, commentStart) == -1)
 				{
 					int commentEnd = declaration.indexOf(SV_COMMENT_END, commentStart);
 					comment = declaration.substring(commentStart, commentEnd + 2);
