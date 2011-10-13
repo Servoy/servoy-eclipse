@@ -407,7 +407,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		catch (Exception e)
 		{
 			ServoyLog.logError(e);
-			throw new RuntimeException("Could not initialize table editor: " + e.getMessage());
+			throw new RuntimeException("Could not initialize table editor: " + e.getMessage(), e);
 		}
 
 		if (table == null)
