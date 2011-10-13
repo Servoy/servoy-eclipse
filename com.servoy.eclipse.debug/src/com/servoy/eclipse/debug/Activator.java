@@ -112,7 +112,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	public void registerImage(Image image)
 	{
-		imageList.add(image);
+		if (image != null) imageList.add(image);
 	}
 
 	/**
