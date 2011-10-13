@@ -86,72 +86,72 @@
 		<mkdir dir="${build.result.folder}/@dot"/>
 		<path id="@dot.classpath">
 			<pathelement path="../servoy_shared/bin/"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/bin/"/>
 			<pathelement path="${build.result.folder}/../servoy_shared/@dot"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/@dot"/>
 			<pathelement path="../servoy_shared/bin"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/bin"/>
 			<pathelement path="../servoy_shared/lib/annotations-1.0.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/annotations-1.0.jar"/>
 			<pathelement path="../servoy_shared/lib/BrowserLauncher2.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/BrowserLauncher2.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-codec.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/commons-codec.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-collections.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/commons-collections.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-dbcp.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/commons-dbcp.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-io.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/commons-io.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-logging.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/commons-logging.jar"/>
 			<pathelement path="../servoy_shared/lib/dom4j.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/dom4j.jar"/>
 			<pathelement path="../servoy_shared/lib/jabsorb.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/jabsorb.jar"/>
 			<pathelement path="../servoy_shared/lib/log4j.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/log4j.jar"/>
 			<pathelement path="../servoy_shared/lib/servlet-api.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/servlet-api.jar"/>
 			<pathelement path="../servoy_shared/lib/slf4j-api.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/slf4j-api.jar"/>
 			<pathelement path="../servoy_shared/lib/slf4j-log4j.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/slf4j-log4j.jar"/>
 			<pathelement path="../servoy_shared/lib/wicket-calendar.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/wicket-calendar.jar"/>
 			<pathelement path="../servoy_shared/lib/wicket-extentions.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/wicket-extentions.jar"/>
 			<pathelement path="../servoy_shared/lib/wicket.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/wicket.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-pool.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/commons-pool.jar"/>
 			<pathelement path="../servoy_shared/lib/activation.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/activation.jar"/>
 			<pathelement path="../servoy_shared/lib/mail.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/mail.jar"/>
 			<pathelement path="../servoy_shared/lib/httpclient.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/httpclient.jar"/>
 			<pathelement path="../servoy_shared/lib/httpcore.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/httpcore.jar"/>
 			<pathelement path="../servoy_shared/lib/jcifs.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/jcifs.jar"/>
 			<pathelement path="../servoy_shared/lib/apache-mime4j.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/apache-mime4j.jar"/>
 			<pathelement path="../servoy_shared/lib/httpmime.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/httpmime.jar"/>
 			<pathelement path="../servoy_shared/lib/antlr.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_6.0.1.1220/lib/antlr.jar"/>
 			<pathelement path="../org.eclipse.dltk.javascript.rhino/bin/"/>
-			
+			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino_6.0.1.1220/bin/"/>
 			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino/@dot"/>
-			
+			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino_6.0.1.1220/@dot"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.resources_3.6.1.R36x_v20110131-1630.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.resources.win32.x86_3.5.100.v20100505-1345.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.resources.win32.x86_3.5.100.v20100505-1345.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ant.core_3.2.201.v20110203_r362.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.variables_3.2.400.v20100505.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.runtime_3.6.0.v20100505.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.osgi_3.6.2.R36x_v20110210.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.equinox.transforms.hook_1.0.300.201106061129.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.equinox.transforms.hook_1.0.300.201106061129.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.equinox.common_3.6.0.v20100503.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.jobs_3.5.1.R36x_v20100824.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.runtime.compatibility.registry_3.3.0.v20100520/runtime_registry_compatibility.jar"/>
@@ -165,15 +165,15 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/javax.servlet_2.5.0.v200910301333.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.expressions_3.4.200.v20100505.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.filesystem_1.3.1.R36x_v20100727-0745.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.filesystem.win32.x86_1.1.201.R36x_v20100727-0745.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.aix.ppc_1.1.0.v20100505-1235.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.hpux.ia64_32_1.0.100.v20100505.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.ppc_1.0.200.v20100505-1235.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.x86_1.4.0.v20100505-1235.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.hpux.ia64_32_1.0.100.v20100505.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.win32.x86_64_1.1.201.R36x_v20100727-0745.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.x86_64_1.2.0.v20100505-1235.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.macosx_1.3.0.v20100505.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.solaris.sparc_1.2.0.v20100505-1235.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.aix.ppc_1.1.0.v20100505-1235.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.win32.x86_1.1.201.R36x_v20100727-0745.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.x86_64_1.2.0.v20100505-1235.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.win32.x86_64_1.1.201.R36x_v20100727-0745.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.css.core_1.1.401.v201008161749.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/com.ibm.icu_4.2.1.v20100412.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.apache.xerces_2.9.0.v200909240008.jar"/>
@@ -200,8 +200,8 @@
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.common.emfworkbench.integration_1.2.2.v201008242000.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.emf.edit_2.6.0.v20100914-1218.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.emf.ecore.change_2.5.1.v20100907-1643.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.parser_3.0.0.201110041307.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core_3.0.0.201110041307.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.parser_3.0.0.201110131616.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core_3.0.0.201110131616.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.antlr.runtime_3.0.0.v200803061811.jar"/>
 		</path>
 		<!-- compile the source code -->
