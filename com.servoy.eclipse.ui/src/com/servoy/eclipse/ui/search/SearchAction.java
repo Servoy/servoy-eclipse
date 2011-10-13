@@ -99,7 +99,7 @@ public class SearchAction extends Action implements ISelectionChangedListener
 		{
 			query = new ElementSearch((BaseComponent)selectedObject);
 		}
-		if (query != null) NewSearchUI.runQueryInBackground(query, NewSearchUI.activateSearchResultView());
+		if (query != null) NewSearchUI.runQueryInBackground(query);
 	}
 
 	/*
