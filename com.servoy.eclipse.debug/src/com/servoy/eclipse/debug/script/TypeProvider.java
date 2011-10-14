@@ -189,7 +189,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addScopeType(QBFactory.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBGroupBy.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBJoin.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBJoins.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBJoins.class.getSimpleName(), new QueryBuilderJoinsCreator());
 		addScopeType(QBLogicalCondition.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBResult.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBSelect.class.getSimpleName(), new QueryBuilderCreator());
@@ -1087,6 +1087,52 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				property.setDescription(description.intern());
 				members.add(property);
 			}
+		}
+	}
+
+	private class QueryBuilderJoinsCreator extends QueryBuilderCreator
+	{
+		@Override
+		public Type createType(ITypeInfoContext context, String fullTypeName)
+		{
+			Type type = super.createType(context, fullTypeName);
+
+			Pair<FlattenedSolution, Table> fsAndTable = getFlattenedSolutonAndTable(fullTypeName);
+			FlattenedSolution fs = getFlattenedSolution(context);
+			if (fsAndTable != null && fs != null && fsAndTable.getRight() != null)
+			{
+				Table table = fsAndTable.getRight();
+				try
+				{
+					Iterator<Relation> relations = fs.getRelations(table, true, false, false);
+					while (relations.hasNext())
+					{
+						try
+						{
+							Relation relation = relations.next();
+							if (relation.isValid())
+							{
+								Property property = createProperty(relation.getName(), true,
+									context.getTypeRef(QBJoin.class.getSimpleName() + '<' + relation.getForeignDataSource() + '>'),
+									getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE,
+									relation);
+								property.setVisible(true);
+								type.getMembers().add(property);
+							}
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+
+			return type;
 		}
 	}
 
