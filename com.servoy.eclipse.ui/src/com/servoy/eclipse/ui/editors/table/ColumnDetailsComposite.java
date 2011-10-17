@@ -23,6 +23,7 @@ import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -326,6 +327,10 @@ public class ColumnDetailsComposite extends Composite
 		IObservableValue uuidOtherFlagsTextObserveWidget = SWTObservables.observeSelection(uuidCheckBox);
 		IObservableValue excludedOtherFlagsTextObserveWidget = SWTObservables.observeSelection(excludedCheckBox);
 
+		if (listener != null)
+		{
+			getCIOtherFlagsObserveValue1.addValueChangeListener(listener);
+		}
 		bindingContext = new DataBindingContext();
 
 		bindingContext.bindValue(descriptionTextObserveWidget, getCIDescriptionObserveValue,
@@ -355,6 +360,13 @@ public class ColumnDetailsComposite extends Composite
 				c.flagColumnInfoChanged();
 			}
 		});
+	}
+
+	private IValueChangeListener listener;
+
+	public void addValueChangeListener(IValueChangeListener listener)
+	{
+		this.listener = listener;
 	}
 
 	@Override

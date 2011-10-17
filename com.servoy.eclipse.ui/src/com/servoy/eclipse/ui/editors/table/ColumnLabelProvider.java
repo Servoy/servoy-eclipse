@@ -136,6 +136,10 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 			{
 				return color;
 			}
+			if (column.getColumnInfo() != null && column.getColumnInfo().isExcluded())
+			{
+				return ColorResource.INSTANCE.getColor(gray);
+			}
 		}
 		return null;
 	}

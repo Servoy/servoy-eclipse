@@ -22,6 +22,8 @@ import java.util.Comparator;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.core.databinding.observable.value.IValueChangeListener;
+import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -247,6 +249,14 @@ public class ColumnComposite extends Composite
 
 		columnDetailsComposite = new ColumnDetailsComposite(tabFolder, SWT.NONE);
 		detailsTabItem.setControl(columnDetailsComposite);
+
+		columnDetailsComposite.addValueChangeListener(new IValueChangeListener()
+		{
+			public void handleValueChange(ValueChangeEvent event)
+			{
+				tableViewer.refresh();
+			}
+		});
 
 		final TabItem conversionTabItem = new TabItem(tabFolder, SWT.NONE);
 		conversionTabItem.setText("Conversion");
