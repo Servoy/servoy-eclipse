@@ -14,7 +14,7 @@
     <methodtemplate name="afterFoundSetRecordCreate" addtodo="true">
       <description><![CDATA[Record after-create trigger]]></description>
       <arguments>
-        <methodargument name="record" type="JSRecord"><![CDATA[record that is created]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that is created]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
@@ -22,7 +22,7 @@
     <methodtemplate name="afterRecordDelete" addtodo="true">
       <description><![CDATA[Record after-delete trigger]]></description>
       <arguments>
-        <methodargument name="record" type="JSRecord"><![CDATA[record that is deleted]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that is deleted]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
@@ -36,7 +36,7 @@
     <methodtemplate name="afterRecordInsert" addtodo="true">
       <description><![CDATA[Record after-insert trigger]]></description>
       <arguments>
-        <methodargument name="record" type="JSRecord"><![CDATA[record that is inserted]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that is inserted]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
@@ -50,7 +50,7 @@
     <methodtemplate name="afterRecordUpdate" addtodo="true">
       <description><![CDATA[Record after-update trigger]]></description>
       <arguments>
-        <methodargument name="record" type="JSRecord"><![CDATA[record that is updated]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that is updated]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
@@ -123,7 +123,7 @@ if (not_valid) throw 'cannot delete'
 // return boolean to indicate success
 return true]]></code>
       <arguments>
-        <methodargument name="record" type="JSRecord"><![CDATA[record that will be deleted]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that will be deleted]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
@@ -313,7 +313,7 @@ if (not_valid) throw 'cannot insert'
 // return boolean to indicate success
 return true]]></code>
       <arguments>
-        <methodargument name="record" type="JSRecord"><![CDATA[record that will be inserted]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that will be inserted]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
@@ -397,7 +397,7 @@ return true]]></code>
       <description><![CDATA[Callback method form when editing is stopped]]></description>
       <code><![CDATA[return true]]></code>
       <arguments>
-        <methodargument name="record" type="JSRecord"><![CDATA[record being saved]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record being saved]]></methodargument>
         <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
       </arguments>
     </methodtemplate>
@@ -521,7 +521,7 @@ if (not_valid) throw 'cannot update'
 // return boolean to indicate success
 return true]]></code>
       <arguments>
-        <methodargument name="record" type="JSRecord"><![CDATA[record that will be updated]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that will be updated]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
@@ -540,7 +540,7 @@ else
         <methodargument name="elementType" type="String"><![CDATA[element type (not supported in webclient)]]></methodargument>
         <methodargument name="dataProviderID" type="String"><![CDATA[element data provider (not supported in webclient)]]></methodargument>
         <methodargument name="formName" type="String"><![CDATA[form name]]></methodargument>
-        <methodargument name="record" type="JSRecord"><![CDATA[selected record]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[selected record]]></methodargument>
         <methodargument name="edited" type="Boolean"><![CDATA[is the record edited]]></methodargument>
       </arguments>
     </methodtemplate>

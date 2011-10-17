@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.editors;
 
+import java.util.Collections;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -28,11 +30,13 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TableNode;
 
 /**
@@ -52,6 +56,7 @@ public class AddMethodButtonsComposite extends Composite
 	/**
 	 * @param parent
 	 * @param style
+	 * @param iPersist 
 	 */
 	public AddMethodButtonsComposite(Composite parent, int style)
 	{
@@ -134,7 +139,13 @@ public class AddMethodButtonsComposite extends Composite
 
 	private ScriptMethod createMethod(IPersist parent)
 	{
-		return NewMethodAction.createNewMethod(getShell(), parent, methodKey, false, null);
+		String dataSource = null;
+		if (context instanceof AbstractBase)
+		{
+			dataSource = (String)((AbstractBase)context).getProperty(StaticContentSpecLoader.PROPERTY_DATASOURCE.getPropertyName());
+		}
+		return NewMethodAction.createNewMethod(getShell(), parent, methodKey, false, null,
+			dataSource == null ? null : Collections.singletonMap("dataSource", dataSource));
 	}
 
 	/**

@@ -165,7 +165,13 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		}
 	}
 
-	public static ScriptMethod createNewMethod(final Shell shell, IPersist parent, String methodKey, boolean activate, String forcedMethodName)
+	public static ScriptMethod createNewMethod(Shell shell, IPersist parent, String methodKey, boolean activate, String forcedMethodName)
+	{
+		return createNewMethod(shell, parent, methodKey, activate, forcedMethodName, null);
+	}
+
+	public static ScriptMethod createNewMethod(final Shell shell, IPersist parent, String methodKey, boolean activate, String forcedMethodName,
+		Map<String, String> substitutions)
 	{
 		String methodType;
 		int tagFilter = MethodTemplate.PUBLIC_TAG;
@@ -273,7 +279,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 						new WorkspaceFileAccess(ServoyModel.getWorkspace()).setContents(scriptPath, new byte[0]);
 					}
 
-					String declaration = template.getMethodDeclaration(met.getName(), null, tagToOutput);
+					String declaration = template.getMethodDeclaration(met.getName(), null, tagToOutput, substitutions);
 
 					declaration = format(declaration, file, 0);
 
