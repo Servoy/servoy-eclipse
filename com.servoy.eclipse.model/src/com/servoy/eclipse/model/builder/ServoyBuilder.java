@@ -2819,7 +2819,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			try
 			{
 				IServerInternal server = (IServerInternal)ApplicationServerSingleton.get().getServerManager().getServer(server_name, true, true);
-				Iterator<String> tables = server.getTableAndViewNames(true).iterator();
+				List<String> tableNames = server.getTableAndViewNames(true);
+				Iterator<String> tables = tableNames.iterator();
 				while (tables.hasNext())
 				{
 					String tableName = tables.next();
@@ -2856,6 +2857,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							if (column.getSequenceType() == ColumnInfo.DATABASE_IDENTITY && !column.isDatabasePK())
 							{
 								ServoyMarker mk = MarkerMessages.ColumnDatabaseIdentityProblem.fill(tableName, column.getName());
+								addMarker(res, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, null);
+							}
+							if (column.getColumnInfo() != null && column.getColumnInfo().getForeignType() != null &&
+								!tableNames.contains(column.getColumnInfo().getForeignType()))
+							{
+								ServoyMarker mk = MarkerMessages.ColumnForeignTypeProblem.fill(tableName, column.getName(),
+									column.getColumnInfo().getForeignType());
 								addMarker(res, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, null);
 							}
 							if (column.getColumnInfo() != null && column.getColumnInfo().getAutoEnterType() == ColumnInfo.LOOKUP_VALUE_AUTO_ENTER)

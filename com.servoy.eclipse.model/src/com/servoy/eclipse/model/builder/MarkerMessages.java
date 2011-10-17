@@ -403,6 +403,8 @@ public class MarkerMessages
 		"Table \"{0}\" has column \"{1}\" whose length is insufficient for its sequence.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ColumnDatabaseIdentityProblem = new ServoyMarker(
 		"Table \"{0}\" has column \"{1}\" which is a database identity but is not a primary key in the table.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
+	public static ServoyMarker ColumnForeignTypeProblem = new ServoyMarker(
+		"Table \"{0}\" has column \"{1}\" which has invalid foreign type suggestion: \"{2}\".", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
 	 * The lookup value used for a column is invalid. This can happen when the lookup points to a global identifier that does not exist,
