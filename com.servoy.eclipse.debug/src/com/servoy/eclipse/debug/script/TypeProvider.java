@@ -1330,11 +1330,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 									}
 								}
 							}
-							else
-							{
-								// only solutionName
-								return new Pair<FlattenedSolution, Table>(fs, null);
-							}
 						}
 						catch (Exception e)
 						{
@@ -1365,6 +1360,15 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 							catch (Exception e)
 							{
 								ServoyLog.logError(e);
+							}
+						}
+						else
+						{
+							// only solutionName
+							ServoyProject servoyProject = servoyModel.getServoyProject(config);
+							if (servoyProject != null && servoyModel.getFlattenedSolution().getSolution() != null)
+							{
+								return new Pair<FlattenedSolution, Table>(servoyProject.getEditingFlattenedSolution(), null);
 							}
 						}
 					}
