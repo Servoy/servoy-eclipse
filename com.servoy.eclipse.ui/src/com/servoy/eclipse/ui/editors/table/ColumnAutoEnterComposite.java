@@ -227,7 +227,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 								return method;
 							}
 						};
-						buttons.setContext(PersistContext.create(null, ColumnAutoEnterComposite.this.flattenedSolution.getSolution()), "getLookupValue");
+						buttons.setContext(PersistContext.create(ColumnAutoEnterComposite.this.flattenedSolution.getSolution(), null), "getLookupValue");
 						buttons.setDialog(dialog);
 						return buttons;
 					}
