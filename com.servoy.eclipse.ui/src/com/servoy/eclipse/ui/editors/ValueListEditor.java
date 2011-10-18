@@ -301,7 +301,7 @@ public class ValueListEditor extends PersistEditor
 					public Control createControl(Composite composite)
 					{
 						AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(composite, SWT.NONE);
-						buttons.setContext(getValueList(), "valueListGlobalMethod"); //$NON-NLS-1$
+						buttons.setContext(PersistContext.create(null, getValueList()), "valueListGlobalMethod"); //$NON-NLS-1$
 						buttons.setDialog(dialog);
 						return buttons;
 					}

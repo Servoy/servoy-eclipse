@@ -95,8 +95,8 @@ When false is returned the record a record not be created in the foundset.]]></d
       <description><![CDATA[Handle changed data]]></description>
       <code><![CDATA[return true]]></code>
       <arguments>
-        <methodargument name="oldValue" type="Object"><![CDATA[old value]]></methodargument>
-        <methodargument name="newValue" type="Object"><![CDATA[new value]]></methodargument>
+        <methodargument name="oldValue" type="${dataproviderType}"><![CDATA[old value]]></methodargument>
+        <methodargument name="newValue" type="${dataproviderType}"><![CDATA[new value]]></methodargument>
         <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
       </arguments>
     </methodtemplate>

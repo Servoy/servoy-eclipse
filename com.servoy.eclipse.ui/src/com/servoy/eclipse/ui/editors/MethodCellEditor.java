@@ -71,7 +71,7 @@ public class MethodCellEditor extends DialogCellEditor
 			public Control createControl(Composite composite)
 			{
 				AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(composite, SWT.NONE);
-				buttons.setContext(persistContext.getContext(), id.toString());
+				buttons.setContext(persistContext, id.toString());
 				buttons.setDialog(dialog);
 				return buttons;
 			}

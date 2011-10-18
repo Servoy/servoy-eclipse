@@ -72,6 +72,7 @@ import com.servoy.eclipse.ui.editors.table.ColumnDetailsComposite.NotSameValidat
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.DataProviderConverter;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.IControlFactory;
 import com.servoy.eclipse.ui.views.TreeSelectObservableValue;
@@ -226,7 +227,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 								return method;
 							}
 						};
-						buttons.setContext(ColumnAutoEnterComposite.this.flattenedSolution.getSolution(), "getLookupValue");
+						buttons.setContext(PersistContext.create(null, ColumnAutoEnterComposite.this.flattenedSolution.getSolution()), "getLookupValue");
 						buttons.setDialog(dialog);
 						return buttons;
 					}

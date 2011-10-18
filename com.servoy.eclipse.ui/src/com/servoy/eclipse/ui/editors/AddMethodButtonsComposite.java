@@ -17,6 +17,8 @@
 package com.servoy.eclipse.ui.editors;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -26,12 +28,18 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.ArgumentType;
+import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -44,7 +52,7 @@ import com.servoy.j2db.persistence.TableNode;
  */
 public class AddMethodButtonsComposite extends Composite
 {
-	private IPersist context;
+	private PersistContext persistContext;
 	private String methodKey;
 
 	private TreeSelectDialog dialog;
@@ -74,7 +82,7 @@ public class AddMethodButtonsComposite extends Composite
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				ScriptMethod method = createMethod(context.getAncestor(IRepository.FORMS));
+				ScriptMethod method = createMethod(persistContext.getContext().getAncestor(IRepository.FORMS));
 				if (method != null)
 				{
 					dialog.refreshTree();
@@ -91,11 +99,11 @@ public class AddMethodButtonsComposite extends Composite
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				TableNode tableNode = (TableNode)context.getAncestor(IRepository.TABLENODES);
+				TableNode tableNode = (TableNode)persistContext.getContext().getAncestor(IRepository.TABLENODES);
 				if (tableNode == null)
 				{
 					// try forms table node
-					Form form = (Form)context.getAncestor(IRepository.FORMS);
+					Form form = (Form)persistContext.getContext().getAncestor(IRepository.FORMS);
 					if (form != null && form.getDataSource() != null)
 					{
 						try
@@ -125,7 +133,7 @@ public class AddMethodButtonsComposite extends Composite
 			@Override
 			public void widgetSelected(final SelectionEvent e)
 			{
-				ScriptMethod method = createMethod(context.getAncestor(IRepository.SOLUTIONS));
+				ScriptMethod method = createMethod(persistContext.getContext().getAncestor(IRepository.SOLUTIONS));
 				if (method != null)
 				{
 					dialog.refreshTree();
@@ -137,27 +145,56 @@ public class AddMethodButtonsComposite extends Composite
 		createGlobalMethodButton.setText("Global");
 	}
 
+	@SuppressWarnings("nls")
 	private ScriptMethod createMethod(IPersist parent)
 	{
 		String dataSource = null;
-		if (context instanceof AbstractBase)
+		if (persistContext.getContext() instanceof AbstractBase)
 		{
-			dataSource = (String)((AbstractBase)context).getProperty(StaticContentSpecLoader.PROPERTY_DATASOURCE.getPropertyName());
+			dataSource = (String)((AbstractBase)persistContext.getContext()).getProperty(StaticContentSpecLoader.PROPERTY_DATASOURCE.getPropertyName());
 		}
-		return NewMethodAction.createNewMethod(getShell(), parent, methodKey, false, null,
-			dataSource == null ? null : Collections.singletonMap("dataSource", dataSource));
+		Map<String, String> substitutions = null;
+		if (persistContext.getPersist() instanceof Field)
+		{
+			Field field = (Field)persistContext.getPersist();
+			if (field.getDataProviderID() != null)
+			{
+				try
+				{
+					IDataProvider idp = ModelUtils.getEditingFlattenedSolution(parent).getDataproviderLookup(null, persistContext.getContext()).getDataProvider(
+						field.getDataProviderID());
+					if (idp.getDataProviderType() != -1)
+					{
+						substitutions = new HashMap<String, String>();
+						substitutions.put("dataproviderType",
+							ArgumentType.convertFromColumnType(idp.getDataProviderType(), Column.getDisplayTypeString(idp.getDataProviderType())).getName());
+					}
+				}
+				catch (RepositoryException ex)
+				{
+					ServoyLog.logError(ex);
+				}
+			}
+		}
+		if (dataSource != null)
+		{
+			if (substitutions != null) substitutions.put("datasource", dataSource);
+			else substitutions = Collections.singletonMap("dataSource", dataSource);
+		}
+		return NewMethodAction.createNewMethod(getShell(), parent, methodKey, false, null, substitutions);
 	}
 
 	/**
 	 * @param form
 	 */
-	public void setContext(IPersist context, String methodKey)
+	public void setContext(PersistContext persistContext, String methodKey)
 	{
-		this.context = context;
+		this.persistContext = persistContext;
 		this.methodKey = methodKey;
-		Form form = (Form)context.getAncestor(IRepository.FORMS);
+		Form form = (Form)persistContext.getContext().getAncestor(IRepository.FORMS);
 		createFormMethodButton.setEnabled(form != null);
-		createFoundsetMethodButton.setEnabled((form != null && form.getDataSource() != null) || context.getAncestor(IRepository.TABLENODES) != null);
+		createFoundsetMethodButton.setEnabled((form != null && form.getDataSource() != null) ||
+			persistContext.getContext().getAncestor(IRepository.TABLENODES) != null);
 	}
 
 	/**
