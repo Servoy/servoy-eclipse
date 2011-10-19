@@ -43,6 +43,7 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 	private Color color = null;
 	private ColumnComposite columnComposite;
 	private final RGB gray = new RGB(127, 127, 127);
+	private final RGB gray2 = new RGB(160, 160, 160);
 
 	public ColumnLabelProvider(Color color, ColumnComposite columnComposite)
 	{
@@ -129,29 +130,28 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 
 	public Color getBackground(Object element, int columnIndex)
 	{
-		if (element instanceof Column)
+		if (element instanceof Column && ((Column)element).hasBadNaming())
 		{
-			Column column = (Column)element;
-			if (column.hasBadNaming())
-			{
-				return color;
-			}
-			if (column.getColumnInfo() != null && column.getColumnInfo().isExcluded())
-			{
-				return ColorResource.INSTANCE.getColor(gray);
-			}
+			return color;
 		}
 		return null;
 	}
 
 	public Color getForeground(Object element, int columnIndex)
 	{
-		if (columnIndex == ColumnComposite.CI_DATAPROVIDER_ID && columnComposite.isDataProviderIdDisplayed())
+		if (element instanceof Column)
 		{
 			Column info = (Column)element;
-			if (Utils.equalObjects(info.getName(), info.getDataProviderID()))
+			if (columnIndex == ColumnComposite.CI_DATAPROVIDER_ID && columnComposite.isDataProviderIdDisplayed())
 			{
-				return ColorResource.INSTANCE.getColor(gray);
+				if (Utils.equalObjects(info.getName(), info.getDataProviderID()))
+				{
+					return ColorResource.INSTANCE.getColor(gray);
+				}
+			}
+			if (info.getColumnInfo() != null && info.getColumnInfo().isExcluded())
+			{
+				return ColorResource.INSTANCE.getColor(gray2);
 			}
 		}
 		return null;
