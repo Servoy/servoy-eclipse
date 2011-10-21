@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
@@ -31,6 +31,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -63,13 +64,15 @@ public class RenamePersistAction extends Action implements ISelectionChangedList
 	@Override
 	public void run()
 	{
-		InputDialog nameDialog = new InputDialog(Display.getDefault().getActiveShell(), "Rename form", "Supply a new form name", "", new IInputValidator()
-		{
-			public String isValid(String newText)
+		Form form = (Form)persist;
+		InputDialog nameDialog = new InputDialog(Display.getDefault().getActiveShell(), "Rename form", "Supply a new form name", form.getName(),
+			new IInputValidator()
 			{
-				return IdentDocumentValidator.isJavaIdentifier(newText) ? null : (newText.length() == 0 ? "" : "Invalid form name");
-			}
-		});
+				public String isValid(String newText)
+				{
+					return IdentDocumentValidator.isJavaIdentifier(newText) ? null : (newText.length() == 0 ? "" : "Invalid form name");
+				}
+			});
 		int res = nameDialog.open();
 		if (res == Window.OK)
 		{
