@@ -388,7 +388,7 @@ application.closeSolution();
           </argumentsTypes>
           <return type="byte[]" typecode="[B"/>
           <description/>
-          <deprecated><![CDATA[As of release 3.0, replaced by {@link plugins.images#getImage(Object)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by plugins.images#getImage(Object).]]></deprecated>
           <sample/>
         </function>
         <function name="createNewFormInstance">
@@ -423,7 +423,7 @@ if (ok)
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description/>
-          <deprecated><![CDATA[As of release 2.x, replaced by {@link plugins.file#createTempFile(String, String)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 2.x, replaced by plugins.file#createTempFile(String, String).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="createThumbnailJPGImage">
@@ -434,7 +434,7 @@ if (ok)
           </argumentsTypes>
           <return type="byte[]" typecode="[B"/>
           <description/>
-          <deprecated><![CDATA[As of release 3.0, replaced by {@link plugins.images#getImage(Object)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by plugins.images#getImage(Object).]]></deprecated>
           <sample/>
         </function>
         <function name="createWindow">
@@ -636,7 +636,7 @@ application.exit();]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Get the active user count on the server (can be limited to current solution).]]></description>
           <summary><![CDATA[Get the active user count on the server (can be limited to current solution).]]></summary>
-          <deprecated><![CDATA[As of release 2.x, replaced by {@link #getActiveClientCount(boolean)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 2.x, replaced by #getActiveClientCount(boolean).]]></deprecated>
           <sample/>
         </function>
         <function name="getApplicationType">
@@ -683,7 +683,7 @@ application.output('Including yourself, there are ' + count + ' client(s) runnin
           <return type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="java.util.Date"/>
           <description><![CDATA[Get the current date (with hour/minutes/seconds set to zero).]]></description>
           <summary><![CDATA[Get the current date (with hour/minutes/seconds set to zero).]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by {@link utils#timestampToDate(Object)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by utils#timestampToDate(Object).]]></deprecated>
           <sample/>
         </function>
         <function name="getHostName">
@@ -748,7 +748,7 @@ if ( (m & 1) == 1)
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Get a new UUID (also known as GUID)]]></description>
           <summary><![CDATA[Get a new UUID (also known as GUID)]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by {@link #getUUID()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #getUUID().]]></deprecated>
           <sample><![CDATA[var new_uuid = application.getNewUUID();]]></sample>
         </function>
         <function name="getOSName">
@@ -877,7 +877,7 @@ var uuid_object2 = application.getUUID(new_uuid_object.toBytes());  // convert a
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Returns the user name when logged in ('unknown' when not logged in)]]></description>
           <summary><![CDATA[Returns the user name when logged in ('unknown' when not logged in)]]></summary>
-          <deprecated><![CDATA[As of release 2.0, replaced by {@link security#getUserName(Object[])}.]]></deprecated>
+          <deprecated><![CDATA[As of release 2.0, replaced by security#getUserName(Object[]).]]></deprecated>
           <sample><![CDATA[var uname = application.getUserName();]]></sample>
         </function>
         <function name="getUserProperty">
@@ -979,7 +979,7 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description/>
-          <deprecated><![CDATA[As of release 3.0, replaced by {@link #getValueListDisplayValue(String, Object)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by #getValueListDisplayValue(String, Object).]]></deprecated>
           <sample/>
         </function>
         <function name="getVersion">
@@ -1130,14 +1130,14 @@ globals.showPrintPreview = 0;//clear for next time
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Returns true if the solution is running in the developer.]]></description>
           <summary><![CDATA[Returns true if the solution is running in the developer.]]></summary>
-          <deprecated><![CDATA[As of release 3.0, replaced by {@link #isInDeveloper()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by #isInDeveloper().]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="logout">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 3.0, replaced by {@link security#logout(Object[])}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by security#logout(Object[]).]]></deprecated>
           <sample/>
         </function>
         <function name="output">
@@ -1214,7 +1214,7 @@ application.overrideStyle('mystyle','mystyle_mace')//in this case both styles sh
           </argumentsTypes>
           <return type="byte[]" typecode="[B"/>
           <description/>
-          <deprecated><![CDATA[As of release 2.x, replaced by {@link plugins.file#readFile(Object[])}.]]></deprecated>
+          <deprecated><![CDATA[As of release 2.x, replaced by plugins.file#readFile(Object[]).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="readTXTFile">
@@ -1223,7 +1223,7 @@ application.overrideStyle('mystyle','mystyle_mace')//in this case both styles sh
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description/>
-          <deprecated><![CDATA[As of release 2.x, replaced by {@link plugins.file#readTXTFile(Object[])}.]]></deprecated>
+          <deprecated><![CDATA[As of release 2.x, replaced by plugins.file#readTXTFile(Object[]).]]></deprecated>
           <sample/>
         </function>
         <function name="redo">
@@ -1266,7 +1266,7 @@ previously was added using the application.]]></summary>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description/>
-          <deprecated><![CDATA[As of release 2.x, replaced by {@link plugins.mail#sendMail(Object[])}.]]></deprecated>
+          <deprecated><![CDATA[As of release 2.x, replaced by plugins.mail#sendMail(Object[]).]]></deprecated>
           <sample/>
         </function>
         <function name="setClipboardContent">
@@ -1301,7 +1301,7 @@ application.setErrorCapture(true);]]></sample>
           <return type="void" typecode="void"/>
           <description><![CDATA[Enable/disable the auto save when clicking anywhere on a form and the focus get lost.]]></description>
           <summary><![CDATA[Enable/disable the auto save when clicking anywhere on a form and the focus get lost.]]></summary>
-          <deprecated><![CDATA[As of release 3.0, replaced by {@link databaseManager#setAutoSave(boolean)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by databaseManager#setAutoSave(boolean).]]></deprecated>
           <sample><![CDATA[application.setFocusLostSaveEnabled(false);]]></sample>
         </function>
         <function name="setNumpadEnterAsFocusNextEnabled">
@@ -1526,14 +1526,14 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description/>
-          <deprecated><![CDATA[As of release 2.x, replaced by {@link plugins.file#showDirectorySelectDialog(Object[])}.]]></deprecated>
+          <deprecated><![CDATA[As of release 2.x, replaced by plugins.file#showDirectorySelectDialog(Object[]).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="showFileOpenDialog">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description/>
-          <deprecated><![CDATA[As of release 2.x, replaced by {@link plugins.file#showFileOpenDialog(Object[])}.]]></deprecated>
+          <deprecated><![CDATA[As of release 2.x, replaced by plugins.file#showFileOpenDialog(Object[]).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="showFileSaveDialog">
@@ -1542,7 +1542,7 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description/>
-          <deprecated><![CDATA[As of release 2.x, replaced by {@link plugins.file#showFileSaveDialog(Object[])}.]]></deprecated>
+          <deprecated><![CDATA[As of release 2.x, replaced by plugins.file#showFileSaveDialog(Object[]).]]></deprecated>
           <sample/>
         </function>
         <function name="showFontChooser">
@@ -1771,7 +1771,7 @@ things, you can give an number in ms how long this can take.]]></description>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description/>
-          <deprecated><![CDATA[As of release 2.x, replaced by {@link plugins.file#writeFile(Object, byte[])}.]]></deprecated>
+          <deprecated><![CDATA[As of release 2.x, replaced by plugins.file#writeFile(Object, byte[]).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="writeTXTFile">
@@ -1780,7 +1780,7 @@ things, you can give an number in ms how long this can take.]]></description>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description/>
-          <deprecated><![CDATA[As of release 2.x, replaced by {@link plugins.file#writeTXTFile(Object[])}.]]></deprecated>
+          <deprecated><![CDATA[As of release 2.x, replaced by plugins.file#writeTXTFile(Object[]).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="writeXMLFile">
@@ -1790,7 +1790,7 @@ things, you can give an number in ms how long this can take.]]></description>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description/>
-          <deprecated><![CDATA[As of release 2.x, replaced by {@link plugins.file#writeXMLFile(Object, String)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 2.x, replaced by plugins.file#writeXMLFile(Object, String).]]></deprecated>
           <sample/>
         </function>
       </functions>
@@ -2504,7 +2504,7 @@ returns true if no error did happen.
 
 NOTE: This function could be used to store a copy of records in an archive table. Use the getRecord() function to get the record as an object.]]></description>
           <summary><![CDATA[Copies all matching non empty columns (if overwrite boolean is given all columns except pk/ident, if array then all columns except pk and array names).]]></summary>
-          <deprecated><![CDATA[As of release 6.0, replaced by {@link #copyMatchingFields(Object[])}]]></deprecated>
+          <deprecated><![CDATA[As of release 6.0, replaced by #copyMatchingFields(Object[])]]></deprecated>
           <sample><![CDATA[for( var i = 1 ; i <= foundset.getSize() ; i++ )
 {
 	var srcRecord = foundset.getRecord(i);
@@ -2574,7 +2574,7 @@ controller.saveData();
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description/>
-          <deprecated><![CDATA[As of release 5.0, replaced by {@link JSDataSet#createDataSource(String, Object)}]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by JSDataSet#createDataSource(String, Object)]]></deprecated>
           <sample/>
         </function>
         <function name="createDataSourceByQuery">
@@ -2719,7 +2719,7 @@ databaseManager.getFoundSet('db:/example_data/book_nodes').loadRecords(q)]]></sa
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description/>
-          <deprecated><![CDATA[As of release 3.5, replaced by {@link plugins.rawSQL#executeStoredProcedure(String, String, Object[], int[], int)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.5, replaced by plugins.rawSQL#executeStoredProcedure(String, String, Object[], int[], int).]]></deprecated>
           <sample/>
         </function>
         <function name="getAutoSave">
@@ -2747,7 +2747,7 @@ NOTE: To return an array of records with oustanding changed data, see the functi
           <summary><![CDATA[Returns a dataset with outstanding (not saved) changed data on a record
 
 NOTE: To return an array of records with oustanding changed data, see the function databaseManager.]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by {@link Record#getChangedData()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by Record#getChangedData().]]></deprecated>
           <sample><![CDATA[var dataset = databaseManager.getChangedRecordData(record)
 for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
 {
@@ -3097,7 +3097,7 @@ databaseManager.getFoundSetCount(foundset);]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"><![CDATA[An Array with the column values.]]></return>
           <description><![CDATA[This method is deprecated, use databaseManager.convertToDataSet(foundset, pkNames) instead.]]></description>
           <summary><![CDATA[This method is deprecated, use databaseManager.]]></summary>
-          <deprecated><![CDATA[As of release 6.0, replaced by {@link #convertToDataSet(Object[])}.]]></deprecated>
+          <deprecated><![CDATA[As of release 6.0, replaced by #convertToDataSet(Object[]).]]></deprecated>
           <sample><![CDATA[var dataSet = databaseManager.convertToDataSet(foundset,['order_id']);]]></sample>
           <parameters>
             <parameter name="foundset" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
@@ -5079,7 +5079,7 @@ application.output(button_uuid.toString());]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnAction(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnAction(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnDoubleClickMethod">
@@ -5088,7 +5088,7 @@ application.output(button_uuid.toString());]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnDoubleClick(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnDoubleClick(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnRightClickMethod">
@@ -5097,7 +5097,7 @@ application.output(button_uuid.toString());]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnRightClick(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnRightClick(JSMethod).]]></deprecated>
           <sample/>
         </function>
       </functions>
@@ -5581,7 +5581,7 @@ if (column.hasFlag(JSColumn.UUID_COLUMN))
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Use column.getRowIdentifierType() != JSColumn.NONE instead.]]></description>
           <summary><![CDATA[Use column.]]></summary>
-          <deprecated><![CDATA[As of release 6.0, replaced by {@link #getRowIdentifierType()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 6.0, replaced by #getRowIdentifierType().]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="isUUID">
@@ -5589,7 +5589,7 @@ if (column.hasFlag(JSColumn.UUID_COLUMN))
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Use column.hasFlag(JSColumn.UUID_COLUMN) instead.]]></description>
           <summary><![CDATA[Use column.]]></summary>
-          <deprecated><![CDATA[As of release 6.0, replaced by {@link #hasFlag()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 6.0, replaced by #hasFlag().]]></deprecated>
           <sample/>
         </function>
       </functions>
@@ -6195,7 +6195,7 @@ if (column.hasFlag(JSColumn.UUID_COLUMN))
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Use column.getRowIdentifierType() != JSColumn.NONE instead.]]></description>
           <summary><![CDATA[Use column.]]></summary>
-          <deprecated><![CDATA[As of release 6.0, replaced by {@link #getRowIdentifierType()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 6.0, replaced by #getRowIdentifierType().]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="isUUID">
@@ -6203,7 +6203,7 @@ if (column.hasFlag(JSColumn.UUID_COLUMN))
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Use column.hasFlag(JSColumn.UUID_COLUMN) instead.]]></description>
           <summary><![CDATA[Use column.]]></summary>
-          <deprecated><![CDATA[As of release 6.0, replaced by {@link #hasFlag()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 6.0, replaced by #hasFlag().]]></deprecated>
           <sample/>
         </function>
         <function name="setDatabaseSequenceName">
@@ -7049,7 +7049,7 @@ globals.html_field = '<html>'+dataset.getAsHTML()+'</html>';
           <argumentsTypes/>
           <description><![CDATA[Returns the dataset as a Swing tablemodel.]]></description>
           <summary><![CDATA[Returns the dataset as a Swing tablemodel.]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by {@link #createDataSource(String, Object)}]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #createDataSource(String, Object)]]></deprecated>
           <sample><![CDATA[//assuming the variable dataset contains a dataset
 var model = dataset.getAsTableModel() //gets a Java/Swing tablemodel to be used in beans
 elements.inmemDatagridBean.setModel(model)]]></sample>
@@ -7136,7 +7136,7 @@ var dbException = dataset.getException();]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[returns the contents of the database error message if an error occurred]]></description>
           <summary><![CDATA[returns the contents of the database error message if an error occurred]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by {@link #getException()}]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #getException()]]></deprecated>
           <sample/>
         </function>
         <function name="getMaxColumnIndex">
@@ -8254,7 +8254,7 @@ fieldThree.tabSeq = 1;]]></sample>
         <property deprecated="true" name="text">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #getTitleText()}]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #getTitleText()]]></deprecated>
           <sample/>
         </property>
         <property name="titleText">
@@ -8382,7 +8382,7 @@ application.output(button_uuid.toString());]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnAction(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnAction(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnDataChangeMethod">
@@ -8391,7 +8391,7 @@ application.output(button_uuid.toString());]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnDataChange(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnDataChange(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnFocusGainedMethod">
@@ -8400,7 +8400,7 @@ application.output(button_uuid.toString());]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnFocusGained(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnFocusGained(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnFocusLostMethod">
@@ -8409,7 +8409,7 @@ application.output(button_uuid.toString());]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnFocusLost(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnFocusLost(JSMethod).]]></deprecated>
           <sample/>
         </function>
       </functions>
@@ -8740,7 +8740,7 @@ subForm.extendsForm = superForm;]]></sample>
         <property deprecated="true" name="height">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link JSPart#getHeight()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by JSPart#getHeight().]]></deprecated>
           <sample/>
         </property>
         <property name="initialSort">
@@ -10944,7 +10944,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnDeleteAllRecordsCmd(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnDeleteAllRecordsCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnDeleteRecordCmdMethod">
@@ -10953,7 +10953,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnDeleteRecordCmd(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnDeleteRecordCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnDuplicateRecordCmdMethod">
@@ -10962,7 +10962,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnDuplicateRecordCmd(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnDuplicateRecordCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnFindCmdMethod">
@@ -10971,7 +10971,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnFindCmd(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnFindCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnHideMethod">
@@ -10980,7 +10980,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnHideCmd(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnHideCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnInvertRecordsCmdMethod">
@@ -10989,7 +10989,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnInvertRecordsCmd(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnInvertRecordsCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnLoadMethod">
@@ -10998,7 +10998,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnLoad(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnLoad(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnNewRecordCmdMethod">
@@ -11007,7 +11007,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnNewRecordCmd(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnNewRecordCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnNextRecordCmdMethod">
@@ -11016,7 +11016,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnNextRecordCmd(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnNextRecordCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnOmitRecordCmdMethod">
@@ -11025,7 +11025,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnOmitRecordCmd(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnOmitRecordCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnPreviousRecordCmdMethod">
@@ -11034,7 +11034,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnPreviousRecordCmd(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnPreviousRecordCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnPrintPreviewCmdMethod">
@@ -11043,7 +11043,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnPrintPreviewCmd(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnPrintPreviewCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnRecordEditStartMethod">
@@ -11052,7 +11052,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnRecordEditStart(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnRecordEditStart(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnRecordEditStopMethod">
@@ -11061,7 +11061,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnRecordEditStop(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnRecordEditStop(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnRecordSelectionMethod">
@@ -11070,7 +11070,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnRecordSelection(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnRecordSelection(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnSearchCmdMethod">
@@ -11079,7 +11079,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnSearchCmd(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnSearchCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnShowAllRecordsCmdMethod">
@@ -11088,7 +11088,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnShowAllRecordsCmd(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnShowAllRecordsCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnShowMethod">
@@ -11097,7 +11097,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnShow(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnShow(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnShowOmittedRecordsCmdMethod">
@@ -11106,7 +11106,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnShowOmittedRecordsCmd(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnShowOmittedRecordsCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnSortCmdMethod">
@@ -11115,7 +11115,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnSortCmd(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnSortCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnUnLoadMethod">
@@ -11124,7 +11124,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnUnLoad(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnUnLoad(JSMethod).]]></deprecated>
           <sample/>
         </function>
       </functions>
@@ -11216,7 +11216,7 @@ var ok = %%prefix%%foundset.addFoundSetFilterParam('companyname', '#^||=', 'serv
           <return type="void" typecode="void"/>
           <description><![CDATA[Clears the foundset.]]></description>
           <summary><![CDATA[Clears the foundset.]]></summary>
-          <deprecated><![CDATA[As of release 3.1, replaced by {@link #clear()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.1, replaced by #clear().]]></deprecated>
           <sample/>
         </function>
         <function name="deleteAllRecords">
@@ -11435,7 +11435,7 @@ for (var i = 0; params != null && i < params.length; i++)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Get the number of records in this foundset.]]></description>
           <summary><![CDATA[Get the number of records in this foundset.]]></summary>
-          <deprecated><![CDATA[As of release 3.1, replaced by {@link #getSize()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.1, replaced by #getSize().]]></deprecated>
           <sample><![CDATA[for ( var i = 1 ; i <= %%prefix%%foundset.getMaxRecordIndex() ; i++ )
 {
 	%%prefix%%foundset.setSelectedIndex(i);
@@ -11527,7 +11527,7 @@ When the founset is in multiSelect mode (see property multiSelect), selection ca
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Gets the name of the server used.]]></description>
           <summary><![CDATA[Gets the name of the server used.]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by {@link #getDataSource()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource().]]></deprecated>
           <sample/>
         </function>
         <function name="getSize">
@@ -11550,7 +11550,7 @@ increase as more records are loaded.]]></description>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Gets the name of the table used.]]></description>
           <summary><![CDATA[Gets the name of the table used.]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by {@link #getDataSource()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource().]]></deprecated>
           <sample/>
         </function>
         <function name="invertRecords">
@@ -12548,7 +12548,7 @@ application.output(button_uuid.toString());]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnAction(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnAction(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnDoubleClickMethod">
@@ -12557,7 +12557,7 @@ application.output(button_uuid.toString());]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnDoubleClick(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnDoubleClick(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnRightClickMethod">
@@ -12566,7 +12566,7 @@ application.output(button_uuid.toString());]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnRightClick(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnRightClick(JSMethod).]]></deprecated>
           <sample/>
         </function>
       </functions>
@@ -13133,7 +13133,7 @@ application.output(button_uuid.toString());]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnAction(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnAction(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnDoubleClickMethod">
@@ -13142,7 +13142,7 @@ application.output(button_uuid.toString());]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnDoubleClick(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnDoubleClick(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnRightClickMethod">
@@ -13151,7 +13151,7 @@ application.output(button_uuid.toString());]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by {@link #setOnRightClick(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by #setOnRightClick(JSMethod).]]></deprecated>
           <sample/>
         </function>
       </functions>
@@ -13756,7 +13756,7 @@ childrenPortal.resizable = true;]]></sample>
         <property deprecated="true" name="resizeble">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description/>
-          <deprecated><![CDATA[As of release 6.0, replaced by {@link #getResizable()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 6.0, replaced by #getResizable().]]></deprecated>
           <sample><![CDATA[var childrenPortal = form.newPortal('pp', 'parent_to_child', 10, 10, 620, 460);
 childrenPortal.newTextField('child_table_id', 0, 100, 20);
 childrenPortal.newTextField('child_table_text',150,100,20);
@@ -14710,7 +14710,7 @@ relation.foreignDataSource = 'db:/user_data/another_child_table';]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the server where the foreign table is located.]]></description>
           <summary><![CDATA[The name of the server where the foreign table is located.]]></summary>
-          <deprecated><![CDATA[As of release 5.1, replaced by {@link #getForeignDataSource()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 5.1, replaced by #getForeignDataSource().]]></deprecated>
           <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'example_data', 'parent_table', 'example_data', 'child_table', JSRelation.INNER_JOIN);
 relation.primaryTableName = 'another_parent_table';
 relation.primaryServerName = 'user_data';
@@ -14721,7 +14721,7 @@ relation.foreignServerName = 'user_data';]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the foreign table.]]></description>
           <summary><![CDATA[The name of the foreign table.]]></summary>
-          <deprecated><![CDATA[As of release 5.1, replaced by {@link #getForeignDataSource()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 5.1, replaced by #getForeignDataSource().]]></deprecated>
           <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'example_data', 'parent_table', 'example_data', 'child_table', JSRelation.INNER_JOIN);
 relation.primaryTableName = 'another_parent_table';
 relation.primaryServerName = 'user_data';
@@ -14769,7 +14769,7 @@ relation.foreignDataSource = 'db:/user_data/another_child_table';]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the server where the primary table is located.]]></description>
           <summary><![CDATA[The name of the server where the primary table is located.]]></summary>
-          <deprecated><![CDATA[As of release 5.1, replaced by {@link #getPrimaryDataSource()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 5.1, replaced by #getPrimaryDataSource().]]></deprecated>
           <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'example_data', 'parent_table', 'example_data', 'child_table', JSRelation.INNER_JOIN);
 relation.primaryTableName = 'another_parent_table';
 relation.primaryServerName = 'user_data';
@@ -14780,7 +14780,7 @@ relation.foreignServerName = 'user_data';]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the primary table.]]></description>
           <summary><![CDATA[The name of the primary table.]]></summary>
-          <deprecated><![CDATA[As of release 5.1, replaced by {@link #getPrimaryDataSource()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 5.1, replaced by #getPrimaryDataSource().]]></deprecated>
           <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'example_data', 'parent_table', 'example_data', 'child_table', JSRelation.INNER_JOIN);
 relation.primaryTableName = 'another_parent_table';
 relation.primaryServerName = 'user_data';
@@ -15413,7 +15413,7 @@ tabPanel.onChange = onChangeMethod;]]></sample>
         <property deprecated="true" name="onTabChange">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
           <description/>
-          <deprecated><![CDATA[As of release 5.0, replaced by {@link #getOnChange()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #getOnChange().]]></deprecated>
           <sample><![CDATA[var onTabChangeMethod = form.newMethod('function onTabChange(previousIndex, event) { application.output("Tab changed from previous index " + previousIndex + " at " + event.getTimestamp()); }');
 var tabPanel = form.newTabPanel('tabs', 10, 10, 620, 460);
 tabPanel.newTab('tab1', 'Child Two', childOne);
@@ -15709,7 +15709,7 @@ tabPanel.removeTab('tab1');]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 5.0, replaced by {@link #setOnChange(JSMethod)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #setOnChange(JSMethod).]]></deprecated>
           <sample/>
         </function>
       </functions>
@@ -16939,7 +16939,7 @@ controller.show(win1);]]></sample>
           <description><![CDATA[Closes (hides) the window. It can be shown again using window.show(), controller.show() or controller.showRecords().
 The main application window cannot be closed.]]></description>
           <summary><![CDATA[Closes (hides) the window.]]></summary>
-          <deprecated><![CDATA[As of release 6.0, replaced by {@link #hide()}]]></deprecated>
+          <deprecated><![CDATA[As of release 6.0, replaced by #hide()]]></deprecated>
           <sample><![CDATA[//creates and shows a window for 3 seconds before closing it
 var win = application.createWindow("someWindowName", JSWindow.WINDOW, null);
 win.setInitialBounds(200, 200, 450, 350);
@@ -17631,7 +17631,7 @@ forms['printForm'].controller.showPrintPreview();]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
           <parameters>
-            <parameter name="query" typecode="com.servoy.j2db.querybuilder.impl.QBPart"/>
+            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBPart" typecode="com.servoy.j2db.querybuilder.impl.QBPart"/>
           </parameters>
         </function>
       </functions>
@@ -17808,7 +17808,7 @@ var ok = %%prefix%%foundset.addFoundSetFilterParam('companyname', '#^||=', 'serv
           <return type="void" typecode="void"/>
           <description><![CDATA[Clears the foundset.]]></description>
           <summary><![CDATA[Clears the foundset.]]></summary>
-          <deprecated><![CDATA[As of release 3.1, replaced by {@link #clear()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.1, replaced by #clear().]]></deprecated>
           <sample/>
         </function>
         <function name="deleteAllRecords">
@@ -18027,7 +18027,7 @@ for (var i = 0; params != null && i < params.length; i++)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Get the number of records in this foundset.]]></description>
           <summary><![CDATA[Get the number of records in this foundset.]]></summary>
-          <deprecated><![CDATA[As of release 3.1, replaced by {@link #getSize()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.1, replaced by #getSize().]]></deprecated>
           <sample><![CDATA[for ( var i = 1 ; i <= %%prefix%%foundset.getMaxRecordIndex() ; i++ )
 {
 	%%prefix%%foundset.setSelectedIndex(i);
@@ -18119,7 +18119,7 @@ When the founset is in multiSelect mode (see property multiSelect), selection ca
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Gets the name of the server used.]]></description>
           <summary><![CDATA[Gets the name of the server used.]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by {@link #getDataSource()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource().]]></deprecated>
           <sample/>
         </function>
         <function name="getSize">
@@ -18142,7 +18142,7 @@ increase as more records are loaded.]]></description>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Gets the name of the table used.]]></description>
           <summary><![CDATA[Gets the name of the table used.]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by {@link #getDataSource()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource().]]></deprecated>
           <sample/>
         </function>
         <function name="invertRecords">
@@ -24039,7 +24039,7 @@ var currentState = %%prefix%%%%elementName%%.readOnly;
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Get record index.]]></description>
           <summary><![CDATA[Get record index.]]></summary>
-          <deprecated><![CDATA[As of release 3.0, replaced by {@link foundset#getSelectedIndex()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by foundset#getSelectedIndex().]]></deprecated>
           <sample/>
         </property>
         <property name="toolTipText">
@@ -24192,7 +24192,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description/>
-          <deprecated><![CDATA[As of release 5.x, replaced by {@link foundset#getSize()}.]]></deprecated>
+          <deprecated><![CDATA[As of release 5.x, replaced by foundset#getSize().]]></deprecated>
           <sample/>
         </function>
         <function name="getName">
@@ -26757,7 +26757,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description/>
-          <deprecated><![CDATA[As of release 3.x, replaced by {@link #getTabFormNameAt(int)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.x, replaced by #getTabFormNameAt(int).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="getTabBGColorAt">
@@ -26864,7 +26864,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description/>
-          <deprecated><![CDATA[As of release 3.x, replaced by {@link #isTabEnabledAt(int)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.x, replaced by #isTabEnabledAt(int).]]></deprecated>
           <sample/>
         </function>
         <function name="isTabEnabledAt">
@@ -26998,7 +26998,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 3.x, replaced by {@link #setTabEnabledAt(int, boolean)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.x, replaced by #setTabEnabledAt(int, boolean).]]></deprecated>
           <sample/>
         </function>
         <function name="setTabEnabledAt">
@@ -28881,7 +28881,7 @@ for(var i=1 ; i<=dsUsers.getMaxRowIndex() ; i++)
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description/>
-          <deprecated><![CDATA[As of release 3.0, replaced by {@link #getUserUID(Object[])}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by #getUserUID(Object[]).]]></deprecated>
           <sample/>
         </function>
         <function name="getUserName">
@@ -29164,7 +29164,7 @@ security.setSecuritySettings(dataset);//to be called in solution startup method]
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 3.0, replaced by {@link #setUserUID(Object,String)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by #setUserUID(Object,String).]]></deprecated>
           <sample/>
         </function>
         <function name="setUserUID">
@@ -32191,7 +32191,7 @@ var dot = utils.getUnicodeCharacter(9679);]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description/>
-          <deprecated><![CDATA[As of release 2.0, replaced by {@link #hasRecords(Object[])}.]]></deprecated>
+          <deprecated><![CDATA[As of release 2.0, replaced by #hasRecords(Object[]).]]></deprecated>
           <sample/>
         </function>
         <function name="hasRecords">
@@ -32784,7 +32784,7 @@ var state = %%prefix%%controller.readOnly;
         <property deprecated="true" name="recordIndex">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description/>
-          <deprecated><![CDATA[As of release 3.0, replaced by {@link foundset#getSelectedIndex()}]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by foundset#getSelectedIndex()]]></deprecated>
           <sample/>
         </property>
         <property name="view">
@@ -32809,7 +32809,7 @@ var view = %%prefix%%controller.view;
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Add a filter parameter to limit the foundset permanently]]></description>
           <summary><![CDATA[Add a filter parameter to limit the foundset permanently]]></summary>
-          <deprecated><![CDATA[As of release 3.0, replaced by {@link foundset#addFoundSetFilterParam(String, String, Object, String)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by foundset#addFoundSetFilterParam(String, String, Object, String).]]></deprecated>
           <sample><![CDATA[var success = %%prefix%%controller.addFoundSetFilterParam('customerid', '=', 'BLONP');//possible to add multiple
 %%prefix%%controller.loadAllRecords();//to make param(s) effective]]></sample>
           <parameters>
@@ -32823,7 +32823,7 @@ var view = %%prefix%%controller.view;
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Copy all records from foundset to variable and clipboard]]></description>
           <summary><![CDATA[Copy all records from foundset to variable and clipboard]]></summary>
-          <deprecated><![CDATA[As of release 3.0, replaced by {@link application#setClipboardContent(Object)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by application#setClipboardContent(Object).]]></deprecated>
           <sample><![CDATA[var recorddata = %%prefix%%controller.copyAllRecords();]]></sample>
         </function>
         <function deprecated="true" name="copyRecord">
@@ -32831,7 +32831,7 @@ var view = %%prefix%%controller.view;
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Copy current record to variable and clipboard.]]></description>
           <summary><![CDATA[Copy current record to variable and clipboard.]]></summary>
-          <deprecated><![CDATA[As of release 3.0, replaced by {@link application#setClipboardContent(Object)}.]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by application#setClipboardContent(Object).]]></deprecated>
           <sample><![CDATA[var recorddata = %%prefix%%controller.copyRecord();]]></sample>
         </function>
         <function name="deleteAllRecords">
@@ -32853,7 +32853,7 @@ var view = %%prefix%%controller.view;
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get duplicate of current foundset, can be used by loadRecords again]]></description>
           <summary><![CDATA[Get duplicate of current foundset, can be used by loadRecords again]]></summary>
-          <deprecated><![CDATA[As of release 3.0, replaced by {@link foundset#duplicateFoundSet()}]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by foundset#duplicateFoundSet()]]></deprecated>
           <sample><![CDATA[var dupFoundset = %%prefix%%controller.duplicateFoundSet();
 %%prefix%%controller.find();
 //search some fields
@@ -32985,7 +32985,7 @@ else {
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the name of the window/dialog this form is displayed in. If the form is not showing in a window or dialog (other then main application frame), it returns null.]]></return>
           <description><![CDATA[Get the name of the window/dialog this form is displayed in.]]></description>
           <summary><![CDATA[Get the name of the window/dialog this form is displayed in.]]></summary>
-          <deprecated><![CDATA[As of release 6.0, dialogs/windows API has been rewritten (based in JSWindow objects). Use {@link #getWindow()} instead.]]></deprecated>
+          <deprecated><![CDATA[As of release 6.0, dialogs/windows API has been rewritten (based in JSWindow objects). Use #getWindow() instead.]]></deprecated>
           <sample><![CDATA[var dialogOrWindowName = %%prefix%%controller.getContainerName();
 	if (dialogOrWindowName != null) {
 		application.closeForm(dialogOrWindowName);
@@ -33119,7 +33119,7 @@ var current = %%prefix%%controller.getSelectedIndex();
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Get the name of the server used.]]></description>
           <summary><![CDATA[Get the name of the server used.]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by {@link #getDataSource()}]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource()]]></deprecated>
           <sample/>
         </function>
         <function name="getTabSequence">
@@ -33146,7 +33146,7 @@ else {
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Get the name of the table used.]]></description>
           <summary><![CDATA[Get the name of the table used.]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by {@link #getDataSource()}]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource()]]></deprecated>
           <sample/>
         </function>
         <function name="getWindow">
@@ -33320,7 +33320,7 @@ Note: The omitted records are discarded when these functions are executed: loadA
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 5.0, replaced by {@link #showPrintPreview(Object[])}]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #showPrintPreview(Object[])]]></deprecated>
           <sample/>
         </function>
         <function name="printXML">
@@ -33367,7 +33367,7 @@ Lookups are defined in the dataprovider (columns) auto-enter setting and are nor
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description/>
-          <deprecated><![CDATA[As of release 3.0, replaced by {@link databaseManager#saveData(Object[])}]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by databaseManager#saveData(Object[])]]></deprecated>
           <sample/>
         </function>
         <function name="search">
@@ -33599,7 +33599,7 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description/>
-          <deprecated><![CDATA[As of release 3.0, replaced by {@link foundset#loadOmittedRecords()}]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by foundset#loadOmittedRecords()]]></deprecated>
           <sample/>
         </function>
         <function name="showPrintPreview">

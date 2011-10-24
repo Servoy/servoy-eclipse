@@ -771,7 +771,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the year of the date.]]></description>
           <summary><![CDATA[Gets the year of the date.]]></summary>
-          <deprecated><![CDATA[Obsolete method, replaced by {@link #getFullYear())}.]]></deprecated>
+          <deprecated><![CDATA[Obsolete method, replaced by #getFullYear()).]]></deprecated>
           <sample><![CDATA[date.getYear();]]></sample>
           <links>
             <link>
@@ -1104,7 +1104,7 @@ application.output(str);]]></sample>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the year of the date.]]></description>
           <summary><![CDATA[Sets the year of the date.]]></summary>
-          <deprecated><![CDATA[Obsolete method, replaced by {@link #setFullYear())}.]]></deprecated>
+          <deprecated><![CDATA[Obsolete method, replaced by #setFullYear()).]]></deprecated>
           <sample><![CDATA[date.setYear(integer);]]></sample>
           <parameters>
             <parameter name="yearValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
