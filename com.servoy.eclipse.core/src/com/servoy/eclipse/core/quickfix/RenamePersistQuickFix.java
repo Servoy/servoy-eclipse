@@ -78,30 +78,32 @@ public class RenamePersistQuickFix implements IMarkerResolution
 					if (persist instanceof ISupportUpdateableName || persist instanceof Media)
 					{
 						InputDialog dialog = new InputDialog(Display.getCurrent().getActiveShell(), "Rename element", "Input a new name for element '" +
-							((ISupportName)persist).getName() + "' from solution '" + servoyProject.getSolution().getName() + "'.", "", new IInputValidator()
-						{
-							public String isValid(String newText)
+							((ISupportName)persist).getName() + "' from solution '" + servoyProject.getSolution().getName() + "'.",
+							((ISupportName)persist).getName(), new IInputValidator()
 							{
-								if (!(persist instanceof Media))
+								public String isValid(String newText)
 								{
-									boolean valid = IdentDocumentValidator.isJavaIdentifier(newText);
-									return valid ? null : (newText.length() == 0 ? "" : "Invalid name");
-								}
-								else
-								{
-									if (newText.length() == 0)
+									if (!(persist instanceof Media))
 									{
-										return "";
+										boolean valid = IdentDocumentValidator.isJavaIdentifier(newText);
+										return valid ? ((newText.equalsIgnoreCase(((ISupportName)persist).getName())) ? "" : null) : (newText.length() == 0
+											? "" : "Invalid name");
 									}
-									if (newText.indexOf('\\') >= 0 || newText.indexOf('/') >= 0 || newText.indexOf(' ') >= 0)
+									else
 									{
-										return "Invalid new media name";
+										if (newText.length() == 0)
+										{
+											return "";
+										}
+										if (newText.indexOf('\\') >= 0 || newText.indexOf('/') >= 0 || newText.indexOf(' ') >= 0)
+										{
+											return "Invalid new media name";
+										}
+										// ok
+										return null;
 									}
-									// ok
-									return null;
 								}
-							}
-						});
+							});
 
 						if (dialog.open() != Window.OK) return;
 

@@ -64,13 +64,15 @@ public class RenamePersistAction extends Action implements ISelectionChangedList
 	@Override
 	public void run()
 	{
-		Form form = (Form)persist;
+		final Form form = (Form)persist;
 		InputDialog nameDialog = new InputDialog(Display.getDefault().getActiveShell(), "Rename form", "Supply a new form name", form.getName(),
 			new IInputValidator()
 			{
 				public String isValid(String newText)
 				{
-					return IdentDocumentValidator.isJavaIdentifier(newText) ? null : (newText.length() == 0 ? "" : "Invalid form name");
+
+					return IdentDocumentValidator.isJavaIdentifier(newText) ? (newText.equalsIgnoreCase(form.getName()) ? "" : null) : (newText.length() == 0
+						? "" : "Invalid form name");
 				}
 			});
 		int res = nameDialog.open();

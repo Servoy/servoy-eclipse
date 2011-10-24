@@ -90,12 +90,13 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 			}
 			Solution editingSolution = servoyProject.getEditingSolution();
 
-			InputDialog nameDialog = new InputDialog(viewer.getViewSite().getShell(), "Rename solution", "Rename solution", "", new IInputValidator()
+			final String oldName = servoyProject.getProject().getName();
+			InputDialog nameDialog = new InputDialog(viewer.getViewSite().getShell(), "Rename solution", "Rename solution", oldName, new IInputValidator()
 			{
 				public String isValid(String newText)
 				{
 					boolean valid = IdentDocumentValidator.isJavaIdentifier(newText);
-					return valid ? null : (newText.length() == 0 ? "" : "Invalid solution name");
+					return valid ? (newText.equalsIgnoreCase(oldName) ? "" : null) : (newText.length() == 0 ? "" : "Invalid solution name");
 				}
 			});
 			int res = nameDialog.open();
@@ -107,7 +108,6 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 				{
 					try
 					{
-						String oldName = servoyProject.getProject().getName();
 						boolean isActive = ServoyModelManager.getServoyModelManager().getServoyModel().isModuleActive(oldName);
 						ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 						ServoyProject[] activeProjects = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
