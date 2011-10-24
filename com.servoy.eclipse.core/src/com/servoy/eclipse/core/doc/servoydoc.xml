@@ -14922,11 +14922,9 @@ application.output(button_uuid.toString());]]></sample>
     </object>
     <object publicName="JSRenderEvent" qualifiedName="com.servoy.j2db.scripting.JSRenderEvent">
       <functions>
-        <function deprecated="true" name="getElement">
+        <function deprecated="true" name="getElement" undocumented="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.ui.IScriptRenderMethods" typecode="com.servoy.j2db.ui.IScriptRenderMethods"/>
-          <description/>
-          <sample/>
         </function>
         <function name="getRecord">
           <argumentsTypes/>
