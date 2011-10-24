@@ -18,6 +18,7 @@ package com.servoy.eclipse.debug;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.Action;
@@ -54,7 +55,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 	// The shared instance
 	private static Activator plugin;
 
-	private final List<Image> imageList = new ArrayList<Image>();
+	private final List<Image> imageList = Collections.synchronizedList(new ArrayList<Image>());
 
 	/**
 	 * The constructor
@@ -113,7 +114,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	public void registerImage(Image image)
 	{
-		imageList.add(image);
+		if (image != null) imageList.add(image);
 	}
 
 	/**
