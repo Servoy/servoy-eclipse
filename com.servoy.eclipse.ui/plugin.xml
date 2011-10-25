@@ -288,7 +288,14 @@
             class="com.servoy.eclipse.ui.preferences.SolutionExplorerPreferences"
             id="com.servoy.eclipse.ui.solutionExplorer"
             name="Solution Explorer">
-      </page>      
+      </page>
+      <page
+            category="com.servoy.eclipse.ui.preference"
+            class="com.servoy.eclipse.ui.preferences.AutomaticNamingStrategies"
+            id="com.servoy.eclipse.ui.autoNameStrategies"
+            name="Automatic Naming Strategies">
+      </page>
+            
    </extension>
      <extension
          point="org.eclipse.ui.actionSets">

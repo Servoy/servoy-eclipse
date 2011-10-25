@@ -69,6 +69,7 @@ import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
@@ -77,6 +78,8 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportDataProviderID;
+import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.MethodTemplate;
@@ -170,8 +173,14 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		return createNewMethod(shell, parent, methodKey, activate, forcedMethodName, null);
 	}
 
-	public static ScriptMethod createNewMethod(final Shell shell, IPersist parent, String methodKey, boolean activate, String forcedMethodName,
+	public static ScriptMethod createNewMethod(Shell shell, IPersist parent, String methodKey, boolean activate, String forcedMethodName,
 		Map<String, String> substitutions)
+	{
+		return createNewMethod(shell, parent, methodKey, activate, forcedMethodName, substitutions, null);
+	}
+
+	public static ScriptMethod createNewMethod(final Shell shell, IPersist parent, String methodKey, boolean activate, String forcedMethodName,
+		Map<String, String> substitutions, IPersist persist)
 	{
 		String methodType;
 		int tagFilter = MethodTemplate.PUBLIC_TAG;
@@ -201,7 +210,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		int tagToOutput = MethodTemplate.PUBLIC_TAG;
 		if (methodName == null)
 		{
-			Pair<String, Integer> methodNameAndPrivateFlag = askForMethodName(methodType, parent, methodKey, shell, tagFilter);
+			Pair<String, Integer> methodNameAndPrivateFlag = askForMethodName(methodType, parent, methodKey, shell, tagFilter, persist);
 			if (methodNameAndPrivateFlag != null)
 			{
 				methodName = methodNameAndPrivateFlag.getLeft();
@@ -476,7 +485,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 	}
 
 	@SuppressWarnings("nls")
-	private static Pair<String, Integer> askForMethodName(String methodType, final IPersist parent, String methodKey, Shell shell, int tagFilter)
+	private static Pair<String, Integer> askForMethodName(String methodType, final IPersist parent, String methodKey, Shell shell, int tagFilter,
+		IPersist persist)
 	{
 		String defaultName = ""; //$NON-NLS-1$
 		if (methodKey != null)
@@ -494,6 +504,14 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 			{
 				name = signature.getName();
 			}
+
+			//only form and global methods (event handlers on form elements and tables)
+			if (parent instanceof Form || parent instanceof Solution)
+			{
+				if (persist instanceof TableNode) name = getTableEventHandlerName(name, persist);
+				else if (!(persist instanceof Solution) && !(persist instanceof Form)) name = getFormEventHandlerName(name, persist);
+			}
+
 			for (int i = 0; i < 100; i++)
 			{
 				defaultName = name;
@@ -511,6 +529,46 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		return (dialog.getReturnCode() == Window.CANCEL) ? null : new Pair<String, Integer>(dialog.getValue(), Integer.valueOf(dialog.tagToOutput));
 	}
 
+	private static String makePrettyName(String simpleMethodName, String elementName)
+	{
+		if (elementName == null) return simpleMethodName;
+		String modifiedElemName = elementName.substring(0, 1).toUpperCase() + elementName.substring(1);
+		//include in method name ("on ... Action ")
+		return new StringBuffer(simpleMethodName).insert(2, modifiedElemName).toString();
+	}
+
+	private static String getTableEventHandlerName(String simpleName, IPersist persist)
+	{
+		if (persist == null) return simpleName;
+		if (new DesignerPreferences().getIncludeTableName()) return makePrettyName(simpleName, ((TableNode)persist).getTableName());
+		else return simpleName;
+	}
+
+	private static String getFormEventHandlerName(String simpleName, IPersist persist)
+	{
+		if (persist == null) return simpleName;
+
+		DesignerPreferences dp = new DesignerPreferences();
+		if (dp.getDefaultFormEventHandlerNaming()) return simpleName;
+		else
+		{
+			String prettyName = simpleName;
+			if (dp.getIncludeFormElementDataProviderName() || dp.getIncludeFormElementDataProviderNameWithFallback())
+			{
+				if (persist instanceof ISupportDataProviderID)
+				{
+					String dataProvider = ((ISupportDataProviderID)persist).getDataProviderID();
+					if (dataProvider != null) return makePrettyName(prettyName, dataProvider);
+				}
+			}
+			// does not support dataprovider OR dataprovider is null
+			if (dp.getIncludeFormElementName() || dp.getIncludeFormElementDataProviderNameWithFallback())
+			{
+				if (persist instanceof ISupportName) prettyName = makePrettyName(prettyName, ((ISupportName)persist).getName());
+			}
+			return prettyName;
+		}
+	}
 
 	/**
 	 * @author jcompagner

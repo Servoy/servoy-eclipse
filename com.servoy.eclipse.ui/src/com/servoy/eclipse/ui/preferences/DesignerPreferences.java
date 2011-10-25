@@ -77,6 +77,12 @@ public class DesignerPreferences
 	public static final String PAINT_PAGEBREAKS_SETTING = "paintPageBreaks";
 	public static final String SHOW_RULERS_SETTING = "showRulers";
 	public static final String MARQUEE_SELECT_OUTER_SETTING = "marqueeSelectOuter";
+	public static final String DEFAULT_FORM_EVENT_HANDLER_NAMING_SETTING = "defaultFormEventHandlerNaming";
+	public static final String INCLUDE_FORM_ELEMENT_NAME_SETTING = "includeFormElementName";
+	public static final String INCLUDE_FORM_ELEMENT_DATAPROVIDER_SETTING = "includeFormElementDataProvider";
+	public static final String INCLUDE_FORM_ELEMENT_DATAPROVIDER_FALLBACK_SETTING = "includeormElementDataProviderFallback";
+	public static final String DEFAULT_TABLE_EVENT_HANDLER_NAMING_SETTING = "defaultTableEventHandlerNaming";
+	public static final String INCLUDE_TABLE_NAME_SETTING = "includeTableName";
 
 	public static final String SNAP_TO_ALIGMNENT = "alignment";
 	public static final String SNAP_TO_GRID = "grid";
@@ -108,6 +114,12 @@ public class DesignerPreferences
 	public static final boolean PAINT_PAGEBREAKS_DEFAULT = false;
 	public static final boolean SHOW_RULERS_DEFAULT = true;
 	public static final boolean MARQUEE_SELECT_OUTER_DEFAULT = true;
+	public static final boolean DEFAULT_FORM_EVENT_HANDLER_NAMING_DEFAULT = true;
+	public static final boolean INCLUDE_FORM_ELEMENT_NAME_DEFAULT = false;
+	public static final boolean INCLUDE_FORM_ELEMENT_DATAPROVIDER_DEFAULT = false;
+	public static final boolean INCLUDE_FORM_ELEMENT_DATAPROVIDER_FALLBACK_DEFAULT = false;
+	public static final boolean DEFAULT_TABLE_EVENT_HANDLER_NAMING_DEFAULT = true;
+	public static final boolean INCLUDE_TABLE_NAME_DEFAULT = false;
 
 	protected final IEclipsePreferences eclipsePreferences;
 
@@ -463,6 +475,69 @@ public class DesignerPreferences
 	{
 		setProperty(FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING, formToolsOnMainToolbar);
 	}
+
+	public boolean getDefaultFormEventHandlerNaming()
+	{
+		return getProperty(DEFAULT_FORM_EVENT_HANDLER_NAMING_SETTING, DEFAULT_FORM_EVENT_HANDLER_NAMING_DEFAULT);
+	}
+
+	public void setDefaultFormEventHandlerNaming(boolean defaultEventHandlerNaming)
+	{
+		setProperty(DEFAULT_FORM_EVENT_HANDLER_NAMING_SETTING, defaultEventHandlerNaming);
+	}
+
+	public boolean getIncludeFormElementName()
+	{
+		return getProperty(INCLUDE_FORM_ELEMENT_NAME_SETTING, INCLUDE_FORM_ELEMENT_NAME_DEFAULT);
+	}
+
+	public void setIncludeFormElementName(boolean includeElementName)
+	{
+		setProperty(INCLUDE_FORM_ELEMENT_NAME_SETTING, includeElementName);
+	}
+
+	public boolean getIncludeFormElementDataProviderName()
+	{
+		return getProperty(INCLUDE_FORM_ELEMENT_DATAPROVIDER_SETTING, INCLUDE_FORM_ELEMENT_DATAPROVIDER_DEFAULT);
+	}
+
+	public void setIncludeFormElementDataProviderName(boolean includeDataProviderName)
+	{
+		setProperty(INCLUDE_FORM_ELEMENT_DATAPROVIDER_SETTING, includeDataProviderName);
+	}
+
+	public boolean getIncludeFormElementDataProviderNameWithFallback()
+	{
+		return getProperty(INCLUDE_FORM_ELEMENT_DATAPROVIDER_FALLBACK_SETTING, INCLUDE_FORM_ELEMENT_DATAPROVIDER_FALLBACK_DEFAULT);
+	}
+
+	public void setIncludeFormElementDataProviderNameWithFallback(boolean includeDataProviderNameFallback)
+	{
+		setProperty(INCLUDE_FORM_ELEMENT_DATAPROVIDER_FALLBACK_SETTING, includeDataProviderNameFallback);
+	}
+
+	//getDefaultTableEventHandlerNaming
+	public boolean getDefaultTableEventHandlerNaming()
+	{
+		return getProperty(DEFAULT_TABLE_EVENT_HANDLER_NAMING_SETTING, DEFAULT_TABLE_EVENT_HANDLER_NAMING_DEFAULT);
+	}
+
+	public void setDefaultTableEventHandlerNaming(boolean defaultTableEventHandling)
+	{
+		setProperty(DEFAULT_TABLE_EVENT_HANDLER_NAMING_SETTING, defaultTableEventHandling);
+	}
+
+	//getIncludeTableNameInEventHandler
+	public boolean getIncludeTableName()
+	{
+		return getProperty(INCLUDE_TABLE_NAME_SETTING, INCLUDE_TABLE_NAME_DEFAULT);
+	}
+
+	public void setIncludeTableName(boolean includeTableNameInEventHandler)
+	{
+		setProperty(INCLUDE_TABLE_NAME_SETTING, includeTableNameInEventHandler);
+	}
+
 
 	public static boolean isCoolbarSetting(String key)
 	{
