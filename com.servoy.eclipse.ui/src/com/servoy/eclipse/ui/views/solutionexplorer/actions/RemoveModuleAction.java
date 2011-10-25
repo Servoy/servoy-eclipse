@@ -39,6 +39,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectReference;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Action for removing the selected module from one of the active modules that contains it.
@@ -74,7 +75,7 @@ public class RemoveModuleAction extends Action implements ISelectionChangedListe
 			Solution editingSolution = parentProject.getEditingSolution();
 			if (editingSolution != null)
 			{
-				String[] modules = ModelUtils.getTokenElements(editingSolution.getModulesNames(), ",", true);
+				String[] modules = Utils.getTokenElements(editingSolution.getModulesNames(), ",", true);
 				List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
 				modulesList.remove(selectedProject.getProject().getName());
 				String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");

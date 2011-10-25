@@ -41,6 +41,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 public class RenameSolutionAction extends Action implements ISelectionChangedListener
@@ -130,7 +131,7 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 						{
 							for (ServoyProject module : activeProjects)
 							{
-								String[] modulesNames = ModelUtils.getTokenElements(module.getEditingSolution().getModulesNames(), ",", true);
+								String[] modulesNames = Utils.getTokenElements(module.getEditingSolution().getModulesNames(), ",", true);
 								if (modulesNames != null && modulesNames.length > 0)
 								{
 									boolean changed = false;

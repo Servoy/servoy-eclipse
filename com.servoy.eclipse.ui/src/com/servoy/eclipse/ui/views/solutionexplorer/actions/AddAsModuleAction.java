@@ -39,6 +39,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Action for adding the selected solution(s) as (a) module(s) of one of the already active modules.
@@ -75,7 +76,7 @@ public class AddAsModuleAction extends Action implements ISelectionChangedListen
 			Solution editingSolution = activeModule.getEditingSolution();
 			if (editingSolution != null)
 			{
-				String[] modules = ModelUtils.getTokenElements(editingSolution.getModulesNames(), ",", true);
+				String[] modules = Utils.getTokenElements(editingSolution.getModulesNames(), ",", true);
 				List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
 				for (String module : selectedProjects)
 				{

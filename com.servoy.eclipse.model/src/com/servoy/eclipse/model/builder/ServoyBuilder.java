@@ -498,7 +498,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		if (servoyProject != null && active && servoyProject.getSolution() != null)
 		{
 			// check if all modules are checked out
-			String[] modulesNames = ModelUtils.getTokenElements(servoyProject.getSolution().getModulesNames(), ",", true); //$NON-NLS-1$
+			String[] modulesNames = Utils.getTokenElements(servoyProject.getSolution().getModulesNames(), ",", true); //$NON-NLS-1$
 			if (modulesNames != null)
 			{
 				for (String name : modulesNames)
