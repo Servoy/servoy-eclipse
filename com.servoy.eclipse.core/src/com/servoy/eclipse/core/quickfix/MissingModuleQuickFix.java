@@ -29,6 +29,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Utils;
 
 public class MissingModuleQuickFix implements IMarkerResolution
 {
@@ -55,7 +56,7 @@ public class MissingModuleQuickFix implements IMarkerResolution
 			try
 			{
 				Solution solution = servoyProject.getEditingSolution();
-				String[] modules = ModelUtils.getTokenElements(servoyProject.getSolution().getModulesNames(), ",", true);
+				String[] modules = Utils.getTokenElements(servoyProject.getSolution().getModulesNames(), ",", true);
 				List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
 				if (modulesList.contains(moduleName))
 				{

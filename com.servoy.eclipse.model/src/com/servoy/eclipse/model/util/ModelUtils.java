@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.WeakHashMap;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -49,30 +48,6 @@ import com.servoy.j2db.util.Pair;
 
 public class ModelUtils
 {
-	public static String[] getTokenElements(String value, String delim, boolean trim)
-	{
-		if (value == null)
-		{
-			return new String[] { };
-		}
-
-		List<String> lst = new ArrayList<String>();
-		StringTokenizer tokemizer = new StringTokenizer(value, delim);
-		while (tokemizer.hasMoreElements())
-		{
-			String token = tokemizer.nextToken();
-			if (trim)
-			{
-				lst.add(token.trim());
-			}
-			else
-			{
-				lst.add(token);
-			}
-		}
-		return lst.toArray(new String[lst.size()]);
-	}
-
 	public static String getTokenValue(Object[] value, String delim)
 	{
 		if (value == null || value.length == 0)

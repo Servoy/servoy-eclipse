@@ -239,7 +239,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 			{
 				if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
 				{
-					String[] moduleNames = ModelUtils.getTokenElements(activeProject.getSolution().getModulesNames(), ",", true);
+					String[] moduleNames = Utils.getTokenElements(activeProject.getSolution().getModulesNames(), ",", true);
 					final ArrayList<ServoyProject> modulesToUpdate = new ArrayList<ServoyProject>();
 					final StringBuilder sbUpdateModuleNames = new StringBuilder();
 
@@ -294,7 +294,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 										Solution editingSolution = activeProject.getEditingSolution();
 										if (editingSolution != null)
 										{
-											String[] modules = ModelUtils.getTokenElements(editingSolution.getModulesNames(), ",", true);
+											String[] modules = Utils.getTokenElements(editingSolution.getModulesNames(), ",", true);
 											List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
 											for (ServoyProject updateModule : modulesToUpdate)
 												modulesList.remove(updateModule.getSolution().getName());
@@ -405,7 +405,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				{
 					ServoyProject servoyProject = (ServoyProject)project.getNature(ServoyProject.NATURE_ID);
 					Solution solution = servoyProject.getSolution();
-					String[] modules = ModelUtils.getTokenElements(solution.getModulesNames(), ",", true);
+					String[] modules = Utils.getTokenElements(solution.getModulesNames(), ",", true);
 					updatingProjects.add(project);
 
 					for (String moduleName : modules)
@@ -1199,7 +1199,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 					buildPaths.add(DLTKCore.newSourceEntry(sp.getProject().getFullPath(), new IPath[] { new Path(ResourcesUtils.STP_DIR + "/"), new Path(
 						SolutionSerializer.MEDIAS_DIR + "/") }));
 				}
-				String[] moduleNames = ModelUtils.getTokenElements(sp.getSolution().getModulesNames(), ",", true);
+				String[] moduleNames = Utils.getTokenElements(sp.getSolution().getModulesNames(), ",", true);
 				Arrays.sort(moduleNames);
 				// test all build paths
 				for (String moduleName : moduleNames)

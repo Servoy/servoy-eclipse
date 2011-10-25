@@ -24,7 +24,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 
 import com.servoy.eclipse.model.repository.EclipseMessages;
-import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Adapter for making a i18n resource a suitable input for an editor.
@@ -43,7 +43,7 @@ public class I18NEditorInput implements IEditorInput
 			String fileName = fileEditorInput.getName();
 			if (fileName.endsWith(EclipseMessages.MESSAGES_EXTENSION))
 			{
-				String[] fileNameTokens = ModelUtils.getTokenElements(fileName, ".", true);
+				String[] fileNameTokens = Utils.getTokenElements(fileName, ".", true);
 				if (fileNameTokens != null && fileNameTokens.length > 1)
 				{
 					return new I18NEditorInput(fileNameTokens[0], fileNameTokens[1]);

@@ -37,7 +37,6 @@ import com.servoy.eclipse.model.builder.ErrorKeeper;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IUnexpectedSituationHandler;
 import com.servoy.eclipse.model.repository.EclipseRepository;
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.AbstractActiveSolutionHandler;
@@ -59,6 +58,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 
 /**
  * models servoy solution as project
@@ -133,7 +133,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 				(solution = ((ServoyProject)solutionProject.getNature(ServoyProject.NATURE_ID)).getSolution()) != null && modules.indexOf(solution) == -1)
 			{
 				modules.add(solution);
-				String[] solutionModules = ModelUtils.getTokenElements(solution.getModulesNames(), ",", true);
+				String[] solutionModules = Utils.getTokenElements(solution.getModulesNames(), ",", true);
 				if (solutionModules != null)
 				{
 					for (String module : solutionModules)
