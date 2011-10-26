@@ -107,6 +107,8 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IDefaultValue;
 import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
+import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
+import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
 import com.servoy.j2db.FormManager;
@@ -3228,50 +3230,64 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 		if (name.equals("name"))
 		{
-			return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null, new ICellEditorFactory()
-			{
-				public CellEditor createPropertyEditor(Composite parent)
+			return new DelegatePropertyController<String, String>(new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null,
+				new ICellEditorFactory()
 				{
-					VerifyingTextCellEditor cellEditor = new VerifyingTextCellEditor(parent);
-					cellEditor.addVerifyListener(DocumentValidatorVerifyListener.IDENT_SERVOY_VERIFIER);
-					cellEditor.setValidator(new ICellEditorValidator()
+					public CellEditor createPropertyEditor(Composite parent)
 					{
-						public String isValid(Object value)
+						VerifyingTextCellEditor cellEditor = new VerifyingTextCellEditor(parent);
+						cellEditor.addVerifyListener(DocumentValidatorVerifyListener.IDENT_SERVOY_VERIFIER);
+						cellEditor.setValidator(new ICellEditorValidator()
 						{
-							if (ModelUtils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext()))
+							public String isValid(Object value)
 							{
-								return "Cannot change name of an override element.";
-							}
-							if (value instanceof String && ((String)value).length() > 0)
-							{
-								try
+								if (ModelUtils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext()))
 								{
-									if (persistContext.getPersist() instanceof IFormElement)
+									return "Cannot change name of an override element.";
+								}
+								if (value instanceof String && ((String)value).length() > 0)
+								{
+									try
 									{
-										ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value,
-											persistContext.getPersist().getID(),
-											new ValidatorSearchContext(persistContext.getPersist().getParent(), IRepository.ELEMENTS), false);
+										if (persistContext.getPersist() instanceof IFormElement)
+										{
+											ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value,
+												persistContext.getPersist().getID(),
+												new ValidatorSearchContext(persistContext.getPersist().getParent(), IRepository.ELEMENTS), false);
 
+										}
+										else if (persistContext.getPersist() instanceof Form)
+										{
+											ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value,
+												persistContext.getPersist().getID(),
+												new ValidatorSearchContext(persistContext.getPersist(), IRepository.FORMS), false);
+										}
 									}
-									else if (persistContext.getPersist() instanceof Form)
+									catch (RepositoryException e)
 									{
-										ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value,
-											persistContext.getPersist().getID(), new ValidatorSearchContext(persistContext.getPersist(), IRepository.FORMS),
-											false);
+										return e.getMessage();
 									}
 								}
-								catch (RepositoryException e)
-								{
-									return e.getMessage();
-								}
+								return null;
 							}
-							return null;
-						}
-					});
+						});
 
-					return cellEditor;
+						return cellEditor;
+					}
+				}))
+			{
+				@Override
+				public IMergedPropertyDescriptor createMergedPropertyDescriptor(IMergeablePropertyDescriptor pd)
+				{
+					return null;
 				}
-			});
+
+				@Override
+				public boolean isMergeableWith(IMergeablePropertyDescriptor pd)
+				{
+					return true;
+				}
+			};
 		}
 
 		if (name.equals("defaultPageFormat"))
