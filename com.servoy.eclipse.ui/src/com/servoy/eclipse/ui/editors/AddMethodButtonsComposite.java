@@ -125,7 +125,7 @@ public class AddMethodButtonsComposite extends Composite
 				}
 			}
 		});
-		createFoundsetMethodButton.setText("FoundSet");
+		createFoundsetMethodButton.setText("Entity");
 
 		createGlobalMethodButton = new Button(this, SWT.NONE);
 		createGlobalMethodButton.addSelectionListener(new SelectionAdapter()

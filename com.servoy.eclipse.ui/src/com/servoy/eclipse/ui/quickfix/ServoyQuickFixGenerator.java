@@ -102,7 +102,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, null, eventName, IRepository.FORMS, "form"));
 				resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, null, eventName, IRepository.SOLUTIONS, "global"));
 				if (dataSource != null) resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName, IRepository.TABLENODES,
-					"foundset"));
+					"entity"));
 
 				return resolutions.toArray(new IMarkerResolution[resolutions.size()]);
 			}
