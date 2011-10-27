@@ -16,9 +16,10 @@
  */
 package com.servoy.eclipse.ui.util;
 
-import javax.swing.text.BadLocationException;
-import javax.swing.text.StringContent;
 import javax.swing.text.AbstractDocument.Content;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
+import javax.swing.text.StringContent;
 
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.VerifyEvent;
@@ -74,10 +75,15 @@ public class DocumentValidatorVerifyListener implements VerifyListener
 			{
 				Content content = new StringContent();
 				content.insertString(0, value);
-				ValidatingDocument document = new ValidatingDocument(content, validators);
-				document.replace(e.start, e.end - e.start, e.text, null);
-				// if something changed, it is probably ok.
-				e.doit = !value.equals(document.getText(0, document.getLength())) || (e.start == 0 && e.end == document.getLength());
+				ValidatingDocument checkedNewContent = new ValidatingDocument(content, validators);
+				checkedNewContent.replace(e.start, e.end - e.start, e.text, null);
+
+				content = new StringContent();
+				content.insertString(0, value);
+				PlainDocument uncheckedNewContent = new PlainDocument(content);
+				uncheckedNewContent.replace(e.start, e.end - e.start, e.text, null);
+
+				e.doit = uncheckedNewContent.getText(0, uncheckedNewContent.getLength()).equals(checkedNewContent.getText(0, checkedNewContent.getLength()));
 			}
 			catch (BadLocationException ex)
 			{
