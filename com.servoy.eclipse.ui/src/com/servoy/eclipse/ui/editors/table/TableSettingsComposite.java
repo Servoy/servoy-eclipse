@@ -62,6 +62,8 @@ public class TableSettingsComposite extends Group
 
 	private final Button trackingButton;
 
+	private final Button trackingSelectButton;
+
 	private final TableEditor tableEditor;
 
 	private String currentGroup;
@@ -148,7 +150,16 @@ public class TableSettingsComposite extends Group
 		fd_trackingButton.bottom = new FormAttachment(0, 229);
 		fd_trackingButton.top = new FormAttachment(0, 209);
 		trackingButton.setLayoutData(fd_trackingButton);
-		trackingButton.setText("Tracking");
+		trackingButton.setText("Tracking(Insert/Update/Delete)");
+
+		trackingSelectButton = new Button(this, SWT.CHECK);
+		final FormData fd_trackingSelectButton = new FormData();
+		fd_trackingSelectButton.left = new FormAttachment(0, 20);
+		fd_trackingSelectButton.right = new FormAttachment(100, 0);
+		fd_trackingSelectButton.bottom = new FormAttachment(0, 254);
+		fd_trackingSelectButton.top = new FormAttachment(0, 234);
+		trackingSelectButton.setLayoutData(fd_trackingSelectButton);
+		trackingSelectButton.setText("Tracking(Select)");
 
 		setDefaultValues();
 		implicitButton.setEnabled(false);
@@ -171,6 +182,7 @@ public class TableSettingsComposite extends Group
 		insertButton.addSelectionListener(selectionListener);
 		deleteButton.addSelectionListener(selectionListener);
 		trackingButton.addSelectionListener(selectionListener);
+		trackingSelectButton.addSelectionListener(selectionListener);
 
 	}
 
@@ -183,6 +195,7 @@ public class TableSettingsComposite extends Group
 		updateButton.setSelection(true);
 		deleteButton.setSelection(true);
 		trackingButton.setSelection(false);
+		trackingSelectButton.setSelection(false);
 		enableControls(false);
 	}
 
@@ -193,6 +206,7 @@ public class TableSettingsComposite extends Group
 		updateButton.setEnabled(enable);
 		deleteButton.setEnabled(enable);
 		trackingButton.setEnabled(enable);
+		trackingSelectButton.setEnabled(enable);
 		if (enable) enableTracking();
 	}
 
@@ -240,6 +254,7 @@ public class TableSettingsComposite extends Group
 		updateButton.setSelection(((i_access & IRepository.UPDATE) != 0));
 		deleteButton.setSelection(((i_access & IRepository.DELETE) != 0));
 		trackingButton.setSelection(((i_access & IRepository.TRACKING) != 0));
+		trackingSelectButton.setSelection(((i_access & IRepository.TRACKING_VIEWS) != 0));
 	}
 
 	private void enableTracking()
@@ -254,6 +269,7 @@ public class TableSettingsComposite extends Group
 				if (log != null)
 				{
 					trackingButton.setEnabled(true);
+					trackingSelectButton.setEnabled(true);
 					return;
 				}
 			}
@@ -264,6 +280,7 @@ public class TableSettingsComposite extends Group
 
 		}
 		trackingButton.setEnabled(false);
+		trackingSelectButton.setEnabled(false);
 	}
 
 	@Override
@@ -302,6 +319,10 @@ public class TableSettingsComposite extends Group
 			if (trackingButton.getSelection())
 			{
 				access += IRepository.TRACKING;
+			}
+			if (trackingSelectButton.getSelection())
+			{
+				access += IRepository.TRACKING_VIEWS;
 			}
 		}
 		if (securityInfo.containsKey(currentGroup)) securityInfo.remove(currentGroup);
