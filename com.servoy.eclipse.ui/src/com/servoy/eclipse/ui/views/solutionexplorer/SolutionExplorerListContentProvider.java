@@ -167,6 +167,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		TYPES.put("long", "Number"); //$NON-NLS-1$ //$NON-NLS-2$
 		TYPES.put("Record", Record.JS_RECORD); //$NON-NLS-1$
 		TYPES.put("IRecordInternal", Record.JS_RECORD); //$NON-NLS-1$
+		TYPES.put("IRecord", Record.JS_RECORD); //$NON-NLS-1$
 		TYPES.put("IFoundSetInternal", FoundSet.JS_FOUNDSET); //$NON-NLS-1$
 		TYPES.put("FoundSet", FoundSet.JS_FOUNDSET); //$NON-NLS-1$
 		TYPES.put(FormScope.class.getSimpleName(), "RuntimeForm"); //$NON-NLS-1$
