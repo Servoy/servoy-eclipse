@@ -248,6 +248,7 @@ public class ElementResolver implements IElementResolver
 			while (iterator.hasNext())
 			{
 				String name = iterator.next();
+				if (name.startsWith(TypeCreator.TYPE_PREFIX)) name = name.substring(name.lastIndexOf(".") + 1);
 				if (!name.toLowerCase().startsWith(lowerCasePrefix)) iterator.remove();
 			}
 		}
@@ -464,6 +465,8 @@ public class ElementResolver implements IElementResolver
 			}
 			Property property = TypeCreator.createProperty(name, readOnly, typeRef, type.getDescription(), image, resource);
 			property.setHideAllowed(hideAllowed);
+			property.setDeprecated(type.isDeprecated());
+			property.setVisible(type.isVisible());
 			return property;
 		}
 		return null;

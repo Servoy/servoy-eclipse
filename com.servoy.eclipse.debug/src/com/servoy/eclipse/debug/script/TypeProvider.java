@@ -359,11 +359,11 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		DesignApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
 		synchronized (this)
 		{
-			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class));
-			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class));
-			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class));
-			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class));
-			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(ServoyException.class));
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class), null);
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class), null);
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class), null);
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class), null);
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(ServoyException.class), null);
 
 			List<IClientPlugin> lst = application.getPluginManager().getPlugins(IClientPlugin.class);
 			for (IClientPlugin clientPlugin : lst)
@@ -377,7 +377,13 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						IScriptable scriptObject = (IScriptable)method.invoke(clientPlugin, (Object[])null);
 						if (scriptObject instanceof IReturnedTypesProvider)
 						{
-							registerConstantsForScriptObject((IReturnedTypesProvider)scriptObject);
+							String prefix = "plugins." + clientPlugin.getName() + ".";
+							registerConstantsForScriptObject((IReturnedTypesProvider)scriptObject, prefix);
+							if (((IReturnedTypesProvider)scriptObject).getAllReturnedTypes() != null &&
+								((IReturnedTypesProvider)scriptObject).getAllReturnedTypes().length > 0)
+							{
+								linkedTypes.put(scriptObject.getClass(), ((IReturnedTypesProvider)scriptObject).getAllReturnedTypes());
+							}
 						}
 					}
 				}

@@ -106,6 +106,8 @@ public abstract class TypeCreator
 	private static final int INSTANCE_FIELD = 3;
 	private static final int STATIC_FIELD = 4;
 
+	public static final String TYPE_PREFIX = "plugins.";
+
 	protected final static ImageDescriptor METHOD = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
 		new Path("/icons/function.gif"), null));
 	protected final static ImageDescriptor PROPERTY = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
@@ -178,6 +180,8 @@ public abstract class TypeCreator
 	private final ConcurrentMap<String, Class< ? >> classTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, Class< ? >> anonymousClassTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, IScopeTypeCreator> scopeTypes = new ConcurrentHashMap<String, IScopeTypeCreator>();
+	protected final ConcurrentMap<Class< ? >, Class< ? >[]> linkedTypes = new ConcurrentHashMap<Class< ? >, Class< ? >[]>();
+	protected final ConcurrentMap<Class< ? >, String> prefixedTypes = new ConcurrentHashMap<Class< ? >, String>();
 	private volatile boolean initialized;
 	private final ConcurrentMap<String, Boolean> invariantScopes = new ConcurrentHashMap<String, Boolean>();
 	protected static final List<String> objectMethods = Arrays.asList(new String[] { "wait", "toString", "hashCode", "equals", "notify", "notifyAll", "getClass" });
@@ -238,6 +242,7 @@ public abstract class TypeCreator
 			while (iterator.hasNext())
 			{
 				String name = iterator.next();
+				if (name.startsWith(TYPE_PREFIX)) name = name.substring(name.lastIndexOf(".") + 1);
 				if (!name.toLowerCase().startsWith(lowerCasePrefix)) iterator.remove();
 			}
 		}
@@ -284,7 +289,7 @@ public abstract class TypeCreator
 		return type;
 	}
 
-	protected final void registerConstantsForScriptObject(IReturnedTypesProvider scriptObject)
+	protected final void registerConstantsForScriptObject(IReturnedTypesProvider scriptObject, String prefix)
 	{
 		if (scriptObject == null) return;
 		Class< ? >[] allReturnedTypes = scriptObject.getAllReturnedTypes();
@@ -323,10 +328,19 @@ public abstract class TypeCreator
 					{
 						addAnonymousClassType(constants.getPrefix(), element);
 						ElementResolver.registerConstantType(constants.getPrefix(), constants.getPrefix());
+						if (prefix != null)
+						{
+							addAnonymousClassType(prefix + constants.getPrefix(), element);
+							ElementResolver.registerConstantType(prefix + constants.getPrefix(), prefix + constants.getPrefix());
+						}
 					}
 					else
 					{
 						addType(constants.getPrefix(), element);
+						if (prefix != null)
+						{
+							addType(prefix + constants.getPrefix(), element);
+						}
 					}
 				}
 				catch (Exception e)
@@ -340,12 +354,25 @@ public abstract class TypeCreator
 				{
 					addAnonymousClassType(element.getSimpleName(), element);
 					ElementResolver.registerConstantType(element.getSimpleName(), element.getSimpleName());
+					if (prefix != null)
+					{
+						addAnonymousClassType(prefix + element.getSimpleName(), element);
+						ElementResolver.registerConstantType(prefix + element.getSimpleName(), prefix + element.getSimpleName());
+					}
 				}
 				else
 				{
 					addType(element.getSimpleName(), element);
+					if (prefix != null)
+					{
+						addType(prefix + element.getSimpleName(), element);
+					}
 				}
 
+			}
+			if (prefix != null)
+			{
+				prefixedTypes.put(element, prefix);
 			}
 		}
 	}
@@ -394,7 +421,7 @@ public abstract class TypeCreator
 			ImageDescriptor desc = IconProvider.instance().descriptor(cls);
 			type.setAttribute(IMAGE_DESCRIPTOR, desc);
 		}
-		if (IDeprecated.class.isAssignableFrom(cls))
+		if (IDeprecated.class.isAssignableFrom(cls) || (prefixedTypes.containsKey(cls) && !typeName.equals(prefixedTypes.get(cls) + cls.getSimpleName())))
 		{
 			type.setDeprecated(true);
 			type.setVisible(false);
@@ -402,6 +429,35 @@ public abstract class TypeCreator
 		if (IScriptBaseMethods.class.isAssignableFrom(cls) && cls != IScriptBaseMethods.class)
 		{
 			type.setSuperType(context.getType("RuntimeComponent"));
+		}
+		Class< ? >[] returnTypes = linkedTypes.get(cls);
+		if (returnTypes != null)
+		{
+			int index = typeName.indexOf('<');
+			int index2;
+			String config = typeName;
+			if (index != -1 && (index2 = typeName.indexOf('>', index)) != -1)
+			{
+				config = typeName.substring(index + 1, index2);
+			}
+			for (Class< ? > returnTypeClass : returnTypes)
+			{
+				String name = returnTypeClass.getSimpleName();
+				if (IPrefixedConstantsObject.class.isAssignableFrom(returnTypeClass))
+				{
+					try
+					{
+						IPrefixedConstantsObject constants = (IPrefixedConstantsObject)returnTypeClass.newInstance();
+						name = constants.getPrefix();
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+				String prefix = TYPE_PREFIX + config + ".";
+				members.add(createProperty(name, true, TypeUtil.classType(context.getType(prefix + name)), null, null));
+			}
 		}
 		return type;
 	}
@@ -634,8 +690,16 @@ public abstract class TypeCreator
 			return context.getTypeRef(ITypeNames.ARRAY);
 		}
 
-		String typeName = SolutionExplorerListContentProvider.TYPES.get(memberReturnType.getSimpleName());
-		addAnonymousClassType(typeName, memberReturnType);
+		String typeName = null;
+		if (prefixedTypes.containsKey(memberReturnType))
+		{
+			typeName = prefixedTypes.get(memberReturnType) + memberReturnType.getSimpleName();
+		}
+		else
+		{
+			typeName = SolutionExplorerListContentProvider.TYPES.get(memberReturnType.getSimpleName());
+			addAnonymousClassType(typeName, memberReturnType);
+		}
 		return context.getTypeRef(typeName);
 	}
 
@@ -694,7 +758,7 @@ public abstract class TypeCreator
 		Type createType(ITypeInfoContext context, String fullTypeName);
 	}
 
-	public static IParameter[] getParameters(String key, Class< ? > scriptObjectClass, MemberBox member)
+	public IParameter[] getParameters(String key, Class< ? > scriptObjectClass, MemberBox member)
 	{
 		if (scriptObjectClass == null) return null;
 		IScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectForClass(scriptObjectClass);
@@ -752,13 +816,18 @@ public abstract class TypeCreator
 					if (removeOptional && i < member.getParameterTypes().length)
 					{
 						Class< ? > paramClass = member.getParameterTypes()[i];
+						String className = (paramClass.isArray()) ? paramClass.getComponentType().getName() : paramClass.getName();
+						if (prefixedTypes.containsKey((paramClass.isArray()) ? paramClass.getComponentType() : paramClass))
+						{
+							className = prefixedTypes.get((paramClass.isArray()) ? paramClass.getComponentType() : paramClass) + className;
+						}
 						if (paramClass.isArray())
 						{
-							type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getComponentType().getName()) + "[]";
+							type = SolutionExplorerListContentProvider.TYPES.get(className) + "[]";
 						}
 						else
 						{
-							type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getName());
+							type = SolutionExplorerListContentProvider.TYPES.get(className);
 						}
 					}
 					parameters[i] = new ScriptParameter(name, type, i < member.getParameterTypes().length ? member.getParameterTypes()[i] : null, optional,
@@ -784,23 +853,29 @@ public abstract class TypeCreator
 						}
 						else if (paramClass.isArray())
 						{
-							type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getComponentType().getName()) + "[]";
+							type = SolutionExplorerListContentProvider.TYPES.get((prefixedTypes.containsKey(paramClass.getComponentType())
+								? prefixedTypes.get(paramClass.getComponentType()) : "") + paramClass.getComponentType().getName()) +
+								"[]";
 						}
 						else
 						{
-							type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getName());
+							type = SolutionExplorerListContentProvider.TYPES.get((prefixedTypes.containsKey(paramClass) ? prefixedTypes.get(paramClass) : "") +
+								paramClass.getName());
 						}
 
 					}
 					else if (paramClass.isArray())
 					{
-						type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getComponentType().getName()) + "[]";
+						type = SolutionExplorerListContentProvider.TYPES.get((prefixedTypes.containsKey(paramClass.getComponentType())
+							? prefixedTypes.get(paramClass.getComponentType()) : "") + paramClass.getComponentType().getName()) +
+							"[]";
 						name = type;
 
 					}
 					else
 					{
-						type = SolutionExplorerListContentProvider.TYPES.get(paramClass.getName());
+						type = SolutionExplorerListContentProvider.TYPES.get((prefixedTypes.containsKey(paramClass) ? prefixedTypes.get(paramClass) : "") +
+							paramClass.getName());
 						name = type;
 					}
 					parameters[i] = new ScriptParameter(name, type, paramClass, optional, false);
