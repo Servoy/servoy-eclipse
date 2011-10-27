@@ -48,6 +48,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
@@ -139,7 +141,16 @@ public class RelationEditor extends PersistEditor
 				tableRows = relation.getAllObjectsAsList().size() + 1;
 			}
 		}
-		nameField.addVerifyListener(DocumentValidatorVerifyListener.IDENT_SERVOY_VERIFIER);
+		nameField.addVerifyListener(new VerifyListener()
+		{
+			public void verifyText(VerifyEvent e)
+			{
+				DocumentValidatorVerifyListener.IDENT_SERVOY_VERIFIER.verifyText(e);
+				// allow only lower case relation names at design time in developer to avoid easy-to-make-mistakes
+				// relation names can have mixed case when created with solution model
+				if (e.doit && e.text != null) e.text = Utils.toEnglishLocaleLowerCase(e.text);
+			}
+		});
 
 		datasourceSelectComposite = new DatasourceSelectComposite(comp, SWT.NONE, getRelation());
 
