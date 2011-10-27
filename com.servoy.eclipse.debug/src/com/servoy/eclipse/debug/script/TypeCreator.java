@@ -319,8 +319,10 @@ public abstract class TypeCreator
 				constant = al.size() == 0;
 			}
 
+			boolean add = false;
 			if (IPrefixedConstantsObject.class.isAssignableFrom(element))
 			{
+				add = true;
 				try
 				{
 					IPrefixedConstantsObject constants = (IPrefixedConstantsObject)element.newInstance();
@@ -350,6 +352,7 @@ public abstract class TypeCreator
 			}
 			else if (IConstantsObject.class.isAssignableFrom(element) || IJavaScriptType.class.isAssignableFrom(element))
 			{
+				add = true;
 				if (constant)
 				{
 					addAnonymousClassType(element.getSimpleName(), element);
@@ -370,7 +373,7 @@ public abstract class TypeCreator
 				}
 
 			}
-			if (prefix != null)
+			if (prefix != null && add)
 			{
 				prefixedTypes.put(element, prefix);
 			}
