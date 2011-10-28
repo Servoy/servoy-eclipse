@@ -316,6 +316,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 
 						EclipseMessages.writeProjectI18NFiles(activeProject, false, false);
 						buildProjects(Arrays.asList(getServoyProjects()));
+						testBuildPathsAndBuild(activeProject, false);
 					}
 					catch (Exception ex)
 					{
