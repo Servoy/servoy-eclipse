@@ -1498,7 +1498,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 										}
 										members.add(createProperty(formElement.getName(), true, getElementType(context, persistClass), null, PROPERTY));
 									}
-									else if (formElement.getGroupID() != null)
+									if (formElement.getGroupID() != null)
 									{
 										String groupName = FormElementGroup.getName(formElement.getGroupID());
 										if (groupName != null)
