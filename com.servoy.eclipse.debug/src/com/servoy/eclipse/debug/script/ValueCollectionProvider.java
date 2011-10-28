@@ -39,6 +39,7 @@ import org.eclipse.dltk.javascript.typeinfo.IModelBuilder.IMember;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
+import org.eclipse.dltk.javascript.typeinfo.model.Type;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -81,15 +82,25 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			return collection;
 		}
 
+		String typeName = null;
+
+
 		if (member instanceof Member && ((Member)member).getType() != null)
 		{
-			String name = ((Member)member).getType().getName();
-			if (name != null && name.startsWith(FoundSet.JS_FOUNDSET + '<') && name.endsWith(">"))
+			typeName = ((Member)member).getType().getName();
+		}
+		else if (member instanceof Type)
+		{
+			typeName = member.getName();
+		}
+		if (typeName != null)
+		{
+			if (typeName != null && typeName.startsWith(FoundSet.JS_FOUNDSET + '<') && typeName.endsWith(">"))
 			{
 				FlattenedSolution editingFlattenedSolution = TypeCreator.getFlattenedSolution(context);
 				if (editingFlattenedSolution != null)
 				{
-					String config = name.substring(FoundSet.JS_FOUNDSET.length() + 1, name.length() - 1);
+					String config = typeName.substring(FoundSet.JS_FOUNDSET.length() + 1, typeName.length() - 1);
 					// config is either a dataSource or a relation name
 
 					String[] dbServernameTablename = DataSourceUtils.getDBServernameTablename(config);
