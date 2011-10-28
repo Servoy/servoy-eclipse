@@ -106,13 +106,13 @@ public class StartPageBrowserEditor extends EditorPart
 		browser = new Browser(parent, SWT.NONE);
 		String url = STARTPAGE_URL + "?dl=" + (ApplicationServerSingleton.get().hasDeveloperLicense());
 		String showOnStartup = Settings.getInstance().getProperty("servoy.developer.showStartPage");
-		if (showOnStartup == null || showOnStartup.equals("false"))
+		if (showOnStartup == null || showOnStartup.equals("true"))
 		{
-			url += "&show=false";
+			url += "&show=true";
 		}
 		else
 		{
-			url += "&show=true";
+			url += "&show=false";
 		}
 		browser.setUrl(url, null, new String[] { "Cache-Control: no-cache" });
 		browser.addLocationListener(new LocationAdapter()
