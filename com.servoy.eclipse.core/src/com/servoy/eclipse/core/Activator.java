@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.SwingUtilities;
@@ -102,7 +103,6 @@ import com.servoy.j2db.plugins.IMethodTemplatesProvider;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
-import com.servoy.j2db.smart.J2DBClient;
 import com.servoy.j2db.smart.plugins.PluginManager;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
@@ -366,10 +366,10 @@ public class Activator extends Plugin
 					{
 						if (Settings.getInstance() != null)
 						{
-							IApplication application = getDebugClientHandler().getDebugReadyClient();
-							if (application instanceof J2DBClient)
+							List<ClientState> applications = getDebugClientHandler().getActiveDebugClients();
+							for (ClientState application : applications)
 							{
-								((J2DBClient)application).shutDown(true);
+								application.shutDown(true);
 							}
 							Settings.getInstance().save();
 						}
