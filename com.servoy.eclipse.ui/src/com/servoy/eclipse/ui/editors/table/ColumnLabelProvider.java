@@ -17,11 +17,9 @@
 package com.servoy.eclipse.ui.editors.table;
 
 import org.eclipse.jface.viewers.ITableColorProvider;
-import org.eclipse.jface.viewers.ITableFontProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.ISharedImages;
@@ -33,51 +31,40 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.util.Utils;
 
-public class ColumnLabelProvider extends LabelProvider implements ITableLabelProvider, ITableFontProvider, ITableColorProvider
+public class ColumnLabelProvider extends LabelProvider implements ITableLabelProvider, ITableColorProvider
 {
 	public static final Image TRUE_IMAGE = Activator.getDefault().loadImageFromBundle("chk_on_icon.gif"); //$NON-NLS-1$
 	public static final Image FALSE_IMAGE = Activator.getDefault().loadImageFromBundle("chk_off_icon.gif"); //$NON-NLS-1$
 	public static final Image TRUE_RADIO = Activator.getDefault().loadImageFromBundle("radio_on.gif"); //$NON-NLS-1$
 	public static final Image FALSE_RADIO = Activator.getDefault().loadImageFromBundle("radio_off.gif"); //$NON-NLS-1$
 
-	private Color color = null;
-	private ColumnComposite columnComposite;
-	private final RGB gray = new RGB(127, 127, 127);
-	private final RGB gray2 = new RGB(160, 160, 160);
+	private static final RGB GRAY = new RGB(127, 127, 127);
+	private static final RGB GRAY2 = new RGB(160, 160, 160);
+
+	private final Color color;
+	private final ColumnComposite columnComposite;
 
 	public ColumnLabelProvider(Color color, ColumnComposite columnComposite)
 	{
-		super();
 		this.color = color;
 		this.columnComposite = columnComposite;
 	}
 
 	public ColumnLabelProvider()
 	{
-		super();
-		this.color = null;
+		this(null, null);
 	}
 
 	public Image getColumnImage(Object element, int columnIndex)
 	{
-		int delta = columnComposite.isDataProviderIdDisplayed() ? 1 : 0;
+		int delta = columnComposite != null && columnComposite.isDataProviderIdDisplayed() ? 1 : 0;
 		if (columnIndex == ColumnComposite.CI_ALLOW_NULL + delta)
 		{
-			if (((Column)element).getAllowNull())
-			{
-				return TRUE_IMAGE;
-			}
-			else
-			{
-				return FALSE_IMAGE;
-			}
+			return ((Column)element).getAllowNull() ? TRUE_IMAGE : FALSE_IMAGE;
 		}
-		else if (columnComposite != null)
+		if (columnIndex == ColumnComposite.CI_DELETE + delta)
 		{
-			if (columnIndex == ColumnComposite.CI_DELETE + delta)
-			{
-				return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-			}
+			return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 		}
 		return null;
 	}
@@ -85,47 +72,36 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 	public String getColumnText(Object element, int columnIndex)
 	{
 		Column info = (Column)element;
-		int delta = columnComposite.isDataProviderIdDisplayed() ? 1 : 0;
 		if (columnIndex == ColumnComposite.CI_NAME)
 		{
-			return columnComposite.isDataProviderIdDisplayed() ? info.getSQLName() : info.getName();
+			return columnComposite != null && columnComposite.isDataProviderIdDisplayed() ? info.getSQLName() : info.getName();
 		}
-		else if ((columnIndex == ColumnComposite.CI_DELETE + delta) || (columnIndex == ColumnComposite.CI_ALLOW_NULL + delta))
+		int delta = columnComposite != null && columnComposite.isDataProviderIdDisplayed() ? 1 : 0;
+		if ((columnIndex == ColumnComposite.CI_DELETE + delta) || (columnIndex == ColumnComposite.CI_ALLOW_NULL + delta))
 		{
-			return "";
+			return ""; //$NON-NLS-1$
 		}
-		else if (columnIndex == ColumnComposite.CI_TYPE + delta)
+		if (columnIndex == ColumnComposite.CI_TYPE + delta)
 		{
 			return info.getTypeAsString();
 		}
-		else if (columnIndex == ColumnComposite.CI_LENGTH + delta)
+		if (columnIndex == ColumnComposite.CI_LENGTH + delta)
 		{
-			return info.getScale() > 0 ? info.getLength() + "," + info.getScale() : Integer.toString(info.getLength());
+			return info.getScale() > 0 ? info.getLength() + "," + info.getScale() : Integer.toString(info.getLength()); //$NON-NLS-1$
 		}
-		else if (columnIndex == ColumnComposite.CI_ROW_IDENT + delta)
+		if (columnIndex == ColumnComposite.CI_ROW_IDENT + delta)
 		{
 			return Column.getFlagsString(info.getRowIdentType());
 		}
-		else if (columnIndex == ColumnComposite.CI_SEQUENCE_TYPE + delta)
+		if (columnIndex == ColumnComposite.CI_SEQUENCE_TYPE + delta)
 		{
 			return ColumnInfo.getSeqDisplayTypeString(info.getSequenceType());
 		}
-		else if (columnIndex == ColumnComposite.CI_DATAPROVIDER_ID)
+		if (columnIndex == ColumnComposite.CI_DATAPROVIDER_ID)
 		{
 			return info.getDataProviderID();
 		}
-		else
-		{
-			return columnIndex + ": " + element;
-		}
-	}
-
-	public Font getFont(Object element, int columnIndex)
-	{
-//		ParameterInfo info = (ParameterInfo)element;
-//		if (info.isAdded()) return JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT);
-//		else 
-		return null;
+		return columnIndex + ": " + element; //$NON-NLS-1$
 	}
 
 	public Color getBackground(Object element, int columnIndex)
@@ -142,16 +118,14 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 		if (element instanceof Column)
 		{
 			Column info = (Column)element;
-			if (columnIndex == ColumnComposite.CI_DATAPROVIDER_ID && columnComposite.isDataProviderIdDisplayed())
+			if (columnIndex == ColumnComposite.CI_DATAPROVIDER_ID && columnComposite != null && columnComposite.isDataProviderIdDisplayed() &&
+				Utils.equalObjects(info.getName(), info.getDataProviderID()))
 			{
-				if (Utils.equalObjects(info.getName(), info.getDataProviderID()))
-				{
-					return ColorResource.INSTANCE.getColor(gray);
-				}
+				return ColorResource.INSTANCE.getColor(GRAY);
 			}
 			if (info.getColumnInfo() != null && info.getColumnInfo().isExcluded())
 			{
-				return ColorResource.INSTANCE.getColor(gray2);
+				return ColorResource.INSTANCE.getColor(GRAY2);
 			}
 		}
 		return null;
