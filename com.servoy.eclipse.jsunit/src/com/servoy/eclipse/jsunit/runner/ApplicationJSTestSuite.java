@@ -267,9 +267,9 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 
 	private TestIdentifier addGlobalTests(Solution solution, StringBuffer testCode)
 	{
-		Iterator<ScriptMethod> it = solution.getScriptMethods(true);
+		Iterator<ScriptMethod> it = solution.getScriptMethods(null, true);
 		// prefix the name so that we have no name conflicts with other form/module/global tests
-		return addTestCaseIfNecessary(it, "Global tests", "globals", testCode);
+		return addTestCaseIfNecessary(it, "Global tests", "scopes", testCode);
 	}
 
 	private List<TestIdentifier> addAllFormTests(Solution solution, FlattenedSolution flattenedSolution, StringBuffer testCode)
@@ -320,6 +320,10 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 				testCode.append(" = this; ");
 				testCode.append(callPrefix);
 				testCode.append(".");
+				if (method.getParent() instanceof Solution)
+				{
+					testCode.append(method.getScopeName()).append('.');
+				}
 				testCode.append(method.getName());
 				testCode.append("(); ");
 				testCode.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);

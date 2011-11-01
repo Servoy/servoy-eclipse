@@ -27,6 +27,8 @@ import org.eclipse.dltk.javascript.typeinfo.model.Property;
 import org.eclipse.dltk.javascript.ui.typeinfo.IElementLabelProvider;
 import org.eclipse.jface.resource.ImageDescriptor;
 
+import com.servoy.j2db.persistence.ScriptVariable;
+
 /**
  * Extension point implementation of {@link IElementLabelProvider} that returns the {@link TypeCreator#IMAGE_DESCRIPTOR} attribute
  * if set from a element
@@ -53,6 +55,7 @@ public class ElementLabelProvider implements IElementLabelProvider
 		propertyNames.add("servoyDeveloper");
 		propertyNames.add("security");
 		propertyNames.add("elements");
+		propertyNames.add(ScriptVariable.SCOPES);
 	}
 
 	public ImageDescriptor getImageDescriptor(Element element)

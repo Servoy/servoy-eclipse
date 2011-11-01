@@ -63,7 +63,7 @@ public class DuplicatePersistAction extends AbstractMovePersistAction
 
 	@Override
 	protected ExtendedInputDialog<String> createDialog(final IPersist persist, final IValidateName nameValidator, String[] solutionNames,
-		int initialSolutionIndex)
+		String initialSolutionName)
 	{
 		String newName = null;
 		String oldName = ((ISupportName)persist).getName();
@@ -94,7 +94,7 @@ public class DuplicatePersistAction extends AbstractMovePersistAction
 				return message;
 			}
 
-		}, solutionNames, "Please select the destination solution:", initialSolutionIndex)
+		}, solutionNames, initialSolutionName, "Please select the destination solution:")
 		{
 			@Override
 			protected void validateInput()

@@ -84,7 +84,7 @@ public class DebugMethodAction extends Action implements ISelectionChangedListen
 	{
 		if (method != null)
 		{
-			Activator.getDefault().getDebugClientHandler().executeMethod(method.getParent(), method.getName());
+			Activator.getDefault().getDebugClientHandler().executeMethod(method.getParent(), method.getScopeName(), method.getName());
 		}
 	}
 }

@@ -727,7 +727,7 @@ public class VisualFormEditorPartsPage extends Composite
 		try
 		{
 			FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(editor.getForm());
-			dialog = new DataProviderDialog(getShell(), DataProviderLabelProvider.INSTANCE_HIDEPREFIX, PersistContext.create(editor.getForm(), null),
+			dialog = new DataProviderDialog(getShell(), DataProviderLabelProvider.INSTANCE_HIDEPREFIX, PersistContext.create(editor.getForm()),
 				flattenedSolution, flattenedSolution.getFlattenedForm(editor.getForm()).getTable(), new DataProviderTreeViewer.DataProviderOptions(false, true,
 					false, false, false, false, false, false, INCLUDE_RELATIONS.NESTED, false, true, null), null, SWT.MULTI, "Select Group-by fields");
 			if (dialog.open() == SWT.CANCEL)

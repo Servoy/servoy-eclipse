@@ -181,7 +181,7 @@ public class AddMethodButtonsComposite extends Composite
 			if (substitutions != null) substitutions.put("datasource", dataSource);
 			else substitutions = Collections.singletonMap("dataSource", dataSource);
 		}
-		return NewMethodAction.createNewMethod(getShell(), parent, methodKey, false, null, substitutions, persistContext.getPersist());
+		return NewMethodAction.createNewMethod(getShell(), parent, methodKey, false, null, null, substitutions, persistContext.getPersist());
 	}
 
 	/**

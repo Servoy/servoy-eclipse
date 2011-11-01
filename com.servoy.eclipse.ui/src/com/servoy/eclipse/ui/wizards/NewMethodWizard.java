@@ -28,7 +28,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
@@ -59,41 +58,35 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 public class NewMethodWizard extends Wizard implements INewWizard
 {
+
 	public static final String ID = "com.servoy.eclipse.ui.NewMethodWizard"; //$NON-NLS-1$
 
 	private MethodFormsSolutionPage methodPage;
 	private WizardPage errorPage;
 	private final String activeSolutionName;
-	private final ServoyModel servoyModel;
-
 
 	public NewMethodWizard(String activeSolutionName)
 	{
 		super();
 		this.activeSolutionName = activeSolutionName;
-		servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 	}
 
 	public NewMethodWizard()
 	{
-		super();
-		this.activeSolutionName = "";
-		servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		this("");
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
 
-		if (servoyModel.getActiveProject() == null)
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() == null)
 		{
 			errorPage = new WizardPage("No active Servoy solution project found") //$NON-NLS-1$
 			{
-
 				public void createControl(Composite parent)
 				{
 					setControl(new Composite(parent, SWT.NONE));
 				}
-
 			};
 			errorPage.setTitle("No active Servoy solution project found");
 			errorPage.setErrorMessage("Please activate a Servoy solution project before trying to create a new style");
@@ -124,39 +117,33 @@ public class NewMethodWizard extends Wizard implements INewWizard
 	@Override
 	public boolean performFinish()
 	{
-		String[] params = methodPage.getSelectedItems();
-		if (params != null)
+		SelectedMethod selectedMethod = methodPage.getSelectedItems();
+		if (selectedMethod != null && !selectedMethod.selectedMethodName.equals(""))
 		{
-			if (params[0].equals("") == false && params[1].equals("") == false && params[2].equals("") == false)
+			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(selectedMethod.selectedSolutionName);
+			if (servoyProject != null)
 			{
-				ServoyProject servoyProject = servoyModel.getServoyProject(params[0]);
-				if (servoyProject != null)
+				if (selectedMethod.formMethod)
 				{
 					Solution editingSolution = servoyProject.getEditingSolution();
 					if (editingSolution != null)
 					{
-						Form form = editingSolution.getForm(params[1]);
-						NewMethodAction.createNewMethod(null, form, null, true, params[2]);
+						NewMethodAction.createNewMethod(null, editingSolution.getForm(selectedMethod.context), null, true, selectedMethod.selectedMethodName,
+							null);
 					}
 				}
-
-			}
-			else if (params[0].equals("") == false && params[1].equals("") == true && params[2].equals("") == false)
-			{
-				ServoyProject servoyProject = servoyModel.getServoyProject(params[0]);
-				if (servoyProject != null)
+				else
 				{
 					Solution editingSolution = servoyProject.getEditingSolution();
 					if (editingSolution != null)
 					{
-						NewMethodAction.createNewMethod(null, editingSolution, null, true, params[2]);
+						NewMethodAction.createNewMethod(null, editingSolution, null, true, selectedMethod.selectedMethodName, selectedMethod.context);
 					}
 				}
 			}
 		}
 		return true;
 	}
-
 
 	public class MethodFormsSolutionPage extends WizardPage implements Listener
 	{
@@ -165,13 +152,10 @@ public class NewMethodWizard extends Wizard implements INewWizard
 		private Combo solutionsCombo;
 		private String[] currentSolutionNames;
 
-		private String selectedSolutionName = ""; //$NON-NLS-1$
 		private Combo formsCombo;
+		private Combo scopesCombo;
 		private Text methodNameText;
-		private String selectedFormName;
-		private String selectedMethodName;
 		private Button checkButton;
-		private boolean globalSelected;
 
 		protected MethodFormsSolutionPage(String pageName)
 		{
@@ -184,15 +168,13 @@ public class NewMethodWizard extends Wizard implements INewWizard
 
 		private void retrieveCurrentSolutionNames()
 		{
-			ServoyProject servoyProject = servoyModel.getActiveProject();
-			Solution solution = servoyProject.getSolution();
-			ServoyProject projects[] = servoyModel.getModulesOfActiveProject();
+			ServoyProject projects[] = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 
 			List<String> list = new ArrayList<String>();
 
 			for (ServoyProject project : projects)
 			{
-				if (list.contains(project.getSolution().getName()) == false)
+				if (!list.contains(project.getSolution().getName()))
 				{
 					list.add(project.getSolution().getName());
 				}
@@ -200,24 +182,24 @@ public class NewMethodWizard extends Wizard implements INewWizard
 
 			currentSolutionNames = new String[list.size()];
 			list.toArray(currentSolutionNames);
-
 		}
 
 		/**
 		 * 
 		 * @return a string[] with the selected combo items
 		 */
-		public String[] getSelectedItems()
+		public SelectedMethod getSelectedItems()
 		{
-			selectedSolutionName = solutionsCombo.getItem(solutionsCombo.getSelectionIndex());
-			selectedFormName = formsCombo.getItem(formsCombo.getSelectionIndex());
-			selectedMethodName = methodNameText.getText();
-			globalSelected = checkButton.getSelection();
-			if (globalSelected == true || selectedFormName.equals(NO_FORM_PRESENT))
+			String selectedSolutionName = solutionsCombo.getItem(solutionsCombo.getSelectionIndex());
+			String selectedFormName = formsCombo.getItem(formsCombo.getSelectionIndex());
+			String selectedScopeName = scopesCombo.getItem(scopesCombo.getSelectionIndex());
+			String selectedMethodName = methodNameText.getText();
+			boolean globalSelected = checkButton.getSelection();
+			if (globalSelected || selectedFormName.equals(NO_FORM_PRESENT))
 			{
-				return new String[] { selectedSolutionName, "", selectedMethodName };
+				return new SelectedMethod(false, selectedSolutionName, selectedScopeName, selectedMethodName);
 			}
-			return new String[] { selectedSolutionName, selectedFormName, selectedMethodName };
+			return new SelectedMethod(true, selectedSolutionName, selectedFormName, selectedMethodName);
 		}
 
 		public void createControl(Composite parent)
@@ -238,7 +220,7 @@ public class NewMethodWizard extends Wizard implements INewWizard
 
 			solutionsCombo.setItems(currentSolutionNames);
 			int counter = 0;
-			if (activeSolutionName.equals("") == false)
+			if (!activeSolutionName.equals(""))
 			{
 				for (int i = 0; i < currentSolutionNames.length; i++)
 				{
@@ -256,8 +238,7 @@ public class NewMethodWizard extends Wizard implements INewWizard
 				@Override
 				public void widgetSelected(SelectionEvent event)
 				{
-					selectedSolutionName = solutionsCombo.getItem(solutionsCombo.getSelectionIndex());
-					updateFormsCombo(selectedSolutionName);
+					updateCombos(solutionsCombo.getItem(solutionsCombo.getSelectionIndex()));
 				}
 			});
 
@@ -282,26 +263,22 @@ public class NewMethodWizard extends Wizard implements INewWizard
 				}
 			});
 
+			scopesCombo = new Combo(topLevel, SWT.DROP_DOWN | SWT.READ_ONLY);
+			UIUtils.setDefaultVisibleItemCount(scopesCombo);
+			scopesCombo.setEnabled(false);
 
 			Label globalLabel = new Label(topLevel, SWT.NONE);
 			globalLabel.setText("Global");
 
 			checkButton = new Button(topLevel, SWT.CHECK);
 			checkButton.setSelection(false);
-			checkButton.addSelectionListener(new SelectionListener()
+			checkButton.addSelectionListener(new SelectionAdapter()
 			{
-
-				public void widgetDefaultSelected(SelectionEvent e)
-				{
-					// TODO Auto-generated method stub
-
-				}
-
+				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					boolean result = !checkButton.getSelection();
-					formsCombo.setEnabled(result);
-
+					scopesCombo.setEnabled(checkButton.getSelection());
+					formsCombo.setEnabled(!checkButton.getSelection());
 				}
 			});
 
@@ -312,99 +289,103 @@ public class NewMethodWizard extends Wizard implements INewWizard
 			formLayout.marginWidth = formLayout.marginHeight = 15;
 			topLevel.setLayout(formLayout);
 
-			//label
+			// solution name label
 			FormData formData = new FormData();
 			formData.left = new FormAttachment(0, 0);
 			formData.top = new FormAttachment(solutionsCombo, 0, SWT.CENTER);
 			solutionNameLabel.setLayoutData(formData);
 
-			//combo
+			// solutions combo
 			formData = new FormData();
 			formData.left = new FormAttachment(solutionNameLabel, 0);
 			formData.top = new FormAttachment(0, 0);
 			formData.right = new FormAttachment(100, 0);
 			solutionsCombo.setLayoutData(formData);
 
-			//label
+			// forms name label
 			formData = new FormData();
 			formData.left = new FormAttachment(0, 0);
 			formData.top = new FormAttachment(formsCombo, 0, SWT.CENTER);
 			formsNameLabel.setLayoutData(formData);
 
-			//text
+			// forms combo
 			formData = new FormData();
 			formData.left = new FormAttachment(solutionsCombo, 0, SWT.LEFT);
 			formData.top = new FormAttachment(solutionsCombo, 0, SWT.BOTTOM);
 			formData.right = new FormAttachment(100, 0);
 			formsCombo.setLayoutData(formData);
 
-			//label
+			// global method label
 			formData = new FormData();
 			formData.left = new FormAttachment(0, 0);
 			formData.top = new FormAttachment(checkButton, 0, SWT.CENTER);
 			globalLabel.setLayoutData(formData);
 
-			//text
+			// global method check
 			formData = new FormData();
 			formData.left = new FormAttachment(formsCombo, 0, SWT.LEFT);
 			formData.top = new FormAttachment(formsCombo, 0, SWT.BOTTOM);
-			formData.right = new FormAttachment(100, 0);
 			checkButton.setLayoutData(formData);
 
-			//label
+			// scopenames combo
+			formData = new FormData();
+			formData.left = new FormAttachment(checkButton, 0, SWT.RIGHT);
+			formData.top = new FormAttachment(formsCombo, 0, SWT.BOTTOM);
+			formData.right = new FormAttachment(100, 0);
+			scopesCombo.setLayoutData(formData);
+
+			// method name label
 			formData = new FormData();
 			formData.left = new FormAttachment(0, 0);
 			formData.top = new FormAttachment(methodNameText, 0, SWT.CENTER);
 			methodNameLabel.setLayoutData(formData);
 
-			//text
+			// method name text
 			formData = new FormData();
 			formData.left = new FormAttachment(checkButton, 0, SWT.LEFT);
 			formData.top = new FormAttachment(checkButton, 0, SWT.BOTTOM);
 			formData.right = new FormAttachment(100, 0);
 			methodNameText.setLayoutData(formData);
 
-			String currentSolutionSelected = solutionsCombo.getItem(solutionsCombo.getSelectionIndex());
-			updateFormsCombo(currentSolutionSelected);
-
-
+			updateCombos(solutionsCombo.getItem(solutionsCombo.getSelectionIndex()));
 		}
 
-		protected void updateFormsCombo(String solutionName)
+		protected void updateCombos(String solutionName)
 		{
+			// update forms combo
 			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
 			Iterator<Form> formsIterator = servoyProject.getEditingSolution().getForms(null, true);
-			List formNameList = new ArrayList();
+			List<String> formNameList = new ArrayList<String>();
 			while (formsIterator.hasNext())
 			{
-				Form form = formsIterator.next();
-				formNameList.add(form.getName());
+				formNameList.add(formsIterator.next().getName());
 			}
 			if (formNameList.size() == 0)
 			{
 				formNameList.add(NO_FORM_PRESENT);
 			}
-			String[] items = new String[formNameList.size()];
-			formNameList.toArray(items);
-			formsCombo.setItems(items);
+			formsCombo.setItems(formNameList.toArray(new String[formNameList.size()]));
 			formsCombo.select(0);
 
+			// update scopes combo
+			List<String> scopeNames = servoyProject.getGlobalScopenames();
+			scopesCombo.setItems(scopeNames.toArray(new String[scopeNames.size()]));
+			scopesCombo.select(0);
 		}
 
 		@Override
 		public void setVisible(boolean visible)
 		{
 			super.setVisible(visible);
-
 			if (visible)
 			{
 				setPageComplete(validatePage());
 			}
 		}
 
-
 		protected String methodExists(String methodName, String solutionName, String formName)
 		{
+			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			ServoyProject servoyProject = servoyModel.getServoyProject(solutionName);
 			if (formName.trim().length() == 0)
 			{
@@ -419,7 +400,6 @@ public class NewMethodWizard extends Wizard implements INewWizard
 				{
 					return e.getMessage();
 				}
-
 			}
 			else
 			{
@@ -453,16 +433,10 @@ public class NewMethodWizard extends Wizard implements INewWizard
 			{
 				String methodName = methodNameText.getText();
 				String solutionName = solutionsCombo.getItem(solutionsCombo.getSelectionIndex());
-				String formName = formsCombo.getItem(formsCombo.getSelectionIndex());
-
-				boolean selected = checkButton.getSelection();
-				if (selected == true)
-				{
-					formName = "";
-				}
+				String formName = checkButton.getSelection() ? "" : formsCombo.getItem(formsCombo.getSelectionIndex());
 
 				String errMessage = methodExists(methodName, solutionName, formName);
-				if (errMessage.equals("") == false)
+				if (!errMessage.equals(""))
 				{
 					error = "Name error encountered due to following reason: " + errMessage;
 				}
@@ -477,7 +451,22 @@ public class NewMethodWizard extends Wizard implements INewWizard
 		{
 			setPageComplete(validatePage());
 		}
+	}
 
+	public static class SelectedMethod
+	{
+		public final String selectedSolutionName;
+		public final String context;
+		public final String selectedMethodName;
+		public final boolean formMethod;
+
+		public SelectedMethod(boolean formMethod, String selectedSolutionName, String context, String selectedMethodName)
+		{
+			this.formMethod = formMethod;
+			this.selectedSolutionName = selectedSolutionName;
+			this.context = context;
+			this.selectedMethodName = selectedMethodName;
+		}
 	}
 
 }

@@ -295,7 +295,7 @@ public class FoundsetMethodsComposite extends Composite
 								MessageDialog.openError(getShell(), "Error", "You must save before editing the method code.");
 								return;
 							}
-							EditorUtil.openScriptEditor(method, true);
+							EditorUtil.openScriptEditor(method, null, true);
 						}
 					}
 				}

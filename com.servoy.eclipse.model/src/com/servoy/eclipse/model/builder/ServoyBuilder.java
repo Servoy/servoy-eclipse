@@ -98,6 +98,7 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IVariable;
@@ -127,6 +128,7 @@ import com.servoy.j2db.util.IntHashMap;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.RoundHalfUpDecimalFormat;
+import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -245,7 +247,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String COLUMN_MARKER_TYPE = _PREFIX + ".columnProblem"; //$NON-NLS-1$
 	public static final String INVALID_EVENT_METHOD = _PREFIX + ".invalidEventMethod"; //$NON-NLS-1$
 	public static final String INVALID_COMMAND_METHOD = _PREFIX + ".invalidCommandMethod"; //$NON-NLS-1$
-	public static final String INVALID_DATAPROVIDERID = _PREFIX + ".invalidDataProvideID"; //$NON-NLS-1$
+	public static final String INVALID_DATAPROVIDERID = _PREFIX + ".invalidDataProviderID"; //$NON-NLS-1$
 	public static final String DEPRECATED_PROPERTY_USAGE = _PREFIX + ".deprecatedPropertyUsage"; //$NON-NLS-1$
 	public static final String FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION = _PREFIX + ".formWithDatasourceInLoginSolution"; //$NON-NLS-1$
 	public static final String MULTIPLE_METHODS_ON_SAME_ELEMENT = _PREFIX + ".multipleMethodsInfo"; //$NON-NLS-1$
@@ -565,36 +567,44 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private static final Integer VALUELIST_DUPLICATION = new Integer(4);
 	private static final Integer MEDIA_DUPLICATION = new Integer(5);
 
-	private void addDuplicatePersist(final IPersist persist, Map<String, Map<Integer, Set<ISupportChilds>>> duplicationMap, final IProject project)
+	private void addDuplicatePersist(final IPersist persist, Map<String, Map<Integer, Set<Pair<String, ISupportChilds>>>> duplicationMap, final IProject project)
 	{
 		if (persist instanceof IScriptProvider || persist instanceof ScriptVariable)
 		{
 			String name = ((ISupportName)persist).getName();
 			if (name != null)
 			{
-				ArrayList<ISupportChilds> duplicatedParents = new ArrayList<ISupportChilds>(3);
-				Map<Integer, Set<ISupportChilds>> persistSet = duplicationMap.get(name);
+				String scopeName = null;
+				if (persist instanceof ISupportScope && persist.getParent() instanceof Solution)
+				{
+					scopeName = ((ISupportScope)persist).getScopeName();
+					if (scopeName == null) scopeName = ScriptVariable.GLOBAL_SCOPE;
+				}
+				List<Pair<String, ISupportChilds>> duplicatedParents = new ArrayList<Pair<String, ISupportChilds>>(3);
+				Map<Integer, Set<Pair<String, ISupportChilds>>> persistSet = duplicationMap.get(name);
 				if (persistSet == null)
 				{
-					persistSet = new HashMap<Integer, Set<ISupportChilds>>();
+					persistSet = new HashMap<Integer, Set<Pair<String, ISupportChilds>>>();
 					duplicationMap.put(name, persistSet);
 				}
-				Set<ISupportChilds> parentSet = persistSet.get(METHOD_DUPLICATION);
-				if (parentSet != null && parentSet.contains(persist.getParent()))
+				Set<Pair<String, ISupportChilds>> parentScopeSet = persistSet.get(METHOD_DUPLICATION);
+				Pair<String, ISupportChilds> scopedParent = new Pair<String, ISupportChilds>(scopeName, persist.getParent());
+				if (parentScopeSet != null && parentScopeSet.contains(scopedParent))
 				{
-					duplicatedParents.add(persist.getParent());
+					duplicatedParents.add(scopedParent);
 				}
-				else if (parentSet != null && persist.getParent() instanceof Solution)
+				else if (parentScopeSet != null && persist.getParent() instanceof Solution)
 				{
-					for (ISupportChilds supportChilds : parentSet)
+					for (Pair<String, ISupportChilds> supportChilds : parentScopeSet)
 					{
-						if (supportChilds instanceof Solution)
+						if (supportChilds.getRight() instanceof Solution && (scopeName == null || scopeName.equals(supportChilds.getLeft())))
 						{
 							duplicatedParents.add(supportChilds);
 						}
 					}
 				}
-				for (ISupportChilds duplicatedParent : duplicatedParents)
+
+				for (Pair<String, ISupportChilds> duplicatedParent : duplicatedParents)
 				{
 					String duplicateParentsName = ""; //$NON-NLS-1$
 					if (duplicatedParent instanceof ISupportName)
@@ -613,7 +623,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					}
 					int severity = IMarker.SEVERITY_ERROR;
 					String otherChildsType = "method"; //$NON-NLS-1$
-					Iterator<IPersist> allObjects = duplicatedParent.getAllObjects();
+					Iterator<IPersist> allObjects = duplicatedParent.getRight().getAllObjects();
 					while (allObjects.hasNext())
 					{
 						IPersist child = allObjects.next();
@@ -654,13 +664,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						persist);
 
 				}
-				Set<ISupportChilds> parents = parentSet;
+				Set<Pair<String, ISupportChilds>> parents = parentScopeSet;
 				if (parents == null)
 				{
-					parents = new HashSet<ISupportChilds>();
+					parents = new HashSet<Pair<String, ISupportChilds>>();
 					persistSet.put(METHOD_DUPLICATION, parents);
 				}
-				parents.add(persist.getParent());
+				parents.add(new Pair<String, ISupportChilds>(scopeName, persist.getParent()));
 			}
 		}
 		if (persist instanceof Form)
@@ -668,13 +678,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			String name = ((ISupportName)persist).getName();
 			if (name != null)
 			{
-				Map<Integer, Set<ISupportChilds>> persistSet = duplicationMap.get(name);
+				Map<Integer, Set<Pair<String, ISupportChilds>>> persistSet = duplicationMap.get(name);
 				if (persistSet == null)
 				{
-					persistSet = new HashMap<Integer, Set<ISupportChilds>>();
+					persistSet = new HashMap<Integer, Set<Pair<String, ISupportChilds>>>();
 					duplicationMap.put(name, persistSet);
 				}
-				Set<ISupportChilds> parentSet = persistSet.get(FORM_DUPLICATION);
+				Set<Pair<String, ISupportChilds>> parentSet = persistSet.get(FORM_DUPLICATION);
 				if (parentSet != null)
 				{
 					String parentsName = ""; //$NON-NLS-1$
@@ -682,11 +692,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						parentsName = ((ISupportName)persist.getParent()).getName();
 					}
-					for (ISupportChilds parent : parentSet)
+					for (Pair<String, ISupportChilds> parent : parentSet)
 					{
-						if (parent instanceof Solution)
+						if (parent.getRight() instanceof Solution)
 						{
-							Solution solution = (Solution)parent;
+							Solution solution = (Solution)parent.getRight();
 							Form duplicateForm = solution.getForm(name);
 							if (duplicateForm != null)
 							{
@@ -698,13 +708,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 					}
 				}
-				Set<ISupportChilds> parents = parentSet;
+				Set<Pair<String, ISupportChilds>> parents = parentSet;
 				if (parents == null)
 				{
-					parents = new HashSet<ISupportChilds>();
+					parents = new HashSet<Pair<String, ISupportChilds>>();
 					persistSet.put(FORM_DUPLICATION, parents);
 				}
-				parents.add(persist.getParent());
+				parents.add(new Pair<String, ISupportChilds>(null, persist.getParent()));
 			}
 			final Map<String, Set<IPersist>> formElementsByName = new HashMap<String, Set<IPersist>>();
 			persist.acceptVisitor(new IPersistVisitor()
@@ -744,10 +754,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			String name = ((ISupportName)persist).getName();
 			if (name != null)
 			{
-				Map<Integer, Set<ISupportChilds>> persistSet = duplicationMap.get(name);
+				Map<Integer, Set<Pair<String, ISupportChilds>>> persistSet = duplicationMap.get(name);
 				if (persistSet == null)
 				{
-					persistSet = new HashMap<Integer, Set<ISupportChilds>>();
+					persistSet = new HashMap<Integer, Set<Pair<String, ISupportChilds>>>();
 					duplicationMap.put(name, persistSet);
 				}
 				Integer type = RELATION_DUPLICATION;
@@ -759,7 +769,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					type = MEDIA_DUPLICATION;
 				}
-				Set<ISupportChilds> parentSet = persistSet.get(type);
+				Set<Pair<String, ISupportChilds>> parentSet = persistSet.get(type);
 				if (parentSet != null)
 				{
 					String parentsName = ""; //$NON-NLS-1$
@@ -767,11 +777,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						parentsName = ((ISupportName)persist.getParent()).getName();
 					}
-					for (ISupportChilds parent : parentSet)
+					for (Pair<String, ISupportChilds> parent : parentSet)
 					{
-						if (parent instanceof Solution)
+						if (parent.getRight() instanceof Solution)
 						{
-							Solution solution = (Solution)parent;
+							Solution solution = (Solution)parent.getRight();
 							if (persist instanceof Relation)
 							{
 								Relation duplicateRelation = solution.getRelation(name);
@@ -813,13 +823,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 					}
 				}
-				Set<ISupportChilds> parents = parentSet;
+				Set<Pair<String, ISupportChilds>> parents = parentSet;
 				if (parents == null)
 				{
-					parents = new HashSet<ISupportChilds>();
+					parents = new HashSet<Pair<String, ISupportChilds>>();
 					persistSet.put(type, parents);
 				}
-				parents.add(persist.getParent());
+				parents.add(new Pair<String, ISupportChilds>(null, persist.getParent()));
 			}
 		}
 	}
@@ -828,7 +838,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		// this is a special case
 		ServoyProject[] modules = getServoyModel().getModulesOfActiveProject();
-		final Map<String, Map<Integer, Set<ISupportChilds>>> duplicationMap = new HashMap<String, Map<Integer, Set<ISupportChilds>>>();
+		final Map<String, Map<Integer, Set<Pair<String, ISupportChilds>>>> duplicationMap = new HashMap<String, Map<Integer, Set<Pair<String, ISupportChilds>>>>();
 		if (modules != null)
 		{
 			for (ServoyProject module : modules)
@@ -1440,8 +1450,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												}
 											}
 
-											if (dataProvider == null &&
-												((parentForm.getDataSource() != null) || (id.startsWith(ScriptVariable.GLOBAL_DOT_PREFIX))))
+											if (dataProvider == null && (parentForm.getDataSource() != null || ScopesUtils.isVariableScope(id)))
 											{
 												ServoyMarker mk;
 												if (elementName == null)
@@ -1799,10 +1808,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							{
 								ScriptMethod scriptMethod = null;
 								boolean unresolved = true;
-								if (form.getRowBGColorCalculation().startsWith(ScriptVariable.GLOBAL_DOT_PREFIX))
+								Pair<String, String> scope = ScopesUtils.getVariableScope(form.getRowBGColorCalculation());
+								if (scope.getLeft() != null)
 								{
-									String methodName = form.getRowBGColorCalculation().substring(ScriptVariable.GLOBAL_DOT_PREFIX.length());
-									scriptMethod = flattenedSolution.getScriptMethod(methodName);
+									scriptMethod = flattenedSolution.getScriptMethod(scope.getLeft(), scope.getRight());
 								}
 								if (scriptMethod == null)
 								{
@@ -1821,7 +1830,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										{
 											while (tableNodes.hasNext())
 											{
-												ScriptCalculation calc = AbstractBase.selectByName(tableNodes.next().getScriptCalculations().iterator(),
+												ScriptCalculation calc = AbstractBase.selectByName(tableNodes.next().getScriptCalculations(),
 													form.getRowBGColorCalculation());
 												if (calc != null)
 												{
@@ -2466,8 +2475,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				if (vl.getValueListType() == ValueList.GLOBAL_METHOD_VALUES)
 				{
-					String methodName = vl.getCustomValues().substring(ScriptVariable.GLOBAL_DOT_PREFIX.length());
-					ScriptMethod scriptMethod = flattenedSolution.getScriptMethod(methodName);
+					ScriptMethod scriptMethod = flattenedSolution.getScriptMethod(null, vl.getCustomValues());
 					if (scriptMethod == null)
 					{
 						ServoyMarker mk = MarkerMessages.ValuelistGlobalMethodNotFound.fill(vl.getName());
@@ -2872,15 +2880,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								if (lookup != null && !"".equals(lookup)) //$NON-NLS-1$
 								{
 									boolean invalid = false;
-									if (lookup.startsWith(ScriptVariable.GLOBAL_DOT_PREFIX))
+									if (ScopesUtils.isVariableScope(lookup))
 									{
-										IDataProvider dataProvider = getServoyModel().getFlattenedSolution().getGlobalDataProvider(lookup);
-										if (dataProvider == null)
+										if (getServoyModel().getFlattenedSolution().getGlobalDataProvider(lookup) == null &&
+											getServoyModel().getFlattenedSolution().getScriptMethod(null, lookup) == null)
 										{
-											if (getServoyModel().getFlattenedSolution().getScriptMethod(lookup) == null)
-											{
-												invalid = true;
-											}
+											invalid = true;
 										}
 									}
 									else
@@ -3305,7 +3310,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 							else
 							{
-								if (primaryDataProvider.startsWith(ScriptVariable.GLOBAL_DOT_PREFIX))
+								if (ScopesUtils.isVariableScope(primaryDataProvider))
 								{
 									dataProvider = getServoyModel().getFlattenedSolution().getGlobalDataProvider(primaryDataProvider);
 								}
@@ -3512,6 +3517,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString()); //$NON-NLS-1$
 				marker.setAttribute("SolutionName", resource.getName()); //$NON-NLS-1$
+				if (type.equals(INVALID_DATAPROVIDERID) && persist instanceof ISupportDataProviderID)
+				{
+					marker.setAttribute("DataProviderID", ((ISupportDataProviderID)persist).getDataProviderID()); //$NON-NLS-1$
+				}
 			}
 			else if (type.equals(DUPLICATE_NAME_MARKER_TYPE))
 			{

@@ -211,7 +211,6 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 		}
 		String[] solutionNames = new String[activeModules.length];
 		String initialSolutionName = persist.getRootObject().getName();
-		int initialSolutionIndex = 0;
 
 		for (int i = activeModules.length - 1; i >= 0; i--)
 		{
@@ -220,16 +219,7 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 		}
 		Arrays.sort(solutionNames);
 
-		for (int i = solutionNames.length - 1; i >= 0; i--)
-		{
-			if (initialSolutionName.equals(solutionNames[i]))
-			{
-				initialSolutionIndex = i;
-			}
-		}
-
-
-		ExtendedInputDialog<String> dialog = createDialog(persist, nameValidator, solutionNames, initialSolutionIndex);
+		ExtendedInputDialog<String> dialog = createDialog(persist, nameValidator, solutionNames, initialSolutionName);
 		dialog.open();
 		if (dialog.getExtendedValue() == null)
 		{
@@ -424,7 +414,7 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 	 * @return
 	 */
 	protected abstract ExtendedInputDialog<String> createDialog(final IPersist persist, final IValidateName nameValidator, String[] solutionNames,
-		int initialSolutionIndex);
+		String initialSolutionName);
 
 	protected class Location
 	{

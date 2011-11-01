@@ -26,9 +26,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.ICommand;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 
@@ -37,6 +39,7 @@ import com.servoy.eclipse.model.builder.ErrorKeeper;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IUnexpectedSituationHandler;
 import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.AbstractActiveSolutionHandler;
@@ -549,6 +552,32 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 			getEditingFlattenedSolution(loadLoginSolution, loadMainSolution);
 		}
 	}
+
+
+	public List<String> getGlobalScopenames()
+	{
+		List<String> scopeNames = new ArrayList<String>();
+		if (project != null)
+		{
+			try
+			{
+				// look for js files in the project directory
+				for (IResource member : getProject().members())
+				{
+					if (member instanceof IFile && member.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
+					{
+						scopeNames.add(member.getName().substring(0, member.getName().length() - SolutionSerializer.JS_FILE_EXTENSION.length()));
+					}
+				}
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError("Could not list members for project '" + this + '\'', e);
+			}
+		}
+		return scopeNames;
+	}
+
 
 	@Override
 	public String toString()

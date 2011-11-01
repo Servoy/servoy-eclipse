@@ -81,10 +81,12 @@ import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IBeanClassProvider;
 import com.servoy.j2db.plugins.IClientPlugin;
@@ -182,7 +184,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addScopeType("Dataproviders", new DataprovidersScopeCreator());
 		addScopeType("InvisibleRelations", new InvisibleRelationsScopeCreator());
 		addScopeType("InvisibleDataproviders", new InvisibleDataprovidersScopeCreator());
-		addScopeType("Globals", new GlobalScopeCreator());
+		addScopeType("Scopes", new ScopesScopeCreator());
+		addScopeType("Scope", new ScopeScopeCreator());
 		addScopeType(QBAggregate.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBColumn.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBCondition.class.getSimpleName(), new QueryBuilderCreator());
@@ -499,7 +502,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	}
 
 
-	private class GlobalScopeCreator implements IScopeTypeCreator
+	private class ScopesScopeCreator implements IScopeTypeCreator
 	{
 		/**
 		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
@@ -507,34 +510,72 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		public Type createType(ITypeInfoContext context, String fullTypeName)
 		{
 			FlattenedSolution fs = getFlattenedSolution(context);
-
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
-			if (fs != null)
-			{
-				type.setName("Globals<" + fs.getMainSolutionMetaData().getName() + '>');
-			}
-			else
-			{
-				type.setName("Globals");
-			}
 			type.setKind(TypeKind.JAVA);
-			type.setAttribute(IMAGE_DESCRIPTOR, GLOBALS);
+			type.setAttribute(IMAGE_DESCRIPTOR, SCOPES);
+			type.setName(fullTypeName);
 
-			EList<Member> members = type.getMembers();
-
-			members.add(createProperty(context, "allmethods", true, "Array", "Returns all global method names in an Array", SPECIAL_PROPERTY));
-			members.add(createProperty(context, "allvariables", true, "Array", "Returns all global variable names in an Array", SPECIAL_PROPERTY));
-			members.add(createProperty(context, "allrelations", true, "Array", "Returns all global relation names in an Array", SPECIAL_PROPERTY));
-
-			if (fs != null)
+			if ("Scopes".equals(fullTypeName))
 			{
-				type.setSuperType(context.getType("Relations<" + fs.getSolution().getName() + '>'));
+				// special array lookup property so that scopes[xxx]. does code complete.
+				Property arrayProp = createProperty(context, "[]", true, "Scope", PROPERTY);
+				arrayProp.setVisible(false);
+				type.getMembers().add(arrayProp);
+				// quickly add this one to the static types. context.markInvariant(type); 
+			}
+			else if (fs != null)
+			{
+				type.setSuperType(context.getType("Scopes"));
+				EList<Member> members = type.getMembers();
+
+				for (Pair<String, IRootObject> scope : fs.getScopes())
+				{
+					Property scopeProperty = createProperty(scope.getLeft(), true,
+						context.getTypeRef("Scope<" + scope.getRight().getRootObject().getName() + '/' + scope.getLeft() + '>'),
+						"Global scope " + scope.getLeft() + " defined in solution " + scope.getRight().getRootObject().getName(), SCOPES);
+//					scopeProperty.setAttribute(LAZY_VALUECOLLECTION, persist); // currently not needed, solution name from config is used
+					members.add(scopeProperty);
+				}
 			}
 			return type;
-
 		}
 	}
 
+	private class ScopeScopeCreator implements IScopeTypeCreator
+	{
+		public Type createType(ITypeInfoContext context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+
+			if (typeName.endsWith(">"))
+			{
+				// Scope<solutionname/scopeName>
+				FlattenedSolution fs = getFlattenedSolution(context);
+				String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
+				String[] split = config.split("/");
+				String solutionName = split[0];
+				String scopeName = split[1];
+
+				if (ScriptVariable.GLOBAL_SCOPE.equals(scopeName))
+				{
+					EList<Member> members = type.getMembers();
+
+					members.add(createProperty(context, "allmethods", true, "Array", "Returns all global method names in an Array", SPECIAL_PROPERTY));
+					members.add(createProperty(context, "allvariables", true, "Array", "Returns all global variable names in an Array", SPECIAL_PROPERTY));
+					members.add(createProperty(context, "allrelations", true, "Array", "Returns all global relation names in an Array", SPECIAL_PROPERTY));
+				}
+
+				if (fs != null && (fs.getMainSolutionMetaData().getName().equals(solutionName) || fs.hasModule(solutionName)))
+				{
+					type.setSuperType(context.getType("Relations<" + config + '>')); // Relations<solutionName/scopeName>
+				}
+			}
+
+			return type;
+		}
+	}
 
 	private class FormsScopeCreator implements IScopeTypeCreator
 	{
@@ -1060,11 +1101,10 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
 
-			Pair<FlattenedSolution, Table> fsAndTable = getFlattenedSolutonAndTable(typeName);
-			if (fsAndTable != null && fsAndTable.getRight() != null)
+			TypeConfig fsAndTable = getFlattenedSolutonAndTable(typeName);
+			if (fsAndTable != null && fsAndTable.table != null)
 			{
-				Table table = fsAndTable.getRight();
-				addDataProviders(table.getColumns().iterator(), type.getMembers(), table.getDataSource(), context);
+				addDataProviders(fsAndTable.table.getColumns().iterator(), type.getMembers(), fsAndTable.table.getDataSource(), context);
 				context.markInvariant(type, "scope:qbcolumns");
 			}
 
@@ -1107,14 +1147,13 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		{
 			Type type = super.createType(context, fullTypeName);
 
-			Pair<FlattenedSolution, Table> fsAndTable = getFlattenedSolutonAndTable(fullTypeName);
+			TypeConfig fsAndTable = getFlattenedSolutonAndTable(fullTypeName);
 			FlattenedSolution fs = getFlattenedSolution(context);
-			if (fsAndTable != null && fs != null && fsAndTable.getRight() != null)
+			if (fsAndTable != null && fs != null && fsAndTable.table != null)
 			{
-				Table table = fsAndTable.getRight();
 				try
 				{
-					Iterator<Relation> relations = fs.getRelations(table, true, false, false);
+					Iterator<Relation> relations = fs.getRelations(fsAndTable.table, true, false, false);
 					while (relations.hasNext())
 					{
 						try
@@ -1168,18 +1207,15 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
 
-			Pair<FlattenedSolution, Table> fsAndTable = getFlattenedSolutonAndTable(typeName);
-			if (fsAndTable != null && fsAndTable.getLeft() != null)
+			TypeConfig fsAndTable = getFlattenedSolutonAndTable(typeName);
+			if (fsAndTable != null && fsAndTable.flattenedSolution != null)
 			{
-				FlattenedSolution fs = fsAndTable.getLeft();
-				Table table = fsAndTable.getRight();
-				if (table != null)
-				{
-					type.setSuperType(context.getType("Relations<" + fs.getSolution().getName() + '>'));
-				}
+				// do not set Relations<solutionName> as supertype when table is not null, if you do then in a table 
+				// context (like forms.x.foundset) global relations show up.
 				try
 				{
-					addRelations(context, fs, type.getMembers(), fs.getRelations(table, true, false, table == null), isVisible());
+					addRelations(context, fsAndTable.flattenedSolution, fsAndTable.scopeName, type.getMembers(),
+						fsAndTable.flattenedSolution.getRelations(fsAndTable.table, true, false, fsAndTable.table == null), isVisible());
 				}
 				catch (RepositoryException e)
 				{
@@ -1208,23 +1244,21 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 	private class DataprovidersScopeCreator implements IScopeTypeCreator
 	{
-
 		public Type createType(ITypeInfoContext context, String typeName)
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
 
-			Pair<FlattenedSolution, Table> fsAndTable = getFlattenedSolutonAndTable(typeName);
-			if (fsAndTable != null && fsAndTable.getRight() != null)
+			TypeConfig fsAndTable = getFlattenedSolutonAndTable(typeName);
+			if (fsAndTable != null && fsAndTable.table != null)
 			{
-				if (fsAndTable.getLeft() != null)
+				if (fsAndTable.flattenedSolution != null)
 				{
-					FlattenedSolution fs = fsAndTable.getLeft();
-					type.setSuperType(context.getType(typeName.substring(0, typeName.indexOf('<') + 1) + fsAndTable.getRight().getDataSource() + '>'));
+					type.setSuperType(context.getType(typeName.substring(0, typeName.indexOf('<') + 1) + fsAndTable.table.getDataSource() + '>'));
 					try
 					{
-						Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(fsAndTable.getRight());
+						Map<String, IDataProvider> allDataProvidersForTable = fsAndTable.flattenedSolution.getAllDataProvidersForTable(fsAndTable.table);
 						if (allDataProvidersForTable != null)
 						{
 							addDataProviders(allDataProvidersForTable.values().iterator(), type.getMembers(), context, isVisible(), false);
@@ -1237,8 +1271,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				}
 				else
 				{
-					Table table = fsAndTable.getRight();
-					addDataProviders(table.getColumns().iterator(), type.getMembers(), context, isVisible(), true);
+					addDataProviders(fsAndTable.table.getColumns().iterator(), type.getMembers(), context, isVisible(), true);
 					context.markInvariant(type, "scope:tables");
 				}
 			}
@@ -1308,7 +1341,18 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		}
 	}
 
-	private static Pair<FlattenedSolution, Table> getFlattenedSolutonAndTable(String typeName)
+	/**
+	 * Parse the config for a type. Possible combinations: 
+	 *
+	 * <br>* Typename&lt;solutionName;dataSource&gt;
+	 * 
+	 * <br>* Typename&lt;dataSource&gt;
+	 * 
+	 * <br>* Typename&lt;solutionName&gt;
+	 * 
+	 * <br>* Typename&lt;solutionName/scopeName&gt;
+	 */
+	private static TypeConfig getFlattenedSolutonAndTable(String typeName)
 	{
 		if (typeName.endsWith(">"))
 		{
@@ -1336,7 +1380,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 									Table table = (Table)server.getTable(dbServernameTablename[1]);
 									if (table != null)
 									{
-										return new Pair<FlattenedSolution, Table>(fs, table);
+										return new TypeConfig(fs, table);
 									}
 								}
 							}
@@ -1349,7 +1393,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				}
 				else
 				{
-					// this is only dataSource
+					// this is only dataSource or solutionname[/scope]
 					if (servoyModel.getFlattenedSolution().getSolution() != null)
 					{
 						String[] dbServernameTablename = DataSourceUtils.getDBServernameTablename(config);
@@ -1363,7 +1407,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 									Table table = (Table)server.getTable(dbServernameTablename[1]);
 									if (table != null)
 									{
-										return new Pair<FlattenedSolution, Table>(null, table);
+										return new TypeConfig(table);
 									}
 								}
 							}
@@ -1374,11 +1418,12 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						}
 						else
 						{
-							// only solutionName
-							ServoyProject servoyProject = servoyModel.getServoyProject(config);
+							// solutionName[/scopeName]
+							String[] split = config.split("/");
+							ServoyProject servoyProject = servoyModel.getServoyProject(split[0]);
 							if (servoyProject != null && servoyModel.getFlattenedSolution().getSolution() != null)
 							{
-								return new Pair<FlattenedSolution, Table>(servoyProject.getEditingFlattenedSolution(), null);
+								return new TypeConfig(servoyProject.getEditingFlattenedSolution(), split.length == 1 ? null : split[1]);
 							}
 						}
 					}
@@ -1542,14 +1587,16 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	 * @param visible 
 	 * @throws RepositoryException
 	 */
-	private static void addRelations(ITypeInfoContext context, FlattenedSolution fs, EList<Member> members, Iterator<Relation> relations, boolean visible)
+	private static void addRelations(ITypeInfoContext context, FlattenedSolution fs, String scopeName, EList<Member> members, Iterator<Relation> relations,
+		boolean visible)
 	{
 		while (relations.hasNext())
 		{
 			try
 			{
 				Relation relation = relations.next();
-				if (relation.isValid())
+				// show only relations that are valid and defined for this scope
+				if (relation.isValid() && (scopeName == null || relation.usesScope(scopeName)))
 				{
 					Property property = createProperty(relation.getName(), true, context.getTypeRef(FoundSet.JS_FOUNDSET + '<' + relation.getName() + '>'),
 						getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE, relation);
@@ -1696,18 +1743,13 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			type.setKind(TypeKind.JAVA);
 			type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
 			type.setSuperType(superType);
-
-			EList<Member> typeMembers = type.getMembers();
-			for (Member member : members)
-			{
-				typeMembers.add(member);
-			}
+			type.getMembers().addAll(members);
 			return type;
 		}
+
 		FlattenedSolution fs = getFlattenedSolution(context);
 		if (fs == null) return superType;
 
-		Table table = null;
 
 		String serverName = null;
 		String tableName = null;
@@ -1727,6 +1769,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				tableName = config.substring(index + 1);
 			}
 		}
+
+		Table table = null;
 		if (serverName != null)
 		{
 			try
@@ -1762,54 +1806,66 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			}
 		}
 
-		if (table != null)
+		Type type;
+		if (table == null && config.startsWith("{") && config.endsWith("}"))
 		{
-			Type relationsType;
-			Type dataproviderType;
-			if (visible)
-			{
-				relationsType = context.getType("Relations<" + fs.getSolution().getName() + ';' + table.getDataSource() + '>');
-				dataproviderType = context.getType("Dataproviders<" + fs.getSolution().getName() + ';' + table.getDataSource() + '>');
-			}
-			else
-			{
-				relationsType = context.getType("InvisibleRelations<" + fs.getSolution().getName() + ';' + table.getDataSource() + '>');
-				dataproviderType = context.getType("InvisibleDataproviders<" + fs.getSolution().getName() + ';' + table.getDataSource() + '>');
-			}
-			Type compositeType = TypeInfoModelFactory.eINSTANCE.createType();
-			compositeType.setName(fullTypeName);
-			compositeType.setKind(TypeKind.JAVA);
-			compositeType.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
-			compositeType.setSuperType(superType);
-
-			compositeType.getMembers().addAll(members);
-			EList<Type> traits = compositeType.getTraits();
-			traits.add(dataproviderType);
-			traits.add(relationsType);
-			return compositeType;
-		}
-		else if (config.startsWith("{") && config.endsWith("}"))
-		{
-			Type type = getRecordType(config);
-			type.setName(fullTypeName);
-			type.setKind(TypeKind.JAVA);
-			type.getMembers().addAll(members);
-			type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
-			type.setSuperType(superType);
-			return type;
+			type = getRecordType(config);
 		}
 		else
 		{
-			Type type = TypeInfoModelFactory.eINSTANCE.createType();
-			type.getMembers().addAll(members);
-			type.setName(fullTypeName);
-			type.setKind(TypeKind.JAVA);
-			type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
-			type.setSuperType(superType);
-			return type;
-
+			type = TypeInfoModelFactory.eINSTANCE.createType();
 		}
+		type.getMembers().addAll(members);
+		type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
+		type.setSuperType(superType);
+		type.setName(fullTypeName);
+		type.setKind(TypeKind.JAVA);
+
+		if (table != null)
+		{
+			String traitsConfig = fs.getSolution().getName() + ';' + table.getDataSource();
+			String relationsType = "Relations<" + traitsConfig + '>';
+			String dataproviderType = "Dataproviders<" + traitsConfig + '>';
+			if (!visible)
+			{
+				relationsType = "Invisible" + relationsType;
+				dataproviderType = "Invisible" + dataproviderType;
+			}
+
+			EList<Type> traits = type.getTraits();
+			traits.add(context.getType(dataproviderType));
+			traits.add(context.getType(relationsType));
+		}
+
+		return type;
 	}
 
+	public static class TypeConfig
+	{
+		public final FlattenedSolution flattenedSolution;
+		public final Table table;
+		public final String scopeName;
 
+		public TypeConfig(FlattenedSolution flattenedSolution, String scopeName, Table table)
+		{
+			this.flattenedSolution = flattenedSolution;
+			this.scopeName = scopeName;
+			this.table = table;
+		}
+
+		public TypeConfig(FlattenedSolution flattenedSolution, Table table)
+		{
+			this(flattenedSolution, null, table);
+		}
+
+		public TypeConfig(FlattenedSolution flattenedSolution, String scopeName)
+		{
+			this(flattenedSolution, scopeName, null);
+		}
+
+		public TypeConfig(Table table)
+		{
+			this(null, null, table);
+		}
+	}
 }

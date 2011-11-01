@@ -102,6 +102,7 @@ import com.servoy.j2db.debug.DataCallProfileData;
 import com.servoy.j2db.debug.IProfileListener;
 import com.servoy.j2db.debug.ProfileData;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
+import com.servoy.j2db.persistence.ScriptVariable;
 
 /**
  * This sample class demonstrates how to plug-in a new workbench view. The view
@@ -709,19 +710,18 @@ public class ProfilerView extends ViewPart
 							lineStart = "#" + lineNumbers[0];
 						}
 
-						String printedMethodName = "";
+						String printedMethodName;
 						file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(pd.getSourceName()));
-						if (file.getName().equals("globals.js"))
+						if (file.getProjectRelativePath().segmentCount() == 1) // Global scope file
 						{
-							printedMethodName = "globals.";
-							printedMethodName = printedMethodName + pd.getMethodName() + "[" + file.getProject().getName() + "]";
+							printedMethodName = ScriptVariable.SCOPES_DOT_PREFIX + file.getName().replace(".js", "") + '.' + pd.getMethodName() + '[' +
+								file.getProject().getName() + ']';
 						}
 						else
 						{
-							printedMethodName = printedMethodName + pd.getMethodName() + "[" + file.getName().replace(".js", "") + "]";
+							printedMethodName = pd.getMethodName() + '[' + file.getName().replace(".js", "") + ']';
 						}
-
-						return pd.isInnerFunction() ? printedMethodName + " (innerfunction" + lineStart + ")" : printedMethodName;
+						return pd.isInnerFunction() ? printedMethodName + " (innerfunction" + lineStart + ')' : printedMethodName;
 					case 1 :
 						return Long.toString(pd.getOwnTime());
 					case 2 :
@@ -742,19 +742,18 @@ public class ProfilerView extends ViewPart
 				switch (columnIndex)
 				{
 					case 0 :
-						String printedMethodName = "";
+						String printedMethodName;
 						IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(pd.getSourceName()));
-						if (file.getName().equals("globals.js"))
+						if (file.getProjectRelativePath().segmentCount() == 1) // Global scope file
 						{
-							printedMethodName = "globals.";
-							printedMethodName = printedMethodName + pd.getMethodName() + "[" + file.getProject().getName() + "]";
+							printedMethodName = ScriptVariable.SCOPES_DOT_PREFIX + file.getName().replace(".js", "") + '.' + pd.getMethodName() + '[' +
+								file.getProject().getName() + ']';
 						}
 						else
 						{
-							printedMethodName = printedMethodName + pd.getMethodName() + "[" + file.getName().replace(".js", "") + "]";
+							printedMethodName = pd.getMethodName() + '[' + file.getName().replace(".js", "") + ']';
 						}
-
-						return pd.getInnerFunctionLineStart() == -1 ? printedMethodName : printedMethodName + "#" + pd.getInnerFunctionLineStart();
+						return pd.getInnerFunctionLineStart() == -1 ? printedMethodName : printedMethodName + '#' + pd.getInnerFunctionLineStart();
 					case 1 :
 						return Long.toString(pd.getOwnTime());
 					case 2 :

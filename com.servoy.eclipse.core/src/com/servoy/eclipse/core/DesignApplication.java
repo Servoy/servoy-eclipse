@@ -257,11 +257,8 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 				{
 					foundSetManager = new FoundSetManager(this, new SwingFoundSetFactory())
 					{
-						/**
-						 * @see com.servoy.j2db.dataprocessing.FoundSetManager#getGlobalScopeProvider()
-						 */
 						@Override
-						public IGlobalValueEntry getGlobalScopeProvider()
+						public IGlobalValueEntry getScopesScopeProvider()
 						{
 							return new IGlobalValueEntry()
 							{

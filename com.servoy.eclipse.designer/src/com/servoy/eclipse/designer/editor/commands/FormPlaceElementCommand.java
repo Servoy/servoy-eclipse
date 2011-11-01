@@ -79,11 +79,11 @@ import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
-import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.Template;
+import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -582,7 +582,11 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 		{
 			IDataProvider dataProvider = null;
 			FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(parent);
-			if (!dragData.dataProviderId.startsWith(ScriptVariable.GLOBAL_DOT_PREFIX))
+			if (ScopesUtils.isVariableScope(dragData.dataProviderId))
+			{
+				dataProvider = flattenedSolution.getGlobalDataProvider(dragData.dataProviderId);
+			}
+			else
 			{
 				Table table = null;
 				Relation[] relations = null;
@@ -660,10 +664,6 @@ public class FormPlaceElementCommand extends Command implements ISupportModels
 						}
 					}
 				}
-			}
-			else
-			{
-				dataProvider = flattenedSolution.getGlobalDataProvider(dragData.dataProviderId);
 			}
 			if (dataProvider != null)
 			{

@@ -107,6 +107,7 @@ import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.StringComparator;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Content provider for the solution explorer tree.
@@ -158,7 +159,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private PlatformSimpleUserNode forms;
 
-	private PlatformSimpleUserNode globalsFolder;
+	private PlatformSimpleUserNode scopesFolder;
+
+	private Map<String, PlatformSimpleUserNode> globalsFolders;
 
 	private PlatformSimpleUserNode allRelations;
 
@@ -708,17 +711,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					{
 						un.children = new PlatformSimpleUserNode[0];
 					}
-					return un.children;
 				}
 				catch (Exception e)
 				{
 					ServoyLog.logWarning("Cannot create the children of node " + un.getName(), e); //$NON-NLS-1$
 				}
 			}
-			else
-			{
-				return un.children;
-			}
+			return un.children;
 		}
 		return new Object[0];
 	}
@@ -770,7 +769,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private void addServersNodeChildren(PlatformSimpleUserNode serversNode)
 	{
-		List<PlatformSimpleUserNode> servers = new ArrayList<PlatformSimpleUserNode>();
+		List<PlatformSimpleUserNode> serverNodes = new ArrayList<PlatformSimpleUserNode>();
 		IServerManagerInternal handler = ServoyModel.getServerManager();
 		String[] array = handler.getServerNames(false, false, true, true);
 		for (String server_name : array)
@@ -808,7 +807,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 
 			PlatformSimpleUserNode node = new PlatformSimpleUserNode(server_name, UserNodeType.SERVER, "", tooltip, serverObj, image); //$NON-NLS-1$
-			servers.add(node);
+			serverNodes.add(node);
 			node.parent = serversNode;
 			if (serverObj.getConfig().isEnabled() && serverObj.isValid())
 			{
@@ -831,7 +830,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			}
 		}
 
-		serversNode.children = servers.toArray(new PlatformSimpleUserNode[servers.size()]);
+		serversNode.children = serverNodes.toArray(new PlatformSimpleUserNode[serverNodes.size()]);
 	}
 
 	private void addPluginsNodeChildren(PlatformSimpleUserNode pluginNode)
@@ -986,17 +985,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		Solution solution = servoyProject.getSolution();
 		if (solution != null)
 		{
-			if (solutionOfCalculation == null)
-			{
-				globalsFolder = new PlatformSimpleUserNode(Messages.TreeStrings_Globals, UserNodeType.GLOBALS_ITEM, solution,
-					uiActivator.loadImageFromBundle("globe.gif")); //$NON-NLS-1$
-			}
-			else
-			{
-				globalsFolder = new PlatformSimpleUserNode(Messages.TreeStrings_Globals, UserNodeType.GLOBALS_ITEM_CALCULATION_MODE, solution,
-					uiActivator.loadImageFromBundle("globe.gif")); //$NON-NLS-1$
-			}
-			addGlobalsNodeChildren(globalsFolder, solution);
+			scopesFolder = new PlatformSimpleUserNode(Messages.TreeStrings_Scopes, solutionOfCalculation == null ? UserNodeType.SCOPES_ITEM
+				: UserNodeType.SCOPES_ITEM_CALCULATION_MODE, solution, uiActivator.loadImageFromBundle("scopes.gif")); //$NON-NLS-1$
+			scopesFolder.parent = projectNode;
+			addScopesNodeChildren(scopesFolder);
 
 			allRelations = null;
 			forms = new PlatformSimpleUserNode(Messages.TreeStrings_Forms, UserNodeType.FORMS, solution, uiActivator.loadImageFromBundle("forms.gif"));
@@ -1009,12 +1001,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			}
 			valuelists = new PlatformSimpleUserNode(Messages.TreeStrings_ValueLists, UserNodeType.VALUELISTS, solution,
 				uiActivator.loadImageFromBundle("valuelists.gif")); //$NON-NLS-1$
+			valuelists.parent = projectNode;
 			media = new PlatformSimpleUserNode(Messages.TreeStrings_Media, UserNodeType.MEDIA, solution, uiActivator.loadImageFromBundle("image.gif"));
+			media.parent = projectNode;
 			addMediaFolderChildrenNodes(media);
 
-			globalsFolder.parent = projectNode;
-			valuelists.parent = projectNode;
-			media.parent = projectNode;
 
 			if (solutionOfCalculation != null)
 			{
@@ -1027,18 +1018,20 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 				dataProvidersNode.parent = projectNode;
 				allRelations.parent = projectNode;
-				projectNode.children = new PlatformSimpleUserNode[] { globalsFolder, dataProvidersNode, forms, allRelations, valuelists, media };
+				projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, dataProvidersNode, forms, allRelations, valuelists, media };
 				forms.hide();
 			}
 			else
 			{
-				projectNode.children = new PlatformSimpleUserNode[] { globalsFolder, forms, allRelations, valuelists, media };
+				projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, forms, allRelations, valuelists, media };
 				// solution's allRelations not allowed in login solutions
 				if (activeSolutionNode != null &&
 					((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
-					allRelations != null) allRelations.hide();
+					allRelations != null)
+				{
+					allRelations.hide();
+				}
 			}
-
 		}
 	}
 
@@ -1052,26 +1045,62 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 			mediaFolder.children = view.createMediaFolderChildrenNodes(folderNode, uiActivator, EnumSet.of(MediaNode.TYPE.FOLDER));
 			for (SimpleUserNode n : mediaFolder.children)
+			{
 				n.parent = mediaFolder;
+			}
 		}
 	}
 
-	private void addGlobalsNodeChildren(PlatformSimpleUserNode globalsFolder, Solution solution)
+	public void refreshScopesNodeChildren()
 	{
-		PlatformSimpleUserNode globalVariables = new PlatformSimpleUserNode(Messages.TreeStrings_variables, UserNodeType.GLOBAL_VARIABLES, solution,
-			uiActivator.loadImageFromBundle("global_variabletree.gif")); //$NON-NLS-1$
-		globalVariables.parent = globalsFolder;
+		addScopesNodeChildren(scopesFolder);
+		view.refreshTreeNodeFromModel(scopesFolder);
+	}
+
+	private void addScopesNodeChildren(PlatformSimpleUserNode parent)
+	{
+		Solution solution = (Solution)parent.getRealObject();
+		SimpleUserNode project = parent.getAncestorOfType(ServoyProject.class);
+		if (project == null)
+		{
+			return;
+		}
+
+		List<String> scopeNames = ((ServoyProject)project.getRealObject()).getGlobalScopenames();
+		globalsFolders = new HashMap<String, PlatformSimpleUserNode>();
 
 		PlatformSimpleUserNode currentForm = new PlatformSimpleUserNode(Messages.TreeStrings_currentcontroller, UserNodeType.CURRENT_FORM, null,
 			uiActivator.loadImageFromBundle("formula.gif")); //$NON-NLS-1$
 		if (solutionOfCalculation != null) currentForm.hide();
-		currentForm.parent = globalsFolder;
+		currentForm.parent = parent;
 
-		PlatformSimpleUserNode globalRelations = new PlatformSimpleUserNode(Messages.TreeStrings_relations, UserNodeType.GLOBALRELATIONS, solution,
+		List<PlatformSimpleUserNode> nodes = new ArrayList<PlatformSimpleUserNode>(scopeNames.size() + 1);
+		nodes.add(currentForm);
+		for (String scopeName : scopeNames)
+		{
+			Pair<Solution, String> solutionAndScope = new Pair<Solution, String>(solution, scopeName);
+			PlatformSimpleUserNode globalsFolder = new PlatformSimpleUserNode(Utils.stringInitCap(scopeName), UserNodeType.GLOBALS_ITEM, solutionAndScope,
+				uiActivator.loadImageFromBundle("globe.gif")); //$NON-NLS-1$
+			globalsFolder.parent = parent;
+			globalsFolders.put(scopeName, globalsFolder);
+			nodes.add(globalsFolder);
+			addGlobalsNodeChildren(globalsFolder, solutionAndScope);
+		}
+
+		parent.children = nodes.toArray(new PlatformSimpleUserNode[nodes.size()]);
+	}
+
+	private void addGlobalsNodeChildren(PlatformSimpleUserNode globalsFolder, Pair<Solution, String> solutionAndScope)
+	{
+		PlatformSimpleUserNode globalVariables = new PlatformSimpleUserNode(Messages.TreeStrings_variables, UserNodeType.GLOBAL_VARIABLES, solutionAndScope,
+			uiActivator.loadImageFromBundle("global_variabletree.gif")); //$NON-NLS-1$
+		globalVariables.parent = globalsFolder;
+
+		PlatformSimpleUserNode globalRelations = new PlatformSimpleUserNode(Messages.TreeStrings_relations, UserNodeType.GLOBALRELATIONS, solutionAndScope,
 			uiActivator.loadImageFromOldLocation("relationsoverview.gif")); //$NON-NLS-1$
 		addGlobalRelationsNodeChildren(globalRelations);
 		globalRelations.parent = globalsFolder;
-		globalsFolder.children = new PlatformSimpleUserNode[] { currentForm, globalVariables, globalRelations };
+		globalsFolder.children = new PlatformSimpleUserNode[] { globalVariables, globalRelations };
 
 		// globals relations not allowed in login solution
 
@@ -1083,17 +1112,17 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	private void addFormsNodeChildren(PlatformSimpleUserNode formsNode)
 	{
 		Solution solution = (Solution)formsNode.getRealObject();
-		List<PlatformSimpleUserNode> forms = new ArrayList<PlatformSimpleUserNode>();
+		List<PlatformSimpleUserNode> nodes = new ArrayList<PlatformSimpleUserNode>();
 		Iterator<Form> it = solution.getForms(null, true);
 		while (it.hasNext())
 		{
 			Form f = it.next();
 			PlatformSimpleUserNode node = new PlatformSimpleUserNode(f.getName(), UserNodeType.FORM, f.getName(), f.getDataSource() == null ? "No table"
 				: ("Server: " + f.getServerName() + ", Table: " + f.getTableName()), f, uiActivator.loadImageFromBundle("designer.gif")); //$NON-NLS-3$
-			forms.add(node);
+			nodes.add(node);
 			node.parent = formsNode;
 		}
-		formsNode.setChildren(forms.toArray(new PlatformSimpleUserNode[forms.size()]));
+		formsNode.setChildren(nodes.toArray(new PlatformSimpleUserNode[nodes.size()]));
 	}
 
 	private void addFormNodeChildren(PlatformSimpleUserNode formNode)
@@ -1425,18 +1454,21 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private void addGlobalRelationsNodeChildren(PlatformSimpleUserNode globalRelations)
 	{
-		Solution solution = (Solution)globalRelations.getRealObject();
+		Pair<Solution, String> solutionAndScope = (Pair<Solution, String>)globalRelations.getRealObject();
 		try
 		{
 			List<PlatformSimpleUserNode> rels = new ArrayList<PlatformSimpleUserNode>();
-			Iterator<Relation> it = solution.getRelations(null, true, true); // returns all global relations
+			Iterator<Relation> it = solutionAndScope.getLeft().getRelations(null, true, true); // returns all global relations
 			while (it.hasNext())
 			{
 				Relation r = it.next();
-				PlatformSimpleUserNode un = new PlatformSimpleUserNode(r.getName(), UserNodeType.RELATION, r,
-					uiActivator.loadImageFromBundle("global_relation.gif")); //$NON-NLS-1$
-				un.parent = globalRelations;
-				rels.add(un);
+				if (r.usesScope(solutionAndScope.getRight()))
+				{
+					PlatformSimpleUserNode un = new PlatformSimpleUserNode(r.getName(), UserNodeType.RELATION, r,
+						uiActivator.loadImageFromBundle("global_relation.gif")); //$NON-NLS-1$
+					un.parent = globalRelations;
+					rels.add(un);
+				}
 			}
 			globalRelations.children = rels.toArray(new PlatformSimpleUserNode[rels.size()]);
 		}
@@ -1808,9 +1840,14 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return forms;
 	}
 
-	public PlatformSimpleUserNode getGlobalsFolder()
+	public PlatformSimpleUserNode getScopesFolder()
 	{
-		return globalsFolder;
+		return scopesFolder;
+	}
+
+	public PlatformSimpleUserNode getGlobalsFolder(String scopeName)
+	{
+		return globalsFolders == null ? null : globalsFolders.get(scopeName);
 	}
 
 	public PlatformSimpleUserNode getRelations()

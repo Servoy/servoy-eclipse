@@ -87,6 +87,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.Utils;
 
 public class RelationEditor extends PersistEditor
@@ -193,7 +194,7 @@ public class RelationEditor extends PersistEditor
 					{
 						WritableList oldInput = (WritableList)tableViewer.getInput();
 						oldInput.remove(index);
-						oldInput.add(new Integer[] { null, 0, null, null });
+						oldInput.add(new Integer[] { null, Integer.valueOf(0), null, null });
 						tableViewer.setInput(oldInput);
 						flagModified(true);
 					}
@@ -321,24 +322,24 @@ public class RelationEditor extends PersistEditor
 						Integer[] row = (Integer[])oldInput.get(i);
 						if (reuseSource)
 						{
-							input.add(new Integer[] { row[0], 0, null, null });
+							input.add(new Integer[] { row[0], Integer.valueOf(0), null, null });
 							continue;
 						}
 						else if (reuseDestination)
 						{
-							if (row[0] != null && oldColumns != null && row[0] < oldColumns.length &&
-								oldColumns[row[0]].startsWith(ScriptVariable.GLOBAL_DOT_PREFIX))
+							if (row[0] != null && oldColumns != null && row[0].intValue() < oldColumns.length &&
+								ScopesUtils.isVariableScope(oldColumns[row[0].intValue()]))
 							{
-								String name = oldColumns[row[0]];
+								String name = oldColumns[row[0].intValue()];
 								Integer fromIndex = null;
 								String[] newColumns = getDataProviders(CI_FROM);
 								for (int j = 0; j < newColumns.length; j++)
 								{
-									if (newColumns[j].equals(name)) fromIndex = j;
+									if (newColumns[j].equals(name)) fromIndex = Integer.valueOf(j);
 								}
-								input.add(new Integer[] { fromIndex, 0, row[2], null });
+								input.add(new Integer[] { fromIndex, Integer.valueOf(0), row[2], null });
 							}
-							else input.add(new Integer[] { null, 0, row[2], null });
+							else input.add(new Integer[] { null, Integer.valueOf(0), row[2], null });
 							continue;
 						}
 					}
@@ -348,7 +349,7 @@ public class RelationEditor extends PersistEditor
 					ServoyLog.logError(e);
 				}
 			}
-			input.add(new Integer[] { null, 0, null, null });
+			input.add(new Integer[] { null, Integer.valueOf(0), null, null });
 		}
 		boolean didAutoFill = false;
 		if (autoFill && getRelation().getPrimaryServerName() != null && getRelation().getForeignServerName() != null)
@@ -416,15 +417,9 @@ public class RelationEditor extends PersistEditor
 							if (input.size() > rowIdentColumns.indexOf(column))
 							{
 								int index = rowIdentColumns.indexOf(column);
-								if (input.get(index)[CI_FROM] == null) input.get(index)[CI_FROM] = getDataProvidersIndex(CI_FROM, column.getDataProviderID());
-								else
+								if (input.get(index)[CI_FROM] == null || !ScopesUtils.isVariableScope(columns[((Integer)input.get(index)[CI_FROM]).intValue()]))
 								{
-									int valueIndex = Integer.parseInt(input.get(index)[CI_FROM].toString());
-									String dataProvider = columns[valueIndex];
-									if (!dataProvider.startsWith(ScriptVariable.GLOBAL_DOT_PREFIX))
-									{
-										input.get(index)[CI_FROM] = getDataProvidersIndex(CI_FROM, column.getDataProviderID());
-									}
+									input.get(index)[CI_FROM] = getDataProvidersIndex(CI_FROM, column.getDataProviderID());
 								}
 							}
 						}
@@ -435,8 +430,7 @@ public class RelationEditor extends PersistEditor
 					{
 						if (row[CI_TO] != null)
 						{
-							int index = Integer.parseInt(row[CI_TO].toString());
-							String columnName = columns[index];
+							String columnName = columns[((Integer)row[CI_TO]).intValue()];
 							Column column = primaryTable.getColumn(columnName);
 							if (column != null) input.get(input.indexOf(row))[CI_FROM] = getDataProvidersIndex(CI_FROM, column.getDataProviderID());
 						}
@@ -461,8 +455,7 @@ public class RelationEditor extends PersistEditor
 					{
 						if (row[CI_FROM] != null)
 						{
-							int index = Integer.parseInt(row[CI_FROM].toString());
-							String columnName = columns[index];
+							String columnName = columns[((Integer)row[CI_FROM]).intValue()];
 							Column column = foreignTable.getColumn(columnName);
 							if (column != null) input.get(input.indexOf(row))[CI_TO] = getDataProvidersIndex(CI_TO, column.getDataProviderID());
 						}
@@ -503,7 +496,6 @@ public class RelationEditor extends PersistEditor
 		toViewerColumn.setEditingSupport(new DataProviderEditingSupport(this, tableViewer, CI_TO));
 
 		TableColumn delColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_DELETE);
-		TableViewerColumn delViewerColumn = new TableViewerColumn(tableViewer, delColumn);
 		delColumn.setToolTipText("Clear row");
 
 		TableColumnLayout layout = new TableColumnLayout();
@@ -518,8 +510,7 @@ public class RelationEditor extends PersistEditor
 
 	public boolean canEdit(Object obj)
 	{
-		int idx = input.indexOf(obj);
-		return canEditIndex(idx);
+		return canEditIndex(input.indexOf(obj));
 	}
 
 	public int getIndex(Object obj)
@@ -529,11 +520,7 @@ public class RelationEditor extends PersistEditor
 
 	public boolean canEditIndex(int idx)
 	{
-		if (idx >= 0 && getRowCount() >= idx)
-		{
-			return true;
-		}
-		return false;
+		return idx >= 0 && getRowCount() >= idx;
 	}
 
 	private int getRowCount()
@@ -569,7 +556,7 @@ public class RelationEditor extends PersistEditor
 			{
 				if (dps[i].equals(s))
 				{
-					return new Integer(i);
+					return Integer.valueOf(i);
 				}
 			}
 		}
@@ -586,7 +573,7 @@ public class RelationEditor extends PersistEditor
 			{
 				if (dps[i].equals(s))
 				{
-					return new Integer(i);
+					return Integer.valueOf(i);
 				}
 			}
 
@@ -604,7 +591,7 @@ public class RelationEditor extends PersistEditor
 					bestIndex = i;
 				}
 			}
-			if (bestLen > 0) return new Integer(bestIndex);
+			if (bestLen > 0) return Integer.valueOf(bestIndex);
 		}
 		return null;
 	}
@@ -649,8 +636,6 @@ public class RelationEditor extends PersistEditor
 		retval.add(EMPTY);
 		try
 		{
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-
 			com.servoy.j2db.persistence.Table t = null;
 			Map<String, ScriptCalculation> calcs = null;
 			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(getPersist());
@@ -736,7 +721,7 @@ public class RelationEditor extends PersistEditor
 		if (getRowCount() == tableRows)
 		{
 			tableRows++;
-			input.add(new Integer[] { null, 0, null, null });
+			input.add(new Integer[] { null, Integer.valueOf(0), null, null });
 			tableViewer.setInput(new WritableList(input, null));
 		}
 		this.getSite().getShell().getDisplay().asyncExec(new Runnable()
@@ -856,10 +841,10 @@ public class RelationEditor extends PersistEditor
 			}
 			else
 			{
-				IPersist[] items = r.getAllObjectsAsList().toArray(new IPersist[] { });
-				for (IPersist element : items)
+				Object[] items = r.getAllObjectsAsList().toArray();
+				for (Object element : items)
 				{
-					r.removeChild(element);
+					r.removeChild((IPersist)element);
 				}
 				if (items.length > 0) r.flagChanged();
 			}

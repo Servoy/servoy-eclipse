@@ -244,7 +244,7 @@ public class MethodDialog extends TreeSelectDialog
 			else if (parentElement instanceof Solution)
 			{
 				parent = context.getAncestor(IRepository.SOLUTIONS);
-				scriptMethods = ((Solution)parentElement).getScriptMethods(true);
+				scriptMethods = ((Solution)parentElement).getScriptMethods(null/* TODO scopes in method content provider */, true);
 			}
 
 			else

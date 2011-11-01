@@ -191,6 +191,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.DebugMethodAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteI18NAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteMediaAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeletePersistAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteScopeAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteScriptAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteServerAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteSolutionAction;
@@ -215,6 +216,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.NavigationToggleActi
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewPostgresDbAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewRelationAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewScopeAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewServerAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewSybaseDbAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewTableAction;
@@ -242,6 +244,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.RemoveSolutionProtec
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameMediaAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameMediaFolderAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenamePersistAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameScopeAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameSolutionAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ReplaceServerAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ReplaceTableAction;
@@ -305,15 +308,15 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	 */
 	private static final String DIALOGSTORE_RATIO = "SolutionExplorerView.ratio"; //$NON-NLS-1$
 
-	public static final String DIALOGSTORE_VIEWORIENTATION = "SolutionExplorerView.orientation";
+	public static final String DIALOGSTORE_VIEWORIENTATION = "SolutionExplorerView.orientation";//$NON-NLS-1$
 
-	public static final String USE_OPEN_AS_DEFAULT = "SolutionExplorerView.useOpenAsDefaultAction";
+	public static final String USE_OPEN_AS_DEFAULT = "SolutionExplorerView.useOpenAsDefaultAction";//$NON-NLS-1$
 
-	public static final String INCLUDE_ENTRIES_FROM_MODULES = "SolutionExplorerView.includeEntriedFromModules";
+	public static final String INCLUDE_ENTRIES_FROM_MODULES = "SolutionExplorerView.includeEntriedFromModules";//$NON-NLS-1$
 
-	public static final String DIALOGSTORE_CONTEXT_MENU_NAVIGATION = "SolutionExplorerView.contextMenuNavigation";
+	public static final String DIALOGSTORE_CONTEXT_MENU_NAVIGATION = "SolutionExplorerView.contextMenuNavigation";//$NON-NLS-1$
 
-	public static final String DIALOGSTORE_CONTEXT_MENU_TREE_HANDLING = "SolutionExplorerView.contextMenuTreeNavigation";
+	public static final String DIALOGSTORE_CONTEXT_MENU_TREE_HANDLING = "SolutionExplorerView.contextMenuTreeNavigation";//$NON-NLS-1$
 
 	/**
 	 * This orientation tells the view to put the list (outline) part of the view under the tree.
@@ -357,7 +360,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private AddAsModuleAction addAsModuleAction;
 
-	private RenameSolutionAction renameSolutionAction;
+	private ContextAction renameActionInTree;
 
 	private RemoveModuleAction removeModuleAction;
 
@@ -393,7 +396,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private DuplicatePersistAction duplicateFormAction;
 	private MovePersistAction moveFormAction;
-	private RenamePersistAction renameFormAction;
 
 	private NewPostgresDbAction newPostgresqlDatabase;
 	private NewSybaseDbAction newSybaseDatabase;
@@ -1049,6 +1051,25 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		return ret;
 	}
 
+	/**
+	 * Returns the node that are selected in the tree.
+	 */
+	public List<SimpleUserNode> getSelectedTreeNodes()
+	{
+
+		List<SimpleUserNode> ret = new ArrayList<SimpleUserNode>();
+		Iterator< ? > selection = ((ITreeSelection)tree.getSelection()).iterator();
+		while (selection.hasNext())
+		{
+			Object next = selection.next();
+			if (next instanceof SimpleUserNode)
+			{
+				ret.add((SimpleUserNode)next);
+			}
+		}
+		return ret;
+	}
+
 	public void refreshSelection()
 	{
 		tree.setSelection(tree.getSelection());
@@ -1151,12 +1172,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	 * 
 	 * @param orientation VIEW_ORIENTATION_HORIZONTAL, VIEW_ORIENTATION_AUTOMATIC or VIEW_ORIENTATION_VERTICAL
 	 */
-	public void setOrientation(int orientation)
+	public void setOrientation(int o)
 	{
-		if (orientation != VIEW_ORIENTATION_VERTICAL && orientation != VIEW_ORIENTATION_HORIZONTAL && orientation != VIEW_ORIENTATION_AUTOMATIC)
-		{
-			orientation = VIEW_ORIENTATION_AUTOMATIC;
-		}
+		int orientation = o == VIEW_ORIENTATION_VERTICAL || o == VIEW_ORIENTATION_HORIZONTAL ? o : VIEW_ORIENTATION_AUTOMATIC;
 
 		if (fCurrentOrientation != orientation)
 		{
@@ -1331,7 +1349,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				if (elements != null)
 				{
 					SolutionExplorerTreeContentProvider cp = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
-					ArrayList<SimpleUserNode> changedUserNodeA = new ArrayList<SimpleUserNode>();
+					List<SimpleUserNode> changedUserNodeA = new ArrayList<SimpleUserNode>();
 					SimpleUserNode simpleUserNode;
 
 					for (Object e : elements)
@@ -1344,7 +1362,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						else if (e instanceof IResource)
 						{
 							IResource adaptableResource = (IResource)e;
-
 							if (adaptableResource.exists())
 							{
 								simpleUserNode = SolutionExplorerView.this.resourceToSimpleUserNode(adaptableResource);
@@ -1381,7 +1398,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		// reloads and such;
 		// careful - when using single nodes in order to get/set stuff (not tree
 		// paths) this comparer
-		// must be temporarely removed; for example: double clicking a "Globals"
+		// must be temporarily removed; for example: double clicking a "Globals"
 		// node will read the
 		// expanded state of that node and expand/collapse it programatically -
 		// but if the comparer
@@ -2116,9 +2133,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (addModuleAction.isEnabled()) manager.add(addModuleAction);
 		if (moveFormAction.isEnabled()) manager.add(moveFormAction);
 		if (duplicateFormAction.isEnabled()) manager.add(duplicateFormAction);
-		if (renameFormAction.isEnabled()) manager.add(renameFormAction);
 		if (deleteActionInTree.isEnabled()) manager.add(deleteActionInTree);
-		if (renameSolutionAction.isEnabled()) manager.add(renameSolutionAction);
+		if (renameActionInTree.isEnabled()) manager.add(renameActionInTree);
 		manager.add(new Separator());
 		manager.add(cutAction);
 		manager.add(copyAction);
@@ -2308,7 +2324,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					// expand to the leafs, otherwise
 					// expand two levels
 					SimpleUserNode toExpand = (SimpleUserNode)treeFilter.getFirstMatchingNode();
-					ArrayList<Object> expandedElements = new ArrayList<Object>();
+					List<Object> expandedElements = new ArrayList<Object>();
 					while (toExpand != null)
 					{
 						expandedElements.add(toExpand);
@@ -2334,7 +2350,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	private void createActions()
 	{
 		moveSample = new MoveTextAction(this, true);
@@ -2343,7 +2358,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		searchTreeAction = new SearchAction();
 		moveFormAction = new MovePersistAction(getSite().getShell());
 		duplicateFormAction = new DuplicatePersistAction(getSite().getShell());
-		renameFormAction = new RenamePersistAction();
 		changeResourcesProjectAction = new ChangeResourcesProjectAction(getSite().getShell());
 		removeSolutionProtectionAction = new RemoveSolutionProtectionAction(getSite().getShell());
 		reloadTablesOfServerAction = new ReloadTablesAction();
@@ -2393,6 +2407,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		openFormEditorAction = new OpenFormEditorAction();
 
+		IAction newScope = new NewScopeAction(this);
+
 		IAction newRelation = new NewRelationAction(this);
 		IAction importMedia = new ImportMediaAction(this);
 		importMediaFolder = new ImportMediaFolderAction(this);
@@ -2403,6 +2419,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		duplicatePersistAction = new DuplicatePersistAction(this.getSite().getShell());
 
 		newActionInTreePrimary.registerAction(UserNodeType.FORM, newMethod);
+		newActionInTreePrimary.registerAction(UserNodeType.SCOPES_ITEM, newScope);
+		newActionInTreePrimary.registerAction(UserNodeType.SCOPES_ITEM_CALCULATION_MODE, newScope);
 		newActionInTreePrimary.registerAction(UserNodeType.GLOBALS_ITEM, newMethod);
 		newActionInTreePrimary.registerAction(UserNodeType.GLOBAL_VARIABLES, newVariable);
 		newActionInTreePrimary.registerAction(UserNodeType.FORM_VARIABLES, newVariable);
@@ -2457,27 +2475,21 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInListSecondary.registerAction(UserNodeType.VIEW, newForm);
 
 		openAction = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.gif"), "Open"); //$NON-NLS-1$ //$NON-NLS-2$
-		IAction openScript = new OpenScriptAction();
-		IAction openStyle = new OpenStyleAction(this);
-		IAction openValueList = new OpenValueListAction(this);
-		IAction openTable = new OpenTableAction(this);
-		IAction openRelation = new OpenRelationAction();
-		IAction openMedia = new OpenMediaAction();
-		IAction openI18N = new OpenI18NAction(this);
 
+		IAction openScript = new OpenScriptAction();
 		openAction.registerAction(UserNodeType.FORM_METHOD, openScript);
 		openAction.registerAction(UserNodeType.GLOBAL_METHOD_ITEM, openScript);
 		openAction.registerAction(UserNodeType.CALCULATIONS_ITEM, openScript);
 		openAction.registerAction(UserNodeType.GLOBAL_VARIABLE_ITEM, openScript);
 		openAction.registerAction(UserNodeType.FORM_VARIABLE_ITEM, openScript);
-		openAction.registerAction(UserNodeType.FORM_VARIABLE_ITEM, openScript);
-		openAction.registerAction(UserNodeType.STYLE_ITEM, openStyle);
-		openAction.registerAction(UserNodeType.VALUELIST_ITEM, openValueList);
+		openAction.registerAction(UserNodeType.STYLE_ITEM, new OpenStyleAction(this));
+		openAction.registerAction(UserNodeType.VALUELIST_ITEM, new OpenValueListAction(this));
+		IAction openTable = new OpenTableAction(this);
 		openAction.registerAction(UserNodeType.TABLE, openTable);
 		openAction.registerAction(UserNodeType.VIEW, openTable);
-		openAction.registerAction(UserNodeType.RELATION, openRelation);
-		openAction.registerAction(UserNodeType.MEDIA_IMAGE, openMedia);
-		openAction.registerAction(UserNodeType.I18N_FILE_ITEM, openI18N);
+		openAction.registerAction(UserNodeType.RELATION, new OpenRelationAction());
+		openAction.registerAction(UserNodeType.MEDIA_IMAGE, new OpenMediaAction());
+		openAction.registerAction(UserNodeType.I18N_FILE_ITEM, new OpenI18NAction(this));
 
 		deleteActionInList = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE), "Delete"); //$NON-NLS-1$
 		IAction deleteMedia = new DeleteMediaAction("Delete media", this); //$NON-NLS-1$
@@ -2491,12 +2503,12 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction deleteFormVariable = new DeleteScriptAction(UserNodeType.FORM_VARIABLE_ITEM, "Delete variable", this); //$NON-NLS-1$
 		IAction deleteGlobalVariable = new DeleteScriptAction(UserNodeType.GLOBAL_VARIABLE_ITEM, "Delete variable", this); //$NON-NLS-1$
 		IAction deleteI18N = new DeleteI18NAction(getSite().getShell());
+		IAction deleteScope = new DeleteScopeAction("Delete scope", this);
 
 		deleteActionInList.registerAction(UserNodeType.FORM_METHOD, deleteFormScript);
 		deleteActionInList.registerAction(UserNodeType.GLOBAL_METHOD_ITEM, deleteGlobalScript);
 		deleteActionInList.registerAction(UserNodeType.FORM_VARIABLE_ITEM, deleteFormVariable);
 		deleteActionInList.registerAction(UserNodeType.GLOBAL_VARIABLE_ITEM, deleteGlobalVariable);
-		// deleteAction.registerAction(UserNodeType.GLOBAL_ITEM, deleteVariable);
 		deleteActionInList.registerAction(UserNodeType.VALUELIST_ITEM, deleteValueList);
 		deleteActionInList.registerAction(UserNodeType.MEDIA_IMAGE, deleteMedia);
 		deleteActionInList.registerAction(UserNodeType.MEDIA_FOLDER, deleteMedia);
@@ -2512,7 +2524,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		debugMethodAction = new DebugMethodAction(this);
 
 		openActionInTree = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.gif"), "Open"); //$NON-NLS-1$ //$NON-NLS-2$
-		openRelation = new OpenRelationAction(); // must be another instance
+		IAction openRelation = new OpenRelationAction(); // must be another instance
 		// (in order to use only
 		// selections from the tree)
 		openActionInTree.registerAction(UserNodeType.RELATION, openRelation);
@@ -2532,9 +2544,18 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		deleteActionInTree.registerAction(UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE, deleteSolution);
 		deleteActionInTree.registerAction(UserNodeType.SERVER, deleteServer);
 		deleteActionInTree.registerAction(UserNodeType.MEDIA_FOLDER, deleteMedia);
+		deleteActionInTree.registerAction(UserNodeType.GLOBALS_ITEM, deleteScope);
+
+		renameActionInTree = new ContextAction(this, null, "Rename"); //$NON-NLS-1$
+
+		RenameSolutionAction renameSolutionAction = new RenameSolutionAction(this);
+		renameActionInTree.registerAction(UserNodeType.SOLUTION, renameSolutionAction);
+		renameActionInTree.registerAction(UserNodeType.SOLUTION_ITEM, renameSolutionAction);
+		renameActionInTree.registerAction(UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE, renameSolutionAction);
+		renameActionInTree.registerAction(UserNodeType.FORM, new RenamePersistAction());
+		renameActionInTree.registerAction(UserNodeType.GLOBALS_ITEM, new RenameScopeAction(this));
 
 		addAsModuleAction = new AddAsModuleAction(getSite().getShell());
-		renameSolutionAction = new RenameSolutionAction(this);
 		removeModuleAction = new RemoveModuleAction(getSite().getShell());
 		addModuleAction = new AddModuleAction(getSite().getShell());
 
@@ -2570,7 +2591,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		tree.addSelectionChangedListener(searchTreeAction);
 		tree.addSelectionChangedListener(deleteActionInTree);
 		tree.addSelectionChangedListener(addAsModuleAction);
-		tree.addSelectionChangedListener(renameSolutionAction);
+		tree.addSelectionChangedListener(renameActionInTree);
 		tree.addSelectionChangedListener(removeModuleAction);
 		tree.addSelectionChangedListener(addModuleAction);
 		tree.addSelectionChangedListener(setActive);
@@ -2579,15 +2600,12 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		tree.addSelectionChangedListener(openSqlEditorAction);
 		tree.addSelectionChangedListener(duplicateFormAction);
 		tree.addSelectionChangedListener(moveFormAction);
-		tree.addSelectionChangedListener(renameFormAction);
 		tree.addSelectionChangedListener(changeResourcesProjectAction);
 		tree.addSelectionChangedListener(removeSolutionProtectionAction);
 		tree.addSelectionChangedListener(reloadTablesOfServerAction);
 		tree.addSelectionChangedListener(updateServoySequencesAction);
 		tree.addSelectionChangedListener(duplicateServer);
 		tree.addSelectionChangedListener(enableServer);
-//		tree.addSelectionChangedListener(newDatabase);
-//		tree.addSelectionChangedListener(newSybaseDatabase);
 		tree.addSelectionChangedListener(toggleFormCommandsActions);
 		tree.addSelectionChangedListener(expandNodeAction);
 
@@ -2598,7 +2616,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		fRefreshAction = new RefreshAction(this);
 		collapseTreeAction = new CollapseTreeAction(tree);
-		collapseTreeAction.setId("collapseTreeAction");
+		collapseTreeAction.setId("collapseTreeAction"); //$NON-NLS-1$
 		selectAllActionInTree = new SelectAllAction(tree);
 		selectAllActionInlist = new SelectAllAction(list);
 
@@ -2646,7 +2664,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				// this is why we need to use the selection given by the event
 				// instead of the selection given by the tree
 				boolean isForm = (doubleClickedItem.getType() == UserNodeType.FORM); // form open action was moved to the designer plugin, so we must make a special case for it (it is no longer part of openActionInTree)
-				boolean isGlobals = (doubleClickedItem.getType() == UserNodeType.GLOBALS_ITEM);
 				openActionInTree.selectionChanged(new SelectionChangedEvent(tree, new StructuredSelection(doubleClickedItem)));
 				Preferences store = Activator.getDefault().getPluginPreferences();
 				String formDblClickOption = store.getString(SolutionExplorerPreferences.FORM_DOUBLE_CLICK_ACTION);
@@ -2662,20 +2679,18 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					}
 					else
 					{
-						EditorUtil.openScriptEditor((Form)doubleClickedItem.getRealObject(), true);
+						EditorUtil.openScriptEditor((Form)doubleClickedItem.getRealObject(), null, true);
 					}
 				}
-				else if (isGlobals && (ctrlPressed || globalsDblClickOptionDefined))
+				else if (((doubleClickedItem.getType() == UserNodeType.GLOBALS_ITEM) && (ctrlPressed || globalsDblClickOptionDefined)) ||
+					(doubleClickedItem.getType() == UserNodeType.GLOBAL_VARIABLES))
 				{
-					EditorUtil.openScriptEditor((Solution)doubleClickedItem.getRealObject(), true);
-				}
-				else if (doubleClickedItem.getType() == UserNodeType.GLOBAL_VARIABLES)
-				{
-					EditorUtil.openScriptEditor((Solution)doubleClickedItem.getRealObject(), true);
+					Pair<Solution, String> pair = (Pair<Solution, String>)doubleClickedItem.getRealObject();
+					EditorUtil.openScriptEditor(pair.getLeft(), pair.getRight(), true);
 				}
 				else if (doubleClickedItem.getType() == UserNodeType.FORM_VARIABLES)
 				{
-					EditorUtil.openScriptEditor((Form)doubleClickedItem.getRealObject(), true);
+					EditorUtil.openScriptEditor((Form)doubleClickedItem.getRealObject(), null, true);
 				}
 				else if (doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE)
 				{
@@ -2816,7 +2831,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	{
 		if (selection instanceof IStructuredSelection)
 		{
-			UUID uuid = null;
 			IStructuredSelection treeSelection = (IStructuredSelection)selection;
 			Object firstElement = treeSelection.getFirstElement();
 
@@ -2933,12 +2947,12 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				{
 					String mediaInfo = mediaNode.getInfo();
 					node = new UserNode(mediaNode.getName(), UserNodeType.MEDIA_IMAGE, new SimpleDeveloperFeedback(mediaInfo, mediaInfo, mediaInfo),
-						mediaNode.getMedia(), uiActivator.loadImageFromBundle("image.gif"));
+						mediaNode.getMedia(), uiActivator.loadImageFromBundle("image.gif")); //$NON-NLS-1$
 				}
 				else if (mediaNode.getType() == MediaNode.TYPE.FOLDER && mediaNodeTypeFilter.contains(MediaNode.TYPE.FOLDER))
 				{
 					node = new PlatformSimpleUserNode(mediaNode.getName(), UserNodeType.MEDIA_FOLDER, mediaNode,
-						uiActivator.loadImageFromBundle("media_folder.gif"));
+						uiActivator.loadImageFromBundle("media_folder.gif")); //$NON-NLS-1$
 				}
 
 				if (node != null) dlm.add(node);
@@ -3077,10 +3091,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 							}
 						}
 					}
-					else if (segments[1].equals(SolutionSerializer.GLOBALS_FILE))
+					else if (segments.length == 2 && segments[1].endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 					{
-						PlatformSimpleUserNode globalsFolder = cp.getGlobalsFolder();
-						if (globalsFolder.getType() == UserNodeType.GLOBALS_ITEM) return globalsFolder;
+						// globals (scope) file
+						return cp.getGlobalsFolder(segments[1].substring(0, segments[1].length() - SolutionSerializer.JS_FILE_EXTENSION.length()));
 					}
 				}
 				break;

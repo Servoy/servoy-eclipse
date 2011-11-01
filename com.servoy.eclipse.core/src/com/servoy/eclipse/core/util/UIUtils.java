@@ -37,6 +37,13 @@ import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -56,7 +63,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -87,24 +93,30 @@ public class UIUtils
 	}
 	public static class InputAndListDialog extends ExtendedInputDialog<String>
 	{
-
 		private final String listDescriptionText;
 		private final String[] listOptions;
-		private int listSelection;
+		private String listValue;
+		private ListViewer listViewer;
 
 		public InputAndListDialog(Shell parentShell, String dialogTitle, String dialogMessage, String initialTextValue, IInputValidator validator,
-			String[] comboOptions, String comboDescriptionText, int initialComboSelection)
+			String[] listOptions, String listValue, String listDescriptionText)
 		{
 			super(parentShell, dialogTitle, dialogMessage, initialTextValue, validator);
+			this.listOptions = listOptions;
+			this.listValue = listValue;
+			this.listDescriptionText = listDescriptionText;
 			setBlockOnOpen(true);
-			this.listOptions = comboOptions;
-			this.listDescriptionText = comboDescriptionText;
-			listSelection = initialComboSelection;
 		}
 
 		@Override
 		protected Control createDialogArea(Composite parent)
 		{
+			if (listOptions == null)
+			{
+				// no list, just default behaviour
+				return super.createDialogArea(parent);
+			}
+
 			Composite area = new Composite(parent, SWT.NONE);
 			GridLayout layout = new GridLayout();
 			layout.marginHeight = layout.marginWidth = 10;
@@ -113,27 +125,29 @@ public class UIUtils
 			Label comboDescription = new Label(area, SWT.NONE);
 			comboDescription.setText(listDescriptionText);
 
-			final List lst = new List(area, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
-			lst.setItems(listOptions);
-			lst.select(listSelection);
-			lst.showSelection();
-			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-			gd.heightHint = 200;
-			lst.setLayoutData(gd);
-
-			lst.addSelectionListener(new SelectionListener()
+			listViewer = new ListViewer(area, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
+			listViewer.setContentProvider(ArrayContentProvider.getInstance());
+			listViewer.setLabelProvider(new LabelProvider());
+			listViewer.setInput(listOptions);
+			listViewer.setSelection(new StructuredSelection(listValue));
+			listViewer.addSelectionChangedListener(new ISelectionChangedListener()
 			{
-				public void widgetDefaultSelected(SelectionEvent e)
+				public void selectionChanged(SelectionChangedEvent event)
 				{
-					widgetSelected(e);
-				}
-
-				public void widgetSelected(SelectionEvent e)
-				{
-					listSelection = lst.getSelectionIndex();
+					IStructuredSelection selection = (IStructuredSelection)listViewer.getSelection();
+					if (selection.isEmpty())
+					{
+						listValue = null;
+					}
+					listValue = (String)selection.getFirstElement();
 					validateInput();
 				}
 			});
+
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+			gd.heightHint = 200;
+			listViewer.getControl().setLayoutData(gd);
+
 			layout = (GridLayout)((Composite)super.createDialogArea(area)).getLayout();
 			layout.marginHeight = layout.marginWidth = 0;
 
@@ -143,11 +157,7 @@ public class UIUtils
 		@Override
 		public String getExtendedValue()
 		{
-			if (listSelection != -1)
-			{
-				return listOptions[listSelection];
-			}
-			return null;
+			return listValue;
 		}
 
 	}

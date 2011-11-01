@@ -117,6 +117,7 @@ import com.servoy.j2db.ui.IScriptRenderMethods;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ITagResolver;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Text;
@@ -455,8 +456,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.GLOBALRELATIONS)
 			{
-				Solution sol = (Solution)un.getRealObject();
-				lm = TreeBuilder.docToOneNode(Globals.class, this, UserNodeType.ARRAY, "globals.", null, "allrelations", sol, null).toArray(); //$NON-NLS-1$
+				Pair<Solution, String> pair = (Pair<Solution, String>)un.getRealObject();
+				lm = TreeBuilder.docToOneNode(Globals.class, this, UserNodeType.ARRAY, ScriptVariable.SCOPES_DOT_PREFIX + pair.getRight() + '.', null,
+					"allrelations", pair, null).toArray(); //$NON-NLS-1$
 			}
 			else if (type == UserNodeType.ALL_RELATIONS)
 			{
@@ -679,7 +681,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return lm;
 	}
 
-	private List<IPersist> getPersists(Solution solution, UserNodeType type)
+	private List<IPersist> getPersists(Solution solution, UserNodeType type, String scopeName)
 	{
 		List<IPersist> persists = new ArrayList<IPersist>();
 		try
@@ -709,11 +711,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						it = module.getValueLists(false);
 						break;
 					case GLOBAL_VARIABLES :
-						it = module.getScriptVariables(false);
+						it = module.getScriptVariables(scopeName, false);
 						break;
 					case GLOBALS_ITEM :
-						it = module.getScriptMethods(false);
+						it = module.getScriptMethods(scopeName, false);
 						break;
+
 					default :
 						it = null;
 				}
@@ -737,7 +740,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		List<SimpleUserNode> rels = new ArrayList<SimpleUserNode>();
 		try
 		{
-			List<IPersist> relations = getPersists(solution, UserNodeType.RELATIONS);
+			List<IPersist> relations = getPersists(solution, UserNodeType.RELATIONS, null);
 			for (IPersist persist : relations)
 			{
 				Relation relation = (Relation)persist;
@@ -1008,14 +1011,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	private Object[] createGlobalVariables(SimpleUserNode un)
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
-		Solution s = (Solution)un.getRealObject();
-		TreeBuilder.docToOneNode(Globals.class, this, UserNodeType.GLOBAL_VARIABLES, "globals.", dlm, "allvariables", s, null);
-		List<IPersist> persists = getPersists(s, UserNodeType.GLOBAL_VARIABLES);
+		Pair<Solution, String> pair = (Pair<Solution, String>)un.getRealObject();
+		TreeBuilder.docToOneNode(Globals.class, this, UserNodeType.GLOBAL_VARIABLES, ScriptVariable.SCOPES_DOT_PREFIX + pair.getRight() + '.', dlm,
+			"allvariables", pair, null);
+		List<IPersist> persists = getPersists(pair.getLeft(), UserNodeType.GLOBAL_VARIABLES, pair.getRight());
 		for (IPersist persist : persists)
 		{
 			ScriptVariable var = (ScriptVariable)persist;
 			SimpleUserNode node = new UserNode(
-				getDisplayName(var, s),
+				getDisplayName(var, pair.getLeft()),
 				UserNodeType.GLOBAL_VARIABLE_ITEM,
 				var.getDataProviderID(),
 				Column.getDisplayTypeString(var.getDataProviderType()) + " " + var.getDataProviderID(), var, uiActivator.loadImageFromBundle("global_variable.gif")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1069,14 +1073,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	private Object[] createGlobalScripts(SimpleUserNode un)
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
-		Solution sol = un != null ? (Solution)un.getRealObject() : null;
-		TreeBuilder.docToOneNode(Globals.class, this, UserNodeType.GLOBALS_ITEM, "globals.", dlm, "allmethods", sol, null);
-		List<IPersist> persists = getPersists(sol, UserNodeType.GLOBALS_ITEM);
+
+		Pair<Solution, String> pair = (Pair<Solution, String>)un.getRealObject();
+		TreeBuilder.docToOneNode(Globals.class, this, UserNodeType.GLOBALS_ITEM, ScriptVariable.SCOPES_DOT_PREFIX + pair.getRight() + '.', dlm, "allmethods",
+			pair, null);
+		List<IPersist> persists = getPersists(pair.getLeft(), UserNodeType.GLOBALS_ITEM, pair.getRight());
 		for (IPersist persist : persists)
 		{
 			ScriptMethod sm = (ScriptMethod)persist;
-			SimpleUserNode node = new UserNode(getDisplayName(sm, sol), UserNodeType.GLOBAL_METHOD_ITEM, ScriptVariable.GLOBAL_DOT_PREFIX + sm.getName() +
-				"();", sm.getName() + "()", sm, uiActivator.loadImageFromBundle("global_method.gif")); //$NON-NLS-1$ //$NON-NLS-2$
+			SimpleUserNode node = new UserNode(getDisplayName(sm, pair.getLeft()), UserNodeType.GLOBAL_METHOD_ITEM,
+				sm.getPrefixedName() + "();", sm.getName() + "()", sm, uiActivator.loadImageFromBundle("global_method.gif")); //$NON-NLS-1$ //$NON-NLS-2$
 			dlm.add(node);
 		}
 		return dlm.toArray();
@@ -1087,7 +1093,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
 		Solution s = (Solution)un.getRealObject();
 
-		List<IPersist> valuelists = getPersists(s, UserNodeType.VALUELISTS);
+		List<IPersist> valuelists = getPersists(s, UserNodeType.VALUELISTS, null);
 		for (IPersist persist : valuelists)
 		{
 			ValueList var = (ValueList)persist;

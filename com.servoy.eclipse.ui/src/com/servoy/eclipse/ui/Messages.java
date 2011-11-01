@@ -114,6 +114,7 @@ public class Messages extends NLS
 	public static String TreeStrings_Number;
 	public static String TreeStrings_Forms;
 	public static String TreeStrings_FromProject;
+	public static String TreeStrings_Scopes;
 	public static String TreeStrings_Globals;
 	public static String TreeStrings_History;
 	public static String TreeStrings_SolutionModel;

@@ -137,6 +137,7 @@ import com.servoy.j2db.persistence.IServerConfigListener;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.IVariable;
@@ -1884,8 +1885,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 						{
 							continue;
 						}
-						ISupportChilds parent = persist.getParent();
-						MultiTextEdit textEdit = getScriptFileChanges(parent, scriptFile);
+						MultiTextEdit textEdit = getScriptFileChanges(persist, scriptFile);
 
 						if (textEdit.getChildrenSize() > 0)
 						{
@@ -2644,8 +2644,15 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 	 * @param scriptFile
 	 * @return
 	 */
-	public MultiTextEdit getScriptFileChanges(ISupportChilds parent, final IFile scriptFile)
+	public MultiTextEdit getScriptFileChanges(IPersist savedPersist, final IFile scriptFile)
 	{
+		ISupportChilds parent = savedPersist.getParent();
+		String scopeName = null;
+		if (savedPersist instanceof ISupportScope)
+		{
+			scopeName = ((ISupportScope)savedPersist).getScopeName();
+		}
+
 		MultiTextEdit textEdit = new MultiTextEdit();
 
 		Script parse = JavaScriptParserUtil.parse(DLTKCore.createSourceModuleFrom(scriptFile));
@@ -2664,9 +2671,9 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 					{
 						persist = ((Form)parent).getScriptVariable(decl.getVariableName());
 					}
-					else if (parent instanceof Solution)
+					else if (parent instanceof Solution && scopeName != null)
 					{
-						persist = ((Solution)parent).getScriptVariable(decl.getVariableName());
+						persist = ((Solution)parent).getScriptVariable(scopeName, decl.getVariableName());
 					}
 				}
 				else if (expression instanceof FunctionStatement)
@@ -2676,9 +2683,9 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 					{
 						persist = ((Form)parent).getScriptMethod(name);
 					}
-					else if (parent instanceof Solution)
+					else if (parent instanceof Solution && scopeName != null)
 					{
-						persist = ((Solution)parent).getScriptMethod(name);
+						persist = ((Solution)parent).getScriptMethod(scopeName, name);
 					}
 					else if (parent instanceof TableNode)
 					{

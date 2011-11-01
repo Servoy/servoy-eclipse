@@ -102,6 +102,7 @@ import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValueList;
@@ -121,9 +122,17 @@ public class EditorUtil
 	 * @param activate TODO
 	 * 
 	 */
-	public static IEditorPart openScriptEditor(IPersist persist, boolean activate)
+	public static IEditorPart openScriptEditor(IPersist persist, String scopeName, boolean activate)
 	{
-		String scriptPath = SolutionSerializer.getScriptPath(persist, false);
+		String scriptPath;
+		if (persist instanceof Solution && scopeName != null)
+		{
+			scriptPath = SolutionSerializer.getRelativePath(persist, false) + scopeName + SolutionSerializer.JS_FILE_EXTENSION;
+		}
+		else
+		{
+			scriptPath = SolutionSerializer.getScriptPath(persist, false);
+		}
 		if (scriptPath == null)
 		{
 			return null;
@@ -314,14 +323,14 @@ public class EditorUtil
 		}
 		if (persist instanceof IScriptProvider)
 		{
-			return openScriptEditor(persist, true);
+			return openScriptEditor(persist, null, true);
 		}
 		Form form = (Form)persist.getAncestor(IRepository.FORMS);
 		if (form != null)
 		{
 			return openFormDesignEditor(form);
 		}
-		return openScriptEditor(persist, true);
+		return openScriptEditor(persist, null, true);
 	}
 
 	public static IEditorPart openSecurityEditor(IFile f)
@@ -415,7 +424,7 @@ public class EditorUtil
 		}
 		if (dataProvider instanceof ScriptCalculation || dataProvider instanceof ScriptVariable)
 		{
-			return openScriptEditor((IPersist)dataProvider, true);
+			return openScriptEditor((IPersist)dataProvider, null, true);
 		}
 		ColumnWrapper cw = dataProvider.getColumnWrapper();
 		IEditorPart part = null;

@@ -39,8 +39,8 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.ScopesUtils;
 
 /**
  * Label provider for methods.
@@ -66,16 +66,16 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 	public String getText(Object value)
 	{
 		if (value == null) return ""; //$NON-NLS-1$
-		MethodWithArguments mwa;
-		if (value instanceof ComplexProperty)
+		Object val = value;
+		if (val instanceof ComplexProperty)
 		{
-			mwa = ((ComplexProperty<MethodWithArguments>)value).getValue();
+			val = ((ComplexProperty)val).getValue();
 		}
-		else
+		if (val instanceof MethodWithArguments)
 		{
-			mwa = (MethodWithArguments)value;
+			return getMethodText((MethodWithArguments)val, persistContext, showPrefix, showNoneForDefault);
 		}
-		return getMethodText(mwa, persistContext, showPrefix, showNoneForDefault);
+		return val.toString();
 	}
 
 	public static String getMethodText(MethodWithArguments mwa, PersistContext persistContext, boolean showPrefix, boolean showNoneForDefault)
@@ -121,9 +121,12 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 		if (showPrefix && sm.getParent() instanceof Solution)
 		{
 			// global method
-			sb.append(ScriptVariable.GLOBAL_DOT_PREFIX);
+			sb.append(ScopesUtils.getScopeString(sm));
 		}
-		sb.append(sm.getName());
+		else
+		{
+			sb.append(sm.getName());
+		}
 
 		if (sm instanceof AbstractBase)
 		{
@@ -154,15 +157,20 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 
 	public IPersist getPersist(Object value)
 	{
-		MethodWithArguments mwa;
-		if (value instanceof ComplexProperty)
+		Object val = value;
+		if (val instanceof ComplexProperty)
 		{
-			mwa = ((ComplexProperty<MethodWithArguments>)value).getValue();
+			val = ((ComplexProperty)val).getValue();
 		}
-		else
+		if (val instanceof IPersist)
 		{
-			mwa = (MethodWithArguments)value;
+			return (IPersist)val;
 		}
-		return ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), mwa.table, mwa.methodId);
+		if (val instanceof MethodWithArguments)
+		{
+			return ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), ((MethodWithArguments)val).table,
+				((MethodWithArguments)val).methodId);
+		}
+		return null;
 	}
 }

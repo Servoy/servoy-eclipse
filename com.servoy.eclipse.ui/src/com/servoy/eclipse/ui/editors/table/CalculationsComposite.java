@@ -391,7 +391,7 @@ public class CalculationsComposite extends Composite
 								MessageDialog.openError(getShell(), "Error", "You must save before editing the calculation code.");
 								return;
 							}
-							EditorUtil.openScriptEditor(calculation, true);
+							EditorUtil.openScriptEditor(calculation, null, true);
 						}
 					}
 				}

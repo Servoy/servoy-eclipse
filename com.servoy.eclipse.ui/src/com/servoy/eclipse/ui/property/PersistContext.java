@@ -53,6 +53,11 @@ public class PersistContext
 		return context == null ? persist : context;
 	}
 
+	public static PersistContext create(IPersist persist)
+	{
+		return create(persist, null);
+	}
+
 	public static PersistContext create(IPersist persist, IPersist context)
 	{
 		if (persist == null)

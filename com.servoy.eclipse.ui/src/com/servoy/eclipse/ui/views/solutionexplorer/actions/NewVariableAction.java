@@ -59,7 +59,6 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
@@ -75,11 +74,11 @@ import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
-import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.StringInCodeSerializer;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
@@ -139,169 +138,163 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 		SimpleUserNode node = viewer.getSelectedTreeNode();
 		if (node != null)
 		{
-			ServoyProject pr = (ServoyProject)node.getAncestorOfType(ServoyProject.class).getRealObject();
-			if (pr != null)
+			final IPersist parent;
+			String variableScopeType;
+			String scopeName = null;
+			final Object validationContext;
+			if (node.getType() == UserNodeType.FORM_VARIABLES)
 			{
-				final IPersist parent;
-				if (node.getType() == UserNodeType.FORM_VARIABLES)
+				// add form variable
+				parent = (Form)node.getRealObject();
+				variableScopeType = "form";
+				validationContext = parent;
+			}
+			else if (node.getType() == UserNodeType.GLOBAL_VARIABLES)
+			{
+				// add global variable
+				Pair<Solution, String> pair = (Pair<Solution, String>)node.getRealObject();
+				parent = pair.getLeft();
+				scopeName = pair.getRight();
+				validationContext = scopeName;
+				variableScopeType = "global";
+			}
+			else
+			{
+				return;
+			}
+
+			VariableEditDialog askUserDialog = new VariableEditDialog(viewer.getSite().getShell(), "Create a new " + variableScopeType + " variable",
+				new IInputValidator()
 				{
-					// add form variable
-					parent = (Form)node.getRealObject();
-				}
-				else if (node.getType() == UserNodeType.GLOBAL_VARIABLES)
-				{
-					// add global variable
-					parent = pr.getSolution();
-				}
-				else
-				{
-					return;
-				}
-				createNewVariable(viewer.getSite().getShell(), parent, null);
+					public String isValid(String newText)
+					{
+						String message = null;
+						if (newText.length() == 0)
+						{
+							message = "";
+						}
+						else if (!IdentDocumentValidator.isJavaIdentifier(newText))
+						{
+							message = "Invalid variable name";
+						}
+						else
+						{
+							try
+							{
+								ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(newText, -1,
+									new ValidatorSearchContext(validationContext, IRepository.SCRIPTVARIABLES), false);
+							}
+							catch (RepositoryException e)
+							{
+								message = e.getMessage();
+							}
+						}
+						return message;
+					}
+				});
+			askUserDialog.open();
+			String variableName = askUserDialog.getVariableName();
+			int variableType = askUserDialog.getVariableType();
+			String defaultValue = askUserDialog.getVariableDefaultValue();
+
+			if (variableName != null)
+			{
+				createNewVariable(viewer.getSite().getShell(), parent, scopeName, variableName, variableType, defaultValue);
 			}
 		}
 	}
 
-	public static ScriptVariable createNewVariable(final Shell shell, final IPersist parent, String forcedVariableName)
+	public static ScriptVariable createNewVariable(Shell shell, IPersist parent, String scopeName, String variableName, int variableType, String defaultValue)
 	{
-		String variableScopeType = null;
-		if (parent instanceof Form)
+		try
 		{
-			variableScopeType = "form";
+			// create the repository object to make sure there are no name conflicts
+			ScriptVariable var;
+			if (parent instanceof Solution)
+			{
+				var = ((Solution)parent).createNewScriptVariable(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(),
+					scopeName == null ? ScriptVariable.GLOBAL_SCOPE : scopeName, variableName, variableType);
+			}
+			else
+			{
+				var = ((Form)parent).createNewScriptVariable(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), variableName,
+					variableType);
+			}
+			var.setDefaultValue(defaultValue);
+			String code = SolutionSerializer.serializePersist(var, true, ServoyModel.getDeveloperRepository()).toString();
+			((ISupportChilds)parent).removeChild(var);
+
+			String scriptPath = SolutionSerializer.getScriptPath(var, false);
+			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
+			IEditorPart openEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(
+				FileEditorInputFactory.createFileEditorInput(file));
+			if (openEditor instanceof ScriptEditor)
+			{
+				// the JS file is being edited - we cannot just modify the file on disk
+				boolean wasDirty = openEditor.isDirty();
+
+				// add new variable to the JS editor
+				ISourceViewer sv = ((ScriptEditor)openEditor).getScriptSourceViewer();
+				StyledText st = sv.getTextWidget();
+
+				st.setCaretOffset(0);
+				st.insert(""); // if you have a folded comment for example (folded region) at the beginning of the file
+				// trying to alter it will result in a deny and expansion of that area - so in order to make sure content
+				// is really added do this insert that either does nothing or expands the collapsed text at char 0...
+				st.insert(code + '\n');
+				st.setCaretOffset(code.length());
+				st.showSelection();
+				st.forceFocus();
+
+				if (!wasDirty)
+				{
+					openEditor.doSave(null);
+				}
+
+				st.forceFocus();
+				// let the user know the change is added to the already edited
+				// file (he will not see it in the solution explorer)
+				openEditor.getSite().getPage().activate(openEditor);
+			}
+			else
+			{
+				InputStream contents = null;
+				ByteArrayOutputStream baos = null;
+				try
+				{
+					if (file.exists())
+					{
+						contents = new BufferedInputStream(file.getContents(true));
+					}
+					baos = new ByteArrayOutputStream();
+					baos.write(code.getBytes("UTF8")); //$NON-NLS-1$
+					baos.write("\n".getBytes("UTF8")); //$NON-NLS-1$//$NON-NLS-2$
+					Utils.streamCopy(contents, baos);
+					new WorkspaceFileAccess(ServoyModel.getWorkspace()).setContents(scriptPath, baos.toByteArray()); // will also create file and parent folders if needed
+				}
+				finally
+				{
+					Utils.closeInputStream(contents);
+					Utils.closeOutputStream(baos);
+				}
+				EditorUtil.openScriptEditor(var, null, true);
+			}
+			return var;
 		}
-		else
+		catch (RepositoryException e)
 		{
-			variableScopeType = "global";
+			MessageDialog.openWarning(shell, "Cannot create the new " + variableType + " variable", "Reason: " + e.getMessage());
+			ServoyLog.logWarning("Cannot create variable", e);
 		}
-
-		ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
-		final IValidateName nameValidator = sm.getNameValidator();
-		int variableType = IColumnTypes.TEXT;
-		String defaultValue = null;
-		if (forcedVariableName == null)
+		catch (CoreException e)
 		{
-			VariableEditDialog askUserDialog = new VariableEditDialog(shell, "Create a new " + variableScopeType + " variable", new IInputValidator()
-			{
-				public String isValid(String newText)
-				{
-					String message = null;
-					if (newText.length() == 0)
-					{
-						message = "";
-					}
-					else if (!IdentDocumentValidator.isJavaIdentifier(newText))
-					{
-						message = "Invalid variable name";
-					}
-					else
-					{
-						try
-						{
-							nameValidator.checkName(newText, -1, new ValidatorSearchContext(parent, IRepository.SCRIPTVARIABLES), false);
-						}
-						catch (RepositoryException e)
-						{
-							message = e.getMessage();
-						}
-					}
-					return message;
-				}
-			});
-			askUserDialog.open();
-			forcedVariableName = askUserDialog.getVariableName();
-			variableType = askUserDialog.getVariableType();
-			defaultValue = askUserDialog.getVariableDefaultValue();
+			MessageDialog.openWarning(shell, "Cannot create the JS file for new " + variableType + " variable", "Reason: " + e.getMessage());
+			ServoyLog.logWarning("Cannot create variable", e);
 		}
-		if (forcedVariableName != null)
+		catch (IOException e)
 		{
-			try
-			{
-				// create the repository object to make sure there are no name conflicts
-				ScriptVariable var;
-				if (parent instanceof Solution)
-				{
-					var = ((Solution)parent).createNewScriptVariable(sm.getNameValidator(), forcedVariableName, variableType);
-				}
-				else
-				{
-					var = ((Form)parent).createNewScriptVariable(sm.getNameValidator(), forcedVariableName, variableType);
-				}
-				var.setDefaultValue(defaultValue);
-				String code = SolutionSerializer.serializePersist(var, true, ServoyModel.getDeveloperRepository()).toString();
-				((ISupportChilds)parent).removeChild(var);
-
-				String scriptPath = SolutionSerializer.getScriptPath(parent, false);
-				IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
-				IEditorPart openEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(
-					FileEditorInputFactory.createFileEditorInput(file));
-				if (openEditor instanceof ScriptEditor)
-				{
-					// the JS file is being edited - we cannot just modify the file on disk
-					boolean wasDirty = openEditor.isDirty();
-
-					// add new variable to the JS editor
-					ISourceViewer sv = ((ScriptEditor)openEditor).getScriptSourceViewer();
-					StyledText st = sv.getTextWidget();
-
-					st.setCaretOffset(0);
-					st.insert(""); // if you have a folded comment for example (folded region) at the beginning of the file
-					// trying to alter it will result in a deny and expansion of that area - so in order to make sure content
-					// is really added do this insert that either does nothing or expands the collapsed text at char 0...
-					st.insert(code + "\n");
-					st.setCaretOffset(code.length());
-					st.showSelection();
-					st.forceFocus();
-
-					if (!wasDirty)
-					{
-						openEditor.doSave(null);
-					}
-
-					st.forceFocus();
-					// let the user know the change is added to the already edited
-					// file (he will not see it in the solution explorer)
-					openEditor.getSite().getPage().activate(openEditor);
-				}
-				else
-				{
-					InputStream contents = null;
-					ByteArrayOutputStream baos = null;
-					try
-					{
-						if (file.exists())
-						{
-							contents = new BufferedInputStream(file.getContents(true));
-						}
-						baos = new ByteArrayOutputStream();
-						baos.write(code.getBytes("UTF8")); //$NON-NLS-1$
-						baos.write("\n".getBytes("UTF8")); //$NON-NLS-1$//$NON-NLS-2$
-						Utils.streamCopy(contents, baos);
-						new WorkspaceFileAccess(ServoyModel.getWorkspace()).setContents(scriptPath, baos.toByteArray()); // will also create file and parent folders if needed
-					}
-					finally
-					{
-						Utils.closeInputStream(contents);
-						Utils.closeOutputStream(baos);
-					}
-					EditorUtil.openScriptEditor(var, true);
-				}
-				return var;
-			}
-			catch (RepositoryException e)
-			{
-				MessageDialog.openWarning(shell, "Cannot create the new " + variableType + " variable", "Reason: " + e.getMessage());
-				ServoyLog.logWarning("Cannot create variable", e);
-			}
-			catch (CoreException e)
-			{
-				MessageDialog.openWarning(shell, "Cannot create the JS file for new " + variableType + " variable", "Reason: " + e.getMessage());
-				ServoyLog.logWarning("Cannot create variable", e);
-			}
-			catch (IOException e)
-			{
-				MessageDialog.openWarning(shell, "Cannot modify the JS file for new " + variableType + " variable", "Reason: " + e.getMessage());
-				ServoyLog.logWarning("Cannot create variable", e);
-			}
+			MessageDialog.openWarning(shell, "Cannot modify the JS file for new " + variableType + " variable", "Reason: " + e.getMessage());
+			ServoyLog.logWarning("Cannot create variable", e);
 		}
 		return null;
 	}

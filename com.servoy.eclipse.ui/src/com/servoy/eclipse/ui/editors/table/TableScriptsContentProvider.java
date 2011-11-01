@@ -27,9 +27,9 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.SortedTypeIterator;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.persistence.TypeIterator;
 import com.servoy.j2db.util.SortedList;
 
 /**
@@ -61,7 +61,7 @@ public class TableScriptsContentProvider extends FlatTreeContentProvider
 				Iterator<TableNode> tableNodes = solution.getTableNodes(table);
 				while (tableNodes.hasNext())
 				{
-					Iterator<IPersist> scriptsIterator = SortedTypeIterator.createFilteredIterator(tableNodes.next().getAllObjectsAsList().iterator(), typeId);
+					Iterator<IPersist> scriptsIterator = new TypeIterator<IPersist>(tableNodes.next().getAllObjectsAsList(), typeId);
 					while (scriptsIterator.hasNext())
 					{
 						IPersist script = scriptsIterator.next();

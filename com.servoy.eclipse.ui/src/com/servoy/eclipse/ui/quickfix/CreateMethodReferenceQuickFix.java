@@ -90,7 +90,7 @@ public class CreateMethodReferenceQuickFix implements IMarkerResolution
 			MethodArgument signature = template.getSignature();
 			if (signature == null) return;
 
-			ScriptMethod method = NewMethodAction.createNewMethod(UIUtils.getActiveShell(), parent, eventName, true, signature.getName());
+			ScriptMethod method = NewMethodAction.createNewMethod(UIUtils.getActiveShell(), parent, eventName, true, null, null);
 			if (method != null)
 			{
 				PropertyDescriptor descriptor = new PropertyDescriptor(eventName, persist.getClass());

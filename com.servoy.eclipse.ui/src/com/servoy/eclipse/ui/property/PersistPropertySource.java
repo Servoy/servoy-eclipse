@@ -965,19 +965,20 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 							FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(),
 								persistContext.getContext());
 							Iterator<ScriptMethod> scriptMethods = null;
-							if (value.getFormName() != null)
+							String scopeName = value.getScopeName();
+							if (scopeName != null)
+							{
+								// global method
+								scriptMethods = flattenedSolution.getScriptMethods(scopeName, false);
+							}
+							else
 							{
 								// form method
-								Form methodForm = flattenedSolution.getForm(value.getFormName());
+								Form methodForm = flattenedSolution.getForm(value.getContextName());
 								if (methodForm != null)
 								{
 									scriptMethods = methodForm.getScriptMethods(false);
 								}
-							}
-							else
-							{
-								// global method
-								scriptMethods = flattenedSolution.getScriptMethods(false);
 							}
 							if (scriptMethods != null)
 							{
@@ -2304,7 +2305,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 						}
 						else
 						{
-							retval.append("Global");
+							retval.append("Global[").append(((ScriptVariable)dp).getScopeName()).append(']');
 						}
 					}
 					retval.append('(');

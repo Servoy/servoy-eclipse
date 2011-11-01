@@ -24,6 +24,7 @@ import org.eclipse.dltk.core.keyword.IKeywordCategory;
 import org.eclipse.dltk.core.keyword.IKeywordProvider;
 import org.eclipse.dltk.javascript.core.JSKeywordCategory;
 
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 
 @SuppressWarnings("nls")
@@ -34,26 +35,28 @@ public class KeywordProvider implements IKeywordProvider
 
 	static
 	{
-		keywords = new String[17];
+		keywords = new String[18];
+		int n = 0;
 
-		keywords[0] = IExecutingEnviroment.TOPLEVEL_JSUNIT;
-		keywords[1] = IExecutingEnviroment.TOPLEVEL_UTILS;
-		keywords[2] = IExecutingEnviroment.TOPLEVEL_SECURITY;
-		keywords[3] = "elements";
-		keywords[4] = "controller";
-		keywords[5] = "currentcontroller";
-		keywords[6] = IExecutingEnviroment.TOPLEVEL_APPLICATION;
-		keywords[7] = IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER;
-		keywords[8] = IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER;
-		keywords[9] = "globals";
-		keywords[10] = IExecutingEnviroment.TOPLEVEL_FORMS;
-		keywords[11] = IExecutingEnviroment.TOPLEVEL_HISTORY;
-		keywords[12] = IExecutingEnviroment.TOPLEVEL_PLUGINS;
-		keywords[13] = "_super";
+		keywords[n++] = IExecutingEnviroment.TOPLEVEL_JSUNIT;
+		keywords[n++] = IExecutingEnviroment.TOPLEVEL_UTILS;
+		keywords[n++] = IExecutingEnviroment.TOPLEVEL_SECURITY;
+		keywords[n++] = "elements";
+		keywords[n++] = "controller";
+		keywords[n++] = "currentcontroller";
+		keywords[n++] = IExecutingEnviroment.TOPLEVEL_APPLICATION;
+		keywords[n++] = IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER;
+		keywords[n++] = IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER;
+		keywords[n++] = ScriptVariable.GLOBAL_SCOPE;
+		keywords[n++] = IExecutingEnviroment.TOPLEVEL_SCOPES;
+		keywords[n++] = IExecutingEnviroment.TOPLEVEL_FORMS;
+		keywords[n++] = IExecutingEnviroment.TOPLEVEL_HISTORY;
+		keywords[n++] = IExecutingEnviroment.TOPLEVEL_PLUGINS;
+		keywords[n++] = "_super";
 
-		keywords[14] = "FIXME";
-		keywords[15] = "CHECKME";
-		keywords[16] = "TODO";
+		keywords[n++] = "FIXME";
+		keywords[n++] = "CHECKME";
+		keywords[n++] = "TODO";
 
 		Arrays.sort(keywords);
 	}
@@ -62,17 +65,13 @@ public class KeywordProvider implements IKeywordProvider
 	{
 	}
 
-	/**
-	 * @test
-	 * @see test
-	 */
 	public String[] getKeywords(IKeywordCategory category, ISourceModule module)
 	{
 		if (category == JSKeywordCategory.CODE)
 		{
 			return keywords;
 		}
-		else if (category == JSKeywordCategory.JS_DOC_TAG)
+		if (category == JSKeywordCategory.JS_DOC_TAG)
 		{
 			return new String[] { "@AllowToRunInFind" };
 		}

@@ -63,6 +63,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
 import com.servoy.j2db.ClientState;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.scripting.GlobalScope;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
@@ -144,7 +145,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 
 	public static Scriptable getScope(ClientState state, boolean create)
 	{
-		GlobalScope ss = state.getScriptEngine().getGlobalScope();
+		GlobalScope ss = state.getScriptEngine().getScopesScope().getOrCreateGlobalScope(ScriptVariable.GLOBAL_SCOPE);
 		Scriptable scope = null;
 		if (ss.has(TEST_SCOPE, ss))
 		{

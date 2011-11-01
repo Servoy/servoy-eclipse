@@ -360,7 +360,7 @@
             label="Open Form"
             visible="true">
          <action
-               class="com.servoy.eclipse.ui.actions.OpenFormInScripteditorActionDelegate"
+               class="com.servoy.eclipse.ui.actions.OpenInScripteditorActionDelegate"
                id="com.servoy.eclipse.ui.openFormInJs"
                definitionId="com.servoy.eclipse.ui.OpenFormJsAction"
                label="Open form in Script Editor"
@@ -504,7 +504,7 @@
        	</markerResolutionGenerator>
        	<markerResolutionGenerator
             class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
-            markerType="com.servoy.eclipse.core.invalidDataProvideID">
+            markerType="com.servoy.eclipse.core.invalidDataProviderID">
        	</markerResolutionGenerator>     
      </extension>
      <extension
@@ -634,7 +634,7 @@
             adaptable="true"
             id="com.servoy.eclipse.ui.OpenScriptContributions">
          <action
-               class="com.servoy.eclipse.ui.actions.OpenFormInScripteditorActionDelegate"
+               class="com.servoy.eclipse.ui.actions.OpenInScripteditorActionDelegate"
                definitionId="com.servoy.eclipse.ui.OpenFormJsAction"
                enablesFor="1"
                icon="icons/js.gif"
@@ -643,7 +643,7 @@
                menubarPath="open.ext"
                state="false"
                style="push"
-               tooltip="Open form in Script Editor">
+               tooltip="Open in Script Editor">
          </action>
          <visibility>
             <or>
@@ -651,7 +651,7 @@
                   name="com.servoy.eclipse.ui.actions.Openable$OpenableForm">
             </objectClass>
                <objectClass
-                  name="com.servoy.eclipse.ui.actions.Openable$OpenableSolution">
+                  name="com.servoy.eclipse.ui.actions.Openable$OpenableGlobalScope">
             </objectClass></or>
          </visibility>
       </objectContribution>

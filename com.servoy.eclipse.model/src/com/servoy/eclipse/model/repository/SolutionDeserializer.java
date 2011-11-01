@@ -103,6 +103,7 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.ServerProxy;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -376,6 +377,15 @@ public class SolutionDeserializer
 							else if (file.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 							{
 								List<JSONObject> scriptObjects = parseJSFile(f, changed);
+								if (parent instanceof Solution)
+								{
+									// the scope name for global methods/variables is based on the filename
+									String scopeName = file.substring(0, file.length() - SolutionSerializer.JS_FILE_EXTENSION.length());
+									for (JSONObject so : scriptObjects)
+									{
+										so.put(StaticContentSpecLoader.PROPERTY_SCOPENAME.getPropertyName(), scopeName);
+									}
+								}
 								File parentFile = f.getParentFile();
 								if (parentFile.getName().equals(SolutionSerializer.FORMS_DIR) ||
 									(parentFile.getParentFile() != null && parentFile.getParentFile().getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME)))
@@ -958,7 +968,7 @@ public class SolutionDeserializer
 
 
 			List<VariableDeclaration> variables = new ArrayList<VariableDeclaration>();
-			List<FunctionStatement> functionss = new ArrayList<FunctionStatement>();
+			List<FunctionStatement> functions = new ArrayList<FunctionStatement>();
 			final List<ConstStatement> constants = new ArrayList<ConstStatement>();
 			List<Statement> statements = script.getStatements();
 			for (ASTNode node : statements)
@@ -972,7 +982,7 @@ public class SolutionDeserializer
 					}
 					else if (exp instanceof FunctionStatement)
 					{
-						functionss.add((FunctionStatement)exp);
+						functions.add((FunctionStatement)exp);
 					}
 				}
 				else if (node instanceof ConstStatement)
@@ -1237,7 +1247,7 @@ public class SolutionDeserializer
 				jsonObjects.add(json);
 			}
 
-			for (FunctionStatement function : functionss)
+			for (FunctionStatement function : functions)
 			{
 				String comment = null;
 				if (function.getDocumentation() != null) comment = function.getDocumentation().getText();

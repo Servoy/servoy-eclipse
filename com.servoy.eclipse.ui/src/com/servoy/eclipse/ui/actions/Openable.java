@@ -13,13 +13,14 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.actions;
 
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Pair;
 
 /**
  * Openable items for Open menu actions.
@@ -43,6 +44,7 @@ public class Openable
 
 	public static Openable getOpenable(Object data)
 	{
+		// create specific subclasses, see objectClass visibility for objectContribution extension point 
 		if (data instanceof IPersist)
 		{
 			IPersist persist = (IPersist)data;
@@ -51,11 +53,10 @@ public class Openable
 			{
 				return new OpenableForm(form);
 			}
-			Solution solution = (Solution)persist.getAncestor(IRepository.SOLUTIONS);
-			if (solution != null)
-			{
-				return new OpenableSolution(solution);
-			}
+		}
+		if (data instanceof Pair< ? , ? > && ((Pair< ? , ? >)data).getLeft() instanceof Solution && ((Pair< ? , ? >)data).getRight() instanceof String)
+		{
+			return new OpenableGlobalScope((Pair<Solution, String>)data);
 		}
 		return new Openable(data);
 	}
@@ -74,17 +75,17 @@ public class Openable
 		}
 	}
 
-	public static class OpenableSolution extends Openable
+	public static class OpenableGlobalScope extends Openable
 	{
-		public OpenableSolution(Solution data)
+		public OpenableGlobalScope(Pair<Solution, String> data)
 		{
 			super(data);
 		}
 
 		@Override
-		public Solution getData()
+		public Pair<Solution, String> getData()
 		{
-			return (Solution)super.getData();
+			return (Pair<Solution, String>)super.getData();
 		}
 	}
 }

@@ -25,10 +25,12 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewVariableAction;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
-import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -67,19 +69,21 @@ public class CreateVariableReferenceQuickFix implements IMarkerResolution
 					if (persist instanceof ISupportDataProviderID)
 					{
 						variableName = ((ISupportDataProviderID)persist).getDataProviderID();
-						if (variableName.startsWith(ScriptVariable.GLOBAL_DOT_PREFIX))
+						Pair<String, String> scope = ScopesUtils.getVariableScope(variableName);
+						String scopeName = scope.getLeft();
+						if (scopeName != null)
 						{
-							variableName = variableName.substring(ScriptVariable.GLOBAL_DOT_PREFIX.length());
+							variableName = scope.getRight();
 							parent = persist.getAncestor(IRepository.SOLUTIONS);
 						}
 						else
 						{
 							parent = persist.getAncestor(IRepository.FORMS);
 						}
-					}
-					if (parent != null)
-					{
-						NewVariableAction.createNewVariable(UIUtils.getActiveShell(), parent, variableName);
+						if (parent != null)
+						{
+							NewVariableAction.createNewVariable(UIUtils.getActiveShell(), parent, scopeName, variableName, IColumnTypes.TEXT, null);
+						}
 					}
 				}
 				catch (Exception e)

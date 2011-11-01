@@ -35,10 +35,10 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.SafeArrayList;
+import com.servoy.j2db.util.ScopesUtils;
 
 /**
  * Property controller for String properties that are script names, subproperties are instance arguments
@@ -77,8 +77,7 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 					FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
 
 					// try global method
-					String methodName = value.startsWith(ScriptVariable.GLOBAL_DOT_PREFIX) ? value.substring(ScriptVariable.GLOBAL_DOT_PREFIX.length()) : value;
-					IPersist method = flattenedSolution.getScriptMethod(methodName);
+					IPersist method = flattenedSolution.getScriptMethod(null, value);
 
 					if (method == null && table != null)
 					{
@@ -143,7 +142,7 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 						mwa.methodId);
 					if (scriptProvider != null)
 					{
-						return scriptProvider.getParent() instanceof IRootObject ? ScriptVariable.GLOBAL_DOT_PREFIX + scriptProvider.getDisplayName()
+						return scriptProvider.getParent() instanceof IRootObject ? ScopesUtils.getScopeString(scriptProvider)
 							: scriptProvider.getDisplayName();
 					}
 				}

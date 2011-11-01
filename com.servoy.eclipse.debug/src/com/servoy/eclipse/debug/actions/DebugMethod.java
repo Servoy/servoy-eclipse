@@ -57,7 +57,8 @@ public class DebugMethod implements IViewActionDelegate
 		if (sm != null && Activator.getDefault().getDebugClientHandler().getDebugReadyClient() != null)
 		{
 			IPath path = sm.getPath();
-			String solutionName = path.segments()[0];
+			String[] segments = path.segments();
+			String solutionName = segments[0];
 			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
 			if (servoyProject != null && servoyProject.getProject().isOpen())
 			{
@@ -66,10 +67,16 @@ public class DebugMethod implements IViewActionDelegate
 				File parentFile = SolutionSerializer.getParentFile(workspaceDir, new File(workspaceDir, path.toString()));
 				UUID uuid = SolutionDeserializer.getUUID(parentFile);
 
-				IPersist persist = AbstractRepository.searchPersist(sol, uuid);
-				if (persist instanceof ISupportChilds)
+				IPersist parent = AbstractRepository.searchPersist(sol, uuid);
+				if (parent instanceof ISupportChilds)
 				{
-					Activator.getDefault().getDebugClientHandler().executeMethod((ISupportChilds)persist, sm.getElementName());
+					String scopeName = null;
+					if (parent instanceof Solution)
+					{
+						String basename = segments[segments.length - 1];
+						scopeName = basename.substring(0, basename.length() - 3); // remove .js
+					}
+					Activator.getDefault().getDebugClientHandler().executeMethod((ISupportChilds)parent, scopeName, sm.getElementName());
 				}
 			}
 		}

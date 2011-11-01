@@ -29,6 +29,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.util.Pair;
 
 /**
  * This action opens in the editor the user script element currently selected in the outline of the solution view.
@@ -79,18 +80,27 @@ public class OpenScriptAction extends Action implements ISelectionChangedListene
 				SimpleUserNode node = ((SimpleUserNode)it.next());
 				if (node != null)
 				{
+					String scopeName = null;
 					Object obj = node.getRealObject();
 					if (obj instanceof ColumnWrapper)
 					{
 						obj = ((ColumnWrapper)obj).getColumn();
 					}
+					else if (obj instanceof Pair< ? , ? >) // Pair<Solution, Scopename>
+					{
+						if (((Pair< ? , ? >)obj).getRight() instanceof String)
+						{
+							scopeName = ((Pair< ? , String>)obj).getRight();
+						}
+						obj = ((Pair< ? , ? >)obj).getLeft();
+
+					}
 					if (obj instanceof IPersist)
 					{
-						EditorUtil.openScriptEditor((IPersist)obj, true);
+						EditorUtil.openScriptEditor((IPersist)obj, scopeName, true);
 					}
 				}
 			}
 		}
 	}
-
 }

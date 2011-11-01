@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.labelproviders;
 
 
@@ -33,11 +33,18 @@ import com.servoy.j2db.persistence.Solution;
 public class SolutionContextDelegateLabelProvider extends DelegateLabelProvider implements IFontProvider, IPersistLabelProvider
 {
 	private final IPersist context;
+	private final boolean prefixSolutionName;
 
 	public SolutionContextDelegateLabelProvider(IPersistLabelProvider labelProvider, IPersist context)
 	{
+		this(labelProvider, context, false);
+	}
+
+	public SolutionContextDelegateLabelProvider(IPersistLabelProvider labelProvider, IPersist context, boolean prefixSolutionName)
+	{
 		super(labelProvider);
 		this.context = context;
+		this.prefixSolutionName = prefixSolutionName;
 	}
 
 	@Override
@@ -53,6 +60,10 @@ public class SolutionContextDelegateLabelProvider extends DelegateLabelProvider 
 				Solution persistSolution = (Solution)persist.getAncestor(IRepository.SOLUTIONS);
 				if (contextSolution != null && persistSolution != null && !contextSolution.getUUID().equals(persistSolution.getUUID()))
 				{
+					if (prefixSolutionName)
+					{
+						return persistSolution.getName() + '.' + baseText;
+					}
 					return baseText + " [" + persistSolution.getName() + ']';
 				}
 			}

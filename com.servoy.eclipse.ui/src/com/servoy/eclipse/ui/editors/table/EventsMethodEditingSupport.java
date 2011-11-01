@@ -143,7 +143,7 @@ public class EventsMethodEditingSupport extends EditingSupport
 				ServoyLog.logError(e);
 				return null;
 			}
-			PersistContext persistContext = PersistContext.create(tableNode, null);
+			PersistContext persistContext = PersistContext.create(tableNode);
 			editor = new MethodCellEditor(((TreeViewer)getViewer()).getTree(), new SolutionContextDelegateLabelProvider(new MethodLabelProvider(persistContext,
 				false, true), solution), new MethodValueEditor(persistContext), persistContext, node.getType().getProperty().getPropertyName(), false,
 				new MethodListOptions(false, true, false, true, true, table));

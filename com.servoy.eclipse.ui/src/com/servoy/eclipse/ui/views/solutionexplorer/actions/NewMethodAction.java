@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +42,6 @@ import org.eclipse.dltk.ui.formatter.ScriptFormatterManager;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.Document;
@@ -62,8 +62,9 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.core.util.UIUtils.InputAndListDialog;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
@@ -76,6 +77,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
@@ -85,6 +87,7 @@ import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
@@ -147,43 +150,33 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		SimpleUserNode node = viewer.getSelectedTreeNode();
 		if (node != null)
 		{
-			ServoyProject pr = (ServoyProject)node.getAncestorOfType(ServoyProject.class).getRealObject();
-			if (pr != null)
+			if (node.getType() == UserNodeType.FORM)
 			{
-				if (node.getType() == UserNodeType.FORM)
-				{
-					// add form method
-					createNewMethod(viewer.getSite().getShell(), (Form)node.getRealObject(), null, true, null);
-				}
-				else if (node.getType() == UserNodeType.GLOBALS_ITEM)
-				{
-					// add global method
-					createNewMethod(viewer.getSite().getShell(), pr.getSolution(), null, true, null);
-				}
+				// add form method
+				createNewMethod(viewer.getSite().getShell(), (Form)node.getRealObject(), null, true, null, null);
 			}
-			else
+			else if (node.getType() == UserNodeType.GLOBALS_ITEM)
 			{
-				ServoyLog.logWarning("Cannot find servoy project", null); //$NON-NLS-1$
+				Pair<Solution, String> pair = (Pair<Solution, String>)node.getRealObject();
+				// add global method
+				createNewMethod(viewer.getSite().getShell(), pair.getLeft(), null, true, null, pair.getRight(), null, null);
 			}
 		}
 	}
 
-	public static ScriptMethod createNewMethod(Shell shell, IPersist parent, String methodKey, boolean activate, String forcedMethodName)
+	public static ScriptMethod createNewMethod(Shell shell, IPersist parent, String methodKey, boolean activate, String forcedMethodName, String forcedScopeName)
 	{
-		return createNewMethod(shell, parent, methodKey, activate, forcedMethodName, null);
-	}
-
-	public static ScriptMethod createNewMethod(Shell shell, IPersist parent, String methodKey, boolean activate, String forcedMethodName,
-		Map<String, String> substitutions)
-	{
-		return createNewMethod(shell, parent, methodKey, activate, forcedMethodName, substitutions, null);
+		return createNewMethod(shell, parent, methodKey, activate, forcedMethodName, forcedScopeName, null, null);
 	}
 
 	public static ScriptMethod createNewMethod(final Shell shell, IPersist parent, String methodKey, boolean activate, String forcedMethodName,
-		Map<String, String> substitutions, IPersist persist)
+		String forcedScopeName, Map<String, String> substitutions, IPersist persist)
 	{
 		String methodType;
 		int tagFilter = MethodTemplate.PUBLIC_TAG;
+		String[] listOptions = null;
+		String scopeName = forcedScopeName == null ? ScriptVariable.GLOBAL_SCOPE : forcedScopeName;
+		String listDescriptionText = null;
 		if (parent instanceof Form)
 		{
 			methodType = "form";
@@ -192,6 +185,26 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		else if (parent instanceof Solution)
 		{
 			methodType = "global";
+			if (forcedScopeName == null)
+			{
+				// let user select from scopes.
+				Collection<Pair<String, IRootObject>> scopes = ModelUtils.getEditingFlattenedSolution(parent).getScopes();
+				if (scopes.size() == 0)
+				{
+					listOptions = new String[] { ScriptVariable.GLOBAL_SCOPE };
+				}
+				else
+				{
+					listOptions = new String[scopes.size()];
+					int i = 0;
+					for (Pair<String, IRootObject> scope : scopes)
+					{
+						listOptions[i++] = scope.getLeft();
+					}
+				}
+			}
+
+			listDescriptionText = "Select scope";
 		}
 		else if (parent instanceof TableNode)
 		{
@@ -210,10 +223,12 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		int tagToOutput = MethodTemplate.PUBLIC_TAG;
 		if (methodName == null)
 		{
-			Pair<String, Integer> methodNameAndPrivateFlag = askForMethodName(methodType, parent, methodKey, shell, tagFilter, persist);
+			Pair<Pair<String, String>, Integer> methodNameAndPrivateFlag = askForMethodName(methodType, parent, methodKey, shell, tagFilter, listOptions,
+				scopeName, listDescriptionText, persist);
 			if (methodNameAndPrivateFlag != null)
 			{
-				methodName = methodNameAndPrivateFlag.getLeft();
+				scopeName = methodNameAndPrivateFlag.getLeft().getLeft();
+				methodName = methodNameAndPrivateFlag.getLeft().getRight();
 				tagToOutput = methodNameAndPrivateFlag.getRight().intValue();
 			}
 		}
@@ -228,7 +243,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 				if (parent instanceof Solution)
 				{
 					// global method
-					met = ((Solution)parent).createNewGlobalScriptMethod(sm.getNameValidator(), methodName);
+					met = ((Solution)parent).createNewGlobalScriptMethod(sm.getNameValidator(), scopeName, methodName);
 				}
 				else if (parent instanceof Form)
 				{
@@ -279,7 +294,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 					{
 						template = MethodTemplate.getTemplate(met.getClass(), methodKey);
 					}
-					String scriptPath = SolutionSerializer.getScriptPath(parent, false);
+					String scriptPath = SolutionSerializer.getScriptPath(met, false);
 					IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
 					// if the file isn't there, create it here so that the formatter sees the js file.
 					if (!file.exists())
@@ -395,7 +410,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 
 						if (activate)
 						{
-							EditorUtil.openScriptEditor(met, true);
+							EditorUtil.openScriptEditor(met, null, true);
 						}
 					}
 
@@ -485,8 +500,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 	}
 
 	@SuppressWarnings("nls")
-	private static Pair<String, Integer> askForMethodName(String methodType, final IPersist parent, String methodKey, Shell shell, int tagFilter,
-		IPersist persist)
+	private static Pair<Pair<String, String>, Integer> askForMethodName(String methodType, final IPersist parent, String methodKey, Shell shell, int tagFilter,
+		String[] listOptions, String listValue, String listDescriptionText, IPersist persist)
 	{
 		String defaultName = ""; //$NON-NLS-1$
 		if (methodKey != null)
@@ -522,11 +537,13 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 				}
 			}
 		}
-		NewMethodInputDialog dialog = new NewMethodInputDialog(shell, "New " + methodType + " method", "Specify a method name", defaultName, parent, tagFilter);
+		NewMethodInputDialog dialog = new NewMethodInputDialog(shell, "New " + methodType + " method", "Specify a method name", defaultName, parent, tagFilter,
+			listOptions, listValue, listDescriptionText);
 		dialog.setBlockOnOpen(true);
 		dialog.open();
 
-		return (dialog.getReturnCode() == Window.CANCEL) ? null : new Pair<String, Integer>(dialog.getValue(), Integer.valueOf(dialog.tagToOutput));
+		return (dialog.getReturnCode() == Window.CANCEL) ? null : new Pair<Pair<String, String>, Integer>(new Pair<String, String>(dialog.getExtendedValue(),
+			dialog.getValue()), Integer.valueOf(dialog.tagToOutput));
 	}
 
 	private static String makePrettyName(String simpleMethodName, String elementName)
@@ -574,7 +591,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 	 * @author jcompagner
 	 *
 	 */
-	private static final class NewMethodInputDialog extends InputDialog
+	private static final class NewMethodInputDialog extends InputAndListDialog
 	{
 		private Button okButton;
 		private int tagToOutput;
@@ -582,14 +599,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		private Button createProtectedButton;
 		private final int tagFilter;
 
-		/**
-		 * @param parentShell
-		 * @param dialogTitle
-		 * @param dialogMessage
-		 * @param initialValue
-		 * @param validator
-		 */
-		private NewMethodInputDialog(Shell parentShell, String dialogTitle, String dialogMessage, String initialValue, final IPersist parent, int tagFilter)
+		private NewMethodInputDialog(Shell parentShell, String dialogTitle, String dialogMessage, String initialValue, final IPersist parent, int tagFilter,
+			String[] listOptions, String listValue, String listDescriptionText)
 		{
 			super(parentShell, dialogTitle, dialogMessage, initialValue, new IInputValidator()
 			{
@@ -598,7 +609,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 					if (newText.length() == 0) return ""; //$NON-NLS-1$
 					return validateMethodName(parent, newText);
 				}
-			});
+			}, listOptions, listValue, listDescriptionText);
 			this.tagFilter = tagFilter;
 		}
 

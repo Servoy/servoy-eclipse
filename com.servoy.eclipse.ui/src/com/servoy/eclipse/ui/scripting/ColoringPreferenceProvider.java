@@ -21,6 +21,7 @@ import org.eclipse.dltk.ui.coloring.IColoringPreferenceProvider;
 import org.eclipse.dltk.ui.coloring.IColoringPreferenceRequestor;
 import org.eclipse.swt.graphics.RGB;
 
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 
 @SuppressWarnings("nls")
@@ -51,7 +52,8 @@ public class ColoringPreferenceProvider implements IColoringPreferenceProvider
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_APPLICATION, IExecutingEnviroment.TOPLEVEL_APPLICATION, new RGB(0, 200, 0));
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, new RGB(0, 200, 0));
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER, IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER, new RGB(0, 200, 0));
-		requestor.addPreference("globals", "globals", new RGB(0, 200, 50));
+		requestor.addPreference(ScriptVariable.GLOBAL_SCOPE, ScriptVariable.GLOBAL_SCOPE, new RGB(0, 200, 50));
+		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_SCOPES, IExecutingEnviroment.TOPLEVEL_SCOPES, new RGB(0, 200, 50));
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_FORMS, IExecutingEnviroment.TOPLEVEL_FORMS, new RGB(0, 200, 100));
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_HISTORY, IExecutingEnviroment.TOPLEVEL_HISTORY, new RGB(0, 200, 0));
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_PLUGINS, IExecutingEnviroment.TOPLEVEL_PLUGINS, new RGB(255, 0, 0));

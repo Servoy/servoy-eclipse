@@ -1058,7 +1058,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 					table = (Table)server.getTable(newFormWizardPage.getTableName());
 				}
 				Form superForm = newFormWizardPage.getSuperForm();
-				((DataProviderContentProvider)treeViewer.getContentProvider()).setTable(table, PersistContext.create(superForm, null));
+				((DataProviderContentProvider)treeViewer.getContentProvider()).setTable(table, PersistContext.create(superForm));
 				treeViewer.setLabelProvider(new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(
 					DataProviderLabelProvider.INSTANCE_HIDEPREFIX, superForm), superForm));
 				treeViewer.refreshTree();

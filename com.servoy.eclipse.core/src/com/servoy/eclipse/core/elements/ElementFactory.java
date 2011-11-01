@@ -89,7 +89,6 @@ import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
-import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Tab;
@@ -102,6 +101,7 @@ import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.FixedStyleSheet;
 import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -823,8 +823,8 @@ public class ElementFactory
 					IScriptProvider scriptMethod = ModelUtils.getScriptMethod(form, null, form.getTable(), methodId);
 					if (scriptMethod != null)
 					{
-						object.put(key, scriptMethod.getParent() instanceof IRootObject ? ScriptVariable.GLOBAL_DOT_PREFIX + scriptMethod.getDisplayName()
-							: scriptMethod.getDisplayName());
+						object.put(key,
+							scriptMethod.getParent() instanceof IRootObject ? ScopesUtils.getScopeString(scriptMethod) : scriptMethod.getDisplayName());
 					}
 				}
 			}
@@ -1188,9 +1188,9 @@ public class ElementFactory
 			{
 				String name = object.getString(key);
 				ScriptMethod scriptMethod = null;
-				if (name.startsWith(ScriptVariable.GLOBAL_DOT_PREFIX))
+				if (ScopesUtils.isVariableScope(name))
 				{
-					scriptMethod = flattenedSolution.getScriptMethod(name.substring(ScriptVariable.GLOBAL_DOT_PREFIX.length()));
+					scriptMethod = flattenedSolution.getScriptMethod(null, name);
 				}
 				else if (!name.equals("-1") && !name.equals("0")) //$NON-NLS-1$ //$NON-NLS-2$
 				{

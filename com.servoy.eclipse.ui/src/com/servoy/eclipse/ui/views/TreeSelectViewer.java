@@ -98,7 +98,6 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 	protected String title = DEFAULT_TITLE;
 	protected String name;
 	private ILabelProvider textLabelProvider; // different label provider for text and dialog
-	private int defaultButtonWidth = GroupLayout.PREFERRED_SIZE;
 	private boolean showFilter = true;
 	private boolean showFilterMode = false;
 	private int defaultFilterMode = TreePatternFilter.FILTER_LEAFS;
@@ -132,12 +131,6 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 	public TreeSelectViewer(Composite parent, int style, IValueEditor valueEditor)
 	{
 		init(parent, style, valueEditor);
-	}
-
-	public TreeSelectViewer(Composite parent, int style, int buttonWidth)
-	{
-		setDefaultButtonWidth(buttonWidth);
-		init(parent, style, null);
 	}
 
 	protected void init(Composite parent, int style, IValueEditor valueEditor)
@@ -536,11 +529,6 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 		Assert.isTrue(labelProvider instanceof ILabelProvider);
 		super.setLabelProvider(labelProvider);
 		createContentProposalAdapter();
-	}
-
-	public void setDefaultButtonWidth(int width)
-	{
-		this.defaultButtonWidth = width;
 	}
 
 	/**

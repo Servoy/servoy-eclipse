@@ -213,7 +213,7 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 			group.getName());
 		if (id instanceof Integer)
 		{
-			return PersistContext.create(group.getElement(((Integer)id).intValue()), null);
+			return PersistContext.create(group.getElement(((Integer)id).intValue()));
 		}
 		return null;
 	}

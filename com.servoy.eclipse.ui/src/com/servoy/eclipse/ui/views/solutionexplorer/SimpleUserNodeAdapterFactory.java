@@ -227,6 +227,11 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 				{
 					realObject = ((Object[])realObject)[0];
 				}
+				// some nodes are stored in a Pair
+				else if (realObject instanceof Pair && ((Pair< ? , ? >)realObject).getLeft() instanceof IPersist)
+				{
+					realObject = ((Pair< ? , ? >)realObject).getLeft();
+				}
 				if (realObject instanceof IPersist && !(realObject instanceof Solution) && !(realObject instanceof Style) &&
 					!(realObject instanceof StringResource)) // solution is shown under ServoyProject nodes
 				{
@@ -236,99 +241,98 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 
 			if (persist != null)
 			{
-				if (type != UserNodeType.SOLUTION && type != UserNodeType.SOLUTION_ITEM && type != UserNodeType.GLOBALS_ITEM && type != UserNodeType.RELATION &&
-					type != UserNodeType.FORM)
+				if (type != UserNodeType.SOLUTION && type != UserNodeType.SOLUTION_ITEM && type != UserNodeType.RELATION && type != UserNodeType.FORM)
 				{
 					return null;
 				}
 
 				Pair<String, String> filePath = SolutionSerializer.getFilePath(persist, true);
 				return ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(filePath.getLeft() + filePath.getRight()));
-
 			}
-			else
-			{
-				if (type == UserNodeType.SERVERS)
-				{
-					SimpleResourceMapping servers = getResourceProjectResourceMapping(SolutionSerializer.DATASOURCES_DIR_NAME);
-					if (servers != null) return servers.getModelObject();
-				}
-				else if (type == UserNodeType.STYLES)
-				{
-					SimpleResourceMapping styles = getResourceProjectResourceMapping(StringResourceDeserializer.STYLES_DIR_NAME);
-					if (styles != null) return styles.getModelObject();
-				}
-				else if (type == UserNodeType.TEMPLATES)
-				{
-					SimpleResourceMapping templates = getResourceProjectResourceMapping(StringResourceDeserializer.TEMPLATES_DIR_NAME);
-					if (templates != null) return templates.getModelObject();
-				}
-				else if (type == UserNodeType.USER_GROUP_SECURITY)
-				{
-					SimpleResourceMapping securities = getResourceProjectResourceMapping(WorkspaceUserManager.SECURITY_DIR);
-					if (securities != null) return securities.getModelObject();
-				}
-				else if (type == UserNodeType.I18N_FILES)
-				{
-					SimpleResourceMapping i18n = getResourceProjectResourceMapping(EclipseMessages.MESSAGES_DIR);
-					if (i18n != null) return i18n.getModelObject();
-				}
-				else if (type == UserNodeType.RESOURCES)
-				{
-					ServoyResourcesProject servoyResourcesProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 
-					if (servoyResourcesProject != null)
-					{
-						return servoyResourcesProject.getProject();
-					}
-				}
-				else if (type == UserNodeType.ALL_RELATIONS)
+			if (type == UserNodeType.SERVERS)
+			{
+				SimpleResourceMapping servers = getResourceProjectResourceMapping(SolutionSerializer.DATASOURCES_DIR_NAME);
+				if (servers != null) return servers.getModelObject();
+			}
+			else if (type == UserNodeType.STYLES)
+			{
+				SimpleResourceMapping styles = getResourceProjectResourceMapping(StringResourceDeserializer.STYLES_DIR_NAME);
+				if (styles != null) return styles.getModelObject();
+			}
+			else if (type == UserNodeType.TEMPLATES)
+			{
+				SimpleResourceMapping templates = getResourceProjectResourceMapping(StringResourceDeserializer.TEMPLATES_DIR_NAME);
+				if (templates != null) return templates.getModelObject();
+			}
+			else if (type == UserNodeType.USER_GROUP_SECURITY)
+			{
+				SimpleResourceMapping securities = getResourceProjectResourceMapping(WorkspaceUserManager.SECURITY_DIR);
+				if (securities != null) return securities.getModelObject();
+			}
+			else if (type == UserNodeType.I18N_FILES)
+			{
+				SimpleResourceMapping i18n = getResourceProjectResourceMapping(EclipseMessages.MESSAGES_DIR);
+				if (i18n != null) return i18n.getModelObject();
+			}
+			else if (type == UserNodeType.RESOURCES)
+			{
+				ServoyResourcesProject servoyResourcesProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
+
+				if (servoyResourcesProject != null)
 				{
-					SimpleUserNode project = userNode.getAncestorOfType(IProjectNature.class);
-					if (project != null)
-					{
-						SimpleResourceMapping relations = getProjectResourceMapping(((IProjectNature)project.getRealObject()).getProject(),
-							SolutionSerializer.RELATIONS_DIR);
-						if (relations != null) return relations.getModelObject();
-					}
+					return servoyResourcesProject.getProject();
 				}
-				else if (type == UserNodeType.VALUELISTS)
+			}
+			else if (type == UserNodeType.ALL_RELATIONS)
+			{
+				SimpleUserNode project = userNode.getAncestorOfType(IProjectNature.class);
+				if (project != null)
 				{
-					SimpleUserNode project = userNode.getAncestorOfType(IProjectNature.class);
-					if (project != null)
-					{
-						SimpleResourceMapping valuelists = getProjectResourceMapping(((IProjectNature)project.getRealObject()).getProject(),
-							SolutionSerializer.VALUELISTS_DIR);
-						if (valuelists != null) return valuelists.getModelObject();
-					}
+					SimpleResourceMapping relations = getProjectResourceMapping(((IProjectNature)project.getRealObject()).getProject(),
+						SolutionSerializer.RELATIONS_DIR);
+					if (relations != null) return relations.getModelObject();
 				}
-				else if (type == UserNodeType.MEDIA)
+			}
+			else if (type == UserNodeType.VALUELISTS)
+			{
+				SimpleUserNode project = userNode.getAncestorOfType(IProjectNature.class);
+				if (project != null)
 				{
-					SimpleUserNode project = userNode.getAncestorOfType(IProjectNature.class);
-					if (project != null)
-					{
-						SimpleResourceMapping media = getProjectResourceMapping(((IProjectNature)project.getRealObject()).getProject(),
-							SolutionSerializer.MEDIAS_DIR);
-						if (media != null) return media.getModelObject();
-					}
+					SimpleResourceMapping valuelists = getProjectResourceMapping(((IProjectNature)project.getRealObject()).getProject(),
+						SolutionSerializer.VALUELISTS_DIR);
+					if (valuelists != null) return valuelists.getModelObject();
 				}
-				else if (type == UserNodeType.FORMS)
+			}
+			else if (type == UserNodeType.MEDIA)
+			{
+				SimpleUserNode project = userNode.getAncestorOfType(IProjectNature.class);
+				if (project != null)
 				{
-					SimpleUserNode project = userNode.getAncestorOfType(IProjectNature.class);
-					if (project != null)
-					{
-						SimpleResourceMapping forms = getProjectResourceMapping(((IProjectNature)project.getRealObject()).getProject(),
-							SolutionSerializer.FORMS_DIR);
-						if (forms != null) return forms.getModelObject();
-					}
+					SimpleResourceMapping media = getProjectResourceMapping(((IProjectNature)project.getRealObject()).getProject(),
+						SolutionSerializer.MEDIAS_DIR);
+					if (media != null) return media.getModelObject();
 				}
-				else if (type == UserNodeType.GLOBALS_ITEM)
+			}
+			else if (type == UserNodeType.FORMS)
+			{
+				SimpleUserNode project = userNode.getAncestorOfType(IProjectNature.class);
+				if (project != null)
 				{
-					SimpleUserNode project = userNode.getAncestorOfType(IProjectNature.class);
-					if (project != null)
-					{
-						return (((IProjectNature)project.getRealObject()).getProject()).findMember(SolutionSerializer.GLOBALS_FILE);
-					}
+					SimpleResourceMapping forms = getProjectResourceMapping(((IProjectNature)project.getRealObject()).getProject(),
+						SolutionSerializer.FORMS_DIR);
+					if (forms != null) return forms.getModelObject();
+				}
+			}
+			else if (type == UserNodeType.GLOBALS_ITEM)
+			{
+				SimpleUserNode project = userNode.getAncestorOfType(IProjectNature.class);
+				if (project != null)
+				{
+					// Pair<Solution, scopeName>
+					Pair<Solution, String> pair = (Pair<Solution, String>)userNode.getRealObject();
+					return (((IProjectNature)project.getRealObject()).getProject()).findMember(pair.getRight().toString() +
+						SolutionSerializer.JS_FILE_EXTENSION);
 				}
 			}
 		}
@@ -336,7 +340,7 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 		{
 			if (adaptableObject instanceof SimpleUserNode)
 			{
-				final SimpleUserNode userNode = (SimpleUserNode)adaptableObject;
+				SimpleUserNode userNode = (SimpleUserNode)adaptableObject;
 				switch (userNode.getType())
 				{
 					case SOLUTION :

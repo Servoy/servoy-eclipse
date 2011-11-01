@@ -47,7 +47,6 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.Solution;
 
 public class JavaScriptFilePostSaveListener implements IPostSaveListener
@@ -127,8 +126,7 @@ public class JavaScriptFilePostSaveListener implements IPostSaveListener
 					continue;
 				}
 
-				ISupportChilds parent = persist.getParent();
-				MultiTextEdit textEdit = servoyModel.getScriptFileChanges(parent, scriptFile);
+				MultiTextEdit textEdit = servoyModel.getScriptFileChanges(persist, scriptFile);
 				if (textEdit != null && textEdit.getChildrenSize() > 0)
 				{
 					ITextFileBufferManager textFileBufferManager = FileBuffers.getTextFileBufferManager();

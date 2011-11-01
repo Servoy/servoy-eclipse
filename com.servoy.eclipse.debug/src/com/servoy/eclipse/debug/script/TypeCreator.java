@@ -147,6 +147,8 @@ public abstract class TypeCreator
 
 	protected final static ImageDescriptor GLOBALS = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
 		new Path("/icons/globe.gif"), null));
+	protected final static ImageDescriptor SCOPES = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
+		new Path("/icons/scopes.gif"), null));
 	protected final static ImageDescriptor FORMS = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
 		new Path("/icons/forms.gif"), null));
 

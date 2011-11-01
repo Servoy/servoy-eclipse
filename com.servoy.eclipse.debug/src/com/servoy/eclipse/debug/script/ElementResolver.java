@@ -22,12 +22,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
-import org.eclipse.dltk.javascript.typeinference.IValueCollection;
-import org.eclipse.dltk.javascript.typeinference.ValueCollectionFactory;
 import org.eclipse.dltk.javascript.typeinfo.IElementResolver;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
@@ -41,8 +38,6 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 
-import com.servoy.eclipse.model.ServoyModelFinder;
-import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
@@ -54,6 +49,7 @@ import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Table;
 
 /**
@@ -95,6 +91,7 @@ public class ElementResolver implements IElementResolver
 		typeNameCreators.put("plugins", new SimpleNameTypeNameCreator("Plugins"));
 		typeNameCreators.put("elements", new ElementsTypeNameCreator());
 		typeNameCreators.put("forms", new FormsNameCreator());
+		typeNameCreators.put(ScriptVariable.SCOPES, new ScopesTypeNameCreator());
 		typeNameCreators.put("alldataproviders", new SimpleNameTypeNameCreator("Array"));
 
 		formOnlyNames.add("controller");
@@ -125,9 +122,9 @@ public class ElementResolver implements IElementResolver
 			}
 
 			IPath path = resource.getProjectRelativePath();
-			if (path.segmentCount() == 1 && path.segment(0).equals(SolutionSerializer.GLOBALS_FILE))
+			if (path.segmentCount() == 1)
 			{
-				// globals.js
+				// globals.js (or other scope)
 				// global, remove the form only things.
 				typeNames.removeAll(formOnlyNames);
 				try
@@ -140,7 +137,7 @@ public class ElementResolver implements IElementResolver
 				}
 				catch (RepositoryException e)
 				{
-					ServoyLog.logError("Cant get global relations", e);
+					ServoyLog.logError("Can't get global relations", e);
 				}
 			}
 
@@ -150,7 +147,7 @@ public class ElementResolver implements IElementResolver
 				Form form = TypeCreator.getForm(context);
 				if (form != null)
 				{
-					typeNames.add("globals");
+					typeNames.add(ScriptVariable.GLOBAL_SCOPE);
 					Form formToUse = form;
 					if (form.getExtendsID() > 0)
 					{
@@ -191,7 +188,7 @@ public class ElementResolver implements IElementResolver
 				Table table = getDatasourceTable(context, fs);
 				if (table != null)
 				{
-					typeNames.add("globals");
+					typeNames.add(ScriptVariable.GLOBAL_SCOPE);
 					if (path.segment(2).endsWith(SolutionSerializer.CALCULATIONS_POSTFIX))
 					{
 						// datasources/server/table_calculations.js
@@ -290,32 +287,18 @@ public class ElementResolver implements IElementResolver
 		if (TypeCreator.BASE_TYPES.contains(name)) return null;
 
 		FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
-		if ("globals".equals(name))
+		if (ScriptVariable.GLOBAL_SCOPE.equals(name))
 		{
 			if (fs == null || fs.getSolution() == null)
 			{
 				return null;
 			}
-			ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(fs.getSolution().getName());
-			IFile file = project.getProject().getFile(SolutionSerializer.GLOBALS_FILE);
-			IValueCollection globalsValueCollection = ValueCollectionProvider.getValueCollection(file, true);
-			if (globalsValueCollection != null)
-			{
-				IValueCollection collection = ValueCollectionFactory.createScopeValueCollection();
-				ValueCollectionFactory.copyInto(collection, globalsValueCollection);
-				collection = ValueCollectionProvider.getGlobalModulesValueCollection(fs, collection);
-				if (collection != null)
-				{
-					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
-					property.setName(name);
-					property.setReadOnly(true);
-					property.setAttribute(TypeCreator.VALUECOLLECTION, collection);
-					property.setAttribute(TypeCreator.IMAGE_DESCRIPTOR, TypeCreator.GLOBALS);
-					property.setType(context.getTypeRef("Globals<" + fs.getSolution().getName() + '>'));
-					return property;
-				}
-			}
-			return null;
+			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+			property.setName(name);
+			property.setReadOnly(true);
+			property.setAttribute(TypeCreator.IMAGE_DESCRIPTOR, TypeCreator.GLOBALS);
+			property.setType(context.getTypeRef("Scope<" + fs.getSolution().getName() + "/globals>"));
+			return property;
 		}
 
 		if ("_super".equals(name))
@@ -333,12 +316,16 @@ public class ElementResolver implements IElementResolver
 			return null;
 		}
 
-		Type type = null;
-		String typeName = getTypeName(context, name);
+		String typeName;
 		if ("servoyDeveloper".equals(name))
 		{
 			typeName = "JSDeveloperSolutionModel";
 		}
+		else
+		{
+			typeName = getTypeName(context, name);
+		}
+		Type type = null;
 		if (typeName != null)
 		{
 			if (SolutionSerializer.getDataSourceForCalculationJSFile(context.getModelElement().getResource()) != null &&
@@ -351,6 +338,11 @@ public class ElementResolver implements IElementResolver
 				(noneFoundsetNames.contains(name) || formOnlyNames.contains(name)))
 			{
 				// hide in foundset method
+				return null;
+			}
+			if (SolutionSerializer.getFormNameForJSFile(context.getModelElement().getResource()) == null && formOnlyNames.contains(name))
+			{
+				// hide in other then forms
 				return null;
 			}
 			type = context.getType(typeName);
@@ -523,6 +515,22 @@ public class ElementResolver implements IElementResolver
 				return "Elements<" + form.getName() + '>';
 			}
 			return "Elements";
+		}
+	}
+
+	private class ScopesTypeNameCreator implements ITypeNameCreator
+	{
+		/**
+		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
+		 */
+		public String getTypeName(ITypeInfoContext context, String fullTypeName)
+		{
+			FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
+			if (fs != null)
+			{
+				return "Scopes<" + fs.getMainSolutionMetaData().getName() + '>';
+			}
+			return "Scopes";
 		}
 	}
 

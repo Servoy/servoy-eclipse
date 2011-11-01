@@ -80,8 +80,8 @@ public class DataProviderCellEditor extends DialogCellEditor
 	{
 		try
 		{
-			DataProviderDialog dialog = new DataProviderDialog(cellEditorWindow.getShell(), getLabelProvider(), PersistContext.create(form, null),
-				flattenedSolution, flattenedSolution.getFlattenedForm(form).getTable(), input, getSelection(), SWT.NONE, "Select Data Provider");
+			DataProviderDialog dialog = new DataProviderDialog(cellEditorWindow.getShell(), getLabelProvider(), PersistContext.create(form), flattenedSolution,
+				flattenedSolution.getFlattenedForm(form).getTable(), input, getSelection(), SWT.NONE, "Select Data Provider");
 			dialog.open();
 
 			if (dialog.getReturnCode() != Window.CANCEL)

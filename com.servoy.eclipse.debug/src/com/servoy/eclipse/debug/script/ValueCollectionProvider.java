@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
 import org.eclipse.dltk.internal.javascript.ti.IValueProvider;
@@ -50,6 +51,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -64,15 +66,13 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	@SuppressWarnings("restriction")
 	public IValueCollection valueOf(ITypeInfoContext context, Element member)
 	{
-		IValueCollection collection = (IValueCollection)member.getAttribute(TypeCreator.VALUECOLLECTION);
-		if (collection != null) return collection;
 		Object attribute = member.getAttribute(TypeCreator.LAZY_VALUECOLLECTION);
 		if (attribute instanceof Form)
 		{
 			Form form = (Form)attribute;
 			String scriptPath = SolutionSerializer.getScriptPath(form, false);
 			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
-			collection = ValueCollectionFactory.createValueCollection();
+			IValueCollection collection = ValueCollectionFactory.createValueCollection();
 			ValueCollectionFactory.copyInto(collection, getValueCollection(file, true));
 			collection = getSuperFormContext(context, form, collection);
 			if (member.getAttribute(IReferenceAttributes.SUPER_SCOPE) != null)
@@ -83,8 +83,6 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		}
 
 		String typeName = null;
-
-
 		if (member instanceof Member && ((Member)member).getType() != null)
 		{
 			typeName = ((Member)member).getType().getName();
@@ -95,7 +93,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		}
 		if (typeName != null)
 		{
-			if (typeName != null && typeName.startsWith(FoundSet.JS_FOUNDSET + '<') && typeName.endsWith(">"))
+			if (typeName.startsWith(FoundSet.JS_FOUNDSET + '<') && typeName.endsWith(">"))
 			{
 				FlattenedSolution editingFlattenedSolution = TypeCreator.getFlattenedSolution(context);
 				if (editingFlattenedSolution != null)
@@ -131,6 +129,50 @@ public class ValueCollectionProvider implements IMemberEvaluator
 							ValueCollectionFactory.copyInto(valueCollection, getValueCollection(file, true));
 						}
 						return valueCollection;
+					}
+				}
+			}
+
+			else if (typeName.startsWith("Scope<") && typeName.endsWith(">"))
+			{
+				// Scope<solutionName/scopeName>
+				FlattenedSolution editingFlattenedSolution = TypeCreator.getFlattenedSolution(context);
+				if (editingFlattenedSolution != null)
+				{
+					String config = typeName.substring("Scope<".length(), typeName.length() - 1);
+					String[] split = config.split("/");
+					if (split.length == 2)
+					{
+						String solutionName = split[0];
+						String scopeName = split[1];
+
+						if (editingFlattenedSolution.getMainSolutionMetaData().getName().equals(solutionName) ||
+							editingFlattenedSolution.hasModule(solutionName))
+						{
+							ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
+							if (project != null)
+							{
+								String fileName = scopeName + SolutionSerializer.JS_FILE_EXTENSION;
+								IFile file = project.getProject().getFile(fileName);
+								IValueCollection globalsValueCollection = ValueCollectionProvider.getValueCollection(file, true);
+
+								if (globalsValueCollection == null)
+								{
+									return null;
+								}
+
+								IValueCollection collection = ValueCollectionFactory.createScopeValueCollection();
+								ValueCollectionFactory.copyInto(collection, globalsValueCollection);
+
+								// Currently only the old globals scope is merged with entries from modules
+								if (ScriptVariable.GLOBAL_SCOPE.equals(scopeName))
+								{
+									ValueCollectionProvider.getGlobalModulesValueCollection(editingFlattenedSolution, fileName, collection);
+								}
+								// scopes other than globals are not merged
+								return collection;
+							}
+						}
 					}
 				}
 			}
@@ -209,10 +251,12 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
 				if (fs != null)
 				{
-					if (SolutionSerializer.isGlobalsJSFile(resource))
+					IPath path = resource.getProjectRelativePath();
+					if (path.segmentCount() == 1)
 					{
-						// globals.js
-						IValueCollection globalsValueCollection = getGlobalModulesValueCollection(fs, ValueCollectionFactory.createValueCollection());
+						// globals scope
+						IValueCollection globalsValueCollection = getGlobalModulesValueCollection(fs, path.segment(0),
+							ValueCollectionFactory.createValueCollection());
 						if (fullGlobalScope.get().booleanValue())
 						{
 							ValueCollectionFactory.copyInto(globalsValueCollection, getValueCollection((IFile)resource, true));
@@ -255,7 +299,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	 * @param fs
 	 * @param collection
 	 */
-	public static IValueCollection getGlobalModulesValueCollection(FlattenedSolution fs, IValueCollection collection)
+	public static IValueCollection getGlobalModulesValueCollection(FlattenedSolution fs, String filename, IValueCollection collection)
 	{
 		Solution[] modules = fs.getModules();
 		if (modules != null)
@@ -263,7 +307,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			for (Solution module : modules)
 			{
 				ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(module.getName());
-				IFile file = project.getProject().getFile(SolutionSerializer.GLOBALS_FILE); //$NON-NLS-1$
+				IFile file = project.getProject().getFile(filename);
 				IValueCollection moduleCollection = getValueCollection(file, true);
 				if (moduleCollection != null)
 				{
@@ -333,7 +377,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 					if (makeImmutable)
 					{
 						collection = ValueCollectionFactory.makeImmutable(collection);
-						if (file.getName().equals(SolutionSerializer.GLOBALS_FILE))
+						if (file.getProjectRelativePath().segmentCount() == 1 && file.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION)) // globals file
 						{
 							scriptCache.put(file, new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()), collection));
 						}

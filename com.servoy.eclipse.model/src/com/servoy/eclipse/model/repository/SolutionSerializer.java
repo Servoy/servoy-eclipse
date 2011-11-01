@@ -52,6 +52,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
@@ -102,7 +103,7 @@ public class SolutionSerializer
 	public static final String CALCULATIONS_POSTFIX = CALCULATIONS_POSTFIX_WITHOUT_EXT + JS_FILE_EXTENSION;
 	public static final String FOUNDSET_POSTFIX_WITHOUT_EXT = "_entity"; //$NON-NLS-1$
 	public static final String FOUNDSET_POSTFIX = FOUNDSET_POSTFIX_WITHOUT_EXT + JS_FILE_EXTENSION;
-	public static final String GLOBALS_FILE = "globals" + JS_FILE_EXTENSION; //$NON-NLS-1$
+	public static final String GLOBALS_FILE = ScriptVariable.GLOBAL_SCOPE + JS_FILE_EXTENSION;
 
 	public static boolean isJSONFile(String fileName)
 	{
@@ -466,7 +467,7 @@ public class SolutionSerializer
 		{
 			return getCommentImpl(persist, repository, ((ScriptVariable)persist).getComment());
 		}
-		else if (persist instanceof AbstractScriptProvider)
+		if (persist instanceof AbstractScriptProvider)
 		{
 			String comment = ((AbstractScriptProvider)persist).getRuntimeProperty(IScriptProvider.COMMENT);
 			if ("".equals(comment)) comment = null; //$NON-NLS-1$
@@ -496,10 +497,11 @@ public class SolutionSerializer
 		{
 			obj = generateJSONObject(persist, false, false, repository);
 			obj.setNewLines(false);
-			obj.remove("methodCode"); //$NON-NLS-1$
-			obj.remove("declaration"); //$NON-NLS-1$
-			obj.remove(PROP_NAME);
-			obj.remove("defaultValue"); //$NON-NLS-1$
+			obj.remove(StaticContentSpecLoader.PROPERTY_METHODCODE.getPropertyName());
+			obj.remove(StaticContentSpecLoader.PROPERTY_DECLARATION.getPropertyName());
+			obj.remove(StaticContentSpecLoader.PROPERTY_NAME.getPropertyName());
+			obj.remove(StaticContentSpecLoader.PROPERTY_DEFAULTVALUE.getPropertyName());
+			obj.remove(StaticContentSpecLoader.PROPERTY_SCOPENAME.getPropertyName());
 			obj.remove(SolutionDeserializer.COMMENT_JSON_ATTRIBUTE);
 			obj.remove(SolutionDeserializer.LINE_NUMBER_OFFSET_JSON_ATTRIBUTE);
 			StringBuilder sb = new StringBuilder();
@@ -583,10 +585,11 @@ public class SolutionSerializer
 			if (persist instanceof IScriptProvider || persist instanceof IVariable)
 			{
 				obj.setNewLines(false);
-				obj.remove("methodCode"); //$NON-NLS-1$
-				obj.remove("declaration"); //$NON-NLS-1$
+				obj.remove(StaticContentSpecLoader.PROPERTY_METHODCODE.getPropertyName());
+				obj.remove(StaticContentSpecLoader.PROPERTY_DECLARATION.getPropertyName());
 				obj.remove(PROP_NAME);
-				obj.remove("defaultValue"); //$NON-NLS-1$
+				obj.remove(StaticContentSpecLoader.PROPERTY_DEFAULTVALUE.getPropertyName());
+				obj.remove(StaticContentSpecLoader.PROPERTY_SCOPENAME.getPropertyName());
 				obj.remove(SolutionDeserializer.COMMENT_JSON_ATTRIBUTE);
 				obj.remove(SolutionDeserializer.LINE_NUMBER_OFFSET_JSON_ATTRIBUTE);
 
@@ -1028,9 +1031,13 @@ public class SolutionSerializer
 			parent = persist.getParent();
 		}
 
-		if (parent instanceof Solution)
+		if (persist instanceof Solution)
 		{
 			return GLOBALS_FILE;
+		}
+		if (parent instanceof Solution && persist instanceof ISupportScope)
+		{
+			return ((ISupportScope)persist).getScopeName() + JS_FILE_EXTENSION;
 		}
 		if (parent instanceof Form)
 		{
@@ -1161,16 +1168,6 @@ public class SolutionSerializer
 		}
 		// try one level up
 		return getParentFile(workspace, dir);
-	}
-
-	public static boolean isGlobalsJSFile(IResource resource)
-	{
-		if (resource != null)
-		{
-			IPath path = resource.getProjectRelativePath();
-			return path.segmentCount() == 1 && path.segment(0).equals(SolutionSerializer.GLOBALS_FILE);
-		}
-		return false;
 	}
 
 	public static String getFormNameForJSFile(IResource resource)

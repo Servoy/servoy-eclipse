@@ -102,7 +102,7 @@ public class AddScriptProviderButtonsComposite extends Composite
 			public void widgetSelected(final SelectionEvent e)
 			{
 				ScriptMethod method = NewMethodAction.createNewMethod(getShell(), persist.getAncestor(IRepository.SOLUTIONS),
-					AddScriptProviderButtonsComposite.this.methodKey, false, null);
+					AddScriptProviderButtonsComposite.this.methodKey, false, null, null);
 				if (method != null)
 				{
 					dialog.refreshTree();

@@ -227,7 +227,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 								return method;
 							}
 						};
-						buttons.setContext(PersistContext.create(ColumnAutoEnterComposite.this.flattenedSolution.getSolution(), null), "getLookupValue");
+						buttons.setContext(PersistContext.create(ColumnAutoEnterComposite.this.flattenedSolution.getSolution()), "getLookupValue");
 						buttons.setDialog(dialog);
 						return buttons;
 					}
@@ -727,7 +727,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			try
 			{
 				Object object = DataProviderConverter.getDataProvider(flattenedSolution, null, table, (String)fromObject);
-				if (object == null) object = flattenedSolution.getScriptMethod((String)fromObject);
+				if (object == null) object = flattenedSolution.getScriptMethod(null, (String)fromObject);
 				if (object == null) return new UnresolvedDataProvider((String)fromObject);
 				return object;
 			}

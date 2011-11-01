@@ -97,6 +97,7 @@ import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.ISQLCondition;
+import com.servoy.j2db.util.ScopesUtils;
 
 public class SuggestForeignTypesWizard extends Wizard
 {
@@ -612,7 +613,7 @@ public class SuggestForeignTypesWizard extends Wizard
 						for (IPersist persist : allRelationItems)
 						{
 							RelationItem relItem = (RelationItem)persist;
-							if (relItem.getOperator() == ISQLCondition.EQUALS_OPERATOR && !relItem.getPrimaryDataProviderID().startsWith("globals.")) //$NON-NLS-1$
+							if (relItem.getOperator() == ISQLCondition.EQUALS_OPERATOR && !ScopesUtils.isVariableScope(relItem.getPrimaryDataProviderID()))
 							{
 								// Don't use self-referencing columns.
 								if (!(rel.getPrimaryTableName().equals(rel.getForeignTableName()) && relItem.getPrimaryDataProviderID().equals(

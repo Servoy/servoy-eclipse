@@ -96,7 +96,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 						{
 							// the context is the currently viewed form
 							NewMethodAction.createNewMethod(getControl().getShell(), persistContext.getContext(), getId().toString(), true,
-								scriptMethod.getName());
+								scriptMethod.getName(), null);
 							// Note: the original value is returned, but FormInheritenceMethodConverter.getScriptMethod() will find 
 							// the new method via the form hierarchy
 						}
@@ -212,7 +212,8 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 
 		public void openEditor(MethodWithArguments value)
 		{
-			EditorUtil.openScriptEditor(ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), value.table, value.methodId), true);
+			EditorUtil.openScriptEditor(ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), value.table, value.methodId),
+				null, true);
 		}
 	}
 

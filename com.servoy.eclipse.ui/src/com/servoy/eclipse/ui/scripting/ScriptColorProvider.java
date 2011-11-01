@@ -33,9 +33,14 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 
-public class ScriptColorProvider /* implements IScriptColorProvider, IScriptColorPreferenceProvider */
+/**
+ * @author jcompagner
+ */
+@SuppressWarnings("nls")
+public class ScriptColorProvider
 {
 	private static final String BOLD_KEY = PreferenceConstants.EDITOR_BOLD_SUFFIX;
 
@@ -54,13 +59,10 @@ public class ScriptColorProvider /* implements IScriptColorProvider, IScriptColo
 	 */
 	private static final String UNDERLINE_KEY = PreferenceConstants.EDITOR_UNDERLINE_SUFFIX;
 
-	private static String COLOR_KEY = "color"; //$NON-NLS-1$
+	private static String COLOR_KEY = "color";
 
-	private static String SERVOY_CAT = "Keywords";
 	private static String SERVOY_OP = "Math Operators";
 	private static String SERVOY_COMPARE_OPERATORS = "Compare operators";
-	private static String SERVOY_AUX_OPERATOR = "Additional";
-	private static String SERVOY_MAIN = "Servoy";
 
 	private final Map<String, IToken> keywords;
 	private final Map<String, IToken> symbols;
@@ -69,122 +71,14 @@ public class ScriptColorProvider /* implements IScriptColorProvider, IScriptColo
 	private final IPreferenceStore fPreferenceStore;
 	private final ISharedTextColors sharedTextColors;
 
-//	private ColorProviderCategory servoy_cat;
-//
-//	private ColorProviderCategory servoy_op;
-//
-//	private ColorProviderCategory servoy_aux;
-//
-//	private ColorProviderCategory servoy_comp;
-//
-//	private ColorProviderCategory servoy_main;
-
 	public ScriptColorProvider()
 	{
 		fPreferenceStore = Activator.getDefault().getPreferenceStore();
 		sharedTextColors = Activator.getDefault().getSharedTextColors();
 		keywords = new HashMap<String, IToken>();
 		symbols = new HashMap<String, IToken>();
-		initDefaults();
 		createKeywords();
 		createRules();
-	}
-
-	private void initDefaults()
-	{
-////		servoy_cat = new ColorProviderCategory(SERVOY_CAT);
-////		servoy_op = new ColorProviderCategory(SERVOY_OP);
-////		servoy_aux = new ColorProviderCategory(SERVOY_AUX_OPERATOR);
-////		servoy_comp = new ColorProviderCategory(SERVOY_COMPARE_OPERATORS);
-////		servoy_main = new ColorProviderCategory(SERVOY_MAIN);
-//
-//		initKey(IExecutingEnviroment.TOPLEVEL_JSUNIT, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
-//
-//		initKey(IExecutingEnviroment.TOPLEVEL_UTILS, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
-//
-//		initKey(IExecutingEnviroment.TOPLEVEL_SECURITY, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
-//
-//		initKey("elements", new RGB(100, 200, 0), false, false, false, false, servoy_cat);
-//
-//		initKey("controller", new RGB(50, 200, 0), false, false, false, false, servoy_cat);
-//
-//		initKey("currentcontroller", new RGB(50, 200, 0), false, false, false, false, servoy_cat);
-//
-//		initKey(IExecutingEnviroment.TOPLEVEL_APPLICATION, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
-//
-//		initKey(IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
-//
-//		initKey(IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
-//
-//		initKey("globals", new RGB(0, 200, 50), false, false, false, false, servoy_cat);
-//
-//		initKey(IExecutingEnviroment.TOPLEVEL_FORMS, new RGB(0, 200, 100), false, false, false, false, servoy_cat);
-//
-//		initKey(IExecutingEnviroment.TOPLEVEL_HISTORY, new RGB(0, 200, 0), false, false, false, false, servoy_cat);
-//
-//		initKey(IExecutingEnviroment.TOPLEVEL_PLUGINS, new RGB(255, 0, 0), false, false, false, false, servoy_cat);
-//
-//		initKey(SERVOY_COMPARE_OPERATORS, new RGB(0, 0, 255), true, false, false, false, servoy_main);
-//
-//		initKey("_super", new RGB(85, 0, 127), true, false, false, false, servoy_aux);
-//		/*
-//		 * initKey("[", new RGB(0, 0, 255), true, false, false, false, servoy_aux);
-//		 * 
-//		 * initKey("]", new RGB(0, 0, 255), true, false, false, false, servoy_aux);
-//		 */
-//		initKey("null", new RGB(0, 0, 255), true, false, false, false, servoy_aux);
-//
-//		initKey("undefined", new RGB(0, 0, 255), true, false, false, false, servoy_aux);
-///*
-// * initKey("</", new RGB(0, 0, 255), false, false, false, false, servoy_aux);
-// */
-//
-//		initKey(SERVOY_OP, new RGB(255, 0, 0), false, false, false, false, servoy_main);
-//
-//		initKey("TODO", new RGB(180, 0, 0), false, true, false, false, servoy_aux);
-//
-//		initKey("CHECKME", new RGB(180, 0, 0), false, true, false, false, servoy_aux);
-//
-//		initKey("FIXME", new RGB(180, 0, 0), false, true, false, false, servoy_aux);
-//
-//		servoy_main.addItem(servoy_cat);
-//		servoy_main.addItem(servoy_aux);
-
-
-	}
-
-	/*
-	 * void initKey(String key, RGB defRgbValue, boolean defIsBold, boolean defIsItalic, boolean defIsStrikeThrough, boolean defIsUnderline,
-	 * ColorProviderCategory category) { if (getRgbFor(getColorKey(key)) == null) { PreferenceConverter.setDefault(fPreferenceStore, getColorKey(key),
-	 * defRgbValue); }
-	 * 
-	 * ColorProviderCategory item = new ColorProviderCategory(key, getColorKey(key)); category.addItem(item);
-	 * 
-	 * //bold if (getDecorationFor(getBoldKey(key)) == null) { fPreferenceStore.setDefault(getBoldKey(key), defIsBold); }
-	 * 
-	 * //italic if (getDecorationFor(getItalicKey(key)) == null) { fPreferenceStore.setDefault(getItalicKey(key), defIsItalic); }
-	 * 
-	 * //strike through if (getDecorationFor(getStrikeThroughKey(key)) == null) { fPreferenceStore.setDefault(getStrikeThroughKey(key), defIsStrikeThrough); }
-	 * 
-	 * //underline if (getDecorationFor(getUnderlineKey(key)) == null) { fPreferenceStore.setDefault(getUnderlineKey(key), defIsUnderline); } }
-	 */
-
-	private Boolean getDecorationFor(String key)
-	{
-		if (fPreferenceStore.isDefault(key) || !fPreferenceStore.contains(key))
-		{
-			return null;
-		}
-		return new Boolean(fPreferenceStore.getBoolean(key));
-	}
-
-	private RGB getRgbFor(String colorKey)
-	{
-		if (fPreferenceStore.contains(colorKey))
-		{
-			return PreferenceConverter.getColor(fPreferenceStore, colorKey);
-		}
-		return null;
 	}
 
 	/**
@@ -195,24 +89,25 @@ public class ScriptColorProvider /* implements IScriptColorProvider, IScriptColo
 		createKeyword(IExecutingEnviroment.TOPLEVEL_JSUNIT);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_UTILS);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_SECURITY);
-		createKeyword("elements"); //$NON-NLS-1$
-		createKeyword("controller"); //$NON-NLS-1$
-		createKeyword("currentcontroller"); //$NON-NLS-1$
+		createKeyword("elements");
+		createKeyword("controller");
+		createKeyword("currentcontroller");
 		createKeyword(IExecutingEnviroment.TOPLEVEL_APPLICATION);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER);
-		createKeyword("globals"); //$NON-NLS-1$
+		createKeyword(ScriptVariable.GLOBAL_SCOPE);
+		createKeyword(IExecutingEnviroment.TOPLEVEL_SCOPES);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_FORMS);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_HISTORY);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_PLUGINS);
 
-		createKeyword("null"); //$NON-NLS-1$
-		createKeyword("undefined"); //$NON-NLS-1$
-		createKeyword("_super"); //$NON-NLS-1$
+		createKeyword("null");
+		createKeyword("undefined");
+		createKeyword("_super");
 
-		createKeyword("FIXME"); //$NON-NLS-1$
-		createKeyword("CHECKME"); //$NON-NLS-1$
-		createKeyword("TODO"); //$NON-NLS-1$
+		createKeyword("FIXME");
+		createKeyword("CHECKME");
+		createKeyword("TODO");
 	}
 
 	private void createKeyword(String keyword)
@@ -227,43 +122,38 @@ public class ScriptColorProvider /* implements IScriptColorProvider, IScriptColo
 
 	}
 
-	private void createSymbol(String symbol)
-	{
-		symbols.put(symbol, new Token(createTextAttribute(symbol)));
-	}
-
 	/**
 	 * 
 	 */
 	private void createRules()
 	{
-		createSymbol("!", SERVOY_COMPARE_OPERATORS);//$NON-NLS-1$
-		createSymbol("!==", SERVOY_COMPARE_OPERATORS);//$NON-NLS-1$
-		createSymbol("===", SERVOY_COMPARE_OPERATORS);//$NON-NLS-1$
-		createSymbol("==", SERVOY_COMPARE_OPERATORS);//$NON-NLS-1$
-		createSymbol(">=", SERVOY_COMPARE_OPERATORS); //$NON-NLS-1$
-		createSymbol("<=", SERVOY_COMPARE_OPERATORS); //$NON-NLS-1$
-		createSymbol("!=", SERVOY_COMPARE_OPERATORS); //$NON-NLS-1$
-		createSymbol(">", SERVOY_COMPARE_OPERATORS); //$NON-NLS-1$
-		createSymbol("<", SERVOY_COMPARE_OPERATORS); //$NON-NLS-1$
-		createSymbol("[", SERVOY_COMPARE_OPERATORS); //$NON-NLS-1$
-		createSymbol("]", SERVOY_COMPARE_OPERATORS); //$NON-NLS-1$
-		createSymbol("+", SERVOY_OP); //$NON-NLS-1$
-		createSymbol("-", SERVOY_OP); //$NON-NLS-1$
-		createSymbol("*", SERVOY_OP); //$NON-NLS-1$
-		createSymbol("/", SERVOY_OP); //$NON-NLS-1$
-		createSymbol("=", SERVOY_OP); //$NON-NLS-1$
-		createSymbol("^", SERVOY_OP); //$NON-NLS-1$
-		createSymbol("|", SERVOY_OP); //$NON-NLS-1$
-		createSymbol("&", SERVOY_OP); //$NON-NLS-1$
-		createSymbol("%", SERVOY_OP); //$NON-NLS-1$
-		createSymbol("~", SERVOY_OP); //$NON-NLS-1$
+		createSymbol("!", SERVOY_COMPARE_OPERATORS);
+		createSymbol("!==", SERVOY_COMPARE_OPERATORS);
+		createSymbol("===", SERVOY_COMPARE_OPERATORS);
+		createSymbol("==", SERVOY_COMPARE_OPERATORS);
+		createSymbol(">=", SERVOY_COMPARE_OPERATORS);
+		createSymbol("<=", SERVOY_COMPARE_OPERATORS);
+		createSymbol("!=", SERVOY_COMPARE_OPERATORS);
+		createSymbol(">", SERVOY_COMPARE_OPERATORS);
+		createSymbol("<", SERVOY_COMPARE_OPERATORS);
+		createSymbol("[", SERVOY_COMPARE_OPERATORS);
+		createSymbol("]", SERVOY_COMPARE_OPERATORS);
+		createSymbol("+", SERVOY_OP);
+		createSymbol("-", SERVOY_OP);
+		createSymbol("*", SERVOY_OP);
+		createSymbol("/", SERVOY_OP);
+		createSymbol("=", SERVOY_OP);
+		createSymbol("^", SERVOY_OP);
+		createSymbol("|", SERVOY_OP);
+		createSymbol("&", SERVOY_OP);
+		createSymbol("%", SERVOY_OP);
+		createSymbol("~", SERVOY_OP);
 
-		createSymbol("||", SERVOY_COMPARE_OPERATORS); //$NON-NLS-1$
-		createSymbol("&&", SERVOY_COMPARE_OPERATORS); //$NON-NLS-1$
+		createSymbol("||", SERVOY_COMPARE_OPERATORS);
+		createSymbol("&&", SERVOY_COMPARE_OPERATORS);
 
-		createSymbol("</", SERVOY_COMPARE_OPERATORS); //$NON-NLS-1$ // special support for xml
-		createSymbol("/>", SERVOY_COMPARE_OPERATORS); //$NON-NLS-1$ // special support for xml
+		createSymbol("</", SERVOY_COMPARE_OPERATORS); // special support for xml
+		createSymbol("/>", SERVOY_COMPARE_OPERATORS); // special support for xml
 
 		rules = new IRule[1];
 		rules[0] = new IRule()
@@ -278,7 +168,7 @@ public class ScriptColorProvider /* implements IScriptColorProvider, IScriptColo
 					if (c != ICharacterScanner.EOF)
 					{
 						String dbl = single + (char)c;
-						if (dbl.equals("==") || dbl.equals("!=")) //$NON-NLS-1$
+						if (dbl.equals("==") || dbl.equals("!="))
 						{
 							c = scanner.read();
 							if (c != ICharacterScanner.EOF)
@@ -389,11 +279,6 @@ public class ScriptColorProvider /* implements IScriptColorProvider, IScriptColo
 		return getPreferenceKeyPrefix() + keyword + COLOR_KEY;
 	}
 
-//	public IColorProviderCategoryItem[] getCategories()
-//	{
-//		return new IColorProviderCategoryItem[] { servoy_main };
-//	}
-
 	public IPreferenceStore getPreferenceStore()
 	{
 		return this.fPreferenceStore;
@@ -412,6 +297,6 @@ public class ScriptColorProvider /* implements IScriptColorProvider, IScriptColo
 	 */
 	public String getPreferenceKeyPrefix()
 	{
-		return "_SERVOY_"; //$NON-NLS-1$
+		return "_SERVOY_";
 	}
 }

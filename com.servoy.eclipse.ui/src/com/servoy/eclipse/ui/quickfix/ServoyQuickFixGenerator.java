@@ -31,6 +31,7 @@ import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.util.ScopesUtils;
 
 /**
  * Class that gives the list of quick-fixes (available in the ui plugin) for Servoy markers.
@@ -58,26 +59,6 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				return new IMarkerResolution[] { new RemoveInvalidSortColumnsQuickFix(uuid, solName) };
 			}
 
-			if (type.equals(ServoyBuilder.DEPRECATED_PROPERTY_USAGE) || type.equals(ServoyBuilder.FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION))
-			{
-				String propertyName = (String)marker.getAttribute("PropertyName");
-				String displayName = (String)marker.getAttribute("DisplayName");
-				String solName = (String)marker.getAttribute("SolutionName");
-				String uuid = (String)marker.getAttribute("Uuid");
-
-				List<IMarkerResolution> resolutions = new ArrayList<IMarkerResolution>();
-
-				resolutions.add(new ClearPropertyQuickFix(solName, uuid, propertyName, displayName));
-
-				if ("loginFormID".equals(propertyName))
-				{
-					resolutions.add(0, new CreateLoginSolutionQuickFix(solName));
-					resolutions.add(new MarkSolutionAsWebclientOnlyQuickFix(solName));
-				}
-
-				return resolutions.toArray(new IMarkerResolution[resolutions.size()]);
-			}
-
 			if (type.equals(ServoyBuilder.UNRESOLVED_RELATION_UUID))
 			{
 				String propertyName = (String)marker.getAttribute("PropertyName");
@@ -89,31 +70,53 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 					solName, uuid, propertyName, displayName) };
 			}
 
-			if (type.equals(ServoyBuilder.INVALID_EVENT_METHOD) || type.equals(ServoyBuilder.INVALID_COMMAND_METHOD))
+			// add dynamic resolutions below this line
+			List<IMarkerResolution> resolutions = new ArrayList<IMarkerResolution>();
+
+			if (type.equals(ServoyBuilder.DEPRECATED_PROPERTY_USAGE) || type.equals(ServoyBuilder.FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION))
+			{
+				String propertyName = (String)marker.getAttribute("PropertyName");
+				String displayName = (String)marker.getAttribute("DisplayName");
+				String solName = (String)marker.getAttribute("SolutionName");
+				String uuid = (String)marker.getAttribute("Uuid");
+
+				resolutions.add(new ClearPropertyQuickFix(solName, uuid, propertyName, displayName));
+
+				if (StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName().equals(propertyName))
+				{
+					resolutions.add(0, new CreateLoginSolutionQuickFix(solName));
+					resolutions.add(new MarkSolutionAsWebclientOnlyQuickFix(solName));
+				}
+			}
+
+			else if (type.equals(ServoyBuilder.INVALID_EVENT_METHOD) || type.equals(ServoyBuilder.INVALID_COMMAND_METHOD))
 			{
 				String solName = (String)marker.getAttribute("SolutionName");
 				String eventName = (String)marker.getAttribute("EventName");
 				String uuid = (String)marker.getAttribute("Uuid");
 				String dataSource = (String)marker.getAttribute("DataSource");
 
-				List<IMarkerResolution> resolutions = new ArrayList<IMarkerResolution>(4);
-
 				resolutions.add(new ClearPropertyQuickFix(solName, uuid, eventName, eventName));
 				resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, null, eventName, IRepository.FORMS, "form"));
 				resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, null, eventName, IRepository.SOLUTIONS, "global"));
 				if (dataSource != null) resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName, IRepository.TABLENODES,
 					"entity"));
-
-				return resolutions.toArray(new IMarkerResolution[resolutions.size()]);
 			}
-			if (type.equals(ServoyBuilder.INVALID_DATAPROVIDERID))
+
+			else if (type.equals(ServoyBuilder.INVALID_DATAPROVIDERID))
 			{
 				String solName = (String)marker.getAttribute("SolutionName");
 				String uuid = (String)marker.getAttribute("Uuid");
-				return new IMarkerResolution[] { new ClearPropertyQuickFix(solName, uuid, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
-					StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName()), new CreateColumnReferenceQuickFix(uuid, solName), new CreateVariableReferenceQuickFix(
-					uuid, solName) };
+				String dataProviderID = (String)marker.getAttribute("DataProviderID");
+
+				resolutions.add(new ClearPropertyQuickFix(solName, uuid, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
+					StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName()));
+				// don't create column name when dpid is a global
+				if (!ScopesUtils.isVariableScope(dataProviderID)) resolutions.add(new CreateColumnReferenceQuickFix(uuid, solName));
+				resolutions.add(new CreateVariableReferenceQuickFix(uuid, solName));
 			}
+
+			return resolutions.toArray(new IMarkerResolution[resolutions.size()]);
 		}
 		catch (CoreException e)
 		{

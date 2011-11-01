@@ -60,7 +60,7 @@ class RelayEditorProvider implements IRelayEditorProvider
 					if (methodCellEditor == null)
 					{
 						Solution solution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution();
-						PersistContext persistContext = PersistContext.create(solution, null);
+						PersistContext persistContext = PersistContext.create(solution);
 						MethodLabelProvider methodLabelProvider = new MethodLabelProvider(persistContext, false, false);
 						methodCellEditor = new MethodCellEditor(parent.getTable(), methodLabelProvider, new MethodValueEditor(persistContext), persistContext,
 							key, false, new MethodListOptions(true, false, false, true, false, null));
@@ -111,7 +111,7 @@ class RelayEditorProvider implements IRelayEditorProvider
 					realValue = value instanceof MethodWithArguments ? value : MethodDialog.METHOD_NONE;
 					if (value instanceof String)
 					{
-						ScriptMethod scriptMethod = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getScriptMethod(
+						ScriptMethod scriptMethod = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getScriptMethod(null,
 							(String)value);
 						if (scriptMethod != null)
 						{

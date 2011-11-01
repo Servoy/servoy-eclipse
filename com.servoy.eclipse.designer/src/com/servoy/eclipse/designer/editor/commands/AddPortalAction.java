@@ -82,7 +82,7 @@ public class AddPortalAction extends DesignerToolbarAction
 			return null;
 		}
 
-		DataProviderDialog dialog = new DataProviderDialog(getShell(), DataProviderLabelProvider.INSTANCE_HIDEPREFIX, PersistContext.create(form, null),
+		DataProviderDialog dialog = new DataProviderDialog(getShell(), DataProviderLabelProvider.INSTANCE_HIDEPREFIX, PersistContext.create(form),
 			editingFlattenedSolution, table, new DataProviderTreeViewer.DataProviderOptions(false, false, false, true, false, false, false, false,
 				INCLUDE_RELATIONS.NESTED, true, false, null), null, SWT.MULTI, "Select Data Providers");
 		dialog.setOptionsAreaFactory(new IControlFactory()

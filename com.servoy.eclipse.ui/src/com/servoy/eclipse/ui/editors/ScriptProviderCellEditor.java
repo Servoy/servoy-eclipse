@@ -56,11 +56,9 @@ import com.servoy.eclipse.ui.util.IControlFactory;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
-import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Table;
 
 /**
@@ -259,7 +257,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 				{
 					EditorUtil.openDataProviderEditor((IDataProvider)scriptprovider);
 				}
-				EditorUtil.openScriptEditor(scriptprovider, true);
+				EditorUtil.openScriptEditor(scriptprovider, null, true);
 			}
 		}
 
@@ -283,14 +281,12 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 				if (value == null || ScriptProviderPropertyController.NONE == value) return Messages.LabelNone;
 				if (value instanceof IScriptProvider)
 				{
-					String txt = ((IScriptProvider)value).getDisplayName();
-
-					if (showPrefix && value instanceof ScriptMethod && ((ScriptMethod)value).getParent() instanceof IRootObject)
+					if (showPrefix && value instanceof ScriptMethod)
 					{
-						return ScriptVariable.GLOBAL_DOT_PREFIX + txt;
+						return ((ScriptMethod)value).getPrefixedName();
 					}
 
-					return txt;
+					return ((IScriptProvider)value).getDisplayName();
 				}
 				if (value instanceof MethodWithArguments)
 				{
