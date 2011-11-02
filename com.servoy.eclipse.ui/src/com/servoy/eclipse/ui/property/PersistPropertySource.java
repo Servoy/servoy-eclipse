@@ -184,6 +184,7 @@ import com.servoy.j2db.util.Utils;
 public class PersistPropertySource implements IPropertySource, IAdaptable, IModelSavePropertySource
 {
 	public static final IPropertyController<Integer, Integer> HORIZONTAL_ALIGNMENT_CONTROLLER;
+	public static final IPropertyController<Integer, Integer> SELECTION_MODE_CONTROLLER;
 	public static final IPropertyController<Integer, Integer> VERTICAL_ALIGNMENT_CONTROLLER;
 	public static final IPropertyController<Integer, Integer> ROLLOVER_CURSOR_CONTROLLER;
 	public static final IPropertyController<Integer, Integer> ROTATION_CONTROLLER;
@@ -215,6 +216,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			new ComboboxPropertyModel<Integer>(
 				new Integer[] { Integer.valueOf(-1), Integer.valueOf(SwingConstants.LEFT), Integer.valueOf(SwingConstants.CENTER), Integer.valueOf(SwingConstants.RIGHT) },
 				new String[] { Messages.LabelDefault, Messages.AlignLeft, Messages.AlignCenter, Messages.AlignRight }), Messages.LabelUnresolved);
+		SELECTION_MODE_CONTROLLER = new ComboboxPropertyController<Integer>(
+			"selectionMode",
+			RepositoryHelper.getDisplayName("selectionMode", Form.class),
+			new ComboboxPropertyModel<Integer>(
+				new Integer[] { Integer.valueOf(IForm.SELECTION_MODE_DEFAULT), Integer.valueOf(IForm.SELECTION_MODE_SINGLE), Integer.valueOf(IForm.SELECTION_MODE_MULTI) },
+				new String[] { Messages.LabelDefault, Messages.SelectionModeSingle, Messages.SelectionModeMulti }), Messages.LabelUnresolved);
 		SHAPE_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>(
 			"shapeType",
 			RepositoryHelper.getDisplayName("shapeType", RectShape.class),
@@ -2822,6 +2829,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		if (name.equals("view"))
 		{
 			return VIEW_TYPE_CONTOLLER;
+		}
+
+		if ("selectionMode".equals(name))
+		{
+			return SELECTION_MODE_CONTROLLER;
 		}
 
 		if (name.equals("textOrientation"))
