@@ -83,7 +83,7 @@ public class FormEditPolicy extends ComponentEditPolicy
 			DataFieldRequest dataFieldRequest = ((DataFieldRequest)request);
 			command = new FormPlacePortalCommand(application, form, dataFieldRequest.getData(), dataFieldRequest.getType(), dataFieldRequest.getExtendedData(),
 				fieldPositioner, dataFieldRequest.getlocation() == null ? null : dataFieldRequest.getlocation().getSWTPoint(), null, dataFieldRequest.fillText,
-				dataFieldRequest.fillName, form);
+				dataFieldRequest.fillName, dataFieldRequest.placeAsLabels, dataFieldRequest.placeWithLabels, form);
 		}
 		else if (VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()) && request instanceof DataFieldRequest)
 		{

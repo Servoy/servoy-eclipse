@@ -146,8 +146,8 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			}
 			else if (requestType.type == RequestType.TYPE_PORTAL)
 			{
-				command = new FormPlacePortalCommand(application, form, data, requestType, extendedData, null, loc.getSWTPoint(), size, false, false,
-					parent.getPersist());
+				command = new FormPlacePortalCommand(application, form, data, requestType, extendedData, null, loc.getSWTPoint(), size, false, false, false,
+					false, parent.getPersist());
 			}
 			else if (requestType.type == RequestType.TYPE_FIELD)
 			{

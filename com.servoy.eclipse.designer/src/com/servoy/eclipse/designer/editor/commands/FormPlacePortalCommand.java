@@ -37,6 +37,8 @@ public class FormPlacePortalCommand extends FormPlaceElementCommand
 {
 	private final boolean fillText;
 	private final boolean fillName;
+	private final boolean placeAsLabels;
+	private final boolean placeWithLabels;
 
 	/**
 	 * Command to add a portal.
@@ -47,11 +49,13 @@ public class FormPlacePortalCommand extends FormPlaceElementCommand
 	 */
 	public FormPlacePortalCommand(IApplication application, ISupportFormElements parent, Object object, Object requestType,
 		Map<Object, Object> objectProperties, IFieldPositioner fieldPositioner, Point defaultLocation, org.eclipse.draw2d.geometry.Dimension size,
-		boolean fillText, boolean fillName, IPersist context)
+		boolean fillText, boolean fillName, boolean placeAsLabels, boolean placeWithLabels, IPersist context)
 	{
 		super(application, parent, object, requestType, objectProperties, fieldPositioner, defaultLocation, size, context);
 		this.fillText = fillText;
 		this.fillName = fillName;
+		this.placeAsLabels = placeAsLabels;
+		this.placeWithLabels = placeWithLabels;
 	}
 
 	@Override
@@ -60,7 +64,7 @@ public class FormPlacePortalCommand extends FormPlaceElementCommand
 		if (parent instanceof Form)
 		{
 			setLabel("place portal");
-			return new IPersist[] { ElementFactory.createPortal((Form)parent, (Object[])object, fillText, fillName, location) };
+			return new IPersist[] { ElementFactory.createPortal((Form)parent, (Object[])object, fillText, fillName, placeAsLabels, placeWithLabels, location) };
 		}
 		return null;
 	}

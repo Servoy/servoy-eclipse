@@ -31,7 +31,6 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 
-import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.border.Border;
 
@@ -694,7 +693,8 @@ public class ElementFactory
 		return new Dimension(width, height);
 	}
 
-	public static IPersist createPortal(Form form, Object[] dataProviders, boolean fillText, boolean fillName, Point location) throws RepositoryException
+	public static IPersist createPortal(Form form, Object[] dataProviders, boolean fillText, boolean fillName, boolean placeAsLabels, boolean placeWithLabels,
+		Point location) throws RepositoryException
 	{
 		Relation[] relations = dataProviders == null || dataProviders.length == 0 ? null : ((IDataProvider)dataProviders[0]).getColumnWrapper().getRelations();
 
@@ -715,34 +715,12 @@ public class ElementFactory
 		Portal portal = form.createNewPortal(portalName.toString(), new java.awt.Point(x, y));
 		if (dataProviders != null && dataProviders.length > 0)
 		{
-			Dimension portaldim = new Dimension(dataProviders.length * 80, 50);
+			Dimension portaldim = new Dimension(dataProviders.length * 140, 50);
 			portal.setSize(portaldim);
 
 			portal.setRelationName(relationName.toString());
 
-			FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form);
-			for (int r = 0; r < dataProviders.length; r++)
-			{
-				if (dataProviders[r] == null) continue;
-
-				String dataProviderID = ((IDataProvider)dataProviders[r]).getDataProviderID();
-				IDataProvider dp = flattenedSolution.getDataproviderLookup(null, form).getDataProvider(dataProviderID);
-				if (dp == null) continue;
-
-				java.awt.Point fieldpos = new java.awt.Point(x + (r * 80), y);
-				Field field = portal.createNewField(fieldpos);
-				field.setEditable(dp.isEditable());
-				field.setBorderType(ComponentFactoryHelper.createBorderString(BorderFactory.createEmptyBorder()));
-				field.setDataProviderID(dataProviderID);
-				String cutofDPID = dataProviderID;
-				int indx = cutofDPID.lastIndexOf('.');
-				if (indx != -1)
-				{
-					cutofDPID = cutofDPID.substring(indx + 1);
-				}
-				if (fillName) field.setName(getCorrectName(form, portalName + "_" + cutofDPID)); //$NON-NLS-1$
-				if (fillText) field.setText(cutofDPID);
-			}
+			createFields(portal, dataProviders, placeAsLabels, placeWithLabels, true, fillText, fillName, null, new Point(x, y));
 		}
 		placeElementOnTop(portal);
 		return portal;
