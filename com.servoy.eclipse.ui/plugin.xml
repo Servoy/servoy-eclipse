@@ -161,6 +161,15 @@
        		name="Export Active Solution">
    		</wizard>
  </extension>
+ <extension
+     point = "org.eclipse.ui.propertyPages">
+        <page
+              class="com.servoy.eclipse.ui.views.SolutionPropertiesPage"
+              id="com.servoy.eclipse.ui.views.SolutionPropertiesPage"
+              name="Solution Properties"
+              objectClass="com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode">
+        </page>
+  </extension>
    <extension
          point="org.eclipse.ui.editors">
       <editor
