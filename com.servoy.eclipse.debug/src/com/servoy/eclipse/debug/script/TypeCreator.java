@@ -902,13 +902,15 @@ public abstract class TypeCreator
 				name = resource.getProject().getName();
 			}
 		}
-		//if (servoyModel.isActiveProject(name))
-		if (name != null)
+		if (servoyModel.isSolutionActive(name))
 		{
-			ServoyProject servoyProject = servoyModel.getServoyProject(name);
-			if (servoyProject != null)
+			if (name != null)
 			{
-				return servoyProject.getEditingFlattenedSolution();
+				ServoyProject servoyProject = servoyModel.getServoyProject(name);
+				if (servoyProject != null)
+				{
+					return servoyProject.getEditingFlattenedSolution();
+				}
 			}
 		}
 		return null;

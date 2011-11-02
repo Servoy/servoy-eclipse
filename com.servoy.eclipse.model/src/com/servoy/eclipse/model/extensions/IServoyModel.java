@@ -58,4 +58,6 @@ public interface IServoyModel
 
 	DataModelManager getDataModelManager();
 
+	boolean isSolutionActive(String name);
+
 }

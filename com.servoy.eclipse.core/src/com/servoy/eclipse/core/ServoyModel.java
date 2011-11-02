@@ -2049,7 +2049,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				// file outside of visited tree, ignore
 				continue;
 			}
-			else if (file.getName().endsWith(WorkspaceUserManager.SECURITY_FILE_EXTENSION) && isModuleActive(project.getName()))
+			else if (file.getName().endsWith(WorkspaceUserManager.SECURITY_FILE_EXTENSION) && isSolutionActive(project.getName()))
 			{
 				// must be a form ".sec" file; find the form for it...
 				File projectFolder = project.getLocation().toFile();
@@ -2142,28 +2142,6 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 			fireActiveProjectUpdated(IActiveProjectListener.SECURITY_INFO_CHANGED);
 		}
 		return changedScriptMethods;
-	}
-
-	public boolean isActiveProject(String name)
-	{
-		if (name != null && getActiveProject() != null)
-		{
-			return name.equals(getActiveProject().getProject().getName()) || isModuleActive(name);
-		}
-		return false;
-	}
-
-	public boolean isModuleActive(String name)
-	{
-		ServoyProject[] activeModules = getModulesOfActiveProject();
-		for (ServoyProject p : activeModules)
-		{
-			if (p.getProject().getName().equals(name))
-			{
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private void handleChangedFilesInResourcesProject(List<IResourceDelta> al)

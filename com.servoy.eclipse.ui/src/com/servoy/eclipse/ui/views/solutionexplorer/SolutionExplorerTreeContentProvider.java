@@ -570,8 +570,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					allSolutionChildren.add(node);
 					node.parent = allSolutionsNode;
 
-					String solutionName = (String)servoyProject.getSolution().getProperty(StaticContentSpecLoader.PROPERTY_TITLETEXT.getPropertyName());
-					if (solutionName == null) solutionName = servoyProject.getSolution().getName();
+					//String solutionName = (String)servoyProject.getSolution().getProperty(StaticContentSpecLoader.PROPERTY_TITLETEXT.getPropertyName());
+					//if (solutionName == null) solutionName = servoyProject.getSolution().getName();
+					// above code would load all solutions
+					String solutionName = servoyProject.getProject().getName();
 
 					node.setToolTipText(solutionName + "(" + getSolutionTypeAsString(servoyProject) + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
@@ -617,7 +619,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private String getSolutionTypeAsString(ServoyProject project)
 	{
-		switch (project.getSolution().getSolutionType())
+		switch (project.getSolutionMetaData().getSolutionType())
 		{
 			case SolutionMetaData.SOLUTION :
 				return SolutionMetaData.solutionTypeNames[0];
