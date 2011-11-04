@@ -80,6 +80,10 @@ public class ColumnConversionComposite extends Composite
 			public void widgetSelected(SelectionEvent e)
 			{
 				te.flushTable();
+				if (column != null && column.getColumnInfo() != null)
+				{
+					column.getColumnInfo().setConverterProperties(null);
+				}
 				loadTable();
 				saveTable();
 			}

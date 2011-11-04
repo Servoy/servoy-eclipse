@@ -79,6 +79,10 @@ public class ColumnValidationComposite extends Composite
 			public void widgetSelected(SelectionEvent e)
 			{
 				te.flushTable();
+				if (column != null && column.getColumnInfo() != null)
+				{
+					column.getColumnInfo().setValidatorProperties(null);
+				}
 				loadTable();
 				saveTable();
 			}
