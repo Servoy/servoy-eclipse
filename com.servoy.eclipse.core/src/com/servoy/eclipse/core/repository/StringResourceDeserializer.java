@@ -13,11 +13,12 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.repository;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -192,7 +193,7 @@ public class StringResourceDeserializer
 		File contentFile = new File(wsd, getStringResourceContentFilePath(resourcesProjectName, resource.getName(), romd.getObjectTypeId()));
 		if (contentFile.exists())
 		{
-			resource.loadFromFile(contentFile);
+			resource.loadFromFile(contentFile, Charset.forName("UTF8"));
 		}
 		resource.setChangeHandler(new EclipseChangeHandler(eclipseRepository));
 		return resource;
