@@ -18,7 +18,6 @@ package com.servoy.eclipse.core.repository;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -193,7 +192,7 @@ public class StringResourceDeserializer
 		File contentFile = new File(wsd, getStringResourceContentFilePath(resourcesProjectName, resource.getName(), romd.getObjectTypeId()));
 		if (contentFile.exists())
 		{
-			resource.loadFromFile(contentFile, Charset.forName("UTF8"));
+			resource.loadFromFile(contentFile);
 		}
 		resource.setChangeHandler(new EclipseChangeHandler(eclipseRepository));
 		return resource;
