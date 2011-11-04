@@ -28,6 +28,8 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.gef.commands.CommandStack;
+import org.eclipse.gef.commands.CommandStackEvent;
+import org.eclipse.gef.commands.CommandStackEventListener;
 import org.eclipse.gef.commands.CommandStackListener;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.swt.SWT;
@@ -84,7 +86,7 @@ import com.servoy.j2db.util.Utils;
 public class VisualFormEditor extends MultiPageEditorPart implements CommandStackListener, IActiveProjectListener, IPersistChangeListener, IShowEditorInput,
 	ITabbedEditor
 {
-	private static final String COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.context";
+	private static final String COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.context"; //$NON-NLS-1$
 
 	// edit request types
 	public static final String REQ_COPY = "VFE_COPY"; //$NON-NLS-1$
@@ -115,6 +117,8 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	private VisualFormEditorTabSequencePage tabseditor = null;
 	private VisualFormEditorSecurityPage seceditor = null;
 	private boolean closing = false;
+
+	private final CommandStackListener commandStackEventListener = new CommandStackListener();
 
 	@Override
 	public void init(IEditorSite site, IEditorInput editorInput) throws PartInitException
@@ -152,7 +156,6 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		}
 
 		activateEditorContext();
-
 	}
 
 	/*
@@ -196,6 +199,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	public void dispose()
 	{
 		// stop listening
+		getCommandStack().removeCommandStackEventListener(commandStackEventListener);
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.removeActiveProjectListener(this);
 		servoyModel.removePersistChangeListener(false, this);
@@ -266,7 +270,6 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	{
 		super.pageChange(newPageIndex);
 		if (graphicaleditor != null) graphicaleditor.commandStackChanged(new EventObject(this));
-
 	}
 
 	@Override
@@ -718,6 +721,8 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 			createTabsPage();
 		}
 		createSecPage(); // MultiPageEditorPart wants at least 1 page
+
+		getCommandStack().addCommandStackEventListener(commandStackEventListener);
 	}
 
 	protected void createDesignPage() throws PartInitException
@@ -856,4 +861,30 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 			}
 		}
 	}
+
+
+	/**
+	 * @return the commandStackEventListener
+	 */
+	public CommandStackListener getCommandStackEventListener()
+	{
+		return commandStackEventListener;
+	}
+
+	public static class CommandStackListener implements CommandStackEventListener
+	{
+		private int lastState = CommandStack.POST_EXECUTE;
+
+		public void stackChanged(CommandStackEvent event)
+		{
+			lastState = event.getDetail();
+		}
+
+		public boolean isRunningCommand()
+		{
+			return (lastState & CommandStack.POST_MASK) == 0;
+		}
+	}
+
+
 }

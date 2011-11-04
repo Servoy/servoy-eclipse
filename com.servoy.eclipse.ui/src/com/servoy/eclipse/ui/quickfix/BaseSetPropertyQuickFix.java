@@ -24,10 +24,8 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -105,14 +103,7 @@ public abstract class BaseSetPropertyQuickFix implements IMarkerResolution
 					// use standard adapter mechanism, it will follow the same logic as set-to-default-value in properties view.
 					// Note: for scripts and solutions it will do the saving automatically via SavingPersistPropertySource.
 					// For form elements the editor will be opened.
-					// see DesignerPropertyAdapterFactory.getAdapter
-					Object realObject = persist;
-					if (persist instanceof Solution)
-					{
-						realObject = servoyProject;
-					}
-					IPropertySource propertySource = (IPropertySource)Platform.getAdapterManager().getAdapter(new SimpleUserNode(null, null, realObject, null),
-						IPropertySource.class);
+					IPropertySource propertySource = (IPropertySource)Platform.getAdapterManager().getAdapter(persist, IPropertySource.class);
 					if (propertySource != null)
 					{
 						setPropertyValue(propertySource);

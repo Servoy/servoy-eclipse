@@ -16,9 +16,11 @@
  */
 package com.servoy.eclipse.designer.property;
 
-import org.eclipse.gef.commands.CommandStack;
+import org.eclipse.gef.commands.Command;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
+
+import com.servoy.eclipse.designer.editor.VisualFormEditor;
 
 /**
  * set properties via the editor's command stack
@@ -29,12 +31,12 @@ import org.eclipse.ui.views.properties.IPropertySource;
 public class UndoablePropertySource implements IPropertySource
 {
 	private final IPropertySource propertySource;
-	private final CommandStack commandStack;
+	private final VisualFormEditor editorPart;
 
-	public UndoablePropertySource(IPropertySource propertySource, CommandStack commandStack)
+	public UndoablePropertySource(IPropertySource propertySource, VisualFormEditor editorPart)
 	{
 		this.propertySource = propertySource;
-		this.commandStack = commandStack;
+		this.editorPart = editorPart;
 	}
 
 	public Object getEditableValue()
@@ -72,7 +74,7 @@ public class UndoablePropertySource implements IPropertySource
 	public void setPropertyValue(Object id, Object value)
 	{
 		IPropertyDescriptor pd = getPropertyDescriptor(id);
-		commandStack.execute(SetValueCommand.createSetvalueCommand(pd == null ? "" : pd.getDisplayName(), propertySource, (String)id, value));
+		executeCommand(SetValueCommand.createSetvalueCommand(pd == null ? "" : pd.getDisplayName(), propertySource, id, value));
 	}
 
 	public void resetPropertyValue(Object id)
@@ -82,7 +84,23 @@ public class UndoablePropertySource implements IPropertySource
 			ResetValueCommand restoreCmd = new ResetValueCommand();
 			restoreCmd.setTarget(propertySource);
 			restoreCmd.setPropertyId(id);
-			commandStack.execute(restoreCmd);
+			executeCommand(restoreCmd);
+		}
+	}
+
+	protected void executeCommand(Command command)
+	{
+		if (editorPart.getCommandStackEventListener().isRunningCommand())
+		{
+			// we are already running on the command stack, execute the command directly to prevent double-ctl-z for undo
+			if (command != null && command.canExecute())
+			{
+				command.execute();
+			}
+		}
+		else
+		{
+			editorPart.getCommandStack().execute(command);
 		}
 	}
 

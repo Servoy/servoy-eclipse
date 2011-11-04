@@ -1086,7 +1086,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 		}
 		if (type == IPropertySourceProvider.class)
 		{
-			return new UndoablePersistPropertySourceProvider(editorPart, getCommandStack());
+			return new UndoablePersistPropertySourceProvider(editorPart);
 		}
 		if (type.equals(IContentOutlinePage.class))
 		{
