@@ -234,7 +234,7 @@ public class ColumnComposite extends Composite
 		final TabItem validationTabItem = new TabItem(tabFolder, SWT.NONE);
 		validationTabItem.setText("Validation");
 
-		columnValidationComposite = new ColumnValidationComposite(tabFolder, SWT.NONE);
+		columnValidationComposite = new ColumnValidationComposite(te, tabFolder, SWT.NONE);
 		validationTabItem.setControl(columnValidationComposite);
 
 		columnAutoEnterComposite = new ColumnAutoEnterComposite(tabFolder, flattenedSolution, SWT.NONE);
@@ -261,7 +261,7 @@ public class ColumnComposite extends Composite
 		final TabItem conversionTabItem = new TabItem(tabFolder, SWT.NONE);
 		conversionTabItem.setText("Conversion");
 
-		columnConversionComposite = new ColumnConversionComposite(tabFolder, SWT.NONE);
+		columnConversionComposite = new ColumnConversionComposite(te, tabFolder, SWT.NONE);
 		conversionTabItem.setControl(columnConversionComposite);
 
 		Button addButton;

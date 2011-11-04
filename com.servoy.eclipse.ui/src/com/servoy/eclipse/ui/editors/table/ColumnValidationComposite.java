@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
 
 import java.io.IOException;
@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Table;
 
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.util.MapEntryValueEditor;
 import com.servoy.j2db.dataprocessing.IColumnValidator;
 import com.servoy.j2db.dataprocessing.IPropertyDescriptorProvider;
@@ -63,7 +64,7 @@ public class ColumnValidationComposite extends Composite
 	 * @param parent
 	 * @param style
 	 */
-	public ColumnValidationComposite(Composite parent, int style)
+	public ColumnValidationComposite(final TableEditor te, Composite parent, int style)
 	{
 		super(parent, style);
 
@@ -77,6 +78,7 @@ public class ColumnValidationComposite extends Composite
 
 			public void widgetSelected(SelectionEvent e)
 			{
+				te.flushTable();
 				loadTable();
 				saveTable();
 			}
@@ -88,6 +90,7 @@ public class ColumnValidationComposite extends Composite
 		{
 			public void handleChange(ChangeEvent event)
 			{
+				te.flushTable();
 				saveTable();
 			}
 		});

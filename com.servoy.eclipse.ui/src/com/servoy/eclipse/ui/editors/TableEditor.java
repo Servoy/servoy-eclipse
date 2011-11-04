@@ -567,10 +567,10 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 				isModified = false;
 				firePropertyChange(IEditorPart.PROP_DIRTY);
-				if (Activator.getDefault().getDebugClientHandler().isClientStarted())
+				if (flushTable)
 				{
-					MessageDialog.openInformation(getSite().getShell(), "Client Restart Required",
-						"Web Client must be restarted (if still open) in order for the changes to be effective.");
+					flushTable = false;
+					Activator.getDefault().getDebugClientHandler().refreshDebugClients(table);
 				}
 				columnComposite.refreshSelection();
 			}
@@ -595,6 +595,13 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				firePropertyChange(IEditorPart.PROP_DIRTY);
 			}
 		});
+	}
+
+	private boolean flushTable = false;
+
+	public void flushTable()
+	{
+		flushTable = true;
 	}
 
 	@Override
