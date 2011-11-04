@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.designer.property;
 
-import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 
@@ -33,20 +32,18 @@ import com.servoy.j2db.persistence.IPersist;
 
 public class UndoablePersistPropertySourceProvider implements IPropertySourceProvider
 {
-	protected final CommandStack commandStack;
 	private final VisualFormEditor editorPart;
 
-	public UndoablePersistPropertySourceProvider(VisualFormEditor editorPart, CommandStack commandStack)
+	public UndoablePersistPropertySourceProvider(VisualFormEditor editorPart)
 	{
 		this.editorPart = editorPart;
-		this.commandStack = commandStack;
 	}
 
 	public IPropertySource getPropertySource(Object object)
 	{
 		if (object instanceof IPersist)
 		{
-			return new UndoablePropertySource(new PersistPropertySource(((IPersist)object), editorPart.getForm(), false), commandStack);
+			return new UndoablePropertySource(new PersistPropertySource(((IPersist)object), editorPart.getForm(), false), editorPart);
 		}
 		return null;
 	}

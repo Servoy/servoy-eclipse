@@ -149,7 +149,8 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 		{
 			persist = (IPersist)obj;
 			autoSave = persist instanceof Solution || persist instanceof ScriptVariable || persist instanceof IScriptProvider;
-			retargetToEditor = false;
+			// retargetToEditor must be true so that persist saves from anywhere (like quickfix)
+			// retargetToEditor = false;
 		}
 
 		if (persist != null)
