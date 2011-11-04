@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 
+import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.DataRequest;
 import com.servoy.eclipse.ui.dialogs.TemplateContentProvider;
@@ -51,8 +52,22 @@ public class ApplyTemplateActionDelegate extends AbstractEditpartActionDelegate
 	protected Request createRequest(EditPart editPart)
 	{
 		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS, TemplateContentProvider.DEFAULT,
-			new LabelProvider(), null, null, SWT.NONE, "Select template", TemplateContentProvider.TEMPLATES_DUMMY_INPUT, null, false,
-			TreeSelectDialog.TEMPLATE_DIALOG, null);
+			new LabelProvider()
+			{
+				@Override
+				public String getText(Object element)
+				{
+					if (element == null)
+					{
+						return "";
+					}
+					else if (element instanceof TemplateElementHolder)
+					{
+						return ((TemplateElementHolder)element).template.getName();
+					}
+					else return element.toString();
+				}
+			}, null, null, SWT.NONE, "Select template", TemplateContentProvider.TEMPLATES_DUMMY_INPUT, null, false, TreeSelectDialog.TEMPLATE_DIALOG, null);
 		dialog.open();
 
 		if (dialog.getReturnCode() == Window.CANCEL)
