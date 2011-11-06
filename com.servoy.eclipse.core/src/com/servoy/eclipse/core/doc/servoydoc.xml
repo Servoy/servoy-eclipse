@@ -293,7 +293,7 @@ application.addClientInfo('For any issues call +31-SA-AS');]]></sample>
           <parameters>
             <parameter name="info" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[A line of text to be added as additional client information
-             on behalf of the running Servoy client.]]></description>
+            on behalf of the running Servoy client.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -822,7 +822,7 @@ if ( (m & 1) == 1)
         <function deprecated="true" name="getStartupArguments">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"><![CDATA[Array with 2 elements, a string that is the startup argument and a map containing all named startup arguments,
- or null if there is no argument passed]]></return>
+or null if there is no argument passed]]></return>
           <description><![CDATA[Get the parameters which are provided by startup.
 It returns an array with 2 elements, a string that is the startup argument and a map containing all named startup arguments, or
 null if there is no argument passed]]></description>
@@ -1268,7 +1268,7 @@ previously was added using the application.]]></summary>
           <parameters>
             <parameter name="info" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[A line of text to be removed from the client information
-             on behalf of the running Servoy client.]]></description>
+            on behalf of the running Servoy client.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -3152,7 +3152,7 @@ while(fsUpdater.next())
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[The next sequence for the column, null if there was no sequence for that column 
-         or if there is no column with the given name.]]></return>
+        or if there is no column with the given name.]]></return>
           <description><![CDATA[Gets the next sequence for a column which has a sequence defined in its column dataprovider properties.
 
 NOTE: For more infomation on configuring the sequence for a column, see the section Auto enter options for a column from the Dataproviders chapter in the Servoy Developer User's Guide.]]></description>
@@ -3166,14 +3166,14 @@ application.output(nextValue);]]></sample>
           <parameters>
             <parameter name="dataSource|serverName">
               <description><![CDATA[The datasource that points to the table which has the column with the sequence,
- 								or the name of the server where the table can be found. If the name of the server
- 								is specified, then a second optional parameter specifying the name of the table
- 								must be used. If the datasource is specified, then the name of the table is not needed
- 								as the second argument.]]></description>
+								or the name of the server where the table can be found. If the name of the server
+								is specified, then a second optional parameter specifying the name of the table
+								must be used. If the datasource is specified, then the name of the table is not needed
+								as the second argument.]]></description>
             </parameter>
             <parameter name="tableName" optional="true">
               <description><![CDATA[The name of the table that has the column with the sequence. Use this parameter
- 							only if you specified the name of the server as the first parameter.]]></description>
+							only if you specified the name of the server as the first parameter.]]></description>
             </parameter>
             <parameter name="columnName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The name of the column that has a sequence defined in its properties.]]></description>
@@ -9440,7 +9440,7 @@ form.getPart(JSPart.LEADING_SUBSUMMARY, 160).background = 'red';]]></sample>
             </parameter>
             <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[The height of the part to retrieve. Use this parameter when retrieving one of multiple
- 	                      Leading/Trailing Subsummary parts.]]></description>
+	                      Leading/Trailing Subsummary parts.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -9486,7 +9486,7 @@ form.newButton('mybutton',50,50+height,80,20,solutionModel.getGlobalMethod('glob
             </parameter>
             <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[The height of the part whose Y offset will be returned. This is used when
-                        one of multiple Leading/Trailing Sumsummary parts is retrieved.]]></description>
+                       one of multiple Leading/Trailing Sumsummary parts is retrieved.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -10709,7 +10709,7 @@ form.removePart(JSPart.LEADING_SUBSUMMARY, 160);]]></sample>
             </parameter>
             <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[The height of the part that should be removed. This parameter is for 
- 					removing one of multiple Leading/Trailing Subsummary parts.]]></description>
+					removing one of multiple Leading/Trailing Subsummary parts.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -11040,7 +11040,7 @@ var ok = %%prefix%%foundset.addFoundSetFilterParam('companyname', '#^||=', 'serv
           <return type="void" typecode="void"/>
           <description><![CDATA[Clears the foundset.]]></description>
           <summary><![CDATA[Clears the foundset.]]></summary>
-          <deprecated><![CDATA[As of release 3.1, replaced by clear().]]></deprecated>
+          <deprecated><![CDATA[As of release 3.1, replaced by #clear().]]></deprecated>
           <sample/>
         </function>
         <function name="deleteAllRecords">
@@ -11259,7 +11259,7 @@ for (var i = 0; params != null && i < params.length; i++)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Get the number of records in this foundset.]]></description>
           <summary><![CDATA[Get the number of records in this foundset.]]></summary>
-          <deprecated><![CDATA[As of release 3.1, replaced by getSize().]]></deprecated>
+          <deprecated><![CDATA[As of release 3.1, replaced by #getSize().]]></deprecated>
           <sample><![CDATA[for ( var i = 1 ; i <= %%prefix%%foundset.getMaxRecordIndex() ; i++ )
 {
 	%%prefix%%foundset.setSelectedIndex(i);
@@ -11351,7 +11351,7 @@ When the founset is in multiSelect mode (see property multiSelect), selection ca
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Gets the name of the server used.]]></description>
           <summary><![CDATA[Gets the name of the server used.]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by getDataSource().]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource().]]></deprecated>
           <sample/>
         </function>
         <function name="getSize">
@@ -11374,7 +11374,7 @@ increase as more records are loaded.]]></description>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Gets the name of the table used.]]></description>
           <summary><![CDATA[Gets the name of the table used.]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by getDataSource().]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource().]]></deprecated>
           <sample/>
         </function>
         <function name="invertRecords">
@@ -15517,7 +15517,7 @@ tabPanel.newTab('tab2', 'Child Two', childTwo);]]></sample>
             </parameter>
             <parameter name="relation" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[A JSRelation object that relates the parent form with the form
-                          that will be displayed in the new tab.]]></description>
+                         that will be displayed in the new tab.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -17947,8 +17947,8 @@ query.joins().add(detailDataSource,  IQueryBuilderJoin.LEFT_OUTER_JOIN, "detail"
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBJoin" typecode="com.servoy.j2db.querybuilder.impl.QBJoin"/>
-          <description><![CDATA[Add a join with join type LEFT_OUTER_JOIN and no alias for the joining table.]]></description>
-          <summary><![CDATA[Add a join with join type LEFT_OUTER_JOIN and no alias for the joining table.]]></summary>
+          <description><![CDATA[Add a join with join type IQueryBuilderJoin#LEFT_OUTER_JOIN and no alias for the joining table.]]></description>
+          <summary><![CDATA[Add a join with join type IQueryBuilderJoin#LEFT_OUTER_JOIN and no alias for the joining table.]]></summary>
           <sample/>
         </function>
         <function name="add">
@@ -17976,14 +17976,14 @@ query.joins().add(detailDataSource,  IQueryBuilderJoin.LEFT_OUTER_JOIN, "detail"
               <description><![CDATA[data source]]></description>
             </parameter>
             <parameter name="joinType" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[join type, one of LEFT_OUTER_JOIN, INNER_JOIN, RIGHT_OUTER_JOIN, FULL_JOIN]]></description>
+              <description><![CDATA[join type, one of IQueryBuilderJoin#LEFT_OUTER_JOIN, IQueryBuilderJoin#INNER_JOIN, IQueryBuilderJoin#RIGHT_OUTER_JOIN, IQueryBuilderJoin#FULL_JOIN]]></description>
             </parameter>
             <parameter name="alias" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[alias for joining table
-  <pre>
- query.joins().add(detailDataSource,  IQueryBuilderJoin.LEFT_OUTER_JOIN, "detail")
-     .on().add(query.getColumn("pk").eq(query.getColumn("detail", "fk")));
- </pre>]]></description>
+ <pre>
+query.joins().add(detailDataSource,  IQueryBuilderJoin.LEFT_OUTER_JOIN, "detail")
+    .on().add(query.getColumn("pk").eq(query.getColumn("detail", "fk")));
+</pre>]]></description>
             </parameter>
           </parameters>
         </function>
@@ -17995,7 +17995,7 @@ query.joins().add(detailDataSource,  IQueryBuilderJoin.LEFT_OUTER_JOIN, "detail"
           <return type="com.servoy.j2db.querybuilder.impl.QBJoin" typecode="com.servoy.j2db.querybuilder.impl.QBJoin"/>
           <description><![CDATA[Add a join based on relation or add a manual join.
 <p>When dataSourceOrRelation is a relation name, a join will be added based on the relation.
-<br>When dataSourceOrRelation is a data source, an empty join will be added with join type LEFT_OUTER_JOIN.]]></description>
+<br>When dataSourceOrRelation is a data source, an empty join will be added with join type IQueryBuilderJoin#LEFT_OUTER_JOIN.]]></description>
           <summary><![CDATA[Add a join based on relation or add a manual join.]]></summary>
           <sample/>
           <parameters>
@@ -18226,7 +18226,7 @@ query.where().add(query.getColumn("flag").eq(new Integer(1)).add(query.getColumn
 <pre>
  // where exists (select 1 from tab where flag = ?)
  query.where().add(query.exists(subQuery.result().addValue(new Integer(1)).getParent().where().add(subQuery.getColumn("flag").eq("T")).getRoot()));
-
+ 
  // or simple variant: adds 'select 1' and calls getRoot()
  query.where().add(query.exists(subQuery.where().add(subQuery.getColumn("flag").eq("T"))));
 </pre>]]></description>
@@ -18501,7 +18501,7 @@ var ok = %%prefix%%foundset.addFoundSetFilterParam('companyname', '#^||=', 'serv
           <return type="void" typecode="void"/>
           <description><![CDATA[Clears the foundset.]]></description>
           <summary><![CDATA[Clears the foundset.]]></summary>
-          <deprecated><![CDATA[As of release 3.1, replaced by clear().]]></deprecated>
+          <deprecated><![CDATA[As of release 3.1, replaced by #clear().]]></deprecated>
           <sample/>
         </function>
         <function name="deleteAllRecords">
@@ -18720,7 +18720,7 @@ for (var i = 0; params != null && i < params.length; i++)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Get the number of records in this foundset.]]></description>
           <summary><![CDATA[Get the number of records in this foundset.]]></summary>
-          <deprecated><![CDATA[As of release 3.1, replaced by getSize().]]></deprecated>
+          <deprecated><![CDATA[As of release 3.1, replaced by #getSize().]]></deprecated>
           <sample><![CDATA[for ( var i = 1 ; i <= %%prefix%%foundset.getMaxRecordIndex() ; i++ )
 {
 	%%prefix%%foundset.setSelectedIndex(i);
@@ -18812,7 +18812,7 @@ When the founset is in multiSelect mode (see property multiSelect), selection ca
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Gets the name of the server used.]]></description>
           <summary><![CDATA[Gets the name of the server used.]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by getDataSource().]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource().]]></deprecated>
           <sample/>
         </function>
         <function name="getSize">
@@ -18835,7 +18835,7 @@ increase as more records are loaded.]]></description>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Gets the name of the table used.]]></description>
           <summary><![CDATA[Gets the name of the table used.]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by getDataSource().]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource().]]></deprecated>
           <sample/>
         </function>
         <function name="invertRecords">
@@ -33913,7 +33913,7 @@ var current = %%prefix%%controller.getSelectedIndex();
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Get the name of the server used.]]></description>
           <summary><![CDATA[Get the name of the server used.]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by getDataSource()]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource()]]></deprecated>
           <sample/>
         </function>
         <function name="getTabSequence">
@@ -33940,7 +33940,7 @@ else {
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Get the name of the table used.]]></description>
           <summary><![CDATA[Get the name of the table used.]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by getDataSource()]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource()]]></deprecated>
           <sample/>
         </function>
         <function name="getWindow">
