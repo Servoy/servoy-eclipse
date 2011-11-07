@@ -599,7 +599,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				members.add(createProperty(context, "length", true, "Number", "Number of forms", PROPERTY));
 
 				// special array lookup property so that forms[xxx]. does code complete.
-				Property arrayProp = createProperty(context, "[]", true, "Form", PROPERTY);
+				Property arrayProp = createProperty(context, "[]", true, "RuntimeForm", PROPERTY);
 				arrayProp.setVisible(false);
 				members.add(arrayProp);
 				type.setName("Forms");
@@ -618,7 +618,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					Property formProperty = createProperty(form.getName(), true, context.getTypeRef("Form<" + form.getName() + '>'),
+					Property formProperty = createProperty(form.getName(), true, context.getTypeRef("RuntimeForm<" + form.getName() + '>'),
 						getDescription(form.getDataSource()), FORM_IMAGE);
 					formProperty.setAttribute(LAZY_VALUECOLLECTION, form);
 					if (FormEncapsulation.isPrivate(form, fs))
@@ -930,7 +930,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			if (typeName.equals("Form") || typeName.equals("RuntimeForm"))
 			{
 				type = TypeInfoModelFactory.eINSTANCE.createType();
-				type.setName(typeName);
+				type.setName("RuntimeForm");
 				type.setKind(TypeKind.JAVA);
 
 				EList<Member> members = type.getMembers();
