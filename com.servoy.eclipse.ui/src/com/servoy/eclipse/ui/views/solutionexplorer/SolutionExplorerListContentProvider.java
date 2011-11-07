@@ -64,6 +64,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.IForm;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
@@ -172,6 +173,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		TYPES.put("IFoundSetInternal", FoundSet.JS_FOUNDSET); //$NON-NLS-1$
 		TYPES.put("FoundSet", FoundSet.JS_FOUNDSET); //$NON-NLS-1$
 		TYPES.put(FormScope.class.getSimpleName(), "RuntimeForm"); //$NON-NLS-1$
+		TYPES.put(IForm.class.getSimpleName(), "RuntimeForm"); //$NON-NLS-1$
 		TYPES.put("org.mozilla.javascript.NativeArray", "Array"); //$NON-NLS-1$ //$NON-NLS-2$
 		TYPES.put("JSWindowImpl$JSWindow", "JSWindow"); //$NON-NLS-1$ //$NON-NLS-2$
 		TYPES.put("IScriptRenderMethods", IScriptRenderMethods.JS_RENDERABLE); //$NON-NLS-1$
