@@ -43,6 +43,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.ScopesUtils;
 
 /**
  * An {@link ISearchQuery} implementation for finding relations in frm and js files.
@@ -74,7 +75,17 @@ public class ScriptVariableSearch extends DLTKSearchEngineSearch
 		if (variable.getParent() instanceof Solution)
 		{
 			FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm", "*.rel" }, true);
-			TextSearchEngine.create().search(scope, collector, Pattern.compile("\\bglobals." + variable.getName() + "\\b"), monitor);
+			if (ScriptVariable.GLOBAL_SCOPE.equals(variable.getScopeName()))
+			{
+				// legacy globals.xx, also matches scopes.globals.xx
+				TextSearchEngine.create().search(scope, collector,
+					ScriptMethodSearch.createSearchPattern(ScriptVariable.GLOBALS_DOT_PREFIX + variable.getName()), monitor);
+			}
+			else
+			{
+				// scopes.scopename.xx
+				TextSearchEngine.create().search(scope, collector, ScriptMethodSearch.createSearchPattern(ScopesUtils.getScopeString(variable)), monitor);
+			}
 		}
 		else
 		{

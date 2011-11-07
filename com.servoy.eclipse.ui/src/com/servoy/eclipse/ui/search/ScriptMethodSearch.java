@@ -38,6 +38,7 @@ import org.eclipse.search.ui.text.FileTextSearchScope;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 
 /**
@@ -68,13 +69,22 @@ public class ScriptMethodSearch extends DLTKSearchEngineSearch
 		final TextSearchRequestor collector = getResultCollector();
 
 		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm", "*.tbl" }, true);
-		TextSearchEngine.create().search(scope, collector, Pattern.compile(method.getUUID().toString()), monitor);
+		TextSearchEngine.create().search(scope, collector, createSearchPattern(method.getUUID().toString()), monitor);
 
 		if (method.getParent() instanceof Solution)
 		{
 			// bgcolor usage
 			scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm" }, true);
-			TextSearchEngine.create().search(scope, collector, Pattern.compile(method.getPrefixedName()), monitor);
+			if (ScriptVariable.GLOBAL_SCOPE.equals(method.getScopeName()))
+			{
+				// legacy globals.xx, also matches scopes.globals.xx
+				TextSearchEngine.create().search(scope, collector, createSearchPattern(ScriptVariable.GLOBALS_DOT_PREFIX + method.getName()), monitor);
+			}
+			else
+			{
+				// scopes.scopename.xx
+				TextSearchEngine.create().search(scope, collector, createSearchPattern(method.getPrefixedName()), monitor);
+			}
 		}
 
 		String scriptPath = SolutionSerializer.getScriptPath(method, false);
@@ -84,6 +94,11 @@ public class ScriptMethodSearch extends DLTKSearchEngineSearch
 		callDLTKSearchEngine(monitor, collector, methodElement, IDLTKSearchConstants.REFERENCES, (Solution)method.getRootObject());
 
 		return Status.OK_STATUS;
+	}
+
+	public static Pattern createSearchPattern(String fixedString)
+	{
+		return Pattern.compile("\\b" + fixedString.replaceAll("\\.", "\\\\.") + "\\b"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
 	/*

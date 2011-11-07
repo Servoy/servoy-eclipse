@@ -183,7 +183,7 @@ public class ValueListEditor extends PersistEditor
 		nameField.addVerifyListener(DocumentValidatorVerifyListener.IDENT_SERVOY_VERIFIER);
 
 		customValues = new Text(comp, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
-		customValues.setToolTipText("list with fixed displayValue[|realValue] ('^' for null real value, %%globals.NAME%% for global real value)"); //$NON-NLS-1$
+		customValues.setToolTipText("list with fixed displayValue[|realValue] ('^' for null real value, %%scopes.globals.NAME%% for global real value)"); //$NON-NLS-1$
 		customValuesButton = new Button(comp, SWT.RADIO);
 		customValuesButton.setText("Custom Values"); //$NON-NLS-1$
 		customvalueButtonSelectionListener = new SelectionAdapter()
