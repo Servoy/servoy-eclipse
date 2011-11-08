@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -97,6 +98,9 @@ public class TagsAndI18NTextDialog extends Dialog
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX);
 	}
 
+	private Browser browser;
+	private TabItem htmlPreviewTabItem;
+
 	/*
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
@@ -143,6 +147,12 @@ public class TagsAndI18NTextDialog extends Dialog
 
 		final Composite textComposite = new Composite(tabFolder, SWT.NONE);
 		textTabItem.setControl(textComposite);
+
+		htmlPreviewTabItem = new TabItem(tabFolder, SWT.NONE);
+		htmlPreviewTabItem.setText("HTML Preview");
+		htmlPreviewTabItem.setControl(null);
+
+		browser = new Browser(tabFolder, SWT.NONE);
 
 		text = new Text(textComposite, SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 		final GroupLayout textLayout = new GroupLayout(textComposite);
@@ -224,6 +234,12 @@ public class TagsAndI18NTextDialog extends Dialog
 	{
 		value = text.getText();
 		i18nComposite.selectKey(value);
+		if (value.contains("<html"))
+		{
+			browser.setText(value);
+			htmlPreviewTabItem.setControl(browser);
+		}
+		else htmlPreviewTabItem.setControl(null);
 	}
 
 	protected void handleAdd()
