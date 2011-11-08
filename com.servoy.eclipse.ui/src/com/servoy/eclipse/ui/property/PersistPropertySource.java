@@ -191,7 +191,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	public static final IPropertyController<Integer, Integer> SHAPE_TYPE_CONTOLLER;
 	public static final IPropertyController<Integer, Integer> VIEW_TYPE_CONTOLLER;
 	public static final IPropertyController<Integer, Integer> DISPLAY_TYPE_CONTOLLER;
-	public static final IPropertyController<String, Integer> NAMEDFOUNDSET_CONTOLLER;
 	public static final IPropertyController<Integer, Integer> TAB_ORIENTATION_CONTROLLER;
 	public static final IPropertyController<String, String> MNEMONIC_CONTROLLER;
 	public static final IPropertyController<Integer, Integer> TEXT_ORIENTATION_CONTROLLER;
@@ -271,10 +270,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 		MNEMONIC_CONTROLLER = new EditableComboboxPropertyController("mnemonic", RepositoryHelper.getDisplayName("mnemonic", GraphicalComponent.class),
 			new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" });
-
-		NAMEDFOUNDSET_CONTOLLER = new ComboboxPropertyController<String>("namedFoundSet", RepositoryHelper.getDisplayName("namedFoundSet", Form.class),
-			new ComboboxPropertyModel<String>(new String[] { null, Form.SEPARATE_FLAG, Form.EMPTY_FLAG },
-				new String[] { Messages.LabelDefault, Form.SEPARATE_FLAG, Form.EMPTY_FLAG }), Messages.LabelUnresolved);
 
 		VIEW_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>(
 			"view",
@@ -1575,6 +1570,13 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		};
 	}
 
+	public static ComboboxPropertyController<String> createNamedFoundsetPropertyController(String id, String displayName, Form form)
+	{
+		NamedFoundsetComboboxModel model = new NamedFoundsetComboboxModel(form);
+		return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved, new ComboboxDelegateValueEditor<String>(
+			new NamedFoundsetRelationValueEditor(form), model));
+	}
+
 	/**
 	 * Get property descriptor that maps multiple properties into 1
 	 * 
@@ -2856,11 +2858,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return DISPLAY_TYPE_CONTOLLER;
 		}
 
-		if (name.equals("namedFoundSet"))
-		{
-			return NAMEDFOUNDSET_CONTOLLER;
-		}
-
 		if (name.equals("tabOrientation"))
 		{
 			return TAB_ORIENTATION_CONTROLLER;
@@ -3061,6 +3058,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		{
 			return createStyleClassPropertyController(persistContext.getPersist(), id, displayName, ModelUtils.getStyleLookupname(persistContext.getPersist()),
 				form);
+		}
+
+		if (name.equals("namedFoundSet"))
+		{
+			return createNamedFoundsetPropertyController(id, displayName, form);
 		}
 
 		if (name.equals("styleName"))

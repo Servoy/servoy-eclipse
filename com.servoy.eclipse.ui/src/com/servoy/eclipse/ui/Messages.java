@@ -80,6 +80,8 @@ public class Messages extends NLS
 	public static String SelectionModeSingle;
 	public static String SelectionModeMulti;
 
+	public static String NamedFoundsetGlobalRelationSuffix;
+
 	public static String Public;
 	public static String Private;
 	public static String ModulePrivate;
