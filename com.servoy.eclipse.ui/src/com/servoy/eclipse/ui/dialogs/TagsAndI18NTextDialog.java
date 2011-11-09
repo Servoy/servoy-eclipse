@@ -66,6 +66,7 @@ import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationList;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.util.HtmlUtils;
 
 public class TagsAndI18NTextDialog extends Dialog
 {
@@ -234,7 +235,7 @@ public class TagsAndI18NTextDialog extends Dialog
 	{
 		value = text.getText();
 		i18nComposite.selectKey(value);
-		if (value.contains("<html"))
+		if (HtmlUtils.hasUsefulHtmlContent(value))
 		{
 			browser.setText(value);
 			htmlPreviewTabItem.setControl(browser);
