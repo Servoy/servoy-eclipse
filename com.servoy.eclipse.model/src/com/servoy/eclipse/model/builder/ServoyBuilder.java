@@ -1959,89 +1959,136 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						if (o instanceof Field)
 						{
 							Field field = (Field)o;
-							if (field.getDisplayType() == Field.COMBOBOX && field.getEditable() && field.getValuelistID() > 0)
+							if (field.getValuelistID() > 0)
 							{
 								ValueList vl = flattenedSolution.getValueList(field.getValuelistID());
 								if (vl != null)
 								{
-									boolean showWarning = false;
-									if (vl.getValueListType() == ValueList.DATABASE_VALUES && vl.getReturnDataProviders() != vl.getShowDataProviders())
+									if (field.getDisplayType() == Field.COMBOBOX && field.getEditable())
 									{
-										showWarning = true;
-									}
-									if (vl.getValueListType() == ValueList.CUSTOM_VALUES && vl.getCustomValues() != null && vl.getCustomValues().contains("|"))
-									{
-										showWarning = true;
-									}
-									if (showWarning)
-									{
-										ServoyMarker mk;
-										if (field.getName() != null)
+
+										boolean showWarning = false;
+										if (vl.getValueListType() == ValueList.DATABASE_VALUES && vl.getReturnDataProviders() != vl.getShowDataProviders())
 										{
-											mk = MarkerMessages.FormEditableNamedComboboxCustomValuelist.fill(field.getName());
+											showWarning = true;
 										}
-										else
+										if (vl.getValueListType() == ValueList.CUSTOM_VALUES && vl.getCustomValues() != null &&
+											vl.getCustomValues().contains("|"))
 										{
-											mk = MarkerMessages.FormEditableUnnamedComboboxCustomValuelist;
+											showWarning = true;
 										}
-										addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, field);
-									}
-								}
-							}
-							if (field.getValuelistID() > 0 && (field.getDisplayType() == Field.TEXT_FIELD || field.getDisplayType() == Field.TYPE_AHEAD))
-							{
-								ValueList vl = flattenedSolution.getValueList(field.getValuelistID());
-								if (vl != null && vl.getValueListType() == ValueList.DATABASE_VALUES)
-								{
-									try
-									{
-										Table table = (Table)vl.getTable();
-										ScriptCalculation calc = null;
-										boolean errorFound = false;
-										if (vl.getDataProviderID1() != null)
-										{
-											calc = flattenedSolution.getScriptCalculation(vl.getDataProviderID1(), table);
-											if (calc != null)
-											{
-												Column column = table.getColumn(vl.getDataProviderID1());
-												if (column == null) errorFound = true;
-											}
-										}
-										if (vl.getDataProviderID2() != null && !errorFound)
-										{
-											calc = flattenedSolution.getScriptCalculation(vl.getDataProviderID2(), table);
-											if (calc != null)
-											{
-												Column column = table.getColumn(vl.getDataProviderID2());
-												if (column == null) errorFound = true;
-											}
-										}
-										if (vl.getDataProviderID3() != null && !errorFound)
-										{
-											calc = flattenedSolution.getScriptCalculation(vl.getDataProviderID3(), table);
-											if (calc != null)
-											{
-												Column column = table.getColumn(vl.getDataProviderID3());
-												if (column == null) errorFound = true;
-											}
-										}
-										if (errorFound)
+										if (showWarning)
 										{
 											ServoyMarker mk;
 											if (field.getName() != null)
 											{
-												mk = MarkerMessages.FormTypeAheadNamedUnstoredCalculation.fill(field.getName());
+												mk = MarkerMessages.FormEditableNamedComboboxCustomValuelist.fill(field.getName());
 											}
 											else
 											{
-												mk = MarkerMessages.FormTypeAheadUnnamedUnstoredCalculation;
+												mk = MarkerMessages.FormEditableUnnamedComboboxCustomValuelist;
 											}
-											addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, field);
+											addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, field);
 										}
 									}
-									catch (Exception e)
+									if ((field.getDisplayType() == Field.TEXT_FIELD || field.getDisplayType() == Field.TYPE_AHEAD) &&
+										vl.getValueListType() == ValueList.DATABASE_VALUES)
 									{
-										ServoyLog.logError(e);
+										try
+										{
+											Table table = (Table)vl.getTable();
+											ScriptCalculation calc = null;
+											boolean errorFound = false;
+											if (vl.getDataProviderID1() != null)
+											{
+												calc = flattenedSolution.getScriptCalculation(vl.getDataProviderID1(), table);
+												if (calc != null)
+												{
+													Column column = table.getColumn(vl.getDataProviderID1());
+													if (column == null) errorFound = true;
+												}
+											}
+											if (vl.getDataProviderID2() != null && !errorFound)
+											{
+												calc = flattenedSolution.getScriptCalculation(vl.getDataProviderID2(), table);
+												if (calc != null)
+												{
+													Column column = table.getColumn(vl.getDataProviderID2());
+													if (column == null) errorFound = true;
+												}
+											}
+											if (vl.getDataProviderID3() != null && !errorFound)
+											{
+												calc = flattenedSolution.getScriptCalculation(vl.getDataProviderID3(), table);
+												if (calc != null)
+												{
+													Column column = table.getColumn(vl.getDataProviderID3());
+													if (column == null) errorFound = true;
+												}
+											}
+											if (errorFound)
+											{
+												ServoyMarker mk;
+												if (field.getName() != null)
+												{
+													mk = MarkerMessages.FormTypeAheadNamedUnstoredCalculation.fill(field.getName());
+												}
+												else
+												{
+													mk = MarkerMessages.FormTypeAheadUnnamedUnstoredCalculation;
+												}
+												addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, field);
+											}
+										}
+										catch (Exception e)
+										{
+											ServoyLog.logError(e);
+										}
+									}
+									if (vl.getValueListType() == ValueList.DATABASE_VALUES && vl.getRelationName() != null)
+									{
+										Form form = (Form)o.getAncestor(IRepository.FORMS);
+										String[] parts = vl.getRelationName().split("\\."); //$NON-NLS-1$
+										Relation relation = flattenedSolution.getRelation(parts[0]);
+										if (!relation.getPrimaryDataSource().equals(form.getDataSource()))
+										{
+											ServoyMarker mk;
+											if (field.getName() != null)
+											{
+												mk = MarkerMessages.FormNamedFieldRelatedValuelist.fill(field.getName(), vl.getName(), form.getName());
+											}
+											else
+											{
+												mk = MarkerMessages.FormUnnamedFieldRelatedValuelist.fill(vl.getName(), form.getName());
+											}
+											addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, field);
+										}
+									}
+									if (vl.getFallbackValueListID() > 0)
+									{
+										ValueList fallback = flattenedSolution.getValueList(vl.getFallbackValueListID());
+										if (fallback != null && fallback.getValueListType() == ValueList.DATABASE_VALUES && fallback.getRelationName() != null)
+										{
+											Form form = (Form)o.getAncestor(IRepository.FORMS);
+											String[] parts = fallback.getRelationName().split("\\."); //$NON-NLS-1$
+											Relation relation = flattenedSolution.getRelation(parts[0]);
+											if (!relation.getPrimaryDataSource().equals(form.getDataSource()))
+											{
+												ServoyMarker mk;
+												if (field.getName() != null)
+												{
+													mk = MarkerMessages.FormNamedFieldFallbackRelatedValuelist.fill(field.getName(), vl.getName(),
+														fallback.getName(), form.getName());
+												}
+												else
+												{
+													mk = MarkerMessages.FormUnnamedFieldFallbackRelatedValuelist.fill(vl.getName(), fallback.getName(),
+														form.getName());
+												}
+												addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null,
+													field);
+											}
+										}
 									}
 								}
 							}

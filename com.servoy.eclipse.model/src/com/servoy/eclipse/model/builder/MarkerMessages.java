@@ -271,6 +271,15 @@ public class MarkerMessages
 	public static ServoyMarker FormEditableUnnamedComboboxCustomValuelist = new ServoyMarker(
 		"Editable combobox has attached a valuelist that contains real values. This is not supported.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
+	public static ServoyMarker FormNamedFieldRelatedValuelist = new ServoyMarker(
+		"Field \"{0}\" has attached a related valuelist \"{1}\" that doesn't have the same datasource as form \"{2}\" .", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+	public static ServoyMarker FormUnnamedFieldRelatedValuelist = new ServoyMarker(
+		"Field has attached a related valuelist \"{0}\" that doesn't have the same datasource as form \"{1}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+
+	public static ServoyMarker FormNamedFieldFallbackRelatedValuelist = new ServoyMarker(
+		"Field \"{0}\" has attached a valuelist \"{1}\" whose fallback valuelist \"{2}\" is related but that doesn't have the same datasource as form \"{3}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+	public static ServoyMarker FormUnnamedFieldFallbackRelatedValuelist = new ServoyMarker(
+		"Field has attached a valuelist \"{0}\" whose fallback valuelist \"{1}\" is related but that doesn't have the same datasource as form \"{2}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	/**
 	 * The labelfor element used by a label cannot be found.
 	 */
