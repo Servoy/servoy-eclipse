@@ -377,7 +377,7 @@ public class SolutionDeserializer
 							else if (file.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 							{
 								List<JSONObject> scriptObjects = parseJSFile(f, changed);
-								if (parent instanceof Solution)
+								if (dir.equals(solutionDir))
 								{
 									// the scope name for global methods/variables is based on the filename
 									String scopeName = file.substring(0, file.length() - SolutionSerializer.JS_FILE_EXTENSION.length());
