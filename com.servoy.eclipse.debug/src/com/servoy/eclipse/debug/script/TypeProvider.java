@@ -67,6 +67,7 @@ import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServoyBeanFactory;
+import com.servoy.j2db.dataprocessing.DataException;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
@@ -136,6 +137,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	{
 		addType("JSDataSet", JSDataSet.class);
 		addType(IExecutingEnviroment.TOPLEVEL_SERVOY_EXCEPTION, ServoyException.class);
+		addType(DataException.class.getSimpleName(), DataException.class);
 
 		addAnonymousClassType("Controller", JSForm.class);
 		addAnonymousClassType("JSApplication", JSApplication.class);
