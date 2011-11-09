@@ -17,7 +17,8 @@
 
 package com.servoy.eclipse.ui.views;
 
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IViewReference;
@@ -25,6 +26,15 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.views.properties.PropertySheetPage;
+
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.IRestorer;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.SimplePersistFactory;
+import com.servoy.j2db.persistence.Solution;
 
 
 /**
@@ -37,6 +47,7 @@ import org.eclipse.ui.views.properties.PropertySheetPage;
 public class SolutionPropertiesPage extends PropertyPage
 {
 	private ModifiedPropertySheetPage page;
+	private Solution original;
 
 	@Override
 	protected Control createContents(Composite parent)
@@ -44,16 +55,44 @@ public class SolutionPropertiesPage extends PropertyPage
 		page = new ModifiedPropertySheetPage();
 		page.createControl(parent);
 
-		ISelection sel = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection();
 		IWorkbenchPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().getActivePart();
-		page.selectionChanged(part, sel);
+		IPersist persist = (IPersist)getElement().getAdapter(IPersist.class);
+		if (persist instanceof Solution)
+		{
+			original = SimplePersistFactory.createDummyCopy((Solution)persist);
+			original.copyPropertiesMap(((Solution)persist).getPropertiesMap(), true);
+			page.selectionChanged(part, new StructuredSelection(persist));
+		}
 
 		return page.getControl();
 	}
 
 	@Override
+	public boolean performCancel()
+	{
+		IPersist persist = (IPersist)getElement().getAdapter(IPersist.class);//selected element
+		if (persist instanceof Solution)
+		{
+			IRestorer restorer = (IRestorer)Platform.getAdapterManager().getAdapter(original, IRestorer.class);
+			Object state = restorer.getState(original);
+			restorer.restoreState(persist, state);
+			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(original.getName());
+			try
+			{
+				servoyProject.saveEditingSolutionNodes(new IPersist[] { persist }, false);
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+		return super.performCancel();
+	}
+
+	@Override
 	public boolean performOk()
 	{
+		//refresh the properties sheet page
 		IViewReference[] iv = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getViewReferences();
 		for (IViewReference ref : iv)
 		{
