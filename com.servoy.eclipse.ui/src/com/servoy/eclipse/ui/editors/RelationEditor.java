@@ -186,7 +186,7 @@ public class RelationEditor extends PersistEditor
 			{
 				Point pt = new Point(event.x, event.y);
 				TableItem item = table.getItem(pt);
-				if (item != null && item.getBounds(CI_DELETE).contains(pt) && (!"".equals(item.getText(CI_FROM)) || !"".equals(item.getText(CI_TO))))
+				if (item != null && item.getBounds(CI_DELETE).contains(pt) && (!"".equals(item.getText(CI_FROM)) || !"".equals(item.getText(CI_TO)))) //$NON-NLS-1$ //$NON-NLS-2$
 				{
 					List<TableItem> items = Arrays.asList(table.getItems());
 					int index = items.indexOf(item);
@@ -302,12 +302,19 @@ public class RelationEditor extends PersistEditor
 			Integer[] row = null;
 			if (oldInput != null) row = (Integer[])oldInput.get(items.indexOf(element));
 			Integer ci_from;
-			if (reuseSource && row != null) ci_from = row[0];
-			else ci_from = getDataProvidersIndex(CI_FROM, persist.getPrimaryDataProviderID());
+			if (reuseSource && row != null)
+			{
+				ci_from = row[0];
+			}
+			else
+			{
+				// parse as scopes string so globals.x gets changes to scopes.globals.x
+				ci_from = getDataProvidersIndex(CI_FROM, ScopesUtils.getScopeString(ScopesUtils.getVariableScope(persist.getPrimaryDataProviderID())));
+			}
 			Integer ci_to;
 			if (reuseDestination && row != null) ci_to = row[2];
 			else ci_to = getDataProvidersIndex(CI_TO, persist.getForeignColumnName());
-			input.add(new Integer[] { ci_from, new Integer(persist.getOperator()), ci_to, null });
+			input.add(new Integer[] { ci_from, Integer.valueOf(persist.getOperator()), ci_to, null });
 		}
 		String[] oldColumns = null;
 		if (fromCache != null) oldColumns = fromCache.getRight();
@@ -681,10 +688,7 @@ public class RelationEditor extends PersistEditor
 				if (calcs != null && calcs.size() > 0)
 				{
 					retval.add(SEPARATOR);
-					for (String dp : calcs.keySet())
-					{
-						retval.add(calcs.get(dp));
-					}
+					retval.addAll(calcs.values());
 				}
 				Iterator<ScriptVariable> globs = fs.getScriptVariables(true);
 				if (globs.hasNext())
