@@ -46,6 +46,8 @@ import com.servoy.eclipse.ui.editors.table.DataComposite;
 import com.servoy.eclipse.ui.editors.table.EventsComposite;
 import com.servoy.eclipse.ui.editors.table.FoundsetMethodsComposite;
 import com.servoy.eclipse.ui.editors.table.SecurityComposite;
+import com.servoy.j2db.dataprocessing.IColumnConverter;
+import com.servoy.j2db.dataprocessing.IColumnValidator;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumn;
@@ -60,6 +62,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.Utils;
 
 public class TableEditor extends MultiPageEditorPart implements IActiveProjectListener
@@ -531,6 +534,32 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				if (table.getRowIdentColumnsCount() == 0)
 				{
 					MessageDialog.openWarning(getSite().getShell(), "Warning", "No primary key specified on table.");
+				}
+				for (Column column : table.getColumns())
+				{
+					if (column.getColumnInfo() != null)
+					{
+						if (column.getColumnInfo().getValidatorName() != null && column.getColumnInfo().getValidatorProperties() == null)
+						{
+							IColumnValidator validator = ApplicationServerSingleton.get().getPluginManager().getColumnValidatorManager().getValidator(
+								column.getColumnInfo().getValidatorName());
+							if (validator != null && validator.getDefaultProperties() != null)
+							{
+								throw new RepositoryException(
+									"Column " + column.getName() + " has validator " + validator.getName() + " that doesn't have properties filled in."); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+							}
+						}
+						if (column.getColumnInfo().getConverterName() != null && column.getColumnInfo().getConverterProperties() == null)
+						{
+							IColumnConverter converter = ApplicationServerSingleton.get().getPluginManager().getColumnConverterManager().getConverter(
+								column.getColumnInfo().getConverterName());
+							if (converter != null && converter.getDefaultProperties() != null)
+							{
+								throw new RepositoryException(
+									"Column " + column.getName() + " has converter " + converter.getName() + " that doesn't have properties filled in."); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+							}
+						}
+					}
 				}
 
 				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
