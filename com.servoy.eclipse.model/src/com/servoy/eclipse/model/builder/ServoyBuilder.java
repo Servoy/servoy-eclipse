@@ -2220,91 +2220,86 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						ISupportChilds parent = o.getParent();
 						if (o.getTypeID() == IRepository.SOLUTIONS && parent != null)
 						{
+							// solution should have no parent
 							addBadStructureMarker(o, servoyProject, project);
 						}
-						else if (o.getTypeID() == IRepository.MEDIA && (parent == null || parent.getTypeID() != IRepository.SOLUTIONS))
+						else if (parent == null)
+						{
+							// only a solution have no parents the rest should have a parent.
+							if (o.getTypeID() != IRepository.SOLUTIONS) addBadStructureMarker(o, servoyProject, project);
+						}
+						else if (parent.getTypeID() == IRepository.SOLUTIONS)
+						{
+
+							switch (o.getTypeID())
+							{
+								case IRepository.MEDIA :
+								case IRepository.FORMS :
+								case IRepository.RELATIONS :
+								case IRepository.TABLENODES :
+								case IRepository.VALUELISTS :
+								case IRepository.SCRIPTVARIABLES :
+								case IRepository.METHODS :
+									break;
+								default :
+									addBadStructureMarker(o, servoyProject, project);
+							}
+
+						}
+						else if (parent.getTypeID() == IRepository.FORMS)
+						{
+							switch (o.getTypeID())
+							{
+								case IRepository.SCRIPTVARIABLES :
+								case IRepository.PORTALS :
+								case IRepository.METHODS :
+								case IRepository.TABPANELS :
+								case IRepository.BEANS :
+								case IRepository.RECTSHAPES :
+								case IRepository.SHAPES :
+								case IRepository.GRAPHICALCOMPONENTS :
+								case IRepository.PARTS :
+								case IRepository.FIELDS :
+									break;
+								default :
+									addBadStructureMarker(o, servoyProject, project);
+							}
+						}
+						else if (parent.getTypeID() == IRepository.TABLENODES)
+						{
+							switch (o.getTypeID())
+							{
+								case IRepository.AGGREGATEVARIABLES :
+								case IRepository.SCRIPTCALCULATIONS :
+								case IRepository.METHODS :
+									break;
+								default :
+									addBadStructureMarker(o, servoyProject, project);
+							}
+						}
+						else if (parent.getTypeID() == IRepository.PORTALS)
+						{
+							switch (o.getTypeID())
+							{
+								case IRepository.RECTSHAPES :
+								case IRepository.SHAPES :
+								case IRepository.GRAPHICALCOMPONENTS :
+								case IRepository.FIELDS :
+									break;
+								default :
+									addBadStructureMarker(o, servoyProject, project);
+							}
+						}
+						else if (parent.getTypeID() == IRepository.RELATIONS && o.getTypeID() != IRepository.RELATION_ITEMS)
 						{
 							addBadStructureMarker(o, servoyProject, project);
 						}
-						else if (o.getTypeID() == IRepository.SCRIPTVARIABLES &&
-							(parent == null || (parent.getTypeID() != IRepository.SOLUTIONS && parent.getTypeID() != IRepository.FORMS)))
+						else if (parent.getTypeID() == IRepository.TABPANELS && o.getTypeID() != IRepository.TABS)
 						{
 							addBadStructureMarker(o, servoyProject, project);
 						}
-						else if (o.getTypeID() == IRepository.METHODS &&
-							(parent == null || (parent.getTypeID() != IRepository.SOLUTIONS && parent.getTypeID() != IRepository.FORMS && parent.getTypeID() != IRepository.TABLENODES)))
-						{
-							addBadStructureMarker(o, servoyProject, project);
-						}
-						else if (o.getTypeID() == IRepository.FORMS && (parent == null || parent.getTypeID() != IRepository.SOLUTIONS))
-						{
-							addBadStructureMarker(o, servoyProject, project);
-						}
-						else if (o.getTypeID() == IRepository.RELATIONS && (parent == null || parent.getTypeID() != IRepository.SOLUTIONS))
-						{
-							addBadStructureMarker(o, servoyProject, project);
-						}
-						else if (o.getTypeID() == IRepository.TABLENODES && (parent == null || parent.getTypeID() != IRepository.SOLUTIONS))
-						{
-							addBadStructureMarker(o, servoyProject, project);
-						}
-						else if (o.getTypeID() == IRepository.VALUELISTS && (parent == null || parent.getTypeID() != IRepository.SOLUTIONS))
-						{
-							addBadStructureMarker(o, servoyProject, project);
-						}
-						else if (o.getTypeID() == IRepository.PORTALS && (parent == null || parent.getTypeID() != IRepository.FORMS))
-						{
-							addBadStructureMarker(o, servoyProject, project);
-						}
-						else if (o.getTypeID() == IRepository.TABPANELS && (parent == null || parent.getTypeID() != IRepository.FORMS))
-						{
-							addBadStructureMarker(o, servoyProject, project);
-						}
-						else if (o.getTypeID() == IRepository.BEANS && (parent == null || parent.getTypeID() != IRepository.FORMS))
-						{
-							addBadStructureMarker(o, servoyProject, project);
-						}
-						else if (o.getTypeID() == IRepository.RECTSHAPES &&
-							(parent == null || (parent.getTypeID() != IRepository.FORMS && parent.getTypeID() != IRepository.PORTALS)))
-						{
-							addBadStructureMarker(o, servoyProject, project);
-						}
-						else if (o.getTypeID() == IRepository.GRAPHICALCOMPONENTS &&
-							(parent == null || (parent.getTypeID() != IRepository.FORMS && parent.getTypeID() != IRepository.PORTALS)))
-						{
-							addBadStructureMarker(o, servoyProject, project);
-						}
-						else if (o.getTypeID() == IRepository.SHAPES &&
-							(parent == null || (parent.getTypeID() != IRepository.FORMS && parent.getTypeID() != IRepository.PORTALS)))
-						{
-							addBadStructureMarker(o, servoyProject, project);
-						}
-						else if (o.getTypeID() == IRepository.PARTS && (parent == null || parent.getTypeID() != IRepository.FORMS))
-						{
-							addBadStructureMarker(o, servoyProject, project);
-						}
-						else if (o.getTypeID() == IRepository.FIELDS &&
-							(parent == null || (parent.getTypeID() != IRepository.FORMS && parent.getTypeID() != IRepository.PORTALS)))
-						{
-							addBadStructureMarker(o, servoyProject, project);
-						}
-						else if (o.getTypeID() == IRepository.RELATION_ITEMS && (parent == null || parent.getTypeID() != IRepository.RELATIONS))
-						{
-							addBadStructureMarker(o, servoyProject, project);
-						}
-						else if (o.getTypeID() == IRepository.TABS && (parent == null || parent.getTypeID() != IRepository.TABPANELS))
-						{
-							addBadStructureMarker(o, servoyProject, project);
-						}
-						else if (o.getTypeID() == IRepository.SCRIPTCALCULATIONS && (parent == null || parent.getTypeID() != IRepository.TABLENODES))
-						{
-							addBadStructureMarker(o, servoyProject, project);
-						}
-						else if (o.getTypeID() == IRepository.AGGREGATEVARIABLES && (parent == null || parent.getTypeID() != IRepository.TABLENODES))
-						{
-							addBadStructureMarker(o, servoyProject, project);
-						}
-						else if (!(o instanceof IVariable) && !(o instanceof IScriptProvider) &&
+
+						if (!(o instanceof IVariable) && !(o instanceof IScriptProvider) &&
 							!Utils.getAsBoolean(((AbstractBase)o).getRuntimeProperty(SolutionDeserializer.POSSIBLE_DUPLICATE_UUID)))
 						{
 							// remove this property as it takes too much memory
