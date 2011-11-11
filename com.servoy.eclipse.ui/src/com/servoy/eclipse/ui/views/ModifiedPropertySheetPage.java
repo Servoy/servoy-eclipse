@@ -202,10 +202,10 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 							TreeItem item = tree.getItem(new Point(event.x, event.y));
 							if (item != null &&
 								(RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONFOCUSLOSTMETHODID.getPropertyName(), null).equals(
-									item.getText(0)) || RepositoryHelper.getDisplayName(
-									StaticContentSpecLoader.PROPERTY_ONELEMENTFOCUSLOSTMETHODID.getPropertyName(), null).equals(item.getText(0))) ||
-								RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONDATACHANGEMETHODID.getPropertyName(), null).equals(
-									item.getText(0)))
+									item.getText(0)) ||
+									RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONELEMENTFOCUSLOSTMETHODID.getPropertyName(), null).equals(
+										item.getText(0)) || RepositoryHelper.getDisplayName(
+									StaticContentSpecLoader.PROPERTY_ONDATACHANGEMETHODID.getPropertyName(), null).equals(item.getText(0))))
 							{
 								if (tip != null && !tip.isDisposed()) tip.dispose();
 								tip = new Shell(tree.getShell(), SWT.ON_TOP | SWT.NO_FOCUS | SWT.TOOL);
