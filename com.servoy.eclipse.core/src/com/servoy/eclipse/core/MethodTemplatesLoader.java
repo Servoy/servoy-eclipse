@@ -13,20 +13,23 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core;
 
-import java.net.URL;
-import java.util.Iterator;
+import java.io.InputStream;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.ClientMethodTemplatesLoader;
 import com.servoy.j2db.persistence.MethodTemplate;
 
+@SuppressWarnings("nls")
 public class MethodTemplatesLoader
 {
 	public static void loadMethodTemplatesFromXML()
@@ -36,28 +39,32 @@ public class MethodTemplatesLoader
 			// even if it was loaded before with "ClientMethodTemplatesLoader.loadClientMethodTemplatesIfNeeded" we must load the XML, as we are in developer and we need all the method template info
 			ClientMethodTemplatesLoader.setLoaded();
 
-			URL url = MethodTemplatesLoader.class.getResource("doc/methodtemplates.xml"); //$NON-NLS-1$
+			InputStream is = MethodTemplatesLoader.class.getResourceAsStream("doc/methodtemplates.xml"); //$NON-NLS-1$
 			try
 			{
-				SAXReader reader = new SAXReader();
-				Document doc = reader.read(url);
-				Element rootElement = doc.getRootElement();
-				Iterator it = rootElement.elementIterator("event");
+				DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+				Document doc = builder.parse(is);
+				Element rootElement = doc.getDocumentElement();
+				NodeList eventElements = rootElement.getElementsByTagName("event");
 				int counter = 0;
-				while (it.hasNext())
+				for (int i = 0; i < eventElements.getLength(); i++)
 				{
-					Element eventElem = (Element)it.next();
-					String name = eventElem.attributeValue("name");
-					Element methTempl = eventElem.element("methodtemplate");
-					MethodTemplate mt = MethodTemplate.fromXML(methTempl);
-					MethodTemplate.COMMON_TEMPLATES.put(name, mt);
-					counter++;
+					Element eventElem = (Element)eventElements.item(i);
+					String name = eventElem.getAttribute("name");
+					NodeList templElements = eventElem.getElementsByTagName("methodtemplate");
+					if (templElements.getLength() > 0)
+					{
+						Element methTempl = (Element)templElements.item(0);
+						MethodTemplate mt = MethodTemplate.fromXML(methTempl);
+						MethodTemplate.COMMON_TEMPLATES.put(name, mt);
+						counter++;
+					}
 				}
 				System.out.println("Loaded " + counter + " method templates.");
 			}
-			catch (DocumentException e)
+			catch (Throwable e)
 			{
-				e.printStackTrace();
+				ServoyLog.logError("Exception while loading method templates.", e);
 			}
 		}
 	}

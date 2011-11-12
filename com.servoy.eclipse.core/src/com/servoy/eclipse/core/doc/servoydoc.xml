@@ -8295,6 +8295,16 @@ They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION,
 	var myHideElementsForm = solutionModel.newForm('newForm7', 'myServer', 'myTable', 'myStyleName', false, 800, 600);
 	myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
         </constant>
+        <constant name="EMPTY_FOUNDSET">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description/>
+          <sample><![CDATA[// form with empty foundset
+	var frmEmpty = solutionModel.newForm('products_empty', 'example_data', 'products', null, true, 640, 480);
+	frmEmpty.newLabel("Empty FoundSet",10,10,200,20);
+	frmEmpty.newField('categoryid',JSField.TEXT_FIELD,10,40,200,20);
+	frmEmpty.newField('productname',JSField.TEXT_FIELD,10,70,200,20);
+	frmEmpty.namedFoundSet = JSForm.EMPTY_FOUNDSET;]]></sample>
+        </constant>
         <constant name="HIDE_CONTROLLER_ENCAPSULATION">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
@@ -8551,6 +8561,40 @@ They are as follows: JSForm.LIST_VIEW, JSForm.LOCKED_LIST_VIEW, JSForm.LOCKED_RE
 	var myRecordViewForm = solutionModel.newForm('newForm5', 'myServer', 'myTable', 'myStyleName', false, 800, 600);
 	myRecordViewForm.view = JSForm.RECORD_VIEW;]]></sample>
         </constant>
+        <constant name="SELECTION_MODE_DEFAULT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used for form selectionMode property. It means that the foundset's multiSelect property is used.]]></description>
+          <summary><![CDATA[Constant used for form selectionMode property.]]></summary>
+          <sample><![CDATA[var myForm = solutionModel.getForm('my_form_name');
+myForm.selectionMode = JSForm.SELECTION_MODE_DEFAULT;]]></sample>
+        </constant>
+        <constant name="SELECTION_MODE_MULTI">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used for form selectionMode property. It means that the form will force multiSelect to true on the foundset it uses.]]></description>
+          <summary><![CDATA[Constant used for form selectionMode property.]]></summary>
+          <sample><![CDATA[var myForm = solutionModel.getForm('my_form_name');
+myForm.selectionMode = JSForm.SELECTION_MODE_MULTI;]]></sample>
+        </constant>
+        <constant name="SELECTION_MODE_SINGLE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used for form selectionMode property. It means that the form will force multiSelect to false on the foundset it uses.]]></description>
+          <summary><![CDATA[Constant used for form selectionMode property.]]></summary>
+          <sample><![CDATA[var myForm = solutionModel.getForm('my_form_name');
+myForm.selectionMode = JSForm.SELECTION_MODE_SINGLE;]]></sample>
+        </constant>
+        <constant name="SEPARATE_FOUNDSET">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description/>
+          <sample><![CDATA[// form with separate foundset
+	var frmSeparate = solutionModel.newForm('products_separate', 'example_data', 'products', null, true, 640, 480);
+	frmSeparate.newLabel("Separate FoundSet",10,10,200,20);
+	frmSeparate.newField('categoryid',JSField.TEXT_FIELD,10,40,200,20);
+	frmSeparate.newField('productname',JSField.TEXT_FIELD,10,70,200,20);
+	frmSeparate.namedFoundSet = JSForm.SEPARATE_FOUNDSET;
+	forms['products_separate'].controller.find();
+	forms['products_separate'].categoryid = '=2';
+	forms['products_separate'].controller.search();]]></sample>
+        </constant>
       </constants>
       <properties>
         <property name="borderType">
@@ -8615,14 +8659,21 @@ application.output(formName);]]></sample>
         <property name="namedFoundSet">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Property that tells the form to use a named foundset instead of the default foundset.
-When "separate" as special value is specified the form will always create a copy of assigned foundset and therefor become separated from other foundsets]]></description>
+When JSForm.SEPARATE_FOUNDSET is specified the form will always create a copy of assigned foundset and therefore become separated from other foundsets.
+When JSForm.EMPTY_FOUNDSET, the form will have an initially empty foundset.
+
+The namedFoundset can be based on a global relation; in this case namedFoundset is the relation's name.
+You can also set the namedFoundset to a JSRelation object directly.
+It will tell this form to initially load a global relation based foundset.
+The global relation's foreign datasource must match the form's datasource.
+Do not use relations named "empty" or "separate" to avoid confusions.]]></description>
           <summary><![CDATA[Property that tells the form to use a named foundset instead of the default foundset.]]></summary>
           <sample><![CDATA[// form with separate foundset
 	var frmSeparate = solutionModel.newForm('products_separate', 'example_data', 'products', null, true, 640, 480);
 	frmSeparate.newLabel("Separate FoundSet",10,10,200,20);
 	frmSeparate.newField('categoryid',JSField.TEXT_FIELD,10,40,200,20);
 	frmSeparate.newField('productname',JSField.TEXT_FIELD,10,70,200,20);
-	frmSeparate.namedFoundSet = SM_NAMEDFOUNDSET.SEPARATE;
+	frmSeparate.namedFoundSet = JSForm.SEPARATE_FOUNDSET;
 	forms['products_separate'].controller.find();
 	forms['products_separate'].categoryid = '=2';
 	forms['products_separate'].controller.search();
@@ -8632,11 +8683,15 @@ When "separate" as special value is specified the form will always create a copy
 	frmEmpty.newLabel("Empty FoundSet",10,10,200,20);
 	frmEmpty.newField('categoryid',JSField.TEXT_FIELD,10,40,200,20);
 	frmEmpty.newField('productname',JSField.TEXT_FIELD,10,70,200,20);
-	frmEmpty.namedFoundSet = SM_NAMEDFOUNDSET.EMPTY;
+	frmEmpty.namedFoundSet = JSForm.EMPTY_FOUNDSET;
 
- // form with an initial foundset base on a global relation
+ // form with an initial foundset based on a global relation
  var frmGlobalRel = solutionModel.newForm("categories_related", solutionModel.getForm("categories"));
- frmGlobalRel.namedFoundSet = "g2_to_category_name";]]></sample>
+ frmGlobalRel.namedFoundSet = "g2_to_category_name";
+ 
+ // form with an initial foundset based on a global relation
+ var frmGlobalRel = solutionModel.newForm("categories_related", solutionModel.getForm("categories"));
+ frmGlobalRel.namedFoundSet = solutionModel.getRelation("g1_to_categories");]]></sample>
         </property>
         <property name="navigator">
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
@@ -8956,10 +9011,10 @@ forms['newForm1'].controller.show();]]></sample>
 Selection mode is applied when necessary to the foundset used by the form (through it's multiSelect property), even if the foundset changes.
 If two or more forms with non-default and different selectionMode values share the same foundset, the first form that applies it's selectionMode wins.
 
-Can be one of SM_SELECTION.DEFAULT, SM_SELECTION.SINGLE or SM_SELECTION.MULTI.]]></description>
+Can be one of SELECTION_MODE_DEFAULT, SELECTION_MODE_SINGLE or SELECTION_MODE_MULTI.]]></description>
           <summary><![CDATA[Returns the value of the form's selectionMode property.]]></summary>
           <sample><![CDATA[var myForm = solutionModel.getForm('my_form_name');
-if (myForm.selectionMode == SM_SELECTION.MULTI) myForm.selectionMode = SM_SELECTION.DEFAULT;]]></sample>
+if (myForm.selectionMode == JSForm.SELECTION_MODE_MULTI) myForm.selectionMode = JSForm.SELECTION_MODE_DEFAULT;]]></sample>
         </property>
         <property name="serverName">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -10804,22 +10859,6 @@ forms['newFormX'].controller.show();]]></sample>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the specified name of the JSTabPanel to be removed]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="setNamedFoundSet">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.scripting.solutionmodel.JSRelation"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description><![CDATA[Tells this form to initially load a global relation based foundset.]]></description>
-          <summary><![CDATA[Tells this form to initially load a global relation based foundset.]]></summary>
-          <sample><![CDATA[// form with an initial foundset base on a global relation
- var frmGlobalRel = solutionModel.newForm("categories_related", solutionModel.getForm("categories"));
- // frmGlobalRel.setNamedFoundSet(solutionModel.getRelation("g1_to_categories"));]]></sample>
-          <parameters>
-            <parameter name="globalRelation" type="com.servoy.j2db.scripting.solutionmodel.JSRelation" typecode="com.servoy.j2db.scripting.solutionmodel.JSRelation">
-              <description><![CDATA[the global relation's foreign datasource must match the form's datasource.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -17341,33 +17380,6 @@ var smallLabelWithBigImageReduceNoAspect = form.newLabel('', 70, 10, 50, 50);
 smallLabelWithBigImageReduceNoAspect.imageMedia = bigImage;
 smallLabelWithBigImageReduceNoAspect.background = 'yellow';	
 smallLabelWithBigImageReduceNoAspect.mediaOptions = SM_MEDIAOPTION.REDUCE;]]></sample>
-        </constant>
-      </constants>
-    </object>
-    <object publicName="NAMEDFOUNDSET" qualifiedName="com.servoy.j2db.scripting.solutionmodel.NAMEDFOUNDSET">
-      <constants>
-        <constant name="EMPTY">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description/>
-          <sample><![CDATA[// form with empty foundset
-	var frmEmpty = solutionModel.newForm('products_empty', 'example_data', 'products', null, true, 640, 480);
-	frmEmpty.newLabel("Empty FoundSet",10,10,200,20);
-	frmEmpty.newField('categoryid',JSField.TEXT_FIELD,10,40,200,20);
-	frmEmpty.newField('productname',JSField.TEXT_FIELD,10,70,200,20);
-	frmEmpty.namedFoundSet = SM_NAMEDFOUNDSET.EMPTY;]]></sample>
-        </constant>
-        <constant name="SEPARATE">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description/>
-          <sample><![CDATA[// form with separate foundset
-	var frmSeparate = solutionModel.newForm('products_separate', 'example_data', 'products', null, true, 640, 480);
-	frmSeparate.newLabel("Separate FoundSet",10,10,200,20);
-	frmSeparate.newField('categoryid',JSField.TEXT_FIELD,10,40,200,20);
-	frmSeparate.newField('productname',JSField.TEXT_FIELD,10,70,200,20);
-	frmSeparate.namedFoundSet = SM_NAMEDFOUNDSET.SEPARATE;
-	forms['products_separate'].controller.find();
-	forms['products_separate'].categoryid = '=2';
-	forms['products_separate'].controller.search();]]></sample>
         </constant>
       </constants>
     </object>
@@ -28810,31 +28822,6 @@ noScrollbars.scrollbars = SM_SCROLLBAR.HORIZONTAL_SCROLLBAR_NEVER | SM_SCROLLBAR
         </constant>
       </constants>
     </object>
-    <object publicName="SELECTIONMODE" qualifiedName="com.servoy.j2db.scripting.solutionmodel.SELECTIONMODE">
-      <constants>
-        <constant name="DEFAULT">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant used for form selectionMode property. It means that the foundset's multiSelect property is used.]]></description>
-          <summary><![CDATA[Constant used for form selectionMode property.]]></summary>
-          <sample><![CDATA[var myForm = solutionModel.getForm('my_form_name');
-myForm.selectionMode = SM_SELECTION.DEFAULT;]]></sample>
-        </constant>
-        <constant name="MULTI">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant used for form selectionMode property. It means that the form will force multiSelect to true on the foundset it uses.]]></description>
-          <summary><![CDATA[Constant used for form selectionMode property.]]></summary>
-          <sample><![CDATA[var myForm = solutionModel.getForm('my_form_name');
-myForm.selectionMode = SM_SELECTION.MULTI;]]></sample>
-        </constant>
-        <constant name="SINGLE">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant used for form selectionMode property. It means that the form will force multiSelect to false on the foundset it uses.]]></description>
-          <summary><![CDATA[Constant used for form selectionMode property.]]></summary>
-          <sample><![CDATA[var myForm = solutionModel.getForm('my_form_name');
-myForm.selectionMode = SM_SELECTION.SINGLE;]]></sample>
-        </constant>
-      </constants>
-    </object>
     <object publicName="SQL_ACTION_TYPES" qualifiedName="com.servoy.j2db.scripting.info.SQL_ACTION_TYPES">
       <constants>
         <constant name="DELETE_ACTION">
@@ -33921,7 +33908,7 @@ var retval = utils.stringWordCount('this is a test');]]></sample>
         </constant>
       </constants>
     </object>
-    <object publicName="ValidationFailedException" qualifiedName="com.servoy.j2db.ValidationFailedException">
+    <object publicName="ValidationFailedException" qualifiedName="com.servoy.j2db.dataprocessing.ValidationFailedException">
       <functions>
         <function name="getErrorCode">
           <argumentsTypes/>
