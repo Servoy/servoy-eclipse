@@ -17,7 +17,6 @@
 package com.servoy.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -194,17 +193,9 @@ public class SortDialog extends Dialog
 		rightButton.setEnabled(false);
 		dataProviderViewer.addSelectionChangedListener(new ISelectionChangedListener()
 		{
-
 			public void selectionChanged(SelectionChangedEvent event)
 			{
-				if (dataProviderViewer.getSelection() != null && !dataProviderViewer.getSelection().isEmpty())
-				{
-					rightButton.setEnabled(true);
-				}
-				else
-				{
-					rightButton.setEnabled(false);
-				}
+				rightButton.setEnabled(dataProviderViewer.getSelection() != null && !dataProviderViewer.getSelection().isEmpty());
 			}
 		});
 
@@ -230,17 +221,9 @@ public class SortDialog extends Dialog
 		columnTable.setHeaderVisible(true);
 		tableViewer.addSelectionChangedListener(new ISelectionChangedListener()
 		{
-
 			public void selectionChanged(SelectionChangedEvent event)
 			{
-				if (tableViewer.getSelection() != null && !tableViewer.getSelection().isEmpty())
-				{
-					leftButton.setEnabled(true);
-				}
-				else
-				{
-					leftButton.setEnabled(false);
-				}
+				leftButton.setEnabled(tableViewer.getSelection() != null && !tableViewer.getSelection().isEmpty());
 			}
 		});
 
@@ -295,35 +278,18 @@ public class SortDialog extends Dialog
 			{
 				if (columnIndex == CI_ASCENDING)
 				{
-					if (((SortColumn)element).getSortOrder() == SortColumn.ASCENDING)
-					{
-						return ColumnLabelProvider.TRUE_RADIO;
-					}
-					else
-					{
-						return ColumnLabelProvider.FALSE_RADIO;
-					}
+					return ((SortColumn)element).getSortOrder() == SortColumn.ASCENDING ? ColumnLabelProvider.TRUE_RADIO : ColumnLabelProvider.FALSE_RADIO;
 				}
-				else if (columnIndex == CI_DESCENDING)
+				if (columnIndex == CI_DESCENDING)
 				{
-					if (((SortColumn)element).getSortOrder() == SortColumn.ASCENDING)
-					{
-						return ColumnLabelProvider.FALSE_RADIO;
-					}
-					else
-					{
-						return ColumnLabelProvider.TRUE_RADIO;
-					}
+					return ((SortColumn)element).getSortOrder() == SortColumn.ASCENDING ? ColumnLabelProvider.FALSE_RADIO : ColumnLabelProvider.TRUE_RADIO;
 				}
-				else
-				{
-					return null;
-				}
+				return null;
 			}
 
 			public String getColumnText(Object element, int columnIndex)
 			{
-				if (columnIndex == CI_NAME) return ((SortColumn)element).getColumn().getName();
+				if (columnIndex == CI_NAME) return ((SortColumn)element).getColumnWrapper().getDataProviderID();
 				return null;
 			}
 
@@ -426,14 +392,7 @@ public class SortDialog extends Dialog
 							SortColumn sortColumn = getSortColumn(columnName);
 							if (sortColumn != null)
 							{
-								if (order != null && order.trim().startsWith("desc")) //$NON-NLS-1$
-								{
-									sortColumn.setSortOrder(SortColumn.DESCENDING);
-								}
-								else
-								{
-									sortColumn.setSortOrder(SortColumn.ASCENDING);
-								}
+								sortColumn.setSortOrder(order != null && order.trim().startsWith("desc") ? SortColumn.DESCENDING : SortColumn.ASCENDING); //$NON-NLS-1$
 								tableColumns.add(sortColumn);
 							}
 						}
@@ -480,64 +439,54 @@ public class SortDialog extends Dialog
 			return tableColumns.toArray(new SortColumn[tableColumns.size()]);
 		}
 
-		public void addColumn(List list)
+		public void addColumn(List< ? > list)
 		{
-			Iterator iterator = list.iterator();
-			while (iterator.hasNext())
+			for (Object element : list)
 			{
-				SortColumn sortColumn = null;
-				Object element = iterator.next();
-				if (!containsSortColumn(element))
-				{
-					if (element instanceof IColumn)
-					{
-						sortColumn = new SortColumn((IColumn)element);
-					}
-					else if (element instanceof ColumnWrapper)
-					{
-						sortColumn = new SortColumn((ColumnWrapper)element);
-					}
-					if (sortColumn != null)
-					{
-						tableColumns.add(sortColumn);
-					}
-				}
+				addIfDoesNotContainColumn(element);
 			}
 
 			tableViewer.setInput(getTableData());
 		}
 
-		private boolean containsSortColumn(Object element)
+		private void addIfDoesNotContainColumn(Object element)
 		{
-			IColumn column = null;
-			if (element instanceof IColumn)
+			ColumnWrapper columnWrapper;
+			if (element instanceof ColumnWrapper)
 			{
-				column = (IColumn)element;
+				columnWrapper = ((ColumnWrapper)element);
 			}
-			else if (element instanceof ColumnWrapper)
+			else if (element instanceof IColumn)
 			{
-				column = ((ColumnWrapper)element).getColumn();
+				columnWrapper = new ColumnWrapper((IColumn)element);
 			}
-			if (column != null)
+			else return;
+
+			for (SortColumn sortColumn : tableColumns)
 			{
-				SortColumn[] sortColumns = getTableData();
-				if (sortColumns != null)
+				if (columnWrapper.getColumn().equals(sortColumn.getColumn()))
 				{
-					for (SortColumn sortColumn : sortColumns)
+					if (columnWrapper.getRelationList() == null)
 					{
-						if (sortColumn.getColumn().equals(column)) return true;
+						if (sortColumn.getRelationList() == null)
+						{
+							return;
+						}
+					}
+					else if (columnWrapper.getRelationList().equals(sortColumn.getRelationList()))
+					{
+						return;
 					}
 				}
 			}
-			return false;
+			tableColumns.add(new SortColumn(columnWrapper));
 		}
 
 		public void removeColumn(List<SortColumn> list)
 		{
 			if (list != null)
 			{
-				for (SortColumn sortColumn : list)
-					tableColumns.remove(sortColumn);
+				tableColumns.removeAll(list);
 			}
 			tableViewer.setInput(getTableData());
 		}
@@ -574,11 +523,10 @@ public class SortDialog extends Dialog
 
 		public String getValue()
 		{
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < tableColumns.size(); i++)
 			{
-				SortColumn sc = tableColumns.get(i);
-				sb.append(sc.toString());
+				sb.append(tableColumns.get(i).toString());
 				if (i < tableColumns.size() - 1) sb.append(", "); //$NON-NLS-1$
 			}
 			return sb.toString();
