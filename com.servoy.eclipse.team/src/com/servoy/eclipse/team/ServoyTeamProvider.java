@@ -622,7 +622,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 				ignorePattern = element.getPattern();
 				ignoreStatus = new Boolean(element.getEnabled());
 
-				if (!ignorePattern.equals(".*") && !ignorePattern.equals("*.obj"))
+				if (!ignorePattern.equals(".stp") && !ignorePattern.equals("*.obj"))
 				{
 					ignorePatterns.add(ignorePattern);
 					ignorePatternsStatus.add(ignoreStatus);
@@ -630,7 +630,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 			}
 		}
 
-		ignorePatterns.add(".*");
+		ignorePatterns.add(".stp");
 		ignorePatternsStatus.add(new Boolean(true));
 		ignorePatterns.add("*.obj");
 		ignorePatternsStatus.add(new Boolean(false));
