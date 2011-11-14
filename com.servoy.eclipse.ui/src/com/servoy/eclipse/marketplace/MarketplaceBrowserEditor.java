@@ -49,8 +49,8 @@ import com.servoy.j2db.util.Utils;
 public class MarketplaceBrowserEditor extends EditorPart
 {
 	public static final String MARKETPLACE_BROWSER_EDITOR_ID = "com.servoy.eclipse.marketplace.MarketplaceBrowserEditor"; //$NON-NLS-1$
-	public static final String MARKETPLACE_URL = "https://crm.servoy.com/servoy-webclient/ss?s=marketplace"; //$NON-NLS-1$
-	//public static final String MARKETPLACE_URL = "http://localhost:8080/servoy-webclient/ss?s=downloadLink"; //$NON-NLS-1$
+	public static final String MARKETPLACE_URL = "https://crm.servoy.com/servoy-webclient/ss/s/marketplace"; //$NON-NLS-1$
+	//public static final String MARKETPLACE_URL = "http://localhost:8080/servoy-webclient/ss/s/downloadLink"; //$NON-NLS-1$
 	public static final String MARKETPLACE_XML_VERSION = "1.0"; //$NON-NLS-1$
 	private static final String PARAM_SERVOY_VERSION = "servoyVersion"; //$NON-NLS-1$
 	private static final String PARAM_MARKETPLACE_XML_VERSION = "marketplaceXMLVersion"; //$NON-NLS-1$ 
