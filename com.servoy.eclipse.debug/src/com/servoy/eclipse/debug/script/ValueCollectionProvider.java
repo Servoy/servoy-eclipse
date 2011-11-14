@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.debug.script;
 
+import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -50,8 +51,7 @@ import com.servoy.j2db.util.Pair;
 @SuppressWarnings("nls")
 public class ValueCollectionProvider implements IMemberEvaluator
 {
-	private static final Map<IFile, Pair<Long, IValueCollection>> scriptCache = new ConcurrentHashMap<IFile, Pair<Long, IValueCollection>>();
-
+	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> scriptCache = new ConcurrentHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>();
 
 	@SuppressWarnings("restriction")
 	public IValueCollection valueOf(ITypeInfoContext context, Element member)
@@ -64,7 +64,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			String scriptPath = SolutionSerializer.getScriptPath(form, false);
 			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
 			collection = ValueCollectionFactory.createValueCollection();
-			ValueCollectionFactory.copyInto(collection, getValueCollection(file, true));
+			ValueCollectionFactory.copyInto(collection, getValueCollection(file));
 			collection = getSuperFormContext(context, form, collection);
 			if (member.getAttribute(IReferenceAttributes.SUPER_SCOPE) != null)
 			{
@@ -88,14 +88,22 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
 			if (fs != null)
 			{
-				IValueCollection superForms = ValueCollectionFactory.createScopeValueCollection();
+				IValueCollection superForms = null;
 				Form superForm = fs.getForm(form.getExtendsID());
+
+				superForms = ValueCollectionFactory.createScopeValueCollection();
 				List<IValueCollection> superCollections = new ArrayList<IValueCollection>();
 				while (superForm != null)
 				{
 					String scriptPath = SolutionSerializer.getScriptPath(superForm, false);
 					IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
-					IValueCollection vc = getValueCollection(file, false);
+					IValueCollection vc = null;
+					IValueCollection collection = getValueCollection(file);
+					if (collection != null)
+					{
+						vc = ValueCollectionFactory.createScopeValueCollection();
+						((IValueProvider)vc).getValue().addValue(((IValueProvider)collection).getValue());
+					}
 					if (vc != null)
 					{
 						Set<String> children = vc.getDirectChildren();
@@ -149,7 +157,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 						IValueCollection globalsValeuCollection = getGlobalModulesValueCollection(context, fs, ValueCollectionFactory.createValueCollection());
 						if (fullGlobalScope.get().booleanValue())
 						{
-							ValueCollectionFactory.copyInto(globalsValeuCollection, getValueCollection((IFile)resource, true));
+							ValueCollectionFactory.copyInto(globalsValeuCollection, getValueCollection((IFile)resource));
 						}
 						return globalsValeuCollection;
 					}
@@ -181,7 +189,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			{
 				ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(module.getName());
 				IFile file = project.getProject().getFile("globals.js"); //$NON-NLS-1$
-				IValueCollection moduleCollection = getValueCollection(file, true);
+				IValueCollection moduleCollection = getValueCollection(file);
 				if (moduleCollection != null)
 				{
 					ValueCollectionFactory.copyInto(collection, moduleCollection);
@@ -200,50 +208,58 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		}
 	};
 
-	public static IValueCollection getValueCollection(IFile file, boolean makeImmutable)
+	public static IValueCollection getValueCollection(IFile file)
 	{
 		IValueCollection collection = null;
-		try
+		synchronized (scriptCache)
 		{
-			Pair<Long, IValueCollection> pair = scriptCache.get(file);
-			if (pair == null || pair.getLeft().longValue() != file.getModificationStamp())
+			try
 			{
-				Set<IFile> set = creatingCollection.get();
-				if (set.contains(file))
+				SoftReference<Pair<Long, IValueCollection>> sr = scriptCache.get(file);
+				Pair<Long, IValueCollection> pair = null;
+				if (sr != null)
 				{
-					if (pair != null) return pair.getRight();
-					return null;
+					pair = sr.get();
 				}
-
-				set.add(file);
-				try
+				if (pair == null || pair.getLeft().longValue() != file.getModificationStamp())
 				{
-					collection = ValueCollectionFactory.createValueCollection(file, false);
-					if (makeImmutable)
+					Set<IFile> set = creatingCollection.get();
+					if (set.contains(file))
 					{
-						collection = ValueCollectionFactory.makeImmutable(collection);
-						if (file.getName().equals("globals.js"))
-						{
-							scriptCache.put(file, new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()), collection));
-						}
+						if (pair != null) return pair.getRight();
+						return null;
 					}
-
+					if (pair != null && pair.getLeft().longValue() != file.getModificationStamp())
+					{
+						scriptCache.clear();
+					}
+					set.add(file);
+					try
+					{
+						collection = ValueCollectionFactory.createValueCollection(file, false);
+						collection = ValueCollectionFactory.makeImmutable(collection);
+						scriptCache.put(
+							file,
+							new SoftReference<Pair<Long, IValueCollection>>(new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()), collection)));
+					}
+					finally
+					{
+						set.remove(file);
+					}
 				}
-				finally
+				else
 				{
-					set.remove(file);
+					collection = pair.getRight();
 				}
+
 			}
-			else
+			catch (Exception e)
 			{
-				collection = pair.getRight();
+				ServoyLog.logError(e);
 			}
 
 		}
-		catch (Exception e)
-		{
-			ServoyLog.logError(e);
-		}
+
 		return collection;
 	}
 
@@ -268,4 +284,5 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	{
 		return fullGlobalScope.get().booleanValue();
 	}
+
 }

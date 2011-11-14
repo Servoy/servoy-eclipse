@@ -271,7 +271,7 @@ public class ElementResolver implements IElementResolver
 			}
 			ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(fs.getSolution().getName());
 			IFile file = project.getProject().getFile("globals.js");
-			IValueCollection globalsValueCollection = ValueCollectionProvider.getValueCollection(file, true);
+			IValueCollection globalsValueCollection = ValueCollectionProvider.getValueCollection(file);
 			if (globalsValueCollection != null)
 			{
 				IValueCollection collection = ValueCollectionFactory.createScopeValueCollection();
