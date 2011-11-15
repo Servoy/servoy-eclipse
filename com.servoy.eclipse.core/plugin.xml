@@ -330,4 +330,20 @@
             nature="org.eclipse.dltk.javascript.core.nature">
       </saveParticipant>
    </extension>
+   <extension
+         point="org.eclipse.dltk.core.buildParticipant">
+      <buildParticipant
+            class="com.servoy.eclipse.core.builder.JSFileExternalize"
+            id="com.servoy.eclipse.core.builder.JSFileExternalize"
+            name="JavaScript file string externalize"
+            nature="org.eclipse.dltk.javascript.core.nature">
+      </buildParticipant>
+   </extension>
+   <extension
+         point="org.eclipse.dltk.core.problemFactory">
+      <problemIdentifierFactory
+            class="com.servoy.eclipse.core.builder.JSFileExternalizeProblemFactory"
+            namespace="com.servoy.eclipse.core.builder.JSFileExternalizeProblem">
+      </problemIdentifierFactory>
+   </extension>
 </plugin>
