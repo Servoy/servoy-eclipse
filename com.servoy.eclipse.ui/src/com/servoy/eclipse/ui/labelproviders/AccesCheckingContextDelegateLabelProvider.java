@@ -17,24 +17,26 @@
 package com.servoy.eclipse.ui.labelproviders;
 
 
-import com.servoy.j2db.persistence.Form;
+import org.eclipse.osgi.util.NLS;
+
+import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ScriptMethod;
 
 /**
- * Delegate label provider that adds the form context to the label.
+ * Delegate label provider that adds a marker to the text when the value should not be accessible from the context..
  * 
  * @author rgansevles
  * 
  */
-public class FormContextDelegateLabelProvider extends AbstractPersistContextDelegateLabelProvider
+public class AccesCheckingContextDelegateLabelProvider extends AbstractPersistContextDelegateLabelProvider
 {
-	public FormContextDelegateLabelProvider(AbstractPersistContextDelegateLabelProvider labelProvider)
+	public AccesCheckingContextDelegateLabelProvider(AbstractPersistContextDelegateLabelProvider labelProvider)
 	{
 		this(labelProvider, labelProvider.getContext());
 	}
 
-	public FormContextDelegateLabelProvider(IPersistLabelProvider labelProvider, IPersist context)
+	public AccesCheckingContextDelegateLabelProvider(IPersistLabelProvider labelProvider, IPersist context)
 	{
 		super(labelProvider, context);
 	}
@@ -43,20 +45,14 @@ public class FormContextDelegateLabelProvider extends AbstractPersistContextDele
 	public String getText(Object value)
 	{
 		String baseText = super.getText(value);
-		if (getContext() != null && value != null)
+		if (value != null && getContext() != null)
 		{
 			IPersist persist = getPersist(value);
-			if (persist != null && persist.getParent() instanceof Form)
+			if (persist instanceof ScriptMethod && persist.getParent() != getContext() && ((ScriptMethod)persist).isPrivate())
 			{
-				// form method
-				Form contextForm = (Form)getContext().getAncestor(IRepository.FORMS);
-				if (contextForm != null && !persist.getParent().getUUID().equals(contextForm.getUUID()))
-				{
-					return baseText + " [" + ((Form)persist.getParent()).getName() + ']'; //$NON-NLS-1$
-				}
+				return NLS.bind(Messages.LabelInvalidAccessPrivate, baseText);
 			}
 		}
-
 		return baseText;
 	}
 }

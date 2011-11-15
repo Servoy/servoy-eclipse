@@ -169,6 +169,8 @@ public class MarkerMessages
 		"Valuelist \"{0}\" is custom values valuelist so it should not specify table, server or relation.", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE, "Removed table, server and relation."); //$NON-NLS-1$ //$NON-NLS-2$
 	public static ServoyMarker ValuelistGlobalMethodNotFound = new ServoyMarker(
 		"Valuelist \"{0}\" references an inexisting global method.", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE); //$NON-NLS-1$
+	public static ServoyMarker ValuelistGlobalMethodNotAccessible = new ServoyMarker(
+		"Valuelist \"{0}\" references a private global method that is not accessible from this solution.", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ValuelistInvalidCustomValues = new ServoyMarker(
 		"Valuelist \"{0}\" has invalid custom value (all or none rows should have real value).", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE); //$NON-NLS-1$
 
@@ -217,6 +219,18 @@ public class MarkerMessages
 		"Property \"{0}\" in form \"{1}\" is linked to an entity that does not exist.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker PropertyOnElementInFormTargetNotFound = new ServoyMarker(
 		"Property \"{0}\" from element \"{1}\" in form \"{2}\" is linked to an entity that does not exist.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+
+	/**
+	 * Private methods accessed from outside context.
+	 */
+	public static ServoyMarker PropertyTargetNotAccessible = new ServoyMarker(
+		"Property \"{0}\" is linked to a private method which is not accessible from the context.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$
+	public static ServoyMarker PropertyOnElementTargetNotAccessible = new ServoyMarker(
+		"Property \"{0}\" from element \"{1}\" is linked to private method which is not accessible from the context.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$
+	public static ServoyMarker PropertyInFormTargetNotAccessible = new ServoyMarker(
+		"Property \"{0}\" in form \"{1}\" is linked to a private method which is not accessible from the form.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+	public static ServoyMarker PropertyOnElementInFormTargetNotAccessible = new ServoyMarker(
+		"Property \"{0}\" from element \"{1}\" in form \"{2}\" is linked to a private method which is not accessible from the context.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker FormTableNoPK = new ServoyMarker(
 		"Form \"{0}\" is based on table \"{1}\" which does not have a primary key.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
@@ -361,13 +375,13 @@ public class MarkerMessages
 		"Element \"{0}\" in form \"{1}\" has dataprovider \"{2}\" that is not based on form table.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
-	 * Aggregates are non-editable values and thus should not be displayed in editable fields.
+	 * Aggregates are non-editable values and this should not be displayed in editable fields.
 	 */
 	public static ServoyMarker FormDataproviderAggregateNotEditable = new ServoyMarker(
 		"Element in form \"{0}\" has dataprovider \"{1}\" which is an aggregate and cannot be editable.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
-	 * Aggregates are non-editable values and thus should not be displayed in editable fields.
+	 * Aggregates are non-editable values and this should not be displayed in editable fields.
 	 */
 	public static ServoyMarker FormDataproviderOnElementAggregateNotEditable = new ServoyMarker(
 		"Element \"{0}\" in form \"{1}\" has dataprovider \"{2}\" which is an aggregate and cannot be editable.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$

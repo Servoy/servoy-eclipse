@@ -118,9 +118,9 @@ public class TagsAndI18NTextDialog extends Dialog
 		final Composite composite_1 = new Composite(sashForm, SWT.NONE);
 		dpTree = new DataProviderTreeViewer(composite_1, new CombinedLabelProvider(StandardTagsLabelProvider.INSTANCE_HIDEPREFIX,
 			new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(DataProviderLabelProvider.INSTANCE_HIDEPREFIX,
-				persistContext.getContext()), persistContext.getContext())), new CombinedTreeContentProvider(new DataProviderContentProvider(persistContext,
-			flattenedSolution, table), StandardTagsContentProvider.INSTANCE), new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true,
-			true, true, true, INCLUDE_RELATIONS.NESTED, true, true, null), true, true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(),
+				persistContext.getContext()))), new CombinedTreeContentProvider(new DataProviderContentProvider(persistContext, flattenedSolution, table),
+			StandardTagsContentProvider.INSTANCE), new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true,
+			INCLUDE_RELATIONS.NESTED, true, true, null), true, true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(),
 			TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
 
 		addButton = new Button(composite_1, SWT.NONE);

@@ -258,7 +258,7 @@ public class MethodDialog extends TreeSelectDialog
 				while (scriptMethods.hasNext())
 				{
 					ScriptMethod sm = scriptMethods.next();
-					if (parent == sm.getParent() || !sm.isPrivate())
+					if (context == sm.getParent() || !sm.isPrivate())
 					{
 						lst.add(MethodWithArguments.create(sm, null));
 					}

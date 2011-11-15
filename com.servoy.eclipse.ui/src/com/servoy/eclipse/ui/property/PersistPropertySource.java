@@ -799,7 +799,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 						public Integer convertValue(Object id, MethodWithArguments value)
 						{
 							if (persistContext != null) setInstancMethodArguments(persistContext.getPersist(), id, value.arguments);
-							return new Integer(value.methodId);
+							return Integer.valueOf(value.methodId);
 						}
 					};
 
@@ -2628,9 +2628,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			hidePrefix.setConverter(converter);
 
 			ILabelProvider labelProviderShowPrefix = new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(showPrefix,
-				persistContext.getContext()), persistContext.getContext());
+				persistContext.getContext()));
 			final ILabelProvider labelProviderHidePrefix = new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(hidePrefix,
-				persistContext.getContext()), persistContext.getContext());
+				persistContext.getContext()));
 			PropertyController<String, String> propertyController = new PropertyController<String, String>(id, displayName, null, labelProviderShowPrefix,
 				new ICellEditorFactory()
 				{
@@ -2981,7 +2981,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 							if (returnValue != null)
 							{
 								Form f = (Form)persistContext.getPersist();
-								if (!Utils.equalObjects(new Integer(f.getExtendsID()), returnValue))
+								if (!Utils.equalObjects(Integer.valueOf(f.getExtendsID()), returnValue))
 								{
 									List<IPersist> overridePersists = new ArrayList<IPersist>();
 									for (IPersist child : f.getAllObjectsAsList())

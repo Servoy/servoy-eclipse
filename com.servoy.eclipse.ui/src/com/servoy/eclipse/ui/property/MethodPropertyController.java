@@ -33,6 +33,7 @@ import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodListOptions;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.editors.MethodCellEditor;
+import com.servoy.eclipse.ui.labelproviders.AccesCheckingContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
@@ -66,16 +67,16 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 		super(id, displayName);
 		this.options = options;
 		this.persistContext = persistContext;
-		setLabelProvider(new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(new MethodLabelProvider(persistContext, true,
-			!options.includeDefault), persistContext.getContext()), persistContext.getContext()));
+		setLabelProvider(new AccesCheckingContextDelegateLabelProvider(new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(
+			new MethodLabelProvider(persistContext, true, !options.includeDefault), persistContext.getContext()))));
 		setSupportsReadonly(true);
 	}
 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		ILabelProvider methodLabelProvider = new FormContextDelegateLabelProvider(new MethodLabelProvider(persistContext, false, !options.includeDefault),
-			persistContext.getContext());
+		ILabelProvider methodLabelProvider = new AccesCheckingContextDelegateLabelProvider(new FormContextDelegateLabelProvider(new MethodLabelProvider(
+			persistContext, false, !options.includeDefault), persistContext.getContext()));
 		return new MethodCellEditor(parent, methodLabelProvider, new MethodValueEditor(persistContext), persistContext, getId(), false, // readonly is handled in openDialogBox below
 			options)
 		{
@@ -129,7 +130,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 				// arguments defined in template, will be overridden at runtime
 				final MethodArgument templateArgument = template.getArguments()[i];
 				String argName = (formalArguments != null && i < formalArguments.length) ? formalArguments[i].getName() : "arguments[" + i + ']'; //$NON-NLS-1$
-				propertyController = new PropertyController<String, String>(new Integer(i), argName, null, new LabelProvider()
+				propertyController = new PropertyController<String, String>(Integer.valueOf(i), argName, null, new LabelProvider()
 				{
 					@Override
 					public String getText(Object element)
@@ -142,7 +143,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			else
 			{
 				final int index = i;
-				propertyController = new PropertyController<String, String>(new Integer(i), formalArguments[i].getName(), null, new LabelProvider()
+				propertyController = new PropertyController<String, String>(Integer.valueOf(i), formalArguments[i].getName(), null, new LabelProvider()
 				{
 					@Override
 					public String getText(Object element)

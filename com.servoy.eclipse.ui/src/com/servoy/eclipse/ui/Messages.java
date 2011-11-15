@@ -53,6 +53,7 @@ public class Messages extends NLS
 	public static String LabelNone;
 	public static String LabelUnresolved;
 	public static String LabelUnresolved_arg;
+	public static String LabelInvalidAccessPrivate;
 	public static String LabelError;
 	public static String LabelUnrelated;
 	public static String LabelInherited;

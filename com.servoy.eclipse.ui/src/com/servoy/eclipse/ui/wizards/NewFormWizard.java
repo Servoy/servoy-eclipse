@@ -619,11 +619,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			if (superForm != null)
 			{
-				extendsFormViewer.setSelection(new StructuredSelection(new Integer(superForm.getID())));
+				extendsFormViewer.setSelection(new StructuredSelection(Integer.valueOf(superForm.getID())));
 			}
 			else
 			{
-				extendsFormViewer.setSelection(new StructuredSelection(new Integer(Form.NAVIGATOR_NONE)));
+				extendsFormViewer.setSelection(new StructuredSelection(Integer.valueOf(Form.NAVIGATOR_NONE)));
 			}
 		}
 
@@ -860,7 +860,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 							extendsFormID = form.getID();
 						}
 					}
-					extendsFormViewer.setSelection(new StructuredSelection(new Integer(extendsFormID)));
+					extendsFormViewer.setSelection(new StructuredSelection(Integer.valueOf(extendsFormID)));
 
 					// styleName
 					Style templateStyle = null;
@@ -1060,7 +1060,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				Form superForm = newFormWizardPage.getSuperForm();
 				((DataProviderContentProvider)treeViewer.getContentProvider()).setTable(table, PersistContext.create(superForm));
 				treeViewer.setLabelProvider(new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(
-					DataProviderLabelProvider.INSTANCE_HIDEPREFIX, superForm), superForm));
+					DataProviderLabelProvider.INSTANCE_HIDEPREFIX, superForm)));
 				treeViewer.refreshTree();
 			}
 			catch (RemoteException e)

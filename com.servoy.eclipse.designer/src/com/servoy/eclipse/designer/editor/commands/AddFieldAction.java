@@ -101,7 +101,7 @@ public class AddFieldAction extends DesignerToolbarAction
 		}
 
 		DataProviderDialog dialog = new DataProviderDialog(getShell(), new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(
-			DataProviderLabelProvider.INSTANCE_HIDEPREFIX, form), form), PersistContext.create(form), flattenedSolution, table, input, null, SWT.MULTI,
+			DataProviderLabelProvider.INSTANCE_HIDEPREFIX, form)), PersistContext.create(form), flattenedSolution, table, input, null, SWT.MULTI,
 			"Select Data Providers");
 
 		IDialogSettings settings = dialog.getDataProvideDialogSettings();

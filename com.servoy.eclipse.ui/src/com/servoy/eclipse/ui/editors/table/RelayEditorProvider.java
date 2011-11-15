@@ -61,6 +61,7 @@ class RelayEditorProvider implements IRelayEditorProvider
 					{
 						Solution solution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution();
 						PersistContext persistContext = PersistContext.create(solution);
+						// The global method plugins are not tied to a solution, so we cannot filter for private methods here 
 						MethodLabelProvider methodLabelProvider = new MethodLabelProvider(persistContext, false, false);
 						methodCellEditor = new MethodCellEditor(parent.getTable(), methodLabelProvider, new MethodValueEditor(persistContext), persistContext,
 							key, false, new MethodListOptions(true, false, false, true, false, null));

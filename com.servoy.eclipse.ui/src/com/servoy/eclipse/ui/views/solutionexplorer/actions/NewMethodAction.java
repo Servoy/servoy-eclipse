@@ -91,6 +91,7 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
@@ -173,18 +174,26 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		String forcedScopeName, Map<String, String> substitutions, IPersist persist)
 	{
 		String methodType;
-		int tagFilter = MethodTemplate.PUBLIC_TAG;
+		int tagFilter;
 		String[] listOptions = null;
 		String scopeName = forcedScopeName == null ? ScriptVariable.GLOBAL_SCOPE : forcedScopeName;
 		String listDescriptionText = null;
 		if (parent instanceof Form)
 		{
 			methodType = "form";
-			tagFilter |= (MethodTemplate.PRIVATE_TAG | MethodTemplate.PROTECTED_TAG);
+			tagFilter = MethodTemplate.ALL_TAGS; // form method can only be created from form context
 		}
 		else if (parent instanceof Solution)
 		{
 			methodType = "global";
+			if (persist instanceof Solution || persist instanceof ValueList /* global method vl */)
+			{
+				tagFilter = MethodTemplate.PRIVATE_TAG | MethodTemplate.PUBLIC_TAG; // protected is n/a
+			}
+			else
+			{
+				tagFilter = MethodTemplate.PUBLIC_TAG; // no private methods for events from outside globals
+			}
 			if (forcedScopeName == null)
 			{
 				// let user select from scopes.
@@ -209,7 +218,14 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		else if (parent instanceof TableNode)
 		{
 			methodType = "entity";
-			tagFilter |= MethodTemplate.PRIVATE_TAG; // no protected
+			if (persist instanceof TableNode)
+			{
+				tagFilter = MethodTemplate.PRIVATE_TAG | MethodTemplate.PUBLIC_TAG; // protected is n/a
+			}
+			else
+			{
+				tagFilter = MethodTemplate.PUBLIC_TAG; // no private methods for events from outside table node
+			}
 		}
 		else
 		{
@@ -250,8 +266,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 					Form form = (Form)parent;
 					if (form.getExtendsID() > 0)
 					{
-						List<Form> formHierarchy = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingFlattenedSolution().getFormHierarchy(
-							form);
+						List<Form> formHierarchy = sm.getActiveProject().getEditingFlattenedSolution().getFormHierarchy(form);
 						for (Form f : formHierarchy)
 						{
 							if (f != form)

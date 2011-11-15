@@ -72,6 +72,7 @@ import com.servoy.eclipse.ui.dialogs.SortDialog;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.editors.valuelist.ValueListDPSelectionComposite;
+import com.servoy.eclipse.ui.labelproviders.AccesCheckingContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
@@ -290,7 +291,10 @@ public class ValueListEditor extends PersistEditor
 			}
 		};
 
-		globalMethodSelect = new TreeSelectViewer(comp, SWT.NONE, new MethodValueEditor(PersistContext.create(getValueList())))
+		// use the solution as context, private methods from the same solution are allowed
+		final PersistContext context = PersistContext.create(getValueList().getParent());
+
+		globalMethodSelect = new TreeSelectViewer(comp, SWT.NONE, new MethodValueEditor(context))
 		{
 			@Override
 			public IStructuredSelection openDialogBox(Control cellEditorWindow)
@@ -302,7 +306,7 @@ public class ValueListEditor extends PersistEditor
 					public Control createControl(Composite composite)
 					{
 						AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(composite, SWT.NONE);
-						buttons.setContext(PersistContext.create(getValueList()), "valueListGlobalMethod"); //$NON-NLS-1$
+						buttons.setContext(context, "valueListGlobalMethod"); //$NON-NLS-1$
 						buttons.setDialog(dialog);
 						return buttons;
 					}
@@ -316,11 +320,11 @@ public class ValueListEditor extends PersistEditor
 				return (IStructuredSelection)dialog.getSelection(); // single select
 			}
 		};
-		globalMethodSelect.setContentProvider(new MethodDialog.MethodTreeContentProvider(PersistContext.create(getValueList())));
-		globalMethodSelect.setLabelProvider(new SolutionContextDelegateLabelProvider(new MethodLabelProvider(PersistContext.create(getValueList()), false,
-			false), getValueList()));
-		globalMethodSelect.setTextLabelProvider(new SolutionContextDelegateLabelProvider(new MethodLabelProvider(PersistContext.create(getValueList()), true,
-			false), getValueList(), true));
+		globalMethodSelect.setContentProvider(new MethodDialog.MethodTreeContentProvider(context));
+		globalMethodSelect.setLabelProvider(new AccesCheckingContextDelegateLabelProvider(new SolutionContextDelegateLabelProvider(new MethodLabelProvider(
+			context, false, false), context.getContext())));
+		globalMethodSelect.setTextLabelProvider(new AccesCheckingContextDelegateLabelProvider(new SolutionContextDelegateLabelProvider(new MethodLabelProvider(
+			context, true, false), getValueList().getParent(), true)));
 		globalMethodSelect.setInput(new MethodListOptions(false, false, false, true, false, null));
 		globalMethodSelect.setEditable(true);
 		Control globalMethodSelectControl = globalMethodSelect.getControl();
@@ -1091,7 +1095,7 @@ public class ValueListEditor extends PersistEditor
 				ValueList obj = it.next();
 				if (isValid(obj, processed))
 				{
-					vlIds.add(new Integer(obj.getID()));
+					vlIds.add(Integer.valueOf(obj.getID()));
 				}
 			}
 

@@ -17,9 +17,6 @@
 package com.servoy.eclipse.ui.labelproviders;
 
 
-import org.eclipse.jface.viewers.IFontProvider;
-import org.eclipse.swt.graphics.Font;
-
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Solution;
@@ -30,10 +27,19 @@ import com.servoy.j2db.persistence.Solution;
  * @author rgansevles
  * 
  */
-public class SolutionContextDelegateLabelProvider extends DelegateLabelProvider implements IFontProvider, IPersistLabelProvider
+public class SolutionContextDelegateLabelProvider extends AbstractPersistContextDelegateLabelProvider
 {
-	private final IPersist context;
 	private final boolean prefixSolutionName;
+
+	public SolutionContextDelegateLabelProvider(AbstractPersistContextDelegateLabelProvider labelProvider)
+	{
+		this(labelProvider, labelProvider.getContext(), false);
+	}
+
+	public SolutionContextDelegateLabelProvider(AbstractPersistContextDelegateLabelProvider labelProvider, boolean prefixSolutionName)
+	{
+		this(labelProvider, labelProvider.getContext(), prefixSolutionName);
+	}
 
 	public SolutionContextDelegateLabelProvider(IPersistLabelProvider labelProvider, IPersist context)
 	{
@@ -42,8 +48,7 @@ public class SolutionContextDelegateLabelProvider extends DelegateLabelProvider 
 
 	public SolutionContextDelegateLabelProvider(IPersistLabelProvider labelProvider, IPersist context, boolean prefixSolutionName)
 	{
-		super(labelProvider);
-		this.context = context;
+		super(labelProvider, context);
 		this.prefixSolutionName = prefixSolutionName;
 	}
 
@@ -51,12 +56,12 @@ public class SolutionContextDelegateLabelProvider extends DelegateLabelProvider 
 	public String getText(Object value)
 	{
 		String baseText = super.getText(value);
-		if (value != null && context != null)
+		if (value != null && getContext() != null)
 		{
 			IPersist persist = getPersist(value);
 			if (persist != null)
 			{
-				Solution contextSolution = (Solution)context.getAncestor(IRepository.SOLUTIONS);
+				Solution contextSolution = (Solution)getContext().getAncestor(IRepository.SOLUTIONS);
 				Solution persistSolution = (Solution)persist.getAncestor(IRepository.SOLUTIONS);
 				if (contextSolution != null && persistSolution != null && !contextSolution.getUUID().equals(persistSolution.getUUID()))
 				{
@@ -64,28 +69,10 @@ public class SolutionContextDelegateLabelProvider extends DelegateLabelProvider 
 					{
 						return persistSolution.getName() + '.' + baseText;
 					}
-					return baseText + " [" + persistSolution.getName() + ']';
+					return baseText + " [" + persistSolution.getName() + ']'; //$NON-NLS-1$
 				}
 			}
 		}
 		return baseText;
-	}
-
-	/**
-	 * @see IFontProvider
-	 * 
-	 */
-	public Font getFont(Object element)
-	{
-		if (getLabelProvider() instanceof IFontProvider)
-		{
-			return ((IFontProvider)getLabelProvider()).getFont(element);
-		}
-		return null;
-	}
-
-	public IPersist getPersist(Object value)
-	{
-		return ((IPersistLabelProvider)getLabelProvider()).getPersist(value);
 	}
 }

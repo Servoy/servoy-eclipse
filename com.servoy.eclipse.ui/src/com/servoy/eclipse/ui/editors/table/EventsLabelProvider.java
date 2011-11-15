@@ -23,9 +23,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE.SharedImages;
 
 import com.servoy.eclipse.ui.editors.table.EventsComposite.EventNode;
-import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
-import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
-import com.servoy.eclipse.ui.property.PersistContext;
 
 public class EventsLabelProvider extends LabelProvider implements ITableLabelProvider
 {
@@ -49,7 +46,7 @@ public class EventsLabelProvider extends LabelProvider implements ITableLabelPro
 	{
 		if (element instanceof EventNode)
 		{
-			EventNode node = (EventNode)element;
+			final EventNode node = (EventNode)element;
 			switch (columnIndex)
 			{
 				case EventsComposite.CI_NAME :
@@ -57,8 +54,7 @@ public class EventsLabelProvider extends LabelProvider implements ITableLabelPro
 					return node.getName();
 				case EventsComposite.CI_METHOD :
 					if (node.isSolution()) return "";
-					return new SolutionContextDelegateLabelProvider(new MethodLabelProvider(PersistContext.create(node.getSolution()), true, true),
-						node.getSolution()).getText(node.getMethodWithArguments());
+					return node.getMethodLabelProvider().getText(node.getMethodWithArguments());
 				default :
 					return columnIndex + ": " + element;
 			}
@@ -66,5 +62,4 @@ public class EventsLabelProvider extends LabelProvider implements ITableLabelPro
 
 		return element.toString();
 	}
-
 }

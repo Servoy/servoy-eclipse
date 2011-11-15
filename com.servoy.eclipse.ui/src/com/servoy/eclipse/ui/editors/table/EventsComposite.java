@@ -27,6 +27,7 @@ import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -49,7 +50,11 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.editors.TableEditor;
+import com.servoy.eclipse.ui.labelproviders.AccesCheckingContextDelegateLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.StringTokenizerConverter;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
@@ -122,7 +127,7 @@ public class EventsComposite extends Composite
 	public static final int CI_NAME = 0;
 	public static final int CI_METHOD = 1;
 
-	private final class TreeColumnsSorter extends SelectionAdapter
+	private static final class TreeColumnsSorter extends SelectionAdapter
 	{
 		private final TreeViewerNodesComparator comparator;
 		private final TreeViewer viewer;
@@ -238,7 +243,7 @@ public class EventsComposite extends Composite
 		treeViewer.setExpandedElements(expandedRows.toArray());
 	}
 
-	private class TreeViewerNodesComparator extends ViewerComparator
+	private static class TreeViewerNodesComparator extends ViewerComparator
 	{
 		private boolean ascending = true;
 
@@ -313,27 +318,54 @@ public class EventsComposite extends Composite
 
 		private final Solution solution;
 		private final boolean isSolution;
-		private List<EventNode> children;
-		private EventNodeType type;
+		private final List<EventNode> children;
+		private final EventNodeType type;
 		private MethodWithArguments mwa;
+		private final ILabelProvider methodLabelProvider;
 
-		public EventNode(EventNodeType type, MethodWithArguments mwa, Solution solution)
+		public EventNode(EventNodeType type, MethodWithArguments mwa, Solution solution, final Table table)
 		{
 			this.type = type;
 			this.mwa = mwa;
 			this.solution = solution;
-			isSolution = false;
+			this.children = null;
+			this.isSolution = false;
+
+			this.methodLabelProvider = new AccesCheckingContextDelegateLabelProvider(new SolutionContextDelegateLabelProvider(new MethodLabelProvider(
+				PersistContext.create(solution), true, true), solution), null)
+			{
+				@Override
+				public com.servoy.j2db.persistence.IPersist getContext()
+				{
+					// get the table node lazily, it may not exist yet when the label provider is created
+					try
+					{
+						Iterator<TableNode> it = EventNode.this.solution.getTableNodes(table);
+						if (it.hasNext())
+						{
+							return it.next();
+						}
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError(e);
+					}
+					return null;
+				}
+			};
 		}
 
-		public EventNode(Solution solution, Table t)
+		public EventNode(Solution solution, Table table)
 		{
 			this.solution = solution;
-			isSolution = true;
-			children = new ArrayList<EventNode>();
+			this.type = null;
+			this.methodLabelProvider = null;
+			this.isSolution = true;
+			this.children = new ArrayList<EventNode>();
 			TableNode tableNode = null;
 			try
 			{
-				Iterator<TableNode> it = solution.getTableNodes(t);
+				Iterator<TableNode> it = solution.getTableNodes(table);
 				if (it.hasNext())
 				{
 					tableNode = it.next();
@@ -348,7 +380,7 @@ public class EventsComposite extends Composite
 				for (EventNodeType tp : EventNodeType.values())
 				{
 					children.add(new EventNode(tp, tableNode == null ? MethodDialog.METHOD_DEFAULT : new MethodWithArguments(
-						((Integer)tableNode.getProperty(tp.getProperty().getPropertyName())).intValue(), tableNode.getTable()), solution));
+						((Integer)tableNode.getProperty(tp.getProperty().getPropertyName())).intValue(), tableNode.getTable()), solution, table));
 				}
 			}
 			catch (RepositoryException e)
@@ -375,6 +407,11 @@ public class EventsComposite extends Composite
 		public Solution getSolution()
 		{
 			return solution;
+		}
+
+		public ILabelProvider getMethodLabelProvider()
+		{
+			return methodLabelProvider;
 		}
 
 		public EventNodeType getType()

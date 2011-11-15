@@ -30,6 +30,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodListOptions;
 import com.servoy.eclipse.ui.editors.MethodCellEditor;
 import com.servoy.eclipse.ui.editors.table.EventsComposite.EventNode;
+import com.servoy.eclipse.ui.labelproviders.AccesCheckingContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.MethodPropertyController.MethodValueEditor;
@@ -144,9 +145,10 @@ public class EventsMethodEditingSupport extends EditingSupport
 				return null;
 			}
 			PersistContext persistContext = PersistContext.create(tableNode);
-			editor = new MethodCellEditor(((TreeViewer)getViewer()).getTree(), new SolutionContextDelegateLabelProvider(new MethodLabelProvider(persistContext,
-				false, true), solution), new MethodValueEditor(persistContext), persistContext, node.getType().getProperty().getPropertyName(), false,
-				new MethodListOptions(false, true, false, true, true, table));
+			editor = new MethodCellEditor(((TreeViewer)getViewer()).getTree(), new AccesCheckingContextDelegateLabelProvider(
+				new SolutionContextDelegateLabelProvider(new MethodLabelProvider(persistContext, false, true), tableNode)), new MethodValueEditor(
+				persistContext), persistContext, node.getType().getProperty().getPropertyName(), false, new MethodListOptions(false, true, false, true, true,
+				table));
 		}
 		return editor;
 	}
