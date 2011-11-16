@@ -17,10 +17,13 @@
 
 package com.servoy.eclipse.core.builder;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.ast.parser.IModuleDeclaration;
-import org.eclipse.dltk.compiler.problem.ProblemSeverity;
+import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.SourceParserUtil;
@@ -28,6 +31,8 @@ import org.eclipse.dltk.core.builder.IBuildContext;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.IBuildParticipantFactory;
 import org.eclipse.dltk.javascript.ast.CallExpression;
+import org.eclipse.dltk.javascript.ast.Comment;
+import org.eclipse.dltk.javascript.ast.FunctionStatement;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
@@ -65,6 +70,7 @@ public class JSFileExternalize implements IBuildParticipantFactory
 	{
 		private static final String I18N_EXTERNALIZE_CALLBACK = "i18n.getI18NMessage"; //$NON-NLS-1$
 		private static final String WARNING_MESSAGE = "Non-externalized string literal; it should be followed by //$NON-NLS-<n>$"; //$NON-NLS-1$
+		private static final String SUPPRESS_WARNING_NLS = "@SuppressWarnings(nls)"; //$NON-NLS-1$
 
 		/*
 		 * @see org.eclipse.dltk.core.builder.IBuildParticipant#build(org.eclipse.dltk.core.builder.IBuildContext)
@@ -105,10 +111,7 @@ public class JSFileExternalize implements IBuildParticipantFactory
 		{
 			if (reporter != null)
 			{
-				reporter.setMessage(JSFileExternalizeProblem.NON_EXTERNALIZED_STRING, WARNING_MESSAGE);
-				reporter.setSeverity(ProblemSeverity.WARNING);
-				reporter.setRange(sourceStart, sourceStop);
-				reporter.report();
+				reporter.reportProblem(JSFileExternalizeProblem.NON_EXTERNALIZED_STRING, WARNING_MESSAGE, sourceStart, sourceStop);
 			}
 		}
 
@@ -122,9 +125,13 @@ public class JSFileExternalize implements IBuildParticipantFactory
 					private int parsingLineStartIdx, parsingLineEndIdx = -1;
 					private int stringLiteralIdxInLine;
 
+					private final List<IProblemIdentifier> suppressProblems = Arrays.asList(new IProblemIdentifier[] { JSFileExternalizeProblem.NON_EXTERNALIZED_STRING });
+
 					@Override
 					public boolean visitGeneral(ASTNode node) throws Exception
 					{
+
+
 						if (node instanceof StringLiteral)
 						{
 							if (!isEvaluatingI18N)
@@ -155,6 +162,18 @@ public class JSFileExternalize implements IBuildParticipantFactory
 								isEvaluatingI18N = true;
 							}
 						}
+						else if (node instanceof FunctionStatement)
+						{
+							Comment comment = ((FunctionStatement)node).getDocumentation();
+							if (comment != null)
+							{
+								String commentStr = comment.getText();
+								if (commentStr != null && commentStr.indexOf(SUPPRESS_WARNING_NLS) != -1)
+								{
+									reporter.pushSuppressWarnings(suppressProblems);
+								}
+							}
+						}
 						return true;
 					}
 
@@ -168,6 +187,10 @@ public class JSFileExternalize implements IBuildParticipantFactory
 							{
 								isEvaluatingI18N = false;
 							}
+						}
+						else if (node instanceof FunctionStatement)
+						{
+							reporter.popSuppressWarnings();
 						}
 					}
 

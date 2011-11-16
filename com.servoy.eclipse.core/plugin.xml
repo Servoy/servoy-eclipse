@@ -345,6 +345,12 @@
             class="com.servoy.eclipse.core.builder.JSFileExternalizeProblemFactory"
             namespace="com.servoy.eclipse.core.builder.JSFileExternalizeProblem">
       </problemIdentifierFactory>
+	  <problemCategory
+            scope="@SuppressWarnings"
+            id="nls"
+            nature="org.eclipse.dltk.javascript.core.nature">
+			<problem>com.servoy.eclipse.core.builder.JSFileExternalizeProblem#NON_EXTERNALIZED_STRING</problem>
+	   </problemCategory>      
    </extension>
    <extension
    		point="org.eclipse.dltk.javascript.ui.problemSections">
