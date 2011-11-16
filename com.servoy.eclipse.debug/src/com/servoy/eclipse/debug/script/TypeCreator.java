@@ -823,7 +823,7 @@ public abstract class TypeCreator
 			}
 		}
 		//if (servoyModel.isActiveProject(name))
-		if (name != null)
+		if (name != null && servoyModel.isSolutionActive(name))
 		{
 			ServoyProject servoyProject = servoyModel.getServoyProject(name);
 			if (servoyProject != null)

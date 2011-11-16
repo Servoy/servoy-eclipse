@@ -190,6 +190,10 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 
 	protected ServoyModel()
 	{
+		// hopefully by doing this before problems view has any stored state will allow us to limit visible markers to active solutions;
+		// unfortunately there isn't currently a possibility to limit the scope of a filter to a workingSet via extension point - only the user can do it
+		PlatformUI.getPreferenceStore().setValue(IWorkbenchPreferenceConstants.USE_WINDOW_WORKING_SET_BY_DEFAULT, true);
+
 		activeProjectListeners = new ArrayList<IActiveProjectListener>();
 		realPersistChangeListeners = new ArrayList<IPersistChangeListener>();
 		editingPersistChangeListeners = new ArrayList<IPersistChangeListener>();
@@ -246,10 +250,9 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 						for (String moduleName : moduleNames)
 						{
 							IProject moduleProject = ServoyModel.getWorkspace().getRoot().getProject(moduleName);
-							ServoyProject sp = (ServoyProject)moduleProject.getNature(ServoyProject.NATURE_ID);
 							if (moduleProject != null && moduleProject.isOpen() && ServoyUpdatingProject.needUpdate(moduleProject))
 							{
-								sp = (ServoyProject)moduleProject.getNature(ServoyProject.NATURE_ID);
+								ServoyProject sp = (ServoyProject)moduleProject.getNature(ServoyProject.NATURE_ID);
 								modulesToUpdate.add(sp);
 								if (sbUpdateModuleNames.length() > 0) sbUpdateModuleNames.append(", ");
 								sbUpdateModuleNames.append(sp.getSolution().getName());
@@ -313,6 +316,8 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 						}
 
 						EclipseMessages.writeProjectI18NFiles(activeProject, false, false);
+						testBuildPathsAndBuild(activeProject, false);
+						updateWorkingSet();
 						buildProjects(Arrays.asList(getServoyProjects()));
 					}
 					catch (Exception ex)
@@ -692,11 +697,11 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				{
 					if (project == null)
 					{
-						progressMonitor.beginTask("Processing solution deactivation", 6);
+						progressMonitor.beginTask("Processing solution deactivation", 7);
 					}
 					else
 					{
-						progressMonitor.beginTask("Activating solution \"" + project + "\"", 6);
+						progressMonitor.beginTask("Activating solution \"" + project + "\"", 7);
 					}
 
 					progressMonitor.subTask("Loading solution...");
@@ -812,6 +817,9 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 						progressMonitor.worked(1);
 
 						testBuildPathsAndBuild(project, buildProject);
+						updateWorkingSet();
+
+						progressMonitor.subTask("Closing outdated editors...");
 
 						Display.getDefault().syncExec(new Runnable()
 						{
@@ -860,7 +868,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 								}
 							}
 						});
-
+						progressMonitor.worked(1);
 					}
 				}
 				finally
@@ -1143,18 +1151,6 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		for (ServoyProject p : getModulesOfActiveProject())
 		{
 			p.resetEditingFlattenedSolution(true, true);
-
-			WorkspaceJob testBuildPaths = new WorkspaceJob("Test Build Paths")
-			{
-				@Override
-				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
-				{
-					testBuildPaths(activeProject, new HashSet<ServoyProject>());
-					return Status.OK_STATUS;
-				}
-			};
-			testBuildPaths.setRule(getWorkspace().getRoot());
-			testBuildPaths.schedule();
 		}
 	}
 
@@ -1204,8 +1200,11 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 						if (moduleProject.isAccessible())
 						{
 							ServoyProject servoyModuleProject = (ServoyProject)moduleProject.getNature(ServoyProject.NATURE_ID);
-							testBuildPaths(servoyModuleProject, processed);
-							buildPaths.add(DLTKCore.newProjectEntry(moduleProject.getFullPath(), true));
+							if (servoyModuleProject != null && servoyModuleProject.getSolution() != null) // maybe it's not a valid solution project
+							{
+								testBuildPaths(servoyModuleProject, processed);
+								buildPaths.add(DLTKCore.newProjectEntry(moduleProject.getFullPath(), true));
+							}
 						}
 					}
 					catch (Exception e)
@@ -1242,6 +1241,14 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		{
 			listener.activeProjectChanged(activeProject);
 		}
+	}
+
+	private void modulesChangedForActiveSolution()
+	{
+		resetActiveEditingFlattenedSolutions();
+		updateFlattenedSolution();
+		getUserManager().reloadAllSecurityInformation();
+		fireActiveProjectUpdated(IActiveProjectListener.MODULES_UPDATED); // this will also eventually refresh JS build paths and working set
 	}
 
 	private void fireActiveProjectUpdated(int updateInfo)
@@ -1522,9 +1529,6 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		return ResourcesPlugin.getWorkspace();
 	}
 
-	/**
-	 * @param event
-	 */
 	private void projectChanged(IResourceChangeEvent event)
 	{
 		if (getDeveloperRepository() == null)
@@ -1536,6 +1540,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		boolean callActiveProject = false;
 		// these are the projects
 		IResourceDelta[] affectedChildren = event.getDelta().getAffectedChildren();
+		boolean moduleListChanged = false; // no use updating flattened solutions/security/building multiple times and so on... just do it once if needed
 		for (IResourceDelta element : affectedChildren)
 		{
 			IResource resource = element.getResource();
@@ -1577,11 +1582,27 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 						// check if there is a solution for it
 						if (eclipseRepository.isSolutionMetaDataLoaded(resource.getName()))
 						{
-							final List<IResourceDelta> al = findChangedFiles(element, new ArrayList<IResourceDelta>());
-							// do nothing if no file was really changed
-							if (al == null || al.size() == 0) return;
-							if (eclipseRepository.getActiveRootObject(resource.getName(), IRepository.SOLUTIONS) != null)
+							// if this solution was not needed before and it is not yet deserialized then we need not load it now
+							boolean solutionLoaded = eclipseRepository.isSolutionLoaded(resource.getName());
+							final List<IResourceDelta> al;
+							if (!solutionLoaded && shouldBeModuleOfActiveSolution(resource.getName()))
 							{
+								// previously invalid module of active solution? it changed, maybe it is valid now
+								al = findChangedFiles(element, new ArrayList<IResourceDelta>());
+								// do nothing if no file was really changed
+								if (al != null && al.size() != 0)
+								{
+									if (eclipseRepository.getActiveRootObject(resource.getName(), IRepository.SOLUTIONS) != null) // try to deserialize it again
+									{
+										moduleListChanged = true; // now it's valid and active solution must be aware of this
+									}
+								}
+							}
+							else if (solutionLoaded)
+							{
+								al = findChangedFiles(element, new ArrayList<IResourceDelta>());
+								// do nothing if no file was really changed
+								if (al == null || al.size() == 0) return;
 								// there is already a solution, update solution resources only after a build
 								if (eclipseRepository.isSavingInWorkspace())
 								{
@@ -1597,28 +1618,26 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 								{
 									handleOutstandingChangedFiles(al);
 								}
-							} // else probably some deserialize error prevented the solution from being read
+							}
 						}
 						else
 						{
 							// maybe this is a new ServoyProject (checked out right now, or imported into the workspace...);
 							// in this case we need enable it to have a solution - by updating the repository's root object meta data cache
 							eclipseRepository.registerSolutionMetaData(resource.getName());
-							Solution sol = (Solution)eclipseRepository.getActiveRootObject(resource.getName(), IRepository.SOLUTIONS);
 
-							// might be a module of the currently active solution (we need to refresh the modules cache)
-							if (activeProject != null && sol != null)
+							if (shouldBeModuleOfActiveSolution(resource.getName()))
 							{
-								updateFlattenedSolution();
-
-								if (isModule(sol))
+								if ((Solution)eclipseRepository.getActiveRootObject(resource.getName(), IRepository.SOLUTIONS) != null)
 								{
-									resetActiveEditingFlattenedSolutions();
-									getUserManager().reloadAllSecurityInformation();
-									fireActiveProjectUpdated(IActiveProjectListener.MODULES_UPDATED);
+									// it's a new valid module of the active solution
+									moduleListChanged = true;
 								}
 							}
-							callActiveProject = true;
+							else if (activeProject == null)
+							{
+								callActiveProject = true;
+							}
 						}
 					}
 					else
@@ -1642,10 +1661,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 							{
 								if (isModule(solution))
 								{
-									resetActiveEditingFlattenedSolutions();
-									updateFlattenedSolution();
-									getUserManager().reloadAllSecurityInformation();
-									fireActiveProjectUpdated(IActiveProjectListener.MODULES_UPDATED);
+									moduleListChanged = true;
 								}
 							}
 						}
@@ -1697,10 +1713,42 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				ServoyLog.logError(e);
 			}
 		}
+		if (moduleListChanged)
+		{
+			modulesChangedForActiveSolution();
+		}
 		if (callActiveProject)
 		{
 			autoSelectActiveProjectIfNull(true);
 		}
+	}
+
+	/**
+	 * Checks whether or not the solution with given name is or should be a module of the active solution.<br>
+	 * It checks modules listed in all current modules of flattened solution; it is able to detect modules that are not part of the actual flattened solution yet, without actually loading them (so for example solutions that the active solution or it's modules listed as a module but was not valid/present previously).
+	 */
+	private boolean shouldBeModuleOfActiveSolution(String searchForName)
+	{
+		if (activeProject != null)
+		{
+			ServoyProject[] modules = getModulesOfActiveProject();
+			for (ServoyProject spm : modules)
+			{
+				Solution s = spm.getSolution();
+				if (s != null)
+				{
+					String[] moduleNames = Utils.getTokenElements(s.getModulesNames(), ",", true);
+					for (String mn : moduleNames)
+					{
+						if (searchForName.equals(mn))
+						{
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -1985,10 +2033,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		if (solution.isChanged() && (oldModules != newModules) && (oldModules == null || (!oldModules.equals(newModules))) && activeProject != null &&
 			(activeProject.getSolution() == solution || isModule(solution)))
 		{
-			resetActiveEditingFlattenedSolutions();
-			updateFlattenedSolution();
-			getUserManager().reloadAllSecurityInformation();
-			fireActiveProjectUpdated(IActiveProjectListener.MODULES_UPDATED);
+			modulesChangedForActiveSolution();
 		}
 
 		final LinkedHashMap<UUID, IPersist> changed = new LinkedHashMap<UUID, IPersist>();
@@ -2036,7 +2081,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				// file outside of visited tree, ignore
 				continue;
 			}
-			else if (file.getName().endsWith(WorkspaceUserManager.SECURITY_FILE_EXTENSION) && isModuleActive(project.getName()))
+			else if (file.getName().endsWith(WorkspaceUserManager.SECURITY_FILE_EXTENSION) && isSolutionActive(project.getName()))
 			{
 				// must be a form ".sec" file; find the form for it...
 				File projectFolder = project.getLocation().toFile();
@@ -2129,28 +2174,6 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 			fireActiveProjectUpdated(IActiveProjectListener.SECURITY_INFO_CHANGED);
 		}
 		return changedScriptParents;
-	}
-
-	public boolean isActiveProject(String name)
-	{
-		if (name != null && getActiveProject() != null)
-		{
-			return name.equals(getActiveProject().getProject().getName()) || isModuleActive(name);
-		}
-		return false;
-	}
-
-	public boolean isModuleActive(String name)
-	{
-		ServoyProject[] activeModules = getModulesOfActiveProject();
-		for (ServoyProject p : activeModules)
-		{
-			if (p.getProject().getName().equals(name))
-			{
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private void handleChangedFilesInResourcesProject(List<IResourceDelta> al)
@@ -2562,10 +2585,6 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		getServerManager().removeServerConfigListener(serverConfigSyncer);
 	}
 
-	/**
-	 * @param project
-	 * @param buildProject
-	 */
 	public void testBuildPathsAndBuild(final ServoyProject project, final boolean buildProject)
 	{
 		WorkspaceJob testBuildPaths = new WorkspaceJob("Test Build Paths")
@@ -2580,14 +2599,15 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		};
 		testBuildPaths.setRule(getWorkspace().getRoot());
 		testBuildPaths.schedule();
+	}
 
-
+	public void updateWorkingSet()
+	{
 		WorkspaceJob updateServoyWorkingSet = new WorkspaceJob("Servoy active solution workingset updater")
 		{
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 			{
-				PlatformUI.getPreferenceStore().setValue(IWorkbenchPreferenceConstants.USE_WINDOW_WORKING_SET_BY_DEFAULT, true);
 				if (getActiveProject() != null)
 				{
 					ServoyProject[] allprojects = getModulesOfActiveProject();
@@ -2626,11 +2646,6 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		updateServoyWorkingSet.schedule();
 	}
 
-	/**
-	 * @param parent
-	 * @param scriptFile
-	 * @return
-	 */
 	public MultiTextEdit getScriptFileChanges(ISupportChilds parent, final IFile scriptFile)
 	{
 		MultiTextEdit textEdit = new MultiTextEdit();

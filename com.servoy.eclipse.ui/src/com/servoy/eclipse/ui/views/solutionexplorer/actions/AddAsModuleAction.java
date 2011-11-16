@@ -96,7 +96,6 @@ public class AddAsModuleAction extends Action implements ISelectionChangedListen
 				{
 					ServoyLog.logError("Cannot save new module list for active module " + activeModule.getProject().getName(), e);
 				}
-				ServoyModelManager.getServoyModelManager().getServoyModel().testBuildPathsAndBuild(activeModule, true);
 			}
 		}
 	}

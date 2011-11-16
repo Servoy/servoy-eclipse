@@ -307,4 +307,17 @@ public abstract class AbstractServoyModel implements IServoyModel
 		}
 	}
 
+	public boolean isSolutionActive(String name)
+	{
+		ServoyProject[] activeModules = getModulesOfActiveProject();
+		for (ServoyProject p : activeModules)
+		{
+			if (p.getProject().getName().equals(name))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 }

@@ -109,7 +109,7 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 					try
 					{
 						String oldName = servoyProject.getProject().getName();
-						boolean isActive = ServoyModelManager.getServoyModelManager().getServoyModel().isModuleActive(oldName);
+						boolean isActive = ServoyModelManager.getServoyModelManager().getServoyModel().isSolutionActive(oldName);
 						ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 						ServoyProject[] activeProjects = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 						if (isActive)

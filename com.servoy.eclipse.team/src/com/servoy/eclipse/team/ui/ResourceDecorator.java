@@ -135,7 +135,8 @@ public class ResourceDecorator implements ILightweightLabelDecorator
 				}
 				catch (CoreException ex)
 				{
-					ServoyLog.logError(ex);
+					// annoying message that appears when a project is not open while visiting...
+					if (ex.getMessage() == null || !ex.getMessage().contains("is not open")) ServoyLog.logError(ex);
 				}
 
 				if (mappingImg[0] != null) decoration.addOverlay(mappingImg[0], IDecoration.BOTTOM_RIGHT);
