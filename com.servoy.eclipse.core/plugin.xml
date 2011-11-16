@@ -346,4 +346,15 @@
             namespace="com.servoy.eclipse.core.builder.JSFileExternalizeProblem">
       </problemIdentifierFactory>
    </extension>
+   <extension
+   		point="org.eclipse.dltk.javascript.ui.problemSections">
+		<section
+				id="com.servoy.eclipse.core.builder.externalize"
+				name="Externalized strings"
+				priority="1000">
+      		<problem
+      			id="com.servoy.eclipse.core.builder.JSFileExternalizeProblem#NON_EXTERNALIZED_STRING"
+            	label="Non externalized string"/>
+        </section>
+   </extension>
 </plugin>
