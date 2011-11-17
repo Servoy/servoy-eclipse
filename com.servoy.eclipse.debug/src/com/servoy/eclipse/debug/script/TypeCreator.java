@@ -92,7 +92,6 @@ import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.ui.IScriptBaseMethods;
 import com.servoy.j2db.util.HtmlUtils;
-import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Utils;
 
@@ -1028,7 +1027,7 @@ public abstract class TypeCreator
 		}
 	}
 
-	private static final ConcurrentMap<Pair<Class< ? >, String>, String> docCache = new ConcurrentHashMap<Pair<Class< ? >, String>, String>(64, 0.9f, 16);
+	private static final ConcurrentMap<MethodSignature, String> docCache = new ConcurrentHashMap<MethodSignature, String>(64, 0.9f, 16);
 
 	/**
 	 * @param key
@@ -1040,7 +1039,7 @@ public abstract class TypeCreator
 	{
 		if (scriptObjectClass == null) return null;
 
-		Pair<Class< ? >, String> cacheKey = new Pair<Class< ? >, String>(scriptObjectClass, name);
+		MethodSignature cacheKey = new MethodSignature(scriptObjectClass, name, parameterTypes);
 		String doc = docCache.get(cacheKey);
 		if (doc == null)
 		{
@@ -1049,17 +1048,20 @@ public abstract class TypeCreator
 			if (scriptObject != null)
 			{
 				String sample = null;
+				boolean deprecated = false;
 				if (scriptObject instanceof ITypedScriptObject)
 				{
 					String toolTip = ((ITypedScriptObject)scriptObject).getToolTip(key, parameterTypes);
 					if (toolTip != null) doc = toolTip;
 					sample = ((ITypedScriptObject)scriptObject).getSample(key, parameterTypes);
+					deprecated = ((ITypedScriptObject)scriptObject).isDeprecated(key, parameterTypes);
 				}
 				else
 				{
 					String toolTip = scriptObject.getToolTip(name);
 					if (toolTip != null) doc = toolTip;
 					sample = scriptObject.getSample(key);
+					deprecated = scriptObject.isDeprecated(key);
 				}
 				if (sample != null)
 				{
@@ -1067,6 +1069,7 @@ public abstract class TypeCreator
 				}
 				if (doc != null)
 				{
+					if (deprecated) doc += "<br/><b>@deprecated</b>";
 					doc = Utils.stringReplace(doc, "\n", "<br/>"); //$NON-NLS-1$ //$NON-NLS-2$
 					doc = Utils.stringReplace(doc, "%%prefix%%", ""); //$NON-NLS-1$ //$NON-NLS-2$
 					doc = Utils.stringReplace(doc, "%%elementName%%", "elements.elem"); //$NON-NLS-1$
@@ -1136,5 +1139,66 @@ public abstract class TypeCreator
 			}
 		}
 		return null;
+	}
+
+	private final static class MethodSignature
+	{
+		private final Class< ? > scriptObjectClass;
+		private final String name;
+		private final Class< ? >[] parameterTypes;
+
+		/**
+		 * @param scriptObjectClass
+		 * @param name
+		 * @param parameterTypes
+		 */
+		public MethodSignature(Class< ? > scriptObjectClass, String name, Class< ? >[] parameterTypes)
+		{
+			this.scriptObjectClass = scriptObjectClass;
+			this.name = name;
+			this.parameterTypes = parameterTypes;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((name == null) ? 0 : name.hashCode());
+			result = prime * result + Arrays.hashCode(parameterTypes);
+			result = prime * result + ((scriptObjectClass == null) ? 0 : scriptObjectClass.hashCode());
+			return result;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj) return true;
+			if (obj == null) return false;
+			if (getClass() != obj.getClass()) return false;
+			MethodSignature other = (MethodSignature)obj;
+			if (name == null)
+			{
+				if (other.name != null) return false;
+			}
+			else if (!name.equals(other.name)) return false;
+			if (!Arrays.equals(parameterTypes, other.parameterTypes)) return false;
+			if (scriptObjectClass == null)
+			{
+				if (other.scriptObjectClass != null) return false;
+			}
+			else if (!scriptObjectClass.equals(other.scriptObjectClass)) return false;
+			return true;
+		}
 	}
 }
