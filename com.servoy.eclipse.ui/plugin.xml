@@ -947,6 +947,7 @@
             searchResultClass="com.servoy.eclipse.ui.search.FileSearchResult">
       </viewPage>
    </extension>
+   
    <extension
          point="org.eclipse.dltk.ui.coloring">
       <coloring
@@ -966,5 +967,13 @@
             class="com.servoy.eclipse.ui.scripting.KeywordProvider"
             nature="org.eclipse.dltk.javascript.core.nature">
       </keywordProvider>
+   </extension>
+   <extension
+         point="org.eclipse.search.textSearchQueryProvider">
+      <textSearchQueryProvider
+            class="com.servoy.eclipse.ui.search.ServoyTextSearchQueryProvider"
+            id="com.servoy.eclipse.ui.search.textSearch"
+            label="Text Search Query Provider 2">
+      </textSearchQueryProvider>
    </extension>
 </plugin>
