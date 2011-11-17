@@ -212,7 +212,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 							// don't set the child to private if the form itself did also implement it.
 							if (form.getScriptMethod(child) == null && form.getScriptVariable(child) == null)
 							{
-								Object attribute = chld.getAttribute(IReferenceAttributes.PARAMETERS);
+								Object attribute = chld.getAttribute(IReferenceAttributes.METHOD);
 								if (attribute == null) attribute = chld.getAttribute(IReferenceAttributes.VARIABLE);
 								if (attribute instanceof IMember && ((IMember)attribute).isPrivate())
 								{

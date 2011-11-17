@@ -45,7 +45,6 @@ import org.eclipse.dltk.javascript.typeinfo.model.SimpleType;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
-import org.eclipse.dltk.javascript.typeinfo.model.TypeRef;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.EMap;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -957,6 +956,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			else
 			{
 				FlattenedSolution fs = getFlattenedSolution(context);
+				if (fs == null) return context.getKnownType("Form", TypeMode.CODE);
 				String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
 				Form form = fs.getForm(config);
 				if (form == null) return context.getKnownType("Form", TypeMode.CODE);
@@ -1706,7 +1706,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		{
 			if (member.getDirectType() != null)
 			{
-				TypeRef typeRef = TypeInfoModelFactory.eINSTANCE.createTypeRef();
+				SimpleType typeRef = TypeInfoModelFactory.eINSTANCE.createSimpleType();
 				typeRef.setTarget(member.getDirectType());
 				clone.setType(typeRef);
 			}
@@ -1730,7 +1730,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		clone.setName(parameter.getName());
 		if (parameter.getDirectType() != null)
 		{
-			TypeRef typeRef = TypeInfoModelFactory.eINSTANCE.createTypeRef();
+			SimpleType typeRef = TypeInfoModelFactory.eINSTANCE.createSimpleType();
 			typeRef.setTarget(parameter.getDirectType());
 			clone.setType(typeRef);
 		}
