@@ -214,7 +214,7 @@ public class EventsComposite extends Composite
 					for (String modulename : modulesNames)
 					{
 						ServoyProject moduleProject = servoyModel.getServoyProject(modulename);
-						if (moduleProject != null && solutions.add(moduleProject.getSolution().getUUID()))
+						if (moduleProject != null && moduleProject.getSolution() != null && solutions.add(moduleProject.getSolution().getUUID()))
 						{
 							rows.add(new EventNode((Solution)moduleProject.getEditingPersist(moduleProject.getSolution().getUUID()), t));
 						}

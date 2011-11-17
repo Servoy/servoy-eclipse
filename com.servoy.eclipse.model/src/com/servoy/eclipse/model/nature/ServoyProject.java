@@ -90,6 +90,33 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 		this.project = project;
 	}
 
+	/**
+	 * Convenience method that delegates to repository.
+	 */
+	public boolean isSolutionLoaded()
+	{
+		IDeveloperRepository repository = ApplicationServerSingleton.get().getDeveloperRepository();
+		if (repository != null)
+		{
+			try
+			{
+				return ((EclipseRepository)repository).isSolutionLoaded(project.getName());
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * This method gets the solution for a ServoyProject. If the solution is not yet read from disk it will be deserialized now.
+	 * NOTE: Do not call this if you do not need to deserialize the solution of this project.
+	 * There are cases in which you can ignore the solution if it's not already deserialized.
+	 * @see #isSolutionLoaded()
+	 * @return
+	 */
 	public Solution getSolution()
 	{
 		Solution solution = null;

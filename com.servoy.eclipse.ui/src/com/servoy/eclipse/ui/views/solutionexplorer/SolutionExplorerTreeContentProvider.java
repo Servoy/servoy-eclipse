@@ -573,9 +573,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					//String solutionName = (String)servoyProject.getSolution().getProperty(StaticContentSpecLoader.PROPERTY_TITLETEXT.getPropertyName());
 					//if (solutionName == null) solutionName = servoyProject.getSolution().getName();
 					// above code would load all solutions
-					String solutionName = servoyProject.getProject().getName();
-
-					node.setToolTipText(solutionName + "(" + getSolutionTypeAsString(servoyProject) + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+					// do not load all solutions at startup by reading solution directly
+					node.setToolTipText(servoyProject.getProject().getName() + "(" + getSolutionTypeAsString(servoyProject) + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		}
@@ -619,27 +618,30 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private String getSolutionTypeAsString(ServoyProject project)
 	{
-		switch (project.getSolutionMetaData().getSolutionType())
+		if (project.getSolutionMetaData() != null)
 		{
-			case SolutionMetaData.SOLUTION :
-				return SolutionMetaData.solutionTypeNames[0];
-			case SolutionMetaData.MODULE :
-				return SolutionMetaData.solutionTypeNames[1];
-			case SolutionMetaData.WEB_CLIENT_ONLY :
-				return SolutionMetaData.solutionTypeNames[2];
-			case SolutionMetaData.SMART_CLIENT_ONLY :
-				return SolutionMetaData.solutionTypeNames[3];
-			case SolutionMetaData.LOGIN_SOLUTION :
-				return SolutionMetaData.solutionTypeNames[4];
-			case SolutionMetaData.AUTHENTICATOR :
-				return SolutionMetaData.solutionTypeNames[5];
-			case SolutionMetaData.PRE_IMPORT_HOOK :
-				return SolutionMetaData.solutionTypeNames[6];
-			case SolutionMetaData.POST_IMPORT_HOOK :
-				return SolutionMetaData.solutionTypeNames[7];
+			switch (project.getSolutionMetaData().getSolutionType())
+			{
+				case SolutionMetaData.SOLUTION :
+					return SolutionMetaData.solutionTypeNames[0];
+				case SolutionMetaData.MODULE :
+					return SolutionMetaData.solutionTypeNames[1];
+				case SolutionMetaData.WEB_CLIENT_ONLY :
+					return SolutionMetaData.solutionTypeNames[2];
+				case SolutionMetaData.SMART_CLIENT_ONLY :
+					return SolutionMetaData.solutionTypeNames[3];
+				case SolutionMetaData.LOGIN_SOLUTION :
+					return SolutionMetaData.solutionTypeNames[4];
+				case SolutionMetaData.AUTHENTICATOR :
+					return SolutionMetaData.solutionTypeNames[5];
+				case SolutionMetaData.PRE_IMPORT_HOOK :
+					return SolutionMetaData.solutionTypeNames[6];
+				case SolutionMetaData.POST_IMPORT_HOOK :
+					return SolutionMetaData.solutionTypeNames[7];
+			}
 		}
 
-		return ""; //$NON-NLS-1$
+		return "unknown type"; //$NON-NLS-1$
 	}
 
 	public Object getParent(Object child)

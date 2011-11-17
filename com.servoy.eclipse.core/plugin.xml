@@ -324,6 +324,15 @@
       </problemFilter>
    </extension>
    <extension
+         point="org.eclipse.ui.workingSets">
+      <workingSet
+            description="working set that reflects all active solution projects (active sol. + modules)"
+            icon="icons/servoy_donut16x16.png"
+            id="com.servoy.eclipse.core.activeSolutionWorkingset"
+            name="Servoy Active Solutions">
+      </workingSet>
+   </extension>
+   <extension
          point="org.eclipse.dltk.ui.saveParticipants">
       <saveParticipant
             class="com.servoy.eclipse.core.repository.JavaScriptFilePostSaveListener"

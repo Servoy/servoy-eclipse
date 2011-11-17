@@ -146,6 +146,15 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 		return false;
 	}
 
+	public boolean isSolutionLoaded(String solutionName) throws RepositoryException
+	{
+		if (isRootObjectCacheInitialized())
+		{
+			return getRootObjectCache().isRootObjectCached(solutionName, IRepository.SOLUTIONS, 0);
+		}
+		return false;
+	}
+
 	private int last_element_id = Integer.MAX_VALUE / 2;
 
 	public synchronized int getNewElementID(UUID new_uuid) throws RepositoryException
@@ -827,4 +836,5 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 
 		return repositoryUUID;
 	}
+
 }

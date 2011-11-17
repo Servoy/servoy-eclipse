@@ -39,6 +39,7 @@ import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.FileTextSearchScope;
 
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.Solution;
 
@@ -71,6 +72,8 @@ public class RelationSearch extends AbstractPersistSearch
 
 		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm" }, true);
 		TextSearchEngine.create().search(scope, collector, Pattern.compile("\\b" + relation.getName() + "\\b"), monitor);
+		TextSearchEngine.create().search(scope, collector, Pattern.compile("\\b" + Form.NAMED_FOUNDSET_GLOBAL_RELATION_PREFIX + relation.getName() + "\\b"),
+			monitor);
 
 		scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.js" }, true);
 		((RelationSearchResultCollector)collector).setEngine(DLTKLanguageManager.getSelectionEngine(JavaScriptNature.NATURE_ID));
