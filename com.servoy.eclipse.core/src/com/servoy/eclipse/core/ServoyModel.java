@@ -316,8 +316,8 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 						}
 
 						EclipseMessages.writeProjectI18NFiles(activeProject, false, false);
-						testBuildPathsAndBuild(activeProject, false);
 						updateWorkingSet();
+						testBuildPathsAndBuild(activeProject, false);
 						buildProjects(Arrays.asList(getServoyProjects()));
 					}
 					catch (Exception ex)
@@ -816,8 +816,8 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 						});
 						progressMonitor.worked(1);
 
-						testBuildPathsAndBuild(project, buildProject);
 						updateWorkingSet();
+						testBuildPathsAndBuild(project, buildProject);
 
 						progressMonitor.subTask("Closing outdated editors...");
 
