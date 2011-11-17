@@ -20,7 +20,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -825,7 +824,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 	private class PluginsScopeCreator implements IScopeTypeCreator
 	{
-		private final Map<String, Image> images = new HashMap<String, Image>();
+		private final Map<String, Image> images = new ConcurrentHashMap<String, Image>();
 
 		/**
 		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
@@ -1012,7 +1011,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	{
 		private Type cachedSuperTypeTemplateType = null;
 
-		private final Map<String, Class< ? >> qbClasses = new HashMap<String, Class< ? >>();
+		private final Map<String, Class< ? >> qbClasses = new ConcurrentHashMap<String, Class< ? >>();
 
 		QueryBuilderCreator()
 		{
@@ -1439,7 +1438,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 	public class ElementsScopeCreator implements IScopeTypeCreator
 	{
-		private final Map<String, String> typeNames = new HashMap<String, String>();
+		private final Map<String, String> typeNames = new ConcurrentHashMap<String, String>();
 
 		private ElementsScopeCreator()
 		{
