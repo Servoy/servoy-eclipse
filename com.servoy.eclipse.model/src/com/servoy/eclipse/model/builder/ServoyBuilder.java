@@ -406,7 +406,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				else
 				{
-					if (project.hasNature(ServoyResourcesProject.NATURE_ID))
+					if (project.isOpen() && project.hasNature(ServoyResourcesProject.NATURE_ID))
 					{
 						final ServoyProject servoyProject = getServoyProject(getProject());
 						if (isActiveSolutionOrModule(servoyProject))

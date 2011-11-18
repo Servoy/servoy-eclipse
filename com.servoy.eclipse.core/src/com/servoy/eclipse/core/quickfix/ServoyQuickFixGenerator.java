@@ -60,9 +60,9 @@ import com.servoy.eclipse.core.quickfix.security.ReplaceUUIDForOneOfUsersWithDup
 import com.servoy.eclipse.core.quickfix.security.SecurityQuickFix;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
-import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.IPersist;
@@ -188,9 +188,13 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				final UUID id = UUID.fromString(uuid);
 				String solName = (String)marker.getAttribute("SolutionName");
 				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
-				IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
-				if (serverName != null) fixes = new IMarkerResolution[] { new MissingServerQuickFix(serverName), new DeletePersistQuickFix(persist,
-					servoyProject) };
+				if (servoyProject.isSolutionLoaded())
+				{
+					IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
+					if (serverName != null) fixes = new IMarkerResolution[] { new MissingServerQuickFix(serverName), new DeletePersistQuickFix(persist,
+						servoyProject) };
+					else fixes = new IMarkerResolution[0];
+				}
 				else fixes = new IMarkerResolution[0];
 			}
 			else if (type.equals(ServoyBuilder.BAD_STRUCTURE_MARKER_TYPE))

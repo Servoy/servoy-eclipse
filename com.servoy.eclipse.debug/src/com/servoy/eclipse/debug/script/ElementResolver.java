@@ -120,76 +120,33 @@ public class ElementResolver implements IElementResolver
 		}
 
 
-		if (form != null)
+		if (fs != null)
 		{
-			typeNames.add("globals");
-			Form formToUse = form;
-			if (form.getExtendsFormID() > 0)
+			if (form != null)
 			{
-				formToUse = fs.getFlattenedForm(form);
-				typeNames.add("_super");
-			}
-			try
-			{
-				Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(formToUse.getTable());
-				if (allDataProvidersForTable != null)
-				{
-					typeNames.addAll(allDataProvidersForTable.keySet());
-				}
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError("Cant get dataproviders of " + form, e);
-			}
-
-			try
-			{
-				Iterator<Relation> relations = fs.getRelations(formToUse.getTable(), true, false);
-				while (relations.hasNext())
-				{
-					typeNames.add(relations.next().getName());
-				}
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError("Cant get relations of " + form, e);
-			}
-		}
-		else if (fs != null)
-		{
-			// global, remove the form only things.
-			typeNames.removeAll(noneGlobalNames);
-
-			Table calcTable = getCalculationTable(context, fs);
-			if (calcTable != null)
-			{
-				typeNames.removeAll(noneCalcNames);
 				typeNames.add("globals");
-				typeNames.add("getDataSource");
+				Form formToUse = form;
+				if (form.getExtendsFormID() > 0)
+				{
+					formToUse = fs.getFlattenedForm(form);
+					typeNames.add("_super");
+				}
 				try
 				{
-					Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(calcTable);
+					Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(formToUse.getTable());
 					if (allDataProvidersForTable != null)
 					{
 						typeNames.addAll(allDataProvidersForTable.keySet());
 					}
-					Iterator<Relation> relations = fs.getRelations(calcTable, true, false);
-					while (relations.hasNext())
-					{
-						typeNames.add(relations.next().getName());
-					}
 				}
-				catch (Exception e)
+				catch (RepositoryException e)
 				{
-					ServoyLog.logError("Cant get dataproviders of " + calcTable + " for calculations " + context.getModelElement().getResource(), e);
+					ServoyLog.logError("Cant get dataproviders of " + form, e);
 				}
 
-			}
-			else
-			{
 				try
 				{
-					Iterator<Relation> relations = fs.getRelations(null, true, false);
+					Iterator<Relation> relations = fs.getRelations(formToUse.getTable(), true, false);
 					while (relations.hasNext())
 					{
 						typeNames.add(relations.next().getName());
@@ -198,6 +155,52 @@ public class ElementResolver implements IElementResolver
 				catch (RepositoryException e)
 				{
 					ServoyLog.logError("Cant get relations of " + form, e);
+				}
+			}
+			else
+			{
+				// global, remove the form only things.
+				typeNames.removeAll(noneGlobalNames);
+
+				Table calcTable = getCalculationTable(context, fs);
+				if (calcTable != null)
+				{
+					typeNames.removeAll(noneCalcNames);
+					typeNames.add("globals");
+					typeNames.add("getDataSource");
+					try
+					{
+						Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(calcTable);
+						if (allDataProvidersForTable != null)
+						{
+							typeNames.addAll(allDataProvidersForTable.keySet());
+						}
+						Iterator<Relation> relations = fs.getRelations(calcTable, true, false);
+						while (relations.hasNext())
+						{
+							typeNames.add(relations.next().getName());
+						}
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError("Cant get dataproviders of " + calcTable + " for calculations " + context.getModelElement().getResource(), e);
+					}
+
+				}
+				else
+				{
+					try
+					{
+						Iterator<Relation> relations = fs.getRelations(null, true, false);
+						while (relations.hasNext())
+						{
+							typeNames.add(relations.next().getName());
+						}
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError("Cant get relations of " + form, e);
+					}
 				}
 			}
 		}
@@ -315,7 +318,7 @@ public class ElementResolver implements IElementResolver
 		}
 		if (typeName != null)
 		{
-			if ((noneCalcNames.contains(name) || noneGlobalNames.contains(name)) && getCalculationTable(context, fs) != null)
+			if ((noneCalcNames.contains(name) || noneGlobalNames.contains(name)) && fs != null && getCalculationTable(context, fs) != null)
 			{
 				return null;
 			}

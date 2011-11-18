@@ -865,52 +865,59 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			else
 			{
 				FlattenedSolution fs = getFlattenedSolution(context);
-				String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
-				Form form = fs.getForm(config);
-				if (form == null) return context.getKnownType("Form", TypeMode.CODE);
-				Form formToUse = fs.getFlattenedForm(form);
-				Type superForm = context.getType("Form");
-				if (form.getExtendsID() > 0)
+				if (fs != null)
 				{
-					Form extendsForm = fs.getForm(form.getExtendsID());
-					if (extendsForm != null) superForm = context.getType("Form<" + extendsForm.getName() + '>');
+					String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
+					Form form = fs.getForm(config);
+					if (form == null) return context.getKnownType("Form", TypeMode.CODE);
+					Form formToUse = fs.getFlattenedForm(form);
+					Type superForm = context.getType("Form");
+					if (form.getExtendsID() > 0)
+					{
+						Form extendsForm = fs.getForm(form.getExtendsID());
+						if (extendsForm != null) superForm = context.getType("Form<" + extendsForm.getName() + '>');
+					}
+
+					String ds = formToUse.getDataSource();
+					List<Member> overwrittenMembers = new ArrayList<Member>();
+
+					if (ds != null || FormEncapsulation.hideFoundset(formToUse))
+					{
+						String foundsetType = FoundSet.JS_FOUNDSET;
+						if (ds != null) foundsetType += '<' + ds + '>';
+						Member clone = createProperty(context, "foundset", true, foundsetType, FOUNDSET_IMAGE);
+						overwrittenMembers.add(clone);
+						clone.setVisible(!FormEncapsulation.hideFoundset(formToUse));
+					}
+					if (FormEncapsulation.hideController(formToUse))
+					{
+						Member clone = createProperty(context, "controller", true, "Controller", IconProvider.instance().descriptor(JSForm.class));
+						overwrittenMembers.add(clone);
+						clone.setVisible(false);
+					}
+					if (FormEncapsulation.hideDataproviders(formToUse))
+					{
+						Member clone = createProperty("alldataproviders", true, TypeUtil.arrayOf("String"), "Array with all the dataprovider names",
+							SPECIAL_PROPERTY);
+						overwrittenMembers.add(clone);
+						clone.setVisible(false);
+
+						clone = createProperty("allrelations", true, TypeUtil.arrayOf("String"), "Array with all the relation names", SPECIAL_PROPERTY);
+						overwrittenMembers.add(clone);
+						clone.setVisible(false);
+					}
+
+					Member clone = createProperty(context, "elements", true, "Elements<" + config + '>', ELEMENTS);
+					overwrittenMembers.add(clone);
+					clone.setVisible(!FormEncapsulation.hideElements(formToUse));
+
+					type = getCombinedType(context, typeName, ds, overwrittenMembers, superForm, FORM_IMAGE, !FormEncapsulation.hideDataproviders(formToUse));
+					if (type != null) type.setAttribute(LAZY_VALUECOLLECTION, form);
 				}
-
-				String ds = formToUse.getDataSource();
-				List<Member> overwrittenMembers = new ArrayList<Member>();
-
-				if (ds != null || FormEncapsulation.hideFoundset(formToUse))
+				else
 				{
-					String foundsetType = FoundSet.JS_FOUNDSET;
-					if (ds != null) foundsetType += '<' + ds + '>';
-					Member clone = createProperty(context, "foundset", true, foundsetType, FOUNDSET_IMAGE);
-					overwrittenMembers.add(clone);
-					clone.setVisible(!FormEncapsulation.hideFoundset(formToUse));
+					type = null;
 				}
-				if (FormEncapsulation.hideController(formToUse))
-				{
-					Member clone = createProperty(context, "controller", true, "Controller", IconProvider.instance().descriptor(JSForm.class));
-					overwrittenMembers.add(clone);
-					clone.setVisible(false);
-				}
-				if (FormEncapsulation.hideDataproviders(formToUse))
-				{
-					Member clone = createProperty("alldataproviders", true, TypeUtil.arrayOf("String"), "Array with all the dataprovider names",
-						SPECIAL_PROPERTY);
-					overwrittenMembers.add(clone);
-					clone.setVisible(false);
-
-					clone = createProperty("allrelations", true, TypeUtil.arrayOf("String"), "Array with all the relation names", SPECIAL_PROPERTY);
-					overwrittenMembers.add(clone);
-					clone.setVisible(false);
-				}
-
-				Member clone = createProperty(context, "elements", true, "Elements<" + config + '>', ELEMENTS);
-				overwrittenMembers.add(clone);
-				clone.setVisible(!FormEncapsulation.hideElements(formToUse));
-
-				type = getCombinedType(context, typeName, ds, overwrittenMembers, superForm, FORM_IMAGE, !FormEncapsulation.hideDataproviders(formToUse));
-				if (type != null) type.setAttribute(LAZY_VALUECOLLECTION, form);
 			}
 			return type;
 		}
