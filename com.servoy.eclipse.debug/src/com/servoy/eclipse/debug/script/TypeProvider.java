@@ -497,7 +497,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		 */
 		public Type createType(ITypeInfoContext context, String fullTypeName)
 		{
-			FlattenedSolution fs = getFlattenedSolution(context);
 			Type type = null;
 			if ("Forms".equals(fullTypeName))
 			{
@@ -517,8 +516,10 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				// quickly add this one to the static types.
 				context.markInvariant(type);
 			}
-			else if (fs != null)
+			else
 			{
+				FlattenedSolution fs = getFlattenedSolution(context);
+				if (fs == null) return context.getKnownType("Forms", TypeMode.CODE);
 				type = TypeInfoModelFactory.eINSTANCE.createType();
 				type.setSuperType(context.getType("Forms"));
 				type.setName("Forms<" + fs.getMainSolutionMetaData().getName() + '>');
@@ -1134,7 +1135,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			else
 			{
 				ServoyProject servoyProject = servoyModel.getServoyProject(solutionServerTableNames[0]);
-				if (servoyProject != null)
+				if (servoyProject != null && servoyModel.isSolutionActive(servoyProject.getProject().getName()))
 				{
 					FlattenedSolution fs = servoyProject.getEditingFlattenedSolution();
 
