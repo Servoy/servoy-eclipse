@@ -148,7 +148,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 	{
 		ArrayList<Solution> modules = new ArrayList<Solution>();
 		Solution solution = getSolution();
-		getModules(solution.getName(), modules);
+		if (solution != null) getModules(solution.getName(), modules);
 
 		return modules.toArray(new Solution[modules.size()]);
 	}
@@ -418,34 +418,32 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 	 */
 	public ServoyResourcesProject getResourcesProject()
 	{
-		if (!project.exists()) return null;
-		try
+		if (project.exists() && project.isOpen())
 		{
-			final IProject[] referencedProjects = project.getDescription().getReferencedProjects();
-			final ArrayList<ServoyResourcesProject> resourcesProjects = new ArrayList<ServoyResourcesProject>();
-			for (IProject p : referencedProjects)
+			try
 			{
-				if (p.exists() && p.isOpen() && p.hasNature(ServoyResourcesProject.NATURE_ID))
+				final IProject[] referencedProjects = project.getDescription().getReferencedProjects();
+				final ArrayList<ServoyResourcesProject> resourcesProjects = new ArrayList<ServoyResourcesProject>();
+				for (IProject p : referencedProjects)
 				{
-					resourcesProjects.add((ServoyResourcesProject)p.getNature(ServoyResourcesProject.NATURE_ID));
+					if (p.exists() && p.isOpen() && p.hasNature(ServoyResourcesProject.NATURE_ID))
+					{
+						resourcesProjects.add((ServoyResourcesProject)p.getNature(ServoyResourcesProject.NATURE_ID));
+					}
 				}
-			}
 
-			if (resourcesProjects.size() == 1)
-			{
-				return resourcesProjects.get(0);
+				if (resourcesProjects.size() == 1)
+				{
+					return resourcesProjects.get(0);
+				}
+				// if size > 1 an error marker will be set on the project + a quick fix provided
 			}
-			else
+			catch (CoreException e)
 			{
-				return null;
+				ServoyLog.logError("Exception while reading referenced projects for " + project.getName(), e); //$NON-NLS-1$
 			}
-			// if size > 1 an error marker will be set on the project + a quick fix provided
 		}
-		catch (CoreException e)
-		{
-			ServoyLog.logError("Exception while reading referenced projects for " + project.getName(), e); //$NON-NLS-1$
-			return null;
-		}
+		return null;
 	}
 
 	/**

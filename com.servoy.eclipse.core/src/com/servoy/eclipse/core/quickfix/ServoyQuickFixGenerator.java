@@ -188,9 +188,13 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				final UUID id = UUID.fromString(uuid);
 				String solName = (String)marker.getAttribute("SolutionName");
 				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
-				IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
-				if (serverName != null) fixes = new IMarkerResolution[] { new MissingServerQuickFix(serverName), new DeletePersistQuickFix(persist,
-					servoyProject) };
+				if (servoyProject.isSolutionLoaded())
+				{
+					IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
+					if (serverName != null) fixes = new IMarkerResolution[] { new MissingServerQuickFix(serverName), new DeletePersistQuickFix(persist,
+						servoyProject) };
+					else fixes = new IMarkerResolution[0];
+				}
 				else fixes = new IMarkerResolution[0];
 			}
 			else if (type.equals(ServoyBuilder.BAD_STRUCTURE_MARKER_TYPE))

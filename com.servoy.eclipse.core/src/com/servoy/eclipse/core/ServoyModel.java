@@ -1550,6 +1550,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		// these are the projects
 		IResourceDelta[] affectedChildren = event.getDelta().getAffectedChildren();
 		boolean moduleListChanged = false; // no use updating flattened solutions/security/building multiple times and so on... just do it once if needed
+		boolean resourcesUpdated = false; // no use calling this multiple times either
 		for (IResourceDelta element : affectedChildren)
 		{
 			IResource resource = element.getResource();
@@ -1657,10 +1658,11 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 							getServoyProject(resource.getName()).resetEditingFlattenedSolution(false, false);
 							refreshServoyProjects();
 						}
-						Solution solution = (Solution)eclipseRepository.getActiveRootObject(resource.getName(), IRepository.SOLUTIONS);
-						if (solution != null)
+						boolean isLoaded = eclipseRepository.isSolutionMetaDataLoaded(resource.getName());
+						if (isLoaded)
 						{
-							eclipseRepository.removeRootObject(solution.getID());
+							eclipseRepository.removeRootObject(eclipseRepository.getRootObjectMetaData(resource.getName(), IRepository.SOLUTIONS).getRootObjectId());
+							// it is unloaded; avoid loading it afterwards when checking for active solutions
 							if (activeProject != null && activeProject.getProject().getName().equals(resource.getName()))
 							{
 								setActiveProject(null, true);
@@ -1668,7 +1670,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 							}
 							else if (activeProject != null)
 							{
-								if (isModule(solution))
+								if (shouldBeModuleOfActiveSolution(resource.getName()))
 								{
 									moduleListChanged = true;
 								}
@@ -1706,14 +1708,14 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 							}
 							if (referencedByActiveProject && element.findMember(new Path(".project")) != null)
 							{
-								updateResources(IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT, null);
+								resourcesUpdated = true;
 							}
 						}
 					}
 					else if (activeResourcesProject != null && project == activeResourcesProject.getProject())
 					{
 						// the current resources project lost it's capacity to be a resources project
-						updateResources(IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT, null);
+						resourcesUpdated = true;
 					}
 				}
 			}
@@ -1722,9 +1724,13 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				ServoyLog.logError(e);
 			}
 		}
-		if (moduleListChanged)
+		if (moduleListChanged && activeProject != null) // maybe user deleted/closed more then 1 project
 		{
 			modulesChangedForActiveSolution();
+		}
+		if (resourcesUpdated && activeProject != null)
+		{
+			updateResources(IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT, null);
 		}
 		if (callActiveProject)
 		{

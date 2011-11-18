@@ -511,13 +511,13 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		 */
 		public Type createType(ITypeInfoContext context, String fullTypeName)
 		{
-			FlattenedSolution fs = getFlattenedSolution(context);
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setKind(TypeKind.JAVA);
 			type.setAttribute(IMAGE_DESCRIPTOR, SCOPES);
 			type.setName(fullTypeName);
 
-			if ("Scopes".equals(fullTypeName))
+			FlattenedSolution fs;
+			if ("Scopes".equals(fullTypeName) || (fs = getFlattenedSolution(context)) == null)
 			{
 				// special array lookup property so that scopes[xxx]. does code complete.
 				Property arrayProp = createProperty(context, "[]", true, "Scope", PROPERTY);
@@ -525,7 +525,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				type.getMembers().add(arrayProp);
 				// quickly add this one to the static types. context.markInvariant(type); 
 			}
-			else if (fs != null)
+			else
 			{
 				type.setSuperType(context.getType("Scopes"));
 				EList<Member> members = type.getMembers();
@@ -588,7 +588,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		 */
 		public Type createType(ITypeInfoContext context, String fullTypeName)
 		{
-			FlattenedSolution fs = getFlattenedSolution(context);
 			Type type = null;
 			if ("Forms".equals(fullTypeName))
 			{
@@ -608,8 +607,10 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				// quickly add this one to the static types.
 				context.markInvariant(type);
 			}
-			else if (fs != null)
+			else
 			{
+				FlattenedSolution fs = getFlattenedSolution(context);
+				if (fs == null) return context.getKnownType("Forms", TypeMode.CODE);
 				type = TypeInfoModelFactory.eINSTANCE.createType();
 				type.setSuperType(context.getType("Forms"));
 				type.setName("Forms<" + fs.getMainSolutionMetaData().getName() + '>');
@@ -1369,7 +1370,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				{
 					// solutionName;dataSource
 					ServoyProject servoyProject = servoyModel.getServoyProject(config.substring(0, sep));
-					if (servoyProject != null && servoyModel.getFlattenedSolution().getSolution() != null)
+					if (servoyProject != null && servoyModel.isSolutionActive(servoyProject.getProject().getName()) &&
+						servoyModel.getFlattenedSolution().getSolution() != null)
 					{
 						try
 						{
@@ -1424,7 +1426,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 							// solutionName[/scopeName]
 							String[] split = config.split("/");
 							ServoyProject servoyProject = servoyModel.getServoyProject(split[0]);
-							if (servoyProject != null && servoyModel.getFlattenedSolution().getSolution() != null)
+							if (servoyProject != null && servoyModel.isSolutionActive(servoyProject.getProject().getName()) &&
+								servoyModel.getFlattenedSolution().getSolution() != null)
 							{
 								return new TypeConfig(servoyProject.getEditingFlattenedSolution(), split.length == 1 ? null : split[1]);
 							}
