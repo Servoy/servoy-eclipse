@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.core.builder;
+package com.servoy.eclipse.core.builder.jsexternalize;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,7 +30,6 @@ import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.core.builder.IBuildContext;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.IBuildParticipantFactory;
-import org.eclipse.dltk.javascript.ast.CallExpression;
 import org.eclipse.dltk.javascript.ast.Comment;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
 import org.eclipse.dltk.javascript.ast.Script;
@@ -68,8 +67,7 @@ public class JSFileExternalize implements IBuildParticipantFactory
 
 	class StringExternalizeParser implements IBuildParticipant
 	{
-		private static final String I18N_EXTERNALIZE_CALLBACK = "i18n.getI18NMessage"; //$NON-NLS-1$
-		private static final String WARNING_MESSAGE = "Non-externalized string literal; it should be followed by //$NON-NLS-<n>$"; //$NON-NLS-1$
+		private static final String WARNING_MESSAGE = "Non-externalized string literal; it should be followed by ";
 		private static final String SUPPRESS_WARNING_NLS = "@SuppressWarnings(nls)"; //$NON-NLS-1$
 
 		/*
@@ -107,11 +105,12 @@ public class JSFileExternalize implements IBuildParticipantFactory
 			return script;
 		}
 
-		private void reportWarning(Reporter reporter, int sourceStart, int sourceStop)
+		private void reportWarning(Reporter reporter, int sourceStart, int sourceStop, int stringLiteralIdx)
 		{
 			if (reporter != null)
 			{
-				reporter.reportProblem(JSFileExternalizeProblem.NON_EXTERNALIZED_STRING, WARNING_MESSAGE, sourceStart, sourceStop);
+				reporter.reportProblem(JSFileExternalizeProblem.NON_EXTERNALIZED_STRING,
+					WARNING_MESSAGE + "//$NON-NLS-" + stringLiteralIdx + "$", sourceStart, sourceStop); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 
@@ -119,50 +118,26 @@ public class JSFileExternalize implements IBuildParticipantFactory
 		{
 			try
 			{
-				script.traverse(new org.eclipse.dltk.ast.ASTVisitor()
+				script.traverse(new StringLiteralVisitor(content)
 				{
-					private boolean isEvaluatingI18N;
-					private int parsingLineStartIdx, parsingLineEndIdx = -1;
-					private int stringLiteralIdxInLine;
-
 					private final List<IProblemIdentifier> suppressProblems = Arrays.asList(new IProblemIdentifier[] { JSFileExternalizeProblem.NON_EXTERNALIZED_STRING });
+
+					/*
+					 * @see com.servoy.eclipse.core.builder.StringLiteralVisitor#visitStringLiteral(org.eclipse.dltk.javascript.ast.StringLiteral, int, int,
+					 * int)
+					 */
+					@Override
+					public boolean visitStringLiteral(StringLiteral node, int lineStartIdx, int lineEndIdx, int stringLiteralIdx)
+					{
+						if (!isMarkedForSkip(new String(content, lineStartIdx, lineEndIdx - lineStartIdx + 1), stringLiteralIdx)) reportWarning(reporter,
+							node.sourceStart(), node.sourceEnd(), stringLiteralIdx);
+						return true;
+					}
 
 					@Override
 					public boolean visitGeneral(ASTNode node) throws Exception
 					{
-
-
-						if (node instanceof StringLiteral)
-						{
-							if (!isEvaluatingI18N)
-							{
-								int nodeLineStartIdx = getNodeLineStartIdx((StringLiteral)node);
-								if (parsingLineEndIdx < 0)
-								{
-									parsingLineEndIdx = getNodeLineEndIdx((StringLiteral)node);
-								}
-								if (parsingLineStartIdx != nodeLineStartIdx)
-								{
-									parsingLineStartIdx = nodeLineStartIdx;
-									parsingLineEndIdx = getNodeLineEndIdx((StringLiteral)node);
-									stringLiteralIdxInLine = 0;
-								}
-
-								stringLiteralIdxInLine++;
-
-								if (!isMarkedForSkip(new String(content, parsingLineStartIdx, parsingLineEndIdx - parsingLineStartIdx + 1),
-									stringLiteralIdxInLine)) reportWarning(reporter, node.sourceStart(), node.sourceEnd());
-							}
-						}
-						else if (node instanceof CallExpression)
-						{
-							CallExpression mc = (CallExpression)node;
-							if (I18N_EXTERNALIZE_CALLBACK.equals(mc.getExpression().toString()))
-							{
-								isEvaluatingI18N = true;
-							}
-						}
-						else if (node instanceof FunctionStatement)
+						if (node instanceof FunctionStatement)
 						{
 							Comment comment = ((FunctionStatement)node).getDocumentation();
 							if (comment != null)
@@ -174,42 +149,17 @@ public class JSFileExternalize implements IBuildParticipantFactory
 								}
 							}
 						}
-						return true;
+						return super.visitGeneral(node);
 					}
 
 					@Override
 					public void endvisitGeneral(ASTNode node) throws Exception
 					{
-						if (node instanceof CallExpression)
-						{
-							CallExpression mc = (CallExpression)node;
-							if (I18N_EXTERNALIZE_CALLBACK.equals(mc.getExpression().toString()))
-							{
-								isEvaluatingI18N = false;
-							}
-						}
-						else if (node instanceof FunctionStatement)
+						if (node instanceof FunctionStatement)
 						{
 							reporter.popSuppressWarnings();
 						}
-					}
-
-					private int getNodeLineStartIdx(StringLiteral node)
-					{
-						int startIdx = node.sourceStart();
-						while (startIdx > -1 && content[startIdx] != '\n')
-							startIdx--;
-
-						return startIdx + 1;
-					}
-
-					private int getNodeLineEndIdx(StringLiteral node)
-					{
-						int endIdx = node.sourceEnd();
-						while (endIdx < content.length && content[endIdx] != '\n')
-							endIdx++;
-
-						return endIdx - 1;
+						super.endvisitGeneral(node);
 					}
 
 					private boolean isMarkedForSkip(String nodeLine, int nodeLineIdx)

@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.core.builder;
+package com.servoy.eclipse.core.builder.jsexternalize;
 
 import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
 

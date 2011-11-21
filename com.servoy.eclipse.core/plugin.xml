@@ -271,7 +271,11 @@
       <markerResolutionGenerator
             class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.obsoleteElement">
-      </markerResolutionGenerator>      
+      </markerResolutionGenerator>
+      <markerResolutionGenerator
+         	class="com.servoy.eclipse.core.builder.jsexternalize.JSFileExternalizeQuickFixGenerator"
+         	markerType="org.eclipse.dltk.javascript.core.jsproblem">
+   	  </markerResolutionGenerator>
    </extension>
    <extension
          point="org.eclipse.ui.splashHandlers">
@@ -342,8 +346,8 @@
    <extension
          point="org.eclipse.dltk.core.buildParticipant">
       <buildParticipant
-            class="com.servoy.eclipse.core.builder.JSFileExternalize"
-            id="com.servoy.eclipse.core.builder.JSFileExternalize"
+            class="com.servoy.eclipse.core.builder.jsexternalize.JSFileExternalize"
+            id="com.servoy.eclipse.core.builder.jsexternalize.JSFileExternalize"
             name="JavaScript file string externalize"
             nature="org.eclipse.dltk.javascript.core.nature">
       </buildParticipant>
@@ -351,14 +355,14 @@
    <extension
          point="org.eclipse.dltk.core.problemFactory">
       <problemIdentifierFactory
-            class="com.servoy.eclipse.core.builder.JSFileExternalizeProblemFactory"
-            namespace="com.servoy.eclipse.core.builder.JSFileExternalizeProblem">
+            class="com.servoy.eclipse.core.builder.jsexternalize.JSFileExternalizeProblemFactory"
+            namespace="com.servoy.eclipse.core.builder.jsexternalize.JSFileExternalizeProblem">
       </problemIdentifierFactory>
 	  <problemCategory
             scope="@SuppressWarnings"
             id="nls"
             nature="org.eclipse.dltk.javascript.core.nature">
-			<problem>com.servoy.eclipse.core.builder.JSFileExternalizeProblem#NON_EXTERNALIZED_STRING</problem>
+			<problem>com.servoy.eclipse.core.builder.jsexternalize.JSFileExternalizeProblem#NON_EXTERNALIZED_STRING</problem>
 	   </problemCategory>      
    </extension>
    <extension
@@ -368,7 +372,7 @@
 				name="Externalized strings"
 				priority="1000">
       		<problem
-      			id="com.servoy.eclipse.core.builder.JSFileExternalizeProblem#NON_EXTERNALIZED_STRING"
+      			id="com.servoy.eclipse.core.builder.jsexternalize.JSFileExternalizeProblem#NON_EXTERNALIZED_STRING"
             	label="Non externalized string"/>
         </section>
    </extension>
