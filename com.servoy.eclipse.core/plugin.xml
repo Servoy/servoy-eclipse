@@ -267,6 +267,10 @@
       <markerResolutionGenerator
             class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.formWithDatasourceInLoginSolution">
+      </markerResolutionGenerator>
+      <markerResolutionGenerator
+            class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.obsoleteElement">
       </markerResolutionGenerator>      
    </extension>
    <extension

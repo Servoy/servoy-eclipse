@@ -251,6 +251,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String UNRESOLVED_RELATION_UUID = _PREFIX + ".unresolvedRelationUuid"; //$NON-NLS-1$
 	public static final String CONSTANTS_USED_MARKER_TYPE = _PREFIX + ".constantsUsed"; //$NON-NLS-1$
 	public static final String MISSING_DRIVER = _PREFIX + ".missingDriver"; //$NON-NLS-1$
+	public static final String OBSOLETE_ELEMENT = _PREFIX + ".obsoleteElement"; //$NON-NLS-1$
 
 	private SAXParserFactory parserFactory;
 	private final HashSet<String> referencedProjectsSet = new HashSet<String>();
@@ -1044,6 +1045,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, MULTIPLE_METHODS_ON_SAME_ELEMENT);
 		deleteMarkers(project, UNRESOLVED_RELATION_UUID);
 		deleteMarkers(project, MISSING_DRIVER);
+		deleteMarkers(project, OBSOLETE_ELEMENT);
 
 		final ServoyProject servoyProject = getServoyProject(project);
 		boolean active = isActiveSolutionOrModule(servoyProject);
@@ -2179,6 +2181,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, o);
 								}
 							}
+						}
+						if (o.getTypeID() == IRepository.SHAPES)
+						{
+							ServoyMarker mk = MarkerMessages.ObsoleteElement.fill(((Form)o.getAncestor(IRepository.FORMS)).getName());
+							addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, o);
 						}
 						checkDeprecatedPropertyUsage(o, project);
 						ISupportChilds parent = o.getParent();
@@ -3502,7 +3509,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 			else if (type.equals(DUPLICATE_UUID) || type.equals(DUPLICATE_SIBLING_UUID) || type.equals(BAD_STRUCTURE_MARKER_TYPE) ||
 				type.equals(INVALID_SORT_OPTION) || type.equals(EVENT_METHOD_MARKER_TYPE) || type.equals(PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE) ||
-				type.equals(INVALID_EVENT_METHOD) || type.equals(MISSING_STYLE) || type.equals(INVALID_COMMAND_METHOD) || type.equals(INVALID_DATAPROVIDERID))
+				type.equals(INVALID_EVENT_METHOD) || type.equals(MISSING_STYLE) || type.equals(INVALID_COMMAND_METHOD) || type.equals(INVALID_DATAPROVIDERID) ||
+				type.equals(OBSOLETE_ELEMENT))
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString()); //$NON-NLS-1$
 				marker.setAttribute("SolutionName", resource.getName()); //$NON-NLS-1$

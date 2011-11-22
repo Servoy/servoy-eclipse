@@ -217,6 +217,15 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				String uuid = (String)marker.getAttribute("Uuid");
 				fixes = new IMarkerResolution[] { new ModifyRelationNameQuickfix(uuid, solName, true), new ModifyRelationNameQuickfix(uuid, solName, false) };
 			}
+			else if (type.equals(ServoyBuilder.OBSOLETE_ELEMENT))
+			{
+				String solName = (String)marker.getAttribute("SolutionName");
+				String uuid = (String)marker.getAttribute("Uuid");
+				final UUID id = UUID.fromString(uuid);
+				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
+				IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
+				fixes = new IMarkerResolution[] { new DeletePersistQuickFix(persist, servoyProject) };
+			}
 			else if (type.equals(ServoyBuilder.MISSING_STYLE))
 			{
 				boolean clearStyle = marker.getAttribute("clearStyle", false);
