@@ -1730,34 +1730,6 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 	}
 
 	/**
-	 * Checks whether or not the solution with given name is or should be a module of the active solution.<br>
-	 * It checks modules listed in all current modules of flattened solution; it is able to detect modules that are not part of the actual flattened solution yet, without actually loading them (so for example solutions that the active solution or it's modules listed as a module but was not valid/present previously).
-	 */
-	private boolean shouldBeModuleOfActiveSolution(String searchForName)
-	{
-		if (activeProject != null)
-		{
-			ServoyProject[] modules = getModulesOfActiveProject();
-			for (ServoyProject spm : modules)
-			{
-				Solution s = spm.getSolution();
-				if (s != null)
-				{
-					String[] moduleNames = Utils.getTokenElements(s.getModulesNames(), ",", true);
-					for (String mn : moduleNames)
-					{
-						if (searchForName.equals(mn))
-						{
-							return true;
-						}
-					}
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
 	 * Handle all outstanding changes and new changes (null if none)
 	 */
 	protected void handleOutstandingChangedFiles(List<IResourceDelta> newChanges)

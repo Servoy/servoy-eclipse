@@ -72,6 +72,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.FormController;
 import com.servoy.j2db.dataprocessing.DBValueList;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractScriptProvider;
@@ -139,6 +140,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static int MAX_EXCEPTIONS = 25;
 	public static int MIN_FIELD_LENGTH = 1000;
 	public static int exceptionCount = 0;
+
+	private static final int LIMIT_FOR_PORTAL_TABPANEL_COUNT_ON_FORM = 3;
+	private static final int LIMIT_FOR_FIELD_COUNT_ON_TABLEVIEW_FORM = 20;
 
 	class ServoyDeltaVisitor implements IResourceDeltaVisitor
 	{
@@ -265,18 +269,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	protected IProject[] build(int kind, Map args, IProgressMonitor progressMonitor) throws CoreException
 	{
 		// make sure the IServoyModel is initialized
-		ServoyModelFinder.getServoyModel();
+		getServoyModel();
 
 		referencedProjectsSet.clear();
 		moduleProjectsSet.clear();
 
 		IProject[] referencedProjects = getProject().getReferencedProjects();
-		ServoyProject sp = getServoyProject(getProject());
 		ArrayList<IProject> moduleAndModuleReferencedProjects = null;
-		if (sp != null)
+		// we are interested in showing module error markers only if the project is in use (active prj or active module)
+		if (servoyModel.isSolutionActive(getProject().getName()))
 		{
-			// we are interested in showing module error markers only if the project is in use (active prj or active module)
-			if (isActiveSolutionOrModule(sp))
+			ServoyProject sp = getServoyProject(getProject());
+			if (sp != null)
 			{
 				Solution sol = sp.getSolution();
 				if (sol != null)
@@ -398,8 +402,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					checkResourcesForModules(getProject());
 					if (project.exists())
 					{
-						ServoyProject servoyProject = getServoyProject(project);
-						if (isActiveSolutionOrModule(servoyProject))
+						if (servoyModel.isSolutionActive(project.getName()))
 						{
 							checkColumns(project);
 						}
@@ -409,18 +412,17 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					if (project.isOpen() && project.hasNature(ServoyResourcesProject.NATURE_ID))
 					{
-						final ServoyProject servoyProject = getServoyProject(getProject());
-						if (isActiveSolutionOrModule(servoyProject))
+						if (servoyModel.isSolutionActive(getProject().getName()))
 						{
 							checkStyles(getProject());
 							checkColumns(getProject());
 						}
-						IProject[] projects = project.getReferencingProjects();
+						IProject[] projects = project.getReferencingProjects(); // hmm, modules do not use the Eclipse referencing project thing right? only used for resources project... 
 						if (projects != null)
 						{
 							for (IProject p : projects)
 							{
-								if (isActiveSolutionOrModule(getServoyProject(p)))
+								if (servoyModel.isSolutionActive(p.getName()))
 								{
 									deleteMarkers(p, PROJECT_RELATION_MARKER_TYPE);
 									checkRelations(p, new HashMap<String, IPersist>());
@@ -455,7 +457,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 		// check this solution project and it's modules to see that they use the same resources project
 		ServoyProject servoyProject = getServoyProject(project);
-		boolean active = isActiveSolutionOrModule(servoyProject);
+		boolean active = servoyModel.isSolutionActive(project.getName());
 
 		if (servoyProject != null)
 		{
@@ -494,7 +496,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, MISPLACED_MODULES_MARKER_TYPE);
 
 		final ServoyProject servoyProject = getServoyProject(project);
-		boolean active = isActiveSolutionOrModule(servoyProject);
+		boolean active = servoyModel.isSolutionActive(project.getName());
 
 		if (servoyProject != null && active && servoyProject.getSolution() != null)
 		{
@@ -529,34 +531,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 			}
 		}
-	}
-
-	private boolean isActiveSolutionOrModule(ServoyProject servoyProject)
-	{
-		boolean found = false;
-		ServoyProject activeProject = getServoyModel().getActiveProject();
-		if (activeProject != null)
-		{
-			ArrayList<String> projectNames = new ArrayList<String>();
-			projectNames.add(activeProject.getSolution().getName());
-			if (activeProject.equals(servoyProject)) found = true;
-			if (!found)
-			{
-				ServoyProject[] modules = getServoyModel().getModulesOfActiveProject();
-				if (modules != null)
-				{
-					for (ServoyProject module : modules)
-					{
-						if (module.equals(servoyProject))
-						{
-							found = true;
-							if (module.getSolution() != null) projectNames.add(module.getSolution().getName());
-						}
-					}
-				}
-			}
-		}
-		return found;
 	}
 
 	private static final Integer METHOD_DUPLICATION = new Integer(1);
@@ -1048,15 +1022,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, OBSOLETE_ELEMENT);
 
 		final ServoyProject servoyProject = getServoyProject(project);
-		boolean active = isActiveSolutionOrModule(servoyProject);
+		boolean active = servoyModel.isSolutionActive(project.getName());
 
 		final Map<String, IPersist> missingServers = new HashMap<String, IPersist>();
 		final List<String> goodServers = new ArrayList<String>();
 		if (servoyProject != null)
 		{
-			if (active && servoyProject.getSolution() != null)
+			if (active)
 			{
-				addDeserializeProblemMarkers(servoyProject);
+				addDeserializeProblemMarkersIfNeeded(servoyProject);
 				refreshDBIMarkers();
 				checkPersistDuplication();
 				addDriverProblemMarker(project);
@@ -1780,11 +1754,20 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								}
 							}
 
+							// check to see if there are too many portals/tab panels for an acceptable slow WAN SC deployment
+							int portalAndTabPanelCount = 0;
+							// check to see if there are too many columns in a table view form (that could result in poor WC performance when selecting rows for example)
+							int fieldCount = 0;
+							// also check tab sequences
 							Map<Integer, Boolean> tabSequences = new HashMap<Integer, Boolean>();
 							Iterator<IPersist> iterator = form.getAllObjects();
 							while (iterator.hasNext())
 							{
 								IPersist persist = iterator.next();
+								if (persist.getTypeID() == IRepository.TABPANELS || persist.getTypeID() == IRepository.PORTALS) portalAndTabPanelCount++;
+								else if (persist.getTypeID() == IRepository.FIELDS ||
+									(persist.getTypeID() == IRepository.GRAPHICALCOMPONENTS && ((GraphicalComponent)persist).getLabelFor() == null)) fieldCount++;
+
 								if (persist instanceof ISupportTabSeq && ((ISupportTabSeq)persist).getTabSeq() > 0)
 								{
 									int tabSeq = ((ISupportTabSeq)persist).getTabSeq();
@@ -1803,6 +1786,20 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									}
 								}
 							}
+							if (portalAndTabPanelCount > LIMIT_FOR_PORTAL_TABPANEL_COUNT_ON_FORM)
+							{
+								ServoyMarker mk = MarkerMessages.FormHasTooManyThingsAndProbablyLowPerformance.fill(
+									String.valueOf(LIMIT_FOR_PORTAL_TABPANEL_COUNT_ON_FORM), "portals/tab panels", ""); //$NON-NLS-1$ //$NON-NLS-2$
+								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, form);
+							}
+							if (fieldCount > LIMIT_FOR_FIELD_COUNT_ON_TABLEVIEW_FORM &&
+								(form.getView() == FormController.LOCKED_TABLE_VIEW || form.getView() == FormController.TABLE_VIEW))
+							{
+								ServoyMarker mk = MarkerMessages.FormHasTooManyThingsAndProbablyLowPerformance.fill(
+									String.valueOf(LIMIT_FOR_FIELD_COUNT_ON_TABLEVIEW_FORM), "fields", " table view"); //$NON-NLS-1$ //$NON-NLS-2$
+								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, form);
+							}
+
 							if (form.getRowBGColorCalculation() != null)
 							{
 								ScriptMethod scriptMethod = null;
@@ -2291,6 +2288,17 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				checkI18n(project);
 				checkLoginSolution(project);
 			}
+			else if (servoyModel.shouldBeModuleOfActiveSolution(project.getName()))
+			{
+				// so we have an actual Servoy project that is not active, but it should be active
+				addDeserializeProblemMarkersIfNeeded(servoyProject);
+				if (servoyProject.getDeserializeExceptions().size() == 0 && servoyProject.getSolution() == null)
+				{
+					addDeserializeProblemMarker(servoyProject.getProject(), "Probably some corrupted file(s). Please check solution metadata file.", //$NON-NLS-1$
+						servoyProject.getProject().getName());
+					ServoyLog.logError("No solution in a servoy project that has no deserialize problems", null); //$NON-NLS-1$
+				}
+			}
 
 
 			for (String missingServer : missingServers.keySet())
@@ -2578,22 +2586,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private void addDeserializeProblemMarkers(ServoyProject servoyProject)
+	private void addDeserializeProblemMarkersIfNeeded(ServoyProject servoyProject)
 	{
 		HashMap<File, Exception> deserializeExceptionMessages = servoyProject.getDeserializeExceptions();
-		String deserializeExceptionMessage = null;
 		for (Map.Entry<File, Exception> entry : deserializeExceptionMessages.entrySet())
 		{
 			IResource file = getEclipseResourceFromJavaIO(entry.getKey(), servoyProject.getProject());
 			if (file == null) file = servoyProject.getProject();
 			addDeserializeProblemMarker(file, entry.getValue().getMessage(), servoyProject.getProject().getName());
-		}
-
-		if (deserializeExceptionMessage == null && servoyProject.getSolution() == null)
-		{
-			addDeserializeProblemMarker(servoyProject.getProject(), "Probably some corrupted file(s). Please check solution metadata file.", //$NON-NLS-1$
-				servoyProject.getProject().getName());
-			ServoyLog.logError("No solution in a servoy project that has no deserialize problems", null); //$NON-NLS-1$
 		}
 	}
 

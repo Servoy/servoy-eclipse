@@ -43,6 +43,7 @@ import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author acostescu
@@ -315,6 +316,34 @@ public abstract class AbstractServoyModel implements IServoyModel
 			if (p.getProject().getName().equals(name))
 			{
 				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Checks whether or not the solution with given name is or should be a module of the active solution.<br>
+	 * It checks modules listed in all current modules of flattened solution; it is able to detect modules that are not part of the actual flattened solution yet, without actually loading them (so for example solutions that the active solution or it's modules listed as a module but was not valid/present previously).
+	 */
+	public boolean shouldBeModuleOfActiveSolution(String searchForName)
+	{
+		if (activeProject != null)
+		{
+			ServoyProject[] modules = getModulesOfActiveProject();
+			for (ServoyProject spm : modules)
+			{
+				Solution s = spm.getSolution();
+				if (s != null)
+				{
+					String[] moduleNames = Utils.getTokenElements(s.getModulesNames(), ",", true);
+					for (String mn : moduleNames)
+					{
+						if (searchForName.equals(mn))
+						{
+							return true;
+						}
+					}
+				}
 			}
 		}
 		return false;

@@ -220,6 +220,8 @@ public class MarkerMessages
 
 	public static ServoyMarker FormTableNoPK = new ServoyMarker(
 		"Form \"{0}\" is based on table \"{1}\" which does not have a primary key.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+	public static ServoyMarker FormHasTooManyThingsAndProbablyLowPerformance = new ServoyMarker(
+		"For performance reasons on the internet/WAN it is strongly suggested to place no more then {0} {1} on a{2} form.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormRowBGCalcTargetNotFound = new ServoyMarker(
 		"rowBGColorCalculation of form \"{0}\" is linked to an entity that does not exist.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormDuplicatePart = new ServoyMarker("Form \"{0}\" has multiple parts of type: \"{1}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
