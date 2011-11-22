@@ -60,4 +60,10 @@ public interface IServoyModel
 
 	boolean isSolutionActive(String solutionName);
 
+	/**
+	 * Checks whether or not the solution with given name is or should be a module of the active solution.<br>
+	 * It checks modules listed in all current modules of flattened solution; it is able to detect modules that are not part of the actual flattened solution yet, without actually loading them (so for example solutions that the active solution or it's modules listed as a module but was not valid/present previously).
+	 */
+	boolean shouldBeModuleOfActiveSolution(String searchForName);
+
 }
