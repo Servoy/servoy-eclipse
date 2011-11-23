@@ -2,6 +2,7 @@ package com.servoy.eclipse.debug.script;
 
 import org.eclipse.dltk.javascript.typeinfo.IRType;
 import org.eclipse.dltk.javascript.typeinfo.IRTypeFactory;
+import org.eclipse.dltk.javascript.typeinfo.ITypeSystem;
 import org.eclipse.dltk.javascript.typeinfo.model.SimpleType;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
@@ -120,6 +121,16 @@ public class JavaClassRuntimeTypeFactory implements IRTypeFactory
 		public int hashCode()
 		{
 			return type.hashCode();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.dltk.javascript.typeinfo.IRType#activeTypeSystem(org.eclipse.dltk.javascript.typeinfo.ITypeSystem)
+		 */
+		public ITypeSystem activeTypeSystem(ITypeSystem fallback)
+		{
+			return fallback;
 		}
 
 	}
