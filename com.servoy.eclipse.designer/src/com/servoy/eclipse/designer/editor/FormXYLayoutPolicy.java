@@ -49,6 +49,7 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.Part;
@@ -441,5 +442,12 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 	{
 		getAlignmentFeedbackHelper().eraseElementAlignmentFeedback();
 		super.eraseSizeOnDropFeedback(request);
+	}
+
+	@Override
+	protected Dimension getMinimumSizeFor(GraphicalEditPart child)
+	{
+		if (child.getModel() instanceof GraphicalComponent) return new Dimension(1, 1);
+		return new Dimension(8, 8);
 	}
 }
