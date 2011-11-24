@@ -18,7 +18,11 @@
 package com.servoy.eclipse.debug.script;
 
 import org.eclipse.dltk.ast.ASTNode;
+import org.eclipse.dltk.compiler.IElementRequestor.FieldInfo;
+import org.eclipse.dltk.internal.javascript.parser.structure.IStructureRequestor;
+import org.eclipse.dltk.internal.javascript.parser.structure.StructureReporter2;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
+import org.eclipse.dltk.javascript.ast.Identifier;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.typeinference.IValueCollection;
 import org.eclipse.dltk.javascript.typeinference.IValueReference;
@@ -56,7 +60,22 @@ public class CalculationsTypeInferenceHandler implements ITypeInferenceHandler
 			visitor.enterContext(ValueCollectionFactory.createScopeValueCollection(parent));
 			try
 			{
+				if (visitor instanceof StructureReporter2)
+				{
+					Identifier name = ((FunctionStatement)node).getName();
+					IStructureRequestor requestor = ((StructureReporter2)visitor).getRequestor();
+					FieldInfo fi = new FieldInfo();
+					fi.name = name.getName();
+					fi.declarationStart = node.sourceStart();
+					fi.nameSourceStart = name.sourceStart();
+					fi.nameSourceEnd = name.sourceEnd();
+					requestor.enterFieldCheckDuplicates(fi, name, null);
+				}
 				visitor.visitFunctionBody((FunctionStatement)node);
+				if (visitor instanceof StructureReporter2)
+				{
+					((StructureReporter2)visitor).getRequestor().exitField(node.sourceEnd());
+				}
 			}
 			finally
 			{
