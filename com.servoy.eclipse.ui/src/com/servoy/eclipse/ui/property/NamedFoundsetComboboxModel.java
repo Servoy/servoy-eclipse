@@ -47,11 +47,11 @@ public class NamedFoundsetComboboxModel implements IComboboxPropertyModel<String
 		String[] globalRelations = getCompatibleGlobalRelations();
 		String[] displayValues = new String[globalRelations.length + 3]; // 3 constant values
 		displayValues[0] = Messages.LabelDefault;
-		displayValues[1] = Form.NAMED_FOUNDSET_SEPARATE;
-		displayValues[2] = Form.NAMED_FOUNDSET_EMPTY;
+		displayValues[1] = Messages.LabelSeparate;
+		displayValues[2] = Messages.LabelEmpty;
 		for (int i = 3; i < displayValues.length; i++)
 		{
-			displayValues[i] = globalRelations[i - 3] + Messages.NamedFoundsetGlobalRelationSuffix;
+			displayValues[i] = globalRelations[i - 3];
 		}
 		return displayValues;
 	}

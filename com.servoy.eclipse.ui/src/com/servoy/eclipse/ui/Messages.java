@@ -50,6 +50,8 @@ public class Messages extends NLS
 
 	public static String LabelDefault;
 	public static String LabelIgnore;
+	public static String LabelSeparate;
+	public static String LabelEmpty;
 	public static String LabelNone;
 	public static String LabelUnresolved;
 	public static String LabelUnresolved_arg;
@@ -80,8 +82,6 @@ public class Messages extends NLS
 
 	public static String SelectionModeSingle;
 	public static String SelectionModeMulti;
-
-	public static String NamedFoundsetGlobalRelationSuffix;
 
 	public static String Public;
 	public static String Private;
