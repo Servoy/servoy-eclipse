@@ -376,4 +376,11 @@
             	label="Non externalized string"/>
         </section>
    </extension>
+   <extension
+         point="org.eclipse.dltk.ui.correctionProcessor">
+      <correctionProcessor
+            class="com.servoy.eclipse.core.builder.jsexternalize.ExternalizeScriptCorrectionProcessor"
+            nature="org.eclipse.dltk.javascript.core.nature">
+      </correctionProcessor>
+   </extension>
 </plugin>

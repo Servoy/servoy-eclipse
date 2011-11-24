@@ -980,4 +980,11 @@
             label="Text Search Query Provider 2">
       </textSearchQueryProvider>
    </extension>
+   <extension
+         point="org.eclipse.dltk.ui.correctionProcessor">
+      <correctionProcessor
+            class="com.servoy.eclipse.ui.quickfix.StartI18NExternalizeWizard"
+            nature="org.eclipse.dltk.javascript.core.nature">
+      </correctionProcessor>
+   </extension>   
 </plugin>

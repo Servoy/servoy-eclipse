@@ -15,44 +15,21 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.ui.quickfix;
+package com.servoy.eclipse.core.builder.jsexternalize;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.dltk.compiler.problem.DefaultProblemIdentifier;
-import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.dltk.ui.editor.IScriptAnnotation;
-import org.eclipse.dltk.ui.text.IAnnotationResolution;
 import org.eclipse.dltk.ui.text.IScriptCorrectionContext;
 import org.eclipse.dltk.ui.text.IScriptCorrectionProcessor;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.ui.IMarkerResolution;
-import org.eclipse.ui.IMarkerResolutionGenerator;
-
-import com.servoy.eclipse.core.builder.jsexternalize.JSFileExternalizeProblem;
-import com.servoy.eclipse.ui.actions.ShowI18NDialogActionDelegate;
 
 /**
- * Quick fix that starts the I18N externalize wizard
+ * Script corrector for externalize strings
  * @author gboros
  */
-public class StartI18NExternalizeWizard implements IMarkerResolutionGenerator, IScriptCorrectionProcessor
+public class ExternalizeScriptCorrectionProcessor implements IScriptCorrectionProcessor
 {
-	private static IMarkerResolution[] NONE = new IMarkerResolution[0];
-
-	/*
-	 * @see org.eclipse.ui.IMarkerResolutionGenerator#getResolutions(org.eclipse.core.resources.IMarker)
-	 */
-	public IMarkerResolution[] getResolutions(IMarker marker)
-	{
-		IProblemIdentifier problemId = DefaultProblemIdentifier.getProblemId(marker);
-
-		if (problemId == JSFileExternalizeProblem.NON_EXTERNALIZED_STRING)
-		{
-			return new IMarkerResolution[] { new RunI18NExternalizeWizardResolution() };
-		}
-
-		return NONE;
-	}
 
 	/*
 	 * @see org.eclipse.dltk.ui.text.IScriptCorrectionProcessor#canFix(org.eclipse.dltk.ui.editor.IScriptAnnotation)
@@ -78,7 +55,14 @@ public class StartI18NExternalizeWizard implements IMarkerResolutionGenerator, I
 	{
 		if (annotation.getId() == JSFileExternalizeProblem.NON_EXTERNALIZED_STRING)
 		{
-			context.addResolution(new RunI18NExternalizeWizardResolution(), annotation);
+			IResource scriptFile = annotation.getSourceModule().getResource();
+			if (scriptFile instanceof IFile)
+			{
+				int problemStartIdx = context.getInvocationContext().getOffset();
+
+				context.addResolution(new AddMissingNLSResolution((IFile)scriptFile, problemStartIdx), annotation);
+				context.addResolution(new GenerateSuppressWarningsResolution("nls", (IFile)scriptFile, problemStartIdx), annotation); //$NON-NLS-1$
+			}
 		}
 	}
 
@@ -90,37 +74,4 @@ public class StartI18NExternalizeWizard implements IMarkerResolutionGenerator, I
 	{
 	}
 
-	class RunI18NExternalizeWizardResolution implements IMarkerResolution, IAnnotationResolution
-	{
-
-		/*
-		 * @see org.eclipse.dltk.ui.text.IAnnotationResolution#run(org.eclipse.dltk.ui.editor.IScriptAnnotation, org.eclipse.jface.text.IDocument)
-		 */
-		public void run(IScriptAnnotation annotation, IDocument document)
-		{
-			showWizard();
-		}
-
-		/*
-		 * @see org.eclipse.ui.IMarkerResolution#run(org.eclipse.core.resources.IMarker)
-		 */
-		public void run(IMarker marker)
-		{
-			showWizard();
-		}
-
-		private void showWizard()
-		{
-			ShowI18NDialogActionDelegate delegate = new ShowI18NDialogActionDelegate();
-			delegate.run(ShowI18NDialogActionDelegate.ACTION_EXTERNALIZE);
-		}
-
-		/*
-		 * @see org.eclipse.ui.IMarkerResolution#getLabel()
-		 */
-		public String getLabel()
-		{
-			return "Run I18N externalize wizard";
-		}
-	}
 }
