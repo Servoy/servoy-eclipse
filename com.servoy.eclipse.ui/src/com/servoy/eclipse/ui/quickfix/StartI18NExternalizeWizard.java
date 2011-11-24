@@ -120,7 +120,7 @@ public class StartI18NExternalizeWizard implements IMarkerResolutionGenerator, I
 		 */
 		public String getLabel()
 		{
-			return "Run I18N externalize wizard";
+			return "Open the 'Externalize Strings' wizard";
 		}
 	}
 }
