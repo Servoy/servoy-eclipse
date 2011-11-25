@@ -376,7 +376,7 @@ public class I18NExternalizeDialog extends Dialog
 	@Override
 	protected Control createDialogArea(Composite parent)
 	{
-		getShell().setText("I18N externalize"); //$NON-NLS-1$
+		getShell().setText("Externalize Strings");
 		Composite composite = (Composite)super.createDialogArea(parent);
 
 		Composite treeViewerComposite = new Composite(composite, SWT.NONE);

@@ -43,7 +43,7 @@ public class AddMissingNLSResolution extends TextFileEditResolution
 	 */
 	public String getLabel()
 	{
-		return "Insert missing $NON-NLS-<n>$";
+		return "Insert missing $NON-NLS$ tag";
 	}
 
 	/*

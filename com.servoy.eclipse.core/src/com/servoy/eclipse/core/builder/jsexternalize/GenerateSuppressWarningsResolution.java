@@ -44,7 +44,8 @@ class GenerateSuppressWarningsResolution extends TextFileEditResolution
 
 	public String getLabel()
 	{
-		return "Generate SuppressWarnings(" + type + ")";
+		FunctionStatement f = getFunction();
+		return "Add SuppressWarnings(" + type + ") to '" + (f != null ? f.getFunctionName() : "") + "'";
 	}
 
 	private String getAnnotation()
@@ -52,37 +53,41 @@ class GenerateSuppressWarningsResolution extends TextFileEditResolution
 		return "@SuppressWarnings(" + type + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	private FunctionStatement getFunction(final IFile scriptFile, final int position)
+	private FunctionStatement functionAtPosition;
+
+	private FunctionStatement getFunction()
 	{
-		Script script = JavaScriptParserUtil.parse(DLTKCore.createSourceModuleFrom(scriptFile));
-		final FunctionStatement[] functionStatement = new FunctionStatement[] { null };
-
-		try
+		if (functionAtPosition == null)
 		{
-			script.traverse(new org.eclipse.dltk.ast.ASTVisitor()
+			Script script = JavaScriptParserUtil.parse(DLTKCore.createSourceModuleFrom(scriptFile));
+
+			try
 			{
-				@Override
-				public boolean visitGeneral(ASTNode node) throws Exception
+				script.traverse(new org.eclipse.dltk.ast.ASTVisitor()
 				{
-					if (node instanceof FunctionStatement)
+					@Override
+					public boolean visitGeneral(ASTNode node) throws Exception
 					{
-						FunctionStatement fs = (FunctionStatement)node;
-						if (fs.sourceStart() < position && position < fs.sourceEnd())
+						if (node instanceof FunctionStatement)
 						{
-							functionStatement[0] = (FunctionStatement)node;
-							return false;
+							FunctionStatement fs = (FunctionStatement)node;
+							if (fs.sourceStart() < problemStartIdx && problemStartIdx < fs.sourceEnd())
+							{
+								functionAtPosition = (FunctionStatement)node;
+								return false;
+							}
 						}
+						return true;
 					}
-					return true;
-				}
-			});
-		}
-		catch (Exception ex)
-		{
-			ServoyLog.logError(ex);
+				});
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
+			}
 		}
 
-		return functionStatement[0];
+		return functionAtPosition;
 	}
 
 	/*
@@ -91,7 +96,7 @@ class GenerateSuppressWarningsResolution extends TextFileEditResolution
 	@Override
 	public void run()
 	{
-		FunctionStatement fs = getFunction(scriptFile, problemStartIdx);
+		FunctionStatement fs = getFunction();
 		if (fs != null)
 		{
 			int insertOffset = -1;

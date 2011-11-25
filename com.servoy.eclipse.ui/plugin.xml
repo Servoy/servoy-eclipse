@@ -333,11 +333,11 @@
                class="com.servoy.eclipse.ui.actions.ShowI18NDialogActionDelegate"
                icon="icons/i18n_ext.gif"
                id="com.servoy.eclipse.ui.actions.I18nExternalizeDialog"
-               label="Show Externalize Dialog"
+               label="Show Externalize Strings Dialog"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/actions"
                style="push"
                toolbarPath="Normal/additions"
-               tooltip="Externalize Messages">
+               tooltip="Externalize Strings">
          </action>         
          <!--action
                class="com.servoy.eclipse.ui.actions.ShowI1n8DialogActionDelegate"

@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
@@ -30,7 +30,7 @@ public class I18NExternalizeAction extends Action
 	public I18NExternalizeAction()
 	{
 		//setImageDescriptor(Activator.loadImageDescriptorFromBundle("i18n.gif")); //$NON-NLS-1$
-		setText("Externalize to I18N"); //$NON-NLS-1$
+		setText("Externalize Strings"); //$NON-NLS-1$
 		setToolTipText("Externalize active solution's texts"); //$NON-NLS-1$
 	}
 

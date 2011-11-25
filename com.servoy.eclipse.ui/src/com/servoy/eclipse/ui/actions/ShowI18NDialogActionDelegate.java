@@ -102,14 +102,14 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 
 		if (activeProject == null)
 		{
-			new MessageDialog(shell, ACTION_EXTERNALIZE.equals(actionId) ? "Externalize" : "Edit I18N messages", null,
+			new MessageDialog(shell, ACTION_EXTERNALIZE.equals(actionId) ? "Externalize Strings" : "Edit I18N messages", null,
 				"The dialog does not work when there is no active solution set.", MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0).open();
 			return;
 		}
 		String i18nDetails[] = hasI18NTable();
 		if (i18nDetails == null)
 		{
-			if (MessageDialog.openQuestion(shell, ACTION_EXTERNALIZE.equals(actionId) ? "Externalize" : "Edit I18N messages",
+			if (MessageDialog.openQuestion(shell, ACTION_EXTERNALIZE.equals(actionId) ? "Externalize Strings" : "Edit I18N messages",
 				"There is no i18n table defined for the active solution. Do you want to define one now ?"))
 			{
 				TableContentProvider tableContentProvider = new TableContentProvider();
