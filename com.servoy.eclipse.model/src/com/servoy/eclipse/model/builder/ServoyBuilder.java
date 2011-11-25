@@ -2254,7 +2254,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						if (o.getTypeID() == IRepository.SHAPES)
 						{
 							ServoyMarker mk = MarkerMessages.ObsoleteElement.fill(((Form)o.getAncestor(IRepository.FORMS)).getName());
-							addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, o);
+							addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, o);
 						}
 						checkDeprecatedPropertyUsage(o, project);
 						ISupportChilds parent = o.getParent();
