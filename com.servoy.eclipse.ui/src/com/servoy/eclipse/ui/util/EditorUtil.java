@@ -405,7 +405,7 @@ public class EditorUtil
 				((StructuredTextEditor)editor).getEditorInput()));
 			try
 			{
-				IRegion region = finder.find(0, lookup, true, true, false, false);
+				IRegion region = finder.find(0, lookup, true, true, true, false);
 				((StructuredTextEditor)editor).selectAndReveal(region.getOffset(), region.getLength());
 			}
 			catch (Exception ex)
