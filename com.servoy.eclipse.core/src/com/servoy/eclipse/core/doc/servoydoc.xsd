@@ -114,12 +114,6 @@
 		</xs:sequence>
 	</xs:complexType>
 
-	<xs:complexType name="seelist">
-		<xs:sequence>
-			<xs:element name="see" type="see" maxOccurs="unbounded" />
-		</xs:sequence>
-	</xs:complexType>
-
 	<xs:complexType name="function">
 		<xs:sequence>
 			<xs:element name="argumentsTypes" type="argumentstypeslist"
@@ -137,8 +131,6 @@
 			<xs:element name="parameters" type="parameterlist"
 				maxOccurs="1" minOccurs="0"></xs:element>
 			<xs:element name="links" type="linklist" maxOccurs="1"
-				minOccurs="0"></xs:element>
-			<xs:element name="sees" type="seelist" maxOccurs="1"
 				minOccurs="0"></xs:element>
 		</xs:sequence>
 		<xs:attribute name="undocumented" type="xs:boolean" use="optional"></xs:attribute>
