@@ -14,10 +14,6 @@
 				<xs:element name="jslib" type="objectlist" maxOccurs="1"
 					minOccurs="0" />
 			</xs:sequence>
-			<xs:attribute name="version" type="xs:string" use="required"></xs:attribute>
-			<xs:attribute name="buildNumber" type="xs:string" use="required"></xs:attribute>
-			<xs:attribute name="generationTime" type="xs:string"
-				use="required"></xs:attribute>
 		</xs:complexType>
 	</xs:element>
 
@@ -134,6 +130,8 @@
 				minOccurs="0"></xs:element>
 			<xs:element name="summary" type="xs:string" maxOccurs="1"
 				minOccurs="0"></xs:element>
+			<xs:element name="deprecated" type="xs:string" maxOccurs="1"
+				minOccurs="0"></xs:element>
 			<xs:element name="sample" type="xs:string" maxOccurs="1"
 				minOccurs="0"></xs:element>
 			<xs:element name="parameters" type="parameterlist"
@@ -146,6 +144,7 @@
 		<xs:attribute name="undocumented" type="xs:boolean" use="optional"></xs:attribute>
 		<xs:attribute name="deprecated" type="xs:boolean" use="optional"></xs:attribute>
 		<xs:attribute name="name" type="xs:string" use="required"></xs:attribute>
+		<xs:attribute name="varargs" type="xs:boolean" use="optional"></xs:attribute>
 		<xs:attribute name="since" type="xs:string" use="optional"></xs:attribute>
 		<xs:attribute name="until" type="xs:string" use="optional"></xs:attribute>
 		<xs:attribute name="special" type="xs:boolean" use="optional"></xs:attribute>

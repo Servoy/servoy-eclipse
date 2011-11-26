@@ -19,7 +19,6 @@
 		</xs:sequence>
 		<xs:attribute name="version" type="xs:string" use="required"></xs:attribute>
 		<xs:attribute name="buildNumber" type="xs:string" use="required"></xs:attribute>
-		<xs:attribute name="generationTime" type="xs:string" use="required"></xs:attribute>
 	</xs:complexType>
 
 	<xs:complexType name="documentation">

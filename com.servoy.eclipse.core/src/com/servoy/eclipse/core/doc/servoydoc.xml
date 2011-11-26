@@ -17935,8 +17935,8 @@ Operator: lessThan]]></description>
       <properties>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
-          <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
-          <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
+          <description><![CDATA[Get query builder parent.]]></description>
+          <summary><![CDATA[Get query builder parent.]]></summary>
           <sample/>
         </property>
         <property name="root">
