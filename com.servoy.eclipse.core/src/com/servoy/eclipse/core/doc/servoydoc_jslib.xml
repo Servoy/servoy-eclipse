@@ -1311,7 +1311,7 @@ var aBook = new book_with_author("name","author");]]></sample>
           <description><![CDATA[Returns a string representing the source code of the function. Overrides the Object.toString method.]]></description>
           <summary><![CDATA[Returns a string representing the source code of the function.]]></summary>
           <sample><![CDATA[function printHello() {
-		return "Hello";
+	return "Hello";
 }
 application.output(printHello.toString());]]></sample>
           <links>
@@ -1526,7 +1526,7 @@ application.output(isXMLName("bad name")); // because of the space, prints: fals
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Makes a integer from the starting numbers in a given string in the base specified.]]></description>
           <summary><![CDATA[Makes a integer from the starting numbers in a given string in the base specified.]]></summary>
-          <sample><![CDATA[parseInt( 'string' [, base] )]]></sample>
+          <sample><![CDATA[parseInt('0774' , 8)]]></sample>
           <links>
             <link>
               <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Predefined_Functions/parseInt_and_parseFloat_Functions</url>
@@ -1825,20 +1825,20 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
             </link>
           </links>
         </function>
-        <function name="max">
+        <function name="max" varargs="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Returns the greater of two (or more) numbers.]]></description>
           <summary><![CDATA[Returns the greater of two (or more) numbers.]]></summary>
-          <sample><![CDATA[Math.max(number,number[,number])]]></sample>
+          <sample><![CDATA[Math.max(number,number,number)]]></sample>
           <parameters>
             <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="valueN" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="valueN" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
           </parameters>
           <links>
             <link>
@@ -1846,20 +1846,20 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
             </link>
           </links>
         </function>
-        <function name="min">
+        <function name="min" varargs="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Returns the lesser of two (or more) numbers.]]></description>
           <summary><![CDATA[Returns the lesser of two (or more) numbers.]]></summary>
-          <sample><![CDATA[Math.min(number,number[,number])]]></sample>
+          <sample><![CDATA[Math.min(number,number,number)]]></sample>
           <parameters>
             <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="valueN" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="valueN" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
           </parameters>
           <links>
             <link>
@@ -2629,7 +2629,7 @@ default:
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[returns a character of the string.]]></description>
           <summary><![CDATA[returns a character of the string.]]></summary>
-          <sample><![CDATA[string.charAt(integer position);]]></sample>
+          <sample><![CDATA[string.charAt(integer_position);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
@@ -2646,7 +2646,7 @@ default:
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[returns a decimal code of the char in the string.]]></description>
           <summary><![CDATA[returns a decimal code of the char in the string.]]></summary>
-          <sample><![CDATA[string.charCodeAt(integer position);]]></sample>
+          <sample><![CDATA[string.charCodeAt(integer_position);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
@@ -2887,7 +2887,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[returns a substring of the string.]]></description>
           <summary><![CDATA[returns a substring of the string.]]></summary>
-          <sample><![CDATA[string.slice(start [,end]);]]></sample>
+          <sample><![CDATA[string.slice(start,end);]]></sample>
           <parameters>
             <parameter name="beginSlice" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <parameter name="endSlice" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -2918,7 +2918,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[returns an array of objects whose elements are segments of the current string.]]></description>
           <summary><![CDATA[returns an array of objects whose elements are segments of the current string.]]></summary>
-          <sample><![CDATA[string.split(delimiter [,limitInteger]);]]></sample>
+          <sample><![CDATA[string.split(delimiter,limitInteger);]]></sample>
           <parameters>
             <parameter name="separator" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
             <parameter name="limit" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -2961,7 +2961,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[returns a substring of the string from the start with the number of chars specified.]]></description>
           <summary><![CDATA[returns a substring of the string from the start with the number of chars specified.]]></summary>
-          <sample><![CDATA[string.substr(start [,number of chars]);]]></sample>
+          <sample><![CDATA[string.substr(start, number_of_chars);]]></sample>
           <parameters>
             <parameter name="start" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <parameter name="length" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -2980,7 +2980,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[Returns a substring of the string from the start index until the end index.]]></description>
           <summary><![CDATA[Returns a substring of the string from the start index until the end index.]]></summary>
-          <sample><![CDATA[string.substring(start [,end]);]]></sample>
+          <sample><![CDATA[string.substring(start, end);]]></sample>
           <parameters>
             <parameter name="indexA" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <parameter name="indexB" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
