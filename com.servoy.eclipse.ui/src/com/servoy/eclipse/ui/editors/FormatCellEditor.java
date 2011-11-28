@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors;
 
 import org.eclipse.jface.window.Window;
@@ -21,8 +21,11 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.component.ComponentFactory;
+import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -31,6 +34,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.util.Pair;
 
 /**
  * @author jcompagner
@@ -72,17 +76,30 @@ public class FormatCellEditor extends TextDialogCellEditor
 				Form form = (Form)supportChilds;
 				IDataProviderLookup dataproviderLookup = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getDataproviderLookup(
 					null, form);
-				try
+				Pair<String, Integer> fieldFormat = null;
+				if (persist instanceof Field)
 				{
-					IDataProvider dataProvider = dataproviderLookup.getDataProvider(dataProviderID);
-					if (dataProvider != null)
-					{
-						type = dataProvider.getDataProviderType();
-					}
+					fieldFormat = ComponentFactory.getFieldFormat((Field)persist, dataproviderLookup, Activator.getDefault().getDesignClient());
+
 				}
-				catch (RepositoryException re)
+				if (fieldFormat != null)
 				{
-					ServoyLog.logError(re);
+					type = fieldFormat.getRight().intValue();
+				}
+				else
+				{
+					try
+					{
+						IDataProvider dataProvider = dataproviderLookup.getDataProvider(dataProviderID);
+						if (dataProvider != null)
+						{
+							type = dataProvider.getDataProviderType();
+						}
+					}
+					catch (RepositoryException re)
+					{
+						ServoyLog.logError(re);
+					}
 				}
 			}
 		}
