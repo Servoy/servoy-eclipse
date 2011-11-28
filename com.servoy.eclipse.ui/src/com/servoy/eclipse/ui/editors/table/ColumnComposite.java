@@ -329,8 +329,10 @@ public class ColumnComposite extends Composite
 
 		tableLayout.setHorizontalGroup(tableLayout.createParallelGroup(GroupLayout.TRAILING).add(
 			tableLayout.createSequentialGroup().addContainerGap().add(
-				tableLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582, Short.MAX_VALUE).add(
-					tableLayout.createSequentialGroup().add(displayDataProviderID).addPreferredGap(LayoutStyle.RELATED).add(addButton))).addContainerGap()));
+				tableLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582, Short.MAX_VALUE).add(
+					addButton).add(
+					tableLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582,
+						Short.MAX_VALUE).add(displayDataProviderID))).addContainerGap()));
 		tableLayout.setVerticalGroup(tableLayout.createParallelGroup(GroupLayout.LEADING).add(
 			GroupLayout.TRAILING,
 			tableLayout.createSequentialGroup().addContainerGap().add(tableContainer, GroupLayout.PREFERRED_SIZE, 185, Short.MAX_VALUE).addPreferredGap(
