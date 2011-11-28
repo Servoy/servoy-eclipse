@@ -913,4 +913,10 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		x11handler.setAskForImportServerName(askForImportServerName);
 	}
 
+
+	public void checkMovedObjects(ImportInfo importInfo) throws RepositoryException
+	{
+
+	}
+
 }
