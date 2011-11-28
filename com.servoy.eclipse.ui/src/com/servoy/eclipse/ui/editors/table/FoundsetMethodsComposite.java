@@ -206,7 +206,7 @@ public class FoundsetMethodsComposite extends Composite
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			GroupLayout.TRAILING,
 			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, treeContainer, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING, treeContainer, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE).add(
 					groupLayout.createSequentialGroup().add(addButton).addPreferredGap(LayoutStyle.RELATED).add(removeButton))).addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			GroupLayout.TRAILING,
