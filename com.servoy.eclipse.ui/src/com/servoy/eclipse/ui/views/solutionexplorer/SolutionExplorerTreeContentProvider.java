@@ -1530,7 +1530,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 			for (Relation r : relations)
 			{
-				PlatformSimpleUserNode un = new PlatformSimpleUserNode(r.getName(), type, r, solution, uiActivator.loadImageFromBundle("relation.gif")); //$NON-NLS-1$
+				String displayName;
+				Solution rootSolution = (Solution)r.getRootObject();
+				if (solution == rootSolution) displayName = r.getName();
+				else displayName = r.getName() + " [" + rootSolution.getName() + "]";
+				PlatformSimpleUserNode un = new PlatformSimpleUserNode(displayName, type, r, solution, uiActivator.loadImageFromBundle("relation.gif")); //$NON-NLS-1$
 				un.parent = relationsNode;
 				relationNodes.add(un);
 			}
