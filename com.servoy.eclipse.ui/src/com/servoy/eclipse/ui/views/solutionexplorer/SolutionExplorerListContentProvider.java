@@ -69,7 +69,6 @@ import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
-import com.servoy.j2db.documentation.IParameter;
 import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
 import com.servoy.j2db.documentation.scripting.docs.FormElements;
 import com.servoy.j2db.documentation.scripting.docs.Forms;
@@ -1417,8 +1416,18 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			NativeJavaMethod njm = ijm.getMethod(id, false);
 			if (njm == null) continue;
 
-			SimpleUserNode node = new UserNode(id, actionType, new MethodFeedback(id, elementName, resolver, scriptObject, njm), (Object)null, functionIcon);
-			dlm.add(node);
+			for (MemberBox method : njm.getMethods())
+			{
+				String paramTypes = "";
+				for (Class param : method.getParameterTypes())
+				{
+					paramTypes += TYPES.get(param.getSimpleName()) + ",";
+				}
+				paramTypes = "(" + (method.getParameterTypes().length > 0 ? paramTypes.substring(0, paramTypes.length() - 1) : "") + ")";
+				SimpleUserNode node = new UserNode(id + paramTypes + " - " + TYPES.get(method.getReturnType().getSimpleName()), actionType, new MethodFeedback(
+					id, method.getParameterTypes(), elementName, resolver, scriptObject, njm), (Object)null, functionIcon);
+				dlm.add(node);
+			}
 		}
 		SimpleUserNode[] nodes = new SimpleUserNode[dlm.size()];
 		return dlm.toArray(nodes);
@@ -1593,17 +1602,18 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		private final ITagResolver resolver;
 		private final IScriptObject scriptObject;
 		private final String name;
+		private final Class[] parameterTypes;
 		private final NativeJavaMethod njm;
 		private final String prefix;
 
-		MethodFeedback(String name, String prefix, ITagResolver resolver, IScriptObject scriptObject, NativeJavaMethod njm)
+		MethodFeedback(String name, Class[] parameterTypes, String prefix, ITagResolver resolver, IScriptObject scriptObject, NativeJavaMethod njm)
 		{
 			this.name = name;
+			this.parameterTypes = parameterTypes;
 			this.prefix = prefix;
 			this.resolver = resolver;
 			this.scriptObject = ScriptObjectRegistry.getAdapterIfAny(scriptObject);
 			this.njm = njm;
-
 		}
 
 		/**
@@ -1614,7 +1624,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			String sample = null;
 			if (scriptObject != null)
 			{
-				sample = scriptObject.getSample(name);
+				if (parameterTypes != null && scriptObject instanceof XMLScriptObjectAdapter) sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name,
+					parameterTypes);
+				else sample = scriptObject.getSample(name);
 				sample = Text.processTags(sample, resolver);
 			}
 			return sample;
@@ -1625,59 +1637,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		 */
 		public String getCode()
 		{
-			String[] paramNames = null;
-			if (scriptObject != null)
-			{
-				paramNames = scriptObject.getParameterNames(name);
-			}
-
-			MemberBox method = getBestMatchingMethod(name, njm, scriptObject);
-			StringBuffer sbParamsString = new StringBuffer();
-
-			Class[] params = method.getParameterTypes();
-			if (paramNames != null && params.length != paramNames.length)
-			{
-				if (params.length == 1 && params[0].isArray())
-				{
-					// leave
-				}
-				else
-				{
-					paramNames = null;
-				}
-			}
-			for (int j = 0; j < params.length; j++)
-			{
-				if (params.length == 1 && params[0].isArray())
-				{
-					if (paramNames == null)
-					{
-						sbParamsString.append(TYPES.get(params[j].getComponentType().getName()));
-						sbParamsString.append("[]"); //$NON-NLS-1$
-					}
-					else
-					{
-						for (int k = 0; k < paramNames.length; k++)
-						{
-							sbParamsString.append(" "); //$NON-NLS-1$
-							sbParamsString.append(paramNames[k]);
-							if (k < paramNames.length - 1) sbParamsString.append(", "); //$NON-NLS-1$
-						}
-						break;
-					}
-				}
-				if (paramNames != null)
-				{
-					sbParamsString.append(paramNames[j]);
-				}
-				else
-				{
-					sbParamsString.append(TYPES.get(params[j].getName()).toLowerCase());
-				}
-				if (j < params.length - 1) sbParamsString.append(", "); //$NON-NLS-1$
-			}
-
-			return prefix + name + "(" + sbParamsString + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			return prefix + name + "(" + getPrettyParameterTypesString() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		/**
@@ -1689,103 +1649,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			String[] paramNames = null;
 			if (scriptObject != null)
 			{
-				tooltip = Text.processTags(scriptObject.getToolTip(name), resolver);
+				String description = "";
+				if (parameterTypes != null && scriptObject instanceof XMLScriptObjectAdapter) description = ((XMLScriptObjectAdapter)scriptObject).getToolTip(
+					name, parameterTypes);
+				else description = scriptObject.getToolTip(name);
+				tooltip = Text.processTags(description, resolver);
 				paramNames = scriptObject.getParameterNames(name);
 			}
 			if (tooltip == null) tooltip = ""; //$NON-NLS-1$
 
-			MemberBox method = getBestMatchingMethod(name, njm, scriptObject);
-
-			boolean methodIsOverloaded = isMethodNameOverloaded(name, njm);
-			if (methodIsOverloaded) method = getBestOverloadedMatch(njm);
-
-			StringBuffer sbParamsString = new StringBuffer();
-
-			Class[] params = method.getParameterTypes();
-			if (paramNames != null && params.length != paramNames.length)
-			{
-				if (params.length == 1 && params[0].isArray())
-				{
-					// leave
-				}
-				else
-				{
-					paramNames = null;
-				}
-			}
-
-			//trying to get parameter names
-			if (paramNames == null && scriptObject instanceof XMLScriptObjectAdapter)
-			{
-				XMLScriptObjectAdapter xmlsa = (XMLScriptObjectAdapter)scriptObject;
-				IParameter[] ipar = xmlsa.getParameters(name, method.getParameterTypes());
-				if (ipar != null)
-				{
-					paramNames = new String[ipar.length];
-					for (int idx = 0; idx < paramNames.length; idx++)
-					{
-						paramNames[idx] = ipar[idx].getName();
-					}
-				}
-			}
-
-			boolean appendSqrBracket = true;
-			for (int j = 0; j < params.length; j++)
-			{
-				if (params.length == 1 && params[0].isArray())
-				{
-					String str = Arrays.asList(params[0]).get(0).getCanonicalName();
-					int start = str.lastIndexOf(".");
-					int end = str.indexOf("[");
-					String ttype = str.substring(start + 1, end);
-
-					if (paramNames == null)
-					{
-						sbParamsString.append(TYPES.get(params[j].getComponentType().getName()));
-						sbParamsString.append("[]"); //$NON-NLS-1$
-					}
-					else
-					{
-						for (int k = 0; k < paramNames.length; k++)
-						{
-							if (sbParamsString.length() != 0) sbParamsString.append(" "); //$NON-NLS-1$ 
-							if (paramNames[k].startsWith("[")) sbParamsString.append("[" + TYPES.get(ttype) + " " + paramNames[k].substring(1)); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-							else sbParamsString.append(TYPES.get(ttype) + " " + paramNames[k]); //$NON-NLS-1$
-							if (k < paramNames.length - 1) sbParamsString.append(", "); //$NON-NLS-1$
-						}
-						break;
-					}
-				}
-				else
-				{
-					if (paramNames != null && paramNames[j].startsWith("[")) //$NON-NLS-1$
-					{
-						sbParamsString.append("["); //$NON-NLS-1$
-						paramNames[j] = paramNames[j].substring(1);
-						appendSqrBracket = false;
-					}
-					if (params[j].isArray())
-					{
-						sbParamsString.append(TYPES.get(params[j].getComponentType().getName()));
-						sbParamsString.append("[]"); //$NON-NLS-1$
-					}
-					else
-					{
-						Object type = TYPES.get(params[j].getName());
-						sbParamsString.append(type);
-					}
-				}
-				if (paramNames != null)
-				{
-					sbParamsString.append(" "); //$NON-NLS-1$
-					sbParamsString.append(paramNames[j]);
-				}
-				if (j < params.length - 1) sbParamsString.append(", "); //$NON-NLS-1$
-			}
-
-			if (methodIsOverloaded && appendSqrBracket) sbParamsString = makeProperOptionalArgs(njm.getMethods(), sbParamsString);
-
-			Class returnType = method.getReturnType();
+			Class returnType = njm.getMethods()[0].getReturnType();
 			StringBuffer returnTypeStringBuffer = new StringBuffer();
 			while (returnType.isArray())
 			{
@@ -1794,7 +1667,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			returnTypeStringBuffer.insert(0, TYPES.get(returnType.getName()));
 
-			String tmp = "<html><body><b>" + returnTypeStringBuffer.toString() + " " + name + "(" + sbParamsString + ")</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			String tmp = "<html><body><b>" + returnTypeStringBuffer.toString() + " " + name + "(" + getPrettyParameterTypesString() + ")</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			if ("".equals(tooltip)) //$NON-NLS-1$
 			{
 				tooltip = tmp + "</body></html>"; //$NON-NLS-1$
@@ -1806,78 +1679,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			return tooltip;
 		}
 
-		private boolean isMethodNameOverloaded(String name, NativeJavaMethod njm)
+		private String getPrettyParameterTypesString()
 		{
-			MemberBox[] methods = njm.getMethods();
-			if (methods.length > 1) return true;
-			else return false;
-		}
+			if (parameterTypes.length == 0) return ""; //$NON-NLS-1$
 
-		private MemberBox getBestOverloadedMatch(NativeJavaMethod njm)
-		{
-			// Only the first method!!!!!!!
-			MemberBox[] methods = njm.getMethods();
-			MemberBox method = methods[0];
-			for (int j = 1; j < methods.length; j++)
+			String paramTypes = ""; //$NON-NLS-1$
+			for (Class param : parameterTypes)
 			{
-				if (method.getParameterTypes().length < methods[j].getParameterTypes().length)
-				{
-					method = methods[j];
-				}
+				paramTypes += TYPES.get(param.getSimpleName()) + ","; //$NON-NLS-1$
 			}
-
-			//return method with max number of args
-			return method;
-		}
-
-		private StringBuffer makeProperOptionalArgs(MemberBox[] methods, StringBuffer sbParamsString)
-		{
-			MemberBox baseMethod = methods[0];
-			for (int j = 1; j < methods.length; j++)
-			{
-				if (baseMethod.getParameterTypes().length > methods[j].getParameterTypes().length)
-				{
-					baseMethod = methods[j];
-				}
-			}
-
-			int paramsNo = baseMethod.getParameterTypes().length;//min no of params
-			String[] sp = sbParamsString.toString().split(",");//max no of params
-
-			String res = "";
-			for (int i = 0; i < sp.length; i++)
-			{
-				sp[i] = sp[i].trim();
-				if (i >= paramsNo) sp[i] = "[" + sp[i] + "]";
-				if (i < sp.length - 1) res = res + sp[i] + ", ";
-			}
-			res = res + sp[sp.length - 1];
-
-			return new StringBuffer(res);
-		}
-
-		private MemberBox getBestMatchingMethod(String name, NativeJavaMethod njm, IScriptObject scriptObject)
-		{
-			if (scriptObject != null)
-			{
-				String[] paramNames = scriptObject.getParameterNames(name);
-				if (paramNames != null)
-				{
-					MemberBox method = null;
-					MemberBox[] methods = njm.getMethods();
-					for (MemberBox method2 : methods)
-					{
-						if (method2.getParameterTypes().length == paramNames.length)
-						{
-							method = method2;
-							break;
-						}
-					}
-					if (method != null) return method;
-				}
-			}
-
-			return getBestOverloadedMatch(njm);
+			return paramTypes.substring(0, paramTypes.length() - 1);
 		}
 	}
 
