@@ -320,12 +320,16 @@ public class ColumnComposite extends Composite
 			groupLayout.createSequentialGroup().addContainerGap().add(
 				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582, Short.MAX_VALUE).add(
 					GroupLayout.LEADING, tabFolder, GroupLayout.PREFERRED_SIZE, 582, Short.MAX_VALUE).add(
-					groupLayout.createSequentialGroup().add(displayDataProviderID).addPreferredGap(LayoutStyle.RELATED).add(addButton))).addContainerGap()));
+					groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582,
+						Short.MAX_VALUE).add(addButton).add(
+						groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582,
+							Short.MAX_VALUE).add(displayDataProviderID))))));
+
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			GroupLayout.TRAILING,
 			groupLayout.createSequentialGroup().addContainerGap().add(tableContainer, GroupLayout.PREFERRED_SIZE, 185, Short.MAX_VALUE).addPreferredGap(
-				LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(displayDataProviderID).add(addButton)).add(tabFolder,
-				GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap()));
+				LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(addButton).add(displayDataProviderID)).addPreferredGap(
+				LayoutStyle.RELATED).add(tabFolder, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap()));
 
 		tableLayout.setHorizontalGroup(tableLayout.createParallelGroup(GroupLayout.TRAILING).add(
 			tableLayout.createSequentialGroup().addContainerGap().add(
@@ -336,7 +340,7 @@ public class ColumnComposite extends Composite
 		tableLayout.setVerticalGroup(tableLayout.createParallelGroup(GroupLayout.LEADING).add(
 			GroupLayout.TRAILING,
 			tableLayout.createSequentialGroup().addContainerGap().add(tableContainer, GroupLayout.PREFERRED_SIZE, 185, Short.MAX_VALUE).addPreferredGap(
-				LayoutStyle.RELATED).add(tableLayout.createParallelGroup(GroupLayout.BASELINE).add(displayDataProviderID).add(addButton)).addContainerGap()));
+				LayoutStyle.RELATED).add(tableLayout.createParallelGroup(GroupLayout.BASELINE).add(addButton).add(displayDataProviderID)).addContainerGap()));
 		container.setLayout(tableLayout);
 		//
 
