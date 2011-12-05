@@ -104,6 +104,7 @@ public class DeleteTableAction extends Action implements ISelectionChangedListen
 						while (it.hasNext())
 						{
 							selectedTable = (TableWrapper)it.next().getRealObject();
+							boolean deleteTable = true;
 							try
 							{
 								ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -127,7 +128,8 @@ public class DeleteTableAction extends Action implements ISelectionChangedListen
 												deleteEACAsker = new YesYesToAllNoNoToAllAsker(shell, getText());
 											}
 											deleteEACAsker.setMessage("Table events, aggregattions and/or calculations exist for table '" +
-												selectedTable.getTableName() + "' in the active solution and/or modules.\nDo you want to delete these as well?");
+												selectedTable.getTableName() +
+												"' in the active solution and/or modules.\nDo you still want to delete the table?");
 											// we have tableNode(s)... ask user if these should be deleted as well
 											if (deleteEACAsker.userSaidYes())
 											{
@@ -136,25 +138,29 @@ public class DeleteTableAction extends Action implements ISelectionChangedListen
 													deletePersist(tableNodes.next());
 												}
 											}
+											else deleteTable = false;
 										}
 									}
 
-									((IServerInternal)server).removeTable((Table)table);
+									if (deleteTable)
+									{
+										((IServerInternal)server).removeTable((Table)table);
 
-									// EditorUtil.closeEditor(table) needs to be run in an UI thread
-									if (Display.getCurrent() != null)
-									{
-										EditorUtil.closeEditor(table);
-									}
-									else
-									{
-										Display.getDefault().asyncExec(new Runnable()
+										// EditorUtil.closeEditor(table) needs to be run in an UI thread
+										if (Display.getCurrent() != null)
 										{
-											public void run()
+											EditorUtil.closeEditor(table);
+										}
+										else
+										{
+											Display.getDefault().asyncExec(new Runnable()
 											{
-												EditorUtil.closeEditor(table);
-											}
-										});
+												public void run()
+												{
+													EditorUtil.closeEditor(table);
+												}
+											});
+										}
 									}
 								}
 								else
