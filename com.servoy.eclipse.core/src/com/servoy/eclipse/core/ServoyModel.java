@@ -1553,7 +1553,7 @@ public class ServoyModel implements IWorkspaceSaveListener
 						{
 							final List<IResourceDelta> al = findChangedFiles(element, new ArrayList<IResourceDelta>());
 							// do nothing if no file was really changed
-							if (al == null || al.size() == 0) return;
+							if (al == null || al.size() == 0) continue;
 							if (eclipseRepository.getActiveRootObject(resource.getName(), IRepository.SOLUTIONS) != null)
 							{
 								// there is already a solution, update solution resources only after a build
