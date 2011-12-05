@@ -1603,7 +1603,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 							{
 								al = findChangedFiles(element, new ArrayList<IResourceDelta>());
 								// do nothing if no file was really changed
-								if (al == null || al.size() == 0) return;
+								if (al == null || al.size() == 0) continue;
 								// there is already a solution, update solution resources only after a build
 								if (eclipseRepository.isSavingInWorkspace())
 								{
