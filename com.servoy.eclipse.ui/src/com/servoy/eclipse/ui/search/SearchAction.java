@@ -119,7 +119,7 @@ public class SearchAction extends Action implements ISelectionChangedListener
 				node.getType() == UserNodeType.FORM_METHOD || node.getType() == UserNodeType.GLOBAL_METHOD_ITEM ||
 				node.getType() == UserNodeType.GLOBAL_VARIABLE_ITEM || node.getType() == UserNodeType.FORM_VARIABLE_ITEM ||
 				node.getType() == UserNodeType.SERVER || node.getType() == UserNodeType.TABLE || node.getType() == UserNodeType.FORM_ELEMENTS_ITEM ||
-				node.getType() == UserNodeType.BEAN)
+				node.getType() == UserNodeType.BEAN || node.getType() == UserNodeType.VIEW)
 			{
 				selectedObject = node.getRealObject();
 				if (selectedObject instanceof Object[])
