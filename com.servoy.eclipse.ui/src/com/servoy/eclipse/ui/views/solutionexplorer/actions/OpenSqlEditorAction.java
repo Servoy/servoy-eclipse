@@ -84,7 +84,7 @@ public class OpenSqlEditorAction extends Action implements ISelectionChangedList
 				state = (node.getType() == UserNodeType.SERVER && node.getRealObject() != null);
 				if (!state)
 				{
-					state = (node.getType() == UserNodeType.TABLE && node.getRealObject() != null);
+					state = ((node.getType() == UserNodeType.TABLE || node.getType() == UserNodeType.VIEW) && node.getRealObject() != null);
 				}
 				if (state)
 				{
