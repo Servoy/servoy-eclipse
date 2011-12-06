@@ -76,6 +76,7 @@ import com.servoy.j2db.documentation.scripting.docs.Globals;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -916,6 +917,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		while (cols.hasNext())
 		{
 			Column c = cols.next();
+			ColumnInfo ci = c.getColumnInfo();
+			if (ci != null && ci.isExcluded())
+			{
+				continue;
+			}
 			Object real = relation == null ? c : new ColumnWrapper(c, new Relation[] { relation });
 			dlm.add(new UserNode(c.getDataProviderID(), type, new ColumnFeedback(prefix, c), real, uiActivator.loadImageFromBundle("column.gif")));
 		}

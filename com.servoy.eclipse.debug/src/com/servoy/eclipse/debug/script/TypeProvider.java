@@ -1292,6 +1292,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				if (columnsOnly)
 				{
 					if (provider instanceof AggregateVariable || provider instanceof ScriptCalculation) continue;
+					if (provider instanceof Column && ((Column)provider).getColumnInfo().isExcluded()) return;
 				}
 				else
 				{
