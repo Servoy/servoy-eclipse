@@ -74,6 +74,7 @@ import com.servoy.j2db.dataprocessing.ValidationFailedException;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.FormEncapsulation;
@@ -1292,7 +1293,11 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				if (columnsOnly)
 				{
 					if (provider instanceof AggregateVariable || provider instanceof ScriptCalculation) continue;
-					if (provider instanceof Column && ((Column)provider).getColumnInfo().isExcluded()) return;
+					if (provider instanceof Column)
+					{
+						ColumnInfo ci = ((Column)provider).getColumnInfo();
+						if (ci != null && ci.isExcluded()) continue;
+					}
 				}
 				else
 				{
