@@ -306,7 +306,7 @@ public class DataModelManager implements IColumnInfoManager
 	// delete item
 	public void removeColumnInfo(Column c) throws RepositoryException
 	{
-		Table t = c.getTable();
+//		Table t = c.getTable();
 		c.removeColumnInfo();
 		// should only write the dbi once, not for every column; make sure updateAllColumnInfo is called at the end
 		//updateAllColumnInfo(t);
@@ -600,8 +600,8 @@ public class DataModelManager implements IColumnInfoManager
 				cid.defaultFormat = cobj.has("defaultFormat") ? cobj.optString("defaultFormat") : null;
 				cid.elementTemplateProperties = cobj.has("elementTemplateProperties") ? cobj.optString("elementTemplateProperties") : null;
 				cid.flags = cobj.has("flags") ? cobj.optInt("flags") : 0;
-				cid.dataProviderID = cobj.has("dataProviderID") ? cobj.optString("dataProviderID") : null;
-				cid.containsMetaData = cobj.has("containsMetaData") ? cobj.optInt("containsMetaData") : null;
+				cid.dataProviderID = cobj.has("dataProviderID") ? Utils.toEnglishLocaleLowerCase(cobj.optString("dataProviderID")) : null;
+				cid.containsMetaData = cobj.has("containsMetaData") ? Integer.valueOf(cobj.optInt("containsMetaData")) : null;
 				if (!tableInfo.columnInfoDefSet.contains(cid))
 				{
 					tableInfo.columnInfoDefSet.add(cid);
@@ -848,7 +848,7 @@ public class DataModelManager implements IColumnInfoManager
 						// and we need to keep track of them individually - so remember the ID of the marker for each table
 						if (columnDifference.type == TableDifference.MISSING_DBI_FILE)
 						{
-							missingDbiFileMarkerIds.put(columnDifference.getServerName() + '.' + columnDifference.getTableName(), marker.getId());
+							missingDbiFileMarkerIds.put(columnDifference.getServerName() + '.' + columnDifference.getTableName(), Long.valueOf(marker.getId()));
 						}
 					}
 					catch (CoreException e)
@@ -1243,7 +1243,7 @@ public class DataModelManager implements IColumnInfoManager
 
 		public synchronized void addDifference(TableDifference d)
 		{
-			differenceTypes.put(d.getServerName() + '.' + d.getTableName(), new Integer(d.getType()));
+			differenceTypes.put(d.getServerName() + '.' + d.getTableName(), Integer.valueOf(d.getType()));
 			if (!differences.contains(d))
 			{
 				differences.add(d);
