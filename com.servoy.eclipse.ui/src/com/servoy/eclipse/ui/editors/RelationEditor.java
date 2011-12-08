@@ -677,7 +677,7 @@ public class RelationEditor extends PersistEditor
 				{
 					// stored calcs are shown in calculations section
 					Column col = cols.next();
-					if (calcs == null || !calcs.containsKey(col.getDataProviderID()))
+					if ((calcs == null || !calcs.containsKey(col.getDataProviderID())) && ((col.getFlags() & Column.EXCLUDED_COLUMN) != Column.EXCLUDED_COLUMN))
 					{
 						retval.add(col);
 					}
