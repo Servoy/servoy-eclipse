@@ -607,11 +607,13 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 									if (SolutionSerializer.isJSONFile(fileRelativePath))
 									{
 										// check if a script needs to be deleted
-										String scriptPath = SolutionSerializer.getScriptPath(toDelete, true);
-										if (scriptPath != null)
-										{
-											wsa.delete(scriptPath);
-										}
+										String[] scriptPaths = SolutionSerializer.getScriptPaths(toDelete, true);
+
+										for (String scriptPath : scriptPaths)
+											if (scriptPath != null)
+											{
+												wsa.delete(scriptPath);
+											}
 
 										// forms/orders.obj has now been deleted, also delete the forms/orders directory if it exists
 										String elementsDirectory = fileRelativePath.substring(0, fileRelativePath.length() -
