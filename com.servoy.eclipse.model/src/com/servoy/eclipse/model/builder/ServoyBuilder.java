@@ -1510,7 +1510,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												}
 												addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, o);
 											}
-											if (dataProvider != null && dataProvider instanceof Column)
+											if (dataProvider != null && dataProvider instanceof Column && ((Column)dataProvider).getColumnInfo() != null)
 											{
 												if (((Column)dataProvider).getColumnInfo().isExcluded())
 												{
@@ -2531,7 +2531,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								problems.add(new Problem(mk.getType(), IMarker.SEVERITY_ERROR, mk.getText()));
 							}
 						}
-						else if (column.getColumnInfo().isExcluded())
+						else if (column.getColumnInfo() != null && column.getColumnInfo().isExcluded())
 						{
 							ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID1(), table.getName());
 							problems.add(new Problem(mk.getType(), IMarker.SEVERITY_WARNING, mk.getText()));
@@ -2548,7 +2548,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								problems.add(new Problem(mk.getType(), IMarker.SEVERITY_ERROR, mk.getText()));
 							}
 						}
-						else if (column.getColumnInfo().isExcluded())
+						else if (column.getColumnInfo() != null && column.getColumnInfo().isExcluded())
 						{
 							ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID2(), table.getName());
 							problems.add(new Problem(mk.getType(), IMarker.SEVERITY_WARNING, mk.getText()));
@@ -2566,7 +2566,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								problems.add(new Problem(mk.getType(), IMarker.SEVERITY_ERROR, mk.getText()));
 							}
 						}
-						else if (column.getColumnInfo().isExcluded())
+						else if (column.getColumnInfo() != null && column.getColumnInfo().isExcluded())
 						{
 							ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID3(), table.getName());
 							problems.add(new Problem(mk.getType(), IMarker.SEVERITY_WARNING, mk.getText()));
@@ -3311,7 +3311,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					String colName = split[split.length - 1];
 					Column c = lastTable.getColumn(colName);
-					if (c == null || c.getColumnInfo().isExcluded())
+					if (c == null || (c.getColumnInfo() != null && c.getColumnInfo().isExcluded()))
 					{
 						ServoyMarker mk = MarkerMessages.InvalidSortOptionsColumnNotFound.fill(elementName, name, sortOptions, colName);
 						problems.add(new Problem(mk.getType(), IMarker.SEVERITY_WARNING, mk.getText()));
@@ -3453,11 +3453,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									errorsFound = true;
 									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, element);
 								}
-								else if (((Table)ptable).getColumn(primaryDataProvider).getColumnInfo().isExcluded())
-								{
-									mk = MarkerMessages.RelationItemPrimaryDataproviderNotFound.fill(element.getName(), primaryDataProvider);
-									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, element);
-								}
 							}
 							if (foreignColumn == null || "".equals(foreignColumn))//$NON-NLS-1$ 
 							{
@@ -3474,11 +3469,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									errorsFound = true;
 									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, element);
 								}
-								else if (((Table)ftable).getColumn(foreignColumn).getColumnInfo().isExcluded())
-								{
-									mk = MarkerMessages.RelationItemForeignDataproviderNotFound.fill(element.getName(), foreignColumn);
-									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, element);
-								}
 							}
 							if (dataProvider != null && column != null && dataProvider instanceof Column && column instanceof Column &&
 								((Column)dataProvider).getColumnInfo() != null && ((Column)column).getColumnInfo() != null)
@@ -3490,6 +3480,16 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									mk = MarkerMessages.RelationItemUUIDProblem.fill(element.getName(), primaryDataProvider, foreignColumn);
 									errorsFound = true;
 									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, element);
+								}
+								if (((Column)dataProvider).getColumnInfo().isExcluded())
+								{
+									mk = MarkerMessages.RelationItemPrimaryDataproviderNotFound.fill(element.getName(), primaryDataProvider);
+									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, element);
+								}
+								if (((Column)column).getColumnInfo().isExcluded())
+								{
+									mk = MarkerMessages.RelationItemForeignDataproviderNotFound.fill(element.getName(), foreignColumn);
+									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, element);
 								}
 							}
 						}
