@@ -47,9 +47,17 @@ public class ColumnNameEditingSupport extends EditingSupport
 		this.realName = realName;
 		tableViewer = tv;
 		editor = new VerifyingTextCellEditor(tv.getTable());
-		editor.addVerifyListener(new DocumentValidatorVerifyListener(
-			new IDocumentValidator[] { new IdentDocumentValidator(IdentDocumentValidator.TYPE_SQL), new LengthDocumentValidator(
-				Column.MAX_SQL_OBJECT_NAME_LENGTH) }));
+		if (realName)
+		{
+			editor.addVerifyListener(new DocumentValidatorVerifyListener(
+				new IDocumentValidator[] { new IdentDocumentValidator(IdentDocumentValidator.TYPE_SQL), new LengthDocumentValidator(
+					Column.MAX_SQL_OBJECT_NAME_LENGTH) }));
+		}
+		else
+		{
+			editor.addVerifyListener(new DocumentValidatorVerifyListener(new IDocumentValidator[] { new IdentDocumentValidator(
+				IdentDocumentValidator.TYPE_SERVOY) }));
+		}
 	}
 
 	@Override
