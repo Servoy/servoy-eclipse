@@ -54,6 +54,7 @@ public class DesignPerspective implements IPerspectiveFactory
 	protected static final String[] actionIds = { "org.eclipse.debug.ui.launchActionSet", "org.eclipse.ui.externaltools.ExternalToolsSet" };
 	protected static final String[] activityIds = { "com.servoy.eclipse.activities.javaDevelopment", "com.servoy.eclipse.activities.antDevelopment", "org.eclipse.team.cvs", "org.eclipse.antDevelopment", "org.eclipse.javaDevelopment", "org.eclipse.plugInDevelopment", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk", "com.servoy.eclipse.activities.edit", "org.eclipse.equinox.p2.ui.sdk.classicUpdate" };
 	public static final String TestRunnerViewPart_NAME = "org.eclipse.jdt.junit.ResultView"; //this field is copied from TestRunnerViewPart.NAME which is an eclipse internal class and cannot be referenced.
+	public static final String CallHierarchyViewPart_ID = "org.eclipse.dltk.callhierarchy.view"; //this field is copied from CallHierarchyViewPart.ID_CALL_HIERARCHY
 
 	@SuppressWarnings("restriction")
 	public void createInitialLayout(IPageLayout layout)
@@ -67,12 +68,14 @@ public class DesignPerspective implements IPerspectiveFactory
 		right.addView(IPageLayout.ID_OUTLINE);
 		right.addView(IPageLayout.ID_PROP_SHEET);
 
+
 		IFolderLayout bottom = layout.createFolder("bottom", IPageLayout.BOTTOM, 0.8f, editorArea);
 		bottom.addView(IPageLayout.ID_PROBLEM_VIEW);
 		bottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);//move to debug perspective only
 		bottom.addView(IPageLayout.ID_TASK_LIST);
 		bottom.addView(IPageLayout.ID_BOOKMARKS);
 		bottom.addView(NewSearchUI.SEARCH_VIEW_ID);
+		bottom.addPlaceholder(CallHierarchyViewPart_ID);
 
 		//maximize window on first launch, it start too small first time
 		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
