@@ -219,7 +219,11 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 		{
 			setIgnoreFocusLost(true);
 			Object newValue = openDialogBox(control);
-			if (!CANCELVALUE.equals(newValue))
+			if (CANCELVALUE.equals(newValue))
+			{
+				fireCancelEditor();
+			}
+			else
 			{
 				boolean newValidState = isCorrect(newValue);
 				if (newValidState)
