@@ -737,19 +737,15 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			alldataproviders.setName("alldataproviders");
 			alldataproviders.setDescription("the dataproviders array of this foundset");
 			alldataproviders.setAttribute(IMAGE_DESCRIPTOR, SPECIAL_PROPERTY);
-			type.getMembers().add(alldataproviders);
+			type.getMembers().add(makeDeprected(alldataproviders));
 
 			Property maxRecordIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
 			maxRecordIndex.setName("maxRecordIndex");
-			maxRecordIndex.setDeprecated(true);
-			maxRecordIndex.setVisible(false);
-			type.getMembers().add(maxRecordIndex);
+			type.getMembers().add(makeDeprected(maxRecordIndex));
 
 			Property selectedIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
 			selectedIndex.setName("selectedIndex");
-			selectedIndex.setDeprecated(true);
-			selectedIndex.setVisible(false);
-			type.getMembers().add(selectedIndex);
+			type.getMembers().add(makeDeprected(selectedIndex));
 			return type;
 		}
 	}
@@ -939,11 +935,15 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 				EList<Member> members = type.getMembers();
 
-				members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "Array with all the names in this form scope", SPECIAL_PROPERTY));
-				members.add(createProperty("alldataproviders", true, TypeUtil.arrayOf("String"), "Array with all the dataprovider names", SPECIAL_PROPERTY));
-				members.add(createProperty("allmethods", true, TypeUtil.arrayOf("String"), "Array with all the method names", SPECIAL_PROPERTY));
-				members.add(createProperty("allrelations", true, TypeUtil.arrayOf("String"), "Array with all the relation names", SPECIAL_PROPERTY));
-				members.add(createProperty("allvariables", true, TypeUtil.arrayOf("String"), "Array with all the variable names", SPECIAL_PROPERTY));
+				members.add(makeDeprected(createProperty("allnames", true, TypeUtil.arrayOf("String"), "Array with all the names in this form scope",
+					SPECIAL_PROPERTY)));
+				members.add(makeDeprected(createProperty("alldataproviders", true, TypeUtil.arrayOf("String"), "Array with all the dataprovider names",
+					SPECIAL_PROPERTY)));
+				members.add(makeDeprected(createProperty("allmethods", true, TypeUtil.arrayOf("String"), "Array with all the method names", SPECIAL_PROPERTY)));
+				members.add(makeDeprected(createProperty("allrelations", true, TypeUtil.arrayOf("String"), "Array with all the relation names",
+					SPECIAL_PROPERTY)));
+				members.add(makeDeprected(createProperty("allvariables", true, TypeUtil.arrayOf("String"), "Array with all the variable names",
+					SPECIAL_PROPERTY)));
 
 				// controller and foundset and elements
 				members.add(createProperty(context, "controller", true, "Controller", IconProvider.instance().descriptor(JSForm.class)));
@@ -1444,6 +1444,18 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		}
 		return null;
 	}
+
+	/**
+	 * @param createProperty
+	 * @return
+	 */
+	private static Member makeDeprected(Property property)
+	{
+		property.setDeprecated(true);
+		property.setVisible(false);
+		return property;
+	}
+
 
 	public class ElementsScopeCreator implements IScopeTypeCreator
 	{
