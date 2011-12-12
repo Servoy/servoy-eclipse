@@ -18,6 +18,7 @@ package com.servoy.eclipse.debug.actions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.Iterator;
 
 import javax.swing.SwingUtilities;
 
@@ -28,11 +29,21 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkbenchWindowPulldownDelegate;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
+import org.eclipse.ui.internal.browser.BrowserManager;
+import org.eclipse.ui.internal.browser.ExternalBrowserInstance;
+import org.eclipse.ui.internal.browser.IBrowserDescriptor;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
@@ -49,7 +60,7 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
  * @author jcompagner
  * 
  */
-public class StartWebClientActionDelegate extends StartDebugAction implements IRunnableWithProgress
+public class StartWebClientActionDelegate extends StartDebugAction implements IRunnableWithProgress, IWorkbenchWindowPulldownDelegate
 {
 	private IWorkbenchWindow window;
 
@@ -129,8 +140,8 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 							{
 								String url = "http://localhost:" + ApplicationServerSingleton.get().getWebServerPort() + "/servoy-webclient/solutions/solution/" + solution.getName(); //$NON-NLS-1$ //$NON-NLS-2$
 								IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
-								IWebBrowser browser = support.getExternalBrowser();
-								browser.openURL(new URL(url));
+								if (webBrowser == null) webBrowser = support.getExternalBrowser();
+								webBrowser.openURL(new URL(url));
 							}
 							catch (final Throwable e)//catch all for apple mac
 							{
@@ -155,7 +166,6 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 		}
 	}
 
-
 	@Override
 	public void selectionChanged(IAction action, ISelection selection)
 	{
@@ -174,4 +184,79 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 		action.setEnabled(enabled);
 	}
 
+	private Menu broswersListMenu;
+	private IWebBrowser webBrowser;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.IWorkbenchWindowPulldownDelegate#getMenu(org.eclipse.swt.widgets.Control)
+	 */
+	public Menu getMenu(Control parent)
+	{
+		if (broswersListMenu != null) broswersListMenu.dispose();
+
+		broswersListMenu = new Menu(parent);
+		try
+		{
+			Iterator iterator = BrowserManager.getInstance().getWebBrowsers().iterator();
+			while (iterator.hasNext())
+			{
+				final IBrowserDescriptor ewb = (IBrowserDescriptor)iterator.next();
+				MenuItem menuItem = new MenuItem(broswersListMenu, SWT.PUSH);
+				menuItem.setText(ewb.getName());
+				menuItem.addSelectionListener(new SelectionAdapter()
+				{
+					@Override
+					public void widgetSelected(SelectionEvent e)
+					{
+						try
+						{
+							IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
+							org.eclipse.ui.internal.browser.IBrowserExt ext = null;
+							if (ewb != null)
+							{
+								//ext := "org.eclipse.ui.browser." + specifiId 
+								ext = org.eclipse.ui.internal.browser.WebBrowserUIPlugin.findBrowsers(ewb.getLocation());
+								if (ext != null)
+								{
+									webBrowser = ext.createBrowser(ext.getId(), ewb.getLocation(), ewb.getParameters());
+									if (webBrowser == null) webBrowser = new ExternalBrowserInstance(ext.getId(), ewb);
+								}
+								else
+								{
+									webBrowser = new ExternalBrowserInstance("org.eclipse.ui.browser." + ewb.getName().toLowerCase().replace(" ", "_"), ewb);
+								}
+							}
+							if (webBrowser == null) webBrowser = support.getExternalBrowser(); //default to external system browser
+
+							window.getWorkbench().getProgressService().run(true, false, StartWebClientActionDelegate.this);
+						}
+						catch (Exception ex)
+						{
+							ServoyLog.logError(ex);
+						}
+					}
+				});
+			}
+
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return broswersListMenu;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.debug.actions.StartDebugAction#dispose()
+	 */
+	@Override
+	public void dispose()
+	{
+		if (broswersListMenu != null) broswersListMenu.dispose();
+		super.dispose();
+	}
 }

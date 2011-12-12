@@ -16,7 +16,7 @@
                id="com.servoy.eclipse.ui.startWebClient"
                label="Start Debug Web Client"
                menubarPath="org.eclipse.ui.run/start"
-               style="push"
+               style="pulldown"
                toolbarPath="Normal/additions"
                tooltip="Start Debug Web Client">
          </action>

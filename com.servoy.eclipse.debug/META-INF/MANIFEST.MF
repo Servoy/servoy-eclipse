@@ -35,3 +35,4 @@ Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Export-Package: com.servoy.eclipse.debug.actions
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: org.eclipse.ui.internal.browser
