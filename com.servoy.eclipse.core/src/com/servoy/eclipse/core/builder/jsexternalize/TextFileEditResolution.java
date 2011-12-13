@@ -25,7 +25,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.ui.editor.IScriptAnnotation;
-import org.eclipse.dltk.ui.text.IAnnotationResolution;
+import org.eclipse.dltk.ui.text.IAnnotationResolution2;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ui.IEditorPart;
@@ -40,7 +40,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
  * @author gboros
  *
  */
-public abstract class TextFileEditResolution implements IMarkerResolution, IAnnotationResolution
+public abstract class TextFileEditResolution implements IMarkerResolution, IAnnotationResolution2
 {
 	protected IFile scriptFile;
 	protected int problemStartIdx;

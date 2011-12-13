@@ -20,6 +20,8 @@ package com.servoy.eclipse.core.builder.jsexternalize;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.javascript.ast.Comment;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
 import org.eclipse.dltk.javascript.ast.Script;
@@ -53,9 +55,37 @@ class GenerateSuppressWarningsResolution extends TextFileEditResolution
 		return "@SuppressWarnings(" + type + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.dltk.ui.text.IAnnotationResolution2#getDescription()
+	 */
+	@SuppressWarnings("nls")
+	public String getDescription()
+	{
+		FunctionStatement f = getFunction();
+		ISourceModule sourceModule = DLTKCore.createSourceModuleFrom(scriptFile);
+		try
+		{
+			String functionString = sourceModule.getBuffer().getText(f.sourceStart(), f.sourceEnd() - f.sourceStart());
+			int lineEnd = functionString.indexOf('\n');
+			StringBuilder sb = new StringBuilder(lineEnd + 100);
+			sb.append("<html><body> *<b>");
+			sb.append(getAnnotation());
+			sb.append("</b><br/> */<br/>");
+			sb.append(functionString.substring(0, lineEnd));
+			sb.append("</body></html>");
+			return sb.toString();
+		}
+		catch (ModelException e)
+		{
+		}
+		return getLabel();
+	}
+
 	private FunctionStatement functionAtPosition;
 
-	private FunctionStatement getFunction()
+	FunctionStatement getFunction()
 	{
 		if (functionAtPosition == null)
 		{

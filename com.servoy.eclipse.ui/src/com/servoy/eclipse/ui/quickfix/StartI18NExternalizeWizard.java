@@ -21,7 +21,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.dltk.compiler.problem.DefaultProblemIdentifier;
 import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
 import org.eclipse.dltk.ui.editor.IScriptAnnotation;
-import org.eclipse.dltk.ui.text.IAnnotationResolution;
+import org.eclipse.dltk.ui.text.IAnnotationResolution2;
 import org.eclipse.dltk.ui.text.IScriptCorrectionContext;
 import org.eclipse.dltk.ui.text.IScriptCorrectionProcessor;
 import org.eclipse.jface.text.IDocument;
@@ -90,7 +90,7 @@ public class StartI18NExternalizeWizard implements IMarkerResolutionGenerator, I
 	{
 	}
 
-	class RunI18NExternalizeWizardResolution implements IMarkerResolution, IAnnotationResolution
+	class RunI18NExternalizeWizardResolution implements IMarkerResolution, IAnnotationResolution2
 	{
 
 		/*
@@ -113,6 +113,16 @@ public class StartI18NExternalizeWizard implements IMarkerResolutionGenerator, I
 		{
 			ShowI18NDialogActionDelegate delegate = new ShowI18NDialogActionDelegate();
 			delegate.run(ShowI18NDialogActionDelegate.ACTION_EXTERNALIZE);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.dltk.ui.text.IAnnotationResolution2#getDescription()
+		 */
+		public String getDescription()
+		{
+			return getLabel();
 		}
 
 		/*

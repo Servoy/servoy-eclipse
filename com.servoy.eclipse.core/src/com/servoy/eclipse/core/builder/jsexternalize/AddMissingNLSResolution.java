@@ -20,6 +20,7 @@ package com.servoy.eclipse.core.builder.jsexternalize;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
@@ -47,6 +48,34 @@ public class AddMissingNLSResolution extends TextFileEditResolution
 	}
 
 	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.dltk.ui.text.IAnnotationResolution2#getDescription()
+	 */
+	@SuppressWarnings("nls")
+	public String getDescription()
+	{
+		ISourceModule scriptFileSourceModule = DLTKCore.createSourceModuleFrom(scriptFile);
+		try
+		{
+			String contents = scriptFileSourceModule.getBuffer().getContents();
+			int firstIndex = contents.lastIndexOf('\n', problemStartIdx);
+			if (firstIndex == -1) firstIndex = 0;
+			int lastIndex = contents.indexOf('\n', problemStartIdx);
+			if (lastIndex == -1) lastIndex = contents.length();
+			StringBuilder sb = new StringBuilder(lastIndex - firstIndex + 50);
+			sb.append("<html><body>");
+			sb.append(contents.substring(firstIndex, lastIndex));
+			sb.append(" <b>//$NON-NLS-1$</b></body></html>");
+			return sb.toString();
+		}
+		catch (ModelException e)
+		{
+		}
+		return getLabel();
+	}
+
+	/*
 	 * @see com.servoy.eclipse.core.builder.jsexternalize.TextFileEditResolution#run(org.eclipse.core.resources.IFile, int)
 	 */
 	@Override
@@ -66,7 +95,7 @@ public class AddMissingNLSResolution extends TextFileEditResolution
 					int nodeOffset = node.getRange().getOffset();
 					if (nodeOffset <= problemStartIdx && problemStartIdx < nodeOffset + node.getRange().getLength())
 					{
-						InsertEdit nonNLSTextEdit = new InsertEdit(lineEndIdx + 1, " //$NON-NLS-" + stringLiteralIdx + "$"); //$NON-NLS-1$ //$NON-NLS-2$
+						InsertEdit nonNLSTextEdit = new InsertEdit(lineEndIdx + 1, " //$NON-NLS-" + stringLiteralIdx + "$"); //$NON-NLS-1$ 
 						applyTextEdit(scriptFile, nonNLSTextEdit);
 						return false;
 					}
