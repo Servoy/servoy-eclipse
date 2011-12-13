@@ -761,7 +761,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private void addServersNodeChildren(PlatformSimpleUserNode serversNode)
 	{
-		List<PlatformSimpleUserNode> servers = new ArrayList<PlatformSimpleUserNode>();
+		List<PlatformSimpleUserNode> allServers = new ArrayList<PlatformSimpleUserNode>();
 		IServerManagerInternal handler = ServoyModel.getServerManager();
 		String[] array = handler.getServerNames(false, false, true, true);
 		for (String server_name : array)
@@ -799,7 +799,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 
 			PlatformSimpleUserNode node = new PlatformSimpleUserNode(server_name, UserNodeType.SERVER, "", tooltip, serverObj, image); //$NON-NLS-1$
-			servers.add(node);
+			allServers.add(node);
 			node.parent = serversNode;
 			if (serverObj.getConfig().isEnabled() && serverObj.isValid())
 			{
@@ -822,7 +822,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			}
 		}
 
-		serversNode.children = servers.toArray(new PlatformSimpleUserNode[servers.size()]);
+		serversNode.children = allServers.toArray(new PlatformSimpleUserNode[allServers.size()]);
 	}
 
 	private void addPluginsNodeChildren(PlatformSimpleUserNode pluginNode)

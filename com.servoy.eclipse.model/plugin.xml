@@ -554,4 +554,15 @@
             type="com.servoy.eclipse.core.servoyProblem">
       </super>
    </extension>
+   <extension
+         id="com.servoy.eclipse.core.hiddenTableInUse"
+         name="Hidden table still in use"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="com.servoy.eclipse.core.servoyProblem">
+      </super>
+   </extension>
 </plugin>

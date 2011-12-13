@@ -195,6 +195,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.EditSecurityAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EditVariableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EnableServerAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ExpandNodeAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.HideUnhideTablesAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NExternalizeAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NReadFromDBAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NWriteToDBAction;
@@ -399,6 +400,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private ContextAction newActionInListSecondary;
 
 	private SynchronizeTablesAction synchronizeTablesWithDBAction;
+	private HideUnhideTablesAction hideUnhideTablesAction;
 
 	private LoadRelationsAction loadRelationsAction;
 
@@ -531,10 +533,13 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		@Override
 		public Font getFont(Object element)
 		{
-			if (element instanceof SimpleUserNode &&
-				(((SimpleUserNode)element).getType() == UserNodeType.GRAYED_OUT || (((SimpleUserNode)element).getType() == UserNodeType.I18N_FILE_ITEM && !((SimpleUserNode)element).isEnabled())))
+			if (element instanceof SimpleUserNode)
 			{
-				return JFaceResources.getFontRegistry().getItalic((JFaceResources.DIALOG_FONT));
+				SimpleUserNode node = (SimpleUserNode)element;
+				if (node.getType() == UserNodeType.GRAYED_OUT || (node.getAppearenceFlags() & SimpleUserNode.TEXT_ITALIC) != 0)
+				{
+					return JFaceResources.getFontRegistry().getItalic((JFaceResources.DIALOG_FONT));
+				} // if this needs to be extended to allow BOLD and ITALIC at the same time fonts, you can use put JFaceResources.getFontRegistry() to put an italic version the get it's bold value for example
 			}
 			if (treeFilter != null)
 			{
@@ -574,12 +579,15 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		@Override
 		public Color getForeground(Object element)
 		{
-			if (element instanceof SimpleUserNode &&
-				(((SimpleUserNode)element).getType() == UserNodeType.GRAYED_OUT || (((SimpleUserNode)element).getType() == UserNodeType.I18N_FILE_ITEM && !((SimpleUserNode)element).isEnabled())))
+			if (element instanceof SimpleUserNode)
 			{
-				return light_grey;
+				SimpleUserNode node = (SimpleUserNode)element;
+				if (node.getType() == UserNodeType.GRAYED_OUT || (node.getAppearenceFlags() & SimpleUserNode.TEXT_GRAYED_OUT) != 0)
+				{
+					return light_grey;
+				}
 			}
-			else return super.getForeground(element);
+			return super.getForeground(element);
 		}
 
 		@Override
@@ -1698,10 +1706,15 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						Form form = it.next();
 						if (names.contains(form.getTableName()))
 						{
-							form.clearTable();
+							form.clearTable(); // TODO wouldn't this be better located in ServoyModel or someplace else?
 						}
 					}
 				}
+				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(((IServerInternal)server).getName());
+			}
+
+			public void hiddenTableChanged(IServer server, Table table)
+			{
 				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(((IServerInternal)server).getName());
 			}
 
@@ -2125,6 +2138,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (movePersistAction.isEnabled()) manager.add(movePersistAction);
 		if (duplicatePersistAction.isEnabled()) manager.add(duplicatePersistAction);
 		if (deleteActionInList.isEnabled()) manager.add(deleteActionInList);
+		if (hideUnhideTablesAction.isEnabled()) manager.add(hideUnhideTablesAction);
 		// Other plug-ins can contribute their actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
@@ -2293,6 +2307,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		reloadTablesOfServerAction = new ReloadTablesAction();
 		updateServoySequencesAction = new UpdateServoySequencesAction();
 		synchronizeTablesWithDBAction = new SynchronizeTablesAction();
+		hideUnhideTablesAction = new HideUnhideTablesAction();
 		loadRelationsAction = new LoadRelationsAction(this);
 
 		newActionInTreePrimary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
@@ -2491,6 +2506,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		list.addSelectionChangedListener(copyTable);
 		list.addSelectionChangedListener(overrideMethod);
 		list.addSelectionChangedListener(openSqlEditorAction);
+		list.addSelectionChangedListener(hideUnhideTablesAction);
 
 		tree.addSelectionChangedListener(importMediaFolder);
 		tree.addSelectionChangedListener(synchronizeTablesWithDBAction);

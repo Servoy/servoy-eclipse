@@ -447,6 +447,12 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			{
 				// not interested
 			}
+
+			public void hiddenTableChanged(IServer server, Table table)
+			{
+				// not interested; we still show the editor as the table is still there
+
+			}
 		};
 		server.addTableListener(tableListener);
 		serverListener = new IServerListener()

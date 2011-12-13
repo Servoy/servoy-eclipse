@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.ui.dialogs;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +28,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions.TableListType;
-import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 
@@ -127,12 +126,12 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 	{
 		List<TableWrapper> lst = new ArrayList<TableWrapper>();
 		ServoyModelManager.getServoyModelManager().getServoyModel();
-		IServer server = ServoyModel.getServerManager().getServer(serverName, true, true);
+		IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(serverName, true, true);
 		if (server != null)
 		{
 			try
 			{
-				for (String tableName : server.getTableAndViewNames(true))
+				for (String tableName : server.getTableAndViewNames(true, true))
 				{
 					if (options.type == TableListType.I18N)
 					{
@@ -147,10 +146,6 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 				}
 			}
 			catch (RepositoryException e)
-			{
-				ServoyLog.logError("Could not get tables for server " + server, e);
-			}
-			catch (RemoteException e)
 			{
 				ServoyLog.logError("Could not get tables for server " + server, e);
 			}

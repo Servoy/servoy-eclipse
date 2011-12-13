@@ -194,7 +194,9 @@ public class SuggestForeignTypesWizard extends Wizard
 		return true;
 	}
 
-	public void init(@SuppressWarnings("unused") IWorkbench workbench, @SuppressWarnings("unused") IStructuredSelection selection)
+	public void init(@SuppressWarnings("unused")
+	IWorkbench workbench, @SuppressWarnings("unused")
+	IStructuredSelection selection)
 	{
 		if (!hasServer) serverSelectionPage = new ServerSelectionPage("serverSelection"); //$NON-NLS-1$
 		suggestionPage = new SuggestionPage("suggestionPage"); //$NON-NLS-1$
@@ -516,7 +518,7 @@ public class SuggestForeignTypesWizard extends Wizard
 			{
 				try
 				{
-					List<String> tableNames = server.getTableNames(true);
+					List<String> tableNames = ((IServerInternal)server).getTableAndViewNames(true, true);
 					allTableNames = new String[tableNames.size()];
 					allTableNames = tableNames.toArray(allTableNames);
 					Arrays.sort(allTableNames);
@@ -529,10 +531,6 @@ public class SuggestForeignTypesWizard extends Wizard
 					suggestionCellEditor.setItems(arrayNamesWithEmptyEntry);
 				}
 				catch (RepositoryException e)
-				{
-					ServoyLog.logWarning("Failed to get table names list.", e); //$NON-NLS-1$
-				}
-				catch (RemoteException e)
 				{
 					ServoyLog.logWarning("Failed to get table names list.", e); //$NON-NLS-1$
 				}

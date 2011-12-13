@@ -256,6 +256,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String CONSTANTS_USED_MARKER_TYPE = _PREFIX + ".constantsUsed"; //$NON-NLS-1$
 	public static final String MISSING_DRIVER = _PREFIX + ".missingDriver"; //$NON-NLS-1$
 	public static final String OBSOLETE_ELEMENT = _PREFIX + ".obsoleteElement"; //$NON-NLS-1$
+	public static final String HIDDEN_TABLE_STILL_IN_USE = _PREFIX + ".hiddenTableInUse"; //$NON-NLS-1$
 
 	private SAXParserFactory parserFactory;
 	private final HashSet<String> referencedProjectsSet = new HashSet<String>();
@@ -395,7 +396,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				if (!project.exists() || (project.isOpen() && project.hasNature(ServoyProject.NATURE_ID) && project == getProject()))
 				{
 					// a project that this builder in interested in was deleted (so a module or the resources proj.)
-					// or something has changed in the active solution project
+					// or something has changed in this builder's solution project
 					checkServoyProject(getProject());
 					checkModules(getProject());
 					checkResourcesForServoyProject(getProject());
@@ -416,8 +417,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							checkStyles(getProject());
 							checkColumns(getProject());
+
+							deleteMarkers(getProject(), HIDDEN_TABLE_STILL_IN_USE);
+							deleteMarkers(getProject(), I18N_MARKER_TYPE);
+							checkI18n(getProject()); // maybe hidden tables changed
 						}
-						IProject[] projects = project.getReferencingProjects(); // hmm, modules do not use the Eclipse referencing project thing right? only used for resources project... 
+						IProject[] projects = project.getReferencingProjects();
 						if (projects != null)
 						{
 							for (IProject p : projects)
@@ -425,6 +430,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								if (servoyModel.isSolutionActive(p.getName()))
 								{
 									deleteMarkers(p, PROJECT_RELATION_MARKER_TYPE);
+									deleteMarkers(p, HIDDEN_TABLE_STILL_IN_USE);
 									checkRelations(p, new HashMap<String, IPersist>());
 								}
 							}
@@ -1020,6 +1026,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, UNRESOLVED_RELATION_UUID);
 		deleteMarkers(project, MISSING_DRIVER);
 		deleteMarkers(project, OBSOLETE_ELEMENT);
+		deleteMarkers(project, HIDDEN_TABLE_STILL_IN_USE);
 
 		final ServoyProject servoyProject = getServoyProject(project);
 		boolean active = servoyModel.isSolutionActive(project.getName());
@@ -1467,6 +1474,22 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												}
 												addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, o);
 											}
+											if (dataProvider != null && dataProvider instanceof Column)
+											{
+												if (((Column)dataProvider).getColumnInfo().isExcluded())
+												{
+													ServoyMarker mk;
+													if (elementName == null)
+													{
+														mk = MarkerMessages.FormDataproviderNotFound.fill(inForm, id);
+													}
+													else
+													{
+														mk = MarkerMessages.FormDataproviderOnElementNotFound.fill(elementName, inForm, id);
+													}
+													addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, o);
+												}
+											}
 										}
 									}
 								}
@@ -1601,7 +1624,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								catch (Exception e)
 								{
 								}
-								if (table == null)
+								if (table == null || table.isHiddenInDeveloper())
 								{
 									Iterator<IPersist> iterator = node.getAllObjects();
 									while (iterator.hasNext())
@@ -1610,9 +1633,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										String what;
 										if (persist instanceof AggregateVariable) what = "Aggregation"; //$NON-NLS-1$
 										else what = "Calculation"; //$NON-NLS-1$
-										ServoyMarker mk = MarkerMessages.ItemReferencesInvalidTable.fill(what, ((ISupportName)persist).getName(),
-											node.getTableName());
-										addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, persist);
+										ServoyMarker mk;
+										if (table != null)
+										{
+											mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(table.getDataSource(), what + " ",
+												((ISupportName)persist).getName());
+										}
+										else
+										{
+											mk = MarkerMessages.ItemReferencesInvalidTable.fill(what, ((ISupportName)persist).getName(), node.getTableName());
+										}
+										addMarker(project, mk.getType(), mk.getText(), -1, table != null ? IMarker.SEVERITY_WARNING : IMarker.SEVERITY_ERROR,
+											table != null ? IMarker.PRIORITY_LOW : IMarker.PRIORITY_NORMAL, null, persist);
 									}
 								}
 							}
@@ -1653,6 +1685,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									else if (table != null && form.getInitialSort() != null)
 									{
 										addMarkers(project, checkSortOptions(table, form.getInitialSort(), form, flattenedSolution), form);
+									}
+									if (table != null && table.isHiddenInDeveloper())
+									{
+										ServoyMarker mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(table.getDataSource(), "form ", form.getName());
+										addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, form);
 									}
 								}
 								catch (Exception e)
@@ -2431,6 +2468,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								ServoyMarker mk = MarkerMessages.ValuelistDBTableNotAccessible.fill(vl.getName(), stn[1]);
 								problems.add(new Problem(mk.getType(), IMarker.SEVERITY_ERROR, mk.getText()));
 							}
+							else if (table.isHiddenInDeveloper())
+							{
+								ServoyMarker mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(table.getDataSource(), "valuelist ", vl.getName());
+								problems.add(new Problem(mk.getType(), IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, mk.getText(), null));
+							}
 						} // server not found is reported elsewhere
 					}
 				}
@@ -2447,6 +2489,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								problems.add(new Problem(mk.getType(), IMarker.SEVERITY_ERROR, mk.getText()));
 							}
 						}
+						else if (column.getColumnInfo().isExcluded())
+						{
+							ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID1(), table.getName());
+							problems.add(new Problem(mk.getType(), IMarker.SEVERITY_WARNING, mk.getText()));
+						}
 					}
 					if (vl.getDataProviderID2() != null && !vl.getDataProviderID2().equals(vl.getDataProviderID1()) && !"".equals(vl.getDataProviderID2()))//$NON-NLS-1$
 					{
@@ -2458,6 +2505,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID2(), table.getName());
 								problems.add(new Problem(mk.getType(), IMarker.SEVERITY_ERROR, mk.getText()));
 							}
+						}
+						else if (column.getColumnInfo().isExcluded())
+						{
+							ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID2(), table.getName());
+							problems.add(new Problem(mk.getType(), IMarker.SEVERITY_WARNING, mk.getText()));
 						}
 					}
 					if (vl.getDataProviderID3() != null && !vl.getDataProviderID3().equals(vl.getDataProviderID1()) &&
@@ -2471,6 +2523,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID3(), table.getName());
 								problems.add(new Problem(mk.getType(), IMarker.SEVERITY_ERROR, mk.getText()));
 							}
+						}
+						else if (column.getColumnInfo().isExcluded())
+						{
+							ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID3(), table.getName());
+							problems.add(new Problem(mk.getType(), IMarker.SEVERITY_WARNING, mk.getText()));
 						}
 					}
 					if (vl.getUseTableFilter() && vl.getValueListType() == ValueList.DATABASE_VALUES && vl.getDatabaseValuesType() == ValueList.TABLE_VALUES)
@@ -2810,6 +2867,20 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		Solution solution = servoyProject.getSolution();
 		if (solution.getI18nTableName() != null && solution.getI18nServerName() != null)
 		{
+			// is this table actually hidden in developer? If yes, show a warning. (developer would work even if table is not there based on resources files, but if it was
+			// hidden on purpose, it is probably meant as deprecated and we should issue a warning)
+			IServerInternal s = (IServerInternal)ApplicationServerSingleton.get().getServerManager().getServer(solution.getI18nServerName());
+			if (s != null && s.isValid() && s.getConfig().isEnabled())
+			{
+				if (s.isTableHiddenInDeveloper(solution.getI18nTableName()))
+				{
+					ServoyMarker mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(
+						DataSourceUtils.createDBTableDataSource(solution.getI18nServerName(), solution.getI18nTableName()), "i18n for solution ",
+						solution.getName());
+					addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, solution);
+				}
+			}
+
 			ServoyProject[] modules = getSolutionModules(servoyProject);
 			if (modules != null)
 			{
@@ -3178,7 +3249,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					String colName = split[split.length - 1];
 					Column c = lastTable.getColumn(colName);
-					if (c == null)
+					if (c == null || c.getColumnInfo().isExcluded())
 					{
 						ServoyMarker mk = MarkerMessages.InvalidSortOptionsColumnNotFound.fill(elementName, name, sortOptions, colName);
 						problems.add(new Problem(mk.getType(), IMarker.SEVERITY_WARNING, mk.getText()));
@@ -3236,13 +3307,21 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, element);
 							continue;
 						}
-						else if (((Table)ptable).getRowIdentColumnsCount() == 0)
+						else
 						{
-							mk = MarkerMessages.RelationPrimaryTableWithoutPK.fill(element.getName(), element.getPrimaryTableName(),
-								element.getPrimaryServerName());
-							element.setValid(false);
-							addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, element);
-							continue;
+							if (((Table)ptable).isHiddenInDeveloper())
+							{
+								mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(ptable.getDataSource(), "relation ", element.getName());
+								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, element);
+							}
+							if (((Table)ptable).getRowIdentColumnsCount() == 0)
+							{
+								mk = MarkerMessages.RelationPrimaryTableWithoutPK.fill(element.getName(), element.getPrimaryTableName(),
+									element.getPrimaryServerName());
+								element.setValid(false);
+								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, element);
+								continue;
+							}
 						}
 
 						IServerInternal fserver = (IServerInternal)sm.getServer(element.getForeignServerName());
@@ -3268,15 +3347,22 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, element);
 							continue;
 						}
-						else if (((Table)ftable).getRowIdentColumnsCount() == 0)
+						else
 						{
-							mk = MarkerMessages.RelationForeignTableWithoutPK.fill(element.getName(), element.getForeignTableName(),
-								element.getForeignServerName());
-							element.setValid(false);
-							addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, element);
-							continue;
+							if (((Table)ftable).isHiddenInDeveloper())
+							{
+								mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(ftable.getDataSource(), "relation ", element.getName());
+								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, element);
+							}
+							if (((Table)ftable).getRowIdentColumnsCount() == 0)
+							{
+								mk = MarkerMessages.RelationForeignTableWithoutPK.fill(element.getName(), element.getForeignTableName(),
+									element.getForeignServerName());
+								element.setValid(false);
+								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, element);
+								continue;
+							}
 						}
-
 						if (!element.isParentRef() && element.getItemCount() == 0)
 						{
 							mk = MarkerMessages.RelationEmpty.fill(element.getName());
@@ -3320,6 +3406,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									errorsFound = true;
 									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, element);
 								}
+								else if (((Table)ptable).getColumn(primaryDataProvider).getColumnInfo().isExcluded())
+								{
+									mk = MarkerMessages.RelationItemPrimaryDataproviderNotFound.fill(element.getName(), primaryDataProvider);
+									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, element);
+								}
 							}
 							if (foreignColumn == null || "".equals(foreignColumn))//$NON-NLS-1$ 
 							{
@@ -3335,6 +3426,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									mk = MarkerMessages.RelationItemForeignDataproviderNotFound.fill(element.getName(), foreignColumn);
 									errorsFound = true;
 									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, element);
+								}
+								else if (((Table)ftable).getColumn(foreignColumn).getColumnInfo().isExcluded())
+								{
+									mk = MarkerMessages.RelationItemForeignDataproviderNotFound.fill(element.getName(), foreignColumn);
+									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, element);
 								}
 							}
 							if (dataProvider != null && column != null && dataProvider instanceof Column && column instanceof Column &&
@@ -3434,7 +3530,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		{
 			for (Problem problem : problems)
 			{
-				addMarker(resource, problem.type, problem.message, -1, problem.severity, IMarker.PRIORITY_NORMAL, null, persist);
+				addMarker(resource, problem.type, problem.message, -1, problem.severity, problem.priority, null, persist);
 			}
 		}
 	}
@@ -3510,7 +3606,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			else if (type.equals(DUPLICATE_UUID) || type.equals(DUPLICATE_SIBLING_UUID) || type.equals(BAD_STRUCTURE_MARKER_TYPE) ||
 				type.equals(INVALID_SORT_OPTION) || type.equals(EVENT_METHOD_MARKER_TYPE) || type.equals(PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE) ||
 				type.equals(INVALID_EVENT_METHOD) || type.equals(MISSING_STYLE) || type.equals(INVALID_COMMAND_METHOD) || type.equals(INVALID_DATAPROVIDERID) ||
-				type.equals(OBSOLETE_ELEMENT))
+				type.equals(OBSOLETE_ELEMENT) || type.equals(HIDDEN_TABLE_STILL_IN_USE))
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString()); //$NON-NLS-1$
 				marker.setAttribute("SolutionName", resource.getName()); //$NON-NLS-1$
@@ -3675,18 +3771,25 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		public final int severity;
 		public final String message;
 		public final String fix;
+		public final int priority;
 
-		public Problem(String type, int severity, String message, String fix)
+		public Problem(String type, int severity, int priority, String message, String fix)
 		{
 			this.type = type;
 			this.severity = severity;
+			this.priority = priority;
 			this.message = message;
 			this.fix = fix;
 		}
 
+		public Problem(String type, int severity, String message, String fix)
+		{
+			this(type, severity, IMarker.PRIORITY_NORMAL, message, fix);
+		}
+
 		public Problem(String type, int severity, String message)
 		{
-			this(type, severity, message, null);
+			this(type, severity, IMarker.PRIORITY_NORMAL, message, null);
 		}
 	}
 

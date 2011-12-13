@@ -34,7 +34,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 public class ReloadTablesAction extends Action implements ISelectionChangedListener
 {
 
-	public IStructuredSelection selectedServers = null;
+	protected IStructuredSelection selectedServers = null;
 
 	public ReloadTablesAction()
 	{

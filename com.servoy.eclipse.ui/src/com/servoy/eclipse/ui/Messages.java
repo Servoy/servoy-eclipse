@@ -35,8 +35,12 @@ public class Messages extends NLS
 	public static String DuplicateFormAction_duplicateForm;
 	public static String ChangeResourcesProjectAction_chooseResourcesProject;
 	public static String EditVariableAction_editVariable;
+	public static String HideUnhideTablesAction_toggle;
+	public static String HideUnhideTablesAction_hide;
+	public static String HideUnhideTablesAction_unhide;
 
 	public static String SolutionExplorerTreeContentProvider_active;
+	public static String SolutionExplorerListContentProvider_hidden;
 	public static String SolutionExplorerView_cannotFindSolution;
 	public static String SolutionExplorerView_deserialize;
 	public static String SolutionExplorerView_doubleClick;

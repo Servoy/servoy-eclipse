@@ -87,8 +87,8 @@ public class SynchronizeTablesAction extends OpenWizardAction implements ISelect
 	@Override
 	public boolean isEnabled()
 	{
-		// if not active solution then it is not enabled
-		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() == null)
+		// if not active solution or resources project then it is not enabled
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() == null)
 		{
 			return false;
 		}
