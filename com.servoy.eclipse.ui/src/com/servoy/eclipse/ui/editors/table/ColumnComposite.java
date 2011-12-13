@@ -67,6 +67,7 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.editors.table.actions.CopyColumnNameAction;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
@@ -596,7 +597,7 @@ public class ColumnComposite extends Composite
 			{
 				Column id = t.createNewColumn(nameValidator, colname, IColumnTypes.INTEGER, 0);
 				id.setDatabasePK(true);
-				id.setSequenceType(ColumnInfo.SERVOY_SEQUENCE);
+				id.setSequenceType(getDefaultFirstColumnSequenceType());//andrei2-FIX: use prop here
 			}
 			catch (RepositoryException e)
 			{
@@ -610,8 +611,12 @@ public class ColumnComposite extends Composite
 		WritableList columnsList = new WritableList(new ArrayList<Column>(t.getColumns()), Column.class);
 		tableViewer.setInput(columnsList);
 //		bindingContext = new DataBindingContext();
+	}
 
-
+	private int getDefaultFirstColumnSequenceType()
+	{
+		if (new DesignerPreferences().getUseDatabaseSequence()) return ColumnInfo.DATABASE_SEQUENCE;
+		else return ColumnInfo.SERVOY_SEQUENCE;
 	}
 
 	@Override

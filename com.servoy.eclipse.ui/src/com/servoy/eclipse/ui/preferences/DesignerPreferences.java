@@ -83,6 +83,8 @@ public class DesignerPreferences
 	public static final String INCLUDE_FORM_ELEMENT_DATAPROVIDER_FALLBACK_SETTING = "includeormElementDataProviderFallback";
 	public static final String DEFAULT_TABLE_EVENT_HANDLER_NAMING_SETTING = "defaultTableEventHandlerNaming";
 	public static final String INCLUDE_TABLE_NAME_SETTING = "includeTableName";
+	public static final String USE_SERVOY_SEQUENCE_SETTING = "useServoySequence";
+	public static final String USE_DATABASE_SEQUENCE_SETTING = "useDatabaseSequence";
 
 	public static final String SNAP_TO_ALIGMNENT = "alignment";
 	public static final String SNAP_TO_GRID = "grid";
@@ -120,6 +122,8 @@ public class DesignerPreferences
 	public static final boolean INCLUDE_FORM_ELEMENT_DATAPROVIDER_FALLBACK_DEFAULT = false;
 	public static final boolean DEFAULT_TABLE_EVENT_HANDLER_NAMING_DEFAULT = true;
 	public static final boolean INCLUDE_TABLE_NAME_DEFAULT = false;
+	public static final boolean USE_SERVOY_SEQUENCE_DEFAULT = true;
+	public static final boolean USE_DATABASE_SEQUENCE_DEFAULT = false;
 
 	protected final IEclipsePreferences eclipsePreferences;
 
@@ -538,6 +542,25 @@ public class DesignerPreferences
 		setProperty(INCLUDE_TABLE_NAME_SETTING, includeTableNameInEventHandler);
 	}
 
+	public boolean getUseServoySequence()
+	{
+		return getProperty(USE_SERVOY_SEQUENCE_SETTING, USE_SERVOY_SEQUENCE_DEFAULT);
+	}
+
+	public void setUseServoySequence(boolean useServoySequence)
+	{
+		setProperty(USE_SERVOY_SEQUENCE_SETTING, useServoySequence);
+	}
+
+	public boolean getUseDatabaseSequence()
+	{
+		return getProperty(USE_DATABASE_SEQUENCE_SETTING, USE_DATABASE_SEQUENCE_DEFAULT);
+	}
+
+	public void setUseDatabaseSequence(boolean useDatabaseSequence)
+	{
+		setProperty(USE_DATABASE_SEQUENCE_SETTING, useDatabaseSequence);
+	}
 
 	public static boolean isCoolbarSetting(String key)
 	{

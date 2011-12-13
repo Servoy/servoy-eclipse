@@ -52,6 +52,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private Button showColumnsInDbOrderButton;
 	private Button showColumnsInAlphabeticOrderButton;
 	private Label enhancedSecurityLabel;
+	private Button useServoySequence;
+	private Button useDatabaseSequence;
 
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
@@ -146,6 +148,22 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showColumnsInDbOrderButton = new Button(columnsOrderGroup, SWT.RADIO);
 		showColumnsInDbOrderButton.setText("in database defined order");
 
+		//Table Creation Options
+		Group tableCreationSettings = new Group(rootContainer, SWT.NONE);
+		tableCreationSettings.setText("Table Creation Settings"); //$NON-NLS-1$
+		tableCreationSettings.setLayout(new GridLayout(1, false));
+		tableCreationSettings.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
+
+		Group defaultFirstColumnSequenceType = new Group(tableCreationSettings, SWT.NONE);
+		defaultFirstColumnSequenceType.setText("Default Primary Key Sequence Type"); //$NON-NLS-1$
+		defaultFirstColumnSequenceType.setLayout(new GridLayout(1, true));
+
+		useServoySequence = new Button(defaultFirstColumnSequenceType, SWT.RADIO);
+		useServoySequence.setText("Servoy Sequence"); //$NON-NLS-1$
+
+		useDatabaseSequence = new Button(defaultFirstColumnSequenceType, SWT.RADIO);
+		useDatabaseSequence.setText("Database Sequence"); //$NON-NLS-1$
+
 		initializeFields();
 
 		return rootContainer;
@@ -161,6 +179,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		openFirstFormDesignerButton.setSelection(prefs.getOpenFirstFormDesigner());
 		showColumnsInDbOrderButton.setSelection(prefs.getShowColumnsInDbOrder());
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
+		useServoySequence.setSelection(prefs.getUseServoySequence());
+		useDatabaseSequence.setSelection(prefs.getUseDatabaseSequence());
 	}
 
 	@Override
@@ -172,6 +192,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		openFirstFormDesignerButton.setSelection(DesignerPreferences.OPEN_FIRST_FORM_DESIGNER_DEFAULT);
 		showColumnsInDbOrderButton.setSelection(DesignerPreferences.SHOW_COLUMNS_IN_DB_ORDER_DEFAULT);
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
+		useServoySequence.setSelection(DesignerPreferences.USE_SERVOY_SEQUENCE_DEFAULT);
+		useDatabaseSequence.setSelection(DesignerPreferences.USE_DATABASE_SEQUENCE_DEFAULT);
 
 		super.performDefaults();
 	}
@@ -186,6 +208,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.CLOSE_EDITORS_ON_EXIT, closeEditorOnExitButton.getSelection());
 		prefs.setOpenFirstFormDesigner(openFirstFormDesignerButton.getSelection());
 		prefs.setShowColumnsInDbOrder(showColumnsInDbOrderButton.getSelection());
+		prefs.setUseServoySequence(useServoySequence.getSelection());
+		prefs.setUseDatabaseSequence(useDatabaseSequence.getSelection());
 
 		prefs.save();
 
