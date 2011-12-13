@@ -51,6 +51,7 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
@@ -533,7 +534,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		{
 			try
 			{
-				List<String> tableNames = ServoyModel.getServerManager().getServer(serverName).getTableAndViewNames(true);
+				List<String> tableNames = ((IServerInternal)ServoyModel.getServerManager().getServer(serverName)).getTableAndViewNames(true, true);
 				for (String tableName : tableNames)
 				{
 					contentProvider.add(new Table(serverName, tableName), itemsFilter);

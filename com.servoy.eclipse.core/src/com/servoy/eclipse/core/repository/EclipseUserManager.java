@@ -159,7 +159,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 				}
 				if (deleted && resourcesProject != null)
 				{
-					// delete dbi files as well if tables were deleted by user
+					// delete .sec files as well if tables were deleted by user
 					try
 					{
 						for (Table table : tables)
@@ -197,6 +197,12 @@ public class EclipseUserManager extends WorkspaceUserManager
 			{
 				t.addIColumnListener(columnListener);
 			}
+
+			public void hiddenTableChanged(IServer server, Table table)
+			{
+				// nothing to do here				
+			}
+
 		};
 
 		// add listeners to initial servers & tables
@@ -205,11 +211,11 @@ public class EclipseUserManager extends WorkspaceUserManager
 		{
 			IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
 			server.addTableListener(tableListener);
-			if (server.getConfig().isEnabled() && server.isValid())
+			if (server.getConfig().isEnabled() && server.isValid() && server.isTableListLoaded())
 			{
 				try
 				{
-					for (String tableName : server.getTableNames(false))
+					for (String tableName : server.getTableAndViewNames(false))
 					{
 						if (server.isTableLoaded(tableName))
 						{
@@ -350,6 +356,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 		ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(true, persistChangeListener);
 	}
 
+	@Override
 	public void dispose()
 	{
 		if (serverListener != null)
@@ -370,7 +377,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 				IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
 				server.removeTableListener(tableListener);
 
-				if (server.getConfig().isEnabled() && server.isValid())
+				if (server.getConfig().isEnabled() && server.isValid() && server.isTableListLoaded())
 				{
 					try
 					{

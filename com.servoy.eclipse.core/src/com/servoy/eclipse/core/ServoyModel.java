@@ -1148,7 +1148,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		for (int i = servers.length - 1; i >= 0; i--)
 		{
 			IServer s = serverManager.getServer(servers[i]);
-			if (s != null)
+			if (s != null && ((IServerInternal)s).isValid() && ((IServerInternal)s).getConfig().isEnabled() && ((IServerInternal)s).isTableListLoaded())
 			{
 				DataModelManager.reloadAllColumnInfo(s);
 			}

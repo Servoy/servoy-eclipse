@@ -43,6 +43,10 @@ public class SimpleUserNode
 	public SimpleUserNode[] children;
 	public SimpleUserNode parent;
 
+	public final static int TEXT_ITALIC = 1;
+	public final static int TEXT_GRAYED_OUT = 2;
+	private int appearanceFlags = 0;
+
 	protected boolean hidden = false;
 
 	public SimpleUserNode(String displayName, UserNodeType type)
@@ -107,9 +111,53 @@ public class SimpleUserNode
 		this.developerFeedback = rob;
 	}
 
+	public void setToolTipText(final String txt)
+	{
+		final IDeveloperFeedback feedback = getDeveloperFeedback();
+		if (feedback instanceof SimpleDeveloperFeedback)
+		{
+			((SimpleDeveloperFeedback)feedback).setToolTipText(txt);
+		}
+		else if (feedback != null)
+		{
+			setDeveloperFeedback(new IDeveloperFeedback()
+			{
+
+				public String getToolTipText()
+				{
+					return txt;
+				}
+
+				public String getSample()
+				{
+					return feedback.getSample();
+				}
+
+				public String getCode()
+				{
+					return feedback.getCode();
+				}
+			});
+		}
+		else
+		{
+			setDeveloperFeedback(new SimpleDeveloperFeedback(null, null, txt));
+		}
+	}
+
 	public void setDisplayName(String s)
 	{
 		name = s;
+	}
+
+	public void setAppearenceFlags(int flags)
+	{
+		appearanceFlags = flags;
+	}
+
+	public int getAppearenceFlags()
+	{
+		return appearanceFlags;
 	}
 
 	public String getCode()

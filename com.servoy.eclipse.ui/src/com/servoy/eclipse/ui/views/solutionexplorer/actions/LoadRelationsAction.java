@@ -60,9 +60,6 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 
 	private final SolutionExplorerView viewer;
 
-	/**
-	 * Creates a new "duplicate form" action.
-	 */
 	public LoadRelationsAction(SolutionExplorerView sev)
 	{
 		viewer = sev;
@@ -173,7 +170,7 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 			List<RelationData> relations = new ArrayList<RelationData>();
 			try
 			{
-				List<String> tableNames = server.getTableNames(true);
+				List<String> tableNames = server.getTableAndViewNames(true, true);
 				// plus 1 for sorting at the end
 				monitor.beginTask("Loading relations", tableNames.size() + 1); //$NON-NLS-1$
 				for (String tableName : tableNames)
@@ -274,7 +271,7 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 									String fcolumnName = (String)element[2];
 
 									Table foreignTable = server.getTable(ftableName);
-									if (foreignTable == null) continue;
+									if (foreignTable == null || foreignTable.isHiddenInDeveloper()) continue;
 
 									Column primaryColumn = table.getColumn(pcolumnName);
 									Column foreignColumn = foreignTable.getColumn(fcolumnName);

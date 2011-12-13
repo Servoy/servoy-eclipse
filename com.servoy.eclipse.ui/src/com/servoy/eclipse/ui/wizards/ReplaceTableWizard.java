@@ -51,7 +51,7 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ReplaceTableVisitor;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
@@ -245,14 +245,14 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 		 */
 		private void updateTargetTablesCombo(String serverName)
 		{
-			IServer server;
+			IServerInternal server;
 			String[] allTables = null;
 			try
 			{
-				server = repository.getServer(serverName);
+				server = (IServerInternal)repository.getServer(serverName);
 				if (server != null)
 				{
-					List<String> tableNames = server.getTableAndViewNames(true);
+					List<String> tableNames = server.getTableAndViewNames(true, true);
 					allTables = new String[tableNames.size()];
 
 					int counter = 0;

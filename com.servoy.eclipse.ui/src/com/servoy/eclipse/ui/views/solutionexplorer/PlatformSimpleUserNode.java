@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import org.eclipse.core.internal.runtime.AdapterManager;
@@ -22,7 +22,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IActionFilter;
 
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.eclipse.ui.node.IDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -55,40 +54,6 @@ public class PlatformSimpleUserNode extends SimpleUserNode implements IAdaptable
 	public PlatformSimpleUserNode(String displayName, UserNodeType type, String codeFragment, String sampleCode, String toolTip, Object realObject, Object icon)
 	{
 		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, sampleCode, toolTip), realObject, icon);
-	}
-
-	public void setToolTipText(final String txt)
-	{
-		final IDeveloperFeedback feedback = getDeveloperFeedback();
-		if (feedback instanceof SimpleDeveloperFeedback)
-		{
-			((SimpleDeveloperFeedback)feedback).setToolTipText(txt);
-		}
-		else if (feedback != null)
-		{
-			setDeveloperFeedback(new IDeveloperFeedback()
-			{
-
-				public String getToolTipText()
-				{
-					return txt;
-				}
-
-				public String getSample()
-				{
-					return feedback.getSample();
-				}
-
-				public String getCode()
-				{
-					return feedback.getCode();
-				}
-			});
-		}
-		else
-		{
-			setDeveloperFeedback(new SimpleDeveloperFeedback(null, null, txt));
-		}
 	}
 
 	/**

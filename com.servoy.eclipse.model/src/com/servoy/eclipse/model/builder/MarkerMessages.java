@@ -422,6 +422,9 @@ public class MarkerMessages
 	public static ServoyMarker FormDataproviderOnElementNotFound = new ServoyMarker(
 		"Element \"{0}\" in form \"{1}\" has dataprovider \"{2}\" that does not exist.", ServoyBuilder.INVALID_DATAPROVIDERID); //$NON-NLS-1$
 
+	public static ServoyMarker TableMarkedAsHiddenButUsedIn = new ServoyMarker(
+		"Table \"{0}\" is marked as hidden in developer, but it is still used in {1}\"{2}\".", ServoyBuilder.HIDDEN_TABLE_STILL_IN_USE); //$NON-NLS-1$
+
 	public static ServoyMarker ColumnUUIDFlagNotSet = new ServoyMarker(
 		"Table \"{0}\" has column \"{1}\" which is an UUID generator but does not have the UUID flag set.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ColumnIncompatibleTypeForSequence = new ServoyMarker(

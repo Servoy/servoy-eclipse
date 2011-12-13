@@ -83,11 +83,10 @@ import com.servoy.j2db.util.xmlxport.TableDef;
  */
 public class DataModelManager implements IColumnInfoManager
 {
+
 	public static final String COLUMN_INFO_FILE_EXTENSION = "dbi";
 	public static final String COLUMN_INFO_FILE_EXTENSION_WITH_DOT = '.' + COLUMN_INFO_FILE_EXTENSION;
 	public static final String TEMP_UPPERCASE_PREFIX = "TEMP_"; // tables that are not considered as being 'real'
-	private static final String PROP_TABLE_TYPE = "tableType";
-	private static final String PROP_COLUMNS = "columns";
 
 	private final IProject resourceProject;
 	private final IServerManagerInternal sm;
@@ -118,6 +117,12 @@ public class DataModelManager implements IColumnInfoManager
 			public void tablesRemoved(IServer server, Table tables[], boolean deleted)
 			{
 				// not interested in this
+			}
+
+			public void hiddenTableChanged(IServer server, Table table)
+			{
+				// TODO Auto-generated method stub
+
 			}
 
 			public void serverStateChanged(IServer server, int oldState, int newState)
@@ -161,6 +166,7 @@ public class DataModelManager implements IColumnInfoManager
 					}
 				}
 			}
+
 		};
 		// add listeners to initial server list
 		String[] array = sm.getServerNames(false, false, true, true);
@@ -210,7 +216,7 @@ public class DataModelManager implements IColumnInfoManager
 				IServerInternal s = (IServerInternal)sm.getServer(t.getServerName());
 				if (s != null && s.getConfig().isEnabled() && s.isValid() && json_table != null)
 				{
-					existingColumnInfo = deserializeTable(t, json_table);
+					existingColumnInfo = deserializeTable(s, t, json_table);
 				}
 			}
 			catch (JSONException e)
@@ -258,6 +264,67 @@ public class DataModelManager implements IColumnInfoManager
 				createNewColumnInfo(c, existingColumnInfo == 0 && t.getPKColumnTypeRowIdentCount() == 1);//was missing - create automatic sequences if missing
 			}
 		}
+	}
+
+	public boolean isHiddenInDeveloper(IServerInternal server, String tableName)
+	{
+		if (server == null || tableName == null || !server.getConfig().isEnabled() || !server.isValid()) return false; // this should never happen
+		IFile file = getDBIFile(server.getName(), tableName);
+		if (file.exists())
+		{
+			InputStream is = null;
+			try
+			{
+				is = file.getContents(true);
+				String json_table = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+				if (json_table != null)
+				{
+					TableDef tableInfo = deserializeTableInfo(json_table);
+					if (tableName.equals(tableInfo.name))
+					{
+						return tableInfo.hiddenInDeveloper;
+					}
+				}
+			}
+			catch (JSONException e)
+			{
+				// maybe the .dbi file content is corrupt... try to init table/load all column info (if not done already) so as to add an error marker
+				ServoyLog.logError(e);
+				try
+				{
+					server.getTable(tableName);
+				}
+				catch (RepositoryException ee)
+				{
+					// this is probably the same exception as above, but log it just the same to make sure
+					ServoyLog.logWarning("Getting table failed", ee);
+				}
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
+				// maybe the .dbi file content is corrupt... try to init table/load all column info (if not done already) so as to add an error marker
+				try
+				{
+					server.getTable(tableName);
+				}
+				catch (RepositoryException ee)
+				{
+					// this is probably the same exception as above, but log it just the same to make sure
+					ServoyLog.logWarning("Getting table failed", ee);
+				}
+			}
+			finally
+			{
+				if (is != null)
+				{
+					Utils.closeInputStream(is);
+					is = null;
+				}
+			}
+		}
+
+		return false; // file does not exist, is empty or something unexpected happened
 	}
 
 	public void createNewColumnInfo(Column c, boolean createMissingServoySequence) throws RepositoryException
@@ -480,7 +547,7 @@ public class DataModelManager implements IColumnInfoManager
 		return file.equals(writingMarkerFreeDBIFile);
 	}
 
-	private int deserializeTable(Table t, String json_table) throws RepositoryException, JSONException
+	private int deserializeTable(IServerInternal s, Table t, String json_table) throws RepositoryException, JSONException
 	{
 		int existingColumnInfo = 0;
 		TableDef tableInfo = deserializeTableInfo(json_table);
@@ -488,6 +555,8 @@ public class DataModelManager implements IColumnInfoManager
 		{
 			throw new RepositoryException("Table name does not match dbi file name for " + t.getName());
 		}
+
+		s.setTableHiddenInDeveloper(t.getName(), tableInfo.hiddenInDeveloper);
 		if (tableInfo.columnInfoDefSet.size() > 0)
 		{
 			for (int j = 0; j < tableInfo.columnInfoDefSet.size(); j++)
@@ -566,42 +635,46 @@ public class DataModelManager implements IColumnInfoManager
 		ServoyJSONObject dbiContents = new ServoyJSONObject(stringDBIContent, true);
 		TableDef tableInfo = new TableDef();
 		tableInfo.name = dbiContents.getString(SolutionSerializer.PROP_NAME);
-		tableInfo.tableType = dbiContents.getInt(PROP_TABLE_TYPE);
+		tableInfo.tableType = dbiContents.getInt(TableDef.PROP_TABLE_TYPE);
+		tableInfo.hiddenInDeveloper = dbiContents.has(TableDef.HIDDEN_IN_DEVELOPER) ? dbiContents.getBoolean(TableDef.HIDDEN_IN_DEVELOPER) : false;
 
-		if (dbiContents.has(PROP_COLUMNS))
+		if (dbiContents.has(TableDef.PROP_COLUMNS))
 		{
-			JSONArray columns = dbiContents.getJSONArray(PROP_COLUMNS);
+			JSONArray columns = dbiContents.getJSONArray(TableDef.PROP_COLUMNS);
 			for (int i = 0; i < columns.length(); i++)
 			{
 				JSONObject cobj = columns.getJSONObject(i);
 				if (cobj == null) continue;
 				ColumnInfoDef cid = new ColumnInfoDef();
 
-				cid.creationOrderIndex = cobj.getInt("creationOrderIndex");
+				cid.creationOrderIndex = cobj.getInt(ColumnInfoDef.CREATION_ORDER_INDEX);
 				cid.name = cobj.getString(SolutionSerializer.PROP_NAME);
-				cid.datatype = cobj.getInt("dataType");
-				cid.length = cobj.has("length") ? cobj.optInt("length") : 0;
-				cid.allowNull = cobj.getBoolean("allowNull");
-				cid.autoEnterType = cobj.has("autoEnterType") ? cobj.optInt("autoEnterType") : ColumnInfo.NO_AUTO_ENTER;
-				cid.autoEnterSubType = cobj.has("autoEnterSubType") ? cobj.optInt("autoEnterSubType") : ColumnInfo.NO_SEQUENCE_SELECTED;
-				cid.sequenceStepSize = cobj.has("sequenceStepSize") ? cobj.optInt("sequenceStepSize") : 1;
-				cid.preSequenceChars = cobj.has("preSequenceChars") ? cobj.optString("preSequenceChars") : null;
-				cid.postSequenceChars = cobj.has("postSequenceChars") ? cobj.optString("postSequenceChars") : null;
-				cid.defaultValue = cobj.has("defaultValue") ? cobj.optString("defaultValue") : null;
-				cid.lookupValue = cobj.has("lookupValue") ? cobj.optString("lookupValue") : null;
-				cid.databaseSequenceName = cobj.has("databaseSequenceName") ? cobj.optString("databaseSequenceName") : null;
-				cid.titleText = cobj.has("titleText") ? cobj.optString("titleText") : null;
-				cid.description = cobj.has("description") ? cobj.optString("description") : null;
-				cid.foreignType = cobj.has("foreignType") ? cobj.optString("foreignType") : null;
-				cid.converterName = cobj.has("converterName") ? cobj.optString("converterName") : null;
-				cid.converterProperties = cobj.has("converterProperties") ? cobj.optString("converterProperties") : null;
-				cid.validatorProperties = cobj.has("validatorProperties") ? cobj.optString("validatorProperties") : null;
-				cid.validatorName = cobj.has("validatorName") ? cobj.optString("validatorName") : null;
-				cid.defaultFormat = cobj.has("defaultFormat") ? cobj.optString("defaultFormat") : null;
-				cid.elementTemplateProperties = cobj.has("elementTemplateProperties") ? cobj.optString("elementTemplateProperties") : null;
-				cid.flags = cobj.has("flags") ? cobj.optInt("flags") : 0;
-				cid.dataProviderID = cobj.has("dataProviderID") ? Utils.toEnglishLocaleLowerCase(cobj.optString("dataProviderID")) : null;
-				cid.containsMetaData = cobj.has("containsMetaData") ? Integer.valueOf(cobj.optInt("containsMetaData")) : null;
+				cid.datatype = cobj.getInt(ColumnInfoDef.DATA_TYPE);
+				cid.length = cobj.has(ColumnInfoDef.LENGTH) ? cobj.optInt(ColumnInfoDef.LENGTH) : 0;
+				cid.allowNull = cobj.getBoolean(ColumnInfoDef.ALLOW_NULL);
+				cid.autoEnterType = cobj.has(ColumnInfoDef.AUTO_ENTER_TYPE) ? cobj.optInt(ColumnInfoDef.AUTO_ENTER_TYPE) : ColumnInfo.NO_AUTO_ENTER;
+				cid.autoEnterSubType = cobj.has(ColumnInfoDef.AUTO_ENTER_SUB_TYPE) ? cobj.optInt(ColumnInfoDef.AUTO_ENTER_SUB_TYPE)
+					: ColumnInfo.NO_SEQUENCE_SELECTED;
+				cid.sequenceStepSize = cobj.has(ColumnInfoDef.SEQUENCE_STEP_SIZE) ? cobj.optInt(ColumnInfoDef.SEQUENCE_STEP_SIZE) : 1;
+				cid.preSequenceChars = cobj.has(ColumnInfoDef.PRE_SEQUENCE_CHARS) ? cobj.optString(ColumnInfoDef.PRE_SEQUENCE_CHARS) : null;
+				cid.postSequenceChars = cobj.has(ColumnInfoDef.POST_SEQUENCE_CHARS) ? cobj.optString(ColumnInfoDef.POST_SEQUENCE_CHARS) : null;
+				cid.defaultValue = cobj.has(ColumnInfoDef.DEFAULT_VALUE) ? cobj.optString(ColumnInfoDef.DEFAULT_VALUE) : null;
+				cid.lookupValue = cobj.has(ColumnInfoDef.LOOKUP_VALUE) ? cobj.optString(ColumnInfoDef.LOOKUP_VALUE) : null;
+				cid.databaseSequenceName = cobj.has(ColumnInfoDef.DATABASE_SEQUENCE_NAME) ? cobj.optString(ColumnInfoDef.DATABASE_SEQUENCE_NAME) : null;
+				cid.titleText = cobj.has(ColumnInfoDef.TITLE_TEXT) ? cobj.optString(ColumnInfoDef.TITLE_TEXT) : null;
+				cid.description = cobj.has(ColumnInfoDef.DESCRIPTION) ? cobj.optString(ColumnInfoDef.DESCRIPTION) : null;
+				cid.foreignType = cobj.has(ColumnInfoDef.FOREIGN_TYPE) ? cobj.optString(ColumnInfoDef.FOREIGN_TYPE) : null;
+				cid.converterName = cobj.has(ColumnInfoDef.CONVERTER_NAME) ? cobj.optString(ColumnInfoDef.CONVERTER_NAME) : null;
+				cid.converterProperties = cobj.has(ColumnInfoDef.CONVERTER_PROPERTIES) ? cobj.optString(ColumnInfoDef.CONVERTER_PROPERTIES) : null;
+				cid.validatorProperties = cobj.has(ColumnInfoDef.VALIDATOR_PROPERTIES) ? cobj.optString(ColumnInfoDef.VALIDATOR_PROPERTIES) : null;
+				cid.validatorName = cobj.has(ColumnInfoDef.VALIDATOR_NAME) ? cobj.optString(ColumnInfoDef.VALIDATOR_NAME) : null;
+				cid.defaultFormat = cobj.has(ColumnInfoDef.DEFAULT_FORMAT) ? cobj.optString(ColumnInfoDef.DEFAULT_FORMAT) : null;
+				cid.elementTemplateProperties = cobj.has(ColumnInfoDef.ELEMENT_TEMPLATE_PROPERTIES) ? cobj.optString(ColumnInfoDef.ELEMENT_TEMPLATE_PROPERTIES)
+					: null;
+				cid.flags = cobj.has(ColumnInfoDef.FLAGS) ? cobj.optInt(ColumnInfoDef.FLAGS) : 0;
+				cid.dataProviderID = cobj.has(ColumnInfoDef.DATA_PROVIDER_ID) ? Utils.toEnglishLocaleLowerCase(cobj.optString(ColumnInfoDef.DATA_PROVIDER_ID))
+					: null;
+				cid.containsMetaData = cobj.has(ColumnInfoDef.CONTAINS_META_DATA) ? Integer.valueOf(cobj.optInt(ColumnInfoDef.CONTAINS_META_DATA)) : null;
 				if (!tableInfo.columnInfoDefSet.contains(cid))
 				{
 					tableInfo.columnInfoDefSet.add(cid);
@@ -615,6 +688,7 @@ public class DataModelManager implements IColumnInfoManager
 	{
 		TableDef tableInfo = new TableDef();
 		tableInfo.name = t.getName();
+		tableInfo.hiddenInDeveloper = t.isHiddenInDeveloper();
 
 		List<String> colNames = new ArrayList<String>();
 		Collection<Column> col = t.getColumns();
@@ -693,7 +767,8 @@ public class DataModelManager implements IColumnInfoManager
 	{
 		ServoyJSONObject tobj = new ServoyJSONObject();
 		tobj.put(SolutionSerializer.PROP_NAME, tableInfo.name);
-		tobj.put(PROP_TABLE_TYPE, tableInfo.tableType);
+		tobj.put(TableDef.PROP_TABLE_TYPE, tableInfo.tableType);
+		if (tableInfo.hiddenInDeveloper) tobj.put(TableDef.HIDDEN_IN_DEVELOPER, true);
 
 		JSONArray carray = new ServoyJSONArray();
 		Iterator<ColumnInfoDef> it = tableInfo.columnInfoDefSet.iterator();
@@ -702,38 +777,38 @@ public class DataModelManager implements IColumnInfoManager
 			ColumnInfoDef cid = it.next();
 			ServoyJSONObject obj = new ServoyJSONObject();
 			obj.put(SolutionSerializer.PROP_NAME, cid.name);
-			obj.put("dataType", cid.datatype);
-			if (cid.length != 0) obj.put("length", cid.length);
-			obj.put("allowNull", cid.allowNull);
-			if (cid.flags != 0) obj.put("flags", cid.flags);
+			obj.put(ColumnInfoDef.DATA_TYPE, cid.datatype);
+			if (cid.length != 0) obj.put(ColumnInfoDef.LENGTH, cid.length);
+			obj.put(ColumnInfoDef.ALLOW_NULL, cid.allowNull);
+			if (cid.flags != 0) obj.put(ColumnInfoDef.FLAGS, cid.flags);
 
-			obj.put("creationOrderIndex", cid.creationOrderIndex);
+			obj.put(ColumnInfoDef.CREATION_ORDER_INDEX, cid.creationOrderIndex);
 
 			if (cid.autoEnterType != ColumnInfo.NO_AUTO_ENTER)
 			{
-				obj.put("autoEnterType", cid.autoEnterType);
-				if (cid.autoEnterSubType != ColumnInfo.NO_SEQUENCE_SELECTED) obj.put("autoEnterSubType", cid.autoEnterSubType);
+				obj.put(ColumnInfoDef.AUTO_ENTER_TYPE, cid.autoEnterType);
+				if (cid.autoEnterSubType != ColumnInfo.NO_SEQUENCE_SELECTED) obj.put(ColumnInfoDef.AUTO_ENTER_SUB_TYPE, cid.autoEnterSubType);
 			}
-			if (cid.sequenceStepSize > 1) obj.put("sequenceStepSize", cid.sequenceStepSize);
-			obj.putOpt("preSequenceChars", cid.preSequenceChars);
-			obj.putOpt("postSequenceChars", cid.postSequenceChars);
-			obj.putOpt("defaultValue", cid.defaultValue);
-			obj.putOpt("lookupValue", cid.lookupValue);
-			obj.putOpt("databaseSequenceName", cid.databaseSequenceName);
-			obj.putOpt("titleText", cid.titleText);
-			obj.putOpt("description", cid.description);
-			obj.putOpt("foreignType", cid.foreignType);
-			obj.putOpt("converterName", cid.converterName);
-			obj.putOpt("converterProperties", cid.converterProperties);
-			obj.putOpt("validatorProperties", cid.validatorProperties);
-			obj.putOpt("validatorName", cid.validatorName);
-			obj.putOpt("defaultFormat", cid.defaultFormat);
-			obj.putOpt("dataProviderID", cid.dataProviderID);
-			obj.putOpt("containsMetaData", cid.containsMetaData);
-			obj.putOpt("elementTemplateProperties", cid.elementTemplateProperties);
+			if (cid.sequenceStepSize > 1) obj.put(ColumnInfoDef.SEQUENCE_STEP_SIZE, cid.sequenceStepSize);
+			obj.putOpt(ColumnInfoDef.PRE_SEQUENCE_CHARS, cid.preSequenceChars);
+			obj.putOpt(ColumnInfoDef.POST_SEQUENCE_CHARS, cid.postSequenceChars);
+			obj.putOpt(ColumnInfoDef.DEFAULT_VALUE, cid.defaultValue);
+			obj.putOpt(ColumnInfoDef.LOOKUP_VALUE, cid.lookupValue);
+			obj.putOpt(ColumnInfoDef.DATABASE_SEQUENCE_NAME, cid.databaseSequenceName);
+			obj.putOpt(ColumnInfoDef.TITLE_TEXT, cid.titleText);
+			obj.putOpt(ColumnInfoDef.DESCRIPTION, cid.description);
+			obj.putOpt(ColumnInfoDef.FOREIGN_TYPE, cid.foreignType);
+			obj.putOpt(ColumnInfoDef.CONVERTER_NAME, cid.converterName);
+			obj.putOpt(ColumnInfoDef.CONVERTER_PROPERTIES, cid.converterProperties);
+			obj.putOpt(ColumnInfoDef.VALIDATOR_PROPERTIES, cid.validatorProperties);
+			obj.putOpt(ColumnInfoDef.VALIDATOR_NAME, cid.validatorName);
+			obj.putOpt(ColumnInfoDef.DEFAULT_FORMAT, cid.defaultFormat);
+			obj.putOpt(ColumnInfoDef.ELEMENT_TEMPLATE_PROPERTIES, cid.elementTemplateProperties);
+			obj.putOpt(ColumnInfoDef.DATA_PROVIDER_ID, cid.dataProviderID);
+			obj.putOpt(ColumnInfoDef.CONTAINS_META_DATA, cid.containsMetaData);
 			carray.put(obj);
 		}
-		tobj.put(PROP_COLUMNS, carray);
+		tobj.put(TableDef.PROP_COLUMNS, carray);
 		return tobj.toString(true);
 	}
 

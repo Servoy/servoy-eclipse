@@ -223,7 +223,7 @@ public class I18NExternalizeDialog extends Dialog
 				for (String serverName : serverNames)
 				{
 					server = sm.getServer(serverName);
-					List<String> tableAndViews = server.getTableAndViewNames(true);
+					List<String> tableAndViews = ((IServerInternal)server).getTableAndViewNames(true, true);
 					for (String tableName : tableAndViews)
 					{
 						ITable table = server.getTable(tableName);

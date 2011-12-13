@@ -49,6 +49,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
+import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.IDeveloperFeedback;
 import com.servoy.eclipse.ui.node.IImageLookup;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
@@ -746,8 +747,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			for (IPersist persist : relations)
 			{
 				Relation relation = (Relation)persist;
-				SimpleUserNode un = new SimpleUserNode(getDisplayName(relation, solution), UserNodeType.RELATION, new SimpleDeveloperFeedback(
-					relation.getName(), null, null), (Object)relation, relation.isGlobal() ? uiActivator.loadImageFromBundle("global_relation.gif")
+				SimpleUserNode un = new UserNode(getDisplayName(relation, solution), UserNodeType.RELATION, new SimpleDeveloperFeedback(relation.getName(),
+					null, null), relation, relation.isGlobal() ? uiActivator.loadImageFromBundle("global_relation.gif")
 					: uiActivator.loadImageFromBundle("relation.gif"));
 				rels.add(un);
 			}
@@ -816,6 +817,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			boolean isActive = activeI18NFileNames.indexOf(i18nFileItemName) != -1;
 			UserNode node = new UserNode(i18nFileItemName, UserNodeType.I18N_FILE_ITEM, null, isActive ? null : "Not referenced");
 			node.setEnabled(isActive);
+			node.setAppearenceFlags(isActive ? 0 : (SimpleUserNode.TEXT_GRAYED_OUT | SimpleUserNode.TEXT_ITALIC));
 			dlm.add(node);
 		}
 
@@ -848,11 +850,32 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				List<String> viewNames = s.getViewNames(true);
 				if (viewNames != null && viewNames.size() > 0)
 				{
+					List<String> hiddenViews = null;
 					Iterator<String> it = viewNames.iterator();
 					while (it.hasNext())
 					{
 						String name = it.next();
-						dlm.add(new UserNode(name, UserNodeType.VIEW, new TableWrapper(s.getName(), name), uiActivator.loadImageFromBundle("portal.gif")));
+						if (s.isTableHiddenInDeveloper(name))
+						{
+							if (hiddenViews == null) hiddenViews = new ArrayList<String>();
+							hiddenViews.add(name);
+						}
+						else
+						{
+							dlm.add(new UserNode(name, UserNodeType.VIEW, new TableWrapper(s.getName(), name), uiActivator.loadImageFromBundle("portal.gif")));
+						}
+					}
+					if (hiddenViews != null)
+					{
+						// tables and views that are marked by user as "hiddenInDeveloper" will only be shown in this sol. ex. list and grayed-out + at the bottom of this list
+						for (String name : hiddenViews)
+						{
+							UserNode node = new UserNode(name, UserNodeType.VIEW, new TableWrapper(s.getName(), name), uiActivator.loadImageFromBundle(
+								"portal.gif", true));
+							node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
+							node.setToolTipText(Messages.SolutionExplorerListContentProvider_hidden);
+							dlm.add(node);
+						}
 					}
 				}
 			}
@@ -872,11 +895,31 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			Iterator<String> tableNames;
 			tableNames = s.getTableNames(true).iterator();
 
+			List<String> hiddenTables = null;
 			while (tableNames.hasNext())
 			{
 				String tableName = tableNames.next();
-
-				dlm.add(new UserNode(tableName, UserNodeType.TABLE, new TableWrapper(s.getName(), tableName), uiActivator.loadImageFromBundle("portal.gif")));
+				if (s.isTableHiddenInDeveloper(tableName))
+				{
+					if (hiddenTables == null) hiddenTables = new ArrayList<String>();
+					hiddenTables.add(tableName);
+				}
+				else
+				{
+					dlm.add(new UserNode(tableName, UserNodeType.TABLE, new TableWrapper(s.getName(), tableName), uiActivator.loadImageFromBundle("portal.gif")));
+				}
+			}
+			if (hiddenTables != null)
+			{
+				// tables and views that are marked by user as "hiddenInDeveloper" will only be shown in this sol. ex. list and grayed-out + at the bottom of this list
+				for (String name : hiddenTables)
+				{
+					UserNode node = new UserNode(name, UserNodeType.TABLE, new TableWrapper(s.getName(), name), uiActivator.loadImageFromBundle("portal.gif",
+						true));
+					node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
+					node.setToolTipText(Messages.SolutionExplorerListContentProvider_hidden);
+					dlm.add(node);
+				}
 			}
 		}
 		return dlm.toArray();
@@ -1448,7 +1491,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		Object[] ids = scriptable.getIds();
 		Arrays.sort(ids);
-		UserNode[] nodes = new UserNode[ids.length];
+		SimpleUserNode[] nodes = new SimpleUserNode[ids.length];
 
 		for (int i = 0; i < ids.length; i++)
 		{
