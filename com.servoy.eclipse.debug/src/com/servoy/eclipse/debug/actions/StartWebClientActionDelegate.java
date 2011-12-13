@@ -23,6 +23,9 @@ import java.util.Iterator;
 import javax.swing.SwingUtilities;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.jface.action.IAction;
@@ -36,7 +39,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
@@ -62,17 +64,6 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
  */
 public class StartWebClientActionDelegate extends StartDebugAction implements IRunnableWithProgress, IWorkbenchWindowPulldownDelegate
 {
-	private IWorkbenchWindow window;
-
-	/**
-	 * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#init(org.eclipse.ui.IWorkbenchWindow)
-	 */
-	@Override
-	public void init(IWorkbenchWindow window)
-	{
-		this.window = window;
-	}
-
 	/**
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
 	 */
@@ -82,18 +73,28 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 		DLTKDebugUIPlugin.getDefault();
 		DebugPlugin.getDefault();
 
-		try
+		Job job = new Job("Web client start") //$NON-NLS-1$
 		{
-			window.getWorkbench().getProgressService().run(true, false, this);
-		}
-		catch (InvocationTargetException e)
-		{
-			ServoyLog.logError(e);
-		}
-		catch (InterruptedException e)
-		{
-			ServoyLog.logError(e);
-		}
+			@Override
+			protected IStatus run(IProgressMonitor monitor)
+			{
+				try
+				{
+					StartWebClientActionDelegate.this.run(monitor);
+				}
+				catch (InvocationTargetException itex)
+				{
+					ServoyLog.logError(itex);
+				}
+				catch (InterruptedException intex)
+				{
+					ServoyLog.logError(intex);
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		job.setUser(true);
+		job.schedule();
 	}
 
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
@@ -230,7 +231,28 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 							}
 							if (webBrowser == null) webBrowser = support.getExternalBrowser(); //default to external system browser
 
-							window.getWorkbench().getProgressService().run(true, false, StartWebClientActionDelegate.this);
+							Job job = new Job("Web client start") //$NON-NLS-1$
+							{
+								@Override
+								protected IStatus run(IProgressMonitor monitor)
+								{
+									try
+									{
+										StartWebClientActionDelegate.this.run(monitor);
+									}
+									catch (InvocationTargetException itex)
+									{
+										ServoyLog.logError(itex);
+									}
+									catch (InterruptedException intex)
+									{
+										ServoyLog.logError(intex);
+									}
+									return Status.OK_STATUS;
+								}
+							};
+							job.setUser(true);
+							job.schedule();
 						}
 						catch (Exception ex)
 						{

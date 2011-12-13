@@ -27,6 +27,9 @@ import javax.swing.JRootPane;
 import javax.swing.KeyStroke;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.jface.action.IAction;
@@ -34,13 +37,12 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IWorkbenchWindow;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.Activator;
-import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
 import com.servoy.eclipse.debug.Activator.ShortcutDefinition;
+import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IDebugJ2DBClient;
@@ -73,15 +75,7 @@ public class StartSmartClientActionDelegate extends StartDebugAction implements 
 		}
 	};
 
-	private IWorkbenchWindow window;
-
 	private List<ShortcutDefinition> shortCuts;
-
-	@Override
-	public void init(IWorkbenchWindow w)
-	{
-		this.window = w;
-	}
 
 	/**
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
@@ -91,21 +85,29 @@ public class StartSmartClientActionDelegate extends StartDebugAction implements 
 		//make sure the plugins are loaded
 		DLTKDebugUIPlugin.getDefault();
 		DebugPlugin.getDefault();
-		try
+
+		Job job = new Job("Smart client start") //$NON-NLS-1$
 		{
-			// run in the progress service thread in stead of the main swt thread.
-			// needed to make sure the main swt thread is not busy when the debug smart client
-			// is created, see ApplicationServer.DebugClientHandler.
-			window.getWorkbench().getProgressService().run(true, false, this);
-		}
-		catch (InvocationTargetException e)
-		{
-			ServoyLog.logError(e);
-		}
-		catch (InterruptedException e)
-		{
-			ServoyLog.logError(e);
-		}
+			@Override
+			protected IStatus run(IProgressMonitor monitor)
+			{
+				try
+				{
+					StartSmartClientActionDelegate.this.run(monitor);
+				}
+				catch (InvocationTargetException e)
+				{
+					ServoyLog.logError(e);
+				}
+				catch (InterruptedException e)
+				{
+					ServoyLog.logError(e);
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		job.setUser(true);
+		job.schedule();
 	}
 
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
