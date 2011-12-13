@@ -518,7 +518,12 @@ public class SuggestForeignTypesWizard extends Wizard
 			{
 				try
 				{
-					List<String> tableNames = ((IServerInternal)server).getTableAndViewNames(true, true);
+					List<String> tableNames = ((IServerInternal)server).getTableNames(true);
+					Iterator<String> it = tableNames.iterator();
+					while (it.hasNext())
+					{
+						if (((IServerInternal)server).isTableHiddenInDeveloper(it.next())) it.remove();
+					}
 					allTableNames = new String[tableNames.size()];
 					allTableNames = tableNames.toArray(allTableNames);
 					Arrays.sort(allTableNames);

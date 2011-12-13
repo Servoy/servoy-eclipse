@@ -170,7 +170,7 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 			List<RelationData> relations = new ArrayList<RelationData>();
 			try
 			{
-				List<String> tableNames = server.getTableAndViewNames(true, true);
+				List<String> tableNames = server.getTableNames(true);
 				// plus 1 for sorting at the end
 				monitor.beginTask("Loading relations", tableNames.size() + 1); //$NON-NLS-1$
 				for (String tableName : tableNames)
@@ -180,136 +180,139 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 						return null;
 					}
 					Table table = server.getTable(tableName);
-					Connection connection = null;
-					ResultSet resultSet = null;
-					try
+					if (!table.isHiddenInDeveloper())
 					{
-						connection = server.getConnection();
-						DatabaseMetaData dbmd = connection.getMetaData();
-						Map<String, List<List<Object[]>>> relationInfo = new HashMap<String, List<List<Object[]>>>();
-
-						resultSet = dbmd.getExportedKeys(server.getConfig().getCatalog(), server.getConfig().getSchema(), table.getSQLName());
-						while (resultSet.next())
+						Connection connection = null;
+						ResultSet resultSet = null;
+						try
 						{
-							String pcolumnName = resultSet.getString("PKCOLUMN_NAME"); //$NON-NLS-1$
-							String ftableName = resultSet.getString("FKTABLE_NAME"); //$NON-NLS-1$
-							String fcolumnName = resultSet.getString("FKCOLUMN_NAME"); //$NON-NLS-1$
-							String fkname = resultSet.getString("FK_NAME"); //$NON-NLS-1$
+							connection = server.getConnection();
+							DatabaseMetaData dbmd = connection.getMetaData();
+							Map<String, List<List<Object[]>>> relationInfo = new HashMap<String, List<List<Object[]>>>();
 
-							String relname = fkname;
-							if (relname == null) relname = table.getSQLName() + "_to_" + ftableName; //$NON-NLS-1$
-
-							int keySeq = resultSet.getInt("KEY_SEQ");
-							Debug.trace("Found (export) rel: name: " + relname + "  keyseq = " + keySeq + ' ' + table.getSQLName() + ' ' + pcolumnName +
-								" -> " + ftableName + ' ' + fcolumnName);
-
-							List<List<Object[]>> rel_items_list = relationInfo.get(relname);
-							if (rel_items_list == null)
+							resultSet = dbmd.getExportedKeys(server.getConfig().getCatalog(), server.getConfig().getSchema(), table.getSQLName());
+							while (resultSet.next())
 							{
-								rel_items_list = new ArrayList<List<Object[]>>();
-								relationInfo.put(relname, rel_items_list);
-								rel_items_list.add(new ArrayList<Object[]>());
-							}
-							// rel_items_list is a list of items-lists, we are adding items to the last of this list
-							rel_items_list.get(rel_items_list.size() - 1).add(new Object[] { pcolumnName, ftableName, fcolumnName });
-						}
-						resultSet = Utils.closeResultSet(resultSet);
+								String pcolumnName = resultSet.getString("PKCOLUMN_NAME"); //$NON-NLS-1$
+								String ftableName = resultSet.getString("FKTABLE_NAME"); //$NON-NLS-1$
+								String fcolumnName = resultSet.getString("FKCOLUMN_NAME"); //$NON-NLS-1$
+								String fkname = resultSet.getString("FK_NAME"); //$NON-NLS-1$
 
-						resultSet = dbmd.getImportedKeys(server.getConfig().getCatalog(), server.getConfig().getSchema(), table.getSQLName());
-						int lastKeySeq = Integer.MAX_VALUE;
-						while (resultSet.next())
-						{
-							String pcolumnName = resultSet.getString("PKCOLUMN_NAME"); //$NON-NLS-1$
-							String ptableName = resultSet.getString("PKTABLE_NAME"); //$NON-NLS-1$
-							String fcolumnName = resultSet.getString("FKCOLUMN_NAME"); //$NON-NLS-1$
+								String relname = fkname;
+								if (relname == null) relname = table.getSQLName() + "_to_" + ftableName; //$NON-NLS-1$
 
-							String relname = table.getSQLName() + "_to_" + ptableName; //$NON-NLS-1$
+								int keySeq = resultSet.getInt("KEY_SEQ");
+								Debug.trace("Found (export) rel: name: " + relname + "  keyseq = " + keySeq + ' ' + table.getSQLName() + ' ' + pcolumnName +
+									" -> " + ftableName + ' ' + fcolumnName);
 
-							int keySeq = resultSet.getInt("KEY_SEQ"); //$NON-NLS-1$
-							Debug.trace("Found (import) rel: name: " + relname + " keyseq = " + keySeq + ' ' + table.getSQLName() + ' ' + pcolumnName + " -> " +
-								ptableName + ' ' + fcolumnName);
-
-							List<List<Object[]>> rel_items_list = relationInfo.get(relname);
-							if (rel_items_list == null)
-							{
-								rel_items_list = new ArrayList<List<Object[]>>();
-								relationInfo.put(relname, rel_items_list);
-							}
-
-							// assume KEY_SEQ ascending ordered, do not assume 0 or 1 based (jdbc spec is not clear on this).
-							// when KEY_SEQ is not increasing, we have a separate constraint between the same tables.
-							if (rel_items_list.size() == 0 || keySeq <= lastKeySeq)
-							{
-								rel_items_list.add(new ArrayList<Object[]>());
-							}
-							lastKeySeq = keySeq;
-
-							// add the item to the last list of rel_items_list
-							rel_items_list.get(rel_items_list.size() - 1).add(new Object[] { fcolumnName, ptableName, pcolumnName });
-						}
-						resultSet = Utils.closeResultSet(resultSet);
-
-						Iterator<Map.Entry<String, List<List<Object[]>>>> it = relationInfo.entrySet().iterator();
-						while (it.hasNext())
-						{
-							Map.Entry<String, List<List<Object[]>>> entry = it.next();
-							String rname = entry.getKey();
-							List<List<Object[]>> rel_items_list = entry.getValue();
-							// we may have multiple lists of items defined for the same relation name
-							for (int l = 0; l < rel_items_list.size(); l++)
-							{
-								List<Column> primaryColumns = new ArrayList<Column>();
-								List<Column> foreignColumns = new ArrayList<Column>();
-
-								List<Object[]> rel_items = rel_items_list.get(l);
-								for (int i = 0; i < rel_items.size(); i++)
+								List<List<Object[]>> rel_items_list = relationInfo.get(relname);
+								if (rel_items_list == null)
 								{
-									Object[] element = rel_items.get(i);
+									rel_items_list = new ArrayList<List<Object[]>>();
+									relationInfo.put(relname, rel_items_list);
+									rel_items_list.add(new ArrayList<Object[]>());
+								}
+								// rel_items_list is a list of items-lists, we are adding items to the last of this list
+								rel_items_list.get(rel_items_list.size() - 1).add(new Object[] { pcolumnName, ftableName, fcolumnName });
+							}
+							resultSet = Utils.closeResultSet(resultSet);
 
-									String pcolumnName = (String)element[0];
-									String ftableName = (String)element[1];
-									String fcolumnName = (String)element[2];
+							resultSet = dbmd.getImportedKeys(server.getConfig().getCatalog(), server.getConfig().getSchema(), table.getSQLName());
+							int lastKeySeq = Integer.MAX_VALUE;
+							while (resultSet.next())
+							{
+								String pcolumnName = resultSet.getString("PKCOLUMN_NAME"); //$NON-NLS-1$
+								String ptableName = resultSet.getString("PKTABLE_NAME"); //$NON-NLS-1$
+								String fcolumnName = resultSet.getString("FKCOLUMN_NAME"); //$NON-NLS-1$
 
-									Table foreignTable = server.getTable(ftableName);
-									if (foreignTable == null) continue;
+								String relname = table.getSQLName() + "_to_" + ptableName; //$NON-NLS-1$
 
-									Column primaryColumn = table.getColumn(pcolumnName);
-									Column foreignColumn = foreignTable.getColumn(fcolumnName);
+								int keySeq = resultSet.getInt("KEY_SEQ"); //$NON-NLS-1$
+								Debug.trace("Found (import) rel: name: " + relname + " keyseq = " + keySeq + ' ' + table.getSQLName() + ' ' + pcolumnName +
+									" -> " + ptableName + ' ' + fcolumnName);
 
-									if (primaryColumn == null || foreignColumn == null) continue;
-									primaryColumns.add(primaryColumn);
-									foreignColumns.add(foreignColumn);
+								List<List<Object[]>> rel_items_list = relationInfo.get(relname);
+								if (rel_items_list == null)
+								{
+									rel_items_list = new ArrayList<List<Object[]>>();
+									relationInfo.put(relname, rel_items_list);
 								}
 
-								if (primaryColumns.size() != 0)
+								// assume KEY_SEQ ascending ordered, do not assume 0 or 1 based (jdbc spec is not clear on this).
+								// when KEY_SEQ is not increasing, we have a separate constraint between the same tables.
+								if (rel_items_list.size() == 0 || keySeq <= lastKeySeq)
 								{
-									// postfix the relation name when there are multiple
-									String relationName = rname;
-									if (rel_items_list.size() > 1)
+									rel_items_list.add(new ArrayList<Object[]>());
+								}
+								lastKeySeq = keySeq;
+
+								// add the item to the last list of rel_items_list
+								rel_items_list.get(rel_items_list.size() - 1).add(new Object[] { fcolumnName, ptableName, pcolumnName });
+							}
+							resultSet = Utils.closeResultSet(resultSet);
+
+							Iterator<Map.Entry<String, List<List<Object[]>>>> it = relationInfo.entrySet().iterator();
+							while (it.hasNext())
+							{
+								Map.Entry<String, List<List<Object[]>>> entry = it.next();
+								String rname = entry.getKey();
+								List<List<Object[]>> rel_items_list = entry.getValue();
+								// we may have multiple lists of items defined for the same relation name
+								for (int l = 0; l < rel_items_list.size(); l++)
+								{
+									List<Column> primaryColumns = new ArrayList<Column>();
+									List<Column> foreignColumns = new ArrayList<Column>();
+
+									List<Object[]> rel_items = rel_items_list.get(l);
+									for (int i = 0; i < rel_items.size(); i++)
 									{
-										relationName += "_" + (l + 1);
+										Object[] element = rel_items.get(i);
+
+										String pcolumnName = (String)element[0];
+										String ftableName = (String)element[1];
+										String fcolumnName = (String)element[2];
+
+										Table foreignTable = server.getTable(ftableName);
+										if (foreignTable == null || foreignTable.isHiddenInDeveloper()) continue;
+
+										Column primaryColumn = table.getColumn(pcolumnName);
+										Column foreignColumn = foreignTable.getColumn(fcolumnName);
+
+										if (primaryColumn == null || foreignColumn == null) continue;
+										primaryColumns.add(primaryColumn);
+										foreignColumns.add(foreignColumn);
 									}
 
-									boolean defaultAdd = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getRelation(
-										relationName) == null;
+									if (primaryColumns.size() != 0)
+									{
+										// postfix the relation name when there are multiple
+										String relationName = rname;
+										if (rel_items_list.size() > 1)
+										{
+											relationName += "_" + (l + 1);
+										}
 
-									relations.add(new RelationData(relationName, table, primaryColumns, foreignColumns, defaultAdd));
+										boolean defaultAdd = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getRelation(
+											relationName) == null;
+
+										relations.add(new RelationData(relationName, table, primaryColumns, foreignColumns, defaultAdd));
+									}
 								}
 							}
 						}
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
-					catch (SQLException e)
-					{
-						ServoyLog.logError(e);
-					}
-					finally
-					{
-						Utils.closeResultSet(resultSet);
-						Utils.closeConnection(connection);
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError(e);
+						}
+						catch (SQLException e)
+						{
+							ServoyLog.logError(e);
+						}
+						finally
+						{
+							Utils.closeResultSet(resultSet);
+							Utils.closeConnection(connection);
+						}
 					}
 					monitor.worked(1);
 				}

@@ -211,7 +211,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 		{
 			IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
 			server.addTableListener(tableListener);
-			if (server.getConfig().isEnabled() && server.isValid() && server.isTableListLoaded())
+			if (server.getConfig().isEnabled() && server.isValid())
 			{
 				try
 				{
@@ -377,7 +377,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 				IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
 				server.removeTableListener(tableListener);
 
-				if (server.getConfig().isEnabled() && server.isValid() && server.isTableListLoaded())
+				if (server.getConfig().isEnabled() && server.isValid())
 				{
 					try
 					{
