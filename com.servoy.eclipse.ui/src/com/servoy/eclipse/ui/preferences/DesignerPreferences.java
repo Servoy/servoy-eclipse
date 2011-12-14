@@ -32,6 +32,7 @@ import org.osgi.service.prefs.BackingStoreException;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.resource.ColorResource;
+import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
@@ -83,8 +84,7 @@ public class DesignerPreferences
 	public static final String INCLUDE_FORM_ELEMENT_DATAPROVIDER_FALLBACK_SETTING = "includeormElementDataProviderFallback";
 	public static final String DEFAULT_TABLE_EVENT_HANDLER_NAMING_SETTING = "defaultTableEventHandlerNaming";
 	public static final String INCLUDE_TABLE_NAME_SETTING = "includeTableName";
-	public static final String USE_SERVOY_SEQUENCE_SETTING = "useServoySequence";
-	public static final String USE_DATABASE_SEQUENCE_SETTING = "useDatabaseSequence";
+	public static final String PK_SEQUENCE_TYPE_SETTING = "primaryKeySequenceType";
 
 	public static final String SNAP_TO_ALIGMNENT = "alignment";
 	public static final String SNAP_TO_GRID = "grid";
@@ -124,6 +124,7 @@ public class DesignerPreferences
 	public static final boolean INCLUDE_TABLE_NAME_DEFAULT = false;
 	public static final boolean USE_SERVOY_SEQUENCE_DEFAULT = true;
 	public static final boolean USE_DATABASE_SEQUENCE_DEFAULT = false;
+	public static final int PK_SEQUENCE_TYPE_DEFAULT = ColumnInfo.SERVOY_SEQUENCE;
 
 	protected final IEclipsePreferences eclipsePreferences;
 
@@ -542,24 +543,14 @@ public class DesignerPreferences
 		setProperty(INCLUDE_TABLE_NAME_SETTING, includeTableNameInEventHandler);
 	}
 
-	public boolean getUseServoySequence()
+	public int getPrimaryKeySequenceType()
 	{
-		return getProperty(USE_SERVOY_SEQUENCE_SETTING, USE_SERVOY_SEQUENCE_DEFAULT);
+		return getProperty(PK_SEQUENCE_TYPE_SETTING, PK_SEQUENCE_TYPE_DEFAULT);
 	}
 
-	public void setUseServoySequence(boolean useServoySequence)
+	public void setPrimaryKeySequenceType(int primaryKeySequenceType)
 	{
-		setProperty(USE_SERVOY_SEQUENCE_SETTING, useServoySequence);
-	}
-
-	public boolean getUseDatabaseSequence()
-	{
-		return getProperty(USE_DATABASE_SEQUENCE_SETTING, USE_DATABASE_SEQUENCE_DEFAULT);
-	}
-
-	public void setUseDatabaseSequence(boolean useDatabaseSequence)
-	{
-		setProperty(USE_DATABASE_SEQUENCE_SETTING, useDatabaseSequence);
+		setProperty(PK_SEQUENCE_TYPE_SETTING, primaryKeySequenceType);
 	}
 
 	public static boolean isCoolbarSetting(String key)

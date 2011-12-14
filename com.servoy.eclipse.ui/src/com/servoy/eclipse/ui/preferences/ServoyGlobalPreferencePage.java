@@ -17,6 +17,11 @@
 package com.servoy.eclipse.ui.preferences;
 
 import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -36,6 +41,8 @@ import org.eclipse.ui.internal.util.PrefUtil;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.debug.DeveloperPreferences;
+import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.util.ObjectWrapper;
 
 /**
  * Main preference page for Servoy settings.
@@ -52,8 +59,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private Button showColumnsInDbOrderButton;
 	private Button showColumnsInAlphabeticOrderButton;
 	private Label enhancedSecurityLabel;
-	private Button useServoySequence;
-	private Button useDatabaseSequence;
+	private ComboViewer primaryKeySequenceTypeCombo;
 
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
@@ -154,15 +160,16 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		tableCreationSettings.setLayout(new GridLayout(1, false));
 		tableCreationSettings.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
-		Group defaultFirstColumnSequenceType = new Group(tableCreationSettings, SWT.NONE);
-		defaultFirstColumnSequenceType.setText("Default Primary Key Sequence Type"); //$NON-NLS-1$
-		defaultFirstColumnSequenceType.setLayout(new GridLayout(1, true));
+		Group defaultPrimaryKeySequenceType = new Group(tableCreationSettings, SWT.NONE);
+		defaultPrimaryKeySequenceType.setText("Default Primary Key Sequence Type"); //$NON-NLS-1$
+		defaultPrimaryKeySequenceType.setLayout(new GridLayout(1, true));
 
-		useServoySequence = new Button(defaultFirstColumnSequenceType, SWT.RADIO);
-		useServoySequence.setText("Servoy Sequence"); //$NON-NLS-1$
-
-		useDatabaseSequence = new Button(defaultFirstColumnSequenceType, SWT.RADIO);
-		useDatabaseSequence.setText("Database Sequence"); //$NON-NLS-1$
+		primaryKeySequenceTypeCombo = new ComboViewer(defaultPrimaryKeySequenceType);
+		primaryKeySequenceTypeCombo.setContentProvider(new ArrayContentProvider());
+		primaryKeySequenceTypeCombo.setLabelProvider(new LabelProvider());
+		primaryKeySequenceTypeCombo.setInput(new ObjectWrapper[] { new ObjectWrapper("Servoy Sequence", new Integer(ColumnInfo.SERVOY_SEQUENCE)), new ObjectWrapper( //$NON-NLS-1$
+			"Database Sequence", new Integer(ColumnInfo.DATABASE_SEQUENCE)), new ObjectWrapper("Database Identity", new Integer(ColumnInfo.DATABASE_IDENTITY)), new ObjectWrapper( //$NON-NLS-1$ //$NON-NLS-2$
+			"UUID Generator", new Integer(ColumnInfo.UUID_GENERATOR)) }); //$NON-NLS-1$
 
 		initializeFields();
 
@@ -179,8 +186,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		openFirstFormDesignerButton.setSelection(prefs.getOpenFirstFormDesigner());
 		showColumnsInDbOrderButton.setSelection(prefs.getShowColumnsInDbOrder());
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
-		useServoySequence.setSelection(prefs.getUseServoySequence());
-		useDatabaseSequence.setSelection(prefs.getUseDatabaseSequence());
+		setPrimaryKeySequenceTypeValue(prefs.getPrimaryKeySequenceType());
 	}
 
 	@Override
@@ -192,8 +198,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		openFirstFormDesignerButton.setSelection(DesignerPreferences.OPEN_FIRST_FORM_DESIGNER_DEFAULT);
 		showColumnsInDbOrderButton.setSelection(DesignerPreferences.SHOW_COLUMNS_IN_DB_ORDER_DEFAULT);
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
-		useServoySequence.setSelection(DesignerPreferences.USE_SERVOY_SEQUENCE_DEFAULT);
-		useDatabaseSequence.setSelection(DesignerPreferences.USE_DATABASE_SEQUENCE_DEFAULT);
+		setPrimaryKeySequenceTypeValue(DesignerPreferences.PK_SEQUENCE_TYPE_DEFAULT);
 
 		super.performDefaults();
 	}
@@ -208,11 +213,22 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.CLOSE_EDITORS_ON_EXIT, closeEditorOnExitButton.getSelection());
 		prefs.setOpenFirstFormDesigner(openFirstFormDesignerButton.getSelection());
 		prefs.setShowColumnsInDbOrder(showColumnsInDbOrderButton.getSelection());
-		prefs.setUseServoySequence(useServoySequence.getSelection());
-		prefs.setUseDatabaseSequence(useDatabaseSequence.getSelection());
-
+		prefs.setPrimaryKeySequenceType(((Integer)((ObjectWrapper)((IStructuredSelection)primaryKeySequenceTypeCombo.getSelection()).getFirstElement()).getType()).intValue());
 		prefs.save();
 
 		return true;
+	}
+
+	private void setPrimaryKeySequenceTypeValue(int pk_seq_type)
+	{
+		Integer seqType = Integer.valueOf(pk_seq_type);
+		for (ObjectWrapper ow : (ObjectWrapper[])primaryKeySequenceTypeCombo.getInput())
+		{
+			if (ow.getType().equals(seqType))
+			{
+				primaryKeySequenceTypeCombo.setSelection(new StructuredSelection(ow));
+				return;
+			}
+		}
 	}
 }

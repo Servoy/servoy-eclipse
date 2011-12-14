@@ -71,7 +71,6 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
-import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.ITable;
@@ -597,7 +596,7 @@ public class ColumnComposite extends Composite
 			{
 				Column id = t.createNewColumn(nameValidator, colname, IColumnTypes.INTEGER, 0);
 				id.setDatabasePK(true);
-				id.setSequenceType(getDefaultFirstColumnSequenceType());//andrei2-FIX: use prop here
+				id.setSequenceType(getDefaultFirstColumnSequenceType());
 			}
 			catch (RepositoryException e)
 			{
@@ -615,8 +614,7 @@ public class ColumnComposite extends Composite
 
 	private int getDefaultFirstColumnSequenceType()
 	{
-		if (new DesignerPreferences().getUseDatabaseSequence()) return ColumnInfo.DATABASE_SEQUENCE;
-		else return ColumnInfo.SERVOY_SEQUENCE;
+		return new DesignerPreferences().getPrimaryKeySequenceType();
 	}
 
 	@Override
