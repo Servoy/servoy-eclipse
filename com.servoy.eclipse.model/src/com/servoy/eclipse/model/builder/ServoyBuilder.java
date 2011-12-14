@@ -3299,6 +3299,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 						}
 						ITable ptable = pserver.getTable(element.getPrimaryTableName());
+						boolean usingHiddenTableInPrimary = false;
 						if (ptable == null)
 						{
 							mk = MarkerMessages.RelationPrimaryTableNotFound.fill(element.getName(), element.getPrimaryTableName(),
@@ -3311,6 +3312,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							if (((Table)ptable).isHiddenInDeveloper())
 							{
+								usingHiddenTableInPrimary = true;
 								mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(ptable.getDataSource(), "relation ", element.getName());
 								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, element);
 							}
@@ -3349,7 +3351,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						else
 						{
-							if (((Table)ftable).isHiddenInDeveloper())
+							if (!usingHiddenTableInPrimary && ((Table)ftable).isHiddenInDeveloper())
 							{
 								mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(ftable.getDataSource(), "relation ", element.getName());
 								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, element);

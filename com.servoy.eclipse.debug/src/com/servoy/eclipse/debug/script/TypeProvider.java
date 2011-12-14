@@ -83,6 +83,7 @@ import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -1019,7 +1020,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(table);
 						if (allDataProvidersForTable != null)
 						{
-							addDataProviders(allDataProvidersForTable.values().iterator(), type.getMembers(), context, isVisible(), false);
+							addDataProviders(allDataProvidersForTable.values().iterator(), type.getMembers(), context, table.isHiddenInDeveloper(),
+								isVisible(), false);
 						}
 					}
 					catch (RepositoryException e)
@@ -1030,7 +1032,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				else if (fsAndTable.length == 1)
 				{
 					Table table = (Table)fsAndTable[0];
-					addDataProviders(table.getColumns().iterator(), type.getMembers(), context, isVisible(), true);
+					addDataProviders(table.getColumns().iterator(), type.getMembers(), context, false, isVisible(), true);
 					context.markInvariant(type, "scope:tables");
 				}
 			}
@@ -1039,8 +1041,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			return type;
 		}
 
-		private void addDataProviders(Iterator< ? extends IDataProvider> dataproviders, EList<Member> members, ITypeInfoContext context, boolean visible,
-			boolean columnsOnly)
+		private void addDataProviders(Iterator< ? extends IDataProvider> dataproviders, EList<Member> members, ITypeInfoContext context, boolean deprecated,
+			boolean visible, boolean columnsOnly)
 		{
 			while (dataproviders.hasNext())
 			{
@@ -1095,6 +1097,11 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				}
 				property.setAttribute(IMAGE_DESCRIPTOR, image);
 				property.setDescription(description.intern());
+				if (deprecated)
+				{
+					property.setDeprecated(true);
+					property.setDescription(property.getDescription() + " <b>of table marked as HIDDEN in developer</b>");
+				}
 				members.add(property);
 			}
 		}
@@ -1353,6 +1360,18 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				{
 					Property property = createProperty(relation.getName(), true, context.getTypeRef(FoundSet.JS_FOUNDSET + "<" + relation.getName() + ">"),
 						getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE, relation);
+					if (visible)
+					{
+						IServerInternal sp = ((IServerInternal)relation.getPrimaryServer());
+						IServerInternal sf = ((IServerInternal)relation.getForeignServer());
+						if ((sp != null && sp.isTableHiddenInDeveloper(relation.getPrimaryTableName())) ||
+							(sf != null && sf.isTableHiddenInDeveloper(relation.getForeignTableName())))
+						{
+							property.setDeprecated(true);
+							property.setDescription(property.getDescription() + "<br><b>This relation is based on a table marked as HIDDEN in developer</b>.");
+						}
+					}
+
 					property.setVisible(visible);
 					members.add(property);
 				}
@@ -1587,6 +1606,12 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			EList<Type> traits = compositeType.getTraits();
 			traits.add(dataproviderType);
 			traits.add(relationsType);
+
+			if (table.isHiddenInDeveloper())
+			{
+				compositeType.setDescription("<b>Based on a table that is marked as HIDDEN in developer</b>");
+				compositeType.setDeprecated(true);
+			}
 			return compositeType;
 		}
 		else if (config.startsWith("{") && config.endsWith("}"))
