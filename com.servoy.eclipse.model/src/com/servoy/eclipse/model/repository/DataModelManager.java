@@ -400,15 +400,17 @@ public class DataModelManager implements IColumnInfoManager
 
 	public static void reloadAllColumnInfo(IServer server)
 	{
+		IServerInternal s = (IServerInternal)server;
+		s.reloadServerInfo();
 		try
 		{
-			Iterator<String> tables = ((IServerInternal)server).getTableAndViewNames(true).iterator();
+			Iterator<String> tables = s.getTableAndViewNames(true).iterator();
 			while (tables.hasNext())
 			{
 				String tableName = tables.next();
-				if (((IServerInternal)server).isTableLoaded(tableName))
+				if (s.isTableLoaded(tableName))
 				{
-					((IServerInternal)server).reloadTableColumnInfo(((IServerInternal)server).getTable(tableName));
+					s.reloadTableColumnInfo(((IServerInternal)server).getTable(tableName));
 				}
 			}
 		}
