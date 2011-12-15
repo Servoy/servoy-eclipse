@@ -18,9 +18,11 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewPart;
 
 import com.servoy.eclipse.core.Activator;
@@ -71,7 +73,7 @@ public class DebugMethodAction extends Action implements ISelectionChangedListen
 			}
 		}
 
-		setEnabled(ok && Activator.getDefault().getDebugClientHandler().getDebugReadyClient() != null);
+		setEnabled(ok);
 	}
 
 	public boolean isMethodSelected()
@@ -84,7 +86,10 @@ public class DebugMethodAction extends Action implements ISelectionChangedListen
 	{
 		if (method != null)
 		{
-			Activator.getDefault().getDebugClientHandler().executeMethod(method.getParent(), method.getScopeName(), method.getName());
+			if (Activator.getDefault().getDebugClientHandler().getDebugReadyClient() != null) Activator.getDefault().getDebugClientHandler().executeMethod(
+				method.getParent(), method.getScopeName(), method.getName());
+			else MessageDialog.openError(Display.getDefault().getActiveShell(),
+				"Debug Method Problem", "Cannot debug method; please start a debug client first."); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 }

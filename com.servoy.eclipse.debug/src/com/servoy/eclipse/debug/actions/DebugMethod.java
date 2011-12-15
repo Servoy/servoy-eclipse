@@ -22,8 +22,10 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
 
@@ -80,6 +82,10 @@ public class DebugMethod implements IViewActionDelegate
 				}
 			}
 		}
+		else if (Activator.getDefault().getDebugClientHandler().getDebugReadyClient() == null)
+		{
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Debug Method Problem", "Cannot debug method; please start a debug client first."); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 	}
 
 	/**
@@ -88,20 +94,14 @@ public class DebugMethod implements IViewActionDelegate
 	public void selectionChanged(IAction action, ISelection selection)
 	{
 		sm = null;
-		boolean enable = Activator.getDefault().getDebugClientHandler().getDebugReadyClient() != null;
-		if (enable)
+		boolean enable = false;
+		if (selection instanceof IStructuredSelection)
 		{
-			if (selection instanceof IStructuredSelection)
+			Object o = ((IStructuredSelection)selection).getFirstElement();
+			if (o instanceof IMethod)
 			{
-				Object o = ((IStructuredSelection)selection).getFirstElement();
-				if (o instanceof IMethod)
-				{
-					sm = (IMethod)o;
-				}
-				else
-				{
-					enable = false;
-				}
+				sm = (IMethod)o;
+				enable = true;
 			}
 			else
 			{
