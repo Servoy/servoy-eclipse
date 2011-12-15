@@ -18,6 +18,7 @@ package com.servoy.eclipse.debug.actions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.swing.SwingUtilities;
@@ -31,10 +32,12 @@ import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
@@ -47,6 +50,7 @@ import org.eclipse.ui.internal.browser.BrowserManager;
 import org.eclipse.ui.internal.browser.ExternalBrowserInstance;
 import org.eclipse.ui.internal.browser.IBrowserDescriptor;
 import org.eclipse.ui.internal.browser.Messages;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
@@ -188,6 +192,7 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 
 	private Menu broswersListMenu;
 	private IWebBrowser webBrowser;
+	private HashMap<String, Image> browsersImagesList;
 
 	/*
 	 * (non-Javadoc)
@@ -207,6 +212,7 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 				final IBrowserDescriptor ewb = (IBrowserDescriptor)iterator.next();
 				MenuItem menuItem = new MenuItem(broswersListMenu, SWT.PUSH);
 				menuItem.setText(ewb.getName());
+				menuItem.setImage(getImageForName(ewb.getName(), ewb.getLocation()));
 				menuItem.addSelectionListener(new SelectionAdapter()
 				{
 					@Override
@@ -277,6 +283,30 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 		return broswersListMenu;
 	}
 
+	private Image getImageForName(String name, String location)
+	{
+		String browserImgFileName = ""; //$NON-NLS-1$
+		String browserName = (name != null ? name.toLowerCase() : ""); //$NON-NLS-1$
+		String browserLocation = (location != null ? location.toLowerCase() : ""); //$NON-NLS-1$
+		if (browserLocation.contains("iexplore") || browserName.contains("explorer")) browserImgFileName = "explorer.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		else if (browserLocation.contains("firefox") || browserName.contains("firefox")) browserImgFileName = "firefox.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		else if (browserLocation.contains("chrome") || browserName.contains("chrome")) browserImgFileName = "chrome.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		else if (browserLocation.contains("safari") || browserName.contains("safari")) browserImgFileName = "safari.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		else if (browserLocation.contains("opera") || browserName.contains("opera")) browserImgFileName = "opera.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return getImageForBrowser(browserImgFileName);
+	}
+
+	private Image getImageForBrowser(String name)
+	{
+		if (browsersImagesList == null) browsersImagesList = new HashMap<String, Image>();
+		if (!name.equals("") && !browsersImagesList.containsKey(name)) //$NON-NLS-1$
+		{
+			ImageDescriptor id = AbstractUIPlugin.imageDescriptorFromPlugin(com.servoy.eclipse.debug.Activator.PLUGIN_ID, "icons/" + name); //$NON-NLS-1$
+			browsersImagesList.put(name, id.createImage());
+		}
+		return browsersImagesList.get(name);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -286,6 +316,13 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 	public void dispose()
 	{
 		if (broswersListMenu != null) broswersListMenu.dispose();
+		if (browsersImagesList != null)
+		{
+			Iterator<String> browserNames = browsersImagesList.keySet().iterator();
+			while (browserNames.hasNext())
+				browsersImagesList.get(browserNames.next()).dispose();
+			browsersImagesList.clear();
+		}
 		super.dispose();
 	}
 }
