@@ -46,6 +46,7 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.internal.browser.BrowserManager;
 import org.eclipse.ui.internal.browser.ExternalBrowserInstance;
 import org.eclipse.ui.internal.browser.IBrowserDescriptor;
+import org.eclipse.ui.internal.browser.Messages;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
@@ -215,7 +216,7 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 						{
 							IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
 							org.eclipse.ui.internal.browser.IBrowserExt ext = null;
-							if (ewb != null)
+							if (ewb != null && !ewb.getName().equals(Messages.prefSystemBrowser))
 							{
 								//ext := "org.eclipse.ui.browser." + specifiId 
 								ext = org.eclipse.ui.internal.browser.WebBrowserUIPlugin.findBrowsers(ewb.getLocation());
@@ -226,10 +227,16 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 								}
 								else
 								{
-									webBrowser = new ExternalBrowserInstance("org.eclipse.ui.browser." + ewb.getName().toLowerCase().replace(" ", "_"), ewb);
+									if (ewb.getLocation() != null) webBrowser = new ExternalBrowserInstance("org.eclipse.ui.browser." +
+										ewb.getName().toLowerCase().replace(" ", "_"), ewb);
 								}
 							}
-							if (webBrowser == null) webBrowser = support.getExternalBrowser(); //default to external system browser
+
+							if (webBrowser == null ||
+								((ewb != null && ewb.getName().equals(Messages.prefSystemBrowser)) && (webBrowser != null && !webBrowser.equals(support.getExternalBrowser()))))
+							{
+								webBrowser = support.getExternalBrowser(); //default to system web browser
+							}
 
 							Job job = new Job("Web client start") //$NON-NLS-1$
 							{
