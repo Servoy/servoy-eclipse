@@ -85,6 +85,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
@@ -1553,37 +1554,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 							}
 							IApplication application = Activator.getDefault().getDesignClient();
 							Iterator<IPersist> formObjects = formToUse.getAllObjects();
-							while (formObjects.hasNext())
-							{
-								IPersist persist = formObjects.next();
-								if (persist instanceof IFormElement)
-								{
-									IFormElement formElement = (IFormElement)persist;
-									if (!Utils.stringIsEmpty(formElement.getName()))
-									{
-										Class< ? > persistClass = ElementUtil.getPersistScriptClass(application, persist);
-										if (persistClass != null && formElement instanceof Bean)
-										{
-											String beanClassName = ((Bean)formElement).getBeanClassName();
-											if (beanClassName != null)
-											{
-												// map the persist class that is registered in the initialize() method under the beanclassname under that same name.
-												// So SwingDBTreeView class/name points to "DBTreeView" which points to that class again of the class types 
-												typeNames.put(persistClass.getSimpleName(), beanClassName.substring(beanClassName.lastIndexOf('.') + 1));
-											}
-										}
-										members.add(createProperty(formElement.getName(), true, getElementType(context, persistClass), null, PROPERTY));
-									}
-									if (formElement.getGroupID() != null)
-									{
-										String groupName = FormElementGroup.getName(formElement.getGroupID());
-										if (groupName != null)
-										{
-											members.add(createProperty(groupName, true, getElementType(context, RuntimeGroup.class), null, PROPERTY));
-										}
-									}
-								}
-							}
+							createFormElementProperties(application, context, members, formObjects);
 						}
 						catch (Exception e)
 						{
@@ -1593,6 +1564,51 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				}
 			}
 			return type;
+		}
+
+		/**
+		 * @param application
+		 * @param context
+		 * @param members
+		 * @param formObjects
+		 */
+		private void createFormElementProperties(IApplication application, ITypeInfoContext context, EList<Member> members, Iterator<IPersist> formObjects)
+		{
+			while (formObjects.hasNext())
+			{
+				IPersist persist = formObjects.next();
+				if (persist instanceof IFormElement)
+				{
+					IFormElement formElement = (IFormElement)persist;
+					if (!Utils.stringIsEmpty(formElement.getName()))
+					{
+						Class< ? > persistClass = ElementUtil.getPersistScriptClass(application, persist);
+						if (persistClass != null && formElement instanceof Bean)
+						{
+							String beanClassName = ((Bean)formElement).getBeanClassName();
+							if (beanClassName != null)
+							{
+								// map the persist class that is registered in the initialize() method under the beanclassname under that same name.
+								// So SwingDBTreeView class/name points to "DBTreeView" which points to that class again of the class types 
+								typeNames.put(persistClass.getSimpleName(), beanClassName.substring(beanClassName.lastIndexOf('.') + 1));
+							}
+						}
+						members.add(createProperty(formElement.getName(), true, getElementType(context, persistClass), null, PROPERTY));
+					}
+					if (formElement.getGroupID() != null)
+					{
+						String groupName = FormElementGroup.getName(formElement.getGroupID());
+						if (groupName != null)
+						{
+							members.add(createProperty(groupName, true, getElementType(context, RuntimeGroup.class), null, PROPERTY));
+						}
+					}
+					if (formElement instanceof Portal)
+					{
+						createFormElementProperties(application, context, members, ((Portal)formElement).getAllObjects());
+					}
+				}
+			}
 		}
 
 		private SimpleType getElementType(ITypeInfoContext context, Class< ? > cls)
