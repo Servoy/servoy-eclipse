@@ -28,6 +28,8 @@ import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServer;
@@ -99,6 +101,15 @@ public class SearchAction extends Action implements ISelectionChangedListener
 		{
 			query = new ElementSearch((BaseComponent)selectedObject);
 		}
+		else if (selectedObject instanceof Column)
+		{
+			query = new DataProviderSearch((Column)selectedObject);
+		}
+		else if (selectedObject instanceof ColumnWrapper)
+		{
+			if (((ColumnWrapper)selectedObject).getColumn() instanceof Column) query = new DataProviderSearch(
+				(Column)((ColumnWrapper)selectedObject).getColumn());
+		}
 		if (query != null) NewSearchUI.runQueryInBackground(query);
 	}
 
@@ -119,7 +130,8 @@ public class SearchAction extends Action implements ISelectionChangedListener
 				node.getType() == UserNodeType.FORM_METHOD || node.getType() == UserNodeType.GLOBAL_METHOD_ITEM ||
 				node.getType() == UserNodeType.GLOBAL_VARIABLE_ITEM || node.getType() == UserNodeType.FORM_VARIABLE_ITEM ||
 				node.getType() == UserNodeType.SERVER || node.getType() == UserNodeType.TABLE || node.getType() == UserNodeType.FORM_ELEMENTS_ITEM ||
-				node.getType() == UserNodeType.BEAN || node.getType() == UserNodeType.VIEW)
+				node.getType() == UserNodeType.BEAN || node.getType() == UserNodeType.VIEW || node.getType() == UserNodeType.TABLE_COLUMNS_ITEM ||
+				node.getType() == UserNodeType.RELATION_COLUMN)
 			{
 				selectedObject = node.getRealObject();
 				if (selectedObject instanceof Object[])
