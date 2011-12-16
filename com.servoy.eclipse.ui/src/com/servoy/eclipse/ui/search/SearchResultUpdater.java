@@ -106,26 +106,41 @@ public class SearchResultUpdater implements IResourceChangeListener, IQueryListe
 									break;
 								}
 
-								if (searchText == null && fileText == null) break;
+								if (searchText == null || fileText == null) break;
 
 								if (matches.length > 0)
 								{
 									for (Match m : matches)
 									{
-										org.eclipse.search.internal.ui.text.LineElement le = ((org.eclipse.search.internal.ui.text.FileMatch)m).getLineElement();
+										int startOfLine = -1; //start of line in the file
+										int lengthToSearch = -1; //length of the old line match
+										String lineElementContents = "";
+
+										if (m instanceof com.servoy.eclipse.ui.search.FileMatch)
+										{
+											com.servoy.eclipse.ui.search.LineElement svyle = ((com.servoy.eclipse.ui.search.FileMatch)m).getLineElement();
+											startOfLine = svyle.getOffset();
+											lengthToSearch = svyle.getLength();
+											lineElementContents = svyle.getContents();
+										}
+										else
+										{
+											org.eclipse.search.internal.ui.text.LineElement le = ((org.eclipse.search.internal.ui.text.FileMatch)m).getLineElement();
+											startOfLine = le.getOffset();
+											lengthToSearch = le.getLength();
+											lineElementContents = le.getContents();
+										}
 
 										//get start of line element
-										int startOfLine = le.getOffset();//start of line in the file
-										int lengthToSearch = le.getLength();//length of the old line match
-										int ind1 = le.getContents().indexOf(searchText) - 1;
-										int ind2 = le.getContents().indexOf(searchText) + searchText.length() + 1;
+										int ind1 = lineElementContents.indexOf(searchText) - 1;
+										int ind2 = lineElementContents.indexOf(searchText) + searchText.length() + 1;
 										if (startOfLine < 0 || ind1 < 0) continue;
 
 										//safety: make sure we don't take out unnecessary stuff when doubleclicking on a match
 										String newLineOfText = fileText.substring(startOfLine, startOfLine + lengthToSearch);
-										if (newLineOfText.trim().equals(le.getContents().trim())) continue;
+										if (newLineOfText.trim().equals(lineElementContents.trim())) continue;
 
-										String theMatch = le.getContents().substring(ind1, ind2);
+										String theMatch = lineElementContents.substring(ind1, ind2);
 
 										//search if new line in the file (where old match was) still contains the match (=search text + 1char before and 1after it)
 										//a match is changed if it differs one char before and one after the searchtext in the line string
