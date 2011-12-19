@@ -66,8 +66,10 @@ import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServoyBeanFactory;
+import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.DataException;
 import com.servoy.j2db.dataprocessing.FoundSet;
+import com.servoy.j2db.dataprocessing.IColumnConverterManager;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
@@ -93,6 +95,7 @@ import com.servoy.j2db.plugins.IBeanClassProvider;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.plugins.IPluginManager;
+import com.servoy.j2db.plugins.IPluginManagerInternal;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.IReturnedTypesProvider;
 import com.servoy.j2db.scripting.IScriptable;
@@ -1064,7 +1067,14 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				property.setName(provider.getDataProviderID());
 				property.setAttribute(RESOURCE, provider);
 				property.setVisible(visible);
-				switch (provider.getDataProviderType())
+				int dataProviderType = provider.getDataProviderType();
+				if (provider instanceof Column)
+				{
+					IPluginManagerInternal pluginManager = (IPluginManagerInternal)com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getPluginManager();
+					IColumnConverterManager converterManager = pluginManager.getColumnConverterManager();
+					dataProviderType = ComponentFactory.getConvertedType(converterManager, (Column)provider, dataProviderType);
+				}
+				switch (dataProviderType)
 				{
 					case IColumnTypes.DATETIME :
 						property.setType(context.getTypeRef("Date"));

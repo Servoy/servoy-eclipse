@@ -71,9 +71,12 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.FoundSet;
+import com.servoy.j2db.dataprocessing.IColumnConverterManager;
 import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.Record;
+import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -82,6 +85,7 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.plugins.IPluginManagerInternal;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IDeprecated;
 import com.servoy.j2db.scripting.IJavaScriptType;
@@ -666,7 +670,14 @@ public abstract class TypeCreator
 	protected static final Type getDataProviderType(ITypeInfoContext context, IDataProvider provider)
 	{
 		Type type = null;
-		switch (provider.getDataProviderType())
+		int dataProviderType = provider.getDataProviderType();
+		if (provider instanceof Column)
+		{
+			IPluginManagerInternal pluginManager = (IPluginManagerInternal)com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getPluginManager();
+			IColumnConverterManager converterManager = pluginManager.getColumnConverterManager();
+			dataProviderType = ComponentFactory.getConvertedType(converterManager, (Column)provider, dataProviderType);
+		}
+		switch (dataProviderType)
 		{
 			case IColumnTypes.DATETIME :
 				type = context.getType("Date");
@@ -680,7 +691,7 @@ public abstract class TypeCreator
 				break;
 			default :
 				// for now don't return a type (so that anything is valid)
-				// mamybe we should return Array<byte> but then we also have to check column converters.
+				// maybe we should return Array<byte>
 				// should be in sync with TypeProvider.DataprovidersScopeCreator
 //				type = context.getType("Object");
 				break;
