@@ -169,6 +169,17 @@
               name="Solution Properties"
               objectClass="com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode">
         </page>
+		<page
+			category="org.eclipse.dltk.javascript.editor.saveActions.propertyPage"
+			name="Externalize Strings"
+			class="com.servoy.eclipse.ui.preferences.JSFileExternalizeNLSRemoverConfigurationPage"
+			id="org.eclipse.dltk.javascript.editor.saveActions.removeNLS">
+			<enabledWhen>
+				<adapt type="org.eclipse.core.resources.IProject">
+					<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.dltk.javascript.core.nature"/>
+				</adapt>
+			</enabledWhen>
+		</page>
   </extension>
    <extension
          point="org.eclipse.ui.editors">

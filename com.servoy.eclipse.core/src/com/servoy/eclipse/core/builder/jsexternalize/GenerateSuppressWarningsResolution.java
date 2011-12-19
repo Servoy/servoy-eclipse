@@ -135,7 +135,7 @@ class GenerateSuppressWarningsResolution extends TextFileEditResolution
 			{
 				insertOffset = documentation.sourceEnd() - 2;
 				InsertEdit suppressTextEdit = new InsertEdit(insertOffset, "* " + getAnnotation() + "\n "); //$NON-NLS-1$ //$NON-NLS-2$
-				applyTextEdit(scriptFile, suppressTextEdit);
+				TextFileEditUtil.applyTextEdit(scriptFile, suppressTextEdit);
 			}
 		}
 	}

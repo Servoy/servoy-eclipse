@@ -342,6 +342,10 @@
             class="com.servoy.eclipse.core.repository.JavaScriptFilePostSaveListener"
             nature="org.eclipse.dltk.javascript.core.nature">
       </saveParticipant>
+      <saveParticipant
+            class="com.servoy.eclipse.core.builder.jsexternalize.PostSaveNLSRemover"
+            nature="org.eclipse.dltk.javascript.core.nature">
+      </saveParticipant>      
    </extension>
    <extension
          point="org.eclipse.dltk.core.buildParticipant">

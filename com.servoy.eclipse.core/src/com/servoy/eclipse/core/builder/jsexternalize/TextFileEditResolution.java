@@ -17,23 +17,12 @@
 
 package com.servoy.eclipse.core.builder.jsexternalize;
 
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
-import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.ui.editor.IScriptAnnotation;
 import org.eclipse.dltk.ui.text.IAnnotationResolution2;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerResolution;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.FileEditorInput;
-
-import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * Base resolution class when file modification is needed
@@ -67,70 +56,5 @@ public abstract class TextFileEditResolution implements IMarkerResolution, IAnno
 	public void run(IScriptAnnotation annotation, IDocument document)
 	{
 		run();
-	}
-
-	protected void applyTextEdit(IFile scriptFile, TextEdit textEdit)
-	{
-		ITextFileBufferManager textFileBufferManager = FileBuffers.getTextFileBufferManager();
-		try
-		{
-			textFileBufferManager.connect(scriptFile.getFullPath(), LocationKind.IFILE, null);
-		}
-		catch (CoreException e)
-		{
-			ServoyLog.logError(e);
-			return;
-		}
-
-		try
-		{
-			ITextFileBuffer textFileBuffer = textFileBufferManager.getTextFileBuffer(scriptFile.getFullPath(), LocationKind.IFILE);
-			IDocument document = textFileBuffer.getDocument();
-
-			FileEditorInput editorInput = new FileEditorInput(scriptFile);
-			final IEditorPart openEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow() == null ? null
-				: PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(editorInput);
-
-			boolean dirty = openEditor != null ? openEditor.isDirty() : textFileBuffer.isDirty();
-
-			try
-			{
-				textEdit.apply(document);
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError(e);
-			}
-
-			if (!dirty)
-			{
-				if (openEditor != null)
-				{
-					openEditor.doSave(null);
-				}
-				else
-				{
-					try
-					{
-						textFileBuffer.commit(null, true);
-					}
-					catch (CoreException e)
-					{
-						ServoyLog.logError(e);
-					}
-				}
-			}
-		}
-		finally
-		{
-			try
-			{
-				textFileBufferManager.disconnect(scriptFile.getFullPath(), LocationKind.IFILE, null);
-			}
-			catch (CoreException e)
-			{
-				ServoyLog.logError(e);
-			}
-		}
 	}
 }

@@ -96,7 +96,7 @@ public class AddMissingNLSResolution extends TextFileEditResolution
 					if (nodeOffset <= problemStartIdx && problemStartIdx < nodeOffset + node.getRange().getLength())
 					{
 						InsertEdit nonNLSTextEdit = new InsertEdit(lineEndIdx + 1, " //$NON-NLS-" + stringLiteralIdx + "$"); //$NON-NLS-1$ 
-						applyTextEdit(scriptFile, nonNLSTextEdit);
+						TextFileEditUtil.applyTextEdit(scriptFile, nonNLSTextEdit);
 						return false;
 					}
 
