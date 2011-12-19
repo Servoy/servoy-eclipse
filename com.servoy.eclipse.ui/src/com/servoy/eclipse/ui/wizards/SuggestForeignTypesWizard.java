@@ -522,7 +522,7 @@ public class SuggestForeignTypesWizard extends Wizard
 					Iterator<String> it = tableNames.iterator();
 					while (it.hasNext())
 					{
-						if (((IServerInternal)server).isTableHiddenInDeveloper(it.next())) it.remove();
+						if (((IServerInternal)server).isTableMarkedAsHiddenInDeveloper(it.next())) it.remove();
 					}
 					allTableNames = new String[tableNames.size()];
 					allTableNames = tableNames.toArray(allTableNames);
@@ -624,7 +624,7 @@ public class SuggestForeignTypesWizard extends Wizard
 									Table pkTable = (Table)server.getTable(rel.getPrimaryTableName());
 									Column pkCol = pkTable.getColumn(relItem.getPrimaryDataProviderID());
 									Column fkCol = fkTable.getColumn(relItem.getForeignColumnName());
-									if (fkCol != null && !fkCol.isDatabasePK() && pkTable != null && !pkTable.isHiddenInDeveloper() && pkCol != null &&
+									if (fkCol != null && !fkCol.isDatabasePK() && pkTable != null && !pkTable.isMarkedAsHiddenInDeveloper() && pkCol != null &&
 										pkCol.isDatabasePK())
 									{
 										if (matchedFromRelations.containsKey(fkCol.getName()))

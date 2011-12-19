@@ -848,7 +848,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					while (it.hasNext())
 					{
 						String name = it.next();
-						if (s.isTableHiddenInDeveloper(name))
+						if (s.isTableMarkedAsHiddenInDeveloper(name))
 						{
 							if (hiddenViews == null) hiddenViews = new ArrayList<String>();
 							hiddenViews.add(name);
@@ -892,7 +892,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			while (tableNames.hasNext())
 			{
 				String tableName = tableNames.next();
-				if (s.isTableHiddenInDeveloper(tableName))
+				if (s.isTableMarkedAsHiddenInDeveloper(tableName))
 				{
 					if (hiddenTables == null) hiddenTables = new ArrayList<String>();
 					hiddenTables.add(tableName);
