@@ -170,10 +170,10 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 		Utils.streamCopy(bis, baos);
 		byte[] media_data = baos.toByteArray();
 
-		String mime = ImageLoader.getContentType(media_data);
+		String mime = ImageLoader.getContentType(media_data, file.getName());
 		if (mime == null)
 		{
-			repository.getContentType(file.getName());
+			mime = repository.getContentType(file.getName());
 		}
 		String name = Utils.stringReplace(targetParentPath != null ? targetParentPath + file.getName() : file.getName(), " ", "_");
 		Media media = editingSolution.getMedia(name);
