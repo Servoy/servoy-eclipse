@@ -609,11 +609,13 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 										// check if a script needs to be deleted
 										String[] scriptPaths = SolutionSerializer.getScriptPaths(toDelete, true);
 
-										for (String scriptPath : scriptPaths)
-											if (scriptPath != null)
+										if (scriptPaths != null)
+										{
+											for (String scriptPath : scriptPaths)
 											{
 												wsa.delete(scriptPath);
 											}
+										}
 
 										// forms/orders.obj has now been deleted, also delete the forms/orders directory if it exists
 										String elementsDirectory = fileRelativePath.substring(0, fileRelativePath.length() -
