@@ -1669,7 +1669,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								catch (Exception e)
 								{
 								}
-								if (table == null || table.isHiddenInDeveloper())
+								if (table == null || table.isMarkedAsHiddenInDeveloper())
 								{
 									Iterator<IPersist> iterator = node.getAllObjects();
 									while (iterator.hasNext())
@@ -1731,7 +1731,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									{
 										addMarkers(project, checkSortOptions(table, form.getInitialSort(), form, flattenedSolution), form);
 									}
-									if (table != null && table.isHiddenInDeveloper())
+									if (table != null && table.isMarkedAsHiddenInDeveloper())
 									{
 										ServoyMarker mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(table.getDataSource(), "form ", form.getName());
 										addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, form);
@@ -1745,6 +1745,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_HIGH, null, form);
 								}
 							}
+
+							// if form uses global relation, check that is is valid
+
 							try
 							{
 								if (table != null)
@@ -2538,7 +2541,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								ServoyMarker mk = MarkerMessages.ValuelistDBTableNotAccessible.fill(vl.getName(), stn[1]);
 								problems.add(new Problem(mk.getType(), IMarker.SEVERITY_ERROR, mk.getText()));
 							}
-							else if (table.isHiddenInDeveloper())
+							else if (table.isMarkedAsHiddenInDeveloper())
 							{
 								ServoyMarker mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(table.getDataSource(), "valuelist ", vl.getName());
 								problems.add(new Problem(mk.getType(), IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, mk.getText(), null));
@@ -2946,7 +2949,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			IServerInternal s = (IServerInternal)ApplicationServerSingleton.get().getServerManager().getServer(solution.getI18nServerName());
 			if (s != null && s.isValid() && s.getConfig().isEnabled())
 			{
-				if (s.isTableHiddenInDeveloper(solution.getI18nTableName()))
+				if (s.isTableMarkedAsHiddenInDeveloper(solution.getI18nTableName()))
 				{
 					ServoyMarker mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(
 						DataSourceUtils.createDBTableDataSource(solution.getI18nServerName(), solution.getI18nTableName()), "i18n for solution ",
@@ -3414,7 +3417,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						else
 						{
-							if (((Table)ptable).isHiddenInDeveloper())
+							if (((Table)ptable).isMarkedAsHiddenInDeveloper())
 							{
 								usingHiddenTableInPrimary = true;
 								mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(ptable.getDataSource(), "relation ", element.getName());
@@ -3455,7 +3458,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						else
 						{
-							if (!usingHiddenTableInPrimary && ((Table)ftable).isHiddenInDeveloper())
+							if (!usingHiddenTableInPrimary && ((Table)ftable).isMarkedAsHiddenInDeveloper())
 							{
 								mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(ftable.getDataSource(), "relation ", element.getName());
 								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, null, element);

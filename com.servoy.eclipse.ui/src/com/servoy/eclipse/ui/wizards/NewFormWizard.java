@@ -273,11 +273,13 @@ public class NewFormWizard extends Wizard implements INewWizard
 			String dataSource = DataSourceUtils.createDBTableDataSource(newFormWizardPage.getServerName(), newFormWizardPage.getTableName());
 			Form form = servoyProject.getEditingSolution().createNewForm(servoyModel.getNameValidator(), style, newFormWizardPage.getFormName(), dataSource,
 				true, new Dimension(640/* width */, 480/* height */));
+			// use superform selected by user
+			Form superForm = newFormWizardPage.getSuperForm();
 
 			if (template == null)
 			{
 				// create default form, most is already set in createNewForm
-				form.createNewPart(Part.BODY, 480/* height */);
+				if (superForm == null) form.createNewPart(Part.BODY, 480/* height */); // else the form just inherits parts from super; no need to add body
 			}
 			else
 			{
@@ -290,8 +292,6 @@ public class NewFormWizard extends Wizard implements INewWizard
 				form.setStyleName(style == null ? null : style.getName());
 			}
 
-			// use superform selected by user
-			Form superForm = newFormWizardPage.getSuperForm();
 			if (superForm != null && template == null)
 			{
 				form.clearProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());

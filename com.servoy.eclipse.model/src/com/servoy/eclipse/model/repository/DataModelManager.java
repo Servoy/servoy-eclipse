@@ -558,7 +558,7 @@ public class DataModelManager implements IColumnInfoManager
 			throw new RepositoryException("Table name does not match dbi file name for " + t.getName());
 		}
 
-		s.setTableHiddenInDeveloper(t.getName(), tableInfo.hiddenInDeveloper);
+		s.setTableMarkedAsHiddenInDeveloper(t.getName(), tableInfo.hiddenInDeveloper);
 		if (tableInfo.columnInfoDefSet.size() > 0)
 		{
 			for (int j = 0; j < tableInfo.columnInfoDefSet.size(); j++)
@@ -690,7 +690,7 @@ public class DataModelManager implements IColumnInfoManager
 	{
 		TableDef tableInfo = new TableDef();
 		tableInfo.name = t.getName();
-		tableInfo.hiddenInDeveloper = t.isHiddenInDeveloper();
+		tableInfo.hiddenInDeveloper = t.isMarkedAsHiddenInDeveloper();
 
 		List<String> colNames = new ArrayList<String>();
 		Collection<Column> col = t.getColumns();

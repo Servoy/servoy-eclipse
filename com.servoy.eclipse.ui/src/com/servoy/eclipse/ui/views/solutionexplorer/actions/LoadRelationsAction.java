@@ -271,7 +271,7 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 									String fcolumnName = (String)element[2];
 
 									Table foreignTable = server.getTable(ftableName);
-									if (foreignTable == null || foreignTable.isHiddenInDeveloper()) continue;
+									if (foreignTable == null || foreignTable.isMarkedAsHiddenInDeveloper()) continue;
 
 									Column primaryColumn = table.getColumn(pcolumnName);
 									Column foreignColumn = foreignTable.getColumn(fcolumnName);

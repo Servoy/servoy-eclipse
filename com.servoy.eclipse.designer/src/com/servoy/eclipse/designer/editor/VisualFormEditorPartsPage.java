@@ -60,6 +60,8 @@ import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.PartTypeLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
@@ -69,6 +71,8 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDeveloperRepository;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
@@ -218,7 +222,7 @@ public class VisualFormEditorPartsPage extends Composite
 
 		Label onCurrentFormLabel = new Label(partsGroup, SWT.NONE);
 		onCurrentFormLabel.setAlignment(SWT.RIGHT);
-		onCurrentFormLabel.setText("On current form");
+		onCurrentFormLabel.setText("Used by form");
 
 		currentParts = new ListViewer(partsGroup, SWT.BORDER | SWT.MULTI);
 		currentParts.addOpenListener(new IOpenListener()
@@ -238,7 +242,8 @@ public class VisualFormEditorPartsPage extends Composite
 		});
 		org.eclipse.swt.widgets.List currentPartsList = currentParts.getList();
 		currentPartsList.setToolTipText("Parts on current form");
-		currentParts.setLabelProvider(PartTypeLabelProvider.INSTANCE);
+		currentParts.setLabelProvider(new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(
+			new PartTypeLabelProvider(editor.getForm()), editor.getForm()), editor.getForm().getSolution(), false));
 		currentParts.setContentProvider(new ArrayContentProvider());
 
 		upButton = new Button(partsGroup, SWT.NONE);
@@ -382,7 +387,7 @@ public class VisualFormEditorPartsPage extends Composite
 		ISelection availablePartsSelection = availableParts.getSelection();
 
 		Part lastSuperPart = null;
-		if (editor.getForm().getExtendsFormID() > 0)
+		if (editor.getForm().getExtendsID() > 0)
 		{
 			// there is a super-form, can only add parts on the bottom
 			Iterator<Part> flattenedParts = flattenedForm.getParts();
@@ -400,8 +405,8 @@ public class VisualFormEditorPartsPage extends Composite
 		List<Part> currentPartList = new ArrayList<Part>();
 
 		Iterator<Part> it;
-		// current parts
-		it = editor.getForm().getParts();
+		// currently used parts
+		it = flattenedForm.getParts();
 		while (it.hasNext())
 		{
 			Part p = it.next();
@@ -425,7 +430,34 @@ public class VisualFormEditorPartsPage extends Composite
 		addAvailablePartType(Part.FOOTER, lastSuperPart, currentTypes, partTypes);
 		addAvailablePartType(Part.TITLE_FOOTER, lastSuperPart, currentTypes, partTypes);
 
-		currentParts.setSelection(currentPartsSelection);
+		// keep selection even is a part was overriden/unoverriden (can't simply use part type below because of subsummaries)
+		ISelection newCurrentPartsSelection = currentPartsSelection;
+		if (newCurrentPartsSelection instanceof StructuredSelection)
+		{
+			Object[] selectedParts = ((StructuredSelection)newCurrentPartsSelection).toArray();
+			List<Object> newSelection = new ArrayList<Object>();
+			for (Object o : selectedParts)
+			{
+				if (o instanceof Part) // always true
+				{
+					Part oldP = (Part)o;
+					IPersist oldParent = oldP.getAncestor(IRepository.FORMS);
+					for (Part newP : currentPartList)
+					{
+						IPersist newParent = newP.getAncestor(IRepository.FORMS);
+						if (newP == oldP ||
+							(newP.getPartType() == oldP.getPartType() && ((oldParent != editor.getForm() && newParent == editor.getForm() && newP.getExtendsID() == oldP.getID()) || (oldParent == editor.getForm() &&
+								newParent != editor.getForm() && oldP.getExtendsID() == newP.getID()))))
+						{
+							newSelection.add(newP);
+							break;
+						}
+					}
+				}
+			}
+			newCurrentPartsSelection = new StructuredSelection(newSelection);
+		}
+		currentParts.setSelection(newCurrentPartsSelection);
 		availableParts.setInput(partTypes);
 		availableParts.setSelection(availablePartsSelection);
 
@@ -484,7 +516,7 @@ public class VisualFormEditorPartsPage extends Composite
 		while (it.hasNext())
 		{
 			Part part = (Part)it.next();
-			if (part.isOverrideElement())
+			if (part.getAncestor(IRepository.FORMS) != editor.getForm())
 			{
 				return true;
 			}

@@ -1602,7 +1602,20 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 							}
 							if (firstForm != null)
 							{
-								EditorUtil.openFormDesignEditor(firstForm);
+								final Form ff = firstForm;
+								WorkbenchJob j = new WorkbenchJob("Opening form...")
+								{
+
+									@Override
+									public IStatus runInUIThread(IProgressMonitor monitor)
+									{
+										EditorUtil.openFormDesignEditor(ff);
+										return Status.OK_STATUS;
+									}
+								};
+								// we are already in UI thread here but sometimes under a pretty big stack already
+								// made it work later in a job because it would generate an exception due to locking in AWT stuff happening in form editor at import
+								j.schedule();
 							}
 						}
 						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setScriptingNodesEnabled(activeProject != null);

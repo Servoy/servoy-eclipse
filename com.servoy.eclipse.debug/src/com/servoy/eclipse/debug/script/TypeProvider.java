@@ -1271,7 +1271,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						Map<String, IDataProvider> allDataProvidersForTable = fsAndTable.flattenedSolution.getAllDataProvidersForTable(fsAndTable.table);
 						if (allDataProvidersForTable != null)
 						{
-							addDataProviders(allDataProvidersForTable.values().iterator(), type.getMembers(), context, fsAndTable.table.isHiddenInDeveloper(),
+							addDataProviders(allDataProvidersForTable.values().iterator(), type.getMembers(), context, fsAndTable.table.isMarkedAsHiddenInDeveloper(),
 								isVisible(), false);
 						}
 					}
@@ -1661,8 +1661,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 					{
 						IServerInternal sp = ((IServerInternal)relation.getPrimaryServer());
 						IServerInternal sf = ((IServerInternal)relation.getForeignServer());
-						if ((sp != null && sp.isTableHiddenInDeveloper(relation.getPrimaryTableName())) ||
-							(sf != null && sf.isTableHiddenInDeveloper(relation.getForeignTableName())))
+						if ((sp != null && sp.isTableMarkedAsHiddenInDeveloper(relation.getPrimaryTableName())) ||
+							(sf != null && sf.isTableMarkedAsHiddenInDeveloper(relation.getForeignTableName())))
 						{
 							property.setDeprecated(true);
 							property.setDescription(property.getDescription() + "<br><b>This relation is based on a table marked as HIDDEN in developer</b>.");
@@ -1905,7 +1905,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			traits.add(context.getType(dataproviderType));
 			traits.add(context.getType(relationsType));
 
-			if (table.isHiddenInDeveloper())
+			if (table.isMarkedAsHiddenInDeveloper())
 			{
 				type.setDescription("<b>Based on a table that is marked as HIDDEN in developer</b>");
 				type.setDeprecated(true);

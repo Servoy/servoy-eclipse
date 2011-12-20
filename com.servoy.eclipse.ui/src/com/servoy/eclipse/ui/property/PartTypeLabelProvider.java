@@ -19,6 +19,10 @@ package com.servoy.eclipse.ui.property;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.labelproviders.IPersistLabelProvider;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Part;
 
 /**
@@ -26,12 +30,19 @@ import com.servoy.j2db.persistence.Part;
  * <p>
  * Value may be Part or Integer (part type).
  * 
- * @author rgansevles
+ * @author rgansevles, acostescu
  * 
  */
-public class PartTypeLabelProvider extends LabelProvider
+public class PartTypeLabelProvider extends LabelProvider implements IPersistLabelProvider
 {
-	public static final PartTypeLabelProvider INSTANCE = new PartTypeLabelProvider();
+
+	public static final PartTypeLabelProvider INSTANCE = new PartTypeLabelProvider(null);
+	private final Form form;
+
+	public PartTypeLabelProvider(Form formContext)
+	{
+		this.form = formContext;
+	}
 
 	@Override
 	public String getText(Object value)
@@ -39,7 +50,13 @@ public class PartTypeLabelProvider extends LabelProvider
 		if (value instanceof Part)
 		{
 			String text = Part.getDisplayName(((Part)value).getPartType());
-			if (((Part)value).isOverrideElement())
+			Part part = (Part)value;
+			IPersist formAncestor = part.getAncestor(IRepository.FORMS);
+			if (formAncestor != form)
+			{
+				text += " (" + Messages.LabelInherited + ")";
+			}
+			else if (((Part)value).isOverrideElement())
 			{
 				text += " (" + Messages.LabelOverride + ")";
 			}
@@ -51,4 +68,11 @@ public class PartTypeLabelProvider extends LabelProvider
 		}
 		return Messages.LabelUnresolved;
 	}
+
+	public IPersist getPersist(Object value)
+	{
+		if (value instanceof Part) return (IPersist)value;
+		else return null;
+	}
+
 }

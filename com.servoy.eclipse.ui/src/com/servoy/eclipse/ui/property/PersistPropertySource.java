@@ -2972,7 +2972,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				{
 					return new ListSelectCellEditor(parent, "Select parent form", new FormContentProvider(flattenedEditingSolution, form), formLabelProvider,
 						new FormValueEditor(flattenedEditingSolution), readOnly, new FormContentProvider.FormListOptions(
-							FormListOptions.FormListType.HIERARCHY, null, false, true, false), SWT.NONE, null, "parentFormDialog")
+							FormListOptions.FormListType.HIERARCHY, null, true, false, false), SWT.NONE, null, "parentFormDialog")
 					{
 						@Override
 						protected Object openDialogBox(Control cellEditorWindow)
@@ -3002,7 +3002,56 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 										{
 											returnValue = null;
 										}
+									}
+									if (returnValue != null)
+									{
+										// here we decide what happens to the parts that are declared in this form; if new extended form
+										// has those parts, mark them as overriden; if we wouldn't do this you could end up with 2 body parts in the same form: one overriden and one notº
+										// an alternative would be to simply delete these parts
+										ArrayList<Part> inheritedParts = new ArrayList<Part>();
+										int newExtendsId = ((Integer)returnValue).intValue();
+										if (newExtendsId != Form.NAVIGATOR_NONE && newExtendsId != Form.NAVIGATOR_DEFAULT) // NAVIGATOR_NONE (0 default value as in contentspec) should be used but in the past either one or the other was used
+										{
+											Form newSuperForm = flattenedEditingSolution.getForm(((Integer)returnValue).intValue());
+											if (newSuperForm != null)
+											{
+												Iterator<Part> it = newSuperForm.getParts();
+												while (it.hasNext())
+													inheritedParts.add(it.next());
+												List<Form> ancestorForms = flattenedEditingSolution.getFormHierarchy(newSuperForm);
+												for (Form frm : ancestorForms)
+												{
+													it = frm.getParts();
+													while (it.hasNext())
+														inheritedParts.add(it.next());
+												}
+											}
+										}
 
+										Iterator<Part> it = f.getParts();
+										while (it.hasNext())
+										{
+											Part p = it.next();
+											Part ancestorP = null;
+											// find first ancestor of the same part type
+											for (Part aP : inheritedParts)
+											{
+												if (aP.getPartType() == p.getPartType())
+												{
+													ancestorP = aP;
+													break;
+												}
+											}
+											if (ancestorP != null)
+											{
+												// remove part type as it is inherited
+												Map<String, Object> pMap = p.getPropertiesMap();
+												pMap.remove(StaticContentSpecLoader.PROPERTY_PARTTYPE.getPropertyName());
+												p.copyPropertiesMap(pMap, true);
+
+												p.setExtendsID(ancestorP.getID());
+											}
+										}
 									}
 								}
 							}
@@ -3011,6 +3060,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					};
 				}
 			};
+
 			pd.setLabelProvider(formLabelProvider);
 			return pd;
 		}
