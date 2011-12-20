@@ -31,7 +31,7 @@ import org.eclipse.search.ui.text.FileTextSearchScope;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.IColumn;
 
 /**
  * An {@link ISearchQuery} implementation for finding dataproviders (columns) in dbi, frm, rel, val, js files.
@@ -40,11 +40,11 @@ import com.servoy.j2db.persistence.Column;
  */
 public class DataProviderSearch extends DLTKSearchEngineSearch
 {
-	private final Column column;
+	private final IColumn dataprovider;
 
-	public DataProviderSearch(Column column)
+	public DataProviderSearch(IColumn dataprovider)
 	{
-		this.column = column;
+		this.dataprovider = dataprovider;
 	}
 
 	/*
@@ -59,8 +59,8 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 		IResource[] scopes = getScopes(activeProject.getSolution());
 		final TextSearchRequestor collector = getResultCollector();
 
-		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.dbi", "*.frm", "*.rel", "*.val", "*.js" }, true);
-		TextSearchEngine.create().search(scope, collector, Pattern.compile("\\b" + column.getName() + "\\b"), monitor);
+		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm", "*.rel", "*.val", "*.js" }, true); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
+		TextSearchEngine.create().search(scope, collector, Pattern.compile("\\b" + dataprovider.getName() + "\\b"), monitor); //$NON-NLS-1$ //$NON-NLS-2$
 
 		return Status.OK_STATUS;
 	}
@@ -72,7 +72,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 	 */
 	public String getLabel()
 	{
-		return "Searching references to dataprovider '" + column.getName() + "'"; //$NON-NLS-1$//$NON-NLS-2$
+		return "Searching references to dataprovider '" + dataprovider.getName() + "'"; //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 }

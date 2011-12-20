@@ -47,11 +47,13 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
+import com.servoy.eclipse.ui.editors.table.actions.SearchForDataProvidersReferencesAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DuplicatePersistAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.MovePersistAction;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IValidateName;
@@ -66,6 +68,7 @@ public class AggregationsComposite extends Composite
 	private final Button removeButton;
 	private final MenuItem moveItem;
 	private final MenuItem duplicateItem;
+	private final MenuItem searchForReferencesItem;
 
 //	private final DataBindingContext m_bindingContext;
 	private final TreeViewer treeViewer;
@@ -145,6 +148,22 @@ public class AggregationsComposite extends Composite
 					action.setPersist((AggregateVariable)selection[0].getData());
 					action.run();
 					treeViewer.refresh();
+				}
+			}
+		});
+		searchForReferencesItem = new MenuItem(menu, SWT.PUSH);
+		searchForReferencesItem.setText("Search for Referecens");
+		searchForReferencesItem.setEnabled(true);
+		searchForReferencesItem.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				TreeItem[] selection = treeViewer.getTree().getSelection();
+				if (selection != null && selection.length > 0 && selection[0].getData() instanceof AggregateVariable)
+				{
+					SearchForDataProvidersReferencesAction searchAction = new SearchForDataProvidersReferencesAction((IColumn)selection[0].getData());
+					searchAction.run();
 				}
 			}
 		});

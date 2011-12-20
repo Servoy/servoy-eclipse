@@ -67,7 +67,7 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.editors.table.actions.CopyColumnNameAction;
-import com.servoy.eclipse.ui.editors.table.actions.SearchForColumnReferencesAction;
+import com.servoy.eclipse.ui.editors.table.actions.SearchForDataProvidersReferencesAction;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.FlattenedSolution;
@@ -94,7 +94,7 @@ public class ColumnComposite extends Composite
 	private final Button displayDataProviderID;
 
 	private CopyColumnNameAction copyColumnNameAction;
-	private SearchForColumnReferencesAction searchForReferences;
+	private SearchForDataProvidersReferencesAction searchForReferences;
 
 	/**
 	 * Create the composite
@@ -442,7 +442,7 @@ public class ColumnComposite extends Composite
 		nameViewerColumn.setEditingSupport(nameEditor);
 
 		copyColumnNameAction = new CopyColumnNameAction(tableViewer.getTable().getDisplay());//getSite().getShell().getDisplay());
-		searchForReferences = new SearchForColumnReferencesAction();
+		searchForReferences = new SearchForDataProvidersReferencesAction();
 		MenuManager menuMgr = new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuMgr.add(copyColumnNameAction);
 		menuMgr.add(searchForReferences);
