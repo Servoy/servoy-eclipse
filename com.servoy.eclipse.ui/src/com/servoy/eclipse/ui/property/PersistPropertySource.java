@@ -3033,10 +3033,10 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 										{
 											Part p = it.next();
 											Part ancestorP = null;
-											// find first ancestor of the same part type
+											// find first ancestor of the same part type for parts that cannot be duplicate in a form
 											for (Part aP : inheritedParts)
 											{
-												if (aP.getPartType() == p.getPartType())
+												if (aP.getPartType() == p.getPartType() && !Part.canBeMoved(p.getPartType()))
 												{
 													ancestorP = aP;
 													break;
