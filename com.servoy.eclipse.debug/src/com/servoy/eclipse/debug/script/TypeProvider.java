@@ -65,10 +65,9 @@ import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServoyBeanFactory;
-import com.servoy.j2db.component.ComponentFactory;
+import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataprocessing.DataException;
 import com.servoy.j2db.dataprocessing.FoundSet;
-import com.servoy.j2db.dataprocessing.IColumnConverterManager;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
@@ -97,7 +96,6 @@ import com.servoy.j2db.plugins.IBeanClassProvider;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.plugins.IPluginManager;
-import com.servoy.j2db.plugins.IPluginManagerInternal;
 import com.servoy.j2db.querybuilder.impl.QBAggregate;
 import com.servoy.j2db.querybuilder.impl.QBColumn;
 import com.servoy.j2db.querybuilder.impl.QBColumns;
@@ -510,7 +508,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	}
 
 
-	private class ScopesScopeCreator implements IScopeTypeCreator
+	private static class ScopesScopeCreator implements IScopeTypeCreator
 	{
 		/**
 		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
@@ -549,7 +547,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		}
 	}
 
-	private class ScopeScopeCreator implements IScopeTypeCreator
+	private static class ScopeScopeCreator implements IScopeTypeCreator
 	{
 		public Type createType(ITypeInfoContext context, String typeName)
 		{
@@ -585,7 +583,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		}
 	}
 
-	private class FormsScopeCreator implements IScopeTypeCreator
+	private static class FormsScopeCreator implements IScopeTypeCreator
 	{
 		private final ConcurrentMap<String, String> descriptions = new ConcurrentHashMap<String, String>();
 
@@ -755,7 +753,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		}
 	}
 
-	private class JSDataSetCreator implements IScopeTypeCreator
+	private static class JSDataSetCreator implements IScopeTypeCreator
 	{
 
 		/*
@@ -927,7 +925,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		}
 	}
 
-	private class FormScopeCreator implements IScopeTypeCreator
+	private static class FormScopeCreator implements IScopeTypeCreator
 	{
 		public Type createType(ITypeInfoContext context, String typeName)
 		{
@@ -1102,7 +1100,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		}
 	}
 
-	private class QueryBuilderColumnsCreator implements IScopeTypeCreator
+	private static class QueryBuilderColumnsCreator implements IScopeTypeCreator
 	{
 
 		public Type createType(ITypeInfoContext context, String typeName)
@@ -1271,8 +1269,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						Map<String, IDataProvider> allDataProvidersForTable = fsAndTable.flattenedSolution.getAllDataProvidersForTable(fsAndTable.table);
 						if (allDataProvidersForTable != null)
 						{
-							addDataProviders(allDataProvidersForTable.values().iterator(), type.getMembers(), context, fsAndTable.table.isMarkedAsHiddenInDeveloper(),
-								isVisible(), false);
+							addDataProviders(allDataProvidersForTable.values().iterator(), type.getMembers(), context,
+								fsAndTable.table.isMarkedAsHiddenInDeveloper(), isVisible(), false);
 						}
 					}
 					catch (RepositoryException e)
@@ -1305,33 +1303,30 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						if (ci != null && ci.isExcluded()) continue;
 					}
 				}
-				else
-				{
-					if (provider instanceof Column) continue;
-				}
+				else if (provider instanceof Column) continue;
+
 				Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 				property.setName(provider.getDataProviderID());
 				property.setAttribute(RESOURCE, provider);
 				property.setVisible(visible);
-				int dataProviderType = provider.getDataProviderType();
-				if (provider instanceof Column)
-				{
-					IPluginManagerInternal pluginManager = (IPluginManagerInternal)com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getPluginManager();
-					IColumnConverterManager converterManager = pluginManager.getColumnConverterManager();
-					dataProviderType = ComponentFactory.getConvertedType(converterManager, ((Column)provider).getColumnInfo(), dataProviderType);
-				}
-				switch (dataProviderType)
+
+				ComponentFormat componentFormat = ComponentFormat.getComponentFormat(null, provider,
+					com.servoy.eclipse.core.Activator.getDefault().getDesignClient());
+				switch (componentFormat.dpType)
 				{
 					case IColumnTypes.DATETIME :
 						property.setType(context.getTypeRef("Date"));
 						break;
+
 					case IColumnTypes.INTEGER :
 					case IColumnTypes.NUMBER :
 						property.setType(context.getTypeRef("Number"));
 						break;
+
 					case IColumnTypes.TEXT :
 						property.setType(context.getTypeRef("String"));
 						break;
+
 					case IColumnTypes.MEDIA :
 						// for now don't return a type (so that anything is valid)
 						// mamybe we should return Array<byte> but then we also have to check column converters.
@@ -1361,7 +1356,6 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				members.add(property);
 			}
 		}
-
 
 		protected boolean isVisible()
 		{

@@ -17,9 +17,8 @@
 package com.servoy.eclipse.ui.editors.table;
 
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,17 +34,19 @@ import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
+import org.json.JSONException;
 
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.util.MapEntryValueEditor;
+import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IColumnValidator;
 import com.servoy.j2db.dataprocessing.IPropertyDescriptorProvider;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
-import com.servoy.j2db.util.OpenProperties;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
 public class ColumnValidationComposite extends Composite
@@ -190,7 +191,7 @@ public class ColumnValidationComposite extends Composite
 		if (column != null)
 		{
 			ColumnInfo columnInfo = column.getColumnInfo();
-			OpenProperties op = new OpenProperties();
+			Map<String, String> props = new HashMap<String, String>();
 
 			IColumnValidator conv = getSelectedValidator();
 			if (conv != null)
@@ -198,19 +199,20 @@ public class ColumnValidationComposite extends Composite
 				//make sure it lists all defaults
 				if (conv.getDefaultProperties() != null)
 				{
-					op.putAll(conv.getDefaultProperties());
+					props.putAll(conv.getDefaultProperties());
 				}
 
-				if (columnInfo.getValidatorProperties() != null)
+				try
 				{
-					try
+					Map<String, String> parsedValidatorProperties = ComponentFactory.parseJSonProperties(columnInfo.getValidatorProperties());
+					if (parsedValidatorProperties != null)
 					{
-						op.load(new StringReader(columnInfo.getValidatorProperties()));
+						props.putAll(parsedValidatorProperties);
 					}
-					catch (IOException e)
-					{
-						ServoyLog.logError(e);
-					}
+				}
+				catch (IOException e)
+				{
+					ServoyLog.logError(e);
 				}
 			}
 			if (conv instanceof IPropertyDescriptorProvider)
@@ -221,8 +223,8 @@ public class ColumnValidationComposite extends Composite
 			{
 				relayEditorProvider.setPropertyDescriptorProvider(null);
 			}
-			tableViewer.setInput(op.entrySet());
-			if (op.size() > 0) table.select(0);
+			tableViewer.setInput(props.entrySet());
+			if (props.size() > 0) table.select(0);
 		}
 	}
 
@@ -233,6 +235,7 @@ public class ColumnValidationComposite extends Composite
 			ColumnInfo columnInfo = column.getColumnInfo();
 
 			IColumnValidator conv = getSelectedValidator();
+			String props = null;
 			if (conv != null)
 			{
 				columnInfo.setValidatorName(conv.getName());
@@ -240,7 +243,7 @@ public class ColumnValidationComposite extends Composite
 				Set<Map.Entry<String, String>> data = (Set<Map.Entry<String, String>>)tableViewer.getInput();
 				if (data != null && data.size() > 0)
 				{
-					OpenProperties op = new OpenProperties();
+					ServoyJSONObject json = new ServoyJSONObject();
 					Map<String, String> defaults = conv.getDefaultProperties();
 
 					//subtract defaults, makes save smaller
@@ -250,34 +253,28 @@ public class ColumnValidationComposite extends Composite
 						Map.Entry<String, String> pair = it.next();
 						if (defaults == null || (defaults != null && !Utils.equalObjects(defaults.get(pair.getKey()), pair.getValue())))
 						{
-							op.put(pair.getKey(), pair.getValue());
+							try
+							{
+								json.put(pair.getKey(), pair.getValue());
+							}
+							catch (JSONException e)
+							{
+								ServoyLog.logError(e);
+							}
 						}
 					}
 
-					StringWriter sw = new StringWriter();
-					try
+					if (json.length() > 0)
 					{
-						op.store(sw, ""); //$NON-NLS-1$
+						props = json.toString(true).trim();
 					}
-					catch (IOException e)
-					{
-						ServoyLog.logError(e);
-					}
-					String s = sw.toString();
-					s = s.trim();
-					if (s.length() == 0 || op.size() == 0) s = null;
-					columnInfo.setValidatorProperties(s);
-				}
-				else
-				{
-					columnInfo.setValidatorProperties(null);
 				}
 			}
 			else
 			{
 				columnInfo.setValidatorName(null);
-				columnInfo.setValidatorProperties(null);
 			}
+			columnInfo.setValidatorProperties(props);
 			column.flagColumnInfoChanged();
 		}
 	}

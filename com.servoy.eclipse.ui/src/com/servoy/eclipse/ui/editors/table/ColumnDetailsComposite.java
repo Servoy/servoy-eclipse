@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
@@ -57,6 +58,7 @@ import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.views.TreeSelectObservableValue;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.eclipse.ui.wizards.SuggestForeignTypesWizard;
+import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.RepositoryException;
 
@@ -129,17 +131,18 @@ public class ColumnDetailsComposite extends Composite
 			{
 				if (column != null)
 				{
-					FormatDialog fd = new FormatDialog(getShell(), defaultFormat.getText(), column.getDataProviderType());
+					// base the format dialog on the type of the default converter
+					ComponentFormat componentFormat = ComponentFormat.getComponentFormat(null, column, Activator.getDefault().getDesignClient());
+					FormatDialog fd = new FormatDialog(getShell(), defaultFormat.getText(), componentFormat.dpType);
 					fd.open();
 					if (fd.getReturnCode() != Window.CANCEL)
 					{
-						defaultFormat.setText(fd.getFormat());
+						String property = fd.getFormatProperty();
+						defaultFormat.setText(property == null ? "" : property); // TODO: use label provider to hide json format
 					}
 				}
 			}
 		});
-//		UIUtils.setDefaultVisibleItemCount(defaultFormatCombo);
-//		defaultFormatCombo.setItems(DATE_FORMAT_VALUES);
 
 		foreignTypeTreeSelect = new TreeSelectViewer(this, SWT.NONE, TableValueEditor.INSTANCE);
 		foreignTypeTreeSelect.setTitleText("Select foreign table");

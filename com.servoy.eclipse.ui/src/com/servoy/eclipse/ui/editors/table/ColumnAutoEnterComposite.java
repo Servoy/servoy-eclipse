@@ -57,6 +57,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -78,6 +79,7 @@ import com.servoy.eclipse.ui.util.IControlFactory;
 import com.servoy.eclipse.ui.views.TreeSelectObservableValue;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnTypes;
@@ -344,31 +346,37 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		columnAutoEnterDBSeqComposite.initDataBindings(c);
 		ColumnInfo columnInfo = c.getColumnInfo();
 		List<String> systemTypes = new ArrayList<String>();
-		int type = Column.mapToDefaultType(c.getType());
+
+		// use dataprovider type as defined by column converter
+		ComponentFormat componentFormat = ComponentFormat.getComponentFormat(null, c, Activator.getDefault().getDesignClient());
+		int type = componentFormat.dpType;
 		systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.NO_SYSTEM_VALUE));//no system value
 		systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.DATABASE_MANAGED));
-		if (type == IColumnTypes.DATETIME) systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER,
-			ColumnInfo.SYSTEM_VALUE_CREATION_DATETIME));
-		if (type == IColumnTypes.DATETIME) systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER,
-			ColumnInfo.SYSTEM_VALUE_CREATION_SERVER_DATETIME));
+		if (type == IColumnTypes.DATETIME)
+		{
+			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_CREATION_DATETIME));
+			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_CREATION_SERVER_DATETIME));
+		}
 		if (type == IColumnTypes.TEXT) systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER,
 			ColumnInfo.SYSTEM_VALUE_CREATION_USERNAME));
 		if (type == IColumnTypes.TEXT || type == IColumnTypes.INTEGER || type == IColumnTypes.NUMBER) systemTypes.add(columnInfo.getAutoEnterSubTypeString(
 			ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_CREATION_USERUID));
-		if (type == IColumnTypes.DATETIME) systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER,
-			ColumnInfo.SYSTEM_VALUE_MODIFICATION_DATETIME));
-		if (type == IColumnTypes.DATETIME) systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER,
-			ColumnInfo.SYSTEM_VALUE_MODIFICATION_SERVER_DATETIME));
+		if (type == IColumnTypes.DATETIME)
+		{
+			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_MODIFICATION_DATETIME));
+			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_MODIFICATION_SERVER_DATETIME));
+		}
 		if (type == IColumnTypes.TEXT) systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER,
 			ColumnInfo.SYSTEM_VALUE_MODIFICATION_USERNAME));
 		if (type == IColumnTypes.TEXT || type == IColumnTypes.INTEGER || type == IColumnTypes.NUMBER) systemTypes.add(columnInfo.getAutoEnterSubTypeString(
 			ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_MODIFICATION_USERUID));
-		Object[] oSystem = systemTypes.toArray();
+
 		String[] system = new String[systemTypes.size()];
-		for (int i = 0; i < oSystem.length; i++)
+		for (int i = 0; i < systemTypes.size(); i++)
 		{
-			system[i] = oSystem[i].toString();
+			system[i] = systemTypes.get(i).toString();
 		}
+
 		systemValueCombo.removeAll();
 		systemValueCombo.setItems(system);
 
@@ -448,7 +456,6 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		IObservableValue customValueTextObserveWidget = SWTObservables.observeText(customValueText, SWT.Modify);
 		IObservableValue getCILookUpValueObserveValue = PojoObservables.observeValue(columnInfoBean, "lookupValue");
 		IObservableValue lookUpValueSelectObserveWidget = new TreeSelectObservableValue(lookupValueSelect, IDataProvider.class);
-
 
 		bindingContext = new DataBindingContext();
 
@@ -604,7 +611,6 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 					return;
 				}
 			}
-
 		}
 		tabFolder.setVisible(false);
 
@@ -754,9 +760,13 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			{
 				return Status.OK_STATUS;
 			}
-			IDataProvider dataProvider = (IDataProvider)value;
-			int otherType = Column.mapToDefaultType(dataProvider.getDataProviderType());
-			int valueType = Column.mapToDefaultType(column.getType());
+
+			// use dataprovider type as defined by column converter
+			ComponentFormat otherComponentFormat = ComponentFormat.getComponentFormat(null, (IDataProvider)value, Activator.getDefault().getDesignClient());
+			ComponentFormat columnComponentFormat = ComponentFormat.getComponentFormat(null, column, Activator.getDefault().getDesignClient());
+
+			int otherType = otherComponentFormat.dpType;
+			int valueType = columnComponentFormat.dpType;
 			boolean typeMismatch = false;
 			if (valueType == otherType)
 			{

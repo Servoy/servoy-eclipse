@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -125,6 +126,7 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.FormatParser;
+import com.servoy.j2db.util.FormatParser.ParsedFormat;
 import com.servoy.j2db.util.IntHashMap;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
@@ -1401,40 +1403,38 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												}
 												if (format != null && format.length() > 0)
 												{
-													FormatParser fp = new FormatParser(format);
-													if (fp.getDisplayFormat() != null && !fp.getDisplayFormat().startsWith("i18n:"))
+													ParsedFormat parsedFormat = FormatParser.parseFormatProperty(format);
+													if (parsedFormat.getDisplayFormat() != null && !parsedFormat.getDisplayFormat().startsWith("i18n:"))
 													{
+														// TODO: check type defined by column converter
 														int dataType = dataProvider.getDataProviderType();
-														boolean addMarker = false;
 														try
 														{
 															if (dataType == IColumnTypes.DATETIME)
 															{
-																new SimpleDateFormat(fp.getDisplayFormat());
-																if (fp.getEditFormat() != null) new SimpleDateFormat(fp.getEditFormat());
+																new SimpleDateFormat(parsedFormat.getDisplayFormat());
+																if (parsedFormat.getEditFormat() != null) new SimpleDateFormat(parsedFormat.getEditFormat());
 															}
 															else if (dataType == IColumnTypes.INTEGER || dataType == IColumnTypes.NUMBER)
 															{
-																new RoundHalfUpDecimalFormat(fp.getDisplayFormat(), Locale.getDefault());
-																if (fp.getEditFormat() != null) new RoundHalfUpDecimalFormat(fp.getEditFormat(),
-																	Locale.getDefault());
+																new RoundHalfUpDecimalFormat(parsedFormat.getDisplayFormat(), Locale.getDefault());
+																if (parsedFormat.getEditFormat() != null) new RoundHalfUpDecimalFormat(
+																	parsedFormat.getEditFormat(), Locale.getDefault());
 															}
 														}
 														catch (Exception ex)
 														{
-															addMarker = true;
 															Debug.trace(ex);
-														}
-														if (addMarker)
-														{
+
 															ServoyMarker mk;
 															if (elementName == null)
 															{
-																mk = MarkerMessages.FormFormatInvalid.fill(inForm, fp.getFormat());
+																mk = MarkerMessages.FormFormatInvalid.fill(inForm, parsedFormat.toFormatProperty());
 															}
 															else
 															{
-																mk = MarkerMessages.FormFormatOnElementInvalid.fill(elementName, inForm, fp.getFormat());
+																mk = MarkerMessages.FormFormatOnElementInvalid.fill(elementName, inForm,
+																	parsedFormat.toFormatProperty());
 															}
 															addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING,
 																IMarker.PRIORITY_NORMAL, null, o);
@@ -2422,10 +2422,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 			}
 
-
-			for (String missingServer : missingServers.keySet())
+			for (Entry<String, IPersist> entry : missingServers.entrySet())
 			{
-				IPersist persist = missingServers.get(missingServer);
+				String missingServer = entry.getKey();
+				IPersist persist = entry.getValue();
 				ServoyMarker mk = MarkerMessages.ServerNotAccessibleFirstOccurence.fill(project.getName(), missingServer);
 				IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_HIGH, null, persist);
 				try
@@ -2438,9 +2438,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					ServoyLog.logError(e);
 				}
-
 			}
-
 		}
 		else
 		{
@@ -3037,8 +3035,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								ServoyMarker mk = MarkerMessages.ColumnUUIDFlagNotSet.fill(tableName, column.getName());
 								addMarker(res, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, null);
 							}
-							if ((column.getSequenceType() == ColumnInfo.UUID_GENERATOR && (Column.mapToDefaultType(column.getType()) != IColumnTypes.TEXT && Column.mapToDefaultType(column.getType()) != IColumnTypes.MEDIA)) ||
-								(column.getSequenceType() == ColumnInfo.SERVOY_SEQUENCE && (Column.mapToDefaultType(column.getType()) != IColumnTypes.INTEGER && Column.mapToDefaultType(column.getType()) != IColumnTypes.NUMBER)))
+							// TODO: check type defined by column converter
+							if ((column.getSequenceType() == ColumnInfo.UUID_GENERATOR && (column.getDataProviderType() != IColumnTypes.TEXT && column.getDataProviderType() != IColumnTypes.MEDIA)) ||
+								(column.getSequenceType() == ColumnInfo.SERVOY_SEQUENCE && (column.getDataProviderType() != IColumnTypes.INTEGER && column.getDataProviderType() != IColumnTypes.NUMBER)))
 							{
 								ServoyMarker mk = MarkerMessages.ColumnIncompatibleTypeForSequence.fill(tableName, column.getName());
 								addMarker(res, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, null);

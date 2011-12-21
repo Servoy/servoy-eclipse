@@ -53,6 +53,7 @@ import com.servoy.j2db.FormController;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServiceProvider;
 import com.servoy.j2db.component.ComponentFactory;
+import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
@@ -359,12 +360,14 @@ public class ElementFactory
 					field.setText(ci.getTitleText());
 				}
 			}
-			int type = dataProvider.getDataProviderType();
-			if (type == IColumnTypes.MEDIA)
+
+			// use dataprovider type as defined by converter
+			ComponentFormat componentFormat = ComponentFormat.getComponentFormat(null, dataProvider, Activator.getDefault().getDesignClient());
+			if (componentFormat.dpType == IColumnTypes.MEDIA)
 			{
 				field.setDisplayType(Field.IMAGE_MEDIA);
 			}
-			else if (type == IColumnTypes.DATETIME)
+			else if (componentFormat.dpType == IColumnTypes.DATETIME)
 			{
 				field.setDisplayType(Field.CALENDAR);
 			}

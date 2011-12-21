@@ -13,47 +13,76 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors;
 
+import org.eclipse.core.databinding.observable.ChangeEvent;
+import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.grouplayout.GroupLayout;
+import org.eclipse.swt.layout.grouplayout.LayoutStyle;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Widget;
 
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.dataprocessing.IUIConverter;
+import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumnTypes;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.util.FormatParser;
+import com.servoy.j2db.util.FormatParser.ParsedFormat;
 
+/**
+ * Dialog for format options, includes options to configure UI converters
+ * 
+ * @author jcompagner, rgansevles
+ *
+ */
 public class FormatDialog extends Dialog
 {
-	private String format;
+	private ParsedFormat parsedFormat;
 
-	private IFormatTextContainer container = null;
+	private Composite uiConverterContainer = null;
 
-	private final int type;
+	private Composite formatContainer = null;
+	private IFormatTextContainer formatComposite = null;
+
+	private final int dataproviderType;
+	private Integer convertedType;
+
+	private Button useConvertersCheckbutton;
+
+	private ConvertersComposite<IUIConverter> uiConvertersComposite;
 
 	/**
 	 * @param parent
-	 * @param type 
-	 * @param formatCellEditor TODO
+	 * @param formatProperty
+	 * @param objectType
 	 */
-	public FormatDialog(Shell parent, String format, int type)
+	public FormatDialog(Shell parent, String formatProperty, int objectType)
 	{
 		super(parent);
-		this.format = format;
-		this.type = type;
+		this.parsedFormat = FormatParser.parseFormatProperty(formatProperty);
+		this.dataproviderType = objectType;
 	}
 
 	/**
 	 * @param value
 	 */
-	public String getFormat()
+	public String getFormatProperty()
 	{
-		return format;
+		return parsedFormat.toFormatProperty();
 	}
 
 	@Override
@@ -76,60 +105,202 @@ public class FormatDialog extends Dialog
 	@Override
 	protected Control createDialogArea(Composite parent)
 	{
-
+		// create components
 		Composite composite = (Composite)super.createDialogArea(parent);
-		switch (type)
+		composite.setLayout(new GridLayout(1, false));
+
+		uiConverterContainer = new Composite(composite, SWT.BORDER);
+		uiConverterContainer.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
+
+		useConvertersCheckbutton = new Button(uiConverterContainer, SWT.CHECK);
+		useConvertersCheckbutton.setText("Use a UI converter");
+
+		formatContainer = new Composite(composite, SWT.NONE);
+		formatContainer.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true, 1, 1));
+		formatContainer.setLayout(new GridLayout());
+
+		uiConvertersComposite = new ConvertersComposite<IUIConverter>(uiConverterContainer, SWT.NONE)
 		{
-			case IColumnTypes.DATETIME :
+			@Override
+			protected int[] getSupportedTypes(IUIConverter converter)
 			{
-				container = new FormatDateContainer(composite, SWT.NONE);
-				((Composite)container).setLayoutData(new GridData(GridData.FILL_BOTH));
-				container.setFormat(format);
-				getShell().setText("Edit date format property");
-				break;
+				return converter.getSupportedDataproviderTypes();
 			}
-			case IColumnTypes.INTEGER :
-			case IColumnTypes.NUMBER :
-			{
-				container = new FormatIntegerContainer(composite, SWT.NONE);
-				((Composite)container).setLayoutData(new GridData(GridData.FILL_BOTH));
-				container.setFormat(format);
-				getShell().setText("Edit integer/number format property");
-				break;
-			}
-			case IColumnTypes.TEXT :
-			{
-				container = new FormatTextContainer(composite, SWT.NONE);
-				((Composite)container).setLayoutData(new GridData(GridData.FILL_BOTH));
-				container.setFormat(format);
-				getShell().setText("Edit text format property");
-				break;
-			}
-		}
-		if (container == null)
+		};
+
+		// layout components
+		GroupLayout gl_uiConverterContainer = new GroupLayout(uiConverterContainer);
+		gl_uiConverterContainer.setHorizontalGroup(gl_uiConverterContainer.createParallelGroup(GroupLayout.LEADING).add(
+			gl_uiConverterContainer.createSequentialGroup().add(
+				gl_uiConverterContainer.createParallelGroup(GroupLayout.LEADING).add(
+					gl_uiConverterContainer.createSequentialGroup().addContainerGap().add(useConvertersCheckbutton, GroupLayout.PREFERRED_SIZE, 169,
+						GroupLayout.PREFERRED_SIZE)).add(uiConvertersComposite)).addContainerGap()));
+		gl_uiConverterContainer.setVerticalGroup(gl_uiConverterContainer.createParallelGroup(GroupLayout.LEADING).add(
+			gl_uiConverterContainer.createSequentialGroup().add(useConvertersCheckbutton, GroupLayout.PREFERRED_SIZE, 39, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+				LayoutStyle.RELATED).add(uiConvertersComposite, GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)));
+
+		uiConverterContainer.setLayout(gl_uiConverterContainer);
+
+		// set data
+		useConvertersCheckbutton.setSelection(parsedFormat.getUIConverterName() != null);
+		uiConvertersComposite.setConverters(dataproviderType, parsedFormat.getUIConverterName(),
+			ApplicationServerSingleton.get().getPluginManager().getUIConverterManager().getConverters().values());
+
+		setPropertiesForSelectedConverter();
+		recreateFormatTextContainer();
+		layoutForUIConverters();
+
+		// add listeners
+		useConvertersCheckbutton.addSelectionListener(new SelectionAdapter()
 		{
-			container = new FormatTextContainer(composite, SWT.NONE);
-			((Composite)container).setLayoutData(new GridData(GridData.FILL_BOTH));
-			container.setFormat(format);
-		}
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				handleUseConvertersChanged();
+				layoutForUIConverters();
+				recreateFormatTextContainer();
+				((Composite)getContents()).layout(true, true);
+			}
+		});
+
+		uiConvertersComposite.addConverterChangedListener(new ISelectionChangedListener()
+		{
+			public void selectionChanged(SelectionChangedEvent event)
+			{
+				handleConverterChanged();
+				setPropertiesForSelectedConverter();
+				recreateFormatTextContainer();
+				((Composite)getContents()).layout(true, true);
+			}
+		});
+
+		uiConvertersComposite.addPropertyChangeListener(new IChangeListener()
+		{
+			public void handleChange(ChangeEvent event)
+			{
+				handleConverterPropertyChanged();
+				recreateFormatTextContainer();
+				((Composite)getContents()).layout(true, true);
+			}
+		});
+
 		return composite;
 	}
 
+	protected void handleUseConvertersChanged()
+	{
+		if (!useConvertersCheckbutton.getSelection())
+		{
+			parsedFormat = parsedFormat.getCopy(null, null);
+		}
+	}
+
+	protected void handleConverterChanged()
+	{
+		if (useConvertersCheckbutton.getSelection())
+		{
+			IUIConverter conv = uiConvertersComposite.getSelectedConverter();
+			parsedFormat = parsedFormat.getCopy(conv == null ? null : conv.getName(), null);
+		}
+	}
+
+	protected void handleConverterPropertyChanged()
+	{
+		if (useConvertersCheckbutton.getSelection())
+		{
+			parsedFormat = parsedFormat.getCopy(parsedFormat.getUIConverterName(), uiConvertersComposite.getProperties());
+		}
+	}
+
+	protected void layoutForUIConverters()
+	{
+		boolean useConverters = useConvertersCheckbutton.getSelection();
+		uiConvertersComposite.setVisible(useConverters);
+		((GridData)uiConverterContainer.getLayoutData()).heightHint = useConverters ? -1 : 50;
+	}
+
+	protected void recreateFormatTextContainer()
+	{
+		int newConvertedType;
+		if (convertedType == null)
+		{
+			newConvertedType = calculateConvertedType();
+		}
+		else if (convertedType.intValue() == (newConvertedType = calculateConvertedType()))
+		{
+			// type unchanged
+			return;
+		}
+
+		convertedType = Integer.valueOf(newConvertedType);
+
+		// recreate format container
+		if (formatComposite != null)
+		{
+			((Widget)formatComposite).dispose();
+			formatComposite = null;
+		}
+
+		String title;
+		switch (newConvertedType)
+		{
+			case IColumnTypes.DATETIME :
+
+				formatComposite = new FormatDateContainer(formatContainer, SWT.NONE);
+				title = "Edit date format property";
+				break;
+
+			case IColumnTypes.INTEGER :
+			case IColumnTypes.NUMBER :
+
+				formatComposite = new FormatIntegerContainer(formatContainer, SWT.NONE);
+				title = "Edit integer/number format property";
+				break;
+
+			default :
+				formatComposite = new FormatTextContainer(formatContainer, SWT.NONE);
+				title = "Edit text format property";
+		}
+
+		((Composite)formatComposite).setLayoutData(new GridData(GridData.FILL_BOTH));
+
+		formatComposite.setParsedFormat(parsedFormat);
+
+		getShell().setText(title);
+	}
+
+	protected int calculateConvertedType()
+	{
+		if (useConvertersCheckbutton.getSelection())
+		{
+			IUIConverter conv = uiConvertersComposite.getSelectedConverter();
+			if (conv != null)
+			{
+				int uiType = conv.getToObjectType(uiConvertersComposite.getProperties());
+				if (uiType != Integer.MAX_VALUE)
+				{
+					return Column.mapToDefaultType(uiType);
+				}
+			}
+		}
+
+		return dataproviderType;
+	}
+
 	/**
-	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
+	 * 
 	 */
+	protected void setPropertiesForSelectedConverter()
+	{
+		uiConvertersComposite.setProperties(parsedFormat.getUIConverterProperties());
+	}
+
 	@Override
 	protected void okPressed()
 	{
-		try
-		{
-			this.format = container.getFormat();
-			super.okPressed();
-		}
-		catch (Exception e)
-		{
-			MessageDialog.openError(getShell(), "Error in format", e.getLocalizedMessage()); //$NON-NLS-1$
-		}
+		parsedFormat = FormatParser.parseFormatString(formatComposite.getFormatString(), parsedFormat.getUIConverterName(),
+			parsedFormat.getUIConverterProperties());
+		super.okPressed();
 	}
 
 	@Override
@@ -140,9 +311,9 @@ public class FormatDialog extends Dialog
 
 	public static interface IFormatTextContainer
 	{
-		String getFormat();
+		String getFormatString();
 
-		void setFormat(String format);
+		void setParsedFormat(ParsedFormat parsedFormat);
 	}
 
 }

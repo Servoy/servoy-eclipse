@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors;
 
 import java.text.SimpleDateFormat;
@@ -46,7 +46,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.ui.editors.FormatDialog.IFormatTextContainer;
-import com.servoy.j2db.util.FormatParser;
+import com.servoy.j2db.util.FormatParser.ParsedFormat;
 
 /**
  * @author jcompagner
@@ -233,7 +233,7 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 	 * @see com.servoy.eclipse.ui.editors.FormatCellEditor.IFormatTextContainer#getFormat()
 	 */
 	@SuppressWarnings("nls")
-	public String getFormat()
+	public String getFormatString()
 	{
 		String format = displayFormat.getText();
 		if (format.length() > 0)
@@ -261,7 +261,7 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 	 * @see com.servoy.eclipse.ui.editors.FormatCellEditor.IFormatTextContainer#setFormat(java.lang.String)
 	 */
 	@SuppressWarnings("nls")
-	public void setFormat(String format)
+	public void setParsedFormat(ParsedFormat parsedFormat)
 	{
 		displayFormat.setText("");
 		editFormat.setText("");
@@ -269,18 +269,17 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 		useMask.setSelection(false);
 		placeholder.setEnabled(false);
 		editFormat.setEnabled(true);
-		if (format != null)
+		if (parsedFormat != null)
 		{
-			FormatParser fp = new FormatParser(format);
-			displayFormat.setText(fp.getDisplayFormat() != null ? fp.getDisplayFormat() : "");
-			if (fp.isMask())
+			displayFormat.setText(parsedFormat.getDisplayFormat() != null ? parsedFormat.getDisplayFormat() : "");
+			if (parsedFormat.isMask())
 			{
 				useMask.setSelection(true);
 				placeholder.setEnabled(true);
 				editFormat.setEnabled(false);
-				if (fp.getPlaceHolderCharacter() != 0) placeholder.setText(Character.toString(fp.getPlaceHolderCharacter()));
+				if (parsedFormat.getPlaceHolderCharacter() != 0) placeholder.setText(Character.toString(parsedFormat.getPlaceHolderCharacter()));
 			}
-			else if (fp.hasEditFormat()) editFormat.setText(fp.getEditFormat());
+			else if (parsedFormat.hasEditFormat()) editFormat.setText(parsedFormat.getEditFormat());
 		}
 	}
 }

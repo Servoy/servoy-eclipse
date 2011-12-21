@@ -174,28 +174,30 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 					pi.setSequenceType(i);
 					pi.setFlag(Column.UUID_COLUMN, i == ColumnInfo.UUID_GENERATOR);
 					column = pi;
+					int dpType = pi.getDataProviderType();
 					changeSupport.fireEvent(new ChangeEvent(observable));
 					if (i == ColumnInfo.DATABASE_IDENTITY && i != previousSeqType && pi.getTable().getExistInDB())
 					{
 						MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
 							"Servoy won't alter the table for you, so you must be sure that it is a identity/auto-increment column!");
 					}
-					if (i == ColumnInfo.SERVOY_SEQUENCE &&
-						(Column.mapToDefaultType(pi.getType()) != IColumnTypes.INTEGER && Column.mapToDefaultType(pi.getType()) != IColumnTypes.NUMBER))
+					else if (i == ColumnInfo.SERVOY_SEQUENCE && dpType != IColumnTypes.INTEGER && dpType != IColumnTypes.NUMBER)
 					{
 						MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
 							"Servoy sequence is only supported for numeric column types.");
 					}
-					if (i == ColumnInfo.UUID_GENERATOR &&
-						(Column.mapToDefaultType(pi.getType()) != IColumnTypes.TEXT && Column.mapToDefaultType(pi.getType()) != IColumnTypes.MEDIA))
+					else if (i == ColumnInfo.UUID_GENERATOR)
 					{
-						MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
-							"UUID generator sequence is only supported for text and media column types.");
-					}
-					else if (i == ColumnInfo.UUID_GENERATOR && pi.getLength() > 0 && pi.getLength() < 36)
-					{
-						MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
-							"UUID generator column has too small length.");
+						if (dpType != IColumnTypes.TEXT && dpType != IColumnTypes.MEDIA)
+						{
+							MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
+								"UUID generator sequence is only supported for text and media column types.");
+						}
+						else if (pi.getLength() > 0 && pi.getLength() < 36)
+						{
+							MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
+								"UUID generator column has too small length.");
+						}
 					}
 					break;
 				}
@@ -203,7 +205,6 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 			getViewer().update(element, null);
 			pi.flagColumnInfoChanged();
 		}
-
 	}
 
 	public Column getColumn()

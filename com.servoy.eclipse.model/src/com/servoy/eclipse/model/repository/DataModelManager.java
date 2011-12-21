@@ -332,7 +332,7 @@ public class DataModelManager implements IColumnInfoManager
 		int element_id = ApplicationServerSingleton.get().getDeveloperRepository().getNewElementID(null);
 		ColumnInfo ci = new ColumnInfo(element_id, false);
 		if (createMissingServoySequence && c.getRowIdentType() != Column.NORMAL_COLUMN && c.getSequenceType() == ColumnInfo.NO_SEQUENCE_SELECTED &&
-			(Column.mapToDefaultType(c.getType()) == IColumnTypes.INTEGER || Column.mapToDefaultType(c.getType()) == IColumnTypes.NUMBER))
+			(c.getDataProviderType() == IColumnTypes.INTEGER || c.getDataProviderType() == IColumnTypes.NUMBER))
 		{
 			ci.setAutoEnterType(ColumnInfo.SEQUENCE_AUTO_ENTER);
 			ci.setAutoEnterSubType(ColumnInfo.SERVOY_SEQUENCE);

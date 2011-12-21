@@ -24,7 +24,7 @@ import org.eclipse.swt.widgets.Control;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.component.ComponentFactory;
+import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
@@ -34,7 +34,6 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.util.Pair;
 
 /**
  * @author jcompagner
@@ -76,16 +75,16 @@ public class FormatCellEditor extends TextDialogCellEditor
 				Form form = (Form)supportChilds;
 				IDataProviderLookup dataproviderLookup = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getDataproviderLookup(
 					null, form);
-				Pair<String, Integer> fieldFormat = null;
+				ComponentFormat componentFormat = null;
 				if (persist instanceof Field)
 				{
-					fieldFormat = ComponentFactory.getComponentFormat(((Field)persist).getFormat(), dataProviderID, dataproviderLookup,
+					componentFormat = ComponentFormat.getComponentFormat(((Field)persist).getFormat(), dataProviderID, dataproviderLookup,
 						Activator.getDefault().getDesignClient());
 
 				}
-				if (fieldFormat != null)
+				if (componentFormat != null)
 				{
-					type = fieldFormat.getRight().intValue();
+					type = componentFormat.dpType;
 				}
 				else
 				{
@@ -110,6 +109,6 @@ public class FormatCellEditor extends TextDialogCellEditor
 		{
 			return TextDialogCellEditor.CANCELVALUE;
 		}
-		return dialog.getFormat();
+		return dialog.getFormatProperty();
 	}
 }

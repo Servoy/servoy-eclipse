@@ -74,6 +74,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE.SharedImages;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.SerialRule;
@@ -84,6 +85,7 @@ import com.servoy.eclipse.ui.editors.table.ColumnLabelProvider;
 import com.servoy.eclipse.ui.util.IColumnComparator;
 import com.servoy.eclipse.ui.util.ITableComparator;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumn;
@@ -98,6 +100,13 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.ISQLCondition;
 import com.servoy.j2db.util.ScopesUtils;
+
+/**
+ * Wizard to suggest foreign types for a column.
+ * 
+ * @author gersze
+ *
+ */
 
 public class SuggestForeignTypesWizard extends Wizard
 {
@@ -183,7 +192,6 @@ public class SuggestForeignTypesWizard extends Wizard
 					});
 					return Status.CANCEL_STATUS;
 				}
-
 			}
 		};
 
@@ -195,9 +203,7 @@ public class SuggestForeignTypesWizard extends Wizard
 		return true;
 	}
 
-	public void init(@SuppressWarnings("unused")
-	IWorkbench workbench, @SuppressWarnings("unused")
-	IStructuredSelection selection)
+	public void init(@SuppressWarnings("unused") IWorkbench workbench, @SuppressWarnings("unused") IStructuredSelection selection)
 	{
 		if (!hasServer) serverSelectionPage = new ServerSelectionPage("serverSelection"); //$NON-NLS-1$
 		suggestionPage = new SuggestionPage("suggestionPage"); //$NON-NLS-1$
@@ -701,14 +707,19 @@ public class SuggestForeignTypesWizard extends Wizard
 	private double matchNames(String fkTable, Column fkColumn, Column pkColumn)
 	{
 		// First check the types. If not the same, don't check further.
-		int fkType = Column.mapToDefaultType(fkColumn.getDataProviderType());
-		int pkType = Column.mapToDefaultType(pkColumn.getDataProviderType());
+
+		// use dataprovider type as defined by converter
+		ComponentFormat fkComponentFormat = ComponentFormat.getComponentFormat(null, fkColumn, Activator.getDefault().getDesignClient());
+		ComponentFormat pkComponentFormat = ComponentFormat.getComponentFormat(null, pkColumn, Activator.getDefault().getDesignClient());
 
 		// We try to match only INTEGER, NUMBER and STRING columns.
-		if (fkType != IColumnTypes.INTEGER && fkType != IColumnTypes.NUMBER && fkType != IColumnTypes.TEXT) return 0;
-		if (pkType != IColumnTypes.INTEGER && pkType != IColumnTypes.NUMBER && pkType != IColumnTypes.TEXT) return 0;
+		if (fkComponentFormat.dpType != IColumnTypes.INTEGER && fkComponentFormat.dpType != IColumnTypes.NUMBER &&
+			fkComponentFormat.dpType != IColumnTypes.TEXT) return 0;
+		if (pkComponentFormat.dpType != IColumnTypes.INTEGER && pkComponentFormat.dpType != IColumnTypes.NUMBER &&
+			pkComponentFormat.dpType != IColumnTypes.TEXT) return 0;
 
-		if (!(pkType == fkType || (pkType == IColumnTypes.NUMBER && fkType == IColumnTypes.INTEGER) || (pkType == IColumnTypes.INTEGER && fkType == IColumnTypes.NUMBER))) return 0;
+		if (!(pkComponentFormat.dpType == fkComponentFormat.dpType ||
+			(pkComponentFormat.dpType == IColumnTypes.NUMBER && fkComponentFormat.dpType == IColumnTypes.INTEGER) || (pkComponentFormat.dpType == IColumnTypes.INTEGER && fkComponentFormat.dpType == IColumnTypes.NUMBER))) return 0;
 
 		// Compute two parameters:
 		// - how much the PK and the FK columns resemble
@@ -778,7 +789,10 @@ public class SuggestForeignTypesWizard extends Wizard
 
 				// And now do the same with the map organized by columns.
 				SortedMap<ITable, ForeignTypeSuggestionEntry> suggestionsForColumn;
-				if (suggestionsByColumn.containsKey(parentColumn)) suggestionsForColumn = suggestionsByColumn.get(parentColumn);
+				if (suggestionsByColumn.containsKey(parentColumn))
+				{
+					suggestionsForColumn = suggestionsByColumn.get(parentColumn);
+				}
 				else
 				{
 					suggestionsForColumn = new TreeMap<ITable, ForeignTypeSuggestionEntry>(new ITableComparator());
@@ -820,7 +834,7 @@ public class SuggestForeignTypesWizard extends Wizard
 
 		public synchronized String commitData(IProgressMonitor monitor)
 		{
-			StringBuffer result = new StringBuffer();
+			StringBuilder result = new StringBuilder();
 			for (ITable parentTable : suggestionsByTable.keySet())
 			{
 				monitor.setTaskName("Saving foreign types for table '" + parentTable.getName() + "'."); //$NON-NLS-1$ //$NON-NLS-2$
@@ -928,48 +942,45 @@ public class SuggestForeignTypesWizard extends Wizard
 		{
 			if (isGroupingEntry())
 			{
-				boolean hasRelevantChild = false;
 				for (ForeignTypeSuggestionEntry child : children)
+				{
 					if (child.isRelevant())
 					{
-						hasRelevantChild = true;
-						break;
+						return true;
 					}
-				return hasRelevantChild;
+				}
+				return false;
 			}
-			else
-			{
-				int type = Column.mapToDefaultType(parentColumn.getDataProviderType());
-				return (type == IColumnTypes.INTEGER) || (type == IColumnTypes.NUMBER) || (type == IColumnTypes.TEXT);
-			}
+
+			// use dataprovider type as defined by converter
+			ComponentFormat componentFormat = ComponentFormat.getComponentFormat(null, parentColumn, Activator.getDefault().getDesignClient());
+			return componentFormat.dpType == IColumnTypes.INTEGER || componentFormat.dpType == IColumnTypes.NUMBER ||
+				componentFormat.dpType == IColumnTypes.TEXT;
 		}
 
 		public boolean isChanged()
 		{
 			if (isGroupingEntry())
 			{
-				boolean hasChangedChild = false;
 				for (ForeignTypeSuggestionEntry child : children)
+				{
 					if (child.isChanged())
 					{
-						hasChangedChild = true;
-						break;
+						return true;
 					}
-				return hasChangedChild;
-			}
-			else
-			{
-				ColumnInfo ci = ((Column)parentColumn).getColumnInfo();
-				boolean suggestedForeignTypeEmpty = (suggestedForeignType == null) || (suggestedForeignType.getName() == null) ||
-					(suggestedForeignType.getName().trim().length() == 0);
-				boolean currentForeignTypeEmpty = (ci == null) || (ci.getForeignType() == null) || (ci.getForeignType().trim().length() == 0);
-				if (!currentForeignTypeEmpty)
-				{
-					if (!suggestedForeignTypeEmpty) return (!ci.getForeignType().equals(suggestedForeignType.getName()));
-					else return true;
 				}
-				else return !suggestedForeignTypeEmpty;
+				return false;
 			}
+
+			ColumnInfo ci = ((Column)parentColumn).getColumnInfo();
+			boolean suggestedForeignTypeEmpty = suggestedForeignType == null || suggestedForeignType.getName() == null ||
+				suggestedForeignType.getName().trim().length() == 0;
+			boolean currentForeignTypeEmpty = ci == null || ci.getForeignType() == null || ci.getForeignType().trim().length() == 0;
+			if (currentForeignTypeEmpty)
+			{
+				return !suggestedForeignTypeEmpty;
+			}
+			return suggestedForeignTypeEmpty || !ci.getForeignType().equals(suggestedForeignType.getName());
 		}
 
 		public boolean isGroupingEntry()
@@ -1018,7 +1029,9 @@ public class SuggestForeignTypesWizard extends Wizard
 		{
 			List<ForeignTypeSuggestionEntry> result = new ArrayList<ForeignTypeSuggestionEntry>();
 			for (ForeignTypeSuggestionEntry entry : children)
+			{
 				if (entry.shouldShow()) result.add(entry);
+			}
 			return result;
 		}
 
@@ -1033,13 +1046,11 @@ public class SuggestForeignTypesWizard extends Wizard
 			if (isGrouping)
 			{
 				if (isGroupingByColumns) return parentColumn.getName();
-				else return parentTable.getName();
+				return parentTable.getName();
 			}
-			else
-			{
-				if (groupByColumns) return parentTable.getName();
-				else return parentColumn.getName();
-			}
+
+			if (groupByColumns) return parentTable.getName();
+			return parentColumn.getName();
 		}
 	}
 
@@ -1049,14 +1060,14 @@ public class SuggestForeignTypesWizard extends Wizard
 		{
 			ForeignTypeSuggestionEntry entry = (ForeignTypeSuggestionEntry)parentElement;
 			if (entry.isGroupingEntry()) return entry.getChildrenFiltered().toArray();
-			else return null;
+			return null;
 		}
 
 		public Object getParent(Object element)
 		{
 			ForeignTypeSuggestionEntry entry = (ForeignTypeSuggestionEntry)element;
 			if (entry.isGroupingEntry()) return null;
-			else return entry.getParent();
+			return entry.getParent();
 		}
 
 		public boolean hasChildren(Object element)
@@ -1103,16 +1114,28 @@ public class SuggestForeignTypesWizard extends Wizard
 				ITable suggestedTable = row.getSuggestedForeignType();
 				suggestedForeignType = suggestedTable == null ? ENTRY_NONE : suggestedTable.getName();
 			}
+
 			switch (columnIndex)
 			{
 				case TABLE_OR_COLUMN_NAME_INDEX :
 					return row.getRelevantName();
+
 				case DATATYPE_INDEX :
-					return row.isGroupingEntry() ? "" : Column.getDisplayTypeString(parentColumn.getDataProviderType()); //$NON-NLS-1$
+					if (row.isGroupingEntry())
+					{
+						return ""; //$NON-NLS-1$
+					}
+
+					// use dataprovider type as defined by converter
+					ComponentFormat componentFormat = ComponentFormat.getComponentFormat(null, parentColumn, Activator.getDefault().getDesignClient());
+					return Column.getDisplayTypeString(componentFormat.dpType);
+
 				case CURRENT_FOREIGN_TYPE_INDEX :
 					return currentForeignType;
+
 				case SUGGESTED_FOREIGN_TYPE_INDEX :
 					return suggestedForeignType;
+
 				default :
 					return null;
 			}

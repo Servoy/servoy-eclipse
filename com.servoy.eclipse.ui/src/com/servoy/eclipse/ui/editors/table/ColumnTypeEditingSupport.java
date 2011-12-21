@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
 
 import org.eclipse.jface.viewers.CellEditor;
@@ -64,8 +64,7 @@ public class ColumnTypeEditingSupport extends EditingSupport
 	{
 		if (element instanceof Column)
 		{
-			Column pi = (Column)element;
-			int type = pi.getType();
+			int type = ((Column)element).getDataProviderType();
 			int index = 0;
 			for (int i = 0; i < Column.allDefinedTypes.length; i++)
 			{
@@ -75,7 +74,7 @@ public class ColumnTypeEditingSupport extends EditingSupport
 					break;
 				}
 			}
-			return new Integer(index);
+			return Integer.valueOf(index);
 		}
 		return null;
 	}

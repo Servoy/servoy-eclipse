@@ -17,46 +17,30 @@
 package com.servoy.eclipse.ui.editors.table;
 
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.grouplayout.GroupLayout;
-import org.eclipse.swt.layout.grouplayout.LayoutStyle;
-import org.eclipse.swt.widgets.Combo;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Table;
+import org.json.JSONException;
 
-import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.editors.ConvertersComposite;
 import com.servoy.eclipse.ui.editors.TableEditor;
-import com.servoy.eclipse.ui.util.MapEntryValueEditor;
+import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IColumnConverter;
-import com.servoy.j2db.dataprocessing.IPropertyDescriptorProvider;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
-import com.servoy.j2db.util.OpenProperties;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
-public class ColumnConversionComposite extends Composite
+public class ColumnConversionComposite extends ConvertersComposite<IColumnConverter>
 {
-	private final Combo combo;
-	private final MapEntryValueEditor tableViewer;
-
 	private Column column;
-	private final Table table;
-	private final Composite tableContainer;
-	private final RelayEditorProvider relayEditorProvider;
 
 	/**
 	 * Create the composite
@@ -68,31 +52,17 @@ public class ColumnConversionComposite extends Composite
 	{
 		super(parent, style);
 
-		combo = new Combo(this, SWT.READ_ONLY);
-		UIUtils.setDefaultVisibleItemCount(combo);
-
-		combo.addSelectionListener(new SelectionListener()
+		addConverterChangedListener(new ISelectionChangedListener()
 		{
-			public void widgetDefaultSelected(SelectionEvent e)
-			{
-			}
-
-			public void widgetSelected(SelectionEvent e)
+			public void selectionChanged(SelectionChangedEvent event)
 			{
 				te.flushTable();
-				if (column != null && column.getColumnInfo() != null)
-				{
-					column.getColumnInfo().setConverterProperties(null);
-				}
 				loadTable();
 				saveTable();
 			}
 		});
 
-		tableContainer = new Composite(this, SWT.NONE);
-		relayEditorProvider = new RelayEditorProvider();
-		tableViewer = new MapEntryValueEditor(tableContainer, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION, relayEditorProvider);
-		tableViewer.getObservable().addChangeListener(new IChangeListener()
+		addPropertyChangeListener(new IChangeListener()
 		{
 			public void handleChange(ChangeEvent event)
 			{
@@ -100,129 +70,32 @@ public class ColumnConversionComposite extends Composite
 				saveTable();
 			}
 		});
-		table = tableViewer.getTable();
-		table.setLinesVisible(true);
-		table.setHeaderVisible(true);
-		final GroupLayout groupLayout = new GroupLayout(this);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			GroupLayout.TRAILING,
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE).add(
-					GroupLayout.LEADING, combo, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE)).addContainerGap()));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(combo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-				LayoutStyle.RELATED).add(tableContainer, GroupLayout.PREFERRED_SIZE, 150, Short.MAX_VALUE).addContainerGap()));
-		setLayout(groupLayout);
-		//
-	}
-
-	@Override
-	protected void checkSubclass()
-	{
-		// Disable the check that prevents subclassing of SWT components
 	}
 
 	public void initDataBindings(Column c)
 	{
 		this.column = c;
 
-		ColumnInfo ci = c.getColumnInfo();
-		int selectedIndex = 0;
-
-		Map<String, IColumnConverter> converters = ApplicationServerSingleton.get().getPluginManager().getColumnConverterManager().getConverters();
-		List<String> options = new ArrayList<String>();
-		options.add("none"); //$NON-NLS-1$
-		Iterator<IColumnConverter> it = converters.values().iterator();
-		while (it.hasNext())
-		{
-			IColumnConverter conv = it.next();
-			String name = conv.getName();
-			int[] conv_types = conv.getSupportedColumnTypes();
-			if (conv_types != null)
-			{
-				for (int element : conv_types)
-				{
-					if (Column.mapToDefaultType(c.getType()) == Column.mapToDefaultType(element))
-					{
-						options.add(name);
-						if (name.equals(ci.getConverterName()))
-						{
-							selectedIndex = options.size() - 1;
-						}
-					}
-				}
-			}
-			else
-			{
-				//works on all columns
-				options.add(name);
-				if (name.equals(ci.getConverterName()))
-				{
-					selectedIndex = options.size() - 1;
-				}
-			}
-		}
-		combo.setItems(options.toArray(new String[options.size()]));
-		combo.select(selectedIndex);
+		setConverters(c.getType(), c.getColumnInfo().getConverterName(),
+			ApplicationServerSingleton.get().getPluginManager().getColumnConverterManager().getConverters().values());
 		loadTable();
-	}
-
-	private IColumnConverter getSelectedConverter()
-	{
-		Map<String, IColumnConverter> converters = ApplicationServerSingleton.get().getPluginManager().getColumnConverterManager().getConverters();
-		Iterator<IColumnConverter> it = converters.values().iterator();
-		String selectedConvertor = combo.getText();
-		while (it.hasNext())
-		{
-			IColumnConverter conv = it.next();
-			String name = conv.getName();
-			if (name.equals(selectedConvertor))
-			{
-				return conv;
-			}
-		}
-		return null;
 	}
 
 	private void loadTable()
 	{
+		Map<String, String> props = null;
 		if (column != null)
 		{
-			ColumnInfo columnInfo = column.getColumnInfo();
-			OpenProperties op = new OpenProperties();
-
-			IColumnConverter conv = getSelectedConverter();
-			if (conv != null)
+			try
 			{
-				//make sure it lists all defaults
-				if (conv.getDefaultProperties() != null)
-				{
-					op.putAll(conv.getDefaultProperties());
-				}
-
-				if (columnInfo.getConverterProperties() != null)
-				{
-					try
-					{
-						op.load(new StringReader(columnInfo.getConverterProperties()));
-					}
-					catch (IOException e)
-					{
-						ServoyLog.logError(e);
-					}
-				}
+				props = ComponentFactory.parseJSonProperties(column.getColumnInfo().getConverterProperties());
 			}
-			if (conv instanceof IPropertyDescriptorProvider)
+			catch (IOException e)
 			{
-				relayEditorProvider.setPropertyDescriptorProvider((IPropertyDescriptorProvider)conv);
+				ServoyLog.logError(e);
 			}
-			else
-			{
-				relayEditorProvider.setPropertyDescriptorProvider(null);
-			}
-			tableViewer.setInput(op.entrySet());
-			if (op.size() > 0) table.select(0);
 		}
+		setProperties(props);
 	}
 
 	private void saveTable()
@@ -232,53 +105,50 @@ public class ColumnConversionComposite extends Composite
 			ColumnInfo columnInfo = column.getColumnInfo();
 
 			IColumnConverter conv = getSelectedConverter();
+			String props = null;
 			if (conv != null)
 			{
 				columnInfo.setConverterName(conv.getName());
-				@SuppressWarnings("unchecked")
-				Set<Map.Entry<String, String>> data = (Set<Map.Entry<String, String>>)tableViewer.getInput();
-				if (data != null && data.size() > 0)
+				Map<String, String> properties = getProperties();
+				if (properties != null && properties.size() > 0)
 				{
-					OpenProperties op = new OpenProperties();
+					ServoyJSONObject json = new ServoyJSONObject(true, false);
 					Map<String, String> defaults = conv.getDefaultProperties();
 
 					//subtract defaults, makes save smaller
-					Iterator<Map.Entry<String, String>> it = data.iterator();
-					while (it.hasNext())
+					for (Entry<String, String> pair : properties.entrySet())
 					{
-						Map.Entry<String, String> pair = it.next();
-						if (defaults == null || (defaults != null && !Utils.equalObjects(defaults.get(pair.getKey()), pair.getValue())))
+						if (defaults == null || !Utils.equalObjects(defaults.get(pair.getKey()), pair.getValue()))
 						{
-							op.put(pair.getKey(), pair.getValue());
+							try
+							{
+								json.put(pair.getKey(), pair.getValue());
+							}
+							catch (JSONException e)
+							{
+								ServoyLog.logError(e);
+							}
 						}
 					}
 
-					StringWriter sw = new StringWriter();
-					try
+					if (json.length() > 0)
 					{
-						op.store(sw, ""); //$NON-NLS-1$
+						props = Utils.stringReplace(json.toString().trim(), System.getProperty("line.separator"), "\n");// to avoid conflicts on different developer OSes with team when it's actually the same content
 					}
-					catch (IOException e)
-					{
-						ServoyLog.logError(e);
-					}
-					String s = sw.toString();
-					s = s.trim();
-					s = Utils.stringReplace(s, System.getProperty("line.separator"), "\n"); // to avoid conflicts on different developer OSes with team when it's actually the same content
-					if (s.length() == 0 || op.size() == 0) s = null;
-					columnInfo.setConverterProperties(s);
-				}
-				else
-				{
-					columnInfo.setConverterProperties(null);
 				}
 			}
 			else
 			{
 				columnInfo.setConverterName(null);
-				columnInfo.setConverterProperties(null);
 			}
+			columnInfo.setConverterProperties(props);
 			column.flagColumnInfoChanged();
 		}
+	}
+
+	@Override
+	protected int[] getSupportedTypes(IColumnConverter converter)
+	{
+		return converter.getSupportedColumnTypes();
 	}
 }

@@ -42,6 +42,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
@@ -52,6 +53,7 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -796,9 +798,9 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		public String getText(Object value)
 		{
 			String append = ""; //$NON-NLS-1$
-			if (selectedElements != null)
+			if (selectedElements != null && selectedElements.contains(value))
 			{
-				if (selectedElements.contains(value)) append += getDataProviderTypeByValue(value);
+				append += getDataProviderTypeByValue(value);
 			}
 			String dpDialogText = getDataProviderDialogText(value);
 			if (dpDialogText == null)
@@ -812,17 +814,19 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		{
 			if (value instanceof Column)
 			{
-				return " - " + Column.getDisplayTypeString(((Column)value).getDataProviderType()); //$NON-NLS-1$
+				// use dataprovider type as defined by column converter
+				ComponentFormat componentFormat = ComponentFormat.getComponentFormat(null, (Column)value, Activator.getDefault().getDesignClient());
+				return " - " + Column.getDisplayTypeString(componentFormat.dpType); //$NON-NLS-1$
 			}
-			else if (value instanceof ScriptVariable)
+			if (value instanceof ScriptVariable)
 			{
 				return " - " + Column.getDisplayTypeString(((ScriptVariable)value).getVariableType()); //$NON-NLS-1$
 			}
-			else if (value instanceof ScriptCalculation)
+			if (value instanceof ScriptCalculation)
 			{
 				return " - " + ((ScriptCalculation)value).getTypeAsString(); //$NON-NLS-1$
 			}
-			else if (value instanceof AggregateVariable)
+			if (value instanceof AggregateVariable)
 			{
 				return " - " + Column.getDisplayTypeString(((AggregateVariable)value).getDataProviderType()); //$NON-NLS-1$
 			}
@@ -943,7 +947,6 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					((TreeViewer)event.getSource()).update(previousElems.toArray(), null);
 				}
 			}
-
 		}
 	}
 }

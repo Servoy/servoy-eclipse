@@ -563,7 +563,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 					};
 					pluginManager.loadClientPlugins(this);
 					((FoundSetManager)getFoundSetManager()).setColumnManangers(pluginManager.getColumnValidatorManager(),
-						pluginManager.getColumnConverterManager());
+						pluginManager.getColumnConverterManager(), pluginManager.getUIConverterManager());
 				}
 			}
 		}

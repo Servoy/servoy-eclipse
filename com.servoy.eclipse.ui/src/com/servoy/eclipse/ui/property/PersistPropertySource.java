@@ -114,6 +114,7 @@ import com.servoy.j2db.FormController;
 import com.servoy.j2db.FormManager;
 import com.servoy.j2db.IForm;
 import com.servoy.j2db.component.ComponentFactory;
+import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataui.PropertyEditorClass;
 import com.servoy.j2db.dataui.PropertyEditorHint;
 import com.servoy.j2db.dataui.PropertyEditorOption;
@@ -2320,7 +2321,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					retval.append('(');
 					retval.append(dataprovider);
 					retval.append(',');
-					retval.append(Column.getDisplayTypeString(dp.getDataProviderType()));
+					// use dataprovider type as defined by converter
+					ComponentFormat componentFormat = ComponentFormat.getComponentFormat(null, dp, Activator.getDefault().getDesignClient());
+					retval.append(Column.getDisplayTypeString(componentFormat.dpType));
 					Column column = null;
 					if (dp instanceof ScriptCalculation)
 					{
@@ -2336,7 +2339,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					}
 					if (dp.getLength() > 0)
 					{
-						switch (dp.getDataProviderType())
+						switch (componentFormat.dpType)
 						{
 							case IColumnTypes.TEXT :
 							case IColumnTypes.MEDIA :

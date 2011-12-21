@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
 
 import org.eclipse.core.databinding.observable.AbstractObservable;
@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ScriptCalculation;
@@ -100,11 +101,10 @@ public class CalculationTypeEditingSupport extends EditingSupport
 			int type = Column.allDefinedTypes[index];
 			if (type != calculation.getType())
 			{
-				calculation.setTypeAndCheck(type);
+				calculation.setTypeAndCheck(type, Activator.getDefault().getDesignClient());
 				changeSupport.fireEvent(new ChangeEvent(observable));
 			}
 			getViewer().update(element, null);
-
 		}
 	}
 

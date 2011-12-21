@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -46,7 +46,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.ui.editors.FormatDialog.IFormatTextContainer;
-import com.servoy.j2db.util.FormatParser;
+import com.servoy.j2db.util.FormatParser.ParsedFormat;
 
 /**
  * @author jcompagner
@@ -256,7 +256,7 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 	 * @see com.servoy.eclipse.ui.editors.FormatCellEditor.IFormatTextContainer#getFormat()
 	 */
 	@SuppressWarnings("nls")
-	public String getFormat()
+	public String getFormatString()
 	{
 		if (upperCase.getSelection()) return "|U";
 		if (lowerCase.getSelection()) return "|L";
@@ -281,7 +281,7 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 	/**
 	 * @see com.servoy.eclipse.ui.editors.FormatCellEditor.IFormatTextContainer#setFormat(java.lang.String)
 	 */
-	public void setFormat(String format)
+	public void setParsedFormat(ParsedFormat parsedFormat)
 	{
 		clearText();
 		upperCase.setSelection(false);
@@ -289,13 +289,12 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 		displayFormatRadio.setSelection(true);
 		placeHolder.setEnabled(true);
 		useRaw.setEnabled(true);
-		if (format != null)
+		if (parsedFormat != null)
 		{
-			FormatParser fp = new FormatParser(format);
-			upperCase.setSelection(fp.isAllUpperCase());
-			lowerCase.setSelection(fp.isAllLowerCase());
-			numberInput.setSelection(fp.isNumberValidator());
-			if (fp.isAllUpperCase() || fp.isAllLowerCase() || fp.isNumberValidator())
+			upperCase.setSelection(parsedFormat.isAllUpperCase());
+			lowerCase.setSelection(parsedFormat.isAllLowerCase());
+			numberInput.setSelection(parsedFormat.isNumberValidator());
+			if (parsedFormat.isAllUpperCase() || parsedFormat.isAllLowerCase() || parsedFormat.isNumberValidator())
 			{
 				displayFormatRadio.setSelection(false);
 				placeHolder.setEnabled(false);
@@ -303,15 +302,15 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 			}
 			else
 			{
-				displayFormat.setText(fp.getDisplayFormat());
-				useRaw.setSelection(fp.isRaw());
-				if (fp.getPlaceHolderString() != null)
+				displayFormat.setText(parsedFormat.getDisplayFormat() != null ? parsedFormat.getDisplayFormat() : "");
+				useRaw.setSelection(parsedFormat.isRaw());
+				if (parsedFormat.getPlaceHolderString() != null)
 				{
-					placeHolder.setText(fp.getPlaceHolderString());
+					placeHolder.setText(parsedFormat.getPlaceHolderString());
 				}
-				else if (fp.getPlaceHolderCharacter() != 0)
+				else if (parsedFormat.getPlaceHolderCharacter() != 0)
 				{
-					placeHolder.setText(Character.toString(fp.getPlaceHolderCharacter()));
+					placeHolder.setText(Character.toString(parsedFormat.getPlaceHolderCharacter()));
 				}
 			}
 		}

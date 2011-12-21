@@ -37,7 +37,7 @@ import com.servoy.j2db.dataprocessing.IPropertyDescriptorProvider;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
 
-class RelayEditorProvider implements IRelayEditorProvider
+public class RelayEditorProvider implements IRelayEditorProvider
 {
 	private IPropertyDescriptorProvider propertyProvider;
 

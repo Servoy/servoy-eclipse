@@ -44,7 +44,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.ibm.icu.text.DecimalFormat;
 import com.servoy.eclipse.ui.editors.FormatDialog.IFormatTextContainer;
-import com.servoy.j2db.util.FormatParser;
+import com.servoy.j2db.util.FormatParser.ParsedFormat;
 
 /**
  * @author jcompagner
@@ -215,7 +215,7 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 	/**
 	 * @see com.servoy.eclipse.ui.editors.FormatCellEditor.IFormatTextContainer#getFormat()
 	 */
-	public String getFormat()
+	public String getFormatString()
 	{
 		String format = displayFormat.getText();
 		// test it
@@ -238,29 +238,27 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 	 * @see com.servoy.eclipse.ui.editors.FormatCellEditor.IFormatTextContainer#setFormat(java.lang.String)
 	 */
 	@SuppressWarnings("nls")
-	public void setFormat(String format)
+	public void setParsedFormat(ParsedFormat parsedFormat)
 	{
 		displayFormat.setText("");
 		editFormat.setText("");
 		maxLength.setText("");
 
-		if (format != null)
+		if (parsedFormat != null)
 		{
-			FormatParser fp = new FormatParser(format);
-
-			if (fp.hasEditFormat())
+			if (parsedFormat.hasEditFormat())
 			{
-				displayFormat.setText(fp.getDisplayFormat());
-				editFormat.setText(fp.getEditFormat());
+				displayFormat.setText(parsedFormat.getDisplayFormat());
+				editFormat.setText(parsedFormat.getEditFormat());
 			}
 			else
 			{
-				displayFormat.setText(fp.getDisplayFormat());
+				displayFormat.setText(parsedFormat.getDisplayFormat() != null ? parsedFormat.getDisplayFormat() : "");
 				editFormat.setText("");
 			}
-			if (fp.getMaxLength() != null)
+			if (parsedFormat.getMaxLength() != null)
 			{
-				maxLength.setText(fp.getMaxLength().toString());
+				maxLength.setText(parsedFormat.getMaxLength().toString());
 			}
 		}
 	}

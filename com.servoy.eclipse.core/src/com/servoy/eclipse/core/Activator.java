@@ -87,8 +87,6 @@ import com.servoy.j2db.IDebugClientHandler;
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.IDesignerCallback;
-import com.servoy.j2db.dataprocessing.IColumnConverter;
-import com.servoy.j2db.dataprocessing.IColumnValidator;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
@@ -104,6 +102,7 @@ import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
 import com.servoy.j2db.smart.plugins.PluginManager;
+import com.servoy.j2db.util.CompositeIterable;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
@@ -697,22 +696,14 @@ public class Activator extends Plugin
 
 		// Visit all column validators/converters and let them add any method templates to
 		// MethodTemplate.
-		Map<String, IColumnConverter> converters = pluginManager.getColumnConverterManager().getConverters();
-		for (IColumnConverter conv : converters.values())
+		for (Object conv : new CompositeIterable<Object>(//
+			pluginManager.getColumnConverterManager().getConverters().values(),//
+			pluginManager.getUIConverterManager().getConverters().values(), //
+			pluginManager.getColumnValidatorManager().getValidators().values()))
 		{
 			if (conv instanceof IMethodTemplatesProvider)
 			{
-				Map<String, IMethodTemplate> templs = ((IMethodTemplatesProvider)conv).getMethodTemplates(MethodTemplatesFactory.getInstance());
-				processMethodTemplates(templs);
-			}
-		}
-		Map<String, IColumnValidator> validators = pluginManager.getColumnValidatorManager().getValidators();
-		for (IColumnValidator val : validators.values())
-		{
-			if (val instanceof IMethodTemplatesProvider)
-			{
-				Map<String, IMethodTemplate> templs = ((IMethodTemplatesProvider)val).getMethodTemplates(MethodTemplatesFactory.getInstance());
-				processMethodTemplates(templs);
+				processMethodTemplates(((IMethodTemplatesProvider)conv).getMethodTemplates(MethodTemplatesFactory.getInstance()));
 			}
 		}
 

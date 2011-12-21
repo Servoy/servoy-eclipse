@@ -28,18 +28,19 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
+import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.ArgumentType;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -159,20 +160,15 @@ public class AddMethodButtonsComposite extends Composite
 			Field field = (Field)persistContext.getPersist();
 			if (field.getDataProviderID() != null)
 			{
-				try
+				// use dataprovider type as defined by column converter
+				ComponentFormat componentFormat = ComponentFormat.getComponentFormat(field.getFormat(), field.getDataProviderID(),
+					ModelUtils.getEditingFlattenedSolution(parent).getDataproviderLookup(null, persistContext.getContext()),
+					Activator.getDefault().getDesignClient());
+				if (componentFormat.dpType != -1)
 				{
-					IDataProvider idp = ModelUtils.getEditingFlattenedSolution(parent).getDataproviderLookup(null, persistContext.getContext()).getDataProvider(
-						field.getDataProviderID());
-					if (idp.getDataProviderType() != -1)
-					{
-						substitutions = new HashMap<String, String>();
-						substitutions.put("dataproviderType",
-							ArgumentType.convertFromColumnType(idp.getDataProviderType(), Column.getDisplayTypeString(idp.getDataProviderType())).getName());
-					}
-				}
-				catch (RepositoryException ex)
-				{
-					ServoyLog.logError(ex);
+					substitutions = new HashMap<String, String>();
+					substitutions.put("dataproviderType",
+						ArgumentType.convertFromColumnType(componentFormat.dpType, Column.getDisplayTypeString(componentFormat.dpType)).getName());
 				}
 			}
 		}
