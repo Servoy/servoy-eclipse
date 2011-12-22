@@ -103,18 +103,13 @@ public class FormBackgroundLayer extends FreeformLayer
 	{
 		Iterator<Part> parts = flattenedForm.getParts();
 		int prevY = 0;
-		Color formBg = null;
 		while (parts.hasNext())
 		{
 			Part part = parts.next();
 			Color bg;
 			if (part.getBackground() == null)
 			{
-				if (formBg == null)
-				{
-					formBg = ColorResource.INSTANCE.getColor(ColorResource.ColorAwt2Rgb(getFormBackground(flattenedForm)));
-				}
-				bg = formBg;
+				bg = ColorResource.INSTANCE.getColor(ColorResource.ColorAwt2Rgb(getPartBackground(flattenedForm, part)));
 			}
 			else
 			{
@@ -157,22 +152,35 @@ public class FormBackgroundLayer extends FreeformLayer
 	 * @param form
 	 * @return
 	 */
-	public static java.awt.Color getFormBackground(Form form)
+	public static java.awt.Color getPartBackground(Form form, Part part)
 	{
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
 		FixedStyleSheet styleSheet = ComponentFactory.getCSSStyle(null, flattenedSolution.getStyleForForm(form, null));
 		java.awt.Color background = null;
 		if (styleSheet != null)
 		{
-			String lookupname = "form";
-			if (form.getStyleClass() != null && !"".equals(form.getStyleClass()))
+			Style style = null;
+			String partLookup = Part.getCSSSelector(part.getPartType());
+			if (partLookup != null)
 			{
-				lookupname += '.' + form.getStyleClass();
+				style = styleSheet.getRule(partLookup);
+				if (style != null)
+				{
+					background = styleSheet.getBackground(style);
+				}
 			}
-			Style style = styleSheet.getRule(lookupname);
-			if (style != null)
+			if (background == null)
 			{
-				background = styleSheet.getBackground(style);
+				String lookupname = "form";
+				if (form.getStyleClass() != null && !"".equals(form.getStyleClass()))
+				{
+					lookupname += '.' + form.getStyleClass();
+				}
+				style = styleSheet.getRule(lookupname);
+				if (style != null)
+				{
+					background = styleSheet.getBackground(style);
+				}
 			}
 		}
 

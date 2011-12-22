@@ -192,7 +192,8 @@ public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 						}
 						else
 						{
-							java.awt.Color formBackground = part.getBackground() == null ? FormBackgroundLayer.getFormBackground(form) : part.getBackground();
+							java.awt.Color formBackground = part.getBackground() == null ? FormBackgroundLayer.getPartBackground(form, part)
+								: part.getBackground();
 							borderDisabled = !paintedBackground.equals(formBackground);
 						}
 					}
