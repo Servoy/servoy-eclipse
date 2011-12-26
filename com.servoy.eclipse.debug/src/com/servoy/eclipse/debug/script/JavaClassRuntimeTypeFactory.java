@@ -1,11 +1,11 @@
 package com.servoy.eclipse.debug.script;
 
+import org.eclipse.dltk.javascript.typeinfo.IRSimpleType;
 import org.eclipse.dltk.javascript.typeinfo.IRType;
 import org.eclipse.dltk.javascript.typeinfo.IRTypeFactory;
 import org.eclipse.dltk.javascript.typeinfo.ITypeSystem;
-import org.eclipse.dltk.javascript.typeinfo.model.SimpleType;
+import org.eclipse.dltk.javascript.typeinfo.TypeCompatibility;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
-import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
 
 public class JavaClassRuntimeTypeFactory implements IRTypeFactory
 {
@@ -18,7 +18,7 @@ public class JavaClassRuntimeTypeFactory implements IRTypeFactory
 		return null;
 	}
 
-	private static class JavaRuntimeType implements IRType, SimpleType
+	private static class JavaRuntimeType implements IRSimpleType
 	{
 
 		private final Type type;
@@ -34,16 +34,6 @@ public class JavaClassRuntimeTypeFactory implements IRTypeFactory
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.dltk.javascript.typeinfo.model.JSType#getKind()
-		 */
-		public TypeKind getKind()
-		{
-			return type.getKind();
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
 		 * @see org.eclipse.dltk.javascript.typeinfo.model.JSType#getName()
 		 */
 		public String getName()
@@ -54,27 +44,17 @@ public class JavaClassRuntimeTypeFactory implements IRTypeFactory
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.dltk.javascript.typeinfo.JSType2#isArray()
-		 */
-		public boolean isArray()
-		{
-			return ((Class< ? >)type.getAttribute(TypeProvider.JAVA_CLASS)).isArray();
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
 		 * @see org.eclipse.dltk.javascript.typeinfo.JSType2#isAssignableFrom(org.eclipse.dltk.javascript.typeinfo.JSType2)
 		 */
-		public boolean isAssignableFrom(IRType runtimeType)
+		public TypeCompatibility isAssignableFrom(IRType runtimeType)
 		{
 			if (runtimeType instanceof JavaRuntimeType)
 			{
 				Class< ? > cls = (Class< ? >)type.getAttribute(TypeProvider.JAVA_CLASS);
 				Class< ? > other = (Class< ? >)((JavaRuntimeType)runtimeType).type.getAttribute(TypeProvider.JAVA_CLASS);
-				return cls.isAssignableFrom(other);
+				return cls.isAssignableFrom(other) ? TypeCompatibility.TRUE : TypeCompatibility.FALSE;
 			}
-			return false;
+			return TypeCompatibility.FALSE;
 		}
 
 		/*
@@ -85,16 +65,6 @@ public class JavaClassRuntimeTypeFactory implements IRTypeFactory
 		public Type getTarget()
 		{
 			return type;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.dltk.javascript.typeinfo.model.ClassType#setTarget(org.eclipse.dltk.javascript.typeinfo.model.Type)
-		 */
-		public void setTarget(Type value)
-		{
-			//ignore
 		}
 
 		/*
