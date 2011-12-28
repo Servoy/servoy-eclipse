@@ -17687,6 +17687,15 @@ Operator: greaterThan]]></description>
             <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBPart" typecode="com.servoy.j2db.querybuilder.impl.QBPart"/>
           </parameters>
         </function>
+        <function name="isin" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
+          <parameters>
+            <parameter name="values" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"/>
+          </parameters>
+        </function>
         <function name="le">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
@@ -17874,6 +17883,15 @@ Operator: greaterThan]]></description>
           <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBPart" typecode="com.servoy.j2db.querybuilder.impl.QBPart"/>
+          </parameters>
+        </function>
+        <function name="isin" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
+          <parameters>
+            <parameter name="values" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"/>
           </parameters>
         </function>
         <function name="le">
