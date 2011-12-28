@@ -12,7 +12,7 @@
     <methodtemplate addtodo="true" name="afterFoundSetRecordCreate">
       <description><![CDATA[Record after-create trigger]]></description>
       <arguments>
-        <methodargument name="record" type="JSRecord&lt;${dataSource}>"><![CDATA[record that is created]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that is created]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
@@ -20,35 +20,35 @@
     <methodtemplate addtodo="true" name="afterRecordDelete">
       <description><![CDATA[Record after-delete trigger]]></description>
       <arguments>
-        <methodargument name="record" type="JSRecord&lt;${dataSource}>"><![CDATA[record that is deleted]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that is deleted]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
   <event name="onAfterFindMethodID">
     <methodtemplate addtodo="true" name="afterFoundSetFind">
       <description><![CDATA[Foundset post-find trigger]]></description>
-      <code><![CDATA[]]></code>
+      <code></code>
     </methodtemplate>
   </event>
   <event name="onAfterInsertMethodID">
     <methodtemplate addtodo="true" name="afterRecordInsert">
       <description><![CDATA[Record after-insert trigger]]></description>
       <arguments>
-        <methodargument name="record" type="JSRecord&lt;${dataSource}>"><![CDATA[record that is inserted]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that is inserted]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
   <event name="onAfterSearchMethodID">
     <methodtemplate addtodo="true" name="afterFoundSetSearch">
       <description><![CDATA[Foundset post-search trigger]]></description>
-      <code><![CDATA[]]></code>
+      <code></code>
     </methodtemplate>
   </event>
   <event name="onAfterUpdateMethodID">
     <methodtemplate addtodo="true" name="afterRecordUpdate">
       <description><![CDATA[Record after-update trigger]]></description>
       <arguments>
-        <methodargument name="record" type="JSRecord&lt;${dataSource}>"><![CDATA[record that is updated]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that is updated]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
@@ -74,7 +74,7 @@
     <methodtemplate addtodo="true" name="onFoundSetRecordCreate" type="Boolean">
       <description><![CDATA[Record pre-create trigger
 When false is returned the record a record not be created in the foundset.]]></description>
-      <code><![CDATA[]]></code>
+      <code></code>
     </methodtemplate>
   </event>
   <event name="onDataBroadcastMethodID">
@@ -121,7 +121,7 @@ if (not_valid) throw 'cannot delete'
 // return boolean to indicate success
 return true]]></code>
       <arguments>
-        <methodargument name="record" type="JSRecord&lt;${dataSource}>"><![CDATA[record that will be deleted]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that will be deleted]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
@@ -280,7 +280,7 @@ return true]]></code>
     <methodtemplate addtodo="true" name="onFoundSetFind" type="Boolean">
       <description><![CDATA[Foundset pre-find trigger
 When false is returned the foundset will not go into find mode.]]></description>
-      <code><![CDATA[]]></code>
+      <code></code>
     </methodtemplate>
   </event>
   <event name="onFocusGainedMethodID">
@@ -321,7 +321,7 @@ if (not_valid) throw 'cannot insert'
 // return boolean to indicate success
 return true]]></code>
       <arguments>
-        <methodargument name="record" type="JSRecord&lt;${dataSource}>"><![CDATA[record that will be inserted]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that will be inserted]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
@@ -405,7 +405,7 @@ return true]]></code>
       <description><![CDATA[Callback method form when editing is stopped]]></description>
       <code><![CDATA[return true]]></code>
       <arguments>
-        <methodargument name="record" type="JSRecord&lt;${dataSource}>"><![CDATA[record being saved]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record being saved]]></methodargument>
         <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
       </arguments>
     </methodtemplate>
@@ -463,10 +463,10 @@ if (event.isRecordSelected()) {
     <methodtemplate addtodo="true" name="onFoundSetSearch" type="Boolean">
       <description><![CDATA[Foundset pre-search trigger
 When false is returned the search will not be executed and the foundset will stay in find mode.]]></description>
-      <code><![CDATA[]]></code>
+      <code></code>
       <arguments>
-        <methodargument name="clearLastResults" type="Boolean"><![CDATA[]]></methodargument>
-        <methodargument name="reduceSearch" type="Boolean"><![CDATA[]]></methodargument>
+        <methodargument name="clearLastResults" type="Boolean"></methodargument>
+        <methodargument name="reduceSearch" type="Boolean"></methodargument>
       </arguments>
     </methodtemplate>
   </event>
@@ -529,7 +529,7 @@ if (not_valid) throw 'cannot update'
 // return boolean to indicate success
 return true]]></code>
       <arguments>
-        <methodargument name="record" type="JSRecord&lt;${dataSource}>"><![CDATA[record that will be updated]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that will be updated]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
@@ -548,7 +548,7 @@ else
         <methodargument name="elementType" type="String"><![CDATA[element type (not supported in webclient)]]></methodargument>
         <methodargument name="dataProviderID" type="String"><![CDATA[element data provider (not supported in webclient)]]></methodargument>
         <methodargument name="formName" type="String"><![CDATA[form name]]></methodargument>
-        <methodargument name="record" type="JSRecord&lt;${dataSource}>"><![CDATA[selected record]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[selected record]]></methodargument>
         <methodargument name="edited" type="Boolean"><![CDATA[is the record edited]]></methodargument>
       </arguments>
     </methodtemplate>
