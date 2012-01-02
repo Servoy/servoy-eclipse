@@ -72,6 +72,7 @@ import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourceP
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -81,6 +82,7 @@ import com.servoy.j2db.util.Debug;
  */
 public class UIUtils
 {
+	private static ImageDescriptor errorImageDescriptor;
 
 	public static abstract class ExtendedInputDialog<T> extends InputDialog
 	{
@@ -518,41 +520,58 @@ public class UIUtils
 			@Override
 			public ImageData getImageData()
 			{
-				int width = renderedImage.getWidth();
-				int height = renderedImage.getHeight();
-
-				int depth = 24;
-				PaletteData palette = new PaletteData(0xFF, 0xFF00, 0xFF0000);
-				ImageData swtdata = new ImageData(width, height, depth, palette);
-				Raster raster = renderedImage.getData();
-				int numbands = raster.getNumBands();
-				int[] awtdata = raster.getPixels(0, 0, width, height, new int[width * height * numbands]);
-				int step = swtdata.depth / 8;
-
-				byte[] data = swtdata.data;
-				swtdata.transparentPixel = -1;
-				int baseindex = 0;
-				for (int y = 0; y < height; y++)
+				try
 				{
-					int idx = (0 + y) * swtdata.bytesPerLine + 0 * step;
+					int width = renderedImage.getWidth();
+					int height = renderedImage.getHeight();
 
-					for (int x = 0; x < width; x++)
+					int depth = 24;
+					PaletteData palette = new PaletteData(0xFF, 0xFF00, 0xFF0000);
+					ImageData swtdata = new ImageData(width, height, depth, palette);
+					Raster raster = renderedImage.getData();
+					int numbands = raster.getNumBands();
+					int[] awtdata = raster.getPixels(0, 0, width, height, new int[width * height * numbands]);
+					int step = swtdata.depth / 8;
+
+					byte[] data = swtdata.data;
+					swtdata.transparentPixel = -1;
+					int baseindex = 0;
+					for (int y = 0; y < height; y++)
 					{
-						int pixel = x + y * width;
-						baseindex = pixel * numbands;
+						int idx = (0 + y) * swtdata.bytesPerLine + 0 * step;
 
-						data[idx++] = (byte)awtdata[baseindex + 2];
-						data[idx++] = (byte)awtdata[baseindex + 1];
-						data[idx++] = (byte)awtdata[baseindex];
-						if (numbands == 4 && transparent)
+						for (int x = 0; x < width; x++)
 						{
-							swtdata.setAlpha(x, y, awtdata[baseindex + 3]);
+							int pixel = x + y * width;
+							baseindex = pixel * numbands;
+
+							data[idx++] = (byte)awtdata[baseindex + 2];
+							data[idx++] = (byte)awtdata[baseindex + 1];
+							data[idx++] = (byte)awtdata[baseindex];
+							if (numbands == 4 && transparent)
+							{
+								swtdata.setAlpha(x, y, awtdata[baseindex + 3]);
+							}
 						}
 					}
+					return swtdata;
 				}
-				return swtdata;
+				catch (RuntimeException e)
+				{
+					ServoyLog.logError(e);
+					return getErrorImageData();
+				}
 			}
 		};
+	}
+
+	public static ImageData getErrorImageData()
+	{
+		if (errorImageDescriptor == null)
+		{
+			errorImageDescriptor = ImageDescriptor.createFromFile(IApplication.class, "images/error.gif"); //$NON-NLS-1$
+		}
+		return errorImageDescriptor.getImageData();
 	}
 
 	private static boolean hasAlpha(java.awt.Image image)
