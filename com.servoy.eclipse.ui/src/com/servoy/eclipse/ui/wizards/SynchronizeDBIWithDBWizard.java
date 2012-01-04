@@ -264,7 +264,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					page1 = new SplitInThreeWizardPage<IServerInternal, String>(
 						"Missing tables",
 						"Database information files (.dbi from resources project) can point to tables that do not exist in the database.\nYou can choose to create those tables according to the information or delete the unwanted information files.",
-						"Ignore", "Create table", "Delete .dbi", "Ignore all/multiselection", "Create all/multiselection", "Delete all/multiselection",
+						"Skip", "Create table", "Delete .dbi", "Skip all/multiselection", "Create all/multiselection", "Delete all/multiselection",
 						foundMissingTables, comparator, serverImage, tableImage);
 				}
 				else
@@ -276,7 +276,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					page2 = new SplitInThreeWizardPage<IServerInternal, String>(
 						"Missing database information files",
 						"Tables in the database can lack an associated database information file (.dbi in the resources project).\nYou can choose to create the database information file or delete the table from the database.",
-						"Ignore", "Create .dbi", "Delete table", "Ignore all/multiselection", "Create all/multiselection", "Delete all/multiselection",
+						"Skip", "Create .dbi", "Delete table", "Skip all/multiselection", "Create all/multiselection", "Delete all/multiselection",
 						foundSupplementalTables, comparator, serverImage, tableImage);
 				}
 				else
