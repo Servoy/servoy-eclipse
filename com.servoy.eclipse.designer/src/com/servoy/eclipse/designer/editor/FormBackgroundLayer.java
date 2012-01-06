@@ -21,8 +21,6 @@ import java.awt.print.PageFormat;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import javax.swing.text.Style;
-
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.FigureUtilities;
 import org.eclipse.draw2d.FreeformLayer;
@@ -41,7 +39,8 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Part;
-import com.servoy.j2db.util.FixedStyleSheet;
+import com.servoy.j2db.util.IStyleRule;
+import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.PersistHelper;
 
 /**
@@ -155,15 +154,15 @@ public class FormBackgroundLayer extends FreeformLayer
 	public static java.awt.Color getPartBackground(Form form, Part part)
 	{
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
-		FixedStyleSheet styleSheet = ComponentFactory.getCSSStyle(null, flattenedSolution.getStyleForForm(form, null));
+		IStyleSheet styleSheet = ComponentFactory.getCSSStyle(null, flattenedSolution.getStyleForForm(form, null));
 		java.awt.Color background = null;
 		if (styleSheet != null)
 		{
-			Style style = null;
+			IStyleRule style = null;
 			String partLookup = Part.getCSSSelector(part.getPartType());
 			if (partLookup != null)
 			{
-				style = styleSheet.getRule(partLookup);
+				style = styleSheet.getCSSRule(partLookup);
 				if (style != null)
 				{
 					background = styleSheet.getBackground(style);
@@ -176,7 +175,7 @@ public class FormBackgroundLayer extends FreeformLayer
 				{
 					lookupname += '.' + form.getStyleClass();
 				}
-				style = styleSheet.getRule(lookupname);
+				style = styleSheet.getCSSRule(lookupname);
 				if (style != null)
 				{
 					background = styleSheet.getBackground(style);

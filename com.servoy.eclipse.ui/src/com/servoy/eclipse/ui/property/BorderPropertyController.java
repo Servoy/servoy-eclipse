@@ -18,7 +18,10 @@ package com.servoy.eclipse.ui.property;
 
 import java.awt.Color;
 import java.awt.Insets;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.StringTokenizer;
 
 import javax.swing.BorderFactory;
 import javax.swing.border.BevelBorder;
@@ -34,6 +37,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.views.properties.ComboBoxPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
@@ -47,12 +51,17 @@ import com.servoy.eclipse.ui.editors.FontCellEditor;
 import com.servoy.eclipse.ui.editors.TagsAndI18NTextCellEditor;
 import com.servoy.eclipse.ui.labelproviders.FontLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.TextCutoffLabelProvider;
+import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
+import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.eclipse.ui.util.ModifiedComboBoxCellEditor;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.util.IStyleSheet;
+import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.gui.RoundedBorder;
 import com.servoy.j2db.util.gui.SpecialMatteBorder;
 
 /**
@@ -66,7 +75,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 {
 	public static enum BorderType
 	{
-		Default, Empty, Etched, Bevel, Line, Title, Matte, SpecialMatte
+		Default, Empty, Etched, Bevel, Line, Title, Matte, SpecialMatte, RoundedBorder
 	}
 
 	public static HashMap<BorderType, Border> defaultBorderValues = new HashMap<BorderType, Border>();
@@ -100,6 +109,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		defaultBorderValues.put(BorderType.Title, new TitledBorder("Title")); //$NON-NLS-1$
 		defaultBorderValues.put(BorderType.Matte, new MatteBorder(0, 0, 0, 0, Color.BLACK));
 		defaultBorderValues.put(BorderType.SpecialMatte, new SpecialMatteBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK));
+		defaultBorderValues.put(BorderType.RoundedBorder, new RoundedBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK));
 	}
 
 	private static BorderType getBorderTypeConstant(Border border)
@@ -114,6 +124,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			if (cls == javax.swing.border.TitledBorder.class) return BorderType.Title;
 			if (cls == javax.swing.border.MatteBorder.class) return BorderType.Matte;
 			if (cls == com.servoy.j2db.util.gui.SpecialMatteBorder.class) return BorderType.SpecialMatte;
+			if (cls == com.servoy.j2db.util.gui.RoundedBorder.class) return BorderType.RoundedBorder;
 		}
 		return BorderType.Default;
 	}
@@ -144,6 +155,8 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 				return new MatteBorder(0, 0, 0, 0, Color.BLACK);
 			case SpecialMatte :
 				return new SpecialMatteBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK);
+			case RoundedBorder :
+				return new RoundedBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK);
 		}
 		return null;
 	}
@@ -176,6 +189,9 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 				break;
 			case SpecialMatte :
 				propertySource = new SpecialMatteBorderPropertySource((ComplexProperty<SpecialMatteBorder>)complexProperty);
+				break;
+			case RoundedBorder :
+				propertySource = new RoundedBorderPropertySource((ComplexProperty<SpecialMatteBorder>)complexProperty);
 				break;
 		}
 		if (propertySource != null)
@@ -451,33 +467,568 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 	}
 
+	public static class BorderStylesPropertySource extends ComplexPropertySource<String[]>
+	{
+		private static final String TOP_STYLE = "top_style";
+		private static final String LEFT_STYLE = "left_style";
+		private static final String BOTTOM_STYLE = "bottom_style";
+		private static final String RIGHT_STYLE = "right_style";
+		protected static final List<String> borderStyles = Arrays.asList(IStyleSheet.BORDER_STYLES);
+
+		public BorderStylesPropertySource(ComplexProperty<String[]> complexProperty)
+		{
+			super(complexProperty);
+		}
+
+		private static final IPropertyDescriptor[] PROPERTY_DESCRIPTORS = PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] {//
+		new ComboBoxPropertyDescriptor(TOP_STYLE, "top style", IStyleSheet.BORDER_STYLES), //
+		new ComboBoxPropertyDescriptor(LEFT_STYLE, "left style", IStyleSheet.BORDER_STYLES),//
+		new ComboBoxPropertyDescriptor(BOTTOM_STYLE, "bottom style", IStyleSheet.BORDER_STYLES),//
+		new ComboBoxPropertyDescriptor(RIGHT_STYLE, "right style", IStyleSheet.BORDER_STYLES),//
+		});
+
+		@Override
+		public IPropertyDescriptor[] createPropertyDescriptors()
+		{
+			return PROPERTY_DESCRIPTORS;
+		}
+
+		@Override
+		public Object getPropertyValue(Object id)
+		{
+			String[] style = getEditableValue();
+			if (TOP_STYLE.equals(id))
+			{
+				return Integer.valueOf(borderStyles.indexOf(style[0]));
+			}
+			if (LEFT_STYLE.equals(id))
+			{
+				return Integer.valueOf(borderStyles.indexOf(style[1]));
+			}
+			if (BOTTOM_STYLE.equals(id))
+			{
+				return Integer.valueOf(borderStyles.indexOf(style[2]));
+			}
+			if (RIGHT_STYLE.equals(id))
+			{
+				return Integer.valueOf(borderStyles.indexOf(style[3]));
+			}
+
+			return null;
+		}
+
+		@Override
+		protected String[] setComplexPropertyValue(Object id, Object v)
+		{
+			String[] styles = getEditableValue();
+			if (styles == null)
+			{
+				styles = new String[4];
+			}
+			if (TOP_STYLE.equals(id))
+			{
+				styles[0] = borderStyles.get(Utils.getAsInteger(v));
+			}
+			if (LEFT_STYLE.equals(id))
+			{
+				styles[1] = borderStyles.get(Utils.getAsInteger(v));
+			}
+			if (BOTTOM_STYLE.equals(id))
+			{
+				styles[2] = borderStyles.get(Utils.getAsInteger(v));
+			}
+			if (RIGHT_STYLE.equals(id))
+			{
+				styles[3] = borderStyles.get(Utils.getAsInteger(v));
+			}
+			return styles;
+		}
+
+		@Override
+		public Object resetComplexPropertyValue(Object id)
+		{
+			return "solid"; //$NON-NLS-1$
+		}
+	}
+
+	public static class RoundedRadiusPropertySource extends ComplexPropertySource<float[]>
+	{
+		private static final String TOP_LEFT_HORIZONTAL = "top_left_width";
+		private static final String TOP_RIGHT_HORIZONTAL = "top_right_width";
+		private static final String BOTTOM_RIGHT_HORIZONTAL = "bottom_right_width";
+		private static final String BOTTOM_LEFT_HORIZONTAL = "bottom_left_width";
+		private static final String TOP_LEFT_VERTICAL = "top_left_height";
+		private static final String TOP_RIGHT_VERTICAL = "top_right_height";
+		private static final String BOTTOM_RIGHT_VERTICAL = "bottom_right_height";
+		private static final String BOTTOM_LEFT_VERTICAL = "bottom_left_height";
+
+		public RoundedRadiusPropertySource(ComplexProperty<float[]> complexProperty)
+		{
+			super(complexProperty);
+		}
+
+		private static final IPropertyDescriptor[] PROPERTY_DESCRIPTORS = PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] {//
+		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_LEFT_HORIZONTAL, "top left horizontal"), //
+		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_RIGHT_HORIZONTAL, "top right horizontal"),//
+		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_RIGHT_HORIZONTAL, "bottom right horizontal"),//
+		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_LEFT_HORIZONTAL, "bottom left horizontal"),//
+		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_LEFT_HORIZONTAL, "top left vertical"), //
+		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_RIGHT_HORIZONTAL, "top right vertical"),//
+		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_RIGHT_HORIZONTAL, "bottom right vertical"),//
+		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_LEFT_HORIZONTAL, "bottom left vertical") //
+		});
+
+		@Override
+		public IPropertyDescriptor[] createPropertyDescriptors()
+		{
+			return PROPERTY_DESCRIPTORS;
+		}
+
+		@Override
+		public Object getPropertyValue(Object id)
+		{
+			float[] radius = getEditableValue();
+			if (TOP_LEFT_HORIZONTAL.equals(id))
+			{
+				return radius[0];
+			}
+			if (TOP_RIGHT_HORIZONTAL.equals(id))
+			{
+				return radius[1];
+			}
+			if (BOTTOM_RIGHT_HORIZONTAL.equals(id))
+			{
+				return radius[2];
+			}
+			if (BOTTOM_LEFT_HORIZONTAL.equals(id))
+			{
+				return radius[3];
+			}
+			if (TOP_LEFT_VERTICAL.equals(id))
+			{
+				return radius[4];
+			}
+			if (TOP_RIGHT_VERTICAL.equals(id))
+			{
+				return radius[5];
+			}
+			if (BOTTOM_RIGHT_VERTICAL.equals(id))
+			{
+				return radius[6];
+			}
+			if (BOTTOM_LEFT_VERTICAL.equals(id))
+			{
+				return radius[7];
+			}
+
+			return null;
+		}
+
+		@Override
+		protected float[] setComplexPropertyValue(Object id, Object v)
+		{
+			float[] radius = getEditableValue();
+			if (radius == null)
+			{
+				radius = new float[] { 0, 0, 0, 0, 0, 0, 0, 0 };
+			}
+			if (TOP_LEFT_HORIZONTAL.equals(id))
+			{
+				radius[0] = ((Float)v).floatValue();
+			}
+			if (TOP_RIGHT_HORIZONTAL.equals(id))
+			{
+				radius[1] = ((Float)v).floatValue();
+			}
+			if (BOTTOM_RIGHT_HORIZONTAL.equals(id))
+			{
+				radius[2] = ((Float)v).floatValue();
+			}
+			if (BOTTOM_LEFT_HORIZONTAL.equals(id))
+			{
+				radius[3] = ((Float)v).floatValue();
+			}
+			if (TOP_LEFT_VERTICAL.equals(id))
+			{
+				radius[4] = ((Float)v).floatValue();
+			}
+			if (TOP_RIGHT_VERTICAL.equals(id))
+			{
+				radius[5] = ((Float)v).floatValue();
+			}
+			if (BOTTOM_RIGHT_VERTICAL.equals(id))
+			{
+				radius[6] = ((Float)v).floatValue();
+			}
+			if (BOTTOM_LEFT_VERTICAL.equals(id))
+			{
+				radius[7] = ((Float)v).floatValue();
+			}
+			return radius;
+		}
+
+		@Override
+		public Object resetComplexPropertyValue(Object id)
+		{
+			return 0;
+		}
+	}
+
+	public static class RoundedBorderPropertySource extends SpecialMatteBorderPropertySource
+	{
+		private static final IObjectTextConverter converter = new IObjectTextConverter()
+		{
+
+			public Object convertToObject(String value)
+			{
+				if (value == null)
+				{
+					return null;
+				}
+				StringTokenizer tok = new StringTokenizer(value, ",");
+				float[] values = new float[] { 0, 0, 0, 0, 0, 0, 0, 0 };
+				try
+				{
+					if (tok.countTokens() == 1)
+					{
+						Arrays.fill(values, Integer.parseInt(tok.nextToken().trim()));
+					}
+					else if (tok.countTokens() == 4)
+					{
+						for (int index = 0; index < 4; index++)
+						{
+							values[index] = values[index + 4] = Integer.parseInt(tok.nextToken().trim());
+						}
+					}
+					else
+					{
+						for (int index = 0; index < 8; index++)
+						{
+							values[index] = Integer.parseInt(tok.nextToken().trim());
+						}
+					}
+				}
+				catch (NumberFormatException e)
+				{
+					ServoyLog.logError(e);
+					return null;
+				}
+				return values;
+			}
+
+			public String convertToString(Object value)
+			{
+				if (value == null)
+				{
+					return "";
+				}
+				StringBuilder buf = new StringBuilder();
+				float[] values = (float[])value;
+				float[] templateValue = new float[8];
+				Arrays.fill(templateValue, values[0]);
+				if (Arrays.equals(values, templateValue)) return String.valueOf(values[0]);
+				for (int i = 0; i < templateValue.length; i++)
+				{
+					templateValue[i] = values[i % 4];
+				}
+				if (Arrays.equals(values, templateValue))
+				{
+					return new StringBuilder().append(values[0]).append(",").append(values[1]).append(",").append(values[2]).append(",").append(values[3]).toString();
+				}
+				for (int i = 0; i < values.length; i++)
+				{
+					buf.append(values[i]);
+					if (i != values.length - 1)
+					{
+						buf.append(",");
+					}
+				}
+				return buf.toString();
+			}
+
+			public String isCorrectString(String value)
+			{
+				if (value != null && value.trim().length() > 0 && convertToObject(value) == null)
+				{
+					return "Expecting 1, 4 or 8 numbers.";
+				}
+				return null;
+			}
+
+			public String isCorrectObject(Object value)
+			{
+				if (value == null || (value instanceof float[]))
+				{
+					return null;
+				}
+				return "Object is not an array of numbers.";
+			}
+		};
+		private static final ComplexPropertyConverter<float[]> complexConverter = new ComplexPropertyConverter<float[]>()
+		{
+			@Override
+			public Object convertProperty(Object property, float[] value)
+			{
+				return new ComplexProperty<float[]>(value)
+				{
+					@Override
+					public IPropertySource getPropertySource()
+					{
+						return new RoundedRadiusPropertySource(this);
+					}
+				};
+			}
+		};
+		private static PropertyController<float[], Object> radiusController = new PropertyController<float[], Object>(ROUNDING_RADIUS, "rounding radius",
+			complexConverter, new LabelProvider()
+			{
+
+				@Override
+				public String getText(Object element)
+				{
+					return converter.convertToString(element);
+				}
+			}, new ICellEditorFactory()
+			{
+				public CellEditor createPropertyEditor(Composite parent)
+				{
+					return new ConvertorObjectCellEditor(parent, converter);
+				}
+			});
+		private static final IObjectTextConverter converterStyles = new IObjectTextConverter()
+		{
+
+			public Object convertToObject(String value)
+			{
+				if (value == null)
+				{
+					return null;
+				}
+				StringTokenizer tok = new StringTokenizer(value, ",");
+				String[] values = new String[4];
+				if (tok.countTokens() != 4)
+				{
+					Arrays.fill(values, tok.nextToken());
+				}
+				else
+				{
+					for (int index = 0; index < 4; index++)
+					{
+						values[index] = tok.nextToken();
+					}
+				}
+				for (int i = 0; i < 4; i++)
+				{
+					if (!BorderStylesPropertySource.borderStyles.contains(values[i]))
+					{
+						return null;
+					}
+				}
+				return values;
+			}
+
+			public String convertToString(Object value)
+			{
+				if (value == null)
+				{
+					return "";
+				}
+				String[] values = (String[])value;
+				return new StringBuilder().append(values[0]).append(",").append(values[1]).append(",").append(values[2]).append(",").append(values[3]).toString();
+			}
+
+			public String isCorrectString(String value)
+			{
+				if (value != null && value.trim().length() > 0 && convertToObject(value) == null)
+				{
+					return "Expecting 1 or 4 border styles.";
+				}
+				return null;
+			}
+
+			public String isCorrectObject(Object value)
+			{
+				if (value == null || (value instanceof String[]))
+				{
+					return null;
+				}
+				return "Object is not an array of styles.";
+			}
+		};
+		private static final ComplexPropertyConverter<String[]> complexStyleConverter = new ComplexPropertyConverter<String[]>()
+		{
+			@Override
+			public Object convertProperty(Object property, String[] value)
+			{
+				return new ComplexProperty<String[]>(value)
+				{
+					@Override
+					public IPropertySource getPropertySource()
+					{
+						return new BorderStylesPropertySource(this);
+					}
+				};
+			}
+		};
+		private static PropertyController<String[], Object> stylesController = new PropertyController<String[], Object>(BORDER_STYLE, "border style",
+			complexStyleConverter, new LabelProvider()
+			{
+
+				@Override
+				public String getText(Object element)
+				{
+					return converterStyles.convertToString(element);
+				}
+			}, new ICellEditorFactory()
+			{
+				public CellEditor createPropertyEditor(Composite parent)
+				{
+					return new ConvertorObjectCellEditor(parent, converterStyles);
+				}
+			});
+
+		public RoundedBorderPropertySource(ComplexProperty<SpecialMatteBorder> complexProperty)
+		{
+			super(complexProperty);
+		}
+
+		private IPropertyDescriptor[] descriptors = null;
+
+		@Override
+		public IPropertyDescriptor[] createPropertyDescriptors()
+		{
+			if (descriptors == null)
+			{
+				IPropertyDescriptor[] oldDescriptors = super.createPropertyDescriptors();
+				IPropertyDescriptor[] fixedDescriptors = new IPropertyDescriptor[oldDescriptors.length];
+				System.arraycopy(oldDescriptors, 0, fixedDescriptors, 0, oldDescriptors.length);
+				fixedDescriptors[fixedDescriptors.length - 2] = radiusController;
+				fixedDescriptors[fixedDescriptors.length - 1] = stylesController;
+				descriptors = PropertyController.applySequencePropertyComparator(fixedDescriptors);
+			}
+			return descriptors;
+		}
+
+		@Override
+		public Object getPropertyValue(Object id)
+		{
+			SpecialMatteBorder border = getEditableValue();
+			if (ROUNDING_RADIUS.equals(id))
+			{
+				return complexConverter.convertProperty(id, ((RoundedBorder)border).getRadius());
+			}
+			if (BORDER_STYLE.equals(id))
+			{
+				return complexStyleConverter.convertProperty(id, ((RoundedBorder)border).getBorderStyles());
+			}
+			return super.getPropertyValue(id);
+		}
+
+		@Override
+		protected RoundedBorder setComplexPropertyValue(Object id, Object v)
+		{
+			RoundedBorder border = (RoundedBorder)getEditableValue();
+			if (border == null)
+			{
+				border = (RoundedBorder)createBorder(BorderType.RoundedBorder);
+			}
+
+			SpecialMatteBorder smb = super.setComplexPropertyValue(id, v);
+			RoundedBorder roundedBorder = new RoundedBorder(smb.getTop(), smb.getLeft(), smb.getBottom(), smb.getRight(), smb.getTopColor(),
+				smb.getLeftColor(), smb.getBottomColor(), smb.getRightColor());
+			if (ROUNDING_RADIUS.equals(id))
+			{
+				if (v instanceof float[])
+				{
+					roundedBorder.setRoundingRadius((float[])v);
+				}
+				else
+				{
+					roundedBorder.setRoundingRadius(((ComplexProperty<float[]>)v).getValue());
+				}
+				roundedBorder.setBorderStyles(border.getBorderStyles());
+			}
+			else if (BORDER_STYLE.equals(id))
+			{
+				if (v instanceof String[])
+				{
+					roundedBorder.setBorderStyles((String[])v);
+				}
+				else
+				{
+					roundedBorder.setBorderStyles(((ComplexProperty<String[]>)v).getValue());
+				}
+				roundedBorder.setRoundingRadius(border.getRadius());
+			}
+			else
+			{
+				roundedBorder.setBorderStyles(border.getBorderStyles());
+				roundedBorder.setRoundingRadius(border.getRadius());
+			}
+			return roundedBorder;
+		}
+
+		@Override
+		public Object resetComplexPropertyValue(Object id)
+		{
+			RoundedBorder defVal = (RoundedBorder)defaultBorderValues.get(BorderType.RoundedBorder);
+			if (ROUNDING_RADIUS.equals(id))
+			{
+				return defVal.getRadius();
+			}
+			else if (BORDER_STYLE.equals(id))
+			{
+				return defVal.getBorderStyles();
+			}
+			return super.resetComplexPropertyValue(id);
+		}
+	}
 	public static class SpecialMatteBorderPropertySource extends ComplexPropertySource<SpecialMatteBorder>
 	{
-		private static final String TOP_SIZE = "top_size";
-		private static final String LEFT_SIZE = "left_size";
-		private static final String BOTTOM_SIZE = "bottom_size";
-		private static final String RIGHT_SIZE = "right_size";
+		private static final ComplexPropertyConverter<Insets> sizeConverter = new ComplexPropertyConverter<java.awt.Insets>()
+		{
+			@Override
+			public Object convertProperty(Object property, java.awt.Insets value)
+			{
+				return new ComplexProperty<Insets>(value)
+				{
+					@Override
+					public IPropertySource getPropertySource()
+					{
+						return new InsetsPropertySource(this);
+					}
+				};
+			}
+		};
+
+		private static final String SIZE = "size";
+
+		private static PropertyController<java.awt.Insets, Object> sizeController = new PropertyController<java.awt.Insets, Object>(SIZE, "size",
+			sizeConverter, InsetsPropertySource.getLabelProvider(), new ICellEditorFactory()
+			{
+				public CellEditor createPropertyEditor(Composite parent)
+				{
+					return InsetsPropertySource.createPropertyEditor(parent);
+				}
+			});
 
 		private static final String TOP_COLOR = "top_color";
 		private static final String LEFT_COLOR = "left_color";
 		private static final String BOTTOM_COLOR = "bottom_color";
 		private static final String RIGHT_COLOR = "right_color";
 
-		private static final String ROUNDING_RADIUS = "rounding_radius";
-		private static final String DASH_PATTERN = "dash_pattern";
+		protected static final String ROUNDING_RADIUS = "rounding_radius";
+		protected static final String BORDER_STYLE = "dash_pattern";
 
 		// make sure sub-properties are sorted in defined order
 		private static final IPropertyDescriptor[] PROPERTY_DESCRIPTORS = PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] {//
-		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_SIZE, "top size"), //
-		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, LEFT_SIZE, "left size"),//
-		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_SIZE, "bottom size"),//
-		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, RIGHT_SIZE, "right size"),//
+		sizeController, //
 		new ColorPropertyController(TOP_COLOR, "top color"), //
 		new ColorPropertyController(LEFT_COLOR, "left color"),//
 		new ColorPropertyController(BOTTOM_COLOR, "bottom color"),//
 		new ColorPropertyController(RIGHT_COLOR, "right color"),//
 		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, ROUNDING_RADIUS, "rounding radius"),//
-		new TextPropertyDescriptor(DASH_PATTERN, "dash pattern") //
+		new TextPropertyDescriptor(BORDER_STYLE, "dash pattern") //
 		});
 
 		public SpecialMatteBorderPropertySource(ComplexProperty<SpecialMatteBorder> complexProperty)
@@ -495,21 +1046,10 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		public Object getPropertyValue(Object id)
 		{
 			SpecialMatteBorder border = getEditableValue();
-			if (TOP_SIZE.equals(id))
+			if (SIZE.equals(id))
 			{
-				return new Float(border.getTop());
-			}
-			if (LEFT_SIZE.equals(id))
-			{
-				return new Float(border.getLeft());
-			}
-			if (BOTTOM_SIZE.equals(id))
-			{
-				return new Float(border.getBottom());
-			}
-			if (RIGHT_SIZE.equals(id))
-			{
-				return new Float(border.getRight());
+				return sizeConverter.convertProperty(id,
+					new Insets((int)border.getTop(), (int)border.getLeft(), (int)border.getBottom(), (int)border.getRight()));
 			}
 			if (TOP_COLOR.equals(id))
 			{
@@ -531,7 +1071,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			{
 				return new Float(border.getRoundingRadius());
 			}
-			if (DASH_PATTERN.equals(id))
+			if (BORDER_STYLE.equals(id))
 			{
 				return SpecialMatteBorder.createDashString(border.getDashPattern());
 			}
@@ -549,24 +1089,9 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			}
 
 			SpecialMatteBorder smb = null;
-			if (TOP_SIZE.equals(id))
+			if (SIZE.equals(id))
 			{
-				smb = new SpecialMatteBorder(((Number)v).floatValue(), border.getLeft(), border.getBottom(), border.getRight(), border.getTopColor(),
-					border.getLeftColor(), border.getBottomColor(), border.getRightColor());
-			}
-			else if (LEFT_SIZE.equals(id))
-			{
-				smb = new SpecialMatteBorder(border.getTop(), ((Number)v).floatValue(), border.getBottom(), border.getRight(), border.getTopColor(),
-					border.getLeftColor(), border.getBottomColor(), border.getRightColor());
-			}
-			else if (BOTTOM_SIZE.equals(id))
-			{
-				smb = new SpecialMatteBorder(border.getTop(), border.getLeft(), ((Number)v).floatValue(), border.getRight(), border.getTopColor(),
-					border.getLeftColor(), border.getBottomColor(), border.getRightColor());
-			}
-			else if (RIGHT_SIZE.equals(id))
-			{
-				smb = new SpecialMatteBorder(border.getTop(), border.getLeft(), border.getBottom(), ((Number)v).floatValue(), border.getTopColor(),
+				smb = new SpecialMatteBorder(((Insets)v).top, ((Insets)v).left, ((Insets)v).bottom, ((Insets)v).right, border.getTopColor(),
 					border.getLeftColor(), border.getBottomColor(), border.getRightColor());
 			}
 			else if (TOP_COLOR.equals(id))
@@ -602,14 +1127,14 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 				smb = new SpecialMatteBorder(border.getTop(), border.getLeft(), border.getBottom(), border.getRight(), border.getTopColor(),
 					border.getLeftColor(), border.getBottomColor(), border.getRightColor());
 				smb.setDashPattern(border.getDashPattern());
-				smb.setRoundingRadius(((Number)v).floatValue());
+				if (v instanceof Number) smb.setRoundingRadius(((Number)v).floatValue());
 			}
-			else if (DASH_PATTERN.equals(id))
+			else if (BORDER_STYLE.equals(id))
 			{
 				smb = new SpecialMatteBorder(border.getTop(), border.getLeft(), border.getBottom(), border.getRight(), border.getTopColor(),
 					border.getLeftColor(), border.getBottomColor(), border.getRightColor());
 				smb.setRoundingRadius(border.getRoundingRadius());
-				smb.setDashPattern(SpecialMatteBorder.createDash((String)v));
+				if (v instanceof String) smb.setDashPattern(SpecialMatteBorder.createDash((String)v));
 			}
 			return smb;
 		}
@@ -618,21 +1143,9 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		public Object resetComplexPropertyValue(Object id)
 		{
 			SpecialMatteBorder defVal = (SpecialMatteBorder)defaultBorderValues.get(BorderType.SpecialMatte);
-			if (TOP_SIZE.equals(id))
+			if (SIZE.equals(id))
 			{
-				return defVal.getTop();
-			}
-			else if (LEFT_SIZE.equals(id))
-			{
-				return defVal.getLeft();
-			}
-			else if (BOTTOM_SIZE.equals(id))
-			{
-				return defVal.getBottom();
-			}
-			else if (RIGHT_SIZE.equals(id))
-			{
-				return defVal.getRight();
+				return new Insets((int)defVal.getTop(), (int)defVal.getLeft(), (int)defVal.getBottom(), (int)defVal.getRight());
 			}
 			else if (TOP_COLOR.equals(id))
 			{
@@ -654,7 +1167,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			{
 				return defVal.getRoundingRadius();
 			}
-			else if (DASH_PATTERN.equals(id))
+			else if (BORDER_STYLE.equals(id))
 			{
 				return defVal.getDashPattern();
 			}
@@ -1044,7 +1557,8 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 
 		@Override
-		public Object resetComplexPropertyValue(@SuppressWarnings("unused") Object id)
+		public Object resetComplexPropertyValue(@SuppressWarnings("unused")
+		Object id)
 		{
 			TitledBorder defVal = (TitledBorder)defaultBorderValues.get(BorderType.Title);
 			if (TITLE.equals(id))

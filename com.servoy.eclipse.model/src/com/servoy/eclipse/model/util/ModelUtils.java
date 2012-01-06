@@ -18,7 +18,6 @@ package com.servoy.eclipse.model.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -43,7 +42,7 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
-import com.servoy.j2db.util.FixedStyleSheet;
+import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.Pair;
 
 public class ModelUtils
@@ -83,7 +82,7 @@ public class ModelUtils
 	/**
 	 * Weak cache for style classes per lookupname.
 	 */
-	private final static WeakHashMap<FixedStyleSheet, Map<Pair<String, String>, String[]>> styleClassesCache = new WeakHashMap<FixedStyleSheet, Map<Pair<String, String>, String[]>>();
+	private final static WeakHashMap<IStyleSheet, Map<Pair<String, String>, String[]>> styleClassesCache = new WeakHashMap<IStyleSheet, Map<Pair<String, String>, String[]>>();
 
 	public static String[] getStyleClasses(Style style, String lookupName, String formStyleClass)
 	{
@@ -92,7 +91,7 @@ public class ModelUtils
 			return new String[0];
 		}
 
-		FixedStyleSheet styleSheet = ComponentFactory.getCSSStyle(null, style);
+		IStyleSheet styleSheet = ComponentFactory.getCSSStyle(null, style);
 		Map<Pair<String, String>, String[]> map = styleClassesCache.get(styleSheet);
 		if (map == null)
 		{
@@ -109,7 +108,7 @@ public class ModelUtils
 		return styleClasses;
 	}
 
-	private static String[] calculateStyleClasses(FixedStyleSheet styleSheet, String lookupName, String formStyleClass)
+	private static String[] calculateStyleClasses(IStyleSheet styleSheet, String lookupName, String formStyleClass)
 	{
 		List<String> styleClasses = new ArrayList<String>();
 		boolean matchedFormPrefix = false;
@@ -123,10 +122,10 @@ public class ModelUtils
 		{
 			boolean styleExist = false;
 			boolean matchedFormPrefixField = false;
-			Enumeration< ? > selectors = styleSheet.getStyleNames();
-			while (selectors.hasMoreElements())
+			List<String> selectors = styleSheet.getStyleNames();
+			for (String selector : selectors)
 			{
-				String[] styleParts = ((String)selectors.nextElement()).split("\\p{Space}+?"); //$NON-NLS-1$
+				String[] styleParts = selector.split("\\p{Space}+?"); //$NON-NLS-1$
 				if (styleParts.length <= 2 && (styleParts.length == 1 || styleParts[0].equals(formPrefix)))
 				{
 					String styleName = styleParts[styleParts.length - 1];
@@ -152,10 +151,9 @@ public class ModelUtils
 			}
 		}
 
-		Enumeration< ? > selectors = styleSheet.getStyleNames();
-		while (selectors.hasMoreElements())
+		List<String> selectors = styleSheet.getStyleNames();
+		for (String selector : selectors)
 		{
-			String selector = (String)selectors.nextElement();
 			String[] styleParts = selector.split("\\p{Space}+?"); //$NON-NLS-1$
 			String styleName = styleParts[styleParts.length - 1];
 			if ((matchedFormPrefix && styleParts.length == 1) // found a match with form prefix, skip root matches 

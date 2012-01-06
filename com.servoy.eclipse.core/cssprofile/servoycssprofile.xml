@@ -41,6 +41,15 @@
 			<property name="background-attachment" enabled="false"/>
 			<property name="background-position" enabled="false"/>
 			<property name="background-repeat" enabled="false" />
+			<property name="border-radius"/>
+			<property name="border-top-style"/>
+			<property name="border-left-style"/>
+			<property name="border-bottom-style"/>
+			<property name="border-right_style"/>
+			<property name="border-top-left-radius"/>
+			<property name="border-top-right-radius"/>
+			<property name="border-bottom-right-radius"/>
+			<property name="border-bottom-left-radius"/>
 			<property name="clear" enabled="false"/>
 			<property name="display" enabled="false"/>
 			<property name="float" enabled="false"/>
@@ -68,12 +77,26 @@
 			<keyword name="none"/>
 			<keyword name="dotted"/>
 			<keyword name="dashed"/>
+			<keyword name="double"/>
 			<keyword name="solid"/>
+			<keyword name="ridge"/>
 			<keyword name="groove"/>
 			<keyword name="inset"/>
 			<keyword name="outset"/>
 		</property-def>
-		
+		<property-def name="border-top-style" inherited="no" category="box">
+			<property name="border-style"/>
+		</property-def>
+		<property-def name="border-left-style" inherited="no" category="box">
+			<property name="border-style"/>
+		</property-def>
+		<property-def name="border-bottom-style" inherited="no" category="box">
+			<property name="border-style"/>
+		</property-def>
+		<property-def name="border-right_style" inherited="no" category="box">
+			<property name="border-style"/>
+		</property-def>
+			
 		<property-def name="background-image" inherited="no" category="colorandbackground">
 	        <keyword name="mediaurl"/>
 	    </property-def>
@@ -92,6 +115,22 @@
 		</property-def>
 		<property-def name="border-width" category="box">
 			<number name="pxunit"/>
+		</property-def>
+		<property-def name="border-top-left-radius" category="box">
+			<container name="generic-corner-radius"/>
+		</property-def>
+		<property-def name="border-top-right-radius" category="box">
+			<container name="generic-corner-radius"/>
+		</property-def>
+		<property-def name="border-bottom-left-radius" category="box">
+			<container name="generic-corner-radius"/>
+		</property-def>
+		<property-def name="border-bottom-right-radius" category="box">
+			<container name="generic-corner-radius"/>
+		</property-def>
+		<property-def name="border-radius" category="box">
+			<container name="generic-corner-radius"/>
+			<separator name="slash"/>
 		</property-def>
 		<property-def name="margin" category="box">
 			<property name="margin-top"/>
@@ -126,7 +165,9 @@
 			<keyword name="right"/>
 			<keyword name="center"/>
 		</property-def>
-		
+		<container-def name="generic-corner-radius">
+			<number name="pxunit"/>
+		</container-def>
 		 <number-def name="pxunit">
 	        <unit name="px"/>
 	    </number-def>

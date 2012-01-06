@@ -98,7 +98,8 @@ import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.server.headlessclient.dataui.WebDefaultRecordNavigator;
 import com.servoy.j2db.util.ComponentFactoryHelper;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.FixedStyleSheet;
+import com.servoy.j2db.util.IStyleRule;
+import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ScopesUtils;
@@ -325,7 +326,7 @@ public class ElementFactory
 		}
 
 		// Look into styles.
-		FixedStyleSheet ss = ComponentFactory.getCSSStyleForForm(sp, form);
+		IStyleSheet ss = ComponentFactory.getCSSStyleForForm(sp, form);
 		if (ss != null)
 		{
 			String lookupname = "form"; //$NON-NLS-1$
@@ -333,7 +334,7 @@ public class ElementFactory
 			{
 				lookupname += '.' + form.getStyleClass();
 			}
-			javax.swing.text.Style style = ss.getRule(lookupname);
+			IStyleRule style = ss.getCSSRule(lookupname);
 			if (style != null)
 			{
 				return ss.getBorder(style);
