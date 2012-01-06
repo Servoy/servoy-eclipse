@@ -297,7 +297,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				form.clearProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
 				form.clearProperty(StaticContentSpecLoader.PROPERTY_SHOWINMENU.getPropertyName());
 			}
-			form.setExtendsID(superForm == null ? Form.NAVIGATOR_NONE : superForm.getID());
+			if (superForm != null) form.setExtendsID(superForm.getID());
 			// add selected data providers
 			Object[] dataProviders = dataProviderWizardPage.getDataProviders();
 			if (dataProviders != null && dataProviders.length > 0)
