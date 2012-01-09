@@ -572,10 +572,10 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_RIGHT_HORIZONTAL, "top right horizontal"),//
 		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_RIGHT_HORIZONTAL, "bottom right horizontal"),//
 		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_LEFT_HORIZONTAL, "bottom left horizontal"),//
-		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_LEFT_HORIZONTAL, "top left vertical"), //
-		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_RIGHT_HORIZONTAL, "top right vertical"),//
-		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_RIGHT_HORIZONTAL, "bottom right vertical"),//
-		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_LEFT_HORIZONTAL, "bottom left vertical") //
+		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_LEFT_VERTICAL, "top left vertical"), //
+		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_RIGHT_VERTICAL, "top right vertical"),//
+		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_RIGHT_VERTICAL, "bottom right vertical"),//
+		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_LEFT_VERTICAL, "bottom left vertical") //
 		});
 
 		@Override
