@@ -1091,8 +1091,17 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			SpecialMatteBorder smb = null;
 			if (SIZE.equals(id))
 			{
-				smb = new SpecialMatteBorder(((Insets)v).top, ((Insets)v).left, ((Insets)v).bottom, ((Insets)v).right, border.getTopColor(),
-					border.getLeftColor(), border.getBottomColor(), border.getRightColor());
+				Insets insets = null;
+				if (v instanceof Insets)
+				{
+					insets = (Insets)v;
+				}
+				else
+				{
+					insets = ((ComplexProperty<Insets>)v).getValue();
+				}
+				smb = new SpecialMatteBorder(insets.top, insets.left, insets.bottom, insets.right, border.getTopColor(), border.getLeftColor(),
+					border.getBottomColor(), border.getRightColor());
 			}
 			else if (TOP_COLOR.equals(id))
 			{
