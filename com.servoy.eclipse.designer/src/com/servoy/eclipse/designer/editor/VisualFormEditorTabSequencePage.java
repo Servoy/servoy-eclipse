@@ -69,6 +69,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.views.IndexedListViewer;
 import com.servoy.eclipse.ui.views.IndexedStructuredSelection;
+import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportName;
@@ -466,12 +467,15 @@ public class VisualFormEditorTabSequencePage extends Composite
 
 			if (ts.getTabSeq() != tabSeqs[i] && ts instanceof IPersist)
 			{
+				IPersist tsPersist = (IPersist)ts;
+				if (tsPersist instanceof IFlattenedPersistWrapper) tsPersist = ((IFlattenedPersistWrapper< ? >)tsPersist).getWrappedPersist();
+
 				if (command == null)
 				{
 					command = new CompoundCommand(label);
 				}
 
-				command.add(getSetTabSeqCommand((IPersist)ts, tabSeqs[i]));
+				command.add(getSetTabSeqCommand(tsPersist, tabSeqs[i]));
 			}
 		}
 
