@@ -180,14 +180,30 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		formProperties.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
 		Group navigatorDefaultSettings = new Group(formProperties, SWT.NONE);
-		navigatorDefaultSettings.setText("Show Navigator Default Setting"); //$NON-NLS-1$
+		navigatorDefaultSettings.setText("Show Navigator default setting - use at new form creation"); //$NON-NLS-1$
 		navigatorDefaultSettings.setLayout(new GridLayout(1, true));
 
-		showNavigatorDefaultOnButton = new Button(navigatorDefaultSettings, SWT.RADIO);
+		showNavigatorDefaultOnButton = new Button(navigatorDefaultSettings, SWT.CHECK);
 		showNavigatorDefaultOnButton.setText("On"); //$NON-NLS-1$
+		showNavigatorDefaultOnButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				if (((Button)(e.widget)).getSelection()) showNavigatorDefaultOffButton.setSelection(false);
+			}
+		});
 
-		showNavigatorDefaultOffButton = new Button(navigatorDefaultSettings, SWT.RADIO);
+		showNavigatorDefaultOffButton = new Button(navigatorDefaultSettings, SWT.CHECK);
 		showNavigatorDefaultOffButton.setText("Off"); //$NON-NLS-1$
+		showNavigatorDefaultOffButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				if (((Button)(e.widget)).getSelection()) showNavigatorDefaultOnButton.setSelection(false);
+			}
+		});
 
 		initializeFields();
 
