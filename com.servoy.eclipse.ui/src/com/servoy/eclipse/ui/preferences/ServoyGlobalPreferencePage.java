@@ -60,6 +60,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private Button showColumnsInAlphabeticOrderButton;
 	private Label enhancedSecurityLabel;
 	private ComboViewer primaryKeySequenceTypeCombo;
+	private Button showNavigatorDefaultOnButton;
+	private Button showNavigatorDefaultOffButton;
 
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
@@ -171,11 +173,26 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 			"Database Sequence", new Integer(ColumnInfo.DATABASE_SEQUENCE)), new ObjectWrapper("Database Identity", new Integer(ColumnInfo.DATABASE_IDENTITY)), new ObjectWrapper( //$NON-NLS-1$ //$NON-NLS-2$
 			"UUID Generator", new Integer(ColumnInfo.UUID_GENERATOR)) }); //$NON-NLS-1$
 
+		//Form Properties
+		Group formProperties = new Group(rootContainer, SWT.NONE);
+		formProperties.setText("Form Properties"); //$NON-NLS-1$
+		formProperties.setLayout(new GridLayout(1, true));
+		formProperties.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
+
+		Group navigatorDefaultSettings = new Group(formProperties, SWT.NONE);
+		navigatorDefaultSettings.setText("Show Navigator Default Setting"); //$NON-NLS-1$
+		navigatorDefaultSettings.setLayout(new GridLayout(1, true));
+
+		showNavigatorDefaultOnButton = new Button(navigatorDefaultSettings, SWT.RADIO);
+		showNavigatorDefaultOnButton.setText("On"); //$NON-NLS-1$
+
+		showNavigatorDefaultOffButton = new Button(navigatorDefaultSettings, SWT.RADIO);
+		showNavigatorDefaultOffButton.setText("Off"); //$NON-NLS-1$
+
 		initializeFields();
 
 		return rootContainer;
 	}
-
 
 	protected void initializeFields()
 	{
@@ -187,6 +204,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showColumnsInDbOrderButton.setSelection(prefs.getShowColumnsInDbOrder());
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
 		setPrimaryKeySequenceTypeValue(prefs.getPrimaryKeySequenceType());
+		showNavigatorDefaultOnButton.setSelection(prefs.getShowNavigatorDefault());
+		showNavigatorDefaultOffButton.setSelection(!showNavigatorDefaultOnButton.getSelection());
 	}
 
 	@Override
@@ -199,6 +218,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showColumnsInDbOrderButton.setSelection(DesignerPreferences.SHOW_COLUMNS_IN_DB_ORDER_DEFAULT);
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
 		setPrimaryKeySequenceTypeValue(DesignerPreferences.PK_SEQUENCE_TYPE_DEFAULT);
+		showNavigatorDefaultOnButton.setSelection(DesignerPreferences.SHOW_NAVIGATOR_DEFAULT);
+		showNavigatorDefaultOffButton.setSelection(!showNavigatorDefaultOnButton.getSelection());
 
 		super.performDefaults();
 	}
@@ -214,6 +235,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		prefs.setOpenFirstFormDesigner(openFirstFormDesignerButton.getSelection());
 		prefs.setShowColumnsInDbOrder(showColumnsInDbOrderButton.getSelection());
 		prefs.setPrimaryKeySequenceType(((Integer)((ObjectWrapper)((IStructuredSelection)primaryKeySequenceTypeCombo.getSelection()).getFirstElement()).getType()).intValue());
+		prefs.setShowNavigatorDefault(showNavigatorDefaultOnButton.getSelection());
 		prefs.save();
 
 		return true;

@@ -300,9 +300,9 @@ public class NewFormWizard extends Wizard implements INewWizard
 			if (superForm != null) form.setExtendsID(superForm.getID());
 			// add selected data providers
 			Object[] dataProviders = dataProviderWizardPage.getDataProviders();
+			DesignerPreferences designerPreferences = new DesignerPreferences();
 			if (dataProviders != null && dataProviders.length > 0)
 			{
-				DesignerPreferences designerPreferences = new DesignerPreferences();
 				ElementFactory.createFields(form, dataProviders, dataProviderWizardPage.optionsGroup.isPlaceAsLabels(),
 					dataProviderWizardPage.optionsGroup.isPlaceWithLabels(), dataProviderWizardPage.optionsGroup.isPlaceHorizontal(),
 					dataProviderWizardPage.optionsGroup.isFillText(), dataProviderWizardPage.optionsGroup.isFillName(), designerPreferences.getGridSnapTo()
@@ -314,6 +314,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 					form.setView(FormController.LOCKED_TABLE_VIEW);
 				}
 			}
+
+			if (form.getNavigatorID() == Form.NAVIGATOR_DEFAULT && !designerPreferences.getShowNavigatorDefault()) form.setNavigatorID(Form.NAVIGATOR_NONE);
 
 			// save
 			servoyProject.saveEditingSolutionNodes(new IPersist[] { form }, true);

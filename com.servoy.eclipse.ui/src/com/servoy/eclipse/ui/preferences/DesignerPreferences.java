@@ -85,6 +85,7 @@ public class DesignerPreferences
 	public static final String DEFAULT_TABLE_EVENT_HANDLER_NAMING_SETTING = "defaultTableEventHandlerNaming";
 	public static final String INCLUDE_TABLE_NAME_SETTING = "includeTableName";
 	public static final String PK_SEQUENCE_TYPE_SETTING = "primaryKeySequenceType";
+	public static final String SHOW_NAVIGATOR_DEFAULT_SETTING = "showNavigatorDefault";
 
 	public static final String SNAP_TO_ALIGMNENT = "alignment";
 	public static final String SNAP_TO_GRID = "grid";
@@ -125,6 +126,7 @@ public class DesignerPreferences
 	public static final boolean USE_SERVOY_SEQUENCE_DEFAULT = true;
 	public static final boolean USE_DATABASE_SEQUENCE_DEFAULT = false;
 	public static final int PK_SEQUENCE_TYPE_DEFAULT = ColumnInfo.SERVOY_SEQUENCE;
+	public static final boolean SHOW_NAVIGATOR_DEFAULT = true;
 
 	protected final IEclipsePreferences eclipsePreferences;
 
@@ -551,6 +553,16 @@ public class DesignerPreferences
 	public void setPrimaryKeySequenceType(int primaryKeySequenceType)
 	{
 		setProperty(PK_SEQUENCE_TYPE_SETTING, primaryKeySequenceType);
+	}
+
+	public boolean getShowNavigatorDefault()
+	{
+		return getProperty(SHOW_NAVIGATOR_DEFAULT_SETTING, SHOW_NAVIGATOR_DEFAULT);
+	}
+
+	public void setShowNavigatorDefault(boolean showNavigatorDefault)
+	{
+		setProperty(SHOW_NAVIGATOR_DEFAULT_SETTING, showNavigatorDefault);
 	}
 
 	public static boolean isCoolbarSetting(String key)
