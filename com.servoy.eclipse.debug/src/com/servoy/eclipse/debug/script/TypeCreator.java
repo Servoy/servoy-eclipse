@@ -89,7 +89,7 @@ import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ITypedScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
-import com.servoy.j2db.ui.IScriptBaseMethods;
+import com.servoy.j2db.ui.runtime.IRuntimeComponent;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Utils;
@@ -431,7 +431,7 @@ public abstract class TypeCreator
 			type.setDeprecated(true);
 			type.setVisible(false);
 		}
-		if (IScriptBaseMethods.class.isAssignableFrom(cls) && cls != IScriptBaseMethods.class)
+		if (cls != IRuntimeComponent.class && IRuntimeComponent.class.isAssignableFrom(cls))
 		{
 			type.setSuperType(context.getType("RuntimeComponent"));
 		}

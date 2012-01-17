@@ -67,6 +67,10 @@ import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IForm;
 import com.servoy.j2db.dataprocessing.FoundSet;
+import com.servoy.j2db.dataprocessing.IDataSet;
+import com.servoy.j2db.dataprocessing.IFoundSetInternal;
+import com.servoy.j2db.dataprocessing.IRecord;
+import com.servoy.j2db.dataprocessing.IRecordInternal;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
@@ -115,6 +119,7 @@ import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.ui.IComponent;
 import com.servoy.j2db.ui.IScriptRenderMethods;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -168,19 +173,19 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		TYPES.put("float", "Number"); //$NON-NLS-1$ //$NON-NLS-2$
 		TYPES.put("int", "Number"); //$NON-NLS-1$ //$NON-NLS-2$
 		TYPES.put("long", "Number"); //$NON-NLS-1$ //$NON-NLS-2$
-		TYPES.put("Record", Record.JS_RECORD); //$NON-NLS-1$
-		TYPES.put("IRecordInternal", Record.JS_RECORD); //$NON-NLS-1$
-		TYPES.put("IRecord", Record.JS_RECORD); //$NON-NLS-1$
-		TYPES.put("IFoundSetInternal", FoundSet.JS_FOUNDSET); //$NON-NLS-1$
-		TYPES.put("FoundSet", FoundSet.JS_FOUNDSET); //$NON-NLS-1$
+		TYPES.put(Record.class.getSimpleName(), Record.JS_RECORD);
+		TYPES.put(IRecordInternal.class.getSimpleName(), Record.JS_RECORD);
+		TYPES.put(IRecord.class.getSimpleName(), Record.JS_RECORD);
+		TYPES.put(IFoundSetInternal.class.getSimpleName(), FoundSet.JS_FOUNDSET);
+		TYPES.put(FoundSet.class.getSimpleName(), FoundSet.JS_FOUNDSET);
 		TYPES.put(FormScope.class.getSimpleName(), "RuntimeForm"); //$NON-NLS-1$
 		TYPES.put(IForm.class.getSimpleName(), "RuntimeForm"); //$NON-NLS-1$
 		TYPES.put("org.mozilla.javascript.NativeArray", "Array"); //$NON-NLS-1$ //$NON-NLS-2$
 		TYPES.put("JSWindowImpl$JSWindow", "JSWindow"); //$NON-NLS-1$ //$NON-NLS-2$
-		TYPES.put("IScriptRenderMethods", IScriptRenderMethods.JS_RENDERABLE); //$NON-NLS-1$
-		TYPES.put("IComponent", "RuntimeComponent"); //$NON-NLS-1$ //$NON-NLS-2$
-		TYPES.put("IDataSet", "JSDataSet"); //$NON-NLS-1$ //$NON-NLS-2$
-		TYPES.put("Scriptable", "Object"); //$NON-NLS-1$ //$NON-NLS-2$
+		TYPES.put(IScriptRenderMethods.class.getSimpleName(), IScriptRenderMethods.JS_RENDERABLE);
+		TYPES.put(IComponent.class.getSimpleName(), "RuntimeComponent"); //$NON-NLS-1$ 
+		TYPES.put(IDataSet.class.getSimpleName(), "JSDataSet"); //$NON-NLS-1$ 
+		TYPES.put(Scriptable.class.getSimpleName(), "Object"); //$NON-NLS-1$ 
 		Method[] methods = Object.class.getMethods();
 		for (Method method : methods)
 		{

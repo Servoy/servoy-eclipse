@@ -19,7 +19,6 @@ package com.servoy.eclipse.ui.util;
 import java.awt.Rectangle;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -60,26 +59,28 @@ import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
-import com.servoy.j2db.ui.IDepricatedScriptTabPanelMethods;
 import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
-import com.servoy.j2db.ui.IScriptCheckBoxMethods;
-import com.servoy.j2db.ui.IScriptChoiceMethods;
-import com.servoy.j2db.ui.IScriptDataButtonMethods;
-import com.servoy.j2db.ui.IScriptDataCalendarMethods;
-import com.servoy.j2db.ui.IScriptDataComboboxMethods;
 import com.servoy.j2db.ui.IScriptDataLabelMethods;
-import com.servoy.j2db.ui.IScriptDataPasswordMethods;
-import com.servoy.j2db.ui.IScriptFieldMethods;
-import com.servoy.j2db.ui.IScriptListBoxMethods;
-import com.servoy.j2db.ui.IScriptMediaInputFieldMethods;
 import com.servoy.j2db.ui.IScriptPortalComponentMethods;
-import com.servoy.j2db.ui.IScriptRadioMethods;
-import com.servoy.j2db.ui.IScriptRectMethods;
-import com.servoy.j2db.ui.IScriptScriptButtonMethods;
 import com.servoy.j2db.ui.IScriptScriptLabelMethods;
 import com.servoy.j2db.ui.IScriptSplitPaneMethods;
-import com.servoy.j2db.ui.IScriptTextAreaMethods;
-import com.servoy.j2db.ui.IScriptTextEditorMethods;
+import com.servoy.j2db.ui.IScriptTabPanelMethods;
+import com.servoy.j2db.ui.runtime.IRuntimeButton;
+import com.servoy.j2db.ui.runtime.IRuntimeCalendar;
+import com.servoy.j2db.ui.runtime.IRuntimeCheck;
+import com.servoy.j2db.ui.runtime.IRuntimeChecks;
+import com.servoy.j2db.ui.runtime.IRuntimeCombobox;
+import com.servoy.j2db.ui.runtime.IRuntimeDataButton;
+import com.servoy.j2db.ui.runtime.IRuntimeHtmlArea;
+import com.servoy.j2db.ui.runtime.IRuntimeImageMedia;
+import com.servoy.j2db.ui.runtime.IRuntimeListBox;
+import com.servoy.j2db.ui.runtime.IRuntimePassword;
+import com.servoy.j2db.ui.runtime.IRuntimeRadio;
+import com.servoy.j2db.ui.runtime.IRuntimeRadios;
+import com.servoy.j2db.ui.runtime.IRuntimeRectangle;
+import com.servoy.j2db.ui.runtime.IRuntimeRtfArea;
+import com.servoy.j2db.ui.runtime.IRuntimeTextArea;
+import com.servoy.j2db.ui.runtime.IRuntimeTextField;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
@@ -92,21 +93,6 @@ import com.servoy.j2db.util.UUID;
 
 public class ElementUtil
 {
-	private static final class FormElementComparator implements Comparator<IFormElement>
-	{
-		public final static FormElementComparator INSTANCE = new FormElementComparator();
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-		 */
-		public int compare(IFormElement o1, IFormElement o2)
-		{
-			return o1.getFormIndex() - o2.getFormIndex();
-		}
-	}
-
 	public static Pair<String, Image> getPersistNameAndImage(IPersist persist)
 	{
 		String name = getPersistImageName(persist);
@@ -298,65 +284,59 @@ public class ElementUtil
 			{
 				if (label.getDataProviderID() == null && !label.getDisplaysTags())
 				{
-					return IScriptScriptButtonMethods.class;
+					return IRuntimeButton.class;
 				}
-				else
-				{
-					return IScriptDataButtonMethods.class;
-				}
+				return IRuntimeDataButton.class;
 			}
-			else
+
+			if (label.getDataProviderID() == null && !label.getDisplaysTags())
 			{
-				if (label.getDataProviderID() == null && !label.getDisplaysTags())
-				{
-					return IScriptScriptLabelMethods.class;
-				}
-				else
-				{
-					return IScriptDataLabelMethods.class;
-				}
+				return IScriptScriptLabelMethods.class;
 			}
+			return IScriptDataLabelMethods.class;
 		}
-		else if (persist instanceof Field)
+
+		if (persist instanceof Field)
 		{
 			Field field = (Field)persist;
 
 			switch (field.getDisplayType())
 			{
 				case Field.PASSWORD :
-					return IScriptDataPasswordMethods.class;
+					return IRuntimePassword.class;
 				case Field.RTF_AREA :
+					return IRuntimeRtfArea.class;
 				case Field.HTML_AREA :
-					return IScriptTextEditorMethods.class;
+					return IRuntimeHtmlArea.class;
 				case Field.TEXT_AREA :
-					return IScriptTextAreaMethods.class;
+					return IRuntimeTextArea.class;
 				case Field.CHECKS :
 					if (isSingle(application, field))
 					{
-						return IScriptCheckBoxMethods.class;
+						return IRuntimeCheck.class;
 					}
-					return IScriptChoiceMethods.class;
+					return IRuntimeChecks.class;
 				case Field.RADIOS :
 					if (isSingle(application, field))
 					{
-						return IScriptRadioMethods.class;
+						return IRuntimeRadio.class;
 					}
-					return IScriptChoiceMethods.class;
+					return IRuntimeRadios.class;
 				case Field.COMBOBOX :
-					return IScriptDataComboboxMethods.class;
+					return IRuntimeCombobox.class;
 				case Field.CALENDAR :
-					return IScriptDataCalendarMethods.class;
+					return IRuntimeCalendar.class;
 				case Field.IMAGE_MEDIA :
-					return IScriptMediaInputFieldMethods.class;
+					return IRuntimeImageMedia.class;
 				case Field.LIST_BOX :
 				case Field.MULTI_SELECTION_LIST_BOX :
-					return IScriptListBoxMethods.class;
+					return IRuntimeListBox.class;
 				default :
-					return IScriptFieldMethods.class;
+					return IRuntimeTextField.class;
 			}
-
 		}
-		else if (persist instanceof Bean)
+
+		if (persist instanceof Bean)
 		{
 			Bean bean = (Bean)persist;
 			String beanClassName = bean.getBeanClassName();
@@ -393,23 +373,25 @@ public class ElementUtil
 			}
 			return beanClass;
 		}
-		else if (persist instanceof TabPanel)
+
+		if (persist instanceof TabPanel)
 		{
 			int orient = ((TabPanel)persist).getTabOrientation();
 			if (orient == TabPanel.SPLIT_HORIZONTAL || orient == TabPanel.SPLIT_VERTICAL) return IScriptSplitPaneMethods.class;
-			else if (orient == TabPanel.ACCORDION_PANEL) return IScriptAccordionPanelMethods.class;
-			else return IDepricatedScriptTabPanelMethods.class;
+			if (orient == TabPanel.ACCORDION_PANEL) return IScriptAccordionPanelMethods.class;
+			return IScriptTabPanelMethods.class;
 		}
-		else if (persist instanceof Portal)
+
+		if (persist instanceof Portal)
 		{
 			return IScriptPortalComponentMethods.class;
 		}
-		else if (persist instanceof RectShape)
+
+		if (persist instanceof RectShape)
 		{
-			return IScriptRectMethods.class;
+			return IRuntimeRectangle.class;
 		}
 		return null;
-
 	}
 
 	/**
@@ -436,10 +418,9 @@ public class ElementUtil
 			}
 			return false;
 		}
-		else
-		{
-			return true;
-		}
+
+
+		return true;
 	}
 
 	public static List<IFormElement> getOverlappingFormElements(Form flattenedForm, IFormElement formElement)
