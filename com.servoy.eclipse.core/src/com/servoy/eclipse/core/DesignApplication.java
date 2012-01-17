@@ -77,6 +77,7 @@ import com.servoy.j2db.plugins.IPluginManager;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IApplicationServer;
+import com.servoy.j2db.server.shared.IApplicationServerAccess;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.smart.J2DBClient;
 import com.servoy.j2db.smart.dataui.SwingItemFactory;
@@ -558,6 +559,11 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	public IRepository getRepository()
 	{
 		return getClient().getRepository();
+	}
+
+	public IApplicationServerAccess getApplicationServerAccess()
+	{
+		return getClient().getApplicationServerAccess();
 	}
 
 	public boolean haveRepositoryAccess()
