@@ -1640,11 +1640,6 @@ public class WorkspaceUserManager implements IUserManager
 		return result;
 	}
 
-	public void getAdministrators(String clientId)
-	{
-		//do nothing, not needed 
-	}
-
 	public boolean checkIfAdministratorsAreAvailable(String clientId)
 	{
 		List<String> adminGroup = userGroups.get(IRepository.ADMIN_GROUP);
