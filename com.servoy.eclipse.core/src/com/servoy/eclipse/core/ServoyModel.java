@@ -944,6 +944,8 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				}
 			};
 			buildJob.setRule(activeProject.getProject().getWorkspace().getRoot());
+			buildJob.setSystem(false);
+			buildJob.setUser(true);
 			buildJob.schedule();
 		}
 	}

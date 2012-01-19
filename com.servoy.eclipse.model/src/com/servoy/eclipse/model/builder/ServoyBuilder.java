@@ -55,10 +55,14 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dltk.compiler.problem.ProblemSeverity;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.servoy.eclipse.model.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
@@ -90,6 +94,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
@@ -263,6 +268,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String OBSOLETE_ELEMENT = _PREFIX + ".obsoleteElement"; //$NON-NLS-1$
 	public static final String HIDDEN_TABLE_STILL_IN_USE = _PREFIX + ".hiddenTableInUse"; //$NON-NLS-1$
 
+	// warning/error level settings keys/defaults
+	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels"; //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW = new Pair<String, ProblemSeverity>("performanceTableColumns", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> LEVEL_PERFORMANCE_TABS_PORTALS = new Pair<String, ProblemSeverity>("performanceTabsPortals", ProblemSeverity.WARNING); //$NON-NLS-1$
+
 	private SAXParserFactory parserFactory;
 	private final HashSet<String> referencedProjectsSet = new HashSet<String>();
 	private final HashSet<String> moduleProjectsSet = new HashSet<String>();
@@ -270,6 +280,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private static IMarkerAttributeContributor[] markerContributors;
 
 	private IProgressMonitor monitor;
+	private final IEclipsePreferences levelSettingsNode;
+
+	public ServoyBuilder()
+	{
+		levelSettingsNode = new InstanceScope().getNode(ERROR_WARNING_PREFERENCES_NODE);
+	}
 
 	@Override
 	protected IProject[] build(int kind, Map args, IProgressMonitor progressMonitor) throws CoreException
@@ -1855,6 +1871,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							int portalAndTabPanelCount = 0;
 							// check to see if there are too many columns in a table view form (that could result in poor WC performance when selecting rows for example)
 							int fieldCount = 0;
+							boolean isTableView = (form.getView() == FormController.LOCKED_TABLE_VIEW || form.getView() == FormController.TABLE_VIEW);
 							// also check tab sequences
 							Map<Integer, Boolean> tabSequences = new HashMap<Integer, Boolean>();
 							Iterator<IPersist> iterator = form.getAllObjects();
@@ -1862,8 +1879,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							{
 								IPersist persist = iterator.next();
 								if (persist.getTypeID() == IRepository.TABPANELS || persist.getTypeID() == IRepository.PORTALS) portalAndTabPanelCount++;
-								else if (persist.getTypeID() == IRepository.FIELDS ||
-									(persist.getTypeID() == IRepository.GRAPHICALCOMPONENTS && ((GraphicalComponent)persist).getLabelFor() == null)) fieldCount++;
+								else if (isTableView && persist instanceof IFormElement
+									&&	(persist.getTypeID() == IRepository.FIELDS ||
+										(persist.getTypeID() == IRepository.GRAPHICALCOMPONENTS && ((GraphicalComponent)persist).getLabelFor() == null) ||
+										persist.getTypeID() == IRepository.BEANS || persist.getTypeID() == IRepository.SHAPES)
+								    && form.getPartAt(((IFormElement)persist).getLocation().y).getPartType() == Part.BODY) fieldCount++;
 
 								if (persist instanceof ISupportTabSeq && ((ISupportTabSeq)persist).getTabSeq() > 0)
 								{
@@ -1885,16 +1905,25 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 							if (portalAndTabPanelCount > LIMIT_FOR_PORTAL_TABPANEL_COUNT_ON_FORM)
 							{
-								ServoyMarker mk = MarkerMessages.FormHasTooManyThingsAndProbablyLowPerformance.fill(
-									String.valueOf(LIMIT_FOR_PORTAL_TABPANEL_COUNT_ON_FORM), "portals/tab panels", ""); //$NON-NLS-1$ //$NON-NLS-2$
-								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, form);
+								String customSeverity = levelSettingsNode.get(LEVEL_PERFORMANCE_TABS_PORTALS.getLeft(), LEVEL_PERFORMANCE_TABS_PORTALS.getRight().name());
+								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+								{
+									ServoyMarker mk = MarkerMessages.FormHasTooManyThingsAndProbablyLowPerformance.fill(
+										String.valueOf(LIMIT_FOR_PORTAL_TABPANEL_COUNT_ON_FORM), "portals/tab panels", ""); //$NON-NLS-1$ //$NON-NLS-2$
+									addMarker(project, mk.getType(), mk.getText(), -1, getTranslatedSeverity(customSeverity, LEVEL_PERFORMANCE_TABS_PORTALS.getRight()),
+										IMarker.PRIORITY_NORMAL, null, form);
+								}
 							}
-							if (fieldCount > LIMIT_FOR_FIELD_COUNT_ON_TABLEVIEW_FORM &&
-								(form.getView() == FormController.LOCKED_TABLE_VIEW || form.getView() == FormController.TABLE_VIEW))
+							if (fieldCount > LIMIT_FOR_FIELD_COUNT_ON_TABLEVIEW_FORM)
 							{
-								ServoyMarker mk = MarkerMessages.FormHasTooManyThingsAndProbablyLowPerformance.fill(
-									String.valueOf(LIMIT_FOR_FIELD_COUNT_ON_TABLEVIEW_FORM), "fields", " table view"); //$NON-NLS-1$ //$NON-NLS-2$
-								addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, form);
+								String customSeverity = levelSettingsNode.get(LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW.getLeft(), LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW.getRight().name());
+								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+								{
+									ServoyMarker mk = MarkerMessages.FormHasTooManyThingsAndProbablyLowPerformance.fill(
+										String.valueOf(LIMIT_FOR_FIELD_COUNT_ON_TABLEVIEW_FORM), "columns", " table view"); //$NON-NLS-1$ //$NON-NLS-2$
+									addMarker(project, mk.getType(), mk.getText(), -1, getTranslatedSeverity(customSeverity, LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW.getRight()),
+										IMarker.PRIORITY_NORMAL, null, form);
+								}
 							}
 
 							if (form.getRowBGColorCalculation() != null)
@@ -2443,6 +2472,20 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		else
 		{
 			ServoyLog.logError("Servoy project is null for a eclipse project with correct nature", null); //$NON-NLS-1$
+		}
+	}
+
+	protected int getTranslatedSeverity(String severity, ProblemSeverity problemSeverity)
+	{
+		if (severity.equals(ProblemSeverity.WARNING.name())) return IMarker.SEVERITY_WARNING;
+		else if (severity.equals(ProblemSeverity.ERROR.name())) return IMarker.SEVERITY_ERROR;
+		else if (severity.equals(ProblemSeverity.INFO.name())) return IMarker.SEVERITY_INFO;
+		else switch (problemSeverity)
+		{
+			case WARNING : return IMarker.SEVERITY_WARNING;
+			case ERROR : return IMarker.SEVERITY_ERROR;
+			case INFO : return IMarker.SEVERITY_INFO;
+			default : return IMarker.SEVERITY_INFO; // should never happen
 		}
 	}
 

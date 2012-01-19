@@ -28,6 +28,7 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -282,25 +283,31 @@ public abstract class AbstractServoyModel implements IServoyModel
 		};
 	}
 
-	public void buildActiveProjects(IProgressMonitor monitor)
+	public void buildActiveProjects(IProgressMonitor m)
 	{
 		try
 		{
+			ServoyProject[] modules = getModulesOfActiveProject();
+			SubMonitor monitor = SubMonitor.convert(m, "Building active solution...", 3 + ((activeResourcesProject != null) ? 7 : 0) +
+				((modules != null) ? modules.length * 10 : 0));
 			ServoyBuilder.deleteAllBuilderMarkers();
-			if (getModulesOfActiveProject() != null)
+			monitor.internalWorked(3);
+			if (modules != null)
 			{
-				for (ServoyProject module : getModulesOfActiveProject())
+				for (ServoyProject module : modules)
 				{
+					SubMonitor cm = monitor.newChild(10);
 					if (module.getProject() != null)
 					{
-						module.getProject().build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+						module.getProject().build(IncrementalProjectBuilder.FULL_BUILD, cm);
 					}
 				}
 			}
 			if (activeResourcesProject != null)
 			{
-				activeResourcesProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+				activeResourcesProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, monitor.newChild(7));
 			}
+			monitor.done();
 		}
 		catch (Exception ex)
 		{

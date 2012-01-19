@@ -311,6 +311,12 @@
       </page>
       <page
             category="com.servoy.eclipse.ui.preference"
+            class="com.servoy.eclipse.ui.preferences.ServoyErrorWarningPreferencePage"
+            id="com.servoy.eclipse.ui.preferences.errorsWarnings"
+            name="Errors/Warnings">
+      </page>
+      <page
+            category="com.servoy.eclipse.ui.preference"
             class="com.servoy.eclipse.ui.preferences.AutomaticNamingStrategies"
             id="com.servoy.eclipse.ui.autoNameStrategies"
             name="Automatic Naming Strategies">
