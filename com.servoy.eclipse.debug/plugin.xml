@@ -273,5 +273,12 @@
            </problem>
         </problemCategory>
      </extension>
+     <extension
+           point="org.eclipse.ui.editors.templates">
+        <include
+              file="templates/templates.xml"
+              translations="templates/templates.properties">
+        </include>
+     </extension>
    
 </plugin>

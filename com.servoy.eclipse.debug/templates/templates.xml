@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+
+<template 
+	context="javascriptUniversalTemplateContextType" 
+	description="%type.description" 
+	id="com.servoy.eclipse.template.type" 
+	name="type">/** @type {${type}} */
+	${cursor}
+	</template>
+
+<template 
+	context="javascriptUniversalTemplateContextType" 
+	description="%recordType.description" 
+	id="com.servoy.eclipse.template.jsrecordtype" 
+	name="type JSRecord">/** @type {JSRecord&lt;db:/${servername}/${tablename}&gt;} */
+	${cursor}
+	</template>
+
+<template 
+	context="javascriptUniversalTemplateContextType" 
+	description="%foundsetType.description" 
+	id="com.servoy.eclipse.template.jsfoundsettype" 
+	name="type JSFoundSet">/** @type {JSFoundSet&lt;db:/${servername}/${tablename}&gt;} */
+	${cursor}
+	</template>
+	
+<template 
+	context="javascriptUniversalTemplateContextType" 
+	description="%forLookDataset.description" 
+	id="com.servoy.eclipse.template.fordataset" 
+	name="for">for (var ${index}=1; ${index}&lt;=${dataset}.getMaxRowIndex(); ${index}++) {
+	var row = ${dataset}.getRowAsArray(${index});
+	${line_selection}${cursor}
+}</template>	
+</templates>
