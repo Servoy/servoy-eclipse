@@ -73,6 +73,7 @@ public class ElementResolver implements IElementResolver
 	private final Set<String> formOnlyNames = new HashSet<String>();
 	private final Set<String> noneCalcNames = new HashSet<String>();
 	private final Set<String> noneFoundsetNames = new HashSet<String>();
+	private final Set<String> deprecated = new HashSet<String>();
 
 	public ElementResolver()
 	{
@@ -106,6 +107,8 @@ public class ElementResolver implements IElementResolver
 
 		noneCalcNames.addAll(noneFoundsetNames); // all filtered out for foundset methods is also filtered out for calcs
 		noneCalcNames.add("databaseManager");
+
+		deprecated.add("alldataproviders");
 	}
 
 
@@ -457,8 +460,16 @@ public class ElementResolver implements IElementResolver
 			}
 			Property property = TypeCreator.createProperty(name, readOnly, typeRef, type.getDescription(), image, resource);
 			property.setHideAllowed(hideAllowed);
-			property.setDeprecated(type.isDeprecated());
-			property.setVisible(type.isVisible());
+			if (deprecated.contains(name))
+			{
+				property.setDeprecated(true);
+				property.setVisible(false);
+			}
+			else
+			{
+				property.setDeprecated(type.isDeprecated());
+				property.setVisible(type.isVisible());
+			}
 			return property;
 		}
 		return null;
