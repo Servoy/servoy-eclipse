@@ -288,6 +288,12 @@
             class="com.servoy.eclipse.ui.preferences.SolutionExplorerPreferences"
             id="com.servoy.eclipse.ui.solutionExplorer"
             name="Solution Explorer">
+      </page>
+      <page
+            category="com.servoy.eclipse.ui.preference"
+            class="com.servoy.eclipse.ui.preferences.ServoyErrorWarningPreferencePage"
+            id="com.servoy.eclipse.ui.preferences.errorsWarnings"
+            name="Errors/Warnings">
       </page>      
    </extension>
      <extension
