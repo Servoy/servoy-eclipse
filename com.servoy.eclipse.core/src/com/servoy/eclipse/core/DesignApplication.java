@@ -332,21 +332,21 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 						}
 
 						@Override
-						public IFoundSetInternal getSeparateFoundSet(IFoundSetListener l, List defaultSortColumns) throws ServoyException
+						public IFoundSetInternal getSeparateFoundSet(IFoundSetListener l, List<SortColumn> defaultSortColumns) throws ServoyException
 						{
 							// no foundsets in designer
 							return null;
 						}
 
 						@Override
-						public IFoundSet getSharedFoundSet(String dataSource) throws ServoyException
+						public IFoundSetInternal getSharedFoundSet(String dataSource) throws ServoyException
 						{
 							// no foundsets in designer
 							return null;
 						}
 
 						@Override
-						public IFoundSetInternal getSharedFoundSet(String dataSource, List defaultSortColumns) throws ServoyException
+						public IFoundSetInternal getSharedFoundSet(String dataSource, List<SortColumn> defaultSortColumns) throws ServoyException
 						{
 							// no foundsets in designer
 							return null;
