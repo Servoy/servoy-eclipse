@@ -128,7 +128,7 @@ public class RelationEditor extends PersistEditor
 
 		Label nameLabel;
 		nameLabel = new Label(comp, SWT.NONE);
-		nameLabel.setText("Relation name");
+		nameLabel.setText("Relation name"); //$NON-NLS-1$
 
 		nameField = new Text(comp, SWT.BORDER);
 
