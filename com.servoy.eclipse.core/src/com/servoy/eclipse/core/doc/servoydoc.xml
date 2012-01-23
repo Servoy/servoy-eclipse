@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -4229,7 +4229,7 @@ var status = history.buttonsEnabled;]]></sample>
           <sample><![CDATA[history.go(-3);]]></sample>
           <parameters>
             <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[the absolute index]]></description>
+              <description><![CDATA[the relative index]]></description>
             </parameter>
           </parameters>
         </function>
@@ -16870,6 +16870,13 @@ if (someWindow.isVisible() == false) {
 win1.setInitialBounds(200, 200, 450, 350);
 win1.title = "Window 1";
 controller.show(win1);]]></sample>
+        </property>
+        <property name="undecorated">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[if this window will be undecorated]]></return>
+          <description><![CDATA[Gets/Sets the undecorated property.
+If set then this window will not have any decoration and can't be moved/resized or closed.]]></description>
+          <summary><![CDATA[Gets/Sets the undecorated property.]]></summary>
+          <sample/>
         </property>
       </properties>
       <functions>
