@@ -44,6 +44,7 @@ import org.mozilla.javascript.ScriptableObject;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyLog;
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.TableWrapper;
 import com.servoy.eclipse.ui.node.IDeveloperFeedback;
@@ -55,9 +56,9 @@ import com.servoy.eclipse.ui.node.UserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.IApplication;
 import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
@@ -380,11 +381,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = createTableColumns((Table)un.getRealObject(), un.getSolution());
 			}
-			else if (type == UserNodeType.SERVER)
+			else if (type == UserNodeType.SERVER && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
 				lm = createTables((IServerInternal)un.getRealObject());
 			}
-			else if (type == UserNodeType.VIEWS)
+			else if (type == UserNodeType.VIEWS && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
 				lm = createViews((IServerInternal)un.getRealObject());
 			}
