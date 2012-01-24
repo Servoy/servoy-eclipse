@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -37,6 +38,7 @@ import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
+import com.servoy.j2db.util.Settings;
 
 
 /**
@@ -87,6 +89,14 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 			try
 			{
 				final IServerInternal s = (IServerInternal)node.getRealObject();
+
+				if (!ServoyModel.isClientRepositoryAccessAllowed(s.getName()))
+				{
+					MessageDialog.openWarning(viewer.getViewSite().getShell(), "User tables restricted",
+						"User tables in the repository_server have been turned off via setting " + Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_SETTING);
+					return;
+				}
+
 				InputDialog nameDialog = new InputDialog(viewer.getViewSite().getShell(), "Create table", "Supply table name", "", new IInputValidator()
 				{
 					public String isValid(String newText)

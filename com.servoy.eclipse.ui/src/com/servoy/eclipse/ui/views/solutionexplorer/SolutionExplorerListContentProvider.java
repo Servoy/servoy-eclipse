@@ -44,6 +44,7 @@ import org.mozilla.javascript.ScriptableObject;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IPersistChangeListener;
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
@@ -410,11 +411,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = createTableColumns((Table)un.getRealObject(), un.getSolution());
 			}
-			else if (type == UserNodeType.SERVER)
+			else if (type == UserNodeType.SERVER && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
 				lm = createTables((IServerInternal)un.getRealObject());
 			}
-			else if (type == UserNodeType.VIEWS)
+			else if (type == UserNodeType.VIEWS && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
 				lm = createViews((IServerInternal)un.getRealObject());
 			}

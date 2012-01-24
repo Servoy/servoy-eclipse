@@ -76,6 +76,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IUserManager;
+import com.servoy.j2db.server.shared.IUserManagerInternal;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.ServoyJSONArray;
@@ -89,7 +90,7 @@ import com.servoy.j2db.util.Utils;
  * This class manages security information when running from an Eclipse-Servoy workspace.
  * @author acostescu
  */
-public class WorkspaceUserManager implements IUserManager
+public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 {
 	public interface IUserGroupChangeListener
 	{
