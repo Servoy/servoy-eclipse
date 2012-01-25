@@ -60,6 +60,7 @@ import com.servoy.eclipse.core.quickfix.security.RemoveAccessMaskForMissingEleme
 import com.servoy.eclipse.core.util.ResourcesUtils;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.BufferedDataSet;
+import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumn;
@@ -81,12 +82,16 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.IClientInternal;
+import com.servoy.j2db.server.shared.IClientManagerInternal;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerInternal;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
+import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.StringComparator;
 import com.servoy.j2db.util.UUID;
@@ -103,7 +108,42 @@ public class EclipseUserManager implements IUserManager, IUserManagerInternal
 		public void userGroupChanged();
 	}
 
-	private final ArrayList<IUserGroupChangeListener> userGroupChangedChangeListeners = new ArrayList<IUserGroupChangeListener>();
+	/** Check if user is administrator.
+	 * <p> Some operations can only be done by admin user or own user (like change own password)
+	 * @param clientId
+	 * @param ownerUserId allowed when non-null
+	 * @throws RepositoryException 
+	 */
+	private void checkForAdminUser(String clientId, String ownerUserId) throws RepositoryException
+	{
+		if (ApplicationServerSingleton.get().getClientId().equals(clientId))
+		{
+			// internal: ok
+			return;
+		}
+
+		if (!ServoyModel.isClientRepositoryAccessAllowed())
+		{
+			// check if user is in admin group
+			IClientManagerInternal clientManager = ((IDataServerInternal)ApplicationServerSingleton.get().getDataServer()).getClientManager();
+			IClientInternal client = clientManager.getClient(clientId);
+			if (client == null || client.getClientInfo().getUserGroups() == null ||
+				!Arrays.asList(client.getClientInfo().getUserGroups()).contains(IRepository.ADMIN_GROUP))
+			{
+				// non-admin user, check for own user
+				if (ownerUserId == null || !ownerUserId.equals(client.getClientInfo().getUserUid()))
+				{
+					Debug.error("Access to repository server denied to client code, see admin property " + Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_SETTING,
+						new IllegalAccessException());
+					throw new RepositoryException(ServoyException.NO_ACCESS);
+				}
+			}
+		}
+
+		// ok
+	}
+
+	private final List<IUserGroupChangeListener> userGroupChangedChangeListeners = new ArrayList<IUserGroupChangeListener>();
 
 	public void addUserGroupChangeListener(IUserGroupChangeListener listener)
 	{
@@ -2117,6 +2157,8 @@ public class EclipseUserManager implements IUserManager, IUserManagerInternal
 
 	public int createGroup(String clientId, String groupName) throws ServoyException
 	{
+		checkForAdminUser(clientId, null);
+
 		if (!createGroupInternal(clientId, groupName)) return -1;
 
 		if (writeMode == WRITE_MODE_AUTOMATIC)
@@ -2148,7 +2190,11 @@ public class EclipseUserManager implements IUserManager, IUserManagerInternal
 		{
 			return ERR_RESOURCE_PROJECT_MISSING;
 		}
+
 		if (userName == null || userName.trim().length() == 0 || password == null || password.length() == 0) return ERR_EMPTY_USERNAME_OR_PASSWORD;
+
+		checkForAdminUser(clientId, null);
+
 		String hashedPassword = password;
 		if (!alreadyHashed)
 		{
@@ -2182,6 +2228,9 @@ public class EclipseUserManager implements IUserManager, IUserManagerInternal
 			ServoyLog.logError("Invalid parameters received, or manager is not operational - setFormSecurityAccess(...)", null); //$NON-NLS-1$
 			return;
 		}
+
+		checkForAdminUser(clientId, null);
+
 		GroupSecurityInfo gsi = getGroupSecurityInfo(groupName);
 
 		if (gsi != null)
@@ -2255,6 +2304,8 @@ public class EclipseUserManager implements IUserManager, IUserManagerInternal
 			return;
 		}
 
+		checkForAdminUser(clientId, null);
+
 		GroupSecurityInfo gsi = getGroupSecurityInfo(groupName);
 		if (gsi != null)
 		{
@@ -2279,6 +2330,9 @@ public class EclipseUserManager implements IUserManager, IUserManagerInternal
 	public boolean addUserToGroup(String clientId, int userId, int groupId) throws ServoyException
 	{
 		if (userId < 0 || groupId < 0 || (!isOperational())) return false;
+
+		checkForAdminUser(clientId, null);
+
 		String groupName = getUUID(groupId);
 		String userUUID = getUUID(userId);
 		if (groupName == null || userUUID == null) return false;
@@ -2305,6 +2359,9 @@ public class EclipseUserManager implements IUserManager, IUserManagerInternal
 	public boolean setPassword(String clientId, String userUID, String password, boolean hashPassword) throws ServoyException
 	{
 		if (userUID == null || userUID.length() == 0 || password == null || password.length() == 0 || (!isOperational())) return false;
+
+		checkForAdminUser(clientId, userUID);
+
 		String passwordHash = hashPassword ? Utils.calculateMD5HashBase64(password) : password;
 
 		for (User u : allDefinedUsers)
@@ -2326,6 +2383,8 @@ public class EclipseUserManager implements IUserManager, IUserManagerInternal
 	public boolean setUserUID(String clientId, String oldUserUID, String newUserUID) throws ServoyException
 	{
 		if (oldUserUID == null || oldUserUID.length() == 0 || newUserUID == null || newUserUID.length() == 0 || (!isOperational())) return false;
+
+		checkForAdminUser(clientId, null);
 
 		for (User u : allDefinedUsers)
 		{
@@ -2358,6 +2417,8 @@ public class EclipseUserManager implements IUserManager, IUserManagerInternal
 	{
 		if (userUID == null || newUserName == null || newUserName.length() == 0 || (!isOperational())) return false;
 
+		checkForAdminUser(clientId, userUID);
+
 		for (User u : allDefinedUsers)
 		{
 			if (userUID.equals(u.userUid))
@@ -2378,6 +2439,9 @@ public class EclipseUserManager implements IUserManager, IUserManagerInternal
 	public boolean removeUserFromGroup(String clientId, int userId, int groupId) throws ServoyException
 	{
 		if (userId < 0 || groupId < 0 || (!isOperational())) return false;
+
+		checkForAdminUser(clientId, null);
+
 		String groupName = getUUID(groupId);
 		String userUUID = getUUID(userId);
 		if (groupName == null || userUUID == null) return false;
@@ -2399,6 +2463,9 @@ public class EclipseUserManager implements IUserManager, IUserManagerInternal
 	public boolean deleteUser(String clientId, String userUUID) throws ServoyException
 	{
 		if (userUUID == null || (!isOperational())) return false;
+
+		checkForAdminUser(clientId, null);
+
 		User user = null;
 		for (User u : allDefinedUsers)
 		{
@@ -2443,6 +2510,8 @@ public class EclipseUserManager implements IUserManager, IUserManagerInternal
 	{
 		if (groupId < 0 || newName == null || newName.length() == 0 || (!isOperational()) || userGroups.containsKey(newName)) return false;
 
+		checkForAdminUser(clientId, null);
+
 		String oldName = getUUID(groupId);
 		if (oldName != null)
 		{
@@ -2468,6 +2537,9 @@ public class EclipseUserManager implements IUserManager, IUserManagerInternal
 	public boolean deleteGroup(String clientId, int groupId) throws ServoyException
 	{
 		if (groupId < 0 || (!isOperational())) return false;
+
+		checkForAdminUser(clientId, null);
+
 		String groupName = getUUID(groupId);
 		if (groupName != null)
 		{
@@ -3172,5 +3244,4 @@ public class EclipseUserManager implements IUserManager, IUserManagerInternal
 
 		ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(true, persistChangeListener);
 	}
-
 }
