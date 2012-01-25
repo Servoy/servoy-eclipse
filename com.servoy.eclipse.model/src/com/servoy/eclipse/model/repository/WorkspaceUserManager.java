@@ -2439,7 +2439,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	protected void setReadError(RepositoryException e)
 	{
-//		ServoyLog.logError(e);
+		ServoyLog.logError(e);
 		clearAllSecurityInfo();
 		// mark as not operational
 		if (e instanceof SecurityReadException)
