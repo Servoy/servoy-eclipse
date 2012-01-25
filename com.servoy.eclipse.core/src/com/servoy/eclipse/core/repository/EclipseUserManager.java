@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.core.repository;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,11 +37,13 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnListener;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
@@ -49,6 +52,12 @@ import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.IClientInternal;
+import com.servoy.j2db.server.shared.IClientManagerInternal;
+import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.ServoyException;
+import com.servoy.j2db.util.Settings;
 
 /**
  * This class manages security information when running from an Eclipse-Servoy developer.
@@ -57,12 +66,47 @@ import com.servoy.j2db.persistence.Table;
  */
 public class EclipseUserManager extends WorkspaceUserManager
 {
-
 	// listeners to model/server/table changes
 	private ITableListener tableListener;
 	private IServerListener serverListener;
 	private IPersistChangeListener persistChangeListener;
 	private IColumnListener columnListener;
+
+	/** Check if user is administrator.
+	 * <p> Some operations can only be done by admin user or own user (like change own password)
+	 * @param clientId
+	 * @param ownerUserId allowed when non-null
+	 * @throws RepositoryException 
+	 */
+	@Override
+	protected void checkForAdminUser(String clientId, String ownerUserId) throws RepositoryException
+	{
+		if (ApplicationServerSingleton.get().getClientId().equals(clientId))
+		{
+			// internal: ok
+			return;
+		}
+
+		if (!ServoyModel.isClientRepositoryAccessAllowed())
+		{
+			// check if user is in admin group
+			IClientManagerInternal clientManager = ((IDataServerInternal)ApplicationServerSingleton.get().getDataServer()).getClientManager();
+			IClientInternal client = clientManager.getClient(clientId);
+			if (client == null || client.getClientInfo().getUserGroups() == null ||
+				!Arrays.asList(client.getClientInfo().getUserGroups()).contains(IRepository.ADMIN_GROUP))
+			{
+				// non-admin user, check for own user
+				if (ownerUserId == null || !ownerUserId.equals(client.getClientInfo().getUserUid()))
+				{
+					Debug.error("Access to repository server denied to client code, see admin property " + Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_SETTING,
+						new IllegalAccessException());
+					throw new RepositoryException(ServoyException.NO_ACCESS);
+				}
+			}
+		}
+
+		// ok
+	}
 
 	/**
 	 * If this method is called, the user manager will listen for form/form element/table/table column add/remove/modify events and will update in-memory

@@ -546,9 +546,13 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 
 	public static boolean isClientRepositoryAccessAllowed(String server_name)
 	{
+		return isClientRepositoryAccessAllowed() || !IServer.REPOSITORY_SERVER.equals(Utils.toEnglishLocaleLowerCase(server_name));
+	}
+
+	public static boolean isClientRepositoryAccessAllowed()
+	{
 		return Utils.getAsBoolean(getSettings().getProperty(Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_SETTING,
-			String.valueOf(Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_DEFAULT))) ||
-			!IServer.REPOSITORY_SERVER.equals(Utils.toEnglishLocaleLowerCase(server_name));
+			String.valueOf(Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_DEFAULT)));
 	}
 
 	public synchronized ServoyModel refreshServoyProjects()
