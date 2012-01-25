@@ -97,6 +97,14 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		public void userGroupChanged();
 	}
 
+	/** Check if user is administrator.
+	 */
+	@SuppressWarnings("unused")
+	protected void checkForAdminUser(String clientId, String ownerUserId) throws RepositoryException
+	{
+		// default implementation
+	}
+
 	private final ArrayList<IUserGroupChangeListener> userGroupChangedChangeListeners = new ArrayList<IUserGroupChangeListener>();
 
 	public void addUserGroupChangeListener(IUserGroupChangeListener listener)
@@ -1817,6 +1825,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	public int createGroup(String clientId, String groupName) throws ServoyException
 	{
+		checkForAdminUser(clientId, null);
+
 		if (!createGroupInternal(clientId, groupName)) return -1;
 
 		if (writeMode == WRITE_MODE_AUTOMATIC)
@@ -1849,6 +1859,9 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			return ERR_RESOURCE_PROJECT_MISSING;
 		}
 		if (userName == null || userName.trim().length() == 0 || password == null || password.length() == 0) return ERR_EMPTY_USERNAME_OR_PASSWORD;
+
+		checkForAdminUser(clientId, null);
+
 		String hashedPassword = password;
 		if (!alreadyHashed)
 		{
@@ -1882,6 +1895,9 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			ServoyLog.logError("Invalid parameters received, or manager is not operational - setFormSecurityAccess(...)", null); //$NON-NLS-1$
 			return;
 		}
+
+		checkForAdminUser(clientId, null);
+
 		GroupSecurityInfo gsi = getGroupSecurityInfo(groupName);
 
 		if (gsi != null)
@@ -1955,6 +1971,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			return;
 		}
 
+		checkForAdminUser(clientId, null);
+
 		GroupSecurityInfo gsi = getGroupSecurityInfo(groupName);
 		if (gsi != null)
 		{
@@ -1979,6 +1997,9 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	public boolean addUserToGroup(String clientId, int userId, int groupId) throws ServoyException
 	{
 		if (userId < 0 || groupId < 0 || (!isOperational())) return false;
+
+		checkForAdminUser(clientId, null);
+
 		String groupName = getUUID(groupId);
 		String userUUID = getUUID(userId);
 		if (groupName == null || userUUID == null) return false;
@@ -2005,6 +2026,9 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	public boolean setPassword(String clientId, String userUID, String password, boolean hashPassword) throws ServoyException
 	{
 		if (userUID == null || userUID.length() == 0 || password == null || password.length() == 0 || (!isOperational())) return false;
+
+		checkForAdminUser(clientId, userUID);
+
 		String passwordHash = hashPassword ? Utils.calculateMD5HashBase64(password) : password;
 
 		for (User u : allDefinedUsers)
@@ -2026,6 +2050,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	public boolean setUserUID(String clientId, String oldUserUID, String newUserUID) throws ServoyException
 	{
 		if (oldUserUID == null || oldUserUID.length() == 0 || newUserUID == null || newUserUID.length() == 0 || (!isOperational())) return false;
+
+		checkForAdminUser(clientId, null);
 
 		for (User u : allDefinedUsers)
 		{
@@ -2058,6 +2084,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	{
 		if (userUID == null || newUserName == null || newUserName.length() == 0 || (!isOperational())) return false;
 
+		checkForAdminUser(clientId, userUID);
+
 		for (User u : allDefinedUsers)
 		{
 			if (userUID.equals(u.userUid))
@@ -2078,6 +2106,9 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	public boolean removeUserFromGroup(String clientId, int userId, int groupId) throws ServoyException
 	{
 		if (userId < 0 || groupId < 0 || (!isOperational())) return false;
+
+		checkForAdminUser(clientId, null);
+
 		String groupName = getUUID(groupId);
 		String userUUID = getUUID(userId);
 		if (groupName == null || userUUID == null) return false;
@@ -2099,6 +2130,9 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	public boolean deleteUser(String clientId, String userUUID) throws ServoyException
 	{
 		if (userUUID == null || (!isOperational())) return false;
+
+		checkForAdminUser(clientId, null);
+
 		User user = null;
 		for (User u : allDefinedUsers)
 		{
@@ -2143,6 +2177,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	{
 		if (groupId < 0 || newName == null || newName.length() == 0 || (!isOperational()) || userGroups.containsKey(newName)) return false;
 
+		checkForAdminUser(clientId, null);
+
 		String oldName = getUUID(groupId);
 		if (oldName != null)
 		{
@@ -2168,6 +2204,9 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	public boolean deleteGroup(String clientId, int groupId) throws ServoyException
 	{
 		if (groupId < 0 || (!isOperational())) return false;
+
+		checkForAdminUser(clientId, null);
+
 		String groupName = getUUID(groupId);
 		if (groupName != null)
 		{
@@ -2832,5 +2871,4 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	{
 		// nothing here
 	}
-
 }
