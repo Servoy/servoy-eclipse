@@ -379,7 +379,7 @@ return true]]></code>
   <event name="onRenderMethodID">
     <methodtemplate name="onRender" addtodo="true">
       <description><![CDATA[Called before the form component is rendered]]></description>
-      <code><![CDATA[// NOTE: a property set on the renderable, will be keept on the element also after onRender is done
+      <code><![CDATA[// NOTE: a property set on the renderable, will be kept on the element also after onRender is done
 if (event.isRecordSelected()) {
 	event.getRenderable().fgcolor = '#00ff00';
 } else if (event.getRecordIndex() % 2) {
