@@ -20,11 +20,13 @@ package com.servoy.eclipse.debug.actions;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.ui.IWorkbenchWindow;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -36,14 +38,7 @@ import com.servoy.j2db.IDebugJ2DBClient;
  */
 public class StartJsUnitClientActionDelegate extends StartDebugAction implements IRunnableWithProgress
 {
-	private IWorkbenchWindow window;
 	private boolean started = false;
-
-	@Override
-	public void init(IWorkbenchWindow w)
-	{
-		this.window = w;
-	}
 
 	/**
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
@@ -54,21 +49,29 @@ public class StartJsUnitClientActionDelegate extends StartDebugAction implements
 		//make sure the plugins are loaded
 		DLTKDebugUIPlugin.getDefault();
 		DebugPlugin.getDefault();
-		try
+
+		Job job = new Job("JSUnit test client start") //$NON-NLS-1$
 		{
-			// run in the progress service thread in stead of the main swt thread.
-			// needed to make sure the main swt thread is not busy when the debug smart client
-			// is created, see ApplicationServer.DebugClientHandler.
-			window.getWorkbench().getProgressService().run(true, false, this);
-		}
-		catch (InvocationTargetException e)
-		{
-			ServoyLog.logError(e);
-		}
-		catch (InterruptedException e)
-		{
-			ServoyLog.logError(e);
-		}
+			@Override
+			protected IStatus run(IProgressMonitor monitor)
+			{
+				try
+				{
+					StartJsUnitClientActionDelegate.this.run(monitor);
+				}
+				catch (InvocationTargetException itex)
+				{
+					ServoyLog.logError(itex);
+				}
+				catch (InterruptedException intex)
+				{
+					ServoyLog.logError(intex);
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		job.setUser(true);
+		job.schedule();
 	}
 
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
