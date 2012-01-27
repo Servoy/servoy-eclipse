@@ -127,6 +127,8 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 	@Override
 	protected Collection<RootObjectMetaData> loadRootObjectMetaDatas() throws Exception
 	{
+		// TODO: this is the correct way to get the list of projects (it also gets the projects from another location):
+		// ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		List<RootObjectMetaData> retval = new ArrayList<RootObjectMetaData>();
 		String[] dirs = wsa.list();
 		for (String element : dirs)
