@@ -108,11 +108,9 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
-import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportName;
-import com.servoy.j2db.persistence.ISupportSize;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IVariable;
@@ -1320,13 +1318,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 						}
 						checkCancel();
-						if (o instanceof ISupportBounds && o instanceof ISupportSize)
+						if (o instanceof BaseComponent)
 						{
 							// check if not outside form
 							Form form = (Form)o.getAncestor(IRepository.FORMS);
 							if (form != null)
 							{
-								Point location = ((ISupportBounds)o).getLocation();
+								Point location = ((BaseComponent)o).getLocation();
 								if (location != null)
 								{
 									Iterator<com.servoy.j2db.persistence.Part> parts = form.getParts();
@@ -1338,7 +1336,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										if (startPos <= location.y && endPos > location.y)
 										{
 											// found the part
-											int height = ((ISupportSize)o).getSize().height;
+											int height = ((BaseComponent)o).getSize().height;
 											if (location.y + height > endPos)
 											{
 												String message = "Element "; //$NON-NLS-1$
@@ -1398,7 +1396,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													}
 												}
 											}
-											if (width < location.x + ((ISupportSize)o).getSize().width)
+											if (width < location.x + ((BaseComponent)o).getSize().width)
 											{
 												String message = "Element "; //$NON-NLS-1$
 												if (o instanceof ISupportName && ((ISupportName)o).getName() != null)
