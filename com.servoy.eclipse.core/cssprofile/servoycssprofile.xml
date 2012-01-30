@@ -38,9 +38,7 @@
 			<pseudo-class name="visited" enabled="false"/>
 			<pseudo-class name="active" enabled="false"/>
 			<property name="background" enabled="false"/>
-			<property name="background-attachment" enabled="false"/>
-			<property name="background-position" enabled="false"/>
-			<property name="background-repeat" enabled="false" />
+			<property name="background-size"/>
 			<property name="border-radius"/>
 			<property name="border-top-style"/>
 			<property name="border-left-style"/>
@@ -73,6 +71,23 @@
 			<property name="word-spacing" enabled="false"/>
         </style-rule-def>
         
+       <property-def name="background-position" inherited="no" category="colorandbackground">
+			<number name="percentage"/>
+			<number name="pxunit"/>
+			<keyword name="top"/>
+			<keyword name="center"/>
+			<keyword name="bottom"/>
+			<keyword name="left"/>
+			<keyword name="right"/>
+		</property-def>
+		
+		<property-def name="background-size" inherited="no" category="colorandbackground">
+			<number name="percentage"/>
+			<number name="pxunit"/>
+			<keyword name="cover"/>
+			<keyword name="contain"/>
+		</property-def>
+	
         <property-def name="border-style" inherited="no" category="box">
 			<keyword name="none"/>
 			<keyword name="dotted"/>
@@ -194,5 +209,13 @@
 		
 		<keyword-def name="mediaurl">
 	        <keyword-value>url(media:///test.jpg)</keyword-value>
+	    </keyword-def>
+	    
+	    <keyword-def name="cover">
+	        <keyword-value>cover</keyword-value>
+	    </keyword-def>
+	    
+	    <keyword-def name="contain">
+	        <keyword-value>contain</keyword-value>
 	    </keyword-def>
 </css-profile>

@@ -101,6 +101,7 @@ import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.IStyleRule;
 import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.ImageLoader;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -326,19 +327,10 @@ public class ElementFactory
 		}
 
 		// Look into styles.
-		IStyleSheet ss = ComponentFactory.getCSSStyleForForm(sp, form);
-		if (ss != null)
+		Pair<IStyleSheet, IStyleRule> style = ComponentFactory.getCSSPairStyleForForm(sp, form);
+		if (style != null && style.getLeft() != null && style.getRight() != null)
 		{
-			String lookupname = "form"; //$NON-NLS-1$
-			if (form.getStyleClass() != null && !"".equals(form.getStyleClass())) //$NON-NLS-1$
-			{
-				lookupname += '.' + form.getStyleClass();
-			}
-			IStyleRule style = ss.getCSSRule(lookupname);
-			if (style != null)
-			{
-				return ss.getBorder(style);
-			}
+			return style.getLeft().getBorder(style.getRight());
 		}
 
 		return null;
