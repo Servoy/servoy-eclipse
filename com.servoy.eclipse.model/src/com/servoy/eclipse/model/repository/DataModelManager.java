@@ -61,7 +61,6 @@ import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IColumnTypes;
-import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -109,23 +108,23 @@ public class DataModelManager implements IColumnInfoManager
 
 		tableListener = new ITableListener()
 		{
-			public void tablesAdded(IServer server, String tableNames[])
+			public void tablesAdded(IServerInternal server, String tableNames[])
 			{
 				// not interested in this
 			}
 
-			public void tablesRemoved(IServer server, Table tables[], boolean deleted)
+			public void tablesRemoved(IServerInternal server, Table tables[], boolean deleted)
 			{
 				// not interested in this
 			}
 
-			public void hiddenTableChanged(IServer server, Table table)
+			public void hiddenTableChanged(IServerInternal server, Table table)
 			{
 				// TODO Auto-generated method stub
 
 			}
 
-			public void serverStateChanged(IServer server, int oldState, int newState)
+			public void serverStateChanged(IServerInternal server, int oldState, int newState)
 			{
 				if ((oldState & ITableListener.ENABLED) == 0 && (newState & ITableListener.ENABLED) != 0 && (newState & ITableListener.VALID) != 0)
 				{
@@ -135,7 +134,7 @@ public class DataModelManager implements IColumnInfoManager
 				else if ((newState & ITableListener.ENABLED) == 0 && (oldState & ITableListener.ENABLED) != 0 && (oldState & ITableListener.VALID) != 0)
 				{
 					// an enabled, valid server was disabled, so remove any markers it might have
-					removeErrorMarkers(((IServerInternal)server).getName());
+					removeErrorMarkers(server.getName());
 				}
 			}
 
@@ -178,17 +177,17 @@ public class DataModelManager implements IColumnInfoManager
 
 		serverListener = new IServerListener()
 		{
-			public void serverAdded(IServer s)
+			public void serverAdded(IServerInternal s)
 			{
-				((IServerInternal)s).addTableListener(tableListener);
-				if (((IServerInternal)s).getConfig().isEnabled() && ((IServerInternal)s).isValid()) reloadAllColumnInfo(s);
+				s.addTableListener(tableListener);
+				if (s.getConfig().isEnabled() && s.isValid()) reloadAllColumnInfo(s);
 			}
 
-			public void serverRemoved(IServer s)
+			public void serverRemoved(IServerInternal s)
 			{
 				// remove error markers for server s
-				((IServerInternal)s).removeTableListener(tableListener);
-				removeErrorMarkers(((IServerInternal)s).getName());
+				s.removeTableListener(tableListener);
+				removeErrorMarkers(s.getName());
 			}
 		};
 		sm.addServerListener(serverListener);
@@ -398,19 +397,18 @@ public class DataModelManager implements IColumnInfoManager
 		}
 	}
 
-	public static void reloadAllColumnInfo(IServer server)
+	public static void reloadAllColumnInfo(IServerInternal server)
 	{
-		IServerInternal s = (IServerInternal)server;
-		s.reloadServerInfo();
+		server.reloadServerInfo();
 		try
 		{
-			Iterator<String> tables = s.getTableAndViewNames(true).iterator();
+			Iterator<String> tables = server.getTableAndViewNames(true).iterator();
 			while (tables.hasNext())
 			{
 				String tableName = tables.next();
-				if (s.isTableLoaded(tableName))
+				if (server.isTableLoaded(tableName))
 				{
-					s.reloadTableColumnInfo(((IServerInternal)server).getTable(tableName));
+					server.reloadTableColumnInfo(server.getTable(tableName));
 				}
 			}
 		}

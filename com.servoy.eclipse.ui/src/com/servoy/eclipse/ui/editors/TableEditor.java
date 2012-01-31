@@ -50,7 +50,6 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnListener;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -419,11 +418,11 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		IServerManagerInternal serverManager = ServoyModel.getServerManager();
 		tableListener = new ITableListener()
 		{
-			public void tablesAdded(IServer s, String tableNames[])
+			public void tablesAdded(IServerInternal s, String tableNames[])
 			{
 			}
 
-			public void tablesRemoved(IServer s, Table tables[], boolean delete)
+			public void tablesRemoved(IServerInternal s, Table tables[], boolean delete)
 			{
 				for (Table t : tables)
 				{
@@ -434,7 +433,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				}
 			}
 
-			public void serverStateChanged(IServer s, int oldState, int newState)
+			public void serverStateChanged(IServerInternal s, int oldState, int newState)
 			{
 				if ((newState & (VALID | ENABLED)) != (VALID | ENABLED))
 				{
@@ -448,7 +447,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				// not interested
 			}
 
-			public void hiddenTableChanged(IServer server, Table table)
+			public void hiddenTableChanged(IServerInternal server, Table table)
 			{
 				// not interested; we still show the editor as the table is still there
 
@@ -458,11 +457,11 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		serverListener = new IServerListener()
 		{
 
-			public void serverAdded(IServer s)
+			public void serverAdded(IServerInternal s)
 			{
 			}
 
-			public void serverRemoved(IServer s)
+			public void serverRemoved(IServerInternal s)
 			{
 				if (s == server)
 				{

@@ -254,7 +254,6 @@ import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -1685,12 +1684,13 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IServerManagerInternal serverManager = ServoyModel.getServerManager();
 		tableListener = new ITableListener()
 		{
-			public void tablesAdded(IServer server, String[] tableNames)
+			public void tablesAdded(IServerInternal server, String[] tableNames)
 			{
-				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(((IServerInternal)server).getName());
+				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerViewsNode(server);
+				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
 			}
 
-			public void tablesRemoved(IServer server, Table[] tables, boolean deleted)
+			public void tablesRemoved(IServerInternal server, Table[] tables, boolean deleted)
 			{
 				if (tables != null && tables.length > 0 && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
 				{
@@ -1710,26 +1710,27 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						}
 					}
 				}
-				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(((IServerInternal)server).getName());
+				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerViewsNode(server);
+				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
 			}
 
-			public void hiddenTableChanged(IServer server, Table table)
+			public void hiddenTableChanged(IServerInternal server, Table table)
 			{
-				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(((IServerInternal)server).getName());
+				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
 			}
 
-			public void serverStateChanged(IServer server, int oldState, int newState)
+			public void serverStateChanged(IServerInternal server, int oldState, int newState)
 			{
-				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(((IServerInternal)server).getName());
+				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
 				if ((oldState & ITableListener.VALID) == ITableListener.VALID && (newState & ITableListener.VALID) != ITableListener.VALID)
 				{
 					SolutionExplorerTreeContentProvider treeContentProvider = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
-					final Object serverNode = treeContentProvider.getServers();
+					final Object serversNode = treeContentProvider.getServers();
 					UIUtils.runInUI(new Runnable()
 					{
 						public void run()
 						{
-							tree.setExpandedState(serverNode, true);
+							tree.setExpandedState(serversNode, true);
 						}
 					}, false);
 				}
@@ -1752,16 +1753,16 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		serverListener = new IServerListener()
 		{
 
-			public void serverAdded(IServer s)
+			public void serverAdded(IServerInternal s)
 			{
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerList();
-				((IServerInternal)s).addTableListener(tableListener);
+				s.addTableListener(tableListener);
 			}
 
-			public void serverRemoved(IServer s)
+			public void serverRemoved(IServerInternal s)
 			{
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerList();
-				((IServerInternal)s).removeTableListener(tableListener);
+				s.removeTableListener(tableListener);
 			}
 		};
 		serverManager.addServerListener(serverListener);
