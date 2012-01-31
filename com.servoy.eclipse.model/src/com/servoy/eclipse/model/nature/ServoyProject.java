@@ -592,7 +592,8 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 				{
 					if (member instanceof IFile && member.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 					{
-						scopeNames.add(member.getName().substring(0, member.getName().length() - SolutionSerializer.JS_FILE_EXTENSION.length()));
+						String scopeName = member.getName().substring(0, member.getName().length() - SolutionSerializer.JS_FILE_EXTENSION.length());
+						if (!scopeNames.contains(scopeName)) scopeNames.add(scopeName);
 					}
 				}
 			}
