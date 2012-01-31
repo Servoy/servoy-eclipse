@@ -101,6 +101,7 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
@@ -1318,13 +1319,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 						}
 						checkCancel();
-						if (o instanceof BaseComponent)
+						if (o instanceof IFormElement)
 						{
 							// check if not outside form
 							Form form = (Form)o.getAncestor(IRepository.FORMS);
 							if (form != null)
 							{
-								Point location = ((BaseComponent)o).getLocation();
+								Point location = ((IFormElement)o).getLocation();
 								if (location != null)
 								{
 									Iterator<com.servoy.j2db.persistence.Part> parts = form.getParts();
@@ -1336,7 +1337,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										if (startPos <= location.y && endPos > location.y)
 										{
 											// found the part
-											int height = ((BaseComponent)o).getSize().height;
+											int height = ((IFormElement)o).getSize().height;
 											if (location.y + height > endPos)
 											{
 												String message = "Element "; //$NON-NLS-1$
@@ -1396,7 +1397,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													}
 												}
 											}
-											if (width < location.x + ((BaseComponent)o).getSize().width)
+											if (width < location.x + ((IFormElement)o).getSize().width)
 											{
 												String message = "Element "; //$NON-NLS-1$
 												if (o instanceof ISupportName && ((ISupportName)o).getName() != null)
