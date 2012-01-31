@@ -1245,7 +1245,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 
 	private boolean fireActiveProjectWillChange(ServoyProject toProject)
 	{
-		ArrayList<IActiveProjectListener> clone = new ArrayList<IActiveProjectListener>(activeProjectListeners);
+		List<IActiveProjectListener> clone = new ArrayList<IActiveProjectListener>(activeProjectListeners);
 		for (IActiveProjectListener listener : clone)
 		{
 			if (!listener.activeProjectWillChange(activeProject, toProject))
@@ -1258,7 +1258,9 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 
 	private void fireActiveProjectChanged()
 	{
-		ArrayList<IActiveProjectListener> clone = new ArrayList<IActiveProjectListener>(activeProjectListeners);
+		refreshGlobalScopes();
+
+		List<IActiveProjectListener> clone = new ArrayList<IActiveProjectListener>(activeProjectListeners);
 		for (IActiveProjectListener listener : clone)
 		{
 			listener.activeProjectChanged(activeProject);
@@ -1275,7 +1277,9 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 
 	private void fireActiveProjectUpdated(int updateInfo)
 	{
-		ArrayList<IActiveProjectListener> clone = new ArrayList<IActiveProjectListener>(activeProjectListeners);
+		refreshGlobalScopes();
+
+		List<IActiveProjectListener> clone = new ArrayList<IActiveProjectListener>(activeProjectListeners);
 		for (IActiveProjectListener listener : clone)
 		{
 			listener.activeProjectUpdated(activeProject, updateInfo);
@@ -1756,6 +1760,8 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 	 */
 	protected void handleOutstandingChangedFiles(List<IResourceDelta> newChanges)
 	{
+		refreshGlobalScopes();
+
 		List<IResourceDelta> lst;
 		synchronized (outstandingChangedFiles)
 		{
@@ -1792,6 +1798,31 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 			catch (Exception e)
 			{
 				ServoyLog.logError("Could not handle changed files in project " + project.getName(), e);
+			}
+		}
+	}
+
+	/**
+	 * Refresh the runtime property Solution.SCOPE_NAMES in solutions.
+	 * This will include empty scopes (that have to method or variable yet)
+	 */
+	private void refreshGlobalScopes()
+	{
+		for (ServoyProject project : getModulesOfActiveProject())
+		{
+			List<String> globalScopenames = project.getGlobalScopenames();
+			String[] scopeNames = globalScopenames.toArray(new String[globalScopenames.size()]);
+
+			Solution solution = project.getEditingSolution();
+			if (solution != null)
+			{
+				solution.setRuntimeProperty(Solution.SCOPE_NAMES, scopeNames);
+			}
+
+			solution = project.getSolution();
+			if (solution != null)
+			{
+				solution.setRuntimeProperty(Solution.SCOPE_NAMES, scopeNames);
 			}
 		}
 	}

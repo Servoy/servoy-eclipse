@@ -368,8 +368,7 @@ public class NewMethodWizard extends Wizard implements INewWizard
 			formsCombo.select(0);
 
 			// update scopes combo
-			List<String> scopeNames = servoyProject.getGlobalScopenames();
-			scopesCombo.setItems(scopeNames.toArray(new String[scopeNames.size()]));
+			scopesCombo.setItems(servoyProject.getEditingSolution().getRuntimeProperty(Solution.SCOPE_NAMES));
 			scopesCombo.select(0);
 		}
 

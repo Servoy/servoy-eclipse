@@ -582,6 +582,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 	public List<String> getGlobalScopenames()
 	{
 		List<String> scopeNames = new ArrayList<String>();
+		scopeNames.add(ScriptVariable.GLOBAL_SCOPE);
 		if (project != null)
 		{
 			try

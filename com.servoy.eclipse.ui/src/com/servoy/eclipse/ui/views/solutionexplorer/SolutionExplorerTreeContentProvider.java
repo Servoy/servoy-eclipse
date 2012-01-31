@@ -1070,7 +1070,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			return;
 		}
 
-		List<String> scopeNames = ((ServoyProject)project.getRealObject()).getGlobalScopenames();
 		globalsFolders = new HashMap<String, PlatformSimpleUserNode>();
 
 		PlatformSimpleUserNode currentForm = new PlatformSimpleUserNode(Messages.TreeStrings_currentcontroller, UserNodeType.CURRENT_FORM, null,
@@ -1078,7 +1077,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		if (solutionOfCalculation != null) currentForm.hide();
 		currentForm.parent = parent;
 
-		List<PlatformSimpleUserNode> nodes = new ArrayList<PlatformSimpleUserNode>(scopeNames.size() + 1);
+		// property Solution.SCOPE_NAMES is maintained by ServoyModel based on global js file names
+		String[] scopeNames = solution.getRuntimeProperty(Solution.SCOPE_NAMES);
+		List<PlatformSimpleUserNode> nodes = new ArrayList<PlatformSimpleUserNode>(scopeNames.length + 1);
 		nodes.add(currentForm);
 		for (String scopeName : scopeNames)
 		{

@@ -77,7 +77,6 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
@@ -197,20 +196,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 			if (forcedScopeName == null)
 			{
 				// let user select from scopes.
-				Collection<Pair<String, IRootObject>> scopes = ModelUtils.getEditingFlattenedSolution(parent).getScopes();
-				if (scopes.size() == 0)
-				{
-					listOptions = new String[] { ScriptVariable.GLOBAL_SCOPE };
-				}
-				else
-				{
-					listOptions = new String[scopes.size()];
-					int i = 0;
-					for (Pair<String, IRootObject> scope : scopes)
-					{
-						listOptions[i++] = scope.getLeft();
-					}
-				}
+				Collection<String> scopeNames = ModelUtils.getEditingFlattenedSolution(parent).getScopeNames();
+				listOptions = scopeNames.toArray(new String[scopeNames.size()]);
 			}
 
 			listDescriptionText = "Select scope";
