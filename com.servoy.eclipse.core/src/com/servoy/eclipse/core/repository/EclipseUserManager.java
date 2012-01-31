@@ -44,7 +44,6 @@ import com.servoy.j2db.persistence.IColumnListener;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -162,15 +161,15 @@ public class EclipseUserManager extends WorkspaceUserManager
 
 		tableListener = new ITableListener()
 		{
-			public void tablesAdded(IServer server, String tableNames[])
+			public void tablesAdded(IServerInternal server, String tableNames[])
 			{
 				try
 				{
 					for (String tableName : tableNames)
 					{
-						if (((IServerInternal)server).isTableLoaded(tableName))
+						if (server.isTableLoaded(tableName))
 						{
-							(((IServerInternal)server).getTable(tableName)).addIColumnListener(columnListener);
+							(server.getTable(tableName)).addIColumnListener(columnListener);
 						}
 					}
 				}
@@ -184,8 +183,8 @@ public class EclipseUserManager extends WorkspaceUserManager
 					{
 						for (String tableName : tableNames)
 						{
-							removeSecurityInfoFromMemory(((IServerInternal)server).getName(), tableName);
-							readSecurityInfo(((IServerInternal)server).getName(), tableName);
+							removeSecurityInfoFromMemory(server.getName(), tableName);
+							readSecurityInfo(server.getName(), tableName);
 						}
 					}
 					catch (RepositoryException e)
@@ -195,7 +194,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 				}
 			}
 
-			public void tablesRemoved(IServer server, Table tables[], boolean deleted)
+			public void tablesRemoved(IServerInternal server, Table tables[], boolean deleted)
 			{
 				for (Table table : tables)
 				{
@@ -208,8 +207,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 					{
 						for (Table table : tables)
 						{
-							IPath path = new Path(DataModelManager.getRelativeServerPath(((IServerInternal)server).getName()) + IPath.SEPARATOR +
-								getFileName(table.getName()));
+							IPath path = new Path(DataModelManager.getRelativeServerPath(server.getName()) + IPath.SEPARATOR + getFileName(table.getName()));
 							IFile file = resourcesProject.getFile(path);
 							if (file.exists())
 							{
@@ -227,12 +225,12 @@ public class EclipseUserManager extends WorkspaceUserManager
 					// remove sec. info we have about this table
 					for (Table table : tables)
 					{
-						reloadSecurityInfo(((IServerInternal)server).getName(), table.getName());
+						reloadSecurityInfo(server.getName(), table.getName());
 					}
 				}
 			}
 
-			public void serverStateChanged(IServer server, int oldState, int newState)
+			public void serverStateChanged(IServerInternal server, int oldState, int newState)
 			{
 				// do nothing
 			}
@@ -242,7 +240,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 				t.addIColumnListener(columnListener);
 			}
 
-			public void hiddenTableChanged(IServer server, Table table)
+			public void hiddenTableChanged(IServerInternal server, Table table)
 			{
 				// nothing to do here				
 			}
@@ -278,14 +276,14 @@ public class EclipseUserManager extends WorkspaceUserManager
 		serverListener = new IServerListener()
 		{
 
-			public void serverAdded(IServer s)
+			public void serverAdded(IServerInternal s)
 			{
-				((IServerInternal)s).addTableListener(tableListener);
+				s.addTableListener(tableListener);
 			}
 
-			public void serverRemoved(IServer s)
+			public void serverRemoved(IServerInternal s)
 			{
-				((IServerInternal)s).removeTableListener(tableListener);
+				s.removeTableListener(tableListener);
 			}
 		};
 		serverManager.addServerListener(serverListener);

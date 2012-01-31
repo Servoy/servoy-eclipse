@@ -813,18 +813,28 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			PlatformSimpleUserNode node = new PlatformSimpleUserNode(server_name, UserNodeType.SERVER, "", tooltip, serverObj, image); //$NON-NLS-1$
 			serverNodes.add(node);
 			node.parent = serversNode;
-			if (serverObj.getConfig().isEnabled() && serverObj.isValid())
+			handleServerViewsNode(serverObj, node);
+		}
+
+		serversNode.children = serverNodes.toArray(new PlatformSimpleUserNode[serverNodes.size()]);
+	}
+
+	private void handleServerViewsNode(IServerInternal serverObj, PlatformSimpleUserNode node)
+	{
+		if (serverObj.getConfig().isEnabled() && serverObj.isValid())
+		{
+			List<String> views = null;
+			try
 			{
-				List<String> views = null;
-				try
-				{
-					views = serverObj.getViewNames(true);
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-				}
-				if (views != null && views.size() > 0)
+				views = serverObj.getViewNames(true);
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+			}
+			if (views != null && views.size() > 0)
+			{
+				if (node.children == null || node.children.length == 0)
 				{
 					PlatformSimpleUserNode viewNode = new PlatformSimpleUserNode("Views", UserNodeType.VIEWS, "", "Views", serverObj,
 						PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
@@ -832,9 +842,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					viewNode.parent = node;
 				}
 			}
+			else
+			{
+				node.children = null;
+			}
 		}
-
-		serversNode.children = serverNodes.toArray(new PlatformSimpleUserNode[serverNodes.size()]);
 	}
 
 	private void addPluginsNodeChildren(PlatformSimpleUserNode pluginNode)
@@ -1927,10 +1939,17 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		view.refreshTreeNodeFromModel(servers);
 	}
 
-	/**
-	 * @param persist
-	 * @return
-	 */
+
+	public void refreshServerViewsNode(IServerInternal server)
+	{
+		PlatformSimpleUserNode node = (PlatformSimpleUserNode)findChildNode(servers, server.getName());
+		if (node != null)
+		{
+			handleServerViewsNode(server, node);
+			view.refreshTreeNodeFromModel(node);
+		}
+	}
+
 	public TreePath getTreePath(UUID uuid)
 	{
 		if (activeSolutionNode.getRealObject() != null)
@@ -1945,11 +1964,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return null;
 	}
 
-	/**
-	 * @param startNode
-	 * @param uuid
-	 * @return
-	 */
 	private boolean findNode(PlatformSimpleUserNode startNode, UUID uuid, List<PlatformSimpleUserNode> lst)
 	{
 		Object realObject = startNode.getRealObject();
