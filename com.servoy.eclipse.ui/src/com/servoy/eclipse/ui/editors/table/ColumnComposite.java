@@ -206,7 +206,7 @@ public class ColumnComposite extends Composite
 				{
 					tableViewer.getTable().deselectAll();
 				}
-				else if (item != null && item.getBounds(CI_DELETE).contains(pt))
+				else if (item != null && item.getBounds(displayDataProviderID.getSelection() ? CI_DELETE + 1 : CI_DELETE).contains(pt))
 				{
 					if (t.getTableType() != ITable.TABLE)
 					{
