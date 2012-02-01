@@ -24,8 +24,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.ui.IMarkerResolution;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.preferences.JSDocScriptTemplates;
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -103,9 +101,7 @@ public class DuplicateUuidQuickFix implements IMarkerResolution
 					Object content = null;
 					if (persist instanceof IVariable || persist instanceof IScriptProvider)
 					{
-						JSDocScriptTemplates prefs = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject());
-						String userTemplate = (persist instanceof IVariable) ? prefs.getVariableTemplate() : prefs.getMethodTemplate();
-						content = SolutionSerializer.generateScriptFile(persist.getParent(), repository, userTemplate);
+						content = SolutionSerializer.generateScriptFile(persist.getParent(), repository, null);
 					}
 					else
 					{
