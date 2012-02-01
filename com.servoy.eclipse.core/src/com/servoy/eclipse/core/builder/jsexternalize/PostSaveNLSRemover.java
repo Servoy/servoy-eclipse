@@ -51,7 +51,7 @@ public class PostSaveNLSRemover implements IPostSaveListener
 	public static final String ID = "NLSRemover"; //$NON-NLS-1$
 	public static final String EDITOR_SAVE_PARTICIPANT_PREFIX = "editor_save_participant_"; //$NON-NLS-1$
 
-	/* 
+	/*
 	 * @see org.eclipse.dltk.ui.editor.saveparticipant.IPostSaveListener#getName()
 	 */
 	public String getName()
@@ -59,7 +59,7 @@ public class PostSaveNLSRemover implements IPostSaveListener
 		return ID;
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.dltk.ui.editor.saveparticipant.IPostSaveListener#getId()
 	 */
 	public String getId()
@@ -67,7 +67,7 @@ public class PostSaveNLSRemover implements IPostSaveListener
 		return ID;
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.dltk.ui.editor.saveparticipant.IPostSaveListener#isEnabled(org.eclipse.dltk.core.ISourceModule)
 	 */
 	public boolean isEnabled(ISourceModule compilationUnit)
@@ -76,7 +76,7 @@ public class PostSaveNLSRemover implements IPostSaveListener
 			getId());
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.dltk.ui.editor.saveparticipant.IPostSaveListener#needsChangedRegions(org.eclipse.dltk.core.ISourceModule)
 	 */
 	public boolean needsChangedRegions(ISourceModule compilationUnit) throws CoreException
@@ -84,7 +84,7 @@ public class PostSaveNLSRemover implements IPostSaveListener
 		return false;
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.dltk.ui.editor.saveparticipant.IPostSaveListener#saved(org.eclipse.dltk.core.ISourceModule, org.eclipse.jface.text.IRegion[],
 	 * org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -149,6 +149,15 @@ public class PostSaveNLSRemover implements IPostSaveListener
 				ServoyLog.logError(ex);
 			}
 
+			// add nls comments that may be not on a line with string literal
+			for (Comment nlsComment : allNLSComments)
+			{
+				if (!nlsUsedIdxMap.containsKey(nlsComment))
+				{
+					nlsUsedIdxMap.put(nlsComment, null);
+				}
+			}
+
 			// rewrite all nls comments using only the valid ones
 			writeUsedNLS((IFile)compilationUnit.getResource(), nlsUsedIdxMap);
 		}
@@ -167,8 +176,11 @@ public class PostSaveNLSRemover implements IPostSaveListener
 			ArrayList<Integer> usedIdx = nlsUsedIdxMapEntry.getValue();
 
 			StringBuilder sb = new StringBuilder();
-			for (Integer i : usedIdx)
-				sb.append("//$NON-NLS-").append(i.intValue()).append("$ "); //$NON-NLS-1$ //$NON-NLS-2$
+			if (usedIdx != null)
+			{
+				for (Integer i : usedIdx)
+					sb.append("//$NON-NLS-").append(i.intValue()).append("$ "); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			String replaceNLS = sb.toString();
 			if (!nlsComment.getText().equals(replaceNLS))
 			{
