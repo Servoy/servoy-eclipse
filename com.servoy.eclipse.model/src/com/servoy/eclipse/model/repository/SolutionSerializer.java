@@ -181,7 +181,7 @@ public class SolutionSerializer
 	public static final String PROPERTIESKEY = "@properties="; //$NON-NLS-1$
 	public static final String TYPEKEY = "@type"; //$NON-NLS-1$
 
-	public static String generateScriptFile(final ISupportChilds parent, final IDeveloperRepository repository)
+	public static String generateScriptFile(final ISupportChilds parent, final IDeveloperRepository repository, final String userTemplate)
 	{
 		final Map<Pair<String, String>, Map<IPersist, Object>> projectContents = new HashMap<Pair<String, String>, Map<IPersist, Object>>();//filepathname -> map(persist -> contents)
 		parent.acceptVisitor(new IPersistVisitor()
@@ -199,7 +199,7 @@ public class SolutionSerializer
 						fileContents = new HashMap<IPersist, Object>();
 						projectContents.put(filepathname, fileContents);
 					}
-					Object val = serializePersist(p, true, repository);
+					Object val = serializePersist(p, true, repository, userTemplate);
 					if (val != null) fileContents.put(p, val);
 				}
 				return CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
@@ -282,7 +282,7 @@ public class SolutionSerializer
 						if (fileContents.size() == 0 || filepathname.getRight().endsWith(JS_FILE_EXTENSION))
 						{
 							// only js-files have multiple top-level persists in 1 file.
-							Object val = serializePersist(p, !(p instanceof Solution), repository);
+							Object val = serializePersist(p, !(p instanceof Solution), repository, null);
 							if (val != null) fileContents.put(p, val);
 						}
 						else
@@ -359,7 +359,7 @@ public class SolutionSerializer
 				String solutionFile = solutionPath.getLeft() + solutionPath.getRight();
 				if (!fileAccess.exists(solutionFile))
 				{
-					Object val = serializePersist(node, false, repository);
+					Object val = serializePersist(node, false, repository, null);
 					if (val != null) fileAccess.setUTF8Contents(solutionFile, val.toString());
 				}
 			}
@@ -461,11 +461,11 @@ public class SolutionSerializer
 			p instanceof TableNode || p instanceof IScriptProvider || p instanceof IVariable);
 	}
 
-	public static String getComment(IPersist persist, final IDeveloperRepository repository)
+	public static String getComment(IPersist persist, String userTemplate, final IDeveloperRepository repository)
 	{
 		if (persist instanceof ScriptVariable)
 		{
-			return getCommentImpl(persist, repository, ((ScriptVariable)persist).getComment());
+			return getCommentImpl(persist, repository, ((ScriptVariable)persist).getComment(), userTemplate);
 		}
 		if (persist instanceof AbstractScriptProvider)
 		{
@@ -481,7 +481,7 @@ public class SolutionSerializer
 					comment = declaration.substring(commentStart, commentEnd + 2);
 				}
 			}
-			return getCommentImpl(persist, repository, comment);
+			return getCommentImpl(persist, repository, comment, userTemplate);
 		}
 		throw new IllegalArgumentException("Persist must be an ScriptMethod/Calc or Variable " + persist); //$NON-NLS-1$
 	}
@@ -490,7 +490,7 @@ public class SolutionSerializer
 	 * @param variable
 	 * @param repository
 	 */
-	private static String getCommentImpl(IPersist persist, final IDeveloperRepository repository, String currentComment)
+	private static String getCommentImpl(IPersist persist, final IDeveloperRepository repository, String currentComment, String userTemplate)
 	{
 		ServoyJSONObject obj;
 		try
@@ -507,12 +507,12 @@ public class SolutionSerializer
 			StringBuilder sb = new StringBuilder();
 			if (currentComment == null)
 			{
-				generateDefaultJSDoc(obj, sb, persist instanceof AbstractScriptProvider ? (AbstractScriptProvider)persist : null);
+				generateDefaultJSDoc(obj, sb, userTemplate, persist instanceof AbstractScriptProvider ? (AbstractScriptProvider)persist : null);
 			}
 			else
 			{
 				sb.append(currentComment);
-				replacePropertiesTag(obj, sb, persist instanceof AbstractScriptProvider ? (AbstractScriptProvider)persist : null);
+				replacePropertiesTag(obj, sb, userTemplate, persist instanceof AbstractScriptProvider ? (AbstractScriptProvider)persist : null);
 			}
 			if (persist instanceof ScriptVariable)
 			{
@@ -550,15 +550,25 @@ public class SolutionSerializer
 			}
 			else
 			{
-				int startComment = sb.indexOf(SV_COMMENT_START);
-				int lineEnd = sb.indexOf("\n", startComment); //$NON-NLS-1$
+				int lineEnd = -1;
+				int startProp = sb.indexOf(PROPERTIESKEY);
+				if (startProp != 1)
+				{
+					// insert just before @properties
+					lineEnd = sb.lastIndexOf("\n", startProp);
+				}
+				if (lineEnd == -1)
+				{
+					// else insert after comment start
+					lineEnd = sb.indexOf("\n", sb.indexOf(SV_COMMENT_START)); //$NON-NLS-1$
+				}
 				sb.insert(lineEnd, "\n * " + TYPEKEY + " {" + argumentType.getName() + "}\n *");
 			}
 		}
 	}
 
 	//returns CharSequence,byte[] or JSONObject(=internal for relation items, work on parent!)
-	public static Object serializePersist(IPersist persist, boolean forceRecursive, final IDeveloperRepository repository)
+	public static Object serializePersist(IPersist persist, boolean forceRecursive, final IDeveloperRepository repository, String userTemplate)
 	{
 		if (persist instanceof Media)
 		{
@@ -602,11 +612,11 @@ public class SolutionSerializer
 					if (source != null && source.trim().length() > 0)
 					{
 						sb.append(source);
-						replacePropertiesTag(obj, sb, abstractScriptProvider);
+						replacePropertiesTag(obj, sb, userTemplate, abstractScriptProvider);
 					}
 					else
 					{
-						generateDefaultJSDoc(obj, sb, abstractScriptProvider);
+						generateDefaultJSDoc(obj, sb, userTemplate, abstractScriptProvider);
 						sb.append("function "); //$NON-NLS-1$
 						sb.append(abstractScriptProvider.getName());
 						sb.append("()\n{\n}\n"); //$NON-NLS-1$
@@ -619,11 +629,11 @@ public class SolutionSerializer
 					{
 						sb.append(sv.getComment());
 						sb.append('\n');
-						replacePropertiesTag(obj, sb, null);
+						replacePropertiesTag(obj, sb, userTemplate, null);
 					}
 					else
 					{
-						generateDefaultJSDoc(obj, sb, null);
+						generateDefaultJSDoc(obj, sb, userTemplate, null);
 					}
 					generateJSDocScriptVariableType(sv, sb);
 					sb.append(VAR_KEYWORD);
@@ -672,7 +682,7 @@ public class SolutionSerializer
 	 * @param sb
 	 */
 	@SuppressWarnings("nls")
-	private static void replacePropertiesTag(ServoyJSONObject obj, StringBuilder sb, AbstractScriptProvider abstractScriptProvider)
+	private static void replacePropertiesTag(ServoyJSONObject obj, StringBuilder sb, String userTemplate, AbstractScriptProvider abstractScriptProvider)
 	{
 		if (sb.toString().trim().startsWith(SV_COMMENT_START))
 		{
@@ -704,7 +714,7 @@ public class SolutionSerializer
 		else
 		{
 			StringBuilder doc = new StringBuilder();
-			generateDefaultJSDoc(obj, doc, abstractScriptProvider);
+			generateDefaultJSDoc(obj, doc, userTemplate, abstractScriptProvider);
 			sb.insert(0, doc);
 		}
 	}
@@ -715,10 +725,19 @@ public class SolutionSerializer
 	 * @param abstractScriptProvider TODO
 	 */
 	@SuppressWarnings("nls")
-	private static void generateDefaultJSDoc(ServoyJSONObject obj, StringBuilder sb, AbstractScriptProvider abstractScriptProvider)
+	private static void generateDefaultJSDoc(ServoyJSONObject obj, StringBuilder sb, String userTemplate, AbstractScriptProvider abstractScriptProvider)
 	{
 		sb.append(SV_COMMENT_START);
 		sb.append("\n");
+
+		if (userTemplate != null && userTemplate.length() > 0)
+		{
+			for (String line : userTemplate.split("\n"))
+			{
+				sb.append(" * ").append(line).append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			sb.append(" *\n"); //$NON-NLS-1$
+		}
 
 		if (generateParams(sb, abstractScriptProvider))
 		{

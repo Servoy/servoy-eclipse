@@ -24,6 +24,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.ui.IMarkerResolution;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.preferences.JSDocScriptTemplates;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -101,22 +103,24 @@ public class DuplicateUuidQuickFix implements IMarkerResolution
 					Object content = null;
 					if (persist instanceof IVariable || persist instanceof IScriptProvider)
 					{
-						content = SolutionSerializer.generateScriptFile(persist.getParent(), repository);
+						JSDocScriptTemplates prefs = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject());
+						String userTemplate = (persist instanceof IVariable) ? prefs.getVariableTemplate() : prefs.getMethodTemplate();
+						content = SolutionSerializer.generateScriptFile(persist.getParent(), repository, userTemplate);
 					}
 					else
 					{
 						Form form = (Form)persist.getAncestor(IRepository.FORMS);
 						if (form != null && SolutionSerializer.isCompositeWithItems(form))
 						{
-							content = SolutionSerializer.serializePersist(form, true, repository);
+							content = SolutionSerializer.serializePersist(form, true, repository, null);
 						}
 						else if (SolutionSerializer.isCompositeWithItems(persist.getParent()))
 						{
-							content = SolutionSerializer.serializePersist(persist.getParent(), true, repository);
+							content = SolutionSerializer.serializePersist(persist.getParent(), true, repository, null);
 						}
 						else
 						{
-							content = SolutionSerializer.serializePersist(persist, true, repository);
+							content = SolutionSerializer.serializePersist(persist, true, repository, null);
 						}
 					}
 

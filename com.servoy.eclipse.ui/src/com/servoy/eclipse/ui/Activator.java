@@ -270,9 +270,12 @@ public class Activator extends AbstractUIPlugin
 		return plugin;
 	}
 
+	/**
+	 * Global (workspace) preferences
+	 */
 	public IEclipsePreferences getEclipsePreferences()
 	{
-		return new InstanceScope().getNode(PLUGIN_ID);
+		return InstanceScope.INSTANCE.getNode(PLUGIN_ID);
 	}
 
 	/**

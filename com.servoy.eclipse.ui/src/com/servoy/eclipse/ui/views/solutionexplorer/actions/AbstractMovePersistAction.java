@@ -366,7 +366,7 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 					if (persist instanceof ScriptCalculation)
 					{
 						clone = destinationEditingSolution.createNewScriptCalculation(nameValidator, ((ScriptCalculation)persist).getTable().getDataSource(),
-							newPersistName);
+							newPersistName, null);
 						clone.copyPropertiesMap(((ScriptCalculation)persist).getPropertiesMap(), true);
 					}
 					else if (persist instanceof AggregateVariable)

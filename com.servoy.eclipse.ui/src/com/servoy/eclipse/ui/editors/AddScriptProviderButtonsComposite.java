@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
@@ -135,14 +136,15 @@ public class AddScriptProviderButtonsComposite extends Composite
 				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 				IValidateName nameValidator = servoyModel.getNameValidator();
-				ScriptCalculation calc = solution.createNewScriptCalculation(nameValidator, table.getDataSource(), calcName);
+				ScriptCalculation calc = solution.createNewScriptCalculation(nameValidator, table.getDataSource(), calcName, null);
 				if (calc != null)
 				{
 					calc.setType(IColumnTypes.TEXT);
 					MethodTemplate template = MethodTemplate.getTemplate(calc.getClass(), methodKey);
 					String calcCode = template.getDefaultMethodCode();
 					if (calcCode == null || calcCode.trim().length() == 0) calcCode = "\treturn \"\";"; //$NON-NLS-1$
-					calc.setDeclaration(template.getMethodDeclaration(calcName, calcCode));
+					String userTemplate = new JSDocScriptTemplates(servoyModel.getActiveProject()).getMethodTemplate();
+					calc.setDeclaration(template.getMethodDeclaration(calcName, calcCode, userTemplate));
 
 					ServoyProject servoyProject = servoyModel.getActiveProject();
 					if (servoyProject != null)

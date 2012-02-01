@@ -762,7 +762,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 				new Path(SolutionSerializer.getScriptPath(scriptToRegenerate.getParent(), false)));
 			if (scriptFiles.add(scriptFile))
 			{
-				final String fileContent = SolutionSerializer.generateScriptFile(scriptToRegenerate.getParent(), repository);
+				final String fileContent = SolutionSerializer.generateScriptFile(scriptToRegenerate.getParent(), repository, null);
 				if (scriptFile.exists())
 				{
 					if (fileContent.trim().length() > 0)

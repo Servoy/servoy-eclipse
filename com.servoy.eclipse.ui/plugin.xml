@@ -317,6 +317,12 @@
       </page>
       <page
             category="com.servoy.eclipse.ui.preference"
+            class="com.servoy.eclipse.ui.preferences.JSDocScriptTemplatesPreferencePage"
+            id="com.servoy.eclipse.ui.jsDocTemplates"
+            name="JSDoc Method/Variable Templates">
+      </page>
+      <page
+            category="com.servoy.eclipse.ui.preference"
             class="com.servoy.eclipse.ui.preferences.AutomaticNamingStrategies"
             id="com.servoy.eclipse.ui.autoNameStrategies"
             name="Automatic Naming Strategies">
@@ -1003,5 +1009,12 @@
             class="com.servoy.eclipse.ui.quickfix.StartI18NExternalizeWizard"
             nature="org.eclipse.dltk.javascript.core.nature">
       </correctionProcessor>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <scope
+            class="org.eclipse.core.internal.resources.ProjectPreferences"
+            name="project">
+      </scope>
    </extension>   
 </plugin>

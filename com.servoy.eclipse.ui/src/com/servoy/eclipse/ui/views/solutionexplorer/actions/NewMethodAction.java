@@ -62,7 +62,9 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.core.util.UIUtils.InputAndListDialog;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -282,7 +284,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 				}
 				else if (parent instanceof TableNode)
 				{
-					met = ((TableNode)parent).createNewFoundsetMethod(sm.getNameValidator(), methodName);
+					met = ((TableNode)parent).createNewFoundsetMethod(sm.getNameValidator(), methodName, null);
 				}
 
 				if (met != null)
@@ -305,13 +307,14 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 						new WorkspaceFileAccess(ServoyModel.getWorkspace()).setContents(scriptPath, new byte[0]);
 					}
 
-					String declaration = template.getMethodDeclaration(met.getName(), null, tagToOutput, substitutions);
+					String userTemplate = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject()).getMethodTemplate();
+					String declaration = template.getMethodDeclaration(met.getName(), null, tagToOutput, userTemplate, substitutions);
 
 					declaration = format(declaration, file, 0);
 
 					met.setDeclaration(declaration);
 
-					String code = SolutionSerializer.serializePersist(met, true, ServoyModel.getDeveloperRepository()).toString();
+					String code = SolutionSerializer.serializePersist(met, true, ServoyModel.getDeveloperRepository(), null).toString();
 					((ISupportChilds)parent).removeChild(met);
 
 					final IEditorPart openEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(
