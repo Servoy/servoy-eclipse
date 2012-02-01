@@ -48,8 +48,7 @@ public class JSFileExternalizeQuickFixGenerator implements IMarkerResolutionGene
 			{
 				int problemStartIdx = marker.getAttribute(IMarker.CHAR_START, -1);
 
-				return new IMarkerResolution[] { new AddMissingNLSResolution((IFile)scriptFile, problemStartIdx), new GenerateSuppressWarningsResolution(
-					"nls", (IFile)scriptFile, problemStartIdx) }; //$NON-NLS-1$
+				return new IMarkerResolution[] { new AddMissingNLSResolution((IFile)scriptFile, problemStartIdx) };
 			}
 		}
 

@@ -61,8 +61,6 @@ public class ExternalizeScriptCorrectionProcessor implements IScriptCorrectionPr
 				int problemStartIdx = context.getInvocationContext().getOffset();
 
 				context.addResolution(new AddMissingNLSResolution((IFile)scriptFile, problemStartIdx), annotation);
-				GenerateSuppressWarningsResolution resolution = new GenerateSuppressWarningsResolution("nls", (IFile)scriptFile, problemStartIdx);
-				if (resolution.getFunction() != null) context.addResolution(resolution, annotation);
 			}
 		}
 	}
