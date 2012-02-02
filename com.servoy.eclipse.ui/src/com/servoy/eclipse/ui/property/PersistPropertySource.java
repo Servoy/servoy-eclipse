@@ -2869,7 +2869,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					}
 				}
 				String[] array = names.toArray(new String[names.size()]);
-				Arrays.sort(array);
+				Arrays.sort(array, String.CASE_INSENSITIVE_ORDER);
 				return new EditableComboboxPropertyController(id, displayName, array);
 			}
 		}
