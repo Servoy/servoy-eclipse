@@ -501,6 +501,7 @@
 				<include name="splash.bmp"/>
 				<include name="intro/"/>
 				<include name="plugin_customization.ini"/>
+				<include name="helpData.xml"/>
 				<include name="cssprofile/"/>
 				<include name="config.ini"/>
 			</fileset>
