@@ -59,7 +59,7 @@ public class TableSearch extends DLTKSearchEngineSearch
 	{
 		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 		if (activeProject == null) return Status.OK_STATUS;
-		IResource[] scopes = getScopes(activeProject.getSolution());
+		IResource[] scopes = getAllScopes();
 		final TextSearchRequestor collector = getResultCollector();
 
 		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm", "*.rel", "*.val", "*.js" }, true);

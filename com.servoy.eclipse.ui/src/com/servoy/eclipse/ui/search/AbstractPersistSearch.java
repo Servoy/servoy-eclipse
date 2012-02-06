@@ -99,6 +99,22 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 		return scopes.toArray(new IResource[scopes.size()]);
 	}
 
+	protected IResource[] getAllScopes()
+	{
+		List<IResource> scopes = new ArrayList<IResource>();
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+
+		ServoyProject currentProject = servoyModel.getActiveProject();
+		Solution[] allSolutions = currentProject.getModules();
+
+		for (Solution solution : allSolutions)
+		{
+			ServoyProject servoyProject = servoyModel.getServoyProject(solution.getName());
+			scopes.add(servoyProject.getProject());
+		}
+		return scopes.toArray(new IResource[scopes.size()]);
+	}
+
 	public boolean canRerun()
 	{
 		return true;
