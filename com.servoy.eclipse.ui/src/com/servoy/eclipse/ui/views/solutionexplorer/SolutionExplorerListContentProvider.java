@@ -665,7 +665,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				{
 					cls = real.getClass();
 				}
-				lm = getJSMethods(cls, ".", null, UserNodeType.RETURNTYPE_ELEMENT, null, null);
+				String elementName = ".";
+				if (un.parent != null && un.parent.getType() == UserNodeType.PLUGIN)
+				{
+					elementName = PLUGIN_PREFIX + "." + un.parent.getName() + elementName;
+				}
+				lm = getJSMethods(cls, elementName, null, UserNodeType.RETURNTYPE_ELEMENT, null, null);
 			}
 			else if (type == UserNodeType.JSLIB)
 			{
@@ -1383,6 +1388,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			ITagResolver resolver = new TagResolver(constantsElementName, (prefix == null ? "%%prefix%%" : prefix)); //$NON-NLS-1$
 			if (!constantsElementName.endsWith(".")) constantsElementName = constantsElementName + ".";
+			if (elementName.startsWith(PLUGIN_PREFIX))
+			{
+				constantsElementName = elementName + constantsElementName;
+			}
 
 			List fields = ijm.getFieldIds(true);
 			Object[] arrays = new Object[fields.size()];
