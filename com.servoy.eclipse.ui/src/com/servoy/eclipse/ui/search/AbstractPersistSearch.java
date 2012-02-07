@@ -70,7 +70,9 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 	}
 
 	/**
-	 * Returns a list of the scopes of a solution, from the level of the module passed as parameter, and up to the root solution.
+	 * Returns a list of the Projects of a solution that has the given solution as a module.
+	 * Only the Projects that have the given solution as a module will be included.
+	 * 
 	 * @param sol
 	 */
 	protected IResource[] getScopes(Solution sol)
@@ -102,7 +104,7 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 
 
 	/**
-	 * Returns a list of all the scopes of a solution, including all its modules.
+	 * Returns a list of all the Projects of the active solution, including all its modules.
 	 * 
 	 */
 	protected IResource[] getAllScopes()
