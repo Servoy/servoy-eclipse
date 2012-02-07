@@ -70,7 +70,10 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 	}
 
 	/**
-	 * @return
+	 * Returns a list of the Projects of a solution that has the given solution as a module.
+	 * Only the Projects that have the given solution as a module will be included.
+	 * 
+	 * @param sol
 	 */
 	protected IResource[] getScopes(Solution sol)
 	{
@@ -95,6 +98,27 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 					break;
 				}
 			}
+		}
+		return scopes.toArray(new IResource[scopes.size()]);
+	}
+
+
+	/**
+	 * Returns a list of all the Projects of the active solution, including all its modules.
+	 * 
+	 */
+	protected IResource[] getAllScopes()
+	{
+		List<IResource> scopes = new ArrayList<IResource>();
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+
+		ServoyProject currentProject = servoyModel.getActiveProject();
+		Solution[] allSolutions = currentProject.getModules();
+
+		for (Solution solution : allSolutions)
+		{
+			ServoyProject servoyProject = servoyModel.getServoyProject(solution.getName());
+			scopes.add(servoyProject.getProject());
 		}
 		return scopes.toArray(new IResource[scopes.size()]);
 	}
