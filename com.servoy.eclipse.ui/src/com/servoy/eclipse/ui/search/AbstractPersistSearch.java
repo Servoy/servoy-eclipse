@@ -70,7 +70,8 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 	}
 
 	/**
-	 * @return
+	 * Returns a list of the scopes of a solution, from the level of the module passed as parameter, and up to the root solution.
+	 * @param sol
 	 */
 	protected IResource[] getScopes(Solution sol)
 	{
@@ -99,6 +100,11 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 		return scopes.toArray(new IResource[scopes.size()]);
 	}
 
+
+	/**
+	 * Returns a list of all the scopes of a solution, including all its modules.
+	 * 
+	 */
 	protected IResource[] getAllScopes()
 	{
 		List<IResource> scopes = new ArrayList<IResource>();
