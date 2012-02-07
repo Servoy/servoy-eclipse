@@ -114,6 +114,7 @@
 			
 		<property-def name="background-image" inherited="no" category="colorandbackground">
 	        <keyword name="mediaurl"/>
+	        <keyword name="gradient"/>
 	    </property-def>
     	
     	<property-def name="border-top-width" category="box">
@@ -209,6 +210,10 @@
 		
 		<keyword-def name="mediaurl">
 	        <keyword-value>url(media:///test.jpg)</keyword-value>
+	    </keyword-def>
+	    
+	    <keyword-def name="gradient">
+	        <keyword-value>linear-gradient(top,#fefcea,#f1da36)</keyword-value>
 	    </keyword-def>
 	    
 	    <keyword-def name="cover">
