@@ -270,8 +270,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels"; //$NON-NLS-1$
-	public final static Pair<String, ProblemSeverity> LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW = new Pair<String, ProblemSeverity>("performanceTableColumns", ProblemSeverity.WARNING); //$NON-NLS-1$
-	public final static Pair<String, ProblemSeverity> LEVEL_PERFORMANCE_TABS_PORTALS = new Pair<String, ProblemSeverity>("performanceTabsPortals", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW = new Pair<String, ProblemSeverity>(
+		"performanceTableColumns", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> LEVEL_PERFORMANCE_TABS_PORTALS = new Pair<String, ProblemSeverity>(
+		"performanceTabsPortals", ProblemSeverity.WARNING); //$NON-NLS-1$
 
 	private SAXParserFactory parserFactory;
 	private final HashSet<String> referencedProjectsSet = new HashSet<String>();
@@ -1455,6 +1457,21 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 															addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING,
 																IMarker.PRIORITY_NORMAL, null, o);
 														}
+														if (o instanceof Field && ((Field)o).getDisplayType() == Field.TYPE_AHEAD &&
+															(dataType == IColumnTypes.TEXT || parsedFormat.getEditFormat() != null))
+														{
+															ServoyMarker mk;
+															if (elementName == null)
+															{
+																mk = MarkerMessages.FormFormatIncompatible.fill(inForm, format);
+															}
+															else
+															{
+																mk = MarkerMessages.FormFormatOnElementIncompatible.fill(elementName, inForm, format);
+															}
+															addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING,
+																IMarker.PRIORITY_NORMAL, null, o);
+														}
 													}
 												}
 											}
@@ -1879,11 +1896,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							{
 								IPersist persist = iterator.next();
 								if (persist.getTypeID() == IRepository.TABPANELS || persist.getTypeID() == IRepository.PORTALS) portalAndTabPanelCount++;
-								else if (isTableView && persist instanceof IFormElement
-									&&	(persist.getTypeID() == IRepository.FIELDS ||
+								else if (isTableView &&
+									persist instanceof IFormElement &&
+									(persist.getTypeID() == IRepository.FIELDS ||
 										(persist.getTypeID() == IRepository.GRAPHICALCOMPONENTS && ((GraphicalComponent)persist).getLabelFor() == null) ||
-										persist.getTypeID() == IRepository.BEANS || persist.getTypeID() == IRepository.SHAPES)
-								    && form.getPartAt(((IFormElement)persist).getLocation().y).getPartType() == Part.BODY) fieldCount++;
+										persist.getTypeID() == IRepository.BEANS || persist.getTypeID() == IRepository.SHAPES) &&
+									form.getPartAt(((IFormElement)persist).getLocation().y).getPartType() == Part.BODY) fieldCount++;
 
 								if (persist instanceof ISupportTabSeq && ((ISupportTabSeq)persist).getTabSeq() > 0)
 								{
@@ -1905,24 +1923,27 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 							if (portalAndTabPanelCount > LIMIT_FOR_PORTAL_TABPANEL_COUNT_ON_FORM)
 							{
-								String customSeverity = levelSettingsNode.get(LEVEL_PERFORMANCE_TABS_PORTALS.getLeft(), LEVEL_PERFORMANCE_TABS_PORTALS.getRight().name());
+								String customSeverity = levelSettingsNode.get(LEVEL_PERFORMANCE_TABS_PORTALS.getLeft(),
+									LEVEL_PERFORMANCE_TABS_PORTALS.getRight().name());
 								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 								{
 									ServoyMarker mk = MarkerMessages.FormHasTooManyThingsAndProbablyLowPerformance.fill(
 										String.valueOf(LIMIT_FOR_PORTAL_TABPANEL_COUNT_ON_FORM), "portals/tab panels", ""); //$NON-NLS-1$ //$NON-NLS-2$
-									addMarker(project, mk.getType(), mk.getText(), -1, getTranslatedSeverity(customSeverity, LEVEL_PERFORMANCE_TABS_PORTALS.getRight()),
-										IMarker.PRIORITY_NORMAL, null, form);
+									addMarker(project, mk.getType(), mk.getText(), -1,
+										getTranslatedSeverity(customSeverity, LEVEL_PERFORMANCE_TABS_PORTALS.getRight()), IMarker.PRIORITY_NORMAL, null, form);
 								}
 							}
 							if (fieldCount > LIMIT_FOR_FIELD_COUNT_ON_TABLEVIEW_FORM)
 							{
-								String customSeverity = levelSettingsNode.get(LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW.getLeft(), LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW.getRight().name());
+								String customSeverity = levelSettingsNode.get(LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW.getLeft(),
+									LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW.getRight().name());
 								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 								{
 									ServoyMarker mk = MarkerMessages.FormHasTooManyThingsAndProbablyLowPerformance.fill(
 										String.valueOf(LIMIT_FOR_FIELD_COUNT_ON_TABLEVIEW_FORM), "columns", " table view"); //$NON-NLS-1$ //$NON-NLS-2$
-									addMarker(project, mk.getType(), mk.getText(), -1, getTranslatedSeverity(customSeverity, LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW.getRight()),
-										IMarker.PRIORITY_NORMAL, null, form);
+									addMarker(project, mk.getType(), mk.getText(), -1,
+										getTranslatedSeverity(customSeverity, LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW.getRight()), IMarker.PRIORITY_NORMAL, null,
+										form);
 								}
 							}
 
@@ -2482,10 +2503,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		else if (severity.equals(ProblemSeverity.INFO.name())) return IMarker.SEVERITY_INFO;
 		else switch (problemSeverity)
 		{
-			case WARNING : return IMarker.SEVERITY_WARNING;
-			case ERROR : return IMarker.SEVERITY_ERROR;
-			case INFO : return IMarker.SEVERITY_INFO;
-			default : return IMarker.SEVERITY_INFO; // should never happen
+			case WARNING :
+				return IMarker.SEVERITY_WARNING;
+			case ERROR :
+				return IMarker.SEVERITY_ERROR;
+			case INFO :
+				return IMarker.SEVERITY_INFO;
+			default :
+				return IMarker.SEVERITY_INFO; // should never happen
 		}
 	}
 
