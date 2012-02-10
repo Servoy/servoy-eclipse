@@ -1001,9 +1001,9 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			}
 		};
 
-		private static final String SIZE = "size";
+		private static final String WIDTH = "width";
 
-		private static PropertyController<java.awt.Insets, Object> sizeController = new PropertyController<java.awt.Insets, Object>(SIZE, "size",
+		private static PropertyController<java.awt.Insets, Object> sizeController = new PropertyController<java.awt.Insets, Object>(WIDTH, "width",
 			sizeConverter, InsetsPropertySource.getLabelProvider(), new ICellEditorFactory()
 			{
 				public CellEditor createPropertyEditor(Composite parent)
@@ -1046,7 +1046,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		public Object getPropertyValue(Object id)
 		{
 			SpecialMatteBorder border = getEditableValue();
-			if (SIZE.equals(id))
+			if (WIDTH.equals(id))
 			{
 				return sizeConverter.convertProperty(id,
 					new Insets((int)border.getTop(), (int)border.getLeft(), (int)border.getBottom(), (int)border.getRight()));
@@ -1089,7 +1089,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			}
 
 			SpecialMatteBorder smb = null;
-			if (SIZE.equals(id))
+			if (WIDTH.equals(id))
 			{
 				Insets insets = null;
 				if (v instanceof Insets)
@@ -1152,7 +1152,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		public Object resetComplexPropertyValue(Object id)
 		{
 			SpecialMatteBorder defVal = (SpecialMatteBorder)defaultBorderValues.get(BorderType.SpecialMatte);
-			if (SIZE.equals(id))
+			if (WIDTH.equals(id))
 			{
 				return new Insets((int)defVal.getTop(), (int)defVal.getLeft(), (int)defVal.getBottom(), (int)defVal.getRight());
 			}
