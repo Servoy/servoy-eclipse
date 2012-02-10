@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -14871,7 +14871,8 @@ application.output(button_uuid.toString());]]></sample>
         <function name="getRecord">
           <argumentsTypes/>
           <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.Record"><![CDATA[Record of the element that is being rendered]]></return>
-          <description><![CDATA[Returns the record of the element that is being rendered.]]></description>
+          <description><![CDATA[Returns the record of the element that is being rendered.
+This is null for elements of type form when they are in table view mode.]]></description>
           <summary><![CDATA[Returns the record of the element that is being rendered.]]></summary>
           <sample><![CDATA[// type the record returned from the call with JSDoc, fill in the right server/tablename
 /** @type {JSRecord<db:/servername/tablename>} */
@@ -21552,13 +21553,6 @@ var y = forms.company.elements.portal50.getScrollY();
 forms.company.elements.portal50.setScroll(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y scroll location of specified element - only for an element where height of element is less than the height of element content.]]></summary>
           <sample><![CDATA[var y = %%prefix%%%%elementName%%.getScrollY();]]></sample>
-        </function>
-        <function name="getSelectedElements">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"><![CDATA[array with selected values]]></return>
-          <description><![CDATA[Gets the selected values (real values from valuelist) as array.]]></description>
-          <summary><![CDATA[Gets the selected values (real values from valuelist) as array.]]></summary>
-          <sample><![CDATA[var values = %%prefix%%%%elementName%%.getSelectedElements();]]></sample>
         </function>
         <function name="getValueListName">
           <argumentsTypes/>
@@ -33774,7 +33768,7 @@ indicates the delay in milliseconds before the tooltip is shown.]]></description
 If set on application it will affect all TYPE-AHEAD fields. If set on an element it will affect only that TYPE-AHEAD element/field (with priority over the application property).
 Value can be true/false/null.
 
-If set to true, the affected TYPE_AHEAD(s) will not show the pop-up when gaining focus.
+If set to true, the affected TYPE_AHEAD(s) will show the pop-up when gaining focus.
 DEFAULT: true.]]></description>
           <summary><![CDATA[Property that can be set using application.]]></summary>
           <sample><![CDATA[// make all TYPE-AHEAD fields not show the pop-up when gaining focus
@@ -33789,7 +33783,7 @@ forms.someForm.elements.typeAheadElement.putClientProperty(APP_UI_PROPERTY.TYPE_
 If set on application it will affect all TYPE-AHEAD fields. If set on an element it will affect only that TYPE-AHEAD element/field (with priority over the application property).
 Value can be true/false/null.
 
-If set to true, the affected TYPE_AHEAD(s) will not show the pop-up when the field content is empty.
+If set to true, the affected TYPE_AHEAD(s) will show the pop-up when the field content is empty.
 DEFAULT: true.]]></description>
           <summary><![CDATA[Property that can be set using application.]]></summary>
           <sample><![CDATA[// make all TYPE-AHEAD fields not show the pop-up when there is empty content in the field
