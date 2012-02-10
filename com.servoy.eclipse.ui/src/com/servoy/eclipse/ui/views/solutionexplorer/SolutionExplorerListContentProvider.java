@@ -161,7 +161,13 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				{
 					str = str.substring(i + 1);
 				}
-				o = super.get(str);
+				i = str.lastIndexOf("["); //$NON-NLS-1$
+				if (i >= 0)
+				{
+					o = super.get(str.substring(0, i));
+					if (o != null) o += str.substring(i);
+				}
+				else o = super.get(str);
 				if (o == null) o = str;
 			}
 			return o;
