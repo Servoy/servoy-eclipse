@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -227,6 +228,10 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 		private void updateSourceTablesCombo(String serverName)
 		{
 			List<String> tableNames = serverName == null ? null : DataSourceUtils.getServerTablenames(dataSources, serverName);
+			if (tableNames != null)
+			{
+				Collections.sort(tableNames);
+			}
 			if (tableNames == null || tableNames.size() == 0)
 			{
 				sourceTableNamesCombo.setItems(new String[] { ALL_SOLUTION_TABLES });
