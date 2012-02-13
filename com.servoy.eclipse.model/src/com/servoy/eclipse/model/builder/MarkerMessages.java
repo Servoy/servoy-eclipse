@@ -269,6 +269,8 @@ public class MarkerMessages
 		"Form \"{0}\" is part of a cycle through \"extendsForm\" property.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormDerivedFormDifferentTable = new ServoyMarker(
 		"Form \"{0}\" which extends form \"{1}\" does not have the same table as its parent.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+	public static ServoyMarker FormNamedFoundsetIncorrectValue = new ServoyMarker(
+		"\"namedFoundSet\" property of form \"{0}\" is incorrect.{1}", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormUnnamedElementOutsideBoundsOfForm = new ServoyMarker(
 		"Element in form \"{0}\" is outside the bounds of form.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormNamedElementOutsideBoundsOfForm = new ServoyMarker(

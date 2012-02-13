@@ -79,7 +79,7 @@ public class NamedFoundsetComboboxModel implements IComboboxPropertyModel<String
 		Iterator<Relation> relations;
 		try
 		{
-			relations = ModelUtils.getEditingFlattenedSolution(form).getRelations(form.getTable(), false, true, true);
+			relations = ModelUtils.getEditingFlattenedSolution(form).getRelations(form.getTable(), false, true, true, true);
 			while (relations.hasNext())
 			{
 				gr.add(relations.next().getName());

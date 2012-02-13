@@ -1785,10 +1785,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								!namedFoundset.equals(Form.NAMED_FOUNDSET_SEPARATE))
 							{
 								// it must be a global relation then
-								if (flattenedSolution.getRelation(form.getGlobalRelationNamedFoundset()) == null)
+								Relation r = flattenedSolution.getRelation(form.getGlobalRelationNamedFoundset());
+								if (r == null)
 								{
 									// what is this then?
 									ServoyMarker mk = MarkerMessages.PropertyInFormTargetNotFound.fill("namedFoundset", form.getName());
+									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, form);
+								}
+								else if (!r.isGlobal() || !Utils.stringSafeEquals(form.getDataSource(), r.getForeignDataSource()))
+								{
+									// wrong kind of relation
+									ServoyMarker mk = MarkerMessages.FormNamedFoundsetIncorrectValue.fill(form.getName(),
+										" The relation must be global and it's foreign data source must match the form's datasource.");
 									addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, null, form);
 								}
 							}
