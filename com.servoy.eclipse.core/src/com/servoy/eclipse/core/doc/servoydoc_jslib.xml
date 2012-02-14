@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <servoydoc>
   <jslib>
     <object publicName="Array" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Array" scriptingName="Array">
@@ -2198,6 +2199,7 @@ application.output(patt1.global);]]></sample>
           <links>
             <link>
               <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/RegExp/global</url>
+              <description>Mozilla Developer Center documentation for global function</description>
             </link>
           </links>
         </property>
@@ -2441,6 +2443,15 @@ application.output(typeof(somethingInexisting)); // undefined]]></sample>
 }
 while ( # )]]></sample>
         </function>
+        <function name="for">
+          <argumentsTypes/>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[loop]]></description>
+          <summary><![CDATA[loop]]></summary>
+          <sample><![CDATA[for ( var i = 0 ; i < # ; i++ )
+{
+}]]></sample>
+        </function>
         <function name="for each in">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
@@ -2450,12 +2461,11 @@ while ( # )]]></sample>
 {
 }]]></sample>
         </function>
-        <function name="for">
+        <function name="if">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
-          <description><![CDATA[loop]]></description>
-          <summary><![CDATA[loop]]></summary>
-          <sample><![CDATA[for ( var i = 0 ; i < # ; i++ )
+          <description/>
+          <sample><![CDATA[if ( # )
 {
 }]]></sample>
         </function>
@@ -2467,14 +2477,6 @@ while ( # )]]></sample>
 {
 }
 else
-{
-}]]></sample>
-        </function>
-        <function name="if">
-          <argumentsTypes/>
-          <return type="void" typecode="void"/>
-          <description/>
-          <sample><![CDATA[if ( # )
 {
 }]]></sample>
         </function>
@@ -2507,6 +2509,19 @@ case:
 default:
 }]]></sample>
         </function>
+        <function name="try catch">
+          <argumentsTypes/>
+          <return type="void" typecode="void"/>
+          <description/>
+          <sample><![CDATA[try 
+{
+	#
+}
+ catch(#) 
+{
+	#
+}]]></sample>
+        </function>
         <function name="try catch finally">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
@@ -2519,19 +2534,6 @@ default:
 {
 	#
 } finally 
-{
-	#
-}]]></sample>
-        </function>
-        <function name="try catch">
-          <argumentsTypes/>
-          <return type="void" typecode="void"/>
-          <description/>
-          <sample><![CDATA[try 
-{
-	#
-}
- catch(#) 
 {
 	#
 }]]></sample>
