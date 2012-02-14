@@ -142,29 +142,33 @@ public class ActiveEditorTracker implements IPartListener
 							public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset)
 							{
 								IndexedRegion indexedNode = ContentAssistUtils.getNodeAt(viewer, offset);
-								if (indexedNode instanceof ICSSStyleSheet || (indexedNode instanceof ICSSStyleRule && isBeforeBracket(viewer, offset)))
+								if (indexedNode == null || indexedNode instanceof ICSSStyleSheet ||
+									(indexedNode instanceof ICSSStyleRule && isBeforeBracket(viewer, offset)))
 								{
 									List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
-
+									String text = "";
+									int replacementOffset = 0;
 									Image image = CSSImageHelper.getInstance().getImage(CSSImageType.SELECTOR_TAG);
 									String delimiter = ((IStructuredDocument)viewer.getDocument()).getLineDelimiter();
 									String braces = delimiter + "{" + delimiter + "\t" + delimiter + "}";
 									int cursorOffset = delimiter.length() + 1;
 									IStructuredDocumentRegion documentRegion = ((IStructuredDocument)viewer.getDocument()).getRegionAtCharacterOffset(offset);
-									ITextRegion region = documentRegion.getRegionAtCharacterOffset(offset);
-									if (region == null)
+									if (documentRegion != null)
 									{
-										region = documentRegion.getFirstRegion();
+										ITextRegion region = documentRegion.getRegionAtCharacterOffset(offset);
+										if (region == null)
+										{
+											region = documentRegion.getFirstRegion();
+										}
+										int textOffset = (offset > 0 && !isSpecialDelimiterRegion(region)) ? (offset - 1) : offset;
+										ITextRegion targetRegion = documentRegion.getRegionAtCharacterOffset(textOffset);
+										if (targetRegion == null)
+										{
+											targetRegion = documentRegion.getFirstRegion();
+										}
+										if (targetRegion != null) text = documentRegion.getText(targetRegion).trim();
+										replacementOffset = (offset - text.length()) > 0 ? (offset - text.length()) : 0;
 									}
-									int textOffset = (offset > 0 && !isSpecialDelimiterRegion(region)) ? (offset - 1) : offset;
-									ITextRegion targetRegion = documentRegion.getRegionAtCharacterOffset(textOffset);
-									if (targetRegion == null)
-									{
-										targetRegion = documentRegion.getFirstRegion();
-									}
-									String text = "";
-									if (targetRegion != null) text = documentRegion.getText(targetRegion).trim();
-									int replacementOffset = (offset - text.length()) > 0 ? (offset - text.length()) : 0;
 									for (String lookup : ComponentFactory.LOOKUP_NAMES)
 									{
 										if (!"".equals(text) && !lookup.toLowerCase().startsWith(text.toLowerCase())) continue;
@@ -190,17 +194,13 @@ public class ActiveEditorTracker implements IPartListener
 		while (iRegion.hasNext())
 		{
 			ITextRegion region = iRegion.next();
-			IStructuredDocumentRegion targetRegion = ((IStructuredDocument)viewer.getDocument()).getRegionAtCharacterOffset(offset);
-			String text = targetRegion.getText(region);
+			if (region.getType() == CSSRegionContexts.CSS_SELECTOR_ELEMENT_NAME || region.getType() == CSSRegionContexts.CSS_SELECTOR_COMBINATOR)
+			{
+				return true;
+			}
 			if (region.getType() == CSSRegionContexts.CSS_RBRACE)
 			{
 				return false;
-			}
-			if (region.getType() == CSSRegionContexts.CSS_LBRACE)
-			{
-				int textEnd = targetRegion.getStartOffset(region) + region.getTextEnd();
-				if (offset < textEnd) return true;
-				else return false;
 			}
 		}
 
