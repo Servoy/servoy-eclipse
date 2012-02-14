@@ -699,11 +699,6 @@ public class ProfilerView extends ViewPart
 			if (element instanceof ProfileData)
 			{
 				ProfileData pd = (ProfileData)element;
-				if (pd.getMethodName().equals("<eval>") && pd.getSourceName().equals("internal_anon") && pd.getChildren() != null &&
-					pd.getChildren().length > 0)
-				{
-					pd = pd.getChildren()[0];
-				}
 				String sourceName;
 				IFile file;
 				switch (columnIndex)
@@ -732,7 +727,7 @@ public class ProfilerView extends ViewPart
 						}
 						else
 						{
-							printedMethodName = pd.getSourceName();
+							printedMethodName = pd.getMethodName();
 						}
 
 						return pd.isInnerFunction() ? printedMethodName + " (innerfunction" + lineStart + ")" : printedMethodName;
@@ -776,7 +771,7 @@ public class ProfilerView extends ViewPart
 						}
 						else
 						{
-							printedMethodName = pd.getSourceName();
+							printedMethodName = pd.getMethodName();
 						}
 
 						return pd.getInnerFunctionLineStart() == -1 ? printedMethodName : printedMethodName + "#" + pd.getInnerFunctionLineStart();
