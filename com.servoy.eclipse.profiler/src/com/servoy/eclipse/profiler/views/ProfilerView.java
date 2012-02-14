@@ -472,6 +472,9 @@ public class ProfilerView extends ViewPart
 		 */
 		public void addProfileData(ProfileData profileData)
 		{
+			if (profileData.getMethodName().equals("<eval>") && profileData.getSourceName().equals("internal_anon") &&
+				(profileData.getChildren() == null || profileData.getChildren().length == 0)) return;
+
 			invisibleRoot.add(0, profileData);
 
 			if (invisibleRoot.size() > 400)
