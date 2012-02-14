@@ -551,6 +551,9 @@ public class ProfilerView extends ViewPart
 
 		public void addProfileData(ProfileData profileData)
 		{
+			if (profileData.getMethodName().equals("<eval>") && profileData.getSourceName().equals("internal_anon") &&
+				(profileData.getChildren() == null || profileData.getChildren().length == 0)) return;
+
 			AggregateData ad = new AggregateData(profileData);
 			int index = aggregateData.indexOf(ad);
 			if (index != -1)
@@ -697,10 +700,6 @@ public class ProfilerView extends ViewPart
 			if (element instanceof ProfileData)
 			{
 				ProfileData pd = (ProfileData)element;
-				if (pd.getMethodName().equals("<eval>") && pd.getSourceName().equals("internal_anon"))
-				{
-					pd = pd.getChildren()[0];
-				}
 				String sourceName;
 				IFile file;
 				switch (columnIndex)
@@ -715,14 +714,21 @@ public class ProfilerView extends ViewPart
 
 						String printedMethodName;
 						file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(pd.getSourceName()));
-						if (file.getProjectRelativePath().segmentCount() == 1) // Global scope file
+						if (file != null)
 						{
-							printedMethodName = ScriptVariable.SCOPES_DOT_PREFIX + file.getName().replace(".js", "") + '.' + pd.getMethodName() + '[' +
-								file.getProject().getName() + ']';
+							if (file.getProjectRelativePath().segmentCount() == 1) // Global scope file
+							{
+								printedMethodName = ScriptVariable.SCOPES_DOT_PREFIX + file.getName().replace(".js", "") + '.' + pd.getMethodName() + '[' +
+									file.getProject().getName() + ']';
+							}
+							else
+							{
+								printedMethodName = pd.getMethodName() + '[' + file.getName().replace(".js", "") + ']';
+							}
 						}
 						else
 						{
-							printedMethodName = pd.getMethodName() + '[' + file.getName().replace(".js", "") + ']';
+							printedMethodName = pd.getMethodName();
 						}
 						return pd.isInnerFunction() ? printedMethodName + " (innerfunction" + lineStart + ')' : printedMethodName;
 					case 1 :
@@ -735,7 +741,11 @@ public class ProfilerView extends ViewPart
 					{
 						sourceName = pd.getSourceName();
 						file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(sourceName));
-						return file.getProject().getName() + '/' + file.getProjectRelativePath().toPortableString();
+						if (file != null)
+						{
+							return file.getProject().getName() + '/' + file.getProjectRelativePath().toPortableString();
+						}
+						return sourceName;
 					}
 				}
 			}
@@ -747,14 +757,21 @@ public class ProfilerView extends ViewPart
 					case 0 :
 						String printedMethodName;
 						IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(pd.getSourceName()));
-						if (file.getProjectRelativePath().segmentCount() == 1) // Global scope file
+						if (file != null)
 						{
-							printedMethodName = ScriptVariable.SCOPES_DOT_PREFIX + file.getName().replace(".js", "") + '.' + pd.getMethodName() + '[' +
-								file.getProject().getName() + ']';
+							if (file.getProjectRelativePath().segmentCount() == 1) // Global scope file
+							{
+								printedMethodName = ScriptVariable.SCOPES_DOT_PREFIX + file.getName().replace(".js", "") + '.' + pd.getMethodName() + '[' +
+									file.getProject().getName() + ']';
+							}
+							else
+							{
+								printedMethodName = pd.getMethodName() + '[' + file.getName().replace(".js", "") + ']';
+							}
 						}
 						else
 						{
-							printedMethodName = pd.getMethodName() + '[' + file.getName().replace(".js", "") + ']';
+							printedMethodName = pd.getMethodName();
 						}
 						return pd.getInnerFunctionLineStart() == -1 ? printedMethodName : printedMethodName + '#' + pd.getInnerFunctionLineStart();
 					case 1 :
