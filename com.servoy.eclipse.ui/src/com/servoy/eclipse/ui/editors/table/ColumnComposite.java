@@ -219,8 +219,6 @@ public class ColumnComposite extends Composite
 					{
 						t.removeColumn((Column)column);
 						WritableList columnsList = new WritableList(new ArrayList<Column>(t.getColumns()), Column.class);
-						tableViewer.setInput(columnsList);
-						tableViewer.refresh();
 						if (columnsList.size() > 0) tableViewer.setSelection(new StructuredSelection(columnsList.get(0)), true);
 					}
 				}
@@ -291,9 +289,6 @@ public class ColumnComposite extends Composite
 				{
 					if (showWarning) MessageDialog.openWarning(getShell(), "Warning", "There is another type_here column.");
 					c = t.createNewColumn(nameValidator, newName, IColumnTypes.TEXT, 50);
-					WritableList columnsList = new WritableList(new ArrayList<Column>(t.getColumns()), Column.class);
-					tableViewer.setInput(columnsList);
-					tableViewer.refresh();
 					tableViewer.editElement(c, 0);
 					if (tabFolder.isVisible())
 					{
@@ -400,6 +395,13 @@ public class ColumnComposite extends Composite
 	public void refreshSelection()
 	{
 		tableViewer.setSelection(tableViewer.getSelection(), true);
+	}
+
+	public void refreshViewer(Table table)
+	{
+		WritableList columnsList = new WritableList(new ArrayList<Column>(table.getColumns()), Column.class);
+		tableViewer.setInput(columnsList);
+		tableViewer.refresh();
 	}
 
 	public void selectColumn(Column column)

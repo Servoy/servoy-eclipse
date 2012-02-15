@@ -505,11 +505,13 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			public void iColumnCreated(IColumn column)
 			{
 				flagModified();
+				if (columnComposite != null) columnComposite.refreshViewer(table);
 			}
 
 			public void iColumnRemoved(IColumn column)
 			{
 				flagModified();
+				if (columnComposite != null) columnComposite.refreshViewer(table);
 			}
 		});
 
