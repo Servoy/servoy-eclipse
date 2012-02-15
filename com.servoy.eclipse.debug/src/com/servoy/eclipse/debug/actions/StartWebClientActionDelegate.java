@@ -42,7 +42,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.ui.IWorkbenchWindowPulldownDelegate;
+import org.eclipse.swt.widgets.Widget;
+import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
@@ -67,7 +68,7 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
  * @author jcompagner
  * 
  */
-public class StartWebClientActionDelegate extends StartDebugAction implements IRunnableWithProgress, IWorkbenchWindowPulldownDelegate
+public class StartWebClientActionDelegate extends StartDebugAction implements IRunnableWithProgress, IWorkbenchWindowPulldownDelegate2
 {
 	/**
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
@@ -201,9 +202,75 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 	 */
 	public Menu getMenu(Control parent)
 	{
+		return sharedGetMenu(parent);
+	}
+
+	private Image getImageForName(String name, String location)
+	{
+		String browserImgFileName = ""; //$NON-NLS-1$
+		String browserName = (name != null ? name.toLowerCase() : ""); //$NON-NLS-1$
+		String browserLocation = (location != null ? location.toLowerCase() : ""); //$NON-NLS-1$
+		if (browserLocation.contains("iexplore") || browserName.contains("explorer")) browserImgFileName = "explorer.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		else if (browserLocation.contains("firefox") || browserName.contains("firefox")) browserImgFileName = "firefox.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		else if (browserLocation.contains("chrome") || browserName.contains("chrome")) browserImgFileName = "chrome.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		else if (browserLocation.contains("safari") || browserName.contains("safari")) browserImgFileName = "safari.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		else if (browserLocation.contains("opera") || browserName.contains("opera")) browserImgFileName = "opera.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return getImageForBrowser(browserImgFileName);
+	}
+
+	private Image getImageForBrowser(String name)
+	{
+		if (browsersImagesList == null) browsersImagesList = new HashMap<String, Image>();
+		if (!name.equals("") && !browsersImagesList.containsKey(name)) //$NON-NLS-1$
+		{
+			ImageDescriptor id = AbstractUIPlugin.imageDescriptorFromPlugin(com.servoy.eclipse.debug.Activator.PLUGIN_ID, "icons/" + name); //$NON-NLS-1$
+			browsersImagesList.put(name, id.createImage());
+		}
+		return browsersImagesList.get(name);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.debug.actions.StartDebugAction#dispose()
+	 */
+	@Override
+	public void dispose()
+	{
+		if (broswersListMenu != null) broswersListMenu.dispose();
+		if (browsersImagesList != null)
+		{
+			Iterator<String> browserNames = browsersImagesList.keySet().iterator();
+			while (browserNames.hasNext())
+				browsersImagesList.get(browserNames.next()).dispose();
+			browsersImagesList.clear();
+		}
+		super.dispose();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.IWorkbenchWindowPulldownDelegate2#getMenu(org.eclipse.swt.widgets.Menu)
+	 */
+	public Menu getMenu(Menu parent)
+	{
+		return sharedGetMenu(parent);
+
+	}
+
+	private Menu sharedGetMenu(Widget parent)
+	{
 		if (broswersListMenu != null) broswersListMenu.dispose();
 
-		broswersListMenu = new Menu(parent);
+		if (parent instanceof Control)
+		{
+			broswersListMenu = new Menu((Control)parent);
+		}
+		if (parent instanceof Menu)
+		{
+			broswersListMenu = new Menu((Menu)parent);
+		}
 		try
 		{
 			Iterator iterator = BrowserManager.getInstance().getWebBrowsers().iterator();
@@ -281,48 +348,5 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 			e.printStackTrace();
 		}
 		return broswersListMenu;
-	}
-
-	private Image getImageForName(String name, String location)
-	{
-		String browserImgFileName = ""; //$NON-NLS-1$
-		String browserName = (name != null ? name.toLowerCase() : ""); //$NON-NLS-1$
-		String browserLocation = (location != null ? location.toLowerCase() : ""); //$NON-NLS-1$
-		if (browserLocation.contains("iexplore") || browserName.contains("explorer")) browserImgFileName = "explorer.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		else if (browserLocation.contains("firefox") || browserName.contains("firefox")) browserImgFileName = "firefox.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		else if (browserLocation.contains("chrome") || browserName.contains("chrome")) browserImgFileName = "chrome.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		else if (browserLocation.contains("safari") || browserName.contains("safari")) browserImgFileName = "safari.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		else if (browserLocation.contains("opera") || browserName.contains("opera")) browserImgFileName = "opera.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		return getImageForBrowser(browserImgFileName);
-	}
-
-	private Image getImageForBrowser(String name)
-	{
-		if (browsersImagesList == null) browsersImagesList = new HashMap<String, Image>();
-		if (!name.equals("") && !browsersImagesList.containsKey(name)) //$NON-NLS-1$
-		{
-			ImageDescriptor id = AbstractUIPlugin.imageDescriptorFromPlugin(com.servoy.eclipse.debug.Activator.PLUGIN_ID, "icons/" + name); //$NON-NLS-1$
-			browsersImagesList.put(name, id.createImage());
-		}
-		return browsersImagesList.get(name);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.eclipse.debug.actions.StartDebugAction#dispose()
-	 */
-	@Override
-	public void dispose()
-	{
-		if (broswersListMenu != null) broswersListMenu.dispose();
-		if (browsersImagesList != null)
-		{
-			Iterator<String> browserNames = browsersImagesList.keySet().iterator();
-			while (browserNames.hasNext())
-				browsersImagesList.get(browserNames.next()).dispose();
-			browsersImagesList.clear();
-		}
-		super.dispose();
 	}
 }
