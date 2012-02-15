@@ -2684,6 +2684,8 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 					String comment = SolutionSerializer.getComment(persist, getDeveloperRepository());
 					if (documentation == null || !documentation.getText().equals(comment.trim()))
 					{
+						// if the jsdoc didn't match make sure that the persist is flagged as changed, because it needs to be regenerated.
+						persist.flagChanged();
 						if (documentation == null)
 						{
 							if (!comment.endsWith("\n")) comment += "\n";
