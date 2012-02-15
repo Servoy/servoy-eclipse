@@ -481,11 +481,13 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			public void iColumnCreated(IColumn column)
 			{
 				flagModified();
+				if (columnComposite != null) columnComposite.refreshViewer(table);
 			}
 
 			public void iColumnRemoved(IColumn column)
 			{
 				flagModified();
+				if (columnComposite != null) columnComposite.refreshViewer(table);
 			}
 		});
 
@@ -556,7 +558,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 					MessageDialog.openInformation(getSite().getShell(), "Client Restart Required",
 						"Web Client must be restarted (if still open) in order for the changes to be effective.");
 				}
-				columnComposite.refreshSelection(table);
+				columnComposite.refreshSelection();
 			}
 			catch (Exception e)
 			{
