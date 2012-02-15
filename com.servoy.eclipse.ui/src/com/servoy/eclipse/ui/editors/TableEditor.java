@@ -556,7 +556,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 					MessageDialog.openInformation(getSite().getShell(), "Client Restart Required",
 						"Web Client must be restarted (if still open) in order for the changes to be effective.");
 				}
-				columnComposite.refreshSelection();
+				columnComposite.refreshSelection(table);
 			}
 			catch (Exception e)
 			{

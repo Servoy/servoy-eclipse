@@ -325,9 +325,13 @@ public class ColumnComposite extends Composite
 		myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
 
-	public void refreshSelection()
+	public void refreshSelection(Table table)
 	{
 		tableViewer.setSelection(tableViewer.getSelection(), true);
+
+		WritableList columnsList = new WritableList(new ArrayList<Column>(table.getColumns()), Column.class);
+		tableViewer.setInput(columnsList);
+		tableViewer.refresh();
 	}
 
 	public void selectColumn(Column column)
