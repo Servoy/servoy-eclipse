@@ -90,6 +90,8 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	private ITableListener tableListener;
 
+	private IColumnListener columnListener;
+
 	private IServerListener serverListener;
 
 	public static int ColumnPageIndex = 0;
@@ -263,6 +265,13 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			server.removeTableListener(tableListener);
 			tableListener = null;
 		}
+
+		if (columnListener != null)
+		{
+			table.removeIColumnListener(columnListener);
+			columnListener = null;
+		}
+
 		revert();
 		super.dispose();
 	}
@@ -495,7 +504,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		};
 		serverManager.addServerListener(serverListener);
 
-		table.addIColumnListener(new IColumnListener()
+		columnListener = new IColumnListener()
 		{
 			public void iColumnChanged(IColumn column)
 			{
@@ -513,7 +522,8 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				flagModified();
 				if (columnComposite != null) columnComposite.refreshViewer(table);
 			}
-		});
+		};
+		table.addIColumnListener(columnListener);
 
 		// servoyProject =
 		// ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(persistInput.getSolutionName());
