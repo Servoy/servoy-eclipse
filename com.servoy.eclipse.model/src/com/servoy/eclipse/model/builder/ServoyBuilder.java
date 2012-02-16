@@ -1458,7 +1458,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													}
 												}
 											}
-											if (o instanceof Field && ((Field)o).getDisplayType() == Field.TYPE_AHEAD && ((Field)o).getValuelistID() > 0)
+											if (o instanceof Field &&
+												(((Field)o).getDisplayType() == Field.TYPE_AHEAD || ((Field)o).getDisplayType() == Field.TEXT_FIELD) &&
+												((Field)o).getValuelistID() > 0)
 											{
 												IServiceProvider client = J2DBGlobals.getServiceProvider();
 
@@ -1472,11 +1474,17 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														boolean showWarning = false;
 														ValueList vl = flattenedSolution.getValueList(((Field)o).getValuelistID());
 														if (vl != null && vl.getValueListType() == ValueList.CUSTOM_VALUES && vl.getCustomValues() != null &&
-															vl.getCustomValues().contains("|"))
+															(vl.getCustomValues() == null || vl.getCustomValues().contains("|")))
 														{
 															showWarning = true;
 														}
-														if (dataProvider.getDataProviderType() == IColumnTypes.TEXT ||
+														if (vl != null && vl.getValueListType() == ValueList.DATABASE_VALUES &&
+															vl.getReturnDataProviders() != vl.getShowDataProviders())
+														{
+															showWarning = true;
+														}
+														if ((dataProvider.getDataProviderType() == IColumnTypes.TEXT && !format.parsedFormat.isAllLowerCase() &&
+															!format.parsedFormat.isAllUpperCase() && !format.parsedFormat.isNumberValidator()) ||
 															format.parsedFormat.getEditFormat() != null || showWarning)
 														{
 															ServoyMarker mk;
