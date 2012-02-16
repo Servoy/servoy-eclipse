@@ -78,6 +78,9 @@ import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
+import com.servoy.j2db.IServiceProvider;
+import com.servoy.j2db.J2DBGlobals;
+import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataprocessing.DBValueList;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractScriptProvider;
@@ -1457,17 +1460,40 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 															addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING,
 																IMarker.PRIORITY_NORMAL, null, o);
 														}
-														if (o instanceof Field && ((Field)o).getDisplayType() == Field.TYPE_AHEAD &&
-															(dataType == IColumnTypes.TEXT || parsedFormat.getEditFormat() != null))
+
+													}
+												}
+											}
+											if (o instanceof Field && ((Field)o).getDisplayType() == Field.TYPE_AHEAD && ((Field)o).getValuelistID() > 0)
+											{
+												IServiceProvider client = J2DBGlobals.getServiceProvider();
+
+												if (client != null)
+												{
+													ComponentFormat format = ComponentFormat.getComponentFormat(((Field)o).getFormat(),
+														((Field)o).getDataProviderID(), flattenedSolution.getDataproviderLookup(null, parentForm), client);
+													if (format != null && format.parsedFormat.getDisplayFormat() == null ||
+														!format.parsedFormat.getDisplayFormat().startsWith("i18n:"))
+													{
+														boolean showWarning = false;
+														ValueList vl = flattenedSolution.getValueList(((Field)o).getValuelistID());
+														if (vl != null && vl.getValueListType() == ValueList.CUSTOM_VALUES && vl.getCustomValues() != null &&
+															vl.getCustomValues().contains("|"))
+														{
+															showWarning = true;
+														}
+														if (dataProvider.getDataProviderType() == IColumnTypes.TEXT ||
+															format.parsedFormat.getEditFormat() != null || showWarning)
 														{
 															ServoyMarker mk;
 															if (elementName == null)
 															{
-																mk = MarkerMessages.FormFormatIncompatible.fill(inForm, format);
+																mk = MarkerMessages.FormFormatIncompatible.fill(inForm, format.parsedFormat.getFormatString());
 															}
 															else
 															{
-																mk = MarkerMessages.FormFormatOnElementIncompatible.fill(elementName, inForm, format);
+																mk = MarkerMessages.FormFormatOnElementIncompatible.fill(elementName, inForm,
+																	format.parsedFormat.getFormatString());
 															}
 															addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING,
 																IMarker.PRIORITY_NORMAL, null, o);
