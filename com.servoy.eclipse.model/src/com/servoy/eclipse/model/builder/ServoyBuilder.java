@@ -1417,7 +1417,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														}
 													}
 												}
-												if (field.getDisplayType() == Field.TYPE_AHEAD && field.getValuelistID() > 0)
+												if ((field.getDisplayType() == Field.TYPE_AHEAD || field.getDisplayType() == Field.TEXT_FIELD) &&
+													field.getValuelistID() > 0)
 												{
 													IServiceProvider client = J2DBGlobals.getServiceProvider();
 
@@ -1433,12 +1434,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																boolean showWarning = false;
 																ValueList vl = flattenedSolution.getValueList(field.getValuelistID());
 																if (vl != null && vl.getValueListType() == ValueList.CUSTOM_VALUES &&
-																	vl.getCustomValues() != null && vl.getCustomValues().contains("|"))
+																	(vl.getCustomValues() == null || vl.getCustomValues().contains("|")))
 																{
 																	showWarning = true;
 																}
-																if (format.getRight().intValue() == IColumnTypes.TEXT || parsedFormat.getEditFormat() != null ||
-																	showWarning)
+																if (vl != null && vl.getValueListType() == ValueList.DATABASE_VALUES &&
+																	vl.getReturnDataProviders() != vl.getShowDataProviders())
+																{
+																	showWarning = true;
+																}
+																if ((format.getRight().intValue() == IColumnTypes.TEXT && !parsedFormat.isAllLowerCase() &&
+																	!parsedFormat.isAllUpperCase() && !parsedFormat.isNumberValidator()) ||
+																	parsedFormat.getEditFormat() != null || showWarning)
 																{
 																	ServoyMarker mk;
 																	if (elementName == null)
