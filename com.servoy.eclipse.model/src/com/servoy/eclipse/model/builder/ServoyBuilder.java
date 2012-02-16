@@ -437,6 +437,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						if (servoyModel.isSolutionActive(getProject().getName()))
 						{
+							checkServoyProject(getProject());
 							checkStyles(getProject());
 							checkColumns(getProject());
 
