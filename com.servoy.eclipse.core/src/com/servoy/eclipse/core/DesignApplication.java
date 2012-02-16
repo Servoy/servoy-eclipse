@@ -837,9 +837,9 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 
-	public boolean showURL(String url, String target, String target_options, int timeout_ms, boolean closeDialogs)
+	public boolean showURL(String url, String target, String target_options, int timeout_ms, boolean onRootFrame)
 	{
-		return getClient().showURL(url, target, target_options, timeout_ms, closeDialogs);
+		return getClient().showURL(url, target, target_options, timeout_ms, onRootFrame);
 	}
 
 	/**
