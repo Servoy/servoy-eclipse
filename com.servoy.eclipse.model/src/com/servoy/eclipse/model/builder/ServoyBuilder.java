@@ -77,6 +77,9 @@ import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
+import com.servoy.j2db.IServiceProvider;
+import com.servoy.j2db.J2DBGlobals;
+import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.DBValueList;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractScriptProvider;
@@ -128,6 +131,7 @@ import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.FormatParser;
 import com.servoy.j2db.util.IntHashMap;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
@@ -1415,19 +1419,45 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 															addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING,
 																IMarker.PRIORITY_NORMAL, null, o);
 														}
-														if (field.getDisplayType() == Field.TYPE_AHEAD && (dataType == IColumnTypes.TEXT || editFormat != null))
+													}
+												}
+												if (field.getDisplayType() == Field.TYPE_AHEAD && field.getValuelistID() > 0)
+												{
+													IServiceProvider client = J2DBGlobals.getServiceProvider();
+
+													if (client != null)
+													{
+														Pair<String, Integer> format = ComponentFactory.getFieldFormat(field,
+															flattenedSolution.getDataproviderLookup(null, parentForm), client);
+														if (format.getLeft() != null)
 														{
-															ServoyMarker mk;
-															if (elementName == null)
+															FormatParser parsedFormat = new FormatParser(format.getLeft());
+															if (parsedFormat.getDisplayFormat() == null || !parsedFormat.getDisplayFormat().startsWith("i18n:"))
 															{
-																mk = MarkerMessages.FormFormatIncompatible.fill(inForm, field.getFormat());
+																boolean showWarning = false;
+																ValueList vl = flattenedSolution.getValueList(field.getValuelistID());
+																if (vl != null && vl.getValueListType() == ValueList.CUSTOM_VALUES &&
+																	vl.getCustomValues() != null && vl.getCustomValues().contains("|"))
+																{
+																	showWarning = true;
+																}
+																if (format.getRight().intValue() == IColumnTypes.TEXT || parsedFormat.getEditFormat() != null ||
+																	showWarning)
+																{
+																	ServoyMarker mk;
+																	if (elementName == null)
+																	{
+																		mk = MarkerMessages.FormFormatIncompatible.fill(inForm, field.getFormat());
+																	}
+																	else
+																	{
+																		mk = MarkerMessages.FormFormatOnElementIncompatible.fill(elementName, inForm,
+																			field.getFormat());
+																	}
+																	addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING,
+																		IMarker.PRIORITY_NORMAL, null, o);
+																}
 															}
-															else
-															{
-																mk = MarkerMessages.FormFormatOnElementIncompatible.fill(elementName, inForm, field.getFormat());
-															}
-															addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING,
-																IMarker.PRIORITY_NORMAL, null, o);
 														}
 													}
 												}
