@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.core.quickfix.dbi;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
@@ -148,6 +149,10 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 
 					// reload the column information for this table just to make sure everything is in sync
 					dmm.loadAllColumnInfo(difference.getTable());
+
+					// in order to trigger ServoyBuilder checking of resources
+					IFile dbifile = dmm.getDBIFile(difference.getServerName(), difference.getTableName());
+					dbifile.touch(null);
 				}
 				finally
 				{

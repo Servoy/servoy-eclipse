@@ -441,14 +441,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						if (servoyModel.isSolutionActive(getProject().getName()))
 						{
-							checkStyles(getProject());
+							checkServoyProject(getProject());
 							checkColumns(getProject());
-
-							deleteMarkers(getProject(), HIDDEN_TABLE_STILL_IN_USE);
-							deleteMarkers(getProject(), I18N_MARKER_TYPE);
-							checkI18n(getProject()); // maybe hidden tables changed
-							deleteMarkers(getProject(), PROJECT_RELATION_MARKER_TYPE);
-							checkRelations(getProject(), new HashMap<String, IPersist>());
 						}
 						IProject[] projects = project.getReferencingProjects();
 						if (projects != null)
