@@ -371,9 +371,9 @@ public class MarkerMessages
 		"Element \"{0}\" in form \"{1}\" has invalid format: \"{2}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker FormFormatIncompatible = new ServoyMarker(
-		"Element in form \"{0}\" has incompatible format with its field type (Type Ahead) : \"{1}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Format not supported on element from form \"{0}\" as it has valuelist with real and display values.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormFormatOnElementIncompatible = new ServoyMarker(
-		"Element \"{0}\" in form \"{1}\" has incompatible format with its field type (Type Ahead): \"{2}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Format not supported on element \"{0}\" from form \"{1}\" as it has valuelist with real and display values.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
 	 * The dataprovider used by an element cannot be found. This can happen for example if the structure of a database is changed and columns are deleted or renamed.
