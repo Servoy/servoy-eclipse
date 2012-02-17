@@ -1476,11 +1476,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													ServoyMarker mk;
 													if (elementName == null)
 													{
-														mk = MarkerMessages.FormFormatIncompatible.fill(inForm, ((Field)o).getFormat());
+														mk = MarkerMessages.FormFormatIncompatible.fill(inForm);
 													}
 													else
 													{
-														mk = MarkerMessages.FormFormatOnElementIncompatible.fill(elementName, inForm, ((Field)o).getFormat());
+														mk = MarkerMessages.FormFormatOnElementIncompatible.fill(elementName, inForm);
 													}
 													addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null,
 														o);
