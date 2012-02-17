@@ -1722,7 +1722,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										IPersist persist = iterator.next();
 										String what;
 										if (persist instanceof AggregateVariable) what = "Aggregation"; //$NON-NLS-1$
-										else what = "Calculation"; //$NON-NLS-1$
+										else if (persist instanceof ScriptCalculation) what = "Calculation"; //$NON-NLS-1$
+										else what = "Function"; //$NON-NLS-1$
 										ServoyMarker mk;
 										if (table != null)
 										{
