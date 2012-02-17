@@ -1468,8 +1468,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												{
 													ComponentFormat format = ComponentFormat.getComponentFormat(((Field)o).getFormat(),
 														((Field)o).getDataProviderID(), flattenedSolution.getDataproviderLookup(null, parentForm), client);
-													if (format != null && format.parsedFormat.getDisplayFormat() == null ||
-														!format.parsedFormat.getDisplayFormat().startsWith("i18n:"))
+													if (format != null && format.parsedFormat != null && format.parsedFormat.getFormatString() != null)
 													{
 														boolean showWarning = false;
 														ValueList vl = flattenedSolution.getValueList(((Field)o).getValuelistID());
@@ -1483,9 +1482,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														{
 															showWarning = true;
 														}
-														if ((dataProvider.getDataProviderType() == IColumnTypes.TEXT && !format.parsedFormat.isAllLowerCase() &&
-															!format.parsedFormat.isAllUpperCase() && !format.parsedFormat.isNumberValidator()) ||
-															format.parsedFormat.getEditFormat() != null || showWarning)
+														if (showWarning)
 														{
 															ServoyMarker mk;
 															if (elementName == null)
