@@ -1444,7 +1444,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																ServoyMarker mk;
 																if (elementName == null)
 																{
-																	mk = MarkerMessages.FormFormatIncompatible.fill(inForm, field.getFormat());
+																	mk = MarkerMessages.FormFormatIncompatible.fill(inForm, format.getLeft());
 																}
 																else
 																{
