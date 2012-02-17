@@ -131,7 +131,6 @@ import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.FormatParser;
 import com.servoy.j2db.util.IntHashMap;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
@@ -1428,38 +1427,32 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 															flattenedSolution.getDataproviderLookup(null, parentForm), client);
 														if (format.getLeft() != null)
 														{
-															FormatParser parsedFormat = new FormatParser(format.getLeft());
-															if (parsedFormat.getDisplayFormat() == null || !parsedFormat.getDisplayFormat().startsWith("i18n:"))
+															boolean showWarning = false;
+															ValueList vl = flattenedSolution.getValueList(field.getValuelistID());
+															if (vl != null && vl.getValueListType() == ValueList.CUSTOM_VALUES &&
+																(vl.getCustomValues() == null || vl.getCustomValues().contains("|")))
 															{
-																boolean showWarning = false;
-																ValueList vl = flattenedSolution.getValueList(field.getValuelistID());
-																if (vl != null && vl.getValueListType() == ValueList.CUSTOM_VALUES &&
-																	(vl.getCustomValues() == null || vl.getCustomValues().contains("|")))
+																showWarning = true;
+															}
+															if (vl != null && vl.getValueListType() == ValueList.DATABASE_VALUES &&
+																vl.getReturnDataProviders() != vl.getShowDataProviders())
+															{
+																showWarning = true;
+															}
+															if (showWarning)
+															{
+																ServoyMarker mk;
+																if (elementName == null)
 																{
-																	showWarning = true;
+																	mk = MarkerMessages.FormFormatIncompatible.fill(inForm, field.getFormat());
 																}
-																if (vl != null && vl.getValueListType() == ValueList.DATABASE_VALUES &&
-																	vl.getReturnDataProviders() != vl.getShowDataProviders())
+																else
 																{
-																	showWarning = true;
+																	mk = MarkerMessages.FormFormatOnElementIncompatible.fill(elementName, inForm,
+																		field.getFormat());
 																}
-																if ((format.getRight().intValue() == IColumnTypes.TEXT && !parsedFormat.isAllLowerCase() &&
-																	!parsedFormat.isAllUpperCase() && !parsedFormat.isNumberValidator()) ||
-																	parsedFormat.getEditFormat() != null || showWarning)
-																{
-																	ServoyMarker mk;
-																	if (elementName == null)
-																	{
-																		mk = MarkerMessages.FormFormatIncompatible.fill(inForm, field.getFormat());
-																	}
-																	else
-																	{
-																		mk = MarkerMessages.FormFormatOnElementIncompatible.fill(elementName, inForm,
-																			field.getFormat());
-																	}
-																	addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING,
-																		IMarker.PRIORITY_NORMAL, null, o);
-																}
+																addMarker(project, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING,
+																	IMarker.PRIORITY_NORMAL, null, o);
 															}
 														}
 													}
