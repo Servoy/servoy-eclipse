@@ -1135,7 +1135,15 @@ public class SolutionDeserializer
 					{
 						if (newField)
 						{
-							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+							String typeName = json.getString(JS_TYPE_JSON_ATTRIBUTE);
+							if (typeName != null)
+							{
+								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(typeName));
+							}
+							else
+							{
+								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+							}
 						}
 					}
 					else if (code instanceof CallExpression || code instanceof NewExpression || code instanceof FunctionStatement)
@@ -1175,7 +1183,15 @@ public class SolutionDeserializer
 						}
 						else
 						{
-							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+							String typeName = json.getString(JS_TYPE_JSON_ATTRIBUTE);
+							if (typeName != null)
+							{
+								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(typeName));
+							}
+							else
+							{
+								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+							}
 						}
 					}
 					else if (code instanceof ObjectInitializer)
