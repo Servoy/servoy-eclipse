@@ -270,10 +270,17 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels"; //$NON-NLS-1$
+
+	//performance related
 	public final static Pair<String, ProblemSeverity> LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW = new Pair<String, ProblemSeverity>(
 		"performanceTableColumns", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> LEVEL_PERFORMANCE_TABS_PORTALS = new Pair<String, ProblemSeverity>(
 		"performanceTabsPortals", ProblemSeverity.WARNING); //$NON-NLS-1$
+
+	//relations related
+	public final static Pair<String, ProblemSeverity> RELATIONS_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
+		"relationPrimaryServerWithProblems", ProblemSeverity.ERROR); //$NON-NLS-1$
+
 
 	private SAXParserFactory parserFactory;
 	private final HashSet<String> referencedProjectsSet = new HashSet<String>();

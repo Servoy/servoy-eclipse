@@ -167,6 +167,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_tooManyColumns;
 	public static String ErrorWarningPreferencePage_tooManyTabsPortals;
 	public static String ErrorWarningPreferencePageDescription;
+	public static String ErrorWarningPreferencePage_relationPrimaryServerWithProblems;
 
 	static
 	{

@@ -169,6 +169,12 @@
               name="Solution Properties"
               objectClass="com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode">
         </page>
+         <page
+               class="com.servoy.eclipse.ui.preferences.ServoyErrorWarningPreferencePage"
+               id="com.servoy.eclipse.ui.propertyPage.error.warning"
+               name="Servoy Errors/Warnings"
+               objectClass="com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode">
+        </page>
 		<page
 			category="org.eclipse.dltk.javascript.editor.saveActions.propertyPage"
 			name="Externalize Strings"
@@ -312,7 +318,7 @@
       <page
             category="com.servoy.eclipse.ui.preference"
             class="com.servoy.eclipse.ui.preferences.ServoyErrorWarningPreferencePage"
-            id="com.servoy.eclipse.ui.preferences.errorsWarnings"
+            id="com.servoy.eclipse.ui.preferences.error.warning"
             name="Errors/Warnings">
       </page>
       <page
