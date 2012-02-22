@@ -34,7 +34,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IMediaProvider;
 import com.servoy.j2db.persistence.Media;
@@ -159,7 +158,7 @@ public class MediaNode
 			}
 		}
 
-		if (mediaNodeFilter.contains(UserNodeType.MEDIA_FOLDER))
+		if (mediaNodeFilter.contains(TYPE.FOLDER))
 		{
 			// read directories that are only present in the workspace
 			Solution mediaProviderSolution = null;
