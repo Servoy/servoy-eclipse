@@ -98,7 +98,10 @@ public class SearchResultUpdater implements IResourceChangeListener, IQueryListe
 								String fileText = null;
 								try
 								{
-									fileText = IOUtils.toString(((IFile)delta.getResource()).getContents(), "UTF-8");
+									if (delta.getResource() instanceof IFile)
+									{
+										fileText = IOUtils.toString(((IFile)delta.getResource()).getContents(), "UTF-8");
+									}
 								}
 								catch (IOException e)
 								{
