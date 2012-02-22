@@ -19,7 +19,7 @@ package com.servoy.eclipse.model.preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.servoy.eclipse.model.nature.ServoyProject;
+import org.eclipse.core.resources.IProject;
 
 /**
  * Preferences for templates in jsdoc for new methods and variables.
@@ -35,7 +35,7 @@ public class JSDocScriptTemplates extends ProjectPreferences
 	public static final String METHOD_TEMPLATE_SETTING = "methodTemplate";
 	public static final String VARIABLE_TEMPLATE_SETTING = "variableTemplate";
 
-	public JSDocScriptTemplates(ServoyProject project)
+	public JSDocScriptTemplates(IProject project)
 	{
 		super(project, "jsdoctemplates");
 	}

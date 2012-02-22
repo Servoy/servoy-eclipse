@@ -45,7 +45,7 @@ public class JSDocScriptTemplatesPreferencePage extends PreferencePage implement
 
 	public void init(IWorkbench workbench)
 	{
-		jsDocScriptTemplates = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject());
+		jsDocScriptTemplates = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject().getProject());
 	}
 
 	@Override

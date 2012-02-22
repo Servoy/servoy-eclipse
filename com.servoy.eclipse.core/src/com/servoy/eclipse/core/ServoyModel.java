@@ -2740,7 +2740,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				{
 					Comment documentation = expression.getDocumentation();
 
-					JSDocScriptTemplates prefs = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject());
+					JSDocScriptTemplates prefs = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject().getProject());
 					String userTemplate = (persist instanceof IVariable) ? prefs.getVariableTemplate() : prefs.getMethodTemplate();
 
 					String comment = SolutionSerializer.getComment(persist, userTemplate, getDeveloperRepository());

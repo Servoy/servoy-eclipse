@@ -86,7 +86,7 @@ public class AddTemplateArgumentsQuickFix implements IMarkerResolution
 							MethodTemplate template = MethodTemplate.getTemplate(method.getClass(), eventName);
 							MethodTemplate mixedTemplate = new MethodTemplate(template.getDescription(), new MethodArgument(method.getName(),
 								template.getSignature().getType(), template.getSignature().getDescription()), template.getArguments(), source, false);
-							JSDocScriptTemplates prefs = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject());
+							JSDocScriptTemplates prefs = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject().getProject());
 							String userTemplate = prefs.getMethodTemplate();
 							method.setDeclaration(mixedTemplate.getMethodDeclaration(null, null, userTemplate));
 							method.flagChanged();

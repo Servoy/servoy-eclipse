@@ -322,7 +322,7 @@ public class CalculationsComposite extends Composite
 							te.getTable());
 					}
 
-					String userTemplate = new JSDocScriptTemplates(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject()).getMethodTemplate();
+					String userTemplate = new JSDocScriptTemplates(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject()).getMethodTemplate();
 					ScriptCalculation s = solution.createNewScriptCalculation(nameValidator, te.getTable().getDataSource(), calcName, userTemplate);
 					s.setType(Column.allDefinedTypes[0]);
 					treeViewer.refresh(solution);

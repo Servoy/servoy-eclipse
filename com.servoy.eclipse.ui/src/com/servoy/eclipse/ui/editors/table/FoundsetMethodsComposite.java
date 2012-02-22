@@ -168,7 +168,8 @@ public class FoundsetMethodsComposite extends Composite
 								method = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(solution).getFoundsetMethod(
 									methodName, t.getDataSource());
 							}
-							String userTemplate = new JSDocScriptTemplates(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject()).getMethodTemplate();
+							String userTemplate = new JSDocScriptTemplates(
+								ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject()).getMethodTemplate();
 							ScriptMethod s = solution.createNewFoundsetMethod(nameValidator, t.getDataSource(), methodName, userTemplate);
 							treeViewer.refresh(solution);
 							treeViewer.editElement(s, 0);

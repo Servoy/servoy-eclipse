@@ -217,7 +217,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				new DbiFilePreferences(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject()).clearAcceptedColumnDifferences();
+				new DbiFilePreferences(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getProject()).clearAcceptedColumnDifferences();
 			}
 		});
 

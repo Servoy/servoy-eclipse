@@ -224,7 +224,7 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 			}
 			var.setDefaultValue(defaultValue);
 
-			String userTemplate = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject()).getVariableTemplate();
+			String userTemplate = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject().getProject()).getVariableTemplate();
 
 			String code = SolutionSerializer.serializePersist(var, true, ServoyModel.getDeveloperRepository(), userTemplate).toString();
 			((ISupportChilds)parent).removeChild(var);

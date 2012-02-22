@@ -19,6 +19,7 @@ package com.servoy.eclipse.core.quickfix.dbi;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.preferences.DbiFilePreferences;
 import com.servoy.eclipse.model.repository.DataModelManager;
@@ -65,11 +66,12 @@ public class DBIQuickFixIgnoreColumnDifference extends TableDifferenceQuickFix
 	@Override
 	public void run(TableDifference difference)
 	{
-		new DbiFilePreferences(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject()).addAcceptedColumnDifference(
-			difference.getDbiFileDefinition().columnType, difference.getTableDefinition().columnType);
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		new DbiFilePreferences(servoyModel.getActiveResourcesProject().getProject()).addAcceptedColumnDifference(difference.getDbiFileDefinition().columnType,
+			difference.getTableDefinition().columnType);
 
 		// trigger dbi file change
-		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
+		DataModelManager dmm = servoyModel.getDataModelManager();
 		if (dmm != null)
 		{
 			IFile file = dmm.getDBIFile(difference.getServerName(), difference.getTableName());

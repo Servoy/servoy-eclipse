@@ -17,11 +17,11 @@
 
 package com.servoy.eclipse.model.preferences;
 
+import org.eclipse.core.resources.IProject;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 
 import com.servoy.eclipse.model.Activator;
-import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
@@ -35,9 +35,9 @@ public abstract class ProjectPreferences
 {
 	private final Preferences eclipsePreferences;
 
-	public ProjectPreferences(ServoyProject project, String path)
+	public ProjectPreferences(IProject project, String path)
 	{
-		eclipsePreferences = Activator.getDefault().getEclipsePreferences(project.getProject()).node(path);
+		eclipsePreferences = Activator.getDefault().getEclipsePreferences(project).node(path);
 	}
 
 	protected String getProperty(String key, String defaultValue)

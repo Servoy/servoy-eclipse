@@ -1291,7 +1291,8 @@ public class DataModelManager implements IColumnInfoManager
 						}
 					}
 					if (severity != -1 &&
-						new DbiFilePreferences(ServoyModelFinder.getServoyModel().getActiveProject()).isAcceptedColumnDifference(dbiColumnType, colColumnType))
+						new DbiFilePreferences(ServoyModelFinder.getServoyModel().getActiveResourcesProject().getProject()).isAcceptedColumnDifference(
+							dbiColumnType, colColumnType))
 					{
 						// accepted difference
 						severity = -1;

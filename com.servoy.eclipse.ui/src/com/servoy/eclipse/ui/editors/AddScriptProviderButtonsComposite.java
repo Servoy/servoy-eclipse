@@ -143,7 +143,7 @@ public class AddScriptProviderButtonsComposite extends Composite
 					MethodTemplate template = MethodTemplate.getTemplate(calc.getClass(), methodKey);
 					String calcCode = template.getDefaultMethodCode();
 					if (calcCode == null || calcCode.trim().length() == 0) calcCode = "\treturn \"\";"; //$NON-NLS-1$
-					String userTemplate = new JSDocScriptTemplates(servoyModel.getActiveProject()).getMethodTemplate();
+					String userTemplate = new JSDocScriptTemplates(servoyModel.getActiveProject().getProject()).getMethodTemplate();
 					calc.setDeclaration(template.getMethodDeclaration(calcName, calcCode, userTemplate));
 
 					ServoyProject servoyProject = servoyModel.getActiveProject();

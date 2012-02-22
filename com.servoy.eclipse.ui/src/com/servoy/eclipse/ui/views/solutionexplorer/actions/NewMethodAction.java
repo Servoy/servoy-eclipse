@@ -307,7 +307,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 						new WorkspaceFileAccess(ServoyModel.getWorkspace()).setContents(scriptPath, new byte[0]);
 					}
 
-					String userTemplate = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject()).getMethodTemplate();
+					String userTemplate = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject().getProject()).getMethodTemplate();
 					String declaration = template.getMethodDeclaration(met.getName(), null, tagToOutput, userTemplate, substitutions);
 
 					declaration = format(declaration, file, 0);

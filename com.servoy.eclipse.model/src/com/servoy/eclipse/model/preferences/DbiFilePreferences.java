@@ -18,9 +18,9 @@ package com.servoy.eclipse.model.preferences;
 
 import java.util.Arrays;
 
+import org.eclipse.core.resources.IProject;
 import org.jabsorb.JSONSerializer;
 
-import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.query.ColumnType;
 
@@ -37,7 +37,7 @@ public class DbiFilePreferences extends ProjectPreferences
 {
 	public static final String ACCEPTED_COLUMN_DIFFERENCES_SETTING = "acceptedColumnDifferences";
 
-	public DbiFilePreferences(ServoyProject project)
+	public DbiFilePreferences(IProject project)
 	{
 		super(project, "dbifiles");
 	}
