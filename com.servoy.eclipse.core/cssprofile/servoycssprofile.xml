@@ -58,6 +58,7 @@
 			<property name="list-style-image" enabled="false"/>
 			<property name="list-style-position" enabled="false"/>
 			<property name="list-style-type" enabled="false"/>
+			<property name="opacity"/>
 			<property name="padding" enabled="false"/>
 			<property name="padding-bottom" enabled="false"/>
 			<property name="padding-left" enabled="false"/>
@@ -170,7 +171,9 @@
 			<number name="pxunit"/>
 			<number name="ptunit"/>
 		</property-def>
-	
+		<property-def name="opacity" category="box">
+			<number name="number"/>
+		</property-def>
 		<property-def name="vertical-align" category="text">
 			<keyword name="top"/>
 			<keyword name="middle"/>
@@ -184,6 +187,29 @@
 		<container-def name="generic-corner-radius">
 			<number name="pxunit"/>
 		</container-def>
+		
+		<container-def name="color">
+			<keyword name="aqua"/>
+			<keyword name="black"/>
+			<keyword name="blue"/>
+			<keyword name="fuchsia"/>
+			<keyword name="gray"/>
+			<keyword name="green"/>
+			<keyword name="lime"/>
+			<keyword name="maroon"/>
+			<keyword name="navy"/>
+			<keyword name="olive"/>
+			<keyword name="purple"/>
+			<keyword name="red"/>
+			<keyword name="silver"/>
+			<keyword name="teal"/>
+			<keyword name="white"/>
+			<keyword name="yellow"/>
+			<function name="rgb"/>
+			<function name="rgba"/>
+			<number name="hash"/>
+		</container-def>
+	
 		 <number-def name="pxunit">
 	        <unit name="px"/>
 	    </number-def>
@@ -223,4 +249,8 @@
 	    <keyword-def name="contain">
 	        <keyword-value>contain</keyword-value>
 	    </keyword-def>
+	    
+	    <function-def name="rgba">
+			<function-value>rgba</function-value>
+		</function-def>
 </css-profile>
