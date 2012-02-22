@@ -220,6 +220,7 @@ public final class DatabaseUtils
 					columnInfo.setDataProviderID(columnInfoDef.dataProviderID);
 					columnInfo.setContainsMetaData(columnInfoDef.containsMetaData);
 					columnInfo.setConfiguredColumnType(columnInfoDef.columnType);
+					columnInfo.setCompatibleColumnTypes(columnInfoDef.compatibleColumnTypes);
 					column.setFlags(columnInfoDef.flags);
 
 					columnInfo.flagChanged();

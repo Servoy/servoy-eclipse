@@ -74,6 +74,7 @@ import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.XMLUtils;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
@@ -569,7 +570,6 @@ public class DataModelManager implements IColumnInfoManager
 
 				String cname = cid.name;
 				Column c = t.getColumn(cname);
-				addDifferenceMarkersIfNecessary(c, cid, t, cname);
 
 				if (c != null)
 				{
@@ -596,9 +596,12 @@ public class DataModelManager implements IColumnInfoManager
 					ci.setDataProviderID(cid.dataProviderID);
 					ci.setContainsMetaData(cid.containsMetaData);
 					ci.setConfiguredColumnType(cid.columnType);
+					ci.setCompatibleColumnTypes(cid.compatibleColumnTypes);
 					c.setColumnInfo(ci);
 					c.setFlags(cid.flags); // updates rowident columns in Table as well
 				}
+
+				addDifferenceMarkersIfNecessary(c, cid, t, cname);
 			}
 		}
 		return existingColumnInfo;
@@ -656,6 +659,8 @@ public class DataModelManager implements IColumnInfoManager
 				// Note, since 6.1 dataType and length are interpreted as configured type/length
 				cid.columnType = ColumnType.getInstance(cobj.getInt(ColumnInfoDef.DATA_TYPE),
 					cobj.has(ColumnInfoDef.LENGTH) ? cobj.optInt(ColumnInfoDef.LENGTH) : 0, 0);
+				cid.compatibleColumnTypes = cobj.has(ColumnInfoDef.COMPATIBLE_COLUMN_TYPES)
+					? XMLUtils.parseColumnTypeArray(cobj.optString(ColumnInfoDef.COMPATIBLE_COLUMN_TYPES)) : null;
 				cid.allowNull = cobj.getBoolean(ColumnInfoDef.ALLOW_NULL);
 				cid.autoEnterType = cobj.has(ColumnInfoDef.AUTO_ENTER_TYPE) ? cobj.optInt(ColumnInfoDef.AUTO_ENTER_TYPE) : ColumnInfo.NO_AUTO_ENTER;
 				cid.autoEnterSubType = cobj.has(ColumnInfoDef.AUTO_ENTER_SUB_TYPE) ? cobj.optInt(ColumnInfoDef.AUTO_ENTER_SUB_TYPE)
@@ -734,6 +739,7 @@ public class DataModelManager implements IColumnInfoManager
 			cid = new ColumnInfoDef();
 			cid.name = column.getName();
 			cid.columnType = column.getConfiguredColumnType(); // may copy db column type from column
+			cid.compatibleColumnTypes = ci.getCompatibleColumnTypes(); // may copy db column type from column
 			cid.allowNull = column.getAllowNull();
 			cid.flags = column.getFlags();
 			cid.creationOrderIndex = creationOrderIndex;
@@ -783,6 +789,11 @@ public class DataModelManager implements IColumnInfoManager
 			obj.put(SolutionSerializer.PROP_NAME, cid.name);
 			obj.put(ColumnInfoDef.DATA_TYPE, cid.columnType.getSqlType());
 			if (cid.columnType.getLength() != 0) obj.put(ColumnInfoDef.LENGTH, cid.columnType.getLength());
+			String compatibleColumnTypesStr = XMLUtils.serializeColumnTypeArray(cid.compatibleColumnTypes);
+			if (compatibleColumnTypesStr != null)
+			{
+				obj.put(ColumnInfoDef.COMPATIBLE_COLUMN_TYPES, compatibleColumnTypesStr);
+			}
 			obj.put(ColumnInfoDef.ALLOW_NULL, cid.allowNull);
 			if (cid.flags != 0) obj.put(ColumnInfoDef.FLAGS, cid.flags);
 
@@ -1270,7 +1281,7 @@ public class DataModelManager implements IColumnInfoManager
 				ColumnType colColumnType = c.getColumnType(); // compare db column type with dbi file column type
 				ColumnType dbiColumnType = dbiFileDefinition.columnType;
 
-				if (!colColumnType.equals(dbiColumnType))
+				if (!colColumnType.equals(dbiColumnType) && (c.getColumnInfo() == null || !c.getColumnInfo().isCompatibleColumnType(colColumnType)))
 				{
 					int t1 = Column.mapToDefaultType(colColumnType.getSqlType());
 					int t2 = Column.mapToDefaultType(dbiColumnType.getSqlType());
