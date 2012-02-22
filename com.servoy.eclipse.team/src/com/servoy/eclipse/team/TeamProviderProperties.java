@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.team;
 
 import java.io.File;
@@ -30,7 +30,7 @@ public class TeamProviderProperties
 
 	private static final String SERVER_ADDRESS_KEY = "SERVER_ADDRESS";
 	private static final String USER_KEY = "USER";
-	private static final String PASSWORD_HASH_KEY = "PASSWORD_HASH";
+	private static final String PASSWORD_KEY = "PASSWORD_HASH";
 	private static final String SOLUTION_NAME_KEY = "SOLUTION_NAME";
 	private static final String SOLUTION_VERSION_KEY = "SOLUTION_VERSION";
 	private static final String PROTECTION_PASSWORD_HASH_KEY = "PROTECTION_PASSWORD_HASH";
@@ -39,7 +39,7 @@ public class TeamProviderProperties
 	private final File teamProviderPropertyFile;
 	private String serverAddress;
 	private String user;
-	private String passwordHash;
+	private String password;
 	private String solutionName;
 	private int solutionVersion;
 
@@ -83,14 +83,14 @@ public class TeamProviderProperties
 		this.user = user;
 	}
 
-	public String getPasswordHash()
+	public String getPassword()
 	{
-		return passwordHash;
+		return password;
 	}
 
-	public void setPasswordHash(String passwordHash)
+	public void setPassword(String password)
 	{
-		this.passwordHash = passwordHash;
+		this.password = password;
 	}
 
 	public String getSolutionName()
@@ -138,7 +138,7 @@ public class TeamProviderProperties
 			}
 			setRepositoryUUID(uuid);
 			setUser(prop.getProperty(USER_KEY));
-			setPasswordHash(prop.getProperty(PASSWORD_HASH_KEY));
+			setPassword(prop.getProperty(PASSWORD_KEY));
 			setSolutionName(prop.getProperty(SOLUTION_NAME_KEY));
 			setSolutionVersion(Integer.parseInt(prop.getProperty(SOLUTION_VERSION_KEY)));
 			setProtectionPasswordHash(prop.getProperty(PROTECTION_PASSWORD_HASH_KEY));
@@ -159,7 +159,7 @@ public class TeamProviderProperties
 		prop.setProperty(SERVER_ADDRESS_KEY, getServerAddress());
 		prop.setProperty(IRepository.REPOSITORY_UUID_PROPERTY_NAME, getRepositoryUUID());
 		prop.setProperty(USER_KEY, getUser());
-		prop.setProperty(PASSWORD_HASH_KEY, getPasswordHash());
+		prop.setProperty(PASSWORD_KEY, getPassword());
 		prop.setProperty(SOLUTION_NAME_KEY, getSolutionName());
 		prop.setProperty(SOLUTION_VERSION_KEY, String.valueOf(getSolutionVersion()));
 

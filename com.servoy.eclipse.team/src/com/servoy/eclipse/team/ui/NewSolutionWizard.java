@@ -60,7 +60,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	{
 		private final String serverAddress;
 		private final String user;
-		private final String passHash;
+		private final String password;
 
 		private final SolutionMetaData selectedSolutionMetaData;
 		private final String selectedSolution;
@@ -68,12 +68,12 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 		private final boolean checkoutModules;
 
-		public Result(String serverAddress, String user, String passHash, SolutionMetaData selectedSolutionMetaData, String selectedSolution,
+		public Result(String serverAddress, String user, String password, SolutionMetaData selectedSolutionMetaData, String selectedSolution,
 			int selectedVersion, boolean checkoutModules)
 		{
 			this.serverAddress = serverAddress;
 			this.user = user;
-			this.passHash = passHash;
+			this.password = password;
 
 			this.selectedSolutionMetaData = selectedSolutionMetaData;
 			this.selectedSolution = selectedSolution;
@@ -91,9 +91,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			return user;
 		}
 
-		public String getPassHash()
+		public String getPassword()
 		{
-			return passHash;
+			return password;
 		}
 
 		public SolutionMetaData getSelectedSolutionMetaData()
@@ -159,7 +159,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 		String serverAddress = repositoryPage.getServerAddress();
 		String user = repositoryPage.getUser();
-		String passHash = Utils.calculateMD5HashBase64(repositoryPage.getPassword());
+		String password = repositoryPage.getPassword();
 
 		SolutionMetaData selectedSolutionMetaData = (SolutionMetaData)solutionPage.getSelectedRootObjectMetaData();
 		final String selectedSolution = solutionPage.getSelectedSolution();
@@ -181,7 +181,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			if (!bConfirmedRelease) return false;
 		}
 
-		final Result result = new Result(serverAddress, user, passHash, selectedSolutionMetaData, selectedSolution, selectedVersion, checkoutModules);
+		final Result result = new Result(serverAddress, user, password, selectedSolutionMetaData, selectedSolution, selectedVersion, checkoutModules);
 
 		if (checkoutJob != null)
 		{

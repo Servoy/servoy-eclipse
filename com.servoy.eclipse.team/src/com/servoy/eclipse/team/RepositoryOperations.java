@@ -111,7 +111,7 @@ public class RepositoryOperations
 		this.servoyTeamProvider = servoyTeamProvider;
 		this.projectTeamProperties = projectTeamProperties;
 		repositoryAP = RepositoryAccessPoint.getInstance(projectTeamProperties.getServerAddress(), projectTeamProperties.getUser(),
-			projectTeamProperties.getPasswordHash());
+			projectTeamProperties.getPassword());
 	}
 
 	public boolean isUsingInprocessApplicationServer()
@@ -267,7 +267,7 @@ public class RepositoryOperations
 			new File(project.getWorkspace().getRoot().getLocation().toFile(), project.getName()));
 		pTeamProperties.load();
 		RepositoryAccessPoint pRepositoryAP = RepositoryAccessPoint.getInstance(pTeamProperties.getServerAddress(), pTeamProperties.getUser(),
-			pTeamProperties.getPasswordHash());
+			pTeamProperties.getPassword());
 
 		try
 		{
@@ -426,7 +426,7 @@ public class RepositoryOperations
 			new File(project.getWorkspace().getRoot().getLocation().toFile(), project.getName()));
 		pTeamProperties.load();
 		RepositoryAccessPoint pRepositoryAP = RepositoryAccessPoint.getInstance(pTeamProperties.getServerAddress(), pTeamProperties.getUser(),
-			pTeamProperties.getPasswordHash());
+			pTeamProperties.getPassword());
 
 		File tempWsDir = ServoyTeamProvider.getTemporaryDirectory();
 
@@ -701,8 +701,8 @@ public class RepositoryOperations
 			{
 				for (String userUIDGroup : userUIDGroups)
 				{
-					eclipseUserManager.addUserToGroup(ApplicationServerSingleton.get().getClientId(), userID, eclipseUserManager.getGroupId(
-						ApplicationServerSingleton.get().getClientId(), userUIDGroup));
+					eclipseUserManager.addUserToGroup(ApplicationServerSingleton.get().getClientId(), userID,
+						eclipseUserManager.getGroupId(ApplicationServerSingleton.get().getClientId(), userUIDGroup));
 				}
 			}
 		}
@@ -818,6 +818,7 @@ public class RepositoryOperations
 			if (remoteUserManager.getUserIdByUID(rap.getClientID(), userUUID) == -1)
 			{
 				// insert new user
+				// TODO CHECK, this call doesn't expect a hashed password!
 				int remoteUserID = remoteUserManager.createUser(rap.getClientID(), userName, userPass, userUUID, true);
 				if (localUserGroups != null)
 				{

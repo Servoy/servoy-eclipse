@@ -322,14 +322,14 @@ public class ServoyTeamProvider extends RepositoryProvider
 		return temporaryDirectory;
 	}
 
-	public static IProject createSolutionProject(RepositoryAccessPoint repositoryAP, String serverAddress, String user, String passHash, String solutionName,
+	public static IProject createSolutionProject(RepositoryAccessPoint repositoryAP, String serverAddress, String user, String password, String solutionName,
 		int solutionVersion, IProject resourcesProject, SolutionMetaData solutionMetaData, boolean isCheckoutModules) throws Exception
 	{
-		return createSolutionProject(repositoryAP, serverAddress, user, passHash, solutionName, solutionVersion, resourcesProject, solutionMetaData,
+		return createSolutionProject(repositoryAP, serverAddress, user, password, solutionName, solutionVersion, resourcesProject, solutionMetaData,
 			isCheckoutModules, new ArrayList());
 	}
 
-	private static IProject createSolutionProject(RepositoryAccessPoint repositoryAP, String serverAddress, String user, String passHash, String solutionName,
+	private static IProject createSolutionProject(RepositoryAccessPoint repositoryAP, String serverAddress, String user, String password, String solutionName,
 		int solutionVersion, IProject resourcesProject, SolutionMetaData solutionMetaData, boolean isCheckoutModules, ArrayList alreadyCheckoutedSolutions)
 		throws Exception
 	{
@@ -348,7 +348,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 				project.getName()));
 			teamProviderProperties.setServerAddress(serverAddress);
 			teamProviderProperties.setUser(user);
-			teamProviderProperties.setPasswordHash(passHash);
+			teamProviderProperties.setPassword(password);
 			teamProviderProperties.setSolutionName(solutionName);
 			teamProviderProperties.setSolutionVersion(solutionVersion);
 			teamProviderProperties.setProtectionPasswordHash((solutionMetaData != null && !solutionMetaData.isProtected())
@@ -384,7 +384,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 
 						if (moduleMetaData != null)
 						{
-							ServoyTeamProvider.createSolutionProject(repositoryAP, serverAddress, user, passHash, module, release, resourcesProject,
+							ServoyTeamProvider.createSolutionProject(repositoryAP, serverAddress, user, password, module, release, resourcesProject,
 								moduleMetaData, isCheckoutModules, alreadyCheckoutedSolutions);
 						}
 					}
@@ -397,7 +397,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 		return project;
 	}
 
-	public static IProject createResourcesProject(String name, RepositoryAccessPoint repositoryAP, String serverAddress, String user, String passHash)
+	public static IProject createResourcesProject(String name, RepositoryAccessPoint repositoryAP, String serverAddress, String user, String password)
 		throws Exception
 	{
 		String projectName = name;
@@ -454,7 +454,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 				resourcesProject.getWorkspace().getRoot().getLocation().toFile(), resourcesProject.getName()));
 			teamProviderProperties.setServerAddress(serverAddress);
 			teamProviderProperties.setUser(user);
-			teamProviderProperties.setPasswordHash(passHash);
+			teamProviderProperties.setPassword(password);
 			teamProviderProperties.setSolutionName(resourcesProject.getName());
 			teamProviderProperties.setRepositoryUUID(repositoryAP.getRepository().getRepositoryUUID().toString());
 
@@ -473,7 +473,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 	{
 		String serverAddress = wizardResult.getServerAddress();
 		String user = wizardResult.getUser();
-		String passHash = wizardResult.getPassHash();
+		String password = wizardResult.getPassword();
 
 		SolutionMetaData selectedSolutionMetaData = wizardResult.getSelectedSolutionMetaData();
 		String selectedSolution = wizardResult.getSelectedSolution();
@@ -490,11 +490,11 @@ public class ServoyTeamProvider extends RepositoryProvider
 		}
 		else
 		{
-			RepositoryAccessPoint repositoryAP = RepositoryAccessPoint.getInstance(serverAddress, user, passHash);
+			RepositoryAccessPoint repositoryAP = RepositoryAccessPoint.getInstance(serverAddress, user, password);
 			repositoryAP.checkRemoteRepositoryVersion();
-			IProject resourcesProject = ServoyTeamProvider.createResourcesProject(null, repositoryAP, serverAddress, user, passHash);
+			IProject resourcesProject = ServoyTeamProvider.createResourcesProject(null, repositoryAP, serverAddress, user, password);
 
-			ServoyTeamProvider.createSolutionProject(repositoryAP, serverAddress, user, passHash, selectedSolution, selectedVersion, resourcesProject,
+			ServoyTeamProvider.createSolutionProject(repositoryAP, serverAddress, user, password, selectedSolution, selectedVersion, resourcesProject,
 				selectedSolutionMetaData, isCheckoutModules);
 		}
 	}

@@ -32,7 +32,6 @@ import com.servoy.eclipse.team.RepositoryAccessPoint;
 import com.servoy.eclipse.team.ServoyTeamProvider;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RootObjectMetaData;
-import com.servoy.j2db.util.Utils;
 
 public class SharingWizard extends Wizard implements IConfigurationWizard
 {
@@ -53,12 +52,13 @@ public class SharingWizard extends Wizard implements IConfigurationWizard
 		repositoryPage.saveEnteredValues();
 		final String serverAddress = repositoryPage.getServerAddress();
 		final String user = repositoryPage.getUser();
-		final String passHash = Utils.calculateMD5HashBase64(repositoryPage.getPassword());
+		// TODO this is not the hash anymore but the password itself, we can't store the hash because of the new hash algoritme.
+		final String password = repositoryPage.getPassword();
 
 
 		try
 		{
-			RepositoryAccessPoint repositoryAP = RepositoryAccessPoint.getInstance(serverAddress, user, passHash);
+			RepositoryAccessPoint repositoryAP = RepositoryAccessPoint.getInstance(serverAddress, user, password);
 
 			if (servoyProject.hasNature(ServoyProject.NATURE_ID)) // servoy project
 			{
@@ -67,9 +67,9 @@ public class SharingWizard extends Wizard implements IConfigurationWizard
 				{
 
 					String resourceProjectName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getProject().getName();
-					
-					ServoyTeamProvider.createResourcesProject(resourceProjectName, repositoryAP, serverAddress, user, passHash);
-					ServoyTeamProvider.createSolutionProject(repositoryAP, serverAddress, user, passHash, servoyProject.getName(), 1, null, null, false);
+
+					ServoyTeamProvider.createResourcesProject(resourceProjectName, repositoryAP, serverAddress, user, password);
+					ServoyTeamProvider.createSolutionProject(repositoryAP, serverAddress, user, password, servoyProject.getName(), 1, null, null, false);
 				}
 				else
 				{
@@ -77,13 +77,13 @@ public class SharingWizard extends Wizard implements IConfigurationWizard
 					if (MessageDialog.openQuestion(getShell(), "Servoy share", "Solution with name '" + servoyProject.getName() +
 						"' already exists in the repository. Share anyway ?"))
 					{
-						ServoyTeamProvider.createSolutionProject(repositoryAP, serverAddress, user, passHash, servoyProject.getName(), 1, null, null, false);
+						ServoyTeamProvider.createSolutionProject(repositoryAP, serverAddress, user, password, servoyProject.getName(), 1, null, null, false);
 					}
 				}
 			}
 			else if (servoyProject.hasNature(ServoyResourcesProject.NATURE_ID)) // style project
 			{
-				ServoyTeamProvider.createResourcesProject(servoyProject.getName(), repositoryAP, serverAddress, user, passHash);
+				ServoyTeamProvider.createResourcesProject(servoyProject.getName(), repositoryAP, serverAddress, user, password);
 			}
 
 			Display.getDefault().asyncExec(new Runnable()

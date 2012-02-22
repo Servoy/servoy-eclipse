@@ -52,7 +52,7 @@ public class RepositoryAccessPoint
 
 	private final String serverAddress;
 	private final String user;
-	private final String passwordHash;
+	private final String password;
 
 	private int usedRMIPort;
 
@@ -63,7 +63,7 @@ public class RepositoryAccessPoint
 
 	private IRMIClientSocketFactoryFactory rmiFactoryFactory;
 
-	private RepositoryAccessPoint(String serverAddress, String user, String passwordHash)
+	private RepositoryAccessPoint(String serverAddress, String user, String password)
 	{
 		String serverAddr = serverAddress;
 		if (serverAddr == null) serverAddr = "localhost";
@@ -87,7 +87,7 @@ public class RepositoryAccessPoint
 		}
 		else this.serverAddress = serverAddr;
 		this.user = user;
-		this.passwordHash = passwordHash;
+		this.password = password;
 
 
 		if (usedRMIPort == 0)
@@ -102,11 +102,11 @@ public class RepositoryAccessPoint
 		}
 	}
 
-	public static RepositoryAccessPoint getInstance(String serverAddress, String user, String passwordHash)
+	public static RepositoryAccessPoint getInstance(String serverAddress, String user, String password)
 	{
 		synchronized (instanceRef)
 		{
-			RepositoryAccessPoint rap = new RepositoryAccessPoint(serverAddress, user, passwordHash);
+			RepositoryAccessPoint rap = new RepositoryAccessPoint(serverAddress, user, password);
 			RepositoryAccessPoint oldRAp = instanceRef.get();
 			if (rap.equals(oldRAp))
 			{
@@ -139,7 +139,7 @@ public class RepositoryAccessPoint
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((passwordHash == null) ? 0 : passwordHash.hashCode());
+		result = prime * result + ((password == null) ? 0 : password.hashCode());
 		result = prime * result + ((serverAddress == null) ? 0 : serverAddress.hashCode());
 		result = prime * result + ((user == null) ? 0 : user.hashCode());
 		return result;
@@ -152,11 +152,11 @@ public class RepositoryAccessPoint
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		RepositoryAccessPoint other = (RepositoryAccessPoint)obj;
-		if (passwordHash == null)
+		if (password == null)
 		{
-			if (other.passwordHash != null) return false;
+			if (other.password != null) return false;
 		}
-		else if (!passwordHash.equals(other.passwordHash)) return false;
+		else if (!password.equals(other.password)) return false;
 		if (serverAddress == null)
 		{
 			if (other.serverAddress != null) return false;
@@ -183,7 +183,7 @@ public class RepositoryAccessPoint
 
 	private boolean checkParameters(String srv, String usr, String pwdHash)
 	{
-		return Utils.stringSafeEquals(serverAddress, srv) && Utils.stringSafeEquals(user, usr) && Utils.stringSafeEquals(passwordHash, pwdHash);
+		return Utils.stringSafeEquals(serverAddress, srv) && Utils.stringSafeEquals(user, usr) && Utils.stringSafeEquals(password, pwdHash);
 	}
 
 	public ITeamRepository getRepository() throws ApplicationServerAccessException, RepositoryAccessException, RemoteException
@@ -297,7 +297,8 @@ public class RepositoryAccessPoint
 				IApplicationServer as = (IApplicationServer)LocateRegistry.getRegistry(serverAddress, usedRMIPort,
 					rmiFactoryFactory.getRemoteClientSocketFactory()).lookup(IApplicationServer.NAME);
 
-				clientID = as.getClientID(user, passwordHash); // RemoteApplicationServer
+				// TODO this getClientID expects a password not a hash!!!!
+				clientID = as.getClientID(user, password); // RemoteApplicationServer
 				if (clientID != null)
 				{
 					asa = as.getApplicationServerAccess(clientID);

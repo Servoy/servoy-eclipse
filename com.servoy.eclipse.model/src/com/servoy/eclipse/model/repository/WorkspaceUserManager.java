@@ -1437,35 +1437,40 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		return groupSecurityInfo;
 	}
 
-	public String checkPasswordForUserName(String clientId, String userName, String password, boolean passwordAlreadyHashed)
+	public String checkPasswordForUserName(String clientId, String userName, String password)
 	{
 		if (userName == null || userName.length() == 0 || password == null || password.length() == 0) return null;
-		String hashedPassword = password;
-		if (!passwordAlreadyHashed) hashedPassword = Utils.calculateMD5HashBase64(password);
-		String userUUID = null;
-
 		for (User user : allDefinedUsers)
 		{
-			if (userName.equals(user.name) && (hashedPassword.equals(user.passwordHash)))
+			if (userName.equals(user.name))
 			{
-				userUUID = user.userUid;
-				break;
+				if (Utils.validatePrefixedPBKDF2Hash(password, user.passwordHash))
+				{
+					return user.userUid;
+				}
+				else if (user.passwordHash.equals(Utils.calculateMD5HashBase64(password)))
+				{
+					return user.userUid;
+				}
+				return null;
 			}
 		}
-		return userUUID;
+		return null;
 	}
 
-	public boolean checkPasswordForUserUID(String clientId, String userUID, String password, boolean passwordAlreadyHashed)
+	public boolean checkPasswordForUserUID(String clientId, String userUID, String password)
 	{
 		if (userUID == null || userUID.length() == 0 || password == null || password.length() == 0) return false;
-		String hashedPassword = password;
-		if (!passwordAlreadyHashed) hashedPassword = Utils.calculateMD5HashBase64(password);
 
 		for (User user : allDefinedUsers)
 		{
-			if (userUID.equals(user.userUid) && (hashedPassword.equals(user.passwordHash)))
+			if (userUID.equals(user.userUid))
 			{
-				return true;
+				if (Utils.validatePrefixedPBKDF2Hash(password, user.passwordHash))
+				{
+					return true;
+				}
+				return user.passwordHash.equals(Utils.calculateMD5HashBase64(password));
 			}
 		}
 		return false;
@@ -1874,11 +1879,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 		checkForAdminUser(clientId, null);
 
-		String hashedPassword = password;
-		if (!alreadyHashed)
-		{
-			hashedPassword = Utils.calculateMD5HashBase64(password);
-		}
+		String hashedPassword = alreadyHashed ? password : Utils.calculateAndPrefixPBKDF2PasswordHash(password);
 
 		// Check to see if the user already exists.
 		int id = getUserIdByUserName(clientId, userName);
@@ -2041,7 +2042,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 		checkForAdminUser(clientId, userUID);
 
-		String passwordHash = hashPassword ? Utils.calculateMD5HashBase64(password) : password;
+		String passwordHash = hashPassword ? Utils.calculateAndPrefixPBKDF2PasswordHash(password) : password;
 
 		for (User u : allDefinedUsers)
 		{

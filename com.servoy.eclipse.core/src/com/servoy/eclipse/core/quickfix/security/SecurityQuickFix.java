@@ -160,7 +160,7 @@ public abstract class SecurityQuickFix implements IMarkerResolution
 			int result = dialog.open();
 			if (result == Window.OK)
 			{
-				returnValue = Utils.calculateMD5HashBase64(dialog.getValue());
+				returnValue = Utils.calculateAndPrefixPBKDF2PasswordHash(dialog.getValue());
 			}
 		}
 
