@@ -143,7 +143,7 @@ public class ColumnValidationComposite extends Composite
 			{
 				for (int element : conv_types)
 				{
-					if (Column.mapToDefaultType(c.getType()) == Column.mapToDefaultType(element))
+					if (Column.mapToDefaultType(c.getConfiguredColumnType().getSqlType()) == Column.mapToDefaultType(element))
 					{
 						options.add(name);
 						if (name.equals(ci.getValidatorName()))

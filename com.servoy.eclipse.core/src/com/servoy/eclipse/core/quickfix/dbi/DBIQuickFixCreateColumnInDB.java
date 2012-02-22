@@ -31,6 +31,7 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.query.ColumnType;
 
 /**
  * Quick fix for missing columns in DB (although they are present in the dbi files). It will create a column.
@@ -69,8 +70,7 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 	@Override
 	public void run(TableDifference difference)
 	{
-		int type = difference.getDbiFileDefinition().datatype;
-		int lenght = difference.getDbiFileDefinition().length;
+		ColumnType columnType = difference.getDbiFileDefinition().columnType;
 		Column c;
 		try
 		{
@@ -104,7 +104,7 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 						}
 					};
 					// create the new column in memory
-					c = difference.getTable().createNewColumn(validator, difference.getColumnName(), type, lenght);
+					c = difference.getTable().createNewColumn(validator, difference.getColumnName(), columnType.getSqlType(), columnType.getLength());
 					c.setDatabasePK((difference.getDbiFileDefinition().flags & Column.PK_COLUMN) != 0);
 					c.setAllowNull(difference.getDbiFileDefinition().allowNull);
 					if (difference.getDbiFileDefinition().autoEnterType == ColumnInfo.SEQUENCE_AUTO_ENTER)

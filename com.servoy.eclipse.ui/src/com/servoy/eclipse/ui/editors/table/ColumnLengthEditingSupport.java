@@ -25,6 +25,7 @@ import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumnTypes;
+import com.servoy.j2db.query.ColumnType;
 
 public class ColumnLengthEditingSupport extends EditingSupport
 {
@@ -42,7 +43,6 @@ public class ColumnLengthEditingSupport extends EditingSupport
 	{
 		if (element instanceof Column)
 		{
-			Column pi = (Column)element;
 			int length = 0;
 			try
 			{
@@ -55,7 +55,9 @@ public class ColumnLengthEditingSupport extends EditingSupport
 			{
 				ServoyLog.logError(e);
 			}
-			pi.setLenght(length);
+
+			ColumnType columnType = ((Column)element).getConfiguredColumnType();
+			((Column)element).getColumnInfo().setConfiguredColumnType(ColumnType.getInstance(columnType.getSqlType(), length, columnType.getScale()));
 			getViewer().update(element, null);
 		}
 	}
@@ -65,8 +67,8 @@ public class ColumnLengthEditingSupport extends EditingSupport
 	{
 		if (element instanceof Column)
 		{
-			Column pi = (Column)element;
-			return new Integer(pi.getLength()).toString();
+			Column pi = ((Column)element);
+			return Integer.valueOf(pi.getConfiguredColumnType().getLength()).toString();
 		}
 		return null;
 	}
@@ -82,7 +84,8 @@ public class ColumnLengthEditingSupport extends EditingSupport
 	{
 		if (element instanceof Column && editor != null && !((Column)element).getExistInDB())
 		{
-			int defType = ((Column)element).getDataProviderType();
+			Column pi = ((Column)element);
+			int defType = pi.getConfiguredColumnType().getSqlType();
 			return defType != IColumnTypes.INTEGER && defType != IColumnTypes.DATETIME;
 		}
 		return false;

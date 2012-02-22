@@ -94,7 +94,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.UIJob;
 
-import com.servoy.eclipse.core.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
@@ -104,6 +103,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.EclipseRepository;

@@ -39,6 +39,8 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.internal.util.PrefUtil;
 
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.preferences.DbiFilePreferences;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.debug.DeveloperPreferences;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -202,6 +204,20 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 			public void widgetSelected(SelectionEvent e)
 			{
 				if (((Button)(e.widget)).getSelection()) showNavigatorDefaultOnButton.setSelection(false);
+			}
+		});
+
+
+		Button clearAcceptedDBIColumnDifferencesButton = new Button(rootContainer, SWT.PUSH);
+		clearAcceptedDBIColumnDifferencesButton.setText("Clear accepted DBI column differences"); //$NON-NLS-1$
+		clearAcceptedDBIColumnDifferencesButton.setToolTipText("Clear all accepted column differences that were accepted by quikckfixes from the problem view");
+		clearAcceptedDBIColumnDifferencesButton.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_BEGINNING));
+		clearAcceptedDBIColumnDifferencesButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				new DbiFilePreferences(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject()).clearAcceptedColumnDifferences();
 			}
 		});
 

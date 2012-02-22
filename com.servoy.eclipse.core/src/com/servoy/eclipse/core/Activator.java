@@ -33,8 +33,6 @@ import net.sourceforge.sqlexplorer.dbproduct.ManagedDriver;
 import net.sourceforge.sqlexplorer.dbproduct.User;
 import net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -47,7 +45,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IPartListener;
@@ -782,14 +779,6 @@ public class Activator extends Plugin
 			}
 		}
 		return docManagerpProvider;
-	}
-
-	/**
-	 * Project level preferences
-	 */
-	public IEclipsePreferences getEclipsePreferences(IProject project)
-	{
-		return new ProjectScope(project).getNode(PLUGIN_ID);
 	}
 
 	private void showFirstCheatSheet()

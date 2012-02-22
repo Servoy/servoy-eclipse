@@ -124,7 +124,8 @@ public final class DatabaseUtils
 				ColumnInfoDef columnInfoInfo = columnInfoIt.next();
 
 				// Add the column with the appropriate information.
-				Column column = table.createNewColumn(validator, columnInfoInfo.name, columnInfoInfo.datatype, columnInfoInfo.length);
+				Column column = table.createNewColumn(validator, columnInfoInfo.name, columnInfoInfo.columnType.getSqlType(),
+					columnInfoInfo.columnType.getLength());
 				column.setDatabasePK((columnInfoInfo.flags & Column.PK_COLUMN) != 0);
 				column.setAllowNull(columnInfoInfo.allowNull);
 
@@ -218,6 +219,7 @@ public final class DatabaseUtils
 					columnInfo.setSequenceStepSize(columnInfoDef.sequenceStepSize);
 					columnInfo.setDataProviderID(columnInfoDef.dataProviderID);
 					columnInfo.setContainsMetaData(columnInfoDef.containsMetaData);
+					columnInfo.setConfiguredColumnType(columnInfoDef.columnType);
 					column.setFlags(columnInfoDef.flags);
 
 					columnInfo.flagChanged();

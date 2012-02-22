@@ -29,6 +29,7 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.util.Utils;
 
 public class ColumnLabelProvider extends LabelProvider implements ITableLabelProvider, ITableColorProvider
@@ -72,6 +73,7 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 	public String getColumnText(Object element, int columnIndex)
 	{
 		Column info = (Column)element;
+		ColumnType columnType = info.getConfiguredColumnType();
 		if (columnIndex == ColumnComposite.CI_NAME)
 		{
 			return columnComposite != null && columnComposite.isDataProviderIdDisplayed() ? info.getSQLName() : info.getName();
@@ -83,11 +85,11 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 		}
 		if (columnIndex == ColumnComposite.CI_TYPE + delta)
 		{
-			return info.getTypeAsString();
+			return Column.getDisplayTypeString(columnType.getSqlType());
 		}
 		if (columnIndex == ColumnComposite.CI_LENGTH + delta)
 		{
-			return info.getScale() > 0 ? info.getLength() + "," + info.getScale() : Integer.toString(info.getLength()); //$NON-NLS-1$
+			return columnType.getScale() > 0 ? columnType.getLength() + "," + columnType.getScale() : Integer.toString(columnType.getLength()); //$NON-NLS-1$
 		}
 		if (columnIndex == ColumnComposite.CI_ROW_IDENT + delta)
 		{

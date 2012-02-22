@@ -1091,17 +1091,20 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 		// property Solution.SCOPE_NAMES is maintained by ServoyModel based on global js file names
 		String[] scopeNames = solution.getRuntimeProperty(Solution.SCOPE_NAMES);
-		List<PlatformSimpleUserNode> nodes = new ArrayList<PlatformSimpleUserNode>(scopeNames.length + 1);
+		List<PlatformSimpleUserNode> nodes = new ArrayList<PlatformSimpleUserNode>(scopeNames == null ? 1 : (scopeNames.length + 1));
 		nodes.add(currentForm);
-		for (String scopeName : scopeNames)
+		if (scopeNames != null) // when refreshScopes has not been called yet
 		{
-			Pair<Solution, String> solutionAndScope = new Pair<Solution, String>(solution, scopeName);
-			PlatformSimpleUserNode globalsFolder = new PlatformSimpleUserNode(Utils.stringInitCap(scopeName), UserNodeType.GLOBALS_ITEM, solutionAndScope,
-				uiActivator.loadImageFromBundle("globe.gif")); //$NON-NLS-1$
-			globalsFolder.parent = parent;
-			globalsFolders.put(scopeName, globalsFolder);
-			nodes.add(globalsFolder);
-			addGlobalsNodeChildren(globalsFolder, solutionAndScope);
+			for (String scopeName : scopeNames)
+			{
+				Pair<Solution, String> solutionAndScope = new Pair<Solution, String>(solution, scopeName);
+				PlatformSimpleUserNode globalsFolder = new PlatformSimpleUserNode(Utils.stringInitCap(scopeName), UserNodeType.GLOBALS_ITEM, solutionAndScope,
+					uiActivator.loadImageFromBundle("globe.gif")); //$NON-NLS-1$
+				globalsFolder.parent = parent;
+				globalsFolders.put(scopeName, globalsFolder);
+				nodes.add(globalsFolder);
+				addGlobalsNodeChildren(globalsFolder, solutionAndScope);
+			}
 		}
 
 		parent.children = nodes.toArray(new PlatformSimpleUserNode[nodes.size()]);

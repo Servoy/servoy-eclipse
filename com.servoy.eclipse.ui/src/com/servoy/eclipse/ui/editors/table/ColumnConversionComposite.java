@@ -76,7 +76,7 @@ public class ColumnConversionComposite extends ConvertersComposite<IColumnConver
 	{
 		this.column = c;
 
-		setConverters(c.getType(), c.getColumnInfo().getConverterName(),
+		setConverters(c.getConfiguredColumnType().getSqlType(), c.getColumnInfo().getConverterName(),
 			ApplicationServerSingleton.get().getPluginManager().getColumnConverterManager().getConverters().values());
 		loadTable();
 	}

@@ -29,8 +29,8 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;

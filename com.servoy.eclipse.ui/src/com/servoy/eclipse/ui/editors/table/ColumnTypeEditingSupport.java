@@ -24,6 +24,7 @@ import org.eclipse.swt.SWT;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumnTypes;
+import com.servoy.j2db.query.ColumnType;
 
 public class ColumnTypeEditingSupport extends EditingSupport
 {
@@ -46,14 +47,16 @@ public class ColumnTypeEditingSupport extends EditingSupport
 		if (element instanceof Column)
 		{
 			Column pi = (Column)element;
-			int index = Integer.parseInt(value.toString());
-			int type = Column.allDefinedTypes[index];
-			pi.setType(type);
-			int defaultType = Column.mapToDefaultType(type);
-			if (defaultType == IColumnTypes.NUMBER || defaultType == IColumnTypes.MEDIA)
+			int type = Column.allDefinedTypes[Integer.parseInt(value.toString())];
+
+			int length = pi.getConfiguredColumnType().getLength();
+			if (type == IColumnTypes.NUMBER || type == IColumnTypes.MEDIA)
 			{
-				pi.setLenght(0);// default create unlimited
+				// default create unlimited
+				length = 0;
 			}
+			pi.getColumnInfo().setConfiguredColumnType(ColumnType.getInstance(type, length, 0));
+
 			getViewer().update(element, null);
 			getViewer().refresh();
 		}
@@ -64,7 +67,7 @@ public class ColumnTypeEditingSupport extends EditingSupport
 	{
 		if (element instanceof Column)
 		{
-			int type = ((Column)element).getDataProviderType();
+			int type = Column.mapToDefaultType(((Column)element).getConfiguredColumnType().getSqlType());
 			int index = 0;
 			for (int i = 0; i < Column.allDefinedTypes.length; i++)
 			{

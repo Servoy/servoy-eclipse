@@ -31,6 +31,7 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 import com.servoy.j2db.util.docvalidator.LengthDocumentValidator;
 import com.servoy.j2db.util.docvalidator.ValidatingDocument.IDocumentValidator;
@@ -72,23 +73,19 @@ public class ColumnNameEditingSupport extends EditingSupport
 				if (realName)
 				{
 					pi.updateName(nameValidator, value.toString());
+
+					if (isEmail(value.toString()))
+					{
+						pi.getColumnInfo().setConfiguredColumnType(ColumnType.getInstance(IColumnTypes.TEXT, 254, 0));
+					}
+					else if (isUrl(value.toString()))
+					{
+						pi.getColumnInfo().setConfiguredColumnType(ColumnType.getInstance(IColumnTypes.TEXT, 2048, 0));
+					}
 				}
 				else
 				{
 					pi.updateDataProviderID(nameValidator, value.toString());
-				}
-				if (realName)
-				{
-					if (isEmail(value.toString()))
-					{
-						pi.setType(IColumnTypes.TEXT);
-						pi.setLenght(254);
-					}
-					else if (isUrl(value.toString()))
-					{
-						pi.setType(IColumnTypes.TEXT);
-						pi.setLenght(2048);
-					}
 				}
 			}
 			catch (final Exception e)

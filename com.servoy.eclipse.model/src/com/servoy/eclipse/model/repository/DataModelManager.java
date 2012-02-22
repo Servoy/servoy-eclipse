@@ -52,6 +52,7 @@ import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IUnexpectedSituationHandler;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.preferences.DbiFilePreferences;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -67,6 +68,7 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.ServoyJSONArray;
@@ -330,8 +332,10 @@ public class DataModelManager implements IColumnInfoManager
 	{
 		int element_id = ApplicationServerSingleton.get().getDeveloperRepository().getNewElementID(null);
 		ColumnInfo ci = new ColumnInfo(element_id, false);
-		if (createMissingServoySequence && c.getRowIdentType() != Column.NORMAL_COLUMN && c.getSequenceType() == ColumnInfo.NO_SEQUENCE_SELECTED &&
-			(c.getDataProviderType() == IColumnTypes.INTEGER || c.getDataProviderType() == IColumnTypes.NUMBER))
+		if (createMissingServoySequence &&
+			c.getRowIdentType() != Column.NORMAL_COLUMN &&
+			c.getSequenceType() == ColumnInfo.NO_SEQUENCE_SELECTED &&
+			(Column.mapToDefaultType(c.getConfiguredColumnType().getSqlType()) == IColumnTypes.INTEGER || Column.mapToDefaultType(c.getConfiguredColumnType().getSqlType()) == IColumnTypes.NUMBER))
 		{
 			ci.setAutoEnterType(ColumnInfo.SEQUENCE_AUTO_ENTER);
 			ci.setAutoEnterSubType(ColumnInfo.SERVOY_SEQUENCE);
@@ -591,6 +595,7 @@ public class DataModelManager implements IColumnInfoManager
 					ci.setElementTemplateProperties(cid.elementTemplateProperties);
 					ci.setDataProviderID(cid.dataProviderID);
 					ci.setContainsMetaData(cid.containsMetaData);
+					ci.setConfiguredColumnType(cid.columnType);
 					c.setColumnInfo(ci);
 					c.setFlags(cid.flags); // updates rowident columns in Table as well
 				}
@@ -610,8 +615,7 @@ public class DataModelManager implements IColumnInfoManager
 		else
 		{
 			ColumnInfoDef dbCid = new ColumnInfoDef();
-			dbCid.datatype = c.getType();
-			dbCid.length = c.getLength();
+			dbCid.columnType = c.getConfiguredColumnType();
 			dbCid.allowNull = c.getAllowNull();
 			dbCid.flags = c.getFlags();
 			TableDifference tableDifference = new TableDifference(t, columnName, TableDifference.COLUMN_CONFLICT, dbCid, cid);
@@ -649,8 +653,9 @@ public class DataModelManager implements IColumnInfoManager
 
 				cid.creationOrderIndex = cobj.getInt(ColumnInfoDef.CREATION_ORDER_INDEX);
 				cid.name = cobj.getString(SolutionSerializer.PROP_NAME);
-				cid.datatype = cobj.getInt(ColumnInfoDef.DATA_TYPE);
-				cid.length = cobj.has(ColumnInfoDef.LENGTH) ? cobj.optInt(ColumnInfoDef.LENGTH) : 0;
+				// Note, since 6.1 dataType and length are interpreted as configured type/length
+				cid.columnType = ColumnType.getInstance(cobj.getInt(ColumnInfoDef.DATA_TYPE),
+					cobj.has(ColumnInfoDef.LENGTH) ? cobj.optInt(ColumnInfoDef.LENGTH) : 0, 0);
 				cid.allowNull = cobj.getBoolean(ColumnInfoDef.ALLOW_NULL);
 				cid.autoEnterType = cobj.has(ColumnInfoDef.AUTO_ENTER_TYPE) ? cobj.optInt(ColumnInfoDef.AUTO_ENTER_TYPE) : ColumnInfo.NO_AUTO_ENTER;
 				cid.autoEnterSubType = cobj.has(ColumnInfoDef.AUTO_ENTER_SUB_TYPE) ? cobj.optInt(ColumnInfoDef.AUTO_ENTER_SUB_TYPE)
@@ -728,8 +733,7 @@ public class DataModelManager implements IColumnInfoManager
 		{
 			cid = new ColumnInfoDef();
 			cid.name = column.getName();
-			cid.datatype = column.getType();
-			cid.length = column.getLength();
+			cid.columnType = column.getConfiguredColumnType(); // may copy db column type from column
 			cid.allowNull = column.getAllowNull();
 			cid.flags = column.getFlags();
 			cid.creationOrderIndex = creationOrderIndex;
@@ -777,8 +781,8 @@ public class DataModelManager implements IColumnInfoManager
 			ColumnInfoDef cid = it.next();
 			ServoyJSONObject obj = new ServoyJSONObject();
 			obj.put(SolutionSerializer.PROP_NAME, cid.name);
-			obj.put(ColumnInfoDef.DATA_TYPE, cid.datatype);
-			if (cid.length != 0) obj.put(ColumnInfoDef.LENGTH, cid.length);
+			obj.put(ColumnInfoDef.DATA_TYPE, cid.columnType.getSqlType());
+			if (cid.columnType.getLength() != 0) obj.put(ColumnInfoDef.LENGTH, cid.columnType.getLength());
 			obj.put(ColumnInfoDef.ALLOW_NULL, cid.allowNull);
 			if (cid.flags != 0) obj.put(ColumnInfoDef.FLAGS, cid.flags);
 
@@ -1231,11 +1235,11 @@ public class DataModelManager implements IColumnInfoManager
 			{
 				message.append("row_ident, "); //$NON-NLS-1$
 			}
-			message.append(Column.getDisplayTypeString(definition.datatype));
+			message.append(Column.getDisplayTypeString(definition.columnType.getSqlType()));
 			message.append("(id:"); //$NON-NLS-1$
-			message.append(definition.datatype);
+			message.append(definition.columnType.getSqlType());
 			message.append("), length: "); //$NON-NLS-1$
-			message.append(definition.length);
+			message.append(definition.columnType.getLength());
 			message.append(", allowNull: "); //$NON-NLS-1$
 			message.append(definition.allowNull);
 			message.append(")"); //$NON-NLS-1$
@@ -1263,24 +1267,34 @@ public class DataModelManager implements IColumnInfoManager
 			else if (type == COLUMN_CONFLICT)
 			{
 				Column c = table.getColumn(columnName);
-				if (c.getType() != dbiFileDefinition.datatype || c.getLength() != dbiFileDefinition.length)
+				ColumnType colColumnType = c.getColumnType(); // compare db column type with dbi file column type
+				ColumnType dbiColumnType = dbiFileDefinition.columnType;
+
+				if (!colColumnType.equals(dbiColumnType))
 				{
-					int t1 = Column.mapToDefaultType(c.getType());
-					int t2 = Column.mapToDefaultType(dbiFileDefinition.datatype);
-					if ((t1 == t2 && c.getLength() == dbiFileDefinition.length) ||
-						(t1 == IColumnTypes.NUMBER && c.getScale() == 0 && t2 == IColumnTypes.INTEGER))
+					int t1 = Column.mapToDefaultType(colColumnType.getSqlType());
+					int t2 = Column.mapToDefaultType(dbiColumnType.getSqlType());
+
+					if ((t1 == t2 && colColumnType.getLength() == dbiColumnType.getLength()) ||
+						(t1 == IColumnTypes.NUMBER && colColumnType.getScale() == 0 && t2 == IColumnTypes.INTEGER))
 					{
 						severity = IMarker.SEVERITY_WARNING; // somewhat compatible types... but still different
 					}
 					else
 					{
 						boolean compatibleLengths = (t1 == t2) && (t1 == IColumnTypes.MEDIA || t1 == IColumnTypes.TEXT) &&
-							(Math.abs(c.getLength() - (float)dbiFileDefinition.length) > (Integer.MAX_VALUE / 2));
+							(Math.abs(colColumnType.getLength() - (float)dbiColumnType.getLength()) > (Integer.MAX_VALUE / 2));
 						// this check is for -1 and big value lengths
 						if (!compatibleLengths)
 						{
 							severity = getErrorSeverity(tableName);
 						}
+					}
+					if (severity != -1 &&
+						new DbiFilePreferences(ServoyModelFinder.getServoyModel().getActiveProject()).isAcceptedColumnDifference(dbiColumnType, colColumnType))
+					{
+						// accepted difference
+						severity = -1;
 					}
 				}
 				else if (c.getAllowNull() != dbiFileDefinition.allowNull)
@@ -1377,7 +1391,5 @@ public class DataModelManager implements IColumnInfoManager
 			Integer result = differenceTypes.get(t.getServerName() + '.' + t.getName());
 			return result == null ? -1 : result.intValue();
 		}
-
 	}
-
 }

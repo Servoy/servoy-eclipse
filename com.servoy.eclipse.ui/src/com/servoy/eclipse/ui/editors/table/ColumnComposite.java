@@ -553,29 +553,27 @@ public class ColumnComposite extends Composite
 			@Override
 			protected void updateColumnData(Widget column)
 			{
+				if (!firstTime)
+				{
+					super.updateColumnData(column);
+				}
+
+				//setting of column data here is important for first resize of columns
+				//after the creation of columns page
+				this.setColumnData(nameColumn, new ColumnPixelData(nameColumn.getWidth(), true));
+				this.setColumnData(typeColumn, new ColumnPixelData(typeColumn.getWidth(), true));
+				this.setColumnData(lengthColumn, new ColumnPixelData(lengthColumn.getWidth(), true));
+				this.setColumnData(rowIdentColumn, new ColumnPixelData(rowIdentColumn.getWidth(), true));
+				this.setColumnData(seqType, new ColumnPixelData(seqType.getWidth(), true));
+
 				if (firstTime)
 				{
-					//setting of column data here is important for first resize of columns
-					//after the creation of columns page
-					this.setColumnData(nameColumn, new ColumnPixelData(nameColumn.getWidth(), true));
-					this.setColumnData(typeColumn, new ColumnPixelData(typeColumn.getWidth(), true));
-					this.setColumnData(lengthColumn, new ColumnPixelData(lengthColumn.getWidth(), true));
-					this.setColumnData(rowIdentColumn, new ColumnPixelData(rowIdentColumn.getWidth(), true));
-					this.setColumnData(seqType, new ColumnPixelData(seqType.getWidth(), true));
 					firstTime = false;
 					super.updateColumnData(column);
 				}
-				else
-				{
-					super.updateColumnData(column);
-					this.setColumnData(nameColumn, new ColumnPixelData(nameColumn.getWidth(), true));
-					this.setColumnData(typeColumn, new ColumnPixelData(typeColumn.getWidth(), true));
-					this.setColumnData(lengthColumn, new ColumnPixelData(lengthColumn.getWidth(), true));
-					this.setColumnData(rowIdentColumn, new ColumnPixelData(rowIdentColumn.getWidth(), true));
-					this.setColumnData(seqType, new ColumnPixelData(seqType.getWidth(), true));
-				}
 			}
 		};
+
 		layout.setColumnData(nameColumn, new ColumnWeightData(20, 50, true));
 		layout.setColumnData(typeColumn, new ColumnWeightData(10, 25, true));
 		layout.setColumnData(lengthColumn, new ColumnWeightData(10, 25, true));
@@ -588,7 +586,6 @@ public class ColumnComposite extends Composite
 
 	protected void initDataBindings(Table t)
 	{
-//		bindingContext = BindingHelper.dispose(bindingContext);
 		// if there are no columns in the table create a pk column
 		if (t.getColumns().size() == 0)
 		{
@@ -616,7 +613,6 @@ public class ColumnComposite extends Composite
 		tableViewer.setContentProvider(columnViewContentProvider);
 		WritableList columnsList = new WritableList(new ArrayList<Column>(t.getColumns()), Column.class);
 		tableViewer.setInput(columnsList);
-//		bindingContext = new DataBindingContext();
 	}
 
 	private int getDefaultFirstColumnSequenceType()
@@ -630,75 +626,52 @@ public class ColumnComposite extends Composite
 		// Disable the check that prevents subclassing of SWT components
 	}
 
-	public static class ColumnTypeComparator implements Comparator
+	public static class ColumnTypeComparator implements Comparator<Column>
 	{
 		public static final ColumnTypeComparator INSTANCE = new ColumnTypeComparator();
 
-		public int compare(Object o1, Object o2)
+		public int compare(Column column1, Column column2)
 		{
-			if (o1 instanceof Column && o2 instanceof Column)
-			{
-				Column column1 = (Column)o1;
-				Column column2 = (Column)o2;
-				return column1.getTypeAsString().compareToIgnoreCase(column2.getTypeAsString());
-			}
-			return 0;
+			return Column.getDisplayTypeString(column1.getConfiguredColumnType().getSqlType()).compareToIgnoreCase(
+				Column.getDisplayTypeString(column2.getConfiguredColumnType().getSqlType()));
 		}
 	}
 
-	public static class ColumnLengthComparator implements Comparator
+	public static class ColumnLengthComparator implements Comparator<Column>
 	{
 		public static final ColumnLengthComparator INSTANCE = new ColumnLengthComparator();
 
-		public int compare(Object o1, Object o2)
+		public int compare(Column column1, Column column2)
 		{
-			if (o1 instanceof Column && o2 instanceof Column)
-			{
-				Column column1 = (Column)o1;
-				Column column2 = (Column)o2;
-				int length1 = column1.getLength();
-				int length2 = column2.getLength();
-				if (length1 > length2) return 1;
-				else if (length1 == length2) return 0;
-				else return -1;
-			}
-			return 0;
+			int length1 = column1.getLength();
+			int length2 = column2.getLength();
+			if (length1 > length2) return 1;
+			if (length1 == length2) return 0;
+			return -1;
 		}
 	}
 
-	public static class ColumnAllowNullComparator implements Comparator
+	public static class ColumnAllowNullComparator implements Comparator<Column>
 	{
 		public static final ColumnAllowNullComparator INSTANCE = new ColumnAllowNullComparator();
 
-		public int compare(Object o1, Object o2)
+		public int compare(Column column1, Column column2)
 		{
-			if (o1 instanceof Column && o2 instanceof Column)
-			{
-				Column column1 = (Column)o1;
-				Column column2 = (Column)o2;
-				boolean allowNull1 = column1.getAllowNull();
-				boolean allowNull2 = column2.getAllowNull();
-				if (!allowNull1 & allowNull2) return 1;
-				else if (allowNull1 & !allowNull2) return -1;
-				else return 0;
-			}
+			boolean allowNull1 = column1.getAllowNull();
+			boolean allowNull2 = column2.getAllowNull();
+			if (!allowNull1 & allowNull2) return 1;
+			if (allowNull1 & !allowNull2) return -1;
 			return 0;
 		}
 	}
 
-	public static class ColumnRowIdentComparator implements Comparator
+	public static class ColumnRowIdentComparator implements Comparator<Column>
 	{
 		public static final ColumnRowIdentComparator INSTANCE = new ColumnRowIdentComparator();
 
-		public int compare(Object o1, Object o2)
+		public int compare(Column column1, Column column2)
 		{
-			if (o1 instanceof Column && o2 instanceof Column)
-			{
-				Column column1 = (Column)o1;
-				Column column2 = (Column)o2;
-				return Column.getFlagsString(column1.getRowIdentType()).compareToIgnoreCase(Column.getFlagsString(column2.getRowIdentType()));
-			}
-			return 0;
+			return Column.getFlagsString(column1.getRowIdentType()).compareToIgnoreCase(Column.getFlagsString(column2.getRowIdentType()));
 		}
 	}
 

@@ -27,8 +27,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-import com.servoy.eclipse.core.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
 
 /**
  * Preference page method and variable jsdoc templates.

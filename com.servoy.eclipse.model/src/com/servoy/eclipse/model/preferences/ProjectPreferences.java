@@ -15,12 +15,12 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.core.preferences;
+package com.servoy.eclipse.model.preferences;
 
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 
-import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.model.Activator;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 

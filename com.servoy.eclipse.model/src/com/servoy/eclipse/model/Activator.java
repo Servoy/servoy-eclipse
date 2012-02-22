@@ -17,7 +17,10 @@
 
 package com.servoy.eclipse.model;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -62,6 +65,14 @@ public class Activator extends Plugin
 	public static Activator getDefault()
 	{
 		return plugin;
+	}
+
+	/**
+	 * Project level preferences
+	 */
+	public IEclipsePreferences getEclipsePreferences(IProject project)
+	{
+		return new ProjectScope(project).getNode(PLUGIN_ID);
 	}
 
 }

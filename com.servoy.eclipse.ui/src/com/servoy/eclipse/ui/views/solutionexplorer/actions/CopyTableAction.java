@@ -164,9 +164,9 @@ public class CopyTableAction extends Action implements ISelectionChangedListener
 							if (selectedTable != null)
 							{
 								Column templateCol = selectedTable.getColumn(c.getName());
-								if (templateCol != null)
+								if (templateCol != null && c.getColumnInfo() != null)
 								{
-									targetServer.duplicateColumnInfo(templateCol.getColumnInfo(), c.getColumnInfo());
+									c.getColumnInfo().copyFrom(templateCol.getColumnInfo());
 									c.setColumnInfo(c.getColumnInfo()); // update some members of the Column if they were changed in column info
 								}
 							}

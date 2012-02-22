@@ -32,7 +32,6 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Column;
-import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
@@ -69,11 +68,11 @@ public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 	@Override
 	public boolean canHandleDifference(TableDifference difference)
 	{
-		return difference != null &&
-			difference.getType() == TableDifference.COLUMN_CONFLICT &&
-			((difference.getDbiFileDefinition().datatype != difference.getTableDefinition().datatype) ||
-				(difference.getDbiFileDefinition().length != difference.getTableDefinition().length) ||
-				(difference.getDbiFileDefinition().allowNull != difference.getTableDefinition().allowNull) || ((difference.getDbiFileDefinition().flags & Column.PK_COLUMN) != (difference.getTableDefinition().flags & Column.PK_COLUMN)));
+		return difference != null && difference.getType() == TableDifference.COLUMN_CONFLICT && (//
+			(!difference.getDbiFileDefinition().columnType.equals(difference.getTableDefinition().columnType)) || //
+				(difference.getDbiFileDefinition().allowNull != difference.getTableDefinition().allowNull) || //
+			((difference.getDbiFileDefinition().flags & Column.PK_COLUMN) != (difference.getTableDefinition().flags & Column.PK_COLUMN))//
+			);
 	}
 
 	@Override
@@ -120,10 +119,7 @@ public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 							{
 								// if the types are the same or compatible, we will keep the rest of the database information intact;
 								// otherwise create default column information for this column
-								int defaultTypeInTable = Column.mapToDefaultType(difference.getTableDefinition().datatype);
-								int defaultTypeInDBIFile = Column.mapToDefaultType(cid.datatype);
-								if (defaultTypeInTable != defaultTypeInDBIFile &&
-									(defaultTypeInTable != IColumnTypes.NUMBER || defaultTypeInDBIFile != IColumnTypes.INTEGER))
+								if (!Column.isColumnInfoCompatible(difference.getTableDefinition().columnType, cid.columnType))
 								{
 									// create defaults
 									Column c = difference.getTable().getColumn(difference.getColumnName());
@@ -141,8 +137,7 @@ public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 								else
 								{
 									// only change what could be conflicting and keep the rest of the column info
-									cid.datatype = difference.getTableDefinition().datatype;
-									cid.length = difference.getTableDefinition().length;
+									cid.columnType = difference.getTableDefinition().columnType;
 									cid.allowNull = difference.getTableDefinition().allowNull;
 								}
 								// if pk info differs... use real one

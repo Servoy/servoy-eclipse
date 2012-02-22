@@ -30,6 +30,7 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.query.ColumnType;
 
 /**
  * Quick fix for differences between column info in the dbi file and columns in the DB. It will change the DB column to match the column information.
@@ -64,15 +65,13 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 	{
 		return difference != null &&
 			difference.getType() == TableDifference.COLUMN_CONFLICT &&
-			(difference.getDbiFileDefinition().datatype != difference.getTableDefinition().datatype ||
-				difference.getDbiFileDefinition().length != difference.getTableDefinition().length || (difference.getDbiFileDefinition().allowNull && (!difference.getTableDefinition().allowNull)));
+			(!difference.getDbiFileDefinition().columnType.equals(difference.getTableDefinition().columnType) || (difference.getDbiFileDefinition().allowNull && (!difference.getTableDefinition().allowNull)));
 	}
 
 	@Override
 	public void run(TableDifference difference)
 	{
-		int type = difference.getDbiFileDefinition().datatype;
-		int lenght = difference.getDbiFileDefinition().length;
+		ColumnType columnType = difference.getDbiFileDefinition().columnType;
 		Column c;
 		try
 		{
@@ -107,7 +106,7 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 					};
 
 					// create a new column with the same name, but using column information
-					c = difference.getTable().createNewColumn(validator, difference.getColumnName(), type, lenght);
+					c = difference.getTable().createNewColumn(validator, difference.getColumnName(), columnType.getSqlType(), columnType.getLength());
 					c.setDatabasePK((difference.getDbiFileDefinition().flags & Column.PK_COLUMN) != 0);
 					c.setAllowNull(difference.getDbiFileDefinition().allowNull);
 					if (difference.getDbiFileDefinition().autoEnterType == ColumnInfo.SEQUENCE_AUTO_ENTER)
