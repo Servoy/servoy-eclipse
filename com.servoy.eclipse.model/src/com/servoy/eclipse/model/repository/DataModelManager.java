@@ -52,7 +52,6 @@ import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IUnexpectedSituationHandler;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.preferences.DbiFilePreferences;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -1283,6 +1282,11 @@ public class DataModelManager implements IColumnInfoManager
 			message.append(definition.columnType.getSqlType());
 			message.append("), length: "); //$NON-NLS-1$
 			message.append(definition.columnType.getLength());
+			if (definition.columnType.getScale() != 0)
+			{
+				message.append(", scale: "); //$NON-NLS-1$
+				message.append(definition.columnType.getScale());
+			}
 			message.append(", allowNull: "); //$NON-NLS-1$
 			message.append(definition.allowNull);
 			message.append(")"); //$NON-NLS-1$
@@ -1313,7 +1317,9 @@ public class DataModelManager implements IColumnInfoManager
 				ColumnType colColumnType = c.getColumnType(); // compare db column type with dbi file column type
 				ColumnType dbiColumnType = dbiFileDefinition.columnType;
 
-				if (!colColumnType.equals(dbiColumnType) && (c.getColumnInfo() == null || !c.getColumnInfo().isCompatibleColumnType(colColumnType)))
+				if (!colColumnType.equals(dbiColumnType) &&
+					(c.getColumnInfo() == null || !c.getColumnInfo().isCompatibleColumnType(colColumnType) || !c.getColumnInfo().isCompatibleColumnType(
+						dbiColumnType)))
 				{
 					int t1 = Column.mapToDefaultType(colColumnType.getSqlType());
 					int t2 = Column.mapToDefaultType(dbiColumnType.getSqlType());
@@ -1332,13 +1338,6 @@ public class DataModelManager implements IColumnInfoManager
 						{
 							severity = getErrorSeverity(tableName);
 						}
-					}
-					if (severity != -1 &&
-						new DbiFilePreferences(ServoyModelFinder.getServoyModel().getActiveResourcesProject().getProject()).isAcceptedColumnDifference(
-							dbiColumnType, colColumnType))
-					{
-						// accepted difference
-						severity = -1;
 					}
 				}
 				else if (c.getAllowNull() != dbiFileDefinition.allowNull)

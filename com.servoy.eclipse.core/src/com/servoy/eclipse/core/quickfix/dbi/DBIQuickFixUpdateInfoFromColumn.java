@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.eclipse.core.resources.IFile;
@@ -127,6 +128,11 @@ public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 									{
 										dmm.createNewColumnInfo(c, false);
 										cid = DataModelManager.getColumnInfoDef(c, colNames.indexOf(difference.getColumnName()));
+										// if table definition has a scale, add it to the compatible list, because the default type won't store scale.
+										if (difference.getTableDefinition().columnType.getScale() > 0)
+										{
+											cid.compatibleColumnTypes = Arrays.asList(difference.getTableDefinition().columnType);
+										}
 										tableInfo.columnInfoDefSet.set(i, cid);
 									}
 									else
@@ -139,6 +145,11 @@ public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 									// only change what could be conflicting and keep the rest of the column info
 									cid.columnType = difference.getTableDefinition().columnType;
 									cid.allowNull = difference.getTableDefinition().allowNull;
+									// if table definition has a scale, add it to the compatible list, because the default type won't store scale.
+									if (difference.getTableDefinition().columnType.getScale() > 0)
+									{
+										cid.compatibleColumnTypes = Arrays.asList(difference.getTableDefinition().columnType);
+									}
 								}
 								// if pk info differs... use real one
 								cid.flags = (cid.flags & (~Column.PK_COLUMN)) | (difference.getTableDefinition().flags & Column.PK_COLUMN);
