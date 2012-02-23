@@ -16,15 +16,13 @@
  */
 package com.servoy.eclipse.core.quickfix.dbi;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
-
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.model.preferences.DbiFilePreferences;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
-import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.util.Debug;
 
 /**
  * Quick fix for differences between column info in the dbi file and columns in the DB. It save in the prefs to no longer complain about this difference. 
@@ -53,7 +51,7 @@ public class DBIQuickFixIgnoreColumnDifference extends TableDifferenceQuickFix
 
 	public String getLabel()
 	{
-		return "Accept column difference, no longer report this difference (is stored in active project preferences).";
+		return "Accept column difference, no longer report this difference (is stored in the column info as a compatible column type).";
 	}
 
 	@Override
@@ -67,24 +65,18 @@ public class DBIQuickFixIgnoreColumnDifference extends TableDifferenceQuickFix
 	public void run(TableDifference difference)
 	{
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		new DbiFilePreferences(servoyModel.getActiveResourcesProject().getProject()).addAcceptedColumnDifference(difference.getDbiFileDefinition().columnType,
-			difference.getTableDefinition().columnType);
-
-		// trigger dbi file change
 		DataModelManager dmm = servoyModel.getDataModelManager();
 		if (dmm != null)
 		{
-			IFile file = dmm.getDBIFile(difference.getServerName(), difference.getTableName());
-			if (file.exists())
+			Column column = difference.getTable().getColumn(difference.getColumnName());
+			column.getColumnInfo().addCompatibleColumnType(difference.getTableDefinition().columnType);
+			try
 			{
-				try
-				{
-					file.touch(null);
-				}
-				catch (CoreException e)
-				{
-					ServoyLog.logError(e);
-				}
+				dmm.updateAllColumnInfo(difference.getTable(), false, false);
+			}
+			catch (RepositoryException e)
+			{
+				Debug.error(e);
 			}
 		}
 	}

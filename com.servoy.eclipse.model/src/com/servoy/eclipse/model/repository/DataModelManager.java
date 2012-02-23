@@ -430,6 +430,11 @@ public class DataModelManager implements IColumnInfoManager
 
 	public void updateAllColumnInfo(final Table t) throws RepositoryException
 	{
+		updateAllColumnInfoImpl(t, true);
+	}
+
+	private void updateAllColumnInfoImpl(final Table t, boolean checkForMarkers) throws RepositoryException
+	{
 		if (t == null || !writeDBIFiles) return;
 
 		// this optimize would normally be OK - but would block writes when startAsTeamProvider is true... so leave it out for now (until we stop using 2 column info providers)
@@ -458,16 +463,19 @@ public class DataModelManager implements IColumnInfoManager
 				if (file.exists())
 				{
 					int differenceType = differences.getDifferenceTypeForTable(t);
-					if (differenceType == TableDifference.COLUMN_CONFLICT || differenceType == TableDifference.COLUMN_MISSING_FROM_DB ||
-						differenceType == TableDifference.COLUMN_MISSING_FROM_DBI_FILE)
+					if (checkForMarkers)
 					{
-						for (IUnexpectedSituationHandler e : ResourcesUtils.<IUnexpectedSituationHandler> getExtensions(IUnexpectedSituationHandler.EXTENSION_ID))
+						if (differenceType == TableDifference.COLUMN_CONFLICT || differenceType == TableDifference.COLUMN_MISSING_FROM_DB ||
+							differenceType == TableDifference.COLUMN_MISSING_FROM_DBI_FILE)
 						{
-							// if the user chose 'Yes' for example, write the contents
-							if (!e.allowUnexpectedDBIWrite(t))
+							for (IUnexpectedSituationHandler e : ResourcesUtils.<IUnexpectedSituationHandler> getExtensions(IUnexpectedSituationHandler.EXTENSION_ID))
 							{
-								// disallowed
-								return;
+								// if the user chose 'Yes' for example, write the contents
+								if (!e.allowUnexpectedDBIWrite(t))
+								{
+									// disallowed
+									return;
+								}
 							}
 						}
 					}
@@ -513,6 +521,18 @@ public class DataModelManager implements IColumnInfoManager
 	 */
 	public void updateAllColumnInfo(final Table t, boolean writeBackLater) throws RepositoryException
 	{
+		updateAllColumnInfo(t, writeBackLater, true);
+	}
+
+	/**
+	 * Will save the dbi file later or now, depending on the parameters.
+	 * 
+	 * @param t the table.
+	 * @param writeBackLater specifies whether the column info should be updater now or later.
+	 * @throws RepositoryException
+	 */
+	public void updateAllColumnInfo(final Table t, boolean writeBackLater, final boolean checkForMarkers) throws RepositoryException
+	{
 		if (writeBackLater)
 		{
 			// write them async, because this can be called from a resource change event (that locks the resource tree for writing)
@@ -523,7 +543,7 @@ public class DataModelManager implements IColumnInfoManager
 				{
 					try
 					{
-						updateAllColumnInfo(t);
+						updateAllColumnInfoImpl(t, checkForMarkers);
 					}
 					catch (RepositoryException e)
 					{
@@ -538,7 +558,7 @@ public class DataModelManager implements IColumnInfoManager
 		}
 		else
 		{
-			updateAllColumnInfo(t);
+			updateAllColumnInfoImpl(t, checkForMarkers);
 		}
 	}
 
@@ -599,6 +619,8 @@ public class DataModelManager implements IColumnInfoManager
 					ci.setCompatibleColumnTypes(cid.compatibleColumnTypes);
 					c.setColumnInfo(ci);
 					c.setFlags(cid.flags); // updates rowident columns in Table as well
+					// let table editors and so on now that a column is loaded.
+					t.fireIColumnChanged(c);
 				}
 
 				addDifferenceMarkersIfNecessary(c, cid, t, cname);
@@ -618,7 +640,7 @@ public class DataModelManager implements IColumnInfoManager
 		else
 		{
 			ColumnInfoDef dbCid = new ColumnInfoDef();
-			dbCid.columnType = c.getConfiguredColumnType();
+			dbCid.columnType = c.getColumnType();
 			dbCid.allowNull = c.getAllowNull();
 			dbCid.flags = c.getFlags();
 			TableDifference tableDifference = new TableDifference(t, columnName, TableDifference.COLUMN_CONFLICT, dbCid, cid);
@@ -694,7 +716,12 @@ public class DataModelManager implements IColumnInfoManager
 		return tableInfo;
 	}
 
-	private String serializeTable(Table t) throws JSONException
+	public String serializeTable(Table t) throws JSONException
+	{
+		return serializeTable(t, true);
+	}
+
+	public String serializeTable(Table t, boolean onlyStoredColumns) throws JSONException
 	{
 		TableDef tableInfo = new TableDef();
 		tableInfo.name = t.getName();
@@ -711,7 +738,7 @@ public class DataModelManager implements IColumnInfoManager
 		while (it.hasNext())
 		{
 			Column column = it.next();
-			ColumnInfoDef cid = getColumnInfoDef(column, colNames.indexOf(column.getName()));
+			ColumnInfoDef cid = getColumnInfoDef(column, colNames.indexOf(column.getName()), onlyStoredColumns);
 			if (cid != null)
 			{
 				if (!tableInfo.columnInfoDefSet.contains(cid))
@@ -723,6 +750,11 @@ public class DataModelManager implements IColumnInfoManager
 		return serializeTableInfo(tableInfo);
 	}
 
+	public static ColumnInfoDef getColumnInfoDef(Column column, int creationOrderIndex)
+	{
+		return getColumnInfoDef(column, creationOrderIndex, true);
+	}
+
 	/**
 	 * Puts all information about the given column into a ColumnInfoDef object, if the give column has column info.
 	 * 
@@ -730,11 +762,11 @@ public class DataModelManager implements IColumnInfoManager
 	 * @param creationOrderIndex the creationOrderIndex for this column.
 	 * @return all information about the given column into a ColumnInfoDef object, if the give column has column info and null otherwise.
 	 */
-	public static ColumnInfoDef getColumnInfoDef(Column column, int creationOrderIndex)
+	public static ColumnInfoDef getColumnInfoDef(Column column, int creationOrderIndex, boolean onlyStoredColumns)
 	{
 		ColumnInfoDef cid = null;
 		ColumnInfo ci = column.getColumnInfo();
-		if (ci != null && column.getExistInDB())
+		if (ci != null && (column.getExistInDB() || !onlyStoredColumns))
 		{
 			cid = new ColumnInfoDef();
 			cid.name = column.getName();

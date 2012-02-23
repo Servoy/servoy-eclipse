@@ -16,9 +16,12 @@
  */
 package com.servoy.eclipse.ui.editors;
 
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.Iterator;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
@@ -37,6 +40,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.TableEditorInput;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.table.AggregationsComposite;
@@ -62,6 +66,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
 public class TableEditor extends MultiPageEditorPart implements IActiveProjectListener
@@ -509,6 +514,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			public void iColumnChanged(IColumn column)
 			{
 				flagModified();
+				if (columnComposite != null) columnComposite.refreshViewer(table);
 			}
 
 			public void iColumnCreated(IColumn column)
@@ -633,14 +639,43 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	public void flagModified()
 	{
-		isModified = true;
-		Display.getDefault().asyncExec(new Runnable()
+		boolean modified = true;
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		DataModelManager dmm = servoyModel.getDataModelManager();
+		IFile dbiFile = dmm.getDBIFile(table.getServerName(), table.getName());
+		InputStream is = null;
+		try
 		{
-			public void run()
+			is = dbiFile.getContents(true);
+			String disk = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+			String mem = dmm.serializeTable(table, false);
+			modified = !mem.equals(disk);
+		}
+		catch (Exception e)
+		{
+			Debug.error(e);
+		}
+		finally
+		{
+			try
 			{
-				firePropertyChange(IEditorPart.PROP_DIRTY);
+				is.close();
 			}
-		});
+			catch (Exception e)
+			{
+			}
+		}
+		if (modified != isModified)
+		{
+			isModified = modified;
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					firePropertyChange(IEditorPart.PROP_DIRTY);
+				}
+			});
+		}
 	}
 
 	private boolean flushTable = false;
