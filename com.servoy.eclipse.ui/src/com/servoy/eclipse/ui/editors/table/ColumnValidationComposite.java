@@ -266,7 +266,7 @@ public class ColumnValidationComposite extends Composite
 
 					if (json.length() > 0)
 					{
-						props = json.toString(true).trim();
+						props = json.toString(false).trim();
 					}
 				}
 			}
