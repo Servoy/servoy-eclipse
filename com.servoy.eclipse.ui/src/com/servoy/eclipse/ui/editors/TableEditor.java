@@ -642,27 +642,33 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		boolean modified = true;
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		DataModelManager dmm = servoyModel.getDataModelManager();
-		IFile dbiFile = dmm.getDBIFile(table.getServerName(), table.getName());
-		InputStream is = null;
-		try
+		if (dmm != null)
 		{
-			is = dbiFile.getContents(true);
-			String disk = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
-			String mem = dmm.serializeTable(table, false);
-			modified = !mem.equals(disk);
-		}
-		catch (Exception e)
-		{
-			Debug.error(e);
-		}
-		finally
-		{
+			IFile dbiFile = dmm.getDBIFile(table.getServerName(), table.getName());
+			InputStream is = null;
 			try
 			{
-				is.close();
+				if (dbiFile != null && dbiFile.exists())
+				{
+					is = dbiFile.getContents(true);
+					String disk = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+					String mem = dmm.serializeTable(table, false);
+					modified = !mem.equals(disk);
+				}
 			}
 			catch (Exception e)
 			{
+				Debug.error(e);
+			}
+			finally
+			{
+				try
+				{
+					is.close();
+				}
+				catch (Exception e)
+				{
+				}
 			}
 		}
 		if (modified != isModified)
