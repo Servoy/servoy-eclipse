@@ -338,7 +338,12 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 			Composite inner = addPreferenceComposite(composite, sc1, problemSection);
 			for (ErrorWarningPreferenceItem problemItem : getAssociatedProblemMarkers(problemSection))
 			{
-				addPreferenceItem(inner, problemItem.problem.getLeft(), problemItem.description, names, ids, problemItem.problem.getRight().name());
+				String defaultValue = problemItem.problem.getRight().name();
+				if (isProjectPreferencePage())
+				{
+					defaultValue = InstanceScope.INSTANCE.getNode(ServoyBuilder.ERROR_WARNING_PREFERENCES_NODE).get(problemItem.problem.getLeft(), defaultValue);
+				}
+				addPreferenceItem(inner, problemItem.problem.getLeft(), problemItem.description, names, ids, defaultValue);
 			}
 		}
 
@@ -733,6 +738,14 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 	protected void performDefaults()
 	{
 		changes.clear();
+		try
+		{
+			settingsNode.clear();
+		}
+		catch (BackingStoreException e)
+		{
+			ServoyLog.logError(e);
+		}
 		for (Pair<Combo, Integer> p : defaults)
 		{
 			p.getLeft().select(p.getRight().intValue() >= 0 ? p.getRight().intValue() : 0);
