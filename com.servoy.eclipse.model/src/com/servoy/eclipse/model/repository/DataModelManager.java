@@ -47,6 +47,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.MarkerMessages;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
@@ -150,8 +151,10 @@ public class DataModelManager implements IColumnInfoManager
 							IFile dbiFile = getDBIFile(t.getServerName(), t.getName());
 							if (dbiFile.exists())
 							{
-								String customSeverity = ServoyBuilder.levelSettingsNode.get(ServoyBuilder.COLUMN_UUID_FLAG_NOT_SET.getLeft(),
-									ServoyBuilder.COLUMN_UUID_FLAG_NOT_SET.getRight().name());
+
+								String customSeverity = ServoyBuilder.getSeverity(ServoyBuilder.COLUMN_UUID_FLAG_NOT_SET.getLeft(),
+									ServoyBuilder.COLUMN_UUID_FLAG_NOT_SET.getRight().name(),
+									ServoyModelFinder.getServoyModel().getActiveProject().getProject());
 								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 								{
 									ServoyMarker mk = MarkerMessages.ColumnUUIDFlagNotSet.fill(t.getName(), column.getName());
@@ -1272,7 +1275,8 @@ public class DataModelManager implements IColumnInfoManager
 		private int computeCustomSeverity(Pair<String, ProblemSeverity> problem)
 		{
 			int severity = -1;
-			String customSeverity = ServoyBuilder.levelSettingsNode.get(problem.getLeft(), problem.getRight().name());
+			String customSeverity = ServoyBuilder.getSeverity(problem.getLeft(), problem.getRight().name(),
+				ServoyModelFinder.getServoyModel().getActiveProject().getProject());
 			if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 			{
 				severity = ServoyBuilder.getTranslatedSeverity(customSeverity, problem.getRight());
@@ -1398,6 +1402,7 @@ public class DataModelManager implements IColumnInfoManager
 			{
 				severity = computeCustomSeverity(ServoyBuilder.DBI_BAD_INFO);
 			}
+
 			return severity;
 		}
 	}

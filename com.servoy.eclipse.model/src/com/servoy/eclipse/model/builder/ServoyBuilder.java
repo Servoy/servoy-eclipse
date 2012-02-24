@@ -49,13 +49,13 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.problem.ProblemSeverity;
 import org.xml.sax.SAXException;
@@ -98,6 +98,7 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -515,10 +516,37 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private static IMarkerAttributeContributor[] markerContributors;
 
 	private IProgressMonitor monitor;
-	public static final IEclipsePreferences levelSettingsNode = new InstanceScope().getNode(ERROR_WARNING_PREFERENCES_NODE);;
 
 	public ServoyBuilder()
 	{
+	}
+
+	public static String getSeverity(String key, String def, IPersist persist)
+	{
+		IProject project = null;
+		if (persist != null)
+		{
+			IRootObject rootObject = persist.getRootObject();
+			if (rootObject instanceof Solution)
+			{
+				ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(rootObject.getName());
+				if (servoyProject != null)
+				{
+					project = servoyProject.getProject();
+				}
+			}
+		}
+		return getSeverity(key, def, project);
+	}
+
+	public static String getSeverity(String key, String def, IProject project)
+	{
+		if (project != null)
+		{
+			String value = new ProjectScope(project).getNode(ERROR_WARNING_PREFERENCES_NODE).get(key, null);
+			if (value != null) return value;
+		}
+		return InstanceScope.INSTANCE.getNode(ERROR_WARNING_PREFERENCES_NODE).get(key, def);
 	}
 
 	@Override
@@ -2856,7 +2884,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				if (vl.getCustomValues() != null)
 				{
-					String customSeverity = levelSettingsNode.get(VALUELIST_DB_WITH_CUSTOM_VALUES.getLeft(), VALUELIST_DB_WITH_CUSTOM_VALUES.getRight().name());
+					String customSeverity = getSeverity(VALUELIST_DB_WITH_CUSTOM_VALUES.getLeft(), VALUELIST_DB_WITH_CUSTOM_VALUES.getRight().name(), vl);
 					if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 					{
 						// this is not a custom valuelist
@@ -2873,8 +2901,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					// vl. based on relation; make sure table name/server name are not specified
 					if (vl.getTableName() != null || vl.getServerName() != null)
 					{
-						String customSeverity = levelSettingsNode.get(VALUELIST_RELATION_WITH_DATASOURCE.getLeft(),
-							VALUELIST_RELATION_WITH_DATASOURCE.getRight().name());
+						String customSeverity = getSeverity(VALUELIST_RELATION_WITH_DATASOURCE.getLeft(), VALUELIST_RELATION_WITH_DATASOURCE.getRight().name(),
+							vl);
 						if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 						{
 							ServoyMarker mk = MarkerMessages.ValuelistRelationWithDatasource.fill(vl.getName());
@@ -2889,8 +2917,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						Relation relation = flattenedSolution.getRelation(relName);
 						if (relation == null)
 						{
-							String customSeverity = levelSettingsNode.get(VALUELIST_RELATION_NOT_FOUND.getLeft(),
-								VALUELIST_RELATION_NOT_FOUND.getRight().name());
+							String customSeverity = getSeverity(VALUELIST_RELATION_NOT_FOUND.getLeft(), VALUELIST_RELATION_NOT_FOUND.getRight().name(), vl);
 							if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 							{
 								ServoyMarker mk = MarkerMessages.ValuelistRelationNotFound.fill(vl.getName(), relName);
@@ -2908,8 +2935,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						// check if the relations match up (check foreign/primary tables)
 						if (flattenedSolution.getRelationSequence(vl.getRelationName()) == null)
 						{
-							String customSeverity = levelSettingsNode.get(VALUELIST_RELATION_SEQUENCE_INCONSISTENT.getLeft(),
-								VALUELIST_RELATION_SEQUENCE_INCONSISTENT.getRight().name());
+							String customSeverity = getSeverity(VALUELIST_RELATION_SEQUENCE_INCONSISTENT.getLeft(),
+								VALUELIST_RELATION_SEQUENCE_INCONSISTENT.getRight().name(), vl);
 							if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 							{
 								ServoyMarker mk = MarkerMessages.ValuelistRelationSequenceInconsistent.fill(vl.getName(), vl.getRelationName());
@@ -2926,8 +2953,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				else
 				{
-					String customSeverity = levelSettingsNode.get(VALUELIST_DB_NOT_TABLE_OR_RELATION.getLeft(),
-						VALUELIST_DB_NOT_TABLE_OR_RELATION.getRight().name());
+					String customSeverity = getSeverity(VALUELIST_DB_NOT_TABLE_OR_RELATION.getLeft(), VALUELIST_DB_NOT_TABLE_OR_RELATION.getRight().name(), vl);
 					if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 					{
 						ServoyMarker mk = MarkerMessages.ValuelistDBNotTableOrRelation.fill(vl.getName());
@@ -2940,8 +2966,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					String[] stn = DataSourceUtils.getDBServernameTablename(dataSource);
 					if (stn == null || (stn != null && (stn.length == 0 || (stn.length > 0 && stn[0] == null))))
 					{
-						String customSeverity = levelSettingsNode.get(VALUELIST_DB_MALFORMED_TABLE_DEFINITION.getLeft(),
-							VALUELIST_DB_MALFORMED_TABLE_DEFINITION.getRight().name());
+						String customSeverity = getSeverity(VALUELIST_DB_MALFORMED_TABLE_DEFINITION.getLeft(),
+							VALUELIST_DB_MALFORMED_TABLE_DEFINITION.getRight().name(), vl);
 						if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 						{
 							ServoyMarker mk = MarkerMessages.ValuelistDBMalformedTableDefinition.fill(vl.getName(), dataSource);
@@ -2956,8 +2982,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							if (!server.getName().equals(stn[0]))
 							{
-								String customSeverity = levelSettingsNode.get(VALUELIST_DB_SERVER_DUPLICATE.getLeft(),
-									VALUELIST_DB_SERVER_DUPLICATE.getRight().name());
+								String customSeverity = getSeverity(VALUELIST_DB_SERVER_DUPLICATE.getLeft(), VALUELIST_DB_SERVER_DUPLICATE.getRight().name(),
+									vl);
 								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 								{
 									ServoyMarker mk = MarkerMessages.ValuelistDBServerDuplicate.fill(vl.getName(), stn[0]);
@@ -2968,8 +2994,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							table = server.getTable(stn[1]);
 							if (table == null)
 							{
-								String customSeverity = levelSettingsNode.get(VALUELIST_DB_TABLE_NOT_ACCESSIBLE.getLeft(),
-									VALUELIST_DB_TABLE_NOT_ACCESSIBLE.getRight().name());
+								String customSeverity = getSeverity(VALUELIST_DB_TABLE_NOT_ACCESSIBLE.getLeft(),
+									VALUELIST_DB_TABLE_NOT_ACCESSIBLE.getRight().name(), vl);
 								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 								{
 									ServoyMarker mk = MarkerMessages.ValuelistDBTableNotAccessible.fill(vl.getName(), stn[1]);
@@ -2979,8 +3005,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 							else if (table.isMarkedAsHiddenInDeveloper())
 							{
-								String customSeverity = levelSettingsNode.get(TABLE_MARKED_AS_HIDDEN_BUT_USED_IN.getLeft(),
-									TABLE_MARKED_AS_HIDDEN_BUT_USED_IN.getRight().name());
+								String customSeverity = getSeverity(TABLE_MARKED_AS_HIDDEN_BUT_USED_IN.getLeft(),
+									TABLE_MARKED_AS_HIDDEN_BUT_USED_IN.getRight().name(), vl);
 								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 								{
 									ServoyMarker mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(table.getDataSource(), "valuelist ", vl.getName());
@@ -3001,8 +3027,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							if (flattenedSolution.getScriptCalculation(vl.getDataProviderID1(), table) == null)
 							{
-								String customSeverity = levelSettingsNode.get(VALUELIST_DB_DATASOURCE_NOT_FOUND.getLeft(),
-									VALUELIST_DB_DATASOURCE_NOT_FOUND.getRight().name());
+								String customSeverity = getSeverity(VALUELIST_DB_DATASOURCE_NOT_FOUND.getLeft(),
+									VALUELIST_DB_DATASOURCE_NOT_FOUND.getRight().name(), vl);
 								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 								{
 									ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID1(), table.getName());
@@ -3013,8 +3039,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						else if (column.getColumnInfo() != null && column.getColumnInfo().isExcluded())
 						{
-							String customSeverity = levelSettingsNode.get(VALUELIST_DB_DATASOURCE_NOT_FOUND.getLeft(),
-								VALUELIST_DB_DATASOURCE_NOT_FOUND.getRight().name());
+							String customSeverity = getSeverity(VALUELIST_DB_DATASOURCE_NOT_FOUND.getLeft(),
+								VALUELIST_DB_DATASOURCE_NOT_FOUND.getRight().name(), vl);
 							if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 							{
 								ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID1(), table.getName());
@@ -3030,8 +3056,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							if (flattenedSolution.getScriptCalculation(vl.getDataProviderID2(), table) == null)
 							{
-								String customSeverity = levelSettingsNode.get(VALUELIST_DB_DATASOURCE_NOT_FOUND.getLeft(),
-									VALUELIST_DB_DATASOURCE_NOT_FOUND.getRight().name());
+								String customSeverity = getSeverity(VALUELIST_DB_DATASOURCE_NOT_FOUND.getLeft(),
+									VALUELIST_DB_DATASOURCE_NOT_FOUND.getRight().name(), vl);
 								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 								{
 									ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID2(), table.getName());
@@ -3042,8 +3068,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						else if (column.getColumnInfo() != null && column.getColumnInfo().isExcluded())
 						{
-							String customSeverity = levelSettingsNode.get(VALUELIST_DB_DATASOURCE_NOT_FOUND.getLeft(),
-								VALUELIST_DB_DATASOURCE_NOT_FOUND.getRight().name());
+							String customSeverity = getSeverity(VALUELIST_DB_DATASOURCE_NOT_FOUND.getLeft(),
+								VALUELIST_DB_DATASOURCE_NOT_FOUND.getRight().name(), vl);
 							if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 							{
 								ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID2(), table.getName());
@@ -3060,8 +3086,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							if (flattenedSolution.getScriptCalculation(vl.getDataProviderID3(), table) == null)
 							{
-								String customSeverity = levelSettingsNode.get(VALUELIST_DB_DATASOURCE_NOT_FOUND.getLeft(),
-									VALUELIST_DB_DATASOURCE_NOT_FOUND.getRight().name());
+								String customSeverity = getSeverity(VALUELIST_DB_DATASOURCE_NOT_FOUND.getLeft(),
+									VALUELIST_DB_DATASOURCE_NOT_FOUND.getRight().name(), vl);
 								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 								{
 									ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID3(), table.getName());
@@ -3072,8 +3098,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						else if (column.getColumnInfo() != null && column.getColumnInfo().isExcluded())
 						{
-							String customSeverity = levelSettingsNode.get(VALUELIST_DB_DATASOURCE_NOT_FOUND.getLeft(),
-								VALUELIST_DB_DATASOURCE_NOT_FOUND.getRight().name());
+							String customSeverity = getSeverity(VALUELIST_DB_DATASOURCE_NOT_FOUND.getLeft(),
+								VALUELIST_DB_DATASOURCE_NOT_FOUND.getRight().name(), vl);
 							if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 							{
 								ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID3(), table.getName());
@@ -3087,8 +3113,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						Column column = table.getColumn(DBValueList.NAME_COLUMN);
 						if (column == null)
 						{
-							String customSeverity = levelSettingsNode.get(VALUELIST_DB_DATASOURCE_NOT_FOUND.getLeft(),
-								VALUELIST_DB_DATASOURCE_NOT_FOUND.getRight().name());
+							String customSeverity = getSeverity(VALUELIST_DB_DATASOURCE_NOT_FOUND.getLeft(),
+								VALUELIST_DB_DATASOURCE_NOT_FOUND.getRight().name(), vl);
 							if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 							{
 								ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), DBValueList.NAME_COLUMN, table.getName());
@@ -3113,8 +3139,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				// custom value list; make sure it does not specify table/server/relation
 				if (vl.getTableName() != null || vl.getServerName() != null || vl.getRelationName() != null)
 				{
-					String customSeverity = levelSettingsNode.get(VALUELIST_CUSTOM_VALUES_WITH_DB_INFO.getLeft(),
-						VALUELIST_CUSTOM_VALUES_WITH_DB_INFO.getRight().name());
+					String customSeverity = getSeverity(VALUELIST_CUSTOM_VALUES_WITH_DB_INFO.getLeft(), VALUELIST_CUSTOM_VALUES_WITH_DB_INFO.getRight().name(),
+						vl);
 					if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 					{
 						ServoyMarker marker = MarkerMessages.ValuelistCustomValuesWithDBInfo.fill(vl.getName());
@@ -3132,8 +3158,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					ScriptMethod scriptMethod = flattenedSolution.getScriptMethod(null, vl.getCustomValues());
 					if (scriptMethod == null)
 					{
-						String customSeverity = levelSettingsNode.get(VALUELIST_GLOBAL_METHOD_NOT_FOUND.getLeft(),
-							VALUELIST_GLOBAL_METHOD_NOT_FOUND.getRight().name());
+						String customSeverity = getSeverity(VALUELIST_GLOBAL_METHOD_NOT_FOUND.getLeft(), VALUELIST_GLOBAL_METHOD_NOT_FOUND.getRight().name(),
+							vl);
 						if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 						{
 							ServoyMarker mk = MarkerMessages.ValuelistGlobalMethodNotFound.fill(vl.getName());
@@ -3143,8 +3169,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					}
 					else if (scriptMethod.getParent() != vl.getParent() && scriptMethod.isPrivate())
 					{
-						String customSeverity = levelSettingsNode.get(VALUELIST_GLOBAL_METHOD_NOT_ACCESSIBLE.getLeft(),
-							VALUELIST_GLOBAL_METHOD_NOT_ACCESSIBLE.getRight().name());
+						String customSeverity = getSeverity(VALUELIST_GLOBAL_METHOD_NOT_ACCESSIBLE.getLeft(),
+							VALUELIST_GLOBAL_METHOD_NOT_ACCESSIBLE.getRight().name(), vl);
 						if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 						{
 							ServoyMarker mk = MarkerMessages.ValuelistGlobalMethodNotAccessible.fill(vl.getName());
@@ -3172,8 +3198,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					}
 					if (invalidValues)
 					{
-						String customSeverity = levelSettingsNode.get(VALUELIST_INVALID_CUSTOM_VALUES.getLeft(),
-							VALUELIST_INVALID_CUSTOM_VALUES.getRight().name());
+						String customSeverity = getSeverity(VALUELIST_INVALID_CUSTOM_VALUES.getLeft(), VALUELIST_INVALID_CUSTOM_VALUES.getRight().name(), vl);
 						if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 						{
 							ServoyMarker mk = MarkerMessages.ValuelistInvalidCustomValues.fill(vl.getName());
@@ -3185,7 +3210,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 			else
 			{
-				String customSeverity = levelSettingsNode.get(VALUELIST_TYPE_UNKNOWN.getLeft(), VALUELIST_TYPE_UNKNOWN.getRight().name());
+				String customSeverity = getSeverity(VALUELIST_TYPE_UNKNOWN.getLeft(), VALUELIST_TYPE_UNKNOWN.getRight().name(), vl);
 				if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 				{
 					ServoyMarker mk = MarkerMessages.ValuelistTypeUnknown.fill(vl.getName(), vl.getValueListType());
@@ -3198,7 +3223,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		{
 			exceptionCount++;
 			if (exceptionCount < MAX_EXCEPTIONS) ServoyLog.logError(ex);
-			String customSeverity = levelSettingsNode.get(VALUELIST_GENERIC_ERROR.getLeft(), VALUELIST_GENERIC_ERROR.getRight().name());
+			String customSeverity = getSeverity(VALUELIST_GENERIC_ERROR.getLeft(), VALUELIST_GENERIC_ERROR.getRight().name(), vl);
 			if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 			{
 				ServoyMarker mk;
@@ -3866,8 +3891,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					Relation relation = flattenedSolution.getRelation(split[i]);
 					if (relation == null)
 					{
-						String customSeverity = levelSettingsNode.get(INVALID_SORT_OPTIONS_RELATION_NOT_FOUND.getLeft(),
-							INVALID_SORT_OPTIONS_RELATION_NOT_FOUND.getRight().name());
+						String customSeverity = getSeverity(INVALID_SORT_OPTIONS_RELATION_NOT_FOUND.getLeft(),
+							INVALID_SORT_OPTIONS_RELATION_NOT_FOUND.getRight().name(), persist);
 						if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 						{
 							ServoyMarker mk = MarkerMessages.InvalidSortOptionsRelationNotFound.fill(elementName, name, sortOptions, split[i]);
@@ -3881,8 +3906,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						if (!lastTable.equals(relation.getPrimaryTable()))
 						{
-							String customSeverity = levelSettingsNode.get(INVALID_SORT_OPTIONS_RELATION_DIFFERENT_PRIMARY_DATASOURCE.getLeft(),
-								INVALID_SORT_OPTIONS_RELATION_DIFFERENT_PRIMARY_DATASOURCE.getRight().name());
+							String customSeverity = getSeverity(INVALID_SORT_OPTIONS_RELATION_DIFFERENT_PRIMARY_DATASOURCE.getLeft(),
+								INVALID_SORT_OPTIONS_RELATION_DIFFERENT_PRIMARY_DATASOURCE.getRight().name(), persist);
 							if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 							{
 								ServoyMarker mk = MarkerMessages.InvalidSortOptionsRelationDifferentPrimaryDatasource.fill(elementName, name, sortOptions,
@@ -3900,8 +3925,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					Column c = lastTable.getColumn(colName);
 					if (c == null || (c.getColumnInfo() != null && c.getColumnInfo().isExcluded()))
 					{
-						String customSeverity = levelSettingsNode.get(INVALID_SORT_OPTIONS_COLUMN_NOT_FOUND.getLeft(),
-							INVALID_SORT_OPTIONS_COLUMN_NOT_FOUND.getRight().name());
+						String customSeverity = getSeverity(INVALID_SORT_OPTIONS_COLUMN_NOT_FOUND.getLeft(),
+							INVALID_SORT_OPTIONS_COLUMN_NOT_FOUND.getRight().name(), persist);
 						if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 						{
 							ServoyMarker mk = MarkerMessages.InvalidSortOptionsColumnNotFound.fill(elementName, name, sortOptions, colName);
@@ -4202,7 +4227,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		int priority, String location, IPersist persist)
 	{
 		if (problemSeverity == null) return null;
-		String customSeverity = levelSettingsNode.get(problemSeverity.getLeft(), problemSeverity.getRight().name());
+		String customSeverity = persist != null ? getSeverity(problemSeverity.getLeft(), problemSeverity.getRight().name(), persist) : getSeverity(
+			problemSeverity.getLeft(), problemSeverity.getRight().name(), resource.getProject());
 		if (customSeverity.equals(ProblemSeverity.IGNORE.name())) return null;
 		int severity = getTranslatedSeverity(customSeverity, problemSeverity.getRight());
 
@@ -4322,7 +4348,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static IMarker addMarker(IResource resource, String type, String message, int charNumber, Pair<String, ProblemSeverity> problemSeverity,
 		int priority, String location)
 	{
-		String customSeverity = levelSettingsNode.get(problemSeverity.getLeft(), problemSeverity.getRight().name());
+		String customSeverity = getSeverity(problemSeverity.getLeft(), problemSeverity.getRight().name(), resource.getProject());
 		if (customSeverity.equals(ProblemSeverity.IGNORE.name())) return null;
 		int severity = getTranslatedSeverity(customSeverity, problemSeverity.getRight());
 

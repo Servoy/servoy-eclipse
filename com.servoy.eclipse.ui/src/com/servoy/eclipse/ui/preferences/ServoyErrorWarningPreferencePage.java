@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
@@ -92,7 +93,7 @@ import com.servoy.j2db.util.Pair;
 public class ServoyErrorWarningPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IWorkbenchPropertyPage
 {
 
-	private final IEclipsePreferences settingsNode;
+	private IEclipsePreferences settingsNode;
 	private final HashMap<String, String> changes = new HashMap<String, String>();
 	private final List<Pair<Combo, Integer>> defaults = new ArrayList<Pair<Combo, Integer>>();
 	private final List<String> problemSections = new ArrayList<String>();
@@ -124,8 +125,7 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 
 	public ServoyErrorWarningPreferencePage()
 	{
-		settingsNode = new InstanceScope().getNode(ServoyBuilder.ERROR_WARNING_PREFERENCES_NODE);
-
+		settingsNode = InstanceScope.INSTANCE.getNode(ServoyBuilder.ERROR_WARNING_PREFERENCES_NODE);
 		fProject = null;
 		fData = null;
 		fBlockEnableState = null;
@@ -188,8 +188,11 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 		}
 	}
 
+	private boolean projectSpecificSetting = false;
+
 	protected void enableProjectSpecificSettings(boolean useProjectSpecificSettings)
 	{
+		projectSpecificSetting = useProjectSpecificSettings;
 		fUseProjectSettings.setSelection(useProjectSpecificSettings);
 		enablePreferenceContent(useProjectSpecificSettings);
 		updateLinkVisibility();
@@ -231,6 +234,10 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 	public void setElement(IAdaptable element)
 	{
 		fProject = (IProject)element.getAdapter(IResource.class);
+		if (fProject != null)
+		{
+			settingsNode = new ProjectScope(fProject).getNode(ServoyBuilder.ERROR_WARNING_PREFERENCES_NODE);
+		}
 	}
 
 	protected boolean isProjectPreferencePage()
@@ -745,7 +752,20 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 	{
 		try
 		{
-			if (changes.size() > 0)
+			boolean doBuild = false;
+			if (isProjectPreferencePage() && !projectSpecificSetting && hasProjectSpecificOptions(fProject))
+			{
+				try
+				{
+					settingsNode.clear();
+				}
+				catch (BackingStoreException e)
+				{
+					ServoyLog.logError(e);
+				}
+				doBuild = true;
+			}
+			else if (changes.size() > 0)
 			{
 				for (Entry<String, String> e : changes.entrySet())
 				{
@@ -753,6 +773,10 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 				}
 				settingsNode.flush();
 				changes.clear();
+				doBuild = true;
+			}
+			if (doBuild)
+			{
 				ServoyModelManager.getServoyModelManager().getServoyModel().buildActiveProjectsInJob();
 			}
 		}
@@ -793,6 +817,14 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 	 */
 	public boolean hasProjectSpecificOptions(IProject project)
 	{
+		try
+		{
+			return new ProjectScope(project).getNode(ServoyBuilder.ERROR_WARNING_PREFERENCES_NODE).keys().length > 0;
+		}
+		catch (BackingStoreException e)
+		{
+			ServoyLog.logError(e);
+		}
 		return false;
 	}
 
