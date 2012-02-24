@@ -18,6 +18,8 @@
 package com.servoy.eclipse.ui.preferences;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -425,6 +427,7 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 		problemSections.add(ERROR_WARNING_MODULES_PROBLEMS);
 		problemSections.add(ERROR_WARNING_FORM_PROBLEMS);
 		problemSections.add(ERROR_WARNING_STYLES_PROBLEMS);
+		Collections.sort(problemSections);
 	}
 
 	private class ErrorWarningPreferenceItem
@@ -442,6 +445,14 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 	private List<ErrorWarningPreferenceItem> getAssociatedProblemMarkers(String problemSection)
 	{
 		List<ErrorWarningPreferenceItem> associatedProblemMarkers = new ArrayList<ErrorWarningPreferenceItem>();
+
+		Comparator<ErrorWarningPreferenceItem> descriptionComparator = new Comparator<ErrorWarningPreferenceItem>()
+		{
+			public int compare(ErrorWarningPreferenceItem o1, ErrorWarningPreferenceItem o2)
+			{
+				return o1.description.compareToIgnoreCase(o2.description);
+			}
+		};
 
 		if (ERROR_WARNING_POTENTIAL_DRAWBACKS.equals(problemSection))
 		{
@@ -500,7 +511,6 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.DBI_COLUMN_MISSING_FROM_DB_FILE,
 				Messages.ErrorWarningPreferencePage_DBIColumnMissingFromDBIFile));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.DBI_FILE_MISSING, Messages.ErrorWarningPreferencePage_DBIFileMissing));
-			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.DBI_GENERIC_ERROR, Messages.ErrorWarningPreferencePage_DBIGenericError));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.DBI_TABLE_MISSING, Messages.ErrorWarningPreferencePage_DBITableMissing));
 		}
 		else if (ERROR_WARNING_COLUMNS_PROBLEMS.equals(problemSection))
@@ -706,6 +716,9 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 				Messages.ErrorWarningPreferencePage_serverNotAccessibleFirstOccurence));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.CONSTANTS_USED, Messages.ErrorWarningPreferencePage_constantsUsed));
 		}
+
+		Collections.sort(associatedProblemMarkers, descriptionComparator);
+
 		return associatedProblemMarkers;
 	}
 

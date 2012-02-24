@@ -1396,9 +1396,8 @@ public class DataModelManager implements IColumnInfoManager
 			}
 			else
 			{
-				severity = computeCustomSeverity(ServoyBuilder.DBI_GENERIC_ERROR);
+				severity = computeCustomSeverity(ServoyBuilder.DBI_BAD_INFO);
 			}
-			
 			return severity;
 		}
 	}
