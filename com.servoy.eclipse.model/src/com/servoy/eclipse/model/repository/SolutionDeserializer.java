@@ -1020,7 +1020,7 @@ public class SolutionDeserializer
 							for (Statement consts : constants)
 							{
 								ServoyBuilder.addMarker(resource, ServoyBuilder.CONSTANTS_USED_MARKER_TYPE, "Constants are not supported", consts.sourceEnd(),
-									IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, resource.getProjectRelativePath().toString());
+									ServoyBuilder.CONSTANTS_USED, IMarker.PRIORITY_NORMAL, resource.getProjectRelativePath().toString());
 							}
 							return org.eclipse.core.runtime.Status.OK_STATUS;
 						}

@@ -42,23 +42,21 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dltk.compiler.problem.ProblemSeverity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.MarkerMessages;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IUnexpectedSituationHandler;
-import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.UpdateMarkersJob;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
-import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -69,7 +67,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
-import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
@@ -152,12 +150,18 @@ public class DataModelManager implements IColumnInfoManager
 							IFile dbiFile = getDBIFile(t.getServerName(), t.getName());
 							if (dbiFile.exists())
 							{
-								ServoyMarker mk = MarkerMessages.ColumnUUIDFlagNotSet.fill(t.getName(), column.getName());
-								IMarker marker = dbiFile.createMarker(mk.getType());
-								marker.setAttribute(IMarker.MESSAGE, mk.getText());
-								marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
-								marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
-								marker.setAttribute(IMarker.LOCATION, "JSON file");
+								String customSeverity = ServoyBuilder.levelSettingsNode.get(ServoyBuilder.COLUMN_UUID_FLAG_NOT_SET.getLeft(),
+									ServoyBuilder.COLUMN_UUID_FLAG_NOT_SET.getRight().name());
+								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+								{
+									ServoyMarker mk = MarkerMessages.ColumnUUIDFlagNotSet.fill(t.getName(), column.getName());
+									IMarker marker = dbiFile.createMarker(mk.getType());
+									marker.setAttribute(IMarker.MESSAGE, mk.getText());
+									marker.setAttribute(IMarker.SEVERITY,
+										ServoyBuilder.getTranslatedSeverity(customSeverity, ServoyBuilder.COLUMN_UUID_FLAG_NOT_SET.getRight()));
+									marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
+									marker.setAttribute(IMarker.LOCATION, "JSON file");
+								}
 							}
 						}
 						catch (Exception ex)
@@ -250,7 +254,7 @@ public class DataModelManager implements IColumnInfoManager
 		else
 		{
 			addMissingColumnMarkersIfNeeded = false; // no need adding missing column information markers if the file is missing altogether...
-			addDifferenceMarker(new TableDifference(t, null, TableDifference.MISSING_DBI_FILE, null, null), getErrorSeverity(t.getName()));
+			addDifferenceMarker(new TableDifference(t, null, TableDifference.MISSING_DBI_FILE, null, null));
 		}
 
 		Iterator<Column> columns = t.getColumns().iterator();
@@ -260,7 +264,7 @@ public class DataModelManager implements IColumnInfoManager
 			if (c.getColumnInfo() == null)
 			{
 				if (addMissingColumnMarkersIfNeeded) addDifferenceMarker(new TableDifference(t, c.getName(), TableDifference.COLUMN_MISSING_FROM_DBI_FILE,
-					null, null), getErrorSeverity(t.getName()));
+					null, null));
 				// only create servoy sequences when this was a new table and there is only 1 pk column
 				createNewColumnInfo(c, existingColumnInfo == 0 && t.getPKColumnTypeRowIdentCount() == 1);//was missing - create automatic sequences if missing
 			}
@@ -632,9 +636,11 @@ public class DataModelManager implements IColumnInfoManager
 	{
 		if (c == null)
 		{
-			if (t.getExistInDB()) addDifferenceMarker(new TableDifference(t, columnName, TableDifference.COLUMN_MISSING_FROM_DB, null, cid),
-				getErrorSeverity(t.getName())); // else table is probably being created as we speak - and it's save/sync with DB will reload/rewrite the column info anyway
-			// if we would add these markers even when table is being created, warnings for writing dbi files with error markers will appear
+			if (t.getExistInDB())
+			{
+				addDifferenceMarker(new TableDifference(t, columnName, TableDifference.COLUMN_MISSING_FROM_DB, null, cid)); // else table is probably being created as we speak - and it's save/sync with DB will reload/rewrite the column info anyway
+				// if we would add these markers even when table is being created, warnings for writing dbi files with error markers will appear
+			}
 		}
 		else
 		{
@@ -642,12 +648,7 @@ public class DataModelManager implements IColumnInfoManager
 			dbCid.columnType = c.getColumnType();
 			dbCid.allowNull = c.getAllowNull();
 			dbCid.flags = c.getFlags();
-			TableDifference tableDifference = new TableDifference(t, columnName, TableDifference.COLUMN_CONFLICT, dbCid, cid);
-			int severity = tableDifference.getSeverity();
-			if (severity != -1)
-			{
-				addDifferenceMarker(tableDifference, severity);
-			}
+			addDifferenceMarker(new TableDifference(t, columnName, TableDifference.COLUMN_CONFLICT, dbCid, cid));
 		}
 	}
 
@@ -915,12 +916,15 @@ public class DataModelManager implements IColumnInfoManager
 		if (fileRd.getKind() == IResourceDelta.ADDED) // added or moved from somewhere
 		{
 			// a .dbi file was added for a table that does not exist - add problem marker
-			addDifferenceMarker(new TableDifference(serverName, tableName, null, TableDifference.MISSING_TABLE, null, null), getErrorSeverity(tableName));
+			addDifferenceMarker(new TableDifference(serverName, tableName, null, TableDifference.MISSING_TABLE, null, null));
 		}
 	}
 
-	private void addDifferenceMarker(final TableDifference columnDifference, final int severity)
+	private void addDifferenceMarker(final TableDifference columnDifference)
 	{
+		final int severity = columnDifference.getTypeCustomSeverity();
+		if (severity < 0) return;
+
 		differences.addDifference(columnDifference);
 		final IResource resource;
 		if (columnDifference.type == TableDifference.MISSING_DBI_FILE)
@@ -943,21 +947,21 @@ public class DataModelManager implements IColumnInfoManager
 					{
 						IMarker marker = resource.createMarker(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
 						marker.setAttribute(IMarker.MESSAGE, columnDifference.getUserFriendlyMessage());
-						int adjustedSeverity = severity;
-						if (adjustedSeverity == IMarker.SEVERITY_ERROR)
-						{
-							DataSourceCollectorVisitor datasourceCollector = new DataSourceCollectorVisitor();
-							for (ServoyProject sp : ServoyModelFinder.getServoyModel().getModulesOfActiveProject())
-							{
-								sp.getSolution().acceptVisitor(datasourceCollector);
-							}
-							String datasource = DataSourceUtils.createDBTableDataSource(columnDifference.getServerName(), columnDifference.getTableName());
-							if (!datasourceCollector.getDataSources().contains(datasource))
-							{
-								adjustedSeverity = IMarker.SEVERITY_WARNING;
-							}
-						}
-						marker.setAttribute(IMarker.SEVERITY, adjustedSeverity);
+//						int adjustedSeverity = severity;
+//						if (adjustedSeverity == IMarker.SEVERITY_ERROR)
+//						{
+//							DataSourceCollectorVisitor datasourceCollector = new DataSourceCollectorVisitor();
+//							for (ServoyProject sp : ServoyModelFinder.getServoyModel().getModulesOfActiveProject())
+//							{
+//								sp.getSolution().acceptVisitor(datasourceCollector);
+//							}
+//							String datasource = DataSourceUtils.createDBTableDataSource(columnDifference.getServerName(), columnDifference.getTableName());
+//							if (!datasourceCollector.getDataSources().contains(datasource))
+//							{
+//								adjustedSeverity = IMarker.SEVERITY_WARNING;
+//							}
+//						}
+						marker.setAttribute(IMarker.SEVERITY, severity);
 						marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
 						marker.setAttribute(IMarker.LOCATION, "JSON file");
 						marker.setAttribute(TableDifference.ATTRIBUTE_SERVERNAME, columnDifference.getServerName());
@@ -1016,7 +1020,7 @@ public class DataModelManager implements IColumnInfoManager
 
 					// we have an active solution with a resources project but with invalid security info; add problem marker
 					ServoyMarker mk = MarkerMessages.DBIBadDBInfo.fill(message);
-					ServoyBuilder.addMarker(file, mk.getType(), mk.getText(), charNo, getErrorSeverity(t.getName()), IMarker.PRIORITY_NORMAL, "JSON file"); //$NON-NLS-1$
+					ServoyBuilder.addMarker(file, mk.getType(), mk.getText(), charNo, ServoyBuilder.DBI_BAD_INFO, IMarker.PRIORITY_NORMAL, "JSON file"); //$NON-NLS-1$
 				}
 			}
 		});
@@ -1263,6 +1267,50 @@ public class DataModelManager implements IColumnInfoManager
 				mk = MarkerMessages.DBIGenericError.fill(getColumnString());
 			}
 			return mk.getText();
+		}
+
+		private int computeCustomSeverity(Pair<String, ProblemSeverity> problem)
+		{
+			int severity = -1;
+			String customSeverity = ServoyBuilder.levelSettingsNode.get(problem.getLeft(), problem.getRight().name());
+			if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+			{
+				severity = ServoyBuilder.getTranslatedSeverity(customSeverity, problem.getRight());
+			}
+			return severity;
+		}
+
+		public int getTypeCustomSeverity()
+		{
+			if (tableName.toUpperCase().startsWith(TEMP_UPPERCASE_PREFIX)) return IMarker.SEVERITY_WARNING;
+
+			int severity = -1; //for ignore
+			if (type == COLUMN_MISSING_FROM_DB)
+			{
+				severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_MISSING_FROM_DB);
+			}
+			else if (type == COLUMN_MISSING_FROM_DBI_FILE)
+			{
+				severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_MISSING_FROM_DB_FILE);
+			}
+			else if (type == COLUMN_CONFLICT)
+			{
+				severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_CONFLICT);
+			}
+			else if (type == MISSING_TABLE)
+			{
+				severity = computeCustomSeverity(ServoyBuilder.DBI_TABLE_MISSING);
+			}
+			else if (type == MISSING_DBI_FILE)
+			{
+				severity = computeCustomSeverity(ServoyBuilder.DBI_FILE_MISSING);
+			}
+			else
+			{
+				severity = computeCustomSeverity(ServoyBuilder.DBI_GENERIC_ERROR);
+			}
+
+			return severity;
 		}
 
 		private String getColumnDefinition(ColumnInfoDef definition)

@@ -2794,26 +2794,29 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 						// we have an active solution with a resources project but with invalid security info; add problem marker
 						IMarker marker = ServoyBuilder.addMarker(er, ServoyBuilder.USER_SECURITY_MARKER_TYPE, "Bad User/Security information: " + //$NON-NLS-1$
 							error.getMessage(), charNo, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, "JSON file"); //$NON-NLS-1$
-						try
+						if (marker != null)
 						{
-							marker.setAttribute(MARKER_ATTRIBUTE_TYPE, error.getType());
-							if (error.getWrongValue() instanceof String[])
+							try
 							{
-								marker.setAttribute(MARKER_ATTRIBUTE_WRONG_VALUE_ARRAY_LENGTH, error.getWrongValue());
-								String[] wv = (String[])error.getWrongValue();
-								for (int i = 0; i < wv.length; i++)
+								marker.setAttribute(MARKER_ATTRIBUTE_TYPE, error.getType());
+								if (error.getWrongValue() instanceof String[])
 								{
-									marker.setAttribute(MARKER_ATTRIBUTE_WRONG_VALUE_ARRAY + i, wv[i]);
+									marker.setAttribute(MARKER_ATTRIBUTE_WRONG_VALUE_ARRAY_LENGTH, error.getWrongValue());
+									String[] wv = (String[])error.getWrongValue();
+									for (int i = 0; i < wv.length; i++)
+									{
+										marker.setAttribute(MARKER_ATTRIBUTE_WRONG_VALUE_ARRAY + i, wv[i]);
+									}
+								}
+								else
+								{
+									marker.setAttribute(MARKER_ATTRIBUTE_WRONG_VALUE, error.getWrongValue());
 								}
 							}
-							else
+							catch (CoreException e)
 							{
-								marker.setAttribute(MARKER_ATTRIBUTE_WRONG_VALUE, error.getWrongValue());
+								ServoyLog.logError("Cannot set security problem marker attributes.", e); //$NON-NLS-1$
 							}
-						}
-						catch (CoreException e)
-						{
-							ServoyLog.logError("Cannot set security problem marker attributes.", e); //$NON-NLS-1$
 						}
 					}
 					return Status.OK_STATUS;
