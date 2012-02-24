@@ -922,7 +922,7 @@ public class DataModelManager implements IColumnInfoManager
 
 	private void addDifferenceMarker(final TableDifference columnDifference)
 	{
-		final int severity = columnDifference.getTypeCustomSeverity();
+		final int severity = columnDifference.getSeverity();
 		if (severity < 0) return;
 
 		differences.addDifference(columnDifference);
@@ -1280,39 +1280,6 @@ public class DataModelManager implements IColumnInfoManager
 			return severity;
 		}
 
-		public int getTypeCustomSeverity()
-		{
-			if (tableName.toUpperCase().startsWith(TEMP_UPPERCASE_PREFIX)) return IMarker.SEVERITY_WARNING;
-
-			int severity = -1; //for ignore
-			if (type == COLUMN_MISSING_FROM_DB)
-			{
-				severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_MISSING_FROM_DB);
-			}
-			else if (type == COLUMN_MISSING_FROM_DBI_FILE)
-			{
-				severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_MISSING_FROM_DB_FILE);
-			}
-			else if (type == COLUMN_CONFLICT)
-			{
-				severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_CONFLICT);
-			}
-			else if (type == MISSING_TABLE)
-			{
-				severity = computeCustomSeverity(ServoyBuilder.DBI_TABLE_MISSING);
-			}
-			else if (type == MISSING_DBI_FILE)
-			{
-				severity = computeCustomSeverity(ServoyBuilder.DBI_FILE_MISSING);
-			}
-			else
-			{
-				severity = computeCustomSeverity(ServoyBuilder.DBI_GENERIC_ERROR);
-			}
-
-			return severity;
-		}
-
 		private String getColumnDefinition(ColumnInfoDef definition)
 		{
 			StringBuffer message = new StringBuffer();
@@ -1354,13 +1321,28 @@ public class DataModelManager implements IColumnInfoManager
 
 		public int getSeverity()
 		{
+			if (tableName.toUpperCase().startsWith(TEMP_UPPERCASE_PREFIX)) return IMarker.SEVERITY_WARNING;
+
 			int severity = -1;
-			if (type == COLUMN_MISSING_FROM_DB || type == COLUMN_MISSING_FROM_DBI_FILE || type == MISSING_TABLE || type == MISSING_DBI_FILE)
+			if (type == COLUMN_MISSING_FROM_DB)
 			{
-				severity = getErrorSeverity(tableName);
+				severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_MISSING_FROM_DB);
+			}
+			else if (type == COLUMN_MISSING_FROM_DBI_FILE)
+			{
+				severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_MISSING_FROM_DB_FILE);
+			}
+			else if (type == MISSING_TABLE)
+			{
+				severity = computeCustomSeverity(ServoyBuilder.DBI_TABLE_MISSING);
+			}
+			else if (type == MISSING_DBI_FILE)
+			{
+				severity = computeCustomSeverity(ServoyBuilder.DBI_FILE_MISSING);
 			}
 			else if (type == COLUMN_CONFLICT)
 			{
+				// TODO check, now we always return computeCustomSeverity(ServoyBuilder.DBI_COLUMN_CONFLICT); do we want different ProblemSeverity here for the different situations?
 				Column c = table.getColumn(columnName);
 				ColumnType colColumnType = c.getColumnType(); // compare db column type with dbi file column type
 				ColumnType dbiColumnType = dbiFileDefinition.columnType;
@@ -1375,7 +1357,7 @@ public class DataModelManager implements IColumnInfoManager
 					if ((t1 == t2 && colColumnType.getLength() == dbiColumnType.getLength()) ||
 						(t1 == IColumnTypes.NUMBER && colColumnType.getScale() == 0 && t2 == IColumnTypes.INTEGER))
 					{
-						severity = IMarker.SEVERITY_WARNING; // somewhat compatible types... but still different
+						severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_CONFLICT);
 					}
 					else
 					{
@@ -1384,13 +1366,13 @@ public class DataModelManager implements IColumnInfoManager
 						// this check is for -1 and big value lengths
 						if (!compatibleLengths)
 						{
-							severity = getErrorSeverity(tableName);
+							severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_CONFLICT);
 						}
 					}
 				}
 				else if (c.getAllowNull() != dbiFileDefinition.allowNull)
 				{
-					severity = IMarker.SEVERITY_WARNING;
+					severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_CONFLICT);
 				}
 
 				if (severity != IMarker.SEVERITY_ERROR) // if we already discovered an error, no use checking further
@@ -1402,16 +1384,21 @@ public class DataModelManager implements IColumnInfoManager
 						if ((c.isDatabasePK() && ((dbiFileDefinition.flags & Column.IDENT_COLUMNS) == 0)) || columnInfoIsPk)
 						{
 							// column is pk, but columninfo knows it as normal column, or column is not pk and columninfo knows it as pk
-							severity = getErrorSeverity(tableName);
+							severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_CONFLICT);
 						}
 						else if (c.isDatabasePK() && ((dbiFileDefinition.flags & Column.USER_ROWID_COLUMN) != 0))
 						{
 							// columns is pk, column info says it's USER_ROWID_COLUMN - both ident columns, but not quite the same
-							severity = IMarker.SEVERITY_WARNING;
+							severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_CONFLICT);
 						} // else no other case should be left
 					}
 				}
 			}
+			else
+			{
+				severity = computeCustomSeverity(ServoyBuilder.DBI_GENERIC_ERROR);
+			}
+			
 			return severity;
 		}
 	}

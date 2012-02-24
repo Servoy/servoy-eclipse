@@ -3325,7 +3325,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										columnName);
 									if (tableDifference != null)
 									{
-										int severity = tableDifference.getTypeCustomSeverity();
+										int severity = tableDifference.getSeverity();
 										if (severity >= 0)
 										{
 											marker.setAttribute(IMarker.SEVERITY, severity);
