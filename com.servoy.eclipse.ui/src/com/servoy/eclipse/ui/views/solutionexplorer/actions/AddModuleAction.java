@@ -51,7 +51,9 @@ import com.servoy.eclipse.ui.property.StringTokenizerConverter;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Debug;
 
 /**
  * Class that allows the selection of modules to be added to the currently active solution.
@@ -77,14 +79,21 @@ public class AddModuleAction extends Action implements ISelectionChangedListener
 	{
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		List<String> availableSolutions = new ArrayList<String>();
-		for (int i = 0; i < servoyModel.getServoyProjects().length; i++)
+		try
 		{
-			ServoyProject sp = servoyModel.getServoyProjects()[i];
-			if (!sp.getSolution().getName().equals(servoyModel.getActiveProject().getSolution().getName()))
+			for (RootObjectMetaData rootObject : ServoyModel.getDeveloperRepository().getRootObjectMetaDatas())
 			{
-				availableSolutions.add(sp.getSolution().getName());
+				if (!rootObject.getName().equals(servoyModel.getActiveProject().getSolution().getName()))
+				{
+					availableSolutions.add(rootObject.getName());
+				}
 			}
 		}
+		catch (Exception ex)
+		{
+			Debug.error(ex);
+		}
+
 		StringTokenizerConverter converter = new StringTokenizerConverter(",", true);
 		List<String> allSolutions = new ArrayList<String>(availableSolutions);
 
