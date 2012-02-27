@@ -1852,6 +1852,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									(persist.getTypeID() == IRepository.FIELDS ||
 										(persist.getTypeID() == IRepository.GRAPHICALCOMPONENTS && ((GraphicalComponent)persist).getLabelFor() == null) ||
 										persist.getTypeID() == IRepository.BEANS || persist.getTypeID() == IRepository.SHAPES) &&
+									form.getPartAt(((IFormElement)persist).getLocation().y) != null &&
 									form.getPartAt(((IFormElement)persist).getLocation().y).getPartType() == Part.BODY) fieldCount++;
 
 								if (persist instanceof ISupportTabSeq && ((ISupportTabSeq)persist).getTabSeq() > 0)
