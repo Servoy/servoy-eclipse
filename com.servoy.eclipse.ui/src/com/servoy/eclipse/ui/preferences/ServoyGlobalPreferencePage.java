@@ -179,7 +179,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		formProperties.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
 		showNavigatorDefaultButton = new Button(formProperties, SWT.CHECK);
-		showNavigatorDefaultButton.setText("Show Navigator default setting - use at new form creation"); //$NON-NLS-1$
+		showNavigatorDefaultButton.setText("Set default navigator on new forms"); //$NON-NLS-1$
 
 		initializeFields();
 
