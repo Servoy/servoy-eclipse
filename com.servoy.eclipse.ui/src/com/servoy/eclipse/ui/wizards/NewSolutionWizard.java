@@ -78,7 +78,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 {
 	public static final String ID = "com.servoy.eclipse.ui.NewSolutionWizard"; //$NON-NLS-1$
 
-	private NewSolutionWizardPage page1;
+	protected NewSolutionWizardPage page1;
 
 	/**
 	 * Creates a new wizard.
@@ -395,6 +395,21 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		{
 			solutionName = solutionNameField.getText();
 			setPageComplete(validatePage());
+		}
+
+		public void setSolutionType(int solType)
+		{
+			int selection = 0;
+			for (int i = 0; i < SolutionMetaData.solutionTypes.length; i++)
+			{
+				if (SolutionMetaData.solutionTypes[i] == solType)
+				{
+					selection = i;
+					break;
+				}
+			}
+			solutionTypeCombo.select(selection);
+			handleSolutionTypeComboSelected();
 		}
 
 		/**
