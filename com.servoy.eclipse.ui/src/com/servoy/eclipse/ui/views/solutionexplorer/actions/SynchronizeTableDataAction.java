@@ -76,8 +76,8 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 	{
 		this.shell = shell;
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("sync_tables.png")); //$NON-NLS-1$
-		setToolTipText("Synchronize Table Data");
-		setText(getToolTipText() + "...");
+		setToolTipText("Synchronize meta data for table marked as meta data table between database and workspace");
+		setText(getToolTipText() + "Synchronize Meta Data ...");
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)
