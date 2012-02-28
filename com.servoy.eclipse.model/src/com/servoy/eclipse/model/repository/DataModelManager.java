@@ -387,6 +387,20 @@ public class DataModelManager implements IColumnInfoManager
 			// just been deleted is missing; remove it
 			removeErrorMarker(t.getServerName(), t.getName());
 		}
+
+		// also remove the data file if it exists
+		IFile dataFile = getTableDataFile(t.getDataSource());
+		if (dataFile != null && dataFile.exists())
+		{
+			try
+			{
+				dataFile.delete(true, null);
+			}
+			catch (CoreException e)
+			{
+				throw new RepositoryException(e);
+			}
+		}
 	}
 
 	// delete item
