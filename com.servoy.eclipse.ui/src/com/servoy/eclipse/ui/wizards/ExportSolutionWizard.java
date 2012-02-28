@@ -410,6 +410,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		private Button exportReferencedModulesButton;
 		private Button exportAllTablesFromReferencedServers;
 		private Button exportSampleDataButton;
+		private Button checkMetadataTablesButton;
 		private Button exportI18NDataButton;
 		private Button exportUsersButton;
 		private Spinner nrOfExportedSampleDataSpinner;
@@ -431,18 +432,27 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 			protectWithPasswordButton = new Button(composite, SWT.CHECK);
 			protectWithPasswordButton.setText("Protect solution with password"); //$NON-NLS-1$
+			protectWithPasswordButton.setSelection(exportModel.isProtectWithPassword());
 			protectWithPasswordButton.addListener(SWT.Selection, this);
 
 			exportReferencedModulesButton = new Button(composite, SWT.CHECK);
 			exportReferencedModulesButton.setText("Export referenced modules"); //$NON-NLS-1$
+			exportReferencedModulesButton.setSelection(exportModel.isExportReferencedModules());
 			exportReferencedModulesButton.addListener(SWT.Selection, this);
 
 			exportAllTablesFromReferencedServers = new Button(composite, SWT.CHECK);
 			exportAllTablesFromReferencedServers.setText("Export all tables from referenced servers"); //$NON-NLS-1$
+			exportAllTablesFromReferencedServers.setSelection(exportModel.isExportAllTablesFromReferencedServers());
 			exportAllTablesFromReferencedServers.addListener(SWT.Selection, this);
+
+			checkMetadataTablesButton = new Button(composite, SWT.CHECK);
+			checkMetadataTablesButton.setText("Check metadata tables."); //$NON-NLS-1$ 
+			checkMetadataTablesButton.setSelection(exportModel.isCheckMetadataTables());
+			checkMetadataTablesButton.addListener(SWT.Selection, this);
 
 			exportSampleDataButton = new Button(composite, SWT.CHECK);
 			exportSampleDataButton.setText("Export solution sample data."); //$NON-NLS-1$ 
+			exportSampleDataButton.setSelection(exportModel.isExportSampleData());
 			exportSampleDataButton.addListener(SWT.Selection, this);
 
 			Composite horizontalComposite = new Composite(composite, SWT.None);
@@ -511,10 +521,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 			exportI18NDataButton = new Button(composite, SWT.CHECK);
 			exportI18NDataButton.setText("Export i18n data"); //$NON-NLS-1$
+			exportI18NDataButton.setSelection(exportModel.isExportI18NData());
 			exportI18NDataButton.addListener(SWT.Selection, this);
 
 			exportUsersButton = new Button(composite, SWT.CHECK);
 			exportUsersButton.setText("Export users"); //$NON-NLS-1$
+			exportUsersButton.setSelection(exportModel.isExportUsers());
 			exportUsersButton.addListener(SWT.Selection, this);
 
 			setControl(composite);
@@ -524,6 +536,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		{
 			if (event.widget == protectWithPasswordButton) exportModel.setProtectWithPassword(protectWithPasswordButton.getSelection());
 			else if (event.widget == exportReferencedModulesButton) exportModel.setExportReferencedModules(exportReferencedModulesButton.getSelection());
+			else if (event.widget == checkMetadataTablesButton) exportModel.setCheckMetadataTables(checkMetadataTablesButton.getSelection());
 			else if (event.widget == exportSampleDataButton)
 			{
 				exportModel.setExportSampleData(exportSampleDataButton.getSelection());

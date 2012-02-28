@@ -16,8 +16,18 @@
  */
 package com.servoy.eclipse.ui.wizards;
 
+import java.io.IOException;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.xmlxport.IXMLExportUserChannel;
 
@@ -63,5 +73,40 @@ public class EclipseExportUserChannel implements IXMLExportUserChannel
 	public boolean getExportAllTablesFromReferencedServers()
 	{
 		return exportModel.getExportAllTablesFromReferencedServers();
+	}
+
+	public String getTableMetaData(ITable table) throws IOException
+	{
+		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
+		if (dmm == null)
+		{
+			UIUtils.reportWarning("Error exporting table meta data", "Cannot find internal data model manager.");
+			return null;
+		}
+
+		String wscontents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(dmm.getTableDataFile(table.getDataSource()).getFullPath().toString());
+
+		if (wscontents != null && exportModel.isCheckMetadataTables() && table instanceof Table)
+		{
+			// check if current contents matches data file
+			String dbcontents;
+			try
+			{
+				dbcontents = dmm.generateMetaDataFileContents((Table)table, -1);
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+				throw new IOException("Could not check table meta data from database " + e.getMessage());
+			}
+			if (!wscontents.equals(dbcontents))
+			{
+				throw new IOException("Checking table meta data failed for table '" + table.getName() + "' in server '" + table.getServerName() +
+					"', current workspace contents does not match current database contents.\n" + //
+					"Synchronize the meta data for this table first");
+			}
+		}
+
+		return wscontents;
 	}
 }

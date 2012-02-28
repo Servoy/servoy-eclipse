@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.wizards;
 
 /**
@@ -33,6 +33,7 @@ public class ExportSolutionModel
 	private int numberOfSampleDataExported = 5000;
 
 	private String userAcknowledgedFileToOverwrite = null;
+	private boolean checkMetadataTables = true; // default
 
 	public String getFileName()
 	{
@@ -134,13 +135,15 @@ public class ExportSolutionModel
 	@Override
 	public String toString()
 	{
-		StringBuffer sb = new StringBuffer("[");
+		StringBuilder sb = new StringBuilder("[");
 		sb.append("filename: ");
 		sb.append(fileName);
 		sb.append("\nprotect with password: ");
 		sb.append(protectWithPassword);
 		sb.append("\nexport referenced modules: ");
 		sb.append(exportReferencedModules);
+		sb.append("\ncheck metadata tables: ");
+		sb.append(checkMetadataTables);
 		sb.append("\nexport sample data: ");
 		sb.append(exportSampleData);
 		if (exportSampleData)
@@ -199,5 +202,20 @@ public class ExportSolutionModel
 	public void setExportAllTablesFromReferencedServers(boolean exportAllTablesFromReferencedServers)
 	{
 		this.exportAllTablesFromReferencedServers = exportAllTablesFromReferencedServers;
+	}
+
+	public boolean isExportAllTablesFromReferencedServers()
+	{
+		return exportAllTablesFromReferencedServers;
+	}
+
+	public void setCheckMetadataTables(boolean checkMetadataTables)
+	{
+		this.checkMetadataTables = checkMetadataTables;
+	}
+
+	public boolean isCheckMetadataTables()
+	{
+		return checkMetadataTables;
 	}
 }

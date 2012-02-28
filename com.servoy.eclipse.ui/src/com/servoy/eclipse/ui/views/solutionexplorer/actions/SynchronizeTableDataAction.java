@@ -16,9 +16,6 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -31,6 +28,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.DataModelManager.TooManyRowsException;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
@@ -47,19 +45,12 @@ import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.dataprocessing.ISQLStatement;
 import com.servoy.j2db.dataprocessing.SQLStatement;
-import com.servoy.j2db.persistence.Column;
-import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.query.ColumnType;
-import com.servoy.j2db.query.QueryColumn;
 import com.servoy.j2db.query.QueryDelete;
 import com.servoy.j2db.query.QuerySelect;
-import com.servoy.j2db.query.QuerySort;
-import com.servoy.j2db.query.QueryTable;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.DataSourceUtils;
-import com.servoy.j2db.util.UUID;
 
 /**
  * 
@@ -191,7 +182,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		try
 		{
 			// check for existing data
-			QuerySelect query = createTableQuery(table, null);
+			QuerySelect query = dmm.createTableMetadataQuery(table, null);
 			IDataSet ds = ApplicationServerSingleton.get().getDataServer().performQuery(ApplicationServerSingleton.get().getClientId(), table.getServerName(),
 				null, query, null, false, 0, 1, IDataServer.RAW_QUERY, null);
 			if (ds.getRowCount() > 0 &&
@@ -206,21 +197,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			String contents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(dataFile.getFullPath().toString());
 
 			// parse dataset
-			BufferedDataSet dataSet = dmm.deserializeTableDateContents(contents);
-
-			// replace uuid strings with byte[] for media columns
-			for (Object[] row : dataSet.getRows())
-			{
-				int i = 0;
-				for (ColumnType columnType : dataSet.getColumnTypeInfo())
-				{
-					if (i < row.length && Column.mapToDefaultType(columnType.getSqlType()) == IColumnTypes.MEDIA && row[i] instanceof String)
-					{
-						row[i] = UUID.fromString((String)row[i]).toBytes();
-					}
-					i++;
-				}
-			}
+			BufferedDataSet dataSet = dmm.deserializeTableMetaDataContents(contents);
 
 			// delete existing data
 			ApplicationServerSingleton.get().getDataServer().performUpdates(ApplicationServerSingleton.get().getClientId(),
@@ -260,17 +237,15 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 	 */
 	private void generateTableDataFile(Table table, DataModelManager dmm, IFile dataFile)
 	{
-		LinkedHashMap<Column, QueryColumn> qColumns = new LinkedHashMap<Column, QueryColumn>(); // LinkedHashMap to keep order for column names
-
-		QuerySelect query = createTableQuery(table, qColumns);
-
 		try
 		{
 			final int max = 1000;
-			BufferedDataSet dataSet = (BufferedDataSet)ApplicationServerSingleton.get().getDataServer().performQuery(
-				ApplicationServerSingleton.get().getClientId(), table.getServerName(), null, query, null, false, 0, max, IDataServer.RAW_QUERY, null);
-			// not too much data?
-			if (dataSet.hadMoreRows())
+			String contents;
+			try
+			{
+				contents = dmm.generateMetaDataFileContents(table, max);
+			}
+			catch (TooManyRowsException e)
 			{
 				if (!UIUtils.askQuestion(shell, "Big table", "Table " + table.getName() + " in server " + table.getServerName() + " contains more than " + max +
 					" rows, are you sure you want to copy this table data in the workspace?"))
@@ -280,38 +255,14 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 				}
 
 				// ok you've been warned...
-				dataSet = (BufferedDataSet)ApplicationServerSingleton.get().getDataServer().performQuery(ApplicationServerSingleton.get().getClientId(),
-					table.getServerName(), null, query, null, false, 0, -1 /* unlimited */, IDataServer.RAW_QUERY, null);
+				contents = dmm.generateMetaDataFileContents(table, -1);
 			}
 
-			String[] columnNames = new String[qColumns.size()];
-			int i = 0;
-			for (Column column : qColumns.keySet())
-			{
-				columnNames[i++] = column.getSQLName();
-			}
-			dataSet.setColumnNames(columnNames);
-
-			// replace byte[] uuids with uuid string
-			for (Object[] row : dataSet.getRows())
-			{
-				i = 0;
-				for (Column column : qColumns.keySet())
-				{
-					if (i < row.length && column.hasFlag(Column.UUID_COLUMN) && row[i] instanceof byte[])
-					{
-						row[i] = new UUID((byte[])row[i]).toString();
-					}
-					i++;
-				}
-			}
-
-			String contents = dmm.serializeTableDateContents(dataSet);
 			// if file doesn't exist, this creates the file and its parent directories
-			new WorkspaceFileAccess(ServoyModel.getWorkspace()).setContents(dataFile.getFullPath().toString(), contents.getBytes("UTF-8"));
+			new WorkspaceFileAccess(ServoyModel.getWorkspace()).setUTF8Contents(dataFile.getFullPath().toString(), contents);
 
-			UIUtils.showInformation(shell, "Table synchronization", "Successfully saved " + dataSet.getRowCount() + " records from table " + table.getName() +
-				" in server " + table.getServerName() + " in the workspace");
+			UIUtils.showInformation(shell, "Table synchronization",
+				"Successfully saved records from table " + table.getName() + " in server " + table.getServerName() + " in the workspace");
 		}
 		catch (Exception e)
 		{
@@ -320,28 +271,4 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		}
 	}
 
-	private QuerySelect createTableQuery(Table table, LinkedHashMap<Column, QueryColumn> qyeryColumns)
-	{
-		QuerySelect query = new QuerySelect(new QueryTable(table.getSQLName(), table.getCatalog(), table.getSchema()));
-		LinkedHashMap<Column, QueryColumn> qColumns = qyeryColumns == null ? new LinkedHashMap<Column, QueryColumn>() : qyeryColumns; // LinkedHashMap to keep order for column names
-		Iterator<Column> columns = table.getColumnsSortedByName();
-		while (columns.hasNext())
-		{
-			Column column = columns.next();
-			if (!column.hasFlag(Column.EXCLUDED_COLUMN))
-			{
-				QueryColumn qColumn = new QueryColumn(query.getTable(), column.getID(), column.getSQLName(), column.getType(), column.getLength());
-				query.addColumn(qColumn);
-				qColumns.put(column, qColumn);
-			}
-		}
-		for (Column column : table.getRowIdentColumns())
-		{
-			if (qColumns.containsKey(column))
-			{
-				query.addSort(new QuerySort(qColumns.get(column), true));
-			}
-		}
-		return query;
-	}
 }
