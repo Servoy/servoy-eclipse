@@ -58,6 +58,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
@@ -242,38 +243,13 @@ public class LinkWithEditorAction extends Action
 			}
 		}
 
-		if (persists.size() == 1 && persists.get(0) instanceof ValueList)
+		if (persists.size() == 1 && persists.get(0) instanceof Relation)
 		{
-			ValueList valueList = (ValueList)persists.get(0);
-			Solution solution = (Solution)valueList.getAncestor(IRepository.SOLUTIONS);
-			if (solution != null)
-			{
-				PlatformSimpleUserNode solutionNode = ((SolutionExplorerTreeContentProvider)contentProvider).getSolutionNode(solution.getName());
-				if (solutionNode != null && solutionNode.children != null)
-				{
-					for (SimpleUserNode child : solutionNode.children)
-					{
-						if (child.getType() == UserNodeType.VALUELISTS)
-						{
-							tree.setSelection(new StructuredSelection(child), true);
-							Object[] elements = ((IStructuredContentProvider)list.getContentProvider()).getElements(list.getInput());
-							if (elements != null)
-							{
-								for (Object element : elements)
-								{
-									Object realObject = ((SimpleUserNode)element).getRealObject();
-									if (realObject instanceof IPersist && ((IPersist)realObject).getUUID().equals(valueList.getUUID()))
-									{
-										list.setSelection(new StructuredSelection(element), true);
-										break;
-									}
-								}
-							}
-							break;
-						}
-					}
-				}
-			}
+			setProperSelection(persists.get(0), UserNodeType.ALL_RELATIONS, contentProvider);
+		}
+		else if (persists.size() == 1 && persists.get(0) instanceof ValueList)
+		{
+			setProperSelection(persists.get(0), UserNodeType.VALUELISTS, contentProvider);
 		}
 		else if (files.size() > 0)
 		{
@@ -296,6 +272,39 @@ public class LinkWithEditorAction extends Action
 			if (part instanceof ISetSelectionTarget)
 			{
 				((ISetSelectionTarget)part).selectReveal(new StructuredSelection(files.values().toArray()));
+			}
+		}
+	}
+
+	private void setProperSelection(IPersist persist, UserNodeType persistType, IContentProvider contentProvider)
+	{
+		Solution solution = (Solution)persist.getAncestor(IRepository.SOLUTIONS);
+		if (solution != null)
+		{
+			PlatformSimpleUserNode solutionNode = ((SolutionExplorerTreeContentProvider)contentProvider).getSolutionNode(solution.getName());
+			if (solutionNode != null && solutionNode.children != null)
+			{
+				for (SimpleUserNode child : solutionNode.children)
+				{
+					if (child.getType() == persistType)
+					{
+						tree.setSelection(new StructuredSelection(child), true);
+						Object[] elements = ((IStructuredContentProvider)list.getContentProvider()).getElements(list.getInput());
+						if (elements != null)
+						{
+							for (Object element : elements)
+							{
+								Object realObject = ((SimpleUserNode)element).getRealObject();
+								if (realObject instanceof IPersist && ((IPersist)realObject).getUUID().equals(persist.getUUID()))
+								{
+									list.setSelection(new StructuredSelection(element), true);
+									break;
+								}
+							}
+						}
+						break;
+					}
+				}
 			}
 		}
 	}
