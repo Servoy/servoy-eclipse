@@ -21,19 +21,9 @@ import java.util.LinkedHashMap;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -347,76 +337,5 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			}
 		}
 		return query;
-	}
-
-	public static class SynchronizeTableDataDialog extends Dialog
-	{
-		public static final int IMPORT_TO_DB = 99;
-		public static final int SAVE_TO_WS = 100;
-
-		protected SynchronizeTableDataDialog(Shell parentShell)
-		{
-			super(parentShell);
-		}
-
-		@Override
-		protected void configureShell(Shell shell)
-		{
-			super.configureShell(shell);
-			shell.setText("Choose synchronization action");
-		}
-
-		@Override
-		protected Control createDialogArea(Composite parent)
-		{
-			Composite area = (Composite)super.createDialogArea(parent);
-			area.setLayout(new FillLayout(SWT.HORIZONTAL));
-			Composite dialogComposite = new Composite(area, SWT.NONE);
-
-			Button import2db = new Button(dialogComposite, SWT.NONE);
-			import2db.setToolTipText("load workspace data in database table");
-			import2db.setBounds(165, 55, 95, 27);
-			import2db.setText("-->");
-			import2db.addSelectionListener(new SelectionAdapter()
-			{
-				@Override
-				public void widgetSelected(SelectionEvent e)
-				{
-					setReturnCode(IMPORT_TO_DB);
-					close();
-				}
-			});
-
-			Button save2ws = new Button(dialogComposite, SWT.NONE);
-			save2ws.setToolTipText("Save data from database table in workspace");
-			save2ws.setBounds(165, 95, 95, 27);
-			save2ws.setText("<--");
-			save2ws.addSelectionListener(new SelectionAdapter()
-			{
-				@Override
-				public void widgetSelected(SelectionEvent e)
-				{
-					setReturnCode(SAVE_TO_WS);
-					close();
-				}
-			});
-
-			Label wslabel = new Label(dialogComposite, SWT.BORDER | SWT.CENTER);
-			wslabel.setBounds(31, 60, 101, 62);
-			wslabel.setText("Workspace\nfile");
-
-			Label tablelabel = new Label(dialogComposite, SWT.BORDER | SWT.CENTER);
-			tablelabel.setBounds(317, 60, 117, 62);
-			tablelabel.setText("Database\ntable");
-
-			return dialogComposite;
-		}
-
-		@Override
-		protected void createButtonsForButtonBar(Composite parent)
-		{
-			// just a cancel button
-			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
-		}
 	}
 }
