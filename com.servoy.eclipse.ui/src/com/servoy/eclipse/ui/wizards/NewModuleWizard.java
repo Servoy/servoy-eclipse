@@ -19,7 +19,6 @@ package com.servoy.eclipse.ui.wizards;
 
 import org.eclipse.swt.widgets.Composite;
 
-import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.persistence.SolutionMetaData;
 
 /**
@@ -39,14 +38,14 @@ public class NewModuleWizard extends NewSolutionWizard
 	 */
 	public NewModuleWizard()
 	{
+		super();
 		setWindowTitle("New module");
-		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("solution_module_m.gif"));
 	}
 
 	@Override
 	public void createPageControls(Composite pageContainer)
 	{
 		super.createPageControls(pageContainer);
-		page1.setSolutionType(SolutionMetaData.MODULE);
+		page1.setSolutionType(SolutionMetaData.MODULE, true);
 	}
 }

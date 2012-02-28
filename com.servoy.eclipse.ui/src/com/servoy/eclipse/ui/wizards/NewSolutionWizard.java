@@ -397,7 +397,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			setPageComplete(validatePage());
 		}
 
-		public void setSolutionType(int solType)
+		public void setSolutionType(int solType, boolean fixedType)
 		{
 			int selection = 0;
 			for (int i = 0; i < SolutionMetaData.solutionTypes.length; i++)
@@ -410,6 +410,10 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			}
 			solutionTypeCombo.select(selection);
 			handleSolutionTypeComboSelected();
+			if (fixedType)
+			{
+				solutionTypeCombo.setEnabled(false);
+			}
 		}
 
 		/**
