@@ -88,7 +88,7 @@ public class DataModelManager implements IColumnInfoManager
 
 	public static final String COLUMN_INFO_FILE_EXTENSION = "dbi";
 	public static final String COLUMN_INFO_FILE_EXTENSION_WITH_DOT = '.' + COLUMN_INFO_FILE_EXTENSION;
-	public static final String TABLE_DATA_FILE_EXTENSION_WITH_DOT = ".obj";
+	public static final String TABLE_DATA_FILE_EXTENSION_WITH_DOT = ".data";
 	public static final String TEMP_UPPERCASE_PREFIX = "TEMP_"; // tables that are not considered as being 'real'
 
 	private final IProject resourceProject;
