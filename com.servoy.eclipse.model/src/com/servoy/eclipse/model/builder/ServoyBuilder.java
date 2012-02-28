@@ -3031,7 +3031,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								ServoyMarker mk = MarkerMessages.ColumnIncompatibleTypeForSequence.fill(tableName, column.getName());
 								addMarker(res, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, null);
 							}
-							else if (column.getSequenceType() == ColumnInfo.UUID_GENERATOR && column.getLength() > 0 && column.getLength() < 36)
+							else if (column.getSequenceType() == ColumnInfo.UUID_GENERATOR &&
+								column.getLength() > 0 &&
+								((column.getDataProviderType() == IColumnTypes.MEDIA && column.getLength() < 16) || (column.getDataProviderType() == IColumnTypes.TEXT && column.getLength() < 36)))
 							{
 								ServoyMarker mk = MarkerMessages.ColumnInsufficientLengthForSequence.fill(tableName, column.getName());
 								addMarker(res, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, null, null);
