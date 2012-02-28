@@ -28,6 +28,7 @@ import org.eclipse.jface.window.Window;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -116,7 +117,8 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 							return e.getMessage();
 						}
 
-						boolean valid = IdentDocumentValidator.isSQLIdentifier(newText) && (!(newText.toUpperCase()).startsWith("TEMP_"));//$NON-NLS-1$
+						boolean valid = IdentDocumentValidator.isSQLIdentifier(newText) &&
+							(!(newText.toUpperCase()).startsWith(DataModelManager.TEMP_UPPERCASE_PREFIX));
 						return valid ? null : (newText.length() == 0 ? "" : "Invalid table name"); //$NON-NLS-1$//$NON-NLS-2$
 					}
 				});
