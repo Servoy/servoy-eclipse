@@ -116,7 +116,7 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 							return e.getMessage();
 						}
 
-						boolean valid = IdentDocumentValidator.isSQLIdentifier(newText);
+						boolean valid = IdentDocumentValidator.isSQLIdentifier(newText) && (!(newText.toUpperCase()).startsWith("TEMP_"));//$NON-NLS-1$
 						return valid ? null : (newText.length() == 0 ? "" : "Invalid table name"); //$NON-NLS-1$//$NON-NLS-2$
 					}
 				});
