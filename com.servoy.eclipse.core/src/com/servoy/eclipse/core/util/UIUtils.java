@@ -672,6 +672,17 @@ public class UIUtils
 		return ok[0];
 	}
 
+	public static void showInformation(final Shell shell, final String title, final String message)
+	{
+		Display.getDefault().syncExec(new Runnable()
+		{
+			public void run()
+			{
+				MessageDialog.openInformation(shell, title, message);
+			}
+		});
+	}
+
 	public static String showPasswordDialog(final Shell shell, final String dialogTitle, final String dialogMessage, final String initialValue,
 		final IInputValidator validator)
 	{

@@ -56,6 +56,7 @@ import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.UpdateMarkersJob;
+import com.servoy.j2db.dataprocessing.BufferedDataSet;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnInfoManager;
@@ -68,6 +69,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -86,6 +88,7 @@ public class DataModelManager implements IColumnInfoManager
 
 	public static final String COLUMN_INFO_FILE_EXTENSION = "dbi";
 	public static final String COLUMN_INFO_FILE_EXTENSION_WITH_DOT = '.' + COLUMN_INFO_FILE_EXTENSION;
+	public static final String TABLE_DATA_FILE_EXTENSION_WITH_DOT = ".obj";
 	public static final String TEMP_UPPERCASE_PREFIX = "TEMP_"; // tables that are not considered as being 'real'
 
 	private final IProject resourceProject;
@@ -862,6 +865,113 @@ public class DataModelManager implements IColumnInfoManager
 		return tobj.toString(true);
 	}
 
+	/**
+	 * Serialize contents of buffered dataset to a string, includes column names and type info
+	 * @param dataSet
+	 * @return
+	 * @throws JSONException
+	 */
+	public String serializeTableDateContents(BufferedDataSet dataSet) throws JSONException
+	{
+		if (dataSet == null)
+		{
+			return null;
+		}
+
+		ServoyJSONObject json = new ServoyJSONObject();
+
+		// columns
+		JSONArray jsonColumns = new JSONArray();
+		String[] columnNames = dataSet.getColumnNames();
+		ColumnType[] columnTypes = dataSet.getColumnTypeInfo();
+		for (int c = 0; c < columnNames.length; c++)
+		{
+			JSONObject jsonColumn = new JSONObject();
+			jsonColumn.put("name", columnNames[c]);
+			jsonColumn.put("type", XMLUtils.serializeColumnType(columnTypes[c]));
+			jsonColumns.put(jsonColumn);
+		}
+		json.put("columns", jsonColumns);
+
+		// rows
+		JSONArray jsonRows = new JSONArray();
+		for (int r = 0; r < dataSet.getRowCount(); r++)
+		{
+			Object[] row = dataSet.getRow(r);
+			JSONArray rowobj = new JSONArray();
+			for (int i = 0; i < row.length && i < columnNames.length; i++)
+			{
+				rowobj.put(row[i] == null ? JSONObject.NULL : row[i]);
+			}
+			jsonRows.put(rowobj);
+		}
+		json.put("rows", jsonRows);
+
+		// toString
+		return json.toString(true);
+	}
+
+	/**
+	 * Deserialize table contents string to of buffered dataset to a string, includes column names and type info
+	 * 
+	 * @param data
+	 * @return
+	 * @throws JSONException
+	 */
+	public BufferedDataSet deserializeTableDateContents(String data) throws JSONException
+	{
+		if (data == null)
+		{
+			return null;
+		}
+
+		ServoyJSONObject json = new ServoyJSONObject(data, true);
+		JSONArray jsonColumns = (JSONArray)json.get("columns");
+
+		String[] columnNames = new String[jsonColumns.length()];
+		ColumnType[] columnTypes = new ColumnType[jsonColumns.length()];
+
+		for (int c = 0; c < jsonColumns.length(); c++)
+		{
+			JSONObject jsonColumn = (JSONObject)jsonColumns.get(c);
+
+			columnNames[c] = jsonColumn.getString("name");
+			JSONArray typeArray = new JSONArray(jsonColumn.getString("type"));
+			columnTypes[c] = ColumnType.getInstance(typeArray.getInt(0), typeArray.getInt(1), typeArray.getInt(2));
+		}
+
+		List<Object[]> rows = new ArrayList<Object[]>();
+
+		JSONArray jsonArray = (JSONArray)json.get("rows");
+		for (int r = 0; r < jsonArray.length(); r++)
+		{
+			JSONArray rowobj = (JSONArray)jsonArray.get(r);
+			Object[] row = new Object[columnNames.length];
+			for (int i = 0; i < columnNames.length; i++)
+			{
+				Object val = rowobj.get(i);
+				if (val instanceof JSONArray)
+				{
+					// byte array
+					JSONArray arr = (JSONArray)val;
+					byte[] bytes = new byte[arr.length()];
+					for (int b = 0; b < arr.length(); b++)
+					{
+						bytes[b] = (byte)arr.getInt(b);
+					}
+					row[i] = bytes;
+				}
+				else
+				{
+					row[i] = val;
+				}
+			}
+			rows.add(row);
+		}
+
+		return new BufferedDataSet(columnNames, columnTypes, rows, false);
+	}
+
 	public static String getFileName(String tableName)
 	{
 		return tableName + COLUMN_INFO_FILE_EXTENSION_WITH_DOT;
@@ -873,9 +983,30 @@ public class DataModelManager implements IColumnInfoManager
 		return SolutionSerializer.DATASOURCES_DIR_NAME + IPath.SEPARATOR + serverName + IPath.SEPARATOR;
 	}
 
+	public IFile getDBIFile(String dataSource)
+	{
+		String[] stn = DataSourceUtils.getDBServernameTablename(dataSource);
+		if (stn == null)
+		{
+			return null;
+		}
+		return getDBIFile(stn[0], stn[1]);
+	}
+
 	public IFile getDBIFile(String serverName, String tableName)
 	{
 		IPath path = new Path(getRelativeServerPath(serverName) + IPath.SEPARATOR + getFileName(tableName));
+		return resourceProject.getFile(path);
+	}
+
+	public IFile getTableDataFile(String dataSource)
+	{
+		String[] stn = DataSourceUtils.getDBServernameTablename(dataSource);
+		if (stn == null)
+		{
+			return null;
+		}
+		IPath path = new Path(getRelativeServerPath(stn[0]) + IPath.SEPARATOR + stn[1] + TABLE_DATA_FILE_EXTENSION_WITH_DOT);
 		return resourceProject.getFile(path);
 	}
 

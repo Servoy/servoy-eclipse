@@ -251,6 +251,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.ReplaceServerAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ReplaceTableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.SelectAllAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.SuggestForeignTypesAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.SynchronizeTableDataAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.SynchronizeTablesAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ToggleFormCommandsAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.TreeHandlingToggleAction;
@@ -413,6 +414,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private SynchronizeTablesAction synchronizeTablesWithDBAction;
 	private HideUnhideTablesAction hideUnhideTablesAction;
+	private SynchronizeTableDataAction synchronizeTableDataAction;
 
 	private LoadRelationsAction loadRelationsAction;
 
@@ -2225,6 +2227,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (duplicatePersistAction.isEnabled()) manager.add(duplicatePersistAction);
 		if (deleteActionInList.isEnabled()) manager.add(deleteActionInList);
 		if (hideUnhideTablesAction.isEnabled()) manager.add(hideUnhideTablesAction);
+		if (synchronizeTableDataAction.isEnabled()) manager.add(synchronizeTableDataAction);
 		// Other plug-ins can contribute their actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
@@ -2392,6 +2395,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		updateServoySequencesAction = new UpdateServoySequencesAction();
 		synchronizeTablesWithDBAction = new SynchronizeTablesAction();
 		hideUnhideTablesAction = new HideUnhideTablesAction();
+		synchronizeTableDataAction = new SynchronizeTableDataAction(getSite().getShell());
 		loadRelationsAction = new LoadRelationsAction(this);
 
 		newActionInTreePrimary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
@@ -2608,6 +2612,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		list.addSelectionChangedListener(overrideMethod);
 		list.addSelectionChangedListener(openSqlEditorAction);
 		list.addSelectionChangedListener(hideUnhideTablesAction);
+		list.addSelectionChangedListener(synchronizeTableDataAction);
 
 		tree.addSelectionChangedListener(importMediaFolder);
 		tree.addSelectionChangedListener(synchronizeTablesWithDBAction);
