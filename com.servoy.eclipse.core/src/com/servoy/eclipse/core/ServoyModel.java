@@ -2655,6 +2655,29 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		testBuildPaths.schedule();
 	}
 
+	private ServoyProject[] getAllPossibleModulesOfActiveProject()
+	{
+		List<ServoyProject> allModuleProjects = new ArrayList<ServoyProject>();
+		ServoyProject[] modules = getModulesOfActiveProject();
+		for (ServoyProject spm : modules)
+		{
+			Solution s = spm.getSolution();
+			if (s != null)
+			{
+				String[] moduleNames = Utils.getTokenElements(s.getModulesNames(), ",", true);
+				for (String module : moduleNames)
+				{
+					ServoyProject tmp = getServoyProject(module);
+					if (tmp != null)
+					{
+						allModuleProjects.add(tmp);
+					}
+				}
+			}
+		}
+		return allModuleProjects.toArray(new ServoyProject[allModuleProjects.size()]);
+	}
+
 	public void updateWorkingSet()
 	{
 		WorkspaceJob updateServoyWorkingSet = new WorkspaceJob("Servoy active solution workingset updater")
@@ -2664,7 +2687,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 			{
 				if (getActiveProject() != null)
 				{
-					ServoyProject[] allprojects = getModulesOfActiveProject();
+					ServoyProject[] allprojects = getAllPossibleModulesOfActiveProject();
 
 					IAdaptable[] projects = new IAdaptable[allprojects.length + 1];
 					for (int i = 0; i < allprojects.length; i++)
