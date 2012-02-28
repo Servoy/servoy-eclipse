@@ -33,9 +33,10 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.persistence.IMediaProvider;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.util.Pair;
 
 /**
  * 
@@ -98,10 +99,14 @@ public class CreateMediaFolderAction extends Action implements ISelectionChanged
 				selectedSolution = (Solution)selectedFolderRealObject;
 				mediaFolder = "";
 			}
-			else if (selectedFolderRealObject instanceof Pair< ? , ? >)
+			else if (selectedFolderRealObject instanceof MediaNode)
 			{
-				selectedSolution = (Solution)((Pair< ? , ? >)selectedFolderRealObject).getLeft();
-				mediaFolder = (String)((Pair< ? , ? >)selectedFolderRealObject).getRight();
+				IMediaProvider mp = ((MediaNode)selectedFolderRealObject).getMediaProvider();
+				if (mp instanceof Solution)
+				{
+					selectedSolution = (Solution)mp;
+					mediaFolder = ((MediaNode)selectedFolderRealObject).getPath();
+				}
 			}
 
 			if (selectedSolution != null)

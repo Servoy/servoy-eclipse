@@ -406,6 +406,11 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 
 	public void updateNodesInWorkspace(final IPersist[] nodes, final boolean recursive)
 	{
+		updateNodesInWorkspace(nodes, recursive, true);
+	}
+
+	public void updateNodesInWorkspace(final IPersist[] nodes, final boolean recursive, boolean block)
+	{
 		if (nodes == null || nodes.length == 0) return;
 
 		// Note: some plugins (svn plugin) enforces a refresh which causes resources changes to be picked up
@@ -473,7 +478,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 		saveJob.setUser(false);
 		saveJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
 		saveJob.schedule();
-		// if (block)
+		if (block)
 		{
 			try
 			{

@@ -32,9 +32,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.util.MediaNode;
+import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportMediaAction;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -63,19 +64,12 @@ public class UserNodeFileDropTargetListener extends ViewerDropAdapter
 	public boolean validateDrop(Object target, int operation, TransferData transferType)
 	{
 		SimpleUserNode targetNode = null;
-		if (target == null && getViewer() instanceof ContentViewer)
+
+		Object input = (target == null && getViewer() instanceof ContentViewer) ? ((ContentViewer)getViewer()).getInput() : target;
+		if (input instanceof SimpleUserNode &&
+			(((SimpleUserNode)input).getRealType() == UserNodeType.MEDIA || ((SimpleUserNode)input).getRealType() == UserNodeType.MEDIA_FOLDER))
 		{
-			// dropped on the list
-			Object input = ((ContentViewer)getViewer()).getInput();
-			if (input instanceof SimpleUserNode &&
-				(((SimpleUserNode)input).getRealType() == UserNodeType.MEDIA || ((SimpleUserNode)input).getRealType() == UserNodeType.MEDIA_FOLDER))
-			{
-				targetNode = (SimpleUserNode)input;
-			}
-		}
-		else if (target instanceof SimpleUserNode)
-		{
-			targetNode = (SimpleUserNode)target;
+			targetNode = (SimpleUserNode)input;
 		}
 
 		project = null;
@@ -95,11 +89,30 @@ public class UserNodeFileDropTargetListener extends ViewerDropAdapter
 	{
 		if (project != null && data instanceof String[])
 		{
-			// active the part that was dropped on
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(workbenchPart);
-			final String targetParentPath = workbenchPart instanceof SolutionExplorerView &&
-				((SolutionExplorerView)workbenchPart).getCurrentMediaFolder() != null ? ((SolutionExplorerView)workbenchPart).getCurrentMediaFolder().getPath()
-				: null;
+			Object currentTarget = getCurrentTarget();
+			MediaNode targetMediaNode = null;
+			if (currentTarget == null)
+			{
+				// active the part that was dropped on
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(workbenchPart);
+				if (workbenchPart instanceof SolutionExplorerView && ((SolutionExplorerView)workbenchPart).getCurrentMediaFolder() != null)
+				{
+					targetMediaNode = ((SolutionExplorerView)workbenchPart).getCurrentMediaFolder();
+				}
+			}
+			else
+			{
+				if (currentTarget instanceof PlatformSimpleUserNode)
+				{
+					Object nodeObject = ((PlatformSimpleUserNode)currentTarget).getRealObject();
+					if (nodeObject instanceof MediaNode && ((MediaNode)nodeObject).getType() == MediaNode.TYPE.FOLDER)
+					{
+						targetMediaNode = (MediaNode)nodeObject;
+					}
+				}
+			}
+
+			final String targetParentPath = targetMediaNode != null ? targetMediaNode.getPath() : null;
 			final Solution editingSolution = project.getEditingSolution();
 			Job job = new WorkspaceJob("Import Media") //$NON-NLS-1$
 			{
@@ -135,7 +148,6 @@ public class UserNodeFileDropTargetListener extends ViewerDropAdapter
 				}
 
 			};
-			job.setRule(ServoyModel.getWorkspace().getRoot());
 			job.setUser(true);
 			job.schedule();
 			project = null;

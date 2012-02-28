@@ -143,6 +143,7 @@ import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.IVariable;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.ScriptNameValidator;
@@ -2107,6 +2108,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		});
 
 		File wsDir = workspace.getLocation().toFile();
+		File mediaDir = new File(project.getLocation().toFile(), SolutionSerializer.MEDIAS_DIR);
 
 		boolean securityInfoChanged = false;
 		Set<UUID> checkedParents = new HashSet<UUID>();
@@ -2146,6 +2148,20 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 			{
 				fireSolutionMetaDataChanged(solution);
 				continue;
+			}
+			else if (file.getPath().startsWith(mediaDir.getPath() + File.separator))
+			{
+				String name = file.getPath().substring(mediaDir.getPath().length() + 1);
+				Solution editingSolution = servoyProject.getEditingSolution();
+				EclipseRepository eclipseRepository = (EclipseRepository)editingSolution.getRepository();
+
+				Media media = editingSolution.getMedia(name);
+				if (media == null)
+				{
+					media = editingSolution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), name);
+					media.setMimeType(eclipseRepository.getContentType(name));
+				}
+				eclipseRepository.updateNodesInWorkspace(new IPersist[] { media }, false, false);
 			}
 
 			File parentFile = SolutionSerializer.getParentFile(wsDir, file);

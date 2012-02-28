@@ -29,7 +29,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.DirectoryDialog;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
@@ -117,7 +116,6 @@ public class ImportMediaFolderAction extends ImportMediaAction implements ISelec
 				}
 
 			};
-			job.setRule(ServoyModel.getWorkspace().getRoot());
 			job.setUser(true);
 			job.schedule();
 		}
