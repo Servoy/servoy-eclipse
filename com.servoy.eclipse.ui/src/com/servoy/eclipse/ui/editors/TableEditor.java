@@ -49,6 +49,7 @@ import com.servoy.eclipse.ui.editors.table.ColumnComposite;
 import com.servoy.eclipse.ui.editors.table.DataComposite;
 import com.servoy.eclipse.ui.editors.table.EventsComposite;
 import com.servoy.eclipse.ui.editors.table.FoundsetMethodsComposite;
+import com.servoy.eclipse.ui.editors.table.PropertiesComposite;
 import com.servoy.eclipse.ui.editors.table.SecurityComposite;
 import com.servoy.j2db.dataprocessing.IColumnConverter;
 import com.servoy.j2db.dataprocessing.IColumnValidator;
@@ -93,6 +94,9 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	private SecurityComposite securityComposite;
 
+	private PropertiesComposite propertiesComposite;
+
+
 	private ITableListener tableListener;
 
 	private IColumnListener columnListener;
@@ -111,7 +115,9 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	public static int SecurityPageIndex = 5;
 
-	public static int DataPageIndex = 6;
+	public static int PropertiesPageIndex = 6;
+
+	public static int DataPageIndex = 7;
 
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException
@@ -144,6 +150,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			createAggregationsPage();
 			createEventsPage();
 			createSecurityPage();
+			createPropertiesPage();
 			createDataPage();
 		}
 		updateTitle();
@@ -383,6 +390,13 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		setPageText(TableEditor.SecurityPageIndex, "Security");
 	}
 
+	private void createPropertiesPage()
+	{
+		propertiesComposite = new PropertiesComposite(getContainer(), SWT.None, this);
+		addPage(TableEditor.PropertiesPageIndex, propertiesComposite);
+		setPageText(TableEditor.PropertiesPageIndex, "Properties");
+	}
+
 	@Override
 	public Object getAdapter(Class adapter)
 	{
@@ -513,20 +527,17 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		{
 			public void iColumnChanged(IColumn column)
 			{
-				flagModified();
-				if (columnComposite != null) columnComposite.refreshViewer(table);
+				refresh();
 			}
 
 			public void iColumnCreated(IColumn column)
 			{
-				flagModified();
-				if (columnComposite != null) columnComposite.refreshViewer(table);
+				refresh();
 			}
 
 			public void iColumnRemoved(IColumn column)
 			{
-				flagModified();
-				if (columnComposite != null) columnComposite.refreshViewer(table);
+				refresh();
 			}
 		};
 		table.addIColumnListener(columnListener);
@@ -553,6 +564,10 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				if (columnComposite != null)
 				{
 					columnComposite.checkValidState();
+				}
+				if (propertiesComposite != null)
+				{
+					propertiesComposite.saveValues();
 				}
 				if (table.getRowIdentColumnsCount() == 0)
 				{
@@ -637,37 +652,55 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		}
 	}
 
+	/**
+	 * 
+	 */
+	public void refresh()
+	{
+		flagModified(true);
+		if (propertiesComposite != null) propertiesComposite.refresh();
+		if (columnComposite != null) columnComposite.refreshViewer(table);
+	}
+
 	public void flagModified()
 	{
+		flagModified(true);
+	}
+
+	public void flagModified(boolean checkChanges)
+	{
 		boolean modified = true;
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		DataModelManager dmm = servoyModel.getDataModelManager();
-		if (dmm != null)
+		if (checkChanges)
 		{
-			IFile dbiFile = dmm.getDBIFile(table.getServerName(), table.getName());
-			InputStream is = null;
-			try
+			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			DataModelManager dmm = servoyModel.getDataModelManager();
+			if (dmm != null)
 			{
-				if (dbiFile != null && dbiFile.exists())
-				{
-					is = dbiFile.getContents(true);
-					String disk = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
-					String mem = dmm.serializeTable(table, false);
-					modified = !mem.equals(disk);
-				}
-			}
-			catch (Exception e)
-			{
-				Debug.error(e);
-			}
-			finally
-			{
+				IFile dbiFile = dmm.getDBIFile(table.getServerName(), table.getName());
+				InputStream is = null;
 				try
 				{
-					is.close();
+					if (dbiFile != null && dbiFile.exists())
+					{
+						is = dbiFile.getContents(true);
+						String disk = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+						String mem = dmm.serializeTable(table, false);
+						modified = !mem.equals(disk);
+					}
 				}
 				catch (Exception e)
 				{
+					Debug.error(e);
+				}
+				finally
+				{
+					try
+					{
+						is.close();
+					}
+					catch (Exception e)
+					{
+					}
 				}
 			}
 		}
@@ -769,4 +802,5 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			}
 		});
 	}
+
 }

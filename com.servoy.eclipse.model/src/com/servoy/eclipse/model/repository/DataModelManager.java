@@ -591,6 +591,7 @@ public class DataModelManager implements IColumnInfoManager
 		}
 
 		s.setTableMarkedAsHiddenInDeveloper(t.getName(), tableInfo.hiddenInDeveloper);
+		t.setMarkedAsMetaData(tableInfo.isMetaData);
 		if (tableInfo.columnInfoDefSet.size() > 0)
 		{
 			for (int j = 0; j < tableInfo.columnInfoDefSet.size(); j++)
@@ -672,6 +673,7 @@ public class DataModelManager implements IColumnInfoManager
 		tableInfo.name = dbiContents.getString(SolutionSerializer.PROP_NAME);
 		tableInfo.tableType = dbiContents.getInt(TableDef.PROP_TABLE_TYPE);
 		tableInfo.hiddenInDeveloper = dbiContents.has(TableDef.HIDDEN_IN_DEVELOPER) ? dbiContents.getBoolean(TableDef.HIDDEN_IN_DEVELOPER) : false;
+		tableInfo.isMetaData = dbiContents.has(TableDef.IS_META_DATA) ? dbiContents.getBoolean(TableDef.IS_META_DATA) : false;
 
 		if (dbiContents.has(TableDef.PROP_COLUMNS))
 		{
@@ -732,6 +734,7 @@ public class DataModelManager implements IColumnInfoManager
 		TableDef tableInfo = new TableDef();
 		tableInfo.name = t.getName();
 		tableInfo.hiddenInDeveloper = t.isMarkedAsHiddenInDeveloper();
+		tableInfo.isMetaData = t.isMarkedAsMetaData();
 
 		List<String> colNames = new ArrayList<String>();
 		Collection<Column> col = t.getColumns();
@@ -817,6 +820,7 @@ public class DataModelManager implements IColumnInfoManager
 		tobj.put(SolutionSerializer.PROP_NAME, tableInfo.name);
 		tobj.put(TableDef.PROP_TABLE_TYPE, tableInfo.tableType);
 		if (tableInfo.hiddenInDeveloper) tobj.put(TableDef.HIDDEN_IN_DEVELOPER, true);
+		if (tableInfo.isMetaData) tobj.put(TableDef.IS_META_DATA, true);
 
 		JSONArray carray = new ServoyJSONArray();
 		Iterator<ColumnInfoDef> it = tableInfo.columnInfoDefSet.iterator();

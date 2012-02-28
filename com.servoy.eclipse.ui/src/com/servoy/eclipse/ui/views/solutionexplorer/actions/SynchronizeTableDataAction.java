@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorPart;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -34,6 +35,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -77,7 +79,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		this.shell = shell;
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("sync_tables.png")); //$NON-NLS-1$
 		setToolTipText("Synchronize meta data for table marked as meta data table between database and workspace");
-		setText(getToolTipText() + "Synchronize Meta Data ...");
+		setText("Synchronize Meta Data ...");
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)
@@ -146,7 +148,11 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 				return;
 			}
 			table.setMarkedAsMetaData(true);
-			EditorUtil.openTableEditor(table);
+			IEditorPart tableEditor = EditorUtil.openTableEditor(table);
+			if (tableEditor instanceof TableEditor)
+			{
+				((TableEditor)tableEditor).refresh();
+			}
 		}
 
 		IFile dataFile = dmm.getTableDataFile(dataSource);
