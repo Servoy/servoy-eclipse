@@ -2151,7 +2151,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 			}
 			else if (file.getPath().startsWith(mediaDir.getPath() + File.separator))
 			{
-				String name = file.getPath().substring(mediaDir.getPath().length() + 1);
+				String name = file.getPath().substring(mediaDir.getPath().length() + 1).replace('\\', '/');
 				Solution editingSolution = servoyProject.getEditingSolution();
 				EclipseRepository eclipseRepository = (EclipseRepository)editingSolution.getRepository();
 
