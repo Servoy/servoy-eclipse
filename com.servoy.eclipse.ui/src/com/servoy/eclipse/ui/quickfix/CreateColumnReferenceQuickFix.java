@@ -84,7 +84,7 @@ public class CreateColumnReferenceQuickFix implements IMarkerResolution
 									IEditorPart editor = EditorUtil.openTableEditor(table);
 									if (editor instanceof TableEditor)
 									{
-										((TableEditor)editor).flagModified();
+										((TableEditor)editor).refresh();
 										((TableEditor)editor).selectColumn(column);
 									}
 								}

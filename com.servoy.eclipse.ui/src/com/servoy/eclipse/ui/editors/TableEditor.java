@@ -664,7 +664,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	public void flagModified()
 	{
-		flagModified(true);
+		flagModified(false);
 	}
 
 	public void flagModified(boolean checkChanges)
