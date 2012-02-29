@@ -98,6 +98,7 @@ public class VisualFormEditorPaletteFactory
 	private static final String ELEMENTS_PORTAL_ID = "portal";
 	private static final String ELEMENTS_LISTBOX_ID = "listbox";
 	private static final String ELEMENTS_MULTISELECT_LISTBOX_ID = "multiselection listbox";
+	private static final String ELEMENTS_SPINNER_ID = "spinner";
 	private static final String[] ELEMENTS_IDS = new String[] {
 	/* */ELEMENTS_BUTTON_ID,
 	/* */ELEMENTS_RADIOS_ID,
@@ -114,6 +115,7 @@ public class VisualFormEditorPaletteFactory
 	/* */ELEMENTS_LISTBOX_ID,
 	/* */ELEMENTS_MULTISELECT_LISTBOX_ID,
 	/* */ELEMENTS_TYPE_AHEAD_ID,
+	/* */ELEMENTS_SPINNER_ID,
 	/* */ELEMENTS_PORTAL_ID
 	/* */};
 
@@ -410,6 +412,11 @@ public class VisualFormEditorPaletteFactory
 			icon = Activator.loadImageDescriptorFromBundle("listbox.png");
 			displayType = Field.MULTI_SELECTION_LIST_BOX;
 			size = new Dimension(140, 140);
+		}
+		else if (ELEMENTS_SPINNER_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("spinner.png");
+			displayType = Field.SPINNER;
 		}
 
 		else if (ELEMENTS_PORTAL_ID.equals(id))

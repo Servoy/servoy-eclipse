@@ -385,6 +385,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> FORM_ELEMENT_OUTSIDE_BOUNDS_OF_PART = new Pair<String, ProblemSeverity>(
 		"formElementOutsideBoundsOfPart", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> FORM_OBSOLETE_ELEMENT = new Pair<String, ProblemSeverity>("formObsoleteElement", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> FORM_REQUIRED_PROPERTY_MISSING = new Pair<String, ProblemSeverity>(
+		"formRequiredPropertyMissing", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> FORM_FIELD_FALLBACK_RELATED_VALUELIST = new Pair<String, ProblemSeverity>(
 		"formFieldFallbackRelatedValuelist", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> FORM_FIELD_RELATED_VALUELIST = new Pair<String, ProblemSeverity>(
@@ -2432,12 +2434,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						if (o instanceof Field)
 						{
 							Field field = (Field)o;
+							int type = field.getDisplayType();
 							if (field.getValuelistID() > 0)
 							{
 								ValueList vl = flattenedSolution.getValueList(field.getValuelistID());
 								if (vl != null)
 								{
-									if (field.getDisplayType() == Field.COMBOBOX && field.getEditable())
+									if (type == Field.COMBOBOX && field.getEditable())
 									{
 
 										boolean showWarning = false;
@@ -2465,8 +2468,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												IMarker.PRIORITY_NORMAL, null, field);
 										}
 									}
-									if ((field.getDisplayType() == Field.TEXT_FIELD || field.getDisplayType() == Field.TYPE_AHEAD) &&
-										vl.getValueListType() == ValueList.DATABASE_VALUES)
+									if ((type == Field.TEXT_FIELD || type == Field.TYPE_AHEAD) && vl.getValueListType() == ValueList.DATABASE_VALUES)
 									{
 										try
 										{
@@ -2567,6 +2569,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 									}
 								}
+							}
+							else if (type == Field.LIST_BOX || type == Field.MULTI_SELECTION_LIST_BOX || type == Field.SPINNER)
+							{
+								// these types of fields MUST have a valuelist
+								Form form = (Form)o.getAncestor(IRepository.FORMS);
+								ServoyMarker mk = MarkerMessages.RequiredPropertyMissingOnElement.fill("valuelist", field.getName(), form.getName()); //$NON-NLS-1$
+								addMarker(project, mk.getType(), mk.getText(), -1, FORM_REQUIRED_PROPERTY_MISSING, IMarker.PRIORITY_NORMAL, null, field);
 							}
 						}
 						checkCancel();

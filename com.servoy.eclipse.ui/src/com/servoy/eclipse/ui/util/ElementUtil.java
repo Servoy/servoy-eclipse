@@ -79,6 +79,7 @@ import com.servoy.j2db.ui.runtime.IRuntimeRadio;
 import com.servoy.j2db.ui.runtime.IRuntimeRadios;
 import com.servoy.j2db.ui.runtime.IRuntimeRectangle;
 import com.servoy.j2db.ui.runtime.IRuntimeRtfArea;
+import com.servoy.j2db.ui.runtime.IRuntimeSpinner;
 import com.servoy.j2db.ui.runtime.IRuntimeTextArea;
 import com.servoy.j2db.ui.runtime.IRuntimeTextField;
 import com.servoy.j2db.util.Debug;
@@ -331,6 +332,8 @@ public class ElementUtil
 				case Field.LIST_BOX :
 				case Field.MULTI_SELECTION_LIST_BOX :
 					return IRuntimeListBox.class;
+				case Field.SPINNER :
+					return IRuntimeSpinner.class;
 				default :
 					return IRuntimeTextField.class;
 			}

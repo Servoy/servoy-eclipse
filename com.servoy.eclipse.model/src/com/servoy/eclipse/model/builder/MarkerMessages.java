@@ -400,6 +400,9 @@ public class MarkerMessages
 	public static ServoyMarker FormFormatOnElementIncompatible = new ServoyMarker(
 		"Format not supported on element \"{0}\" from form \"{1}\" as it has valuelist with real and display values.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
+	public static ServoyMarker RequiredPropertyMissingOnElement = new ServoyMarker(
+		"Property \"{0}\" must be set on element \"{1}\", in form \"{2}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+
 	/**
 	 * The dataprovider used by an element cannot be found. This can happen for example if the structure of a database is changed and columns are deleted or renamed.
 	 */
