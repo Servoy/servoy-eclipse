@@ -874,12 +874,10 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 												}
 												references.add(editorReference);
 											}
-											else if (editorInput instanceof PersistEditorInput)
+											else if (editorInput instanceof PersistEditorInput &&
+												(activeProject == null || !((PersistEditorInput)editorInput).getSolutionName().equals(activeProject.toString())))
 											{
-												if (!((PersistEditorInput)editorInput).getSolutionName().equals(activeProject.toString()))
-												{
-													references.add(editorReference);
-												}
+												references.add(editorReference);
 											}
 										}
 										catch (PartInitException e)
