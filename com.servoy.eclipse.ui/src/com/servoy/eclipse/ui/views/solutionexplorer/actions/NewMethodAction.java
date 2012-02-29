@@ -490,6 +490,11 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 				// form method
 				validator.checkName(newText, 0, new ValidatorSearchContext(parent, IRepository.METHODS), false);
 			}
+			if (parent instanceof TableNode)
+			{
+				// foundset method
+				validator.checkName(newText, 0, new ValidatorSearchContext(parent, IRepository.METHODS), false);
+			}
 		}
 		catch (RepositoryException e)
 		{
