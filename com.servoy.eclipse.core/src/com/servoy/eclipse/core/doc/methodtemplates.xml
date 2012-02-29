@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <root>
   <event name="onActionMethodID">
     <methodtemplate addtodo="true" name="onAction">
@@ -27,7 +27,7 @@
   <event name="onAfterFindMethodID">
     <methodtemplate addtodo="true" name="afterFoundSetFind">
       <description><![CDATA[Foundset post-find trigger]]></description>
-      <code/>
+      <code></code>
     </methodtemplate>
   </event>
   <event name="onAfterInsertMethodID">
@@ -41,7 +41,7 @@
   <event name="onAfterSearchMethodID">
     <methodtemplate addtodo="true" name="afterFoundSetSearch">
       <description><![CDATA[Foundset post-search trigger]]></description>
-      <code/>
+      <code></code>
     </methodtemplate>
   </event>
   <event name="onAfterUpdateMethodID">
@@ -74,7 +74,8 @@
     <methodtemplate addtodo="true" name="onFoundSetRecordCreate" type="Boolean">
       <description><![CDATA[Record pre-create trigger
 When false is returned the record a record not be created in the foundset.]]></description>
-      <code/>
+      <code><![CDATA[// return true so that the record can be created
+return true]]></code>
     </methodtemplate>
   </event>
   <event name="onDataBroadcastMethodID">
@@ -115,7 +116,10 @@ Validate the record to be deleted.
 When false is returned the record will not be deleted in the database.
 When an exception is thrown the record will also not be deleted in the database but it will be added to databaseManager.getFailedRecords(),
 the thrown exception can be retrieved via record.exception.getValue().]]></description>
-      <code><![CDATA[// throw exception to pass info to handler, will be returned in record.exception.getValue() when record.exception is a DataException
+      <code><![CDATA[var not_valid = false;
+// test if it is valid.
+
+// throw exception to pass info to handler, will be returned in record.exception.getValue() when record.exception is a DataException
 if (not_valid) throw 'cannot delete'
 
 // return boolean to indicate success
@@ -280,7 +284,8 @@ return true]]></code>
     <methodtemplate addtodo="true" name="onFoundSetFind" type="Boolean">
       <description><![CDATA[Foundset pre-find trigger
 When false is returned the foundset will not go into find mode.]]></description>
-      <code/>
+      <code><![CDATA[// return true so that it will go into find mode.
+return true]]></code>
     </methodtemplate>
   </event>
   <event name="onFocusGainedMethodID">
@@ -315,7 +320,10 @@ Validate the record to be inserted.
 When false is returned the record will not be inserted in the database.
 When an exception is thrown the record will also not be inserted in the database but it will be added to databaseManager.getFailedRecords(),
 the thrown exception can be retrieved via record.exception.getValue().]]></description>
-      <code><![CDATA[// throw exception to pass info to handler, will be returned in record.exception.getValue() when record.exception is a DataException
+      <code><![CDATA[var not_valid = false;
+// test if it is valid.
+
+// throw exception to pass info to handler, will be returned in record.exception.getValue() when record.exception is a DataException
 if (not_valid) throw 'cannot insert'
 
 // return boolean to indicate success
@@ -421,7 +429,7 @@ return true]]></code>
   <event name="onRenderMethodID">
     <methodtemplate addtodo="true" name="onRender">
       <description><![CDATA[Called before the form component is rendered]]></description>
-      <code><![CDATA[// NOTE: a property set on the renderable, will be keept on the element only during onRender
+      <code><![CDATA[// NOTE: a property set on the renderable, will be kept on the element only during onRender
 if (event.isRecordSelected()) {
 	event.getRenderable().fgcolor = '#00ff00';
 } else if (event.getRecordIndex() % 2) {
@@ -463,10 +471,11 @@ if (event.isRecordSelected()) {
     <methodtemplate addtodo="true" name="onFoundSetSearch" type="Boolean">
       <description><![CDATA[Foundset pre-search trigger
 When false is returned the search will not be executed and the foundset will stay in find mode.]]></description>
-      <code/>
+      <code><![CDATA[// return true so that the search will go on.
+return true]]></code>
       <arguments>
-        <methodargument name="clearLastResults" type="Boolean"/>
-        <methodargument name="reduceSearch" type="Boolean"/>
+        <methodargument name="clearLastResults" type="Boolean"></methodargument>
+        <methodargument name="reduceSearch" type="Boolean"></methodargument>
       </arguments>
     </methodtemplate>
   </event>
@@ -523,7 +532,10 @@ Validate the record to be updated.
 When false is returned the record will not be updated in the database.
 When an exception is thrown the record will also not be updated in the database but it will be added to databaseManager.getFailedRecords(),
 the thrown exception can be retrieved via record.exception.getValue().]]></description>
-      <code><![CDATA[// throw exception to pass info to handler, will be returned in record.exception.getValue() when record.exception is a DataException
+      <code><![CDATA[var not_valid = false;
+// test if it is valid.
+
+// throw exception to pass info to handler, will be returned in record.exception.getValue() when record.exception is a DataException
 if (not_valid) throw 'cannot update'
 
 // return boolean to indicate success
