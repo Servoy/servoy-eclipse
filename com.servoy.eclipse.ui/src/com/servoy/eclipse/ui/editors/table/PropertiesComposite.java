@@ -85,8 +85,6 @@ public class PropertiesComposite extends Composite
 		fd_btnMetadataTable.top = new FormAttachment(btnHiddenInDeveloper, 6);
 		fd_btnMetadataTable.left = new FormAttachment(0, 10);
 		btnMetadataTable.setLayoutData(fd_btnMetadataTable);
-		btnMetadataTable.setText("Metadata table");
-
 		refresh();
 	}
 
@@ -95,6 +93,17 @@ public class PropertiesComposite extends Composite
 	 */
 	public void refresh()
 	{
+		if (table.canBeMarkedAsMetaData())
+		{
+			btnMetadataTable.setText("Metadata table");
+			btnMetadataTable.setEnabled(true);
+		}
+		else
+		{
+			btnMetadataTable.setText("Metadata table (Table can't be a metadata table because it must have a UUID primairy key, a modification_date and deletion_date date columns)");
+			btnMetadataTable.setEnabled(false);
+		}
+		btnMetadataTable.getParent().layout(true);
 		btnHiddenInDeveloper.setSelection(table.isMarkedAsHiddenInDeveloper());
 		btnMetadataTable.setSelection(table.isMarkedAsMetaData());
 	}

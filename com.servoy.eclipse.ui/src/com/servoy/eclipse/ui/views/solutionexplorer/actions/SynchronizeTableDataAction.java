@@ -132,6 +132,12 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 
 		if (!table.isMarkedAsMetaData())
 		{
+			if (!table.canBeMarkedAsMetaData())
+			{
+				UIUtils.showInformation(shell, "Table not marked as metadata table",
+					"Table can't be a metadata table because it must have a UUID primairy key, a modification_date and deletion_date date columns");
+				return;
+			}
 			if (!UIUtils.askQuestion(shell, "Table not marked as metadata table", "Table " + table.getName() + " in server " + table.getServerName() +
 				" is not marked as metadata table, mark now?"))
 			{
