@@ -557,8 +557,9 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		if (simpleMethodName == null) return null; //this should never happen
 		if (elementName == null) return simpleMethodName;
 		String modifiedElemName = elementName.substring(0, 1).toUpperCase() + elementName.substring(1);
-		//include in method name ("on ... Action ")
-		return new StringBuffer(simpleMethodName).insert(2, modifiedElemName).toString();
+		//include in method name ("on/after ... Action ")
+		if (simpleMethodName.startsWith("after")) return new StringBuffer(simpleMethodName).insert(5, modifiedElemName).toString(); //$NON-NLS-1$
+		else return new StringBuffer(simpleMethodName).insert(2, modifiedElemName).toString();
 	}
 
 	private static String getTableEventHandlerName(String simpleName, IPersist persist)
