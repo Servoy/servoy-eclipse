@@ -336,7 +336,11 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 			testClientsJob = new TestClientsJob(Messages.ScriptingConsole_testClientsJobName);
 			testClientsJob.schedule(20 * 1000);
 
-			Object[] clients = ApplicationServerSingleton.get().getDebugClientHandler().getActiveDebugClients().toArray();
+			Object[] clients = new Object[0];
+			if (ApplicationServerSingleton.get() != null && ApplicationServerSingleton.get().getDebugClientHandler() != null)
+			{
+				clients = ApplicationServerSingleton.get().getDebugClientHandler().getActiveDebugClients().toArray();
+			}
 			clientsList.setInput(clients);
 			if (clients.length > 0)
 			{
