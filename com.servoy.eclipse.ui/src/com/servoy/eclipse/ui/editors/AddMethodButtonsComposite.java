@@ -164,7 +164,7 @@ public class AddMethodButtonsComposite extends Composite
 				ComponentFormat componentFormat = ComponentFormat.getComponentFormat(field.getFormat(), field.getDataProviderID(),
 					ModelUtils.getEditingFlattenedSolution(parent).getDataproviderLookup(null, persistContext.getContext()),
 					Activator.getDefault().getDesignClient());
-				if (componentFormat.dpType != -1)
+				if (componentFormat.dpType != -1 && componentFormat.dpType != -4)
 				{
 					substitutions = new HashMap<String, String>();
 					substitutions.put("dataproviderType",
