@@ -2653,9 +2653,9 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		testBuildPaths.schedule();
 	}
 
-	private ServoyProject[] getAllPossibleModulesOfActiveProject()
+	private IProject[] getAllReferencedProjectsOfActiveProject()
 	{
-		List<ServoyProject> allModuleProjects = new ArrayList<ServoyProject>();
+		Set<IProject> allModuleProjects = new HashSet<IProject>();
 		ServoyProject[] modules = getModulesOfActiveProject();
 		for (ServoyProject spm : modules)
 		{
@@ -2665,7 +2665,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				String[] moduleNames = Utils.getTokenElements(s.getModulesNames(), ",", true);
 				for (String module : moduleNames)
 				{
-					ServoyProject tmp = getServoyProject(module);
+					IProject tmp = ResourcesPlugin.getWorkspace().getRoot().getProject(module);
 					if (tmp != null)
 					{
 						allModuleProjects.add(tmp);
@@ -2673,7 +2673,14 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				}
 			}
 		}
-		return allModuleProjects.toArray(new ServoyProject[allModuleProjects.size()]);
+
+		if (activeProject != null)
+		{
+			allModuleProjects.add(activeProject.getProject());
+			if (activeProject.getResourcesProject() != null) allModuleProjects.add(activeProject.getResourcesProject().getProject());
+		}
+
+		return allModuleProjects.toArray(new IProject[allModuleProjects.size()]);
 	}
 
 	public void updateWorkingSet()
@@ -2685,14 +2692,8 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 			{
 				if (getActiveProject() != null)
 				{
-					ServoyProject[] allprojects = getAllPossibleModulesOfActiveProject();
+					IAdaptable[] projects = getAllReferencedProjectsOfActiveProject();
 
-					IAdaptable[] projects = new IAdaptable[allprojects.length + 1];
-					for (int i = 0; i < allprojects.length; i++)
-					{
-						projects[i] = allprojects[i].getProject();
-					}
-					projects[allprojects.length] = getActiveProject().getResourcesProject().getProject();
 					IWorkingSetManager workingSetManager = PlatformUI.getWorkbench().getWorkingSetManager();
 					IWorkingSet ws = workingSetManager.getWorkingSet("Servoy Active Solution"); //$NON-NLS-1$
 					if (ws == null)
