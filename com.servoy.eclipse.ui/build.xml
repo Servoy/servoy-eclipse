@@ -241,6 +241,8 @@
 			
 			<pathelement path="../servoy_shared/lib/PBKDF2.jar"/>
 			
+			<pathelement path="../servoy_shared/lib/minis.jar"/>
+			
 			<pathelement path="../org.eclipse.dltk.javascript.rhino/bin/"/>
 			
 			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino/@dot"/>

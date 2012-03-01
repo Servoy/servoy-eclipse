@@ -305,6 +305,8 @@
 			
 			<pathelement path="../servoy_shared/lib/PBKDF2.jar"/>
 			
+			<pathelement path="../servoy_shared/lib/minis.jar"/>
+			
 			<pathelement path="../servoy_headless_client/bin/"/>
 			
 			<pathelement path="${build.result.folder}/../servoy_headless_client/@dot"/>
