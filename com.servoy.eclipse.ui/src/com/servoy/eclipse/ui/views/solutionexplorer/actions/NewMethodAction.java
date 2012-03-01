@@ -530,12 +530,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 				name = signature.getName();
 			}
 
-			//only form and global methods (event handlers on form elements and tables)
-			if (parent instanceof Form || parent instanceof Solution)
-			{
-				if (persist instanceof TableNode) name = getTableEventHandlerName(name, persist);
-				else if (!(persist instanceof Solution) && !(persist instanceof Form)) name = getFormEventHandlerName(name, persist);
-			}
+			if (persist instanceof TableNode) name = getTableEventHandlerName(name, persist);
+			else if (!(persist instanceof Solution) && !(persist instanceof Form)) name = getFormEventHandlerName(name, persist);
 
 			for (int i = 0; i < 100; i++)
 			{
@@ -558,6 +554,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 
 	private static String makePrettyName(String simpleMethodName, String elementName)
 	{
+		if (simpleMethodName == null) return null; //this should never happen
 		if (elementName == null) return simpleMethodName;
 		String modifiedElemName = elementName.substring(0, 1).toUpperCase() + elementName.substring(1);
 		//include in method name ("on ... Action ")
