@@ -27,6 +27,7 @@ import org.eclipse.draw2d.ActionListener;
 import org.eclipse.draw2d.Clickable;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.PositionConstants;
+import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.DragTracker;
 import org.eclipse.gef.EditPart;
@@ -54,6 +55,7 @@ import com.servoy.eclipse.designer.util.AnchoringFigure;
 import com.servoy.eclipse.designer.util.FigureMovedTracker;
 import com.servoy.eclipse.designer.util.PersistChangedTracker;
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
+import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportAnchors;
 import com.servoy.j2db.persistence.Part;
@@ -228,6 +230,18 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 			{
 				super.updateSourceRequest();
 				BasePersistGraphicalEditPart.limitChangeBoundsRequest((ChangeBoundsRequest)getSourceRequest());
+			}
+
+			@Override
+			protected Dimension getMinimumSizeFor(ChangeBoundsRequest request)
+			{
+				List editParts = request.getEditParts();
+				if (editParts.size() == 1 && ((PersistGraphicalEditPart)editParts.get(0)).getModel() instanceof GraphicalComponent)
+				{
+					return new Dimension(1, 1);
+				}
+				return IFigure.MIN_DIMENSION;
+
 			}
 		});
 		return resizeHandle;
