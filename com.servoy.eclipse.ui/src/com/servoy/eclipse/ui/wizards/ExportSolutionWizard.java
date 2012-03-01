@@ -184,9 +184,9 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 				try
 				{
 					exporter.exportSolutionToFile(activeSolution, new File(exportModel.getFileName()), ClientVersion.getVersion(),
-						ClientVersion.getReleaseNumber(), exportModel.isExportSampleData(), exportModel.getNumberOfSampleDataExported(),
-						exportModel.isExportI18NData(), exportModel.isExportUsers(), exportModel.isExportReferencedModules(),
-						exportModel.isProtectWithPassword());
+						ClientVersion.getReleaseNumber(), exportModel.isExportMetaData(), exportModel.isExportSampleData(),
+						exportModel.getNumberOfSampleDataExported(), exportModel.isExportI18NData(), exportModel.isExportUsers(),
+						exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword());
 					monitor.done();
 					return Status.OK_STATUS;
 				}
@@ -410,6 +410,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		private Button exportReferencedModulesButton;
 		private Button exportAllTablesFromReferencedServers;
 		private Button exportSampleDataButton;
+		private Button exportMetadataTablesButton;
 		private Button checkMetadataTablesButton;
 		private Button exportI18NDataButton;
 		private Button exportUsersButton;
@@ -444,6 +445,11 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			exportAllTablesFromReferencedServers.setText("Export all tables from referenced servers"); //$NON-NLS-1$
 			exportAllTablesFromReferencedServers.setSelection(exportModel.isExportAllTablesFromReferencedServers());
 			exportAllTablesFromReferencedServers.addListener(SWT.Selection, this);
+
+			exportMetadataTablesButton = new Button(composite, SWT.CHECK);
+			exportMetadataTablesButton.setText("Export metadata tables."); //$NON-NLS-1$ 
+			exportMetadataTablesButton.setSelection(exportModel.isExportMetaData());
+			exportMetadataTablesButton.addListener(SWT.Selection, this);
 
 			checkMetadataTablesButton = new Button(composite, SWT.CHECK);
 			checkMetadataTablesButton.setText("Check metadata tables."); //$NON-NLS-1$ 
@@ -537,6 +543,11 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			if (event.widget == protectWithPasswordButton) exportModel.setProtectWithPassword(protectWithPasswordButton.getSelection());
 			else if (event.widget == exportReferencedModulesButton) exportModel.setExportReferencedModules(exportReferencedModulesButton.getSelection());
 			else if (event.widget == checkMetadataTablesButton) exportModel.setCheckMetadataTables(checkMetadataTablesButton.getSelection());
+			else if (event.widget == exportMetadataTablesButton)
+			{
+				exportModel.setExportMetaData(exportMetadataTablesButton.getSelection());
+				checkMetadataTablesButton.setEnabled(exportMetadataTablesButton.getSelection());
+			}
 			else if (event.widget == exportSampleDataButton)
 			{
 				exportModel.setExportSampleData(exportSampleDataButton.getSelection());
@@ -544,19 +555,9 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 				nrOfExportedSampleDataSpinner.setEnabled(exportSampleDataButton.getSelection());
 				allRowsRadioButton.setEnabled(exportSampleDataButton.getSelection());
+				allRowsRadioButton.setSelection(false);
 				rowsPerTableRadioButton.setEnabled(exportSampleDataButton.getSelection());
-
-				if (exportSampleDataButton.getSelection() == false)
-				{
-					allRowsRadioButton.setSelection(false);
-					rowsPerTableRadioButton.setSelection(false);
-				}
-				else
-				{
-					allRowsRadioButton.setSelection(false);
-					rowsPerTableRadioButton.setSelection(true);
-				}
-
+				rowsPerTableRadioButton.setSelection(exportSampleDataButton.getSelection());
 			}
 			else if (event.widget == allRowsRadioButton)
 			{

@@ -28,7 +28,6 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.DataModelManager;
-import com.servoy.eclipse.model.repository.DataModelManager.TooManyRowsException;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
@@ -39,15 +38,13 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.IDebugWebClient;
-import com.servoy.j2db.dataprocessing.BufferedDataSet;
 import com.servoy.j2db.dataprocessing.FoundSetManager;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.dataprocessing.IDataSet;
-import com.servoy.j2db.dataprocessing.ISQLStatement;
-import com.servoy.j2db.dataprocessing.SQLStatement;
+import com.servoy.j2db.dataprocessing.MetaDataUtils;
+import com.servoy.j2db.dataprocessing.MetaDataUtils.TooManyRowsException;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.query.QueryDelete;
 import com.servoy.j2db.query.QuerySelect;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -132,10 +129,11 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 
 		if (!table.isMarkedAsMetaData())
 		{
-			if (!table.canBeMarkedAsMetaData())
+			if (!MetaDataUtils.canBeMarkedAsMetaData(table))
 			{
 				UIUtils.showInformation(shell, "Table not marked as metadata table",
-					"Table can't be a metadata table because it must have a UUID primairy key, a modification_date and deletion_date date columns");
+					"Table can't be a metadata table because it must have a UUID primairy key, a " + MetaDataUtils.METADATA_MODIFICATION_COLUMN + " and " +
+						MetaDataUtils.METADATA_DELETION_COLUMN + " date columns");
 				return;
 			}
 			if (!UIUtils.askQuestion(shell, "Table not marked as metadata table", "Table " + table.getName() + " in server " + table.getServerName() +
@@ -152,7 +150,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			}
 		}
 
-		IFile dataFile = dmm.getTableDataFile(dataSource);
+		IFile dataFile = dmm.getMetaDataFile(dataSource);
 		if (dataFile == null)
 		{
 			UIUtils.reportWarning("Error synchronizing table", "Cannot find data file for datasource '" + dataSource + "'.");
@@ -162,21 +160,20 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		switch (new SynchronizeTableDataDialog(shell).open())
 		{
 			case SynchronizeTableDataDialog.IMPORT_TO_DB :
-				importTableData(table, dmm, dataFile);
+				importTableData(table, dataFile);
 				break;
 
 			case SynchronizeTableDataDialog.SAVE_TO_WS :
-				generateTableDataFile(table, dmm, dataFile);
+				generateTableDataFile(table, dataFile);
 				break;
 		}
 	}
 
 	/**
 	 * @param table
-	 * @param dmm
 	 * @param dataFile
 	 */
-	private void importTableData(Table table, DataModelManager dmm, IFile dataFile)
+	private void importTableData(Table table, IFile dataFile)
 	{
 		// import file into table
 		if (!dataFile.exists())
@@ -188,9 +185,9 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		try
 		{
 			// check for existing data
-			QuerySelect query = dmm.createTableMetadataQuery(table, null);
+			QuerySelect query = MetaDataUtils.createTableMetadataQuery(table, null);
 			IDataSet ds = ApplicationServerSingleton.get().getDataServer().performQuery(ApplicationServerSingleton.get().getClientId(), table.getServerName(),
-				null, query, null, false, 0, 1, IDataServer.RAW_QUERY, null);
+				null, query, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
 			if (ds.getRowCount() > 0 &&
 				!UIUtils.askQuestion(shell, "Table is not empty", "Table " + table.getName() + " in server " + table.getServerName() +
 					" is not empty, data synchronize will delete existing data, continue?"))
@@ -202,17 +199,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			// read the json
 			String contents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(dataFile.getFullPath().toString());
 
-			// parse dataset
-			BufferedDataSet dataSet = dmm.deserializeTableMetaDataContents(contents);
-
-			// delete existing data
-			ApplicationServerSingleton.get().getDataServer().performUpdates(ApplicationServerSingleton.get().getClientId(),
-				new ISQLStatement[] { new SQLStatement(IDataServer.RAW_QUERY, table.getServerName(), table.getName(), null, //
-					new QueryDelete(query.getTable())) // delete entire table
-				});
-			// insert the data
-			ApplicationServerSingleton.get().getDataServer().insertDataSet(ApplicationServerSingleton.get().getClientId(), dataSet, table.getDataSource(),
-				table.getServerName(), table.getName(), null, null);
+			int ninserted = MetaDataUtils.loadMetadataInTable(table, contents);
 
 			// flush developer clients
 			IDebugJ2DBClient debugJ2DBClient = com.servoy.eclipse.core.Activator.getDefault().getDebugJ2DBClient();
@@ -226,8 +213,8 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 				((FoundSetManager)debugWebClient.getFoundSetManager()).flushCachedDatabaseData(table.getDataSource());
 			}
 
-			UIUtils.showInformation(shell, "Table synchronization",
-				"Successfully saved " + dataSet.getRowCount() + " records from workspace in table " + table.getName() + " in server " + table.getServerName());
+			UIUtils.showInformation(shell, "Table synchronization", "Successfully saved " + ninserted + " records from workspace in table " + table.getName() +
+				" in server " + table.getServerName());
 		}
 		catch (Exception e)
 		{
@@ -238,10 +225,9 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 
 	/**
 	 * @param table
-	 * @param dmm
 	 * @param dataFile
 	 */
-	private void generateTableDataFile(Table table, DataModelManager dmm, IFile dataFile)
+	private void generateTableDataFile(Table table, IFile dataFile)
 	{
 		try
 		{
@@ -249,7 +235,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			String contents;
 			try
 			{
-				contents = dmm.generateMetaDataFileContents(table, max);
+				contents = MetaDataUtils.generateMetaDataFileContents(table, max);
 			}
 			catch (TooManyRowsException e)
 			{
@@ -261,7 +247,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 				}
 
 				// ok you've been warned...
-				contents = dmm.generateMetaDataFileContents(table, -1);
+				contents = MetaDataUtils.generateMetaDataFileContents(table, -1);
 			}
 
 			// if file doesn't exist, this creates the file and its parent directories

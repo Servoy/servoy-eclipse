@@ -160,6 +160,11 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		return CANCEL_ACTION;
 	}
 
+	public int askImportMetaData()
+	{
+		return UIUtils.askQuestion(shell, "Meta Data", "Do you want to import the meta data contained in the import?") ? OK_ACTION : CANCEL_ACTION;
+	}
+
 	public int askImportSampleData()
 	{
 		return UIUtils.askQuestion(shell, "Sample Data", "Do you want to import the sample data contained in the import?") ? OK_ACTION : CANCEL_ACTION;

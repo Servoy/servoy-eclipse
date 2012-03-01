@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
 import com.servoy.eclipse.ui.editors.TableEditor;
+import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
@@ -93,14 +94,15 @@ public class PropertiesComposite extends Composite
 	 */
 	public void refresh()
 	{
-		if (table.canBeMarkedAsMetaData())
+		if (MetaDataUtils.canBeMarkedAsMetaData(table))
 		{
 			btnMetadataTable.setText("Metadata table");
 			btnMetadataTable.setEnabled(true);
 		}
 		else
 		{
-			btnMetadataTable.setText("Metadata table (Table can't be a metadata table because it must have a UUID primairy key, a modification_date and deletion_date date columns)");
+			btnMetadataTable.setText("Metadata table (Table can't be a metadata table because it must have a UUID primairy key, a " +
+				MetaDataUtils.METADATA_MODIFICATION_COLUMN + " and " + MetaDataUtils.METADATA_DELETION_COLUMN + " date columns)");
 			btnMetadataTable.setEnabled(false);
 		}
 		btnMetadataTable.getParent().layout(true);

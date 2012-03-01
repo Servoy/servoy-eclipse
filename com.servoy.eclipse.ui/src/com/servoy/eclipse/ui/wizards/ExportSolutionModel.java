@@ -24,6 +24,7 @@ public class ExportSolutionModel
 	private String fileName = null;
 	private boolean protectWithPassword = false;
 	private boolean exportReferencedModules = false;
+	private boolean exportMetaData = true;
 	private boolean exportSampleData = false;
 	private boolean exportI18NData = false;
 	private boolean exportUsers = false;
@@ -73,6 +74,16 @@ public class ExportSolutionModel
 	public void setExportReferencedModules(boolean exportReferencedModules)
 	{
 		this.exportReferencedModules = exportReferencedModules;
+	}
+
+	public boolean isExportMetaData()
+	{
+		return exportMetaData;
+	}
+
+	public void setExportMetaData(boolean exportMetaData)
+	{
+		this.exportMetaData = exportMetaData;
 	}
 
 	public boolean isExportSampleData()
@@ -142,6 +153,8 @@ public class ExportSolutionModel
 		sb.append(protectWithPassword);
 		sb.append("\nexport referenced modules: ");
 		sb.append(exportReferencedModules);
+		sb.append("\nexport metadata tables: ");
+		sb.append(exportMetaData);
 		sb.append("\ncheck metadata tables: ");
 		sb.append(checkMetadataTables);
 		sb.append("\nexport sample data: ");

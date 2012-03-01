@@ -19,16 +19,19 @@ package com.servoy.eclipse.core.repository;
 import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.rmi.RemoteException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.jar.JarFile;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -38,11 +41,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.javascript.core.JavaScriptNature;
+import org.json.JSONException;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseChangeHandler;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -52,19 +57,27 @@ import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.j2db.dataprocessing.IDataServer;
+import com.servoy.j2db.dataprocessing.IDataSet;
+import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.persistence.AbstractRootObject;
 import com.servoy.j2db.persistence.I18NUtil.MessageEntry;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Style;
+import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.query.QuerySelect;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.ILogLevel;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.UUID;
@@ -75,6 +88,7 @@ import com.servoy.j2db.util.xmlxport.IXMLImportHandlerVersions11AndHigher;
 import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
 import com.servoy.j2db.util.xmlxport.ImportInfo;
 import com.servoy.j2db.util.xmlxport.ImportTransactable;
+import com.servoy.j2db.util.xmlxport.MetadataDef;
 import com.servoy.j2db.util.xmlxport.RootObjectImportInfo;
 import com.servoy.j2db.util.xmlxport.RootObjectInfo.RootElementInfo;
 import com.servoy.j2db.util.xmlxport.UserInfo;
@@ -738,6 +752,115 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 
 		EclipseMessages.writeMessages(i18nServerName, i18nTableName, currentMessages, workspaceDir);
 
+	}
+
+	public void importMetaData(ImportInfo importInfo) throws RepositoryException
+	{
+		m.setTaskName("Importing meta data");
+
+		// save the metadata in the workspace
+		if (importInfo.metadataMap != null)
+		{
+			DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
+			if (dmm == null)
+			{
+				throw new RepositoryException("Error importing metad data table, Cannot find internal data model manager.");
+			}
+
+			WorkspaceFileAccess ws = new WorkspaceFileAccess(ServoyModel.getWorkspace());
+			for (Entry<String, Set<MetadataDef>> defs : importInfo.metadataMap.entrySet())
+			{
+				ServoyModelManager.getServoyModelManager().getServoyModel();
+				IServer server = ServoyModel.getServerManager().getServer(defs.getKey());
+				if (server == null)
+				{
+					throw new RepositoryException("Error importing meta data table, Cannot find server '" + defs.getKey() + "'.");
+				}
+
+				for (MetadataDef def : defs.getValue())
+				{
+					String[] stn = DataSourceUtils.getDBServernameTablename(def.dataSource);
+					if (stn == null)
+					{
+						throw new RepositoryException("Error importing meta data table, Cannot find table '" + def.dataSource + "'");
+					}
+					ITable table;
+					try
+					{
+						table = server.getTable(stn[1]);
+					}
+					catch (RemoteException e)
+					{
+						throw new RepositoryException("Error importing meta data table, Cannot find table '" + def.dataSource + "'", e);
+					}
+					if (!(table instanceof Table))
+					{
+						throw new RepositoryException("Error importing meta data table, Cannot find table '" + def.dataSource + "'.");
+					}
+
+					if (!((Table)table).isMarkedAsMetaData() && MetaDataUtils.canBeMarkedAsMetaData((Table)table))
+					{
+						// mark table as meta
+						((Table)table).setMarkedAsMetaData(true);
+						try
+						{
+							IFile dbi = dmm.getDBIFile(def.dataSource);
+							if (dbi == null)
+							{
+								throw new RepositoryException("Error importing meta data table, Cannot find dbi file for datasource '" + def.dataSource + "'.");
+							}
+							ws.setUTF8Contents(dbi.getFullPath().toString(), dmm.serializeTable((Table)table));
+						}
+						catch (JSONException e)
+						{
+							ServoyLog.logError("Cannot save table dbi file", e);
+						}
+						catch (IOException e)
+						{
+							ServoyLog.logError("Cannot save table dbi file", e);
+						}
+					}
+
+					IFile mdf = dmm.getMetaDataFile(def.dataSource);
+					if (mdf == null)
+					{
+						throw new RepositoryException("Error importing meta data table, Cannot find meta data file for datasource '" + def.dataSource + "'.");
+					}
+					try
+					{
+						ws.setUTF8Contents(mdf.getFullPath().toString(), def.tableMetaData);
+					}
+					catch (IOException e)
+					{
+						ServoyLog.logError("Error saving meta data for datasource '" + def.dataSource + "'", e);
+						throw new RepositoryException("Error saving meta data for datasource '" + def.dataSource + "': " + e.getMessage());
+					}
+
+					// save it in the table when it is empty
+					try
+					{
+						QuerySelect query = MetaDataUtils.createTableMetadataQuery((Table)table, null);
+						IDataSet ds = ApplicationServerSingleton.get().getDataServer().performQuery(ApplicationServerSingleton.get().getClientId(),
+							table.getServerName(), null, query, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
+						if (ds.getRowCount() == 0)
+						{
+							MetaDataUtils.loadMetadataInTable((Table)table, def.tableMetaData);
+						}
+						else
+						{
+							x11handler.getUserChannel().info(
+								"Meta data for table '" + table.getName() + "' in server '" + server.getName() +
+									"' was not loaded (table not empty), please synchronize table meta data", ILogLevel.INFO);
+						}
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError("Error loading meta data for datasource '" + def.dataSource + "'", e);
+						throw new RepositoryException("Error loading meta data for datasource '" + def.dataSource + "': " + e.getMessage());
+					}
+				}
+			}
+		}
 	}
 
 	public void importSampleData(JarFile jarFile, ImportInfo importInfo)

@@ -21,12 +21,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -58,8 +56,6 @@ import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.UpdateMarkersJob;
-import com.servoy.j2db.dataprocessing.BufferedDataSet;
-import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnInfoManager;
@@ -71,14 +67,9 @@ import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.ColumnType;
-import com.servoy.j2db.query.QueryColumn;
-import com.servoy.j2db.query.QuerySelect;
-import com.servoy.j2db.query.QuerySort;
-import com.servoy.j2db.query.QueryTable;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
-import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
@@ -389,7 +380,7 @@ public class DataModelManager implements IColumnInfoManager
 		}
 
 		// also remove the data file if it exists
-		IFile dataFile = getTableDataFile(t.getDataSource());
+		IFile dataFile = getMetaDataFile(t.getDataSource());
 		if (dataFile != null && dataFile.exists())
 		{
 			try
@@ -889,173 +880,6 @@ public class DataModelManager implements IColumnInfoManager
 		return tobj.toString(true);
 	}
 
-	public QuerySelect createTableMetadataQuery(Table table, LinkedHashMap<Column, QueryColumn> qyeryColumns)
-	{
-		QuerySelect query = new QuerySelect(new QueryTable(table.getSQLName(), table.getCatalog(), table.getSchema()));
-		LinkedHashMap<Column, QueryColumn> qColumns = qyeryColumns == null ? new LinkedHashMap<Column, QueryColumn>() : qyeryColumns; // LinkedHashMap to keep order for column names
-		Iterator<Column> columns = table.getColumnsSortedByName();
-		while (columns.hasNext())
-		{
-			Column column = columns.next();
-			if (!column.hasFlag(Column.EXCLUDED_COLUMN))
-			{
-				QueryColumn qColumn = new QueryColumn(query.getTable(), column.getID(), column.getSQLName(), column.getType(), column.getLength());
-				query.addColumn(qColumn);
-				qColumns.put(column, qColumn);
-			}
-		}
-		for (Column column : table.getRowIdentColumns())
-		{
-			if (qColumns.containsKey(column))
-			{
-				query.addSort(new QuerySort(qColumns.get(column), true));
-			}
-		}
-		return query;
-	}
-
-	public String generateMetaDataFileContents(Table table, int max) throws RemoteException, ServoyException, JSONException, TooManyRowsException
-	{
-		LinkedHashMap<Column, QueryColumn> qColumns = new LinkedHashMap<Column, QueryColumn>(); // LinkedHashMap to keep order for column names
-
-		QuerySelect query = createTableMetadataQuery(table, qColumns);
-
-		BufferedDataSet dataSet = (BufferedDataSet)ApplicationServerSingleton.get().getDataServer().performQuery(
-			ApplicationServerSingleton.get().getClientId(), table.getServerName(), null, query, null, false, 0, max, IDataServer.RAW_QUERY, null);
-		// not too much data?
-		if (dataSet.hadMoreRows())
-		{
-			throw new TooManyRowsException();
-		}
-
-		String[] columnNames = new String[qColumns.size()];
-		int i = 0;
-		for (Column column : qColumns.keySet())
-		{
-			columnNames[i++] = column.getSQLName();
-		}
-		dataSet.setColumnNames(columnNames);
-
-		return serializeTableMetaDataContents(dataSet);
-	}
-
-
-	/**
-	 * Serialize contents of buffered dataset to a string, includes column names and type info
-	 * @param dataSet
-	 * @return
-	 * @throws JSONException
-	 */
-	public String serializeTableMetaDataContents(BufferedDataSet dataSet) throws JSONException
-	{
-		if (dataSet == null)
-		{
-			return null;
-		}
-
-		ServoyJSONObject json = new ServoyJSONObject();
-
-		// columns
-		JSONArray jsonColumns = new JSONArray();
-		String[] columnNames = dataSet.getColumnNames();
-		ColumnType[] columnTypes = dataSet.getColumnTypeInfo();
-		for (int c = 0; c < columnNames.length; c++)
-		{
-			JSONObject jsonColumn = new JSONObject();
-			jsonColumn.put("name", columnNames[c]);
-			jsonColumn.put("type", XMLUtils.serializeColumnType(columnTypes[c]));
-			jsonColumns.put(jsonColumn);
-		}
-		json.put("columns", jsonColumns);
-
-		// rows
-		JSONArray jsonRows = new JSONArray();
-		for (int r = 0; r < dataSet.getRowCount(); r++)
-		{
-			Object[] row = dataSet.getRow(r);
-			JSONArray rowobj = new JSONArray();
-			for (int i = 0; i < row.length && i < columnNames.length; i++)
-			{
-				Object val;
-				if (row[i] == null)
-				{
-					val = JSONObject.NULL;
-				}
-				else if (row[i] instanceof byte[])
-				{
-					val = Utils.encodeBASE64((byte[])row[i]);
-				}
-				else
-				{
-					val = row[i];
-				}
-				rowobj.put(val);
-			}
-			jsonRows.put(rowobj);
-		}
-		json.put("rows", jsonRows);
-
-		// toString
-		return json.toString(true);
-	}
-
-	/**
-	 * Deserialize table contents string to of buffered dataset to a string, includes column names and type info
-	 * 
-	 * @param data
-	 * @return
-	 * @throws JSONException
-	 */
-	public BufferedDataSet deserializeTableMetaDataContents(String data) throws JSONException
-	{
-		if (data == null)
-		{
-			return null;
-		}
-
-		ServoyJSONObject json = new ServoyJSONObject(data, true);
-		JSONArray jsonColumns = (JSONArray)json.get("columns");
-
-		String[] columnNames = new String[jsonColumns.length()];
-		ColumnType[] columnTypes = new ColumnType[jsonColumns.length()];
-
-		for (int c = 0; c < jsonColumns.length(); c++)
-		{
-			JSONObject jsonColumn = (JSONObject)jsonColumns.get(c);
-
-			columnNames[c] = jsonColumn.getString("name");
-			JSONArray typeArray = new JSONArray(jsonColumn.getString("type"));
-			columnTypes[c] = ColumnType.getInstance(typeArray.getInt(0), typeArray.getInt(1), typeArray.getInt(2));
-		}
-
-		List<Object[]> rows = new ArrayList<Object[]>();
-
-		JSONArray jsonArray = (JSONArray)json.get("rows");
-		for (int r = 0; r < jsonArray.length(); r++)
-		{
-			JSONArray rowobj = (JSONArray)jsonArray.get(r);
-			Object[] row = new Object[columnNames.length];
-			for (int i = 0; i < columnNames.length; i++)
-			{
-				Object val = rowobj.get(i);
-				if (val == JSONObject.NULL)
-				{
-					row[i] = null;
-				}
-				else if (Column.mapToDefaultType(columnTypes[i].getSqlType()) == IColumnTypes.MEDIA && val instanceof String)
-				{
-					row[i] = Utils.decodeBASE64((String)val);
-				}
-				else
-				{
-					row[i] = val;
-				}
-			}
-			rows.add(row);
-		}
-
-		return new BufferedDataSet(columnNames, columnTypes, rows, false);
-	}
 
 	public static String getFileName(String tableName)
 	{
@@ -1084,7 +908,7 @@ public class DataModelManager implements IColumnInfoManager
 		return resourceProject.getFile(path);
 	}
 
-	public IFile getTableDataFile(String dataSource)
+	public IFile getMetaDataFile(String dataSource)
 	{
 		String[] stn = DataSourceUtils.getDBServernameTablename(dataSource);
 		if (stn == null)
@@ -1689,10 +1513,6 @@ public class DataModelManager implements IColumnInfoManager
 			Integer result = differenceTypes.get(t.getServerName() + '.' + t.getName());
 			return result == null ? -1 : result.intValue();
 		}
-	}
-
-	public static class TooManyRowsException extends Exception
-	{
 	}
 
 }

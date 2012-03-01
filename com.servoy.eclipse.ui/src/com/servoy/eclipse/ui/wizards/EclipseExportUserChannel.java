@@ -26,6 +26,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.SortedList;
@@ -84,7 +85,7 @@ public class EclipseExportUserChannel implements IXMLExportUserChannel
 			return null;
 		}
 
-		String wscontents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(dmm.getTableDataFile(table.getDataSource()).getFullPath().toString());
+		String wscontents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(dmm.getMetaDataFile(table.getDataSource()).getFullPath().toString());
 
 		if (wscontents != null && exportModel.isCheckMetadataTables() && table instanceof Table)
 		{
@@ -92,7 +93,7 @@ public class EclipseExportUserChannel implements IXMLExportUserChannel
 			String dbcontents;
 			try
 			{
-				dbcontents = dmm.generateMetaDataFileContents((Table)table, -1);
+				dbcontents = MetaDataUtils.generateMetaDataFileContents((Table)table, -1);
 			}
 			catch (Exception e)
 			{
