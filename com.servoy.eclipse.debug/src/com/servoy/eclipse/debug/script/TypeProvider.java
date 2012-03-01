@@ -144,6 +144,7 @@ import com.servoy.j2db.ui.runtime.IRuntimePassword;
 import com.servoy.j2db.ui.runtime.IRuntimeRadio;
 import com.servoy.j2db.ui.runtime.IRuntimeRadios;
 import com.servoy.j2db.ui.runtime.IRuntimeRtfArea;
+import com.servoy.j2db.ui.runtime.IRuntimeSpinner;
 import com.servoy.j2db.ui.runtime.IRuntimeSplitPane;
 import com.servoy.j2db.ui.runtime.IRuntimeTextArea;
 import com.servoy.j2db.ui.runtime.IRuntimeTextField;
@@ -1523,7 +1524,8 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			addType("RuntimeListBox", IRuntimeListBox.class);
 			typeNames.put(IScriptAccordionPanelMethods.class.getSimpleName(), "RuntimeAccordionPanel");
 			addType("RuntimeAccordionPanel", IScriptAccordionPanelMethods.class);
-
+			typeNames.put(IRuntimeSpinner.class.getSimpleName(), "RuntimeSpinner");
+			addType("RuntimeSpinner", IRuntimeSpinner.class);
 			addType("RuntimeComponent", IRuntimeComponent.class);
 		}
 
