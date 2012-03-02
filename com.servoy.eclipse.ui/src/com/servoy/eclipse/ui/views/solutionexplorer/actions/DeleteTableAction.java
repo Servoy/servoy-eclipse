@@ -20,6 +20,8 @@ import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.Iterator;
 
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -95,7 +97,7 @@ public class DeleteTableAction extends Action implements ISelectionChangedListen
 				{
 					Iterator<SimpleUserNode> it = selection.iterator();
 					TableWrapper selectedTable;
-					MultiStatus warnings = new MultiStatus(Activator.PLUGIN_ID, 0, "For more information please click 'Details'.", null);
+					final MultiStatus warnings = new MultiStatus(Activator.PLUGIN_ID, 0, "For more information please click 'Details'.", null);
 					YesYesToAllNoNoToAllAsker deleteEACAsker = null; // asks if you also want to delete table Events, Aggregations, Calculations from active modules
 
 					monitor.beginTask("Deleting table(s)", selection.size());
@@ -110,7 +112,7 @@ public class DeleteTableAction extends Action implements ISelectionChangedListen
 								ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 								IDeveloperRepository repository = ServoyModel.getDeveloperRepository();
 
-								IServer server = repository.getServer(selectedTable.getServerName());
+								final IServer server = repository.getServer(selectedTable.getServerName());
 								final ITable table = server == null ? null : server.getTable(selectedTable.getTableName());
 								if (server instanceof IServerInternal && table instanceof Table)
 								{
@@ -144,7 +146,27 @@ public class DeleteTableAction extends Action implements ISelectionChangedListen
 
 									if (deleteTable)
 									{
-										((IServerInternal)server).removeTable((Table)table);
+										ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable()
+										{
+
+											public void run(IProgressMonitor monitor) throws CoreException
+											{
+												try
+												{
+													((IServerInternal)server).removeTable((Table)table);
+												}
+												catch (SQLException e)
+												{
+													ServoyLog.logError(e);
+													warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Cannot delete table: " + e.getMessage()));
+												}
+												catch (RepositoryException e)
+												{
+													ServoyLog.logError(e);
+													warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Cannot delete table: " + e.getMessage()));
+												}
+											}
+										}, null);
 
 										// EditorUtil.closeEditor(table) needs to be run in an UI thread
 										if (Display.getCurrent() != null)
@@ -178,11 +200,6 @@ public class DeleteTableAction extends Action implements ISelectionChangedListen
 								ServoyLog.logError(e);
 								warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Cannot delete table: " + e.getMessage()));
 							}
-							catch (SQLException e)
-							{
-								ServoyLog.logError(e);
-								warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Cannot delete table: " + e.getMessage()));
-							}
 							monitor.worked(1);
 						}
 					}
@@ -211,7 +228,6 @@ public class DeleteTableAction extends Action implements ISelectionChangedListen
 					return Status.OK_STATUS;
 				}
 			};
-			job.setRule(ServoyModel.getWorkspace().getRoot());
 			job.setUser(true);
 			job.schedule();
 		}
