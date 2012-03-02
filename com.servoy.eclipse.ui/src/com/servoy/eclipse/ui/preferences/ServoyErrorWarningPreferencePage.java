@@ -646,6 +646,8 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_EDITABLE_COMBOBOX_CUSTOM_VALUELIST,
 				Messages.ErrorWarningPreferencePage_formEditableComboboxCustomValuelist));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_EXTENDS_CYCLE, Messages.ErrorWarningPreferencePage_formExtendsCycle));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_EXTENDS_FORM_ELEMENT_NOT_FOUND,
+				Messages.ErrorWarningPreferencePage_formExtendsFormElementNotFound));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_FILE_NAME_INCONSISTENT,
 				Messages.ErrorWarningPreferencePage_formFileNameInconsistent));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_FORMAT_INCOMPATIBLE,

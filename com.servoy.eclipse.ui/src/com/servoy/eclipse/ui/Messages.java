@@ -245,6 +245,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_formElementDuplicateTabSequence;
 	public static String ErrorWarningPreferencePage_formElementOutsideBoundsOfForm;
 	public static String ErrorWarningPreferencePage_formElementOutsideBoundsOfPart;
+	public static String ErrorWarningPreferencePage_formExtendsFormElementNotFound;
 	public static String ErrorWarningPreferencePage_formObsoleteElement;
 	public static String ErrorWarningPreferencePage_formFieldFallbackRelatedValuelist;
 	public static String ErrorWarningPreferencePage_formFieldRelatedValuelist;
