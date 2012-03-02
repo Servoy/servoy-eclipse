@@ -34,6 +34,7 @@ import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
@@ -148,7 +149,15 @@ public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 									// if table definition has a scale, add it to the compatible list, because the default type won't store scale.
 									if (difference.getTableDefinition().columnType.getScale() > 0)
 									{
-										cid.compatibleColumnTypes = Arrays.asList(difference.getTableDefinition().columnType);
+										if (cid.compatibleColumnTypes == null)
+										{
+											cid.compatibleColumnTypes = Arrays.asList(difference.getTableDefinition().columnType);
+										}
+										else
+										{
+											cid.compatibleColumnTypes = new ArrayList<ColumnType>(cid.compatibleColumnTypes);
+											cid.compatibleColumnTypes.add(difference.getTableDefinition().columnType);
+										}
 									}
 								}
 								// if pk info differs... use real one
