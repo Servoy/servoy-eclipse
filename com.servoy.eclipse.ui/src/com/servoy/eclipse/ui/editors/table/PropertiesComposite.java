@@ -18,6 +18,7 @@
 package com.servoy.eclipse.ui.editors.table;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FormAttachment;
@@ -26,9 +27,14 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
+import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
+import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
@@ -42,6 +48,7 @@ public class PropertiesComposite extends Composite
 	private final Button btnHiddenInDeveloper;
 	private final Button btnMetadataTable;
 	private final Table table;
+	private final Button createMetaDataColumnsButton;
 
 	/**
 	 * @param parent
@@ -86,12 +93,39 @@ public class PropertiesComposite extends Composite
 		fd_btnMetadataTable.top = new FormAttachment(btnHiddenInDeveloper, 6);
 		fd_btnMetadataTable.left = new FormAttachment(0, 10);
 		btnMetadataTable.setLayoutData(fd_btnMetadataTable);
+
+		createMetaDataColumnsButton = new Button(this, SWT.NONE);
+		FormData fd_button = new FormData();
+		fd_button.top = new FormAttachment(btnMetadataTable, 6);
+		fd_button.left = new FormAttachment(0, 37);
+		createMetaDataColumnsButton.setLayoutData(fd_button);
+		createMetaDataColumnsButton.setText("add metadata columns");
+		createMetaDataColumnsButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				try
+				{
+					if (table.getColumn(MetaDataUtils.METADATA_MODIFICATION_COLUMN) == null)
+					{
+						tableEditor.getColumnComposite().addColumn(table, MetaDataUtils.METADATA_MODIFICATION_COLUMN, IColumnTypes.DATETIME, 0);
+					}
+					if (table.getColumn(MetaDataUtils.METADATA_DELETION_COLUMN) == null)
+					{
+						tableEditor.getColumnComposite().addColumn(table, MetaDataUtils.METADATA_DELETION_COLUMN, IColumnTypes.DATETIME, 0);
+					}
+				}
+				catch (RepositoryException ex)
+				{
+					ServoyLog.logError(ex);
+					UIUtils.reportWarning("Error creating columns", "Error creating columns: " + ex.getMessage());
+				}
+			}
+		});
 		refresh();
 	}
 
-	/**
-	 * @param table
-	 */
 	public void refresh()
 	{
 		if (MetaDataUtils.canBeMarkedAsMetaData(table))
@@ -108,6 +142,19 @@ public class PropertiesComposite extends Composite
 		btnMetadataTable.getParent().layout(true);
 		btnHiddenInDeveloper.setSelection(table.isMarkedAsHiddenInDeveloper());
 		btnMetadataTable.setSelection(table.isMarkedAsMetaData());
+
+		boolean canMakeMetaDataColumns = true;
+		for (Column column : table.getRowIdentColumns())
+		{
+			if (column.getColumnInfo() == null || !column.getColumnInfo().hasFlag(Column.UUID_COLUMN))
+			{
+				canMakeMetaDataColumns = false;
+			}
+		}
+
+		canMakeMetaDataColumns &= ((table.getColumn(MetaDataUtils.METADATA_MODIFICATION_COLUMN) == null) || (table.getColumn(MetaDataUtils.METADATA_DELETION_COLUMN) == null));
+		createMetaDataColumnsButton.setEnabled(canMakeMetaDataColumns);
+
 	}
 
 	/**

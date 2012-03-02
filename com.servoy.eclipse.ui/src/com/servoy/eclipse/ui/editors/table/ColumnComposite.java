@@ -272,7 +272,6 @@ public class ColumnComposite extends Composite
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 				String orgName = "type_here"; //$NON-NLS-1$
 				String newName = orgName;
 				Column c = t.getColumn(newName);
@@ -288,8 +287,7 @@ public class ColumnComposite extends Composite
 				try
 				{
 					if (showWarning) MessageDialog.openWarning(getShell(), "Warning", "There is another type_here column.");
-					c = t.createNewColumn(nameValidator, newName, IColumnTypes.TEXT, 50);
-					tableViewer.editElement(c, 0);
+					c = addColumn(t, newName, IColumnTypes.TEXT, 50);
 					if (tabFolder.isVisible())
 					{
 						tableViewer.setSelection(new StructuredSelection(c), true);
@@ -355,6 +353,13 @@ public class ColumnComposite extends Composite
 			displayDataProviderID.setSelection(true);
 			showDataProviderColumn();
 		}
+	}
+
+	public Column addColumn(Table t, String newName, int type, int length) throws RepositoryException
+	{
+		Column column = t.createNewColumn(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), newName, type, length);
+		tableViewer.editElement(column, 0);
+		return column;
 	}
 
 	private boolean hasDataProviderSet(Table table)

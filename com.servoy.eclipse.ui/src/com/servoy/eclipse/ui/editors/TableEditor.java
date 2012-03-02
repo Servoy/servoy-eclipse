@@ -174,6 +174,12 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		}
 	}
 
+
+	public ColumnComposite getColumnComposite()
+	{
+		return columnComposite;
+	}
+
 	public void revert()
 	{
 		if (isDirty())
