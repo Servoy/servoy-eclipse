@@ -304,6 +304,9 @@ public class MarkerMessages
 	public static ServoyMarker FormLabelForElementNotFound = new ServoyMarker(
 		"Label in form \"{0}\" has labelfor property \"{1}\" that does not exist.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
+	public static ServoyMarker FormExtendsFormElementNotFound = new ServoyMarker(
+		"Form \"{0}\" extends a form that cannot be found.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+
 	public static ServoyMarker ObsoleteElement = new ServoyMarker(
 		"Form \"{0}\" contains obsolete element type, this should be removed.", ServoyBuilder.OBSOLETE_ELEMENT); //$NON-NLS-1$
 	/**

@@ -378,6 +378,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"formIncompatibleElementType", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> FORM_LABEL_FOR_ELEMENT_NOT_FOUND = new Pair<String, ProblemSeverity>(
 		"formLabelForElementNotFound", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> FORM_EXTENDS_FORM_ELEMENT_NOT_FOUND = new Pair<String, ProblemSeverity>(
+		"formExtendsFormElementNotFound", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> FORM_ELEMENT_DUPLICATE_TAB_SEQUENCE = new Pair<String, ProblemSeverity>(
 		"formElementDuplicateTabSequence", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> FORM_ELEMENT_OUTSIDE_BOUNDS_OF_FORM = new Pair<String, ProblemSeverity>(
@@ -2197,6 +2199,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											superForm = null;
 										}
 									}
+								}
+								else
+								{
+									//superForm not found
+									ServoyMarker mk = MarkerMessages.FormExtendsFormElementNotFound.fill(form.getName());
+									addMarker(project, mk.getType(), mk.getText(), -1, FORM_EXTENDS_FORM_ELEMENT_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, form);
 								}
 
 							}
