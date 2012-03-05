@@ -495,7 +495,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				}
 				catch (RepositoryException e)
 				{
-					ServoyLog.logError("Could not register propery " + element.getName(), e);
+					ServoyLog.logError("Could not register property " + element.getName(), e);
 				}
 			}
 			if (valueObject == persistContext.getPersist())
