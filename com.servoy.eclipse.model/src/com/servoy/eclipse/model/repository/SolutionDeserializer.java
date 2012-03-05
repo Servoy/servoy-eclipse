@@ -47,6 +47,7 @@ import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.javascript.ast.Argument;
 import org.eclipse.dltk.javascript.ast.ArrayInitializer;
+import org.eclipse.dltk.javascript.ast.BinaryOperation;
 import org.eclipse.dltk.javascript.ast.BooleanLiteral;
 import org.eclipse.dltk.javascript.ast.CallExpression;
 import org.eclipse.dltk.javascript.ast.Comment;
@@ -1135,7 +1136,7 @@ public class SolutionDeserializer
 					{
 						if (newField)
 						{
-							String typeName = json.getString(JS_TYPE_JSON_ATTRIBUTE);
+							String typeName = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
 							if (typeName != null)
 							{
 								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(typeName));
@@ -1209,10 +1210,33 @@ public class SolutionDeserializer
 						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
 						json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Boolean");
 					}
+					else if (code instanceof BinaryOperation && json.opt(JS_TYPE_JSON_ATTRIBUTE) == null)
+					{
+						Expression le = ((BinaryOperation)code).getLeftExpression();
+						Expression re = ((BinaryOperation)code).getRightExpression();
+						if (le instanceof StringLiteral || re instanceof StringLiteral)
+						{
+							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
+							json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "String");
+						}
+						else if (le instanceof DecimalLiteral || re instanceof DecimalLiteral)
+						{
+							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.NUMBER);
+							json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Number");
+						}
+					}
 					else
 					{
-						Debug.log("Unknow expression falling back to media: " + code.getClass()); //$NON-NLS-1$
-						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+						// only fall back to media if the jstype is not set, else keep the jstype that is specified in the doc
+						if (json.opt(JS_TYPE_JSON_ATTRIBUTE) == null)
+						{
+							Debug.log("Unknow expression falling back to media: " + code.getClass()); //$NON-NLS-1$
+							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+						}
+						else
+						{
+							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(json.optString(JS_TYPE_JSON_ATTRIBUTE)));
+						}
 					}
 					json.put("defaultValue", value_part); //$NON-NLS-1$
 				}
