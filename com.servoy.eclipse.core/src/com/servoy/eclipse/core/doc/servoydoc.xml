@@ -360,8 +360,24 @@ if (qdialog == "Yes") {
           </parameters>
         </function>
         <function name="closeSolution">
+          <argumentsTypes/>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Closes the currently open solution and optionally opens another solution, calling a specified global method with the specified arguments.
+If the user has been logged in, this function keeps the user logged in and in the newly open solution, the login is skipped and the solution goes straight to the first form.
+If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client). 
+An alternative option is security.logout() which also does a log out for the user (for solutions that require authentication).]]></description>
+          <summary><![CDATA[Closes the currently open solution and optionally opens another solution, calling a specified global method with the specified arguments.]]></summary>
+          <sample><![CDATA[//application.showURL('http://www.servoy.com', '_self');  //Web Client only
+application.closeSolution();
+//close current solution, open solution 'solution_name', call global method 'global_method_name' with argument 'my_argument'.
+//if the user has been logged in, he will stay logged in
+//application.closeSolution('solution_name','global_method_name','my_argument');
+//Note: specifying a solution will not work in the Developer due to debugger dependencies
+//specified solution should be of compatible type with client (normal type or client specific(Smart client only/Web client only) type )]]></sample>
+        </function>
+        <function name="closeSolution">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Closes the currently open solution and optionally opens another solution, calling a specified global method with the specified arguments.
@@ -377,13 +393,65 @@ application.closeSolution();
 //Note: specifying a solution will not work in the Developer due to debugger dependencies
 //specified solution should be of compatible type with client (normal type or client specific(Smart client only/Web client only) type )]]></sample>
           <parameters>
-            <parameter name="solutionToLoad" optional="true">
+            <parameter name="solutionToLoad" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[Name of the solution to load]]></description>
             </parameter>
-            <parameter name="method" optional="true">
+          </parameters>
+        </function>
+        <function name="closeSolution">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Closes the currently open solution and optionally opens another solution, calling a specified global method with the specified arguments.
+If the user has been logged in, this function keeps the user logged in and in the newly open solution, the login is skipped and the solution goes straight to the first form.
+If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client). 
+An alternative option is security.logout() which also does a log out for the user (for solutions that require authentication).]]></description>
+          <summary><![CDATA[Closes the currently open solution and optionally opens another solution, calling a specified global method with the specified arguments.]]></summary>
+          <sample><![CDATA[//application.showURL('http://www.servoy.com', '_self');  //Web Client only
+application.closeSolution();
+//close current solution, open solution 'solution_name', call global method 'global_method_name' with argument 'my_argument'.
+//if the user has been logged in, he will stay logged in
+//application.closeSolution('solution_name','global_method_name','my_argument');
+//Note: specifying a solution will not work in the Developer due to debugger dependencies
+//specified solution should be of compatible type with client (normal type or client specific(Smart client only/Web client only) type )]]></sample>
+          <parameters>
+            <parameter name="solutionToLoad" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[Name of the solution to load]]></description>
+            </parameter>
+            <parameter name="method">
               <description><![CDATA[Name of the global method to call]]></description>
             </parameter>
-            <parameter name="argument" optional="true">
+          </parameters>
+        </function>
+        <function name="closeSolution">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Closes the currently open solution and optionally opens another solution, calling a specified global method with the specified arguments.
+If the user has been logged in, this function keeps the user logged in and in the newly open solution, the login is skipped and the solution goes straight to the first form.
+If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client). 
+An alternative option is security.logout() which also does a log out for the user (for solutions that require authentication).]]></description>
+          <summary><![CDATA[Closes the currently open solution and optionally opens another solution, calling a specified global method with the specified arguments.]]></summary>
+          <sample><![CDATA[//application.showURL('http://www.servoy.com', '_self');  //Web Client only
+application.closeSolution();
+//close current solution, open solution 'solution_name', call global method 'global_method_name' with argument 'my_argument'.
+//if the user has been logged in, he will stay logged in
+//application.closeSolution('solution_name','global_method_name','my_argument');
+//Note: specifying a solution will not work in the Developer due to debugger dependencies
+//specified solution should be of compatible type with client (normal type or client specific(Smart client only/Web client only) type )]]></sample>
+          <parameters>
+            <parameter name="solutionToLoad" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[Name of the solution to load]]></description>
+            </parameter>
+            <parameter name="method">
+              <description><![CDATA[Name of the global method to call]]></description>
+            </parameter>
+            <parameter name="methodArgument" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[Argument passed to the global method]]></description>
             </parameter>
           </parameters>
@@ -1431,6 +1499,67 @@ application.setUIProperty('templates.dir','green_skin');]]></sample>
         </function>
         <function name="setValueListItems">
           <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></description>
+          <summary><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
+          <sample><![CDATA[//set display values (return values will be same as display values)
+application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'));
+//set display values and return values (which are stored in dataprovider)
+//application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'),new Array(10000,10010,10456));
+//set display values and return values converted to numbers
+//application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'),new Array('10000','10010', '10456'), true);
+//do query and fill valuelist (see databaseManager for full details of queries/dataset)
+//var query = 'select display_value,optional_real_value from test_table';
+//var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()), query, null, 25);
+
+//application.setValueListItems('my_en_types',dataset);]]></sample>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[Name of the valuelist]]></description>
+            </parameter>
+            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
+              <description><![CDATA[Dataset with display/real values]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setValueListItems">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></description>
+          <summary><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
+          <sample><![CDATA[//set display values (return values will be same as display values)
+application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'));
+//set display values and return values (which are stored in dataprovider)
+//application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'),new Array(10000,10010,10456));
+//set display values and return values converted to numbers
+//application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'),new Array('10000','10010', '10456'), true);
+//do query and fill valuelist (see databaseManager for full details of queries/dataset)
+//var query = 'select display_value,optional_real_value from test_table';
+//var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()), query, null, 25);
+
+//application.setValueListItems('my_en_types',dataset);]]></sample>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[Name of the valuelist]]></description>
+            </parameter>
+            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
+              <description><![CDATA[Dataset with display/real values]]></description>
+            </parameter>
+            <parameter name="autoconvert" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[Boolean (true) if display values and return values should be converted to numbers]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setValueListItems">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
@@ -1448,16 +1577,76 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
 
 //application.setValueListItems('my_en_types',dataset);]]></sample>
           <parameters>
-            <parameter name="name">
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[Name of the valuelist]]></description>
             </parameter>
-            <parameter name="displayValArray/dataset">
-              <description><![CDATA[Display values array or DataSet]]></description>
+            <parameter name="displayValues" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
+              <description><![CDATA[Display values array]]></description>
             </parameter>
-            <parameter name="realValuesArray" optional="true">
+          </parameters>
+        </function>
+        <function name="setValueListItems">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></description>
+          <summary><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
+          <sample><![CDATA[//set display values (return values will be same as display values)
+application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'));
+//set display values and return values (which are stored in dataprovider)
+//application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'),new Array(10000,10010,10456));
+//set display values and return values converted to numbers
+//application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'),new Array('10000','10010', '10456'), true);
+//do query and fill valuelist (see databaseManager for full details of queries/dataset)
+//var query = 'select display_value,optional_real_value from test_table';
+//var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()), query, null, 25);
+
+//application.setValueListItems('my_en_types',dataset);]]></sample>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[Name of the valuelist]]></description>
+            </parameter>
+            <parameter name="displayValues" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
+              <description><![CDATA[Display values array]]></description>
+            </parameter>
+            <parameter name="realValues" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
               <description><![CDATA[Real values array]]></description>
             </parameter>
-            <parameter name="autoconvert(false)" optional="true">
+          </parameters>
+        </function>
+        <function name="setValueListItems">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></description>
+          <summary><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
+          <sample><![CDATA[//set display values (return values will be same as display values)
+application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'));
+//set display values and return values (which are stored in dataprovider)
+//application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'),new Array(10000,10010,10456));
+//set display values and return values converted to numbers
+//application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'),new Array('10000','10010', '10456'), true);
+//do query and fill valuelist (see databaseManager for full details of queries/dataset)
+//var query = 'select display_value,optional_real_value from test_table';
+//var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()), query, null, 25);
+
+//application.setValueListItems('my_en_types',dataset);]]></sample>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="displayValues" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
+              <description><![CDATA[Display values array]]></description>
+            </parameter>
+            <parameter name="realValues" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
+              <description><![CDATA[Real values array]]></description>
+            </parameter>
+            <parameter name="autoconvert" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[Boolean (true) if display values and return values should be converted to numbers]]></description>
             </parameter>
           </parameters>
@@ -1505,32 +1694,75 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
           </parameters>
         </function>
         <function name="showCalendar">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="java.util.Date"><![CDATA[Selected date or null if canceled]]></return>
+          <description><![CDATA[Show the calendar, returns selected date or null if canceled. Initial value and date format can be also specified.]]></description>
+          <summary><![CDATA[Show the calendar, returns selected date or null if canceled.]]></summary>
+          <sample><![CDATA[var selectedDate = application.showCalendar();]]></sample>
+        </function>
+        <function name="showCalendar">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="java.util.Date"><![CDATA[Selected date or null if canceled]]></return>
-          <description><![CDATA[Show the calendar, returns selected date or null if canceled.]]></description>
+          <description><![CDATA[Show the calendar, returns selected date or null if canceled. Initial value and date format can be also specified.]]></description>
           <summary><![CDATA[Show the calendar, returns selected date or null if canceled.]]></summary>
           <sample><![CDATA[var selectedDate = application.showCalendar();]]></sample>
           <parameters>
-            <parameter name="selecteddate" optional="true">
+            <parameter name="dateFormat" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[Date format]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showCalendar">
+          <argumentsTypes>
+            <argumentType typecode="java.util.Date"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="java.util.Date"><![CDATA[Selected date or null if canceled]]></return>
+          <description><![CDATA[Show the calendar, returns selected date or null if canceled. Initial value and date format can be also specified.]]></description>
+          <summary><![CDATA[Show the calendar, returns selected date or null if canceled.]]></summary>
+          <sample><![CDATA[var selectedDate = application.showCalendar();]]></sample>
+          <parameters>
+            <parameter name="selectedDate" type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="java.util.Date">
               <description><![CDATA[Default selected date]]></description>
             </parameter>
-            <parameter name="dateformat" optional="true">
+          </parameters>
+        </function>
+        <function name="showCalendar">
+          <argumentsTypes>
+            <argumentType typecode="java.util.Date"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="java.util.Date"><![CDATA[Selected date or null if canceled]]></return>
+          <description><![CDATA[Show the calendar, returns selected date or null if canceled. Initial value and date format can be also specified.]]></description>
+          <summary><![CDATA[Show the calendar, returns selected date or null if canceled.]]></summary>
+          <sample><![CDATA[var selectedDate = application.showCalendar();]]></sample>
+          <parameters>
+            <parameter name="selectedDate" type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="java.util.Date">
+              <description><![CDATA[Default selected date]]></description>
+            </parameter>
+            <parameter name="dateFormat" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[Date format]]></description>
             </parameter>
           </parameters>
         </function>
         <function name="showColorChooser">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[selected color or null if canceled]]></return>
+          <description><![CDATA[Show the colorChooser. Returned value is in format #RRGGBB or null if canceled.]]></description>
+          <summary><![CDATA[Show the colorChooser.]]></summary>
+          <sample><![CDATA[var selectedColor = application.showColorChooser();]]></sample>
+        </function>
+        <function name="showColorChooser">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[selected color or null if canceled]]></return>
           <description><![CDATA[Show the colorChooser. Returned value is in format #RRGGBB or null if canceled.]]></description>
           <summary><![CDATA[Show the colorChooser.]]></summary>
           <sample><![CDATA[var selectedColor = application.showColorChooser();]]></sample>
           <parameters>
-            <parameter name="colorString" optional="true">
+            <parameter name="colorString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[Default color]]></description>
             </parameter>
           </parameters>
@@ -1561,16 +1793,24 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
           <sample/>
         </function>
         <function name="showFontChooser">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[selected font]]></return>
+          <description><![CDATA[Show the font chooser dialog. Returns the selected font. Can specify a default font.]]></description>
+          <summary><![CDATA[Show the font chooser dialog.]]></summary>
+          <sample><![CDATA[var selectedFont = application.showFontChooser();
+elements.myfield.font = selectedFont]]></sample>
+        </function>
+        <function name="showFontChooser">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[selected font]]></return>
-          <description><![CDATA[Show the font chooser dialog. Returns the selected font.]]></description>
+          <description><![CDATA[Show the font chooser dialog. Returns the selected font. Can specify a default font.]]></description>
           <summary><![CDATA[Show the font chooser dialog.]]></summary>
           <sample><![CDATA[var selectedFont = application.showFontChooser();
 elements.myfield.font = selectedFont]]></sample>
           <parameters>
-            <parameter name="fontString" optional="true">
+            <parameter name="defaultFont" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[Default font]]></description>
             </parameter>
           </parameters>
@@ -1697,25 +1937,47 @@ application.showFormInWindow(forms.contacts,100,80,500,300,'my own window title'
           </parameters>
         </function>
         <function name="showI18NDialog">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[selected I18N key or null if cancel is pressed]]></return>
+          <description><![CDATA[Opens the i18n dialog so users can change translations. Returns the key selected by the user (not it's translation)  or null if cancel is pressed. Optional parameters specify the initial selections in the dialog.]]></description>
+          <summary><![CDATA[Opens the i18n dialog so users can change translations.]]></summary>
+          <sample><![CDATA[application.showI18NDialog("servoy.button.close", "en");]]></sample>
+        </function>
+        <function name="showI18NDialog">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[selected I18N key or null if cancel is pressed]]></return>
           <description><![CDATA[Opens the i18n dialog so users can change translations. Returns the key selected by the user (not it's translation)  or null if cancel is pressed. Optional parameters specify the initial selections in the dialog.]]></description>
           <summary><![CDATA[Opens the i18n dialog so users can change translations.]]></summary>
           <sample><![CDATA[application.showI18NDialog("servoy.button.close", "en");]]></sample>
           <parameters>
-            <parameter name="keyToSelect" optional="true">
+            <parameter name="keyToSelect" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[Default selected key]]></description>
             </parameter>
-            <parameter name="languageToSelect" optional="true">
+          </parameters>
+        </function>
+        <function name="showI18NDialog">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[selected I18N key or null if cancel is pressed]]></return>
+          <description><![CDATA[Opens the i18n dialog so users can change translations. Returns the key selected by the user (not it's translation)  or null if cancel is pressed. Optional parameters specify the initial selections in the dialog.]]></description>
+          <summary><![CDATA[Opens the i18n dialog so users can change translations.]]></summary>
+          <sample><![CDATA[application.showI18NDialog("servoy.button.close", "en");]]></sample>
+          <parameters>
+            <parameter name="keyToSelect" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[Default selected key]]></description>
+            </parameter>
+            <parameter name="languageToSelect" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[Default selected language]]></description>
             </parameter>
           </parameters>
         </function>
         <function name="showURL">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[Boolean (true) if URL was shown]]></return>
           <description><![CDATA[Shows an URL in a browser.]]></description>
@@ -1727,16 +1989,115 @@ application.showFormInWindow(forms.contacts,100,80,500,300,'my own window title'
 //3rd parameter: dialog options used when a dialog is specified, example: 'height=200,width=400,status=yes,toolbar=no,menubar=no,location=no'
 //3th or 4th parameter: a timeout in seconds when the url should be shown, immediantly/0 is default']]></sample>
           <parameters>
-            <parameter name="url">
+            <parameter name="url" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[URL to show]]></description>
             </parameter>
-            <parameter name="webclientTarget" optional="true">
+          </parameters>
+        </function>
+        <function name="showURL">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[Boolean (true) if URL was shown]]></return>
+          <description><![CDATA[Shows an URL in a browser.]]></description>
+          <summary><![CDATA[Shows an URL in a browser.]]></summary>
+          <sample><![CDATA[application.showURL('http://www.example.com');
+
+//webclient specific additional parameters...
+//2nd parameter: target frame or named dialog/window, so its possible to control in which (internal) frame or dialog the url is loaded, '_self' is current window,'_blank' is new dialog, '_top' is main window
+//3rd parameter: dialog options used when a dialog is specified, example: 'height=200,width=400,status=yes,toolbar=no,menubar=no,location=no'
+//3th or 4th parameter: a timeout in seconds when the url should be shown, immediantly/0 is default']]></sample>
+          <parameters>
+            <parameter name="url" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[URL to show]]></description>
+            </parameter>
+            <parameter name="webclientTarget" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[Target frame or named dialog/window]]></description>
             </parameter>
-            <parameter name="webclientTargetOptions/timeout" optional="true">
+          </parameters>
+        </function>
+        <function name="showURL">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[Boolean (true) if URL was shown]]></return>
+          <description><![CDATA[Shows an URL in a browser.]]></description>
+          <summary><![CDATA[Shows an URL in a browser.]]></summary>
+          <sample><![CDATA[application.showURL('http://www.example.com');
+
+//webclient specific additional parameters...
+//2nd parameter: target frame or named dialog/window, so its possible to control in which (internal) frame or dialog the url is loaded, '_self' is current window,'_blank' is new dialog, '_top' is main window
+//3rd parameter: dialog options used when a dialog is specified, example: 'height=200,width=400,status=yes,toolbar=no,menubar=no,location=no'
+//3th or 4th parameter: a timeout in seconds when the url should be shown, immediantly/0 is default']]></sample>
+          <parameters>
+            <parameter name="url" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[URL to show]]></description>
+            </parameter>
+            <parameter name="webclientTarget" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[Target frame or named dialog/window]]></description>
+            </parameter>
+            <parameter name="timeout" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[A timeout in seconds when the url should be shown]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showURL">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[Boolean (true) if URL was shown]]></return>
+          <description><![CDATA[Shows an URL in a browser.]]></description>
+          <summary><![CDATA[Shows an URL in a browser.]]></summary>
+          <sample><![CDATA[application.showURL('http://www.example.com');
+
+//webclient specific additional parameters...
+//2nd parameter: target frame or named dialog/window, so its possible to control in which (internal) frame or dialog the url is loaded, '_self' is current window,'_blank' is new dialog, '_top' is main window
+//3rd parameter: dialog options used when a dialog is specified, example: 'height=200,width=400,status=yes,toolbar=no,menubar=no,location=no'
+//3th or 4th parameter: a timeout in seconds when the url should be shown, immediantly/0 is default']]></sample>
+          <parameters>
+            <parameter name="url" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[URL to show]]></description>
+            </parameter>
+            <parameter name="webclientTarget" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[Target frame or named dialog/window]]></description>
+            </parameter>
+            <parameter name="webclientTargetOptions" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[Dialog options used when a dialog is specified / a timeout in seconds when the url should be shown]]></description>
             </parameter>
-            <parameter name="timeout" optional="true">
+          </parameters>
+        </function>
+        <function name="showURL">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[Boolean (true) if URL was shown]]></return>
+          <description><![CDATA[Shows an URL in a browser.]]></description>
+          <summary><![CDATA[Shows an URL in a browser.]]></summary>
+          <sample><![CDATA[application.showURL('http://www.example.com');
+
+//webclient specific additional parameters...
+//2nd parameter: target frame or named dialog/window, so its possible to control in which (internal) frame or dialog the url is loaded, '_self' is current window,'_blank' is new dialog, '_top' is main window
+//3rd parameter: dialog options used when a dialog is specified, example: 'height=200,width=400,status=yes,toolbar=no,menubar=no,location=no'
+//3th or 4th parameter: a timeout in seconds when the url should be shown, immediantly/0 is default']]></sample>
+          <parameters>
+            <parameter name="url" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[URL to show]]></description>
+            </parameter>
+            <parameter name="webclientTarget">
+              <description><![CDATA[Target frame or named dialog/window]]></description>
+            </parameter>
+            <parameter name="webclientTargetOptions" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[Dialog options used when a dialog is specified / a timeout in seconds when the url should be shown]]></description>
+            </parameter>
+            <parameter name="timeout" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[A timeout in seconds when the url should be shown]]></description>
             </parameter>
           </parameters>
@@ -1764,8 +2125,17 @@ application.sleep(3000);]]></sample>
           <sample><![CDATA[application.undo();]]></sample>
         </function>
         <function name="updateUI">
+          <argumentsTypes/>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing 
+things, you can give an number in ms how long this can take.]]></description>
+          <summary><![CDATA[Updates the UI (painting).]]></summary>
+          <sample><![CDATA[application.updateUI(500);
+//continue doing things]]></sample>
+        </function>
+        <function name="updateUI">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing 
@@ -1774,7 +2144,7 @@ things, you can give an number in ms how long this can take.]]></description>
           <sample><![CDATA[application.updateUI(500);
 //continue doing things]]></sample>
           <parameters>
-            <parameter name="milliseconds" optional="true">
+            <parameter name="milliseconds" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[How long the update should take in milliseconds]]></description>
             </parameter>
           </parameters>
