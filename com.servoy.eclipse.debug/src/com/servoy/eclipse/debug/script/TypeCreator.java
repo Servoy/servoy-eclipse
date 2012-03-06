@@ -1117,39 +1117,82 @@ public abstract class TypeCreator
 			IScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectForClass(scriptObjectClass);
 			if (scriptObject != null)
 			{
+				StringBuilder docBuilder = new StringBuilder(200);
 				String sample = null;
 				boolean deprecated = false;
 				String deprecatedText = null;
+				IParameter[] parameters = null;
+				String returnText = null;
 				if (scriptObject instanceof ITypedScriptObject)
 				{
 					String toolTip = ((ITypedScriptObject)scriptObject).getToolTip(key, parameterTypes);
-					if (toolTip != null) doc = toolTip;
+					if (toolTip != null) docBuilder.append(toolTip);
 					sample = ((ITypedScriptObject)scriptObject).getSample(key, parameterTypes);
 					deprecated = ((ITypedScriptObject)scriptObject).isDeprecated(key, parameterTypes);
 					if (deprecated)
 					{
 						deprecatedText = ((ITypedScriptObject)scriptObject).getDeprecatedText(key, parameterTypes);
 					}
+
+					parameters = ((ITypedScriptObject)scriptObject).getParameters(key, parameterTypes);
+
+					Class< ? > returnedType = ((ITypedScriptObject)scriptObject).getReturnedType(key, parameterTypes);
+					String returnDescription = ((ITypedScriptObject)scriptObject).getReturnDescription(key, parameterTypes);
+					if (returnedType != null || returnDescription != null)
+					{
+						returnText = "<b>@return</b> ";
+						if (returnedType != null) returnText += returnedType.getSimpleName() + ' ';
+						if (returnDescription != null) returnText += returnDescription;
+					}
 				}
 				else
 				{
 					String toolTip = scriptObject.getToolTip(name);
-					if (toolTip != null) doc = toolTip;
+					if (toolTip != null) docBuilder.append(toolTip);
 					sample = scriptObject.getSample(key);
 					deprecated = scriptObject.isDeprecated(key);
 				}
 				if (sample != null)
 				{
-					doc = doc + "<br/>" + HtmlUtils.escapeMarkup(sample); //$NON-NLS-1$ //$NON-NLS-2$
+					docBuilder.append("<br/><pre>");
+					docBuilder.append(HtmlUtils.escapeMarkup(sample));
+					docBuilder.append("</pre>");
 				}
-				if (doc != null)
+				if (docBuilder.length() > 0)
 				{
+					if (parameters != null)
+					{
+						StringBuilder sb = new StringBuilder(parameters.length * 30);
+						for (IParameter parameter : parameters)
+						{
+							sb.append("<br/><b>@param</b> ");
+							if (parameter.getType() != null)
+							{
+								sb.append("{");
+								sb.append(parameter.getType());
+								sb.append("} ");
+							}
+							sb.append(parameter.getName());
+							if (parameter.getDescription() != null)
+							{
+								sb.append(" ");
+								sb.append(parameter.getDescription());
+							}
+						}
+						docBuilder.append(sb);
+					}
+					if (returnText != null)
+					{
+						docBuilder.append("<br/></br>");
+						docBuilder.append(returnText);
+					}
 					if (deprecatedText != null)
 					{
-						doc += "<br/><br/><b>@deprecated</b> " + deprecatedText;
+						docBuilder.append("<br/><br/><b>@deprecated</b> ");
+						docBuilder.append(deprecatedText);
 					}
-					else if (deprecated) doc += "<br/><br/><b>@deprecated</b>";
-					doc = Utils.stringReplace(doc, "\n", "<br/>"); //$NON-NLS-1$ //$NON-NLS-2$
+					else if (deprecated) docBuilder.append("<br/><br/><b>@deprecated</b>");
+					doc = Utils.stringReplace(docBuilder.toString(), "\n", "<br/>"); //$NON-NLS-1$ //$NON-NLS-2$
 					doc = Utils.stringReplace(doc, "%%prefix%%", ""); //$NON-NLS-1$ //$NON-NLS-2$
 					doc = Utils.stringReplace(doc, "%%elementName%%", "elements.elem"); //$NON-NLS-1$
 				}
