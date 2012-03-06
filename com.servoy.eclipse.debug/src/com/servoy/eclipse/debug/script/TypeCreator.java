@@ -1134,11 +1134,14 @@ public abstract class TypeCreator
 						deprecatedText = ((ITypedScriptObject)scriptObject).getDeprecatedText(key, parameterTypes);
 					}
 
-					parameters = ((ITypedScriptObject)scriptObject).getParameters(key, parameterTypes);
+					if (parameterTypes != null)
+					{
+						parameters = ((ITypedScriptObject)scriptObject).getParameters(key, parameterTypes);
+					}
 
 					Class< ? > returnedType = ((ITypedScriptObject)scriptObject).getReturnedType(key, parameterTypes);
 					String returnDescription = ((ITypedScriptObject)scriptObject).getReturnDescription(key, parameterTypes);
-					if (returnedType != null || returnDescription != null)
+					if ((returnedType != Void.class && returnedType != void.class && returnedType != null) || returnDescription != null)
 					{
 						returnText = "<b>@return</b> ";
 						if (returnedType != null) returnText += returnedType.getSimpleName() + ' ';
