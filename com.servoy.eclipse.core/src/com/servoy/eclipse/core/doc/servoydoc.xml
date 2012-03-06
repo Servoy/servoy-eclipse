@@ -6,7 +6,7 @@
         <constant name="ACCORDION_PANEL">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant used for creating accordion panel from tab panel, by setting its tabOrientation.]]></description>
-          <summary><![CDATA[Constant used for creating accordion panel from tab panel, by setting its tabOrientation.]]></summary>
+          <summary><![CDATA[Constant used for creating accordion panel from tab panel, by setting its tabOrientation]]></summary>
           <sample><![CDATA[var accordion = myForm.newTabPanel('accordion', 10, 10, 620, 460);
 accordion.tabOrientation = SM_ALIGNMENT.ACCORDION_PANEL;]]></sample>
         </constant>
