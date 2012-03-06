@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -1582,6 +1582,38 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
             </parameter>
             <parameter name="displayValues" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
               <description><![CDATA[Display values array]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setValueListItems">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></description>
+          <summary><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
+          <sample><![CDATA[//set display values (return values will be same as display values)
+application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'));
+//set display values and return values (which are stored in dataprovider)
+//application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'),new Array(10000,10010,10456));
+//set display values and return values converted to numbers
+//application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'),new Array('10000','10010', '10456'), true);
+//do query and fill valuelist (see databaseManager for full details of queries/dataset)
+//var query = 'select display_value,optional_real_value from test_table';
+//var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()), query, null, 25);
+
+//application.setValueListItems('my_en_types',dataset);]]></sample>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[Name of the valuelist]]></description>
+            </parameter>
+            <parameter name="displayValues" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
+              <description><![CDATA[Display values array]]></description>
+            </parameter>
+            <parameter name="autoconvert" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[Boolean (true) if display values and return values should be converted to numbers]]></description>
             </parameter>
           </parameters>
         </function>
