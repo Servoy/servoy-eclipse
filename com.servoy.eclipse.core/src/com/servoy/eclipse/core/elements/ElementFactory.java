@@ -542,7 +542,25 @@ public class ElementFactory
 		List<IPersist> tabs = null;
 		if (parent instanceof Form)
 		{
-			tabPanel = ((Form)parent).createNewTabPanel((nameHint == null ? "tabs_" : nameHint) + (location == null ? 0 : location.y));
+			int counter = 0;
+			String tabpanelNameHint = nameHint == null ? "tabs_" : nameHint;
+			while (true)
+			{
+				Iterator<IFormElement> it = ((Form)parent).getFormElementsSortedByFormIndex();
+				tabpanelNameHint = nameHint + (counter == 0 ? "" : counter);
+				boolean duplicate = false;
+				while (it.hasNext() && !duplicate)
+				{
+					if (Utils.stringSafeEquals(it.next().getName(), tabpanelNameHint))
+					{
+						duplicate = true;
+					}
+				}
+				if (duplicate) counter++;
+				else break;
+			}
+
+			tabPanel = ((Form)parent).createNewTabPanel(tabpanelNameHint);
 			tabPanel.setTransparent(true);
 			tabPanel.setPrintable(false);
 			tabPanel.setTabOrientation(tabOrientation);
