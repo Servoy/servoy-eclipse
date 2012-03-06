@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -7781,7 +7781,41 @@ var currRow = dataset.rowIndex]]></sample>
       <functions>
         <function name="addColumn">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if succeeded, else false.]]></return>
+          <description><![CDATA[adds a column with the specified name to the dataset.]]></description>
+          <summary><![CDATA[adds a column with the specified name to the dataset.]]></summary>
+          <sample/>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[column name.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="addColumn">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if succeeded, else false.]]></return>
+          <description><![CDATA[adds a column with the specified name to the dataset.]]></description>
+          <summary><![CDATA[adds a column with the specified name to the dataset.]]></summary>
+          <sample/>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[column name.]]></description>
+            </parameter>
+            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[column index number between 1 and getMaxColumnIndex().]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="addColumn">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if succeeded, else false.]]></return>
           <description><![CDATA[adds a column with the specified name to the dataset.]]></description>
@@ -7789,13 +7823,13 @@ var currRow = dataset.rowIndex]]></sample>
           <sample><![CDATA[//assuming the variable dataset contains a dataset
 var success = dataset.addColumn('columnName',1);]]></sample>
           <parameters>
-            <parameter name="name">
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[column name.]]></description>
             </parameter>
-            <parameter name="index" optional="true">
+            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[column index number between 1 and getMaxColumnIndex().]]></description>
             </parameter>
-            <parameter name="type" optional="true">
+            <parameter name="type" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the type of column, see JSColumn constants.]]></description>
             </parameter>
           </parameters>
@@ -7931,8 +7965,189 @@ var uri2 = ds2.createDataSource('mydata2'); // types are inferred from query res
           </parameters>
         </function>
         <function name="getAsHTML">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String html.]]></return>
+          <description><![CDATA[Get the dataset as an html table, do not escape values or spaces, no multi_line_markup, do not add indentation, add column names.]]></description>
+          <summary><![CDATA[Get the dataset as an html table, do not escape values or spaces, no multi_line_markup, do not add indentation, add column names.]]></summary>
+          <sample><![CDATA[//gets a dataset based on a query
+//useful to limit the number of rows
+var maxReturnedRows = 10;
+var query = 'select c1,c2,c3 from test_table where start_date = ?';
+
+//to access data by name, do not use '.' or special characters in names or aliases
+var args = new Array();
+args[0] = order_date //or new Date();
+var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()),query,args,maxReturnedRows);
+
+// gets a dataset with escape values; escape spaces (lines will not wrap); no multi-line markup; with pretty indentation; shows column names
+var htmlTable = dataset.getAsHTML(true, true, false, true, true);
+
+//assigns the dataset to a field and sets the display type to HTML_AREA
+//assuming the html_field is a global text variable
+scopes.globals.html_field = '<html>'+dataset.getAsHTML()+'</html>';
+
+//Note: To display an HTML_AREA field as an HTML page, add HTML tags at the beginning '<html>' and at the end '</html>'.]]></sample>
+          <parameters>
+            <parameter name="escape_values">
+              <description><![CDATA[if true, replaces illegal HTML characters with corresponding valid escape sequences.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getAsHTML">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String html.]]></return>
+          <description><![CDATA[Get the dataset as an html table, do not escape spaces, no multi_line_markup, do not add indentation, add column names.]]></description>
+          <summary><![CDATA[Get the dataset as an html table, do not escape spaces, no multi_line_markup, do not add indentation, add column names.]]></summary>
+          <sample><![CDATA[//gets a dataset based on a query
+//useful to limit the number of rows
+var maxReturnedRows = 10;
+var query = 'select c1,c2,c3 from test_table where start_date = ?';
+
+//to access data by name, do not use '.' or special characters in names or aliases
+var args = new Array();
+args[0] = order_date //or new Date();
+var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()),query,args,maxReturnedRows);
+
+// gets a dataset with escape values; escape spaces (lines will not wrap); no multi-line markup; with pretty indentation; shows column names
+var htmlTable = dataset.getAsHTML(true, true, false, true, true);
+
+//assigns the dataset to a field and sets the display type to HTML_AREA
+//assuming the html_field is a global text variable
+scopes.globals.html_field = '<html>'+dataset.getAsHTML()+'</html>';
+
+//Note: To display an HTML_AREA field as an HTML page, add HTML tags at the beginning '<html>' and at the end '</html>'.]]></sample>
+          <parameters>
+            <parameter name="escape_values" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[if true, replaces illegal HTML characters with corresponding valid escape sequences.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getAsHTML">
+          <argumentsTypes>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String html.]]></return>
+          <description><![CDATA[Get the dataset as an html table, no multi_line_markup, do not add indentation, add column names.]]></description>
+          <summary><![CDATA[Get the dataset as an html table, no multi_line_markup, do not add indentation, add column names.]]></summary>
+          <sample><![CDATA[//gets a dataset based on a query
+//useful to limit the number of rows
+var maxReturnedRows = 10;
+var query = 'select c1,c2,c3 from test_table where start_date = ?';
+
+//to access data by name, do not use '.' or special characters in names or aliases
+var args = new Array();
+args[0] = order_date //or new Date();
+var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()),query,args,maxReturnedRows);
+
+// gets a dataset with escape values; escape spaces (lines will not wrap); no multi-line markup; with pretty indentation; shows column names
+var htmlTable = dataset.getAsHTML(true, true, false, true, true);
+
+//assigns the dataset to a field and sets the display type to HTML_AREA
+//assuming the html_field is a global text variable
+scopes.globals.html_field = '<html>'+dataset.getAsHTML()+'</html>';
+
+//Note: To display an HTML_AREA field as an HTML page, add HTML tags at the beginning '<html>' and at the end '</html>'.]]></sample>
+          <parameters>
+            <parameter name="escape_values" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[if true, replaces illegal HTML characters with corresponding valid escape sequences.]]></description>
+            </parameter>
+            <parameter name="escape_spaces" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[if true, replaces text spaces with non-breaking space tags ( ) and tabs by four non-breaking space tags.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getAsHTML">
+          <argumentsTypes>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String html.]]></return>
+          <description><![CDATA[Get the dataset as an html table, do not add indentation, add column names.]]></description>
+          <summary><![CDATA[Get the dataset as an html table, do not add indentation, add column names.]]></summary>
+          <sample><![CDATA[//gets a dataset based on a query
+//useful to limit the number of rows
+var maxReturnedRows = 10;
+var query = 'select c1,c2,c3 from test_table where start_date = ?';
+
+//to access data by name, do not use '.' or special characters in names or aliases
+var args = new Array();
+args[0] = order_date //or new Date();
+var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()),query,args,maxReturnedRows);
+
+// gets a dataset with escape values; escape spaces (lines will not wrap); no multi-line markup; with pretty indentation; shows column names
+var htmlTable = dataset.getAsHTML(true, true, false, true, true);
+
+//assigns the dataset to a field and sets the display type to HTML_AREA
+//assuming the html_field is a global text variable
+scopes.globals.html_field = '<html>'+dataset.getAsHTML()+'</html>';
+
+//Note: To display an HTML_AREA field as an HTML page, add HTML tags at the beginning '<html>' and at the end '</html>'.]]></sample>
+          <parameters>
+            <parameter name="escape_values" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[if true, replaces illegal HTML characters with corresponding valid escape sequences.]]></description>
+            </parameter>
+            <parameter name="escape_spaces" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[if true, replaces text spaces with non-breaking space tags ( ) and tabs by four non-breaking space tags.]]></description>
+            </parameter>
+            <parameter name="multi_line_markup" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[if true, multiLineMarkup will enforce new lines that are in the text; single new lines will be replaced by <br>, multiple new lines will be replaced by <p>]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getAsHTML">
+          <argumentsTypes>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String html.]]></return>
+          <description><![CDATA[Get the dataset as an html table, add column names.]]></description>
+          <summary><![CDATA[Get the dataset as an html table, add column names.]]></summary>
+          <sample><![CDATA[//gets a dataset based on a query
+//useful to limit the number of rows
+var maxReturnedRows = 10;
+var query = 'select c1,c2,c3 from test_table where start_date = ?';
+
+//to access data by name, do not use '.' or special characters in names or aliases
+var args = new Array();
+args[0] = order_date //or new Date();
+var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()),query,args,maxReturnedRows);
+
+// gets a dataset with escape values; escape spaces (lines will not wrap); no multi-line markup; with pretty indentation; shows column names
+var htmlTable = dataset.getAsHTML(true, true, false, true, true);
+
+//assigns the dataset to a field and sets the display type to HTML_AREA
+//assuming the html_field is a global text variable
+scopes.globals.html_field = '<html>'+dataset.getAsHTML()+'</html>';
+
+//Note: To display an HTML_AREA field as an HTML page, add HTML tags at the beginning '<html>' and at the end '</html>'.]]></sample>
+          <parameters>
+            <parameter name="escape_values" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[if true, replaces illegal HTML characters with corresponding valid escape sequences.]]></description>
+            </parameter>
+            <parameter name="escape_spaces" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[if true, replaces text spaces with non-breaking space tags ( ) and tabs by four non-breaking space tags.]]></description>
+            </parameter>
+            <parameter name="multi_line_markup" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[if true, multiLineMarkup will enforce new lines that are in the text; single new lines will be replaced by <br>, multiple new lines will be replaced by <p>]]></description>
+            </parameter>
+            <parameter name="pretty_indent" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[if true, adds indentation for more readable HTML code.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getAsHTML">
+          <argumentsTypes>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="boolean"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String html.]]></return>
           <description><![CDATA[Get the dataset as an html table.]]></description>
@@ -7956,19 +8171,19 @@ scopes.globals.html_field = '<html>'+dataset.getAsHTML()+'</html>';
 
 //Note: To display an HTML_AREA field as an HTML page, add HTML tags at the beginning '<html>' and at the end '</html>'.]]></sample>
           <parameters>
-            <parameter name="escape_values" optional="true">
+            <parameter name="escape_values" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[if true, replaces illegal HTML characters with corresponding valid escape sequences.]]></description>
             </parameter>
-            <parameter name="escape_spaces" optional="true">
+            <parameter name="escape_spaces" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[if true, replaces text spaces with non-breaking space tags ( ) and tabs by four non-breaking space tags.]]></description>
             </parameter>
-            <parameter name="multi_line_markup" optional="true">
+            <parameter name="multi_line_markup" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[if true, multiLineMarkup will enforce new lines that are in the text; single new lines will be replaced by <br>, multiple new lines will be replaced by <p>]]></description>
             </parameter>
-            <parameter name="pretty_indent" optional="true">
+            <parameter name="pretty_indent" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[if true, adds indentation for more readable HTML code.]]></description>
             </parameter>
-            <parameter name="add_column_names" optional="true">
+            <parameter name="add_column_names" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[if false, column headers will not be added to the table.]]></description>
             </parameter>
           </parameters>
@@ -8191,25 +8406,34 @@ dataset.getValue(2, 1,'data');]]></sample>
         </function>
         <function name="sort">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="boolean"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sort the dataset on the given column in ascending or descending, or
-sort the dataset using a comparator function.
-
-If the first argument is a number, sort the dataset on the given column index (1-based),
-using the second argument as sort order (true for ascending, false for descending)
-
-If the first argument is a function, sort the dataset using the function as comparator.
-The comparator function is called to compare two rows, that are passed as arguments, and
-it will return -1/0/1 if the first row is less/equal/greater then the second row.]]></description>
-          <summary><![CDATA[Sort the dataset on the given column in ascending or descending, or
-sort the dataset using a comparator function.]]></summary>
+          <description><![CDATA[Sort the dataset on the given column (1-based) in ascending or descending.]]></description>
+          <summary><![CDATA[Sort the dataset on the given column (1-based) in ascending or descending.]]></summary>
           <sample><![CDATA[// sort using column number
 //assuming the variable dataset contains a dataset
-dataset.sort(1,false)
-
-//sort using comparator
+dataset.sort(1, false)]]></sample>
+          <parameters>
+            <parameter name="col" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[column number, 1-based]]></description>
+            </parameter>
+            <parameter name="sort_direction" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[ascending (true) or descending (false)]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="sort">
+          <argumentsTypes>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sort the dataset using the function as comparator.
+The comparator function is called to compare two rows, that are passed as arguments, and
+it will return -1/0/1 if the first row is less/equal/greater then the second row.]]></description>
+          <summary><![CDATA[Sort the dataset using the function as comparator.]]></summary>
+          <sample><![CDATA[//sort using comparator
 dataset.sort(mySortFunction);
 
 function mySortFunction(r1, r2)
@@ -8226,11 +8450,8 @@ function mySortFunction(r1, r2)
 	return o;
 }]]></sample>
           <parameters>
-            <parameter name="col/comparator">
-              <description><![CDATA[column number, 1-based or comparator function]]></description>
-            </parameter>
-            <parameter name="sort_direction" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
-              <description><![CDATA[used only if the first argument is a column number]]></description>
+            <parameter name="comparator" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[comparator function]]></description>
             </parameter>
           </parameters>
         </function>
@@ -12138,15 +12359,6 @@ forms['newFormX'].controller.show();]]></sample>
           <sample><![CDATA[// allow user to select multiple rows.
 %%prefix%%foundset.multiSelect = true;]]></sample>
         </property>
-        <property name="selectedIndex">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int current index (1-based)]]></return>
-          <description><![CDATA[Get the current record index of the foundset.]]></description>
-          <summary><![CDATA[Get the current record index of the foundset.]]></summary>
-          <sample><![CDATA[//gets the current record index in the current foundset
-var current = %%prefix%%foundset.getSelectedIndex();
-//sets the next record in the foundset
-%%prefix%%foundset.setSelectedIndex(current+1);]]></sample>
-        </property>
       </properties>
       <functions>
         <function name="addFoundSetFilterParam">
@@ -12663,6 +12875,16 @@ foundset.loadRecords(q);]]></sample>
           <description><![CDATA[Gets the relation name (null if not a related foundset).]]></description>
           <summary><![CDATA[Gets the relation name (null if not a related foundset).]]></summary>
           <sample><![CDATA[var relName = %%prefix%%foundset.getRelationName();]]></sample>
+        </function>
+        <function name="getSelectedIndex">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int current index (1-based)]]></return>
+          <description><![CDATA[Get the current record index of the foundset.]]></description>
+          <summary><![CDATA[Get the current record index of the foundset.]]></summary>
+          <sample><![CDATA[//gets the current record index in the current foundset
+var current = %%prefix%%foundset.getSelectedIndex();
+//sets the next record in the foundset
+%%prefix%%foundset.setSelectedIndex(current+1);]]></sample>
         </function>
         <function name="getSelectedIndexes">
           <argumentsTypes/>
@@ -13316,7 +13538,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
 var idx = %%prefix%%foundset.newRecord(false); // add as last record
 // %%prefix%%foundset.newRecord(); // adds as first record
 // %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case ls of failure 
+if (idx >= 0) // returned index is -1 in case of failure 
 {
 	%%prefix%%foundset.some_column = "some text";
 	application.output("added on position " + idx);
@@ -13335,7 +13557,7 @@ if (idx >= 0) // returned index is -1 in case ls of failure
 var idx = %%prefix%%foundset.newRecord(false); // add as last record
 // %%prefix%%foundset.newRecord(); // adds as first record
 // %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case ls of failure 
+if (idx >= 0) // returned index is -1 in case of failure 
 {
 	%%prefix%%foundset.some_column = "some text";
 	application.output("added on position " + idx);
@@ -13360,7 +13582,7 @@ if (idx >= 0) // returned index is -1 in case ls of failure
 var idx = %%prefix%%foundset.newRecord(false); // add as last record
 // %%prefix%%foundset.newRecord(); // adds as first record
 // %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case ls of failure 
+if (idx >= 0) // returned index is -1 in case of failure 
 {
 	%%prefix%%foundset.some_column = "some text";
 	application.output("added on position " + idx);
@@ -13387,7 +13609,7 @@ if (idx >= 0) // returned index is -1 in case ls of failure
 var idx = %%prefix%%foundset.newRecord(false); // add as last record
 // %%prefix%%foundset.newRecord(); // adds as first record
 // %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case ls of failure 
+if (idx >= 0) // returned index is -1 in case of failure 
 {
 	%%prefix%%foundset.some_column = "some text";
 	application.output("added on position " + idx);
@@ -13412,7 +13634,7 @@ if (idx >= 0) // returned index is -1 in case ls of failure
 var idx = %%prefix%%foundset.newRecord(false); // add as last record
 // %%prefix%%foundset.newRecord(); // adds as first record
 // %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case ls of failure 
+if (idx >= 0) // returned index is -1 in case of failure 
 {
 	%%prefix%%foundset.some_column = "some text";
 	application.output("added on position " + idx);
@@ -13647,6 +13869,23 @@ ordering of the pk column names.]]></description>
             </parameter>
             <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[value to set]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setSelectedIndex">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Set the current record index.]]></description>
+          <summary><![CDATA[Set the current record index.]]></summary>
+          <sample><![CDATA[//gets the current record index in the current foundset
+var current = %%prefix%%foundset.getSelectedIndex();
+//sets the next record in the foundset
+%%prefix%%foundset.setSelectedIndex(current+1);]]></sample>
+          <parameters>
+            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[index to set (1-based)]]></description>
             </parameter>
           </parameters>
         </function>
@@ -17659,7 +17898,9 @@ var serverName = jsTable.getServerName()]]></sample>
       <functions>
         <function name="createNewColumn">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.dataprocessing.JSColumnObject" typecode="com.servoy.j2db.dataprocessing.JSColumnObject"/>
           <description><![CDATA[Creates a new column in this table. The name, type and length of the new column must be specified. For specifying the
@@ -17689,9 +17930,93 @@ if (server)
 	}
 }]]></sample>
           <parameters>
-            <parameter name="columnName"/>
-            <parameter name="type"/>
-            <parameter name="length"/>
+            <parameter name="columnName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="type" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+            <parameter name="length" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          </parameters>
+        </function>
+        <function name="createNewColumn">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.dataprocessing.JSColumnObject" typecode="com.servoy.j2db.dataprocessing.JSColumnObject"/>
+          <description><![CDATA[Creates a new column in this table. The name, type and length of the new column must be specified. For specifying the
+type of the column, use the JSColumn constants. The column is not actually created in the database until this
+table is synchronized with the database using the JSServer.synchronizeWithDB method. 
+
+The method returns a JSColumn instance that corresponds to the newly created column. If any error occurs and the column cannot be created, then the method
+returns null.]]></description>
+          <summary><![CDATA[Creates a new column in this table.]]></summary>
+          <sample><![CDATA[var server = plugins.maintenance.getServer("example_data");
+if (server)
+{
+	var table = server.createNewTable("users");
+	if (table)
+	{
+		var pk = table.createNewColumn("id", JSColumn.MEDIA, 16); // can also use (JSColumn.TEXT, 36) for UUIDs
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.setFlag(JSColumn.UUID_COLUMN, true)
+		pk.sequenceType = JSColumn.UUID_GENERATOR
+		var c = table.createNewColumn("name", JSColumn.TEXT, 100);
+		c.allowNull = false
+		table.createNewColumn("age", JSColumn.INTEGER, 0);
+		table.createNewColumn("last_login", JSColumn.DATETIME, 0);
+		var result = server.synchronizeWithDB(table);
+		if (result) application.output("Table successfully created.");
+		else application.output("Table not created.");
+	}
+}]]></sample>
+          <parameters>
+            <parameter name="columnName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="type" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+            <parameter name="length" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+            <parameter name="allowNull" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          </parameters>
+        </function>
+        <function name="createNewColumn">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.dataprocessing.JSColumnObject" typecode="com.servoy.j2db.dataprocessing.JSColumnObject"/>
+          <description><![CDATA[Creates a new column in this table. The name, type and length of the new column must be specified. For specifying the
+type of the column, use the JSColumn constants. The column is not actually created in the database until this
+table is synchronized with the database using the JSServer.synchronizeWithDB method. 
+
+The method returns a JSColumn instance that corresponds to the newly created column. If any error occurs and the column cannot be created, then the method
+returns null.]]></description>
+          <summary><![CDATA[Creates a new column in this table.]]></summary>
+          <sample><![CDATA[var server = plugins.maintenance.getServer("example_data");
+if (server)
+{
+	var table = server.createNewTable("users");
+	if (table)
+	{
+		var pk = table.createNewColumn("id", JSColumn.MEDIA, 16); // can also use (JSColumn.TEXT, 36) for UUIDs
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.setFlag(JSColumn.UUID_COLUMN, true)
+		pk.sequenceType = JSColumn.UUID_GENERATOR
+		var c = table.createNewColumn("name", JSColumn.TEXT, 100);
+		c.allowNull = false
+		table.createNewColumn("age", JSColumn.INTEGER, 0);
+		table.createNewColumn("last_login", JSColumn.DATETIME, 0);
+		var result = server.synchronizeWithDB(table);
+		if (result) application.output("Table successfully created.");
+		else application.output("Table not created.");
+	}
+}]]></sample>
+          <parameters>
+            <parameter name="columnName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="type" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+            <parameter name="length" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+            <parameter name="allowNull" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+            <parameter name="pkColumn" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           </parameters>
         </function>
         <function name="deleteColumn">
@@ -18558,8 +18883,23 @@ for (var i=0; i<retDP.length; i++)
 application.output(vlist.getUUID().toString());]]></sample>
         </function>
         <function name="setDisplayDataProviderIds">
+          <argumentsTypes/>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Set the display dataproviders. There can be at most 3 of them, combined with the return dataproviders.
+The values taken from these dataproviders, in order, separated by the separator, will be displayed
+by the valuelist.]]></description>
+          <summary><![CDATA[Set the display dataproviders.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
+        </function>
+        <function name="setDisplayDataProviderIds">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Set the display dataproviders. There can be at most 3 of them, combined with the return dataproviders.
@@ -18574,26 +18914,21 @@ vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
 vlist.separator = ' ## ';
 vlist.sortOptions = 'parent_table_text desc';]]></sample>
           <parameters>
-            <parameter name="dataprovider1">
+            <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The first display dataprovider.]]></description>
-            </parameter>
-            <parameter name="dataprovider2" optional="true">
-              <description><![CDATA[The second display dataprovider.]]></description>
-            </parameter>
-            <parameter name="dataprovider3" optional="true">
-              <description><![CDATA[The third display dataprovider.]]></description>
             </parameter>
           </parameters>
         </function>
-        <function name="setReturnDataProviderIds">
+        <function name="setDisplayDataProviderIds">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Set the return dataprovers. There can be at most 3 of them, combined with the display dataproviders.
-The values taken from these dataproviders, in order, separated by the separator, will be returned
+          <description><![CDATA[Set the display dataproviders. There can be at most 3 of them, combined with the return dataproviders.
+The values taken from these dataproviders, in order, separated by the separator, will be displayed
 by the valuelist.]]></description>
-          <summary><![CDATA[Set the return dataprovers.]]></summary>
+          <summary><![CDATA[Set the display dataproviders.]]></summary>
           <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
 vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
 vlist.dataSource = 'db:/example_data/parent_table';
@@ -18602,13 +18937,133 @@ vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
 vlist.separator = ' ## ';
 vlist.sortOptions = 'parent_table_text desc';]]></sample>
           <parameters>
-            <parameter name="dataprovider1">
+            <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The first display dataprovider.]]></description>
+            </parameter>
+            <parameter name="dataprovider2" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The second display dataprovider.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setDisplayDataProviderIds">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Set the display dataproviders. There can be at most 3 of them, combined with the return dataproviders.
+The values taken from these dataproviders, in order, separated by the separator, will be displayed
+by the valuelist.]]></description>
+          <summary><![CDATA[Set the display dataproviders.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
+          <parameters>
+            <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The first display dataprovider.]]></description>
+            </parameter>
+            <parameter name="dataprovider2" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The second display dataprovider.]]></description>
+            </parameter>
+            <parameter name="dataprovider3" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The third display dataprovider.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setReturnDataProviderIds">
+          <argumentsTypes/>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Set the return dataproviders. There can be at most 3 of them, combined with the display dataproviders.
+The values taken from these dataproviders, in order, separated by the separator, will be returned
+by the valuelist.]]></description>
+          <summary><![CDATA[Set the return dataproviders.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
+        </function>
+        <function name="setReturnDataProviderIds">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Set the return dataproviders. There can be at most 3 of them, combined with the display dataproviders.
+The values taken from these dataproviders, in order, separated by the separator, will be returned
+by the valuelist.]]></description>
+          <summary><![CDATA[Set the return dataproviders.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
+          <parameters>
+            <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The first return dataprovider.]]></description>
             </parameter>
-            <parameter name="dataprovider2" optional="true">
+          </parameters>
+        </function>
+        <function name="setReturnDataProviderIds">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Set the return dataproviders. There can be at most 3 of them, combined with the display dataproviders.
+The values taken from these dataproviders, in order, separated by the separator, will be returned
+by the valuelist.]]></description>
+          <summary><![CDATA[Set the return dataproviders.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
+          <parameters>
+            <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The first return dataprovider.]]></description>
+            </parameter>
+            <parameter name="dataprovider2" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The second return dataprovider.]]></description>
             </parameter>
-            <parameter name="dataprovider3" optional="true">
+          </parameters>
+        </function>
+        <function name="setReturnDataProviderIds">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Set the return dataproviders. There can be at most 3 of them, combined with the display dataproviders.
+The values taken from these dataproviders, in order, separated by the separator, will be returned
+by the valuelist.]]></description>
+          <summary><![CDATA[Set the return dataproviders.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
+          <parameters>
+            <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The first return dataprovider.]]></description>
+            </parameter>
+            <parameter name="dataprovider2" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The second return dataprovider.]]></description>
+            </parameter>
+            <parameter name="dataprovider3" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The third return dataprovider.]]></description>
             </parameter>
           </parameters>
@@ -20733,15 +21188,6 @@ query.getParameter("myvar").setvalue(new Integer(1));
           <sample><![CDATA[// allow user to select multiple rows.
 %%prefix%%foundset.multiSelect = true;]]></sample>
         </property>
-        <property name="selectedIndex">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int current index (1-based)]]></return>
-          <description><![CDATA[Get the current record index of the foundset.]]></description>
-          <summary><![CDATA[Get the current record index of the foundset.]]></summary>
-          <sample><![CDATA[//gets the current record index in the current foundset
-var current = %%prefix%%foundset.getSelectedIndex();
-//sets the next record in the foundset
-%%prefix%%foundset.setSelectedIndex(current+1);]]></sample>
-        </property>
       </properties>
       <functions>
         <function name="addFoundSetFilterParam">
@@ -21258,6 +21704,16 @@ foundset.loadRecords(q);]]></sample>
           <description><![CDATA[Gets the relation name (null if not a related foundset).]]></description>
           <summary><![CDATA[Gets the relation name (null if not a related foundset).]]></summary>
           <sample><![CDATA[var relName = %%prefix%%foundset.getRelationName();]]></sample>
+        </function>
+        <function name="getSelectedIndex">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int current index (1-based)]]></return>
+          <description><![CDATA[Get the current record index of the foundset.]]></description>
+          <summary><![CDATA[Get the current record index of the foundset.]]></summary>
+          <sample><![CDATA[//gets the current record index in the current foundset
+var current = %%prefix%%foundset.getSelectedIndex();
+//sets the next record in the foundset
+%%prefix%%foundset.setSelectedIndex(current+1);]]></sample>
         </function>
         <function name="getSelectedIndexes">
           <argumentsTypes/>
@@ -21911,7 +22367,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
 var idx = %%prefix%%foundset.newRecord(false); // add as last record
 // %%prefix%%foundset.newRecord(); // adds as first record
 // %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case ls of failure 
+if (idx >= 0) // returned index is -1 in case of failure 
 {
 	%%prefix%%foundset.some_column = "some text";
 	application.output("added on position " + idx);
@@ -21930,7 +22386,7 @@ if (idx >= 0) // returned index is -1 in case ls of failure
 var idx = %%prefix%%foundset.newRecord(false); // add as last record
 // %%prefix%%foundset.newRecord(); // adds as first record
 // %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case ls of failure 
+if (idx >= 0) // returned index is -1 in case of failure 
 {
 	%%prefix%%foundset.some_column = "some text";
 	application.output("added on position " + idx);
@@ -21955,7 +22411,7 @@ if (idx >= 0) // returned index is -1 in case ls of failure
 var idx = %%prefix%%foundset.newRecord(false); // add as last record
 // %%prefix%%foundset.newRecord(); // adds as first record
 // %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case ls of failure 
+if (idx >= 0) // returned index is -1 in case of failure 
 {
 	%%prefix%%foundset.some_column = "some text";
 	application.output("added on position " + idx);
@@ -21982,7 +22438,7 @@ if (idx >= 0) // returned index is -1 in case ls of failure
 var idx = %%prefix%%foundset.newRecord(false); // add as last record
 // %%prefix%%foundset.newRecord(); // adds as first record
 // %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case ls of failure 
+if (idx >= 0) // returned index is -1 in case of failure 
 {
 	%%prefix%%foundset.some_column = "some text";
 	application.output("added on position " + idx);
@@ -22007,7 +22463,7 @@ if (idx >= 0) // returned index is -1 in case ls of failure
 var idx = %%prefix%%foundset.newRecord(false); // add as last record
 // %%prefix%%foundset.newRecord(); // adds as first record
 // %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case ls of failure 
+if (idx >= 0) // returned index is -1 in case of failure 
 {
 	%%prefix%%foundset.some_column = "some text";
 	application.output("added on position " + idx);
@@ -22242,6 +22698,23 @@ ordering of the pk column names.]]></description>
             </parameter>
             <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[value to set]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setSelectedIndex">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Set the current record index.]]></description>
+          <summary><![CDATA[Set the current record index.]]></summary>
+          <sample><![CDATA[//gets the current record index in the current foundset
+var current = %%prefix%%foundset.getSelectedIndex();
+//sets the next record in the foundset
+%%prefix%%foundset.setSelectedIndex(current+1);]]></sample>
+          <parameters>
+            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[index to set (1-based)]]></description>
             </parameter>
           </parameters>
         </function>
@@ -33238,39 +33711,7 @@ else
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the created groupname]]></return>
           <description><![CDATA[Creates a group, returns the groupname (or null when group couldn't be created).]]></description>
           <summary><![CDATA[Creates a group, returns the groupname (or null when group couldn't be created).]]></summary>
-          <sample><![CDATA[var removeUser = true;
-//create a user
-var uid = security.createUser('myusername', 'mypassword');
-if (uid) //test if user was created
-{
-	// Get all the groups
-	var set = security.getGroups();
-	for(var p = 1 ; p <= set.getMaxRowIndex() ; p++)
-	{
-		// output name of the group
-		application.output(set.getValue(p, 2));
-		// add user to group
-		security.addUserToGroup(uid, set.getValue(p,2));
-	}
-	// if not remove user, remove user from all the groups
-	if(!removeUser)
-	{
-		// get now all the groups that that users has (all if above did go well)
-		var set =security.getUserGroups(uid);
-		for(var p = 1;p<=set.getMaxRowIndex();p++)
-		{
-			// output name of the group
-			application.output(set.getValue(p, 2));
-			// remove the user from the group
-			security.removeUserFromGroup(uid, set.getValue(p,2));
-		}
-	}
-	else
-	{
-		// delete the user (the user will be removed from the groups)
-		security.deleteUser(uid);
-	}
-}]]></sample>
+          <sample/>
           <parameters>
             <parameter name="groupName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the group name to create]]></description>
@@ -33279,7 +33720,8 @@ if (uid) //test if user was created
         </function>
         <function name="createUser">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[the userUID the created userUID, will be same if provided]]></return>
           <description><![CDATA[Creates a new user, returns new uid (or null when group couldn't be created or user alreay exist).]]></description>
@@ -33318,24 +33760,23 @@ if (uid) //test if user was created
 	}
 }]]></sample>
           <parameters>
-            <parameter name="username">
+            <parameter name="username" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the username]]></description>
             </parameter>
-            <parameter name="password">
+            <parameter name="password" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the user password]]></description>
-            </parameter>
-            <parameter name="userUID" optional="true">
-              <description><![CDATA[the userUID to use]]></description>
             </parameter>
           </parameters>
         </function>
-        <function name="deleteGroup">
+        <function name="createUser">
           <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if deleted]]></return>
-          <description><![CDATA[Deletes a group, returns true if no error was reported.]]></description>
-          <summary><![CDATA[Deletes a group, returns true if no error was reported.]]></summary>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[the userUID the created userUID, will be same if provided]]></return>
+          <description><![CDATA[Creates a new user, returns new uid (or null when group couldn't be created or user alreay exist).]]></description>
+          <summary><![CDATA[Creates a new user, returns new uid (or null when group couldn't be created or user alreay exist).]]></summary>
           <sample><![CDATA[var removeUser = true;
 //create a user
 var uid = security.createUser('myusername', 'mypassword');
@@ -33369,6 +33810,26 @@ if (uid) //test if user was created
 		security.deleteUser(uid);
 	}
 }]]></sample>
+          <parameters>
+            <parameter name="username" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the username]]></description>
+            </parameter>
+            <parameter name="password" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the user password]]></description>
+            </parameter>
+            <parameter name="userUID" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the user UID to use]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="deleteGroup">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if deleted]]></return>
+          <description><![CDATA[Deletes a group, returns true if no error was reported.]]></description>
+          <summary><![CDATA[Deletes a group, returns true if no error was reported.]]></summary>
+          <sample/>
           <parameters>
             <parameter name="groupName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[the name of the group to delete]]></description>
@@ -33459,39 +33920,7 @@ if (uid) //test if user was created
           <description><![CDATA[Get all the groups (returns a dataset).
 first id column is deprecated!, use only the group name column.]]></description>
           <summary><![CDATA[Get all the groups (returns a dataset).]]></summary>
-          <sample><![CDATA[var removeUser = true;
-//create a user
-var uid = security.createUser('myusername', 'mypassword');
-if (uid) //test if user was created
-{
-	// Get all the groups
-	var set = security.getGroups();
-	for(var p = 1 ; p <= set.getMaxRowIndex() ; p++)
-	{
-		// output name of the group
-		application.output(set.getValue(p, 2));
-		// add user to group
-		security.addUserToGroup(uid, set.getValue(p,2));
-	}
-	// if not remove user, remove user from all the groups
-	if(!removeUser)
-	{
-		// get now all the groups that that users has (all if above did go well)
-		var set =security.getUserGroups(uid);
-		for(var p = 1;p<=set.getMaxRowIndex();p++)
-		{
-			// output name of the group
-			application.output(set.getValue(p, 2));
-			// remove the user from the group
-			security.removeUserFromGroup(uid, set.getValue(p,2));
-		}
-	}
-	else
-	{
-		// delete the user (the user will be removed from the groups)
-		security.deleteUser(uid);
-	}
-}]]></sample>
+          <sample/>
         </function>
         <function name="getSystemUserName">
           <argumentsTypes/>
@@ -33568,12 +33997,20 @@ for(var i=1 ; i<=dsUsers.getMaxRowIndex() ; i++)
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description/>
-          <deprecated><![CDATA[As of release 3.0, replaced by #getUserUID(Object[]).]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by #getUserUID(String).]]></deprecated>
           <sample/>
         </function>
         <function name="getUserName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the user name]]></return>
+          <description><![CDATA[Get the current user name (null if not logged in), finds the user name for given user UID if passed as parameter.]]></description>
+          <summary><![CDATA[Get the current user name (null if not logged in), finds the user name for given user UID if passed as parameter.]]></summary>
+          <sample><![CDATA[//gets the current loggedIn username
+var userName = security.getUserName();]]></sample>
+        </function>
+        <function name="getUserName">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the user name]]></return>
           <description><![CDATA[Get the current user name (null if not logged in), finds the user name for given user UID if passed as parameter.]]></description>
@@ -33581,18 +34018,30 @@ for(var i=1 ; i<=dsUsers.getMaxRowIndex() ; i++)
           <sample><![CDATA[//gets the current loggedIn username
 var userName = security.getUserName();]]></sample>
           <parameters>
-            <parameter name="userUID" optional="true">
-              <description><![CDATA[to retrieve the name]]></description>
+            <parameter name="userUID" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the user UID used to retrieve the name]]></description>
             </parameter>
           </parameters>
         </function>
         <function name="getUserUID">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the userUID]]></return>
+          <description><![CDATA[Get the current user UID (null if not logged in); finds the userUID for given user_name if passed as parameter.]]></description>
+          <summary><![CDATA[Get the current user UID (null if not logged in); finds the userUID for given user_name if passed as parameter.]]></summary>
+          <sample><![CDATA[//gets the current loggedIn username
+var userName = security.getUserName(); 
+//gets the uid of the given username
+var userUID = security.getUserUID(userName);
+//is the same as above 
+//var my_userUID = security.getUserUID();]]></sample>
+        </function>
+        <function name="getUserUID">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the userUID]]></return>
-          <description><![CDATA[Get the current user UID (null if not logged in), finds the userUID for given user_name if passed as parameter.]]></description>
-          <summary><![CDATA[Get the current user UID (null if not logged in), finds the userUID for given user_name if passed as parameter.]]></summary>
+          <description><![CDATA[Get the current user UID (null if not logged in); finds the userUID for given user_name if passed as parameter.]]></description>
+          <summary><![CDATA[Get the current user UID (null if not logged in); finds the userUID for given user_name if passed as parameter.]]></summary>
           <sample><![CDATA[//gets the current loggedIn username
 var userName = security.getUserName(); 
 //gets the uid of the given username
@@ -33600,14 +34049,41 @@ var userUID = security.getUserUID(userName);
 //is the same as above 
 //var my_userUID = security.getUserUID();]]></sample>
           <parameters>
-            <parameter name="username" optional="true">
+            <parameter name="username" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the username to find the userUID for]]></description>
             </parameter>
           </parameters>
         </function>
         <function name="getUsers">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet"><![CDATA[dataset with all the users]]></return>
+          <description><![CDATA[Get all the users in the security settings (returns a dataset).]]></description>
+          <summary><![CDATA[Get all the users in the security settings (returns a dataset).]]></summary>
+          <sample><![CDATA[//get all the users in the security settings (Returns a JSDataset)
+var dsUsers = security.getUsers()
+
+//loop through each user to get their group
+//The getValue call is (row,column) where column 1 == id and 2 == name
+for(var i=1 ; i<=dsUsers.getMaxRowIndex() ; i++)
+{
+	//print to the output debugger tab: "user: " and the username
+	application.output("user:" + dsUsers.getValue(i,2));
+
+	//set p to the user group for the current user
+	/** @type {JSDataSet} */
+	var p = security.getUserGroups(dsUsers.getValue(i,1));
+
+	for(k=1;k<=p.getMaxRowIndex();k++)
+	{
+		//print to the output debugger tab: "group" and the group(s)
+		//the user belongs to
+		application.output("group: " + p.getValue(k,2));
+	}
+}]]></sample>
+        </function>
+        <function name="getUsers">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet"><![CDATA[dataset with all the users]]></return>
           <description><![CDATA[Get all the users in the security settings (returns a dataset).]]></description>
@@ -33634,7 +34110,7 @@ for(var i=1 ; i<=dsUsers.getMaxRowIndex() ; i++)
 	}
 }]]></sample>
           <parameters>
-            <parameter name="groupName" optional="true">
+            <parameter name="groupName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the group to filter on]]></description>
             </parameter>
           </parameters>
@@ -33710,8 +34186,23 @@ if (!ok)
           </parameters>
         </function>
         <function name="logout">
+          <argumentsTypes/>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Logout the current user and close the solution, if the solution requires authentication and user is logged in.
+You can redirect to another solution if needed; if you want to go to a different url, you need to call application.showURL(url) before calling security.logout() (this is only applicable for Web Client).
+An alternative option to close a solution and to open another solution, while keeping the user logged in, is application.closeSolution().]]></description>
+          <summary><![CDATA[Logout the current user and close the solution, if the solution requires authentication and user is logged in.]]></summary>
+          <sample><![CDATA[//Set the url to go to after logout.
+//application.showURL('http://www.servoy.com', '_self');  //Web Client only
+security.logout();
+//security.logout('solution_name');//log out and close current solution and open solution 'solution_name'
+//security.logout('solution_name','global_method_name','my_argument');//log out, close current solution, open solution 'solution_name', call global method 'global_method_name' with argument 'my_argument'
+//Note: specifying a solution will not work in the Developer due to debugger dependencies
+//specified solution should be of compatible type with client (normal type or client specific(Smart client only/Web client only) type )]]></sample>
+        </function>
+        <function name="logout">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Logout the current user and close the solution, if the solution requires authentication and user is logged in.
@@ -33726,13 +34217,37 @@ security.logout();
 //Note: specifying a solution will not work in the Developer due to debugger dependencies
 //specified solution should be of compatible type with client (normal type or client specific(Smart client only/Web client only) type )]]></sample>
           <parameters>
-            <parameter name="solutionToLoad" optional="true">
+            <parameter name="solutionToLoad" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the solution to load after logout]]></description>
             </parameter>
-            <parameter name="method" optional="true">
+          </parameters>
+        </function>
+        <function name="logout">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Logout the current user and close the solution, if the solution requires authentication and user is logged in.
+You can redirect to another solution if needed; if you want to go to a different url, you need to call application.showURL(url) before calling security.logout() (this is only applicable for Web Client).
+An alternative option to close a solution and to open another solution, while keeping the user logged in, is application.closeSolution().]]></description>
+          <summary><![CDATA[Logout the current user and close the solution, if the solution requires authentication and user is logged in.]]></summary>
+          <sample><![CDATA[//Set the url to go to after logout.
+//application.showURL('http://www.servoy.com', '_self');  //Web Client only
+security.logout();
+//security.logout('solution_name');//log out and close current solution and open solution 'solution_name'
+//security.logout('solution_name','global_method_name','my_argument');//log out, close current solution, open solution 'solution_name', call global method 'global_method_name' with argument 'my_argument'
+//Note: specifying a solution will not work in the Developer due to debugger dependencies
+//specified solution should be of compatible type with client (normal type or client specific(Smart client only/Web client only) type )]]></sample>
+          <parameters>
+            <parameter name="solutionToLoad" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the solution to load after logout]]></description>
+            </parameter>
+            <parameter name="method" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the method to run in the solution to load]]></description>
             </parameter>
-            <parameter name="argument" optional="true">
+            <parameter name="argument" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[the argument to pass to the method to run]]></description>
             </parameter>
           </parameters>
@@ -33745,39 +34260,7 @@ security.logout();
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if removed]]></return>
           <description><![CDATA[Removes an user from a group.]]></description>
           <summary><![CDATA[Removes an user from a group.]]></summary>
-          <sample><![CDATA[var removeUser = true;
-//create a user
-var uid = security.createUser('myusername', 'mypassword');
-if (uid) //test if user was created
-{
-	// Get all the groups
-	var set = security.getGroups();
-	for(var p = 1 ; p <= set.getMaxRowIndex() ; p++)
-	{
-		// output name of the group
-		application.output(set.getValue(p, 2));
-		// add user to group
-		security.addUserToGroup(uid, set.getValue(p,2));
-	}
-	// if not remove user, remove user from all the groups
-	if(!removeUser)
-	{
-		// get now all the groups that that users has (all if above did go well)
-		var set =security.getUserGroups(uid);
-		for(var p = 1;p<=set.getMaxRowIndex();p++)
-		{
-			// output name of the group
-			application.output(set.getValue(p, 2));
-			// remove the user from the group
-			security.removeUserFromGroup(uid, set.getValue(p,2));
-		}
-	}
-	else
-	{
-		// delete the user (the user will be removed from the groups)
-		security.deleteUser(uid);
-	}
-}]]></sample>
+          <sample/>
           <parameters>
             <parameter name="a_userUID" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[the user UID to be removed]]></description>
@@ -33862,39 +34345,7 @@ security.setSecuritySettings(dataset);//to be called in solution startup method]
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if changed]]></return>
           <description><![CDATA[Set a new userUID for the given userUID.]]></description>
           <summary><![CDATA[Set a new userUID for the given userUID.]]></summary>
-          <sample><![CDATA[var removeUser = true;
-//create a user
-var uid = security.createUser('myusername', 'mypassword');
-if (uid) //test if user was created
-{
-	// Get all the groups
-	var set = security.getGroups();
-	for(var p = 1 ; p <= set.getMaxRowIndex() ; p++)
-	{
-		// output name of the group
-		application.output(set.getValue(p, 2));
-		// add user to group
-		security.addUserToGroup(uid, set.getValue(p,2));
-	}
-	// if not remove user, remove user from all the groups
-	if(!removeUser)
-	{
-		// get now all the groups that that users has (all if above did go well)
-		var set =security.getUserGroups(uid);
-		for(var p = 1;p<=set.getMaxRowIndex();p++)
-		{
-			// output name of the group
-			application.output(set.getValue(p, 2));
-			// remove the user from the group
-			security.removeUserFromGroup(uid, set.getValue(p,2));
-		}
-	}
-	else
-	{
-		// delete the user (the user will be removed from the groups)
-		security.deleteUser(uid);
-	}
-}]]></sample>
+          <sample/>
           <parameters>
             <parameter name="a_userUID" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[the userUID to set the new user UID for]]></description>
