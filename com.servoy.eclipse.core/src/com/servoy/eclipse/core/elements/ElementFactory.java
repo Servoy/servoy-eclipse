@@ -546,7 +546,8 @@ public class ElementFactory
 			String tabpanelNameHint = nameHint == null ? "tabs_" : nameHint;
 			while (true)
 			{
-				Iterator<IFormElement> it = ((Form)parent).getFormElementsSortedByFormIndex();
+				Iterator<IFormElement> it = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(parent).getFlattenedForm(
+					parent).getFormElementsSortedByFormIndex();
 				tabpanelNameHint = nameHint + (counter == 0 ? "" : counter);
 				boolean duplicate = false;
 				while (it.hasNext() && !duplicate)
