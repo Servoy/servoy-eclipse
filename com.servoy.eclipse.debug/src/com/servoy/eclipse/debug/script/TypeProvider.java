@@ -424,6 +424,10 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				{
 					ServoyLog.logError("error creating bean for in the js type provider", e);
 				}
+				catch (NoClassDefFoundError e)
+				{
+					ServoyLog.logError("error creating bean for in the js type provider", e);
+				}
 			}
 			else
 			{
