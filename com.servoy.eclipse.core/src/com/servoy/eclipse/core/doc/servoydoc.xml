@@ -6,7 +6,7 @@
         <constant name="ACCORDION_PANEL">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant used for creating accordion panel from tab panel, by setting its tabOrientation.]]></description>
-          <summary><![CDATA[Constant used for creating accordion panel from tab panel, by setting its tabOrientation]]></summary>
+          <summary><![CDATA[Constant used for creating accordion panel from tab panel, by setting its tabOrientation.]]></summary>
           <sample><![CDATA[var accordion = myForm.newTabPanel('accordion', 10, 10, 620, 460);
 accordion.tabOrientation = SM_ALIGNMENT.ACCORDION_PANEL;]]></sample>
         </constant>
@@ -3019,9 +3019,6 @@ var dataset = databaseManager.convertToDataSet(foundset);
             <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal">
               <description><![CDATA[The foundset to be converted.]]></description>
             </parameter>
-            <parameter name="array_with_dataprovider_names" optional="true">
-              <description><![CDATA[Array with column names.]]></description>
-            </parameter>
           </parameters>
         </function>
         <function name="convertToDataSet">
@@ -3372,6 +3369,16 @@ fs.loadAllRecords();]]></sample>
               <description><![CDATA[The maximum number of rows returned by the query.]]></description>
             </parameter>
           </parameters>
+        </function>
+        <function name="createEmptyDataSet">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet"><![CDATA[An empty JSDataSet with the initial sizes.]]></return>
+          <description><![CDATA[Returns an empty dataset object.]]></description>
+          <summary><![CDATA[Returns an empty dataset object.]]></summary>
+          <sample><![CDATA[// gets an empty dataset with a specifed row and column count
+var dataset = databaseManager.createEmptyDataSet(10,10)
+// gets an empty dataset with a specifed row count and column array
+var dataset2 = databaseManager.createEmptyDataSet(10,new Array ('a','b','c','d'))]]></sample>
         </function>
         <function name="createEmptyDataSet">
           <argumentsTypes>
@@ -4009,7 +4016,7 @@ NOTE: For more detail on named server connections, see the chapter on Database C
         </function>
         <function name="getTable">
           <argumentsTypes>
-            <argumentType typecode="java.lang.Object"/>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.dataprocessing.JSTable" typecode="com.servoy.j2db.dataprocessing.JSTable"><![CDATA[the JSTable get from the input.]]></return>
           <description><![CDATA[Returns the JSTable object from which more info can be obtained (like columns).
@@ -4028,11 +4035,34 @@ var columnType = jscolumn.getTypeAsString();
 var columnSQLName = jscolumn.getSQLName();
 var isPrimaryKey = jscolumn.isRowIdentifier();]]></sample>
           <parameters>
-            <parameter name="foundset/record/datasource">
-              <description><![CDATA[(only db-defined)/server_name The data where the JSTable can be get from.]]></description>
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal">
+              <description><![CDATA[The foundset where the JSTable can be get from.]]></description>
             </parameter>
-            <parameter name="table_name" optional="true">
-              <description><![CDATA[The tablename of the first param is a servername string.]]></description>
+          </parameters>
+        </function>
+        <function name="getTable">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.IRecordInternal"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.dataprocessing.JSTable" typecode="com.servoy.j2db.dataprocessing.JSTable"><![CDATA[the JSTable get from the input.]]></return>
+          <description/>
+          <sample/>
+          <parameters>
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal">
+              <description><![CDATA[The record where the table can be get from.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getTable">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.dataprocessing.JSTable" typecode="com.servoy.j2db.dataprocessing.JSTable"><![CDATA[the JSTable get from the input.]]></return>
+          <description/>
+          <sample/>
+          <parameters>
+            <parameter name="dataSource" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The datasource where the table can be get from.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -4042,21 +4072,8 @@ var isPrimaryKey = jscolumn.isRowIdentifier();]]></sample>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.dataprocessing.JSTable" typecode="com.servoy.j2db.dataprocessing.JSTable"><![CDATA[the JSTable get from the input.]]></return>
-          <description><![CDATA[Returns the JSTable object from which more info can be obtained (like columns).
-The parameter can be a JSFoundset,JSRecord,datasource string or server/tablename combination.]]></description>
-          <summary><![CDATA[Returns the JSTable object from which more info can be obtained (like columns).]]></summary>
-          <sample><![CDATA[var jstable = databaseManager.getTable(controller.getDataSource());
-//var jstable = databaseManager.getTable(foundset);
-//var jstable = databaseManager.getTable(record);
-//var jstable = databaseManager.getTable(datasource);
-var tableSQLName = jstable.getSQLName();
-var columnNamesArray = jstable.getColumnNames();
-var firstColumnName = columnNamesArray[0];
-var jscolumn = jstable.getColumn(firstColumnName);
-var columnLength = jscolumn.getLength();
-var columnType = jscolumn.getTypeAsString();
-var columnSQLName = jscolumn.getSQLName();
-var isPrimaryKey = jscolumn.isRowIdentifier();]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[Server name.]]></description>
@@ -4724,7 +4741,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 //		if (recordIndex % 10 == 0) databaseManager.saveData();
 // }]]></sample>
           <parameters>
-            <parameter name="foundset">
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal">
               <description><![CDATA[The JSRecord to save.]]></description>
             </parameter>
           </parameters>
@@ -7818,7 +7835,8 @@ var currRow = dataset.rowIndex]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if succeeded, else false.]]></return>
           <description><![CDATA[adds a column with the specified name to the dataset.]]></description>
           <summary><![CDATA[adds a column with the specified name to the dataset.]]></summary>
-          <sample/>
+          <sample><![CDATA[//assuming the variable dataset contains a dataset
+var success = dataset.addColumn('columnName',1);]]></sample>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[column name.]]></description>
@@ -7828,25 +7846,6 @@ var currRow = dataset.rowIndex]]></sample>
         <function name="addColumn">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="int"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if succeeded, else false.]]></return>
-          <description><![CDATA[adds a column with the specified name to the dataset.]]></description>
-          <summary><![CDATA[adds a column with the specified name to the dataset.]]></summary>
-          <sample/>
-          <parameters>
-            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[column name.]]></description>
-            </parameter>
-            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[column index number between 1 and getMaxColumnIndex().]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="addColumn">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="int"/>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if succeeded, else false.]]></return>
@@ -7859,6 +7858,26 @@ var success = dataset.addColumn('columnName',1);]]></sample>
               <description><![CDATA[column name.]]></description>
             </parameter>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[column index number between 1 and getMaxColumnIndex().]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="addColumn">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.Integer"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if succeeded, else false.]]></return>
+          <description><![CDATA[adds a column with the specified name to the dataset.]]></description>
+          <summary><![CDATA[adds a column with the specified name to the dataset.]]></summary>
+          <sample><![CDATA[//assuming the variable dataset contains a dataset
+var success = dataset.addColumn('columnName',1);]]></sample>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[column name.]]></description>
+            </parameter>
+            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Integer">
               <description><![CDATA[column index number between 1 and getMaxColumnIndex().]]></description>
             </parameter>
             <parameter name="type" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -34258,6 +34277,32 @@ security.logout();
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Logout the current user and close the solution, if the solution requires authentication and user is logged in.
+You can redirect to another solution if needed; if you want to go to a different url, you need to call application.showURL(url) before calling security.logout() (this is only applicable for Web Client).
+An alternative option to close a solution and to open another solution, while keeping the user logged in, is application.closeSolution().]]></description>
+          <summary><![CDATA[Logout the current user and close the solution, if the solution requires authentication and user is logged in.]]></summary>
+          <sample><![CDATA[//Set the url to go to after logout.
+//application.showURL('http://www.servoy.com', '_self');  //Web Client only
+security.logout();
+//security.logout('solution_name');//log out and close current solution and open solution 'solution_name'
+//security.logout('solution_name','global_method_name','my_argument');//log out, close current solution, open solution 'solution_name', call global method 'global_method_name' with argument 'my_argument'
+//Note: specifying a solution will not work in the Developer due to debugger dependencies
+//specified solution should be of compatible type with client (normal type or client specific(Smart client only/Web client only) type )]]></sample>
+          <parameters>
+            <parameter name="solutionToLoad" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the solution to load after logout]]></description>
+            </parameter>
+            <parameter name="method" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the method to run in the solution to load]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="logout">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
@@ -37857,20 +37902,54 @@ var textalNumber2 = utils.numberFormat(100006.749, '#,###.00'); //returns 100,00
         </function>
         <function name="stringEscapeMarkup">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the escaped text]]></return>
           <description><![CDATA[Returns the escaped markup text (HTML/XML).]]></description>
           <summary><![CDATA[Returns the escaped markup text (HTML/XML).]]></summary>
           <sample><![CDATA[var escapedText = utils.stringEscapeMarkup('<html><body>escape me</body></html>')]]></sample>
           <parameters>
-            <parameter name="textString">
+            <parameter name="textString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the text to process]]></description>
             </parameter>
-            <parameter name="escapeSpaces" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+          </parameters>
+        </function>
+        <function name="stringEscapeMarkup">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the escaped text]]></return>
+          <description><![CDATA[Returns the escaped markup text (HTML/XML).]]></description>
+          <summary><![CDATA[Returns the escaped markup text (HTML/XML).]]></summary>
+          <sample><![CDATA[var escapedText = utils.stringEscapeMarkup('<html><body>escape me</body></html>')]]></sample>
+          <parameters>
+            <parameter name="textString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the text to process]]></description>
+            </parameter>
+            <parameter name="escapeSpaces" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[indicating to escape spaces]]></description>
             </parameter>
-            <parameter name="convertToHtmlUnicodeEscapes" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+          </parameters>
+        </function>
+        <function name="stringEscapeMarkup">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the escaped text]]></return>
+          <description><![CDATA[Returns the escaped markup text (HTML/XML).]]></description>
+          <summary><![CDATA[Returns the escaped markup text (HTML/XML).]]></summary>
+          <sample><![CDATA[var escapedText = utils.stringEscapeMarkup('<html><body>escape me</body></html>')]]></sample>
+          <parameters>
+            <parameter name="textString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the text to process]]></description>
+            </parameter>
+            <parameter name="escapeSpaces" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[indicating to escape spaces]]></description>
+            </parameter>
+            <parameter name="convertToHtmlUnicodeEscapes" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[indicating to use unicode escapes]]></description>
             </parameter>
           </parameters>
@@ -38898,18 +38977,43 @@ if (count == 0)
 }]]></sample>
         </function>
         <function name="duplicateRecord">
-          <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
-          </argumentsTypes>
+          <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if succesful]]></return>
           <description><![CDATA[Duplicate current record or record at index in the form foundset.]]></description>
           <summary><![CDATA[Duplicate current record or record at index in the form foundset.]]></summary>
           <sample><![CDATA[%%prefix%%controller.duplicateRecord(); //duplicate the current record, adds on top
 //%%prefix%%controller.duplicateRecord(false); //duplicate the current record, adds at bottom
 //%%prefix%%controller.duplicateRecord(1,2); //duplicate the first record as second record]]></sample>
+        </function>
+        <function name="duplicateRecord">
+          <argumentsTypes>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
+          <description><![CDATA[Duplicate current record or record at index in the form foundset.]]></description>
+          <summary><![CDATA[Duplicate current record or record at index in the form foundset.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.duplicateRecord(); //duplicate the current record, adds on top
+//%%prefix%%controller.duplicateRecord(false); //duplicate the current record, adds at bottom
+//%%prefix%%controller.duplicateRecord(1,2); //duplicate the first record as second record]]></sample>
           <parameters>
-            <parameter name="location" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
-              <description><![CDATA[true adds the new record as the topmost record, or adds at specified index]]></description>
+            <parameter name="location" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[true adds the new record as the topmost record]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="duplicateRecord">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
+          <description><![CDATA[Duplicate current record or record at index in the form foundset.]]></description>
+          <summary><![CDATA[Duplicate current record or record at index in the form foundset.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.duplicateRecord(); //duplicate the current record, adds on top
+//%%prefix%%controller.duplicateRecord(false); //duplicate the current record, adds at bottom
+//%%prefix%%controller.duplicateRecord(1,2); //duplicate the first record as second record]]></sample>
+          <parameters>
+            <parameter name="location" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[adds at specified index]]></description>
             </parameter>
           </parameters>
         </function>
@@ -39224,9 +39328,7 @@ Notes:
           <sample><![CDATA[%%prefix%%controller.loadOmittedRecords();]]></sample>
         </function>
         <function name="loadRecords">
-          <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
-          </argumentsTypes>
+          <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
           <description><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.
 
@@ -39289,19 +39391,277 @@ limitations/requirements for sqlstring are:
 //-must at least select from the table used in Servoy Form
 //-cannot contain 'group by', 'having' or 'union'
 //-all columns must be fully qualified like 'orders.order_id']]></sample>
+        </function>
+        <function name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
+          <description><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.
+
+Load records can be used in 5 different ways
+1) to load a (related)foundset into the form.
+the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
+controller.loadRecords(order_to_orderdetails);
+
+2) to load a primary key dataset, will remove related sort!
+var dataset = databaseManager.getDataSetByQuery(...);
+controller.loadRecords(dataset);
+
+3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
+controller.loadRecords(123);
+or
+controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
+
+4) to reload all last related records again, if for example after a search in related tabpanel
+controller.loadRecords();
+
+5) to load records in to the form based on a query (also known as 'Form by query')
+controller.loadRecords(sqlstring,parameters);
+limitations/requirements for sqlstring are:
+-must start with 'select'
+-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
+-can contain '?' which are replaced with values from the array supplied to parameters argument
+ if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
+-must contain 'from' keyword
+-the 'from' must be a comma separated list of table names
+-must at least select from the table used in Servoy Form
+-cannot contain 'group by', 'having' or 'union'
+-all columns must be fully qualified like 'orders.order_id']]></description>
+          <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
+          <sample/>
           <parameters>
-            <parameter name="data" optional="true">
-              <description><![CDATA[the foundset/pkdataset/singlenNmber_pk/UUIDpk/queryString to load]]></description>
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
+              <description><![CDATA[to load]]></description>
             </parameter>
-            <parameter name="queryArgumentsArray" optional="true">
+          </parameters>
+        </function>
+        <function name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
+          <description><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.
+
+Load records can be used in 5 different ways
+1) to load a (related)foundset into the form.
+the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
+controller.loadRecords(order_to_orderdetails);
+
+2) to load a primary key dataset, will remove related sort!
+var dataset = databaseManager.getDataSetByQuery(...);
+controller.loadRecords(dataset);
+
+3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
+controller.loadRecords(123);
+or
+controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
+
+4) to reload all last related records again, if for example after a search in related tabpanel
+controller.loadRecords();
+
+5) to load records in to the form based on a query (also known as 'Form by query')
+controller.loadRecords(sqlstring,parameters);
+limitations/requirements for sqlstring are:
+-must start with 'select'
+-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
+-can contain '?' which are replaced with values from the array supplied to parameters argument
+ if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
+-must contain 'from' keyword
+-the 'from' must be a comma separated list of table names
+-must at least select from the table used in Servoy Form
+-cannot contain 'group by', 'having' or 'union'
+-all columns must be fully qualified like 'orders.order_id']]></description>
+          <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
+          <sample/>
+          <parameters>
+            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
+              <description><![CDATA[to load]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.util.UUID"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
+          <description><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.
+
+Load records can be used in 5 different ways
+1) to load a (related)foundset into the form.
+the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
+controller.loadRecords(order_to_orderdetails);
+
+2) to load a primary key dataset, will remove related sort!
+var dataset = databaseManager.getDataSetByQuery(...);
+controller.loadRecords(dataset);
+
+3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
+controller.loadRecords(123);
+or
+controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
+
+4) to reload all last related records again, if for example after a search in related tabpanel
+controller.loadRecords();
+
+5) to load records in to the form based on a query (also known as 'Form by query')
+controller.loadRecords(sqlstring,parameters);
+limitations/requirements for sqlstring are:
+-must start with 'select'
+-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
+-can contain '?' which are replaced with values from the array supplied to parameters argument
+ if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
+-must contain 'from' keyword
+-the 'from' must be a comma separated list of table names
+-must at least select from the table used in Servoy Form
+-cannot contain 'group by', 'having' or 'union'
+-all columns must be fully qualified like 'orders.order_id']]></description>
+          <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
+          <sample/>
+          <parameters>
+            <parameter name="UUIDpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
+              <description><![CDATA[to load]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Number"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
+          <description><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.
+
+Load records can be used in 5 different ways
+1) to load a (related)foundset into the form.
+the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
+controller.loadRecords(order_to_orderdetails);
+
+2) to load a primary key dataset, will remove related sort!
+var dataset = databaseManager.getDataSetByQuery(...);
+controller.loadRecords(dataset);
+
+3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
+controller.loadRecords(123);
+or
+controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
+
+4) to reload all last related records again, if for example after a search in related tabpanel
+controller.loadRecords();
+
+5) to load records in to the form based on a query (also known as 'Form by query')
+controller.loadRecords(sqlstring,parameters);
+limitations/requirements for sqlstring are:
+-must start with 'select'
+-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
+-can contain '?' which are replaced with values from the array supplied to parameters argument
+ if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
+-must contain 'from' keyword
+-the 'from' must be a comma separated list of table names
+-must at least select from the table used in Servoy Form
+-cannot contain 'group by', 'having' or 'union'
+-all columns must be fully qualified like 'orders.order_id']]></description>
+          <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
+          <sample/>
+          <parameters>
+            <parameter name="singlenNmber_pk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
+              <description><![CDATA[to load]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
+          <description><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.
+
+Load records can be used in 5 different ways
+1) to load a (related)foundset into the form.
+the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
+controller.loadRecords(order_to_orderdetails);
+
+2) to load a primary key dataset, will remove related sort!
+var dataset = databaseManager.getDataSetByQuery(...);
+controller.loadRecords(dataset);
+
+3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
+controller.loadRecords(123);
+or
+controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
+
+4) to reload all last related records again, if for example after a search in related tabpanel
+controller.loadRecords();
+
+5) to load records in to the form based on a query (also known as 'Form by query')
+controller.loadRecords(sqlstring,parameters);
+limitations/requirements for sqlstring are:
+-must start with 'select'
+-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
+-can contain '?' which are replaced with values from the array supplied to parameters argument
+ if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
+-must contain 'from' keyword
+-the 'from' must be a comma separated list of table names
+-must at least select from the table used in Servoy Form
+-cannot contain 'group by', 'having' or 'union'
+-all columns must be fully qualified like 'orders.order_id']]></description>
+          <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
+          <sample/>
+          <parameters>
+            <parameter name="queryString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[to load]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
+          <description><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.
+
+Load records can be used in 5 different ways
+1) to load a (related)foundset into the form.
+the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
+controller.loadRecords(order_to_orderdetails);
+
+2) to load a primary key dataset, will remove related sort!
+var dataset = databaseManager.getDataSetByQuery(...);
+controller.loadRecords(dataset);
+
+3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
+controller.loadRecords(123);
+or
+controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
+
+4) to reload all last related records again, if for example after a search in related tabpanel
+controller.loadRecords();
+
+5) to load records in to the form based on a query (also known as 'Form by query')
+controller.loadRecords(sqlstring,parameters);
+limitations/requirements for sqlstring are:
+-must start with 'select'
+-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
+-can contain '?' which are replaced with values from the array supplied to parameters argument
+ if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
+-must contain 'from' keyword
+-the 'from' must be a comma separated list of table names
+-must at least select from the table used in Servoy Form
+-cannot contain 'group by', 'having' or 'union'
+-all columns must be fully qualified like 'orders.order_id']]></description>
+          <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
+          <sample/>
+          <parameters>
+            <parameter name="queryString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[to load]]></description>
+            </parameter>
+            <parameter name="queryArgumentsArray" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
               <description><![CDATA[the arguments to replace the questions marks in the queryString]]></description>
             </parameter>
           </parameters>
         </function>
         <function name="newRecord">
-          <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
-          </argumentsTypes>
+          <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if succesful]]></return>
           <description><![CDATA[Create a new record in the form foundset.]]></description>
           <summary><![CDATA[Create a new record in the form foundset.]]></summary>
@@ -39309,9 +39669,38 @@ limitations/requirements for sqlstring are:
 %%prefix%%controller.newRecord();//default adds on top
 //%%prefix%%controller.newRecord(false); //adds at bottom
 //%%prefix%%controller.newRecord(2); //adds as second record]]></sample>
+        </function>
+        <function name="newRecord">
+          <argumentsTypes>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
+          <description><![CDATA[Create a new record in the form foundset.]]></description>
+          <summary><![CDATA[Create a new record in the form foundset.]]></summary>
+          <sample><![CDATA[// foreign key data is only filled in for equals (=) relation items 
+%%prefix%%controller.newRecord();//default adds on top
+//%%prefix%%controller.newRecord(false); //adds at bottom
+//%%prefix%%controller.newRecord(2); //adds as second record]]></sample>
           <parameters>
-            <parameter name="location" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
-              <description><![CDATA[true adds the new record as the topmost record, or adds at specified index]]></description>
+            <parameter name="location" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[true adds the new record as the topmost record]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="newRecord">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
+          <description><![CDATA[Create a new record in the form foundset.]]></description>
+          <summary><![CDATA[Create a new record in the form foundset.]]></summary>
+          <sample><![CDATA[// foreign key data is only filled in for equals (=) relation items 
+%%prefix%%controller.newRecord();//default adds on top
+//%%prefix%%controller.newRecord(false); //adds at bottom
+//%%prefix%%controller.newRecord(2); //adds as second record]]></sample>
+          <parameters>
+            <parameter name="location" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[adds at specified index]]></description>
             </parameter>
           </parameters>
         </function>
@@ -39325,8 +39714,18 @@ Note: The omitted records are discarded when these functions are executed: loadA
           <sample><![CDATA[var success = %%prefix%%controller.omitRecord();]]></sample>
         </function>
         <function name="print">
+          <argumentsTypes/>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Print this form with current foundset, without preview.]]></description>
+          <summary><![CDATA[Print this form with current foundset, without preview.]]></summary>
+          <sample><![CDATA[//print this form (with foundset records)
+%%prefix%%controller.print();
+//print only current record (no printerSelectDialog) to pdf plugin printer
+//%%prefix%%controller.print(true,false,plugins.pdf_output.getPDFPrinter('c:/temp/out.pdf'));]]></sample>
+        </function>
+        <function name="print">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="boolean"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Print this form with current foundset, without preview.]]></description>
@@ -39336,13 +39735,53 @@ Note: The omitted records are discarded when these functions are executed: loadA
 //print only current record (no printerSelectDialog) to pdf plugin printer
 //%%prefix%%controller.print(true,false,plugins.pdf_output.getPDFPrinter('c:/temp/out.pdf'));]]></sample>
           <parameters>
-            <parameter name="printCurrentRecordOnly" optional="true">
+            <parameter name="printCurrentRecordOnly" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[to print the current record only]]></description>
             </parameter>
-            <parameter name="showPrinterSelectDialog" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+          </parameters>
+        </function>
+        <function name="print">
+          <argumentsTypes>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Print this form with current foundset, without preview.]]></description>
+          <summary><![CDATA[Print this form with current foundset, without preview.]]></summary>
+          <sample><![CDATA[//print this form (with foundset records)
+%%prefix%%controller.print();
+//print only current record (no printerSelectDialog) to pdf plugin printer
+//%%prefix%%controller.print(true,false,plugins.pdf_output.getPDFPrinter('c:/temp/out.pdf'));]]></sample>
+          <parameters>
+            <parameter name="printCurrentRecordOnly" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[to print the current record only]]></description>
+            </parameter>
+            <parameter name="showPrinterSelectDialog" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[to show the printer select dialog (default printer is normally used)]]></description>
             </parameter>
-            <parameter name="printerJob" optional="true">
+          </parameters>
+        </function>
+        <function name="print">
+          <argumentsTypes>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="java.awt.print.PrinterJob"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Print this form with current foundset, without preview.]]></description>
+          <summary><![CDATA[Print this form with current foundset, without preview.]]></summary>
+          <sample><![CDATA[//print this form (with foundset records)
+%%prefix%%controller.print();
+//print only current record (no printerSelectDialog) to pdf plugin printer
+//%%prefix%%controller.print(true,false,plugins.pdf_output.getPDFPrinter('c:/temp/out.pdf'));]]></sample>
+          <parameters>
+            <parameter name="printCurrentRecordOnly" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[to print the current record only]]></description>
+            </parameter>
+            <parameter name="showPrinterSelectDialog" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[to show the printer select dialog (default printer is normally used)]]></description>
+            </parameter>
+            <parameter name="printerJob" type="java.awt.print.PrinterJob" typecode="java.awt.print.PrinterJob">
               <description><![CDATA[print to plugin printer job, see pdf printer plugin for example]]></description>
             </parameter>
           </parameters>
@@ -39353,12 +39792,22 @@ Note: The omitted records are discarded when these functions are executed: loadA
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 5.0, replaced by #showPrintPreview(Object[])]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by #showPrintPreview()]]></deprecated>
           <sample/>
         </function>
         <function name="printXML">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the XML]]></return>
+          <description><![CDATA[Print this form with current foundset records to xml format.]]></description>
+          <summary><![CDATA[Print this form with current foundset records to xml format.]]></summary>
+          <sample><![CDATA[//TIP: see also plugins.file.writeXMLFile(...)
+var xml = %%prefix%%controller.printXML();
+//print only current record 
+//var xml = %%prefix%%controller.printXML(true);]]></sample>
+        </function>
+        <function name="printXML">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="boolean"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the XML]]></return>
           <description><![CDATA[Print this form with current foundset records to xml format.]]></description>
@@ -39368,7 +39817,7 @@ var xml = %%prefix%%controller.printXML();
 //print only current record 
 //var xml = %%prefix%%controller.printXML(true);]]></sample>
           <parameters>
-            <parameter name="printCurrentRecordOnly" optional="true">
+            <parameter name="printCurrentRecordOnly" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[to print the current record only]]></description>
             </parameter>
           </parameters>
@@ -39404,13 +39853,135 @@ Lookups are defined in the dataprovider (columns) auto-enter setting and are nor
           <sample/>
         </function>
         <function name="search">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the recordCount]]></return>
+          <description><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.
+Clear results from previous searches.
+
+Note: Omitted records are automatically excluded when performing a search - meaning that the foundset result by default will not include omitted records.]]></description>
+          <summary><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.]]></summary>
+          <sample><![CDATA[//Load records can be used in 5 different ways
+//1) to copy foundset data from another foundset
+//%%prefix%%foundset.loadRecords(fs);
+
+//2) to load a primary key dataset, will remove related sort!
+//var dataset = databaseManager.getDataSetByQuery(...);
+// dataset must match the table primary key columns (alphabetically ordered)
+//%%prefix%%foundset.loadRecords(dataset);
+
+//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
+//%%prefix%%foundset.loadRecords(123);
+//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
+
+//4) to reload all last related records again, if for example when searched in tabpanel
+//%%prefix%%foundset.loadRecords();
+
+//5) to load records in to the form based on a query (also known as 'Form by query')
+//%%prefix%%foundset.loadRecords(sqlstring,parameters);
+//limitations/requirements for sqlstring are:
+//-must start with 'select'
+//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
+//-can contain '?' which are replaced with values from the array supplied to parameters argument
+//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
+//-must contain 'from' keyword
+//-the 'from' must be a comma separated list of table names
+//-must at least select from the table used in Servoy Form
+//-cannot contain 'group by', 'having' or 'union'
+//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <parameters>
+            <parameter name="clearLastResults">
+              <description><![CDATA[boolean, clear previous search, default true]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="search">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="boolean"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description/>
-          <sample><![CDATA[var recordCount = %%prefix%%controller.search();
-//var recordCount = %%prefix%%controller.search(false,false); //to extend foundset]]></sample>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the recordCount]]></return>
+          <description><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.
+Clear results from previous searches.
+
+Note: Omitted records are automatically excluded when performing a search - meaning that the foundset result by default will not include omitted records.]]></description>
+          <summary><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.]]></summary>
+          <sample><![CDATA[//Load records can be used in 5 different ways
+//1) to copy foundset data from another foundset
+//%%prefix%%foundset.loadRecords(fs);
+
+//2) to load a primary key dataset, will remove related sort!
+//var dataset = databaseManager.getDataSetByQuery(...);
+// dataset must match the table primary key columns (alphabetically ordered)
+//%%prefix%%foundset.loadRecords(dataset);
+
+//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
+//%%prefix%%foundset.loadRecords(123);
+//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
+
+//4) to reload all last related records again, if for example when searched in tabpanel
+//%%prefix%%foundset.loadRecords();
+
+//5) to load records in to the form based on a query (also known as 'Form by query')
+//%%prefix%%foundset.loadRecords(sqlstring,parameters);
+//limitations/requirements for sqlstring are:
+//-must start with 'select'
+//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
+//-can contain '?' which are replaced with values from the array supplied to parameters argument
+//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
+//-must contain 'from' keyword
+//-the 'from' must be a comma separated list of table names
+//-must at least select from the table used in Servoy Form
+//-cannot contain 'group by', 'having' or 'union'
+//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <parameters>
+            <parameter name="clearLastResults" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[boolean, clear previous search, default true]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="search">
+          <argumentsTypes>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the recordCount]]></return>
+          <description><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.
+Clear results from previous searches.
+
+Note: Omitted records are automatically excluded when performing a search - meaning that the foundset result by default will not include omitted records.]]></description>
+          <summary><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.]]></summary>
+          <sample><![CDATA[//Load records can be used in 5 different ways
+//1) to copy foundset data from another foundset
+//%%prefix%%foundset.loadRecords(fs);
+
+//2) to load a primary key dataset, will remove related sort!
+//var dataset = databaseManager.getDataSetByQuery(...);
+// dataset must match the table primary key columns (alphabetically ordered)
+//%%prefix%%foundset.loadRecords(dataset);
+
+//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
+//%%prefix%%foundset.loadRecords(123);
+//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
+
+//4) to reload all last related records again, if for example when searched in tabpanel
+//%%prefix%%foundset.loadRecords();
+
+//5) to load records in to the form based on a query (also known as 'Form by query')
+//%%prefix%%foundset.loadRecords(sqlstring,parameters);
+//limitations/requirements for sqlstring are:
+//-must start with 'select'
+//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
+//-can contain '?' which are replaced with values from the array supplied to parameters argument
+//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
+//-must contain 'from' keyword
+//-the 'from' must be a comma separated list of table names
+//-must at least select from the table used in Servoy Form
+//-cannot contain 'group by', 'having' or 'union'
+//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <parameters>
+            <parameter name="clearLastResults" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[boolean, clear previous search, default true]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="setDataProviderValue">
           <argumentsTypes>
@@ -39456,7 +40027,94 @@ if (!form.controller.getDesignMode())
         </function>
         <function name="setDesignMode">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets this form in designmode with one or more callback methods.]]></description>
+          <summary><![CDATA[Sets this form in designmode with one or more callback methods.]]></summary>
+          <sample><![CDATA[var form = forms["selectedFormName"];
+if (!form.controller.getDesignMode())
+{
+	// Set the current form in designmode with no callbacks
+	form.controller.setDesignMode(true);
+	// Set the current form in designmode with callbacks
+	// where onDrag, onDrop, onSelect, onResize are names of form methods (not from "selectedFormName" form)
+	// form.controller.setDesignMode(onDrag, onDrop, onSelect, onResize);
+}
+//Set the current form out of designmode (to normal browse)
+//form.controller.setDesignMode(false);]]></sample>
+          <parameters>
+            <parameter name="ondrag" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onDrag method reference]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setDesignMode">
+          <argumentsTypes>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets this form in designmode with one or more callback methods.]]></description>
+          <summary><![CDATA[Sets this form in designmode with one or more callback methods.]]></summary>
+          <sample><![CDATA[var form = forms["selectedFormName"];
+if (!form.controller.getDesignMode())
+{
+	// Set the current form in designmode with no callbacks
+	form.controller.setDesignMode(true);
+	// Set the current form in designmode with callbacks
+	// where onDrag, onDrop, onSelect, onResize are names of form methods (not from "selectedFormName" form)
+	// form.controller.setDesignMode(onDrag, onDrop, onSelect, onResize);
+}
+//Set the current form out of designmode (to normal browse)
+//form.controller.setDesignMode(false);]]></sample>
+          <parameters>
+            <parameter name="ondrag" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onDrag method reference]]></description>
+            </parameter>
+            <parameter name="ondrop" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onDrop method reference]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setDesignMode">
+          <argumentsTypes>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets this form in designmode with one or more callback methods.]]></description>
+          <summary><![CDATA[Sets this form in designmode with one or more callback methods.]]></summary>
+          <sample><![CDATA[var form = forms["selectedFormName"];
+if (!form.controller.getDesignMode())
+{
+	// Set the current form in designmode with no callbacks
+	form.controller.setDesignMode(true);
+	// Set the current form in designmode with callbacks
+	// where onDrag, onDrop, onSelect, onResize are names of form methods (not from "selectedFormName" form)
+	// form.controller.setDesignMode(onDrag, onDrop, onSelect, onResize);
+}
+//Set the current form out of designmode (to normal browse)
+//form.controller.setDesignMode(false);]]></sample>
+          <parameters>
+            <parameter name="ondrag" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onDrag method reference]]></description>
+            </parameter>
+            <parameter name="ondrop" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onDrop method reference]]></description>
+            </parameter>
+            <parameter name="onselect" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onSelect method reference]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setDesignMode">
+          <argumentsTypes>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets this form in designmode with one or more callback methods.]]></description>
@@ -39489,7 +40147,12 @@ if (!form.controller.getDesignMode())
         </function>
         <function name="setPageFormat">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Set the page format to use when printing.
@@ -39514,28 +40177,138 @@ Note: The unit specified for width, height and all margins MUST be the same.]]><
 //Set page format to a custom size of 100x200 inch in portrait mode
 %%prefix%%controller.setPageFormat(100, 200, 0, 0, 0, 0, 1, 1);]]></sample>
           <parameters>
-            <parameter name="width">
+            <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
               <description><![CDATA[the specified width of the page to be printed.]]></description>
             </parameter>
-            <parameter name="height">
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
               <description><![CDATA[the specified height of the page to be printed.]]></description>
             </parameter>
-            <parameter name="leftmargin">
+            <parameter name="leftmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
               <description><![CDATA[the specified left margin of the page to be printed.]]></description>
             </parameter>
-            <parameter name="rightmargin">
+            <parameter name="rightmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
               <description><![CDATA[the specified right margin of the page to be printed.]]></description>
             </parameter>
-            <parameter name="topmargin">
+            <parameter name="topmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
               <description><![CDATA[the specified top margin of the page to be printed.]]></description>
             </parameter>
-            <parameter name="bottommargin">
+            <parameter name="bottommargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
               <description><![CDATA[the specified bottom margin of the page to be printed.]]></description>
             </parameter>
-            <parameter name="orientation" optional="true">
+          </parameters>
+        </function>
+        <function name="setPageFormat">
+          <argumentsTypes>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Set the page format to use when printing.
+
+Orientation values:
+0 - Landscape mode
+1 - Portrait mode
+
+Units values:
+0 - millimeters
+1 - inches
+2 - pixels
+
+Note: The unit specified for width, height and all margins MUST be the same.]]></description>
+          <summary><![CDATA[Set the page format to use when printing.]]></summary>
+          <sample><![CDATA[//Set page format to a custom size of 100x200 pixels with 10 pixel margins on all sides in portrait mode
+%%prefix%%controller.setPageFormat(100, 200, 10, 10, 10, 10);
+
+//Set page format to a custom size of 100x200 mm in landscape mode
+%%prefix%%controller.setPageFormat(100, 200, 0, 0, 0, 0, 0, 0);
+
+//Set page format to a custom size of 100x200 inch in portrait mode
+%%prefix%%controller.setPageFormat(100, 200, 0, 0, 0, 0, 1, 1);]]></sample>
+          <parameters>
+            <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified width of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified height of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="leftmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified left margin of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="rightmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified right margin of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="topmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified top margin of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="bottommargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified bottom margin of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="orientation" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the specified orientation of the page to be printed; the default is Portrait mode]]></description>
             </parameter>
-            <parameter name="units" optional="true">
+          </parameters>
+        </function>
+        <function name="setPageFormat">
+          <argumentsTypes>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Set the page format to use when printing.
+
+Orientation values:
+0 - Landscape mode
+1 - Portrait mode
+
+Units values:
+0 - millimeters
+1 - inches
+2 - pixels
+
+Note: The unit specified for width, height and all margins MUST be the same.]]></description>
+          <summary><![CDATA[Set the page format to use when printing.]]></summary>
+          <sample><![CDATA[//Set page format to a custom size of 100x200 pixels with 10 pixel margins on all sides in portrait mode
+%%prefix%%controller.setPageFormat(100, 200, 10, 10, 10, 10);
+
+//Set page format to a custom size of 100x200 mm in landscape mode
+%%prefix%%controller.setPageFormat(100, 200, 0, 0, 0, 0, 0, 0);
+
+//Set page format to a custom size of 100x200 inch in portrait mode
+%%prefix%%controller.setPageFormat(100, 200, 0, 0, 0, 0, 1, 1);]]></sample>
+          <parameters>
+            <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified width of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified height of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="leftmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified left margin of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="rightmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified right margin of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="topmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified top margin of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="bottommargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified bottom margin of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="orientation" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the specified orientation of the page to be printed; the default is Portrait mode]]></description>
+            </parameter>
+            <parameter name="units">
               <description><![CDATA[the specified units for the width and height of the page to be printed; the default is pixels]]></description>
             </parameter>
           </parameters>
@@ -39586,13 +40359,32 @@ var current = %%prefix%%controller.getSelectedIndex();
           </parameters>
         </function>
         <function name="show">
+          <argumentsTypes/>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Shows the form (makes the form visible)
+This function does not affect the form foundset in any way.]]></description>
+          <summary><![CDATA[Shows the form (makes the form visible)
+This function does not affect the form foundset in any way.]]></summary>
+          <sample><![CDATA[// show the form in the current window/dialog
+%%prefix%%controller.show();
+// show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.show(w);
+// show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.show(w);
+//show the form in the main window
+//%%prefix%%controller.show(null);]]></sample>
+        </function>
+        <function name="show">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Shows the form (makes the form visible), optionally showing it in the specified JSWindow.
+          <description><![CDATA[Shows the form (makes the form visible)
 This function does not affect the form foundset in any way.]]></description>
-          <summary><![CDATA[Shows the form (makes the form visible), optionally showing it in the specified JSWindow.]]></summary>
+          <summary><![CDATA[Shows the form (makes the form visible)
+This function does not affect the form foundset in any way.]]></summary>
           <sample><![CDATA[// show the form in the current window/dialog
 %%prefix%%controller.show();
 // show the form in newly created named modal dialog
@@ -39604,9 +40396,20 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
 //show the form in the main window
 //%%prefix%%controller.show(null);]]></sample>
           <parameters>
-            <parameter name="window" optional="true">
-              <description><![CDATA[the window in which this form should be shown. If it is unspecified the current window will be used.]]></description>
+            <parameter name="window" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the window in which this form should be shown]]></description>
             </parameter>
+          </parameters>
+        </function>
+        <function deprecated="true" name="show" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <parameters>
+            <parameter name="window" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+            <parameter name="isModal" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           </parameters>
         </function>
         <function deprecated="true" name="showAllRecords">
@@ -39625,8 +40428,20 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
           <sample/>
         </function>
         <function name="showPrintPreview">
+          <argumentsTypes/>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Show this form in print preview.]]></description>
+          <summary><![CDATA[Show this form in print preview.]]></summary>
+          <sample><![CDATA[//shows this form (with foundset records) in print preview
+%%prefix%%controller.showPrintPreview();
+//to print preview current record only
+//%%prefix%%controller.showPrintPreview(true);
+//to print preview current record only with 125% zoom factor; 
+//%%prefix%%controller.showPrintPreview(true, null, 125);]]></sample>
+        </function>
+        <function name="showPrintPreview">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="boolean"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Show this form in print preview.]]></description>
@@ -39638,20 +40453,64 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
 //to print preview current record only with 125% zoom factor; 
 //%%prefix%%controller.showPrintPreview(true, null, 125);]]></sample>
           <parameters>
-            <parameter name="printCurrentRecordOnly" optional="true">
+            <parameter name="printCurrentRecordOnly" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[to print the current record only]]></description>
             </parameter>
-            <parameter name="printerJob" optional="true">
+          </parameters>
+        </function>
+        <function name="showPrintPreview">
+          <argumentsTypes>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="java.awt.print.PrinterJob"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Show this form in print preview.]]></description>
+          <summary><![CDATA[Show this form in print preview.]]></summary>
+          <sample><![CDATA[//shows this form (with foundset records) in print preview
+%%prefix%%controller.showPrintPreview();
+//to print preview current record only
+//%%prefix%%controller.showPrintPreview(true);
+//to print preview current record only with 125% zoom factor; 
+//%%prefix%%controller.showPrintPreview(true, null, 125);]]></sample>
+          <parameters>
+            <parameter name="printCurrentRecordOnly" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[to print the current record only]]></description>
+            </parameter>
+            <parameter name="printerJob" type="java.awt.print.PrinterJob" typecode="java.awt.print.PrinterJob">
               <description><![CDATA[print to plugin printer job, see pdf printer plugin for example (incase print is used from printpreview)]]></description>
             </parameter>
-            <parameter name="zoomFactor" optional="true">
+          </parameters>
+        </function>
+        <function name="showPrintPreview">
+          <argumentsTypes>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="java.awt.print.PrinterJob"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Show this form in print preview.]]></description>
+          <summary><![CDATA[Show this form in print preview.]]></summary>
+          <sample><![CDATA[//shows this form (with foundset records) in print preview
+%%prefix%%controller.showPrintPreview();
+//to print preview current record only
+//%%prefix%%controller.showPrintPreview(true);
+//to print preview current record only with 125% zoom factor; 
+//%%prefix%%controller.showPrintPreview(true, null, 125);]]></sample>
+          <parameters>
+            <parameter name="printCurrentRecordOnly" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[to print the current record only]]></description>
+            </parameter>
+            <parameter name="printerJob" type="java.awt.print.PrinterJob" typecode="java.awt.print.PrinterJob">
+              <description><![CDATA[print to plugin printer job, see pdf printer plugin for example (incase print is used from printpreview)]]></description>
+            </parameter>
+            <parameter name="zoomFactor" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[a specified number value from 10-400]]></description>
             </parameter>
           </parameters>
         </function>
         <function name="showRecords">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
@@ -39664,10 +40523,220 @@ var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
 var w = application.getWindow("mydialog"); // use null name for main app. window
 %%prefix%%controller.showRecords(foundset, w);]]></sample>
           <parameters>
-            <parameter name="data">
-              <description><![CDATA[the foundset/pkdataset/singleNumber_pk/UUIDpk to load before showing the form.]]></description>
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
+              <description><![CDATA[the foundset to load before showing the form.]]></description>
             </parameter>
-            <parameter name="window" optional="true">
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);]]></sample>
+          <parameters>
+            <parameter name="founset">
+              <description><![CDATA[the foundset to load before showing the form.]]></description>
+            </parameter>
+            <parameter name="window" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the window in which this form should be shown.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);]]></sample>
+          <parameters>
+            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
+              <description><![CDATA[the pkdataset to load before showing the form.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);]]></sample>
+          <parameters>
+            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
+              <description><![CDATA[the pkdataset to load before showing the form.]]></description>
+            </parameter>
+            <parameter name="window" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the window in which this form should be shown.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.util.UUID"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);]]></sample>
+          <parameters>
+            <parameter name="UUIDpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
+              <description><![CDATA[the UUIDpk to load before showing the form.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.util.UUID"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);]]></sample>
+          <parameters>
+            <parameter name="UUIDpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
+              <description><![CDATA[the UUIDpk to load before showing the form.]]></description>
+            </parameter>
+            <parameter name="window" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the window in which this form should be shown.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);]]></sample>
+          <parameters>
+            <parameter name="singleNumber_pk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
+              <description><![CDATA[the singleNumber_pk to load before showing the form.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Number"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);]]></sample>
+          <parameters>
+            <parameter name="singleNumber_pk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
+              <description><![CDATA[the singleNumber_pk to load before showing the form.]]></description>
+            </parameter>
+            <parameter name="window" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the window in which this form should be shown.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function deprecated="true" name="showRecords" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+            <argumentType typecode="java.lang.Object"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <parameters>
+            <parameter name="foundset" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+            <parameter name="dialogName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+            <parameter name="modal" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);]]></sample>
+          <parameters>
+            <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the query to load before showing the form.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);]]></sample>
+          <parameters>
+            <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the query to load before showing the form.]]></description>
+            </parameter>
+            <parameter name="window" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[the window in which this form should be shown.]]></description>
             </parameter>
           </parameters>
@@ -39683,7 +40752,7 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
         </function>
         <function name="sort">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sorts the form foundset based on the given sort string. 
@@ -39691,25 +40760,47 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
           <summary><![CDATA[Sorts the form foundset based on the given sort string.]]></summary>
           <sample><![CDATA[%%prefix%%controller.sort('columnA desc,columnB asc');]]></sample>
           <parameters>
-            <parameter name="sortString">
+            <parameter name="sortString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the specified columns (and sort order)]]></description>
             </parameter>
-            <parameter name="defer" optional="true">
+          </parameters>
+        </function>
+        <function name="sort">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sorts the form foundset based on the given sort string. 
+TIP: You can use the Copy button in the developer Select Sorting Fields dialog to get the needed syntax string for the desired sort fields/order.]]></description>
+          <summary><![CDATA[Sorts the form foundset based on the given sort string.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.sort('columnA desc,columnB asc');]]></sample>
+          <parameters>
+            <parameter name="sortString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified columns (and sort order)]]></description>
+            </parameter>
+            <parameter name="defer" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[the "sortString" will be just stored, without performing a query on the database (the actual sorting will be deferred until the next data loading action).]]></description>
             </parameter>
           </parameters>
         </function>
         <function name="sortDialog">
-          <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
-          </argumentsTypes>
+          <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Show the sort dialog to the user a preselection sortString can be passed, to sort the form foundset.
 TIP: You can use the Copy button in the developer Select Sorting Fields dialog to get the needed syntax string for the desired sort fields/order.]]></description>
           <summary><![CDATA[Show the sort dialog to the user a preselection sortString can be passed, to sort the form foundset.]]></summary>
           <sample><![CDATA[%%prefix%%controller.sortDialog('columnA desc,columnB asc');]]></sample>
+        </function>
+        <function name="sortDialog">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description/>
+          <sample><![CDATA[%%prefix%%controller.sortDialog('columnA desc,columnB asc');]]></sample>
           <parameters>
-            <parameter name="sortString" optional="true">
+            <parameter name="sortString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the specified columns (and sort order)]]></description>
             </parameter>
           </parameters>
@@ -39887,7 +40978,7 @@ for(var i=1;i<=set.getMaxRowIndex();i++)
         </function>
         <function name="getTimeZoneOffset">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[an int representing the time zone's offset from UTC.]]></return>
           <description><![CDATA[Returns the offset (in milliseconds) of this time zone from UTC for the current date or at the specified date.]]></description>
@@ -39897,7 +40988,22 @@ for(var i=1;i<=set.getMaxRowIndex();i++)
             <parameter name="timezone">
               <description><![CDATA[The time zone to get the offset for.]]></description>
             </parameter>
-            <parameter name="date" optional="true">
+          </parameters>
+        </function>
+        <function name="getTimeZoneOffset">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.util.Date"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[an int representing the time zone's offset from UTC.]]></return>
+          <description><![CDATA[Returns the offset (in milliseconds) of this time zone from UTC for the current date or at the specified date.]]></description>
+          <summary><![CDATA[Returns the offset (in milliseconds) of this time zone from UTC for the current date or at the specified date.]]></summary>
+          <sample><![CDATA[var timeZoneOffset = i18n.getTimeZoneOffset('America/Los_Angeles');]]></sample>
+          <parameters>
+            <parameter name="timezone">
+              <description><![CDATA[The time zone to get the offset for.]]></description>
+            </parameter>
+            <parameter name="date" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="java.util.Date">
               <description><![CDATA[The date in the time zone (default current date). Needed in case daylight saving time/GMT offset changes are used in the time zone.]]></description>
             </parameter>
           </parameters>
