@@ -75,6 +75,7 @@ import org.osgi.service.url.URLStreamHandlerService;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.JSUnitUserManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.ClientState;
@@ -470,7 +471,7 @@ public class Activator extends Plugin
 
 	public IDebugJ2DBClient getJSUnitJ2DBClient()
 	{
-		return getDebugClientHandler().getJSUnitJ2DBClient();
+		return getDebugClientHandler().getJSUnitJ2DBClient(new JSUnitUserManager());
 	}
 
 	/**

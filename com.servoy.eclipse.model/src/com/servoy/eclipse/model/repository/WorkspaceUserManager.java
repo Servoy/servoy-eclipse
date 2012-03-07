@@ -522,7 +522,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 * @param later if the file write operation should be performed later using a job.
 	 * @throws RepositoryException if the security contents cannot be written because of some reason...
 	 */
-	private void writeUserAndGroupInfo(boolean later) throws RepositoryException
+	protected void writeUserAndGroupInfo(boolean later) throws RepositoryException
 	{
 		//write groups/users/usergroups
 		IPath path = new Path(SECURITY_FILE_RELATIVE_TO_PROJECT);
@@ -2295,7 +2295,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		}
 	}
 
-	private void deleteGroupReferences(String groupName)
+	protected void deleteGroupReferences(String groupName)
 	{
 		try
 		{
