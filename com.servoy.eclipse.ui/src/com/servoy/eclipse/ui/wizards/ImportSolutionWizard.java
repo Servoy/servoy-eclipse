@@ -194,9 +194,9 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 	private static String getInitialImportPath()
 	{
-		String as_dir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory().replace("\\\\", "\\"); //$NON-NLS-1$//$NON-NLS-2$
-		if (!as_dir.endsWith("\\")) as_dir += "\\"; //$NON-NLS-1$//$NON-NLS-2$
-		return as_dir + "solutions\\examples"; //$NON-NLS-1$
+		String as_dir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory().replace("\\", "/").replace("//", "/"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		if (!as_dir.endsWith("/")) as_dir += "/"; //$NON-NLS-1$//$NON-NLS-2$
+		return as_dir + "solutions/examples"; //$NON-NLS-1$
 	}
 
 	public void setSolutionFilePath(String solutionFilePath)
