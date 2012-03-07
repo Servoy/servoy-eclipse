@@ -268,8 +268,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	public static class GroupSecurityInfo implements ISupportName
 	{
 		public String groupName;
-		public Map<String, List<SecurityInfo>> tableSecurity = new HashMap<String, List<SecurityInfo>>();//servername.tablename -> SecurityInfos 
-		public Map<UUID, List<SecurityInfo>> formSecurity = new HashMap<UUID, List<SecurityInfo>>();//form_uuid -> SecurityInfos
+		public Map<String, List<SecurityInfo>> tableSecurity = new ConcurrentHashMap<String, List<SecurityInfo>>();//servername.tablename -> SecurityInfos 
+		public Map<UUID, List<SecurityInfo>> formSecurity = new ConcurrentHashMap<UUID, List<SecurityInfo>>();//form_uuid -> SecurityInfos
 
 		/**
 		 * Creates a new instance for the group with the given name.<BR>
