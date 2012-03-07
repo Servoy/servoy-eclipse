@@ -3907,33 +3907,44 @@ application.output(nextValue);
 nextValue = databaseManager.getNextSequence(databaseManager.getDataSourceServerName(seqDataSource), databaseManager.getDataSourceTableName(seqDataSource), 'seq_table_value')
 application.output(nextValue);]]></sample>
           <parameters>
-            <parameter name="dataSource|serverName">
+            <parameter name="dataSource" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The datasource that points to the table which has the column with the sequence,
 								or the name of the server where the table can be found. If the name of the server
 								is specified, then a second optional parameter specifying the name of the table
 								must be used. If the datasource is specified, then the name of the table is not needed
 								as the second argument.]]></description>
             </parameter>
-            <parameter name="tableName" optional="true">
+            <parameter name="columnName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The name of the column that has a sequence defined in its properties.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function deprecated="true" name="getNextSequence">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[The next sequence for the column, null if there was no sequence for that column 
+        or if there is no column with the given name.]]></return>
+          <description/>
+          <deprecated><![CDATA[Use getNextSequence(datasource,column)]]></deprecated>
+          <sample/>
+          <parameters>
+            <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The datasource that points to the table which has the column with the sequence,
+								or the name of the server where the table can be found. If the name of the server
+								is specified, then a second optional parameter specifying the name of the table
+								must be used. If the datasource is specified, then the name of the table is not needed
+								as the second argument.]]></description>
+            </parameter>
+            <parameter name="tableName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The name of the table that has the column with the sequence. Use this parameter
 							only if you specified the name of the server as the first parameter.]]></description>
             </parameter>
             <parameter name="columnName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The name of the column that has a sequence defined in its properties.]]></description>
             </parameter>
-          </parameters>
-        </function>
-        <function deprecated="true" name="getNextSequence" undocumented="true">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-          <parameters>
-            <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-            <parameter name="tableName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-            <parameter name="columnName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           </parameters>
         </function>
         <function name="getSQL">
@@ -9127,7 +9138,7 @@ field.dataProviderID = 'parent_table_id';]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The type of display used by the field. Can be one of CALENDAR, CHECKS,
 COMBOBOX, HTML_AREA, IMAGE_MEDIA, PASSWORD, RADIOS, RTF_AREA, TEXT_AREA,
-TEXT_FIELD or TYPE_AHEAD.]]></description>
+TEXT_FIELD, TYPE_AHEAD, LIST_BOX, MULTI_SELECTION_LIST_BOX or SPINNER.]]></description>
           <summary><![CDATA[The type of display used by the field.]]></summary>
           <sample><![CDATA[// The display type is specified when the field is created.
 var cal = form.newField('my_table_date', JSField.CALENDAR, 10, 10, 100, 20);
@@ -36260,7 +36271,12 @@ form.borderType = solutionModel.createMatteBorder(1,1,1,1,"#00ff00");]]></sample
         </function>
         <function name="createPageFormat">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Create a page format string.
@@ -36270,28 +36286,104 @@ Note: The unit specified for width, height and all margins MUST be the same.]]><
           <sample><![CDATA[var form = solutionModel.getForm("someForm");
 form.defaultPageFormat = solutionModel.createPageFormat(612,792,72,72,72,72,SM_ORIENTATION.PORTRAIT,SM_UNITS.PIXELS);]]></sample>
           <parameters>
-            <parameter name="width">
+            <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
               <description><![CDATA[the specified width of the page to be printed.]]></description>
             </parameter>
-            <parameter name="height">
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
               <description><![CDATA[the specified height of the page to be printed.]]></description>
             </parameter>
-            <parameter name="leftmargin">
+            <parameter name="leftmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
               <description><![CDATA[the specified left margin of the page to be printed.]]></description>
             </parameter>
-            <parameter name="rightmargin">
+            <parameter name="rightmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
               <description><![CDATA[the specified right margin of the page to be printed.]]></description>
             </parameter>
-            <parameter name="topmargin">
+            <parameter name="topmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
               <description><![CDATA[the specified top margin of the page to be printed.]]></description>
             </parameter>
-            <parameter name="bottommargin">
+            <parameter name="bottommargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
               <description><![CDATA[the specified bottom margin of the page to be printed.]]></description>
             </parameter>
-            <parameter name="orientation" optional="true">
+          </parameters>
+        </function>
+        <function name="createPageFormat">
+          <argumentsTypes>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[clonedesc js_createPageFormat(double, double, double, double, double, double)]]></description>
+          <summary><![CDATA[clonedesc js_createPageFormat(double, double, double, double, double, double)]]></summary>
+          <sample><![CDATA[var form = solutionModel.getForm("someForm");
+form.defaultPageFormat = solutionModel.createPageFormat(612,792,72,72,72,72,SM_ORIENTATION.PORTRAIT,SM_UNITS.PIXELS);]]></sample>
+          <parameters>
+            <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified width of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified height of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="leftmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified left margin of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="rightmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified right margin of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="topmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified top margin of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="bottommargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified bottom margin of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="orientation" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the specified orientation of the page to be printed; the default is Portrait mode]]></description>
             </parameter>
-            <parameter name="units" optional="true">
+          </parameters>
+        </function>
+        <function name="createPageFormat">
+          <argumentsTypes>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="double"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[clonedesc js_createPageFormat(double, double, double, double, double, double)]]></description>
+          <summary><![CDATA[clonedesc js_createPageFormat(double, double, double, double, double, double)]]></summary>
+          <sample><![CDATA[var form = solutionModel.getForm("someForm");
+form.defaultPageFormat = solutionModel.createPageFormat(612,792,72,72,72,72,SM_ORIENTATION.PORTRAIT,SM_UNITS.PIXELS);]]></sample>
+          <parameters>
+            <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified width of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified height of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="leftmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified left margin of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="rightmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified right margin of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="topmargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified top margin of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="bottommargin" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double">
+              <description><![CDATA[the specified bottom margin of the page to be printed.]]></description>
+            </parameter>
+            <parameter name="orientation" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the specified orientation of the page to be printed; the default is Portrait mode]]></description>
+            </parameter>
+            <parameter name="units" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the specified units for the width and height of the page to be printed; the default is pixels]]></description>
             </parameter>
           </parameters>
@@ -36595,8 +36687,17 @@ if (method != null) application.output(method.code);]]></sample>
           </parameters>
         </function>
         <function name="getGlobalMethods">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSMethod;"><![CDATA[an array of JSMethod type elements]]></return>
+          <description><![CDATA[The list of all global methods.]]></description>
+          <summary><![CDATA[The list of all global methods.]]></summary>
+          <sample><![CDATA[var methods = solutionModel.getGlobalMethods('globals'); 
+for (var x in methods) 
+	application.output(methods[x].getName());]]></sample>
+        </function>
+        <function name="getGlobalMethods">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSMethod;"><![CDATA[an array of JSMethod type elements]]></return>
           <description><![CDATA[The list of all global methods.]]></description>
@@ -36605,7 +36706,7 @@ if (method != null) application.output(method.code);]]></sample>
 for (var x in methods) 
 	application.output(methods[x].getName());]]></sample>
           <parameters>
-            <parameter name="scopeName" optional="true">
+            <parameter name="scopeName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[limit to global methods of specified scope name]]></description>
             </parameter>
           </parameters>
@@ -36639,8 +36740,17 @@ application.output(globalVariable.name + " has the default value of " + globalVa
           </parameters>
         </function>
         <function name="getGlobalVariables">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSVariable[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSVariable;"><![CDATA[an array of JSVariable type elements]]></return>
+          <description><![CDATA[Gets an array of all global variables.]]></description>
+          <summary><![CDATA[Gets an array of all global variables.]]></summary>
+          <sample><![CDATA[var globalVariables = solutionModel.getGlobalVariables('globals');
+for (var i in globalVariables)
+	application.output(globalVariables[i].name + " has the default value of " + globalVariables[i].defaultValue);]]></sample>
+        </function>
+        <function name="getGlobalVariables">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSVariable[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSVariable;"><![CDATA[an array of JSVariable type elements]]></return>
           <description><![CDATA[Gets an array of all global variables.]]></description>
@@ -36649,7 +36759,7 @@ application.output(globalVariable.name + " has the default value of " + globalVa
 for (var i in globalVariables)
 	application.output(globalVariables[i].name + " has the default value of " + globalVariables[i].defaultValue);]]></sample>
           <parameters>
-            <parameter name="scopeName" optional="true">
+            <parameter name="scopeName" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[limit to global vars of specified scope name]]></description>
             </parameter>
           </parameters>
@@ -36704,7 +36814,7 @@ application.output("The relation items are " + relation.getRelationItems());]]><
         </function>
         <function name="getRelations">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSRelation[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSRelation;"><![CDATA[an array of all relations (all elements in the array are of type JSRelation)]]></return>
           <description><![CDATA[Gets an array of all relations; or an array of all global relations if the specified table is NULL.]]></description>
@@ -36714,10 +36824,28 @@ if (relations.length != 0)
 	for (var i in relations)
 		application.output(relations[i].name);]]></sample>
           <parameters>
-            <parameter name="primary_server_name/primary_data_source" optional="true">
-              <description><![CDATA[the specified name of the server or datasource for the specified table]]></description>
+            <parameter name="datasource" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name of the datasource for the specified table]]></description>
             </parameter>
-            <parameter name="primary_table_name" optional="true">
+          </parameters>
+        </function>
+        <function name="getRelations">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSRelation[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSRelation;"><![CDATA[an array of all relations (all elements in the array are of type JSRelation)]]></return>
+          <description><![CDATA[Gets an array of all relations; or an array of all global relations if the specified table is NULL.]]></description>
+          <summary><![CDATA[Gets an array of all relations; or an array of all global relations if the specified table is NULL.]]></summary>
+          <sample><![CDATA[var relations = solutionModel.getRelations('server_name','table_name');
+if (relations.length != 0)
+	for (var i in relations)
+		application.output(relations[i].name);]]></sample>
+          <parameters>
+            <parameter name="servername" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name of the server for the specified table]]></description>
+            </parameter>
+            <parameter name="tablename" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the specified name of the table]]></description>
             </parameter>
           </parameters>
@@ -40269,7 +40397,7 @@ Note: The unit specified for width, height and all margins MUST be the same.]]><
             <parameter name="orientation" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the specified orientation of the page to be printed; the default is Portrait mode]]></description>
             </parameter>
-            <parameter name="units">
+            <parameter name="units" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the specified units for the width and height of the page to be printed; the default is pixels]]></description>
             </parameter>
           </parameters>
@@ -40964,7 +41092,7 @@ for(var i=1;i<=set.getMaxRowIndex();i++)
             <parameter name="timezone">
               <description><![CDATA[The time zone to get the offset for.]]></description>
             </parameter>
-            <parameter name="date" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="java.util.Date">
+            <parameter name="date" type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="java.util.Date">
               <description><![CDATA[The date in the time zone (default current date). Needed in case daylight saving time/GMT offset changes are used in the time zone.]]></description>
             </parameter>
           </parameters>
