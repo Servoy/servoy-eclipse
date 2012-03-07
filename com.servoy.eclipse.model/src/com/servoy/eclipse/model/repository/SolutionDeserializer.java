@@ -192,7 +192,7 @@ public class SolutionDeserializer
 		return solutionUUIDs;
 	}
 
-	public Solution readSolution(File workspace_dir, SolutionMetaData smd, List<File> changedFiles, boolean useFilesForDitryMark) throws RepositoryException
+	public Solution readSolution(File workspace_dir, SolutionMetaData smd, List<File> changedFiles, boolean useFilesForDirtyMark) throws RepositoryException
 	{
 		if (smd == null) return null;
 
@@ -202,9 +202,29 @@ public class SolutionDeserializer
 		HashSet<UUID> solutionUUIDs = getAlreadyUsedUUIDsForSolution(solution.getUUID());
 		solutionUUIDs.clear();
 
-		updateSolution(new File(workspace_dir, smd.getName()), solution, changedFiles, null, true, useFilesForDitryMark);
+		updateSolution(new File(workspace_dir, smd.getName()), solution, changedFiles, null, true, useFilesForDirtyMark);
 
-		if (!useFilesForDitryMark)
+		// Make sure all table nodes exist in memory, otherwise both editing and real solution may both create a table node for the same data source
+		try
+		{
+			for (String serverName : repository.getServerNames(false))
+			{
+				IServer server = repository.getServer(serverName);
+				if (server != null)
+				{
+					for (String tableName : server.getTableAndViewNames(true))
+					{
+						solution.getOrCreateTableNode(DataSourceUtils.createDBTableDataSource(serverName, tableName));
+					}
+				}
+			}
+		}
+		catch (RemoteException e)
+		{
+			throw new RepositoryException(e);
+		}
+
+		if (!useFilesForDirtyMark)
 		{
 			// clear all changed flags
 			solution.acceptVisitor(new IPersistVisitor()
