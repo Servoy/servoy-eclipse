@@ -188,9 +188,16 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		addPage(page);
 	}
 
-	public static String initialPath = null;
+	public static String initialPath = getInitialImportPath();
 	private String solutionFilePath;
 	private boolean askForImportServerName;
+
+	private static String getInitialImportPath()
+	{
+		String as_dir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory().replace("\\\\", "\\"); //$NON-NLS-1$//$NON-NLS-2$
+		if (!as_dir.endsWith("\\")) as_dir += "\\"; //$NON-NLS-1$//$NON-NLS-2$
+		return as_dir + "solutions\\examples"; //$NON-NLS-1$
+	}
 
 	public void setSolutionFilePath(String solutionFilePath)
 	{
@@ -257,7 +264,6 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-
 					FileDialog dlg = new FileDialog(getShell(), SWT.NONE);
 					dlg.setFilterExtensions(new String[] { "*.servoy" });
 					if (initialPath != null) dlg.setFilterPath(initialPath);
