@@ -17,8 +17,17 @@
 
 package com.servoy.eclipse.model.repository;
 
+import java.util.Arrays;
+
+import com.servoy.j2db.dataprocessing.IDataServerInternal;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.IClientInternal;
+import com.servoy.j2db.server.shared.IClientManagerInternal;
+import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.ServoyException;
+import com.servoy.j2db.util.Settings;
 
 /**
  * A special workspaceuser manager for jsunit testing, this one does copy over all the existing users once,
@@ -34,6 +43,39 @@ public final class JSUnitUserManager extends WorkspaceUserManager
 		this.allDefinedUsers.addAll(userManager.allDefinedUsers);
 		this.groupInfos.addAll(userManager.groupInfos);
 		this.userGroups.putAll(userManager.userGroups);
+	}
+
+	/** Check if user is administrator.
+	 * <p> Some operations can only be done by admin user or own user (like change own password)
+	 * @param clientId
+	 * @param ownerUserId allowed when non-null
+	 * @throws RepositoryException 
+	 */
+	@Override
+	protected void checkForAdminUser(String clientId, String ownerUserId) throws RepositoryException
+	{
+		if (ApplicationServerSingleton.get().getClientId().equals(clientId))
+		{
+			// internal: ok
+			return;
+		}
+
+		// check if user is in admin group
+		IClientManagerInternal clientManager = ((IDataServerInternal)ApplicationServerSingleton.get().getDataServer()).getClientManager();
+		IClientInternal client = clientManager.getClient(clientId);
+		if (client == null || client.getClientInfo().getUserGroups() == null ||
+			!Arrays.asList(client.getClientInfo().getUserGroups()).contains(IRepository.ADMIN_GROUP))
+		{
+			// non-admin user, check for own user
+			if (ownerUserId == null || !ownerUserId.equals(client.getClientInfo().getUserUid()))
+			{
+				Debug.error("Access to repository server denied to client code, see admin property " + Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_SETTING,
+					new IllegalAccessException());
+				throw new RepositoryException(ServoyException.NO_ACCESS);
+			}
+		}
+
+		// ok
 	}
 
 	/*
