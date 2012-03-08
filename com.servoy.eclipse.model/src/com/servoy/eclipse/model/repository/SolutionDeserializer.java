@@ -1224,12 +1224,12 @@ public class SolutionDeserializer
 						else if ("Array".equals(objectclass)) //$NON-NLS-1$
 						{
 							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-							String current = json.optString(JS_TYPE_JSON_ATTRIBUTE);
+							String current = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
 							if (current == null || (!current.startsWith("Array") && !current.endsWith("[]"))) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array");
 						}
 						else
 						{
-							String typeName = json.getString(JS_TYPE_JSON_ATTRIBUTE);
+							String typeName = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
 							if (typeName != null)
 							{
 								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(typeName));
@@ -1247,7 +1247,7 @@ public class SolutionDeserializer
 					else if (code instanceof ArrayInitializer)
 					{
 						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-						String current = json.optString(JS_TYPE_JSON_ATTRIBUTE);
+						String current = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
 						if (current == null || (!current.startsWith("Array") && !current.endsWith("[]"))) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array");
 					}
 					else if (code instanceof BooleanLiteral)
