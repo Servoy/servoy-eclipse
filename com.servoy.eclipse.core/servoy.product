@@ -33,6 +33,7 @@ and will be prosecuted to the maximum extent possible under law.
       <vmArgs>-Xms40m
 -Xmx512m
 -XX:MaxPermSize=256M</vmArgs>
+      <vmArgsLin>-Dorg.eclipse.swt.browser.DefaultType=mozilla</vmArgsLin>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
 
