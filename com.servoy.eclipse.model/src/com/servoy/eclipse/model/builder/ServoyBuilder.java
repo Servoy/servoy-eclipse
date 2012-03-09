@@ -4246,8 +4246,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		int priority, String location, IPersist persist)
 	{
 		if (problemSeverity == null) return null;
+		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+		if (activeProject == null) return null;
 		String customSeverity = persist != null ? getSeverity(problemSeverity.getLeft(), problemSeverity.getRight().name(), persist) : getSeverity(
-			problemSeverity.getLeft(), problemSeverity.getRight().name(), ServoyModelFinder.getServoyModel().getActiveProject().getProject());
+			problemSeverity.getLeft(), problemSeverity.getRight().name(), activeProject.getProject());
 		if (customSeverity.equals(ProblemSeverity.IGNORE.name())) return null;
 		int severity = getTranslatedSeverity(customSeverity, problemSeverity.getRight());
 
@@ -4367,8 +4369,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static IMarker addMarker(IResource resource, String type, String message, int charNumber, Pair<String, ProblemSeverity> problemSeverity,
 		int priority, String location)
 	{
-		String customSeverity = getSeverity(problemSeverity.getLeft(), problemSeverity.getRight().name(),
-			ServoyModelFinder.getServoyModel().getActiveProject().getProject());
+		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+		if (activeProject == null) return null;
+		String customSeverity = getSeverity(problemSeverity.getLeft(), problemSeverity.getRight().name(), activeProject.getProject());
 		if (customSeverity.equals(ProblemSeverity.IGNORE.name())) return null;
 		int severity = getTranslatedSeverity(customSeverity, problemSeverity.getRight());
 
