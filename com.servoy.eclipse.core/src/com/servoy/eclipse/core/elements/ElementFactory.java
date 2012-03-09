@@ -543,16 +543,17 @@ public class ElementFactory
 		if (parent instanceof Form)
 		{
 			int counter = 0;
-			String tabpanelNameHint = nameHint == null ? "tabs_" : nameHint;
+			String tabpanelNameHint = nameHint == null ? "tabs" : nameHint;
+			String tabpanelName = null;
 			while (true)
 			{
 				Iterator<IFormElement> it = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(parent).getFlattenedForm(
 					parent).getFormElementsSortedByFormIndex();
-				tabpanelNameHint = nameHint + (counter == 0 ? "" : counter);
+				tabpanelName = tabpanelNameHint + (counter == 0 ? "" : ("_" + counter));
 				boolean duplicate = false;
 				while (it.hasNext() && !duplicate)
 				{
-					if (Utils.stringSafeEquals(it.next().getName(), tabpanelNameHint))
+					if (Utils.stringSafeEquals(it.next().getName(), tabpanelName))
 					{
 						duplicate = true;
 					}
@@ -561,7 +562,7 @@ public class ElementFactory
 				else break;
 			}
 
-			tabPanel = ((Form)parent).createNewTabPanel(tabpanelNameHint);
+			tabPanel = ((Form)parent).createNewTabPanel(tabpanelName);
 			tabPanel.setTransparent(true);
 			tabPanel.setPrintable(false);
 			tabPanel.setTabOrientation(tabOrientation);

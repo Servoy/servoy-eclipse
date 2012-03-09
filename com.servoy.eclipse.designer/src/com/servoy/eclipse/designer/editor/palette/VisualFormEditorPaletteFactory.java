@@ -546,19 +546,19 @@ public class VisualFormEditorPaletteFactory
 		{
 			icon = com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("split.gif");
 			tabOrienation = TabPanel.SPLIT_HORIZONTAL;
-			nameHint = "split_";
+			nameHint = "split";
 		}
 		else if (CONTAINERS_TABLESS_PANEL_ID.equals(id))
 		{
 			icon = Activator.loadImageDescriptorFromBundle("tabless.gif");
 			tabOrienation = TabPanel.HIDE;
-			nameHint = "tabless_";
+			nameHint = "tabless";
 		}
 		else if (CONTAINERS_ACCORDION_PANEL_ID.equals(id))
 		{
 			icon = Activator.loadImageDescriptorFromBundle("accordion.jpg");
 			tabOrienation = TabPanel.ACCORDION_PANEL;
-			nameHint = "accordion_";
+			nameHint = "accordion";
 		}
 
 		if (icon != null)
