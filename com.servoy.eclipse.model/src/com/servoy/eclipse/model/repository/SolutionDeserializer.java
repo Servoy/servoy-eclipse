@@ -1184,7 +1184,7 @@ public class SolutionDeserializer
 						}
 						else
 						{
-							String typeName = json.getString(JS_TYPE_JSON_ATTRIBUTE);
+							String typeName = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
 							if (typeName != null)
 							{
 								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(typeName));
