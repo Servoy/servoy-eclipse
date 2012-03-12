@@ -755,37 +755,37 @@ public class SolutionDeserializer
 		return false;
 	}
 
-
-	private void setMissingTypeOnScriptObject(JSONObject object, ISupportChilds parent) throws JSONException
+	private static void setMissingTypeOnScriptObject(JSONObject object, ISupportChilds parent) throws JSONException
 	{
-		if (!object.has(SolutionSerializer.PROP_TYPEID))
+		int typeId;
+		if (parent instanceof Form || parent instanceof Solution)
 		{
-			if (parent instanceof Form)
+			typeId = object.has("declaration") ? IRepository.METHODS : IRepository.SCRIPTVARIABLES; //$NON-NLS-1$
+		}
+		else if (parent instanceof TableNode)
+		{
+			typeId = IRepository.SCRIPTCALCULATIONS;
+		}
+		// cannot determine type from context
+		else return;
+
+		if (object.has(SolutionSerializer.PROP_TYPEID))
+		{
+			// compare declared type id with determined one
+			int declaredTypeId = object.getInt(SolutionSerializer.PROP_TYPEID);
+			if (declaredTypeId != typeId)
 			{
-				if (object.has("declaration")) //$NON-NLS-1$
+				// strange, type id is set, but different from what we would expect
+				if ((declaredTypeId == IRepository.METHODS || declaredTypeId == IRepository.SCRIPTCALCULATIONS) && !object.has("declaration"))
 				{
-					object.put(SolutionSerializer.PROP_TYPEID, IRepository.METHODS);
-				}
-				else
-				{
-					object.put(SolutionSerializer.PROP_TYPEID, IRepository.SCRIPTVARIABLES);
+					object.put("declaration", "/* declaration missing */"); // scripts are expected to have a declaration, 
 				}
 			}
-			else if (parent instanceof Solution)
-			{
-				if (object.has("declaration")) //$NON-NLS-1$
-				{
-					object.put(SolutionSerializer.PROP_TYPEID, IRepository.METHODS);
-				}
-				else
-				{
-					object.put(SolutionSerializer.PROP_TYPEID, IRepository.SCRIPTVARIABLES);
-				}
-			}
-			else if (parent instanceof TableNode)
-			{
-				object.put(SolutionSerializer.PROP_TYPEID, IRepository.SCRIPTCALCULATIONS);
-			}
+		}
+		else
+		{
+			// set missing type
+			object.put(SolutionSerializer.PROP_TYPEID, typeId);
 		}
 	}
 
