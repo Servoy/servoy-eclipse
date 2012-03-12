@@ -806,37 +806,52 @@ public class SolutionDeserializer
 		return false;
 	}
 
-
 	private static void setMissingTypeOnScriptObject(JSONObject object, ISupportChilds parent, File jsFile) throws JSONException
 	{
-		if (!object.has(SolutionSerializer.PROP_TYPEID))
+		int typeId;
+		if (parent instanceof Form || parent instanceof Solution)
 		{
-			int typeId;
-			if (parent instanceof Form || parent instanceof Solution)
+			if (object.has("declaration")) //$NON-NLS-1$
 			{
-				if (object.has("declaration")) //$NON-NLS-1$
-				{
-					typeId = IRepository.METHODS;
-				}
-				else
-				{
-					typeId = IRepository.SCRIPTVARIABLES;
-				}
+				typeId = IRepository.METHODS;
 			}
-			else if (parent instanceof TableNode)
+			else
 			{
-				if (jsFile.getName().endsWith(SolutionSerializer.CALCULATIONS_POSTFIX))
-				{
-					typeId = IRepository.SCRIPTCALCULATIONS;
-				}
-				else if (jsFile.getName().endsWith(SolutionSerializer.FOUNDSET_POSTFIX))
-				{
-					typeId = IRepository.METHODS;
-				}
-				else return;
+				typeId = IRepository.SCRIPTVARIABLES;
 			}
+		}
+		else if (parent instanceof TableNode)
+		{
+			if (jsFile.getName().endsWith(SolutionSerializer.CALCULATIONS_POSTFIX))
+			{
+				typeId = IRepository.SCRIPTCALCULATIONS;
+			}
+			else if (jsFile.getName().endsWith(SolutionSerializer.FOUNDSET_POSTFIX))
+			{
+				typeId = IRepository.METHODS;
+			}
+			// cannot determine type from context
 			else return;
+		}
+		// cannot determine type from context
+		else return;
 
+		if (object.has(SolutionSerializer.PROP_TYPEID))
+		{
+			// compare declared type id with determined one
+			int declaredTypeId = object.getInt(SolutionSerializer.PROP_TYPEID);
+			if (declaredTypeId != typeId)
+			{
+				// strange, type id is set, but different from what we would expect
+				if ((declaredTypeId == IRepository.METHODS || declaredTypeId == IRepository.SCRIPTCALCULATIONS) && !object.has("declaration"))
+				{
+					object.put("declaration", "/* declaration missing */"); // scripts are expected to have a declaration, 
+				}
+			}
+		}
+		else
+		{
+			// set missing type
 			object.put(SolutionSerializer.PROP_TYPEID, typeId);
 		}
 	}
