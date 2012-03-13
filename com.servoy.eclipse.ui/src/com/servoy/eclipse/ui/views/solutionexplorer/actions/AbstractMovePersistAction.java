@@ -377,7 +377,8 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 					}
 					else
 					{
-						clone = (AbstractBase)((AbstractBase)persist).cloneObj(destinationEditingSolution, true, nameValidator, true, false);
+						clone = (AbstractBase)((AbstractBase)persist).cloneObj(destinationEditingSolution, true, nameValidator, true, false //
+							, false /* elements of original form should remain override, not a flattened element */);
 					}
 					if (clone instanceof ISupportUpdateableName)
 					{

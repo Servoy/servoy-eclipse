@@ -262,12 +262,12 @@ public class ElementUtil
 				});
 				if (parent == null)
 				{
-					parent = (ISupportChilds)((AbstractBase)persist.getParent()).cloneObj((Form)context, false, null, false, false);
+					parent = (ISupportChilds)((AbstractBase)persist.getParent()).cloneObj((Form)context, false, null, false, false, false);
 					((AbstractBase)parent).copyPropertiesMap(null, true);
 					((AbstractBase)parent).setExtendsID(parentPersist.getParent().getID());
 				}
 			}
-			newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false);
+			newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false, false);
 			((AbstractBase)newPersist).copyPropertiesMap(null, true);
 			((AbstractBase)newPersist).setExtendsID(parentPersist.getID());
 		}
