@@ -338,7 +338,8 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 					{
 						newPersistName = Utils.stringReplace(newPersistName, " ", "_");
 					}
-					final AbstractBase clone = (AbstractBase)((AbstractBase)persist).cloneObj(destinationEditingSolution, true, nameValidator, true, false);
+					final AbstractBase clone = (AbstractBase)((AbstractBase)persist).cloneObj(destinationEditingSolution, true, nameValidator, true, false,
+						false /* elements of original form should remain override, not a flattened element */);
 					if (clone instanceof ISupportUpdateableName)
 					{
 						((ISupportUpdateableName)clone).updateName(nameValidator, newPersistName);
@@ -360,8 +361,8 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 		catch (Exception e)
 		{
 			ServoyLog.logError(e);
-			MessageDialog.openError(shell, "Cannot duplicate form", "Persist " + ((ISupportName)persist).getName() + "cannot be duplicated. Reason:\n" +
-				e.getMessage());
+			MessageDialog.openError(shell, "Cannot duplicate form",
+				"Persist " + ((ISupportName)persist).getName() + "cannot be duplicated. Reason:\n" + e.getMessage());
 		}
 		return null;
 	}

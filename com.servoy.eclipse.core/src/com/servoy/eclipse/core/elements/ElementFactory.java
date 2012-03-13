@@ -222,7 +222,7 @@ public class ElementFactory
 			}
 		}
 		IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-		AbstractBase copy = (AbstractBase)component.cloneObj(parent, false, validator, true, true);
+		AbstractBase copy = (AbstractBase)component.cloneObj(parent, false, validator, true, true, true /* when component is an override we want a flattened one */);
 		if (copy instanceof ISupportBounds)
 		{
 			((ISupportBounds)copy).setLocation(new java.awt.Point(x, y));
