@@ -152,7 +152,7 @@ public class EditorUtil
 				}
 				else if (persist instanceof ScriptCalculation)
 				{
-					selection = new SourceMethod((ModelElement)parent, elementName);
+					selection = new SourceField((ModelElement)parent, elementName);
 				}
 			}
 			return DLTKUIPlugin.openInEditor(selection == null ? parent : selection, activate, activate);
