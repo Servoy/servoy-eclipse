@@ -3185,9 +3185,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 								{
 									if (persistContext.getPersist() instanceof IFormElement)
 									{
-										ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value,
+										ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(
+											(String)value,
 											persistContext.getPersist().getID(),
-											new ValidatorSearchContext(persistContext.getPersist().getParent(), IRepository.ELEMENTS), false);
+											new ValidatorSearchContext(flattenedEditingSolution.getFlattenedForm(persistContext.getPersist()),
+												IRepository.ELEMENTS), false);
 
 									}
 									else if (persistContext.getPersist() instanceof Form)
