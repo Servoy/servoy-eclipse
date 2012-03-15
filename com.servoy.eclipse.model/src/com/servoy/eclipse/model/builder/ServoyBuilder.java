@@ -982,7 +982,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				parents.add(new Pair<String, ISupportChilds>(null, persist.getParent()));
 			}
 			final Map<String, Set<IPersist>> formElementsByName = new HashMap<String, Set<IPersist>>();
-			persist.acceptVisitor(new IPersistVisitor()
+			Form flattenedForm = getServoyModel().getFlattenedSolution().getFlattenedForm(persist);
+			flattenedForm.acceptVisitor(new IPersistVisitor()
 			{
 				public Object visit(IPersist o)
 				{
