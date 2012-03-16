@@ -19,6 +19,8 @@ package com.servoy.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -48,12 +50,15 @@ import com.servoy.eclipse.ui.util.IKeywordChecker;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.IDelegate;
+import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -70,11 +75,11 @@ public class MethodDialog extends TreeSelectDialog
 
 	// used only in the dialog, are never selected
 	public static final Object FORM_METHODS = new Object();
-	public static final Object GLOBAL_METHODS = new Object();
+	public static final Object SCOPE_METHODS = new Object();
 
 	private static final Image solutionImage = Activator.getDefault().loadImageFromBundle("solution.gif");
 	private static final Image formMethodsImage = Activator.getDefault().loadImageFromBundle("designer.gif");
-	private static final Image globalMethodsImage = Activator.getDefault().loadImageFromBundle("global_method.gif");
+	private static final Image scopeMethodsImage = Activator.getDefault().loadImageFromBundle("scopes.gif");
 	private static final Image foundsetMethodsImage = Activator.getDefault().loadImageFromBundle("foundset_method.gif");
 
 	/**
@@ -153,13 +158,13 @@ public class MethodDialog extends TreeSelectDialog
 				int n = 0;
 				if (options.includeFormMethods) n++;
 				if (options.includeFoundsetMethods && options.table != null) n++;
-				if (options.includeGlobalMethods) n++;
+				if (options.includeScopeMethods) n++;
 
 				if (n > 1)
 				{
 					if (options.includeFormMethods) lst.add(FORM_METHODS);
 					if (options.includeFoundsetMethods && options.table != null) lst.add(options.table);
-					if (options.includeGlobalMethods) lst.add(GLOBAL_METHODS);
+					if (options.includeScopeMethods) lst.add(SCOPE_METHODS);
 				}
 				else
 				{
@@ -172,9 +177,9 @@ public class MethodDialog extends TreeSelectDialog
 					{
 						lst.addAll(Arrays.asList(getChildren(options.table)));
 					}
-					else if (options.includeGlobalMethods)
+					else if (options.includeScopeMethods)
 					{
-						lst.addAll(Arrays.asList(getChildren(GLOBAL_METHODS)));
+						lst.addAll(Arrays.asList(getChildren(SCOPE_METHODS)));
 					}
 				}
 
@@ -207,12 +212,35 @@ public class MethodDialog extends TreeSelectDialog
 		{
 			IPersist context = persistContext.getContext();
 
-			if (GLOBAL_METHODS == parentElement)
+			if (SCOPE_METHODS == parentElement)
 			{
 				Solution solution = (Solution)context.getAncestor(IRepository.SOLUTIONS);
-				Object[] children = getChildren(solution);
+				Collection<Pair<String, IRootObject>> scopes = ModelUtils.getEditingFlattenedSolution(solution).getScopes();
+				Iterator<Pair<String, IRootObject>> it = scopes.iterator();
+				Comparator<Scope> comparator = new Comparator<Scope>()
+				{
+					public int compare(Scope sc1, Scope sc2)
+					{
+
+						String sc1Name = sc1.getName();
+						String sc2Name = sc2.getName();
+						if (sc1Name.toLowerCase().equals(DataProviderTreeViewer.GLOBALS)) return -1;
+						if (sc2Name.toLowerCase().equals(DataProviderTreeViewer.GLOBALS)) return 1;
+						return sc1Name.compareToIgnoreCase(sc2Name);
+					}
+				};
+				SortedList<Object> scopesList = new SortedList<Object>(comparator);
+				while (it.hasNext())
+				{
+					Pair<String, IRootObject> sc = it.next();
+					if (sc.getRight() == solution)
+					{
+						scopesList.add(new Scope(sc.getLeft(), sc.getRight()));
+					}
+				}
+
 				Solution[] modules = ModelUtils.getEditingFlattenedSolution(solution).getModules();
-				return Utils.arrayInsert(children, modules, children == null ? 0 : children.length, modules == null ? 0 : modules.length);
+				return Utils.arrayInsert(scopesList.toArray(), modules, scopesList == null ? 0 : scopesList.size(), modules == null ? 0 : modules.length);
 			}
 
 			IPersist parent;
@@ -225,7 +253,10 @@ public class MethodDialog extends TreeSelectDialog
 					scriptMethods = ModelUtils.getEditingFlattenedSolution(context).getFlattenedForm(parent).getScriptMethods(true);
 				}
 			}
-
+			else if (parentElement instanceof Scope)
+			{
+				scriptMethods = ((Solution)((Scope)parentElement).getRootObject()).getScriptMethods(((Scope)parentElement).getName(), true);
+			}
 			else if (parentElement instanceof ITable)
 			{
 				// foundset methods
@@ -243,10 +274,18 @@ public class MethodDialog extends TreeSelectDialog
 
 			else if (parentElement instanceof Solution)
 			{
-				parent = context.getAncestor(IRepository.SOLUTIONS);
-				scriptMethods = ((Solution)parentElement).getScriptMethods(null/* TODO scopes in method content provider */, true);
-			}
+				Collection<Pair<String, IRootObject>> scopes = ModelUtils.getEditingFlattenedSolution((Solution)parentElement).getScopes();
+				Iterator<Pair<String, IRootObject>> it = scopes.iterator();
+				Object[] scopesArray = new Object[scopes.size()];
+				int i = 0;
+				while (it.hasNext())
+				{
+					Pair<String, IRootObject> sc = it.next();
+					scopesArray[i++] = new Scope(sc.getLeft(), sc.getRight());
+				}
 
+				return scopesArray;
+			}
 			else
 			{
 				return null;
@@ -274,12 +313,12 @@ public class MethodDialog extends TreeSelectDialog
 
 		public boolean hasChildren(Object element)
 		{
-			return FORM_METHODS == element || GLOBAL_METHODS == element || element instanceof Solution || element instanceof ITable;
+			return FORM_METHODS == element || SCOPE_METHODS == element || element instanceof Solution || element instanceof ITable || element instanceof Scope;
 		}
 
 		public boolean isKeyword(Object element)
 		{
-			return FORM_METHODS == element || GLOBAL_METHODS == element;
+			return FORM_METHODS == element || SCOPE_METHODS == element;
 		}
 	}
 
@@ -288,9 +327,9 @@ public class MethodDialog extends TreeSelectDialog
 		getTreeViewer().getViewer().expandToLevel(FORM_METHODS, 1);
 	}
 
-	public void expandGlobalsNode()
+	public void expandScopesNode()
 	{
-		getTreeViewer().getViewer().expandToLevel(GLOBAL_METHODS, 1);
+		getTreeViewer().getViewer().expandToLevel(SCOPE_METHODS, 1);
 	}
 
 	public static class MethodListOptions
@@ -298,17 +337,17 @@ public class MethodDialog extends TreeSelectDialog
 		public final boolean includeNone;
 		public final boolean includeDefault;
 		public final boolean includeFormMethods;
-		public final boolean includeGlobalMethods;
+		public final boolean includeScopeMethods;
 		public final boolean includeFoundsetMethods;
 		public final ITable table;
 
-		public MethodListOptions(boolean includeNone, boolean includeDefault, boolean includeFormMethods, boolean includeGlobalMethods,
+		public MethodListOptions(boolean includeNone, boolean includeDefault, boolean includeFormMethods, boolean includeScopeMethods,
 			boolean includeFoundsetMethods, ITable table)
 		{
 			this.includeNone = includeNone;
 			this.includeDefault = includeDefault;
 			this.includeFormMethods = includeFormMethods;
-			this.includeGlobalMethods = includeGlobalMethods;
+			this.includeScopeMethods = includeScopeMethods;
 			this.includeFoundsetMethods = includeFoundsetMethods;
 			this.table = table;
 		}
@@ -341,15 +380,16 @@ public class MethodDialog extends TreeSelectDialog
 		protected String getMethodDialogText(Object value)
 		{
 			if (FORM_METHODS == value) return "form methods";
-			if (GLOBAL_METHODS == value) return "global methods";
+			if (SCOPE_METHODS == value) return "scope methods";
 			if (value instanceof ITable) return "entity methods";
+			if (value instanceof Scope) return ((Scope)value).getName();
 			if (value instanceof Solution) return ((Solution)value).getName();
 			return null;
 		}
 
 		public Font getFont(Object value)
 		{
-			if (FORM_METHODS == value || GLOBAL_METHODS == value || value instanceof Solution || value instanceof ITable)
+			if (FORM_METHODS == value || SCOPE_METHODS == value || value instanceof Solution || value instanceof ITable || value instanceof Scope)
 			{
 				return FontResource.getDefaultFont(SWT.ITALIC, 1);
 			}
@@ -378,7 +418,8 @@ public class MethodDialog extends TreeSelectDialog
 		{
 			if (value instanceof Solution) return solutionImage;
 			if (FORM_METHODS == value) return formMethodsImage;
-			if (GLOBAL_METHODS == value) return globalMethodsImage;
+			if (SCOPE_METHODS == value) return scopeMethodsImage;
+			if (value instanceof Scope) return scopeMethodsImage;
 			if (value instanceof ITable) return foundsetMethodsImage;
 			return null;
 		}

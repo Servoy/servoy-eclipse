@@ -18,6 +18,8 @@ package com.servoy.eclipse.ui.editors.table;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -67,6 +69,7 @@ import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentP
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider.UnresolvedDataProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderNodeWrapper;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
+import com.servoy.eclipse.ui.dialogs.Scope;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.editors.AddMethodButtonsComposite;
 import com.servoy.eclipse.ui.editors.table.ColumnDetailsComposite.NotSameValidator;
@@ -84,11 +87,15 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.RelationList;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.SortedList;
 
 public class ColumnAutoEnterComposite extends Composite implements SelectionListener
 {
@@ -182,17 +189,49 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 					public Object[] getChildren(Object parentElement)
 					{
 						if (parentElement instanceof DataProviderNodeWrapper &&
-							((DataProviderNodeWrapper)parentElement).node == DataProviderTreeViewer.GLOBAL_METHODS)
+							((DataProviderNodeWrapper)parentElement).node == DataProviderTreeViewer.SCOPE_METHODS)
 						{
-							Iterator<ScriptMethod> globals = ColumnAutoEnterComposite.this.flattenedSolution.getScriptMethods(true);
-							List<Object> combinedChildren = new ArrayList<Object>();
-							if (globals.hasNext())
+							Collection<Pair<String, IRootObject>> scopes = ColumnAutoEnterComposite.this.flattenedSolution.getScopes();
+							Iterator<Pair<String, IRootObject>> it = scopes.iterator();
+
+							Comparator<Scope> comparator = new Comparator<Scope>()
 							{
-								while (globals.hasNext())
+								public int compare(Scope sc1, Scope sc2)
 								{
-									combinedChildren.add(globals.next());
+
+									String sc1Name = (sc1).getName();
+									String sc2Name = (sc2).getName();
+									if (sc1Name.toLowerCase().equals(DataProviderTreeViewer.GLOBALS)) return -1;
+									if (sc2Name.toLowerCase().equals(DataProviderTreeViewer.GLOBALS)) return 1;
+									return sc1Name.compareToIgnoreCase(sc2Name);
 								}
-								return combinedChildren.toArray();
+							};
+							SortedList<Scope> scopesList = new SortedList<Scope>(comparator);
+							while (it.hasNext())
+							{
+								Pair<String, IRootObject> sc = it.next();
+								scopesList.add(new Scope(sc.getLeft(), sc.getRight()));
+							}
+							List<Object> children = new ArrayList<Object>();
+							for (Scope scope : scopesList)
+							{
+								children.add(new DataProviderNodeWrapper(scope.getName(), scope));
+							}
+							return children.toArray();
+						}
+						if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).scope != null)
+						{
+							Iterator<ScriptMethod> scopeMethods = ColumnAutoEnterComposite.this.flattenedSolution.getScriptMethods(
+								((DataProviderNodeWrapper)parentElement).scope.getName(), true);
+							List<Object> children = new ArrayList<Object>();
+							if (scopeMethods.hasNext())
+							{
+								while (scopeMethods.hasNext())
+								{
+									children.add(scopeMethods.next());
+								}
+								return children.toArray();
+
 							}
 						}
 						return super.getChildren(parentElement);
@@ -203,7 +242,13 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 					{
 						if (value instanceof ScriptMethod)
 						{
-							return new DataProviderNodeWrapper(DataProviderTreeViewer.GLOBAL_METHODS, (RelationList)null);
+							ScriptMethod scriptMethod = (ScriptMethod)value;
+							return new DataProviderNodeWrapper(scriptMethod.getScopeName(), new Scope(scriptMethod.getScopeName(),
+								(Solution)scriptMethod.getParent()));
+						}
+						if (value instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)value).scope != null)
+						{
+							return new DataProviderNodeWrapper(DataProviderTreeViewer.SCOPE_METHODS, (Scope)null);
 						}
 						return super.getParent(value);
 					}
@@ -213,7 +258,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 					{
 						Object[] input = super.getElements(inputElement);
 						List<Object> combinedInputs = new ArrayList<Object>(Arrays.asList(input));
-						combinedInputs.add(new DataProviderNodeWrapper(DataProviderTreeViewer.GLOBAL_METHODS, (RelationList)null));
+						combinedInputs.add(new DataProviderNodeWrapper(DataProviderTreeViewer.SCOPE_METHODS, (RelationList)null));
 						return combinedInputs.toArray();
 					}
 				});

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -61,13 +62,17 @@ import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationList;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.IDelegate;
+import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -80,10 +85,11 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 {
 	public static final String CALCULATIONS = "calculations"; //$NON-NLS-1$
 	public static final String FORM_VARIABLES = "form variables"; //$NON-NLS-1$
-	public static final String GLOBALS = "globals"; //$NON-NLS-1$
-	public static final String GLOBAL_METHODS = "global methods"; //$NON-NLS-1$
+	public static final String SCOPE_VARIABLES = "scope variables"; //$NON-NLS-1$
+	public static final String SCOPE_METHODS = "scope methods"; //$NON-NLS-1$
 	public static final String AGGREGATES = "aggregates"; //$NON-NLS-1$
 	public static final String RELATIONS = "relations"; //$NON-NLS-1$
+	public static final String GLOBALS = "globals"; //$NON-NLS-1$
 	public static final Object[] EMPTY_ARRAY = new Object[0];
 
 	public DataProviderTreeViewer(Composite parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, DataProviderOptions input,
@@ -260,10 +266,10 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 						input.add(new DataProviderNodeWrapper(FORM_VARIABLES, (RelationList)null));
 					}
 
-					// globals
-					if (options.includeGlobals)
+					// scope variables
+					if (options.includeScopes)
 					{
-						input.add(new DataProviderNodeWrapper(GLOBALS, (RelationList)null));
+						input.add(new DataProviderNodeWrapper(SCOPE_VARIABLES, (Scope)null));
 					}
 
 					// aggregates
@@ -381,14 +387,43 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					}
 				}
 
-				if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).node == GLOBALS)
+				if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).node == SCOPE_VARIABLES)
 				{
-					Iterator<ScriptVariable> globals = flattenedSolution.getScriptVariables(true);
-					if (globals.hasNext() && children == null) children = new ArrayList<Object>(10);
-					while (globals.hasNext())
+					Collection<Pair<String, IRootObject>> scopes = flattenedSolution.getScopes();
+					Iterator<Pair<String, IRootObject>> it = scopes.iterator();
+
+					Comparator<Scope> comparator = new Comparator<Scope>()
 					{
-						ScriptVariable sv = globals.next();
-						if (!sv.isPrivate()) children.add(sv);
+						public int compare(Scope sc1, Scope sc2)
+						{
+
+							String sc1Name = sc1.getName();
+							String sc2Name = sc2.getName();
+							if (sc1Name.toLowerCase().equals(GLOBALS)) return -1;
+							if (sc2Name.toLowerCase().equals(GLOBALS)) return 1;
+							return sc1Name.compareToIgnoreCase(sc2Name);
+						}
+					};
+					SortedList<Scope> scopesList = new SortedList<Scope>(comparator);
+					while (it.hasNext())
+					{
+						Pair<String, IRootObject> sc = it.next();
+						scopesList.add(new Scope(sc.getLeft(), sc.getRight()));
+					}
+					children = new ArrayList<Object>();
+					for (Scope scope : scopesList)
+					{
+						children.add(new DataProviderNodeWrapper(scope.getName(), scope));
+					}
+				}
+
+				if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).scope != null)
+				{
+					Iterator<ScriptVariable> scopeVars = flattenedSolution.getScriptVariables(((DataProviderNodeWrapper)parentElement).scope.getName(), true);
+					if (scopeVars.hasNext() && children == null) children = new ArrayList<Object>(10);
+					while (scopeVars.hasNext())
+					{
+						children.add(scopeVars.next());
 					}
 				}
 
@@ -565,13 +600,15 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			}
 			if (value instanceof ScriptVariable)
 			{
-				if (((ScriptVariable)value).getParent() instanceof Form)
+				ScriptVariable var = (ScriptVariable)value;
+
+				if (var.getParent() instanceof Form)
 				{
 					return new DataProviderNodeWrapper(FORM_VARIABLES, (RelationList)null);
 				}
-				else
+				if (var.getParent() instanceof Solution)
 				{
-					return new DataProviderNodeWrapper(GLOBALS, (RelationList)null);
+					return new DataProviderNodeWrapper(var.getScopeName(), new Scope(var.getScopeName(), (Solution)var.getParent()));
 				}
 			}
 			if (value instanceof AggregateVariable)
@@ -594,6 +631,10 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					{
 						return new DataProviderNodeWrapper(RELATIONS, wrapper.relations);
 					}
+				}
+				if (wrapper.scope != null)
+				{
+					return new DataProviderNodeWrapper(SCOPE_VARIABLES, (Scope)null);
 				}
 			}
 			return null;
@@ -658,7 +699,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 
 		public boolean isKeyword(Object element)
 		{
-			if (element == CALCULATIONS || element == FORM_VARIABLES || element == GLOBALS || element == AGGREGATES || element == RELATIONS)
+			if (element == CALCULATIONS || element == FORM_VARIABLES || element == SCOPE_VARIABLES || element == AGGREGATES || element == RELATIONS)
 			{
 				return true;
 			}
@@ -676,12 +717,13 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 
 		public final RelationList relations;
 
+		public Scope scope;
+
 		private int hashcode;
 
 		public DataProviderNodeWrapper(String node, RelationList relations)
 		{
-			this.node = node;
-			this.relations = relations;
+			this(node, relations, null);
 		}
 
 		public DataProviderNodeWrapper(String node, Relation[] relations)
@@ -700,6 +742,19 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			{
 				this.relations = null;
 			}
+			this.scope = null;
+		}
+
+		public DataProviderNodeWrapper(String node, Scope scope)
+		{
+			this(node, null, scope);
+		}
+
+		public DataProviderNodeWrapper(String node, RelationList relations, Scope scope)
+		{
+			this.node = node;
+			this.relations = relations;
+			this.scope = scope;
 		}
 
 		@Override
@@ -711,6 +766,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				int result = 1;
 				result = prime * result + ((node == null) ? 0 : node.hashCode());
 				result = prime * result + ((relations == null) ? 0 : relations.hashCode());
+				result = prime * result + ((scope == null) ? 0 : scope.hashCode());
 				hashcode = result;
 			}
 			return hashcode;
@@ -733,6 +789,11 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				if (other.relations != null) return false;
 			}
 			else if (!relations.equals(other.relations)) return false;
+			if (scope == null)
+			{
+				if (other.scope != null) return false;
+			}
+			else if (!scope.equals(other.scope)) return false;
 			return true;
 		}
 
@@ -741,7 +802,8 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		@Override
 		public String toString()
 		{
-			return "DataProviderNode(" + String.valueOf(node) + ',' + (relations != null ? Utils.stringJoin(relations.getRelations(), '.') : "") + ')';
+			return "DataProviderNode(" + String.valueOf(node) + ',' + (scope != null ? scope : "") + "," +
+				(relations != null ? Utils.stringJoin(relations.getRelations(), '.') : "") + ')';
 		}
 	}
 
@@ -757,7 +819,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		public final boolean includeColumns;
 		public final boolean includeCalculations;
 		public final boolean includeFormVariables;
-		public final boolean includeGlobals;
+		public final boolean includeScopes;
 		public final boolean includeAggregates;
 		public final INCLUDE_RELATIONS includeRelations;
 		public final boolean includeGlobalRelations;
@@ -766,7 +828,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		private final boolean includeRelatedAggregates;
 
 		public DataProviderOptions(boolean includeNone, boolean includeColumns, boolean includeCalculations, boolean includeRelatedCalculations,
-			boolean includeFormVariables, boolean includeGlobals, boolean includeAggregates, boolean includeRelatedAggregates,
+			boolean includeFormVariables, boolean includeScopes, boolean includeAggregates, boolean includeRelatedAggregates,
 			INCLUDE_RELATIONS includeRelations, boolean includeGlobalRelations, boolean expandSingleParent, Relation[] relations)
 		{
 			this.includeNone = includeNone;
@@ -774,7 +836,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			this.includeCalculations = includeCalculations;
 			this.includeRelatedCalculations = includeRelatedCalculations;
 			this.includeFormVariables = includeFormVariables;
-			this.includeGlobals = includeGlobals;
+			this.includeScopes = includeScopes;
 			this.includeAggregates = includeAggregates;
 			this.includeRelatedAggregates = includeRelatedAggregates;
 			this.includeRelations = includeRelations;
