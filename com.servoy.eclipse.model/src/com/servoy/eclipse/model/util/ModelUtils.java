@@ -42,6 +42,7 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.ui.ISupportRowStyling;
 import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.Pair;
 
@@ -155,18 +156,36 @@ public class ModelUtils
 		for (String selector : selectors)
 		{
 			String[] styleParts = selector.split("\\p{Space}+?"); //$NON-NLS-1$
-			String styleName = styleParts[styleParts.length - 1];
-			if ((matchedFormPrefix && styleParts.length == 1) // found a match with form prefix, skip root matches 
-				||
-				styleParts.length > 2 || !styleName.startsWith(lookupName) || (styleParts.length == 2 && !styleParts[0].equals(formPrefix)))
+			int stylePartsCount = styleParts.length;
+			String styleName;
+
+			if ("form".equals(lookupName)) //$NON-NLS-1$
 			{
-				continue;
+				styleName = styleParts[0];
+			}
+			else
+			{
+				styleName = styleParts[styleParts.length - 1];
+				if (styleParts.length > 1 &&
+					(styleName.equals(ISupportRowStyling.CLASS_ODD) || styleName.equals(ISupportRowStyling.CLASS_EVEN) || styleName.equals(ISupportRowStyling.CLASS_SELECTED)))
+				{
+					styleName = styleParts[styleParts.length - 2];
+					stylePartsCount--;
+				}
+
+				if ((matchedFormPrefix && stylePartsCount == 1) // found a match with form prefix, skip root matches 
+					||
+					stylePartsCount > 2 || !styleName.startsWith(lookupName) || (stylePartsCount == 2 && !styleParts[0].equals(formPrefix)))
+				{
+					continue;
+				}
 			}
 
 			int index = styleName.indexOf('.');
 			if (index == lookupName.length() && styleName.startsWith(lookupName))
 			{
-				styleClasses.add(styleName.substring(index + 1));
+				String styleToAdd = styleName.substring(index + 1);
+				if (styleClasses.indexOf(styleToAdd) == -1) styleClasses.add(styleToAdd);
 			}
 		}
 
