@@ -88,6 +88,8 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 	public static final String SCOPE_METHODS = "scope methods"; //$NON-NLS-1$
 	public static final String AGGREGATES = "aggregates"; //$NON-NLS-1$
 	public static final String RELATIONS = "relations"; //$NON-NLS-1$
+	public static final String VARIABLES = "variables"; //$NON-NLS-1$
+	public static final String METHODS = "methods"; //$NON-NLS-1$
 	public static final Object[] EMPTY_ARRAY = new Object[0];
 
 	public DataProviderTreeViewer(Composite parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, DataProviderOptions input,
@@ -267,7 +269,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					// scope variables
 					if (options.includeScopes)
 					{
-						input.add(new DataProviderNodeWrapper(SCOPE_VARIABLES, (Scope)null));
+						input.add(new DataProviderNodeWrapper(SCOPE_VARIABLES, (Scope)null, (String)null));
 					}
 
 					// aggregates
@@ -399,11 +401,12 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					children = new ArrayList<Object>();
 					for (Scope scope : scopesList)
 					{
-						children.add(new DataProviderNodeWrapper(scope.getName(), scope));
+						children.add(new DataProviderNodeWrapper(scope.getName(), scope, VARIABLES));
 					}
 				}
 
-				if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).scope != null)
+				if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).scope != null &&
+					((DataProviderNodeWrapper)parentElement).type == VARIABLES)
 				{
 					Iterator<ScriptVariable> scopeVars = flattenedSolution.getScriptVariables(((DataProviderNodeWrapper)parentElement).scope.getName(), true);
 					if (scopeVars.hasNext() && children == null) children = new ArrayList<Object>(10);
@@ -598,7 +601,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				}
 				if (var.getParent() instanceof Solution)
 				{
-					return new DataProviderNodeWrapper(var.getScopeName(), new Scope(var.getScopeName(), (Solution)var.getParent()));
+					return new DataProviderNodeWrapper(var.getScopeName(), new Scope(var.getScopeName(), (Solution)var.getParent()), VARIABLES);
 				}
 			}
 			if (value instanceof AggregateVariable)
@@ -622,7 +625,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 						return new DataProviderNodeWrapper(RELATIONS, wrapper.relations);
 					}
 				}
-				if (wrapper.scope != null)
+				if (wrapper.scope != null && wrapper.type == VARIABLES)
 				{
 					return new DataProviderNodeWrapper(SCOPE_VARIABLES, (Scope)null);
 				}
@@ -705,6 +708,8 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 	{
 		public final String node;
 
+		public final String type;
+
 		public final RelationList relations;
 
 		public Scope scope;
@@ -713,7 +718,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 
 		public DataProviderNodeWrapper(String node, RelationList relations)
 		{
-			this(node, relations, null);
+			this(node, relations, null, null);
 		}
 
 		public DataProviderNodeWrapper(String node, Relation[] relations)
@@ -733,18 +738,25 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				this.relations = null;
 			}
 			this.scope = null;
+			this.type = null;
 		}
 
 		public DataProviderNodeWrapper(String node, Scope scope)
 		{
-			this(node, null, scope);
+			this(node, null, scope, null);
 		}
 
-		public DataProviderNodeWrapper(String node, RelationList relations, Scope scope)
+		public DataProviderNodeWrapper(String node, Scope scope, String type)
+		{
+			this(node, null, scope, type);
+		}
+
+		public DataProviderNodeWrapper(String node, RelationList relations, Scope scope, String type)
 		{
 			this.node = node;
 			this.relations = relations;
 			this.scope = scope;
+			this.type = type;
 		}
 
 		@Override
@@ -757,6 +769,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				result = prime * result + ((node == null) ? 0 : node.hashCode());
 				result = prime * result + ((relations == null) ? 0 : relations.hashCode());
 				result = prime * result + ((scope == null) ? 0 : scope.hashCode());
+				result = prime * result + ((type == null) ? 0 : type.hashCode());
 				hashcode = result;
 			}
 			return hashcode;
@@ -784,6 +797,11 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				if (other.scope != null) return false;
 			}
 			else if (!scope.equals(other.scope)) return false;
+			if (type == null)
+			{
+				if (other.type != null) return false;
+			}
+			else if (!type.equals(other.type)) return false;
 			return true;
 		}
 
@@ -793,7 +811,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		public String toString()
 		{
 			return "DataProviderNode(" + String.valueOf(node) + ',' + (scope != null ? scope : "") + "," +
-				(relations != null ? Utils.stringJoin(relations.getRelations(), '.') : "") + ')';
+				(relations != null ? Utils.stringJoin(relations.getRelations(), '.') : "") + (type != null ? type : "") + "," + ')';
 		}
 	}
 

@@ -202,11 +202,12 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 							List<Object> children = new ArrayList<Object>();
 							for (Scope scope : scopesList)
 							{
-								children.add(new DataProviderNodeWrapper(scope.getName(), scope));
+								children.add(new DataProviderNodeWrapper(scope.getName(), scope, DataProviderTreeViewer.METHODS));
 							}
 							return children.toArray();
 						}
-						if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).scope != null)
+						if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).scope != null &&
+							((DataProviderNodeWrapper)parentElement).type == DataProviderTreeViewer.METHODS)
 						{
 							Iterator<ScriptMethod> scopeMethods = ColumnAutoEnterComposite.this.flattenedSolution.getScriptMethods(
 								((DataProviderNodeWrapper)parentElement).scope.getName(), true);
@@ -235,9 +236,10 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 						{
 							ScriptMethod scriptMethod = (ScriptMethod)value;
 							return new DataProviderNodeWrapper(scriptMethod.getScopeName(), new Scope(scriptMethod.getScopeName(),
-								(Solution)scriptMethod.getParent()));
+								(Solution)scriptMethod.getParent()), DataProviderTreeViewer.METHODS);
 						}
-						if (value instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)value).scope != null)
+						if (value instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)value).scope != null &&
+							((DataProviderNodeWrapper)value).type == DataProviderTreeViewer.METHODS)
 						{
 							return new DataProviderNodeWrapper(DataProviderTreeViewer.SCOPE_METHODS, (Scope)null);
 						}
