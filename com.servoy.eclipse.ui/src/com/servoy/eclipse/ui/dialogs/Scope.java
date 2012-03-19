@@ -17,7 +17,10 @@
 
 package com.servoy.eclipse.ui.dialogs;
 
+import java.util.Comparator;
+
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.ScriptVariable;
 
 /**
  * @author hhardut
@@ -27,6 +30,19 @@ public class Scope
 {
 	private final String name;
 	private final IRootObject rootObject;
+
+	public static final Comparator<Scope> SCOPE_COMPARATOR = new Comparator<Scope>()
+	{
+		public int compare(Scope sc1, Scope sc2)
+		{
+
+			String sc1Name = sc1.getName();
+			String sc2Name = sc2.getName();
+			if (sc1Name.toLowerCase().equals(ScriptVariable.GLOBAL_SCOPE)) return -1;
+			if (sc2Name.toLowerCase().equals(ScriptVariable.GLOBAL_SCOPE)) return 1;
+			return sc1Name.compareToIgnoreCase(sc2Name);
+		}
+	};
 
 	public Scope(String name, IRootObject rootObject)
 	{
@@ -44,14 +60,45 @@ public class Scope
 		return rootObject;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((rootObject == null) ? 0 : rootObject.hashCode());
+		return result;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object obj)
 	{
-		if (obj instanceof Scope)
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		Scope other = (Scope)obj;
+		if (name == null)
 		{
-			Scope scope = (Scope)obj;
-			return name.equals(scope.name) && rootObject == scope.rootObject;
+			if (other.name != null) return false;
 		}
-		return false;
+		else if (!name.equals(other.name)) return false;
+		if (rootObject == null)
+		{
+			if (other.rootObject != null) return false;
+		}
+		else if (!rootObject.equals(other.rootObject)) return false;
+		return true;
 	}
+
+
 }

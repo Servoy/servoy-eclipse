@@ -19,7 +19,6 @@ package com.servoy.eclipse.ui.editors.table;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -194,19 +193,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 							Collection<Pair<String, IRootObject>> scopes = ColumnAutoEnterComposite.this.flattenedSolution.getScopes();
 							Iterator<Pair<String, IRootObject>> it = scopes.iterator();
 
-							Comparator<Scope> comparator = new Comparator<Scope>()
-							{
-								public int compare(Scope sc1, Scope sc2)
-								{
-
-									String sc1Name = (sc1).getName();
-									String sc2Name = (sc2).getName();
-									if (sc1Name.toLowerCase().equals(DataProviderTreeViewer.GLOBALS)) return -1;
-									if (sc2Name.toLowerCase().equals(DataProviderTreeViewer.GLOBALS)) return 1;
-									return sc1Name.compareToIgnoreCase(sc2Name);
-								}
-							};
-							SortedList<Scope> scopesList = new SortedList<Scope>(comparator);
+							SortedList<Scope> scopesList = new SortedList<Scope>(Scope.SCOPE_COMPARATOR);
 							while (it.hasNext())
 							{
 								Pair<String, IRootObject> sc = it.next();
@@ -228,7 +215,11 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 							{
 								while (scopeMethods.hasNext())
 								{
-									children.add(scopeMethods.next());
+									ScriptMethod sm = scopeMethods.next();
+									if (!sm.isPrivate())
+									{
+										children.add(sm);
+									}
 								}
 								return children.toArray();
 

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -89,7 +88,6 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 	public static final String SCOPE_METHODS = "scope methods"; //$NON-NLS-1$
 	public static final String AGGREGATES = "aggregates"; //$NON-NLS-1$
 	public static final String RELATIONS = "relations"; //$NON-NLS-1$
-	public static final String GLOBALS = "globals"; //$NON-NLS-1$
 	public static final Object[] EMPTY_ARRAY = new Object[0];
 
 	public DataProviderTreeViewer(Composite parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, DataProviderOptions input,
@@ -392,19 +390,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					Collection<Pair<String, IRootObject>> scopes = flattenedSolution.getScopes();
 					Iterator<Pair<String, IRootObject>> it = scopes.iterator();
 
-					Comparator<Scope> comparator = new Comparator<Scope>()
-					{
-						public int compare(Scope sc1, Scope sc2)
-						{
-
-							String sc1Name = sc1.getName();
-							String sc2Name = sc2.getName();
-							if (sc1Name.toLowerCase().equals(GLOBALS)) return -1;
-							if (sc2Name.toLowerCase().equals(GLOBALS)) return 1;
-							return sc1Name.compareToIgnoreCase(sc2Name);
-						}
-					};
-					SortedList<Scope> scopesList = new SortedList<Scope>(comparator);
+					SortedList<Scope> scopesList = new SortedList<Scope>(Scope.SCOPE_COMPARATOR);
 					while (it.hasNext())
 					{
 						Pair<String, IRootObject> sc = it.next();
@@ -423,7 +409,11 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					if (scopeVars.hasNext() && children == null) children = new ArrayList<Object>(10);
 					while (scopeVars.hasNext())
 					{
-						children.add(scopeVars.next());
+						ScriptVariable sv = scopeVars.next();
+						if (!sv.isPrivate())
+						{
+							children.add(sv);
+						}
 					}
 				}
 

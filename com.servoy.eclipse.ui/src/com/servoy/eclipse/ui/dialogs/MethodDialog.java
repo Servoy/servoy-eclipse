@@ -20,7 +20,6 @@ package com.servoy.eclipse.ui.dialogs;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -217,19 +216,7 @@ public class MethodDialog extends TreeSelectDialog
 				Solution solution = (Solution)context.getAncestor(IRepository.SOLUTIONS);
 				Collection<Pair<String, IRootObject>> scopes = ModelUtils.getEditingFlattenedSolution(solution).getScopes();
 				Iterator<Pair<String, IRootObject>> it = scopes.iterator();
-				Comparator<Scope> comparator = new Comparator<Scope>()
-				{
-					public int compare(Scope sc1, Scope sc2)
-					{
-
-						String sc1Name = sc1.getName();
-						String sc2Name = sc2.getName();
-						if (sc1Name.toLowerCase().equals(DataProviderTreeViewer.GLOBALS)) return -1;
-						if (sc2Name.toLowerCase().equals(DataProviderTreeViewer.GLOBALS)) return 1;
-						return sc1Name.compareToIgnoreCase(sc2Name);
-					}
-				};
-				SortedList<Object> scopesList = new SortedList<Object>(comparator);
+				SortedList<Object> scopesList = new SortedList<Object>(Scope.SCOPE_COMPARATOR);
 				while (it.hasNext())
 				{
 					Pair<String, IRootObject> sc = it.next();
