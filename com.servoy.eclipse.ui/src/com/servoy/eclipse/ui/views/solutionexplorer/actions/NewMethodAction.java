@@ -92,7 +92,6 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
-import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
@@ -187,14 +186,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		else if (parent instanceof Solution)
 		{
 			methodType = "global";
-			if (persist instanceof Solution || persist instanceof ValueList /* global method vl */)
-			{
-				tagFilter = MethodTemplate.PRIVATE_TAG | MethodTemplate.PUBLIC_TAG; // protected is n/a
-			}
-			else
-			{
-				tagFilter = MethodTemplate.PUBLIC_TAG; // no private methods for events from outside globals
-			}
+			tagFilter = MethodTemplate.PUBLIC_TAG; // protected is n/a, private methods are local to the scope js file
 			if (forcedScopeName == null)
 			{
 				// let user select from scopes.
