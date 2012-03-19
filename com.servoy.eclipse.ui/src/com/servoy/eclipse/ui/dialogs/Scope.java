@@ -20,7 +20,7 @@ package com.servoy.eclipse.ui.dialogs;
 import com.servoy.j2db.persistence.IRootObject;
 
 /**
- * @author Haniela
+ * @author hhardut
  *
  */
 public class Scope
