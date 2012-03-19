@@ -90,6 +90,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumnInfoBasedSequenceProvider;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -110,7 +111,6 @@ import com.servoy.j2db.util.Utils;
  */
 public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWizard
 {
-
 	private WizardPage errorPage;
 	private SplitInThreeWizardPage<IServerInternal, String> page1;
 	private SplitInThreeWizardPage<IServerInternal, String> page2;
@@ -122,7 +122,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 	public SynchronizeDBIWithDBWizard()
 	{
 		setWindowTitle("Synchronize DB tables with DB information");
-		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("sync_tables_large.png"));
+		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("sync_tables_large.png")); //$NON-NLS-1$
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
@@ -183,29 +183,20 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		else
 		{
 			// if the selection is made up of server nodes, use the valid and enabled ones; otherwise use all the servers
-			boolean serversIdentified;
-			if (selection instanceof IStructuredSelection)
+			boolean serversIdentified = true;
+			Iterator< ? > it = selection.iterator();
+			while (it.hasNext() && serversIdentified)
 			{
-				serversIdentified = true;
-				IStructuredSelection sel = selection;
-				Iterator it = selection.iterator();
-				while (it.hasNext() && serversIdentified)
+				Object element = it.next();
+				if (element instanceof SimpleUserNode)
 				{
-					Object element = it.next();
-					if (element instanceof SimpleUserNode)
+					SimpleUserNode un = (SimpleUserNode)element;
+					if (un.getType() == UserNodeType.SERVER)
 					{
-						SimpleUserNode un = (SimpleUserNode)element;
-						if (un.getType() == UserNodeType.SERVER)
+						IServerInternal s = (IServerInternal)un.getRealObject();
+						if (s.getConfig().isEnabled() || s.isValid())
 						{
-							IServerInternal s = (IServerInternal)un.getRealObject();
-							if (s.getConfig().isEnabled() || s.isValid())
-							{
-								servers.add(s);
-							}
-						}
-						else
-						{
-							serversIdentified = false;
+							servers.add(s);
 						}
 					}
 					else
@@ -213,10 +204,10 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 						serversIdentified = false;
 					}
 				}
-			}
-			else
-			{
-				serversIdentified = false;
+				else
+				{
+					serversIdentified = false;
+				}
 			}
 			if (!serversIdentified || servers.size() == 0)
 			{
@@ -242,17 +233,16 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					public int compare(Pair<IServerInternal, String> o1, Pair<IServerInternal, String> o2)
 					{
 						if (o1 == null && o2 == null) return 0;
-						else if (o1 == null) return -1;
-						else if (o2 == null) return 1;
-						else
+						if (o1 == null) return -1;
+						if (o2 == null) return 1;
+
+						int result = o1.getLeft().getName().compareToIgnoreCase(o2.getLeft().getName());
+						if (result == 0)
 						{
-							int result = o1.getLeft().getName().compareToIgnoreCase(o2.getLeft().getName());
-							if (result == 0)
-							{
-								result = o1.getRight().compareToIgnoreCase(o2.getRight());
-							}
-							return result;
+							result = o1.getRight().compareToIgnoreCase(o2.getRight());
 						}
+						return result;
+
 					}
 				};
 
@@ -300,7 +290,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		}
 	}
 
-	private List<Pair<IServerInternal, String>> getMissingTables(List<IServerInternal> servers, DataModelManager dmm)
+	private static List<Pair<IServerInternal, String>> getMissingTables(List<IServerInternal> servers, DataModelManager dmm)
 	{
 		// choose which of the missing tables (tables that do not exist in the DB but for which there are .dbi files)
 		// will be created and which of the .dbi files are no longer wanted.
@@ -356,7 +346,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		return foundMissingTables;
 	}
 
-	private List<Pair<IServerInternal, String>> getSupplementalTables(List<IServerInternal> servers, DataModelManager dmm)
+	private static List<Pair<IServerInternal, String>> getSupplementalTables(List<IServerInternal> servers, DataModelManager dmm)
 	{
 		// choose which of the missing files (tables that exist in the DB but have no corresponding .dbi file) will be created
 		// and which of the tables corresponding to these missing files will be deleted 
@@ -440,7 +430,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 									if (page3 != null && page3.isChecked())
 									{
 										monitor.subTask("- read and check database information");
-										readAndCheckDatabaseInformation(new SubProgressMonitor(monitor, work3), warnings, work3);
+										readAndCheckDatabaseInformation(new SubProgressMonitor(monitor, work3), work3);
 									}
 									if (warnings.getChildren().length > 0)
 									{
@@ -600,6 +590,16 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 							{
 								// make sure the table is loaded
 								Table t = dbiFileToCreate.getLeft().getTable(dbiFileToCreate.getRight());
+
+								// if table definition has a scale, add it to the compatible list, because the default type won't store scale.
+								for (Column column : t.getColumns())
+								{
+									if (column.getColumnType().getScale() > 0)
+									{
+										column.getColumnInfo().addCompatibleColumnType(column.getColumnType());
+									}
+								}
+
 								// write the file
 								dmm.updateAllColumnInfo(t);
 							}
@@ -618,7 +618,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					}
 				}
 
-				private void readAndCheckDatabaseInformation(IProgressMonitor monitor, MultiStatus warnings, int workUnits)
+				private void readAndCheckDatabaseInformation(IProgressMonitor monitor, int workUnits)
 				{
 					monitor.beginTask("- read and check database information files", workUnits);
 					monitor.subTask("- read and check database information files");
@@ -862,22 +862,22 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			final CheckboxCellEditor editor = new CheckboxCellEditor(tree, SWT.RADIO);
 			TreeColumn dataColumn = new TreeColumn(treeViewer.getTree(), SWT.LEFT, DATA);
 			dataColumn.setText("");
-			TreeViewerColumn dataViewerColumn = new TreeViewerColumn(treeViewer, dataColumn);
+			/* dataViewerColumn */new TreeViewerColumn(treeViewer, dataColumn);
 
 			TreeColumn set1Column = new TreeColumn(treeViewer.getTree(), SWT.CENTER, SET1);
 			set1Column.setText(labelForSet1);
 			TreeViewerColumn set1ViewerColumn = new TreeViewerColumn(treeViewer, set1Column);
-			set1ViewerColumn.setEditingSupport(new RadioEditingSupport(treeViewer, contentProvider, editor, SET1));
+			set1ViewerColumn.setEditingSupport(new RadioEditingSupport<T1, T2>(treeViewer, contentProvider, editor, SET1));
 
 			TreeColumn set2Column = new TreeColumn(treeViewer.getTree(), SWT.CENTER, SET2);
 			set2Column.setText(labelForSet2);
 			TreeViewerColumn set2ViewerColumn = new TreeViewerColumn(treeViewer, set2Column);
-			set2ViewerColumn.setEditingSupport(new RadioEditingSupport(treeViewer, contentProvider, editor, SET2));
+			set2ViewerColumn.setEditingSupport(new RadioEditingSupport<T1, T2>(treeViewer, contentProvider, editor, SET2));
 
 			TreeColumn set3Column = new TreeColumn(treeViewer.getTree(), SWT.CENTER, SET3);
 			set3Column.setText(labelForSet3);
 			TreeViewerColumn set3ViewerColumn = new TreeViewerColumn(treeViewer, set3Column);
-			set3ViewerColumn.setEditingSupport(new RadioEditingSupport(treeViewer, contentProvider, editor, SET3));
+			set3ViewerColumn.setEditingSupport(new RadioEditingSupport<T1, T2>(treeViewer, contentProvider, editor, SET3));
 
 			treeViewer.setLabelProvider(new PairSplitLabelProvider());
 			treeViewer.expandAll();
@@ -967,13 +967,13 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			ISelection selection = treeViewer.getSelection();
 			if (selection instanceof IStructuredSelection && ((IStructuredSelection)selection).size() > 1)
 			{
-				Iterator it = ((IStructuredSelection)selection).iterator();
+				Iterator< ? > it = ((IStructuredSelection)selection).iterator();
 				while (it.hasNext())
 				{
 					Object element = it.next();
 					if (element instanceof Pair)
 					{
-						contentProvider.setSet(element, set);
+						contentProvider.setSet(element, Integer.valueOf(set));
 					}
 				}
 			}
@@ -981,7 +981,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			{
 				for (Pair<T1, T2> p : initialPairs)
 				{
-					contentProvider.setSet(p, set);
+					contentProvider.setSet(p, Integer.valueOf(set));
 				}
 			}
 
@@ -1054,7 +1054,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					{
 						return ((Pair<IServerInternal, String>)element).getRight();
 					}
-					else if (element instanceof ISupportUpdateableName)
+					if (element instanceof ISupportUpdateableName)
 					{
 						return ((ISupportUpdateableName)element).getName();
 					}
@@ -1067,7 +1067,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			}
 		}
 
-		private class RadioEditingSupport extends EditingSupport
+		private static class RadioEditingSupport<T1, T2> extends EditingSupport
 		{
 
 			private final int value;
@@ -1097,22 +1097,20 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			@Override
 			protected Object getValue(Object element)
 			{
-				return contentProvider.getSet(element) == value;
+				return Boolean.valueOf(contentProvider.getSet(element) == value);
 			}
 
 			@Override
 			protected void setValue(Object element, Object value)
 			{
 				// un-check is not allowed...
-				contentProvider.setSet(element, this.value);
-				treeViewer.refresh(element);
+				contentProvider.setSet(element, Integer.valueOf(this.value));
+				getViewer().refresh(element);
 			}
-
 		}
 
-		private class PairTreeContentProvider<T1, T2> implements ITreeContentProvider
+		private static class PairTreeContentProvider<T1, T2> implements ITreeContentProvider
 		{
-
 			private List<Pair<T1, T2>> list;
 			private final Hashtable<Object, Integer> choices = new Hashtable<Object, Integer>();
 
@@ -1143,7 +1141,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 
 			public int getSet(Object element)
 			{
-				return choices.get(element);
+				return choices.get(element).intValue();
 			}
 
 			public Object getParent(Object element)
@@ -1186,7 +1184,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					{
 						rootElement = pair.getLeft();
 						roots.add(rootElement);
-						choices.put(rootElement, NO_CHECKBOX);
+						choices.put(rootElement, Integer.valueOf(NO_CHECKBOX));
 					}
 				}
 				return roots.toArray();
@@ -1206,13 +1204,11 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 				{
 					for (Object o : list)
 					{
-						choices.put(o, SET1);
+						choices.put(o, Integer.valueOf(SET1));
 					}
 				}
 			}
-
 		}
-
 	}
 
 }
