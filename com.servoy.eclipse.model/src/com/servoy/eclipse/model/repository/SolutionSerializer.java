@@ -1038,6 +1038,11 @@ public class SolutionSerializer
 		return new Pair<String, String>(getRelativePath(persist, useOldName), getFileName(persist, useOldName));
 	}
 
+	public static String getRelativeFilePath(IPersist persist, boolean useOldName)
+	{
+		return getRelativePath(persist, useOldName) + getFileName(persist, useOldName);
+	}
+
 	public static String getScriptName(IPersist persist, boolean useOldName)
 	{
 		ISupportChilds parent;

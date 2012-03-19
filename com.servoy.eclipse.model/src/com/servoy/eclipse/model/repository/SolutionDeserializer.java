@@ -204,26 +204,6 @@ public class SolutionDeserializer
 
 		updateSolution(new File(workspace_dir, smd.getName()), solution, changedFiles, null, true, useFilesForDirtyMark);
 
-		// Make sure all table nodes exist in memory, otherwise both editing and real solution may both create a table node for the same data source
-		try
-		{
-			for (String serverName : repository.getServerNames(false))
-			{
-				IServer server = repository.getServer(serverName);
-				if (server != null)
-				{
-					for (String tableName : server.getTableAndViewNames(true))
-					{
-						solution.getOrCreateTableNode(DataSourceUtils.createDBTableDataSource(serverName, tableName));
-					}
-				}
-			}
-		}
-		catch (RemoteException e)
-		{
-			throw new RepositoryException(e);
-		}
-
 		if (!useFilesForDirtyMark)
 		{
 			// clear all changed flags

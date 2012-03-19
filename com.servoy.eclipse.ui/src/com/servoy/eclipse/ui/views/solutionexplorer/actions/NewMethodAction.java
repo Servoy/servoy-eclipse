@@ -28,6 +28,7 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
@@ -65,6 +66,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils.InputAndListDialog;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
+import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -295,6 +297,14 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 					// if the file isn't there, create it here so that the formatter sees the js file.
 					if (!file.exists())
 					{
+						if (met.getParent() instanceof TableNode &&
+							!ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getRelativeFilePath(met.getParent(), true))).exists())
+						{
+							// js file does not exist yet, table node may have been created in memory in editing solution, make sure the table node is saved,
+							// otherwise the same table node (but with different uuid) will be created in the real solution when the js file is read.
+							((EclipseRepository)ServoyModel.getDeveloperRepository()).updateNode(met.getParent(), false);
+						}
+
 						// file doesn't exist, create the file and its parent directories
 						new WorkspaceFileAccess(ServoyModel.getWorkspace()).setContents(scriptPath, new byte[0]);
 					}
