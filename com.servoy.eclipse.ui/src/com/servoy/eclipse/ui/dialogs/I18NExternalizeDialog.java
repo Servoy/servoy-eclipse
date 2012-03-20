@@ -42,9 +42,12 @@ import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.javascript.ast.CallExpression;
 import org.eclipse.dltk.javascript.ast.Comment;
+import org.eclipse.dltk.javascript.ast.FunctionStatement;
+import org.eclipse.dltk.javascript.ast.JSNode;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.SingleLineComment;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
+import org.eclipse.dltk.javascript.ast.VariableDeclaration;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -136,6 +139,7 @@ public class I18NExternalizeDialog extends Dialog
 	private TreeViewer treeViewer;
 	private TreeContentProvider treeContentProvider;
 	private Text filterTextField;
+	private Text commonPrefix;
 	private Button databaseMessagesButton;
 	private Button ignoreMessageButton;
 
@@ -260,6 +264,8 @@ public class I18NExternalizeDialog extends Dialog
 			ignoreMessageButton.setSelection(false);
 			ignoreMessageButton.setEnabled(false);
 		}
+
+		if (commonPrefix != null) commonPrefix.setText("");
 	}
 
 	private void addTableNodeToTree(TreeNode root, IServer server, Table table, TableNode tableNode, String filterText)
@@ -484,7 +490,83 @@ public class I18NExternalizeDialog extends Dialog
 		keyColumn.setText("Key");
 		new TreeViewerColumn(treeViewer, keyColumn).setEditingSupport(new EditingSupport(treeViewer)
 		{
-			private final TextCellEditor editor = new TextCellEditor(treeViewer.getTree());
+			private final TextCellEditor editor = new TextCellEditor(treeViewer.getTree())
+			{
+				/**
+				 * State information for updating action enablement
+				 */
+				private boolean isSelection = false;
+
+				private boolean isDeleteable = false;
+
+				private boolean isSelectable = false;
+
+				@Override
+				protected void doSetFocus()
+				{
+					if (text != null)
+					{
+						int selectionTextStartIdx = text.getText().lastIndexOf("."); //$NON-NLS-1$
+						if (selectionTextStartIdx != -1)
+						{
+							text.setSelection(selectionTextStartIdx + 1, text.getText().length());
+						}
+						else
+						{
+							text.selectAll();
+						}
+						text.setFocus();
+						checkSelection();
+						checkDeleteable();
+						checkSelectable();
+					}
+				}
+
+				/**
+				 * Checks to see if the "deletable" state (can delete/
+				 * nothing to delete) has changed and if so fire an
+				 * enablement changed notification.
+				 */
+				private void checkDeleteable()
+				{
+					boolean oldIsDeleteable = isDeleteable;
+					isDeleteable = isDeleteEnabled();
+					if (oldIsDeleteable != isDeleteable)
+					{
+						fireEnablementChanged(DELETE);
+					}
+				}
+
+				/**
+				 * Checks to see if the "selectable" state (can select)
+				 * has changed and if so fire an enablement changed notification.
+				 */
+				private void checkSelectable()
+				{
+					boolean oldIsSelectable = isSelectable;
+					isSelectable = isSelectAllEnabled();
+					if (oldIsSelectable != isSelectable)
+					{
+						fireEnablementChanged(SELECT_ALL);
+					}
+				}
+
+				/**
+				 * Checks to see if the selection state (selection /
+				 * no selection) has changed and if so fire an
+				 * enablement changed notification.
+				 */
+				private void checkSelection()
+				{
+					boolean oldIsSelection = isSelection;
+					isSelection = text.getSelectionCount() > 0;
+					if (oldIsSelection != isSelection)
+					{
+						fireEnablementChanged(COPY);
+						fireEnablementChanged(CUT);
+					}
+				}
+			};
 
 			@Override
 			protected boolean canEdit(Object element)
@@ -549,6 +631,41 @@ public class I18NExternalizeDialog extends Dialog
 		});
 		filterTextField.setFocus();
 
+		Label commonPrefixLabel = new Label(composite, SWT.RIGHT);
+		commonPrefixLabel.setText("Enter common prefix for generated keys :");
+
+		commonPrefix = new Text(composite, SWT.BORDER);
+		commonPrefix.addKeyListener(new KeyAdapter()
+		{
+			@Override
+			public void keyReleased(KeyEvent event)
+			{
+				if (event.keyCode == SWT.CR)
+				{
+					String newPrefix = commonPrefix.getText();
+					if (newPrefix != null && newPrefix.length() > 0)
+					{
+						ArrayList<TreeNode> allNodes = new ArrayList<TreeNode>();
+						fillNodes(treeViewer.getTree().getItems(), allNodes, false);
+
+						for (TreeNode treeNode : allNodes)
+						{
+							String treeNodeKey = treeNode.getKey();
+							if (treeNodeKey != null && treeNodeKey.length() > 0)
+							{
+								int lastDotIdx = treeNodeKey.lastIndexOf('.');
+								if (lastDotIdx != -1)
+								{
+									treeNode.setKey(newPrefix + treeNodeKey.substring(lastDotIdx));
+								}
+							}
+						}
+						treeViewer.refresh();
+					}
+				}
+			}
+		});
+
 		databaseMessagesButton = new Button(composite, SWT.CHECK);
 		databaseMessagesButton.setText("Show database messages");
 		databaseMessagesButton.setSelection(externalizeDatabaseMessages);
@@ -599,6 +716,7 @@ public class I18NExternalizeDialog extends Dialog
 		ignoreMessageButton.setSelection(false);
 		ignoreMessageButton.setEnabled(false);
 
+
 		GroupLayout i18NLayout = new GroupLayout(composite);
 		i18NLayout.setHorizontalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(
 			i18NLayout.createSequentialGroup().addContainerGap().add(
@@ -607,14 +725,18 @@ public class I18NExternalizeDialog extends Dialog
 					GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, databaseMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(
 					i18NLayout.createSequentialGroup().add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-						LayoutStyle.RELATED).add(filterTextField, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))).addContainerGap()));
+						LayoutStyle.RELATED).add(filterTextField, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)).add(
+					i18NLayout.createSequentialGroup().add(commonPrefixLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(commonPrefix, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))).addContainerGap()));
 		i18NLayout.setVerticalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(
 			i18NLayout.createSequentialGroup().addContainerGap().add(
 				i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(filterTextField, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(
 				treeViewerComposite, GroupLayout.PREFERRED_SIZE, 100, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(ignoreMessageButton,
 				GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
-				databaseMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap()));
+				databaseMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap().add(
+				i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(commonPrefixLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE).add(commonPrefix, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))));
 
 		composite.setLayout(i18NLayout);
 
@@ -800,7 +922,8 @@ public class I18NExternalizeDialog extends Dialog
 							if (isIgnored) continue;
 							stringLiteral = (StringLiteral)astNodes.get(y);
 							String keyHint = getKeyHint(persist, null) + keyIdx++;
-							jsTexts.add(new JSText(persist, stringLiteral.getText(), stringLiteral.sourceStart(), stringLiteral.sourceEnd(), keyHint));
+							jsTexts.add(new JSText(persist, stringLiteral.getText(), stringLiteral.sourceStart(), stringLiteral.sourceEnd(), keyHint,
+								getNameHintForStringLiteral(stringLiteral)));
 						}
 
 					}
@@ -814,6 +937,25 @@ public class I18NExternalizeDialog extends Dialog
 		}
 
 		return jsTexts;
+	}
+
+	private String getNameHintForStringLiteral(StringLiteral stringLiteral)
+	{
+		String nameHint = "";
+		ASTNode parentNode;
+		JSNode currentNode = stringLiteral;
+		while ((parentNode = currentNode.getParent()) instanceof JSNode)
+		{
+			if (parentNode instanceof VariableDeclaration) nameHint = ((VariableDeclaration)parentNode).getVariableName();
+			else if (parentNode instanceof FunctionStatement)
+			{
+				nameHint = ((FunctionStatement)parentNode).getName().getName() + '.' + nameHint;
+				break;
+			}
+			currentNode = (JSNode)parentNode;
+		}
+
+		return nameHint;
 	}
 
 	private Map<Integer, ArrayList<ASTNode>> getLineNumbersForASTNodes(String jsConent, Map<Integer, ASTNode> astNodesMap)
@@ -875,6 +1017,7 @@ public class I18NExternalizeDialog extends Dialog
 		StringBuffer keyHint = new StringBuffer();
 		IPersist p = persist;
 		Element pName;
+		int idx = 0;
 		do
 		{
 			pName = contentSpec.getPropertyForObjectTypeByName(p.getTypeID(), "name");
@@ -891,13 +1034,13 @@ public class I18NExternalizeDialog extends Dialog
 						name = ((Solution)p).getName();
 						break;
 					case IRepository.GRAPHICALCOMPONENTS :
-						name = "label_" + p.getID();
+						name = "label_" + idx++;
 						break;
 					case IRepository.TABS :
-						name = "tab_" + p.getID();
+						name = "tab_" + idx++;
 						break;
 					default :
-						name = p.toString() + "_" + p.getID();
+						name = p.toString() + "_" + idx++;
 
 				}
 			}
@@ -962,7 +1105,7 @@ public class I18NExternalizeDialog extends Dialog
 			editingSolution.getI18nTableName(), workspaceFileAccess);
 
 		ArrayList<TreeNode> selectedNodes = new ArrayList<TreeNode>();
-		fillSelectedNodes(treeViewer.getTree().getItems(), selectedNodes);
+		fillNodes(treeViewer.getTree().getItems(), selectedNodes, true);
 
 		final HashMap<Solution, ArrayList<IPersist>> solutionChangedPersistsMap = new HashMap<Solution, ArrayList<IPersist>>();
 		final ArrayList<Table> changedTables = new ArrayList<Table>();
@@ -1140,7 +1283,7 @@ public class I18NExternalizeDialog extends Dialog
 		externalizeJob.schedule();
 	}
 
-	private void fillSelectedNodes(TreeItem[] items, ArrayList<TreeNode> selectedNodes)
+	private void fillNodes(TreeItem[] items, ArrayList<TreeNode> selectedNodes, boolean onlySelected)
 	{
 		if (items != null && items.length > 0)
 		{
@@ -1148,8 +1291,8 @@ public class I18NExternalizeDialog extends Dialog
 			for (TreeItem treeItem : items)
 			{
 				node = (TreeNode)treeItem.getData();
-				if (!node.isElement() && !node.isColumnInfo() && !node.isJSText()) fillSelectedNodes(treeItem.getItems(), selectedNodes);
-				else if (treeItem.getChecked()) selectedNodes.add(node);
+				if (!node.isElement() && !node.isColumnInfo() && !node.isJSText()) fillNodes(treeItem.getItems(), selectedNodes, onlySelected);
+				else if (!onlySelected || treeItem.getChecked()) selectedNodes.add(node);
 			}
 		}
 	}
@@ -1182,15 +1325,17 @@ public class I18NExternalizeDialog extends Dialog
 		int startPosition;
 		int endPosition;
 		String keyHint;
+		String nameHint;
 		boolean ignored;
 
-		JSText(IPersist parent, String text, int startPosition, int endPosition, String keyHint)
+		JSText(IPersist parent, String text, int startPosition, int endPosition, String keyHint, String nameHint)
 		{
 			this.parent = parent;
 			this.text = text;
 			this.startPosition = startPosition;
 			this.endPosition = endPosition;
 			this.keyHint = keyHint;
+			this.nameHint = nameHint;
 		}
 
 		IPersist getParent()
@@ -1216,6 +1361,11 @@ public class I18NExternalizeDialog extends Dialog
 		String getKeyHint()
 		{
 			return keyHint;
+		}
+
+		String getNameHint()
+		{
+			return nameHint;
 		}
 
 		void setIgnored(boolean ignored)
@@ -1478,7 +1628,7 @@ public class I18NExternalizeDialog extends Dialog
 			}
 			else if (isJSText())
 			{
-				return "";
+				return ((JSText)itemData).getNameHint();
 			}
 
 			return itemData.toString();
