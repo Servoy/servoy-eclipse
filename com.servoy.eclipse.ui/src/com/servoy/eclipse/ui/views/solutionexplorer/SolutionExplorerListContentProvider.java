@@ -114,6 +114,7 @@ import com.servoy.j2db.scripting.IScriptable;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSI18N;
+import com.servoy.j2db.scripting.JSMap;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
@@ -193,6 +194,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		TYPES.put(IComponent.class.getSimpleName(), "RuntimeComponent"); //$NON-NLS-1$ 
 		TYPES.put(IDataSet.class.getSimpleName(), "JSDataSet"); //$NON-NLS-1$ 
 		TYPES.put(Scriptable.class.getSimpleName(), "Object"); //$NON-NLS-1$ 
+		TYPES.put(JSMap.class.getSimpleName(), "Object"); //$NON-NLS-1$
 		Method[] methods = Object.class.getMethods();
 		for (Method method : methods)
 		{
