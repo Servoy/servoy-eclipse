@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -33,9 +34,9 @@ import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IImportWizard;
@@ -50,7 +51,6 @@ import com.servoy.eclipse.core.repository.XMLEclipseWorkspaceImportHandlerVersio
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.util.MessageDialog;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
@@ -62,130 +62,39 @@ import com.servoy.j2db.util.xmlxport.IXMLImportHandlerVersions11AndHigher;
 public class ImportSolutionWizard extends Wizard implements IImportWizard
 {
 	private ImportSolutionWizardPage page;
+	private SolutionImportedPage finishPage;
+	private String importMessageDetails;
 
 	@Override
 	public boolean performFinish()
 	{
-		final File file = new File(page.getPath());
-		if (!file.exists() || !file.isFile())
-		{
-			org.eclipse.jface.dialogs.MessageDialog.openError(getShell(), "Import failed", "Invalid file.");
-			return false;
-		}
-		if (!file.canRead())
-		{
-			org.eclipse.jface.dialogs.MessageDialog.openError(getShell(), "Import failed", "File cannot be read.");
-			return false;
-		}
-		if (page.getErrorMessage() != null)
-		{
-			org.eclipse.jface.dialogs.MessageDialog.openError(getShell(), "Import failed", page.getErrorMessage());
-			return false;
-		}
-		final String resourcesProjectName = page.getNewName();
-		final ServoyResourcesProject existingProject = page.getResourcesProject();
-		final boolean cleanImport = page.isCleanImport();
-		final boolean allowDataModelChanges = page.getAllowDataModelChange();
-		final boolean displayDataModelChanges = page.getDisplayDataModelChange();
-		final boolean activateSolution = page.getActivateSolution();
-		IRunnableWithProgress runnable = new IRunnableWithProgress()
-		{
-
-			public void run(IProgressMonitor monitor)
-			{
-				final EclipseImportUserChannel userChannel = new EclipseImportUserChannel(allowDataModelChanges, displayDataModelChanges, getShell());
-				IApplicationServerSingleton as = ApplicationServerSingleton.get();
-				try
-				{
-					IXMLImportEngine importEngine = as.createXMLImportEngine(file, (EclipseRepository)ServoyModel.getDeveloperRepository(), as.getDataServer(),
-						as.getClientId(), userChannel);
-
-					IXMLImportHandlerVersions11AndHigher x11handler = as.createXMLInMemoryImportHandler(importEngine.getVersionInfo(), as.getDataServer(),
-						as.getClientId(), userChannel, (EclipseRepository)ServoyModel.getDeveloperRepository());
-
-					x11handler.setAskForImportServerName(ImportSolutionWizard.this.shouldAskForImportServerName());
-
-					IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler, userChannel,
-						(EclipseRepository)ServoyModel.getDeveloperRepository(), resourcesProjectName, existingProject, monitor, activateSolution, cleanImport);
-					if (rootObjects != null)
-					{
-						String detail = userChannel.getAllImportantMSGes() + "\nSolution '" + rootObjects[0].getName() + "' imported";
-						if (activateSolution) detail += " and activated";
-						detail += ".";
-						final String message = detail;
-						Display.getDefault().asyncExec(new Runnable()
-						{
-							public void run()
-							{
-								MessageDialog dialog = new MessageDialog(getShell(), "Solution imported", null, null,
-									org.eclipse.jface.dialogs.MessageDialog.NONE, new String[] { "OK" }, 0, message);
-								dialog.open();
-							}
-						});
-					}
-				}
-				catch (final RepositoryException ex)
-				{
-					// Don't show an error message if the import was canceled.
-					if (!ex.hasErrorCode(ServoyException.InternalCodes.OPERATION_CANCELLED))
-					{
-						// Don't show an stack trace for CRC related messages.
-						if (!ex.hasErrorCode(ServoyException.InternalCodes.CHECKSUM_FAILURE))
-						{
-							ServoyLog.logError(ex);
-						}
-						Display.getDefault().asyncExec(new Runnable()
-						{
-							public void run()
-							{
-								org.eclipse.jface.dialogs.MessageDialog.openError(getShell(), "Could not import solution", ex.getMessage());
-							}
-						});
-					}
-				}
-				catch (final Exception ex)
-				{
-					ServoyLog.logError(ex);
-					String msg = "An unexpected error occured";
-					if (ex.getMessage() != null) msg += ex.getMessage();
-					else msg += ". Check the log for more details.";
-					final String mymsg = msg;
-					Display.getDefault().asyncExec(new Runnable()
-					{
-						public void run()
-						{
-							org.eclipse.jface.dialogs.MessageDialog.openError(getShell(), "Could not import solution", mymsg);
-						}
-					});
-
-				}
-			}
-		};
-		try
-		{
-			getContainer().run(true, false, runnable);
-		}
-		catch (InvocationTargetException e)
-		{
-			ServoyLog.logError(e);
-		}
-		catch (InterruptedException e)
-		{
-			ServoyLog.logError(e);
-		}
 		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jface.wizard.Wizard#canFinish()
+	 */
+	@Override
+	public boolean canFinish()
+	{
+		if (finishPage.canFinish()) return true;
+		return false;
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
 		setNeedsProgressMonitor(true);
-		page = new ImportSolutionWizardPage(this, "Import solution");
+		page = new ImportSolutionWizardPage(this, "Import solution"); //$NON-NLS-1$
+		finishPage = new SolutionImportedPage("Solution imported"); //$NON-NLS-1$
 	}
 
 	@Override
 	public void addPages()
 	{
 		addPage(page);
+		addPage(finishPage);
 	}
 
 	public static String initialPath = getInitialImportPath();
@@ -219,7 +128,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		return askForImportServerName;
 	}
 
-	public static class ImportSolutionWizardPage extends WizardPage implements IValidator
+	public class ImportSolutionWizardPage extends WizardPage implements IValidator
 	{
 		private ResourcesProjectChooserComposite resourceProjectComposite;
 		private Text filePath;
@@ -235,8 +144,8 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		{
 			super(pageName);
 			this.wizard = wizard;
-			setTitle("Import a solution");
-			setDescription("A solution (with or without modules) will be imported into the workspace from a .servoy file.");
+			setTitle("Import a solution"); //$NON-NLS-1$
+			setDescription("A solution (with or without modules) will be imported into the workspace from a .servoy file."); //$NON-NLS-1$
 		}
 
 		public void createControl(Composite parent)
@@ -251,6 +160,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 				public void modifyText(ModifyEvent e)
 				{
 					validate();
+					wizard.getContainer().updateButtons();
 				}
 			});
 
@@ -258,14 +168,14 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			if (solutionFilePath != null) filePath.setText(solutionFilePath);
 
 			browseButton = new Button(topLevel, SWT.NONE);
-			browseButton.setText("Browse");
+			browseButton.setText("Browse"); //$NON-NLS-1$
 			browseButton.addSelectionListener(new SelectionAdapter()
 			{
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
 					FileDialog dlg = new FileDialog(getShell(), SWT.NONE);
-					dlg.setFilterExtensions(new String[] { "*.servoy" });
+					dlg.setFilterExtensions(new String[] { "*.servoy" }); //$NON-NLS-1$
 					if (initialPath != null) dlg.setFilterPath(initialPath);
 					if (dlg.open() != null)
 					{
@@ -275,21 +185,21 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 				}
 			});
 			cleanImport = new Button(topLevel, SWT.CHECK);
-			cleanImport.setText("Clean Import");
+			cleanImport.setText("Clean Import"); //$NON-NLS-1$
 
 			allowDataModelChange = new Button(topLevel, SWT.CHECK);
-			allowDataModelChange.setText("Allow data model (database) changes");
+			allowDataModelChange.setText("Allow data model (database) changes"); //$NON-NLS-1$
 			allowDataModelChange.setSelection(true);
 
 			displayDataModelChanges = new Button(topLevel, SWT.CHECK);
-			displayDataModelChanges.setText("Display data model (database) changes");
+			displayDataModelChanges.setText("Display data model (database) changes"); //$NON-NLS-1$
 
 			activateSolution = new Button(topLevel, SWT.CHECK);
-			activateSolution.setText("Activate solution after import");
+			activateSolution.setText("Activate solution after import"); //$NON-NLS-1$
 			activateSolution.setSelection(true);
 
 			resourceProjectComposite = new ResourcesProjectChooserComposite(topLevel, SWT.NONE, this,
-				"Please choose the resources project the solution will reference (for styles, column/sequence info, security)",
+				"Please choose the resources project the solution will reference (for styles, column/sequence info, security)", //$NON-NLS-1$
 				ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject());
 
 			// layout of the page
@@ -342,12 +252,114 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			resourceProjectComposite.setLayoutData(formData);
 		}
 
+		private boolean doSolutionImport()
+		{
+			importMessageDetails = ""; //$NON-NLS-1$
+			final File file = new File(page.getPath());
+			if (!file.exists() || !file.isFile())
+			{
+				finishPage.setErrorMessage("Import failed"); //$NON-NLS-1$
+				finishPage.setTitle("Solution not imported"); //$NON-NLS-1$
+				importMessageDetails = "Could not import solution: Invalid file"; //$NON-NLS-1$
+				return false;
+			}
+			if (!file.canRead())
+			{
+				finishPage.setErrorMessage("Import failed"); //$NON-NLS-1$
+				finishPage.setTitle("Solution not imported"); //$NON-NLS-1$
+				importMessageDetails = "Could not import solution: File cannot be read"; //$NON-NLS-1$
+				return false;
+			}
+			if (page.getErrorMessage() != null)
+			{
+				finishPage.setErrorMessage("Import failed"); //$NON-NLS-1$
+				finishPage.setTitle("Solution not imported"); //$NON-NLS-1$
+				importMessageDetails = "Could not import solution: " + page.getErrorMessage(); //$NON-NLS-1$
+				return false;
+			}
+			final String resourcesProjectName = page.getNewName();
+			final ServoyResourcesProject existingProject = page.getResourcesProject();
+			final boolean isCleanImport = page.isCleanImport();
+			final boolean allowDataModelChanges = page.getAllowDataModelChange();
+			final boolean doDisplayDataModelChanges = page.getDisplayDataModelChange();
+			final boolean doActivateSolution = page.getActivateSolution();
+			IRunnableWithProgress runnable = new IRunnableWithProgress()
+			{
+				public void run(IProgressMonitor monitor)
+				{
+					final EclipseImportUserChannel userChannel = new EclipseImportUserChannel(allowDataModelChanges, doDisplayDataModelChanges, getShell());
+					IApplicationServerSingleton as = ApplicationServerSingleton.get();
+					try
+					{
+						IXMLImportEngine importEngine = as.createXMLImportEngine(file, (EclipseRepository)ServoyModel.getDeveloperRepository(),
+							as.getDataServer(), as.getClientId(), userChannel);
+
+						IXMLImportHandlerVersions11AndHigher x11handler = as.createXMLInMemoryImportHandler(importEngine.getVersionInfo(), as.getDataServer(),
+							as.getClientId(), userChannel, (EclipseRepository)ServoyModel.getDeveloperRepository());
+
+						x11handler.setAskForImportServerName(ImportSolutionWizard.this.shouldAskForImportServerName());
+
+						IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler,
+							userChannel, (EclipseRepository)ServoyModel.getDeveloperRepository(), resourcesProjectName, existingProject, monitor,
+							doActivateSolution, isCleanImport);
+						if (rootObjects != null)
+						{
+							String detail = userChannel.getAllImportantMSGes() + "\nSolution '" + rootObjects[0].getName() + "' imported"; //$NON-NLS-1$ //$NON-NLS-2$
+							if (doActivateSolution) detail += " and activated"; //$NON-NLS-1$
+							detail += "."; //$NON-NLS-1$
+							importMessageDetails = detail;
+						}
+					}
+					catch (final RepositoryException ex)
+					{
+						// Don't show an error message if the import was canceled.
+						if (!ex.hasErrorCode(ServoyException.InternalCodes.OPERATION_CANCELLED))
+						{
+							// Don't show an stack trace for CRC related messages.
+							if (!ex.hasErrorCode(ServoyException.InternalCodes.CHECKSUM_FAILURE))
+							{
+								ServoyLog.logError(ex);
+							}
+							finishPage.setErrorMessage("Import failed"); //$NON-NLS-1$
+							finishPage.setTitle("Solution not imported"); //$NON-NLS-1$
+							importMessageDetails = "Could not import solution: " + ex.getMessage(); //$NON-NLS-1$
+						}
+					}
+					catch (final Exception ex)
+					{
+						ServoyLog.logError(ex);
+						String msg = "An unexpected error occured"; //$NON-NLS-1$
+						if (ex.getMessage() != null) msg += ex.getMessage();
+						else msg += ". Check the log for more details."; //$NON-NLS-1$
+						final String mymsg = msg;
+						finishPage.setErrorMessage("Import failed"); //$NON-NLS-1$
+						finishPage.setTitle("Solution not imported"); //$NON-NLS-1$
+						importMessageDetails = "Could not import solution: " + mymsg; //$NON-NLS-1$
+
+					}
+				}
+			};
+			try
+			{
+				getContainer().run(true, false, runnable);
+			}
+			catch (InvocationTargetException e)
+			{
+				ServoyLog.logError(e);
+			}
+			catch (InterruptedException e)
+			{
+				ServoyLog.logError(e);
+			}
+			return true;
+		}
+
 		public String validate()
 		{
 			String error = null;
 			if (filePath.getText().trim().length() == 0)
 			{
-				error = "Please select servoy file to import.";
+				error = "Please select servoy file to import."; //$NON-NLS-1$
 			}
 			else if (resourceProjectComposite != null) error = resourceProjectComposite.validate();
 			setErrorMessage(error);
@@ -387,6 +399,76 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		public boolean getActivateSolution()
 		{
 			return activateSolution.getSelection();
+		}
+
+		@Override
+		public boolean canFlipToNextPage()
+		{
+			return validate() == null;
+		}
+
+		@Override
+		public IWizardPage getNextPage()
+		{
+			if (canFlipToNextPage())
+			{
+				doSolutionImport();
+				finishPage.setTextMessage(importMessageDetails != null ? importMessageDetails : ""); //$NON-NLS-1$
+			}
+			return finishPage;
+		}
+	}
+
+	private class SolutionImportedPage extends WizardPage implements IValidator
+	{
+		private Text message;
+
+		protected SolutionImportedPage(String pageName)
+		{
+			super(pageName);
+			setTitle(pageName);
+		}
+
+		public void setTextMessage(String msg)
+		{
+			message.setText(msg);
+		}
+
+		public void createControl(Composite parent)
+		{
+			Composite container = new Composite(parent, SWT.NONE);
+			GridLayout layout = new GridLayout();
+			container.setLayout(layout);
+			layout.numColumns = 1;
+
+			message = new Text(container, SWT.WRAP | SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
+			GridData gridData = new GridData();
+			gridData.horizontalAlignment = GridData.FILL;
+			gridData.verticalAlignment = GridData.FILL;
+			gridData.grabExcessHorizontalSpace = true;
+			gridData.grabExcessVerticalSpace = true;
+			gridData.horizontalSpan = 1;
+			message.setLayoutData(gridData);
+			message.setEditable(false);
+
+			setControl(container);
+			setPageComplete(true);
+		}
+
+		public String validate()
+		{
+			return null;
+		}
+
+		public boolean canFinish()
+		{
+			return finishPage.isCurrentPage();
+		}
+
+		@Override
+		public IWizardPage getPreviousPage()
+		{
+			return null;
 		}
 	}
 
