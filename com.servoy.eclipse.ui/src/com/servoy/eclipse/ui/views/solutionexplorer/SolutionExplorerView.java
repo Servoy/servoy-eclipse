@@ -139,6 +139,7 @@ import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
+import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.progress.WorkbenchJob;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
@@ -1809,13 +1810,23 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				{
 					SolutionExplorerTreeContentProvider treeContentProvider = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
 					final Object serversNode = treeContentProvider.getServers();
-					UIUtils.runInUI(new Runnable()
-					{
-						public void run()
+					UIJob expandServersNode = new UIJob(tree.getControl().getDisplay(), "Expand servers node") { //$NON-NLS-1$
+						@Override
+						public IStatus runInUIThread(IProgressMonitor monitor)
 						{
-							tree.setExpandedState(serversNode, true);
+							if (tree.isBusy())
+							{
+								schedule(1000);
+							}
+							else
+							{
+								tree.setExpandedState(serversNode, true);
+							}
+							return Status.OK_STATUS;
 						}
-					}, false);
+					};
+					expandServersNode.setSystem(true);
+					expandServersNode.schedule();
 				}
 			}
 
