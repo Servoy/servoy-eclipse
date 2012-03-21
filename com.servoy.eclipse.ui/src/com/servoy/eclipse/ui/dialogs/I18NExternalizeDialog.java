@@ -72,6 +72,7 @@ import org.eclipse.swt.events.MenuDetectEvent;
 import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
@@ -156,6 +157,7 @@ public class I18NExternalizeDialog extends Dialog
 	private FilterDelayJob delayedFilterJob;
 	private static final long FILTER_TYPE_DELAY = 300;
 	private boolean externalizeDatabaseMessages = true;
+	private String commonPrefixValue = "";
 
 	private final IFileAccess workspaceFileAccess = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 
@@ -265,7 +267,7 @@ public class I18NExternalizeDialog extends Dialog
 			ignoreMessageButton.setEnabled(false);
 		}
 
-		if (commonPrefix != null) commonPrefix.setText("");
+		if (commonPrefix != null) commonPrefix.setText(commonPrefixValue);
 	}
 
 	private void addTableNodeToTree(TreeNode root, IServer server, Table table, TableNode tableNode, String filterText)
@@ -632,7 +634,7 @@ public class I18NExternalizeDialog extends Dialog
 		filterTextField.setFocus();
 
 		Label commonPrefixLabel = new Label(composite, SWT.RIGHT);
-		commonPrefixLabel.setText("Enter common prefix for generated keys :");
+		commonPrefixLabel.setText("Enter common prefix for generated keys");
 
 		commonPrefix = new Text(composite, SWT.BORDER);
 		commonPrefix.addKeyListener(new KeyAdapter()
@@ -642,29 +644,22 @@ public class I18NExternalizeDialog extends Dialog
 			{
 				if (event.keyCode == SWT.CR)
 				{
-					String newPrefix = commonPrefix.getText();
-					if (newPrefix != null && newPrefix.length() > 0)
-					{
-						ArrayList<TreeNode> allNodes = new ArrayList<TreeNode>();
-						fillNodes(treeViewer.getTree().getItems(), allNodes, false);
-
-						for (TreeNode treeNode : allNodes)
-						{
-							String treeNodeKey = treeNode.getKey();
-							if (treeNodeKey != null && treeNodeKey.length() > 0)
-							{
-								int lastDotIdx = treeNodeKey.lastIndexOf('.');
-								if (lastDotIdx != -1)
-								{
-									treeNode.setKey(newPrefix + treeNodeKey.substring(lastDotIdx));
-								}
-							}
-						}
-						treeViewer.refresh();
-					}
+					applyCommonPrefix();
 				}
 			}
 		});
+
+		Button commonPrefixApplyButton = new Button(composite, SWT.PUSH);
+		commonPrefixApplyButton.setText("Apply");
+		commonPrefixApplyButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				applyCommonPrefix();
+			}
+		});
+
 
 		databaseMessagesButton = new Button(composite, SWT.CHECK);
 		databaseMessagesButton.setText("Show database messages");
@@ -727,7 +722,8 @@ public class I18NExternalizeDialog extends Dialog
 					i18NLayout.createSequentialGroup().add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
 						LayoutStyle.RELATED).add(filterTextField, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)).add(
 					i18NLayout.createSequentialGroup().add(commonPrefixLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(commonPrefix, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))).addContainerGap()));
+						GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(commonPrefix, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE).addPreferredGap(
+						LayoutStyle.RELATED).add(commonPrefixApplyButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))).addContainerGap()));
 		i18NLayout.setVerticalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(
 			i18NLayout.createSequentialGroup().addContainerGap().add(
 				i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
@@ -736,7 +732,8 @@ public class I18NExternalizeDialog extends Dialog
 				GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
 				databaseMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap().add(
 				i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(commonPrefixLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(commonPrefix, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))));
+					GroupLayout.PREFERRED_SIZE).add(commonPrefix, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(commonPrefixApplyButton,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))));
 
 		composite.setLayout(i18NLayout);
 
@@ -769,6 +766,31 @@ public class I18NExternalizeDialog extends Dialog
 		}, FILTER_TYPE_DELAY, "Filtering");
 
 		return composite;
+	}
+
+	private void applyCommonPrefix()
+	{
+		String newText = commonPrefix.getText();
+
+		ArrayList<TreeNode> allNodes = new ArrayList<TreeNode>();
+		fillNodes(treeViewer.getTree().getItems(), allNodes, false);
+
+		for (TreeNode treeNode : allNodes)
+		{
+			String treeNodeKey = treeNode.getKey();
+			if (treeNodeKey != null && treeNodeKey.length() > 0 && (newText.length() == 0 || !treeNodeKey.startsWith(newText)))
+			{
+				int subIdx = 0;
+				if (commonPrefixValue != null && treeNodeKey.startsWith(commonPrefixValue))
+				{
+					subIdx = commonPrefixValue.length();
+				}
+
+				treeNode.setKey(newText + treeNodeKey.substring(subIdx));
+			}
+		}
+		treeViewer.refresh();
+		commonPrefixValue = newText;
 	}
 
 	private void addSolutionContent(final TreeNode content, Solution solution, final String filterText)
@@ -949,7 +971,7 @@ public class I18NExternalizeDialog extends Dialog
 			if (parentNode instanceof VariableDeclaration) nameHint = ((VariableDeclaration)parentNode).getVariableName();
 			else if (parentNode instanceof FunctionStatement)
 			{
-				nameHint = ((FunctionStatement)parentNode).getName().getName() + '.' + nameHint;
+				nameHint = ((FunctionStatement)parentNode).getName().getName();
 				break;
 			}
 			currentNode = (JSNode)parentNode;
