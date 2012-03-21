@@ -50,6 +50,7 @@ import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -192,9 +193,7 @@ public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 						}
 						else
 						{
-							java.awt.Color formBackground = part.getBackground() == null ? FormBackgroundLayer.getPartBackground(form, part)
-								: part.getBackground();
-							borderDisabled = !paintedBackground.equals(formBackground);
+							borderDisabled = !paintedBackground.equals(ComponentFactory.getPartBackground(application, part, form));
 						}
 					}
 				}

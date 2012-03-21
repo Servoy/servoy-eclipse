@@ -18,7 +18,6 @@ package com.servoy.eclipse.designer.editor;
 
 import java.awt.Dimension;
 import java.awt.print.PageFormat;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import org.eclipse.draw2d.ColorConstants;
@@ -35,16 +34,11 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.resource.ColorResource;
-import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.Part;
-import com.servoy.j2db.util.IStyleRule;
-import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.PersistHelper;
 
 /**
- * Layer to print form background stuff like data-renderers and page-breaks.
+ * Layer to print transparency background and page-breaks.
  * 
  * @author rgansevles
  * 
@@ -79,46 +73,9 @@ public class FormBackgroundLayer extends FreeformLayer
 		super.paintFigure(graphics);
 
 		if (editorPart.getForm() == null) return;
-		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm());
-		if (flattenedForm.getTransparent())
-		{
-			paintTransparencyFormPattern(graphics, flattenedForm);
-		}
-		else
-		{
-			paintDatarenderers(graphics, flattenedForm);
-		}
+
+		paintTransparencyFormPattern(graphics, ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).getSize());
 		paintPagebreaks(graphics);
-	}
-
-	/**
-	 * Paint data-renderers.
-	 * <p>
-	 * graphics state is expected to be saved by caller.
-	 * 
-	 * @param graphics
-	 */
-	protected void paintDatarenderers(Graphics graphics, Form flattenedForm)
-	{
-		Iterator<Part> parts = flattenedForm.getParts();
-		int prevY = 0;
-		while (parts.hasNext())
-		{
-			Part part = parts.next();
-			Color bg;
-			if (part.getBackground() == null)
-			{
-				bg = ColorResource.INSTANCE.getColor(ColorResource.ColorAwt2Rgb(getPartBackground(flattenedForm, part)));
-			}
-			else
-			{
-				bg = ColorResource.INSTANCE.getColor(ColorResource.ColorAwt2Rgb(part.getBackground()));
-			}
-
-			graphics.setBackgroundColor(bg);
-			graphics.fillRectangle(0, prevY, flattenedForm.getWidth(), part.getHeight() - prevY);
-			prevY = part.getHeight();
-		}
 	}
 
 	/**
@@ -126,9 +83,8 @@ public class FormBackgroundLayer extends FreeformLayer
 	 * @param graphics
 	 * @param flattenedForm
 	 */
-	protected void paintTransparencyFormPattern(Graphics graphics, Form flattenedForm)
+	protected void paintTransparencyFormPattern(Graphics graphics, Dimension size)
 	{
-		Dimension size = flattenedForm.getSize();
 		paintTransparencypattern(graphics, true, size);
 		paintTransparencypattern(graphics, false, size);
 	}
@@ -143,51 +99,6 @@ public class FormBackgroundLayer extends FreeformLayer
 				graphics.fillRectangle(x, y, Math.min(TRANSPARENT_PATTERN_SIZE, size.width - x), Math.min(TRANSPARENT_PATTERN_SIZE, size.height - y));
 			}
 		}
-	}
-
-	/**
-	 * get background based on form style
-	 * 
-	 * @param form
-	 * @return
-	 */
-	public static java.awt.Color getPartBackground(Form form, Part part)
-	{
-		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
-		IStyleSheet styleSheet = ComponentFactory.getCSSStyle(null, flattenedSolution.getStyleForForm(form, null));
-		java.awt.Color background = null;
-		if (styleSheet != null)
-		{
-			IStyleRule style = null;
-			String partLookup = Part.getCSSSelector(part.getPartType());
-			if (partLookup != null)
-			{
-				style = styleSheet.getCSSRule(partLookup);
-				if (style != null)
-				{
-					background = styleSheet.getBackground(style);
-				}
-			}
-			if (background == null)
-			{
-				String lookupname = "form";
-				if (form.getStyleClass() != null && !"".equals(form.getStyleClass()))
-				{
-					lookupname += '.' + form.getStyleClass();
-				}
-				style = styleSheet.getCSSRule(lookupname);
-				if (style != null)
-				{
-					background = styleSheet.getBackground(style);
-				}
-			}
-		}
-
-		if (background == null)
-		{
-			return java.awt.Color.white;
-		}
-		return background;
 	}
 
 	/**

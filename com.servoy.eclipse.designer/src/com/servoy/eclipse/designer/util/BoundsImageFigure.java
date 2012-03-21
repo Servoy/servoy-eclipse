@@ -34,6 +34,6 @@ public class BoundsImageFigure extends ImageFigure implements HandleBounds
 
 	public Rectangle getHandleBounds()
 	{
-		return new Rectangle(getBounds()).crop(getInsets());
+		return new Rectangle(getBounds()).shrink(getInsets());
 	}
 }

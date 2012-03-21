@@ -38,6 +38,7 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Point;
 
 import com.servoy.eclipse.designer.editor.FormBorderGraphicalEditPart.BorderModel;
+import com.servoy.eclipse.designer.editor.FormPartpanelGraphicalEditPart.PartpanelModel;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -53,6 +54,7 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.util.Utils;
 
 /**
  * The Contents Graphical Edit Part for a Servoy Form.
@@ -88,15 +90,17 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		List<Object> list = new ArrayList<Object>();
 
 		list.add(new BorderModel(flattenedForm)); // A separate editpart to show the form border and resize handles
+		for (Part part : Utils.iterate(flattenedForm.getParts()))
+		{
+			// separate editparts for painting part backgrounds
+			list.add(new PartpanelModel(part));
+		}
 
 		Set<FormElementGroup> groups = new HashSet<FormElementGroup>();
 		if (flattenedForm != null)
 		{
-			Iterator<IFormElement> it = flattenedForm.getFormElementsSortedByFormIndex();
-			while (it.hasNext())
+			for (IFormElement o : Utils.iterate(flattenedForm.getFormElementsSortedByFormIndex()))
 			{
-				IFormElement o = it.next();
-
 				if (Boolean.TRUE.equals(getViewer().getProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED)) &&
 					!editorPart.getForm().equals(o.getParent()))
 				{
@@ -151,10 +155,9 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		}
 
 		// parts go on top
-		Iterator<Part> parts = flattenedForm.getParts();
-		while (parts.hasNext())
+		for (Part part : Utils.iterate(flattenedForm.getParts()))
 		{
-			list.add(parts.next());
+			list.add(part);
 		}
 
 		return list;
@@ -209,6 +212,10 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		{
 			return new FormBorderGraphicalEditPart(application, (BorderModel)child);
 		}
+		if (child instanceof PartpanelModel)
+		{
+			return new FormPartpanelGraphicalEditPart(application, (PartpanelModel)child);
+		}
 		if (child instanceof Part)
 		{
 			return new FormPartGraphicalEditPart(application, editorPart, (Part)child, ModelUtils.isInheritedFormElement(child, form));
@@ -240,18 +247,14 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 						org.eclipse.draw2d.geometry.PrecisionRectangle result)
 					{
 						int alteredSnapLocations = super.snapRectangle(request, snapLocations, rect, result);
-						boolean changed = false;
 						if ((gridX > 0) && ((snapLocations & EAST) != 0) && ((alteredSnapLocations & EAST) == 0))
 						{
-							result.preciseWidth -= Math.IEEEremainder(rect.preciseWidth + result.preciseWidth, gridX);
-							changed = true;
+							result.setPreciseWidth(result.preciseWidth() - Math.IEEEremainder(rect.preciseWidth() + result.preciseWidth(), gridX));
 						}
 						if ((gridY > 0) && ((snapLocations & SOUTH) != 0) && ((alteredSnapLocations & SOUTH) == 0))
 						{
-							result.preciseHeight -= Math.IEEEremainder(rect.preciseHeight + result.preciseHeight, gridY);
-							changed = true;
+							result.setPreciseHeight(result.preciseHeight() - Math.IEEEremainder(rect.preciseHeight() + result.preciseHeight(), gridY));
 						}
-						if (changed) result.updateInts();
 						return alteredSnapLocations;
 					}
 				};
