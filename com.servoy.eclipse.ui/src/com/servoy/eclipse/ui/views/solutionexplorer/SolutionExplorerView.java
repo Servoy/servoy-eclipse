@@ -1272,6 +1272,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private void createTreeViewer(Composite parent)
 	{
 		tree = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		tree.setUseHashlookup(true);
 		ColumnViewerToolTipSupport.enableFor(tree);
 		drillDownAdapter = new DrillDownAdapter(tree);
 		tree.setContentProvider(new SolutionExplorerTreeContentProvider(this));
@@ -2908,24 +2909,21 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				segments = folderPath.segments();
 				if (segments.length == 2) // for finding folders under resource project
 				{
-					if (activeProject != null && segments[0].equals(activeProject.getProject().getName()))
+					if (segments[1].equals(SolutionSerializer.FORMS_DIR))
 					{
-						if (segments[1].equals(SolutionSerializer.FORMS_DIR))
-						{
-							return cp.getForms();
-						}
-						else if (segments[1].equals(SolutionSerializer.RELATIONS_DIR))
-						{
-							return cp.getRelations();
-						}
-						else if (segments[1].equals(SolutionSerializer.VALUELISTS_DIR))
-						{
-							return cp.getValuelists();
-						}
-						else if (segments[1].equals(SolutionSerializer.MEDIAS_DIR))
-						{
-							return cp.getMedia();
-						}
+						return cp.getForms();
+					}
+					else if (segments[1].equals(SolutionSerializer.RELATIONS_DIR))
+					{
+						return cp.getRelations();
+					}
+					else if (segments[1].equals(SolutionSerializer.VALUELISTS_DIR))
+					{
+						return cp.getValuelists();
+					}
+					else if (segments[1].equals(SolutionSerializer.MEDIAS_DIR))
+					{
+						return cp.getMedia();
 					}
 
 					if (resourcesProject != null)
@@ -2980,27 +2978,22 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				// we only handle files under solution/forms
 				folderPath = resource.getFullPath();
 				segments = folderPath.segments();
-				String solutionProjectName = null;
-				if (activeProject != null) solutionProjectName = activeProject.getProject().getName();
-				if (solutionProjectName != null && segments[0].equals(solutionProjectName))
+				if (segments[1].equals(SolutionSerializer.FORMS_DIR)) // if the forms node 
 				{
-					if (segments[1].equals(SolutionSerializer.FORMS_DIR)) // if the forms node 
+					SimpleUserNode formsNode = cp.getForms();
+					if (formsNode != null && formsNode.children != null)
 					{
-						SimpleUserNode formsNode = cp.getForms();
-						if (formsNode != null && formsNode.children != null)
+						for (SimpleUserNode un : formsNode.children) // find the form
 						{
-							for (SimpleUserNode un : formsNode.children) // find the form
-							{
-								if (((un.getName() + SolutionSerializer.FORM_FILE_EXTENSION).equals(segments[2]) || (un.getName() + SolutionSerializer.JS_FILE_EXTENSION).equals(segments[2])) &&
-									segments.length == 3) return un;
-							}
+							if (((un.getName() + SolutionSerializer.FORM_FILE_EXTENSION).equals(segments[2]) || (un.getName() + SolutionSerializer.JS_FILE_EXTENSION).equals(segments[2])) &&
+								segments.length == 3) return un;
 						}
 					}
-					else if (segments[1].equals(SolutionSerializer.GLOBALS_FILE))
-					{
-						PlatformSimpleUserNode globalsFolder = cp.getGlobalsFolder();
-						if (globalsFolder.getType() == UserNodeType.GLOBALS_ITEM) return globalsFolder;
-					}
+				}
+				else if (segments[1].equals(SolutionSerializer.GLOBALS_FILE))
+				{
+					PlatformSimpleUserNode globalsFolder = cp.getGlobalsFolder();
+					if (globalsFolder.getType() == UserNodeType.GLOBALS_ITEM) return globalsFolder;
 				}
 				break;
 		}
