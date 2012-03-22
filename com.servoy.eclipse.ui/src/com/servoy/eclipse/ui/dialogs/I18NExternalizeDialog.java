@@ -95,6 +95,7 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -112,6 +113,7 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.ContentSpec.Element;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.I18NUtil;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -120,6 +122,7 @@ import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
@@ -128,11 +131,14 @@ import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.property.I18NMessagesModel;
 import com.servoy.j2db.property.I18NMessagesModel.I18NMessagesModelEntry;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
 public class I18NExternalizeDialog extends Dialog
 {
+	private static final String PREFERENCE_KEY_IGNORE_DB_MESSAGES = "com.servoy.eclipse.ui.dialogs.I18NExternalizeDialog.ignore_db_messages";
+
 	private static final int COLUMN_PROPERTY = 0;
 	private static final int COLUMN_TEXT = 1;
 	private static final int COLUMN_KEY = 2;
@@ -150,13 +156,14 @@ public class I18NExternalizeDialog extends Dialog
 	private final Image elementImage = Activator.getDefault().loadImageFromBundle("element.gif");
 	private final Image serverImage = Activator.getDefault().loadImageFromBundle("server.gif");
 	private final Image tableImage = Activator.getDefault().loadImageFromBundle("portal.gif");
+	private final Image jsImage = Activator.getDefault().loadImageFromBundle("js.gif");
 	private final ServoyProject project;
 	private ArrayList<ServoyProject> i18nProjects;
 	private HashMap<String, String> defaultMessages;
 	private TreeNode content;
 	private FilterDelayJob delayedFilterJob;
 	private static final long FILTER_TYPE_DELAY = 300;
-	private boolean externalizeDatabaseMessages = true;
+	private boolean externalizeDatabaseMessages;
 	private String commonPrefixValue = "";
 
 	private final IFileAccess workspaceFileAccess = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
@@ -167,6 +174,7 @@ public class I18NExternalizeDialog extends Dialog
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX);
 
 		this.project = project;
+		externalizeDatabaseMessages = !PlatformUI.getPreferenceStore().getBoolean(I18NExternalizeDialog.PREFERENCE_KEY_IGNORE_DB_MESSAGES);
 	}
 
 	private ArrayList<ServoyProject> getI18NProjects()
@@ -191,6 +199,110 @@ public class I18NExternalizeDialog extends Dialog
 	{
 		// only apply filter when user stops typing for 300 ms
 		delayedFilterJob.setFilterText(filterTextField.getText());
+	}
+
+	private void updateDataMessagesNodes(ArrayList<ServoyProject> allProjects, String filter)
+	{
+		ArrayList<TreeNode> columnInfoNodes = new ArrayList<TreeNode>();
+
+		if (externalizeDatabaseMessages) // add column infos
+		{
+			final ArrayList<String> solutionServers = new ArrayList<String>();
+			for (ServoyProject servoyProject : allProjects)
+			{
+				servoyProject.getSolution().acceptVisitor(new IPersistVisitor()
+				{
+					public Object visit(IPersist o)
+					{
+						if (o instanceof Form)
+						{
+							Form form = (Form)o;
+							String dataSource = form.getDataSource();
+							if (dataSource != null)
+							{
+								String serverName = DataSourceUtils.getDBServernameTablename(dataSource)[0];
+								if (solutionServers.indexOf(serverName) == -1) solutionServers.add(serverName);
+							}
+							return CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+						}
+						else if (o instanceof Relation)
+						{
+							Relation relation = (Relation)o;
+							String serverLeft = relation.getPrimaryServerName();
+							if (serverLeft != null && solutionServers.indexOf(serverLeft) == -1) solutionServers.add(serverLeft);
+							String serverRight = relation.getForeignServerName();
+							if (serverRight != null && solutionServers.indexOf(serverRight) == -1) solutionServers.add(serverRight);
+							return CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+						}
+						return CONTINUE_TRAVERSAL;
+					}
+				});
+			}
+
+			try
+			{
+				IServerManagerInternal sm = ServoyModel.getServerManager();
+
+				IServer server;
+				for (String serverName : solutionServers)
+				{
+					server = sm.getServer(serverName, true, true);
+					if (server == null) continue;
+					List<String> tableAndViews = ((IServerInternal)server).getTableAndViewNames(true, true);
+					for (String tableName : tableAndViews)
+					{
+						ITable table = server.getTable(tableName);
+						if (table instanceof Table)
+						{
+							Table tableObj = (Table)table;
+							String columnNames[] = tableObj.getColumnNames();
+							TreeNode columnInfoNode;
+							for (String columnName : columnNames)
+							{
+								Column column = tableObj.getColumn(columnName);
+								columnInfoNode = addColumnInfoToTree(content, server, tableObj, column, filter);
+								if (columnInfoNode != null) columnInfoNodes.add(columnInfoNode);
+							}
+
+							for (ServoyProject s : allProjects)
+							{
+								Iterator<TableNode> tableNodesIte = s.getSolution().getTableNodes(tableObj);
+								while (tableNodesIte.hasNext())
+								{
+									addTableNodeToTree(content, server, tableObj, tableNodesIte.next(), filter);
+								}
+							}
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
+			}
+		}
+
+		ArrayList<TreeNode> serverNodes = new ArrayList<TreeNode>();
+		for (TreeNode tn : content.getChildren())
+		{
+			if (tn.getData() instanceof IServer) serverNodes.add(tn);
+		}
+
+		if (!externalizeDatabaseMessages)
+		{
+			for (TreeNode sn : serverNodes)
+				content.getChildren().remove(sn);
+		}
+
+		if (treeViewer != null)
+		{
+			treeViewer.refresh(content);
+			if (externalizeDatabaseMessages)
+			{
+				for (TreeNode cin : columnInfoNodes)
+					treeViewer.expandToLevel(cin, AbstractTreeViewer.ALL_LEVELS);
+			}
+		}
 	}
 
 	public void loadContent(String filterText)
@@ -219,47 +331,7 @@ public class I18NExternalizeDialog extends Dialog
 		for (ServoyProject s : allProjects)
 			addSolutionContent(content, s.getEditingSolution(), filter);
 
-		if (externalizeDatabaseMessages) // add column infos
-		{
-			try
-			{
-				IServerManagerInternal sm = ServoyModel.getServerManager();
-				String[] serverNames = sm.getServerNames(true, true, true, true);
-				IServer server;
-				for (String serverName : serverNames)
-				{
-					server = sm.getServer(serverName);
-					List<String> tableAndViews = ((IServerInternal)server).getTableAndViewNames(true, true);
-					for (String tableName : tableAndViews)
-					{
-						ITable table = server.getTable(tableName);
-						if (table instanceof Table)
-						{
-							Table tableObj = (Table)table;
-							String columnNames[] = tableObj.getColumnNames();
-							for (String columnName : columnNames)
-							{
-								Column column = tableObj.getColumn(columnName);
-								addColumnInfoToTree(content, server, tableObj, column, filter);
-							}
-
-							for (ServoyProject s : allProjects)
-							{
-								Iterator<TableNode> tableNodesIte = s.getSolution().getTableNodes(tableObj);
-								while (tableNodesIte.hasNext())
-								{
-									addTableNodeToTree(content, server, tableObj, tableNodesIte.next(), filter);
-								}
-							}
-						}
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				ServoyLog.logError(ex);
-			}
-		}
+		updateDataMessagesNodes(allProjects, filter);
 
 		if (ignoreMessageButton != null)
 		{
@@ -293,7 +365,7 @@ public class I18NExternalizeDialog extends Dialog
 				}
 				if (serverNodeFound == null)
 				{
-					serverNodeFound = new TreeNode(root, server);
+					serverNodeFound = createTreeNodeForData(server, root);
 					root.addChild(serverNodeFound);
 				}
 
@@ -307,23 +379,23 @@ public class I18NExternalizeDialog extends Dialog
 				}
 				if (tableNodeFound == null)
 				{
-					tableNodeFound = new TreeNode(serverNodeFound, table);
+					tableNodeFound = createTreeNodeForData(table, serverNodeFound);
 					serverNodeFound.addChild(tableNodeFound);
 				}
 			}
 
-			tableNodeFound.addChild(new TreeNode(tableNodeFound, jstxt));
+			tableNodeFound.addChild(createTreeNodeForData(jstxt, tableNodeFound));
 		}
 	}
 
-	private void addColumnInfoToTree(TreeNode root, IServer server, Table table, Column column, String filterText)
+	private TreeNode addColumnInfoToTree(TreeNode root, IServer server, Table table, Column column, String filterText)
 	{
 		ColumnInfo columnInfo = column.getColumnInfo();
 		if (columnInfo != null && (columnInfo.getTitleText() == null || !columnInfo.getTitleText().startsWith("i18n:")))
 		{
 			//check filter
 			if (filterText != null && server.toString().toLowerCase().indexOf(filterText) == -1 && table.toString().toLowerCase().indexOf(filterText) == -1 &&
-				column.toString().toLowerCase().indexOf(filterText) == -1) return;
+				column.toString().toLowerCase().indexOf(filterText) == -1) return null;
 
 
 			ArrayList<TreeNode> serverNodes = root.getChildren();
@@ -337,7 +409,7 @@ public class I18NExternalizeDialog extends Dialog
 			}
 			if (serverNodeFound == null)
 			{
-				serverNodeFound = new TreeNode(root, server);
+				serverNodeFound = createTreeNodeForData(server, root);
 				root.addChild(serverNodeFound);
 			}
 
@@ -352,7 +424,7 @@ public class I18NExternalizeDialog extends Dialog
 			}
 			if (tableNodeFound == null)
 			{
-				tableNodeFound = new TreeNode(serverNodeFound, table);
+				tableNodeFound = createTreeNodeForData(table, serverNodeFound);
 				serverNodeFound.addChild(tableNodeFound);
 			}
 
@@ -367,13 +439,17 @@ public class I18NExternalizeDialog extends Dialog
 			}
 			if (columnNodeFound == null)
 			{
-				columnNodeFound = new TreeNode(tableNodeFound, column);
+				columnNodeFound = createTreeNodeForData(column, tableNodeFound);
 				tableNodeFound.addChild(columnNodeFound);
 			}
 
-			TreeNode columnInfoNode = new TreeNode(columnNodeFound, columnInfo);
+			TreeNode columnInfoNode = createTreeNodeForData(columnInfo, columnNodeFound);
 			columnNodeFound.addChild(columnInfoNode);
+
+			return columnInfoNode;
 		}
+
+		return null;
 	}
 
 	public boolean hasContent()
@@ -391,11 +467,16 @@ public class I18NExternalizeDialog extends Dialog
 		treeViewer = new TreeViewer(treeViewerComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.CHECK)
 		{
 			@Override
-			protected Item newItem(Widget parent, int flags, int ix)
+			protected void createTreeItem(Widget parentWidget, Object element, int index)
 			{
-				Item item = super.newItem(parent, flags, ix);
-				((TreeItem)item).setChecked(true);
-				return item;
+				Item item = newItem(parentWidget, SWT.NULL, index);
+
+				boolean isChecked = true;
+				if (element instanceof TreeNode) isChecked = ((TreeNode)element).isChecked();
+				((TreeItem)item).setChecked(isChecked);
+
+				updateItem(item, element);
+				updatePlus(item, element);
 			}
 		};
 		Tree tree = treeViewer.getTree();
@@ -423,10 +504,15 @@ public class I18NExternalizeDialog extends Dialog
 
 			private void checkTreeItemChildren(TreeItem treeItem, boolean flag)
 			{
+				Object data = treeItem.getData();
+				if (data instanceof TreeNode) ((TreeNode)data).setChecked(flag);
+
 				TreeItem[] children = treeItem.getItems();
 				for (TreeItem child : children)
 				{
 					child.setChecked(flag);
+					Object childData = child.getData();
+					if (childData instanceof TreeNode) ((TreeNode)childData).setChecked(flag);
 					checkTreeItemChildren(child, flag);
 				}
 			}
@@ -675,12 +761,12 @@ public class I18NExternalizeDialog extends Dialog
 			public void widgetSelected(SelectionEvent e)
 			{
 				I18NExternalizeDialog.this.externalizeDatabaseMessages = I18NExternalizeDialog.this.databaseMessagesButton.getSelection();
+				PlatformUI.getPreferenceStore().setValue(I18NExternalizeDialog.PREFERENCE_KEY_IGNORE_DB_MESSAGES,
+					!I18NExternalizeDialog.this.externalizeDatabaseMessages);
 				String filterText = I18NExternalizeDialog.this.filterTextField.getText();
-				I18NExternalizeDialog.this.loadContent("".equals(filterText) ? null : filterText);
-				I18NExternalizeDialog.this.treeViewer.setInput(I18NExternalizeDialog.this.content);
-				I18NExternalizeDialog.this.treeViewer.expandAll();
+				String filter = filterText != null ? filterText.toLowerCase() : filterText;
+				updateDataMessagesNodes(getI18NProjects(), filter);
 			}
-
 		});
 
 		ignoreMessageButton = new Button(composite, SWT.CHECK);
@@ -1399,6 +1485,28 @@ public class I18NExternalizeDialog extends Dialog
 		{
 			return ignored;
 		}
+
+		@Override
+		public boolean equals(Object jsText)
+		{
+			if (jsText instanceof JSText)
+			{
+				JSText compareJSText = (JSText)jsText;
+				return parent.equals(compareJSText.getParent()) && (startPosition == compareJSText.getStartPosition());
+			}
+
+			return false;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + parent.hashCode();
+			result = prime * result + startPosition;
+			return result;
+		}
 	}
 
 	private class TreeContentProvider implements ITreeContentProvider
@@ -1482,10 +1590,43 @@ public class I18NExternalizeDialog extends Dialog
 					{
 						return I18NExternalizeDialog.this.tableImage;
 					}
+					else if (data instanceof JSText)
+					{
+						return I18NExternalizeDialog.this.jsImage;
+					}
 				}
 			}
 			return null;
 		}
+	}
+
+	private final HashMap<Object, TreeNode> dataTreeNodeMap = new HashMap<Object, TreeNode>();
+
+	private TreeNode createTreeNodeForData(Object data, TreeNode parent)
+	{
+		Object keyData = data;
+
+		if (data instanceof Element)
+		{
+			IPersist parentData = (IPersist)parent.getData();
+			keyData = parentData.getUUID() + "_" + ((Element)data).getName();
+		}
+		else if (data instanceof ColumnInfo)
+		{
+			Column parentData = (Column)parent.getData();
+			String datasource = parentData.getTable().getDataSource();
+			keyData = datasource + "_" + parentData.getName();
+		}
+
+		TreeNode treeNodeForData = dataTreeNodeMap.get(keyData);
+		if (treeNodeForData == null)
+		{
+			treeNodeForData = new TreeNode(parent, data);
+			dataTreeNodeMap.put(keyData, treeNodeForData);
+		}
+
+		treeNodeForData.getChildren().clear();
+		return treeNodeForData;
 	}
 
 	private class TreeNode
@@ -1496,6 +1637,8 @@ public class I18NExternalizeDialog extends Dialog
 
 		private String text;
 		private String key;
+
+		private boolean isChecked = true;
 
 		TreeNode()
 		{
@@ -1512,7 +1655,7 @@ public class I18NExternalizeDialog extends Dialog
 		{
 			if (treePath.size() == 0)
 			{
-				addChild(new TreeNode(this, el));
+				addChild(createTreeNodeForData(el, this));
 			}
 			else
 			{
@@ -1526,7 +1669,7 @@ public class I18NExternalizeDialog extends Dialog
 					}
 				}
 
-				TreeNode child = new TreeNode(this, treePathHead);
+				TreeNode child = createTreeNodeForData(treePathHead, this);
 				addChild(child);
 				child.addPersistElement(treePath.subList(1, treePath.size()), el);
 			}
@@ -1631,6 +1774,16 @@ public class I18NExternalizeDialog extends Dialog
 		void setKey(String key)
 		{
 			this.key = key;
+		}
+
+		void setChecked(boolean checked)
+		{
+			this.isChecked = checked;
+		}
+
+		boolean isChecked()
+		{
+			return isChecked;
 		}
 
 		@Override
