@@ -2579,7 +2579,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									}
 								}
 							}
-							else if (type == Field.LIST_BOX || type == Field.MULTI_SELECTION_LIST_BOX || type == Field.SPINNER)
+							else if (type == Field.LIST_BOX || type == Field.MULTISELECT_LISTBOX || type == Field.SPINNER)
 							{
 								// these types of fields MUST have a valuelist
 								Form form = (Form)o.getAncestor(IRepository.FORMS);

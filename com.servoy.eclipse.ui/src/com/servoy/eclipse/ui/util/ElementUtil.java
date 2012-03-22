@@ -330,7 +330,7 @@ public class ElementUtil
 				case Field.IMAGE_MEDIA :
 					return IRuntimeImageMedia.class;
 				case Field.LIST_BOX :
-				case Field.MULTI_SELECTION_LIST_BOX :
+				case Field.MULTISELECT_LISTBOX :
 					return IRuntimeListBox.class;
 				case Field.SPINNER :
 					return IRuntimeSpinner.class;

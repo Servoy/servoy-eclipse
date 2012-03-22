@@ -97,7 +97,7 @@ public class VisualFormEditorPaletteFactory
 	private static final String ELEMENTS_TYPE_AHEAD_ID = "type ahead";
 	private static final String ELEMENTS_PORTAL_ID = "portal";
 	private static final String ELEMENTS_LISTBOX_ID = "listbox";
-	private static final String ELEMENTS_MULTISELECT_LISTBOX_ID = "multiselection listbox";
+	private static final String ELEMENTS_MULTISELECT_LISTBOX_ID = "multiselect listbox";
 	private static final String ELEMENTS_SPINNER_ID = "spinner";
 	private static final String[] ELEMENTS_IDS = new String[] {
 	/* */ELEMENTS_BUTTON_ID,
@@ -410,7 +410,7 @@ public class VisualFormEditorPaletteFactory
 		else if (ELEMENTS_MULTISELECT_LISTBOX_ID.equals(id))
 		{
 			icon = Activator.loadImageDescriptorFromBundle("listbox.png");
-			displayType = Field.MULTI_SELECTION_LIST_BOX;
+			displayType = Field.MULTISELECT_LISTBOX;
 			size = new Dimension(140, 140);
 		}
 		else if (ELEMENTS_SPINNER_ID.equals(id))
