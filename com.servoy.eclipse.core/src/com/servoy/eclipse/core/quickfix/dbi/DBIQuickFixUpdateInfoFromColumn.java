@@ -146,14 +146,14 @@ public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 									// only change what could be conflicting and keep the rest of the column info
 									cid.columnType = difference.getTableDefinition().columnType;
 									cid.allowNull = difference.getTableDefinition().allowNull;
-									// if table definition has a scale, add it to the compatible list, because the default type won't store scale.
+									// if table definition has a scale, add it to the compatible list if needed
 									if (difference.getTableDefinition().columnType.getScale() > 0)
 									{
 										if (cid.compatibleColumnTypes == null)
 										{
 											cid.compatibleColumnTypes = Arrays.asList(difference.getTableDefinition().columnType);
 										}
-										else
+										else if (!cid.compatibleColumnTypes.contains(difference.getTableDefinition().columnType))
 										{
 											cid.compatibleColumnTypes = new ArrayList<ColumnType>(cid.compatibleColumnTypes);
 											cid.compatibleColumnTypes.add(difference.getTableDefinition().columnType);

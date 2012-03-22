@@ -90,7 +90,6 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumnInfoBasedSequenceProvider;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -590,15 +589,6 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 							{
 								// make sure the table is loaded
 								Table t = dbiFileToCreate.getLeft().getTable(dbiFileToCreate.getRight());
-
-								// if table definition has a scale, add it to the compatible list, because the default type won't store scale.
-								for (Column column : t.getColumns())
-								{
-									if (column.getColumnType().getScale() > 0)
-									{
-										column.getColumnInfo().addCompatibleColumnType(column.getColumnType());
-									}
-								}
 
 								// write the file
 								dmm.updateAllColumnInfo(t);
