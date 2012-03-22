@@ -58,11 +58,25 @@ public class PartImageNotifier extends AbstractImageNotifier
 		comp.setBackground(bg == null ? Color.white : bg);
 		comp.setOpaque(!form.getTransparent());
 
+		Pair<IStyleSheet, IStyleRule> formStyle = ComponentFactory.getCSSPairStyleForForm(application, form);
+		boolean formHasBgImage = formStyle != null && formStyle.getRight() != null &&
+			formStyle.getRight().hasAttribute(CSS.Attribute.BACKGROUND_IMAGE.toString());
+
+		boolean paintPartBackgroundOnTopOfImage = formHasBgImage && !form.getTransparent() && bg != null;
+
+		if (paintPartBackgroundOnTopOfImage)
+		{
+			comp.setPaintBackgroundOnTopOfFormImage(true);
+		}
+
 		Pair<IStyleSheet, IStyleRule> pair = ComponentFactory.getStyleForBasicComponent(application, part, form);
 		if (pair == null || pair.getRight() == null || !pair.getRight().hasAttribute(CSS.Attribute.BACKGROUND_IMAGE.toString()))
 		{
-			// use form style for part
-			pair = ComponentFactory.getCSSPairStyleForForm(application, form);
+			if (!paintPartBackgroundOnTopOfImage)
+			{
+				// use form style for part
+				pair = formStyle;
+			}
 		}
 
 		if (pair != null && pair.getRight() != null && pair.getRight().hasAttribute(CSS.Attribute.BACKGROUND_IMAGE.toString()))
