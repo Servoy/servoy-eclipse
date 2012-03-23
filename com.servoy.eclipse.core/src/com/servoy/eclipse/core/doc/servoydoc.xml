@@ -4958,15 +4958,15 @@ if (etype == ELEMENT_TYPES.LIST_BOX)
      // element is a LIST_BOX element
 }]]></sample>
         </constant>
-        <constant name="MULTI_SELECTION_LIST_BOX">
+        <constant name="MULTISELECT_LISTBOX">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant representing a multi selection listbox element.]]></description>
           <summary><![CDATA[Constant representing a multi selection listbox element.]]></summary>
           <sample><![CDATA[//the return value for an element of the TextField type, as returned by the following code
 var etype = elements.elementName.getElementType();
-if (etype == ELEMENT_TYPES.MULTI_SELECTION_LIST_BOX)
+if (etype == ELEMENT_TYPES.MULTISELECT_LISTBOX)
 {
-     // element is a MULTI_SELECTION_LIST_BOX element
+     // element is a MULTISELECT_LISTBOX element
 }]]></sample>
         </constant>
         <constant name="PASSWORD">
@@ -9000,14 +9000,14 @@ vlist.customValues = "one\ntwo\nthree\nfour";
 var list = form.newField('my_table_list', JSField.LIST_BOX, 10, 280, 100, 50);
 list.valuelist = vlist;]]></sample>
         </constant>
-        <constant name="MULTI_SELECTION_LIST_BOX">
+        <constant name="MULTISELECT_LISTBOX">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
 field to list box. The field will show a selection list with multiple choice selection.]]></description>
           <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
           <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
 vlist.customValues = "one\ntwo\nthree\nfour";
-var list = form.newField('my_table_options', JSField.MULTI_SELECTION_LIST_BOX, 10, 280, 100, 50);
+var list = form.newField('my_table_options', JSField.MULTISELECT_LISTBOX, 10, 280, 100, 50);
 list.valuelist = vlist;]]></sample>
         </constant>
         <constant name="PASSWORD">
@@ -9138,7 +9138,7 @@ field.dataProviderID = 'parent_table_id';]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The type of display used by the field. Can be one of CALENDAR, CHECKS,
 COMBOBOX, HTML_AREA, IMAGE_MEDIA, PASSWORD, RADIOS, RTF_AREA, TEXT_AREA,
-TEXT_FIELD, TYPE_AHEAD, LIST_BOX, MULTI_SELECTION_LIST_BOX or SPINNER.]]></description>
+TEXT_FIELD, TYPE_AHEAD, LIST_BOX, MULTISELECT_LISTBOX or SPINNER.]]></description>
           <summary><![CDATA[The type of display used by the field.]]></summary>
           <sample><![CDATA[// The display type is specified when the field is created.
 var cal = form.newField('my_table_date', JSField.CALENDAR, 10, 10, 100, 20);
@@ -11595,9 +11595,9 @@ forms['newForm1'].controller.show();]]></sample>
             <argumentType typecode="int"/>
             <argumentType typecode="int"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSField" typecode="com.servoy.j2db.scripting.solutionmodel.JSField"><![CDATA[a new JSField object on the form with the displayType of MULTI_SELECTION_LIST_BOX]]></return>
-          <description><![CDATA[Creates a new JSField object on the form with the displayType of MULTI_SELECTION_LIST_BOX - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></description>
-          <summary><![CDATA[Creates a new JSField object on the form with the displayType of MULTI_SELECTION_LIST_BOX - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSField" typecode="com.servoy.j2db.scripting.solutionmodel.JSField"><![CDATA[a new JSField object on the form with the displayType of MULTISELECT_LISTBOX]]></return>
+          <description><![CDATA[Creates a new JSField object on the form with the displayType of MULTISELECT_LISTBOX - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></description>
+          <summary><![CDATA[Creates a new JSField object on the form with the displayType of MULTISELECT_LISTBOX - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
           <sample><![CDATA[var form = solutionModel.newForm('newForm1', 'myServer', 'myTable', null, true, 800, 600);
 var calendar = form.newMultiSelectionListBox(myDataProvider, 100, 100, 200, 200);
 forms['newForm1'].controller.show();]]></sample>
@@ -13061,7 +13061,9 @@ foundset.loadRecords(dataset);
 foundset.loadRecords(123);
 foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
 
-4) to reload all last related records again, if for example when searched in tabpanel
+4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
+when in find mode, this will reload the records from before the find() call.
+
 foundset.loadRecords();
 
 5) to load records in to the form based on a query (also known as 'Form by query')
@@ -13125,7 +13127,9 @@ foundset.loadRecords(dataset);
 foundset.loadRecords(123);
 foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
 
-4) to reload all last related records again, if for example when searched in tabpanel
+4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
+when in find mode, this will reload the records from before the find() call.
+
 foundset.loadRecords();
 
 5) to load records in to the form based on a query (also known as 'Form by query')
@@ -13192,7 +13196,9 @@ foundset.loadRecords(dataset);
 foundset.loadRecords(123);
 foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
 
-4) to reload all last related records again, if for example when searched in tabpanel
+4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
+when in find mode, this will reload the records from before the find() call.
+
 foundset.loadRecords();
 
 5) to load records in to the form based on a query (also known as 'Form by query')
@@ -13261,7 +13267,9 @@ foundset.loadRecords(dataset);
 foundset.loadRecords(123);
 foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
 
-4) to reload all last related records again, if for example when searched in tabpanel
+4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
+when in find mode, this will reload the records from before the find() call.
+
 foundset.loadRecords();
 
 5) to load records in to the form based on a query (also known as 'Form by query')
@@ -13330,7 +13338,9 @@ foundset.loadRecords(dataset);
 foundset.loadRecords(123);
 foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
 
-4) to reload all last related records again, if for example when searched in tabpanel
+4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
+when in find mode, this will reload the records from before the find() call.
+
 foundset.loadRecords();
 
 5) to load records in to the form based on a query (also known as 'Form by query')
@@ -13399,7 +13409,9 @@ foundset.loadRecords(dataset);
 foundset.loadRecords(123);
 foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
 
-4) to reload all last related records again, if for example when searched in tabpanel
+4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
+when in find mode, this will reload the records from before the find() call.
+
 foundset.loadRecords();
 
 5) to load records in to the form based on a query (also known as 'Form by query')
@@ -13468,7 +13480,9 @@ foundset.loadRecords(dataset);
 foundset.loadRecords(123);
 foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
 
-4) to reload all last related records again, if for example when searched in tabpanel
+4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
+when in find mode, this will reload the records from before the find() call.
+
 foundset.loadRecords();
 
 5) to load records in to the form based on a query (also known as 'Form by query')
@@ -13538,7 +13552,9 @@ foundset.loadRecords(dataset);
 foundset.loadRecords(123);
 foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
 
-4) to reload all last related records again, if for example when searched in tabpanel
+4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
+when in find mode, this will reload the records from before the find() call.
+
 foundset.loadRecords();
 
 5) to load records in to the form based on a query (also known as 'Form by query')
@@ -21885,7 +21901,9 @@ foundset.loadRecords(dataset);
 foundset.loadRecords(123);
 foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
 
-4) to reload all last related records again, if for example when searched in tabpanel
+4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
+when in find mode, this will reload the records from before the find() call.
+
 foundset.loadRecords();
 
 5) to load records in to the form based on a query (also known as 'Form by query')
@@ -21949,7 +21967,9 @@ foundset.loadRecords(dataset);
 foundset.loadRecords(123);
 foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
 
-4) to reload all last related records again, if for example when searched in tabpanel
+4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
+when in find mode, this will reload the records from before the find() call.
+
 foundset.loadRecords();
 
 5) to load records in to the form based on a query (also known as 'Form by query')
@@ -22016,7 +22036,9 @@ foundset.loadRecords(dataset);
 foundset.loadRecords(123);
 foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
 
-4) to reload all last related records again, if for example when searched in tabpanel
+4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
+when in find mode, this will reload the records from before the find() call.
+
 foundset.loadRecords();
 
 5) to load records in to the form based on a query (also known as 'Form by query')
@@ -22085,7 +22107,9 @@ foundset.loadRecords(dataset);
 foundset.loadRecords(123);
 foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
 
-4) to reload all last related records again, if for example when searched in tabpanel
+4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
+when in find mode, this will reload the records from before the find() call.
+
 foundset.loadRecords();
 
 5) to load records in to the form based on a query (also known as 'Form by query')
@@ -22154,7 +22178,9 @@ foundset.loadRecords(dataset);
 foundset.loadRecords(123);
 foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
 
-4) to reload all last related records again, if for example when searched in tabpanel
+4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
+when in find mode, this will reload the records from before the find() call.
+
 foundset.loadRecords();
 
 5) to load records in to the form based on a query (also known as 'Form by query')
@@ -22223,7 +22249,9 @@ foundset.loadRecords(dataset);
 foundset.loadRecords(123);
 foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
 
-4) to reload all last related records again, if for example when searched in tabpanel
+4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
+when in find mode, this will reload the records from before the find() call.
+
 foundset.loadRecords();
 
 5) to load records in to the form based on a query (also known as 'Form by query')
@@ -22292,7 +22320,9 @@ foundset.loadRecords(dataset);
 foundset.loadRecords(123);
 foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
 
-4) to reload all last related records again, if for example when searched in tabpanel
+4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
+when in find mode, this will reload the records from before the find() call.
+
 foundset.loadRecords();
 
 5) to load records in to the form based on a query (also known as 'Form by query')
@@ -22362,7 +22392,9 @@ foundset.loadRecords(dataset);
 foundset.loadRecords(123);
 foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
 
-4) to reload all last related records again, if for example when searched in tabpanel
+4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
+when in find mode, this will reload the records from before the find() call.
+
 foundset.loadRecords();
 
 5) to load records in to the form based on a query (also known as 'Form by query')
@@ -23291,6 +23323,172 @@ forms.company.elements.faxBtn.visible = !currentState;]]></sample>
               <description><![CDATA[the specified name of the related foundset (default is null)]]></description>
             </parameter>
             <parameter name="index" optional="true">
+              <description><![CDATA[the specified index of a tab, default is -1, will add tab to the end]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="addTab" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <parameters>
+            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          </parameters>
+        </function>
+        <function name="addTab" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <parameters>
+            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabText" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="toolTip" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="iconURL" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          </parameters>
+        </function>
+        <function name="addTab" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <parameters>
+            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabText" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="toolTip" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="iconURL" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="fg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="bg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          </parameters>
+        </function>
+        <function name="addTab" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.IFoundSet"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <parameters>
+            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabText" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="toolTip" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="iconURL" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="fg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="bg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="relation" type="com.servoy.j2db.dataprocessing.IFoundSet" typecode="com.servoy.j2db.dataprocessing.IFoundSet"/>
+          </parameters>
+        </function>
+        <function name="addTab" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.IFoundSet"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <parameters>
+            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabText" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="toolTip" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="iconURL" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="fg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="bg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="relation" type="com.servoy.j2db.dataprocessing.IFoundSet" typecode="com.servoy.j2db.dataprocessing.IFoundSet"/>
+            <parameter name="tabIndex" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          </parameters>
+        </function>
+        <function name="addTab" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <parameters>
+            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabText" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="toolTip" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="iconURL" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="fg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="bg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="relation" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          </parameters>
+        </function>
+        <function name="addTab">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[a boolean value indicating if tab was successfully added]]></return>
+          <description><![CDATA[Adds a relationless or related form as a tab in a specified tabpanel.]]></description>
+          <summary><![CDATA[Adds a relationless or related form as a tab in a specified tabpanel.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.addTab(forms.orders,'ordersTab','Orders',null,null,'#000000','#BBCCEE');]]></sample>
+          <parameters>
+            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified form/form name you wish to add as a tab]]></description>
+            </parameter>
+            <parameter name="name" optional="true">
+              <description><![CDATA[the specified name for the tab or NULL (default is null)]]></description>
+            </parameter>
+            <parameter name="tabText" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified text for the tab (default is null)]]></description>
+            </parameter>
+            <parameter name="tooltip" optional="true">
+              <description><![CDATA[a specified tooltip for the tab (default is null)]]></description>
+            </parameter>
+            <parameter name="iconURL" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[a specified icon image or icon URL for the tab (default is null)]]></description>
+            </parameter>
+            <parameter name="fg" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the HTML RGB Hexadecimal foreground color for the tab (default is null)]]></description>
+            </parameter>
+            <parameter name="bg" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the HTML RGB Hexadecimal background color for the tab (default is null)]]></description>
+            </parameter>
+            <parameter name="relation" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name of the related foundset (default is null)]]></description>
+            </parameter>
+            <parameter name="tabIndex" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the specified index of a tab, default is -1, will add tab to the end]]></description>
             </parameter>
           </parameters>
@@ -32023,6 +32221,172 @@ forms.company.elements.faxBtn.visible = !currentState;]]></sample>
         </property>
       </properties>
       <functions>
+        <function name="addTab" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <parameters>
+            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          </parameters>
+        </function>
+        <function name="addTab" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <parameters>
+            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabText" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="toolTip" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="iconURL" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          </parameters>
+        </function>
+        <function name="addTab" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <parameters>
+            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabText" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="toolTip" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="iconURL" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="fg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="bg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          </parameters>
+        </function>
+        <function name="addTab" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.IFoundSet"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <parameters>
+            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabText" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="toolTip" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="iconURL" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="fg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="bg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="relation" type="com.servoy.j2db.dataprocessing.IFoundSet" typecode="com.servoy.j2db.dataprocessing.IFoundSet"/>
+          </parameters>
+        </function>
+        <function name="addTab" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.IFoundSet"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <parameters>
+            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabText" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="toolTip" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="iconURL" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="fg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="bg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="relation" type="com.servoy.j2db.dataprocessing.IFoundSet" typecode="com.servoy.j2db.dataprocessing.IFoundSet"/>
+            <parameter name="tabIndex" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          </parameters>
+        </function>
+        <function name="addTab" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <parameters>
+            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabText" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="toolTip" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="iconURL" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="fg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="bg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="relation" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          </parameters>
+        </function>
+        <function name="addTab">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[a boolean value indicating if tab was successfully added]]></return>
+          <description><![CDATA[Adds a relationless or related form as a tab in a specified tabpanel.]]></description>
+          <summary><![CDATA[Adds a relationless or related form as a tab in a specified tabpanel.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.addTab(forms.orders,'ordersTab','Orders',null,null,'#000000','#BBCCEE');]]></sample>
+          <parameters>
+            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified form/form name you wish to add as a tab]]></description>
+            </parameter>
+            <parameter name="name" optional="true">
+              <description><![CDATA[the specified name for the tab or NULL (default is null)]]></description>
+            </parameter>
+            <parameter name="tabText" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified text for the tab (default is null)]]></description>
+            </parameter>
+            <parameter name="tooltip" optional="true">
+              <description><![CDATA[a specified tooltip for the tab (default is null)]]></description>
+            </parameter>
+            <parameter name="iconURL" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[a specified icon image or icon URL for the tab (default is null)]]></description>
+            </parameter>
+            <parameter name="fg" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the HTML RGB Hexadecimal foreground color for the tab (default is null)]]></description>
+            </parameter>
+            <parameter name="bg" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the HTML RGB Hexadecimal background color for the tab (default is null)]]></description>
+            </parameter>
+            <parameter name="relation" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name of the related foundset (default is null)]]></description>
+            </parameter>
+            <parameter name="tabIndex" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the specified index of a tab, default is -1, will add tab to the end]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function name="getAbsoluteFormLocationY">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the form in pixels.]]></return>
@@ -32103,6 +32467,13 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
+        <function name="getMaxTabIndex">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[maximum tab index (number)]]></return>
+          <description><![CDATA[Returns the maximum tab index for a specified tabpanel.]]></description>
+          <summary><![CDATA[Returns the maximum tab index for a specified tabpanel.]]></summary>
+          <sample><![CDATA[var max = %%prefix%%%%elementName%%.getMaxTabIndex();]]></sample>
+        </function>
         <function name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
@@ -32125,6 +32496,76 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <description/>
           <deprecated><![CDATA[As of release 5.0, method is obsolete.]]></deprecated>
           <sample/>
+        </function>
+        <function name="getTabFGColorAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[color as hexadecimal RGB string]]></return>
+          <description><![CDATA[Returns the foreground color for a specified tab of a tabpanel.]]></description>
+          <summary><![CDATA[Returns the foreground color for a specified tab of a tabpanel.]]></summary>
+          <sample><![CDATA[var color = %%prefix%%%%elementName%%.getTabFGColorAt(3);]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the number of the specified tab]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getTabFormNameAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the name of the form]]></return>
+          <description><![CDATA[Returns the form name for a specified tab of a tabpanel.]]></description>
+          <summary><![CDATA[Returns the form name for a specified tab of a tabpanel.]]></summary>
+          <sample><![CDATA[var formName = %%prefix%%%%elementName%%.getSelectedTabFormName(3);]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[index of the tab]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getTabNameAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The tab name]]></return>
+          <description><![CDATA[Returns the name - the "name" design time property value - for a specified tab of a tabpanel.]]></description>
+          <summary><![CDATA[Returns the name - the "name" design time property value - for a specified tab of a tabpanel.]]></summary>
+          <sample><![CDATA[var tabName = %%prefix%%%%elementName%%.getTabNameAt(3);]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The number of the specified tab.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getTabRelationNameAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[relation name]]></return>
+          <description><![CDATA[Returns the relation name for a specified tab of a tabpanel.]]></description>
+          <summary><![CDATA[Returns the relation name for a specified tab of a tabpanel.]]></summary>
+          <sample><![CDATA[var relName = %%prefix%%%%elementName%%.getTabRelationNameAt(3);]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[index of the tab]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getTabTextAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The tab text.]]></return>
+          <description><![CDATA[Returns the text for a specified tab of a tabpanel.]]></description>
+          <summary><![CDATA[Returns the text for a specified tab of a tabpanel.]]></summary>
+          <sample><![CDATA[var tabText = %%prefix%%%%elementName%%.getTabTextAt(3);]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The number of the specified tab.]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="getWidth">
           <argumentsTypes/>
@@ -32154,6 +32595,20 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <deprecated><![CDATA[As of release 3.x, replaced by #isTabEnabledAt(int).]]></deprecated>
           <sample/>
         </function>
+        <function name="isTabEnabledAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[True if tab is enabled, false otherwise.]]></return>
+          <description><![CDATA[Returns the enabled status of a specified tab in a tabpanel.]]></description>
+          <summary><![CDATA[Returns the enabled status of a specified tab in a tabpanel.]]></summary>
+          <sample><![CDATA[var status = %%prefix%%%%elementName%%.isTabEnabledAt(3);]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the number of the specified tab.]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function name="putClientProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
@@ -32180,6 +32635,22 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <description><![CDATA[Removes all tabs for a specified tabpanel.]]></description>
           <summary><![CDATA[Removes all tabs for a specified tabpanel.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.removeAllTabs();]]></sample>
+        </function>
+        <function name="removeTabAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[a boolean value indicating if tab was successfully removed]]></return>
+          <description><![CDATA[Removes a specified tab in a tabpanel; can be based on a relation or relationless.
+
+NOTE: In Servoy 4.x (and higher), the addTab function applies to relationless or related tabs in a tabpanel.]]></description>
+          <summary><![CDATA[Removes a specified tab in a tabpanel; can be based on a relation or relationless.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.removeTabAt(3);]]></sample>
+          <parameters>
+            <parameter name="index">
+              <description><![CDATA[The index of the tab to remove.]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="setLocation">
           <argumentsTypes>
@@ -32257,6 +32728,60 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <description/>
           <deprecated><![CDATA[As of release 3.x, replaced by #setTabEnabledAt(int,boolean).]]></deprecated>
           <sample/>
+        </function>
+        <function name="setTabEnabledAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the status of a specified tab in a tabpanel.]]></description>
+          <summary><![CDATA[Sets the status of a specified tab in a tabpanel.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.setTabEnabledAt(3,true);]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the number of the specified tab.]]></description>
+            </parameter>
+            <parameter name="b" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[true if enabled; or false if disabled.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setTabFGColorAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the foreground color for a specified tab in a tabpanel.]]></description>
+          <summary><![CDATA[Sets the foreground color for a specified tab in a tabpanel.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.setTabFGColorAt(3,'#000000');]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the number of the specified tab]]></description>
+            </parameter>
+            <parameter name="s" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the hexadecimal RGB color value to be set.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setTabTextAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the text for a specified tab in a tabpanel.]]></description>
+          <summary><![CDATA[Sets the text for a specified tab in a tabpanel.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.setTabTextAt(3,'newTitle');]]></sample>
+          <parameters>
+            <parameter name="index">
+              <description><![CDATA[the number of the specified tab]]></description>
+            </parameter>
+            <parameter name="text">
+              <description><![CDATA[the text to be set for the specified tab]]></description>
+            </parameter>
+          </parameters>
         </function>
       </functions>
     </object>
@@ -36759,7 +37284,7 @@ for (var i in globalVariables)
 for (var i in globalVariables)
 	application.output(globalVariables[i].name + " has the default value of " + globalVariables[i].defaultValue);]]></sample>
           <parameters>
-            <parameter name="scopeName" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+            <parameter name="scopeName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[limit to global vars of specified scope name]]></description>
             </parameter>
           </parameters>
