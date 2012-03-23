@@ -533,17 +533,35 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		{
 			public void iColumnChanged(IColumn column)
 			{
-				refresh();
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						refresh();
+					}
+				});
 			}
 
 			public void iColumnCreated(IColumn column)
 			{
-				refresh();
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						refresh();
+					}
+				});
 			}
 
 			public void iColumnRemoved(IColumn column)
 			{
-				refresh();
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						refresh();
+					}
+				});
 			}
 		};
 		table.addIColumnListener(columnListener);
