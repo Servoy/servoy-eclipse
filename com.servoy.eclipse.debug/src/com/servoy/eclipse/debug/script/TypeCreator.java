@@ -1172,7 +1172,7 @@ public abstract class TypeCreator
 							if (parameter.getType() != null)
 							{
 								sb.append("{");
-								sb.append(parameter.getType());
+								sb.append(SolutionExplorerListContentProvider.TYPES.get(parameter.getType()));
 								sb.append("} ");
 							}
 							sb.append(parameter.getName());

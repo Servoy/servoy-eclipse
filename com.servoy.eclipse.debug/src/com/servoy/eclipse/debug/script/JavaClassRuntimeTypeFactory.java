@@ -7,6 +7,7 @@ import org.eclipse.dltk.javascript.typeinfo.ITypeSystem;
 import org.eclipse.dltk.javascript.typeinfo.TypeCompatibility;
 import org.eclipse.dltk.javascript.typeinfo.TypeQuery;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
+import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 
 public class JavaClassRuntimeTypeFactory implements IRTypeFactory
@@ -17,6 +18,17 @@ public class JavaClassRuntimeTypeFactory implements IRTypeFactory
 		{
 			return new JavaRuntimeType(type);
 		}
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.dltk.javascript.typeinfo.IRTypeFactory#create(org.eclipse.dltk.javascript.typeinfo.ITypeSystem,
+	 * org.eclipse.dltk.javascript.typeinfo.model.JSType)
+	 */
+	public IRType create(ITypeSystem typeSystem, JSType type)
+	{
 		return null;
 	}
 
@@ -107,11 +119,11 @@ public class JavaClassRuntimeTypeFactory implements IRTypeFactory
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.dltk.javascript.typeinfo.IRType#activeTypeSystem(org.eclipse.dltk.javascript.typeinfo.ITypeSystem)
+		 * @see org.eclipse.dltk.javascript.typeinfo.IRType#activeTypeSystem()
 		 */
-		public ITypeSystem activeTypeSystem(ITypeSystem fallback)
+		public ITypeSystem activeTypeSystem()
 		{
-			return fallback;
+			return null;
 		}
 
 	}
