@@ -1798,6 +1798,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		}
 		if (projectNode != null)
 		{
+			if (projectNode.children == null) getChildren(projectNode); // create them
 			for (SimpleUserNode child : projectNode.children)
 			{
 				if (child.getRealType() == type)
