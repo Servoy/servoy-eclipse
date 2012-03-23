@@ -75,6 +75,7 @@ import com.servoy.j2db.dataprocessing.IRecordInternal;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
+import com.servoy.j2db.documentation.IParameter;
 import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
 import com.servoy.j2db.documentation.scripting.docs.FormElements;
 import com.servoy.j2db.documentation.scripting.docs.Forms;
@@ -1709,7 +1710,24 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		 */
 		public String getCode()
 		{
-			return prefix + name + "(" + getPrettyParameterTypesString() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			String[] paramNames = null;
+			if (scriptObject != null)
+			{
+				if (scriptObject instanceof XMLScriptObjectAdapter && parameterTypes != null)
+				{
+					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, parameterTypes);
+					paramNames = new String[parameters.length];
+					for (int i = 0; i < parameters.length; i++)
+					{
+						paramNames[i] = parameters[i].getName();
+					}
+				}
+				else
+				{
+					paramNames = scriptObject.getParameterNames(name);
+				}
+			}
+			return prefix + name + "(" + getPrettyParameterTypesString(paramNames, true) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		/**
@@ -1722,11 +1740,24 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			if (scriptObject != null)
 			{
 				String description = "";
-				if (parameterTypes != null && scriptObject instanceof XMLScriptObjectAdapter) description = ((XMLScriptObjectAdapter)scriptObject).getToolTip(
-					name, parameterTypes);
-				else description = scriptObject.getToolTip(name);
-				tooltip = Text.processTags(description, resolver);
-				paramNames = scriptObject.getParameterNames(name);
+				if (scriptObject instanceof XMLScriptObjectAdapter && parameterTypes != null)
+				{
+					description = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, parameterTypes);
+					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, parameterTypes);
+
+					paramNames = new String[parameters.length];
+					for (int i = 0; i < parameters.length; i++)
+					{
+						paramNames[i] = parameters[i].getName();
+					}
+					tooltip = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, parameterTypes);
+				}
+				else
+				{
+					description = scriptObject.getToolTip(name);
+					paramNames = scriptObject.getParameterNames(name);
+					tooltip = Text.processTags(description, resolver);
+				}
 			}
 			if (tooltip == null) tooltip = ""; //$NON-NLS-1$
 
@@ -1739,7 +1770,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			returnTypeStringBuffer.insert(0, TYPES.get(returnType.getName()));
 
-			String tmp = "<html><body><b>" + returnTypeStringBuffer.toString() + " " + name + "(" + getPrettyParameterTypesString() + ")</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			String tmp = "<html><body><b>" + returnTypeStringBuffer.toString() + " " + name + "(" + getPrettyParameterTypesString(paramNames, false) + ")</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			if ("".equals(tooltip)) //$NON-NLS-1$
 			{
 				tooltip = tmp + "</body></html>"; //$NON-NLS-1$
@@ -1751,14 +1782,31 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			return tooltip;
 		}
 
-		private String getPrettyParameterTypesString()
+		private String getPrettyParameterTypesString(String[] names, boolean namesOnly)
 		{
 			if (parameterTypes.length == 0) return ""; //$NON-NLS-1$
 
-			String paramTypes = ""; //$NON-NLS-1$
-			for (Class param : parameterTypes)
+			StringBuilder paramTypes = new StringBuilder(32);
+			if (names == null || names.length != parameterTypes.length)
 			{
-				paramTypes += TYPES.get(param.getSimpleName()) + ","; //$NON-NLS-1$
+				for (Class param : parameterTypes)
+				{
+					paramTypes.append(TYPES.get(param.getSimpleName()));
+					paramTypes.append(',');
+				}
+			}
+			else if (names != null)
+			{
+				for (int i = 0; i < parameterTypes.length; i++)
+				{
+					paramTypes.append(names[i]);
+					if (!namesOnly)
+					{
+						paramTypes.append(':');
+						paramTypes.append(TYPES.get(parameterTypes[i].getSimpleName()));
+					}
+					paramTypes.append(',');
+				}
 			}
 			return paramTypes.substring(0, paramTypes.length() - 1);
 		}
