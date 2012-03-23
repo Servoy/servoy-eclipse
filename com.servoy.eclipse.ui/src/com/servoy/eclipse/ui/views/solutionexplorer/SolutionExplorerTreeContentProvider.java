@@ -154,16 +154,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private final PlatformSimpleUserNode i18n;
 
-	private PlatformSimpleUserNode forms;
-
-	private PlatformSimpleUserNode globalsFolder;
-
-	private PlatformSimpleUserNode allRelations;
-
-	private PlatformSimpleUserNode valuelists;
-
-	private PlatformSimpleUserNode media;
-
 	private final PlatformSimpleUserNode[] scriptingNodes;
 
 	private final PlatformSimpleUserNode[] resourceNodes;
@@ -989,6 +979,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		Solution solution = servoyProject.getSolution();
 		if (solution != null)
 		{
+			PlatformSimpleUserNode globalsFolder;
 			if (solutionOfCalculation == null)
 			{
 				globalsFolder = new PlatformSimpleUserNode(Messages.TreeStrings_Globals, UserNodeType.GLOBALS_ITEM, solution,
@@ -1001,18 +992,20 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			}
 			addGlobalsNodeChildren(globalsFolder, solution);
 
-			allRelations = null;
-			forms = new PlatformSimpleUserNode(Messages.TreeStrings_Forms, UserNodeType.FORMS, solution, uiActivator.loadImageFromBundle("forms.gif"));
+			PlatformSimpleUserNode forms = new PlatformSimpleUserNode(Messages.TreeStrings_Forms, UserNodeType.FORMS, solution,
+				uiActivator.loadImageFromBundle("forms.gif"));
 			forms.parent = projectNode;
+			PlatformSimpleUserNode allRelations = null;
 			if (solutionOfCalculation == null)
 			{
 				allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.ALL_RELATIONS, solution,
 					uiActivator.loadImageFromOldLocation("relationsoverview.gif")); //$NON-NLS-1$
 				allRelations.parent = projectNode;
 			}
-			valuelists = new PlatformSimpleUserNode(Messages.TreeStrings_ValueLists, UserNodeType.VALUELISTS, solution,
+			PlatformSimpleUserNode valuelists = new PlatformSimpleUserNode(Messages.TreeStrings_ValueLists, UserNodeType.VALUELISTS, solution,
 				uiActivator.loadImageFromBundle("valuelists.gif")); //$NON-NLS-1$
-			media = new PlatformSimpleUserNode(Messages.TreeStrings_Media, UserNodeType.MEDIA, solution, uiActivator.loadImageFromBundle("image.gif"));
+			PlatformSimpleUserNode media = new PlatformSimpleUserNode(Messages.TreeStrings_Media, UserNodeType.MEDIA, solution,
+				uiActivator.loadImageFromBundle("image.gif"));
 
 			globalsFolder.parent = projectNode;
 			valuelists.parent = projectNode;
@@ -1785,29 +1778,60 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return i18n;
 	}
 
-	public PlatformSimpleUserNode getForms()
+	private SimpleUserNode findProjectNodeChild(ServoyProject project, UserNodeType type)
 	{
-		return forms;
+		SimpleUserNode projectNode = null;
+		if (activeSolutionNode.getRealObject() != null && activeSolutionNode.getRealObject().equals(project))
+		{
+			projectNode = activeSolutionNode;
+		}
+		else
+		{
+			for (SimpleUserNode node : modulesOfActiveSolution.children)
+			{
+				if (node.getRealObject() != null && node.getRealObject().equals(project))
+				{
+					projectNode = node;
+					break;
+				}
+			}
+		}
+		if (projectNode != null)
+		{
+			for (SimpleUserNode child : projectNode.children)
+			{
+				if (child.getRealType() == type)
+				{
+					return child;
+				}
+			}
+		}
+		return null;
 	}
 
-	public PlatformSimpleUserNode getGlobalsFolder()
+	public SimpleUserNode getForms(ServoyProject project)
 	{
-		return globalsFolder;
+		return findProjectNodeChild(project, UserNodeType.FORMS);
 	}
 
-	public PlatformSimpleUserNode getRelations()
+	public SimpleUserNode getGlobalsFolder(ServoyProject project)
 	{
-		return allRelations;
+		return findProjectNodeChild(project, UserNodeType.GLOBALS_ITEM);
 	}
 
-	public PlatformSimpleUserNode getValuelists()
+	public SimpleUserNode getRelations(ServoyProject project)
 	{
-		return valuelists;
+		return findProjectNodeChild(project, UserNodeType.ALL_RELATIONS);
 	}
 
-	public PlatformSimpleUserNode getMedia()
+	public SimpleUserNode getValuelists(ServoyProject project)
 	{
-		return media;
+		return findProjectNodeChild(project, UserNodeType.VALUELISTS);
+	}
+
+	public SimpleUserNode getMedia(ServoyProject project)
+	{
+		return findProjectNodeChild(project, UserNodeType.MEDIA);
 	}
 
 	public PlatformSimpleUserNode getAllSolutionsNode()

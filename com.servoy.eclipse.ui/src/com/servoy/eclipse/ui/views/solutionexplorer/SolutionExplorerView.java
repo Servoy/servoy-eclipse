@@ -2877,10 +2877,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private SimpleUserNode resourceToSimpleUserNode(IResource resource)
 	{
 		SolutionExplorerTreeContentProvider cp = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
-		IPath folderPath;
-		String[] segments;
+		IPath folderPath = resource.getFullPath();
+		String[] segments = folderPath.segments();
 		ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
-		ServoyProject activeProject = sm.getActiveProject();
+		ServoyProject selectedProject = sm.getServoyProject(segments[0]);
 		ServoyResourcesProject resourcesProject = sm.getActiveResourcesProject();
 
 		switch (resource.getType())
@@ -2905,25 +2905,26 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				}
 				break;
 			case IResource.FOLDER :
-				folderPath = resource.getFullPath();
-				segments = folderPath.segments();
 				if (segments.length == 2) // for finding folders under resource project
 				{
-					if (segments[1].equals(SolutionSerializer.FORMS_DIR))
+					if (selectedProject != null)
 					{
-						return cp.getForms();
-					}
-					else if (segments[1].equals(SolutionSerializer.RELATIONS_DIR))
-					{
-						return cp.getRelations();
-					}
-					else if (segments[1].equals(SolutionSerializer.VALUELISTS_DIR))
-					{
-						return cp.getValuelists();
-					}
-					else if (segments[1].equals(SolutionSerializer.MEDIAS_DIR))
-					{
-						return cp.getMedia();
+						if (segments[1].equals(SolutionSerializer.FORMS_DIR))
+						{
+							return cp.getForms(selectedProject);
+						}
+						else if (segments[1].equals(SolutionSerializer.RELATIONS_DIR))
+						{
+							return cp.getRelations(selectedProject);
+						}
+						else if (segments[1].equals(SolutionSerializer.VALUELISTS_DIR))
+						{
+							return cp.getValuelists(selectedProject);
+						}
+						else if (segments[1].equals(SolutionSerializer.MEDIAS_DIR))
+						{
+							return cp.getMedia(selectedProject);
+						}
 					}
 
 					if (resourcesProject != null)
@@ -2956,19 +2957,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				}
 				else if (segments.length == 3) // for finding folders under solution/forms
 				{
-					String solutionProjectName = null;
-					if (activeProject != null) solutionProjectName = activeProject.getProject().getName();
-					if (solutionProjectName != null && segments[0].equals(solutionProjectName))
+					if (segments[1].equals(SolutionSerializer.FORMS_DIR) && selectedProject != null) // if the forms node 
 					{
-						if (segments[1].equals(SolutionSerializer.FORMS_DIR)) // if the forms node 
+						SimpleUserNode formsNode = cp.getForms(selectedProject);
+						if (formsNode != null && formsNode.children != null)
 						{
-							SimpleUserNode formsNode = cp.getForms();
-							if (formsNode != null && formsNode.children != null)
+							for (SimpleUserNode un : formsNode.children) // find the form
 							{
-								for (SimpleUserNode un : formsNode.children) // find the form
-								{
-									if (un.getName().equals(segments[2])) return un;
-								}
+								if (un.getName().equals(segments[2])) return un;
 							}
 						}
 					}
@@ -2977,10 +2973,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			case IResource.FILE :
 				// we only handle files under solution/forms
 				folderPath = resource.getFullPath();
-				segments = folderPath.segments();
-				if (segments[1].equals(SolutionSerializer.FORMS_DIR)) // if the forms node 
+				if (segments[1].equals(SolutionSerializer.FORMS_DIR) && selectedProject != null) // if the forms node 
 				{
-					SimpleUserNode formsNode = cp.getForms();
+					SimpleUserNode formsNode = cp.getForms(selectedProject);
 					if (formsNode != null && formsNode.children != null)
 					{
 						for (SimpleUserNode un : formsNode.children) // find the form
@@ -2990,10 +2985,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						}
 					}
 				}
-				else if (segments[1].equals(SolutionSerializer.GLOBALS_FILE))
+				else if (segments[1].equals(SolutionSerializer.GLOBALS_FILE) && selectedProject != null)
 				{
-					PlatformSimpleUserNode globalsFolder = cp.getGlobalsFolder();
-					if (globalsFolder.getType() == UserNodeType.GLOBALS_ITEM) return globalsFolder;
+					return cp.getGlobalsFolder(selectedProject);
 				}
 				break;
 		}
