@@ -52,6 +52,7 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
@@ -75,6 +76,7 @@ import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.IMediaProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -156,18 +158,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	private final PlatformSimpleUserNode security;
 
 	private final PlatformSimpleUserNode i18n;
-
-	private PlatformSimpleUserNode forms;
-
-	private PlatformSimpleUserNode scopesFolder;
-
-	private Map<String, PlatformSimpleUserNode> globalsFolders;
-
-	private PlatformSimpleUserNode allRelations;
-
-	private PlatformSimpleUserNode valuelists;
-
-	private PlatformSimpleUserNode media;
 
 	private final PlatformSimpleUserNode[] scriptingNodes;
 
@@ -709,7 +699,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					}
 					else if (type == UserNodeType.MEDIA_FOLDER)
 					{
-						addMediaFolderChildrenNodes(un);
+						addMediaFolderChildrenNodes(un, ((MediaNode)un.getRealObject()).getMediaProvider());
 					}
 					if (un.children == null)
 					{
@@ -1001,26 +991,28 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		Solution solution = servoyProject.getSolution();
 		if (solution != null)
 		{
-			scopesFolder = new PlatformSimpleUserNode(Messages.TreeStrings_Scopes, solutionOfCalculation == null ? UserNodeType.SCOPES_ITEM
-				: UserNodeType.SCOPES_ITEM_CALCULATION_MODE, solution, uiActivator.loadImageFromBundle("scopes.gif")); //$NON-NLS-1$
+			PlatformSimpleUserNode scopesFolder = new PlatformSimpleUserNode(Messages.TreeStrings_Scopes, solutionOfCalculation == null
+				? UserNodeType.SCOPES_ITEM : UserNodeType.SCOPES_ITEM_CALCULATION_MODE, solution, uiActivator.loadImageFromBundle("scopes.gif")); //$NON-NLS-1$
 			scopesFolder.parent = projectNode;
 			addScopesNodeChildren(scopesFolder);
 
-			allRelations = null;
-			forms = new PlatformSimpleUserNode(Messages.TreeStrings_Forms, UserNodeType.FORMS, solution, uiActivator.loadImageFromBundle("forms.gif"));
+			PlatformSimpleUserNode forms = new PlatformSimpleUserNode(Messages.TreeStrings_Forms, UserNodeType.FORMS, solution,
+				uiActivator.loadImageFromBundle("forms.gif"));
 			forms.parent = projectNode;
+			PlatformSimpleUserNode allRelations = null;
 			if (solutionOfCalculation == null)
 			{
 				allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.ALL_RELATIONS, solution,
 					uiActivator.loadImageFromOldLocation("relationsoverview.gif")); //$NON-NLS-1$
 				allRelations.parent = projectNode;
 			}
-			valuelists = new PlatformSimpleUserNode(Messages.TreeStrings_ValueLists, UserNodeType.VALUELISTS, solution,
+			PlatformSimpleUserNode valuelists = new PlatformSimpleUserNode(Messages.TreeStrings_ValueLists, UserNodeType.VALUELISTS, solution,
 				uiActivator.loadImageFromBundle("valuelists.gif")); //$NON-NLS-1$
 			valuelists.parent = projectNode;
-			media = new PlatformSimpleUserNode(Messages.TreeStrings_Media, UserNodeType.MEDIA, solution, uiActivator.loadImageFromBundle("image.gif"));
+			PlatformSimpleUserNode media = new PlatformSimpleUserNode(Messages.TreeStrings_Media, UserNodeType.MEDIA, solution,
+				uiActivator.loadImageFromBundle("image.gif"));
 			media.parent = projectNode;
-			addMediaFolderChildrenNodes(media);
+			addMediaFolderChildrenNodes(media, solution);
 
 
 			if (solutionOfCalculation != null)
@@ -1051,13 +1043,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		}
 	}
 
-	private void addMediaFolderChildrenNodes(PlatformSimpleUserNode mediaFolder)
+	private void addMediaFolderChildrenNodes(PlatformSimpleUserNode mediaFolder, IMediaProvider mediaProvider)
 	{
-		PlatformSimpleUserNode mediaNode = getMedia();
-		if (mediaNode != null && mediaFolder != null)
+		if (mediaFolder != null)
 		{
 			MediaNode folderNode = (mediaFolder.getType() == UserNodeType.MEDIA_FOLDER) ? (MediaNode)mediaFolder.getRealObject() : new MediaNode(null, null,
-				MediaNode.TYPE.FOLDER, (Solution)mediaNode.getRealObject());
+				MediaNode.TYPE.FOLDER, mediaProvider);
 
 			mediaFolder.children = view.createMediaFolderChildrenNodes(folderNode, uiActivator, EnumSet.of(MediaNode.TYPE.FOLDER));
 			for (SimpleUserNode n : mediaFolder.children)
@@ -1065,12 +1056,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				n.parent = mediaFolder;
 			}
 		}
-	}
-
-	public void refreshScopesNodeChildren()
-	{
-		addScopesNodeChildren(scopesFolder);
-		view.refreshTreeNodeFromModel(scopesFolder);
 	}
 
 	private void addScopesNodeChildren(PlatformSimpleUserNode parent)
@@ -1081,8 +1066,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		{
 			return;
 		}
-
-		globalsFolders = new HashMap<String, PlatformSimpleUserNode>();
 
 		PlatformSimpleUserNode currentForm = new PlatformSimpleUserNode(Messages.TreeStrings_currentcontroller, UserNodeType.CURRENT_FORM, null,
 			uiActivator.loadImageFromBundle("formula.gif")); //$NON-NLS-1$
@@ -1101,7 +1084,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				PlatformSimpleUserNode globalsFolder = new PlatformSimpleUserNode(Utils.stringInitCap(scopeName), UserNodeType.GLOBALS_ITEM, solutionAndScope,
 					uiActivator.loadImageFromBundle("globe.gif")); //$NON-NLS-1$
 				globalsFolder.parent = parent;
-				globalsFolders.put(scopeName, globalsFolder);
 				nodes.add(globalsFolder);
 				addGlobalsNodeChildren(globalsFolder, solutionAndScope);
 			}
@@ -1674,7 +1656,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Media);
 						if (solutionChildNode != null)
 						{
-							addMediaFolderChildrenNodes(solutionChildNode);
+							addMediaFolderChildrenNodes(solutionChildNode, (Solution)persist);
 							view.refreshTreeNodeFromModel(solutionChildNode);
 						}
 					}
@@ -1859,58 +1841,103 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return i18n;
 	}
 
-	public PlatformSimpleUserNode getForms()
+	private SimpleUserNode findProjectNodeChild(ServoyProject project, UserNodeType type)
 	{
-		return forms;
-	}
-
-	public PlatformSimpleUserNode getScopesFolder()
-	{
-		return scopesFolder;
-	}
-
-	public PlatformSimpleUserNode getGlobalsFolder(String scopeName)
-	{
-		return globalsFolders == null ? null : globalsFolders.get(scopeName);
-	}
-
-	public PlatformSimpleUserNode getRelations()
-	{
-		return allRelations;
-	}
-
-	public PlatformSimpleUserNode getValuelists()
-	{
-		return valuelists;
-	}
-
-	public PlatformSimpleUserNode getMedia()
-	{
-		return media;
-	}
-
-	public PlatformSimpleUserNode getMediaFolderNode(MediaNode mediaFolder)
-	{
-		PlatformSimpleUserNode mediaFolderNode = null;
-		if (mediaFolder != null)
+		SimpleUserNode projectNode = null;
+		if (activeSolutionNode.getRealObject() != null && activeSolutionNode.getRealObject().equals(project))
 		{
-			mediaFolderNode = findMediaFolder(getMedia(), mediaFolder);
+			projectNode = activeSolutionNode;
+		}
+		else
+		{
+			for (SimpleUserNode node : modulesOfActiveSolution.children)
+			{
+				if (node.getRealObject() != null && node.getRealObject().equals(project))
+				{
+					projectNode = node;
+					break;
+				}
+			}
+		}
+		if (projectNode != null)
+		{
+			if (projectNode.children == null) getChildren(projectNode); // create them
+			for (SimpleUserNode child : projectNode.children)
+			{
+				if (child.getRealType() == type)
+				{
+					return child;
+				}
+			}
+		}
+		return null;
+	}
+
+	public SimpleUserNode getForms(ServoyProject project)
+	{
+		return findProjectNodeChild(project, UserNodeType.FORMS);
+	}
+
+	public SimpleUserNode getGlobalsFolder(ServoyProject selectedProject, String scopeName)
+	{
+		SimpleUserNode userNode = findProjectNodeChild(selectedProject, UserNodeType.SCOPES_ITEM);
+		if (userNode != null && userNode.children != null)
+		{
+			String name = Utils.stringInitCap(scopeName);
+			for (SimpleUserNode childNode : userNode.children)
+			{
+				if (childNode.getName().equals(name))
+				{
+					return childNode;
+				}
+			}
+		}
+		return null;
+	}
+
+	public SimpleUserNode getRelations(ServoyProject project)
+	{
+		return findProjectNodeChild(project, UserNodeType.ALL_RELATIONS);
+	}
+
+	public SimpleUserNode getValuelists(ServoyProject project)
+	{
+		return findProjectNodeChild(project, UserNodeType.VALUELISTS);
+	}
+
+	public SimpleUserNode getMedia(ServoyProject project)
+	{
+		return findProjectNodeChild(project, UserNodeType.MEDIA);
+	}
+
+	public SimpleUserNode getMediaFolderNode(MediaNode mediaFolder)
+	{
+		SimpleUserNode mediaFolderNode = null;
+		SimpleUserNode media = null;
+		ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(mediaFolder.getMedia().getRootObject().getName());
+		if (servoyProject != null)
+		{
+			media = getMedia(servoyProject);
+		}
+		if (mediaFolder != null && media != null)
+		{
+			mediaFolderNode = findMediaFolder(media, mediaFolder);
 		}
 
-		return mediaFolderNode != null ? mediaFolderNode : getMedia();
+		return mediaFolderNode != null ? mediaFolderNode : media;
 	}
 
-	private PlatformSimpleUserNode findMediaFolder(PlatformSimpleUserNode mediaFolderNode, MediaNode mediaFolder)
+	private SimpleUserNode findMediaFolder(SimpleUserNode mediaFolderNode, MediaNode mediaFolder)
 	{
 		Object realObject = mediaFolderNode.getRealObject();
 		if (mediaFolder.equals(realObject)) return mediaFolderNode;
 
 		if (mediaFolderNode.children != null && mediaFolderNode.children.length > 0)
 		{
-			PlatformSimpleUserNode mfNode;
+			SimpleUserNode mfNode;
 			for (SimpleUserNode childNode : mediaFolderNode.children)
 			{
-				mfNode = findMediaFolder((PlatformSimpleUserNode)childNode, mediaFolder);
+				mfNode = findMediaFolder(childNode, mediaFolder);
 				if (mfNode != null) return mfNode;
 			}
 		}
