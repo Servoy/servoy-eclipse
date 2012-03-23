@@ -11587,7 +11587,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="newMultiSelectionListBox">
+        <function name="newMultiSelectListBox">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="int"/>
@@ -11599,10 +11599,10 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new JSField object on the form with the displayType of MULTISELECT_LISTBOX - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></description>
           <summary><![CDATA[Creates a new JSField object on the form with the displayType of MULTISELECT_LISTBOX - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
           <sample><![CDATA[var form = solutionModel.newForm('newForm1', 'myServer', 'myTable', null, true, 800, 600);
-var calendar = form.newMultiSelectionListBox(myDataProvider, 100, 100, 200, 200);
+var calendar = form.newMultiSelectListBox(myDataProvider, 100, 100, 200, 200);
 forms['newForm1'].controller.show();]]></sample>
           <parameters>
-            <parameter name="dataprovidername/jsvariable">
+            <parameter name="dataprovider" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[the specified dataprovider name/JSVariable of the JSField object]]></description>
             </parameter>
             <parameter name="x" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
