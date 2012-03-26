@@ -140,7 +140,6 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
-import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableDisplay;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
@@ -774,7 +773,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		 */
 		if (category == PropertyCategory.Events || category == PropertyCategory.Commands)
 		{
-			final ITable table = form == null ? null : form.getTable();
+			final Table table = form == null ? null : form.getTable();
 			return new MethodPropertyController<Integer>(id, displayName, persistContext, new MethodListOptions(true, category == PropertyCategory.Commands,
 				form != null, true, allowFoundsetMethods(persistContext, id) && table != null, table))
 			{
@@ -821,7 +820,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 								@Override
 								public IPropertySource getPropertySource()
 								{
-									return new MethodPropertySource(this, persistContext, null, getId().toString(), isReadOnly());
+									return new MethodPropertySource(this, persistContext, table, getId().toString(), isReadOnly());
 								}
 							};
 						}
@@ -3009,7 +3008,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 									if (returnValue != null)
 									{
 										// here we decide what happens to the parts that are declared in this form; if new extended form
-										// has those parts, mark them as overriden; if we wouldn't do this you could end up with 2 body parts in the same form: one overriden and one notº
+										// has those parts, mark them as overriden; if we wouldn't do this you could end up with 2 body parts in the same form: one overriden and one notï¿½
 										// an alternative would be to simply delete these parts
 										ArrayList<Part> inheritedParts = new ArrayList<Part>();
 										int newExtendsId = ((Integer)returnValue).intValue();
