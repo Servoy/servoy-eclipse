@@ -55,6 +55,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -133,6 +134,7 @@ import com.servoy.j2db.property.I18NMessagesModel.I18NMessagesModelEntry;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 public class I18NExternalizeDialog extends Dialog
@@ -142,13 +144,22 @@ public class I18NExternalizeDialog extends Dialog
 	private static final int COLUMN_PROPERTY = 0;
 	private static final int COLUMN_TEXT = 1;
 	private static final int COLUMN_KEY = 2;
+	private static final int COLUMN_STATUS = 3;
+
+	private static enum STATE
+	{
+		EXTERNALIZE, INTERNALIZE, IGNORE
+	}
+
+	private static final String STATE_TXT_EXTERNALIZE = "Extern";
+	private static final String STATE_TXT_INTERNALIZE = "Intern";
+	private static final String STATE_TXT_IGNORE = "Ignore";
 
 	private TreeViewer treeViewer;
 	private TreeContentProvider treeContentProvider;
 	private Text filterTextField;
 	private Text commonPrefix;
 	private Button databaseMessagesButton;
-	private Button ignoreMessageButton;
 
 	private final ContentSpec contentSpec = StaticContentSpecLoader.getContentSpec();
 	private final Image solutionImage = Activator.getDefault().loadImageFromBundle("solution.gif");
@@ -333,12 +344,6 @@ public class I18NExternalizeDialog extends Dialog
 
 		updateDataMessagesNodes(allProjects, filter);
 
-		if (ignoreMessageButton != null)
-		{
-			ignoreMessageButton.setSelection(false);
-			ignoreMessageButton.setEnabled(false);
-		}
-
 		if (commonPrefix != null) commonPrefix.setText(commonPrefixValue);
 	}
 
@@ -365,7 +370,7 @@ public class I18NExternalizeDialog extends Dialog
 				}
 				if (serverNodeFound == null)
 				{
-					serverNodeFound = createTreeNodeForData(server, root);
+					serverNodeFound = createTreeNodeForData(server, root, null);
 					root.addChild(serverNodeFound);
 				}
 
@@ -379,19 +384,19 @@ public class I18NExternalizeDialog extends Dialog
 				}
 				if (tableNodeFound == null)
 				{
-					tableNodeFound = createTreeNodeForData(table, serverNodeFound);
+					tableNodeFound = createTreeNodeForData(table, serverNodeFound, null);
 					serverNodeFound.addChild(tableNodeFound);
 				}
 			}
 
-			tableNodeFound.addChild(createTreeNodeForData(jstxt, tableNodeFound));
+			tableNodeFound.addChild(createTreeNodeForData(jstxt, tableNodeFound, jstxt.getState()));
 		}
 	}
 
 	private TreeNode addColumnInfoToTree(TreeNode root, IServer server, Table table, Column column, String filterText)
 	{
 		ColumnInfo columnInfo = column.getColumnInfo();
-		if (columnInfo != null && (columnInfo.getTitleText() == null || !columnInfo.getTitleText().startsWith("i18n:")))
+		if (columnInfo != null && columnInfo.getTitleText() != null)
 		{
 			//check filter
 			if (filterText != null && server.toString().toLowerCase().indexOf(filterText) == -1 && table.toString().toLowerCase().indexOf(filterText) == -1 &&
@@ -409,7 +414,7 @@ public class I18NExternalizeDialog extends Dialog
 			}
 			if (serverNodeFound == null)
 			{
-				serverNodeFound = createTreeNodeForData(server, root);
+				serverNodeFound = createTreeNodeForData(server, root, null);
 				root.addChild(serverNodeFound);
 			}
 
@@ -424,7 +429,7 @@ public class I18NExternalizeDialog extends Dialog
 			}
 			if (tableNodeFound == null)
 			{
-				tableNodeFound = createTreeNodeForData(table, serverNodeFound);
+				tableNodeFound = createTreeNodeForData(table, serverNodeFound, null);
 				serverNodeFound.addChild(tableNodeFound);
 			}
 
@@ -439,11 +444,12 @@ public class I18NExternalizeDialog extends Dialog
 			}
 			if (columnNodeFound == null)
 			{
-				columnNodeFound = createTreeNodeForData(column, tableNodeFound);
+				columnNodeFound = createTreeNodeForData(column, tableNodeFound, null);
 				tableNodeFound.addChild(columnNodeFound);
 			}
 
-			TreeNode columnInfoNode = createTreeNodeForData(columnInfo, columnNodeFound);
+			TreeNode columnInfoNode = createTreeNodeForData(columnInfo, columnNodeFound, columnInfo.getTitleText().startsWith("i18n:") ? STATE.EXTERNALIZE
+				: STATE.INTERNALIZE);
 			columnNodeFound.addChild(columnInfoNode);
 
 			return columnInfoNode;
@@ -488,17 +494,6 @@ public class I18NExternalizeDialog extends Dialog
 				{
 					TreeItem treeItem = (TreeItem)event.item;
 					checkTreeItemChildren(treeItem, treeItem.getChecked());
-				}
-				TreeNode node = (TreeNode)((TreeItem)event.item).getData();
-				if (node.isJSText())
-				{
-					I18NExternalizeDialog.this.ignoreMessageButton.setEnabled(true);
-					I18NExternalizeDialog.this.ignoreMessageButton.setSelection(((JSText)node.getData()).isIgnored());
-				}
-				else
-				{
-					I18NExternalizeDialog.this.ignoreMessageButton.setSelection(false);
-					I18NExternalizeDialog.this.ignoreMessageButton.setEnabled(false);
 				}
 			}
 
@@ -572,7 +567,36 @@ public class I18NExternalizeDialog extends Dialog
 
 		TreeColumn textColumn = new TreeColumn(treeViewer.getTree(), SWT.LEFT, I18NExternalizeDialog.COLUMN_TEXT);
 		textColumn.setText("Text");
-		new TreeViewerColumn(treeViewer, textColumn);
+		new TreeViewerColumn(treeViewer, textColumn).setEditingSupport(new EditingSupport(treeViewer)
+		{
+			private final TextCellEditor editor = new TextCellEditor(treeViewer.getTree());
+
+			@Override
+			protected CellEditor getCellEditor(Object element)
+			{
+				return editor;
+			}
+
+			@Override
+			protected boolean canEdit(Object element)
+			{
+				return ((TreeNode)element).getState() == STATE.INTERNALIZE || ((TreeNode)element).getState() == STATE.IGNORE;
+			}
+
+			@Override
+			protected Object getValue(Object element)
+			{
+				return ((TreeNode)element).getText();
+			}
+
+			@Override
+			protected void setValue(Object element, Object value)
+			{
+				((TreeNode)element).setText(value.toString());
+				I18NExternalizeDialog.this.treeViewer.update(element, null);
+			}
+
+		});
 
 		TreeColumn keyColumn = new TreeColumn(treeViewer.getTree(), SWT.LEFT, I18NExternalizeDialog.COLUMN_KEY);
 		keyColumn.setText("Key");
@@ -594,10 +618,9 @@ public class I18NExternalizeDialog extends Dialog
 				{
 					if (text != null)
 					{
-						int selectionTextStartIdx = text.getText().lastIndexOf("."); //$NON-NLS-1$
-						if (selectionTextStartIdx != -1)
+						if (commonPrefixValue.length() > 0 && text.getText().startsWith(commonPrefixValue))
 						{
-							text.setSelection(selectionTextStartIdx + 1, text.getText().length());
+							text.setSelection(commonPrefixValue.length(), text.getText().length());
 						}
 						else
 						{
@@ -659,8 +682,7 @@ public class I18NExternalizeDialog extends Dialog
 			@Override
 			protected boolean canEdit(Object element)
 			{
-				return ((TreeNode)element).isElement() || ((TreeNode)element).isColumnInfo() ||
-					(((TreeNode)element).isJSText() && !((JSText)((TreeNode)element).getData()).isIgnored());
+				return ((TreeNode)element).getState() == STATE.EXTERNALIZE;
 			}
 
 			@Override
@@ -683,6 +705,43 @@ public class I18NExternalizeDialog extends Dialog
 			}
 		});
 
+		TreeColumn statusColumn = new TreeColumn(treeViewer.getTree(), SWT.CENTER, I18NExternalizeDialog.COLUMN_STATUS);
+		statusColumn.setText("Operation");
+		new TreeViewerColumn(treeViewer, statusColumn).setEditingSupport(new EditingSupport(treeViewer)
+		{
+			private final StateCellEditor defaultEditor = new StateCellEditor(treeViewer.getTree(), new STATE[] { STATE.EXTERNALIZE, STATE.INTERNALIZE });
+			private final StateCellEditor jsEditor = new StateCellEditor(treeViewer.getTree(), STATE.values());
+
+			@Override
+			protected CellEditor getCellEditor(Object element)
+			{
+				TreeNode tn = (TreeNode)element;
+
+				return tn.isJSText() ? jsEditor : defaultEditor;
+			}
+
+			@Override
+			protected boolean canEdit(Object element)
+			{
+				TreeNode tn = (TreeNode)element;
+				return (tn.isElement() || tn.isColumnInfo() || tn.isJSText());
+			}
+
+			@Override
+			protected Object getValue(Object element)
+			{
+				return ((TreeNode)element).getState();
+			}
+
+			@Override
+			protected void setValue(Object element, Object value)
+			{
+				((TreeNode)element).setState((STATE)value);
+				I18NExternalizeDialog.this.treeViewer.update(element, null);
+			}
+		});
+
+
 		treeViewer.setLabelProvider(new TreeLabelProvider());
 
 		// layout components
@@ -691,6 +750,7 @@ public class I18NExternalizeDialog extends Dialog
 		layout.setColumnData(propertyColumn, new ColumnWeightData(200, 200, true));
 		layout.setColumnData(textColumn, new ColumnWeightData(200, 200, true));
 		layout.setColumnData(keyColumn, new ColumnWeightData(200, 200, true));
+		layout.setColumnData(statusColumn, new ColumnWeightData(80, 80, true));
 
 		treeViewer.expandAll();
 
@@ -769,41 +829,11 @@ public class I18NExternalizeDialog extends Dialog
 			}
 		});
 
-		ignoreMessageButton = new Button(composite, SWT.CHECK);
-		ignoreMessageButton.setText("Ignore selected message");
-		ignoreMessageButton.addSelectionListener(new SelectionListener()
-		{
-
-			public void widgetDefaultSelected(SelectionEvent e)
-			{
-				// ignore
-			}
-
-			public void widgetSelected(SelectionEvent e)
-			{
-				TreeItem[] selection = treeViewer.getTree().getSelection();
-				if (selection != null && selection.length > 0)
-				{
-					TreeNode node = (TreeNode)selection[selection.length - 1].getData();
-					if (node.isJSText())
-					{
-						((JSText)node.getData()).setIgnored(I18NExternalizeDialog.this.ignoreMessageButton.getSelection());
-						treeViewer.refresh(node);
-					}
-				}
-			}
-
-		});
-		ignoreMessageButton.setSelection(false);
-		ignoreMessageButton.setEnabled(false);
-
-
 		GroupLayout i18NLayout = new GroupLayout(composite);
 		i18NLayout.setHorizontalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(
 			i18NLayout.createSequentialGroup().addContainerGap().add(
 				i18NLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING, treeViewerComposite, GroupLayout.PREFERRED_SIZE, 0,
-					Short.MAX_VALUE).add(GroupLayout.LEADING, ignoreMessageButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, databaseMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+					Short.MAX_VALUE).add(GroupLayout.LEADING, databaseMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(
 					i18NLayout.createSequentialGroup().add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
 						LayoutStyle.RELATED).add(filterTextField, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)).add(
@@ -814,9 +844,8 @@ public class I18NExternalizeDialog extends Dialog
 			i18NLayout.createSequentialGroup().addContainerGap().add(
 				i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(filterTextField, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(
-				treeViewerComposite, GroupLayout.PREFERRED_SIZE, 100, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(ignoreMessageButton,
-				GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
-				databaseMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap().add(
+				treeViewerComposite, GroupLayout.PREFERRED_SIZE, 100, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(databaseMessagesButton,
+				GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap().add(
 				i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(commonPrefixLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(commonPrefix, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(commonPrefixApplyButton,
 					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))));
@@ -859,7 +888,7 @@ public class I18NExternalizeDialog extends Dialog
 		String newText = commonPrefix.getText();
 
 		ArrayList<TreeNode> allNodes = new ArrayList<TreeNode>();
-		fillNodes(treeViewer.getTree().getItems(), allNodes, false);
+		fillNodes(treeViewer.getTree().getItems(), allNodes, false, false);
 
 		for (TreeNode treeNode : allNodes)
 		{
@@ -894,7 +923,7 @@ public class I18NExternalizeDialog extends Dialog
 					if ("text".equals(elName) || "titleText".equals(elName) || "toolTipText".equals(elName))
 					{
 						String property = I18NExternalizeDialog.this.getProperty(o, el);
-						if ((property == null || !property.startsWith("i18n:")))
+						if (property != null)
 						{
 							boolean visible = (filterText == null) || (property != null && property.toLowerCase().indexOf(filterText) != -1);
 							ArrayList<IPersist> treePath = new ArrayList<IPersist>();
@@ -907,7 +936,7 @@ public class I18NExternalizeDialog extends Dialog
 							}
 							while ((persist = persist.getParent()) != null);
 
-							if (visible) content.addPersistElement(treePath, el);
+							if (visible) content.addPersistElement(treePath, el, property.startsWith("i18n:") ? STATE.EXTERNALIZE : STATE.INTERNALIZE);
 						}
 					}
 				}
@@ -931,7 +960,7 @@ public class I18NExternalizeDialog extends Dialog
 						for (JSText jsText : jsTexts)
 						{
 							visible = (filterText == null) || (jsText.getText().toLowerCase().indexOf(filterText) != -1);
-							if (visible) content.addPersistElement(treePath, jsText);
+							if (visible) content.addPersistElement(treePath, jsText, jsText.getState());
 						}
 					}
 				}
@@ -941,7 +970,7 @@ public class I18NExternalizeDialog extends Dialog
 		});
 	}
 
-	private final HashMap<IPersist, Map<Integer, ArrayList<ASTNode>>> persistToLineNumberForASTNodes = new HashMap<IPersist, Map<Integer, ArrayList<ASTNode>>>();
+	private final HashMap<IPersist, Map<Integer, ArrayList<Pair<ASTNode, STATE>>>> persistToLineNumberForASTNodes = new HashMap<IPersist, Map<Integer, ArrayList<Pair<ASTNode, STATE>>>>();
 
 	private ArrayList<JSText> getJSTexts(final IPersist persist)
 	{
@@ -974,7 +1003,7 @@ public class I18NExternalizeDialog extends Dialog
 				Script script = parser.parse(jsContent, reporter);
 				if (problems.size() == 0 && script != null)
 				{
-					final HashMap<Integer, ASTNode> startIdxNodeMap = new HashMap<Integer, ASTNode>();
+					final HashMap<Integer, Pair<ASTNode, STATE>> startIdxNodeMap = new HashMap<Integer, Pair<ASTNode, STATE>>();
 					script.traverse(new ASTVisitor()
 					{
 						@Override
@@ -983,11 +1012,12 @@ public class I18NExternalizeDialog extends Dialog
 							if (node instanceof StringLiteral)
 							{
 								ASTNode parent = ((StringLiteral)node).getParent();
-								if (!(parent instanceof CallExpression && ((CallExpression)parent).getExpression().toString().equalsIgnoreCase(
-									"i18n.getI18NMessage")))
-								{
-									startIdxNodeMap.put(Integer.valueOf(node.sourceStart()), node);
-								}
+
+								STATE state = (parent instanceof CallExpression && ((CallExpression)parent).getExpression().toString().equalsIgnoreCase(
+									"i18n.getI18NMessage")) ? STATE.EXTERNALIZE : STATE.INTERNALIZE;
+
+								ASTNode i18nNode = (state == STATE.EXTERNALIZE) ? parent : node;
+								startIdxNodeMap.put(Integer.valueOf(i18nNode.sourceStart()), new Pair(i18nNode, state));
 							}
 							return true;
 						}
@@ -998,25 +1028,25 @@ public class I18NExternalizeDialog extends Dialog
 					{
 						if (c instanceof SingleLineComment)
 						{
-							startIdxNodeMap.put(Integer.valueOf(c.sourceStart()), c);
+							startIdxNodeMap.put(Integer.valueOf(c.sourceStart()), new Pair(c, null));
 						}
 					}
 
-					Map<Integer, ArrayList<ASTNode>> lineNumberForASTNodes = getLineNumbersForASTNodes(jsContent, startIdxNodeMap);
+					Map<Integer, ArrayList<Pair<ASTNode, STATE>>> lineNumberForASTNodes = getLineNumbersForASTNodes(jsContent, startIdxNodeMap);
 					persistToLineNumberForASTNodes.put(persist, lineNumberForASTNodes);
-					Iterator<ArrayList<ASTNode>> astNodesIte = lineNumberForASTNodes.values().iterator();
-					ArrayList<ASTNode> astNodes;
-					StringLiteral stringLiteral;
+					Iterator<ArrayList<Pair<ASTNode, STATE>>> astNodesIte = lineNumberForASTNodes.values().iterator();
+					ArrayList<Pair<ASTNode, STATE>> astNodes;
+					ASTNode i18nNode;
 					ArrayList<SingleLineComment> lineComments;
 					int keyIdx = 0;
 					while (astNodesIte.hasNext())
 					{
 						astNodes = astNodesIte.next();
 						lineComments = new ArrayList<SingleLineComment>();
-						if (astNodes.get(0) instanceof SingleLineComment)
+						if (astNodes.get(0).getLeft() instanceof SingleLineComment)
 						{
 
-							lineComments.add((SingleLineComment)astNodes.remove(0));
+							lineComments.add((SingleLineComment)astNodes.remove(0).getLeft());
 						}
 
 						for (int y = 0; y < astNodes.size(); y++)
@@ -1027,13 +1057,14 @@ public class I18NExternalizeDialog extends Dialog
 								isIgnored = isIgnored || (lineComment.getText().indexOf("$NON-NLS-" + (y + 1) + "$") != -1);
 								if (isIgnored) break;
 							}
-							if (isIgnored) continue;
-							stringLiteral = (StringLiteral)astNodes.get(y);
-							String keyHint = getKeyHint(persist, null) + keyIdx++;
-							jsTexts.add(new JSText(persist, stringLiteral.getText(), stringLiteral.sourceStart(), stringLiteral.sourceEnd(), keyHint,
-								getNameHintForStringLiteral(stringLiteral)));
-						}
 
+							i18nNode = astNodes.get(y).getLeft();
+							String keyHint = getKeyHint(persist, null) + keyIdx++;
+							STATE state = isIgnored ? STATE.IGNORE : astNodes.get(y).getRight();
+
+							jsTexts.add(new JSText(persist, i18nNode instanceof StringLiteral ? ((StringLiteral)i18nNode).getText() : "",
+								i18nNode.sourceStart(), i18nNode.sourceEnd(), keyHint, getNameHintForJSNodeLiteral((JSNode)i18nNode), state));
+						}
 					}
 				}
 
@@ -1047,11 +1078,67 @@ public class I18NExternalizeDialog extends Dialog
 		return jsTexts;
 	}
 
-	private String getNameHintForStringLiteral(StringLiteral stringLiteral)
+	private String removeNONNLSComments(String jsContent)
+	{
+		JavaScriptParser parser = new JavaScriptParser();
+		final ArrayList<IProblem> problems = new ArrayList<IProblem>();
+		IProblemReporter reporter = new IProblemReporter()
+		{
+
+			public Object getAdapter(Class adapter)
+			{
+				return null;
+			}
+
+			public void reportProblem(IProblem problem)
+			{
+				if (problem.isError())
+				{
+					problems.add(problem);
+				}
+			}
+		};
+
+		Script script = parser.parse(jsContent, reporter);
+		if (problems.size() == 0 && script != null)
+		{
+			String commentTxt;
+			ArrayList<Comment> commentsToRemove = new ArrayList<Comment>();
+			for (Comment comment : script.getComments())
+			{
+				if (comment instanceof SingleLineComment)
+				{
+					commentTxt = ((SingleLineComment)comment).getText();
+					if (commentTxt.startsWith("//$NON-NLS-"))
+					{
+						commentsToRemove.add(comment);
+					}
+				}
+			}
+			if (commentsToRemove.size() > 0)
+			{
+				StringBuilder newJSContent = new StringBuilder(jsContent);
+
+				for (Comment comment : commentsToRemove)
+				{
+					int offset = comment.getRange().getOffset();
+					int len = comment.getRange().getLength();
+
+					newJSContent.replace(offset, offset + len, "");
+				}
+
+				return newJSContent.toString();
+			}
+		}
+
+		return jsContent;
+	}
+
+	private String getNameHintForJSNodeLiteral(JSNode jsNode)
 	{
 		String nameHint = "";
 		ASTNode parentNode;
-		JSNode currentNode = stringLiteral;
+		JSNode currentNode = jsNode;
 		while ((parentNode = currentNode.getParent()) instanceof JSNode)
 		{
 			if (parentNode instanceof VariableDeclaration) nameHint = ((VariableDeclaration)parentNode).getVariableName();
@@ -1066,9 +1153,9 @@ public class I18NExternalizeDialog extends Dialog
 		return nameHint;
 	}
 
-	private Map<Integer, ArrayList<ASTNode>> getLineNumbersForASTNodes(String jsConent, Map<Integer, ASTNode> astNodesMap)
+	private Map<Integer, ArrayList<Pair<ASTNode, STATE>>> getLineNumbersForASTNodes(String jsConent, Map<Integer, Pair<ASTNode, STATE>> astNodesMap)
 	{
-		Map<Integer, ArrayList<ASTNode>> lineNumbersForASTNodesMap = new HashMap<Integer, ArrayList<ASTNode>>();
+		Map<Integer, ArrayList<Pair<ASTNode, STATE>>> lineNumbersForASTNodesMap = new HashMap<Integer, ArrayList<Pair<ASTNode, STATE>>>();
 
 		int line = 1;
 		for (int i = 0; i < jsConent.length(); i++)
@@ -1083,14 +1170,14 @@ public class I18NExternalizeDialog extends Dialog
 				if (astNodesMap.containsKey(oI))
 				{
 					Integer oLine = Integer.valueOf(line);
-					ArrayList<ASTNode> lineNodes = lineNumbersForASTNodesMap.get(oLine);
+					ArrayList<Pair<ASTNode, STATE>> lineNodes = lineNumbersForASTNodesMap.get(oLine);
 					if (lineNodes == null)
 					{
-						lineNodes = new ArrayList<ASTNode>();
+						lineNodes = new ArrayList<Pair<ASTNode, STATE>>();
 						lineNumbersForASTNodesMap.put(oLine, lineNodes);
 					}
-					ASTNode node = astNodesMap.get(oI);
-					if (node instanceof SingleLineComment) lineNodes.add(0, node);
+					Pair<ASTNode, STATE> node = astNodesMap.get(oI);
+					if (node.getLeft() instanceof SingleLineComment) lineNodes.add(0, node);
 					else lineNodes.add(node);
 				}
 			}
@@ -1213,7 +1300,7 @@ public class I18NExternalizeDialog extends Dialog
 			editingSolution.getI18nTableName(), workspaceFileAccess);
 
 		ArrayList<TreeNode> selectedNodes = new ArrayList<TreeNode>();
-		fillNodes(treeViewer.getTree().getItems(), selectedNodes, true);
+		fillNodes(treeViewer.getTree().getItems(), selectedNodes, true, true);
 
 		final HashMap<Solution, ArrayList<IPersist>> solutionChangedPersistsMap = new HashMap<Solution, ArrayList<IPersist>>();
 		final ArrayList<Table> changedTables = new ArrayList<Table>();
@@ -1224,7 +1311,17 @@ public class I18NExternalizeDialog extends Dialog
 			{
 				IPersist p = (IPersist)selNode.getParent().getData();
 				Element element = (Element)selNode.getData();
-				setProperty(p, element, "i18n:" + selNode.getKey());
+				String propertyValue = null;
+				if (selNode.getState() == STATE.EXTERNALIZE)
+				{
+					propertyValue = "i18n:" + selNode.getKey();
+				}
+				else if (selNode.getState() == STATE.INTERNALIZE)
+				{
+					propertyValue = selNode.getText();
+				}
+				if (propertyValue == null) continue;
+				setProperty(p, element, propertyValue);
 				Solution parentSolution = (Solution)p.getAncestor(IRepository.SOLUTIONS);
 				if (parentSolution != null)
 				{
@@ -1240,7 +1337,17 @@ public class I18NExternalizeDialog extends Dialog
 			else if (selNode.isColumnInfo())
 			{
 				ColumnInfo ci = (ColumnInfo)selNode.getData();
-				ci.setTitleText("i18n:" + selNode.getKey());
+				String columnInfoValue = null;
+				if (selNode.getState() == STATE.EXTERNALIZE)
+				{
+					columnInfoValue = "i18n:" + selNode.getKey();
+				}
+				else if (selNode.getState() == STATE.INTERNALIZE)
+				{
+					columnInfoValue = selNode.getText();
+				}
+				if (columnInfoValue == null) continue;
+				ci.setTitleText(columnInfoValue);
 				ci.flagChanged();
 				changedTables.add((Table)selNode.getParent().getParent().getData());
 			}
@@ -1254,13 +1361,22 @@ public class I18NExternalizeDialog extends Dialog
 					persistJSTextMap.put(jstxt.getParent(), persistJSTexts);
 				}
 				jstxt.keyHint = selNode.getKey();
+				jstxt.text = selNode.getText();
+				jstxt.state = selNode.getState();
 				persistJSTexts.put(Integer.valueOf(jstxt.getStartPosition()), jstxt);
 			}
 
-			if (!defaultMessages.containsKey(selNode.getKey()))
+			if (selNode.getState() == STATE.EXTERNALIZE)
 			{
-				I18NUtil.MessageEntry messageEntry = new I18NUtil.MessageEntry(null, selNode.getKey(), selNode.text);
-				projectMessages.put(messageEntry.getLanguageKey(), messageEntry);
+				if (!defaultMessages.containsKey(selNode.getKey()))
+				{
+					I18NUtil.MessageEntry messageEntry = new I18NUtil.MessageEntry(null, selNode.getKey(), selNode.text);
+					projectMessages.put(messageEntry.getLanguageKey(), messageEntry);
+				}
+			}
+			else if (selNode.getState() == STATE.INTERNALIZE)
+			{
+				defaultMessages.remove(selNode.getKey());
 			}
 		}
 
@@ -1286,7 +1402,7 @@ public class I18NExternalizeDialog extends Dialog
 							ArrayList<Integer> persistJSTextStartPos = new ArrayList<Integer>(persistJSTexts.keySet());
 							try
 							{
-								String persistJSContent = workspaceFileAccess.getUTF8Contents(jsPath);
+								String persistJSContent = I18NExternalizeDialog.this.removeNONNLSComments(workspaceFileAccess.getUTF8Contents(jsPath));
 								StringBuffer replacedPersistJSContent = new StringBuffer();
 								ArrayList<Integer> lineIdxOfIgnoredString = new ArrayList<Integer>();
 								int line = 1;
@@ -1295,19 +1411,21 @@ public class I18NExternalizeDialog extends Dialog
 								{
 									if (persistJSTextStartPos.size() > 0 && i == persistJSTextStartPos.get(0).intValue())
 									{
+										String replaceText = null;
 										JSText jstxt = persistJSTexts.get(persistJSTextStartPos.get(0));
-										if (jstxt.isIgnored())
+										if (jstxt.getState() == STATE.IGNORE)
 										{
-											Map<Integer, ArrayList<ASTNode>> linesNodes = persistToLineNumberForASTNodes.get(persistJSTextMapEntry.getKey());
+											replaceText = "'" + jstxt.getText() + "'";
+											Map<Integer, ArrayList<Pair<ASTNode, STATE>>> linesNodes = persistToLineNumberForASTNodes.get(persistJSTextMapEntry.getKey());
 											if (linesNodes != null)
 											{
-												ArrayList<ASTNode> lineNodes = linesNodes.get(Integer.valueOf(line));
+												ArrayList<Pair<ASTNode, STATE>> lineNodes = linesNodes.get(Integer.valueOf(line));
 												if (lineNodes != null)
 												{
 													for (int j = 0; j < lineNodes.size(); j++)
 													{
-														if (lineNodes.get(j) instanceof StringLiteral &&
-															((StringLiteral)lineNodes.get(j)).getText().equals(jstxt.getText()))
+														if (lineNodes.get(j).getLeft() instanceof StringLiteral &&
+															((StringLiteral)lineNodes.get(j).getLeft()).getText().equals(replaceText))
 														{
 															lineIdxOfIgnoredString.add(Integer.valueOf(j + 1));
 															break;
@@ -1316,11 +1434,20 @@ public class I18NExternalizeDialog extends Dialog
 												}
 											}
 										}
-										else
+										else if (jstxt.getState() == STATE.EXTERNALIZE)
 										{
-											replacedPersistJSContent.append("i18n.getI18NMessage('").append(jstxt.getKeyHint()).append("')");
-											i = jstxt.getEndPosition();
+											replaceText = new StringBuilder("i18n.getI18NMessage('").append(jstxt.getKeyHint()).append("')").toString();
 										}
+										else
+										// STATE.INTERNALIZE
+										{
+											replaceText = "'" + jstxt.getText() + "'";
+										}
+
+										replacedPersistJSContent.append(replaceText);
+										i = jstxt.getEndPosition();
+
+
 										persistJSTextStartPos.remove(0);
 									}
 									else
@@ -1391,7 +1518,7 @@ public class I18NExternalizeDialog extends Dialog
 		externalizeJob.schedule();
 	}
 
-	private void fillNodes(TreeItem[] items, ArrayList<TreeNode> selectedNodes, boolean onlySelected)
+	private void fillNodes(TreeItem[] items, ArrayList<TreeNode> selectedNodes, boolean onlySelected, boolean onlyChanged)
 	{
 		if (items != null && items.length > 0)
 		{
@@ -1399,8 +1526,8 @@ public class I18NExternalizeDialog extends Dialog
 			for (TreeItem treeItem : items)
 			{
 				node = (TreeNode)treeItem.getData();
-				if (!node.isElement() && !node.isColumnInfo() && !node.isJSText()) fillNodes(treeItem.getItems(), selectedNodes, onlySelected);
-				else if (!onlySelected || treeItem.getChecked()) selectedNodes.add(node);
+				if (!node.isElement() && !node.isColumnInfo() && !node.isJSText()) fillNodes(treeItem.getItems(), selectedNodes, onlySelected, onlyChanged);
+				else if ((!onlySelected || treeItem.getChecked()) && (!onlyChanged || node.isChanged())) selectedNodes.add(node);
 			}
 		}
 	}
@@ -1434,9 +1561,9 @@ public class I18NExternalizeDialog extends Dialog
 		int endPosition;
 		String keyHint;
 		String nameHint;
-		boolean ignored;
+		STATE state;
 
-		JSText(IPersist parent, String text, int startPosition, int endPosition, String keyHint, String nameHint)
+		JSText(IPersist parent, String text, int startPosition, int endPosition, String keyHint, String nameHint, STATE state)
 		{
 			this.parent = parent;
 			this.text = text;
@@ -1444,6 +1571,7 @@ public class I18NExternalizeDialog extends Dialog
 			this.endPosition = endPosition;
 			this.keyHint = keyHint;
 			this.nameHint = nameHint;
+			this.state = state;
 		}
 
 		IPersist getParent()
@@ -1476,14 +1604,9 @@ public class I18NExternalizeDialog extends Dialog
 			return nameHint;
 		}
 
-		void setIgnored(boolean ignored)
+		STATE getState()
 		{
-			this.ignored = ignored;
-		}
-
-		boolean isIgnored()
-		{
-			return ignored;
+			return state;
 		}
 
 		@Override
@@ -1556,7 +1679,10 @@ public class I18NExternalizeDialog extends Dialog
 				case I18NExternalizeDialog.COLUMN_TEXT :
 					return treeNode.getText();
 				case I18NExternalizeDialog.COLUMN_KEY :
-					return treeNode.isJSText() && ((JSText)treeNode.getData()).isIgnored() ? "<<IGNORED>>" : treeNode.getKey();
+					return treeNode.getState() == STATE.INTERNALIZE ? "" : (treeNode.isJSText() && (treeNode.getState() == STATE.IGNORE) ? "$NON-NLS$"
+						: treeNode.getKey());
+				case I18NExternalizeDialog.COLUMN_STATUS :
+					return treeNode.getStateAsString();
 			}
 
 			return "";
@@ -1602,7 +1728,7 @@ public class I18NExternalizeDialog extends Dialog
 
 	private final HashMap<Object, TreeNode> dataTreeNodeMap = new HashMap<Object, TreeNode>();
 
-	private TreeNode createTreeNodeForData(Object data, TreeNode parent)
+	private TreeNode createTreeNodeForData(Object data, TreeNode parent, STATE state)
 	{
 		Object keyData = data;
 
@@ -1621,7 +1747,7 @@ public class I18NExternalizeDialog extends Dialog
 		TreeNode treeNodeForData = dataTreeNodeMap.get(keyData);
 		if (treeNodeForData == null)
 		{
-			treeNodeForData = new TreeNode(parent, data);
+			treeNodeForData = new TreeNode(parent, data, state);
 			dataTreeNodeMap.put(keyData, treeNodeForData);
 		}
 
@@ -1638,24 +1764,43 @@ public class I18NExternalizeDialog extends Dialog
 		private String text;
 		private String key;
 
+		private STATE state;
+
 		private boolean isChecked = true;
+		private boolean isChanged;
+
+		private String initialText;
+		private String initialKey;
+		private STATE initialState;
 
 		TreeNode()
 		{
 		}
 
-		TreeNode(TreeNode parent, Object itemData)
+		TreeNode(TreeNode parent, Object itemData, STATE state)
 		{
 			this.parent = parent;
 			this.itemData = itemData;
+			if (isElement() || isColumnInfo() || isJSText())
+			{
+				this.state = state;
+				if (state == STATE.EXTERNALIZE)
+				{
+					text = "";
+				}
+
+				initialKey = getKey();
+				initialText = getText();
+				initialState = getState();
+			}
 		}
 
 
-		void addPersistElement(List<IPersist> treePath, Object el)
+		void addPersistElement(List<IPersist> treePath, Object el, STATE state)
 		{
 			if (treePath.size() == 0)
 			{
-				addChild(createTreeNodeForData(el, this));
+				addChild(createTreeNodeForData(el, this, state));
 			}
 			else
 			{
@@ -1664,14 +1809,14 @@ public class I18NExternalizeDialog extends Dialog
 				{
 					if (child.getData().equals(treePathHead))
 					{
-						child.addPersistElement(treePath.subList(1, treePath.size()), el);
+						child.addPersistElement(treePath.subList(1, treePath.size()), el, state);
 						return;
 					}
 				}
 
-				TreeNode child = createTreeNodeForData(treePathHead, this);
+				TreeNode child = createTreeNodeForData(treePathHead, this, state);
 				addChild(child);
-				child.addPersistElement(treePath.subList(1, treePath.size()), el);
+				child.addPersistElement(treePath.subList(1, treePath.size()), el, state);
 			}
 		}
 
@@ -1736,12 +1881,18 @@ public class I18NExternalizeDialog extends Dialog
 				else if (isJSText())
 				{
 					text = ((JSText)itemData).getText();
-					text = text.substring(1, text.length() - 1);
+					if (text.length() > 0) text = text.substring(1, text.length() - 1);
 				}
 				else text = "";
 			}
 
 			return text;
+		}
+
+		void setText(String text)
+		{
+			this.text = text;
+			checkChange();
 		}
 
 		String getKey()
@@ -1774,6 +1925,7 @@ public class I18NExternalizeDialog extends Dialog
 		void setKey(String key)
 		{
 			this.key = key;
+			checkChange();
 		}
 
 		void setChecked(boolean checked)
@@ -1784,6 +1936,45 @@ public class I18NExternalizeDialog extends Dialog
 		boolean isChecked()
 		{
 			return isChecked;
+		}
+
+		STATE getState()
+		{
+			return state;
+		}
+
+		void setState(STATE state)
+		{
+			this.state = state;
+			checkChange();
+		}
+
+		String getStateAsString()
+		{
+			if (state != null)
+			{
+				switch (state)
+				{
+					case EXTERNALIZE :
+						return STATE_TXT_EXTERNALIZE;
+					case INTERNALIZE :
+						return STATE_TXT_INTERNALIZE;
+					case IGNORE :
+						return STATE_TXT_IGNORE;
+				}
+			}
+
+			return "";
+		}
+
+		boolean isChanged()
+		{
+			return isChanged || (getState() == STATE.IGNORE);
+		}
+
+		private void checkChange()
+		{
+			isChanged = (initialState != getState()) || !getKey().equals(initialKey) || !getText().equals(initialText);
 		}
 
 		@Override
@@ -1854,5 +2045,77 @@ public class I18NExternalizeDialog extends Dialog
 	protected IDialogSettings getDialogBoundsSettings()
 	{
 		return EditorUtil.getDialogSettings("i18n_externalize_dialog");
+	}
+
+
+	private class StateCellEditor extends CellEditor
+	{
+		private final STATE[] states;
+		private int valueIdx;
+
+		StateCellEditor(Composite parent, STATE[] states)
+		{
+			super(parent);
+			this.states = states;
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.CellEditor#createControl(org.eclipse.swt.widgets.Composite)
+		 */
+		@Override
+		protected Control createControl(Composite parent)
+		{
+			return null;
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.CellEditor#doGetValue()
+		 */
+		@Override
+		protected Object doGetValue()
+		{
+			return states[valueIdx];
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.CellEditor#doSetFocus()
+		 */
+		@Override
+		protected void doSetFocus()
+		{
+			// ignore
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.CellEditor#doSetValue(java.lang.Object)
+		 */
+		@Override
+		protected void doSetValue(Object v)
+		{
+			for (int i = 0; i < states.length; i++)
+			{
+				if (states[i].equals(v))
+				{
+					valueIdx = i;
+					break;
+				}
+			}
+		}
+
+		@Override
+		public void activate()
+		{
+			valueIdx = (valueIdx + 1) % states.length;
+			fireApplyEditorValue();
+		}
+
+		@Override
+		public void activate(ColumnViewerEditorActivationEvent activationEvent)
+		{
+			if (activationEvent.eventType != ColumnViewerEditorActivationEvent.TRAVERSAL)
+			{
+				super.activate(activationEvent);
+			}
+		}
 	}
 }
