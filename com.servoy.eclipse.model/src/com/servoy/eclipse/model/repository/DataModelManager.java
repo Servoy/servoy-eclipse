@@ -815,6 +815,15 @@ public class DataModelManager implements IColumnInfoManager
 			cid.containsMetaData = ci.getContainsMetaData();
 			cid.elementTemplateProperties = ci.getElementTemplateProperties();
 		}
+		else if (!onlyStoredColumns)
+		{
+			cid = new ColumnInfoDef();
+			cid.name = column.getName();
+			cid.columnType = column.getConfiguredColumnType(); // may copy db column type from column
+			cid.allowNull = column.getAllowNull();
+			cid.flags = column.getFlags();
+			cid.creationOrderIndex = creationOrderIndex;
+		}
 		return cid;
 	}
 
