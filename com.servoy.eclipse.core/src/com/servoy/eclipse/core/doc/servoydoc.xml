@@ -20053,21 +20053,14 @@ query.sort().add(query.getColumn("value").asc());
           <summary><![CDATA[Create an ascending sort expression
 <pre>
 query.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-query.sort
-.add(query.joins.orders_to_order_details.columns.quantity.asc)
-.add(query.columns.companyid)
-foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="avg">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: avg]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-	.root.having.add(query.joins.orders_to_order_details.columns.quantity.avg.eq(1))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="count">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
@@ -20080,40 +20073,27 @@ query.result().add(query.getColumn("value")).add(query.getColumn("value").count(
     .getParent().sort().add(query.getColumn("value").count().desc());
 </pre>]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="desc">
           <return type="com.servoy.j2db.querybuilder.impl.QBSort" typecode="com.servoy.j2db.querybuilder.impl.QBSort"/>
           <description><![CDATA[Create an descending sort expression]]></description>
           <summary><![CDATA[Create an descending sort expression]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-query.sort
-.add(query.joins.orders_to_order_details.columns.quantity.desc)
-.add(query.columns.companyid)
-foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="max">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: max]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.max(10))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="min">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: min]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.min(10))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="not">
           <return type="com.servoy.j2db.querybuilder.impl.QBColumn" typecode="com.servoy.j2db.querybuilder.impl.QBColumn"/>
@@ -20122,30 +20102,27 @@ Aggregate: min]]></description>
 query.where().add(query.getColumn("value").not().eq(new Integer(100));
 </pre>]]></description>
           <summary><![CDATA[Create a negated condition.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.not.eq(1))]]></sample>
+          <sample/>
         </property>
         <property name="null">
           <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
           <description><![CDATA[Compare column with a value or another column.
 Operator: isNull]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.isNull())]]></sample>
+          <sample/>
         </property>
         <property name="sum">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: sum]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.sum(10))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="upper">
           <return type="com.servoy.j2db.querybuilder.impl.QBFunction" typecode="com.servoy.j2db.querybuilder.impl.QBFunction"/>
           <description><![CDATA[Create upper(column) expression]]></description>
           <summary><![CDATA[Create upper(column) expression]]></summary>
-          <sample><![CDATA[query.result.add(query.columns.custname.upper())]]></sample>
+          <sample/>
         </property>
       </properties>
       <functions>
@@ -20161,7 +20138,7 @@ Compare column to between 2 values or other columns.
 query.where().add(query.getColumn("value").between(new Integer(1), new Integer(99));
 </pre>]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.between(0, 5))]]></sample>
+          <sample/>
         </function>
         <function name="eq">
           <argumentsTypes>
@@ -20174,7 +20151,7 @@ Operator: equals
 query.where().add(query.getColumn("value").eq(new Integer(100));
 </pre>]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.eq(1))]]></sample>
+          <sample/>
         </function>
         <function name="ge">
           <argumentsTypes>
@@ -20184,7 +20161,7 @@ query.where().add(query.getColumn("value").eq(new Integer(100));
           <description><![CDATA[Compare column with a value or another column.
 Operator: greaterThanOrEqual]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.ge(2))]]></sample>
+          <sample/>
         </function>
         <function name="gt">
           <argumentsTypes>
@@ -20194,31 +20171,25 @@ Operator: greaterThanOrEqual]]></description>
           <description><![CDATA[Compare column with a value or another column.
 Operator: greaterThan]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.gt(0))]]></sample>
+          <sample/>
         </function>
-        <function name="isin">
+        <function name="isin" undocumented="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBPart"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
-          <description><![CDATA[Compare column with subquery result.
-<pre>
-query.where().add(query.getColumn("value").in(subQuery.result().add(query.getColumn("code")).getParent().where().add(subQuery.getColumn("flag").eq("T"))));
-</pre>]]></description>
-          <summary><![CDATA[Compare column with subquery result.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.in(query2))]]></sample>
+          <parameters>
+            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBPart" typecode="com.servoy.j2db.querybuilder.impl.QBPart"/>
+          </parameters>
         </function>
-        <function name="isin">
+        <function name="isin" undocumented="true">
           <argumentsTypes>
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
-          <description><![CDATA[Compare column with values.
-<pre>
-query.where().add(query.getColumn("value").in(subQuery.result().add(new Object[]{Integer.valueOf(1), Integer.valueof(100)});
-</pre>]]></description>
-          <summary><![CDATA[Compare column with values.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.in([1, 5, 99]))]]></sample>
+          <parameters>
+            <parameter name="values" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"/>
+          </parameters>
         </function>
         <function name="le">
           <argumentsTypes>
@@ -20228,7 +20199,7 @@ query.where().add(query.getColumn("value").in(subQuery.result().add(new Object[]
           <description><![CDATA[Compare column with a value or another column.
 Operator: lessThanOrEqual]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.le(2))]]></sample>
+          <sample/>
         </function>
         <function name="like">
           <argumentsTypes>
@@ -20238,7 +20209,7 @@ Operator: lessThanOrEqual]]></description>
           <description><![CDATA[Compare column with a value or another column.
 Operator: like]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.companyname.like('Serv%'))]]></sample>
+          <sample/>
         </function>
         <function name="like">
           <argumentsTypes>
@@ -20249,7 +20220,7 @@ Operator: like]]></description>
           <description><![CDATA[Compare column with a value or another column.
 Operator: like, with escape character]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.companyname.like('X_%', '_'))]]></sample>
+          <sample/>
         </function>
         <function name="lt">
           <argumentsTypes>
@@ -20259,7 +20230,7 @@ Operator: like, with escape character]]></description>
           <description><![CDATA[Compare column with a value or another column.
 Operator: lessThan]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.lt(99))]]></sample>
+          <sample/>
         </function>
       </functions>
     </object>
@@ -20274,21 +20245,14 @@ query.sort().add(query.getColumn("value").asc());
           <summary><![CDATA[Create an ascending sort expression
 <pre>
 query.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-query.sort
-.add(query.joins.orders_to_order_details.columns.quantity.asc)
-.add(query.columns.companyid)
-foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="avg">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: avg]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-	.root.having.add(query.joins.orders_to_order_details.columns.quantity.avg.eq(1))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="count">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
@@ -20301,40 +20265,27 @@ query.result().add(query.getColumn("value")).add(query.getColumn("value").count(
     .getParent().sort().add(query.getColumn("value").count().desc());
 </pre>]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="desc">
           <return type="com.servoy.j2db.querybuilder.impl.QBSort" typecode="com.servoy.j2db.querybuilder.impl.QBSort"/>
           <description><![CDATA[Create an descending sort expression]]></description>
           <summary><![CDATA[Create an descending sort expression]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-query.sort
-.add(query.joins.orders_to_order_details.columns.quantity.desc)
-.add(query.columns.companyid)
-foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="max">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: max]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.max(10))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="min">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: min]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.min(10))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="not">
           <return type="com.servoy.j2db.querybuilder.impl.QBColumn" typecode="com.servoy.j2db.querybuilder.impl.QBColumn"/>
@@ -20343,56 +20294,39 @@ Aggregate: min]]></description>
 query.where().add(query.getColumn("value").not().eq(new Integer(100));
 </pre>]]></description>
           <summary><![CDATA[Create a negated condition.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.not.eq(1))]]></sample>
+          <sample/>
         </property>
         <property name="null">
           <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
           <description><![CDATA[Compare column with a value or another column.
 Operator: isNull]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.isNull())]]></sample>
+          <sample/>
         </property>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
-	var query = databaseManager.createSelect('db:/example_data/orders')
-	query.where.add(query
-		.or 
-			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
-			.add(query.exists(
-					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
-			))
-		)
-		
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="sum">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: sum]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.sum(10))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="upper">
           <return type="com.servoy.j2db.querybuilder.impl.QBFunction" typecode="com.servoy.j2db.querybuilder.impl.QBFunction"/>
           <description><![CDATA[Create upper(column) expression]]></description>
           <summary><![CDATA[Create upper(column) expression]]></summary>
-          <sample><![CDATA[query.result.add(query.columns.custname.upper())]]></sample>
+          <sample/>
         </property>
       </properties>
       <functions>
@@ -20408,7 +20342,7 @@ Compare column to between 2 values or other columns.
 query.where().add(query.getColumn("value").between(new Integer(1), new Integer(99));
 </pre>]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.between(0, 5))]]></sample>
+          <sample/>
         </function>
         <function name="eq">
           <argumentsTypes>
@@ -20421,7 +20355,7 @@ Operator: equals
 query.where().add(query.getColumn("value").eq(new Integer(100));
 </pre>]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.eq(1))]]></sample>
+          <sample/>
         </function>
         <function name="ge">
           <argumentsTypes>
@@ -20431,7 +20365,7 @@ query.where().add(query.getColumn("value").eq(new Integer(100));
           <description><![CDATA[Compare column with a value or another column.
 Operator: greaterThanOrEqual]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.ge(2))]]></sample>
+          <sample/>
         </function>
         <function name="gt">
           <argumentsTypes>
@@ -20441,31 +20375,25 @@ Operator: greaterThanOrEqual]]></description>
           <description><![CDATA[Compare column with a value or another column.
 Operator: greaterThan]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.gt(0))]]></sample>
+          <sample/>
         </function>
-        <function name="isin">
+        <function name="isin" undocumented="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBPart"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
-          <description><![CDATA[Compare column with subquery result.
-<pre>
-query.where().add(query.getColumn("value").in(subQuery.result().add(query.getColumn("code")).getParent().where().add(subQuery.getColumn("flag").eq("T"))));
-</pre>]]></description>
-          <summary><![CDATA[Compare column with subquery result.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.in(query2))]]></sample>
+          <parameters>
+            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBPart" typecode="com.servoy.j2db.querybuilder.impl.QBPart"/>
+          </parameters>
         </function>
-        <function name="isin">
+        <function name="isin" undocumented="true">
           <argumentsTypes>
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
-          <description><![CDATA[Compare column with values.
-<pre>
-query.where().add(query.getColumn("value").in(subQuery.result().add(new Object[]{Integer.valueOf(1), Integer.valueof(100)});
-</pre>]]></description>
-          <summary><![CDATA[Compare column with values.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.in([1, 5, 99]))]]></sample>
+          <parameters>
+            <parameter name="values" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"/>
+          </parameters>
         </function>
         <function name="le">
           <argumentsTypes>
@@ -20475,7 +20403,7 @@ query.where().add(query.getColumn("value").in(subQuery.result().add(new Object[]
           <description><![CDATA[Compare column with a value or another column.
 Operator: lessThanOrEqual]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.le(2))]]></sample>
+          <sample/>
         </function>
         <function name="like">
           <argumentsTypes>
@@ -20485,7 +20413,7 @@ Operator: lessThanOrEqual]]></description>
           <description><![CDATA[Compare column with a value or another column.
 Operator: like]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.companyname.like('Serv%'))]]></sample>
+          <sample/>
         </function>
         <function name="like">
           <argumentsTypes>
@@ -20496,7 +20424,7 @@ Operator: like]]></description>
           <description><![CDATA[Compare column with a value or another column.
 Operator: like, with escape character]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.companyname.like('X_%', '_'))]]></sample>
+          <sample/>
         </function>
         <function name="lt">
           <argumentsTypes>
@@ -20506,7 +20434,7 @@ Operator: like, with escape character]]></description>
           <description><![CDATA[Compare column with a value or another column.
 Operator: lessThan]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.lt(99))]]></sample>
+          <sample/>
         </function>
       </functions>
     </object>
@@ -20517,27 +20445,13 @@ Operator: lessThan]]></description>
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
-	var query = databaseManager.createSelect('db:/example_data/orders')
-	query.where.add(query
-		.or 
-			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
-			.add(query.exists(
-					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
-			))
-		)
-		
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
       </properties>
     </object>
@@ -20552,21 +20466,14 @@ query.sort().add(query.getColumn("value").asc());
           <summary><![CDATA[Create an ascending sort expression
 <pre>
 query.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-query.sort
-.add(query.joins.orders_to_order_details.columns.quantity.asc)
-.add(query.columns.companyid)
-foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="avg">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: avg]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-	.root.having.add(query.joins.orders_to_order_details.columns.quantity.avg.eq(1))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="count">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
@@ -20579,40 +20486,27 @@ query.result().add(query.getColumn("value")).add(query.getColumn("value").count(
     .getParent().sort().add(query.getColumn("value").count().desc());
 </pre>]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="desc">
           <return type="com.servoy.j2db.querybuilder.impl.QBSort" typecode="com.servoy.j2db.querybuilder.impl.QBSort"/>
           <description><![CDATA[Create an descending sort expression]]></description>
           <summary><![CDATA[Create an descending sort expression]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-query.sort
-.add(query.joins.orders_to_order_details.columns.quantity.desc)
-.add(query.columns.companyid)
-foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="max">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: max]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.max(10))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="min">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: min]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.min(10))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="not">
           <return type="com.servoy.j2db.querybuilder.impl.QBColumn" typecode="com.servoy.j2db.querybuilder.impl.QBColumn"/>
@@ -20621,56 +20515,39 @@ Aggregate: min]]></description>
 query.where().add(query.getColumn("value").not().eq(new Integer(100));
 </pre>]]></description>
           <summary><![CDATA[Create a negated condition.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.not.eq(1))]]></sample>
+          <sample/>
         </property>
         <property name="null">
           <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
           <description><![CDATA[Compare column with a value or another column.
 Operator: isNull]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.isNull())]]></sample>
+          <sample/>
         </property>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
-	var query = databaseManager.createSelect('db:/example_data/orders')
-	query.where.add(query
-		.or 
-			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
-			.add(query.exists(
-					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
-			))
-		)
-		
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="sum">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: sum]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.sum(10))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="upper">
           <return type="com.servoy.j2db.querybuilder.impl.QBFunction" typecode="com.servoy.j2db.querybuilder.impl.QBFunction"/>
           <description><![CDATA[Create upper(column) expression]]></description>
           <summary><![CDATA[Create upper(column) expression]]></summary>
-          <sample><![CDATA[query.result.add(query.columns.custname.upper())]]></sample>
+          <sample/>
         </property>
       </properties>
       <functions>
@@ -20686,7 +20563,7 @@ Compare column to between 2 values or other columns.
 query.where().add(query.getColumn("value").between(new Integer(1), new Integer(99));
 </pre>]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.between(0, 5))]]></sample>
+          <sample/>
         </function>
         <function name="eq">
           <argumentsTypes>
@@ -20699,7 +20576,7 @@ Operator: equals
 query.where().add(query.getColumn("value").eq(new Integer(100));
 </pre>]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.eq(1))]]></sample>
+          <sample/>
         </function>
         <function name="ge">
           <argumentsTypes>
@@ -20709,7 +20586,7 @@ query.where().add(query.getColumn("value").eq(new Integer(100));
           <description><![CDATA[Compare column with a value or another column.
 Operator: greaterThanOrEqual]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.ge(2))]]></sample>
+          <sample/>
         </function>
         <function name="gt">
           <argumentsTypes>
@@ -20719,31 +20596,25 @@ Operator: greaterThanOrEqual]]></description>
           <description><![CDATA[Compare column with a value or another column.
 Operator: greaterThan]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.gt(0))]]></sample>
+          <sample/>
         </function>
-        <function name="isin">
+        <function name="isin" undocumented="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBPart"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
-          <description><![CDATA[Compare column with subquery result.
-<pre>
-query.where().add(query.getColumn("value").in(subQuery.result().add(query.getColumn("code")).getParent().where().add(subQuery.getColumn("flag").eq("T"))));
-</pre>]]></description>
-          <summary><![CDATA[Compare column with subquery result.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.in(query2))]]></sample>
+          <parameters>
+            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBPart" typecode="com.servoy.j2db.querybuilder.impl.QBPart"/>
+          </parameters>
         </function>
-        <function name="isin">
+        <function name="isin" undocumented="true">
           <argumentsTypes>
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
-          <description><![CDATA[Compare column with values.
-<pre>
-query.where().add(query.getColumn("value").in(subQuery.result().add(new Object[]{Integer.valueOf(1), Integer.valueof(100)});
-</pre>]]></description>
-          <summary><![CDATA[Compare column with values.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.in([1, 5, 99]))]]></sample>
+          <parameters>
+            <parameter name="values" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"/>
+          </parameters>
         </function>
         <function name="le">
           <argumentsTypes>
@@ -20753,7 +20624,7 @@ query.where().add(query.getColumn("value").in(subQuery.result().add(new Object[]
           <description><![CDATA[Compare column with a value or another column.
 Operator: lessThanOrEqual]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.le(2))]]></sample>
+          <sample/>
         </function>
         <function name="like">
           <argumentsTypes>
@@ -20763,7 +20634,7 @@ Operator: lessThanOrEqual]]></description>
           <description><![CDATA[Compare column with a value or another column.
 Operator: like]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.companyname.like('Serv%'))]]></sample>
+          <sample/>
         </function>
         <function name="like">
           <argumentsTypes>
@@ -20774,7 +20645,7 @@ Operator: like]]></description>
           <description><![CDATA[Compare column with a value or another column.
 Operator: like, with escape character]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.companyname.like('X_%', '_'))]]></sample>
+          <sample/>
         </function>
         <function name="lt">
           <argumentsTypes>
@@ -20784,7 +20655,7 @@ Operator: like, with escape character]]></description>
           <description><![CDATA[Compare column with a value or another column.
 Operator: lessThan]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.lt(99))]]></sample>
+          <sample/>
         </function>
       </functions>
     </object>
@@ -20792,74 +20663,47 @@ Operator: lessThan]]></description>
       <properties>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
-          <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
-          <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <description><![CDATA[Get query builder parent.]]></description>
+          <summary><![CDATA[Get query builder parent.]]></summary>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
-	var query = databaseManager.createSelect('db:/example_data/orders')
-	query.where.add(query
-		.or 
-			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
-			.add(query.exists(
-					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
-			))
-		)
-		
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
       </properties>
       <functions>
-        <function name="add">
+        <function name="add" undocumented="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBColumn"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBGroupBy" typecode="com.servoy.j2db.querybuilder.impl.QBGroupBy"/>
-          <description><![CDATA[Add column name to group-by clause.
-<p> Same as 
-<pre>
-query.groupBy().add(join.getColumn("value"))
-<pre>]]></description>
-          <summary><![CDATA[Add column name to group-by clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-query.groupBy.add(query.columns.orderid) // have to group by on pk when using having-conditions in (foundset) pk queries
-.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
-foundset.loadRecords(query)]]></sample>
+          <parameters>
+            <parameter name="column" type="com.servoy.j2db.querybuilder.impl.QBColumn" typecode="com.servoy.j2db.querybuilder.impl.QBColumn"/>
+          </parameters>
         </function>
         <function name="addPk">
           <argumentsTypes/>
           <return type="com.servoy.j2db.querybuilder.impl.QBGroupBy" typecode="com.servoy.j2db.querybuilder.impl.QBGroupBy"/>
           <description><![CDATA[Add the tables' primary pk columns in alphabetical order to the group by clause.]]></description>
           <summary><![CDATA[Add the tables' primary pk columns in alphabetical order to the group by clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
-foundset.loadRecords(query)]]></sample>
+          <sample/>
         </function>
       </functions>
     </object>
     <object publicName="QBJoin" qualifiedName="com.servoy.j2db.querybuilder.impl.QBJoin">
       <properties>
-        <property name="columns">
+        <property name="columns" undocumented="true">
           <return type="com.servoy.j2db.querybuilder.impl.QBColumns" typecode="com.servoy.j2db.querybuilder.impl.QBColumns"/>
-          <description><![CDATA[Get columns from query]]></description>
-          <summary><![CDATA[Get columns from query]]></summary>
-          <sample><![CDATA[foundset.getQuery().columns]]></sample>
         </property>
         <property name="joins">
           <return type="com.servoy.j2db.querybuilder.impl.QBJoins" typecode="com.servoy.j2db.querybuilder.impl.QBJoins"/>
           <description><![CDATA[Get the joins clause of this table based clause.
 <p>Joins added to this clause will be based on this table clauses table.]]></description>
           <summary><![CDATA[Get the joins clause of this table based clause.]]></summary>
-          <sample><![CDATA[foundset.getQuery().joins]]></sample>
+          <sample/>
         </property>
         <property name="on">
           <return type="com.servoy.j2db.querybuilder.impl.QBLogicalCondition" typecode="com.servoy.j2db.querybuilder.impl.QBLogicalCondition"/>
@@ -20869,14 +20713,7 @@ query.joins().add(detailDataSource,  IQueryBuilderJoin.LEFT_OUTER_JOIN, "detail"
     .on().add(query.getColumn("pk").eq(query.getColumn("detail", "fk")));
 </pre>]]></description>
           <summary><![CDATA[Get the on clause for the join.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
-var join1 = query.joins.add('db:/example_data/person')
-join1.on.add(query.columns.parent_person_id.eq(join1.columns.person_id))
-var join2 = query.joins.add('db:/example_data/person')
-join2.on.add(join1.columns.parent_person_id.eq(join2.columns.person_id))
-	
-query.where.add(join2.columns.name.eq('john'))
-foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
       </properties>
       <functions>
@@ -20887,7 +20724,7 @@ foundset.loadRecords(query)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBColumn" typecode="com.servoy.j2db.querybuilder.impl.QBColumn"/>
           <description><![CDATA[Get a column from the table.]]></description>
           <summary><![CDATA[Get a column from the table.]]></summary>
-          <sample><![CDATA[foundset.getQuery().getColumn('orderid')]]></sample>
+          <sample/>
         </function>
         <function name="getColumn">
           <argumentsTypes>
@@ -20898,7 +20735,7 @@ foundset.loadRecords(query)]]></sample>
           <description><![CDATA[Get a column from the table with given alias.
 <p>The alias may be of the main table or any level deep joined table.]]></description>
           <summary><![CDATA[Get a column from the table with given alias.]]></summary>
-          <sample><![CDATA[foundset.getQuery().getColumn('orderid', 'opk')]]></sample>
+          <sample/>
         </function>
       </functions>
     </object>
@@ -20908,27 +20745,13 @@ foundset.loadRecords(query)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
-	var query = databaseManager.createSelect('db:/example_data/orders')
-	query.where.add(query
-		.or 
-			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
-			.add(query.exists(
-					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
-			))
-		)
-		
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
       </properties>
       <functions>
@@ -20939,11 +20762,7 @@ foundset.loadRecords(query)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBJoin" typecode="com.servoy.j2db.querybuilder.impl.QBJoin"/>
           <description><![CDATA[Add a join with join type IQueryBuilderJoin#LEFT_OUTER_JOIN and no alias for the joining table.]]></description>
           <summary><![CDATA[Add a join with join type IQueryBuilderJoin#LEFT_OUTER_JOIN and no alias for the joining table.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
-	join.on.add(join.columns.orderid.eq(query.columns.orderid))
-	query.where.add(join.columns.quantity.le(10))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </function>
         <function name="add">
           <argumentsTypes>
@@ -20953,11 +20772,7 @@ foundset.loadRecords(query)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBJoin" typecode="com.servoy.j2db.querybuilder.impl.QBJoin"/>
           <description><![CDATA[Add a join with no alias for the joining table.]]></description>
           <summary><![CDATA[Add a join with no alias for the joining table.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
-	join.on.add(join.columns.orderid.eq(query.columns.orderid))
-	query.where.add(join.columns.quantity.le(10))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </function>
         <function name="add">
           <argumentsTypes>
@@ -20968,11 +20783,22 @@ foundset.loadRecords(query)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBJoin" typecode="com.servoy.j2db.querybuilder.impl.QBJoin"/>
           <description><![CDATA[Add a join clause from the parent query builder part to the specified data source.]]></description>
           <summary><![CDATA[Add a join clause from the parent query builder part to the specified data source.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
-	join.on.add(join.columns.orderid.eq(query.columns.orderid))
-	query.where.add(join.columns.quantity.le(10))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
+          <parameters>
+            <parameter name="dataSource" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[data source]]></description>
+            </parameter>
+            <parameter name="joinType" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[join type, one of IQueryBuilderJoin#LEFT_OUTER_JOIN, IQueryBuilderJoin#INNER_JOIN, IQueryBuilderJoin#RIGHT_OUTER_JOIN, IQueryBuilderJoin#FULL_JOIN]]></description>
+            </parameter>
+            <parameter name="alias" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[alias for joining table
+ <pre>
+query.joins().add(detailDataSource,  IQueryBuilderJoin.LEFT_OUTER_JOIN, "detail")
+    .on().add(query.getColumn("pk").eq(query.getColumn("detail", "fk")));
+</pre>]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="add">
           <argumentsTypes>
@@ -20984,11 +20810,15 @@ foundset.loadRecords(query)]]></sample>
 <p>When dataSourceOrRelation is a relation name, a join will be added based on the relation.
 <br>When dataSourceOrRelation is a data source, an empty join will be added with join type IQueryBuilderJoin#LEFT_OUTER_JOIN.]]></description>
           <summary><![CDATA[Add a join based on relation or add a manual join.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
-	join.on.add(join.columns.orderid.eq(query.columns.orderid))
-	query.where.add(join.columns.quantity.le(10))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
+          <parameters>
+            <parameter name="dataSourceOrRelation" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[add join based on relation or data source]]></description>
+            </parameter>
+            <parameter name="alias" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[alias, when null default is used]]></description>
+            </parameter>
+          </parameters>
         </function>
       </functions>
     </object>
@@ -20998,42 +20828,24 @@ foundset.loadRecords(query)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
-	var query = databaseManager.createSelect('db:/example_data/orders')
-	query.where.add(query
-		.or 
-			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
-			.add(query.exists(
-					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
-			))
-		)
-		
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
       </properties>
       <functions>
-        <function name="add">
+        <function name="add" undocumented="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBLogicalCondition" typecode="com.servoy.j2db.querybuilder.impl.QBLogicalCondition"/>
-          <description><![CDATA[Add a condition to the AND or OR condition list.
-<pre>
-query.where().add(query.getColumn("flag").eq(new Integer(1))).add(query.getColumn("value").isNull());
-</pre>]]></description>
-          <summary><![CDATA[Add a condition to the AND or OR condition list.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-query.where.add(query.columns.orderdate.isNull)]]></sample>
+          <parameters>
+            <parameter name="condition" type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
+          </parameters>
         </function>
       </functions>
     </object>
@@ -21043,27 +20855,13 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
-	var query = databaseManager.createSelect('db:/example_data/orders')
-	query.where.add(query
-		.or 
-			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
-			.add(query.exists(
-					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
-			))
-		)
-		
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
       </properties>
     </object>
@@ -21074,108 +20872,68 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
-	var query = databaseManager.createSelect('db:/example_data/orders')
-	query.where.add(query
-		.or 
-			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
-			.add(query.exists(
-					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
-			))
-		)
-		
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
       </properties>
     </object>
     <object publicName="QBResult" qualifiedName="com.servoy.j2db.querybuilder.impl.QBResult">
       <properties>
-        <property name="distinct">
+        <property name="distinct" undocumented="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[Set the distinct flag for the query.]]></description>
-          <summary><![CDATA[Set the distinct flag for the query.]]></summary>
-          <sample><![CDATA[query.result.distinct = true]]></sample>
         </property>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
-	var query = databaseManager.createSelect('db:/example_data/orders')
-	query.where.add(query
-		.or 
-			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
-			.add(query.exists(
-					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
-			))
-		)
-		
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
       </properties>
       <functions>
-        <function name="add">
+        <function name="add" undocumented="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBResult" typecode="com.servoy.j2db.querybuilder.impl.QBResult"/>
-          <description><![CDATA[Add a column to the query result.
-<pre>
-query.result().add(query.getColumn("value1")).add(query.getColumn("value2"));
-</pre>]]></description>
-          <summary><![CDATA[Add a column to the query result.]]></summary>
-          <sample><![CDATA[query.result.add(query.columns.label_text.max)]]></sample>
+          <parameters>
+            <parameter name="aggregate" type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
+          </parameters>
         </function>
-        <function name="add">
+        <function name="add" undocumented="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBColumn"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBResult" typecode="com.servoy.j2db.querybuilder.impl.QBResult"/>
-          <description><![CDATA[Add a column to the query result.
-<pre>
-query.result().add(query.getColumn("value1")).add(query.getColumn("value2"));
-</pre>]]></description>
-          <summary><![CDATA[Add a column to the query result.]]></summary>
-          <sample><![CDATA[query.result.add(query.columns.custname)]]></sample>
+          <parameters>
+            <parameter name="column" type="com.servoy.j2db.querybuilder.impl.QBColumn" typecode="com.servoy.j2db.querybuilder.impl.QBColumn"/>
+          </parameters>
         </function>
-        <function name="add">
+        <function name="add" undocumented="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBFunction"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBResult" typecode="com.servoy.j2db.querybuilder.impl.QBResult"/>
-          <description><![CDATA[Add a column to the query result.
-<pre>
-query.result().add(query.getColumn("value1")).add(query.getColumn("value2"));
-</pre>]]></description>
-          <summary><![CDATA[Add a column to the query result.]]></summary>
-          <sample><![CDATA[query.result.add(query.columns.custname.upper())]]></sample>
+          <parameters>
+            <parameter name="func" type="com.servoy.j2db.querybuilder.impl.QBFunction" typecode="com.servoy.j2db.querybuilder.impl.QBFunction"/>
+          </parameters>
         </function>
         <function name="addPk">
           <argumentsTypes/>
           <return type="com.servoy.j2db.querybuilder.impl.QBResult" typecode="com.servoy.j2db.querybuilder.impl.QBResult"/>
           <description><![CDATA[Add the tables' primary pk columns in alphabetical order to the query result.]]></description>
           <summary><![CDATA[Add the tables' primary pk columns in alphabetical order to the query result.]]></summary>
-          <sample><![CDATA[query.result.addPk()]]></sample>
+          <sample/>
         </function>
         <function name="addValue">
           <argumentsTypes>
@@ -21188,11 +20946,16 @@ query.result().add(query.getColumn("value1")).add(query.getColumn("value2"));
 query.result().addValue(new Integer(100)).add(query.getColumn("value2"));
 </pre>]]></description>
           <summary><![CDATA[Add a fixed value to the query result.]]></summary>
-          <sample><![CDATA[query.result.addValue(100)]]></sample>
+          <sample/>
         </function>
       </functions>
     </object>
     <object publicName="QBSelect" qualifiedName="com.servoy.j2db.querybuilder.impl.QBSelect">
+      <constants>
+        <constant name="CONDITION_WHERE" undocumented="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+        </constant>
+      </constants>
       <properties>
         <property name="and">
           <return type="com.servoy.j2db.querybuilder.impl.QBLogicalCondition" typecode="com.servoy.j2db.querybuilder.impl.QBLogicalCondition"/>
@@ -21214,25 +20977,10 @@ query.result().addValue(new Integer(100)).add(query.getColumn("value2"));
 	);	
 </pre>]]></description>
           <summary><![CDATA[Create an AND-condition to add conditions to.]]></summary>
-          <sample><![CDATA[query.where.add(
-	  query.or
-	    .add(
-	      query.and
-		    .add(query.columns.flag.eq(1))
-	    .add(query.columns.order_date.isNull)
-		 )
-	    .add(
-	      query.and
-	        .add(query.columns.flag.eq(2))
-	        .add(query.column.order_date.gt(new Date()))
-	     )
-	);]]></sample>
+          <sample/>
         </property>
-        <property name="columns">
+        <property name="columns" undocumented="true">
           <return type="com.servoy.j2db.querybuilder.impl.QBColumns" typecode="com.servoy.j2db.querybuilder.impl.QBColumns"/>
-          <description><![CDATA[Get columns from query]]></description>
-          <summary><![CDATA[Get columns from query]]></summary>
-          <sample><![CDATA[foundset.getQuery().columns]]></sample>
         </property>
         <property name="groupBy">
           <return type="com.servoy.j2db.querybuilder.impl.QBGroupBy" typecode="com.servoy.j2db.querybuilder.impl.QBGroupBy"/>
@@ -21247,10 +20995,7 @@ query.result().add(query.getColumn(val2.getName())).add(query.getColumn(val2.get
 <pre>
 // SELECT val2, COUNT(val2) FROM tab GROUP BY val2 ORDER BY COUNT(val2) DESC
 query.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
-foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="having">
           <return type="com.servoy.j2db.querybuilder.impl.QBLogicalCondition" typecode="com.servoy.j2db.querybuilder.impl.QBLogicalCondition"/>
@@ -21263,17 +21008,14 @@ query.result().add(query.getColumn("value"))
    .getParent().having().add("value").count().gt(Integer.valueOf(1)));
 </pre>]]></description>
           <summary><![CDATA[Get the having-part of the query, used to add conditions.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
-.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
-foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="joins">
           <return type="com.servoy.j2db.querybuilder.impl.QBJoins" typecode="com.servoy.j2db.querybuilder.impl.QBJoins"/>
           <description><![CDATA[Get the joins clause of this table based clause.
 <p>Joins added to this clause will be based on this table clauses table.]]></description>
           <summary><![CDATA[Get the joins clause of this table based clause.]]></summary>
-          <sample><![CDATA[foundset.getQuery().joins]]></sample>
+          <sample/>
         </property>
         <property name="or">
           <return type="com.servoy.j2db.querybuilder.impl.QBLogicalCondition" typecode="com.servoy.j2db.querybuilder.impl.QBLogicalCondition"/>
@@ -21288,33 +21030,10 @@ query.where().add(query.getColumn("custid").eq(new Integer(200)))
     );
 </pre>]]></description>
           <summary><![CDATA[Create an OR-condition to add conditions to.]]></summary>
-          <sample><![CDATA[query.where.add(
-	  query.or
-	    .add(
-	      query.and
-		    .add(query.columns.flag.eq(1))
-	    .add(query.columns.order_date.isNull)
-		 )
-	    .add(
-	      query.and
-	        .add(query.columns.flag.eq(2))
-	        .add(query.column.order_date.gt(new Date()))
-	     )
-	);]]></sample>
+          <sample/>
         </property>
-        <property name="params">
+        <property name="params" undocumented="true">
           <return type="com.servoy.j2db.querybuilder.impl.QBParameters" typecode="com.servoy.j2db.querybuilder.impl.QBParameters"/>
-          <description/>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	query.where.add(query.columns.contact_id.eq(query.getParameter('mycontactid')))
-	
-	// load orders where contact_id = 100
-	query.params['mycontactid'] = 100
-	foundset.loadRecords(query)
-	
-	// load orders where contact_id = 200
-	query.params['mycontactid'] = 200
-	foundset.loadRecords(query)]]></sample>
         </property>
         <property name="result">
           <return type="com.servoy.j2db.querybuilder.impl.QBResult" typecode="com.servoy.j2db.querybuilder.impl.QBResult"/>
@@ -21323,7 +21042,7 @@ query.where().add(query.getColumn("custid").eq(new Integer(200)))
 query.result().add(query.getColumn("id")).add.query.getColumn("note"); // select id, note from tab
 </pre>]]></description>
           <summary><![CDATA[Get the result part of the query, used to add result columns or values.]]></summary>
-          <sample><![CDATA[query.result.add(query.columns.company_id).add(query.columns.customerid)]]></sample>
+          <sample/>
         </property>
         <property name="sort">
           <return type="com.servoy.j2db.querybuilder.impl.QBSorts" typecode="com.servoy.j2db.querybuilder.impl.QBSorts"/>
@@ -21332,11 +21051,7 @@ query.result().add(query.getColumn("id")).add.query.getColumn("note"); // select
 query.sort().add(query.getColumn("note").desc()).add(query.getColumn("id")); // order by note desc, id asc
 </pre>]]></description>
           <summary><![CDATA[Get the sorting part of the query.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-query.sort
-.add(query.joins.orders_to_order_details.columns.quantity.desc)
-.add(query.columns.companyid)
-foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="where">
           <return type="com.servoy.j2db.querybuilder.impl.QBLogicalCondition" typecode="com.servoy.j2db.querybuilder.impl.QBLogicalCondition"/>
@@ -21346,29 +21061,18 @@ The conditions added here are AND-ed.
 query.where().add(query.getColumn("flag").eq(new Integer(1)).add(query.getColumn("foo").isNull(); // where flag = 1 and foo is null
 </pre>]]></description>
           <summary><![CDATA[Get the where-part of the query, used to add conditions.]]></summary>
-          <sample><![CDATA[var query = foundset.getQuery()
-query.where.add(query.columns.flag.eq(1))]]></sample>
+          <sample/>
         </property>
       </properties>
       <functions>
-        <function name="exists">
+        <function name="exists" undocumented="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
-          <description><![CDATA[Get an exists-condition from a subquery
-<pre>
- // where exists (select 1 from tab where flag = ?)
- query.where().add(query.exists(subQuery.result().addValue(new Integer(1)).getParent().where().add(subQuery.getColumn("flag").eq("T")).getRoot()));
- 
- // or simple variant: adds 'select 1' and calls getRoot()
- query.where().add(query.exists(subQuery.where().add(subQuery.getColumn("flag").eq("T"))));
-</pre>]]></description>
-          <summary><![CDATA[Get an exists-condition from a subquery
-<pre>
- // where exists (select 1 from tab where flag = ?)
- query.]]></summary>
-          <sample><![CDATA[foundset.query.where.add(query.exists(query2))]]></sample>
+          <parameters>
+            <parameter name="q" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
+          </parameters>
         </function>
         <function name="getColumn">
           <argumentsTypes>
@@ -21377,7 +21081,7 @@ query.where.add(query.columns.flag.eq(1))]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBColumn" typecode="com.servoy.j2db.querybuilder.impl.QBColumn"/>
           <description><![CDATA[Get a column from the table.]]></description>
           <summary><![CDATA[Get a column from the table.]]></summary>
-          <sample><![CDATA[foundset.getQuery().getColumn('orderid')]]></sample>
+          <sample/>
         </function>
         <function name="getColumn">
           <argumentsTypes>
@@ -21388,7 +21092,7 @@ query.where.add(query.columns.flag.eq(1))]]></sample>
           <description><![CDATA[Get a column from the table with given alias.
 <p>The alias may be of the main table or any level deep joined table.]]></description>
           <summary><![CDATA[Get a column from the table with given alias.]]></summary>
-          <sample><![CDATA[foundset.getQuery().getColumn('orderid', 'opk')]]></sample>
+          <sample/>
         </function>
         <function name="getParameter">
           <argumentsTypes>
@@ -21401,16 +21105,7 @@ query.where().add(query.getColumn("flag").eq(query.getParameter("myvar"));
 query.getParameter("myvar").setvalue(new Integer(1));
 </pre>]]></description>
           <summary><![CDATA[Get or create a parameter for the query, this used to parameterize queries.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
-	query.where.add(query.columns.contact_id.eq(query.getParameter('mycontactid')))
-	
-	// load orders where contact_id = 100
-	query.params['mycontactid'] = 100
-	foundset.loadRecords(query)
-	
-	// load orders where contact_id = 200
-	query.params['mycontactid'] = 200
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </function>
         <function name="not">
           <argumentsTypes>
@@ -21428,15 +21123,16 @@ query.getParameter("myvar").setvalue(new Integer(1));
 	   );
 </pre>]]></description>
           <summary><![CDATA[Create an negated condition.]]></summary>
-          <sample><![CDATA[foundset.query.where.add(query.not(query.columns.flag.eq(1)))]]></sample>
+          <sample/>
         </function>
-        <function name="not">
+        <function name="not" undocumented="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.IQueryBuilderLogicalCondition"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
-          <description/>
-          <sample><![CDATA[foundset.query.where.add(query.not(query.columns.flag.eq(1)))]]></sample>
+          <parameters>
+            <parameter name="cond" type="com.servoy.j2db.querybuilder.impl.QBLogicalCondition" typecode="com.servoy.j2db.querybuilder.IQueryBuilderLogicalCondition"/>
+          </parameters>
         </function>
       </functions>
     </object>
@@ -21446,27 +21142,13 @@ query.getParameter("myvar").setvalue(new Integer(1));
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
-	var query = databaseManager.createSelect('db:/example_data/orders')
-	query.where.add(query
-		.or 
-			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
-			.add(query.exists(
-					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
-			))
-		)
-		
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
       </properties>
     </object>
@@ -21476,97 +21158,75 @@ query.getParameter("myvar").setvalue(new Integer(1));
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
-	var query = databaseManager.createSelect('db:/example_data/orders')
-	query.where.add(query
-		.or 
-			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
-			.add(query.exists(
-					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
-			))
-		)
-		
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
       </properties>
       <functions>
-        <function name="add">
+        <function name="add" undocumented="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBColumn"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBSorts" typecode="com.servoy.j2db.querybuilder.impl.QBSorts"/>
-          <description><![CDATA[Ad an ascending sorting on a column to the query sort.]]></description>
-          <summary><![CDATA[Ad an ascending sorting on a column to the query sort.]]></summary>
-          <sample><![CDATA[query.sort.add(query.columns.orderid)]]></sample>
+          <parameters>
+            <parameter name="columnSortAsc" type="com.servoy.j2db.querybuilder.impl.QBColumn" typecode="com.servoy.j2db.querybuilder.impl.QBColumn"/>
+          </parameters>
         </function>
-        <function name="add">
+        <function name="add" undocumented="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSort"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBSorts" typecode="com.servoy.j2db.querybuilder.impl.QBSorts"/>
-          <description><![CDATA[Ad a sorting on a column to the query sort.]]></description>
-          <summary><![CDATA[Ad a sorting on a column to the query sort.]]></summary>
-          <sample><![CDATA[query.sort.add(query.columns.orderid.desc)]]></sample>
+          <parameters>
+            <parameter name="sort" type="com.servoy.j2db.querybuilder.impl.QBSort" typecode="com.servoy.j2db.querybuilder.impl.QBSort"/>
+          </parameters>
         </function>
         <function name="addPk">
           <argumentsTypes/>
           <return type="com.servoy.j2db.querybuilder.impl.QBSorts" typecode="com.servoy.j2db.querybuilder.impl.QBSorts"/>
           <description><![CDATA[Add the tables' primary pk columns in alphabetical order to the query sort.]]></description>
           <summary><![CDATA[Add the tables' primary pk columns in alphabetical order to the query sort.]]></summary>
-          <sample><![CDATA[query.sort.addPk()]]></sample>
+          <sample/>
+        </function>
+        <function name="addValue" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBSorts" typecode="com.servoy.j2db.querybuilder.impl.QBSorts"/>
+          <parameters>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          </parameters>
         </function>
       </functions>
     </object>
     <object publicName="QBTableClause" qualifiedName="com.servoy.j2db.querybuilder.impl.QBTableClause">
       <properties>
-        <property name="columns">
+        <property name="columns" undocumented="true">
           <return type="com.servoy.j2db.querybuilder.impl.QBColumns" typecode="com.servoy.j2db.querybuilder.impl.QBColumns"/>
-          <description><![CDATA[Get columns from query]]></description>
-          <summary><![CDATA[Get columns from query]]></summary>
-          <sample><![CDATA[foundset.getQuery().columns]]></sample>
         </property>
         <property name="joins">
           <return type="com.servoy.j2db.querybuilder.impl.QBJoins" typecode="com.servoy.j2db.querybuilder.impl.QBJoins"/>
           <description><![CDATA[Get the joins clause of this table based clause.
 <p>Joins added to this clause will be based on this table clauses table.]]></description>
           <summary><![CDATA[Get the joins clause of this table based clause.]]></summary>
-          <sample><![CDATA[foundset.getQuery().joins]]></sample>
+          <sample/>
         </property>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
-	var query = databaseManager.createSelect('db:/example_data/orders')
-	query.where.add(query
-		.or 
-			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
-			.add(query.exists(
-					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
-			))
-		)
-		
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
       </properties>
       <functions>
@@ -21577,7 +21237,7 @@ query.getParameter("myvar").setvalue(new Integer(1));
           <return type="com.servoy.j2db.querybuilder.impl.QBColumn" typecode="com.servoy.j2db.querybuilder.impl.QBColumn"/>
           <description><![CDATA[Get a column from the table.]]></description>
           <summary><![CDATA[Get a column from the table.]]></summary>
-          <sample><![CDATA[foundset.getQuery().getColumn('orderid')]]></sample>
+          <sample/>
         </function>
         <function name="getColumn">
           <argumentsTypes>
@@ -21588,7 +21248,7 @@ query.getParameter("myvar").setvalue(new Integer(1));
           <description><![CDATA[Get a column from the table with given alias.
 <p>The alias may be of the main table or any level deep joined table.]]></description>
           <summary><![CDATA[Get a column from the table with given alias.]]></summary>
-          <sample><![CDATA[foundset.getQuery().getColumn('orderid', 'opk')]]></sample>
+          <sample/>
         </function>
       </functions>
     </object>
