@@ -169,7 +169,6 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						servoyModel.setActiveProject(servoyProject, true);
 						userManager.writeAllSecurityInformation(true);
 						if (!activateSolution) servoyModel.setActiveProject(activeProject, true);
-						dummySolProject[0].delete(true, true, null); // dummy did it's job - to activate correct resources project, now we must remove it
 					}
 					catch (Exception e)
 					{
@@ -177,10 +176,17 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					}
 					finally
 					{
-						synchronized (finishedFlag)
+						try
 						{
-							finishedFlag[0] = true;
-							finishedFlag.notify();
+							if (dummySolProject[0] != null) dummySolProject[0].delete(true, true, null); // dummy did it's job - to activate correct resources project, now we must remove it
+						}
+						finally
+						{
+							synchronized (finishedFlag)
+							{
+								finishedFlag[0] = true;
+								finishedFlag.notify();
+							}
 						}
 					}
 					m.setTaskName("Finished... updating workbench state");
@@ -284,10 +290,17 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					}
 					finally
 					{
-						synchronized (finishedFlag)
+						try
 						{
-							finishedFlag[0] = !nextJobWillStart;
-							if (finishedFlag[0] == true) finishedFlag.notify();
+							if (!nextJobWillStart && dummySolProject[0] != null) dummySolProject[0].delete(true, true, null);
+						}
+						finally
+						{
+							synchronized (finishedFlag)
+							{
+								finishedFlag[0] = !nextJobWillStart;
+								if (finishedFlag[0] == true) finishedFlag.notify();
+							}
 						}
 					}
 					if (nextJobWillStart) importJob3.schedule();
@@ -360,10 +373,17 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					}
 					finally
 					{
-						synchronized (finishedFlag)
+						try
 						{
-							finishedFlag[0] = !nextJobWillStart;
-							if (finishedFlag[0] == true) finishedFlag.notify();
+							if (!nextJobWillStart && dummySolProject[0] != null) dummySolProject[0].delete(true, true, null);
+						}
+						finally
+						{
+							synchronized (finishedFlag)
+							{
+								finishedFlag[0] = !nextJobWillStart;
+								if (finishedFlag[0] == true) finishedFlag.notify();
+							}
 						}
 					}
 					if (nextJobWillStart) importJob2.schedule();
