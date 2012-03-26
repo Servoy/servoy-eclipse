@@ -423,16 +423,6 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		if (typeId == IRepository.SOLUTIONS)
 		{
 			rootObjectMetaData = repository.getRootObjectMetaData(uuid);
-			if (rootObjectMetaData != null)
-			{
-				if (importInfo.isProtected)
-				{
-					// Solution is protected; cannot rename.
-					throw new RepositoryException("The " + objectType + " '" + rootObjectMetaData.getName() +
-						"' already exists in the repository with the name '" + name + "', but the import is protected. Remove the " + objectType +
-						" from the workspace.");
-				}
-			}
 		}
 		else if (typeId == IRepository.STYLES && resourcesProject != null)
 		{
@@ -450,12 +440,6 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 				{
 					if (meta.getRootObjectUuid().equals(uuid))
 					{
-						if (importInfo.isProtected)
-						{
-							// Solution is protected; cannot rename.
-							throw new RepositoryException("The " + objectType + " '" + meta.getName() + "' already exists in the repository with the name '" +
-								name + "', but the import is protected. Remove the " + objectType + " from the workspace.");
-						}
 						rootObjectMetaData = meta;
 					}
 				}
@@ -483,7 +467,8 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 				if (rootObjectMetaData != null && importInfo.isProtected)
 				{
 					throw new RepositoryException("A different " + objectType + " with the name '" + name +
-						"' already exists, but the import is protected. Rename or remove the " + objectType + " in the repository.");
+						"' already exists, but the import is protected. Rename or remove the " + objectType +
+						" in the workspace (Servoy cannot automatically rename a protected solution).");
 				}
 
 			}
@@ -501,7 +486,8 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 				if (rootObjectMetaData != null && importInfo.isProtected)
 				{
 					throw new RepositoryException("A different " + objectType + " with the name '" + name +
-						"' already exists, but the import is protected. Rename or remove the " + objectType + " in the repository.");
+						"' already exists, but the import is protected. Rename or remove the " + objectType +
+						" in the workspace (Servoy cannot automatically rename a protected style).");
 				}
 			}
 
