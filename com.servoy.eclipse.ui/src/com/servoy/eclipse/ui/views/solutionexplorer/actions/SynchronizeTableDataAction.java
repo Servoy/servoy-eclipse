@@ -16,6 +16,10 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -44,10 +48,12 @@ import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.dataprocessing.MetaDataUtils.TooManyRowsException;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.QuerySelect;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.Debug;
 
 /**
  * 
@@ -60,7 +66,8 @@ import com.servoy.j2db.util.DataSourceUtils;
 public class SynchronizeTableDataAction extends Action implements ISelectionChangedListener
 {
 	private final Shell shell;
-	private String dataSource;
+	private final List<String> dataSources = new ArrayList<String>();
+	private IServerInternal selectedServer = null;
 
 	public SynchronizeTableDataAction(Shell shell)
 	{
@@ -72,18 +79,33 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 
 	public void selectionChanged(SelectionChangedEvent event)
 	{
+		dataSources.clear();
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
-		boolean state = (sel.size() == 1);
-		if (state)
+		boolean state = sel.size() > 0;
+		@SuppressWarnings("unchecked")
+		Iterator<SimpleUserNode> iterator = sel.iterator();
+		while (state && iterator.hasNext())
 		{
-			UserNodeType type = ((SimpleUserNode)sel.getFirstElement()).getType();
+			SimpleUserNode userNode = iterator.next();
+			UserNodeType type = userNode.getType();
 			if (type == UserNodeType.TABLE)
 			{
-				SimpleUserNode userNode = (SimpleUserNode)sel.getFirstElement();
 				TableWrapper tableWrapper = (TableWrapper)userNode.getRealObject();
 
-				dataSource = tableWrapper.getDataSource();
-				state = dataSource != null;
+				String dataSource = tableWrapper.getDataSource();
+				if (dataSource != null)
+				{
+					dataSources.add(dataSource);
+				}
+				else state = false;
+			}
+			else if (type == UserNodeType.SERVER)
+			{
+				IServerInternal server = (IServerInternal)userNode.getRealObject();
+				getServerMetadataTables(server);
+				state = dataSources.size() > 0;
+				if (state) selectedServer = server;
+				break;
 			}
 			else
 			{
@@ -93,78 +115,96 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		setEnabled(state);
 	}
 
+	/**
+	 * @param server
+	 */
+	private void getServerMetadataTables(IServerInternal server)
+	{
+		try
+		{
+			List<String> tableNames = server.getTableNames(true);
+			for (String tableName : tableNames)
+			{
+				Table table = server.getTable(tableName);
+				if (table.isMarkedAsMetaData() && MetaDataUtils.canBeMarkedAsMetaData(table))
+				{
+					dataSources.add(table.getDataSource());
+				}
+			}
+		}
+		catch (RepositoryException e)
+		{
+			Debug.log(e);
+		}
+	}
+
 	@Override
 	public void run()
 	{
-		String[] stn = DataSourceUtils.getDBServernameTablename(dataSource);
-		Table table = null;
-		if (stn != null)
+		if (selectedServer != null)
 		{
-			IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(stn[0], true, true);
-			if (server != null)
+			dataSources.clear();
+			getServerMetadataTables(selectedServer);
+		}
+		List<Table> tables = new ArrayList<Table>();
+		for (String dataSource : dataSources)
+		{
+			String[] stn = DataSourceUtils.getDBServernameTablename(dataSource);
+			Table table = null;
+			if (stn != null)
 			{
-				try
+				IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(stn[0], true, true);
+				if (server != null)
 				{
-					table = server.getTable(stn[1]);
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError(e);
+					try
+					{
+						table = server.getTable(stn[1]);
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
 				}
 			}
-		}
 
-		if (table == null)
-		{
-			UIUtils.reportWarning("Error synchronizing table", "Cannot find selected table for datasource '" + dataSource + "'.");
-			return;
-		}
+			if (table == null)
+			{
+				UIUtils.reportWarning("Error synchronizing table", "Cannot find selected table for datasource '" + dataSource + "'.");
+				continue;
+			}
 
-		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
-		if (dmm == null)
-		{
-			UIUtils.reportWarning("Error synchronizing table", "Cannot find internal data model manager.");
-			return;
-		}
-
-		if (!table.isMarkedAsMetaData())
-		{
 			if (!MetaDataUtils.canBeMarkedAsMetaData(table))
 			{
-				UIUtils.showInformation(shell, "Table not marked as metadata table",
-					"Table can't be a metadata table because it must have a UUID primairy key, a " + MetaDataUtils.METADATA_MODIFICATION_COLUMN + " and a " +
-						MetaDataUtils.METADATA_DELETION_COLUMN + " date column");
-				return;
+				UIUtils.showInformation(shell, "Table not marked as metadata table", "Table '" + table.getName() +
+					"' can't be a metadata table because it must have a UUID primairy key, a " + MetaDataUtils.METADATA_MODIFICATION_COLUMN + " and a " +
+					MetaDataUtils.METADATA_DELETION_COLUMN + " date column");
+				continue;
 			}
-			if (!UIUtils.askQuestion(shell, "Table not marked as metadata table", "Table " + table.getName() + " in server " + table.getServerName() +
-				" is not marked as metadata table, mark now?"))
+			if (!table.isMarkedAsMetaData())
 			{
-				// well, then not
-				return;
+				if (!UIUtils.askQuestion(shell, "Table not marked as metadata table", "Table " + table.getName() + " in server " + table.getServerName() +
+					" is not marked as metadata table, mark now?"))
+				{
+					// well, then not
+					continue;
+				}
+				table.setMarkedAsMetaData(true);
+				IEditorPart tableEditor = EditorUtil.openTableEditor(table);
+				if (tableEditor instanceof TableEditor)
+				{
+					((TableEditor)tableEditor).refresh();
+				}
 			}
-			table.setMarkedAsMetaData(true);
-			IEditorPart tableEditor = EditorUtil.openTableEditor(table);
-			if (tableEditor instanceof TableEditor)
-			{
-				((TableEditor)tableEditor).refresh();
-			}
+			tables.add(table);
 		}
-
-		IFile dataFile = dmm.getMetaDataFile(dataSource);
-		if (dataFile == null)
-		{
-			UIUtils.reportWarning("Error synchronizing table", "Cannot find data file for datasource '" + dataSource + "'.");
-			return;
-		}
-
 		switch (new SynchronizeTableDataDialog(shell).open())
 		{
 			case SynchronizeTableDataDialog.IMPORT_TO_DB :
-				importTableData(table, dataFile);
+				importTableData(tables);
 				break;
 
 			case SynchronizeTableDataDialog.SAVE_TO_WS :
-				generateTableDataFile(table, dataFile);
+				generateTableDataFile(tables);
 				break;
 		}
 	}
@@ -173,94 +213,130 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 	 * @param table
 	 * @param dataFile
 	 */
-	private void importTableData(Table table, IFile dataFile)
+	private void importTableData(List<Table> tables)
 	{
-		// import file into table
-		if (!dataFile.exists())
+		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
+		if (dmm == null)
 		{
-			UIUtils.reportWarning("Error synchronizing table", "Data file for datasource '" + dataSource + "' does not exist.");
+			UIUtils.reportWarning("Error synchronizing table(s)", "Cannot find internal data model manager.");
 			return;
 		}
 
-		try
+		StringBuilder sb = new StringBuilder();
+		for (Table table : tables)
 		{
-			// check for existing data
-			QuerySelect query = MetaDataUtils.createTableMetadataQuery(table, null);
-			IDataSet ds = ApplicationServerSingleton.get().getDataServer().performQuery(ApplicationServerSingleton.get().getClientId(), table.getServerName(),
-				null, query, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
-			if (ds.getRowCount() > 0 &&
-				!UIUtils.askQuestion(shell, "Table is not empty", "Table " + table.getName() + " in server " + table.getServerName() +
-					" is not empty, data synchronize will delete existing data, continue?"))
+			IFile dataFile = dmm.getMetaDataFile(table.getDataSource());
+			if (dataFile == null)
 			{
-				// don't delete
-				return;
+				UIUtils.reportWarning("Error synchronizing table", "Cannot find data file for datasource '" + table.getDataSource() + "'.");
+				continue;
 			}
 
-			// read the json
-			String contents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(dataFile.getFullPath().toString());
-
-			int ninserted = MetaDataUtils.loadMetadataInTable(table, contents);
-
-			// flush developer clients
-			IDebugJ2DBClient debugJ2DBClient = com.servoy.eclipse.core.Activator.getDefault().getDebugJ2DBClient();
-			if (debugJ2DBClient != null)
+			// import file into table
+			if (!dataFile.exists())
 			{
-				((FoundSetManager)debugJ2DBClient.getFoundSetManager()).flushCachedDatabaseData(table.getDataSource());
-			}
-			IDebugWebClient debugWebClient = com.servoy.eclipse.core.Activator.getDefault().getDebugWebClient();
-			if (debugWebClient != null)
-			{
-				((FoundSetManager)debugWebClient.getFoundSetManager()).flushCachedDatabaseData(table.getDataSource());
+				UIUtils.reportWarning("Error synchronizing table", "Data file for datasource '" + table.getDataSource() + "' does not exist.");
+				continue;
 			}
 
-			UIUtils.showInformation(shell, "Table synchronization", "Successfully saved " + ninserted + " records from workspace in table " + table.getName() +
-				" in server " + table.getServerName());
+			try
+			{
+				// check for existing data
+				QuerySelect query = MetaDataUtils.createTableMetadataQuery(table, null);
+				IDataSet ds = ApplicationServerSingleton.get().getDataServer().performQuery(ApplicationServerSingleton.get().getClientId(),
+					table.getServerName(), null, query, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
+				if (ds.getRowCount() > 0 &&
+					!UIUtils.askQuestion(shell, "Table is not empty", "Table " + table.getName() + " in server " + table.getServerName() +
+						" is not empty, data synchronize will delete existing data, continue?"))
+				{
+					// don't delete
+					continue;
+				}
+
+				// read the json
+				String contents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(dataFile.getFullPath().toString());
+
+				int ninserted = MetaDataUtils.loadMetadataInTable(table, contents);
+
+				// flush developer clients
+				IDebugJ2DBClient debugJ2DBClient = com.servoy.eclipse.core.Activator.getDefault().getDebugJ2DBClient();
+				if (debugJ2DBClient != null)
+				{
+					((FoundSetManager)debugJ2DBClient.getFoundSetManager()).flushCachedDatabaseData(table.getDataSource());
+				}
+				IDebugWebClient debugWebClient = com.servoy.eclipse.core.Activator.getDefault().getDebugWebClient();
+				if (debugWebClient != null)
+				{
+					((FoundSetManager)debugWebClient.getFoundSetManager()).flushCachedDatabaseData(table.getDataSource());
+				}
+				sb.append("Successfully saved " + ninserted + " records from workspace in table " + table.getName() + " in server " + table.getServerName());
+				sb.append('\n');
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError("Error synchronizing table", e);
+				UIUtils.reportWarning("Error synchronizing table", "Error synchronizing table: " + e.getMessage());
+			}
 		}
-		catch (Exception e)
-		{
-			ServoyLog.logError("Error synchronizing table", e);
-			UIUtils.reportWarning("Error synchronizing table", "Error synchronizing table: " + e.getMessage());
-		}
+		UIUtils.showInformation(shell, "Table synchronization", sb.toString());
 	}
 
 	/**
 	 * @param table
 	 * @param dataFile
 	 */
-	private void generateTableDataFile(Table table, IFile dataFile)
+	private void generateTableDataFile(List<Table> tables)
 	{
-		try
+		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
+		if (dmm == null)
 		{
-			final int max = 1000;
-			String contents;
+			UIUtils.reportWarning("Error synchronizing table(s)", "Cannot find internal data model manager.");
+			return;
+		}
+
+		StringBuilder sb = new StringBuilder();
+		for (Table table : tables)
+		{
 			try
 			{
-				contents = MetaDataUtils.generateMetaDataFileContents(table, max);
-			}
-			catch (TooManyRowsException e)
-			{
-				if (!UIUtils.askQuestion(shell, "Big table", "Table " + table.getName() + " in server " + table.getServerName() + " contains more than " + max +
-					" rows, are you sure you want to copy this table data in the workspace?"))
+				final int max = 1000;
+				String contents;
+				try
 				{
-					// phew
-					return;
+					contents = MetaDataUtils.generateMetaDataFileContents(table, max);
+				}
+				catch (TooManyRowsException e)
+				{
+					if (!UIUtils.askQuestion(shell, "Big table", "Table " + table.getName() + " in server " + table.getServerName() + " contains more than " +
+						max + " rows, are you sure you want to copy this table data in the workspace?"))
+					{
+						// phew
+						continue;
+					}
+
+					// ok you've been warned...
+					contents = MetaDataUtils.generateMetaDataFileContents(table, -1);
 				}
 
-				// ok you've been warned...
-				contents = MetaDataUtils.generateMetaDataFileContents(table, -1);
+				IFile dataFile = dmm.getMetaDataFile(table.getDataSource());
+				if (dataFile == null)
+				{
+					UIUtils.reportWarning("Error synchronizing table", "Cannot find data file for datasource '" + table.getDataSource() + "'.");
+					continue;
+				}
+				// if file doesn't exist, this creates the file and its parent directories
+				new WorkspaceFileAccess(ServoyModel.getWorkspace()).setUTF8Contents(dataFile.getFullPath().toString(), contents);
+
+				sb.append("Successfully saved records from table " + table.getName() + " in server " + table.getServerName() + " in the workspace");
+				sb.append('\n');
 			}
-
-			// if file doesn't exist, this creates the file and its parent directories
-			new WorkspaceFileAccess(ServoyModel.getWorkspace()).setUTF8Contents(dataFile.getFullPath().toString(), contents);
-
-			UIUtils.showInformation(shell, "Table synchronization",
-				"Successfully saved records from table " + table.getName() + " in server " + table.getServerName() + " in the workspace");
+			catch (Exception e)
+			{
+				ServoyLog.logError("Error synchronizing table", e);
+				UIUtils.reportWarning("Error synchronizing table", "Error synchronizing table: " + e.getMessage());
+			}
 		}
-		catch (Exception e)
-		{
-			ServoyLog.logError("Error synchronizing table", e);
-			UIUtils.reportWarning("Error synchronizing table", "Error synchronizing table: " + e.getMessage());
-		}
+		UIUtils.showInformation(shell, "Table synchronization", sb.toString());
 	}
 
 }

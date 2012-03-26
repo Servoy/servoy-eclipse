@@ -416,6 +416,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private SynchronizeTablesAction synchronizeTablesWithDBAction;
 	private HideUnhideTablesAction hideUnhideTablesAction;
 	private SynchronizeTableDataAction synchronizeTableDataAction;
+	private SynchronizeTableDataAction synchronizeTableDataTreeAction;
 
 	private LoadRelationsAction loadRelationsAction;
 
@@ -2128,6 +2129,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (enableServer.isEnabled()) manager.add(enableServer);
 		manager.add(new Separator());
 		if (synchronizeTablesWithDBAction.isEnabled()) manager.add(synchronizeTablesWithDBAction);
+		if (synchronizeTableDataTreeAction.isEnabled()) manager.add(synchronizeTableDataTreeAction);
 		if (reloadTablesOfServerAction.isEnabled()) manager.add(reloadTablesOfServerAction);
 		if (updateServoySequencesAction.isEnabled()) manager.add(updateServoySequencesAction);
 		if (loadRelationsAction.isEnabled()) manager.add(loadRelationsAction);
@@ -2406,6 +2408,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		reloadTablesOfServerAction = new ReloadTablesAction();
 		updateServoySequencesAction = new UpdateServoySequencesAction();
 		synchronizeTablesWithDBAction = new SynchronizeTablesAction();
+		synchronizeTableDataTreeAction = new SynchronizeTableDataAction(getSite().getShell());
 		hideUnhideTablesAction = new HideUnhideTablesAction();
 		synchronizeTableDataAction = new SynchronizeTableDataAction(getSite().getShell());
 		loadRelationsAction = new LoadRelationsAction(this);
@@ -2628,6 +2631,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		tree.addSelectionChangedListener(importMediaFolder);
 		tree.addSelectionChangedListener(synchronizeTablesWithDBAction);
+		tree.addSelectionChangedListener(synchronizeTableDataTreeAction);
 		tree.addSelectionChangedListener(loadRelationsAction);
 		tree.addSelectionChangedListener(newActionInTreePrimary);
 		tree.addSelectionChangedListener(newActionInTreeSecondary);
