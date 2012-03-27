@@ -99,7 +99,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 				}
 				else state = false;
 			}
-			else if (type == UserNodeType.SERVER)
+			else if (type == UserNodeType.SERVER && sel.size() == 1)
 			{
 				IServerInternal server = (IServerInternal)userNode.getRealObject();
 				getServerMetadataTables(server);
