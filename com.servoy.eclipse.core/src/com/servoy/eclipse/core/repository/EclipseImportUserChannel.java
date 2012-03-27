@@ -605,4 +605,9 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	{
 		return CANCEL_ACTION;
 	}
+
+	public String getImporterUsername()
+	{
+		return null;
+	}
 }
