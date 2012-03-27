@@ -197,15 +197,18 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			}
 			tables.add(table);
 		}
-		switch (new SynchronizeTableDataDialog(shell).open())
+		if (tables.size() > 0)
 		{
-			case SynchronizeTableDataDialog.IMPORT_TO_DB :
-				importTableData(tables);
-				break;
+			switch (new SynchronizeTableDataDialog(shell).open())
+			{
+				case SynchronizeTableDataDialog.IMPORT_TO_DB :
+					importTableData(tables);
+					break;
 
-			case SynchronizeTableDataDialog.SAVE_TO_WS :
-				generateTableDataFile(tables);
-				break;
+				case SynchronizeTableDataDialog.SAVE_TO_WS :
+					generateTableDataFile(tables);
+					break;
+			}
 		}
 	}
 
