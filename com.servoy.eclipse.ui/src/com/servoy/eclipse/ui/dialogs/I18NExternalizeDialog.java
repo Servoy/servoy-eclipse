@@ -139,7 +139,11 @@ import com.servoy.j2db.util.Utils;
 
 public class I18NExternalizeDialog extends Dialog
 {
-	private static final String PREFERENCE_KEY_IGNORE_DB_MESSAGES = "com.servoy.eclipse.ui.dialogs.I18NExternalizeDialog.ignore_db_messages";
+	private static final String PREFERENCE_KEY_SHOW_DB_MESSAGES = "com.servoy.eclipse.ui.dialogs.I18NExternalizeDialog.show_db_messages";
+	private static final String PREFERENCE_KEY_SHOW_EXTERNALIZED = "com.servoy.eclipse.ui.dialogs.I18NExternalizeDialog.show_externalized_messages";
+	private static final String PREFERENCE_KEY_SHOW_IGNORED = "com.servoy.eclipse.ui.dialogs.I18NExternalizeDialog.show_ignored_messages";
+	private static final String PREFERENCE_KEY_SHOW_EMPTY = "com.servoy.eclipse.ui.dialogs.I18NExternalizeDialog.show_empty_messages";
+	private static final String PREFERENCE_KEY_SHOW_ONLY_EDITED = "com.servoy.eclipse.ui.dialogs.I18NExternalizeDialog.show_only_edited_messages";
 
 	private static final int COLUMN_PROPERTY = 0;
 	private static final int COLUMN_TEXT = 1;
@@ -159,7 +163,11 @@ public class I18NExternalizeDialog extends Dialog
 	private TreeContentProvider treeContentProvider;
 	private Text filterTextField;
 	private Text commonPrefix;
-	private Button databaseMessagesButton;
+	private Button showDatabaseMessagesButton;
+	private Button showExternalizedMessagesButton;
+	private Button showIgnoredMessagesButton;
+	private Button showEmptyMessagesButton;
+	private Button showOnlyEditedMessagesButton;
 
 	private final ContentSpec contentSpec = StaticContentSpecLoader.getContentSpec();
 	private final Image solutionImage = Activator.getDefault().loadImageFromBundle("solution.gif");
@@ -174,7 +182,11 @@ public class I18NExternalizeDialog extends Dialog
 	private TreeNode content;
 	private FilterDelayJob delayedFilterJob;
 	private static final long FILTER_TYPE_DELAY = 300;
-	private boolean externalizeDatabaseMessages;
+	private boolean isShowDatabaseMsg;
+	private boolean isShowExternalizedMsg;
+	private boolean isShowIgnoredMsg;
+	private boolean isShowEmptyMsg;
+	private boolean isShowOnlyEditedMsg;
 	private String commonPrefixValue = "";
 
 	private final IFileAccess workspaceFileAccess = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
@@ -185,7 +197,17 @@ public class I18NExternalizeDialog extends Dialog
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX);
 
 		this.project = project;
-		externalizeDatabaseMessages = !PlatformUI.getPreferenceStore().getBoolean(I18NExternalizeDialog.PREFERENCE_KEY_IGNORE_DB_MESSAGES);
+		PlatformUI.getPreferenceStore().setDefault(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_DB_MESSAGES, true);
+		PlatformUI.getPreferenceStore().setDefault(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_EXTERNALIZED, true);
+		PlatformUI.getPreferenceStore().setDefault(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_IGNORED, true);
+		PlatformUI.getPreferenceStore().setDefault(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_EMPTY, false);
+		PlatformUI.getPreferenceStore().setDefault(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_ONLY_EDITED, false);
+
+		isShowDatabaseMsg = PlatformUI.getPreferenceStore().getBoolean(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_DB_MESSAGES);
+		isShowExternalizedMsg = PlatformUI.getPreferenceStore().getBoolean(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_EXTERNALIZED);
+		isShowIgnoredMsg = PlatformUI.getPreferenceStore().getBoolean(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_IGNORED);
+		isShowEmptyMsg = PlatformUI.getPreferenceStore().getBoolean(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_EMPTY);
+		isShowOnlyEditedMsg = PlatformUI.getPreferenceStore().getBoolean(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_ONLY_EDITED);
 	}
 
 	private ArrayList<ServoyProject> getI18NProjects()
@@ -216,81 +238,78 @@ public class I18NExternalizeDialog extends Dialog
 	{
 		ArrayList<TreeNode> columnInfoNodes = new ArrayList<TreeNode>();
 
-		if (externalizeDatabaseMessages) // add column infos
+		final ArrayList<String> solutionServers = new ArrayList<String>();
+		for (ServoyProject servoyProject : allProjects)
 		{
-			final ArrayList<String> solutionServers = new ArrayList<String>();
-			for (ServoyProject servoyProject : allProjects)
+			servoyProject.getSolution().acceptVisitor(new IPersistVisitor()
 			{
-				servoyProject.getSolution().acceptVisitor(new IPersistVisitor()
+				public Object visit(IPersist o)
 				{
-					public Object visit(IPersist o)
+					if (o instanceof Form)
 					{
-						if (o instanceof Form)
+						Form form = (Form)o;
+						String dataSource = form.getDataSource();
+						if (dataSource != null)
 						{
-							Form form = (Form)o;
-							String dataSource = form.getDataSource();
-							if (dataSource != null)
-							{
-								String serverName = DataSourceUtils.getDBServernameTablename(dataSource)[0];
-								if (solutionServers.indexOf(serverName) == -1) solutionServers.add(serverName);
-							}
-							return CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+							String serverName = DataSourceUtils.getDBServernameTablename(dataSource)[0];
+							if (solutionServers.indexOf(serverName) == -1) solutionServers.add(serverName);
 						}
-						else if (o instanceof Relation)
-						{
-							Relation relation = (Relation)o;
-							String serverLeft = relation.getPrimaryServerName();
-							if (serverLeft != null && solutionServers.indexOf(serverLeft) == -1) solutionServers.add(serverLeft);
-							String serverRight = relation.getForeignServerName();
-							if (serverRight != null && solutionServers.indexOf(serverRight) == -1) solutionServers.add(serverRight);
-							return CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
-						}
-						return CONTINUE_TRAVERSAL;
+						return CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
 					}
-				});
-			}
-
-			try
-			{
-				IServerManagerInternal sm = ServoyModel.getServerManager();
-
-				IServer server;
-				for (String serverName : solutionServers)
-				{
-					server = sm.getServer(serverName, true, true);
-					if (server == null) continue;
-					List<String> tableAndViews = ((IServerInternal)server).getTableAndViewNames(true, true);
-					for (String tableName : tableAndViews)
+					else if (o instanceof Relation)
 					{
-						ITable table = server.getTable(tableName);
-						if (table instanceof Table)
-						{
-							Table tableObj = (Table)table;
-							String columnNames[] = tableObj.getColumnNames();
-							TreeNode columnInfoNode;
-							for (String columnName : columnNames)
-							{
-								Column column = tableObj.getColumn(columnName);
-								columnInfoNode = addColumnInfoToTree(content, server, tableObj, column, filter);
-								if (columnInfoNode != null) columnInfoNodes.add(columnInfoNode);
-							}
+						Relation relation = (Relation)o;
+						String serverLeft = relation.getPrimaryServerName();
+						if (serverLeft != null && solutionServers.indexOf(serverLeft) == -1) solutionServers.add(serverLeft);
+						String serverRight = relation.getForeignServerName();
+						if (serverRight != null && solutionServers.indexOf(serverRight) == -1) solutionServers.add(serverRight);
+						return CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+					}
+					return CONTINUE_TRAVERSAL;
+				}
+			});
+		}
 
-							for (ServoyProject s : allProjects)
+		try
+		{
+			IServerManagerInternal sm = ServoyModel.getServerManager();
+
+			IServer server;
+			for (String serverName : solutionServers)
+			{
+				server = sm.getServer(serverName, true, true);
+				if (server == null) continue;
+				List<String> tableAndViews = ((IServerInternal)server).getTableAndViewNames(true, true);
+				for (String tableName : tableAndViews)
+				{
+					ITable table = server.getTable(tableName);
+					if (table instanceof Table)
+					{
+						Table tableObj = (Table)table;
+						String columnNames[] = tableObj.getColumnNames();
+						TreeNode columnInfoNode;
+						for (String columnName : columnNames)
+						{
+							Column column = tableObj.getColumn(columnName);
+							columnInfoNode = addColumnInfoToTree(content, server, tableObj, column, filter);
+							if (columnInfoNode != null) columnInfoNodes.add(columnInfoNode);
+						}
+
+						for (ServoyProject s : allProjects)
+						{
+							Iterator<TableNode> tableNodesIte = s.getSolution().getTableNodes(tableObj);
+							while (tableNodesIte.hasNext())
 							{
-								Iterator<TableNode> tableNodesIte = s.getSolution().getTableNodes(tableObj);
-								while (tableNodesIte.hasNext())
-								{
-									addTableNodeToTree(content, server, tableObj, tableNodesIte.next(), filter);
-								}
+								addTableNodeToTree(content, server, tableObj, tableNodesIte.next(), filter);
 							}
 						}
 					}
 				}
 			}
-			catch (Exception ex)
-			{
-				ServoyLog.logError(ex);
-			}
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
 		}
 
 		ArrayList<TreeNode> serverNodes = new ArrayList<TreeNode>();
@@ -299,20 +318,11 @@ public class I18NExternalizeDialog extends Dialog
 			if (tn.getData() instanceof IServer) serverNodes.add(tn);
 		}
 
-		if (!externalizeDatabaseMessages)
-		{
-			for (TreeNode sn : serverNodes)
-				content.getChildren().remove(sn);
-		}
-
 		if (treeViewer != null)
 		{
 			treeViewer.refresh(content);
-			if (externalizeDatabaseMessages)
-			{
-				for (TreeNode cin : columnInfoNodes)
-					treeViewer.expandToLevel(cin, AbstractTreeViewer.ALL_LEVELS);
-			}
+			for (TreeNode cin : columnInfoNodes)
+				treeViewer.expandToLevel(cin, AbstractTreeViewer.ALL_LEVELS);
 		}
 	}
 
@@ -396,8 +406,10 @@ public class I18NExternalizeDialog extends Dialog
 	private TreeNode addColumnInfoToTree(TreeNode root, IServer server, Table table, Column column, String filterText)
 	{
 		ColumnInfo columnInfo = column.getColumnInfo();
-		if (columnInfo != null && columnInfo.getTitleText() != null)
+		if (columnInfo != null)
 		{
+			String columnInfoTitleText = columnInfo.getTitleText();
+			if (columnInfoTitleText == null) columnInfoTitleText = "";
 			//check filter
 			if (filterText != null && server.toString().toLowerCase().indexOf(filterText) == -1 && table.toString().toLowerCase().indexOf(filterText) == -1 &&
 				column.toString().toLowerCase().indexOf(filterText) == -1) return null;
@@ -448,7 +460,7 @@ public class I18NExternalizeDialog extends Dialog
 				tableNodeFound.addChild(columnNodeFound);
 			}
 
-			TreeNode columnInfoNode = createTreeNodeForData(columnInfo, columnNodeFound, columnInfo.getTitleText().startsWith("i18n:") ? STATE.EXTERNALIZE
+			TreeNode columnInfoNode = createTreeNodeForData(columnInfo, columnNodeFound, columnInfoTitleText.startsWith("i18n:") ? STATE.EXTERNALIZE
 				: STATE.INTERNALIZE);
 			columnNodeFound.addChild(columnInfoNode);
 
@@ -807,34 +819,81 @@ public class I18NExternalizeDialog extends Dialog
 		});
 
 
-		databaseMessagesButton = new Button(composite, SWT.CHECK);
-		databaseMessagesButton.setText("Show database messages");
-		databaseMessagesButton.setSelection(externalizeDatabaseMessages);
-		databaseMessagesButton.addSelectionListener(new SelectionListener()
+		SelectionListener showSelectionListener = new SelectionAdapter()
 		{
-
-			public void widgetDefaultSelected(SelectionEvent e)
-			{
-				// ignore
-			}
-
+			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				I18NExternalizeDialog.this.externalizeDatabaseMessages = I18NExternalizeDialog.this.databaseMessagesButton.getSelection();
-				PlatformUI.getPreferenceStore().setValue(I18NExternalizeDialog.PREFERENCE_KEY_IGNORE_DB_MESSAGES,
-					!I18NExternalizeDialog.this.externalizeDatabaseMessages);
-				String filterText = I18NExternalizeDialog.this.filterTextField.getText();
-				String filter = filterText != null ? filterText.toLowerCase() : filterText;
-				updateDataMessagesNodes(getI18NProjects(), filter);
+				Object eventSource = e.getSource();
+				if (eventSource == showDatabaseMessagesButton)
+				{
+					I18NExternalizeDialog.this.isShowDatabaseMsg = I18NExternalizeDialog.this.showDatabaseMessagesButton.getSelection();
+					PlatformUI.getPreferenceStore().setValue(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_DB_MESSAGES,
+						I18NExternalizeDialog.this.isShowDatabaseMsg);
+				}
+				else if (eventSource == showExternalizedMessagesButton)
+				{
+					I18NExternalizeDialog.this.isShowExternalizedMsg = I18NExternalizeDialog.this.showExternalizedMessagesButton.getSelection();
+					PlatformUI.getPreferenceStore().setValue(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_EXTERNALIZED,
+						I18NExternalizeDialog.this.isShowExternalizedMsg);
+				}
+				else if (eventSource == showIgnoredMessagesButton)
+				{
+					I18NExternalizeDialog.this.isShowIgnoredMsg = I18NExternalizeDialog.this.showIgnoredMessagesButton.getSelection();
+					PlatformUI.getPreferenceStore().setValue(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_IGNORED, I18NExternalizeDialog.this.isShowIgnoredMsg);
+				}
+				else if (eventSource == showEmptyMessagesButton)
+				{
+					I18NExternalizeDialog.this.isShowEmptyMsg = I18NExternalizeDialog.this.showEmptyMessagesButton.getSelection();
+					PlatformUI.getPreferenceStore().setValue(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_EMPTY, I18NExternalizeDialog.this.isShowEmptyMsg);
+				}
+				else if (eventSource == showOnlyEditedMessagesButton)
+				{
+					I18NExternalizeDialog.this.isShowOnlyEditedMsg = I18NExternalizeDialog.this.showOnlyEditedMessagesButton.getSelection();
+					PlatformUI.getPreferenceStore().setValue(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_ONLY_EDITED,
+						I18NExternalizeDialog.this.isShowOnlyEditedMsg);
+				}
+
+				treeViewer.refresh();
+				treeViewer.expandAll();
 			}
-		});
+		};
+
+		showDatabaseMessagesButton = new Button(composite, SWT.CHECK);
+		showDatabaseMessagesButton.setText("Show database messages");
+		showDatabaseMessagesButton.setSelection(isShowDatabaseMsg);
+		showDatabaseMessagesButton.addSelectionListener(showSelectionListener);
+
+		showExternalizedMessagesButton = new Button(composite, SWT.CHECK);
+		showExternalizedMessagesButton.setText("Show externalized messages");
+		showExternalizedMessagesButton.setSelection(isShowExternalizedMsg);
+		showExternalizedMessagesButton.addSelectionListener(showSelectionListener);
+
+		showIgnoredMessagesButton = new Button(composite, SWT.CHECK);
+		showIgnoredMessagesButton.setText("Show ignored messages");
+		showIgnoredMessagesButton.setSelection(isShowIgnoredMsg);
+		showIgnoredMessagesButton.addSelectionListener(showSelectionListener);
+
+		showEmptyMessagesButton = new Button(composite, SWT.CHECK);
+		showEmptyMessagesButton.setText("Show messages with empty text");
+		showEmptyMessagesButton.setSelection(isShowEmptyMsg);
+		showEmptyMessagesButton.addSelectionListener(showSelectionListener);
+
+		showOnlyEditedMessagesButton = new Button(composite, SWT.CHECK);
+		showOnlyEditedMessagesButton.setText("Show only edited messages");
+		showOnlyEditedMessagesButton.setSelection(isShowOnlyEditedMsg);
+		showOnlyEditedMessagesButton.addSelectionListener(showSelectionListener);
 
 		GroupLayout i18NLayout = new GroupLayout(composite);
 		i18NLayout.setHorizontalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(
 			i18NLayout.createSequentialGroup().addContainerGap().add(
 				i18NLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING, treeViewerComposite, GroupLayout.PREFERRED_SIZE, 0,
-					Short.MAX_VALUE).add(GroupLayout.LEADING, databaseMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(
+					Short.MAX_VALUE).add(GroupLayout.LEADING, showDatabaseMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, showExternalizedMessagesButton, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, showIgnoredMessagesButton, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, showEmptyMessagesButton, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, showOnlyEditedMessagesButton, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(
 					i18NLayout.createSequentialGroup().add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
 						LayoutStyle.RELATED).add(filterTextField, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)).add(
 					i18NLayout.createSequentialGroup().add(commonPrefixLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
@@ -844,8 +903,12 @@ public class I18NExternalizeDialog extends Dialog
 			i18NLayout.createSequentialGroup().addContainerGap().add(
 				i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(filterTextField, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(
-				treeViewerComposite, GroupLayout.PREFERRED_SIZE, 100, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(databaseMessagesButton,
-				GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap().add(
+				treeViewerComposite, GroupLayout.PREFERRED_SIZE, 100, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(showDatabaseMessagesButton,
+				GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
+				showExternalizedMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+				LayoutStyle.RELATED).add(showIgnoredMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+				LayoutStyle.RELATED).add(showEmptyMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+				LayoutStyle.RELATED).add(showOnlyEditedMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap().add(
 				i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(commonPrefixLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(commonPrefix, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(commonPrefixApplyButton,
 					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))));
@@ -859,9 +922,8 @@ public class I18NExternalizeDialog extends Dialog
 			{
 				if (Display.getCurrent() != null)
 				{
-					I18NExternalizeDialog.this.loadContent("".equals(filterValue) ? null : filterValue);
-					I18NExternalizeDialog.this.treeViewer.setInput(I18NExternalizeDialog.this.content);
-					I18NExternalizeDialog.this.treeViewer.expandAll();
+					treeViewer.refresh();
+					treeViewer.expandAll();
 
 				}
 				else
@@ -870,9 +932,8 @@ public class I18NExternalizeDialog extends Dialog
 					{
 						public void run()
 						{
-							I18NExternalizeDialog.this.loadContent("".equals(filterValue) ? null : filterValue);
-							I18NExternalizeDialog.this.treeViewer.setInput(I18NExternalizeDialog.this.content);
-							I18NExternalizeDialog.this.treeViewer.expandAll();
+							treeViewer.refresh();
+							treeViewer.expandAll();
 						}
 					});
 				}
@@ -923,21 +984,19 @@ public class I18NExternalizeDialog extends Dialog
 					if ("text".equals(elName) || "titleText".equals(elName) || "toolTipText".equals(elName))
 					{
 						String property = I18NExternalizeDialog.this.getProperty(o, el);
-						if (property != null)
+						if (property == null) property = "";
+						boolean visible = (filterText == null) || (property.toLowerCase().indexOf(filterText) != -1);
+						ArrayList<IPersist> treePath = new ArrayList<IPersist>();
+
+						IPersist persist = o;
+						do
 						{
-							boolean visible = (filterText == null) || (property != null && property.toLowerCase().indexOf(filterText) != -1);
-							ArrayList<IPersist> treePath = new ArrayList<IPersist>();
-
-							IPersist persist = o;
-							do
-							{
-								treePath.add(0, persist);
-								if (filterText != null) visible = visible || (getPersistName(persist).toString().toLowerCase().indexOf(filterText) != -1);
-							}
-							while ((persist = persist.getParent()) != null);
-
-							if (visible) content.addPersistElement(treePath, el, property.startsWith("i18n:") ? STATE.EXTERNALIZE : STATE.INTERNALIZE);
+							treePath.add(0, persist);
+							if (filterText != null) visible = visible || (getPersistName(persist).toString().toLowerCase().indexOf(filterText) != -1);
 						}
+						while ((persist = persist.getParent()) != null);
+
+						if (visible) content.addPersistElement(treePath, el, property.startsWith("i18n:") ? STATE.EXTERNALIZE : STATE.INTERNALIZE);
 					}
 				}
 
@@ -1526,6 +1585,7 @@ public class I18NExternalizeDialog extends Dialog
 			for (TreeItem treeItem : items)
 			{
 				node = (TreeNode)treeItem.getData();
+				if (!node.isVisible()) continue;
 				if (!node.isElement() && !node.isColumnInfo() && !node.isJSText()) fillNodes(treeItem.getItems(), selectedNodes, onlySelected, onlyChanged);
 				else if ((!onlySelected || treeItem.getChecked()) && (!onlyChanged || node.isChanged())) selectedNodes.add(node);
 			}
@@ -1837,7 +1897,12 @@ public class I18NExternalizeDialog extends Dialog
 
 		ArrayList<TreeNode> getChildren()
 		{
-			return children;
+			ArrayList<TreeNode> visibleChildren = new ArrayList<TreeNode>();
+			for (TreeNode treeNode : children)
+			{
+				if (treeNode.isVisible()) visibleChildren.add(treeNode);
+			}
+			return visibleChildren;
 		}
 
 
@@ -1977,6 +2042,28 @@ public class I18NExternalizeDialog extends Dialog
 			isChanged = (initialState != getState()) || !getKey().equals(initialKey) || !getText().equals(initialText);
 		}
 
+		boolean isVisible()
+		{
+			boolean isI18NNode = isElement() || isColumnInfo() || isJSText();
+			if (!isI18NNode && getChildren().size() == 0)
+			{
+				return false;
+			}
+			else if (isI18NNode)
+			{
+				String filterText = filterTextField != null ? filterTextField.getText() : null;
+				if (filterText != null && filterText.length() > 0 && getText().indexOf(filterText) == -1) return false;
+
+				if (!isShowDatabaseMsg && isColumnInfo()) return false;
+				if (!isShowExternalizedMsg && getState() == STATE.EXTERNALIZE) return false;
+				if ((!isShowIgnoredMsg && getState() == STATE.IGNORE)) return false;
+				if (!isShowEmptyMsg && getText().length() == 0 && getState() != STATE.EXTERNALIZE) return false;
+				if (isShowOnlyEditedMsg && !isChanged) return false;
+			}
+
+			return true;
+		}
+
 		@Override
 		public String toString()
 		{
@@ -2027,7 +2114,7 @@ public class I18NExternalizeDialog extends Dialog
 	@Override
 	protected Point getInitialSize()
 	{
-		return new Point(800, 600);
+		return new Point(1024, 768);
 	}
 
 	@Override

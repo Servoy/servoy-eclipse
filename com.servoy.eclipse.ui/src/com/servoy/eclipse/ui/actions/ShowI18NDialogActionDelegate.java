@@ -199,8 +199,7 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 							{
 								public void run()
 								{
-									if (dlg.hasContent()) dlg.open();
-									else MessageDialog.openInformation(shell, shell.getText(), "No texts to externalize");
+									dlg.open();
 								}
 							});
 						}
