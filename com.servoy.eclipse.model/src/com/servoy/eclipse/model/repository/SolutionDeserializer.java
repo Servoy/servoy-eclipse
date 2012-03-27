@@ -1275,7 +1275,13 @@ public class SolutionDeserializer
 						}
 						else
 						{
-							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(json.optString(JS_TYPE_JSON_ATTRIBUTE)));
+							int current = json.optInt(VARIABLE_TYPE_JSON_ATTRIBUTE, -1);
+							int servoyType = getServoyType(json.optString(JS_TYPE_JSON_ATTRIBUTE));
+							if (current == -1 ||
+								!((servoyType == IColumnTypes.NUMBER || servoyType == IColumnTypes.INTEGER) && (current == IColumnTypes.NUMBER || current == IColumnTypes.INTEGER)))
+							{
+								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, servoyType);
+							}
 						}
 					}
 					json.put("defaultValue", value_part); //$NON-NLS-1$
