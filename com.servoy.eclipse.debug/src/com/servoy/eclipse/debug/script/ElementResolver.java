@@ -43,6 +43,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.persistence.AggregateVariable;
+import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IServer;
@@ -353,6 +354,7 @@ public class ElementResolver implements IElementResolver
 		boolean readOnly = true;
 		ImageDescriptor image = null;
 		Object resource = null;
+		String description = null;
 		boolean hideAllowed = false;
 		if (type == null && name.indexOf('.') == -1)
 		{
@@ -397,11 +399,13 @@ public class ElementResolver implements IElementResolver
 								if (provider instanceof AggregateVariable)
 								{
 									image = TypeCreator.COLUMN_AGGR_IMAGE;
+									description = "Aggregate (" + ((AggregateVariable)provider).getRootObject().getName() + ")".intern();
 								}
 								else if (provider instanceof ScriptCalculation)
 								{
 									image = TypeCreator.COLUMN_CALC_IMAGE;
 									hideAllowed = true;
+									description = "Calculation (" + ((ScriptCalculation)provider).getRootObject().getName() + ")".intern();
 								}
 							}
 						}
@@ -415,6 +419,12 @@ public class ElementResolver implements IElementResolver
 							readOnly = false;
 							type = TypeCreator.getDataProviderType(context, provider);
 							resource = provider;
+							if (provider instanceof Column && ((Column)provider).getColumnInfo() != null)
+							{
+								String columnDesc = ((Column)provider).getColumnInfo().getDescription();
+								if (columnDesc == null) description = "Column";
+								else description = "Column<br/>" + columnDesc.replace("\n", "<br/>");
+							}
 							if (type == null)
 							{
 								// for now type can be null for media 
@@ -458,7 +468,8 @@ public class ElementResolver implements IElementResolver
 			{
 				typeRef = TypeUtil.ref(type);
 			}
-			Property property = TypeCreator.createProperty(name, readOnly, typeRef, type.getDescription(), image, resource);
+			if (description == null) description = type.getDescription();
+			Property property = TypeCreator.createProperty(name, readOnly, typeRef, description, image, resource);
 			property.setHideAllowed(hideAllowed);
 			if (deprecated.contains(name))
 			{
