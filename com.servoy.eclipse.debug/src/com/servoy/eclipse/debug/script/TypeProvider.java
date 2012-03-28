@@ -1098,15 +1098,23 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				if (provider instanceof AggregateVariable)
 				{
 					image = COLUMN_AGGR_IMAGE;
-					description = "Aggregate (" + ((AggregateVariable)provider).getRootObject().getName() + ")";
+					description = "Aggregate (" + ((AggregateVariable)provider).getRootObject().getName() + ")".intern();
 				}
 				else if (provider instanceof ScriptCalculation)
 				{
 					image = COLUMN_CALC_IMAGE;
-					description = "Calculation (" + ((ScriptCalculation)provider).getRootObject().getName() + ")";
+					description = "Calculation (" + ((ScriptCalculation)provider).getRootObject().getName() + ")".intern();
+				}
+				if (provider instanceof Column && ((Column)provider).getColumnInfo() != null)
+				{
+					String columnDesc = ((Column)provider).getColumnInfo().getDescription();
+					if (columnDesc != null)
+					{
+						description += "<br/>" + columnDesc.replace("\n", "<br/>");
+					}
 				}
 				property.setAttribute(IMAGE_DESCRIPTOR, image);
-				property.setDescription(description.intern());
+				property.setDescription(description);
 				if (deprecated)
 				{
 					property.setDeprecated(true);
