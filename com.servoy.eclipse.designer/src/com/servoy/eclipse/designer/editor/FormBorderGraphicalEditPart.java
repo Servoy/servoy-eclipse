@@ -35,7 +35,7 @@ import org.eclipse.gef.editparts.LayerManager;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.elements.ElementFactory;
-import com.servoy.eclipse.designer.internal.core.BorderImageNotifier;
+import com.servoy.eclipse.designer.internal.core.FormImageNotifier;
 import com.servoy.eclipse.designer.internal.core.IImageNotifier;
 import com.servoy.eclipse.designer.internal.core.ImageFigureController;
 import com.servoy.eclipse.designer.util.BoundsImageFigure;
@@ -61,7 +61,7 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 	private final IApplication application;
 
 	protected ImageFigureController imageFigureController;
-	private BorderImageNotifier borderImageNotifier;
+	private FormImageNotifier borderImageNotifier;
 
 	private List<Handle> handles;
 
@@ -209,7 +209,7 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 	{
 		if (borderImageNotifier == null)
 		{
-			borderImageNotifier = new BorderImageNotifier(application, getModel().flattenedForm);
+			borderImageNotifier = new FormImageNotifier(application, getModel().flattenedForm);
 		}
 		return borderImageNotifier;
 	}

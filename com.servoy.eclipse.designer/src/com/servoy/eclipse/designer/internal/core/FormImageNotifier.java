@@ -20,13 +20,17 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Insets;
 
-import javax.swing.JComponent;
-import javax.swing.JPanel;
 import javax.swing.border.Border;
+import javax.swing.text.html.CSS;
 
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.smart.dataui.StyledEnablePanel;
+import com.servoy.j2db.util.IStyleRule;
+import com.servoy.j2db.util.IStyleSheet;
+import com.servoy.j2db.util.Pair;
 
 /**
  * Handles painting of form borders using awt printing.
@@ -34,11 +38,11 @@ import com.servoy.j2db.persistence.Form;
  * @author rgansevles
  */
 
-public class BorderImageNotifier extends AbstractImageNotifier
+public class FormImageNotifier extends AbstractImageNotifier
 {
 	private final Form flattenedForm;
 
-	public BorderImageNotifier(IApplication application, Form flattenedForm)
+	public FormImageNotifier(IApplication application, Form flattenedForm)
 	{
 		super(application);
 		this.flattenedForm = flattenedForm;
@@ -52,7 +56,9 @@ public class BorderImageNotifier extends AbstractImageNotifier
 		{
 			return null;
 		}
-		JComponent comp = new JPanel();
+		Pair<IStyleSheet, IStyleRule> formStyle = ComponentFactory.getCSSPairStyleForForm(application, flattenedForm);
+
+		StyledEnablePanel comp = new StyledEnablePanel(application);
 		comp.setBorder(border);
 		comp.setOpaque(false);
 		Dimension size = flattenedForm.getSize();
@@ -60,6 +66,11 @@ public class BorderImageNotifier extends AbstractImageNotifier
 		// add border insets
 		Insets insets = border.getBorderInsets(comp);
 		comp.setSize(new Dimension(size.width + insets.left + insets.right, size.height + insets.top + insets.bottom));
+
+		if (formStyle != null && formStyle.getRight() != null && formStyle.getRight().hasAttribute(CSS.Attribute.BACKGROUND_IMAGE.toString()))
+		{
+			comp.setCssRule(formStyle.getRight());
+		}
 		return comp;
 	}
 }
