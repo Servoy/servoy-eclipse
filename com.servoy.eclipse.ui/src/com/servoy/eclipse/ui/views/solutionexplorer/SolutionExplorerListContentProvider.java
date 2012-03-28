@@ -112,6 +112,7 @@ import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.IPrefixedConstantsObject;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.IScriptable;
+import com.servoy.j2db.scripting.ITypedScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSI18N;
@@ -1480,17 +1481,24 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 			}
 
-			if (adapter != null)
-			{
-				if (adapter.isDeprecated(id)) continue;
-				if (adapter.isDeprecated(elementName + id)) continue;
-			}
-
 			NativeJavaMethod njm = ijm.getMethod(id, false);
 			if (njm == null) continue;
 
 			for (MemberBox method : njm.getMethods())
 			{
+				if (adapter != null)
+				{
+					if (adapter instanceof ITypedScriptObject)
+					{
+						if (((ITypedScriptObject)adapter).isDeprecated(id, method.getParameterTypes())) continue;
+					}
+					else
+					{
+						if (adapter.isDeprecated(id)) continue;
+						if (adapter.isDeprecated(elementName + id)) continue;
+					}
+				}
+
 				String paramTypes = "";
 				for (Class param : method.getParameterTypes())
 				{
