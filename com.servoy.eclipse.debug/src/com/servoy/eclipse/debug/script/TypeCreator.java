@@ -542,10 +542,13 @@ public abstract class TypeCreator
 							method.setName(name);
 							Class< ? >[] parameterTypes = memberbox[i].getParameterTypes();
 
-							if (scriptObject instanceof ITypedScriptObject && ((ITypedScriptObject)scriptObject).isDeprecated(name, parameterTypes))
+							if (scriptObject instanceof ITypedScriptObject)
 							{
-								method.setDeprecated(true);
-								method.setVisible(false);
+								if (((ITypedScriptObject)scriptObject).isDeprecated(name, parameterTypes))
+								{
+									method.setDeprecated(true);
+									method.setVisible(false);
+								}
 							}
 							else if (scriptObject != null && scriptObject.isDeprecated(name))
 							{
