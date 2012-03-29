@@ -20131,6 +20131,32 @@ Operator: isNull]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
           <sample><![CDATA[query.where.add(query.columns.flag.isNull())]]></sample>
         </property>
+        <property name="parent">
+          <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
+          <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
+          <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
+          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
+	foundset.loadRecords(query)]]></sample>
+        </property>
+        <property name="root">
+          <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
+          <description><![CDATA[Get query builder parent.]]></description>
+          <summary><![CDATA[Get query builder parent.]]></summary>
+          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
+		
+	var query = databaseManager.createSelect('db:/example_data/orders')
+	query.where.add(query
+		.or 
+			.add(query.columns.order_id.not.isin([1, 2, 3]))
+			
+			.add(query.exists(
+					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
+			))
+		)
+		
+	foundset.loadRecords(query)]]></sample>
+        </property>
         <property name="sum">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
           <description><![CDATA[Create an aggregate expression.
@@ -20878,6 +20904,32 @@ join2.on.add(join1.columns.parent_person_id.eq(join2.columns.person_id))
 query.where.add(join2.columns.name.eq('john'))
 foundset.loadRecords(query)]]></sample>
         </property>
+        <property name="parent">
+          <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
+          <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
+          <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
+          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
+	foundset.loadRecords(query)]]></sample>
+        </property>
+        <property name="root">
+          <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
+          <description><![CDATA[Get query builder parent.]]></description>
+          <summary><![CDATA[Get query builder parent.]]></summary>
+          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
+		
+	var query = databaseManager.createSelect('db:/example_data/orders')
+	query.where.add(query
+		.or 
+			.add(query.columns.order_id.not.isin([1, 2, 3]))
+			
+			.add(query.exists(
+					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
+			))
+		)
+		
+	foundset.loadRecords(query)]]></sample>
+        </property>
       </properties>
       <functions>
         <function name="getColumn">
@@ -21316,6 +21368,14 @@ query.where().add(query.getColumn("custid").eq(new Integer(200)))
 	query.params['mycontactid'] = 200
 	foundset.loadRecords(query)]]></sample>
         </property>
+        <property name="parent">
+          <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
+          <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
+          <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
+          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
+	foundset.loadRecords(query)]]></sample>
+        </property>
         <property name="result">
           <return type="com.servoy.j2db.querybuilder.impl.QBResult" typecode="com.servoy.j2db.querybuilder.impl.QBResult"/>
           <description><![CDATA[Get the result part of the query, used to add result columns or values.
@@ -21324,6 +21384,24 @@ query.result().add(query.getColumn("id")).add.query.getColumn("note"); // select
 </pre>]]></description>
           <summary><![CDATA[Get the result part of the query, used to add result columns or values.]]></summary>
           <sample><![CDATA[query.result.add(query.columns.company_id).add(query.columns.customerid)]]></sample>
+        </property>
+        <property name="root">
+          <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
+          <description><![CDATA[Get query builder parent.]]></description>
+          <summary><![CDATA[Get query builder parent.]]></summary>
+          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
+		
+	var query = databaseManager.createSelect('db:/example_data/orders')
+	query.where.add(query
+		.or 
+			.add(query.columns.order_id.not.isin([1, 2, 3]))
+			
+			.add(query.exists(
+					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
+			))
+		)
+		
+	foundset.loadRecords(query)]]></sample>
         </property>
         <property name="sort">
           <return type="com.servoy.j2db.querybuilder.impl.QBSorts" typecode="com.servoy.j2db.querybuilder.impl.QBSorts"/>
