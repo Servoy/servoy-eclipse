@@ -326,8 +326,11 @@ public class I18NExternalizeDialog extends Dialog
 		}
 	}
 
+	private boolean loadingContent;
+
 	public void loadContent(String filterText)
 	{
+		loadingContent = true;
 		if (defaultMessages == null)
 		{
 			Solution editingSolution = project.getEditingSolution();
@@ -355,6 +358,7 @@ public class I18NExternalizeDialog extends Dialog
 		updateDataMessagesNodes(allProjects, filter);
 
 		if (commonPrefix != null) commonPrefix.setText(commonPrefixValue);
+		loadingContent = false;
 	}
 
 	private void addTableNodeToTree(TreeNode root, IServer server, Table table, TableNode tableNode, String filterText)
@@ -380,7 +384,7 @@ public class I18NExternalizeDialog extends Dialog
 				}
 				if (serverNodeFound == null)
 				{
-					serverNodeFound = createTreeNodeForData(server, root, null);
+					serverNodeFound = new TreeNode(root, server, null);
 					root.addChild(serverNodeFound);
 				}
 
@@ -394,12 +398,12 @@ public class I18NExternalizeDialog extends Dialog
 				}
 				if (tableNodeFound == null)
 				{
-					tableNodeFound = createTreeNodeForData(table, serverNodeFound, null);
+					tableNodeFound = new TreeNode(serverNodeFound, table, null);
 					serverNodeFound.addChild(tableNodeFound);
 				}
 			}
 
-			tableNodeFound.addChild(createTreeNodeForData(jstxt, tableNodeFound, jstxt.getState()));
+			tableNodeFound.addChild(new TreeNode(tableNodeFound, jstxt, jstxt.getState()));
 		}
 	}
 
@@ -426,7 +430,7 @@ public class I18NExternalizeDialog extends Dialog
 			}
 			if (serverNodeFound == null)
 			{
-				serverNodeFound = createTreeNodeForData(server, root, null);
+				serverNodeFound = new TreeNode(root, server, null);
 				root.addChild(serverNodeFound);
 			}
 
@@ -441,7 +445,7 @@ public class I18NExternalizeDialog extends Dialog
 			}
 			if (tableNodeFound == null)
 			{
-				tableNodeFound = createTreeNodeForData(table, serverNodeFound, null);
+				tableNodeFound = new TreeNode(serverNodeFound, table, null);
 				serverNodeFound.addChild(tableNodeFound);
 			}
 
@@ -456,12 +460,11 @@ public class I18NExternalizeDialog extends Dialog
 			}
 			if (columnNodeFound == null)
 			{
-				columnNodeFound = createTreeNodeForData(column, tableNodeFound, null);
+				columnNodeFound = new TreeNode(tableNodeFound, column, null);
 				tableNodeFound.addChild(columnNodeFound);
 			}
 
-			TreeNode columnInfoNode = createTreeNodeForData(columnInfo, columnNodeFound, columnInfoTitleText.startsWith("i18n:") ? STATE.EXTERNALIZE
-				: STATE.INTERNALIZE);
+			TreeNode columnInfoNode = new TreeNode(columnNodeFound, columnInfo, columnInfoTitleText.startsWith("i18n:") ? STATE.EXTERNALIZE : STATE.INTERNALIZE);
 			columnNodeFound.addChild(columnInfoNode);
 
 			return columnInfoNode;
@@ -1786,35 +1789,6 @@ public class I18NExternalizeDialog extends Dialog
 		}
 	}
 
-	private final HashMap<Object, TreeNode> dataTreeNodeMap = new HashMap<Object, TreeNode>();
-
-	private TreeNode createTreeNodeForData(Object data, TreeNode parent, STATE state)
-	{
-		Object keyData = data;
-
-		if (data instanceof Element)
-		{
-			IPersist parentData = (IPersist)parent.getData();
-			keyData = parentData.getUUID() + "_" + ((Element)data).getName();
-		}
-		else if (data instanceof ColumnInfo)
-		{
-			Column parentData = (Column)parent.getData();
-			String datasource = parentData.getTable().getDataSource();
-			keyData = datasource + "_" + parentData.getName();
-		}
-
-		TreeNode treeNodeForData = dataTreeNodeMap.get(keyData);
-		if (treeNodeForData == null)
-		{
-			treeNodeForData = new TreeNode(parent, data, state);
-			dataTreeNodeMap.put(keyData, treeNodeForData);
-		}
-
-		treeNodeForData.getChildren().clear();
-		return treeNodeForData;
-	}
-
 	private class TreeNode
 	{
 		private final ArrayList<TreeNode> children = new ArrayList<TreeNode>();
@@ -1860,7 +1834,7 @@ public class I18NExternalizeDialog extends Dialog
 		{
 			if (treePath.size() == 0)
 			{
-				addChild(createTreeNodeForData(el, this, state));
+				addChild(new TreeNode(this, el, state));
 			}
 			else
 			{
@@ -1874,7 +1848,7 @@ public class I18NExternalizeDialog extends Dialog
 					}
 				}
 
-				TreeNode child = createTreeNodeForData(treePathHead, this, state);
+				TreeNode child = new TreeNode(this, treePathHead, state);
 				addChild(child);
 				child.addPersistElement(treePath.subList(1, treePath.size()), el, state);
 			}
@@ -2044,21 +2018,24 @@ public class I18NExternalizeDialog extends Dialog
 
 		boolean isVisible()
 		{
-			boolean isI18NNode = isElement() || isColumnInfo() || isJSText();
-			if (!isI18NNode && getChildren().size() == 0)
+			if (!loadingContent)
 			{
-				return false;
-			}
-			else if (isI18NNode)
-			{
-				String filterText = filterTextField != null ? filterTextField.getText() : null;
-				if (filterText != null && filterText.length() > 0 && getText().indexOf(filterText) == -1) return false;
+				boolean isI18NNode = isElement() || isColumnInfo() || isJSText();
+				if (!isI18NNode && getChildren().size() == 0)
+				{
+					return false;
+				}
+				else if (isI18NNode)
+				{
+					String filterText = filterTextField != null ? filterTextField.getText() : null;
+					if (filterText != null && filterText.length() > 0 && getText().indexOf(filterText) == -1) return false;
 
-				if (!isShowDatabaseMsg && isColumnInfo()) return false;
-				if (!isShowExternalizedMsg && getState() == STATE.EXTERNALIZE) return false;
-				if ((!isShowIgnoredMsg && getState() == STATE.IGNORE)) return false;
-				if (!isShowEmptyMsg && getText().length() == 0 && getState() != STATE.EXTERNALIZE) return false;
-				if (isShowOnlyEditedMsg && !isChanged) return false;
+					if (!isShowDatabaseMsg && isColumnInfo()) return false;
+					if (!isShowExternalizedMsg && getState() == STATE.EXTERNALIZE) return false;
+					if ((!isShowIgnoredMsg && getState() == STATE.IGNORE)) return false;
+					if (!isShowEmptyMsg && getText().length() == 0 && getState() != STATE.EXTERNALIZE) return false;
+					if (isShowOnlyEditedMsg && !isChanged) return false;
+				}
 			}
 
 			return true;
