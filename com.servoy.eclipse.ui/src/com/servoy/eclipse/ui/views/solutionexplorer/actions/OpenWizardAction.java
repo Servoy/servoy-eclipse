@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -73,6 +74,11 @@ public class OpenWizardAction extends Action
 
 			// Instantiates the wizard container with the wizard and opens it
 			WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard);
+			if (wizard instanceof IPageChangedListener)
+			{
+				dialog.addPageChangedListener((IPageChangedListener)wizard);
+			}
+
 			dialog.create();
 			dialog.open();
 			wizard.dispose();

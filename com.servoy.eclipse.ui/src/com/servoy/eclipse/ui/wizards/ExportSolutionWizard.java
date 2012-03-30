@@ -17,10 +17,8 @@
 package com.servoy.eclipse.ui.wizards;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IMarker;
@@ -34,12 +32,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.PageChangedEvent;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -87,7 +87,7 @@ import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IXMLExporter;
 
-public class ExportSolutionWizard extends Wizard implements IExportWizard
+public class ExportSolutionWizard extends Wizard implements IExportWizard, IPageChangedListener
 {
 	private Solution activeSolution;
 	private ExportSolutionModel exportModel;
@@ -113,55 +113,50 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		workspace = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 	}
 
-	@Override
-	public boolean performFinish()
+	/**
+	 * 
+	 * @return true for errors, null for warnings, false for no markers
+	 */
+	private Boolean hasMarkers(String[] projects)
 	{
-		if (exportModel.isExportReferencedModules()) modulesSelectionPage.initializeModulesToExport();
-		EditorUtil.saveDirtyEditors(getShell(), true);
-		boolean hasErrors = false;
-		boolean hasWarnings = false;
-		try
+		if (projects != null && projects.length > 0)
 		{
-			ServoyProject[] modules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
-			List<String> exportModules = null;
-			if (exportModel.getModulesToExport() != null) exportModules = Arrays.asList(exportModel.getModulesToExport());
-			else exportModules = new ArrayList<String>();
-			for (ServoyProject module : modules)
+			boolean hasWarnings = false;
+			try
 			{
-				if (module.getSolution().equals(activeSolution) || exportModules.contains(module.getSolution().getName()))
+				for (String moduleName : projects)
 				{
-					IMarker[] markers = module.getProject().findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-					for (IMarker marker : markers)
+					ServoyProject module = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(moduleName);
+					if (module != null)
 					{
-						if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_ERROR))
+						IMarker[] markers = module.getProject().findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+						for (IMarker marker : markers)
 						{
-							hasErrors = true;
-							break;
-						}
-						if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_WARNING))
-						{
-							hasWarnings = true;
+							if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_ERROR))
+							{
+								return Boolean.TRUE;
+							}
+							if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_WARNING))
+							{
+								hasWarnings = true;
+							}
 						}
 					}
 				}
 			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
+			}
+			if (hasWarnings) return null;
 		}
-		catch (Exception ex)
-		{
-			ServoyLog.logError(ex);
-		}
-		if (hasErrors)
-		{
-			MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot export solution",
-				"There are errors in the solution that will prevent it from functioning well. Solve errors from problems view first.");
-			return false;
-		}
-		else if (hasWarnings)
-		{
-			if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Are you sure you want to export?",
-				"There are warnings in the solution that may prevent it from functioning well. You may want to solve warnings from problems view first.")) return false;
+		return Boolean.FALSE;
+	}
 
-		}
+	@Override
+	public boolean performFinish()
+	{
+		EditorUtil.saveDirtyEditors(getShell(), true);
 		getDialogSettings().put("initialFileName", exportModel.getFileName());
 
 		WorkspaceJob exportJob = new WorkspaceJob("Exporting solution '" + activeSolution.getName() + "'")
@@ -253,9 +248,18 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		addPage(passwordPage);
 	}
 
+	public void pageChanged(PageChangedEvent event)
+	{
+		if (event.getSelectedPage() == modulesSelectionPage)
+		{
+			modulesSelectionPage.checkStateChanged(null);
+		}
+	}
+
 	@Override
 	public boolean canFinish()
 	{
+		if (modulesSelectionPage.hasMarkers == Boolean.TRUE) return false;
 		if (this.getContainer().getCurrentPage() == fileSelectionPage) return false;
 		if (exportModel.isExportReferencedModules() && this.getContainer().getCurrentPage() == exportOptionsPage) return false;
 		return exportModel.canFinish();
@@ -265,12 +269,23 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 	{
 		private Text fileNameText;
 		private Button browseButton;
+		private final Boolean hasMarkers;
 
 		public FileSelectionPage()
 		{
 			super("page1"); //$NON-NLS-1$
 			setTitle("Choose the destination file"); //$NON-NLS-1$
 			setDescription("Select the file where you want your solution exported to"); //$NON-NLS-1$
+			hasMarkers = hasMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
+			if (hasMarkers == Boolean.TRUE)
+			{
+				setErrorMessage("There are errors in the solution that will prevent it from functioning well. Solve errors from problems view first.");
+			}
+			if (hasMarkers == null)
+			{
+				setMessage(
+					"There are warnings in the solution that may prevent it from functioning well. You may want to solve warnings from problems view first.", IMessageProvider.WARNING); //$NON-NLS-1$
+			}
 		}
 
 		public void createControl(Composite parent)
@@ -335,8 +350,10 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		@Override
 		public boolean canFlipToNextPage()
 		{
+			if (hasMarkers == Boolean.TRUE) return false;
+
 			boolean result = true;
-			boolean messageSet = false;
+			boolean messageSet = (hasMarkers == null);
 			if (exportModel.getFileName() == null) return false;
 			if (fileNameText.getText().length() == 0)
 			{
@@ -349,13 +366,13 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 				{
 					if (f.isDirectory())
 					{
-						setMessage("Specified path points to an existing folder.", IMessageProvider.WARNING); //$NON-NLS-1$
+						if (!messageSet) setMessage("Specified path points to an existing folder.", IMessageProvider.WARNING); //$NON-NLS-1$
 						result = false;
 						messageSet = true;
 					}
 					else
 					{
-						setMessage("Specified path points to an existing file.", IMessageProvider.INFORMATION); //$NON-NLS-1$
+						if (!messageSet) setMessage("Specified path points to an existing file.", IMessageProvider.INFORMATION); //$NON-NLS-1$
 						messageSet = true;
 					}
 				}
@@ -402,6 +419,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 				return exportOptionsPage;
 			}
 		}
+
 	}
 
 	private class ExportOptionsPage extends WizardPage implements Listener
@@ -589,9 +607,10 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		}
 	}
 
-	private class ModulesSelectionPage extends WizardPage implements ISelectionChangedListener
+	private class ModulesSelectionPage extends WizardPage implements ICheckStateListener
 	{
 		CheckboxTreeViewer treeViewer;
+		public Boolean hasMarkers = Boolean.FALSE;
 
 		protected ModulesSelectionPage()
 		{
@@ -656,13 +675,25 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			treeViewer.setInput(moduleNames);
 			treeViewer.setCheckedElements(moduleNames);
 
-			treeViewer.addSelectionChangedListener(this);
+			treeViewer.addCheckStateListener(this);
 			setControl(composite);
 		}
 
-		public void selectionChanged(SelectionChangedEvent event)
+		public void checkStateChanged(CheckStateChangedEvent event)
 		{
-			getWizard().getContainer().updateButtons();
+			initializeModulesToExport();
+			hasMarkers = hasMarkers(exportModel.getModulesToExport());
+			setErrorMessage(null);
+			if (hasMarkers == Boolean.TRUE)
+			{
+				setErrorMessage("There are errors in the solution that will prevent it from functioning well. Solve errors from problems view first.");
+			}
+			if (hasMarkers == null)
+			{
+				setMessage(
+					"There are warnings in the solution that may prevent it from functioning well. You may want to solve warnings from problems view first.", IMessageProvider.WARNING); //$NON-NLS-1$
+			}
+			if (isCurrentPage()) getWizard().getContainer().updateButtons();
 		}
 
 		@Override
@@ -683,6 +714,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 				exportModel.setModulesToExport(moduleNames);
 			}
 			else exportModel.setModulesToExport(null);
+		}
+
+		@Override
+		public boolean canFlipToNextPage()
+		{
+			return (hasMarkers != Boolean.TRUE) && super.canFlipToNextPage();
 		}
 	}
 
