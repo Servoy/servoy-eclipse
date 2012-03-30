@@ -20095,6 +20095,13 @@ query.sort
 .add(query.columns.companyid)
 foundset.loadRecords(query)]]></sample>
         </property>
+        <property name="isNull">
+          <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
+          <description><![CDATA[Compare column with a value or another column.
+Operator: isNull]]></description>
+          <summary><![CDATA[Compare column with a value or another column.]]></summary>
+          <sample><![CDATA[query.where.add(query.columns.flag.isNull())]]></sample>
+        </property>
         <property name="max">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
           <description><![CDATA[Create an aggregate expression.
@@ -20123,13 +20130,6 @@ query.where().add(query.getColumn("value").not().eq(new Integer(100));
 </pre>]]></description>
           <summary><![CDATA[Create a negated condition.]]></summary>
           <sample><![CDATA[query.where.add(query.columns.flag.not.eq(1))]]></sample>
-        </property>
-        <property name="null">
-          <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
-          <description><![CDATA[Compare column with a value or another column.
-Operator: isNull]]></description>
-          <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.isNull())]]></sample>
         </property>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
@@ -20342,6 +20342,13 @@ query.sort
 .add(query.columns.companyid)
 foundset.loadRecords(query)]]></sample>
         </property>
+        <property name="isNull">
+          <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
+          <description><![CDATA[Compare column with a value or another column.
+Operator: isNull]]></description>
+          <summary><![CDATA[Compare column with a value or another column.]]></summary>
+          <sample><![CDATA[query.where.add(query.columns.flag.isNull())]]></sample>
+        </property>
         <property name="max">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
           <description><![CDATA[Create an aggregate expression.
@@ -20370,13 +20377,6 @@ query.where().add(query.getColumn("value").not().eq(new Integer(100));
 </pre>]]></description>
           <summary><![CDATA[Create a negated condition.]]></summary>
           <sample><![CDATA[query.where.add(query.columns.flag.not.eq(1))]]></sample>
-        </property>
-        <property name="null">
-          <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
-          <description><![CDATA[Compare column with a value or another column.
-Operator: isNull]]></description>
-          <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.isNull())]]></sample>
         </property>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
@@ -20620,6 +20620,13 @@ query.sort
 .add(query.columns.companyid)
 foundset.loadRecords(query)]]></sample>
         </property>
+        <property name="isNull">
+          <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
+          <description><![CDATA[Compare column with a value or another column.
+Operator: isNull]]></description>
+          <summary><![CDATA[Compare column with a value or another column.]]></summary>
+          <sample><![CDATA[query.where.add(query.columns.flag.isNull())]]></sample>
+        </property>
         <property name="max">
           <return type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
           <description><![CDATA[Create an aggregate expression.
@@ -20648,13 +20655,6 @@ query.where().add(query.getColumn("value").not().eq(new Integer(100));
 </pre>]]></description>
           <summary><![CDATA[Create a negated condition.]]></summary>
           <sample><![CDATA[query.where.add(query.columns.flag.not.eq(1))]]></sample>
-        </property>
-        <property name="null">
-          <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
-          <description><![CDATA[Compare column with a value or another column.
-Operator: isNull]]></description>
-          <summary><![CDATA[Compare column with a value or another column.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.isNull())]]></sample>
         </property>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
