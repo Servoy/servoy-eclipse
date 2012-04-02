@@ -1371,6 +1371,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				real = clz;
 			}
 		}
+		if (Scriptable.class.isAssignableFrom(clz) && !(ijm instanceof InstanceJavaMembers))
+		{
+			// if the class is a scriptable an the javamembers is not a instance java members, just return nothing.
+			return new SimpleUserNode[0];
+		}
 		return getJSMethodsViaJavaMembers(ijm, o, elementName, prefix, actionType, real, excludeMethodNames);
 	}
 

@@ -54,6 +54,7 @@ import org.mozilla.javascript.JavaMembers;
 import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
+import org.mozilla.javascript.Scriptable;
 
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
@@ -209,6 +210,7 @@ public abstract class TypeCreator
 						{
 							//if (changes.contains(tables))
 							ITypeInfoContext.INVARIANTS.reset("scope:tables");
+							ITypeInfoContext.INVARIANTS.reset("scope:qbcolumns");
 
 							Set<String> keySet = invariantScopes.keySet();
 							for (String context : keySet)
@@ -272,6 +274,10 @@ public abstract class TypeCreator
 				if (type == null)
 				{
 					type = context.getInvariantType(realTypeName, "scope:tables");
+					if (type == null)
+					{
+						type = context.getInvariantType(realTypeName, "scope:qbcolumns");
+					}
 					if (type == null)
 					{
 						type = createDynamicType(context, realTypeName, realTypeName);
@@ -476,6 +482,11 @@ public abstract class TypeCreator
 	{
 		ArrayList<String> al = new ArrayList<String>();
 		JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(scriptObjectClass, null);
+		if (Scriptable.class.isAssignableFrom(scriptObjectClass) && !(javaMembers instanceof InstanceJavaMembers))
+		{
+			// if the class is a scriptable an the javamembers is not a instance java members, just return nothing.
+			return;
+		}
 		if (javaMembers != null)
 		{
 			IScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectForClass(scriptObjectClass);
