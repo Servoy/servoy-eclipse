@@ -20053,7 +20053,8 @@ query.sort().add(query.getColumn("value").asc());
           <summary><![CDATA[Create an ascending sort expression
 <pre>
 query.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders')
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.asc)
 .add(query.columns.companyid)
@@ -20064,7 +20065,8 @@ foundset.loadRecords(query)]]></sample>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: avg]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.avg.eq(1))
 	foundset.loadRecords(query)]]></sample>
@@ -20080,7 +20082,8 @@ query.result().add(query.getColumn("value")).add(query.getColumn("value").count(
     .getParent().sort().add(query.getColumn("value").count().desc());
 </pre>]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
 	foundset.loadRecords(query)]]></sample>
@@ -20089,7 +20092,8 @@ query.result().add(query.getColumn("value")).add(query.getColumn("value").count(
           <return type="com.servoy.j2db.querybuilder.impl.QBSort" typecode="com.servoy.j2db.querybuilder.impl.QBSort"/>
           <description><![CDATA[Create an descending sort expression]]></description>
           <summary><![CDATA[Create an descending sort expression]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders')
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.desc)
 .add(query.columns.companyid)
@@ -20107,7 +20111,8 @@ Operator: isNull]]></description>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: max]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.max(10))
 	foundset.loadRecords(query)]]></sample>
@@ -20117,7 +20122,8 @@ Aggregate: max]]></description>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: min]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.min(10))
 	foundset.loadRecords(query)]]></sample>
@@ -20135,7 +20141,8 @@ query.where().add(query.getColumn("value").not().eq(new Integer(100));
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
         </property>
@@ -20143,8 +20150,10 @@ query.where().add(query.getColumn("value").not().eq(new Integer(100));
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
+	var subquery = databaseManager.createSelect('db:/example_data/order_details')
+	
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -20162,7 +20171,8 @@ query.where().add(query.getColumn("value").not().eq(new Integer(100));
           <description><![CDATA[Create an aggregate expression.
 Aggregate: sum]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.sum(10))
 	foundset.loadRecords(query)]]></sample>
@@ -20300,7 +20310,8 @@ query.sort().add(query.getColumn("value").asc());
           <summary><![CDATA[Create an ascending sort expression
 <pre>
 query.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders')
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.asc)
 .add(query.columns.companyid)
@@ -20311,7 +20322,8 @@ foundset.loadRecords(query)]]></sample>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: avg]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.avg.eq(1))
 	foundset.loadRecords(query)]]></sample>
@@ -20327,7 +20339,8 @@ query.result().add(query.getColumn("value")).add(query.getColumn("value").count(
     .getParent().sort().add(query.getColumn("value").count().desc());
 </pre>]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
 	foundset.loadRecords(query)]]></sample>
@@ -20336,7 +20349,8 @@ query.result().add(query.getColumn("value")).add(query.getColumn("value").count(
           <return type="com.servoy.j2db.querybuilder.impl.QBSort" typecode="com.servoy.j2db.querybuilder.impl.QBSort"/>
           <description><![CDATA[Create an descending sort expression]]></description>
           <summary><![CDATA[Create an descending sort expression]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders')
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.desc)
 .add(query.columns.companyid)
@@ -20354,7 +20368,8 @@ Operator: isNull]]></description>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: max]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.max(10))
 	foundset.loadRecords(query)]]></sample>
@@ -20364,7 +20379,8 @@ Aggregate: max]]></description>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: min]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.min(10))
 	foundset.loadRecords(query)]]></sample>
@@ -20382,7 +20398,8 @@ query.where().add(query.getColumn("value").not().eq(new Integer(100));
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
         </property>
@@ -20390,8 +20407,10 @@ query.where().add(query.getColumn("value").not().eq(new Integer(100));
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
+	var subquery = databaseManager.createSelect('db:/example_data/order_details')
+	
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -20409,7 +20428,8 @@ query.where().add(query.getColumn("value").not().eq(new Integer(100));
           <description><![CDATA[Create an aggregate expression.
 Aggregate: sum]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.sum(10))
 	foundset.loadRecords(query)]]></sample>
@@ -20543,7 +20563,8 @@ Operator: lessThan]]></description>
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
         </property>
@@ -20551,8 +20572,10 @@ Operator: lessThan]]></description>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
+	var subquery = databaseManager.createSelect('db:/example_data/order_details')
+	
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -20578,7 +20601,8 @@ query.sort().add(query.getColumn("value").asc());
           <summary><![CDATA[Create an ascending sort expression
 <pre>
 query.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders')
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.asc)
 .add(query.columns.companyid)
@@ -20589,7 +20613,8 @@ foundset.loadRecords(query)]]></sample>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: avg]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.avg.eq(1))
 	foundset.loadRecords(query)]]></sample>
@@ -20605,7 +20630,8 @@ query.result().add(query.getColumn("value")).add(query.getColumn("value").count(
     .getParent().sort().add(query.getColumn("value").count().desc());
 </pre>]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
 	foundset.loadRecords(query)]]></sample>
@@ -20614,7 +20640,8 @@ query.result().add(query.getColumn("value")).add(query.getColumn("value").count(
           <return type="com.servoy.j2db.querybuilder.impl.QBSort" typecode="com.servoy.j2db.querybuilder.impl.QBSort"/>
           <description><![CDATA[Create an descending sort expression]]></description>
           <summary><![CDATA[Create an descending sort expression]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders')
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.desc)
 .add(query.columns.companyid)
@@ -20632,7 +20659,8 @@ Operator: isNull]]></description>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: max]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.max(10))
 	foundset.loadRecords(query)]]></sample>
@@ -20642,7 +20670,8 @@ Aggregate: max]]></description>
           <description><![CDATA[Create an aggregate expression.
 Aggregate: min]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.min(10))
 	foundset.loadRecords(query)]]></sample>
@@ -20660,7 +20689,8 @@ query.where().add(query.getColumn("value").not().eq(new Integer(100));
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
         </property>
@@ -20668,8 +20698,10 @@ query.where().add(query.getColumn("value").not().eq(new Integer(100));
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
+	var subquery = databaseManager.createSelect('db:/example_data/order_details')
+	
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -20687,7 +20719,8 @@ query.where().add(query.getColumn("value").not().eq(new Integer(100));
           <description><![CDATA[Create an aggregate expression.
 Aggregate: sum]]></description>
           <summary><![CDATA[Create an aggregate expression.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.sum(10))
 	foundset.loadRecords(query)]]></sample>
@@ -20820,7 +20853,8 @@ Operator: lessThan]]></description>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
         </property>
@@ -20828,8 +20862,10 @@ Operator: lessThan]]></description>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
+	var subquery = databaseManager.createSelect('db:/example_data/order_details')
+	
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -20855,7 +20891,8 @@ Operator: lessThan]]></description>
 query.groupBy().add(join.getColumn("value"))
 <pre>]]></description>
           <summary><![CDATA[Add column name to group-by clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders')
 query.groupBy.add(query.columns.orderid) // have to group by on pk when using having-conditions in (foundset) pk queries
 .root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
 foundset.loadRecords(query)]]></sample>
@@ -20865,7 +20902,8 @@ foundset.loadRecords(query)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBGroupBy" typecode="com.servoy.j2db.querybuilder.impl.QBGroupBy"/>
           <description><![CDATA[Add the tables' primary pk columns in alphabetical order to the group by clause.]]></description>
           <summary><![CDATA[Add the tables' primary pk columns in alphabetical order to the group by clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders')
 query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 .root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
 foundset.loadRecords(query)]]></sample>
@@ -20895,9 +20933,12 @@ query.joins().add(detailDataSource,  IQueryBuilderJoin.LEFT_OUTER_JOIN, "detail"
     .on().add(query.getColumn("pk").eq(query.getColumn("detail", "fk")));
 </pre>]]></description>
           <summary><![CDATA[Get the on clause for the join.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+var query = databaseManager.createSelect('db:/example_data/person')
+/** @type {QBJoin<db:/example_data/person>} */
 var join1 = query.joins.add('db:/example_data/person')
 join1.on.add(query.columns.parent_person_id.eq(join1.columns.person_id))
+/** @type {QBJoin<db:/example_data/person>} */
 var join2 = query.joins.add('db:/example_data/person')
 join2.on.add(join1.columns.parent_person_id.eq(join2.columns.person_id))
 	
@@ -20908,7 +20949,8 @@ foundset.loadRecords(query)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
         </property>
@@ -20916,8 +20958,10 @@ foundset.loadRecords(query)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
+	var subquery = databaseManager.createSelect('db:/example_data/order_details')
+	
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -20960,7 +21004,8 @@ foundset.loadRecords(query)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
         </property>
@@ -20968,8 +21013,10 @@ foundset.loadRecords(query)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
+	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 		
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -20991,7 +21038,9 @@ foundset.loadRecords(query)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBJoin" typecode="com.servoy.j2db.querybuilder.impl.QBJoin"/>
           <description><![CDATA[Add a join with join type IQueryBuilderJoin#LEFT_OUTER_JOIN and no alias for the joining table.]]></description>
           <summary><![CDATA[Add a join with join type IQueryBuilderJoin#LEFT_OUTER_JOIN and no alias for the joining table.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))
 	query.where.add(join.columns.quantity.le(10))
@@ -21005,7 +21054,9 @@ foundset.loadRecords(query)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBJoin" typecode="com.servoy.j2db.querybuilder.impl.QBJoin"/>
           <description><![CDATA[Add a join with no alias for the joining table.]]></description>
           <summary><![CDATA[Add a join with no alias for the joining table.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))
 	query.where.add(join.columns.quantity.le(10))
@@ -21020,7 +21071,9 @@ foundset.loadRecords(query)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBJoin" typecode="com.servoy.j2db.querybuilder.impl.QBJoin"/>
           <description><![CDATA[Add a join clause from the parent query builder part to the specified data source.]]></description>
           <summary><![CDATA[Add a join clause from the parent query builder part to the specified data source.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))
 	query.where.add(join.columns.quantity.le(10))
@@ -21036,7 +21089,9 @@ foundset.loadRecords(query)]]></sample>
 <p>When dataSourceOrRelation is a relation name, a join will be added based on the relation.
 <br>When dataSourceOrRelation is a data source, an empty join will be added with join type IQueryBuilderJoin#LEFT_OUTER_JOIN.]]></description>
           <summary><![CDATA[Add a join based on relation or add a manual join.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))
 	query.where.add(join.columns.quantity.le(10))
@@ -21050,7 +21105,8 @@ foundset.loadRecords(query)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
         </property>
@@ -21058,8 +21114,10 @@ foundset.loadRecords(query)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
+	var subquery = databaseManager.createSelect('db:/example_data/order_details')
+	
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -21084,7 +21142,8 @@ foundset.loadRecords(query)]]></sample>
 query.where().add(query.getColumn("flag").eq(new Integer(1))).add(query.getColumn("value").isNull());
 </pre>]]></description>
           <summary><![CDATA[Add a condition to the AND or OR condition list.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders')
 query.where.add(query.columns.orderdate.isNull)]]></sample>
         </function>
       </functions>
@@ -21095,7 +21154,8 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
         </property>
@@ -21103,8 +21163,10 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
+	var subquery = databaseManager.createSelect('db:/example_data/order_details')
+	
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -21126,7 +21188,8 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
         </property>
@@ -21134,8 +21197,10 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
+	var subquery = databaseManager.createSelect('db:/example_data/order_details')
+	
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -21162,7 +21227,8 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
         </property>
@@ -21170,8 +21236,10 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
+	var subquery = databaseManager.createSelect('db:/example_data/order_details')
+	
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -21299,7 +21367,8 @@ query.result().add(query.getColumn(val2.getName())).add(query.getColumn(val2.get
 <pre>
 // SELECT val2, COUNT(val2) FROM tab GROUP BY val2 ORDER BY COUNT(val2) DESC
 query.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders')
 query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 .root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
 foundset.loadRecords(query)]]></sample>
@@ -21315,7 +21384,8 @@ query.result().add(query.getColumn("value"))
    .getParent().having().add("value").count().gt(Integer.valueOf(1)));
 </pre>]]></description>
           <summary><![CDATA[Get the having-part of the query, used to add conditions.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders')
 query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 .root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
 foundset.loadRecords(query)]]></sample>
@@ -21356,8 +21426,10 @@ query.where().add(query.getColumn("custid").eq(new Integer(200)))
         </property>
         <property name="params">
           <return type="com.servoy.j2db.querybuilder.impl.QBParameters" typecode="com.servoy.j2db.querybuilder.impl.QBParameters"/>
-          <description/>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <description><![CDATA[Get the named parameters from a query.]]></description>
+          <summary><![CDATA[Get the named parameters from a query.]]></summary>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query.columns.contact_id.eq(query.getParameter('mycontactid')))
 	
 	// load orders where contact_id = 100
@@ -21372,7 +21444,8 @@ query.where().add(query.getColumn("custid").eq(new Integer(200)))
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
         </property>
@@ -21389,8 +21462,10 @@ query.result().add(query.getColumn("id")).add.query.getColumn("note"); // select
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
+	var subquery = databaseManager.createSelect('db:/example_data/order_details')
+	
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -21410,7 +21485,8 @@ query.result().add(query.getColumn("id")).add.query.getColumn("note"); // select
 query.sort().add(query.getColumn("note").desc()).add(query.getColumn("id")); // order by note desc, id asc
 </pre>]]></description>
           <summary><![CDATA[Get the sorting part of the query.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders')
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.desc)
 .add(query.columns.companyid)
@@ -21479,7 +21555,8 @@ query.where().add(query.getColumn("flag").eq(query.getParameter("myvar"));
 query.getParameter("myvar").setvalue(new Integer(1));
 </pre>]]></description>
           <summary><![CDATA[Get or create a parameter for the query, this used to parameterize queries.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/orders')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query.columns.contact_id.eq(query.getParameter('mycontactid')))
 	
 	// load orders where contact_id = 100
@@ -21524,7 +21601,8 @@ query.getParameter("myvar").setvalue(new Integer(1));
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
         </property>
@@ -21532,8 +21610,10 @@ query.getParameter("myvar").setvalue(new Integer(1));
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
+	var subquery = databaseManager.createSelect('db:/example_data/order_details')
+	
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -21554,7 +21634,8 @@ query.getParameter("myvar").setvalue(new Integer(1));
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
         </property>
@@ -21562,8 +21643,10 @@ query.getParameter("myvar").setvalue(new Integer(1));
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
+	var subquery = databaseManager.createSelect('db:/example_data/order_details')
+	
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -21624,7 +21707,8 @@ query.getParameter("myvar").setvalue(new Integer(1));
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[var query = databaseManager.createSelect('db:/example_data/person')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
         </property>
@@ -21632,8 +21716,10 @@ query.getParameter("myvar").setvalue(new Integer(1));
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent.]]></description>
           <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample><![CDATA[var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
+	var subquery = databaseManager.createSelect('db:/example_data/order_details')
+	
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
