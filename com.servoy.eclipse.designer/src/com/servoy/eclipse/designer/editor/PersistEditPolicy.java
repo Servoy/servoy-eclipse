@@ -45,6 +45,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
@@ -283,9 +284,12 @@ class PersistEditPolicy extends ComponentEditPolicy
 				}
 				if (persist instanceof Media && child instanceof ISupportMedia && child instanceof IPersist)
 				{
+					Media mediaPersist = (Media)persist;
+					String mediaPersistName = mediaPersist.getName();
 					return SetValueCommand.createSetvalueCommand("Drag-n-drop image", new PersistPropertySource((IPersist)child,
 						(IPersist)(formEditPart == null ? null : formEditPart.getModel()), false),
-						StaticContentSpecLoader.PROPERTY_IMAGEMEDIAID.getPropertyName(), new Integer(persist.getID()));
+						StaticContentSpecLoader.PROPERTY_IMAGEMEDIAID.getPropertyName(), new MediaNode(mediaPersistName, mediaPersistName,
+							MediaNode.TYPE.IMAGE, servoyProject.getEditingFlattenedSolution().getSolution(), null, mediaPersist));
 				}
 				if (persist instanceof ValueList && child instanceof Field)
 				{
