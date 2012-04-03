@@ -3082,25 +3082,24 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					// convert between media node and image name
 					return new IPropertyConverter<Integer, MediaNode>()
 					{
-						public MediaNode convertProperty(Object id, Integer value)
+						public MediaNode convertProperty(@SuppressWarnings("hiding")
+						Object id, Integer value)
 						{
-							Media media = flattenedEditingSolution.getMedia(value);
-							if (media != null)
+							if (value != null && value.intValue() > 0)
 							{
-								String mediaName = media.getName();
-								return new MediaNode(mediaName, mediaName, MediaNode.TYPE.IMAGE, flattenedEditingSolution.getSolution(), null, media);
-							}
-							else if (value > 0)
-							{
+								Media media = flattenedEditingSolution.getMedia(value.intValue());
+								if (media != null)
+								{
+									String mediaName = media.getName();
+									return new MediaNode(mediaName, mediaName, MediaNode.TYPE.IMAGE, flattenedEditingSolution.getSolution(), null, media);
+								}
 								return MediaLabelProvider.MEDIA_NODE_UNRESOLVED;
 							}
-							else
-							{
-								return MediaLabelProvider.MEDIA_NODE_NONE;
-							}
+							return MediaLabelProvider.MEDIA_NODE_NONE;
 						}
 
-						public Integer convertValue(Object id, MediaNode value)
+						public Integer convertValue(@SuppressWarnings("hiding")
+						Object id, MediaNode value)
 						{
 							return value == null || value == MediaLabelProvider.MEDIA_NODE_NONE ? Integer.valueOf(0)
 								: Integer.valueOf(value.getMedia().getID());
