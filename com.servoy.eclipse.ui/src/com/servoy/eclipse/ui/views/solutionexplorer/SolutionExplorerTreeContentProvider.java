@@ -2043,7 +2043,45 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 			}
 		}
+		else if (currentActiveEditorPersist instanceof Relation)
+		{
+			Relation rel = (Relation)currentActiveEditorPersist;
+			un = getSolutionNode(currentActiveEditorPersist.getRootObject().getName());
+			if (un != null)
+			{
+				if (rel.isGlobal())
+				{
+					//search all scopes for relation
+					return findChildRelationNodeForParent((Relation)currentActiveEditorPersist, findChildNode(un, Messages.TreeStrings_Scopes));
+				}
+				else
+				{
+					//search all forms for relation
+					return findChildRelationNodeForParent((Relation)currentActiveEditorPersist, findChildNode(un, Messages.TreeStrings_Forms));
+				}
+			}
+		}
 		return un;
+	}
+
+	private Object findChildRelationNodeForParent(Relation r, SimpleUserNode parentNode)
+	{
+		if (parentNode != null)
+		{
+			for (SimpleUserNode uNode : parentNode.children)
+			{
+				if (uNode != null)
+				{
+					SimpleUserNode relsNode = findChildNode(uNode, Messages.TreeStrings_relations);
+					if (relsNode != null)
+					{
+						SimpleUserNode relNode = findChildNode(relsNode, r.getName());
+						if (relNode != null) return relNode;
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 }

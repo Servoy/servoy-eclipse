@@ -3137,6 +3137,13 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						return cp.getGlobalsFolder(selectedProject,
 							segments[1].substring(0, segments[1].length() - SolutionSerializer.JS_FILE_EXTENSION.length()));
 					}
+					else if (segments.length == 3 && segments[1].endsWith(SolutionSerializer.RELATIONS_DIR) &&
+						segments[2].endsWith(SolutionSerializer.RELATION_FILE_EXTENSION))
+					{
+						String name = segments[2].substring(0, segments[2].indexOf(SolutionSerializer.RELATION_FILE_EXTENSION));
+						Relation r = selectedProject.getSolution().getRelation(name);
+						return (SimpleUserNode)cp.getNodeForPersist(r);
+					}
 				}
 				break;
 		}
