@@ -15,21 +15,21 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.core.builder.jsexternalize;
+package com.servoy.eclipse.ui.quickfix.jsexternalize;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.dltk.ui.editor.IScriptAnnotation;
 import org.eclipse.dltk.ui.text.IAnnotationResolution2;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.ui.IMarkerResolution;
+import org.eclipse.ui.IMarkerResolution2;
 
 /**
  * Base resolution class when file modification is needed
  * @author gboros
  *
  */
-public abstract class TextFileEditResolution implements IMarkerResolution, IAnnotationResolution2
+public abstract class TextFileEditResolution implements IMarkerResolution2, IAnnotationResolution2
 {
 	protected IFile scriptFile;
 	protected int problemStartIdx;

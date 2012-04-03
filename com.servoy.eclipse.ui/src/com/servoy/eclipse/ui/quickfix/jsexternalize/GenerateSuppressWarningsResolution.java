@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.core.builder.jsexternalize;
+package com.servoy.eclipse.ui.quickfix.jsexternalize;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dltk.ast.ASTNode;
@@ -26,9 +26,11 @@ import org.eclipse.dltk.javascript.ast.Comment;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.text.edits.InsertEdit;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.Activator;
 
 /**
  * Resolution to add suppress warning on the enclosing method
@@ -53,6 +55,16 @@ class GenerateSuppressWarningsResolution extends TextFileEditResolution
 	private String getAnnotation()
 	{
 		return "@SuppressWarnings(" + type + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.IMarkerResolution2#getImage()
+	 */
+	public Image getImage()
+	{
+		return Activator.getDefault().getImage(Activator.loadImageDescriptorFromBundle("supresswarnings.gif"));
 	}
 
 	/*
@@ -121,7 +133,7 @@ class GenerateSuppressWarningsResolution extends TextFileEditResolution
 	}
 
 	/*
-	 * @see com.servoy.eclipse.core.builder.jsexternalize.TextFileEditResolution#run(org.eclipse.core.resources.IFile, int)
+	 * @see com.servoy.eclipse.ui.quickfix.jsexternalize.TextFileEditResolution#run(org.eclipse.core.resources.IFile, int)
 	 */
 	@Override
 	public void run()

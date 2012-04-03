@@ -555,7 +555,11 @@
       	<markerResolutionGenerator
          	class="com.servoy.eclipse.ui.quickfix.StartI18NExternalizeWizard"
          	markerType="org.eclipse.dltk.javascript.core.jsproblem">
-   	  	</markerResolutionGenerator>       	
+   	  	</markerResolutionGenerator>     
+		<markerResolutionGenerator
+		 	class="com.servoy.eclipse.ui.quickfix.jsexternalize.JSFileExternalizeQuickFixGenerator"
+		 	markerType="org.eclipse.dltk.javascript.core.jsproblem">
+		</markerResolutionGenerator>
      </extension>
      <extension
            point="org.eclipse.ui.commands">
@@ -1018,11 +1022,49 @@
       </textSearchQueryProvider>
    </extension>
    <extension
+         point="org.eclipse.dltk.core.problemFactory">
+      <problemIdentifierFactory
+            class="com.servoy.eclipse.ui.quickfix.jsexternalize.JSFileExternalizeProblemFactory"
+            namespace="com.servoy.eclipse.ui.quickfix.jsexternalize.JSFileExternalizeProblem">
+      </problemIdentifierFactory>
+	  <problemCategory
+            scope="@SuppressWarnings"
+            id="nls"
+            nature="org.eclipse.dltk.javascript.core.nature">
+			<problem>com.servoy.eclipse.ui.quickfix.jsexternalize.JSFileExternalizeProblem#NON_EXTERNALIZED_STRING</problem>
+	   </problemCategory>      
+   </extension>
+   <extension
          point="org.eclipse.dltk.ui.correctionProcessor">
       <correctionProcessor
             class="com.servoy.eclipse.ui.quickfix.StartI18NExternalizeWizard"
             nature="org.eclipse.dltk.javascript.core.nature">
       </correctionProcessor>
+      <correctionProcessor
+            class="com.servoy.eclipse.ui.quickfix.jsexternalize.ExternalizeScriptCorrectionProcessor"
+            nature="org.eclipse.dltk.javascript.core.nature">
+      </correctionProcessor>
+      
+   </extension>
+   <extension
+         point="org.eclipse.dltk.core.buildParticipant">
+      <buildParticipant
+            class="com.servoy.eclipse.ui.quickfix.jsexternalize.JSFileExternalize"
+            id="com.servoy.eclipse.ui.quickfix.jsexternalize.JSFileExternalize"
+            name="JavaScript file string externalize"
+            nature="org.eclipse.dltk.javascript.core.nature">
+      </buildParticipant>
+   </extension>
+   <extension
+   		point="org.eclipse.dltk.javascript.ui.problemSections">
+		<section
+				id="com.servoy.eclipse.ui.quickfix.externalize"
+				name="Externalized strings"
+				priority="1000">
+      		<problem
+      			id="com.servoy.eclipse.ui.quickfix.jsexternalize.JSFileExternalizeProblem#NON_EXTERNALIZED_STRING"
+            	label="Non externalized string"/>
+        </section>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">
@@ -1031,4 +1073,11 @@
             name="project">
       </scope>
    </extension>   
+   <extension
+         point="org.eclipse.dltk.ui.saveParticipants">
+      <saveParticipant
+            class="com.servoy.eclipse.ui.quickfix.jsexternalize.PostSaveNLSRemover"
+            nature="org.eclipse.dltk.javascript.core.nature">
+      </saveParticipant>      
+   </extension>
 </plugin>

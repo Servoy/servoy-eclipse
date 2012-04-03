@@ -13,25 +13,47 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.quickfix;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.ui.IMarkerResolution;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.IMarkerResolution2;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.wizards.SynchronizeDBIWithDBWizard;
 
-public class DBIQuickFixShowSyncWizard implements IMarkerResolution
+public class DBIQuickFixShowSyncWizard implements IMarkerResolution2
 {
 
 	public String getLabel()
 	{
 		return "Open synchronize with database wizard";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.IMarkerResolution2#getImage()
+	 */
+	public Image getImage()
+	{
+		return Activator.getDefault().getImage(Activator.loadImageDescriptorFromBundle("correction_change.gif"));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.IMarkerResolution2#getDescription()
+	 */
+	public String getDescription()
+	{
+		return getLabel();
 	}
 
 	public void run(IMarker marker)

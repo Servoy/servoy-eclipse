@@ -25,11 +25,14 @@ import org.eclipse.dltk.ui.text.IAnnotationResolution2;
 import org.eclipse.dltk.ui.text.IScriptCorrectionContext;
 import org.eclipse.dltk.ui.text.IScriptCorrectionProcessor;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IMarkerResolution;
+import org.eclipse.ui.IMarkerResolution2;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 
-import com.servoy.eclipse.core.builder.jsexternalize.JSFileExternalizeProblem;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.actions.ShowI18NDialogActionDelegate;
+import com.servoy.eclipse.ui.quickfix.jsexternalize.JSFileExternalizeProblem;
 
 /**
  * Quick fix that starts the I18N externalize wizard
@@ -90,7 +93,7 @@ public class StartI18NExternalizeWizard implements IMarkerResolutionGenerator, I
 	{
 	}
 
-	class RunI18NExternalizeWizardResolution implements IMarkerResolution, IAnnotationResolution2
+	class RunI18NExternalizeWizardResolution implements IMarkerResolution2, IAnnotationResolution2
 	{
 
 		/*
@@ -99,6 +102,16 @@ public class StartI18NExternalizeWizard implements IMarkerResolutionGenerator, I
 		public void run(IScriptAnnotation annotation, IDocument document)
 		{
 			showWizard();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.ui.IMarkerResolution2#getImage()
+		 */
+		public Image getImage()
+		{
+			return Activator.getDefault().getImage(Activator.loadImageDescriptorFromBundle("correction_change.gif"));
 		}
 
 		/*

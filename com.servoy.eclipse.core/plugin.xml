@@ -272,10 +272,6 @@
             class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.obsoleteElement">
       </markerResolutionGenerator>
-      <markerResolutionGenerator
-         	class="com.servoy.eclipse.core.builder.jsexternalize.JSFileExternalizeQuickFixGenerator"
-         	markerType="org.eclipse.dltk.javascript.core.jsproblem">
-   	  </markerResolutionGenerator>
    </extension>
    <extension
          point="org.eclipse.ui.splashHandlers">
@@ -342,49 +338,5 @@
             class="com.servoy.eclipse.core.repository.JavaScriptFilePostSaveListener"
             nature="org.eclipse.dltk.javascript.core.nature">
       </saveParticipant>
-      <saveParticipant
-            class="com.servoy.eclipse.core.builder.jsexternalize.PostSaveNLSRemover"
-            nature="org.eclipse.dltk.javascript.core.nature">
-      </saveParticipant>      
-   </extension>
-   <extension
-         point="org.eclipse.dltk.core.buildParticipant">
-      <buildParticipant
-            class="com.servoy.eclipse.core.builder.jsexternalize.JSFileExternalize"
-            id="com.servoy.eclipse.core.builder.jsexternalize.JSFileExternalize"
-            name="JavaScript file string externalize"
-            nature="org.eclipse.dltk.javascript.core.nature">
-      </buildParticipant>
-   </extension>
-   <extension
-         point="org.eclipse.dltk.core.problemFactory">
-      <problemIdentifierFactory
-            class="com.servoy.eclipse.core.builder.jsexternalize.JSFileExternalizeProblemFactory"
-            namespace="com.servoy.eclipse.core.builder.jsexternalize.JSFileExternalizeProblem">
-      </problemIdentifierFactory>
-	  <problemCategory
-            scope="@SuppressWarnings"
-            id="nls"
-            nature="org.eclipse.dltk.javascript.core.nature">
-			<problem>com.servoy.eclipse.core.builder.jsexternalize.JSFileExternalizeProblem#NON_EXTERNALIZED_STRING</problem>
-	   </problemCategory>      
-   </extension>
-   <extension
-   		point="org.eclipse.dltk.javascript.ui.problemSections">
-		<section
-				id="com.servoy.eclipse.core.builder.externalize"
-				name="Externalized strings"
-				priority="1000">
-      		<problem
-      			id="com.servoy.eclipse.core.builder.jsexternalize.JSFileExternalizeProblem#NON_EXTERNALIZED_STRING"
-            	label="Non externalized string"/>
-        </section>
-   </extension>
-   <extension
-         point="org.eclipse.dltk.ui.correctionProcessor">
-      <correctionProcessor
-            class="com.servoy.eclipse.core.builder.jsexternalize.ExternalizeScriptCorrectionProcessor"
-            nature="org.eclipse.dltk.javascript.core.nature">
-      </correctionProcessor>
    </extension>
 </plugin>

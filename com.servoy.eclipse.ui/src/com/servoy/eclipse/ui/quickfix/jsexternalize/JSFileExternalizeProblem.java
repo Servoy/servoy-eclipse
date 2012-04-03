@@ -15,31 +15,25 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.core.builder.jsexternalize;
+package com.servoy.eclipse.ui.quickfix.jsexternalize;
 
 import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
-import org.eclipse.dltk.compiler.problem.IProblemIdentifierFactory;
+
+import com.servoy.eclipse.core.Activator;
 
 /**
- * Problem identifier factory for non-externalized strings problem
+ * Problem identifier for non-externalized strings in js file
  * @author gboros
  */
-public class JSFileExternalizeProblemFactory implements IProblemIdentifierFactory
+public enum JSFileExternalizeProblem implements IProblemIdentifier
 {
+	NON_EXTERNALIZED_STRING;
 
 	/*
-	 * @see org.eclipse.dltk.compiler.problem.IProblemIdentifierFactory#valueOf(java.lang.String)
+	 * @see org.eclipse.dltk.compiler.problem.IProblemIdentifier#contributor()
 	 */
-	public IProblemIdentifier valueOf(String localName) throws IllegalArgumentException
+	public String contributor()
 	{
-		return JSFileExternalizeProblem.valueOf(localName);
-	}
-
-	/*
-	 * @see org.eclipse.dltk.compiler.problem.IProblemIdentifierFactory#values()
-	 */
-	public IProblemIdentifier[] values()
-	{
-		return JSFileExternalizeProblem.values();
+		return Activator.getDefault().toString();
 	}
 }

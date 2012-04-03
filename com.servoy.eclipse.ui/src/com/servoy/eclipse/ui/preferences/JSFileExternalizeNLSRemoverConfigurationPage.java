@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.builder.jsexternalize.PostSaveNLSRemover;
+import com.servoy.eclipse.ui.quickfix.jsexternalize.PostSaveNLSRemover;
 
 /**
  * Preference page for removing unused $NON-NLS$ tags on save

@@ -58,14 +58,24 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.team.ui,
  org.eclipse.core.filesystem
 Bundle-ActivationPolicy: lazy
-Export-Package: com.servoy.eclipse.ui,com.servoy.eclipse.ui.actions,com
- .servoy.eclipse.ui.dialogs,com.servoy.eclipse.ui.editors,com.servoy.ec
- lipse.ui.labelproviders,com.servoy.eclipse.ui.node,com.servoy.eclipse.
- ui.preferences,com.servoy.eclipse.ui.property,com.servoy.eclipse.ui.re
- source,com.servoy.eclipse.ui.scripting,com.servoy.eclipse.ui.util,com.
- servoy.eclipse.ui.views,com.servoy.eclipse.ui.views.properties,com.ser
- voy.eclipse.ui.views.solutionexplorer,com.servoy.eclipse.ui.views.solu
- tionexplorer.actions,com.servoy.eclipse.ui.wizards,org.eclipse.swt.lay
- out.grouplayout,org.eclipse.swt.widgets.baseline
+Export-Package: com.servoy.eclipse.ui,
+ com.servoy.eclipse.ui.actions,
+ com.servoy.eclipse.ui.dialogs,
+ com.servoy.eclipse.ui.editors,
+ com.servoy.eclipse.ui.labelproviders,
+ com.servoy.eclipse.ui.node,
+ com.servoy.eclipse.ui.preferences,
+ com.servoy.eclipse.ui.property,
+ com.servoy.eclipse.ui.quickfix.jsexternalize,
+ com.servoy.eclipse.ui.resource,
+ com.servoy.eclipse.ui.scripting,
+ com.servoy.eclipse.ui.util,
+ com.servoy.eclipse.ui.views,
+ com.servoy.eclipse.ui.views.properties,
+ com.servoy.eclipse.ui.views.solutionexplorer,
+ com.servoy.eclipse.ui.views.solutionexplorer.actions,
+ com.servoy.eclipse.ui.wizards,
+ org.eclipse.swt.layout.grouplayout,
+ org.eclipse.swt.widgets.baseline
 Bundle-ClassPath: .,baseline.jar,swt-grouplayout.jar
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.core.builder.jsexternalize;
+package com.servoy.eclipse.ui.quickfix.jsexternalize;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dltk.core.DLTKCore;
@@ -24,9 +24,11 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.text.edits.InsertEdit;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.Activator;
 
 /**
  * Resolution to add missing NLS to the source line
@@ -45,6 +47,16 @@ public class AddMissingNLSResolution extends TextFileEditResolution
 	public String getLabel()
 	{
 		return "Insert missing $NON-NLS$ tag";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.IMarkerResolution2#getImage()
+	 */
+	public Image getImage()
+	{
+		return Activator.getDefault().getImage(Activator.loadImageDescriptorFromBundle("never_translate.gif"));
 	}
 
 	/*
@@ -76,7 +88,7 @@ public class AddMissingNLSResolution extends TextFileEditResolution
 	}
 
 	/*
-	 * @see com.servoy.eclipse.core.builder.jsexternalize.TextFileEditResolution#run(org.eclipse.core.resources.IFile, int)
+	 * @see com.servoy.eclipse.ui.quickfix.jsexternalize.TextFileEditResolution#run(org.eclipse.core.resources.IFile, int)
 	 */
 	@Override
 	public void run()
