@@ -466,21 +466,24 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 			{
 				public void run()
 				{
-					if (graphicaleditor != null)
+					if (!isClosing())
 					{
-						graphicaleditor.refreshPersists(persists);
-					}
-					if (partseditor != null)
-					{
-						partseditor.refresh();
-					}
-					if (tabseditor != null)
-					{
-						tabseditor.refresh();
-					}
-					if (seceditor != null)
-					{
-						seceditor.refresh();
+						if (graphicaleditor != null)
+						{
+							graphicaleditor.refreshPersists(persists);
+						}
+						if (partseditor != null)
+						{
+							partseditor.refresh();
+						}
+						if (tabseditor != null)
+						{
+							tabseditor.refresh();
+						}
+						if (seceditor != null)
+						{
+							seceditor.refresh();
+						}
 					}
 				}
 			});
@@ -645,7 +648,10 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		{
 			close(true);
 		}
-		// else refresh(null); is already performed from activeProjectWillChange(...) implementation
+		else
+		{
+			refresh(null);
+		}
 	}
 
 	public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
@@ -655,7 +661,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		{
 			close(true);
 		}
-		else
+		else if (updateInfo != IActiveProjectListener.RESOURCES_UPDATED_BECAUSE_ACTIVE_PROJECT_CHANGED)
 		{
 			// other stuff related to the active project has changed, so refresh the editor
 			refresh(null);
@@ -684,22 +690,25 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	{
 		if (activeProject != null)
 		{
-			try
+			if (servoyProject != null)
 			{
-				form = (Form)servoyProject.getEditingPersist(form.getUUID());
+				try
+				{
+					form = (Form)servoyProject.getEditingPersist(form.getUUID());
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError("Could not get form", e);
+				}
 			}
-			catch (RepositoryException e)
+			else
 			{
-				ServoyLog.logError("Could not get form", e);
+				form = null;
 			}
 		}
 		if (form == null)
 		{
 			close(false);
-		}
-		else
-		{
-			refresh(null);
 		}
 		return true;
 	}
