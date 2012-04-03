@@ -32,6 +32,7 @@ import com.servoy.j2db.persistence.Media;
 public class MediaLabelProvider extends LabelProvider implements IPersistLabelProvider
 {
 	public static final MediaNode MEDIA_NODE_NONE = new MediaNode(Messages.LabelNone, null, MediaNode.TYPE.IMAGE, null);
+	public static final MediaNode MEDIA_NODE_UNRESOLVED = new MediaNode(Messages.LabelUnresolved, null, MediaNode.TYPE.IMAGE, null);
 
 	@Override
 	public String getText(Object value)

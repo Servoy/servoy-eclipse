@@ -3090,6 +3090,10 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 								String mediaName = media.getName();
 								return new MediaNode(mediaName, mediaName, MediaNode.TYPE.IMAGE, flattenedEditingSolution.getSolution(), null, media);
 							}
+							else if (value > 0)
+							{
+								return MediaLabelProvider.MEDIA_NODE_UNRESOLVED;
+							}
 							else
 							{
 								return MediaLabelProvider.MEDIA_NODE_NONE;
