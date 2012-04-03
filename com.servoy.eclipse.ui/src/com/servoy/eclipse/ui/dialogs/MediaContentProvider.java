@@ -102,8 +102,7 @@ public class MediaContentProvider implements ITreeContentProvider
 	 */
 	public Object getParent(Object element)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return ((MediaNode)element).getParent();
 	}
 
 	/*

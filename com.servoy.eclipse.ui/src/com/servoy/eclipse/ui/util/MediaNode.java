@@ -110,6 +110,29 @@ public class MediaNode
 		return media;
 	}
 
+	public MediaNode getParent()
+	{
+		if (path.length() > 0)
+		{
+			int idx = path.length() - 1;
+			if (path.charAt(idx) == '/') idx--;
+
+			while (idx > -1 && path.charAt(idx) != '/')
+				idx--;
+			if (idx > 0)
+			{
+				int nameIdx = idx - 1;
+				while (nameIdx > -1 && path.charAt(nameIdx) != '/')
+					nameIdx--;
+				if (nameIdx < 0) nameIdx = 0;
+				else nameIdx++;
+
+				return new MediaNode(path.substring(nameIdx, idx), path.substring(0, idx + 1), TYPE.FOLDER, mediaProvider);
+			}
+		}
+		return null;
+	}
+
 	public boolean hasChildren(EnumSet<TYPE> mediaNodeFilter)
 	{
 		MediaNode[] children = getChildren(mediaNodeFilter);
