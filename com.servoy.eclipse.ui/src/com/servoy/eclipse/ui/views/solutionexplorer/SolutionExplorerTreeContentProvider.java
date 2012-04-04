@@ -2068,7 +2068,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	private Object[] findChildRelationNodeForParent(Relation r, SimpleUserNode parentNode)
 	{
 		List<SimpleUserNode> relations = new ArrayList<SimpleUserNode>();
-		if (parentNode != null)
+		if (parentNode != null && parentNode.children != null)
 		{
 			for (SimpleUserNode uNode : parentNode.children)
 			{
@@ -2083,6 +2083,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 			}
 		}
+		else return null;
+		
 		return relations.toArray();
 	}
 
