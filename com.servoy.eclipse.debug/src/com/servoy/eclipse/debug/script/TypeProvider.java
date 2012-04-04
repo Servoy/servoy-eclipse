@@ -102,6 +102,7 @@ import com.servoy.j2db.querybuilder.impl.QBColumns;
 import com.servoy.j2db.querybuilder.impl.QBCondition;
 import com.servoy.j2db.querybuilder.impl.QBFactory;
 import com.servoy.j2db.querybuilder.impl.QBFunction;
+import com.servoy.j2db.querybuilder.impl.QBFunctions;
 import com.servoy.j2db.querybuilder.impl.QBGroupBy;
 import com.servoy.j2db.querybuilder.impl.QBJoin;
 import com.servoy.j2db.querybuilder.impl.QBJoins;
@@ -214,6 +215,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		addScopeType(QBParameter.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBParameters.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBColumns.class.getSimpleName(), new QueryBuilderColumnsCreator());
+		addScopeType(QBFunctions.class.getSimpleName(), new QueryBuilderCreator());
 	}
 
 	/*
@@ -1047,6 +1049,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			addClass(QBTableClause.class);
 			addClass(QBParameter.class);
 			addClass(QBParameters.class);
+			addClass(QBFunctions.class);
 		}
 
 		private void addClass(Class< ? > clazz)
