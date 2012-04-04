@@ -928,7 +928,19 @@ public class SolutionDeserializer
 				}
 			};
 
-			Script script = parser.parse(fileContent, reporter);
+			Script script = null;
+			try
+			{
+				script = parser.parse(fileContent, reporter);
+			}
+			catch (Throwable t)
+			{
+				Debug.error(t);
+				Debug.error("Parse error with file: " + file +
+					", please check this file for deep recursion like large string concats! ( string + string + string, replace this with string \\ string)");
+				ServoyLog.logError("Parse error with file: " + file +
+					", please check this file for deep recursion like large string concats! ( string + string + string, replace this with string \\ string)", t);
+			}
 			if (problems.size() > 0)
 			{
 				if (Debug.tracing()) Debug.trace("Didn't update the Persist model Script and Variables objects because of problems " + problems + " in file: " +
@@ -938,6 +950,7 @@ public class SolutionDeserializer
 			if (script == null)
 			{
 				Debug.error("No script returned when parsing " + file.getAbsolutePath()); //$NON-NLS-1$
+				ServoyLog.logError("No script returned when parsing " + file.getAbsolutePath(), null);
 				return null;
 			}
 
