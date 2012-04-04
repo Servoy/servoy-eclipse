@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.editors;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -937,6 +938,20 @@ public class RelationEditor extends PersistEditor
 		catch (Exception e)
 		{
 			ServoyLog.logError(e);
+		}
+	}
+
+	@Override
+	public void persistChanges(Collection<IPersist> changes)
+	{
+		super.persistChanges(changes);
+		for (IPersist changed : changes)
+		{
+			if (changed instanceof ScriptVariable && ScopesUtils.isVariableScope(((ScriptVariable)changed).getDataProviderID()))
+			{
+				fromCache = null;
+				break;
+			}
 		}
 	}
 }
