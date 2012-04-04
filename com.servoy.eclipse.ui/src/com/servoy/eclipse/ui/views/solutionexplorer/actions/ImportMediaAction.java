@@ -170,6 +170,10 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 		Utils.streamCopy(bis, baos);
 		byte[] media_data = baos.toByteArray();
 
+		Utils.closeInputStream(bis);
+		Utils.closeInputStream(fis);
+		Utils.closeOutputStream(baos);
+
 		String mime = ImageLoader.getContentType(media_data, file.getName());
 		if (mime == null)
 		{

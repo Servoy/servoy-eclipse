@@ -1182,7 +1182,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			MediaNode mediaFolder = null;
 			if (un.getType() == UserNodeType.MEDIA)
 			{
-				mediaFolder = new MediaNode(null, null, MediaNode.TYPE.FOLDER, (Solution)un.getRealObject());
+				mediaFolder = new MediaNode(null, null, MediaNode.TYPE.FOLDER, ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+					((Solution)un.getRealObject()).getName()).getEditingSolution());
 			}
 			else if (un.getType() == UserNodeType.MEDIA_FOLDER)
 			{

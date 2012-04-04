@@ -2548,6 +2548,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		deleteActionInList = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE), "Delete"); //$NON-NLS-1$
 		IAction deleteMedia = new DeleteMediaAction("Delete media", this); //$NON-NLS-1$
+		IAction deleteMediaFolder = new DeleteMediaAction("Delete media", this); //$NON-NLS-1$
 		IAction deleteValueList = new DeletePersistAction(UserNodeType.VALUELIST_ITEM, "Delete value list"); //$NON-NLS-1$
 		IAction deleteTable = new DeleteTableAction(getSite().getShell());
 		IAction deleteStyle = new DeletePersistAction(UserNodeType.STYLE_ITEM, "Delete style"); //$NON-NLS-1$
@@ -2566,7 +2567,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		deleteActionInList.registerAction(UserNodeType.GLOBAL_VARIABLE_ITEM, deleteGlobalVariable);
 		deleteActionInList.registerAction(UserNodeType.VALUELIST_ITEM, deleteValueList);
 		deleteActionInList.registerAction(UserNodeType.MEDIA_IMAGE, deleteMedia);
-		deleteActionInList.registerAction(UserNodeType.MEDIA_FOLDER, deleteMedia);
+		deleteActionInList.registerAction(UserNodeType.MEDIA_FOLDER, deleteMediaFolder);
 		deleteActionInList.registerAction(UserNodeType.TABLE, deleteTable); /// not UserNodeType.VIEW
 		deleteActionInList.registerAction(UserNodeType.STYLE_ITEM, deleteStyle);
 		deleteActionInList.registerAction(UserNodeType.TEMPLATE_ITEM, deleteTemplate);
@@ -2598,7 +2599,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		deleteActionInTree.registerAction(UserNodeType.SOLUTION_ITEM, deleteSolution);
 		deleteActionInTree.registerAction(UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE, deleteSolution);
 		deleteActionInTree.registerAction(UserNodeType.SERVER, deleteServer);
-		deleteActionInTree.registerAction(UserNodeType.MEDIA_FOLDER, deleteMedia);
+		deleteActionInTree.registerAction(UserNodeType.MEDIA_FOLDER, deleteMediaFolder);
 		deleteActionInTree.registerAction(UserNodeType.GLOBALS_ITEM, deleteScope);
 
 		renameActionInTree = new ContextAction(this, null, "Rename"); //$NON-NLS-1$

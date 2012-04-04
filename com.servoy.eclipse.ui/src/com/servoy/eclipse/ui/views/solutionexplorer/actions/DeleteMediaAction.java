@@ -23,11 +23,18 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
@@ -108,94 +115,139 @@ public class DeleteMediaAction extends Action implements ISelectionChangedListen
 		if (((selectedMediaFolders != null && selectedMediaFolders.size() > 0) || (selectedMedias != null && selectedMedias.size() > 0)) &&
 			MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(), "Are you sure you want to delete?")) //$NON-NLS-1$
 		{
-			if (selectedMediaFolders != null)
+			Job job = new WorkspaceJob("Delete Media") //$NON-NLS-1$
 			{
-				WorkspaceFileAccess wsa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
-				for (MediaNode mediaFolder : selectedMediaFolders)
+
+				@Override
+				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 				{
-					Solution rootObject = null;
-					IMediaProvider mediaProvider = mediaFolder.getMediaProvider();
-					if (mediaProvider instanceof Solution)
+					monitor.beginTask("Deleting Media", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+					try
 					{
-						rootObject = (Solution)mediaProvider;
-					}
-					else if (mediaProvider instanceof FlattenedSolution)
-					{
-						rootObject = ((FlattenedSolution)mediaProvider).getSolution();
-					}
 
-					if (rootObject != null)
-					{
-						ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(rootObject.getName());
-						EclipseRepository repository = (EclipseRepository)rootObject.getRepository();
-
-						Iterator<Media> mediaIte = rootObject.getMedias(false);
-						Media media;
-						ArrayList<IPersist> deletedMedias = new ArrayList<IPersist>();
-						while (mediaIte.hasNext())
+						if (selectedMediaFolders != null && selectedMediaFolders.size() > 0)
 						{
-							media = mediaIte.next();
-							if (media.getName().startsWith(mediaFolder.getPath()))
+							WorkspaceFileAccess wsa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
+							for (MediaNode mediaFolder : selectedMediaFolders)
 							{
-								try
+								Solution rootObject = null;
+								IMediaProvider mediaProvider = mediaFolder.getMediaProvider();
+								if (mediaProvider instanceof Solution)
 								{
-									IPersist editingNode = servoyProject.getEditingPersist(media.getUUID());
-									repository.deleteObject(editingNode);
-									deletedMedias.add(editingNode);
-									EditorUtil.closeEditor(media);
+									rootObject = (Solution)mediaProvider;
 								}
-								catch (RepositoryException e)
+								else if (mediaProvider instanceof FlattenedSolution)
 								{
-									ServoyLog.logError("Could not delete media", e); //$NON-NLS-1$
+									rootObject = ((FlattenedSolution)mediaProvider).getSolution();
+								}
+
+								if (rootObject != null)
+								{
+									ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+										rootObject.getName());
+									EclipseRepository repository = (EclipseRepository)rootObject.getRepository();
+
+									Iterator<Media> mediaIte = rootObject.getMedias(false);
+									Media media;
+									ArrayList<Media> deletedMedias = new ArrayList<Media>();
+									while (mediaIte.hasNext())
+									{
+										media = mediaIte.next();
+										if (media.getName().startsWith(mediaFolder.getPath()))
+										{
+											deletedMedias.add(media);
+										}
+									}
+
+									for (final Media m : deletedMedias)
+									{
+										try
+										{
+											IPersist editingNode = servoyProject.getEditingPersist(m.getUUID());
+											repository.deleteObject(editingNode);
+											Display.getDefault().asyncExec(new Runnable()
+											{
+												public void run()
+												{
+													EditorUtil.closeEditor(m);
+												}
+											});
+										}
+										catch (RepositoryException e)
+										{
+											ServoyLog.logError("Could not delete media", e); //$NON-NLS-1$
+										}
+									}
+
+									try
+									{
+										wsa.delete(rootObject.getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + mediaFolder.getPath());
+										viewer.refreshTreeCompletely();
+									}
+									catch (IOException ex)
+									{
+										ServoyLog.logError(ex);
+									}
+
+									try
+									{
+										servoyProject.saveEditingSolutionNodes(deletedMedias.toArray(new IPersist[0]), true);
+									}
+									catch (RepositoryException e)
+									{
+										ServoyLog.logError("Could not save editing solution when deleting media folder", e); //$NON-NLS-1$
+									}
 								}
 							}
 						}
+						if (selectedMedias != null && selectedMedias.size() > 0)
+						{
+							for (final IPersist media : selectedMedias)
+							{
+								IRootObject rootObject = media.getRootObject();
+								if (rootObject instanceof Solution)
+								{
+									ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+										rootObject.getName());
+									EclipseRepository repository = (EclipseRepository)rootObject.getRepository();
 
-						try
-						{
-							wsa.delete(rootObject.getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + mediaFolder.getPath());
-							viewer.refreshTreeCompletely();
-						}
-						catch (IOException ex)
-						{
-							ServoyLog.logError(ex);
-						}
+									IPersist editingNode = servoyProject.getEditingPersist(media.getUUID());
+									repository.deleteObject(editingNode);
+									servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
+									Display.getDefault().asyncExec(new Runnable()
+									{
+										public void run()
+										{
+											EditorUtil.closeEditor(media);
+										}
+									});
 
-						try
-						{
-							servoyProject.saveEditingSolutionNodes(deletedMedias.toArray(new IPersist[0]), true);
-						}
-						catch (RepositoryException e)
-						{
-							ServoyLog.logError("Could not save editing solution when deleting media folder", e); //$NON-NLS-1$
+								}
+							}
 						}
 					}
-				}
-			}
-			if (selectedMedias != null)
-			{
-				for (IPersist media : selectedMedias)
-				{
-					IRootObject rootObject = media.getRootObject();
-					if (rootObject instanceof Solution)
+					catch (RepositoryException e)
 					{
-						ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(rootObject.getName());
-						EclipseRepository repository = (EclipseRepository)rootObject.getRepository();
-
-						try
-						{
-							IPersist editingNode = servoyProject.getEditingPersist(media.getUUID());
-							repository.deleteObject(editingNode);
-							servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
-							EditorUtil.closeEditor(media);
-						}
-						catch (RepositoryException e)
-						{
-							ServoyLog.logError("Could not delete media", e); //$NON-NLS-1$
-						}
+						MessageDialog.openError(viewer.getSite().getShell(), "Error", "Could not delete media: " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+						ServoyLog.logError("Could not delete media files", e); //$NON-NLS-1$
 					}
+					catch (Exception e)
+					{
+						ServoyLog.logError("Could not delete media files", e); //$NON-NLS-1$
+					}
+					finally
+					{
+						monitor.done();
+					}
+					return Status.OK_STATUS;
 				}
-			}
+
+			};
+			job.setUser(true);
+			// we must have the ws root rule, because EclipseRepository.updateNodesInWorkspace may run,
+			// and we may modifying the medias of the solution
+			job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+			job.schedule();
 		}
 	}
 }

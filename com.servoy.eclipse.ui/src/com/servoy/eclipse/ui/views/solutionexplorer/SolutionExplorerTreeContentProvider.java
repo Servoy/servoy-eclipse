@@ -1012,7 +1012,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			PlatformSimpleUserNode media = new PlatformSimpleUserNode(Messages.TreeStrings_Media, UserNodeType.MEDIA, solution,
 				uiActivator.loadImageFromBundle("image.gif"));
 			media.parent = projectNode;
-			addMediaFolderChildrenNodes(media, solution);
+			addMediaFolderChildrenNodes(media,
+				ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName()).getEditingSolution());
 
 
 			if (solutionOfCalculation != null)
@@ -1656,7 +1657,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Media);
 						if (solutionChildNode != null)
 						{
-							addMediaFolderChildrenNodes(solutionChildNode, (Solution)persist);
+							addMediaFolderChildrenNodes(
+								solutionChildNode,
+								ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(((Solution)persist).getName()).getEditingSolution());
 							view.refreshTreeNodeFromModel(solutionChildNode);
 						}
 					}
