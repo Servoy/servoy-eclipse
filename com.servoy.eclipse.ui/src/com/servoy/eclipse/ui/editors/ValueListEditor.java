@@ -788,7 +788,8 @@ public class ValueListEditor extends PersistEditor
 	@Override
 	public boolean isDirty()
 	{
-		return super.isDirty();
+		return super.isDirty() || !tableSelect.isValid() || !relationSelect.isValid() || !globalMethodSelect.isValid() || !sortingDefinitionSelect.isValid() ||
+			!fallbackValuelist.isValid();
 	}
 
 	private void handleGlobalMethodButtonSelected()

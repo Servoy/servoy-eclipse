@@ -57,7 +57,7 @@ public class HighlightNodeUpdater implements ActiveEditorListener
 		{
 			if (oldActiveEditorPersist instanceof Form)
 			{
-				Object oldNode = treeContentProvider.getNodeForPersist(oldActiveEditorPersist);
+				Object oldNode = treeContentProvider.getNodesForPersist(oldActiveEditorPersist)[0];
 				if (oldNode != null)
 				{
 					treeViewer.update(oldNode, null);
@@ -65,7 +65,7 @@ public class HighlightNodeUpdater implements ActiveEditorListener
 			}
 			if (currentActiveEditorPersist instanceof Form)
 			{
-				Object newNode = treeContentProvider.getNodeForPersist(currentActiveEditorPersist);
+				Object newNode = treeContentProvider.getNodesForPersist(currentActiveEditorPersist)[0];
 				if (newNode != null)
 				{
 					treeViewer.update(newNode, null);

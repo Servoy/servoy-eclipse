@@ -2027,7 +2027,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return found;
 	}
 
-	public Object getNodeForPersist(IPersist currentActiveEditorPersist)
+	public Object[] getNodesForPersist(IPersist currentActiveEditorPersist)
 	{
 		// TODO make this work for other persists as well, when necessary
 		SimpleUserNode un = null;
@@ -2040,6 +2040,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				if (un != null)
 				{
 					un = findChildNode(un, ((Form)currentActiveEditorPersist).getName());
+					return new Object[] { un };
 				}
 			}
 		}
@@ -2061,11 +2062,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 			}
 		}
-		return un;
+		return null;
 	}
 
-	private Object findChildRelationNodeForParent(Relation r, SimpleUserNode parentNode)
+	private Object[] findChildRelationNodeForParent(Relation r, SimpleUserNode parentNode)
 	{
+		List<SimpleUserNode> relations = new ArrayList<SimpleUserNode>();
 		if (parentNode != null)
 		{
 			for (SimpleUserNode uNode : parentNode.children)
@@ -2076,12 +2078,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					if (relsNode != null)
 					{
 						SimpleUserNode relNode = findChildNode(relsNode, r.getName());
-						if (relNode != null) return relNode;
+						if (relNode != null) relations.add(relNode);
 					}
 				}
 			}
 		}
-		return null;
+		return relations.toArray();
 	}
 
 }

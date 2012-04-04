@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -1362,34 +1363,40 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				{
 					SolutionExplorerTreeContentProvider cp = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
 					List<SimpleUserNode> changedUserNodeA = new ArrayList<SimpleUserNode>();
-					SimpleUserNode simpleUserNode;
+					SimpleUserNode[] simpleUserNodes;
 
 					for (Object e : elements)
 					{
-						simpleUserNode = null;
+						simpleUserNodes = null;
 						if (e instanceof SimpleUserNode)
 						{
-							simpleUserNode = (SimpleUserNode)e;
+							simpleUserNodes = new SimpleUserNode[] { (SimpleUserNode)e };
 						}
 						else if (e instanceof IResource)
 						{
 							IResource adaptableResource = (IResource)e;
 							if (adaptableResource.exists())
 							{
-								simpleUserNode = SolutionExplorerView.this.resourceToSimpleUserNode(adaptableResource);
+								simpleUserNodes = SolutionExplorerView.this.resourceToSimpleUserNodes(adaptableResource);
 							}
 						}
 
-						if (simpleUserNode != null)
+						if (simpleUserNodes != null)
 						{
-							SimpleUserNode servoyProjectNode = simpleUserNode.getAncestorOfType(ServoyProject.class);
-							if (servoyProjectNode != null)
+							for (SimpleUserNode simpleUserNode : simpleUserNodes)
 							{
-								SimpleUserNode solutionNodeFromAllSolutions = cp.getSolutionFromAllSolutionsNode(servoyProjectNode.getName());
-								if (solutionNodeFromAllSolutions != null && changedUserNodeA.indexOf(solutionNodeFromAllSolutions) == -1) changedUserNodeA.add(solutionNodeFromAllSolutions);
-							}
+								if (simpleUserNode != null)
+								{
+									SimpleUserNode servoyProjectNode = simpleUserNode.getAncestorOfType(ServoyProject.class);
+									if (servoyProjectNode != null)
+									{
+										SimpleUserNode solutionNodeFromAllSolutions = cp.getSolutionFromAllSolutionsNode(servoyProjectNode.getName());
+										if (solutionNodeFromAllSolutions != null && changedUserNodeA.indexOf(solutionNodeFromAllSolutions) == -1) changedUserNodeA.add(solutionNodeFromAllSolutions);
+									}
 
-							changedUserNodeA.add(simpleUserNode);
+									changedUserNodeA.add(simpleUserNode);
+								}
+							}
 						}
 					}
 					if (changedUserNodeA.size() > 0) tree.update(changedUserNodeA.toArray(), null);
@@ -3019,7 +3026,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	 * @param resource
 	 * @return SE node for the the resource
 	 */
-	private SimpleUserNode resourceToSimpleUserNode(IResource resource)
+	private SimpleUserNode[] resourceToSimpleUserNodes(IResource resource)
 	{
 		SolutionExplorerTreeContentProvider cp = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
 		IPath folderPath = resource.getFullPath();
@@ -3037,11 +3044,11 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					{
 						String projectName = resource.getName();
 						SimpleUserNode solutionNode = cp.getSolutionNode(projectName);
-						return solutionNode;
+						return new SimpleUserNode[] { solutionNode };
 					}
 					else if (resourcesProject != null && resourcesProject.getProject() == resource)
 					{
-						return cp.getResourcesNode(); // it is the resource project
+						return new SimpleUserNode[] { cp.getResourcesNode() }; // it is the resource project
 					}
 				}
 				catch (CoreException ex)
@@ -3056,19 +3063,19 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					{
 						if (segments[1].equals(SolutionSerializer.FORMS_DIR))
 						{
-							return cp.getForms(selectedProject);
+							return new SimpleUserNode[] { cp.getForms(selectedProject) };
 						}
 						else if (segments[1].equals(SolutionSerializer.RELATIONS_DIR))
 						{
-							return cp.getRelations(selectedProject);
+							return new SimpleUserNode[] { cp.getRelations(selectedProject) };
 						}
 						else if (segments[1].equals(SolutionSerializer.VALUELISTS_DIR))
 						{
-							return cp.getValuelists(selectedProject);
+							return new SimpleUserNode[] { cp.getValuelists(selectedProject) };
 						}
 						else if (segments[1].equals(SolutionSerializer.MEDIAS_DIR))
 						{
-							return cp.getMedia(selectedProject);
+							return new SimpleUserNode[] { cp.getMedia(selectedProject) };
 						}
 					}
 
@@ -3079,23 +3086,23 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						{
 							if (segments[1].equals(StringResourceDeserializer.STYLES_DIR_NAME))
 							{
-								return cp.getStylesNode();
+								return new SimpleUserNode[] { cp.getStylesNode() };
 							}
 							else if (segments[1].equals(StringResourceDeserializer.TEMPLATES_DIR_NAME))
 							{
-								return cp.getTemplatesNode();
+								return new SimpleUserNode[] { cp.getTemplatesNode() };
 							}
 							else if (segments[1].equals(SolutionSerializer.DATASOURCES_DIR_NAME))
 							{
-								return cp.getServers();
+								return new SimpleUserNode[] { cp.getServers() };
 							}
 							else if (segments[1].equals(WorkspaceUserManager.SECURITY_DIR))
 							{
-								return cp.getUserGroupSecurityNode();
+								return new SimpleUserNode[] { cp.getUserGroupSecurityNode() };
 							}
 							else if (segments[1].equals(EclipseMessages.MESSAGES_DIR))
 							{
-								return cp.getI18NFilesNode();
+								return new SimpleUserNode[] { cp.getI18NFilesNode() };
 							}
 						}
 					}
@@ -3109,7 +3116,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						{
 							for (SimpleUserNode un : formsNode.children) // find the form
 							{
-								if (un.getName().equals(segments[2])) return un;
+								if (un.getName().equals(segments[2])) return new SimpleUserNode[] { un };
 							}
 						}
 					}
@@ -3127,22 +3134,23 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 							for (SimpleUserNode un : formsNode.children) // find the form
 							{
 								if (((un.getName() + SolutionSerializer.FORM_FILE_EXTENSION).equals(segments[2]) || (un.getName() + SolutionSerializer.JS_FILE_EXTENSION).equals(segments[2])) &&
-									segments.length == 3) return un;
+									segments.length == 3) return new SimpleUserNode[] { un };
 							}
 						}
 					}
 					else if (segments.length == 2 && segments[1].endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 					{
 						// globals (scope) file
-						return cp.getGlobalsFolder(selectedProject,
-							segments[1].substring(0, segments[1].length() - SolutionSerializer.JS_FILE_EXTENSION.length()));
+						return new SimpleUserNode[] { cp.getGlobalsFolder(selectedProject,
+							segments[1].substring(0, segments[1].length() - SolutionSerializer.JS_FILE_EXTENSION.length())) };
 					}
 					else if (segments.length == 3 && segments[1].endsWith(SolutionSerializer.RELATIONS_DIR) &&
 						segments[2].endsWith(SolutionSerializer.RELATION_FILE_EXTENSION))
 					{
 						String name = segments[2].substring(0, segments[2].indexOf(SolutionSerializer.RELATION_FILE_EXTENSION));
 						Relation r = selectedProject.getSolution().getRelation(name);
-						return (SimpleUserNode)cp.getNodeForPersist(r);
+						Object[] simpleUserNodes = cp.getNodesForPersist(r);
+						return Arrays.asList(simpleUserNodes).toArray(new SimpleUserNode[simpleUserNodes.length]);
 					}
 				}
 				break;
