@@ -1829,6 +1829,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 							}
 							else
 							{
+								((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerList();
 								tree.setExpandedState(serversNode, true);
 							}
 							return Status.OK_STATUS;
