@@ -3152,7 +3152,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						String name = segments[2].substring(0, segments[2].indexOf(SolutionSerializer.RELATION_FILE_EXTENSION));
 						Relation r = selectedProject.getSolution().getRelation(name);
 						Object[] simpleUserNodes = cp.getNodesForPersist(r);
-						return Arrays.asList(simpleUserNodes).toArray(new SimpleUserNode[simpleUserNodes.length]);
+						if (simpleUserNodes != null && simpleUserNodes.length > 0)
+						{
+							return Arrays.asList(simpleUserNodes).toArray(new SimpleUserNode[simpleUserNodes.length]);
+						}
 					}
 				}
 				break;
