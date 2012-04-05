@@ -852,6 +852,14 @@ public class ValueListEditor extends PersistEditor
 		{
 			handleDatabaseValuesButtonSelected();
 			getValueList().setDataSource(DataSourceUtils.createDBTableDataSource(tableWrapper.getServerName(), tableWrapper.getTableName()));
+			try
+			{
+				ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager().testTableAndCreateDBIFile((Table)getValueList().getTable());
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
 		}
 	}
 

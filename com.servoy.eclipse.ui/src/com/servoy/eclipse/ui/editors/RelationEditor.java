@@ -154,7 +154,7 @@ public class RelationEditor extends PersistEditor
 			}
 		});
 
-		datasourceSelectComposite = new DatasourceSelectComposite(comp, SWT.NONE, getRelation());
+		datasourceSelectComposite = new DatasourceSelectComposite(comp, SWT.NONE);
 
 		tableContainer = new Composite(comp, SWT.NONE);
 		tableViewer = new TableViewer(tableContainer, SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);

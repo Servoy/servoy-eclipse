@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.relation;
 
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -28,6 +28,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
@@ -54,7 +56,7 @@ public class DatasourceSelectComposite extends Composite
 	 * @param parent
 	 * @param style
 	 */
-	public DatasourceSelectComposite(Composite parent, int style, Relation relation)
+	public DatasourceSelectComposite(Composite parent, int style)
 	{
 		super(parent, style);
 
@@ -189,6 +191,15 @@ public class DatasourceSelectComposite extends Composite
 					TableWrapper tableWrapper = ((TableWrapper)selection.getFirstElement());
 					relationEditor.getRelation().setPrimaryDataSource(
 						DataSourceUtils.createDBTableDataSource(tableWrapper.getServerName(), tableWrapper.getTableName()));
+					try
+					{
+						ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager().testTableAndCreateDBIFile(
+							relationEditor.getRelation().getPrimaryTable());
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError(e);
+					}
 					relationEditor.createInput(false, true, true);
 					relationEditor.flagModified(false);
 					filler.modifyText();
@@ -208,6 +219,15 @@ public class DatasourceSelectComposite extends Composite
 					String oldTableName = relation.getForeignTableName();
 					relationEditor.getRelation().setForeignDataSource(
 						DataSourceUtils.createDBTableDataSource(tableWrapper.getServerName(), tableWrapper.getTableName()));
+					try
+					{
+						ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager().testTableAndCreateDBIFile(
+							relationEditor.getRelation().getForeignTable());
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError(e);
+					}
 					if (relationEditor.getRelation().getPrimaryDataSource() == null)
 					{
 						sourceTable.setSelection(new StructuredSelection(new TableWrapper(tableWrapper.getServerName(), tableWrapper.getTableName())));

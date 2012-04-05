@@ -532,6 +532,23 @@ public class DataModelManager implements IColumnInfoManager
 		}
 	}
 
+	public void testTableAndCreateDBIFile(Table table)
+	{
+		if (table == null) return;
+		IFile dbiFile = getDBIFile(table.getDataSource());
+		if (dbiFile != null && !dbiFile.exists())
+		{
+			try
+			{
+				updateAllColumnInfo(table);
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+	}
+
 	/**
 	 * Will save the dbi file later or now, depending on the parameters.
 	 * 
