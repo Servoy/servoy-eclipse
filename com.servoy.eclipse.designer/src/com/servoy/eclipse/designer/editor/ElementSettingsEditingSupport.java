@@ -107,6 +107,11 @@ public class ElementSettingsEditingSupport extends EditingSupport implements IOb
 			IPersist persist = (IPersist)element;
 			boolean right = Boolean.parseBoolean(value.toString());
 			model.setRight(right, persist, mask);
+			if (mask == IRepository.VIEWABLE && !right)
+			{
+				// also uncheck accesible
+				model.setRight(right, persist, IRepository.ACCESSIBLE);
+			}
 			changeSupport.fireEvent(new ChangeEvent(ElementSettingsEditingSupport.this));
 		}
 
