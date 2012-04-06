@@ -2062,7 +2062,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 			}
 		}
-		return null;
+		return new Object[] { un };
 	}
 
 	private Object[] findChildRelationNodeForParent(Relation r, SimpleUserNode parentNode)
@@ -2084,7 +2084,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			}
 		}
 		else return null;
-		
+
 		return relations.toArray();
 	}
 
