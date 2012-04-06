@@ -31,8 +31,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
@@ -57,13 +57,9 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.ImmutableObjectObservable;
-import com.servoy.j2db.persistence.Column;
-import com.servoy.j2db.persistence.ColumnInfo;
-import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IServerConfigListener;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
-import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Table;
@@ -82,6 +78,7 @@ public class ServerEditor extends EditorPart
 	private Button enabledButton;
 	private Button logServerButton;
 	private Button createLogTableButton;
+	private Button createClientstatsTableButton;
 	private Button skipSysTablesButton;
 	private Text validationQueryField;
 	private Combo validationTypeField;
@@ -233,9 +230,9 @@ public class ServerEditor extends EditorPart
 
 		createLogTableButton = new Button(comp, SWT.PUSH);
 		createLogTableButton.setText("Create Log Table"); //$NON-NLS-1$
-		logTableButtonEnabling();
-		createLogTableButton.addSelectionListener(new SelectionListener()
+		createLogTableButton.addSelectionListener(new SelectionAdapter()
 		{
+			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
 				IServerInternal logServer = (IServerInternal)ServoyModel.getServerManager().getLogServer();
@@ -245,26 +242,13 @@ public class ServerEditor extends EditorPart
 						ServoyModel.getServerManager().getLogServerName() + "' not found or cannot be reached."); //$NON-NLS-1$
 					return;
 				}
+
 				try
 				{
-					Table logTable = logServer.getTable("log"); //$NON-NLS-1$
-					if (logTable == null || logTable.getColumn("pk_data") == null) //$NON-NLS-1$
+					Table logTable = logServer.getLogTable();
+					if (logTable == null)
 					{
-						IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-						logTable = logServer.createNewTable(validator, "log"); //$NON-NLS-1$
-						Column c = logTable.createNewColumn(validator, "log_id", IColumnTypes.INTEGER, 0); //$NON-NLS-1$
-						c.setDatabasePK(true);
-						c.setSequenceType(ColumnInfo.SERVOY_SEQUENCE);
-						logTable.createNewColumn(validator, "server_name", IColumnTypes.TEXT, 50); //$NON-NLS-1$
-						logTable.createNewColumn(validator, "table_name", IColumnTypes.TEXT, 50); //$NON-NLS-1$
-						logTable.createNewColumn(validator, "column_name", IColumnTypes.TEXT, 50); //$NON-NLS-1$
-						logTable.createNewColumn(validator, "log_action", IColumnTypes.INTEGER, 0); //$NON-NLS-1$
-						logTable.createNewColumn(validator, "pk_data", IColumnTypes.TEXT, 190); //$NON-NLS-1$
-						logTable.createNewColumn(validator, "old_data", IColumnTypes.TEXT, 0); //$NON-NLS-1$
-						logTable.createNewColumn(validator, "new_data", IColumnTypes.TEXT, 0); //$NON-NLS-1$
-						logTable.createNewColumn(validator, "event_time", IColumnTypes.DATETIME, 0); //$NON-NLS-1$
-						logTable.createNewColumn(validator, "user_uid", IColumnTypes.TEXT, 190); //$NON-NLS-1$
-						logServer.syncTableObjWithDB(logTable, false, false, null);
+						logTable = logServer.createLogTable();
 						MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Table log created", "Table log successfully created in '" + //$NON-NLS-1$ //$NON-NLS-2$
 							ServoyModel.getServerManager().getLogServerName() + "'."); //$NON-NLS-1$
 					}
@@ -273,7 +257,7 @@ public class ServerEditor extends EditorPart
 						MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Table already exists", "Log table already exists in '" + //$NON-NLS-1$ //$NON-NLS-2$
 							ServoyModel.getServerManager().getLogServerName() + "'."); //$NON-NLS-1$
 					}
-					createLogTableButton.setEnabled(false);
+					createLogTableButton.setEnabled(logTable != null);
 				}
 				catch (RepositoryException re)
 				{
@@ -287,12 +271,56 @@ public class ServerEditor extends EditorPart
 						"Unexpected error while creating log table. Check the log for more details."); //$NON-NLS-1$
 				}
 			}
+		});
 
-			public void widgetDefaultSelected(SelectionEvent e)
+		createClientstatsTableButton = new Button(comp, SWT.PUSH);
+		createClientstatsTableButton.setText("Create Client statistics Table"); //$NON-NLS-1$
+		createClientstatsTableButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
 			{
-				//do nothing
+				IServerInternal logServer = (IServerInternal)ServoyModel.getServerManager().getLogServer();
+				if (logServer == null)
+				{
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Log server not found", "Required server '" + //$NON-NLS-1$ //$NON-NLS-2$
+						ServoyModel.getServerManager().getLogServerName() + "' not found or cannot be reached."); //$NON-NLS-1$
+					return;
+				}
+
+				try
+				{
+					Table statsTable = logServer.getClientStatsTable();
+					if (statsTable == null)
+					{
+						statsTable = logServer.createClientStatsTable();
+						MessageDialog.openInformation(Display.getDefault().getActiveShell(),
+							"Table client_stats created", "Table client_stats successfully created in '" + //$NON-NLS-1$ //$NON-NLS-2$
+								ServoyModel.getServerManager().getLogServerName() + "'."); //$NON-NLS-1$
+					}
+					else
+					{
+						MessageDialog.openInformation(Display.getDefault().getActiveShell(),
+							"Table already exists", "Client statistics table already exists in '" + //$NON-NLS-1$ //$NON-NLS-2$
+								ServoyModel.getServerManager().getLogServerName() + "'."); //$NON-NLS-1$
+					}
+					createClientstatsTableButton.setEnabled(statsTable != null);
+				}
+				catch (RepositoryException re)
+				{
+					ServoyLog.logError(re);
+					MessageDialog.openError(Display.getDefault().getActiveShell(),
+						"Error creating table", "Could not create client statistics table: " + re.getMessage()); //$NON-NLS-1$//$NON-NLS-2$
+				}
+				catch (Exception err)
+				{
+					ServoyLog.logError(err);
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Error creating table", //$NON-NLS-1$
+						"Unexpected error while creating client statistics table. Check the log for more details."); //$NON-NLS-1$
+				}
 			}
 		});
+		enableButtons();
 
 		Label skipSysTablesLabel;
 		skipSysTablesLabel = new Label(comp, SWT.RIGHT);
@@ -464,7 +492,7 @@ public class ServerEditor extends EditorPart
 			serverManager.saveServerConfig(oldServerName, serverConfig);
 
 			//"refresh" the log table creation button
-			logTableButtonEnabling();
+			enableButtons();
 
 			modified = false;
 			firePropertyChange(IEditorPart.PROP_DIRTY);
@@ -726,7 +754,7 @@ public class ServerEditor extends EditorPart
 	public void setFocus()
 	{
 		//in case log table is deleted but the current log server remains the same
-		logTableButtonEnabling();
+		enableButtons();
 	}
 
 	@Override
@@ -754,21 +782,44 @@ public class ServerEditor extends EditorPart
 		return existing;
 	}
 
-	private void logTableButtonEnabling()
+	private void enableButtons()
 	{
-		if (!ServoyModel.getServerManager().logTableExists() &&
-			(serverConfigObservable.getObject().getServerName().equals(ServoyModel.getServerManager().getLogServerName())))
+
+		if (serverConfigObservable.getObject().getServerName().equals(ServoyModel.getServerManager().getLogServerName()))
 		{
-			createLogTableButton.setEnabled(true);
-			createLogTableButton.setToolTipText("Create a log table for tracking; " //$NON-NLS-1$
-				+ "the creation of such a table is possible only if the current database server is the log server " //$NON-NLS-1$
-				+ "and if it does not already contain a log table."); //$NON-NLS-1$
+			if (ServoyModel.getServerManager().logTableExists())
+			{
+				createLogTableButton.setEnabled(false);
+				// FIXME: show tooltips for disabled button
+				createLogTableButton.setToolTipText("Log table already exists in '" + //$NON-NLS-1$
+					ServoyModel.getServerManager().getLogServerName() + "'."); //$NON-NLS-1$
+			}
+			else
+			{
+				createLogTableButton.setEnabled(true);
+				createLogTableButton.setToolTipText("Create a log table for tracking; " //$NON-NLS-1$
+					+ "the creation of such a table is possible only if the current database server is the log server " //$NON-NLS-1$
+					+ "and if it does not already contain a log table."); //$NON-NLS-1$
+			}
+			if (ServoyModel.getServerManager().clientStatsTableExists())
+			{
+				createClientstatsTableButton.setEnabled(false);
+				// FIXME: show tooltips for disabled button
+				createClientstatsTableButton.setToolTipText("Client statistics table already exists in '" + //$NON-NLS-1$
+					ServoyModel.getServerManager().getLogServerName() + "'."); //$NON-NLS-1$
+			}
+			else
+			{
+				createClientstatsTableButton.setEnabled(true);
+				createClientstatsTableButton.setToolTipText("Create a client statistics table for logging (unr)registering of clients; " //$NON-NLS-1$
+					+ "the creation of such a table is possible only if the current database server is the log server " //$NON-NLS-1$
+					+ "and if it does not already contain a client_stats table."); //$NON-NLS-1$
+			}
 		}
 		else
 		{
 			createLogTableButton.setEnabled(false);
-			createLogTableButton.setToolTipText("Log table already exists in '" + //$NON-NLS-1$
-				ServoyModel.getServerManager().getLogServerName() + "'."); //$NON-NLS-1$
+			createClientstatsTableButton.setEnabled(false);
 		}
 	}
 
