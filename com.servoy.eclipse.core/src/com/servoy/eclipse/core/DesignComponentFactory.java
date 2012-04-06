@@ -18,11 +18,14 @@
 package com.servoy.eclipse.core;
 
 import java.awt.Component;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
+import org.eclipse.swt.widgets.Display;
 import org.mozilla.javascript.Scriptable;
 
 import com.servoy.j2db.FlattenedSolution;
@@ -69,7 +72,47 @@ public class DesignComponentFactory extends ComponentFactory
 		return beanDesignComponent;
 	}
 
-	public static Component createDesignComponent(IApplication application, FlattenedSolution flattenedSolution, IPersist meta, Form form)
+
+	public static Component createDesignComponent(final IApplication application, final FlattenedSolution flattenedSolution, final IPersist meta,
+		final Form form)
+	{
+		if (SwingUtilities.isEventDispatchThread())
+		{
+			return createDesignComponentEx(application, flattenedSolution, meta, form);
+		}
+
+		// apply workaround from https://bugs.eclipse.org/bugs/show_bug.cgi?id=291326
+		final Component[] comp = { null };
+		final AtomicBoolean awtFinished = new AtomicBoolean(false);
+		final Display display = Display.getCurrent();
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				// do some AWT stuff here
+				comp[0] = createDesignComponentEx(application, flattenedSolution, meta, form);
+
+				awtFinished.set(true);
+				display.asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						// deliberately empty, this is only to wake up a
+						// potentially waiting SWT-thread below
+					}
+				});
+			}
+		});
+
+		while (!awtFinished.get())
+		{
+			display.sleep();
+		}
+
+		return comp[0];
+	}
+
+	private static Component createDesignComponentEx(IApplication application, FlattenedSolution flattenedSolution, IPersist meta, Form form)
 	{
 		Component c = null;
 		if (meta.getTypeID() == IRepository.BEANS)

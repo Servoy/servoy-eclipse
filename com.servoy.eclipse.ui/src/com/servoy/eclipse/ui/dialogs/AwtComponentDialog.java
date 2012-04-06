@@ -13,12 +13,15 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.swing.SwingUtilities;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -29,6 +32,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -102,7 +106,34 @@ public class AwtComponentDialog extends Dialog
 	public int open()
 	{
 		int open = super.open();
-		frame.dispose();
+
+		// apply workaround from https://bugs.eclipse.org/bugs/show_bug.cgi?id=291326
+		final AtomicBoolean awtFinished = new AtomicBoolean(false);
+		final Display display = Display.getCurrent();
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				// do some AWT stuff here
+				frame.dispose();
+
+				awtFinished.set(true);
+				display.asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						// deliberately empty, this is only to wake up a
+						// potentially waiting SWT-thread below
+					}
+				});
+			}
+		});
+
+		while (!awtFinished.get())
+		{
+			display.sleep();
+		}
+
 		return open;
 	}
 }
