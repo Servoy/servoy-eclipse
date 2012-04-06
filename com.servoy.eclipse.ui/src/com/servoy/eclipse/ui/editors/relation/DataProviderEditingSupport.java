@@ -260,6 +260,8 @@ public class DataProviderEditingSupport extends EditingSupport
 					}
 					previousValue = pi.getCIFrom();
 					pi.setCIFrom((String)currentValue);
+					// get it back so that we get the display value.
+					currentValue = pi.getCIFrom();
 					break;
 				case RelationEditor.CI_OP :
 					currentValue = Integer.valueOf(intValue);
