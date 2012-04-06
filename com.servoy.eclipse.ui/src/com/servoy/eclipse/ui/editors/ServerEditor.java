@@ -352,8 +352,9 @@ public class ServerEditor extends EditorPart
 					validationTypeField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(validationQueryField, GroupLayout.PREFERRED_SIZE, 161,
 					Short.MAX_VALUE).add(enabledButton, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(
 					groupLayout.createSequentialGroup().add(logServerButton, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(createLogTableButton,
-						GroupLayout.PREFERRED_SIZE, 161, GroupLayout.PREFERRED_SIZE)).add(dataModel_cloneFromField, GroupLayout.PREFERRED_SIZE, 161,
-					Short.MAX_VALUE).add(skipSysTablesButton, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE)).addContainerGap()));
+						GroupLayout.PREFERRED_SIZE, 161, GroupLayout.PREFERRED_SIZE).add(createClientstatsTableButton, GroupLayout.PREFERRED_SIZE, 161,
+						GroupLayout.PREFERRED_SIZE)).add(dataModel_cloneFromField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(skipSysTablesButton,
+					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE)).addContainerGap()));
 
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
@@ -398,9 +399,10 @@ public class ServerEditor extends EditorPart
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(enabledButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(enabledLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10,
 				10, 10).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(createLogTableButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(logServerButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
-					logServerLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10, 10, 10).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(createClientstatsTableButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+					GroupLayout.PREFERRED_SIZE).add(createLogTableButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
+					logServerButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(logServerLabel,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10, 10, 10).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(skipSysTablesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(skipSysTablesLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addContainerGap(
 				GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
