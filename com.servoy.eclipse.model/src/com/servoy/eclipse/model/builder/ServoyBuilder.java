@@ -706,19 +706,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							checkServoyProject(getProject());
 							checkColumns(getProject());
 						}
-						IProject[] projects = project.getReferencingProjects();
-						if (projects != null)
-						{
-							for (IProject p : projects)
-							{
-								if (servoyModel.isSolutionActive(p.getName()) && getProject() != p)
-								{
-									deleteMarkers(p, PROJECT_RELATION_MARKER_TYPE);
-									deleteMarkers(p, HIDDEN_TABLE_STILL_IN_USE);
-									checkRelations(p, new HashMap<String, IPersist>());
-								}
-							}
-						}
 					}
 					if (referencedProjectsSet.contains(resource.getName()))
 					{
