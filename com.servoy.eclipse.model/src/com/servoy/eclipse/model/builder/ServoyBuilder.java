@@ -110,6 +110,7 @@ import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IVariable;
+import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
@@ -4093,7 +4094,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								addMarker(project, mk.getType(), mk.getText(), -1, RELATION_ITEM_NO_PRIMARY_DATAPROVIDER, IMarker.PRIORITY_NORMAL, null,
 									element);
 							}
-							else
+							else if (!primaryDataProvider.startsWith(LiteralDataprovider.LITERAL_PREFIX))
 							{
 								if (ScopesUtils.isVariableScope(primaryDataProvider))
 								{

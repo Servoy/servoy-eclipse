@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.relation;
 
 import java.util.ArrayList;
@@ -35,14 +35,12 @@ public class OperatorEditingSupport extends EditingSupport
 {
 	private final ComboBoxCellEditor editor;
 	private final RelationEditor relationEditor;
-	private final int index;
 	private final ArrayList<String> items;
 
-	public OperatorEditingSupport(RelationEditor re, TableViewer tv, int i)
+	public OperatorEditingSupport(RelationEditor re, TableViewer tv)
 	{
 		super(tv);
 		relationEditor = re;
-		index = i;
 		items = new ArrayList<String>();
 		for (int element : RelationItem.RELATION_OPERATORS)
 		{
@@ -61,17 +59,18 @@ public class OperatorEditingSupport extends EditingSupport
 	@Override
 	protected void setValue(Object element, Object value)
 	{
-		if (element instanceof Integer[])
+		if (element instanceof RelationRow)
 		{
-			Integer[] pi = (Integer[])element;
+			RelationRow pi = (RelationRow)element;
 			int listIndex = Utils.getAsInteger(value);
 			String operatorString = items.get(listIndex);
 			int validOperator = RelationItem.getValidOperator(operatorString, RelationItem.RELATION_OPERATORS, null);
 			if (validOperator != -1)
 			{
-				Integer previousValue = pi[index];
-				pi[index] = new Integer(validOperator);
-				if (!Utils.equalObjects(previousValue, pi[index]) && !(previousValue == null && pi[index].intValue() == 0)) relationEditor.flagModified(true);
+				Integer previousValue = pi.getOperator();
+				Integer currentValue = Integer.valueOf(validOperator);
+				pi.setOperator(currentValue);
+				if (!Utils.equalObjects(previousValue, currentValue) && !(previousValue == null && currentValue.intValue() == 0)) relationEditor.flagModified(true);
 			}
 			getViewer().update(element, null);
 		}
@@ -80,10 +79,10 @@ public class OperatorEditingSupport extends EditingSupport
 	@Override
 	protected Object getValue(Object element)
 	{
-		if (element instanceof Integer[])
+		if (element instanceof RelationRow)
 		{
-			Integer[] pi = (Integer[])element;
-			Integer operatorCode = pi[index] != null ? pi[index] : new Integer(0);
+			RelationRow pi = (RelationRow)element;
+			Integer operatorCode = pi.getOperator() != null ? pi.getOperator() : new Integer(0);
 			String operatorString = RelationItem.getOperatorAsString(operatorCode.intValue());
 			return new Integer(items.indexOf(operatorString));
 		}
@@ -99,7 +98,7 @@ public class OperatorEditingSupport extends EditingSupport
 	@Override
 	protected boolean canEdit(Object element)
 	{
-		if (element instanceof Integer[] && editor != null)
+		if (element instanceof RelationRow && editor != null)
 		{
 			return relationEditor.canEdit(element);
 		}

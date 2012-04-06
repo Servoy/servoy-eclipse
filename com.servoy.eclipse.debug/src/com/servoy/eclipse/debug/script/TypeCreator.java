@@ -208,16 +208,7 @@ public abstract class TypeCreator
 					{
 						public void persistChanges(Collection<IPersist> changes)
 						{
-							//if (changes.contains(tables))
-							ITypeInfoContext.INVARIANTS.reset("scope:tables");
-							ITypeInfoContext.INVARIANTS.reset("scope:qbcolumns");
-
-							Set<String> keySet = invariantScopes.keySet();
-							for (String context : keySet)
-							{
-								ITypeInfoContext.INVARIANTS.reset(context);
-							}
-
+							flushCache();
 						}
 					});
 				}
@@ -901,6 +892,22 @@ public abstract class TypeCreator
 			}
 		}
 		return parameters;
+	}
+
+	/**
+	 * 
+	 */
+	protected void flushCache()
+	{
+		//if (changes.contains(tables))
+		ITypeInfoContext.INVARIANTS.reset("scope:tables");
+		ITypeInfoContext.INVARIANTS.reset("scope:qbcolumns");
+
+		Set<String> keySet = invariantScopes.keySet();
+		for (String context : keySet)
+		{
+			ITypeInfoContext.INVARIANTS.reset(context);
+		}
 	}
 
 	public static FlattenedSolution getFlattenedSolution(ITypeInfoContext context)

@@ -72,6 +72,7 @@ import com.servoy.eclipse.ui.editors.relation.DatasourceSelectComposite;
 import com.servoy.eclipse.ui.editors.relation.OperatorEditingSupport;
 import com.servoy.eclipse.ui.editors.relation.OptionsComposite;
 import com.servoy.eclipse.ui.editors.relation.RelationItemLabelProvider;
+import com.servoy.eclipse.ui.editors.relation.RelationRow;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -82,6 +83,7 @@ import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IValidateName;
+import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -195,7 +197,7 @@ public class RelationEditor extends PersistEditor
 					{
 						WritableList oldInput = (WritableList)tableViewer.getInput();
 						oldInput.remove(index);
-						oldInput.add(new Integer[] { null, Integer.valueOf(0), null, null });
+						oldInput.add(new RelationRow(null, Integer.valueOf(0), null, null));
 						tableViewer.setInput(oldInput);
 						flagModified(true);
 					}
@@ -229,9 +231,9 @@ public class RelationEditor extends PersistEditor
 		myScrolledComposite.setMinSize(comp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
 
-	private List<Object[]> input;
+	private List<RelationRow> input;
 
-	public Object getRowInput(int index)
+	public RelationRow getRowInput(int index)
 	{
 		return input.get(index);
 	}
@@ -294,28 +296,28 @@ public class RelationEditor extends PersistEditor
 
 	public void createInput(boolean reuseSource, boolean reuseDestination, boolean autoFill)
 	{
-		input = new ArrayList<Object[]>();
+		input = new ArrayList<RelationRow>();
 		WritableList oldInput = (WritableList)tableViewer.getInput();
 		List<IPersist> items = getRelation().getAllObjectsAsList();
 		for (Object element : items)
 		{
 			RelationItem persist = (RelationItem)element;
-			Integer[] row = null;
-			if (oldInput != null) row = (Integer[])oldInput.get(items.indexOf(element));
-			Integer ci_from;
+			RelationRow row = null;
+			if (oldInput != null) row = (RelationRow)oldInput.get(items.indexOf(element));
+			String ci_from;
 			if (reuseSource && row != null)
 			{
-				ci_from = row[0];
+				ci_from = row.getCIFrom();
 			}
 			else
 			{
 				// parse as scopes string so globals.x gets changes to scopes.globals.x
-				ci_from = getDataProvidersIndex(CI_FROM, ScopesUtils.getScopeString(ScopesUtils.getVariableScope(persist.getPrimaryDataProviderID())));
+				ci_from = ScopesUtils.getScopeString(ScopesUtils.getVariableScope(persist.getPrimaryDataProviderID()));
 			}
-			Integer ci_to;
-			if (reuseDestination && row != null) ci_to = row[2];
+			String ci_to;
+			if (reuseDestination && row != null) ci_to = row.getCITo();
 			else ci_to = getDataProvidersIndex(CI_TO, persist.getForeignColumnName());
-			input.add(new Integer[] { ci_from, Integer.valueOf(persist.getOperator()), ci_to, null });
+			input.add(new RelationRow(ci_from, Integer.valueOf(persist.getOperator()), ci_to, null));
 		}
 		String[] oldColumns = null;
 		if (fromCache != null) oldColumns = fromCache.getRight();
@@ -327,27 +329,26 @@ public class RelationEditor extends PersistEditor
 				{
 					if (oldInput.size() > i)
 					{
-						Integer[] row = (Integer[])oldInput.get(i);
+						RelationRow row = (RelationRow)oldInput.get(i);
 						if (reuseSource)
 						{
-							input.add(new Integer[] { row[0], Integer.valueOf(0), null, null });
+							input.add(new RelationRow(row.getCIFrom(), Integer.valueOf(0), null, null));
 							continue;
 						}
 						else if (reuseDestination)
 						{
-							if (row[0] != null && oldColumns != null && row[0].intValue() < oldColumns.length &&
-								ScopesUtils.isVariableScope(oldColumns[row[0].intValue()]))
+							if (row.getCIFrom() != null && oldColumns != null && ScopesUtils.isVariableScope(row.getCIFrom()))
 							{
-								String name = oldColumns[row[0].intValue()];
+								String name = row.getCIFrom();
 								Integer fromIndex = null;
 								String[] newColumns = getDataProviders(CI_FROM);
 								for (int j = 0; j < newColumns.length; j++)
 								{
 									if (newColumns[j].equals(name)) fromIndex = Integer.valueOf(j);
 								}
-								input.add(new Integer[] { fromIndex, Integer.valueOf(0), row[2], null });
+								input.add(new RelationRow(name, Integer.valueOf(0), row.getCITo(), null));
 							}
-							else input.add(new Integer[] { null, Integer.valueOf(0), row[2], null });
+							else input.add(new RelationRow(null, Integer.valueOf(0), row.getCITo(), null));
 							continue;
 						}
 					}
@@ -357,12 +358,12 @@ public class RelationEditor extends PersistEditor
 					ServoyLog.logError(e);
 				}
 			}
-			input.add(new Integer[] { null, Integer.valueOf(0), null, null });
+			input.add(new RelationRow(null, Integer.valueOf(0), null, null));
 		}
 		boolean didAutoFill = false;
 		if (autoFill && getRelation().getPrimaryServerName() != null && getRelation().getForeignServerName() != null)
 		{
-			Integer[] firstRow = (Integer[])input.get(0);
+			RelationRow firstRow = input.get(0);
 			try
 			{
 				com.servoy.j2db.persistence.Table primaryTable = getRelation().getPrimaryTable();
@@ -378,7 +379,7 @@ public class RelationEditor extends PersistEditor
 							ColumnInfo ci = c.getColumnInfo();
 							if (ci != null && foreignTable.getName().equalsIgnoreCase(ci.getForeignType()))
 							{
-								firstRow[0] = getDataProvidersIndex(CI_FROM, c.getDataProviderID());
+								firstRow.setCIFrom(c.getDataProviderID());
 								didAutoFill = true;
 								break;
 							}
@@ -393,7 +394,7 @@ public class RelationEditor extends PersistEditor
 							ColumnInfo ci = c.getColumnInfo();
 							if (ci != null && primaryTable.getName().equalsIgnoreCase(ci.getForeignType()))
 							{
-								firstRow[2] = getDataProvidersIndex(CI_TO, c.getDataProviderID());
+								firstRow.setCITo(getDataProvidersIndex(CI_TO, c.getDataProviderID()));
 								didAutoFill = true;
 								break;
 							}
@@ -425,22 +426,21 @@ public class RelationEditor extends PersistEditor
 							if (input.size() > rowIdentColumns.indexOf(column))
 							{
 								int index = rowIdentColumns.indexOf(column);
-								if (input.get(index)[CI_FROM] == null || !ScopesUtils.isVariableScope(columns[((Integer)input.get(index)[CI_FROM]).intValue()]))
+								if (input.get(index).getCIFrom() == null || !ScopesUtils.isVariableScope(input.get(index).getCIFrom()))
 								{
-									input.get(index)[CI_FROM] = getDataProvidersIndex(CI_FROM, column.getDataProviderID());
+									input.get(index).setCIFrom(column.getDataProviderID());
 								}
 							}
 						}
 					}
 					// name auto fill
-					String[] columns = getDataProviders(CI_TO);
-					for (Object[] row : input)
+					for (RelationRow row : input)
 					{
-						if (row[CI_TO] != null)
+						if (row.getCITo() != null)
 						{
-							String columnName = columns[((Integer)row[CI_TO]).intValue()];
+							String columnName = row.getCITo();
 							Column column = primaryTable.getColumn(columnName);
-							if (column != null) input.get(input.indexOf(row))[CI_FROM] = getDataProvidersIndex(CI_FROM, column.getDataProviderID());
+							if (column != null) row.setCIFrom(column.getDataProviderID());
 						}
 					}
 				}
@@ -459,13 +459,13 @@ public class RelationEditor extends PersistEditor
 				if (foreignTable != null)
 				{
 					String[] columns = getDataProviders(CI_FROM);
-					for (Object[] row : input)
+					for (RelationRow row : input)
 					{
-						if (row[CI_FROM] != null)
+						if (row.getCIFrom() != null)
 						{
-							String columnName = columns[((Integer)row[CI_FROM]).intValue()];
+							String columnName = row.getCIFrom();
 							Column column = foreignTable.getColumn(columnName);
-							if (column != null) input.get(input.indexOf(row))[CI_TO] = getDataProvidersIndex(CI_TO, column.getDataProviderID());
+							if (column != null) row.setCITo(getDataProvidersIndex(CI_TO, column.getDataProviderID()));
 						}
 					}
 
@@ -491,17 +491,17 @@ public class RelationEditor extends PersistEditor
 		TableColumn fromColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_FROM);
 		fromColumn.setText("From");
 		TableViewerColumn fromViewerColumn = new TableViewerColumn(tableViewer, fromColumn);
-		fromViewerColumn.setEditingSupport(new DataProviderEditingSupport(this, tableViewer, CI_FROM));
+		fromViewerColumn.setEditingSupport(new DataProviderEditingSupport(this, tableViewer, CI_FROM, true));
 
 		TableColumn opColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_OP);
 		opColumn.setText("op");
 		TableViewerColumn opViewerColumn = new TableViewerColumn(tableViewer, opColumn);
-		opViewerColumn.setEditingSupport(new OperatorEditingSupport(this, tableViewer, CI_OP));
+		opViewerColumn.setEditingSupport(new OperatorEditingSupport(this, tableViewer));
 
 		TableColumn toColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_TO);
 		toColumn.setText("To");
 		TableViewerColumn toViewerColumn = new TableViewerColumn(tableViewer, toColumn);
-		toViewerColumn.setEditingSupport(new DataProviderEditingSupport(this, tableViewer, CI_TO));
+		toViewerColumn.setEditingSupport(new DataProviderEditingSupport(this, tableViewer, CI_TO, false));
 
 		TableColumn delColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_DELETE);
 		delColumn.setToolTipText("Clear row");
@@ -536,52 +536,44 @@ public class RelationEditor extends PersistEditor
 		int row = 0;
 		outer : for (; row < input.size(); row++)
 		{
-			Object[] array = input.get(row);
-			for (int col = 0; col < 3; col++)
-			{
-				Object obj = array[col];
-				if (obj == null)
-				{
-					break outer;
-				}
-
-				if (obj instanceof Integer && col != 1 && ((Integer)obj).intValue() == 0)
-				{
-					break outer;
-				}
-			}
+			RelationRow rr = input.get(row);
+			String from = rr.getCIFrom();
+			if (from == null || "".equals(from)) break outer;
+			String to = rr.getCITo();
+			if (to == null || "".equals(to)) break outer;
+			if (rr.getOperator() == null) break outer;
 		}
 		return row;
 	}
 
-	public Integer getDataProvidersIndex(int index, String s)
+	public String getDataProvidersIndex(int index, String s)
 	{
 		if (s == null || index < 0) return null;
 		String[] dps = getDataProviders(index);
 		if (dps != null)
 		{
-			for (int i = 0; i < dps.length; i++)
+			for (String dp : dps)
 			{
-				if (dps[i].equals(s))
+				if (dp.equals(s))
 				{
-					return Integer.valueOf(i);
+					return dp;
 				}
 			}
 		}
 		return null;
 	}
 
-	public Integer getDataProvidersIndexLoose(String[] dps, String s)
+	public String getDataProvidersIndexLoose(String[] dps, String s)
 	{
 		if (s == null) return null;
 		if (dps != null)
 		{
 			// Try perfect match first.
-			for (int i = 0; i < dps.length; i++)
+			for (String dp : dps)
 			{
-				if (dps[i].equals(s))
+				if (dp.equals(s))
 				{
-					return Integer.valueOf(i);
+					return dp;
 				}
 			}
 
@@ -599,7 +591,7 @@ public class RelationEditor extends PersistEditor
 					bestIndex = i;
 				}
 			}
-			if (bestLen > 0) return Integer.valueOf(bestIndex);
+			if (bestLen > 0) return dps[bestIndex];
 		}
 		return null;
 	}
@@ -726,7 +718,7 @@ public class RelationEditor extends PersistEditor
 		if (getRowCount() == tableRows)
 		{
 			tableRows++;
-			input.add(new Integer[] { null, Integer.valueOf(0), null, null });
+			input.add(new RelationRow(null, Integer.valueOf(0), null, null));
 			tableViewer.setInput(new WritableList(input, null));
 		}
 		this.getSite().getShell().getDisplay().asyncExec(new Runnable()
@@ -785,7 +777,7 @@ public class RelationEditor extends PersistEditor
 	{
 		datasourceSelectComposite.checkInconsistency();
 
-		if ((getRelation().getPrimaryServerName() == null || getRelation().getPrimaryTableName() == null) && isEmptySelection(input.get(0)[0]))
+		if ((getRelation().getPrimaryServerName() == null || getRelation().getPrimaryTableName() == null) && isEmptySelection(input.get(0).getCIFrom()))
 		{
 			throw new RepositoryException("Source server data not specified.");
 		}
@@ -795,12 +787,12 @@ public class RelationEditor extends PersistEditor
 		}
 		for (int row = 0; row < input.size(); row++)
 		{
-			Object[] array = input.get(row);
-			if (isEmptySelection(array[0]) && !isEmptySelection(array[2]))
+			RelationRow rr = input.get(row);
+			if (isEmptySelection(rr.getCIFrom()) && !isEmptySelection(rr.getCITo()))
 			{
 				throw new RepositoryException("Column data not complete.");
 			}
-			if (!isEmptySelection(array[0]) && isEmptySelection(array[2]))
+			if (!isEmptySelection(rr.getCIFrom()) && isEmptySelection(rr.getCITo()))
 			{
 				throw new RepositoryException("Column data not complete.");
 			}
@@ -822,25 +814,33 @@ public class RelationEditor extends PersistEditor
 
 				for (int i = 0; i < count; i++)
 				{
-					Integer[] array = (Integer[])input.get(i);
-
-					Object[] primaries = getDataProvidersEx(CI_FROM);
-					int primary_index = Utils.getAsInteger(array[CI_FROM]);
-					Object primary = primaries[primary_index];
-					if (primary instanceof IDataProvider)
-					{
-						dbp[i] = (IDataProvider)primary;
-					}
-
-					operators[i] = Utils.getAsInteger(array[CI_OP]);
+					RelationRow rr = input.get(i);
 
 					Object[] foreigns = getDataProvidersEx(CI_TO);
-					int foreign_index = Utils.getAsInteger(array[CI_TO]);
+					int foreign_index = Arrays.asList(getDataProviders(CI_TO)).indexOf(rr.getCITo());
 					Object foreign = foreigns[foreign_index];
 					if (foreign instanceof IDataProvider)
 					{
 						dbf[i] = (Column)foreign;
 					}
+
+					Object[] primaries = getDataProvidersEx(CI_FROM);
+					int primary_index = Arrays.asList(getDataProviders(CI_FROM)).indexOf(rr.getCIFrom());
+					if (primary_index == -1)
+					{
+						dbp[i] = new LiteralDataprovider(rr.getCIFrom());
+					}
+					else
+					{
+						Object primary = primaries[primary_index];
+						if (primary instanceof IDataProvider)
+						{
+							dbp[i] = (IDataProvider)primary;
+						}
+					}
+
+					operators[i] = Utils.getAsInteger(rr.getOperator());
+
 				}
 				r.createNewRelationItems(dbp, operators, dbf);
 			}
@@ -903,36 +903,34 @@ public class RelationEditor extends PersistEditor
 	 * @param pi
 	 * @param index
 	 */
-	public void autoFill(Integer[] pi, int index)
+	public void autoFill(RelationRow pi, int index)
 	{
 		try
 		{
 			com.servoy.j2db.persistence.Table table = null;
-			int from = -1;
-			int to = -1;
+			String from = null;
+			String to = null;
 
 			if (index == CI_FROM)
 			{
 				table = getRelation().getForeignTable();
-				from = CI_FROM;
-				to = CI_TO;
+				from = pi.getCIFrom();
+				to = pi.getCITo();
 			}
 			else if (index == CI_TO)
 			{
 				table = getRelation().getPrimaryTable();
-				from = CI_TO;
-				to = CI_FROM;
+				from = pi.getCITo();
+				to = pi.getCIFrom();
 			}
 
 			if (table == null) return;
 
-			if (pi[from] != null && (pi[to] == null || pi[to].intValue() == 0))
+			if (from != null && (to == null || "".equals(to)))
 			{
-				String[] fromColumns = getDataProviders(from);
-				int i = pi[from].intValue();
-				String columnName = fromColumns[i];
-				String[] toColumns = getDataProviders(to);
-				pi[to] = getDataProvidersIndexLoose(toColumns, columnName);
+				String[] toColumns = getDataProviders(index == CI_FROM ? CI_TO : CI_FROM);
+				if (index == CI_FROM) pi.setCITo(getDataProvidersIndexLoose(toColumns, from));
+				else pi.setCIFrom(getDataProvidersIndexLoose(toColumns, from));
 			}
 		}
 		catch (Exception e)

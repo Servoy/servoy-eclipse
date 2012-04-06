@@ -86,8 +86,10 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptVariable;
@@ -437,6 +439,17 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			}
 		}
 		super.initalize();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.debug.script.TypeCreator#flushCache()
+	 */
+	@Override
+	protected void flushCache()
+	{
+		relationCache.clear();
 	}
 
 	public Set<String> listTypes(ITypeInfoContext context, TypeMode mode, String prefix)
@@ -1699,7 +1712,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 
 	private static final ConcurrentMap<Relation, String> relationCache = new ConcurrentHashMap<Relation, String>(64, 0.9f, 16);
 
-	private static String getRelationDescription(Relation relation, IDataProvider[] primaryDataProviders, Column[] foreignColumns)
+	static String getRelationDescription(Relation relation, IDataProvider[] primaryDataProviders, Column[] foreignColumns)
 	{
 		String str = relationCache.get(relation);
 		if (str != null) return str;
@@ -1726,9 +1739,9 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 		{
 			sb.append("<br/>From: "); //$NON-NLS-1$
 //			sb.append(relation.getPrimaryDataSource());
-			sb.append(relation.getPrimaryServerName() + "->" + relation.getPrimaryTableName()); //$NON-NLS-1$
+			sb.append(relation.getPrimaryServerName() + " -> " + relation.getPrimaryTableName()); //$NON-NLS-1$
 			sb.append("<br/>To: "); //$NON-NLS-1$
-			sb.append(relation.getForeignServerName() + "->" + relation.getForeignTableName()); //$NON-NLS-1$
+			sb.append(relation.getForeignServerName() + " -> " + relation.getForeignTableName()); //$NON-NLS-1$
 		}
 		sb.append("<br/>"); //$NON-NLS-1$
 		if (primaryDataProviders.length != 0)
@@ -1736,8 +1749,18 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			for (int i = 0; i < foreignColumns.length; i++)
 			{
 				sb.append("&nbsp;&nbsp;"); //$NON-NLS-1$
-				sb.append((primaryDataProviders[i] != null) ? primaryDataProviders[i].getDataProviderID() : "unresolved");
-				sb.append("->"); //$NON-NLS-1$
+				if (primaryDataProviders[i] instanceof LiteralDataprovider)
+				{
+					sb.append(((LiteralDataprovider)primaryDataProviders[i]).getValue());
+					sb.append("&nbsp;"); //$NON-NLS-1$
+					sb.append(RelationItem.getOperatorAsString(relation.getOperators()[i]));
+					sb.append("&nbsp;"); //$NON-NLS-1$
+				}
+				else
+				{
+					sb.append((primaryDataProviders[i] != null) ? primaryDataProviders[i].getDataProviderID() : "unresolved");
+					sb.append(" -> "); //$NON-NLS-1$
+				}
 				sb.append((foreignColumns[i] != null) ? foreignColumns[i].getDataProviderID() : "unresolved");
 				sb.append("<br/>"); //$NON-NLS-1$
 			}

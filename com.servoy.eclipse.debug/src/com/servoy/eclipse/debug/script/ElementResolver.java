@@ -366,6 +366,14 @@ public class ElementResolver implements IElementResolver
 					type = context.getType(FoundSet.JS_FOUNDSET + '<' + relation.getName() + '>');
 					image = TypeCreator.RELATION_IMAGE;
 					resource = relation;
+					try
+					{
+						description = TypeProvider.getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns());
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError(e);
+					}
 				}
 				else
 				{

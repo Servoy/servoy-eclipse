@@ -48,7 +48,9 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.util.Utils;
 
 public class DataProviderEditingSupport extends EditingSupport
@@ -58,12 +60,41 @@ public class DataProviderEditingSupport extends EditingSupport
 	private final int index;
 	private final Integer[] editingRow;
 
-	public DataProviderEditingSupport(final RelationEditor re, final TableViewer tv, int i)
+	public DataProviderEditingSupport(final RelationEditor re, final TableViewer tv, int i, boolean editable)
 	{
 		super(tv);
 		relationEditor = re;
 		index = i;
-		editor = new FixedComboBoxCellEditor(tv.getTable(), new String[0], SWT.READ_ONLY);
+		if (editable)
+		{
+			editor = new FixedComboBoxCellEditor(tv.getTable(), new String[0], SWT.READ_ONLY)
+			{
+				/*
+				 * (non-Javadoc)
+				 * 
+				 * @see org.eclipse.jface.viewers.ComboBoxCellEditor#doSetValue(java.lang.Object)
+				 */
+				@Override
+				protected void doSetValue(Object value)
+				{
+					if (value instanceof String)
+					{
+						super.doSetValue(Integer.valueOf(-1));
+						((CCombo)editor.getControl()).setText((String)value);
+					}
+					else
+					{
+						super.doSetValue(value);
+					}
+				}
+			};
+			((CCombo)editor.getControl()).setEditable(true);
+		}
+		else
+		{
+			editor = new FixedComboBoxCellEditor(tv.getTable(), new String[0], SWT.READ_ONLY);
+		}
+
 
 		MouseAdapter listener = new MouseAdapter()
 		{
@@ -190,13 +221,60 @@ public class DataProviderEditingSupport extends EditingSupport
 	@Override
 	protected void setValue(Object element, Object value)
 	{
-		if (element instanceof Integer[])
+		if (element instanceof RelationRow)
 		{
-			Integer[] pi = (Integer[])element;
-			Integer previousValue = pi[index];
-			pi[index] = new Integer(Utils.getAsInteger(value));
+			RelationRow pi = (RelationRow)element;
+			int intValue = Utils.getAsInteger(value);
+			String[] dataProviders = relationEditor.getDataProviders(index);
+			if (intValue == -1)
+			{
+				String text = ((CCombo)editor.getControl()).getText();
+				if (text.startsWith(ScriptVariable.GLOBALS_DOT_PREFIX))
+				{
+					text = ScriptVariable.SCOPES_DOT_PREFIX + text;
+				}
+				for (int i = 0; i < dataProviders.length; i++)
+				{
+					if (dataProviders[i].equals(text))
+					{
+						intValue = i;
+						break;
+					}
+				}
+			}
+			Object currentValue = null;
+			Object previousValue = null;
+			switch (index)
+			{
+				case RelationEditor.CI_FROM :
+					currentValue = intValue != -1 ? dataProviders[intValue] : ((CCombo)editor.getControl()).getText();
+					if (intValue == -1 && !currentValue.equals(""))
+					{
+						Object parsed = Utils.parseJSExpression((String)currentValue);
+						if (parsed == null)
+						{
+							// not a bool, number or string, convert to quoted string
+							currentValue = "\'" + currentValue + '\''; //$NON-NLS-1$
+						}
+						currentValue = LiteralDataprovider.LITERAL_PREFIX + currentValue;
+					}
+					previousValue = pi.getCIFrom();
+					pi.setCIFrom((String)currentValue);
+					break;
+				case RelationEditor.CI_OP :
+					currentValue = Integer.valueOf(intValue);
+					previousValue = pi.getOperator();
+					pi.setOperator((Integer)currentValue);
+					break;
+				case RelationEditor.CI_TO :
+					currentValue = intValue != -1 ? dataProviders[intValue] : null;
+					previousValue = pi.getCITo();
+					pi.setCITo((String)currentValue);
+			}
+
 			relationEditor.autoFill(pi, index);
-			if (!Utils.equalObjects(previousValue, pi[index]) && !(previousValue == null && pi[index].intValue() == 0)) relationEditor.flagModified(true);
+			if (!Utils.equalObjects(previousValue, currentValue) &&
+				!(previousValue == null && currentValue instanceof Integer && ((Integer)currentValue).intValue() == 0)) relationEditor.flagModified(true);
 			getViewer().update(element, null);
 		}
 	}
@@ -204,10 +282,26 @@ public class DataProviderEditingSupport extends EditingSupport
 	@Override
 	protected Object getValue(Object element)
 	{
-		if (element instanceof Integer[])
+		if (element instanceof RelationRow)
 		{
-			Integer[] pi = (Integer[])element;
-			return (pi[index] != null ? pi[index] : new Integer(0));
+			RelationRow pi = (RelationRow)element;
+			Integer value = null;
+			switch (index)
+			{
+				case RelationEditor.CI_FROM :
+					value = Integer.valueOf(Arrays.asList(relationEditor.getDataProviders(RelationEditor.CI_FROM)).indexOf(pi.getCIFrom()));
+					if (value.intValue() == -1 && pi.getCIFrom() != null)
+					{
+						return pi.getCIFrom();
+					}
+					break;
+				case RelationEditor.CI_OP :
+					value = pi.getOperator();
+					break;
+				case RelationEditor.CI_TO :
+					value = Integer.valueOf(Arrays.asList(relationEditor.getDataProviders(RelationEditor.CI_TO)).indexOf(pi.getCITo()));
+			}
+			return value != null ? value : Integer.valueOf(0);
 		}
 		return null;
 	}
@@ -223,7 +317,7 @@ public class DataProviderEditingSupport extends EditingSupport
 	@Override
 	protected boolean canEdit(Object element)
 	{
-		if (element instanceof Integer[] && editor != null)
+		if (element instanceof RelationRow && editor != null)
 		{
 			return relationEditor.canEdit(element);
 		}

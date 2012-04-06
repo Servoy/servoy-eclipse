@@ -45,9 +45,8 @@ public class RelationItemLabelProvider extends LabelProvider implements ITableLa
 	{
 		if (columnIndex == RelationEditor.CI_DELETE)
 		{
-			Integer[] info = (Integer[])element;
-			if ((info[RelationEditor.CI_FROM] != null && info[RelationEditor.CI_FROM] > 0) ||
-				(info[RelationEditor.CI_TO] != null && info[RelationEditor.CI_TO] > 0))
+			RelationRow info = (RelationRow)element;
+			if ((info.getCIFrom() != null) || (info.getCITo() != null))
 			{
 				return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 			}
@@ -57,15 +56,16 @@ public class RelationItemLabelProvider extends LabelProvider implements ITableLa
 
 	public String getColumnText(Object element, int columnIndex)
 	{
-		Integer[] info = (Integer[])element;
+		RelationRow info = (RelationRow)element;
+		Integer dp = null;
 		switch (columnIndex)
 		{
 			case RelationEditor.CI_FROM :
-			case RelationEditor.CI_TO :
-				String[] dps = relationEditor.getDataProviders(columnIndex);
-				return (info[columnIndex] != null ? dps[Utils.getAsInteger(info[columnIndex])] : RelationEditor.EMPTY);
+				return info.getCIFrom() != null ? info.getCIFrom() : RelationEditor.EMPTY;
 			case RelationEditor.CI_OP :
-				return (info[columnIndex] != null ? RelationItem.getOperatorAsString(Utils.getAsInteger(info[columnIndex])) : RelationEditor.EMPTY);
+				return (info.getOperator() != null ? RelationItem.getOperatorAsString(Utils.getAsInteger(info.getOperator())) : RelationEditor.EMPTY);
+			case RelationEditor.CI_TO :
+				return info.getCITo() != null ? info.getCITo() : RelationEditor.EMPTY;
 			case RelationEditor.CI_DELETE :
 				return "";
 			default :
