@@ -274,7 +274,7 @@ public class ServerEditor extends EditorPart
 		});
 
 		createClientstatsTableButton = new Button(comp, SWT.PUSH);
-		createClientstatsTableButton.setText("Create Client statistics Table"); //$NON-NLS-1$
+		createClientstatsTableButton.setText("Create Client Statistics Table"); //$NON-NLS-1$
 		createClientstatsTableButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -352,7 +352,7 @@ public class ServerEditor extends EditorPart
 					validationTypeField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(validationQueryField, GroupLayout.PREFERRED_SIZE, 161,
 					Short.MAX_VALUE).add(enabledButton, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(
 					groupLayout.createSequentialGroup().add(logServerButton, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(createLogTableButton,
-						GroupLayout.PREFERRED_SIZE, 161, GroupLayout.PREFERRED_SIZE).add(createClientstatsTableButton, GroupLayout.PREFERRED_SIZE, 161,
+						GroupLayout.PREFERRED_SIZE, 161, GroupLayout.PREFERRED_SIZE).add(createClientstatsTableButton, GroupLayout.PREFERRED_SIZE, 220,
 						GroupLayout.PREFERRED_SIZE)).add(dataModel_cloneFromField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(skipSysTablesButton,
 					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE)).addContainerGap()));
 
