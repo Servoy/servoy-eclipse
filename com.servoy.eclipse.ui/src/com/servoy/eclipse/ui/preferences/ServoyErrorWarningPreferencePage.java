@@ -96,6 +96,8 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 	private IEclipsePreferences settingsNode;
 	private final HashMap<String, String> changes = new HashMap<String, String>();
 	private final List<Pair<Combo, Integer>> defaults = new ArrayList<Pair<Combo, Integer>>();
+	private boolean doBuild = false;
+	private boolean defaultsPerformed = false;
 	private final List<String> problemSections = new ArrayList<String>();
 	private final IStatus fBlockStatus;
 	private SelectionButtonDialogField fUseProjectSettings;
@@ -739,25 +741,19 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 	@Override
 	protected void performDefaults()
 	{
-		changes.clear();
-		try
-		{
-			settingsNode.clear();
-		}
-		catch (BackingStoreException e)
-		{
-			ServoyLog.logError(e);
-		}
 		for (Pair<Combo, Integer> p : defaults)
 		{
 			p.getLeft().select(p.getRight().intValue() >= 0 ? p.getRight().intValue() : 0);
 		}
+		doBuild = true;
+		defaultsPerformed = true;
 		super.performDefaults();
 	}
 
 	@Override
 	public boolean performCancel()
 	{
+		doBuild = false;
 		changes.clear();
 		return super.performCancel();
 	}
@@ -767,17 +763,9 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 	{
 		try
 		{
-			boolean doBuild = false;
 			if (isProjectPreferencePage() && !projectSpecificSetting && hasProjectSpecificOptions(fProject))
 			{
-				try
-				{
-					settingsNode.clear();
-				}
-				catch (BackingStoreException e)
-				{
-					ServoyLog.logError(e);
-				}
+				settingsNode.clear();
 				doBuild = true;
 			}
 			else if (changes.size() > 0)
@@ -792,7 +780,13 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 			}
 			if (doBuild)
 			{
+				if (defaultsPerformed)
+				{
+					settingsNode.clear();
+					defaultsPerformed = false;
+				}
 				ServoyModelManager.getServoyModelManager().getServoyModel().buildActiveProjectsInJob();
+				doBuild = false;
 			}
 		}
 		catch (BackingStoreException e)
