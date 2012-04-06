@@ -428,18 +428,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 				savingInWorkspace = true;
 				try
 				{
-					for (final IPersist node : nodes)
-					{
-						try
-						{
-							updateNode(node.getRootObject(), false);//check root if to write for fileversion
-							updateNode(node, recursive);
-						}
-						catch (RepositoryException e)
-						{
-							reportSaveError(e);
-						}
-					}
+					updateNodes(nodes, recursive);
 				}
 				finally
 				{
@@ -491,6 +480,22 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 			}
 		}
 		// No need to refresh workspace, files are written using workspace access, so changes are picked up already
+	}
+
+	public void updateNodes(IPersist[] nodes, boolean recursive)
+	{
+		for (final IPersist node : nodes)
+		{
+			try
+			{
+				updateNode(node.getRootObject(), false);//check root if to write for fileversion
+				updateNode(node, recursive);
+			}
+			catch (RepositoryException e)
+			{
+				reportSaveError(e);
+			}
+		}
 	}
 
 	public boolean isSavingInWorkspace()

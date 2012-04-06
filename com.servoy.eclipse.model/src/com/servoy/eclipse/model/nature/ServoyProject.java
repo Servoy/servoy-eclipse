@@ -383,13 +383,18 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 		return destNode;
 	}
 
+	public void saveEditingSolutionNodes(IPersist[] nodes, boolean recursive) throws RepositoryException
+	{
+		saveEditingSolutionNodes(nodes, recursive, true);
+	}
+
 	/**
 	 * Apply all changes in editingSolution to the solution, starting from nodes.
 	 * 
 	 * @param nodes
 	 * @param recursive
 	 */
-	public void saveEditingSolutionNodes(final IPersist[] nodes, final boolean recursive) throws RepositoryException
+	public void saveEditingSolutionNodes(final IPersist[] nodes, final boolean recursive, boolean runAsJob) throws RepositoryException
 	{
 		if (nodes == null) return;
 
@@ -407,7 +412,14 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 		}
 
 		EclipseRepository repository = (EclipseRepository)ApplicationServerSingleton.get().getDeveloperRepository();
-		repository.updateNodesInWorkspace(nodes, recursive);
+		if (runAsJob)
+		{
+			repository.updateNodesInWorkspace(nodes, recursive);
+		}
+		else
+		{
+			repository.updateNodes(nodes, recursive);
+		}
 	}
 
 	/**

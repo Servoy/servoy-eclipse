@@ -56,6 +56,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Utils;
 
 
 /**
@@ -147,29 +148,29 @@ public class DeleteMediaAction extends Action implements ISelectionChangedListen
 										rootObject.getName());
 									EclipseRepository repository = (EclipseRepository)rootObject.getRepository();
 
-									Iterator<Media> mediaIte = rootObject.getMedias(false);
-									Media media;
-									ArrayList<Media> deletedMedias = new ArrayList<Media>();
-									while (mediaIte.hasNext())
+									List<Media> deletedMedias = new ArrayList<Media>();
+									for (Media media : Utils.iterate(rootObject.getMedias(false)))
 									{
-										media = mediaIte.next();
 										if (media.getName().startsWith(mediaFolder.getPath()))
 										{
-											deletedMedias.add(media);
+											IPersist editingNode = servoyProject.getEditingPersist(media.getUUID());
+											if (editingNode != null)
+											{
+												deletedMedias.add((Media)editingNode);
+											}
 										}
 									}
 
-									for (final Media m : deletedMedias)
+									for (final Media media : deletedMedias)
 									{
 										try
 										{
-											IPersist editingNode = servoyProject.getEditingPersist(m.getUUID());
-											repository.deleteObject(editingNode);
+											repository.deleteObject(media);
 											Display.getDefault().asyncExec(new Runnable()
 											{
 												public void run()
 												{
-													EditorUtil.closeEditor(m);
+													EditorUtil.closeEditor(media);
 												}
 											});
 										}
@@ -181,21 +182,20 @@ public class DeleteMediaAction extends Action implements ISelectionChangedListen
 
 									try
 									{
-										wsa.delete(rootObject.getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + mediaFolder.getPath());
-										viewer.refreshTreeCompletely();
-									}
-									catch (IOException ex)
-									{
-										ServoyLog.logError(ex);
-									}
-
-									try
-									{
-										servoyProject.saveEditingSolutionNodes(deletedMedias.toArray(new IPersist[0]), true);
+										servoyProject.saveEditingSolutionNodes(deletedMedias.toArray(new IPersist[deletedMedias.size()]), true, false);
 									}
 									catch (RepositoryException e)
 									{
 										ServoyLog.logError("Could not save editing solution when deleting media folder", e); //$NON-NLS-1$
+									}
+
+									try
+									{
+										wsa.delete(rootObject.getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + mediaFolder.getPath());
+									}
+									catch (IOException ex)
+									{
+										ServoyLog.logError(ex);
 									}
 								}
 							}
@@ -213,7 +213,7 @@ public class DeleteMediaAction extends Action implements ISelectionChangedListen
 
 									IPersist editingNode = servoyProject.getEditingPersist(media.getUUID());
 									repository.deleteObject(editingNode);
-									servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
+									servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true, false);
 									Display.getDefault().asyncExec(new Runnable()
 									{
 										public void run()

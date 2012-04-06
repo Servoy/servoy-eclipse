@@ -156,7 +156,7 @@ public class MediaNode
 			Media mediaItem = medias.next();
 			String mediaName = mediaItem.getName();
 
-			if (mediaFolder == null || mediaName.startsWith(mediaFolder))
+			if (mediaName != null && (mediaFolder == null || mediaName.startsWith(mediaFolder)))
 			{
 				String mediaPath = mediaFolder == null ? mediaName : mediaName.substring(mediaFolder.length());
 				int pathSepIdx = mediaPath.indexOf('/');
