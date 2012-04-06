@@ -768,7 +768,7 @@ public class RelationEditor extends PersistEditor
 
 	private boolean isEmptySelection(Object object)
 	{
-		if (object == null) return true;
+		if (object == null || "".equals(object)) return true; //$NON-NLS-1$
 		if (object instanceof Integer && ((Integer)object).intValue() == 0) return true;
 		return false;
 	}
