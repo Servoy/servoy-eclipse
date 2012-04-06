@@ -482,11 +482,11 @@ public class UIUtils
 	 */
 	public static Image getSWTImageFromSwingIcon(Icon swingIcon, Device device)
 	{
-		BufferedImage bufferedImage = new BufferedImage(swingIcon.getIconWidth(), swingIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-		swingIcon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
-		PipedOutputStream outBytes = new PipedOutputStream();
 		try
 		{
+			BufferedImage bufferedImage = new BufferedImage(swingIcon.getIconWidth(), swingIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+			swingIcon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
+			PipedOutputStream outBytes = new PipedOutputStream();
 			PipedInputStream inBytes = new PipedInputStream(outBytes);
 			if (Debug.tracing()) Debug.trace("Trying to get a png in thread: " + Thread.currentThread().getName());
 			ImageIO.write(bufferedImage, "PNG", outBytes);
