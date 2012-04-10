@@ -107,6 +107,7 @@ import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.quickfix.jsexternalize.StringLiteralVisitor;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.FilterDelayJob;
 import com.servoy.eclipse.ui.util.FilteredEntity;
@@ -1047,12 +1048,6 @@ public class I18NExternalizeDialog extends Dialog
 				final ArrayList<IProblem> problems = new ArrayList<IProblem>();
 				IProblemReporter reporter = new IProblemReporter()
 				{
-
-					public Object getAdapter(Class adapter)
-					{
-						return null;
-					}
-
 					public void reportProblem(IProblem problem)
 					{
 						if (problem.isError())
@@ -1073,13 +1068,18 @@ public class I18NExternalizeDialog extends Dialog
 						{
 							if (node instanceof StringLiteral)
 							{
-								ASTNode parent = ((StringLiteral)node).getParent();
+								StringLiteral snode = (StringLiteral)node;
+								String value = snode.getValue();
+								if (value != null && value.length() != 0 && !value.startsWith("i18n:"))
+								{
+									ASTNode parent = ((StringLiteral)node).getParent();
 
-								STATE state = (parent instanceof CallExpression && ((CallExpression)parent).getExpression().toString().equalsIgnoreCase(
-									"i18n.getI18NMessage")) ? STATE.EXTERNALIZE : STATE.INTERNALIZE;
+									STATE state = (parent instanceof CallExpression && ((CallExpression)parent).getExpression().toString().equals(
+										StringLiteralVisitor.I18N_EXTERNALIZE_CALLBACK)) ? STATE.EXTERNALIZE : STATE.INTERNALIZE;
 
-								ASTNode i18nNode = (state == STATE.EXTERNALIZE) ? parent : node;
-								startIdxNodeMap.put(Integer.valueOf(i18nNode.sourceStart()), new Pair(i18nNode, state));
+									ASTNode i18nNode = (state == STATE.EXTERNALIZE) ? parent : node;
+									startIdxNodeMap.put(Integer.valueOf(i18nNode.sourceStart()), new Pair<ASTNode, STATE>(i18nNode, state));
+								}
 							}
 							return true;
 						}
@@ -1090,7 +1090,7 @@ public class I18NExternalizeDialog extends Dialog
 					{
 						if (c instanceof SingleLineComment)
 						{
-							startIdxNodeMap.put(Integer.valueOf(c.sourceStart()), new Pair(c, null));
+							startIdxNodeMap.put(Integer.valueOf(c.sourceStart()), new Pair<ASTNode, STATE>(c, null));
 						}
 					}
 
@@ -1498,7 +1498,8 @@ public class I18NExternalizeDialog extends Dialog
 										}
 										else if (jstxt.getState() == STATE.EXTERNALIZE)
 										{
-											replaceText = new StringBuilder("i18n.getI18NMessage('").append(jstxt.getKeyHint()).append("')").toString();
+											replaceText = new StringBuilder(StringLiteralVisitor.I18N_EXTERNALIZE_CALLBACK + "('").append(jstxt.getKeyHint()).append(
+												"')").toString();
 										}
 										else
 										// STATE.INTERNALIZE

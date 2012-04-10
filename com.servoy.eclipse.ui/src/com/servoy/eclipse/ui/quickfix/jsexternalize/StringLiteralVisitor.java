@@ -27,7 +27,7 @@ import org.eclipse.dltk.javascript.ast.StringLiteral;
  */
 public abstract class StringLiteralVisitor extends org.eclipse.dltk.ast.ASTVisitor
 {
-	private static final String I18N_EXTERNALIZE_CALLBACK = "i18n.getI18NMessage"; //$NON-NLS-1$
+	public static final String I18N_EXTERNALIZE_CALLBACK = "i18n.getI18NMessage"; //$NON-NLS-1$
 
 	private boolean isEvaluatingI18N;
 	private int parsingLineStartIdx, parsingLineEndIdx = -1;
@@ -49,20 +49,29 @@ public abstract class StringLiteralVisitor extends org.eclipse.dltk.ast.ASTVisit
 		{
 			if (!isEvaluatingI18N)
 			{
-				int nodeLineStartIdx = getNodeLineStartIdx((StringLiteral)node);
-				if (parsingLineEndIdx < 0)
+				StringLiteral snode = (StringLiteral)node;
+				String value = snode.getValue();
+				if (value != null && (value.length() == 0 || value.startsWith("i18n:")))
 				{
-					parsingLineEndIdx = getNodeLineEndIdx((StringLiteral)node);
+					isEvaluatingI18N = true;
 				}
-				if (parsingLineStartIdx != nodeLineStartIdx)
+				else
 				{
-					parsingLineStartIdx = nodeLineStartIdx;
-					parsingLineEndIdx = getNodeLineEndIdx((StringLiteral)node);
-					stringLiteralIdxInLine = 0;
-				}
+					int nodeLineStartIdx = getNodeLineStartIdx(snode);
+					if (parsingLineEndIdx < 0)
+					{
+						parsingLineEndIdx = getNodeLineEndIdx(snode);
+					}
+					if (parsingLineStartIdx != nodeLineStartIdx)
+					{
+						parsingLineStartIdx = nodeLineStartIdx;
+						parsingLineEndIdx = getNodeLineEndIdx(snode);
+						stringLiteralIdxInLine = 0;
+					}
 
-				stringLiteralIdxInLine++;
-				return visitStringLiteral((StringLiteral)node, parsingLineStartIdx, parsingLineEndIdx, stringLiteralIdxInLine);
+					stringLiteralIdxInLine++;
+					return visitStringLiteral(snode, parsingLineStartIdx, parsingLineEndIdx, stringLiteralIdxInLine);
+				}
 			}
 		}
 		else if (node instanceof CallExpression)
@@ -80,12 +89,25 @@ public abstract class StringLiteralVisitor extends org.eclipse.dltk.ast.ASTVisit
 	@Override
 	public void endvisitGeneral(ASTNode node) throws Exception
 	{
-		if (node instanceof CallExpression)
+		if (isEvaluatingI18N)
 		{
-			CallExpression mc = (CallExpression)node;
-			if (I18N_EXTERNALIZE_CALLBACK.equals(mc.getExpression().toString()))
+			if (node instanceof StringLiteral)
 			{
-				isEvaluatingI18N = false;
+				StringLiteral snode = (StringLiteral)node;
+				String value = snode.getValue();
+				if (value != null && (value.length() == 0 || value.startsWith("i18n:")))
+				{
+					isEvaluatingI18N = false;
+				}
+			}
+
+			else if (node instanceof CallExpression)
+			{
+				CallExpression mc = (CallExpression)node;
+				if (I18N_EXTERNALIZE_CALLBACK.equals(mc.getExpression().toString()))
+				{
+					isEvaluatingI18N = false;
+				}
 			}
 		}
 	}
