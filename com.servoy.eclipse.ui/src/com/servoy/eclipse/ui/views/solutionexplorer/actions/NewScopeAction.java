@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
 import java.io.IOException;
+import java.util.Collection;
 
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.jface.action.Action;
@@ -29,6 +30,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -125,10 +127,14 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 				{
 					return "Invalid scope name";
 				}
-				if (new WorkspaceFileAccess(((IProjectNature)project.getRealObject()).getProject().getWorkspace()).exists(SolutionSerializer.getRelativePath(
-					((((ServoyProject)project.getRealObject()).getSolution())), false) + newText + SolutionSerializer.JS_FILE_EXTENSION))
+				String lowerCase = newText.toLowerCase();
+				Collection<String> scopeNames = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getScopeNames();
+				for (String scopeName : scopeNames)
 				{
-					return "Scope already exists";
+					if (scopeName.toLowerCase().equals(lowerCase))
+					{
+						return "Scope already exists";
+					}
 				}
 				// ok
 				return null;

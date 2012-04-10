@@ -1081,7 +1081,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			for (String scopeName : scopeNames)
 			{
 				Pair<Solution, String> solutionAndScope = new Pair<Solution, String>(solution, scopeName);
-				PlatformSimpleUserNode globalsFolder = new PlatformSimpleUserNode(Utils.stringInitCap(scopeName), UserNodeType.GLOBALS_ITEM, solutionAndScope,
+				PlatformSimpleUserNode globalsFolder = new PlatformSimpleUserNode(scopeName, UserNodeType.GLOBALS_ITEM, solutionAndScope,
 					uiActivator.loadImageFromBundle("globe.gif")); //$NON-NLS-1$
 				globalsFolder.parent = parent;
 				nodes.add(globalsFolder);
