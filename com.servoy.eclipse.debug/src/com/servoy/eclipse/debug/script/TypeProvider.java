@@ -449,6 +449,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 	@Override
 	protected void flushCache()
 	{
+		super.flushCache();
 		relationCache.clear();
 	}
 
