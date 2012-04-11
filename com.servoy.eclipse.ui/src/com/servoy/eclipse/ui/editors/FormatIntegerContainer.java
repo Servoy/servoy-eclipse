@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.editors;
 
+import java.util.Locale;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -42,9 +44,9 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
-import com.ibm.icu.text.DecimalFormat;
 import com.servoy.eclipse.ui.editors.FormatDialog.IFormatTextContainer;
 import com.servoy.j2db.util.FormatParser.ParsedFormat;
+import com.servoy.j2db.util.RoundHalfUpDecimalFormat;
 
 /**
  * @author jcompagner
@@ -219,11 +221,11 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 	{
 		String format = displayFormat.getText();
 		// test it
-		new DecimalFormat(format);
+		new RoundHalfUpDecimalFormat(format, Locale.getDefault()).format(1);
 		if (format.length() > 0 && editFormat.getText().length() > 0)
 		{
 			// test it
-			new DecimalFormat(editFormat.getText());
+			new RoundHalfUpDecimalFormat(editFormat.getText(), Locale.getDefault()).format(1);
 			format = format + '|' + editFormat.getText();
 		}
 		if (maxLength.getText().length() > 0)
