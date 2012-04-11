@@ -59,6 +59,10 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				return new IMarkerResolution[] { new RemoveInvalidSortColumnsQuickFix(uuid, solName) };
 			}
 
+			if (type.equals(ServoyBuilder.DUPLICATE_SCOPE_NAME_MARKER_TYPE))
+			{
+				return new IMarkerResolution[] { new RenameScopeNameQuickFix(marker.getResource()) };
+			}
 			if (type.equals(ServoyBuilder.UNRESOLVED_RELATION_UUID))
 			{
 				String propertyName = (String)marker.getAttribute("PropertyName");

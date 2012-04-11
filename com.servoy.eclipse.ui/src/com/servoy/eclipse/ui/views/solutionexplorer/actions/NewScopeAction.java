@@ -88,7 +88,7 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 				return;
 			}
 
-			String scopeName = askScopeName(viewer.getViewSite().getShell(), project, "");
+			String scopeName = askScopeName(viewer.getViewSite().getShell(), "");
 			if (scopeName == null)
 			{
 				return;
@@ -113,7 +113,7 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 		}
 	}
 
-	public static String askScopeName(Shell shell, final SimpleUserNode project, String initialValue)
+	public static String askScopeName(Shell shell, String initialValue)
 	{
 		InputDialog nameDialog = new InputDialog(shell, "Create new global scope", "New scope name", initialValue, new IInputValidator()
 		{

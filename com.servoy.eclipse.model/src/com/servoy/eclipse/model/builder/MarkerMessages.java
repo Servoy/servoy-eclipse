@@ -139,6 +139,11 @@ public class MarkerMessages
 	public static ServoyMarker DuplicateEntityFound = new ServoyMarker("Duplicate {0} found \"{1}\" in {2}.", ServoyBuilder.DUPLICATE_NAME_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
+	 * This means that two or more scopes have the same name. This can create various kinds of conflicts and should be avoided.
+	 */
+	public static ServoyMarker DuplicateScopeFound = new ServoyMarker("Duplicate scope \"{0}\" found in {1}.", ServoyBuilder.DUPLICATE_SCOPE_NAME_MARKER_TYPE); //$NON-NLS-1$
+
+	/**
 	 * This means that two or more entities have the same UUID. This can create various kinds of conflicts and should be avoided.
 	 */
 	public static ServoyMarker UUIDDuplicate = new ServoyMarker("UUID duplicate found \"{0}\".", ServoyBuilder.DUPLICATE_SIBLING_UUID); //$NON-NLS-1$

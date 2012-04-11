@@ -252,6 +252,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String DUPLICATE_UUID = _PREFIX + ".duplicateUUID"; //$NON-NLS-1$
 	public static final String DUPLICATE_SIBLING_UUID = _PREFIX + ".duplicateSiblingUUID"; //$NON-NLS-1$
 	public static final String DUPLICATE_NAME_MARKER_TYPE = _PREFIX + ".duplicateNameProblem"; //$NON-NLS-1$
+	public static final String DUPLICATE_SCOPE_NAME_MARKER_TYPE = _PREFIX + ".duplicateScopeNameProblem"; //$NON-NLS-1$
 	public static final String INVALID_SORT_OPTION = _PREFIX + ".invalidSortOption"; //$NON-NLS-1$
 	public static final String PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE = _PREFIX + ".differentRelationName"; //$NON-NLS-1$
 	public static final String MISSING_SERVER = _PREFIX + ".missingServer"; //$NON-NLS-1$
@@ -674,7 +675,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		try
 		{
-			if (resource instanceof IFile && resource.getName().endsWith(".xml")) //$NON-NLS-1$
+			if (resource instanceof IFile && resource.getName().endsWith(".js")) //$NON-NLS-1$
+			{
+				checkDuplicateScopes((IFile)resource);
+			}
+			else if (resource instanceof IFile && resource.getName().endsWith(".xml")) //$NON-NLS-1$
 			{
 				checkXML((IFile)resource);
 			}
@@ -809,6 +814,48 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					String message = "Module " + servoyProject.getSolution().getName() + " is a solution import hook, so it should not contain any modules."; //$NON-NLS-1$//$NON-NLS-2$
 					addMarker(project, MISPLACED_MODULES_MARKER_TYPE, message, -1, MODULE_MISPLACED, IMarker.PRIORITY_LOW, null, null);
+				}
+			}
+		}
+	}
+
+	private void checkDuplicateScopes(IFile scriptFile)
+	{
+		if (scriptFile.getParent() == scriptFile.getProject() && scriptFile.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
+		{
+			String scopeName = scriptFile.getName().substring(0, scriptFile.getName().length() - SolutionSerializer.JS_FILE_EXTENSION.length());
+			String lowerCaseScopeName = scopeName.toLowerCase();
+			if (lowerCaseScopeName.equals(ScriptVariable.GLOBAL_SCOPE)) return;
+
+			if (scriptFile.exists())
+			{
+				deleteMarkers(scriptFile, DUPLICATE_SCOPE_NAME_MARKER_TYPE);
+			}
+			List<Pair<String, IRootObject>> scopes = getServoyModel().getFlattenedSolution().getAllScopes();
+			for (Pair<String, IRootObject> scope : scopes)
+			{
+				if (scope.getLeft().toLowerCase().equals(lowerCaseScopeName) && !scope.getRight().getName().equals(scriptFile.getProject().getName()))
+				{
+					String otherFile = scope.getRight().getName() + '/' + scope.getLeft() + SolutionSerializer.JS_FILE_EXTENSION;
+					IFile file = scriptFile.getWorkspace().getRoot().getFile(Path.fromPortableString(otherFile));
+					if (scriptFile.exists())
+					{
+						// duplicate found
+						ServoyMarker mk = MarkerMessages.DuplicateScopeFound.fill(scope.getLeft(), scope.getRight().getName());
+						addMarker(scriptFile, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL,
+							scriptFile.getProject().getName());
+						if (file.exists())
+						{
+							deleteMarkers(file, DUPLICATE_SCOPE_NAME_MARKER_TYPE);
+							mk = MarkerMessages.DuplicateScopeFound.fill(scopeName, scriptFile.getProject().getName());
+							addMarker(file, mk.getType(), mk.getText(), -1, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, file.getProject().getName());
+						}
+					}
+					else if (file.exists())
+					{
+						// this file was deleted or renamed, check the other file
+						checkDuplicateScopes(file);
+					}
 				}
 			}
 		}
