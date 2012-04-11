@@ -18,17 +18,20 @@
 package com.servoy.eclipse.model.extensions;
 
 import com.servoy.eclipse.model.Activator;
+import com.servoy.j2db.IServiceProvider;
 
 /**
  * Extensions that implement this interface are able to provide a servoy model.
  * The returned IServoyModel instance knows a few useful aspects for example the projects that are being used currently for solutions/resources.
  * @author acostescu
  */
-public interface IServoyModelProvider
+public interface IServoyEnvironmentProvider
 {
 
 	static final String EXTENSION_ID = Activator.PLUGIN_ID + ".modelProvider"; //$NON-NLS-1$
 
 	IServoyModel getServoyModel();
+
+	IServiceProvider getServiceProvider();
 
 }

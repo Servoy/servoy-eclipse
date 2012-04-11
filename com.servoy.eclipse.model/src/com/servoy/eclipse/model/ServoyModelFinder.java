@@ -25,34 +25,42 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 
 import com.servoy.eclipse.model.extensions.IServoyModel;
-import com.servoy.eclipse.model.extensions.IServoyModelProvider;
+import com.servoy.eclipse.model.extensions.IServoyEnvironmentProvider;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.IServiceProvider;
 
 /**
- * Class that gives access to a IServoyModel instance by searching the platform for a registered IServoyModelProvider extension.
+ * Class that gives access to a IServoyModel instance by searching the platform for a registered IServoyEnvironmentProvider extension.
  * @author acostescu
  */
 public class ServoyModelFinder
 {
 
-	private static IServoyModelProvider modelProvider = null;
+	private static IServoyEnvironmentProvider modelProvider = null;
 
 	public static IServoyModel getServoyModel()
 	{
 		return initializeServoyModel(null);
 	}
 
+	public static IServiceProvider getServiceProvider()
+	{
+		initializeServoyModel(null);
+		return modelProvider == null ? null : modelProvider.getServiceProvider();
+	}
+
 	public static IServoyModel initializeServoyModel(String instance)
 	{
-		if (modelProvider == null)
+		// if the instance name is given, make sure that that one is created.
+		if (modelProvider == null || instance != null)
 		{
 			IExtensionRegistry reg = Platform.getExtensionRegistry();
-			IExtensionPoint ep = reg.getExtensionPoint(IServoyModelProvider.EXTENSION_ID);
+			IExtensionPoint ep = reg.getExtensionPoint(IServoyEnvironmentProvider.EXTENSION_ID);
 			IExtension[] extensions = ep.getExtensions();
 
 			if (extensions == null || extensions.length == 0)
 			{
-				ServoyLog.logError("Could not find servoy model provider extension (extension point " + IServoyModelProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$//$NON-NLS-2$
+				ServoyLog.logError("Could not find servoy model provider extension (extension point " + IServoyEnvironmentProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$//$NON-NLS-2$
 			}
 			else
 			{
@@ -74,26 +82,26 @@ public class ServoyModelFinder
 				if (ce == null || ce.length == 0)
 				{
 					ServoyLog.logError(
-						"Could not read servoy model provider extension element (extension point " + IServoyModelProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$//$NON-NLS-2$
+						"Could not read servoy model provider extension element (extension point " + IServoyEnvironmentProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$//$NON-NLS-2$
 				}
 				else
 				{
 					if (ce.length > 1)
 					{
 						ServoyLog.logError(
-							"Multiple servoy model provider extension elements found (extension point " + IServoyModelProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$ //$NON-NLS-2$
+							"Multiple servoy model provider extension elements found (extension point " + IServoyEnvironmentProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					try
 					{
-						modelProvider = (IServoyModelProvider)ce[0].createExecutableExtension("class"); //$NON-NLS-1$
+						modelProvider = (IServoyEnvironmentProvider)ce[0].createExecutableExtension("class"); //$NON-NLS-1$
 						if (modelProvider == null)
 						{
-							ServoyLog.logError("Could not load servoy model provider (extension point " + IServoyModelProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$//$NON-NLS-2$
+							ServoyLog.logError("Could not load servoy model provider (extension point " + IServoyEnvironmentProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$//$NON-NLS-2$
 						}
 					}
 					catch (CoreException e)
 					{
-						ServoyLog.logError("Could not load servoy model provider (extension point " + IServoyModelProvider.EXTENSION_ID + ")", e); //$NON-NLS-1$//$NON-NLS-2$
+						ServoyLog.logError("Could not load servoy model provider (extension point " + IServoyEnvironmentProvider.EXTENSION_ID + ")", e); //$NON-NLS-1$//$NON-NLS-2$
 					}
 				}
 			}

@@ -20,6 +20,7 @@ import java.awt.Point;
 import java.awt.print.PageFormat;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -78,7 +79,12 @@ import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
+import com.servoy.j2db.IServiceProvider;
+import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.DBValueList;
+import com.servoy.j2db.dataprocessing.IColumnConverter;
+import com.servoy.j2db.dataprocessing.ITypedColumnConverter;
+import com.servoy.j2db.dataprocessing.IUIConverter;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractScriptProvider;
 import com.servoy.j2db.persistence.AggregateVariable;
@@ -1768,8 +1774,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													ParsedFormat parsedFormat = FormatParser.parseFormatProperty(format);
 													if (parsedFormat.getDisplayFormat() != null && !parsedFormat.getDisplayFormat().startsWith("i18n:"))
 													{
-														// TODO: check type defined by column converter
-														int dataType = dataProvider.getDataProviderType();
+														int dataType = getDataType(dataProvider, parsedFormat);
 														try
 														{
 															if (dataType == IColumnTypes.DATETIME)
@@ -3627,16 +3632,17 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								ServoyMarker mk = MarkerMessages.ColumnUUIDFlagNotSet.fill(tableName, column.getName());
 								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_UUID_FLAG_NOT_SET, IMarker.PRIORITY_NORMAL, null, null);
 							}
-							// TODO: check type defined by column converter
-							if ((column.getSequenceType() == ColumnInfo.UUID_GENERATOR && (column.getDataProviderType() != IColumnTypes.TEXT && column.getDataProviderType() != IColumnTypes.MEDIA)) ||
-								(column.getSequenceType() == ColumnInfo.SERVOY_SEQUENCE && (column.getDataProviderType() != IColumnTypes.INTEGER && column.getDataProviderType() != IColumnTypes.NUMBER)))
+							// check type defined by column converter
+							int dataProviderType = getDataType(column, null);
+							if ((column.getSequenceType() == ColumnInfo.UUID_GENERATOR && (dataProviderType != IColumnTypes.TEXT && dataProviderType != IColumnTypes.MEDIA)) ||
+								(column.getSequenceType() == ColumnInfo.SERVOY_SEQUENCE && (dataProviderType != IColumnTypes.INTEGER && dataProviderType != IColumnTypes.NUMBER)))
 							{
 								ServoyMarker mk = MarkerMessages.ColumnIncompatibleTypeForSequence.fill(tableName, column.getName());
 								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INCOMPATIBLE_TYPE_FOR_SEQUENCE, IMarker.PRIORITY_NORMAL, null, null);
 							}
 							else if (column.getSequenceType() == ColumnInfo.UUID_GENERATOR &&
 								column.getConfiguredColumnType().getLength() > 0 &&
-								((column.getDataProviderType() == IColumnTypes.MEDIA && column.getLength() < 16) || (column.getDataProviderType() == IColumnTypes.TEXT && column.getLength() < 36)))
+								((dataProviderType == IColumnTypes.MEDIA && column.getLength() < 16) || (dataProviderType == IColumnTypes.TEXT && column.getLength() < 36)))
 							{
 								ServoyMarker mk = MarkerMessages.ColumnInsufficientLengthForSequence.fill(tableName, column.getName());
 								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INSUFFICIENT_LENGTH_FOR_SEQUENCE, IMarker.PRIORITY_NORMAL, null, null);
@@ -4530,6 +4536,59 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			servoyModel = ServoyModelFinder.getServoyModel();
 		}
 		return servoyModel;
+	}
+
+	/**
+	 * @param dataProvider
+	 * @param parsedFormat
+	 * @return
+	 * @throws IOException
+	 */
+	private int getDataType(IDataProvider dataProvider, ParsedFormat parsedFormat) throws IOException
+	{
+		int dataType = dataProvider.getDataProviderType();
+		IServiceProvider serviceProvider = ServoyModelFinder.getServiceProvider();
+		if (serviceProvider == null) return dataType;
+		String uiConverterName = parsedFormat != null ? parsedFormat.getUIConverterName() : null;
+		if (uiConverterName != null)
+		{
+			IUIConverter converter = serviceProvider.getFoundSetManager().getUIConverterManager().getConverter(uiConverterName);
+			if (converter != null)
+			{
+				int convType = converter.getToObjectType(parsedFormat.getUIConverterProperties());
+				if (convType != Integer.MAX_VALUE)
+				{
+					dataType = Column.mapToDefaultType(convType);
+				}
+			}
+			else
+			{
+				// TODO report missing converter
+			}
+		}
+		else if (dataProvider instanceof Column && ((Column)dataProvider).getColumnInfo() != null)
+		{
+			ColumnInfo columnInfo = ((Column)dataProvider).getColumnInfo();
+			String converterName = columnInfo.getConverterName();
+			if (converterName != null)
+			{
+				// check type defined by column converter
+				IColumnConverter converter = serviceProvider.getFoundSetManager().getColumnConverterManager().getConverter(converterName);
+				if (converter instanceof ITypedColumnConverter)
+				{
+					int convType = ((ITypedColumnConverter)converter).getToObjectType(ComponentFactory.<String> parseJSonProperties(columnInfo.getConverterProperties()));
+					if (convType != Integer.MAX_VALUE)
+					{
+						dataType = Column.mapToDefaultType(convType);
+					}
+				}
+				else if (converter == null)
+				{
+					// TODO report missing converter
+				}
+			}
+		}
+		return dataType;
 	}
 
 	/**

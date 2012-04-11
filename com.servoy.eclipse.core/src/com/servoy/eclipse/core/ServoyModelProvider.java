@@ -18,18 +18,29 @@
 package com.servoy.eclipse.core;
 
 import com.servoy.eclipse.model.extensions.IServoyModel;
-import com.servoy.eclipse.model.extensions.IServoyModelProvider;
+import com.servoy.eclipse.model.extensions.IServoyEnvironmentProvider;
+import com.servoy.j2db.IServiceProvider;
 
 /**
  * Extension that gives com.servoy.eclipse.model plugin access to the development ServoyModel.
  * @author acostescu
  */
-public class ServoyModelProvider implements IServoyModelProvider
+public class ServoyModelProvider implements IServoyEnvironmentProvider
 {
 
 	public IServoyModel getServoyModel()
 	{
 		return ServoyModelManager.getServoyModelManager().getServoyModel();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.model.extensions.IServoyEnvironmentProvider#getServiceProvider()
+	 */
+	public IServiceProvider getServiceProvider()
+	{
+		return Activator.getDefault().getDesignClient();
 	}
 
 }

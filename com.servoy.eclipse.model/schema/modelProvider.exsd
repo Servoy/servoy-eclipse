@@ -70,7 +70,7 @@ Should only be extended once in a product (multiple servoy model providers does 
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":com.servoy.eclipse.model.extensions.IServoyModelProvider"/>
+                  <meta.attribute kind="java" basedOn=":com.servoy.eclipse.model.extensions.IServoyEnvironmentProvider"/>
                </appinfo>
             </annotation>
          </attribute>
