@@ -76,6 +76,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -394,7 +395,7 @@ public class VisualFormEditorPartsPage extends Composite
 			while (flattenedParts.hasNext())
 			{
 				Part p = flattenedParts.next();
-				if (p.getParent() != editor.getForm() || p.isOverrideElement())
+				if (p.getParent() != editor.getForm() || PersistHelper.isOverrideOrphanElement(p))
 				{
 					lastSuperPart = p;
 				}
@@ -410,7 +411,7 @@ public class VisualFormEditorPartsPage extends Composite
 		while (it.hasNext())
 		{
 			Part p = it.next();
-			if (!p.isOverrideOrphanElement())
+			if (!PersistHelper.isOverrideOrphanElement(p))
 			{
 				currentPartList.add(p);
 				currentTypes.add(new Integer(p.getPartType()));

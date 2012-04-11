@@ -44,16 +44,17 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.SnapToGridFieldPositioner;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -108,7 +109,7 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 					continue;
 				}
 
-				if (o instanceof AbstractBase && ((AbstractBase)o).isOverrideOrphanElement())
+				if (o instanceof ISupportExtendsID && PersistHelper.isOverrideOrphanElement((ISupportExtendsID)o))
 				{
 					// skip orphaned overrides
 					continue;

@@ -140,6 +140,7 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ITableDisplay;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
@@ -1978,10 +1979,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 																																			 */)
 				{
 					((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
-					if (((AbstractBase)persistContext.getPersist()).isOverrideElement() && !((AbstractBase)persistContext.getPersist()).hasOverrideProperties())
+					if (persistContext.getPersist() instanceof ISupportExtendsID &&
+						PersistHelper.isOverrideElement((ISupportExtendsID)persistContext.getPersist()) &&
+						!((AbstractBase)persistContext.getPersist()).hasOverrideProperties())
 					{
 						// last property was reset, remove overriding persist
-						IPersist superPersist = ((AbstractBase)persistContext.getPersist()).getSuperPersist();
+						IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist());
 						try
 						{
 							((IDeveloperRepository)((AbstractBase)persistContext.getPersist()).getRootObject().getRepository()).deleteObject(persistContext.getPersist());
@@ -2049,8 +2052,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				{
 					beanPropertyDescriptor = getBeansProperties().get(id);
 				}
-				boolean isInheritedValue = (value == null && persistContext.getPersist() instanceof AbstractBase &&
-					beanPropertyDescriptor.valueObject == persistContext.getPersist() && ((AbstractBase)persistContext.getPersist()).getSuperPersist() != null && ((AbstractBase)((AbstractBase)persistContext.getPersist()).getSuperPersist()).getProperty((String)id) != null);
+				boolean isInheritedValue = (value == null && persistContext.getPersist() instanceof ISupportExtendsID &&
+					beanPropertyDescriptor.valueObject == persistContext.getPersist() &&
+					PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist()) != null && ((AbstractBase)PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist())).getProperty((String)id) != null);
 				if (beanPropertyDescriptor.valueObject instanceof AbstractBase && value == null && !isInheritedValue)
 				{
 					((AbstractBase)beanPropertyDescriptor.valueObject).clearProperty((String)id);
@@ -2988,7 +2992,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 									List<IPersist> overridePersists = new ArrayList<IPersist>();
 									for (IPersist child : f.getAllObjectsAsList())
 									{
-										if (((AbstractBase)child).isOverrideElement()) overridePersists.add(child);
+										if (child instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)child)) overridePersists.add(child);
 									}
 									if (overridePersists.size() > 0)
 									{

@@ -36,6 +36,7 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
@@ -45,6 +46,7 @@ import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.ui.ISupportRowStyling;
 import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistHelper;
 
 public class ModelUtils
 {
@@ -324,9 +326,9 @@ public class ModelUtils
 				}
 			}
 		}
-		if (element instanceof AbstractBase)
+		if (element instanceof ISupportExtendsID)
 		{
-			return ((AbstractBase)element).isOverrideElement();
+			return PersistHelper.isOverrideElement((ISupportExtendsID)element);
 		}
 		// child of this form, not of a inherited form
 		return false;

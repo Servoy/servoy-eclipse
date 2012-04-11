@@ -69,11 +69,13 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -360,7 +362,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 			List<IPersist> removes = new ArrayList<IPersist>();
 			for (IPersist ip : form.getAllObjectsAsList())
 			{
-				if (((AbstractBase)ip).isOverrideOrphanElement())
+				if (ip instanceof ISupportExtendsID && PersistHelper.isOverrideOrphanElement((ISupportExtendsID)ip))
 				{
 					removes.add(ip);
 				}
@@ -369,7 +371,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 					List<IPersist> removes2 = new ArrayList<IPersist>();
 					for (IPersist child : ((AbstractBase)ip).getAllObjectsAsList())
 					{
-						if (((AbstractBase)child).isOverrideOrphanElement())
+						if (child instanceof ISupportExtendsID && PersistHelper.isOverrideOrphanElement((ISupportExtendsID)child))
 						{
 							removes2.add(child);
 						}
@@ -585,14 +587,15 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 						}
 					}
 
-					if (formParent != form)
+					if (formParent != form && changed instanceof ISupportExtendsID)
 					{
 						IPersist override = (IPersist)form.acceptVisitor(new IPersistVisitor()
 						{
 							public Object visit(IPersist o)
 							{
-								if (changed.getID() == ((AbstractBase)o).getExtendsID() ||
-									(((AbstractBase)changed).getExtendsID() > 0 && ((AbstractBase)changed).getExtendsID() == ((AbstractBase)o).getExtendsID()))
+								if (o instanceof ISupportExtendsID &&
+									changed.getID() == ((ISupportExtendsID)o).getExtendsID() ||
+									(((ISupportExtendsID)changed).getExtendsID() > 0 && ((ISupportExtendsID)changed).getExtendsID() == ((ISupportExtendsID)o).getExtendsID()))
 								{
 									return o;
 								}

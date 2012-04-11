@@ -53,6 +53,7 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportScope;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
@@ -71,6 +72,7 @@ import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
@@ -797,9 +799,9 @@ public class SolutionSerializer
 	public static Map<String, Object> getPersistAsValueMap(IPersist persist, IDeveloperRepository repository, boolean makeFlattened) throws RepositoryException
 	{
 		Map<String, Object> property_values = repository.getPersistAsValueMap(persist);
-		if (makeFlattened && persist instanceof AbstractBase)
+		if (makeFlattened && persist instanceof ISupportExtendsID)
 		{
-			IPersist superPersist = ((AbstractBase)persist).getSuperPersist();
+			IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)persist);
 			if (superPersist != null)
 			{
 				Map<String, Object> flattened_property_values = getPersistAsValueMap(superPersist, repository, makeFlattened);

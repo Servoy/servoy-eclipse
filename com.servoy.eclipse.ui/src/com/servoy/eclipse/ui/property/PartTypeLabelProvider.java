@@ -24,6 +24,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.util.PersistHelper;
 
 /**
  * Label provider for Part type.
@@ -56,7 +57,7 @@ public class PartTypeLabelProvider extends LabelProvider implements IPersistLabe
 			{
 				text += " (" + Messages.LabelInherited + ")";
 			}
-			else if (((Part)value).isOverrideElement())
+			else if (PersistHelper.isOverrideElement((Part)value))
 			{
 				text += " (" + Messages.LabelOverride + ")";
 			}

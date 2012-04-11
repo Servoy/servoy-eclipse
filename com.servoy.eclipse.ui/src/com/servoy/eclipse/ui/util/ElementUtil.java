@@ -46,6 +46,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RectShape;
@@ -84,6 +85,7 @@ import com.servoy.j2db.ui.runtime.IRuntimeTextArea;
 import com.servoy.j2db.ui.runtime.IRuntimeTextField;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -225,16 +227,16 @@ public class ElementUtil
 			// no override
 			return persist;
 		}
-		while (((AbstractBase)persist).getSuperPersist() != null)
+		while (PersistHelper.getSuperPersist((ISupportExtendsID)persist) != null)
 		{
-			persist = ((AbstractBase)persist).getSuperPersist();
+			persist = PersistHelper.getSuperPersist((ISupportExtendsID)persist);
 		}
 		final IPersist parentPersist = persist;
 		IPersist newPersist = (IPersist)context.acceptVisitor(new IPersistVisitor()
 		{
 			public Object visit(IPersist o)
 			{
-				if (((AbstractBase)o).getExtendsID() == parentPersist.getID())
+				if (o instanceof ISupportExtendsID && ((ISupportExtendsID)o).getExtendsID() == parentPersist.getID())
 				{
 					return o;
 				}
@@ -253,7 +255,7 @@ public class ElementUtil
 				{
 					public Object visit(IPersist o)
 					{
-						if (((AbstractBase)o).getExtendsID() == parentPersist.getParent().getID())
+						if (o instanceof ISupportExtendsID && ((ISupportExtendsID)o).getExtendsID() == parentPersist.getParent().getID())
 						{
 							return o;
 						}
@@ -264,12 +266,12 @@ public class ElementUtil
 				{
 					parent = (ISupportChilds)((AbstractBase)persist.getParent()).cloneObj((Form)context, false, null, false, false, false);
 					((AbstractBase)parent).copyPropertiesMap(null, true);
-					((AbstractBase)parent).setExtendsID(parentPersist.getParent().getID());
+					((ISupportExtendsID)parent).setExtendsID(parentPersist.getParent().getID());
 				}
 			}
 			newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false, false);
 			((AbstractBase)newPersist).copyPropertiesMap(null, true);
-			((AbstractBase)newPersist).setExtendsID(parentPersist.getID());
+			((ISupportExtendsID)newPersist).setExtendsID(parentPersist.getID());
 		}
 		return newPersist;
 	}

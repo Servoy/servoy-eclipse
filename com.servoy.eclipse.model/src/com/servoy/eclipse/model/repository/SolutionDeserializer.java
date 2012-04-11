@@ -94,6 +94,7 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.Media;
@@ -1732,7 +1733,7 @@ public class SolutionDeserializer
 				((AbstractBase)retval).removeOverrideCustomProperty();
 				UUID uuid = retval.getUUID();
 				((AbstractBase)retval).resetUUID();
-				((AbstractBase)retval).setExtendsID(((AbstractPersistFactory)repository).getElementIdForUUID(uuid));
+				((ISupportExtendsID)retval).setExtendsID(((AbstractPersistFactory)repository).getElementIdForUUID(uuid));
 			}
 			if (useFilesForDirtyMark) handleChanged(obj, retval);
 		}

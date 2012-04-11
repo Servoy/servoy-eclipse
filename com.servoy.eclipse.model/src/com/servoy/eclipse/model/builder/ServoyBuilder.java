@@ -2203,7 +2203,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							while (it.hasNext())
 							{
 								com.servoy.j2db.persistence.Part part = it.next();
-								if (!part.isOverrideElement())
+								if (!PersistHelper.isOverrideElement(part))
 								{
 									if (!part.canBeMoved() && parts.containsKey(Integer.valueOf(part.getPartType())))
 									{
