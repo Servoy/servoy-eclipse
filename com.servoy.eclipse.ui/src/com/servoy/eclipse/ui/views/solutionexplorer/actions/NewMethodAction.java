@@ -223,7 +223,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		if (methodName == null)
 		{
 			Pair<Pair<String, String>, Integer> methodNameAndPrivateFlag = askForMethodName(methodType, parent, methodKey, shell, tagFilter, listOptions,
-				scopeName, listDescriptionText, persist);
+				scopeName, listDescriptionText, persist, scopeName);
 			if (methodNameAndPrivateFlag != null)
 			{
 				scopeName = methodNameAndPrivateFlag.getLeft().getLeft();
@@ -476,7 +476,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		return methodCode;
 	}
 
-	private static String validateMethodName(final IPersist parent, String newText)
+	private static String validateMethodName(final IPersist parent, String scopeName, String newText)
 	{
 		IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 		try
@@ -484,7 +484,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 			if (parent instanceof Solution)
 			{
 				// global method
-				validator.checkName(newText, 0, new ValidatorSearchContext(IRepository.METHODS), false);
+				validator.checkName(newText, 0, new ValidatorSearchContext(scopeName, IRepository.METHODS), false);
 			}
 
 			if (parent instanceof Form)
@@ -513,7 +513,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 
 	@SuppressWarnings("nls")
 	private static Pair<Pair<String, String>, Integer> askForMethodName(String methodType, final IPersist parent, String methodKey, Shell shell, int tagFilter,
-		String[] listOptions, String listValue, String listDescriptionText, IPersist persist)
+		String[] listOptions, String listValue, String listDescriptionText, IPersist persist, String scopeName)
 	{
 		String defaultName = ""; //$NON-NLS-1$
 		if (methodKey != null)
@@ -539,14 +539,14 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 			{
 				defaultName = name;
 				if (i > 0) defaultName += i;
-				if (validateMethodName(parent, defaultName) == null)
+				if (validateMethodName(parent, scopeName, defaultName) == null)
 				{
 					break;
 				}
 			}
 		}
-		NewMethodInputDialog dialog = new NewMethodInputDialog(shell, "New " + methodType + " method", "Specify a method name", defaultName, parent, tagFilter,
-			listOptions, listValue, listDescriptionText);
+		NewMethodInputDialog dialog = new NewMethodInputDialog(shell, "New " + methodType + " method", "Specify a method name", defaultName, parent, scopeName,
+			tagFilter, listOptions, listValue, listDescriptionText);
 		dialog.setBlockOnOpen(true);
 		dialog.open();
 
@@ -609,15 +609,15 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		private Button createProtectedButton;
 		private final int tagFilter;
 
-		private NewMethodInputDialog(Shell parentShell, String dialogTitle, String dialogMessage, String initialValue, final IPersist parent, int tagFilter,
-			String[] listOptions, String listValue, String listDescriptionText)
+		private NewMethodInputDialog(Shell parentShell, String dialogTitle, String dialogMessage, String initialValue, final IPersist parent,
+			final String scopeName, int tagFilter, String[] listOptions, String listValue, String listDescriptionText)
 		{
 			super(parentShell, dialogTitle, dialogMessage, initialValue, new IInputValidator()
 			{
 				public String isValid(String newText)
 				{
 					if (newText.length() == 0) return ""; //$NON-NLS-1$
-					return validateMethodName(parent, newText);
+					return validateMethodName(parent, scopeName, newText);
 				}
 			}, listOptions, listValue, listDescriptionText);
 			this.tagFilter = tagFilter;

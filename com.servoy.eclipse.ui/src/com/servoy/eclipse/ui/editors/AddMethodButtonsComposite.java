@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.editors;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -137,6 +138,20 @@ public class AddMethodButtonsComposite extends Composite
 			@Override
 			public void widgetSelected(final SelectionEvent e)
 			{
+				if (selectedScope == null)
+				{
+					Collection<String> scopes = ModelUtils.getEditingFlattenedSolution(persistContext.getContext()).getScopeNames();
+					if (scopes.size() > 1)
+					{
+						org.eclipse.jface.dialogs.MessageDialog.openInformation(getShell(), "Please select a scope",
+							"No scope is specified for method creation.");
+						return;
+					}
+					else if (scopes.size() == 1)
+					{
+						selectedScope = new Scope(scopes.iterator().next(), (Solution)persistContext.getContext().getAncestor(IRepository.SOLUTIONS));
+					}
+				}
 				ScriptMethod method = createMethod(persistContext.getContext().getAncestor(IRepository.SOLUTIONS));
 				if (method != null)
 				{
@@ -146,7 +161,7 @@ public class AddMethodButtonsComposite extends Composite
 				}
 			}
 		});
-		createGlobalMethodButton.setText("Global");
+		createGlobalMethodButton.setText("Scope"); //$NON-NLS-1$
 	}
 
 	@SuppressWarnings("nls")
