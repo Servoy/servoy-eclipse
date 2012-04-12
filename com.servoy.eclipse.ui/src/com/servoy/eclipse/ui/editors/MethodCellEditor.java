@@ -18,7 +18,9 @@ package com.servoy.eclipse.ui.editors;
 
 
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -27,6 +29,7 @@ import org.eclipse.swt.widgets.Control;
 import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodListOptions;
 import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodTreeContentProvider;
+import com.servoy.eclipse.ui.dialogs.Scope;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.IControlFactory;
@@ -70,9 +73,21 @@ public class MethodCellEditor extends DialogCellEditor
 		{
 			public Control createControl(Composite composite)
 			{
-				AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(composite, SWT.NONE);
+				final AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(composite, SWT.NONE);
 				buttons.setContext(persistContext, id.toString());
 				buttons.setDialog(dialog);
+				dialog.getTreeViewer().addSelectionChangedListener(new ISelectionChangedListener()
+				{
+					public void selectionChanged(SelectionChangedEvent event)
+					{
+						buttons.setSelectedScope(null);
+						IStructuredSelection selection = (IStructuredSelection)event.getSelection();
+						if (selection != null && !selection.isEmpty() && selection.getFirstElement() instanceof Scope)
+						{
+							buttons.setSelectedScope((Scope)selection.getFirstElement());
+						}
+					}
+				});
 				return buttons;
 			}
 		});

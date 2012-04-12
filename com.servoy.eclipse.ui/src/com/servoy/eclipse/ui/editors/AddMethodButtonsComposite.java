@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Label;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.dialogs.Scope;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -45,6 +46,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TableNode;
 
@@ -54,6 +56,7 @@ import com.servoy.j2db.persistence.TableNode;
 public class AddMethodButtonsComposite extends Composite
 {
 	private PersistContext persistContext;
+	private Scope selectedScope = null;
 	private String methodKey;
 
 	private TreeSelectDialog dialog;
@@ -75,7 +78,7 @@ public class AddMethodButtonsComposite extends Composite
 		Button createGlobalMethodButton;
 
 		Label createMethodLabel = new Label(this, SWT.NONE);
-		createMethodLabel.setText("Create method on");
+		createMethodLabel.setText("Create method in"); //$NON-NLS-1$
 
 		createFormMethodButton = new Button(this, SWT.NONE);
 		createFormMethodButton.addSelectionListener(new SelectionAdapter()
@@ -149,6 +152,12 @@ public class AddMethodButtonsComposite extends Composite
 	@SuppressWarnings("nls")
 	private ScriptMethod createMethod(IPersist parent)
 	{
+		String scopeName = null;
+		if (selectedScope != null && parent instanceof Solution)
+		{
+			parent = selectedScope.getRootObject();
+			scopeName = selectedScope.getName();
+		}
 		String dataSource = null;
 		if (persistContext.getContext() instanceof AbstractBase)
 		{
@@ -177,7 +186,7 @@ public class AddMethodButtonsComposite extends Composite
 			if (substitutions != null) substitutions.put("datasource", dataSource);
 			else substitutions = Collections.singletonMap("dataSource", dataSource);
 		}
-		return NewMethodAction.createNewMethod(getShell(), parent, methodKey, false, null, null, substitutions, persistContext.getPersist());
+		return NewMethodAction.createNewMethod(getShell(), parent, methodKey, false, null, scopeName, substitutions, persistContext.getPersist());
 	}
 
 	/**
@@ -191,6 +200,11 @@ public class AddMethodButtonsComposite extends Composite
 		createFormMethodButton.setEnabled(form != null);
 		createFoundsetMethodButton.setEnabled((form != null && form.getDataSource() != null) ||
 			persistContext.getContext().getAncestor(IRepository.TABLENODES) != null);
+	}
+
+	public void setSelectedScope(Scope scope)
+	{
+		this.selectedScope = scope;
 	}
 
 	/**

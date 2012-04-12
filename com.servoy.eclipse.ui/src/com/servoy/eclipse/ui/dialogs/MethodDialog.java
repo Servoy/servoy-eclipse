@@ -108,6 +108,7 @@ public class MethodDialog extends TreeSelectDialog
 			input,
 			// selection
 			selection, false, TreeSelectDialog.METHOD_DIALOG, valueEditor);
+
 	}
 
 	@Override
@@ -220,7 +221,7 @@ public class MethodDialog extends TreeSelectDialog
 				while (it.hasNext())
 				{
 					Pair<String, IRootObject> sc = it.next();
-					if (sc.getRight() == solution)
+					if (sc.getRight().getName().equals(solution.getName()))
 					{
 						scopesList.add(new Scope(sc.getLeft(), sc.getRight()));
 					}
