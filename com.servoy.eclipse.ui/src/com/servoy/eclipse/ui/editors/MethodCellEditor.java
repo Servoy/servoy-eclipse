@@ -20,7 +20,9 @@ package com.servoy.eclipse.ui.editors;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -76,19 +78,43 @@ public class MethodCellEditor extends DialogCellEditor
 				final AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(composite, SWT.NONE);
 				buttons.setContext(persistContext, id.toString());
 				buttons.setDialog(dialog);
+				setSelectedScope(buttons, (IStructuredSelection)dialog.getTreeViewer().getViewer().getSelection());
 				dialog.getTreeViewer().addSelectionChangedListener(new ISelectionChangedListener()
 				{
 					public void selectionChanged(SelectionChangedEvent event)
 					{
-						buttons.setSelectedScope(null);
-						IStructuredSelection selection = (IStructuredSelection)event.getSelection();
-						if (selection != null && !selection.isEmpty() && selection.getFirstElement() instanceof Scope)
-						{
-							buttons.setSelectedScope((Scope)selection.getFirstElement());
-						}
+						setSelectedScope(buttons, (IStructuredSelection)event.getSelection());
 					}
 				});
 				return buttons;
+			}
+
+			/**
+			 * @param buttons
+			 * @param selection
+			 */
+			private void setSelectedScope(final AddMethodButtonsComposite buttons, IStructuredSelection selection)
+			{
+				buttons.setSelectedScope(null);
+				if (selection != null && !selection.isEmpty() && selection.getFirstElement() instanceof Scope)
+				{
+					buttons.setSelectedScope((Scope)selection.getFirstElement());
+				}
+				else if (selection instanceof ITreeSelection)
+				{
+					TreePath[] paths = ((ITreeSelection)selection).getPaths();
+					if (paths != null && paths.length == 1)
+					{
+						for (int i = paths[0].getSegmentCount(); i-- > 0;)
+						{
+							if (paths[0].getSegment(i) instanceof Scope)
+							{
+								buttons.setSelectedScope((Scope)paths[0].getSegment(i));
+								break;
+							}
+						}
+					}
+				}
 			}
 		});
 		dialog.open();

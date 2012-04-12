@@ -187,13 +187,17 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		}
 		else if (parent instanceof Solution)
 		{
-			methodType = "global";
+			methodType = "[" + ((Solution)parent).getName() + "] globals scope";
 			tagFilter = MethodTemplate.PUBLIC_TAG; // protected is n/a, private methods are local to the scope js file
 			if (forcedScopeName == null)
 			{
 				// let user select from scopes.
 				Collection<String> scopeNames = ModelUtils.getEditingFlattenedSolution(parent).getScopeNames();
 				listOptions = scopeNames.toArray(new String[scopeNames.size()]);
+			}
+			else
+			{
+				methodType = "[" + ((Solution)parent).getName() + "] " + forcedScopeName + " scope";
 			}
 
 			listDescriptionText = "Select scope";
