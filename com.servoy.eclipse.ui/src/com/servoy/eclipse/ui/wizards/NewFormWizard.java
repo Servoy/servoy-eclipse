@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.ui.wizards;
 
-import java.awt.Dimension;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
@@ -272,7 +271,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			// create empty form
 			String dataSource = DataSourceUtils.createDBTableDataSource(newFormWizardPage.getServerName(), newFormWizardPage.getTableName());
 			Form form = servoyProject.getEditingSolution().createNewForm(servoyModel.getNameValidator(), style, newFormWizardPage.getFormName(), dataSource,
-				true, new Dimension(640/* width */, 480/* height */));
+				true, null);
 			// use superform selected by user
 			Form superForm = newFormWizardPage.getSuperForm();
 
