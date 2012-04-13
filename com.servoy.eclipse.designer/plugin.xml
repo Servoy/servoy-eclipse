@@ -324,6 +324,12 @@
             contextId="com.servoy.eclipse.designer.context"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="ALT+M1+S">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.action.addAccordionPaneAction"
+            contextId="com.servoy.eclipse.designer.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="ALT+M1+A">
       </key>      
       <key
             commandId="com.servoy.eclipse.designer.action.addMediaAction"
@@ -475,6 +481,12 @@
             id="com.servoy.eclipse.designer.action.addSplitPaneAction"
             description="Place SplitPane"
             name="Place SplitPane">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            id="com.servoy.eclipse.designer.action.addAccordionPaneAction"
+            description="Place Accordion"
+            name="Place Accordion">
       </command>      
       <command
             categoryId="com.servoy.eclipse.designer.category"
