@@ -552,7 +552,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 			{
 				if (pluginManager == null)
 				{
-					pluginManager = new PluginManager(this)
+					pluginManager = new PluginManager(this, getLAFManager().getClassLoader())
 					{
 						/**
 						 * @see com.servoy.j2db.smart.plugins.PluginManager#checkIfInitialized()
