@@ -221,9 +221,22 @@ public class ElementResolver implements IElementResolver
 						// datasources/server/table_foundset.js
 						typeNames.removeAll(noneFoundsetNames);
 						Type type = context.getType(FoundSet.JS_FOUNDSET + '<' + table.getDataSource() + '>');
+						Map<String, IDataProvider> allDataProvidersForTable = null;
+						try
+						{
+							allDataProvidersForTable = fs.getAllDataProvidersForTable(table);
+						}
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError("Cant get dataproviders of " + table + " for file " + context.getModelElement().getResource(), e);
+						}
 						for (Member member : new TypeMemberQuery(type))
 						{
-							typeNames.add(member.getName());
+							IDataProvider dataProvider = allDataProvidersForTable.get(member.getName());
+							if (dataProvider == null || dataProvider instanceof AggregateVariable)
+							{
+								typeNames.add(member.getName());
+							}
 						}
 					}
 				}
