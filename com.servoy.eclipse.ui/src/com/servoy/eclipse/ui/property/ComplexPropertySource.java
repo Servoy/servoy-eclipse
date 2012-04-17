@@ -65,7 +65,9 @@ public class ComplexPropertySource<T> implements IPropertySource
 		complexProperty.setValue(setComplexPropertyValue(id, v));
 	}
 
-	protected T setComplexPropertyValue(@SuppressWarnings("unused") Object id, @SuppressWarnings("unused") Object v)
+	protected T setComplexPropertyValue(@SuppressWarnings("unused")
+	Object id, @SuppressWarnings("unused")
+	Object v)
 	{
 		return null;
 	}
@@ -77,10 +79,13 @@ public class ComplexPropertySource<T> implements IPropertySource
 
 	public final boolean isPropertySet(Object id)
 	{
-		IPropertyDescriptor[] properties = complexProperty.getPropertySource().getPropertyDescriptors();
-		for (IPropertyDescriptor prop : properties)
+		if (complexProperty != null && complexProperty.getPropertySource() != null)
 		{
-			if (prop.getId().equals(id)) return true;
+			IPropertyDescriptor[] properties = complexProperty.getPropertySource().getPropertyDescriptors();
+			for (IPropertyDescriptor prop : properties)
+			{
+				if (prop.getId().equals(id)) return true;
+			}
 		}
 		return false;
 	}
@@ -90,7 +95,8 @@ public class ComplexPropertySource<T> implements IPropertySource
 		setPropertyValue(id, resetComplexPropertyValue(id));
 	}
 
-	public Object resetComplexPropertyValue(@SuppressWarnings("unused") Object id)
+	public Object resetComplexPropertyValue(@SuppressWarnings("unused")
+	Object id)
 	{
 		return null;
 	}
