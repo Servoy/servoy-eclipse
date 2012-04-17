@@ -49,6 +49,9 @@
          <actionSet
                id="com.servoy.eclipse.ui.servoySearchActionSet">
          </actionSet>
+         <actionSet
+               id="org.eclipse.debug.ui.breakpointActionSet">
+         </actionSet>
       </perspectiveExtension>
       <perspectiveExtension
             targetID="org.eclipse.debug.ui.DebugPerspective">
