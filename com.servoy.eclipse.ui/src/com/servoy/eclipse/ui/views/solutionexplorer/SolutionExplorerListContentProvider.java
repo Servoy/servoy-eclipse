@@ -883,7 +883,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						}
 						else
 						{
-							dlm.add(new UserNode(name, UserNodeType.VIEW, new TableWrapper(s.getName(), name), uiActivator.loadImageFromBundle("portal.gif")));
+							dlm.add(new UserNode(name, UserNodeType.VIEW, new TableWrapper(s.getName(), name, true),
+								uiActivator.loadImageFromBundle("view.png")));
 						}
 					}
 					if (hiddenViews != null)
@@ -892,7 +893,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						for (String name : hiddenViews)
 						{
 							UserNode node = new UserNode(name, UserNodeType.VIEW, new TableWrapper(s.getName(), name), uiActivator.loadImageFromBundle(
-								"portal.gif", true));
+								"view.png", true));
 							node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
 							node.setToolTipText(Messages.SolutionExplorerListContentProvider_hidden);
 							dlm.add(node);

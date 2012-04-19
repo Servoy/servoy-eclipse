@@ -28,11 +28,18 @@ public class TableWrapper
 {
 	private final String serverName;
 	private final String tableName;
+	private final boolean isView;
 
-	public TableWrapper(String serverName, String tableName)
+	public TableWrapper(String serverName, String tableName, boolean isView)
 	{
 		this.serverName = serverName;
 		this.tableName = tableName;
+		this.isView = isView;
+	}
+
+	public TableWrapper(String serverName, String tableName)
+	{
+		this(serverName, tableName, false);
 	}
 
 	public String getServerName()
@@ -45,6 +52,11 @@ public class TableWrapper
 		return tableName;
 	}
 
+	public boolean isView()
+	{
+		return isView;
+	}
+
 	public String getDataSource()
 	{
 		return DataSourceUtils.createDBTableDataSource(serverName, tableName);
@@ -55,6 +67,7 @@ public class TableWrapper
 	{
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + (isView ? 1231 : 1237);
 		result = prime * result + ((serverName == null) ? 0 : serverName.hashCode());
 		result = prime * result + ((tableName == null) ? 0 : tableName.hashCode());
 		return result;
@@ -66,7 +79,8 @@ public class TableWrapper
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		final TableWrapper other = (TableWrapper)obj;
+		TableWrapper other = (TableWrapper)obj;
+		if (isView != other.isView) return false;
 		if (serverName == null)
 		{
 			if (other.serverName != null) return false;
@@ -79,5 +93,6 @@ public class TableWrapper
 		else if (!tableName.equals(other.tableName)) return false;
 		return true;
 	}
+
 
 }

@@ -39,6 +39,7 @@ public class DatasourceLabelProvider extends LabelProvider
 
 	private static final Image SERVER_IMAGE = Activator.getDefault().loadImageFromBundle("server.gif");
 	private static final Image TABLE_IMAGE = Activator.getDefault().loadImageFromBundle("portal.gif");
+	private static final Image VIEW_IMAGE = Activator.getDefault().loadImageFromBundle("view.png");
 
 	private final String defaultText;
 	private final boolean showImage;
@@ -88,6 +89,7 @@ public class DatasourceLabelProvider extends LabelProvider
 				// server
 				return SERVER_IMAGE;
 			}
+			if (tw.isView()) return VIEW_IMAGE;
 			return TABLE_IMAGE;
 		}
 		return super.getImage(element);

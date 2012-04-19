@@ -94,6 +94,7 @@ import com.servoy.j2db.persistence.IColumnInfoBasedSequenceProvider;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.Pair;
@@ -247,6 +248,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 
 				Image serverImage = Activator.getDefault().loadImageFromBundle("server.gif");
 				Image tableImage = Activator.getDefault().loadImageFromBundle("portal.gif");
+				Image viewImage = Activator.getDefault().loadImageFromBundle("view.png");
 
 				if (foundMissingTables.size() > 0)
 				{
@@ -254,7 +256,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 						"Missing tables",
 						"Database information files (.dbi from resources project) can point to tables that do not exist in the database.\nYou can choose to create those tables according to the information or delete the unwanted information files.",
 						"Skip", "Create table", "Delete .dbi", "Skip all/multiselection", "Create all/multiselection", "Delete all/multiselection",
-						foundMissingTables, comparator, serverImage, tableImage);
+						foundMissingTables, comparator, serverImage, tableImage, viewImage);
 				}
 				else
 				{
@@ -266,7 +268,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 						"Missing database information files",
 						"Tables in the database can lack an associated database information file (.dbi in the resources project).\nYou can choose to create the database information file or delete the table from the database.",
 						"Skip", "Create .dbi", "Delete table", "Skip all/multiselection", "Create all/multiselection", "Delete all/multiselection",
-						foundSupplementalTables, comparator, serverImage, tableImage);
+						foundSupplementalTables, comparator, serverImage, tableImage, viewImage);
 				}
 				else
 				{
@@ -770,6 +772,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		private PairTreeContentProvider<T1, T2> contentProvider;
 		private final Image image2;
 		private final Image image1;
+		private final Image image3;
 		private final String allSet1Label;
 		private final String allSet2Label;
 		private final String allSet3Label;
@@ -785,7 +788,8 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		 * @param labelProvider the label provider used by the three tree viewers.
 		 */
 		public SplitInThreeWizardPage(String title, String description, String labelForSet1, String labelForSet2, String labelForSet3, String allSet1Label,
-			String allSet2Label, String allSet3Label, List<Pair<T1, T2>> fatherChildrenPairs, Comparator<Pair<T1, T2>> c, Image image1, Image image2)
+			String allSet2Label, String allSet3Label, List<Pair<T1, T2>> fatherChildrenPairs, Comparator<Pair<T1, T2>> c, Image image1, Image image2,
+			Image image3)
 		{
 			super(title);
 			this.initialPairs = new SortedList<Pair<T1, T2>>(c, fatherChildrenPairs);
@@ -803,6 +807,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 
 			this.image1 = image1;
 			this.image2 = image2;
+			this.image3 = image3;
 
 		}
 
@@ -1026,6 +1031,16 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 				{
 					if (element instanceof Pair)
 					{
+						try
+						{
+							IServerInternal s = (IServerInternal)((Pair)element).getLeft();
+							int tableType = s.getTable((String)((Pair)element).getRight()).getTableType();
+							if (tableType == ITable.VIEW) return image3;
+						}
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError(e);
+						}
 						return image2;
 					}
 					else

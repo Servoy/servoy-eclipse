@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.dialogs;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -142,12 +143,24 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 							continue;
 						}
 					}
-					lst.add(new TableWrapper(serverName, tableName));
+					int tableType = server.getServerManager().getServer(tableName).getTableType(tableName);
+					if (tableType == ITable.VIEW)
+					{
+						lst.add(new TableWrapper(serverName, tableName, true));
+					}
+					else
+					{
+						lst.add(new TableWrapper(serverName, tableName));
+					}
 				}
 			}
 			catch (RepositoryException e)
 			{
 				ServoyLog.logError("Could not get tables for server " + server, e);
+			}
+			catch (RemoteException e)
+			{
+				ServoyLog.logError(e);
 			}
 		}
 		return lst.toArray();
