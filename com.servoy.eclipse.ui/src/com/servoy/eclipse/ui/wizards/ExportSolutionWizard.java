@@ -17,12 +17,22 @@
 package com.servoy.eclipse.ui.wizards;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -30,6 +40,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.IPageChangedListener;
@@ -62,11 +73,15 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
+import org.json.JSONException;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.SerialRule;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -77,15 +92,25 @@ import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.persistence.AbstractRepository;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IUserManager;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
+import com.servoy.j2db.util.xmlxport.ITableDefinitionsManager;
 import com.servoy.j2db.util.xmlxport.IXMLExporter;
+import com.servoy.j2db.util.xmlxport.MetadataDef;
+import com.servoy.j2db.util.xmlxport.TableDef;
 
 public class ExportSolutionWizard extends Wizard implements IExportWizard, IPageChangedListener
 {
@@ -153,6 +178,45 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 		return Boolean.FALSE;
 	}
 
+	/** 
+	 * 
+	 * @return true if the database is down (servers or tables are inaccessible)
+	 */
+	private Boolean hasDbErrorMarkers(String[] projects)
+	{
+		if (projects != null && projects.length > 0)
+		{
+			try
+			{
+				for (String moduleName : projects)
+				{
+					ServoyProject module = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(moduleName);
+					if (module != null)
+					{
+						IMarker[] markers = module.getProject().findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+						for (IMarker marker : markers)
+						{
+							// db down errors = missing server (what other cases?)
+							if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_ERROR) &&
+								ServoyBuilder.MISSING_SERVER.equals(marker.getType()))
+							{
+								return Boolean.TRUE;
+							}
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
+			}
+		}
+		return Boolean.FALSE;
+	}
+
+	private ITableDefinitionsManager tableDefManager = null;
+	private IMetadataDefManager metadataDefManager = null;
+
 	@Override
 	public boolean performFinish()
 	{
@@ -170,19 +234,35 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 
 				AbstractRepository rep = (AbstractRepository)ServoyModel.getDeveloperRepository();
 
-				IApplicationServerSingleton as = ApplicationServerSingleton.get();
+				final IApplicationServerSingleton as = ApplicationServerSingleton.get();
 				IUserManager sm = as.getUserManager();
 				EclipseExportUserChannel eeuc = new EclipseExportUserChannel(exportModel, monitor);
 				EclipseExportI18NHelper eeI18NHelper = new EclipseExportI18NHelper(workspace);
 				IXMLExporter exporter = as.createXMLExporter(rep, sm, eeuc, Settings.getInstance(), as.getDataServer(), as.getClientId(), eeI18NHelper);
+
+				if (fileSelectionPage.dbDownErrors &&
+					(exportModel.isExportMetaData() || exportModel.isExportSampleData() || exportModel.isExportI18NData() || exportModel.isExportUsers() || exportModel.isExportReferencedModules()))
+				{
+					prepareDbDownExportData();
+				}
 
 				try
 				{
 					exporter.exportSolutionToFile(activeSolution, new File(exportModel.getFileName()), ClientVersion.getVersion(),
 						ClientVersion.getReleaseNumber(), exportModel.isExportMetaData(), exportModel.isExportSampleData(),
 						exportModel.getNumberOfSampleDataExported(), exportModel.isExportI18NData(), exportModel.isExportUsers(),
-						exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword());
+						exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword(), tableDefManager, metadataDefManager);
 					monitor.done();
+
+					if (fileSelectionPage.dbDownErrors) Display.getDefault().syncExec(new Runnable()
+					{
+						public void run()
+						{
+							MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution exported with errors",
+								"Solution has been exported with errors. This may prevent the solution from functioning well.\nOnly minimal database info has been exported.");
+						}
+					});
+
 					return Status.OK_STATUS;
 				}
 				catch (final RepositoryException e)
@@ -212,6 +292,211 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 		exportJob.schedule();
 
 		return true;
+	}
+
+	/**
+	 * This method takes care of minimal db info to be used in export in the case in which the db is down.
+	 * It will create and initialize the table def manager and the metadata manager, which will contain server and table and metadata info
+	 * to be used at solution export.
+	 * 
+	 * NOTE: if there are no dbi files created export info will be empty
+	 * 
+	 * @throws CoreException
+	 */
+	private void prepareDbDownExportData() throws CoreException
+	{
+		// A. get only the needed servers (and tables) 
+		final Map<String, List<String>> neededServersTables = getNeededServerTables(activeSolution, exportModel.isExportReferencedModules(),
+			exportModel.isExportI18NData());
+
+		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
+
+		// B. for needed tables, get dbi files (db is down)
+		Map<String, List<IFile>> server_tableDbiFiles = new HashMap<String, List<IFile>>();
+		for (String serverName : neededServersTables.keySet())
+		{
+			IFolder serverInformationFolder = dmm.getDBIFileContainer(serverName);
+			final List<IFile> dbiz = new ArrayList<IFile>();
+			final String srvnm = serverName;
+			if (serverInformationFolder.exists())
+			{
+				serverInformationFolder.accept(new IResourceVisitor()
+				{
+					public boolean visit(IResource resource) throws CoreException
+					{
+						String extension = resource.getFileExtension();
+						if (extension != null && extension.equalsIgnoreCase(DataModelManager.COLUMN_INFO_FILE_EXTENSION))
+						{
+							//we found a dbi file
+							String tableName = resource.getName().substring(0,
+								resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
+							if (neededServersTables.get(srvnm).contains(tableName)) dbiz.add((IFile)resource);
+						}
+						return true;
+					}
+
+				}, IResource.DEPTH_ONE, false);
+			}
+			server_tableDbiFiles.put(serverName, dbiz);
+		}
+
+		// C. deserialize table dbis to get tabledefs and metadata info
+		Map<String, List<TableDef>> serverTableDefs = new HashMap<String, List<TableDef>>();
+		Set<String> servers = server_tableDbiFiles.keySet();
+		Iterator<String> it = servers.iterator();
+		List<MetadataDef> metadataDefs = new ArrayList<MetadataDef>();
+		while (it.hasNext())
+		{
+			String serverName = it.next();
+			List<IFile> files = server_tableDbiFiles.get(serverName);
+			List<TableDef> tableDefs = new ArrayList<TableDef>();
+			for (IFile file : files)
+			{
+				if (file.exists())
+				{
+					InputStream is = file.getContents(true);
+					String dbiFileContent = null;
+					try
+					{
+						dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+					}
+					finally
+					{
+						Utils.closeInputStream(is);
+					}
+					if (dbiFileContent != null)
+					{
+						try
+						{
+							TableDef tableInfo = dmm.deserializeTableInfo(dbiFileContent);
+							tableDefs.add(tableInfo);
+							if (exportModel.isExportMetaData() && tableInfo.isMetaData)
+							{
+								String ds = DataSourceUtils.createDBTableDataSource(serverName, tableInfo.name);
+								IFile mdf = dmm.getMetaDataFile(ds);
+								if (mdf != null && mdf.exists())
+								{
+									String wscontents = null;
+									try
+									{
+										wscontents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(mdf.getFullPath().toString());
+									}
+									catch (IOException e)
+									{
+										ServoyLog.logError("Error while getting metadata file", e);
+									}
+									if (wscontents != null)
+									{
+										MetadataDef mdd = new MetadataDef(ds, wscontents);
+										if (!metadataDefs.contains(mdd)) metadataDefs.add(mdd);
+									}
+								}
+							}
+						}
+						catch (JSONException e)
+						{
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+			serverTableDefs.put(serverName, tableDefs);
+		}
+
+		// D. make use of tabledef info and metadata for the managers
+		tableDefManager = new ITableDefinitionsManager()
+		{
+			private Map<String, List<TableDef>> serverTableDefsMap = new HashMap<String, List<TableDef>>();
+
+			public void setServerTableDefs(Map<String, List<TableDef>> serverTableDefsMap)
+			{
+				this.serverTableDefsMap = serverTableDefsMap;
+			}
+
+			public Map<String, List<TableDef>> getServerTableDefs()
+			{
+				return this.serverTableDefsMap;
+			}
+		};
+		tableDefManager.setServerTableDefs(serverTableDefs);
+
+		metadataDefManager = new IMetadataDefManager()
+		{
+			private List<MetadataDef> metadataDefList = new ArrayList<MetadataDef>();
+
+			public void setMetadataDefsList(List<MetadataDef> metadataDefList)
+			{
+				this.metadataDefList = metadataDefList;
+			}
+
+			public List<MetadataDef> getMetadataDefsList()
+			{
+				return this.metadataDefList;
+			}
+		};
+		metadataDefManager.setMetadataDefsList(metadataDefs);
+	}
+
+	private void addServerTable(Map<String, List<String>> srvTbl, String serverName, String tableName)
+	{
+		List<String> tablesForServer = srvTbl.get(serverName);
+		if (tablesForServer == null)
+		{
+			tablesForServer = new ArrayList<String>();
+		}
+		if (!tablesForServer.contains(tableName)) tablesForServer.add(tableName);
+		srvTbl.put(serverName, tablesForServer);
+	}
+
+	private Map<String, List<String>> getNeededServerTables(Solution mainActiveSolution, boolean includeModules, boolean includeI18NData)
+	{
+		//get modules to export if needed, or just the active project
+		List<Solution> exportedModules = new ArrayList<Solution>();
+		if (includeModules)
+		{
+			ServoyProject[] modules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
+			for (ServoyProject module : modules)
+			{
+				exportedModules.add(module.getSolution());
+			}
+		}
+		else exportedModules.add(mainActiveSolution);
+
+		Map<String, List<String>> neededServersTablesMap = new HashMap<String, List<String>>();
+		for (Solution solution : exportedModules)
+		{
+			Iterator<IPersist> it = solution.getAllObjects();
+			while (it.hasNext())
+			{
+				IPersist object = it.next();
+				int objectTypeId = object.getTypeID();
+				if (objectTypeId == IRepository.FORMS)
+				{
+					Form form = ((Form)object);
+					addServerTable(neededServersTablesMap, form.getServerName(), form.getTableName());
+				}
+				else if (objectTypeId == IRepository.RELATIONS)
+				{
+					Relation relation = ((Relation)object);
+					addServerTable(neededServersTablesMap, relation.getPrimaryServerName(), relation.getPrimaryTableName());
+					addServerTable(neededServersTablesMap, relation.getForeignServerName(), relation.getForeignTableName());
+				}
+				else if (objectTypeId == IRepository.VALUELISTS)
+				{
+					ValueList vl = ((ValueList)object);
+					if (vl.getValueListType() == ValueList.DATABASE_VALUES && vl.getDatabaseValuesType() == ValueList.TABLE_VALUES)
+					{
+						addServerTable(neededServersTablesMap, vl.getServerName(), vl.getTableName());
+					}
+				}
+			}
+		}
+
+		// check if i18n info is needed
+		if (mainActiveSolution.getI18nDataSource() != null && includeI18NData) addServerTable(neededServersTablesMap, mainActiveSolution.getI18nServerName(),
+			mainActiveSolution.getI18nTableName());
+
+		return neededServersTablesMap;
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
@@ -259,7 +544,11 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 	@Override
 	public boolean canFinish()
 	{
-		if (modulesSelectionPage.hasMarkers == Boolean.TRUE) return false;
+		if (modulesSelectionPage.hasMarkers == Boolean.TRUE)
+		{
+			if (fileSelectionPage.dbDownErrors && fileSelectionPage.proceedWithExport) return true;
+			return false;
+		}
 		if (this.getContainer().getCurrentPage() == fileSelectionPage) return false;
 		if (exportModel.isExportReferencedModules() && this.getContainer().getCurrentPage() == exportOptionsPage) return false;
 		return exportModel.canFinish();
@@ -270,6 +559,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 		private Text fileNameText;
 		private Button browseButton;
 		private final Boolean hasMarkers;
+		private boolean proceedWithExport = true;
+		private boolean dbDownErrors = false;
 
 		public FileSelectionPage()
 		{
@@ -279,6 +570,26 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 			hasMarkers = hasMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
 			if (hasMarkers == Boolean.TRUE)
 			{
+				if (hasDbErrorMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() }) == Boolean.TRUE)
+				{
+					dbDownErrors = true;
+					Display.getDefault().syncExec(new Runnable()
+					{
+						public void run()
+						{
+							MessageDialog dlg = new MessageDialog(
+								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+								"Confirm solution export",
+								null,
+								"There are errors in the solution that will prevent it from functioning well; are you sure you want to proceed with the export?",
+								MessageDialog.ERROR, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 2);
+							int result = dlg.open();
+							if (result == 0) proceedWithExport = true;
+							else proceedWithExport = false;
+						}
+					});
+				}
+
 				setErrorMessage("There are errors in the solution that will prevent it from functioning well. Solve errors from problems view first.");
 			}
 			if (hasMarkers == null)
@@ -350,9 +661,13 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 		@Override
 		public boolean canFlipToNextPage()
 		{
-			if (hasMarkers == Boolean.TRUE) return false;
-
 			boolean result = true;
+			if (hasMarkers == Boolean.TRUE)
+			{
+				if (!dbDownErrors) return false;
+				else if (dbDownErrors && !proceedWithExport) result = false;
+			}
+
 			boolean messageSet = (hasMarkers == null);
 			if (exportModel.getFileName() == null) return false;
 			if (fileNameText.getText().length() == 0)
