@@ -511,6 +511,7 @@ public class SolutionSerializer
 			obj.remove(StaticContentSpecLoader.PROPERTY_DEFAULTVALUE.getPropertyName());
 			obj.remove(StaticContentSpecLoader.PROPERTY_SCOPENAME.getPropertyName());
 			obj.remove(SolutionDeserializer.COMMENT_JSON_ATTRIBUTE);
+			obj.remove(SolutionDeserializer.LINE_NUMBER_OFFSET_JSON_ATTRIBUTE);
 			StringBuilder sb = new StringBuilder();
 			if (currentComment == null)
 			{
@@ -608,6 +609,7 @@ public class SolutionSerializer
 				obj.remove(StaticContentSpecLoader.PROPERTY_DEFAULTVALUE.getPropertyName());
 				obj.remove(StaticContentSpecLoader.PROPERTY_SCOPENAME.getPropertyName());
 				obj.remove(SolutionDeserializer.COMMENT_JSON_ATTRIBUTE);
+				obj.remove(SolutionDeserializer.LINE_NUMBER_OFFSET_JSON_ATTRIBUTE);
 
 				if (persist instanceof AbstractScriptProvider)
 				{
