@@ -125,7 +125,6 @@ public class SolutionDeserializer
 	private static final String VARIABLE_TYPE_JSON_ATTRIBUTE = "variableType"; //$NON-NLS-1$
 	private static final String JS_TYPE_JSON_ATTRIBUTE = "jsType"; //$NON-NLS-1$
 	private static final String ARGUMENTS_JSON_ATTRIBUTE = "arguments"; //$NON-NLS-1$
-	static final String LINE_NUMBER_OFFSET_JSON_ATTRIBUTE = "lineNumberOffset"; //$NON-NLS-1$
 	static final String COMMENT_JSON_ATTRIBUTE = "comment"; //$NON-NLS-1$
 	private static final String CHANGED_JSON_ATTRIBUTE = "changed"; //$NON-NLS-1$
 
@@ -1308,18 +1307,6 @@ public class SolutionDeserializer
 					json.put("defaultValue", "");
 				}
 
-				int linenr = 1;
-				int fieldLineIndex = field.sourceStart();
-				for (Line line : lines)
-				{
-					if (line.start > fieldLineIndex)
-					{
-						linenr = line.line;
-						break;
-					}
-				}
-
-				json.put(LINE_NUMBER_OFFSET_JSON_ATTRIBUTE, linenr);
 				json.put(COMMENT_JSON_ATTRIBUTE, commentString);
 				json.put(CHANGED_JSON_ATTRIBUTE, markAsChanged);
 				jsonObjects.add(json);
@@ -1382,19 +1369,7 @@ public class SolutionDeserializer
 //				json.put("filename", file.getAbsolutePath()); //$NON-NLS-1$
 
 
-				int linenr = 1;
-				int functionLineIndex = function.sourceStart();
-				for (Line line : lines)
-				{
-					if (line.start > functionLineIndex)
-					{
-						linenr = line.line;
-						break;
-					}
-				}
-
 				json.put(ARGUMENTS_JSON_ATTRIBUTE, (Object)function.getArguments());
-				json.put(LINE_NUMBER_OFFSET_JSON_ATTRIBUTE, linenr);
 				json.put(COMMENT_JSON_ATTRIBUTE, comment);
 				json.put(CHANGED_JSON_ATTRIBUTE, markAsChanged);
 				jsonObjects.add(json);
@@ -1680,11 +1655,6 @@ public class SolutionDeserializer
 			JSONObject obj = entry.getValue();
 			if (retval instanceof ScriptVariable)
 			{
-				if (obj.has(LINE_NUMBER_OFFSET_JSON_ATTRIBUTE))
-				{
-					int linenr = obj.getInt(LINE_NUMBER_OFFSET_JSON_ATTRIBUTE);
-					((ScriptVariable)retval).setLineNumberOffset(linenr);
-				}
 				if (obj.has(COMMENT_JSON_ATTRIBUTE))
 				{
 					String comment = obj.getString(COMMENT_JSON_ATTRIBUTE);

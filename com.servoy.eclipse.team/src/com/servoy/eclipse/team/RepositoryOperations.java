@@ -74,7 +74,6 @@ import com.servoy.eclipse.team.subscriber.SolutionResourceVariant;
 import com.servoy.eclipse.team.subscriber.SolutionSubscriber;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.dataprocessing.IDataSet;
-import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.I18NUtil;
 import com.servoy.j2db.persistence.IPersist;
@@ -88,7 +87,6 @@ import com.servoy.j2db.persistence.ITeamRepository;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
-import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StringResource;
@@ -1796,30 +1794,4 @@ public class RepositoryOperations
 		return null;
 	}
 
-	private class ScriptLineNumberSetterVisitor implements IPersistVisitor
-	{
-		private final Solution solutionWithLineNumber;
-
-		public ScriptLineNumberSetterVisitor(Solution solutionWithLineNumber)
-		{
-			this.solutionWithLineNumber = solutionWithLineNumber;
-		}
-
-		public Object visit(IPersist o)
-		{
-			if (o instanceof ScriptVariable)
-			{
-				final ScriptVariable so = (ScriptVariable)o;
-
-				AbstractBase so2 = (AbstractBase)AbstractRepository.searchPersist(solutionWithLineNumber, so.getUUID());
-				if (so2 != null && so2 instanceof ScriptVariable)
-				{
-					so.setLineNumberOffset(((ScriptVariable)so2).getLineNumberOffset());
-				}
-			}
-
-			return IPersistVisitor.CONTINUE_TRAVERSAL;
-		}
-
-	}
 }
