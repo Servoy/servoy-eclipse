@@ -51,9 +51,9 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportScope;
-import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
@@ -160,6 +160,12 @@ public class SolutionSerializer
 				IScriptProvider sp = (IScriptProvider)ab;
 				if (sp.getLineNumberOffset() == 0) return null;
 				return Integer.valueOf(sp.getLineNumberOffset());
+			}
+			else if (ab instanceof ScriptVariable)
+			{
+				ScriptVariable svar = (ScriptVariable)ab;
+				if (svar.getLineNumberOffset() == 0) return null;
+				return Integer.valueOf(svar.getLineNumberOffset());
 			}
 			return ab.getSerializableRuntimeProperty(IScriptProvider.LINENUMBER);
 		}
