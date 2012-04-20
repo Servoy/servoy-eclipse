@@ -40,9 +40,7 @@ import com.servoy.eclipse.ui.property.TableValueEditor;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.DataSourceUtils;
-import com.servoy.j2db.util.Utils;
 
 public class DatasourceSelectComposite extends Composite
 {
@@ -190,21 +188,7 @@ public class DatasourceSelectComposite extends Composite
 				IStructuredSelection selection = (IStructuredSelection)sourceTable.getSelection();
 				if (!selection.isEmpty())
 				{
-					Table oldPrimary = null;
-					Table foreignTable = null;
-					try
-					{
-						oldPrimary = relationEditor.getRelation().getPrimaryTable();
-						foreignTable = relationEditor.getRelation().getForeignTable();
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
-					if (oldPrimary != null && !Utils.equalObjects(oldPrimary, foreignTable))
-					{
-						oldPrimary.removeIColumnListener(relationEditor);
-					}
+					relationEditor.unregisterListeners();
 					TableWrapper tableWrapper = ((TableWrapper)selection.getFirstElement());
 					relationEditor.getRelation().setPrimaryDataSource(
 						DataSourceUtils.createDBTableDataSource(tableWrapper.getServerName(), tableWrapper.getTableName()));
@@ -217,18 +201,7 @@ public class DatasourceSelectComposite extends Composite
 					{
 						ServoyLog.logError(e);
 					}
-					try
-					{
-						if (relationEditor.getRelation().getPrimaryTable() != null &&
-							!Utils.equalObjects(relationEditor.getRelation().getPrimaryTable(), foreignTable))
-						{
-							relationEditor.getRelation().getPrimaryTable().addIColumnListener(relationEditor);
-						}
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
+					relationEditor.registerListeners();
 					relationEditor.createInput(false, true, true);
 					relationEditor.flagModified(false);
 					filler.modifyText();
@@ -242,21 +215,7 @@ public class DatasourceSelectComposite extends Composite
 				IStructuredSelection selection = (IStructuredSelection)destinationTable.getSelection();
 				if (!selection.isEmpty())
 				{
-					Table oldForeign = null;
-					Table primaryTable = null;
-					try
-					{
-						primaryTable = relationEditor.getRelation().getPrimaryTable();
-						oldForeign = relationEditor.getRelation().getForeignTable();
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
-					if (oldForeign != null && !Utils.equalObjects(oldForeign, primaryTable))
-					{
-						oldForeign.removeIColumnListener(relationEditor);
-					}
+					relationEditor.unregisterListeners();
 					TableWrapper tableWrapper = ((TableWrapper)selection.getFirstElement());
 					Relation relation = relationEditor.getRelation();
 					String oldServerName = relation.getForeignServerName();
@@ -272,18 +231,7 @@ public class DatasourceSelectComposite extends Composite
 					{
 						ServoyLog.logError(e);
 					}
-					try
-					{
-						if (relationEditor.getRelation().getForeignTable() != null &&
-							!Utils.equalObjects(relationEditor.getRelation().getForeignTable(), primaryTable))
-						{
-							relationEditor.getRelation().getForeignTable().addIColumnListener(relationEditor);
-						}
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
+					relationEditor.registerListeners();
 					if (relationEditor.getRelation().getPrimaryDataSource() == null)
 					{
 						sourceTable.setSelection(new StructuredSelection(new TableWrapper(tableWrapper.getServerName(), tableWrapper.getTableName())));

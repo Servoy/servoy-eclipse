@@ -280,21 +280,7 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 			}
 		});
 		createInput(false, false, false);
-		try
-		{
-			if (getRelation().getPrimaryTable() != null)
-			{
-				getRelation().getPrimaryTable().addIColumnListener(this);
-			}
-			if (getRelation().getForeignTable() != null)
-			{
-				getRelation().getForeignTable().addIColumnListener(this);
-			}
-		}
-		catch (RepositoryException ex)
-		{
-			ServoyLog.logError(ex);
-		}
+		registerListeners();
 	}
 
 	@Override
@@ -1008,12 +994,52 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 	public void dispose()
 	{
 		super.dispose();
+		unregisterListeners();
+	}
+
+	public void registerListeners()
+	{
+		com.servoy.j2db.persistence.Table primaryTable = null;
+		try
+		{
+			primaryTable = getRelation().getPrimaryTable();
+			if (primaryTable != null)
+			{
+				primaryTable.addIColumnListener(this);
+			}
+		}
+		catch (RepositoryException ex)
+		{
+			ServoyLog.logError(ex);
+		}
+		try
+		{
+			if (getRelation().getForeignTable() != null && !Utils.equalObjects(primaryTable, getRelation().getForeignTable()))
+			{
+				getRelation().getForeignTable().addIColumnListener(this);
+			}
+		}
+		catch (RepositoryException ex)
+		{
+			ServoyLog.logError(ex);
+		}
+	}
+
+	public void unregisterListeners()
+	{
 		try
 		{
 			if (getRelation().getPrimaryTable() != null)
 			{
 				getRelation().getPrimaryTable().removeIColumnListener(this);
 			}
+		}
+		catch (RepositoryException ex)
+		{
+			ServoyLog.logError(ex);
+		}
+		try
+		{
 			if (getRelation().getForeignTable() != null)
 			{
 				getRelation().getForeignTable().removeIColumnListener(this);
