@@ -143,7 +143,7 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 							continue;
 						}
 					}
-					int tableType = server.getServerManager().getServer(tableName).getTableType(tableName);
+					int tableType = server.getServerManager().getServer(serverName).getTableType(tableName);
 					if (tableType == ITable.VIEW)
 					{
 						lst.add(new TableWrapper(serverName, tableName, true));
