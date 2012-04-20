@@ -892,7 +892,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						// tables and views that are marked by user as "hiddenInDeveloper" will only be shown in this sol. ex. list and grayed-out + at the bottom of this list
 						for (String name : hiddenViews)
 						{
-							UserNode node = new UserNode(name, UserNodeType.VIEW, new TableWrapper(s.getName(), name), uiActivator.loadImageFromBundle(
+							UserNode node = new UserNode(name, UserNodeType.VIEW, new TableWrapper(s.getName(), name, true), uiActivator.loadImageFromBundle(
 								"view.png", true));
 							node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
 							node.setToolTipText(Messages.SolutionExplorerListContentProvider_hidden);
