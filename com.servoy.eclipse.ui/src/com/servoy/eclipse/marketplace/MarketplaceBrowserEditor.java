@@ -17,27 +17,17 @@
 
 package com.servoy.eclipse.marketplace;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
 
-import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.util.Utils;
 
@@ -124,70 +114,6 @@ public class MarketplaceBrowserEditor extends EditorPart
 				// if install link
 				if (event.location.endsWith("marketplace_test.xml"))
 				{
-					try
-					{
-						// get the link and start install
-						InstallPackage installPackage = new InstallPackage(event.location);
-
-						for (final InstallItem installItem : installPackage.getAllInstallItems())
-						{
-							if (MessageDialog.openConfirm(UIUtils.getActiveShell(), "Servoy Marketplace",
-								"You have choosen to install the follwing product from the Servoy Marketplace\n\n" + installItem.getName() +
-									"\n\nProceed with the install ?"))
-							{
-								try
-								{
-									MarketplaceProgressMonitorDialog progressMonitorDialog = new MarketplaceProgressMonitorDialog(UIUtils.getActiveShell(),
-										installItem.getName());
-									progressMonitorDialog.run(true, false, new IRunnableWithProgress()
-									{
-
-										public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
-										{
-											try
-											{
-												installItem.install(monitor);
-												if (installItem.isRestartRequired())
-												{
-													Display.getDefault().syncExec(new Runnable()
-													{
-														public void run()
-														{
-															if (MessageDialog.openQuestion(UIUtils.getActiveShell(), "Servoy Marketplace",
-																"Servoy Developer must be restarted to complete the installation.\n\nDo you want to restart now ?"))
-															{
-																PlatformUI.getWorkbench().restart();
-															}
-														}
-													});
-												}
-											}
-											catch (final Exception ex)
-											{
-												Display.getDefault().syncExec(new Runnable()
-												{
-													public void run()
-													{
-														MessageDialog.openError(UIUtils.getActiveShell(), "Servoy Marketplace", "Error installing " +
-															installItem.getName() + ".\n\n" + ex.getMessage());
-													}
-												});
-											}
-										}
-									});
-								}
-								catch (Exception ex1)
-								{
-									ServoyLog.logError(ex1);
-								}
-							}
-						}
-					}
-					catch (Exception ex)
-					{
-						ServoyLog.logError(ex);
-						MessageDialog.openError(UIUtils.getActiveShell(), "Servoy Marketplace", "Cannot get install informations.\n\n" + ex.getMessage());
-					}
 					event.doit = false;
 				}
 			}
@@ -201,24 +127,6 @@ public class MarketplaceBrowserEditor extends EditorPart
 	public void setFocus()
 	{
 		if (browser != null) browser.setFocus();
-	}
-
-	class MarketplaceProgressMonitorDialog extends ProgressMonitorDialog
-	{
-		private final String installName;
-
-		public MarketplaceProgressMonitorDialog(Shell parent, String installName)
-		{
-			super(parent);
-			this.installName = installName;
-		}
-
-		@Override
-		protected void configureShell(final Shell shell)
-		{
-			super.configureShell(shell);
-			shell.setText("Servoy Marketplace - Installing " + installName + " ...");
-		}
 	}
 
 	public void deepLink(String deeplinkParam)

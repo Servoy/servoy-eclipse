@@ -24,7 +24,7 @@ import org.eclipse.ui.IPersistableElement;
 /**
  * Input for the Marketplace browser editor.
  * 
- * @author gabi
+ * @author gboros
  *
  */
 public class MarketplaceBrowserEditorInput implements IEditorInput

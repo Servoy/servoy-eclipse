@@ -28,31 +28,31 @@ import org.eclipse.equinox.p2.repository.metadata.IMetadataRepositoryManager;
 import org.eclipse.equinox.p2.ui.ProvisioningUI;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
-import org.w3c.dom.Node;
 
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.ui.Activator;
 
 /**
  * Class representing an installable update URL from the Servoy Marketplace
- * @author gabi
+ * @author gboros
  *
  */
-public class UpdateURLInstall extends InstallItem
+public class UpdateURLInstall implements InstallItem
 {
-	public UpdateURLInstall(Node entryNode)
+	private final String updateURL;
+
+	public UpdateURLInstall(String updateURL)
 	{
-		super(entryNode);
+		this.updateURL = updateURL;
 	}
 
-	@Override
 	public void install(final IProgressMonitor monitor) throws Exception
 	{
 		IProvisioningAgent provisioningAgent = Activator.getDefault().getProvisioningAgent();
 		if (provisioningAgent != null)
 		{
 			IMetadataRepositoryManager manager = (IMetadataRepositoryManager)provisioningAgent.getService(IMetadataRepositoryManager.SERVICE_NAME);
-			final URI installURI = new URL(getURL()).toURI();
+			final URI installURI = new URL(updateURL).toURI();
 			manager.addRepository(installURI);
 
 			Display.getDefault().syncExec(new Runnable()
@@ -67,11 +67,21 @@ public class UpdateURLInstall extends InstallItem
 					}
 					catch (Exception ex)
 					{
-						MessageDialog.openError(UIUtils.getActiveShell(), "Servoy Marketplace", "Error installing " + UpdateURLInstall.this.getName() +
-							".\n\n" + ex.getMessage());
+						MessageDialog.openError(UIUtils.getActiveShell(), "Servoy Marketplace",
+							"Error installing update url: " + updateURL + ".\n\n" + ex.getMessage());
 					}
 				}
 			});
 		}
+	}
+
+	public String getName()
+	{
+		return updateURL;
+	}
+
+	public boolean isRestartRequired()
+	{
+		return false;
 	}
 }

@@ -160,7 +160,10 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 				public void modifyText(ModifyEvent e)
 				{
 					validate();
-					wizard.getContainer().updateButtons();
+					if (wizard.getContainer().getCurrentPage() != null)
+					{
+						wizard.getContainer().updateButtons();
+					}
 				}
 			});
 

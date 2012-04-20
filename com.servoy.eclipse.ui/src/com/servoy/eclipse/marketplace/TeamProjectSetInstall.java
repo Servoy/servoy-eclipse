@@ -1,5 +1,5 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2010 Servoy BV
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2012 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -17,26 +17,38 @@
 
 package com.servoy.eclipse.marketplace;
 
+import java.io.File;
+
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.w3c.dom.Node;
+import org.eclipse.team.internal.ui.ProjectSetImporter;
+
+import com.servoy.eclipse.core.util.UIUtils;
 
 /**
- * Class representing an installable Look And Feel from the Servoy Marketplace
- * @author gabi
- *
+ * Class representing an installable team project set from the Servoy Marketplace
+ * @author gboros
  */
-public class LookAndFeelInstall extends InstallItem
+public class TeamProjectSetInstall implements InstallItem
 {
-	private static final String destinationDir = "lafs"; //$NON-NLS-1$
+	private final File teamProjectSetFile;
 
-	public LookAndFeelInstall(Node entryNode)
+	public TeamProjectSetInstall(File teamProjectSetFile)
 	{
-		super(entryNode);
+		this.teamProjectSetFile = teamProjectSetFile;
 	}
 
-	@Override
 	public void install(IProgressMonitor monitor) throws Exception
 	{
-		downloadURL(destinationDir, monitor, "Installing Look And Feel " + getName() + " ...");
+		ProjectSetImporter.importProjectSet(teamProjectSetFile.getCanonicalPath(), UIUtils.getActiveShell(), monitor);
+	}
+
+	public String getName()
+	{
+		return teamProjectSetFile.getName();
+	}
+
+	public boolean isRestartRequired()
+	{
+		return false;
 	}
 }

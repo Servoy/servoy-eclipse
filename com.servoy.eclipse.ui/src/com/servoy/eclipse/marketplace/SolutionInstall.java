@@ -24,67 +24,50 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.team.internal.ui.ProjectSetImporter;
 import org.eclipse.ui.PlatformUI;
-import org.w3c.dom.Node;
 
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
 
 /**
  * Class representing an installable solution from the Servoy Marketplace
- * @author gabi
+ * @author gboros
  *
  */
-public class SolutionInstall extends InstallItem
+public class SolutionInstall implements InstallItem
 {
-	public static final String destinationDir = "solutions/marketplace"; //$NON-NLS-1$
-	private final ImportSolutionWizard importSolutionWizard;
+	private final File solutionFile;
 
-	public SolutionInstall(Node entryNode)
+	public SolutionInstall(File solutionFile)
 	{
-		super(entryNode);
-		importSolutionWizard = new ImportSolutionWizard();
+		this.solutionFile = solutionFile;
 	}
 
-	@Override
 	public void install(IProgressMonitor monitor) throws Exception
 	{
-		final String dType = getDownloadType();
-		if (DOWNLOAD_TYPE_ZIP.equals(dType) || DOWNLOAD_TYPE_SERVOY.equals(dType) || DOWNLOAD_TYPE_PSF.equals(dType))
+		Display.getDefault().syncExec(new Runnable()
 		{
-			File downloadedFile = downloadURL(DOWNLOAD_TYPE_ZIP.equals(dType) ? "" : destinationDir, monitor, "Installing solution " + getName() + " ..."); //$NON-NLS-1$
-			if (downloadedFile != null)
+			public void run()
 			{
-				final String downloadFileCanonicalPath = downloadedFile.getCanonicalPath();
-
-				if (DOWNLOAD_TYPE_PSF.equals(dType))
-				{
-					ProjectSetImporter.importProjectSet(downloadFileCanonicalPath, UIUtils.getActiveShell(), monitor);
-					new File(downloadFileCanonicalPath).delete();
-				}
-				else
-				{
-					Display.getDefault().syncExec(new Runnable()
-					{
-						public void run()
-						{
-							IStructuredSelection selection = StructuredSelection.EMPTY;
-							importSolutionWizard.setSolutionFilePath(downloadFileCanonicalPath);
-							importSolutionWizard.setAskForImportServerName(true);
-							importSolutionWizard.init(PlatformUI.getWorkbench(), selection);
-							WizardDialog dialog = new WizardDialog(UIUtils.getActiveShell(), importSolutionWizard);
-							dialog.create();
-							dialog.open();
-						}
-					});
-				}
+				IStructuredSelection selection = StructuredSelection.EMPTY;
+				ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
+				importSolutionWizard.setSolutionFilePath(solutionFile.getAbsolutePath());
+				importSolutionWizard.setAskForImportServerName(true);
+				importSolutionWizard.init(PlatformUI.getWorkbench(), selection);
+				WizardDialog dialog = new WizardDialog(UIUtils.getActiveShell(), importSolutionWizard);
+				dialog.create();
+				dialog.open();
 			}
-		}
-		else
-		{
-			ServoyLog.logWarning("Maketplace unknown download type for solution install " + getDownloadType(), null);
-		}
+		});
+	}
+
+	public String getName()
+	{
+		return solutionFile.getName();
+	}
+
+	public boolean isRestartRequired()
+	{
+		return false;
 	}
 }
