@@ -80,7 +80,6 @@ import com.servoy.j2db.persistence.I18NUtil;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -1813,7 +1812,10 @@ public class RepositoryOperations
 				final ScriptVariable so = (ScriptVariable)o;
 
 				AbstractBase so2 = (AbstractBase)AbstractRepository.searchPersist(solutionWithLineNumber, so.getUUID());
-				so.setSerializableRuntimeProperty(IScriptProvider.LINENUMBER, so2.getSerializableRuntimeProperty(IScriptProvider.LINENUMBER));
+				if (so2 != null && so2 instanceof ScriptVariable)
+				{
+					so.setLineNumberOffset(((ScriptVariable)so2).getLineNumberOffset());
+				}
 			}
 
 			return IPersistVisitor.CONTINUE_TRAVERSAL;

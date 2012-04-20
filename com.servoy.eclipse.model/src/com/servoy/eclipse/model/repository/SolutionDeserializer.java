@@ -93,8 +93,8 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ISupportChilds;
-import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.Media;
@@ -1683,7 +1683,7 @@ public class SolutionDeserializer
 				if (obj.has(LINE_NUMBER_OFFSET_JSON_ATTRIBUTE))
 				{
 					int linenr = obj.getInt(LINE_NUMBER_OFFSET_JSON_ATTRIBUTE);
-					((ScriptVariable)retval).setSerializableRuntimeProperty(IScriptProvider.LINENUMBER, new Integer(linenr));
+					((ScriptVariable)retval).setLineNumberOffset(linenr);
 				}
 				if (obj.has(COMMENT_JSON_ATTRIBUTE))
 				{

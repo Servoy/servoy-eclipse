@@ -938,7 +938,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							if (child instanceof ScriptVariable)
 							{
 								otherChildsType = "variable"; //$NON-NLS-1$
-								lineNumber = ((AbstractBase)child).getSerializableRuntimeProperty(IScriptProvider.LINENUMBER);
+								lineNumber = Integer.valueOf(((ScriptVariable)child).getLineNumberOffset());
 							}
 							else if (child instanceof AbstractScriptProvider)
 							{
@@ -958,7 +958,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					if (persist instanceof ScriptVariable)
 					{
 						otherChildsType = "variable"; //$NON-NLS-1$
-						lineNumber = ((AbstractBase)persist).getSerializableRuntimeProperty(IScriptProvider.LINENUMBER);
+						lineNumber = Integer.valueOf(((ScriptVariable)persist).getLineNumberOffset());
 					}
 					else if (persist instanceof AbstractScriptProvider)
 					{
@@ -4332,10 +4332,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			int lineNmbr = lineNumber;
 			if (lineNmbr == -1)
 			{
-				if (persist instanceof IVariable)
+				if (persist instanceof ScriptVariable)
 				{
-					Integer line = ((AbstractBase)persist).getSerializableRuntimeProperty(IScriptProvider.LINENUMBER);
-					lineNmbr = line != null ? line.intValue() : -1;
+					lineNmbr = ((ScriptVariable)persist).getLineNumberOffset();
 				}
 				else if (persist instanceof IScriptProvider)
 				{

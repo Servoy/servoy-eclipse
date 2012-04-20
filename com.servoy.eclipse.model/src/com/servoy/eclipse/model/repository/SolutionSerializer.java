@@ -167,7 +167,7 @@ public class SolutionSerializer
 				if (svar.getLineNumberOffset() == 0) return null;
 				return Integer.valueOf(svar.getLineNumberOffset());
 			}
-			return ab.getSerializableRuntimeProperty(IScriptProvider.LINENUMBER);
+			return null;
 		}
 	};
 
