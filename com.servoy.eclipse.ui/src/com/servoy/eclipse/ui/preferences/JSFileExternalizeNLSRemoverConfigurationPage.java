@@ -45,7 +45,7 @@ public class JSFileExternalizeNLSRemoverConfigurationPage extends AbstractConfig
 		PostSaveNLSRemover.ID) };
 
 
-	/* 
+	/*
 	 * @see
 	 * org.eclipse.dltk.ui.preferences.AbstractConfigurationBlockPropertyAndPreferencePage#createOptionsBlock(org.eclipse.dltk.ui.util.IStatusChangeListener,
 	 * org.eclipse.core.resources.IProject, org.eclipse.ui.preferences.IWorkbenchPreferenceContainer)
@@ -56,7 +56,7 @@ public class JSFileExternalizeNLSRemoverConfigurationPage extends AbstractConfig
 		return new JSFileExternalizeNLSRemoverConfigurationBlock(newStatusChangedListener, project, KEYS, container);
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.dltk.ui.preferences.AbstractConfigurationBlockPropertyAndPreferencePage#getHelpId()
 	 */
 	@Override
@@ -66,7 +66,7 @@ public class JSFileExternalizeNLSRemoverConfigurationPage extends AbstractConfig
 		return null;
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.dltk.ui.preferences.AbstractConfigurationBlockPropertyAndPreferencePage#getProjectHelpId()
 	 */
 	@Override
@@ -101,8 +101,7 @@ public class JSFileExternalizeNLSRemoverConfigurationPage extends AbstractConfig
 	@Override
 	protected String getPreferencePageId()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return "org.eclipse.dltk.javascript.editor.preferences.removeNLS"; //$NON-NLS-1$
 	}
 
 	/*
@@ -111,7 +110,7 @@ public class JSFileExternalizeNLSRemoverConfigurationPage extends AbstractConfig
 	@Override
 	protected String getPropertyPageId()
 	{
-		return "com.servoy.eclipse.propertyPage.NLSRemover"; //$NON-NLS-1$
+		return "org.eclipse.dltk.javascript.editor.propertyPage.removeNLS"; //$NON-NLS-1$
 	}
 
 	class JSFileExternalizeNLSRemoverConfigurationBlock extends AbstractOptionsBlock
