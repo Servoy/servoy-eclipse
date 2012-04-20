@@ -79,6 +79,8 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.IColumn;
+import com.servoy.j2db.persistence.IColumnListener;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -93,7 +95,7 @@ import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.Utils;
 
-public class RelationEditor extends PersistEditor
+public class RelationEditor extends PersistEditor implements IColumnListener
 {
 	public static int NUMBER_VISIBLE_ITEMS = 10;
 
@@ -278,6 +280,21 @@ public class RelationEditor extends PersistEditor
 			}
 		});
 		createInput(false, false, false);
+		try
+		{
+			if (getRelation().getPrimaryTable() != null)
+			{
+				getRelation().getPrimaryTable().addIColumnListener(this);
+			}
+			if (getRelation().getForeignTable() != null)
+			{
+				getRelation().getForeignTable().addIColumnListener(this);
+			}
+		}
+		catch (RepositoryException ex)
+		{
+			ServoyLog.logError(ex);
+		}
 	}
 
 	@Override
@@ -950,6 +967,61 @@ public class RelationEditor extends PersistEditor
 				fromCache = null;
 				break;
 			}
+		}
+	}
+
+	public void iColumnCreated(IColumn column)
+	{
+		refreshTable(column);
+	}
+
+	public void iColumnRemoved(IColumn column)
+	{
+		refreshTable(column);
+	}
+
+	public void iColumnChanged(IColumn column)
+	{
+		refreshTable(column);
+	}
+
+	private void refreshTable(IColumn column)
+	{
+		try
+		{
+			if (column.getTable().getName().equals(getRelation().getPrimaryTableName()))
+			{
+				createInput(false, true, true);
+			}
+			if (column.getTable().getName().equals(getRelation().getForeignTableName()))
+			{
+				createInput(true, false, true);
+			}
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+		}
+	}
+
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		try
+		{
+			if (getRelation().getPrimaryTable() != null)
+			{
+				getRelation().getPrimaryTable().removeIColumnListener(this);
+			}
+			if (getRelation().getForeignTable() != null)
+			{
+				getRelation().getForeignTable().removeIColumnListener(this);
+			}
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
 		}
 	}
 }
