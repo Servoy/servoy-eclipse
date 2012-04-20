@@ -46,7 +46,6 @@ import com.servoy.j2db.AbstractActiveSolutionHandler;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
-import com.servoy.j2db.persistence.AbstractScriptProvider;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -323,15 +322,6 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 					}
 					if (src instanceof IScriptProvider || src instanceof IVariable)
 					{
-						if (src instanceof ScriptVariable)
-						{
-							((ScriptVariable)src).setLineNumberOffset(((ScriptVariable)src).getLineNumberOffset());
-						}
-						else if (src instanceof AbstractScriptProvider)
-						{
-							((AbstractScriptProvider)src).setLineNumberOffset(((AbstractScriptProvider)src).getLineNumberOffset());
-						}
-
 						((AbstractBase)dest).setSerializableRuntimeProperty(IScriptProvider.FILENAME,
 							((AbstractBase)src).getSerializableRuntimeProperty(IScriptProvider.FILENAME));
 						((AbstractBase)dest).setSerializableRuntimeProperty(IScriptProvider.TYPE,
