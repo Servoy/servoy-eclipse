@@ -40,7 +40,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.IPageChangedListener;
@@ -73,7 +72,6 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
 import org.json.JSONException;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -92,13 +90,9 @@ import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.persistence.AbstractRepository;
-import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IUserManager;
@@ -117,12 +111,18 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 	private Solution activeSolution;
 	private ExportSolutionModel exportModel;
 
+	private static int HAS_NO_MARKERS = 0;
+	private static int HAS_ERROR_MARKERS = 1;
+	private static int HAS_WARNING_MARKERS = 2;
+
 	private FileSelectionPage fileSelectionPage;
 	private ExportOptionsPage exportOptionsPage;
 	private ModulesSelectionPage modulesSelectionPage;
 	private PasswordPage passwordPage;
 
 	private final IFileAccess workspace;
+
+	private boolean dbDownErrors = false;
 
 	public ExportSolutionWizard()
 	{
@@ -140,9 +140,9 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 
 	/**
 	 * 
-	 * @return true for errors, null for warnings, false for no markers
+	 * @return the HAS_ERROR_MARKERS constant for errors, HAS_WARNING_MARKERS constant for warnings, HAS_NO_MARKERS for no markers
 	 */
-	private Boolean hasMarkers(String[] projects)
+	private int getMarkers(String[] projects)
 	{
 		if (projects != null && projects.length > 0)
 		{
@@ -159,7 +159,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 						{
 							if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_ERROR))
 							{
-								return Boolean.TRUE;
+								return HAS_ERROR_MARKERS;
 							}
 							if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_WARNING))
 							{
@@ -173,9 +173,9 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 			{
 				ServoyLog.logError(ex);
 			}
-			if (hasWarnings) return null;
+			if (hasWarnings) return HAS_WARNING_MARKERS;
 		}
-		return Boolean.FALSE;
+		return HAS_NO_MARKERS;
 	}
 
 	/** 
@@ -221,16 +221,16 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 	public boolean performFinish()
 	{
 		EditorUtil.saveDirtyEditors(getShell(), true);
-		getDialogSettings().put("initialFileName", exportModel.getFileName());
+		getDialogSettings().put("initialFileName", exportModel.getFileName()); //$NON-NLS-1$
 
-		WorkspaceJob exportJob = new WorkspaceJob("Exporting solution '" + activeSolution.getName() + "'")
+		WorkspaceJob exportJob = new WorkspaceJob("Exporting solution '" + activeSolution.getName() + "'") //$NON-NLS-2$
 		{
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 			{
 				int totalDuration = IProgressMonitor.UNKNOWN;
 				if (exportModel.getModulesToExport() != null) totalDuration = (int)(1.42 * exportModel.getModulesToExport().length); // make the main export be 70% of the time, leave the rest for sample data
-				monitor.beginTask("Exporting solution", totalDuration);
+				monitor.beginTask("Exporting solution", totalDuration); //$NON-NLS-1$
 
 				AbstractRepository rep = (AbstractRepository)ServoyModel.getDeveloperRepository();
 
@@ -240,7 +240,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 				EclipseExportI18NHelper eeI18NHelper = new EclipseExportI18NHelper(workspace);
 				IXMLExporter exporter = as.createXMLExporter(rep, sm, eeuc, Settings.getInstance(), as.getDataServer(), as.getClientId(), eeI18NHelper);
 
-				if (fileSelectionPage.dbDownErrors &&
+				if (dbDownErrors &&
 					(exportModel.isExportMetaData() || exportModel.isExportSampleData() || exportModel.isExportI18NData() || exportModel.isExportUsers() || exportModel.isExportReferencedModules()))
 				{
 					prepareDbDownExportData();
@@ -254,14 +254,17 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 						exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword(), tableDefManager, metadataDefManager);
 					monitor.done();
 
-					if (fileSelectionPage.dbDownErrors) Display.getDefault().syncExec(new Runnable()
+					if (dbDownErrors)
 					{
-						public void run()
+						Display.getDefault().syncExec(new Runnable()
 						{
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution exported with errors",
-								"Solution has been exported with errors. This may prevent the solution from functioning well.\nOnly minimal database info has been exported.");
-						}
-					});
+							public void run()
+							{
+								MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution exported with errors", //$NON-NLS-1$
+									"Solution has been exported with errors. This may prevent the solution from functioning well.\nOnly minimal database info has been exported."); //$NON-NLS-1$
+							}
+						});
+					}
 
 					return Status.OK_STATUS;
 				}
@@ -450,45 +453,27 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 
 	private Map<String, List<String>> getNeededServerTables(Solution mainActiveSolution, boolean includeModules, boolean includeI18NData)
 	{
+		DataSourceCollectorVisitor collector = new DataSourceCollectorVisitor();
 		//get modules to export if needed, or just the active project
-		List<Solution> exportedModules = new ArrayList<Solution>();
 		if (includeModules)
 		{
 			ServoyProject[] modules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 			for (ServoyProject module : modules)
 			{
-				exportedModules.add(module.getSolution());
+				module.getEditingSolution().acceptVisitor(collector);
 			}
 		}
-		else exportedModules.add(mainActiveSolution);
+		else mainActiveSolution.acceptVisitor(collector);
 
 		Map<String, List<String>> neededServersTablesMap = new HashMap<String, List<String>>();
-		for (Solution solution : exportedModules)
+		Set<String> dataSources = collector.getDataSources();
+		Set<String> serverNames = DataSourceUtils.getServerNames(dataSources);
+		for (String serverName : serverNames)
 		{
-			Iterator<IPersist> it = solution.getAllObjects();
-			while (it.hasNext())
+			List<String> tableNames = DataSourceUtils.getServerTablenames(dataSources, serverName);
+			for (String tableName : tableNames)
 			{
-				IPersist object = it.next();
-				int objectTypeId = object.getTypeID();
-				if (objectTypeId == IRepository.FORMS)
-				{
-					Form form = ((Form)object);
-					addServerTable(neededServersTablesMap, form.getServerName(), form.getTableName());
-				}
-				else if (objectTypeId == IRepository.RELATIONS)
-				{
-					Relation relation = ((Relation)object);
-					addServerTable(neededServersTablesMap, relation.getPrimaryServerName(), relation.getPrimaryTableName());
-					addServerTable(neededServersTablesMap, relation.getForeignServerName(), relation.getForeignTableName());
-				}
-				else if (objectTypeId == IRepository.VALUELISTS)
-				{
-					ValueList vl = ((ValueList)object);
-					if (vl.getValueListType() == ValueList.DATABASE_VALUES && vl.getDatabaseValuesType() == ValueList.TABLE_VALUES)
-					{
-						addServerTable(neededServersTablesMap, vl.getServerName(), vl.getTableName());
-					}
-				}
+				addServerTable(neededServersTablesMap, serverName, tableName);
 			}
 		}
 
@@ -518,11 +503,28 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 			initialFileName = new File(new File(initialFileName).getParent(), activeSolution.getName() + ".servoy").getAbsolutePath(); //$NON-NLS-1$
 		}
 		exportModel.setFileName(initialFileName);
+
+		int hasErrs = getMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
+		if (hasErrs == HAS_ERROR_MARKERS)
+		{
+			if (hasDbErrorMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() }) == Boolean.TRUE)
+			{
+				dbDownErrors = true;
+			}
+		}
+
 	}
+
+	private ExportConfirmationPage exportConfirmationPage;
 
 	@Override
 	public void addPages()
 	{
+		if (dbDownErrors)
+		{
+			exportConfirmationPage = new ExportConfirmationPage();
+			addPage(exportConfirmationPage);
+		}
 		fileSelectionPage = new FileSelectionPage();
 		addPage(fileSelectionPage);
 		exportOptionsPage = new ExportOptionsPage();
@@ -544,55 +546,70 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 	@Override
 	public boolean canFinish()
 	{
-		if (modulesSelectionPage.hasMarkers == Boolean.TRUE)
-		{
-			if (fileSelectionPage.dbDownErrors && fileSelectionPage.proceedWithExport) return true;
-			return false;
-		}
+		if (this.getContainer().getCurrentPage() == exportConfirmationPage) return false;
+		if (modulesSelectionPage.projectProblemsType == HAS_ERROR_MARKERS && !dbDownErrors) return false;
 		if (this.getContainer().getCurrentPage() == fileSelectionPage) return false;
 		if (exportModel.isExportReferencedModules() && this.getContainer().getCurrentPage() == exportOptionsPage) return false;
 		return exportModel.canFinish();
+	}
+
+	private class ExportConfirmationPage extends WizardPage
+	{
+		private Text message;
+
+		public ExportConfirmationPage()
+		{
+			super("export confirmation page"); //$NON-NLS-1$
+			setTitle("Export solution confirmation"); //$NON-NLS-1$
+			setErrorMessage("The are errors related to the database in the solution"); //$NON-NLS-1$
+		}
+
+		public void createControl(Composite parent)
+		{
+			Composite container = new Composite(parent, SWT.NONE);
+			GridLayout layout = new GridLayout();
+			container.setLayout(layout);
+			layout.numColumns = 1;
+
+			message = new Text(container, SWT.WRAP | SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
+			GridData gridData = new GridData();
+			gridData.horizontalAlignment = GridData.FILL;
+			gridData.verticalAlignment = GridData.FILL;
+			gridData.grabExcessHorizontalSpace = true;
+			gridData.grabExcessVerticalSpace = true;
+			gridData.horizontalSpan = 1;
+			message.setLayoutData(gridData);
+			message.setEditable(false);
+			message.setText("The errors will prevent the solution from functioning well; are you sure you want to proceed with the export?"); //$NON-NLS-1$
+
+			setControl(container);
+			setPageComplete(true);
+		}
+
+		@Override
+		public IWizardPage getPreviousPage()
+		{
+			return null;
+		}
 	}
 
 	private class FileSelectionPage extends WizardPage implements Listener
 	{
 		private Text fileNameText;
 		private Button browseButton;
-		private final Boolean hasMarkers;
-		private boolean proceedWithExport = true;
-		private boolean dbDownErrors = false;
+		private final int projectProblemsType;
 
 		public FileSelectionPage()
 		{
 			super("page1"); //$NON-NLS-1$
 			setTitle("Choose the destination file"); //$NON-NLS-1$
 			setDescription("Select the file where you want your solution exported to"); //$NON-NLS-1$
-			hasMarkers = hasMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
-			if (hasMarkers == Boolean.TRUE)
+			projectProblemsType = getMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
+			if (projectProblemsType == HAS_ERROR_MARKERS && !dbDownErrors)
 			{
-				if (hasDbErrorMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() }) == Boolean.TRUE)
-				{
-					dbDownErrors = true;
-					Display.getDefault().syncExec(new Runnable()
-					{
-						public void run()
-						{
-							MessageDialog dlg = new MessageDialog(
-								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-								"Confirm solution export",
-								null,
-								"There are errors in the solution that will prevent it from functioning well; are you sure you want to proceed with the export?",
-								MessageDialog.ERROR, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 2);
-							int result = dlg.open();
-							if (result == 0) proceedWithExport = true;
-							else proceedWithExport = false;
-						}
-					});
-				}
-
-				setErrorMessage("There are errors in the solution that will prevent it from functioning well. Solve errors from problems view first.");
+				setErrorMessage("There are errors in the solution that will prevent it from functioning well. Solve errors from problems view first."); //$NON-NLS-1$
 			}
-			if (hasMarkers == null)
+			if (projectProblemsType == HAS_WARNING_MARKERS)
 			{
 				setMessage(
 					"There are warnings in the solution that may prevent it from functioning well. You may want to solve warnings from problems view first.", IMessageProvider.WARNING); //$NON-NLS-1$
@@ -662,13 +679,9 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 		public boolean canFlipToNextPage()
 		{
 			boolean result = true;
-			if (hasMarkers == Boolean.TRUE)
-			{
-				if (!dbDownErrors) return false;
-				else if (dbDownErrors && !proceedWithExport) result = false;
-			}
+			if (projectProblemsType == HAS_ERROR_MARKERS && !dbDownErrors) return false;
 
-			boolean messageSet = (hasMarkers == null);
+			boolean messageSet = (projectProblemsType == HAS_WARNING_MARKERS);
 			if (exportModel.getFileName() == null) return false;
 			if (fileNameText.getText().length() == 0)
 			{
@@ -925,7 +938,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 	private class ModulesSelectionPage extends WizardPage implements ICheckStateListener
 	{
 		CheckboxTreeViewer treeViewer;
-		public Boolean hasMarkers = Boolean.FALSE;
+		public int projectProblemsType = HAS_NO_MARKERS;
 
 		protected ModulesSelectionPage()
 		{
@@ -997,13 +1010,13 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 		public void checkStateChanged(CheckStateChangedEvent event)
 		{
 			initializeModulesToExport();
-			hasMarkers = hasMarkers(exportModel.getModulesToExport());
+			projectProblemsType = getMarkers(exportModel.getModulesToExport());
 			setErrorMessage(null);
-			if (hasMarkers == Boolean.TRUE)
+			if (projectProblemsType == HAS_ERROR_MARKERS)
 			{
 				setErrorMessage("There are errors in the solution that will prevent it from functioning well. Solve errors from problems view first.");
 			}
-			if (hasMarkers == null)
+			if (projectProblemsType == HAS_WARNING_MARKERS)
 			{
 				setMessage(
 					"There are warnings in the solution that may prevent it from functioning well. You may want to solve warnings from problems view first.", IMessageProvider.WARNING); //$NON-NLS-1$
@@ -1034,7 +1047,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 		@Override
 		public boolean canFlipToNextPage()
 		{
-			return (hasMarkers != Boolean.TRUE) && super.canFlipToNextPage();
+			return (projectProblemsType == HAS_NO_MARKERS) && super.canFlipToNextPage();
 		}
 	}
 
