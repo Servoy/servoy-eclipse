@@ -19,10 +19,12 @@ package com.servoy.eclipse.core.quickfix;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.ui.IMarkerResolution;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.MethodArgument;
@@ -88,7 +90,28 @@ public class AddTemplateArgumentsQuickFix implements IMarkerResolution
 								template.getSignature().getType(), template.getSignature().getDescription()), template.getArguments(), source, false);
 							JSDocScriptTemplates prefs = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject().getProject());
 							String userTemplate = prefs.getMethodTemplate();
-							method.setDeclaration(mixedTemplate.getMethodDeclaration(null, null, userTemplate));
+							String comment = SolutionSerializer.getComment(method, null, ServoyModel.getDeveloperRepository());
+							String methodDeclaration = mixedTemplate.getMethodDeclaration(null, null, userTemplate);
+							if (comment != null && comment.indexOf(SolutionSerializer.PROPERTIESKEY) != -1)
+							{
+								int methodDeclarionCommentEnd = methodDeclaration.indexOf(SolutionSerializer.SV_COMMENT_END);
+								String methodDoc = methodDeclaration.substring(0, methodDeclarionCommentEnd);
+								StringBuilder sb = new StringBuilder();
+								int startIndex = methodDoc.indexOf("@param");
+								while (startIndex != -1)
+								{
+									int endIndex = methodDoc.indexOf("\n", startIndex);
+									sb.append(methodDoc.subSequence(startIndex, endIndex));
+									sb.append("\n * ");
+									startIndex = methodDoc.indexOf("@param", startIndex + 5);
+								}
+								sb.append("\n * ");
+								int propertiesIndex = comment.indexOf(SolutionSerializer.PROPERTIESKEY);
+								comment = comment.substring(0, propertiesIndex) + sb.toString() + comment.substring(propertiesIndex);
+								methodDeclaration = comment +
+									methodDeclaration.substring(methodDeclarionCommentEnd + SolutionSerializer.SV_COMMENT_END.length());
+							}
+							method.setDeclaration(methodDeclaration);
 							method.flagChanged();
 						}
 
