@@ -28,6 +28,7 @@ import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Table;
 
@@ -94,14 +95,18 @@ public class RelatedFormsLabelProvider extends LabelProvider implements IPersist
 			Image image = null;
 			if (element instanceof Table)
 			{
+				image = Activator.getDefault().loadImageFromBundle("portal.gif"); //$NON-NLS-1$
 				try
 				{
-					int tableType = ServoyModel.getServerManager().getServer(((Table)element).getServerName()).getTableType(((Table)element).getName());
-					if (tableType == ITable.VIEW)
+					IServer server = ServoyModel.getServerManager().getServer(((Table)element).getServerName());
+					if (server != null)
 					{
-						image = Activator.getDefault().loadImageFromBundle("view.png"); //$NON-NLS-1$
+						int tableType = server.getTableType(((Table)element).getName());
+						if (tableType == ITable.VIEW)
+						{
+							image = Activator.getDefault().loadImageFromBundle("view.png"); //$NON-NLS-1$
+						}
 					}
-					else image = Activator.getDefault().loadImageFromBundle("portal.gif"); //$NON-NLS-1$
 				}
 				catch (Exception e)
 				{
