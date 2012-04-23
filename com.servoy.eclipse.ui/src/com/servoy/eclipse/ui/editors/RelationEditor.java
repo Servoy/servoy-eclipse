@@ -977,11 +977,11 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 		{
 			if (column.getTable().getName().equals(getRelation().getPrimaryTableName()))
 			{
-				createInput(false, true, true);
+				fromCache = null;
 			}
 			if (column.getTable().getName().equals(getRelation().getForeignTableName()))
 			{
-				createInput(true, false, true);
+				toCache = null;
 			}
 		}
 		catch (Exception ex)
