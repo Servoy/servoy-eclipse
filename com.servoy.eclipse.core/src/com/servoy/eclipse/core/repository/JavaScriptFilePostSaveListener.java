@@ -113,12 +113,12 @@ public class JavaScriptFilePostSaveListener implements IPostSaveListener
 			final ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName());
 			final SolutionDeserializer sd = new SolutionDeserializer(ServoyModel.getDeveloperRepository(), servoyProject, file, compilationUnit.getSource());
 			final IContainer workspace = project.getParent();
-			Set<IPersist> changedScriptMethods = servoyModel.handleChangedFiles(project, solution, Collections.singletonList(file), servoyProject, workspace,
+			Set<IPersist> changedScriptElements = servoyModel.handleChangedFiles(project, solution, Collections.singletonList(file), servoyProject, workspace,
 				sd);
 			// add this file to the ignore once list, so that the real save will not parse it again.
 			servoyModel.addIgnoreFile(file);
 			Set<IFile> recreatedFiles = new HashSet<IFile>();
-			for (IPersist persist : changedScriptMethods)
+			for (IPersist persist : changedScriptElements)
 			{
 				IFile scriptFile = workspace.getFile(new Path(SolutionSerializer.getScriptPath(persist, false)));
 				if (!recreatedFiles.add(scriptFile))

@@ -132,7 +132,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
-import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.ISequenceProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerConfigListener;
@@ -1938,9 +1938,9 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		final IContainer workspace = project.getParent();
 
 		SolutionDeserializer sd = new SolutionDeserializer(getDeveloperRepository(), servoyProject);
-		final Set<IPersist> changedScriptMethods = handleChangedFiles(project, solution, changedFiles, servoyProject, workspace, sd);
+		final Set<IPersist> changedScriptElements = handleChangedFiles(project, solution, changedFiles, servoyProject, workspace, sd);
 		// Regenerate script files for parents that have changed script elements.
-		if (changedScriptMethods.size() > 0)
+		if (changedScriptElements.size() > 0)
 		{
 			final Job job = new UIJob("Check changed script files")
 			{
@@ -1950,7 +1950,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				{
 					//if (true) return Status.OK_STATUS;
 					Set<IFile> recreatedFiles = new HashSet<IFile>();
-					for (IPersist persist : changedScriptMethods)
+					for (IPersist persist : changedScriptElements)
 					{
 						IFile scriptFile = workspace.getFile(new Path(SolutionSerializer.getScriptPath(persist, false)));
 						if (!recreatedFiles.add(scriptFile))
@@ -2075,7 +2075,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 
 		final LinkedHashMap<UUID, IPersist> changed = new LinkedHashMap<UUID, IPersist>();
 		final LinkedHashMap<UUID, IPersist> changedEditing = new LinkedHashMap<UUID, IPersist>();
-		final Set<IPersist> changedScriptMethods = new HashSet<IPersist>();
+		final Set<IPersist> changedScriptElements = new HashSet<IPersist>();
 		solution.acceptVisitor(new IPersistVisitor()
 		{
 			public Object visit(IPersist persist)
@@ -2096,9 +2096,9 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 					}
 
 					// find js-files that may have to be recreated
-					if (persist instanceof IVariable || persist instanceof IScriptProvider)
+					if (persist instanceof IScriptElement)
 					{
-						changedScriptMethods.add(persist);
+						changedScriptElements.add(persist);
 					}
 				}
 				return IPersistVisitor.CONTINUE_TRAVERSAL;
@@ -2225,7 +2225,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		{
 			fireActiveProjectUpdated(IActiveProjectListener.SECURITY_INFO_CHANGED);
 		}
-		return changedScriptMethods;
+		return changedScriptElements;
 	}
 
 	private void handleChangedFilesInResourcesProject(List<IResourceDelta> al)

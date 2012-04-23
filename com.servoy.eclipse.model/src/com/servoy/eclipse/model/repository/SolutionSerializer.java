@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
@@ -49,6 +48,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
@@ -155,17 +155,13 @@ public class SolutionSerializer
 
 		private Integer getLineNumber(AbstractBase ab)
 		{
-			if (ab instanceof IScriptProvider)
+			if (ab instanceof IScriptElement)
 			{
-				IScriptProvider sp = (IScriptProvider)ab;
-				if (sp.getLineNumberOffset() == 0) return null;
-				return Integer.valueOf(sp.getLineNumberOffset());
-			}
-			else if (ab instanceof ScriptVariable)
-			{
-				ScriptVariable svar = (ScriptVariable)ab;
-				if (svar.getLineNumberOffset() == 0) return null;
-				return Integer.valueOf(svar.getLineNumberOffset());
+				IScriptElement sp = (IScriptElement)ab;
+				if (sp.getLineNumberOffset() != 0)
+				{
+					return Integer.valueOf(sp.getLineNumberOffset());
+				}
 			}
 			return null;
 		}
@@ -189,7 +185,8 @@ public class SolutionSerializer
 	public static final String PROPERTIESKEY = "@properties="; //$NON-NLS-1$
 	public static final String TYPEKEY = "@type"; //$NON-NLS-1$
 
-	public static String generateScriptFile(final ISupportChilds parent, final IDeveloperRepository repository, final String userTemplate)
+	public static String generateScriptFile(final ISupportChilds parent, final String scopeName, final IDeveloperRepository repository,
+		final String userTemplate)
 	{
 		final Map<Pair<String, String>, Map<IPersist, Object>> projectContents = new HashMap<Pair<String, String>, Map<IPersist, Object>>();//filepathname -> map(persist -> contents)
 		parent.acceptVisitor(new IPersistVisitor()
@@ -198,28 +195,28 @@ public class SolutionSerializer
 			{
 				if (p == parent) return CONTINUE_TRAVERSAL;
 
-				if (p instanceof IVariable || p instanceof IScriptProvider)
+				if (p instanceof IScriptElement)
 				{
-					Pair<String, String> filepathname = getFilePath(p, false);
-					Map<IPersist, Object> fileContents = projectContents.get(filepathname);
-					if (fileContents == null)
+					if (scopeName == null || scopeName.equals(((IScriptElement)p).getScopeName()))
 					{
-						fileContents = new HashMap<IPersist, Object>();
-						projectContents.put(filepathname, fileContents);
+						Pair<String, String> filepathname = getFilePath(p, false);
+						Map<IPersist, Object> fileContents = projectContents.get(filepathname);
+						if (fileContents == null)
+						{
+							fileContents = new HashMap<IPersist, Object>();
+							projectContents.put(filepathname, fileContents);
+						}
+						Object val = serializePersist(p, true, repository, userTemplate);
+						if (val != null) fileContents.put(p, val);
 					}
-					Object val = serializePersist(p, true, repository, userTemplate);
-					if (val != null) fileContents.put(p, val);
 				}
 				return CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
 			}
 		});
 
 		//write all object files
-		Iterator<Entry<Pair<String, String>, Map<IPersist, Object>>> it = projectContents.entrySet().iterator();
-		while (it.hasNext())
+		for (Map<IPersist, Object> fileContents : projectContents.values())
 		{
-			Entry<Pair<String, String>, Map<IPersist, Object>> elem = it.next();
-			Map<IPersist, Object> fileContents = elem.getValue();
 			AbstractBase[] persistArray = fileContents.keySet().toArray(new AbstractBase[fileContents.size()]);
 			Arrays.sort(persistArray, VARS_METHODS);
 
@@ -466,7 +463,7 @@ public class SolutionSerializer
 	public static boolean isCompositeItem(IPersist p)
 	{
 		return !(p instanceof Media || p instanceof IRootObject || p instanceof Relation || p instanceof ValueList || p instanceof Form ||
-			p instanceof TableNode || p instanceof IScriptProvider || p instanceof IVariable);
+			p instanceof TableNode || p instanceof IScriptElement);
 	}
 
 	public static String getComment(IPersist persist, String userTemplate, final IDeveloperRepository repository)
@@ -584,7 +581,7 @@ public class SolutionSerializer
 		}
 		else
 		{
-			if (isCompositeWithItems(persist.getParent()) && !(persist instanceof IScriptProvider || persist instanceof IVariable)) // safety, should never get here anyway
+			if (isCompositeWithItems(persist.getParent()) && !(persist instanceof IScriptElement)) // safety, should never get here anyway
 			{
 				return null;
 			}
@@ -600,7 +597,7 @@ public class SolutionSerializer
 			}
 
 			StringBuilder sb = new StringBuilder();
-			if (persist instanceof IScriptProvider || persist instanceof IVariable)
+			if (persist instanceof IScriptElement)
 			{
 				obj.setNewLines(false);
 				obj.remove(StaticContentSpecLoader.PROPERTY_METHODCODE.getPropertyName());
@@ -877,8 +874,7 @@ public class SolutionSerializer
 			while (it.hasNext())
 			{
 				child = it.next();
-				if (!(child instanceof IScriptProvider || child instanceof IVariable)) itemsArrayList.add(generateJSONObject(child, forceRecursive,
-					makeFlattened, repository));
+				if (!(child instanceof IScriptElement)) itemsArrayList.add(generateJSONObject(child, forceRecursive, makeFlattened, repository));
 			}
 			if (itemsArrayList.size() > 0)
 			{
@@ -944,7 +940,7 @@ public class SolutionSerializer
 		if (persist == null) return null;
 
 		//combined cases
-		if (persist instanceof IVariable || persist instanceof IScriptProvider)
+		if (persist instanceof IScriptElement)
 		{
 			return getScriptName(persist, useOldName);
 		}

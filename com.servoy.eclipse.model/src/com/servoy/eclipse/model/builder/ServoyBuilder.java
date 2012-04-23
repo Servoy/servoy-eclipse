@@ -86,7 +86,6 @@ import com.servoy.j2db.dataprocessing.IColumnConverter;
 import com.servoy.j2db.dataprocessing.ITypedColumnConverter;
 import com.servoy.j2db.dataprocessing.IUIConverter;
 import com.servoy.j2db.persistence.AbstractBase;
-import com.servoy.j2db.persistence.AbstractScriptProvider;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Column;
@@ -105,6 +104,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -115,7 +115,6 @@ import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
@@ -928,45 +927,41 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						type = "variable"; //$NON-NLS-1$
 					}
 					String otherChildsType = "method"; //$NON-NLS-1$
-					Iterator<IPersist> allObjects = duplicatedParent.getRight().getAllObjects();
-					while (allObjects.hasNext())
+					for (IPersist child : Utils.iterate(duplicatedParent.getRight().getAllObjects()))
 					{
-						IPersist child = allObjects.next();
 						if ((child instanceof IScriptProvider || child instanceof ScriptVariable) && ((ISupportName)child).getName().equals(name))
 						{
-							Integer lineNumber = Integer.valueOf(0);
-							if (child instanceof ScriptVariable)
+							int lineNumber;
+							if (child instanceof IScriptElement)
 							{
-								otherChildsType = "variable"; //$NON-NLS-1$
-								lineNumber = Integer.valueOf(((ScriptVariable)child).getLineNumberOffset());
+								if (child instanceof ScriptVariable)
+								{
+									otherChildsType = "variable"; //$NON-NLS-1$
+								}
+								lineNumber = ((IScriptElement)child).getLineNumberOffset();
 							}
-							else if (child instanceof AbstractScriptProvider)
-							{
-								lineNumber = Integer.valueOf(((AbstractScriptProvider)child).getLineNumberOffset());
-							}
-							if (persist instanceof ScriptVariable && otherChildsType.equals("variable") && !duplicateParentsName.equals(parentsName)) //$NON-NLS-1$
-							{
+							else lineNumber = 0;
+//							if (persist instanceof ScriptVariable && otherChildsType.equals("variable") && !duplicateParentsName.equals(parentsName)) //$NON-NLS-1$
+//							{
 //								severity = IMarker.SEVERITY_WARNING;
-							}
+//							}
 							ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(type, name, parentsName);
-							addMarker(project, mk.getType(), mk.getText(), lineNumber == null ? -1 : lineNumber.intValue(), DUPLICATION_DUPLICATE_ENTITY_FOUND,
-								IMarker.PRIORITY_NORMAL, null, child);
+							addMarker(project, mk.getType(), mk.getText(), lineNumber, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, child);
 							break;
 						}
 					}
-					Integer lineNumber = Integer.valueOf(0);
-					if (persist instanceof ScriptVariable)
+					int lineNumber;
+					if (persist instanceof IScriptElement)
 					{
-						otherChildsType = "variable"; //$NON-NLS-1$
-						lineNumber = Integer.valueOf(((ScriptVariable)persist).getLineNumberOffset());
+						if (persist instanceof ScriptVariable)
+						{
+							otherChildsType = "variable"; //$NON-NLS-1$
+						}
+						lineNumber = ((IScriptElement)persist).getLineNumberOffset();
 					}
-					else if (persist instanceof AbstractScriptProvider)
-					{
-						lineNumber = Integer.valueOf(((AbstractScriptProvider)persist).getLineNumberOffset());
-					}
+					else lineNumber = 0;
 					ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(otherChildsType, name, duplicateParentsName);
-					addMarker(project, mk.getType(), mk.getText(), lineNumber == null ? -1 : lineNumber.intValue(), DUPLICATION_DUPLICATE_ENTITY_FOUND,
-						IMarker.PRIORITY_NORMAL, null, persist);
+					addMarker(project, mk.getType(), mk.getText(), lineNumber, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
 
 				}
 				Set<Pair<String, ISupportChilds>> parents = parentScopeSet;
@@ -2836,7 +2831,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							addBadStructureMarker(o, servoyProject, project);
 						}
 
-						if (!(o instanceof IVariable) && !(o instanceof IScriptProvider) &&
+						if (!(o instanceof IScriptElement) &&
 							!Utils.getAsBoolean(((AbstractBase)o).getRuntimeProperty(SolutionDeserializer.POSSIBLE_DUPLICATE_UUID)))
 						{
 							// remove this property as it takes too much memory
@@ -4330,16 +4325,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			marker.setAttribute(IMarker.SEVERITY, severity);
 			marker.setAttribute(IMarker.PRIORITY, priority);
 			int lineNmbr = lineNumber;
-			if (lineNmbr == -1)
+			if (lineNmbr == -1 && persist instanceof IScriptElement)
 			{
-				if (persist instanceof ScriptVariable)
-				{
-					lineNmbr = ((ScriptVariable)persist).getLineNumberOffset();
-				}
-				else if (persist instanceof IScriptProvider)
-				{
-					lineNmbr = ((IScriptProvider)persist).getLineNumberOffset();
-				}
+				lineNmbr = ((IScriptElement)persist).getLineNumberOffset();
 			}
 			if (lineNmbr > 0)
 			{

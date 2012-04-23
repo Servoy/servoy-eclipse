@@ -34,8 +34,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.IScriptProvider;
-import com.servoy.j2db.persistence.IVariable;
+import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
@@ -99,9 +98,9 @@ public class DuplicateUuidQuickFix implements IMarkerResolution
 						fileAccess.delete(fileRelativePath);
 					}
 					Object content = null;
-					if (persist instanceof IVariable || persist instanceof IScriptProvider)
+					if (persist instanceof IScriptElement)
 					{
-						content = SolutionSerializer.generateScriptFile(persist.getParent(), repository, null);
+						content = SolutionSerializer.generateScriptFile(persist.getParent(), ((IScriptElement)persist).getScopeName(), repository, null);
 					}
 					else
 					{

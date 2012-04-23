@@ -39,11 +39,10 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SortedList;
 
@@ -87,7 +86,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 				{
 					for (IPersist persist : flattenedForm.getAllObjectsAsList())
 					{
-						if (persist instanceof ScriptVariable || persist instanceof IScriptProvider)
+						if (persist instanceof IScriptElement)
 						{
 							continue;
 						}
@@ -150,7 +149,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 					availableCategories = new HashSet<Object>();
 					for (IPersist persist : flattenedForm.getAllObjectsAsList())
 					{
-						if (persist instanceof ScriptVariable || persist instanceof IScriptProvider)
+						if (persist instanceof IScriptElement)
 						{
 							continue;
 						}
@@ -181,7 +180,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 				{
 					for (IPersist persist : flattenedForm.getAllObjectsAsList())
 					{
-						if (persist instanceof ScriptVariable || persist instanceof IScriptProvider || persist instanceof Part)
+						if (persist instanceof IScriptElement || persist instanceof Part)
 						{
 							continue;
 						}

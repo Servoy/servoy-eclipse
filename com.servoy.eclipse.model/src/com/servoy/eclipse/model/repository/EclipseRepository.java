@@ -60,10 +60,9 @@ import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRemoteRepository;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
-import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportChilds;
-import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
@@ -567,7 +566,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 		}
 
 		final List<IPersist> processedNodes = new ArrayList<IPersist>();
-		final List<IPersist> scriptsToRegenerate = new ArrayList<IPersist>();
+		final List<IScriptElement> scriptsToRegenerate = new ArrayList<IScriptElement>();
 
 		// visit each node, find deletions and renames
 		IPersistVisitor persistVisitor = new IPersistVisitor()
@@ -592,9 +591,9 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 					{
 						deleteList.addAll(parentsWithDeletedChildren.get(toDelete.getUUID()));
 					}
-					if (toDelete instanceof IVariable || toDelete instanceof IScriptProvider)
+					if (toDelete instanceof IScriptElement)
 					{
-						scriptsToRegenerate.add(toDelete);
+						scriptsToRegenerate.add((IScriptElement)toDelete);
 					}
 					else if (SolutionSerializer.isCompositeItem(toDelete))
 					{
@@ -651,7 +650,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 
 				// rename files from renamed objects
 				if (o.isChanged() && o instanceof AbstractBase && ((AbstractBase)o).getRuntimeProperty(AbstractBase.NameChangeProperty) != null &&
-					!(o instanceof IVariable) && !(o instanceof IScriptProvider) && !SolutionSerializer.isCompositeItem(o))
+					!(o instanceof IScriptElement) && !SolutionSerializer.isCompositeItem(o))
 				{
 					Pair<String, String> fileFromPath = SolutionSerializer.getFilePath(o, true);
 					String fileRelativePath = fileFromPath.getLeft() + fileFromPath.getRight();
@@ -748,7 +747,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 		}
 
 		IDeveloperRepository repository = ApplicationServerSingleton.get().getDeveloperRepository(); // why not use "this" instead?
-		if ((node instanceof IVariable || node instanceof IScriptProvider) && !nodeDeleted && node.isChanged())
+		if (node instanceof IScriptElement && !nodeDeleted && node.isChanged())
 		{
 			// if the node itself is a method or variable, and has changed content, then we must regenerate
 			// the whole script file (just like for deleted script members) - so:
@@ -757,7 +756,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 			// 2. modified script members that have "node" as ancestor will be serialized correctly with SolutionSerializer.writePersist (the else branch of this if)
 			// 3. (the case for this branch) the "node" itself is a modified script member => you cannot use SolutionSerializer.writePersist
 			// because that would delete all other script members from that script file so you need to regenerate this separately too
-			scriptsToRegenerate.add(node);
+			scriptsToRegenerate.add((IScriptElement)node);
 		}
 		else if (!nodeDeleted || node instanceof Media) // deleted Media, have to rewrite medias.obj
 		{
@@ -766,13 +765,13 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 
 		// regenerate the script files for parents that have deleted scripts
 		Set<IFile> scriptFiles = new HashSet<IFile>();
-		for (IPersist scriptToRegenerate : scriptsToRegenerate)
+		for (IScriptElement scriptToRegenerate : scriptsToRegenerate)
 		{
-			final IFile scriptFile = ResourcesPlugin.getWorkspace().getRoot().getFile(
-				new Path(SolutionSerializer.getScriptPath(scriptToRegenerate.getParent(), false)));
+			final IFile scriptFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(scriptToRegenerate, false)));
 			if (scriptFiles.add(scriptFile))
 			{
-				final String fileContent = SolutionSerializer.generateScriptFile(scriptToRegenerate.getParent(), repository, null);
+				final String fileContent = SolutionSerializer.generateScriptFile(scriptToRegenerate.getParent(), scriptToRegenerate.getScopeName(), repository,
+					null);
 				if (scriptFile.exists())
 				{
 					if (fileContent.trim().length() > 0)

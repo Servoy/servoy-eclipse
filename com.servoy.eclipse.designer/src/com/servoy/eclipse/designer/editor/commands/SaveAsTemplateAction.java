@@ -43,12 +43,12 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
-import com.servoy.j2db.persistence.IScriptProvider;
-import com.servoy.j2db.persistence.IVariable;
+import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
@@ -192,11 +192,9 @@ public class SaveAsTemplateAction extends SelectionAction
 		{
 			resourceType = StringResource.FORM_TEMPLATE;
 			// just the form, add all non-script children
-			Iterator<IPersist> allObjects = form.getAllObjects();
-			while (allObjects.hasNext())
+			for (IPersist persist : Utils.iterate(form.getAllObjects()))
 			{
-				IPersist persist = allObjects.next();
-				if (!(persist instanceof IVariable || persist instanceof IScriptProvider))
+				if (!(persist instanceof IScriptElement))
 				{
 					persists.add(persist);
 				}

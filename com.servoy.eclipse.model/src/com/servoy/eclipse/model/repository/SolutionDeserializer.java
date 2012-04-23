@@ -90,13 +90,13 @@ import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -692,7 +692,7 @@ public class SolutionDeserializer
 						{
 							public Object visit(IPersist o)
 							{
-								if ((o instanceof IScriptProvider || o instanceof IVariable) && !o.getParent().equals(parent))
+								if (o instanceof IScriptElement && !o.getParent().equals(parent))
 								{
 									JSONObject jsonObject = noParentDuplicates.get(o.getUUID());
 									if (jsonObject != null)
@@ -1658,12 +1658,9 @@ public class SolutionDeserializer
 			if (SolutionSerializer.isCompositeWithItems(retval))
 			{
 				// also flag items that are stored in the same file; otherwise they will never be flagged
-				Iterator<IPersist> iterator = ((ISupportChilds)retval).getAllObjects();
-				IPersist p;
-				while (iterator.hasNext())
+				for (IPersist p : Utils.iterate(((ISupportChilds)retval).getAllObjects()))
 				{
-					p = iterator.next();
-					if (!(p instanceof IScriptProvider || p instanceof IVariable)) p.flagChanged();
+					if (!(p instanceof IScriptElement)) p.flagChanged();
 				}
 			}
 		}

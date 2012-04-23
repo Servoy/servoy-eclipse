@@ -50,9 +50,9 @@ import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportChilds;
-import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
@@ -320,7 +320,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 						// media bytes are not in content spec
 						((Media)dest).setPermMediaData(((Media)src).getMediaData());
 					}
-					if (src instanceof IScriptProvider || src instanceof IVariable)
+					if (src instanceof IScriptElement)
 					{
 						((AbstractBase)dest).setSerializableRuntimeProperty(IScriptProvider.FILENAME,
 							((AbstractBase)src).getSerializableRuntimeProperty(IScriptProvider.FILENAME));

@@ -44,9 +44,8 @@ import com.servoy.eclipse.ui.property.SavingPersistPropertySource;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.Media;
-import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Style;
@@ -116,7 +115,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 				{
 					persist = (IPersist)realObject;
 				}
-				if (persist instanceof ScriptVariable || persist instanceof IScriptProvider)
+				if (persist instanceof IScriptElement)
 				{
 					autoSave = true;
 				}
@@ -148,7 +147,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 		else if (obj instanceof IPersist)
 		{
 			persist = (IPersist)obj;
-			autoSave = persist instanceof Solution || persist instanceof ScriptVariable || persist instanceof IScriptProvider;
+			autoSave = persist instanceof Solution || persist instanceof IScriptElement;
 			// retargetToEditor must be true so that persist saves from anywhere (like quickfix)
 			// retargetToEditor = false;
 		}
