@@ -2405,6 +2405,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		newActionInListPrimary.registerAction(UserNodeType.STYLES, newStyle);
 		newActionInListPrimary.registerAction(UserNodeType.ALL_RELATIONS, newRelation);
+		newActionInListPrimary.registerAction(UserNodeType.GLOBALRELATIONS, newRelation);
 		newActionInListPrimary.registerAction(UserNodeType.RELATIONS, newRelation);
 
 		newActionInListSecondary.registerAction(UserNodeType.TABLE, newForm);
