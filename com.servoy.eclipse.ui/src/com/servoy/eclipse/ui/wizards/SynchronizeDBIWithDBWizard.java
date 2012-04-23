@@ -1034,8 +1034,12 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 						try
 						{
 							IServerInternal s = (IServerInternal)((Pair)element).getLeft();
-							int tableType = s.getTable((String)((Pair)element).getRight()).getTableType();
-							if (tableType == ITable.VIEW) return image3;
+							Table table = s.getTable((String)((Pair)element).getRight());
+							if (table != null)
+							{
+								int tableType = table.getTableType();
+								if (tableType == ITable.VIEW) return image3;
+							}
 						}
 						catch (RepositoryException e)
 						{
