@@ -46,9 +46,4 @@ public class TeamProjectSetInstall implements InstallItem
 	{
 		return teamProjectSetFile.getName();
 	}
-
-	public boolean isRestartRequired()
-	{
-		return false;
-	}
 }

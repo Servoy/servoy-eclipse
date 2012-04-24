@@ -29,6 +29,4 @@ public interface InstallItem
 	public void install(IProgressMonitor monitor) throws Exception;
 
 	public String getName();
-
-	public boolean isRestartRequired();
 }

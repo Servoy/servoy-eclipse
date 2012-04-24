@@ -18,6 +18,7 @@
 package com.servoy.eclipse.marketplace;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
@@ -27,12 +28,13 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.extension.ExtensionUtils;
 import com.servoy.extension.parser.Content;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.util.Debug;
 
 
 /**
@@ -43,11 +45,11 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
  */
 public class ContentInstaller
 {
-	private final Content content;
+	private final ContentWrapper contentWrapper;
 
-	public ContentInstaller(Content content)
+	public ContentInstaller(File expFile, Content content)
 	{
-		this.content = content;
+		this.contentWrapper = new ContentWrapper(expFile, content, getInstallDir());
 	}
 
 	public void installAll()
@@ -59,56 +61,37 @@ public class ContentInstaller
 	{
 		for (final InstallItem installItem : installItems)
 		{
-			if (MessageDialog.openConfirm(UIUtils.getActiveShell(), "Servoy Marketplace",
-				"You have choosen to install the follwing product from the Servoy Marketplace\n\n" + installItem.getName() + "\n\nProceed with the install ?"))
+			try
 			{
-				try
+				MarketplaceProgressMonitorDialog progressMonitorDialog = new MarketplaceProgressMonitorDialog(UIUtils.getActiveShell(), installItem.getName());
+				progressMonitorDialog.run(true, false, new IRunnableWithProgress()
 				{
-					MarketplaceProgressMonitorDialog progressMonitorDialog = new MarketplaceProgressMonitorDialog(UIUtils.getActiveShell(),
-						installItem.getName());
-					progressMonitorDialog.run(true, false, new IRunnableWithProgress()
-					{
 
-						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+					{
+						try
 						{
-							try
-							{
-								installItem.install(monitor);
-								if (installItem.isRestartRequired())
-								{
-									Display.getDefault().syncExec(new Runnable()
-									{
-										public void run()
-										{
-											if (MessageDialog.openQuestion(UIUtils.getActiveShell(), "Servoy Marketplace",
-												"Servoy Developer must be restarted to complete the installation.\n\nDo you want to restart now ?"))
-											{
-												PlatformUI.getWorkbench().restart();
-											}
-										}
-									});
-								}
-							}
-							catch (final Exception ex)
-							{
-								Display.getDefault().syncExec(new Runnable()
-								{
-									public void run()
-									{
-										Throwable cause = ex.getCause();
-										String msg = cause != null ? cause.getMessage() : ex.getMessage();
-										MessageDialog.openError(UIUtils.getActiveShell(), "Servoy Marketplace", "Error installing " + installItem.getName() +
-											".\n\n" + msg);
-									}
-								});
-							}
+							installItem.install(monitor);
 						}
-					});
-				}
-				catch (Exception ex1)
-				{
-					ServoyLog.logError(ex1);
-				}
+						catch (final Exception ex)
+						{
+							Display.getDefault().syncExec(new Runnable()
+							{
+								public void run()
+								{
+									Throwable cause = ex.getCause();
+									String msg = cause != null ? cause.getMessage() : ex.getMessage();
+									MessageDialog.openError(UIUtils.getActiveShell(), "Servoy Marketplace", "Error installing " + installItem.getName() +
+										".\n\n" + msg);
+								}
+							});
+						}
+					}
+				});
+			}
+			catch (Exception ex1)
+			{
+				ServoyLog.logError(ex1);
 			}
 		}
 	}
@@ -119,7 +102,9 @@ public class ContentInstaller
 		allInstallItems.addAll(getSolutionInstallItems());
 		allInstallItems.addAll(getUpdateURLInstallItems());
 		allInstallItems.addAll(getTeamProjectSetInstallItems());
-		allInstallItems.addAll(getStyleInstallItems());
+
+		StylesInstall styleInstallItem = getStylesInstallItem();
+		if (styleInstallItem != null) allInstallItems.add(styleInstallItem);
 
 		return allInstallItems;
 	}
@@ -128,7 +113,7 @@ public class ContentInstaller
 	{
 		ArrayList<InstallItem> solutionInstallItems = new ArrayList<InstallItem>();
 
-		File[] solutionFiles = content.getSolutionFiles(getInstallDir());
+		File[] solutionFiles = contentWrapper.getSolutionFiles();
 		if (solutionFiles != null)
 		{
 			for (File solutionFile : solutionFiles)
@@ -142,34 +127,26 @@ public class ContentInstaller
 	{
 		ArrayList<InstallItem> updateURLInstallItems = new ArrayList<InstallItem>();
 
-		if (content.eclipseUpdateSiteURLs != null)
+		if (contentWrapper.getEclipseUpdateSiteURLs() != null)
 		{
-			for (String updateURL : content.eclipseUpdateSiteURLs)
+			for (String updateURL : contentWrapper.getEclipseUpdateSiteURLs())
 				updateURLInstallItems.add(new UpdateURLInstall(updateURL));
 		}
 
 		return updateURLInstallItems;
 	}
 
-	public ArrayList<InstallItem> getStyleInstallItems()
+	public StylesInstall getStylesInstallItem()
 	{
-		ArrayList<InstallItem> styleInstallItems = new ArrayList<InstallItem>();
-
-		File[] styleFiles = content.getStyleFiles(getInstallDir());
-		if (styleFiles != null)
-		{
-			for (File styleFile : styleFiles)
-				styleInstallItems.add(new StyleInstall(styleFile));
-		}
-
-		return styleInstallItems;
+		File[] styleFiles = contentWrapper.getStyleFiles();
+		return styleFiles != null ? new StylesInstall(styleFiles) : null;
 	}
 
 	public ArrayList<InstallItem> getTeamProjectSetInstallItems()
 	{
 		ArrayList<InstallItem> teamProjectSetInstallItems = new ArrayList<InstallItem>();
 
-		File[] teamProjectSetFiles = content.getTeamProjectSets(getInstallDir());
+		File[] teamProjectSetFiles = contentWrapper.getTeamProjectSets();
 		if (teamProjectSetFiles != null)
 		{
 			for (File teamProjectSetFile : teamProjectSetFiles)
@@ -179,12 +156,95 @@ public class ContentInstaller
 		return teamProjectSetInstallItems;
 	}
 
+
 	private String getInstallDir()
 	{
 		String installDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
 		installDir = installDir.substring(0, installDir.indexOf("application_server/"));
 
 		return installDir;
+	}
+
+
+	class ContentWrapper
+	{
+		private final File expFileObj;
+		private final Content contentObj;
+		private final String installDir;
+
+		ContentWrapper(File expFile, Content content, String installDir)
+		{
+			expFileObj = expFile;
+			contentObj = content;
+			this.installDir = installDir;
+		}
+
+		File[] getTeamProjectSets()
+		{
+			return getFilesForImportPaths(contentObj.teamProjectSetPaths);
+		}
+
+		File[] getSolutionFiles()
+		{
+			return getFilesForImportPaths(contentObj.solutionToImportPaths);
+		}
+
+		File[] getStyleFiles()
+		{
+			ArrayList<String> stylePaths = new ArrayList<String>();
+
+			try
+			{
+				String[] zipEntryNames = ExtensionUtils.getZipEntryNames(expFileObj);
+
+				for (String zipEntry : zipEntryNames)
+				{
+					if (zipEntry.startsWith("application_server/styles/")) stylePaths.add(zipEntry); //$NON-NLS-1$
+				}
+			}
+			catch (IOException ex)
+			{
+				Debug.error(ex);
+			}
+
+			String[] styleToImportPaths = stylePaths.size() > 0 ? stylePaths.toArray(new String[stylePaths.size()]) : null;
+
+			return getFilesForImportPaths(styleToImportPaths);
+		}
+
+		String[] getEclipseUpdateSiteURLs()
+		{
+			return contentObj.eclipseUpdateSiteURLs;
+		}
+
+		private File[] getFilesForImportPaths(String[] paths)
+		{
+			File[] files = null;
+
+			if (paths != null)
+			{
+				files = new File[paths.length];
+				for (int i = 0; i < paths.length; i++)
+				{
+					File file = new File(installDir + paths[i]);
+					if (!file.exists())
+					{
+						try
+						{
+							file.getParentFile().mkdirs();
+							ExtensionUtils.extractZipEntryToFile(expFileObj, paths[i], file);
+						}
+						catch (Exception ex)
+						{
+							Debug.error(ex);
+						}
+					}
+					files[i] = file;
+				}
+			}
+
+			return files;
+		}
 	}
 
 	class MarketplaceProgressMonitorDialog extends ProgressMonitorDialog

@@ -29,21 +29,21 @@ import org.eclipse.swt.widgets.Display;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourceProjectChoiceDialog;
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.j2db.util.Utils;
 
 /**
- * Class representing an installable style from the Servoy Marketplace
+ * Class representing installables styles from the Servoy Marketplace
  * @author gboros
  *
  */
-public class StyleInstall implements InstallItem
+public class StylesInstall implements InstallItem
 {
-	private final File styleFile;
+	private final File[] stylesFile;
 
-	public StyleInstall(File styleFile)
+	public StylesInstall(File[] stylesFile)
 	{
-		this.styleFile = styleFile;
+		this.stylesFile = stylesFile;
 	}
 
 	public void install(IProgressMonitor monitor) throws Exception
@@ -53,7 +53,7 @@ public class StyleInstall implements InstallItem
 			public void run()
 			{
 				// show resource project choice dialog
-				final ResourceProjectChoiceDialog dialog = new ResourceProjectChoiceDialog(UIUtils.getActiveShell(), "Select resources project for the style",
+				final ResourceProjectChoiceDialog dialog = new ResourceProjectChoiceDialog(UIUtils.getActiveShell(), "Select resource project for the style",
 					null);
 
 				if (dialog.open() == Window.OK)
@@ -69,25 +69,23 @@ public class StyleInstall implements InstallItem
 					}
 
 					WorkspaceFileAccess wfa = new WorkspaceFileAccess(newResourcesProject.getWorkspace());
-					FileInputStream fis = null;
-					try
+
+					for (File styleFile : stylesFile)
 					{
-						fis = new FileInputStream(styleFile);
-						wfa.setContents(newResourcesProject.getName() + "/styles/" + styleFile.getName(), fis); //$NON-NLS-1$
-					}
-					catch (Exception ex)
-					{
-						MessageDialog.openError(UIUtils.getActiveShell(), "Servoy Marketplace", "Error installing " + getName() + ".\n\n" + ex.getMessage());
-					}
-					finally
-					{
-						if (fis != null) try
+						FileInputStream fis = null;
+						try
 						{
-							fis.close();
+							fis = new FileInputStream(styleFile);
+							wfa.setContents(newResourcesProject.getName() + "/styles/" + styleFile.getName(), fis); //$NON-NLS-1$
 						}
 						catch (Exception ex)
 						{
-							ServoyLog.logError(ex);
+							MessageDialog.openError(UIUtils.getActiveShell(), "Servoy Marketplace",
+								"Error installing " + styleFile.getName() + ".\n\n" + ex.getMessage());
+						}
+						finally
+						{
+							Utils.closeInputStream(fis);
 						}
 					}
 				}
@@ -95,20 +93,14 @@ public class StyleInstall implements InstallItem
 		});
 	}
 
-	/*
-	 * @see com.servoy.eclipse.marketplace.InstallItem#getName()
-	 */
+
 	public String getName()
 	{
-		return styleFile.getName();
-	}
+		StringBuilder name = new StringBuilder();
 
-	/*
-	 * @see com.servoy.eclipse.marketplace.InstallItem#isRestartRequired()
-	 */
-	public boolean isRestartRequired()
-	{
-		return false;
-	}
+		for (File styleFile : stylesFile)
+			name.append(styleFile.getName()).append(' ');
 
+		return name.toString();
+	}
 }

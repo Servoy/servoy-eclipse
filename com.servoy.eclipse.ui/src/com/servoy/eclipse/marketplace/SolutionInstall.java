@@ -65,9 +65,4 @@ public class SolutionInstall implements InstallItem
 	{
 		return solutionFile.getName();
 	}
-
-	public boolean isRestartRequired()
-	{
-		return false;
-	}
 }

@@ -79,9 +79,4 @@ public class UpdateURLInstall implements InstallItem
 	{
 		return updateURL;
 	}
-
-	public boolean isRestartRequired()
-	{
-		return false;
-	}
 }
