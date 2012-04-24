@@ -46,9 +46,6 @@ public class StyleInstall implements InstallItem
 		this.styleFile = styleFile;
 	}
 
-	/*
-	 * @see com.servoy.eclipse.marketplace.InstallItem#install(org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	public void install(IProgressMonitor monitor) throws Exception
 	{
 		Display.getDefault().syncExec(new Runnable()
@@ -56,7 +53,7 @@ public class StyleInstall implements InstallItem
 			public void run()
 			{
 				// show resource project choice dialog
-				final ResourceProjectChoiceDialog dialog = new ResourceProjectChoiceDialog(UIUtils.getActiveShell(), "Select resource project for the style",
+				final ResourceProjectChoiceDialog dialog = new ResourceProjectChoiceDialog(UIUtils.getActiveShell(), "Select resources project for the style",
 					null);
 
 				if (dialog.open() == Window.OK)
