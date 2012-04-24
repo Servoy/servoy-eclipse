@@ -478,7 +478,7 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 		else if (ERROR_WARNING_DEVELOPER_PROBLEMS.equals(problemSection)) //RENAME or reorganize THIS!!!!!!
 		{
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.TABLE_MARKED_AS_HIDDEN_BUT_USED_IN,
-				Messages.ErrorWarningPreferencePage_tableMarkedAsHiddedButUsedIn));
+				Messages.ErrorWarningPreferencePage_tableMarkedAsHiddenButUsedIn));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.ITEM_REFERENCES_INVALID_TABLE,
 				Messages.ErrorWarningPreferencePage_itemReferencesInvalidTable));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.METHOD_EVENT_PARAMETERS,
@@ -486,6 +486,7 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.MEDIA_TIFF, Messages.ErrorWarningPreferencePage_mediaTiff));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.CALCULATION_FORM_ACCESS,
 				Messages.ErrorWarningPreferencePage_calculationFormAccess));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.IMAGE_MEDIA_NOT_SET, Messages.ErrorWarningPreferencePage_imageMediaNotSet));
 		}
 		else if (ERROR_WARNING_LOGIN_PROBLEMS.equals(problemSection))
 		{

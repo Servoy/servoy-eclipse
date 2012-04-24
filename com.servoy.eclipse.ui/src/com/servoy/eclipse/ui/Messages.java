@@ -277,11 +277,12 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_styleElementClassNotFound;
 	public static String ErrorWarningPreferencePage_styleFormClassNoStyle;
 	public static String ErrorWarningPreferencePage_styleFormClassNotFound;
-	public static String ErrorWarningPreferencePage_tableMarkedAsHiddedButUsedIn;
+	public static String ErrorWarningPreferencePage_tableMarkedAsHiddenButUsedIn;
 	public static String ErrorWarningPreferencePage_itemReferencesInvalidTable;
 	public static String ErrorWarningPreferencePage_methodEventParameters;
 	public static String ErrorWarningPreferencePage_mediaTiff;
 	public static String ErrorWarningPreferencePage_calculationFormAccess;
+	public static String ErrorWarningPreferencePage_imageMediaNotSet;
 
 	static
 	{

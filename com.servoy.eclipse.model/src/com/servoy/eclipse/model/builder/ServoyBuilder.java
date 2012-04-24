@@ -287,7 +287,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	//developer problems (this is for valuelist, for relations)
 	public final static Pair<String, ProblemSeverity> TABLE_MARKED_AS_HIDDEN_BUT_USED_IN = new Pair<String, ProblemSeverity>(
-		"tableMarkedAsHiddedButUsedIn", ProblemSeverity.WARNING); //$NON-NLS-1$
+		"tableMarkedAsHiddenButUsedIn", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> ITEM_REFERENCES_INVALID_TABLE = new Pair<String, ProblemSeverity>(
 		"itemReferencesInvalidTable", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> METHOD_EVENT_PARAMETERS = new Pair<String, ProblemSeverity>(
@@ -295,6 +295,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> MEDIA_TIFF = new Pair<String, ProblemSeverity>("mediaTiff", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> CALCULATION_FORM_ACCESS = new Pair<String, ProblemSeverity>(
 		"calculationFormAccess", ProblemSeverity.ERROR); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> IMAGE_MEDIA_NOT_SET = new Pair<String, ProblemSeverity>("imageMediaNotSet", ProblemSeverity.ERROR); //$NON-NLS-1$
 
 	//problems with resource projects 
 	public final static Pair<String, ProblemSeverity> REFERENCES_TO_MULTIPLE_RESOURCES = new Pair<String, ProblemSeverity>(
@@ -2741,6 +2742,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									addMarker(project, mk.getType(), mk.getText(), -1, FORM_LABEL_FOR_ELEMENT_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, o);
 								}
 							}
+						}
+						if (o instanceof GraphicalComponent && ((GraphicalComponent)o).getRolloverImageMediaID() > 0 &&
+							((GraphicalComponent)o).getImageMediaID() <= 0)
+						{
+							ServoyMarker mk = MarkerMessages.ImageMediaNotSet.fill(((Form)o.getAncestor(IRepository.FORMS)).getName());
+							addMarker(project, mk.getType(), mk.getText(), -1, IMAGE_MEDIA_NOT_SET, IMarker.PRIORITY_NORMAL, null, o);
 						}
 						checkCancel();
 						if (o.getTypeID() == IRepository.SHAPES)

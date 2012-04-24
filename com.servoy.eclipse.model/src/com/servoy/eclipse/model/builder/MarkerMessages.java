@@ -424,6 +424,12 @@ public class MarkerMessages
 		"Element \"{0}\" in form \"{1}\" has incompatible dataprovider type (MEDIA).", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
+	 * The roll over image Media will only work if an image property is also set.
+	 */
+	public static ServoyMarker ImageMediaNotSet = new ServoyMarker(
+		"Element in form \"{0}\" has 'rolloverImageMedia' property while no 'imageMedia' property is set.", ServoyBuilder.MEDIA_MARKER_TYPE); //$NON-NLS-1$
+
+	/**
 	 * The HTML or RTF field has as dataprovider a column whose length may be too small.
 	 */
 	public static ServoyMarker FormColumnLengthTooSmall = new ServoyMarker(
