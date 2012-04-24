@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.nio.charset.Charset;
@@ -134,6 +134,28 @@ public class DeleteScriptAction extends DeletePersistAction
 					txt = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF8"));
 				}
 				if (txt == null || txt.length() == 0) continue;
+
+				// filtering out "\r" 
+				StringBuilder sbfileContent = null;
+				int lastIndex = 0;
+				for (int i = 0; i < txt.length(); i++)
+				{
+					if (txt.charAt(i) == '\r')
+					{
+						if (sbfileContent == null)
+						{
+							sbfileContent = new StringBuilder(txt.length());
+						}
+						sbfileContent.append(txt.substring(lastIndex, i));
+						lastIndex = i + 1;
+					}
+				}
+				if (sbfileContent != null)
+				{
+					sbfileContent.append(txt.substring(lastIndex));
+					txt = sbfileContent.toString();
+				}
+
 				if (!txt.endsWith("\n")) txt += "\n";
 				int startLine = -1;
 				int endLine = -1;
