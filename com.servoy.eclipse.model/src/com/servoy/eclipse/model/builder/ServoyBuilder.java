@@ -2572,7 +2572,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										Form form = (Form)o.getAncestor(IRepository.FORMS);
 										String[] parts = vl.getRelationName().split("\\."); //$NON-NLS-1$
 										Relation relation = flattenedSolution.getRelation(parts[0]);
-										if (!relation.getPrimaryDataSource().equals(form.getDataSource()))
+										if (!relation.isGlobal() && !relation.getPrimaryDataSource().equals(form.getDataSource()))
 										{
 											ServoyMarker mk;
 											if (field.getName() != null)
