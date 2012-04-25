@@ -3034,6 +3034,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		SolutionExplorerTreeContentProvider cp = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
 		IPath folderPath = resource.getFullPath();
 		String[] segments = folderPath.segments();
+
+		if (segments != null && segments.length == 0) return null;
+
 		ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject selectedProject = sm.getServoyProject(segments[0]);
 		ServoyResourcesProject resourcesProject = sm.getActiveResourcesProject();
