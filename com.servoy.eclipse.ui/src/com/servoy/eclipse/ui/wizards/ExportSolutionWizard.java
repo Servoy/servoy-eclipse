@@ -23,9 +23,9 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -269,17 +269,17 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 
 					return Status.OK_STATUS;
 				}
-				catch (final RepositoryException e)
+				catch (RepositoryException e)
 				{
 					handleExportException(e, null, monitor);
 					return Status.CANCEL_STATUS;
 				}
-				catch (final JSONException jsonex)
+				catch (JSONException jsonex)
 				{
 					handleExportException(jsonex, "Bad JSON file structure.", monitor); //$NON-NLS-1$
 					return Status.CANCEL_STATUS;
 				}
-				catch (final IOException ioex)
+				catch (IOException ioex)
 				{
 					handleExportException(ioex, "Exception getting metadata files.", monitor); //$NON-NLS-1$
 					return Status.CANCEL_STATUS;
@@ -334,11 +334,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 
 		// B. for needed tables, get dbi files (db is down)
 		Map<String, List<IFile>> server_tableDbiFiles = new HashMap<String, List<IFile>>();
-		for (String serverName : neededServersTables.keySet())
+		for (Entry<String, List<String>> neededServersTableEntry : neededServersTables.entrySet())
 		{
+			final String serverName = neededServersTableEntry.getKey();
+			final List<String> tables = neededServersTableEntry.getValue();
 			IFolder serverInformationFolder = dmm.getDBIFileContainer(serverName);
 			final List<IFile> dbiz = new ArrayList<IFile>();
-			final String srvnm = serverName;
 			if (serverInformationFolder.exists())
 			{
 				serverInformationFolder.accept(new IResourceVisitor()
@@ -351,7 +352,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 							//we found a dbi file
 							String tableName = resource.getName().substring(0,
 								resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
-							if (neededServersTables.get(srvnm).contains(tableName)) dbiz.add((IFile)resource);
+							if (tables.contains(tableName)) dbiz.add((IFile)resource);
 						}
 						return true;
 					}
@@ -363,15 +364,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 
 		// C. deserialize table dbis to get tabledefs and metadata info
 		Map<String, List<TableDef>> serverTableDefs = new HashMap<String, List<TableDef>>();
-		Set<String> servers = server_tableDbiFiles.keySet();
-		Iterator<String> it = servers.iterator();
 		List<MetadataDef> metadataDefs = new ArrayList<MetadataDef>();
-		while (it.hasNext())
+		for (Entry<String, List<IFile>> server_tableDbiFile : server_tableDbiFiles.entrySet())
 		{
-			String serverName = it.next();
-			List<IFile> files = server_tableDbiFiles.get(serverName);
+			String serverName = server_tableDbiFile.getKey();
 			List<TableDef> tableDefs = new ArrayList<TableDef>();
-			for (IFile file : files)
+			for (IFile file : server_tableDbiFile.getValue())
 			{
 				if (file.exists())
 				{
@@ -379,41 +377,30 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 					String dbiFileContent = null;
 					try
 					{
-						dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+						dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF-8"));
 					}
 					finally
 					{
-						Utils.closeInputStream(is);
+						is = Utils.closeInputStream(is);
 					}
 					if (dbiFileContent != null)
 					{
-						try
+						TableDef tableInfo = dmm.deserializeTableInfo(dbiFileContent);
+						tableDefs.add(tableInfo);
+						if (exportModel.isExportMetaData() && tableInfo.isMetaData)
 						{
-							TableDef tableInfo = dmm.deserializeTableInfo(dbiFileContent);
-							tableDefs.add(tableInfo);
-							if (exportModel.isExportMetaData() && tableInfo.isMetaData)
+							String ds = DataSourceUtils.createDBTableDataSource(serverName, tableInfo.name);
+							IFile mdf = dmm.getMetaDataFile(ds);
+							if (mdf != null && mdf.exists())
 							{
-								String ds = DataSourceUtils.createDBTableDataSource(serverName, tableInfo.name);
-								IFile mdf = dmm.getMetaDataFile(ds);
-								if (mdf != null && mdf.exists())
+								String wscontents = null;
+								wscontents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(mdf.getFullPath().toString());
+								if (wscontents != null)
 								{
-									String wscontents = null;
-									wscontents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(mdf.getFullPath().toString());
-									if (wscontents != null)
-									{
-										MetadataDef mdd = new MetadataDef(ds, wscontents);
-										if (!metadataDefs.contains(mdd)) metadataDefs.add(mdd);
-									}
+									MetadataDef mdd = new MetadataDef(ds, wscontents);
+									if (!metadataDefs.contains(mdd)) metadataDefs.add(mdd);
 								}
 							}
-						}
-						catch (IOException ioex)
-						{
-							throw ioex;
-						}
-						catch (JSONException jsonex)
-						{
-							throw jsonex;
 						}
 					}
 				}
