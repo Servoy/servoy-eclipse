@@ -240,18 +240,19 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 				EclipseExportI18NHelper eeI18NHelper = new EclipseExportI18NHelper(workspace);
 				IXMLExporter exporter = as.createXMLExporter(rep, sm, eeuc, Settings.getInstance(), as.getDataServer(), as.getClientId(), eeI18NHelper);
 
-				if (dbDownErrors &&
-					(exportModel.isExportMetaData() || exportModel.isExportSampleData() || exportModel.isExportI18NData() || exportModel.isExportUsers() || exportModel.isExportReferencedModules()))
-				{
-					prepareDbDownExportData();
-				}
-
 				try
 				{
+					if (dbDownErrors &&
+						(exportModel.isExportMetaData() || exportModel.isExportSampleData() || exportModel.isExportI18NData() || exportModel.isExportUsers() || exportModel.isExportReferencedModules()))
+					{
+						prepareDbDownExportData();
+					}
+
 					exporter.exportSolutionToFile(activeSolution, new File(exportModel.getFileName()), ClientVersion.getVersion(),
 						ClientVersion.getReleaseNumber(), exportModel.isExportMetaData(), exportModel.isExportSampleData(),
 						exportModel.getNumberOfSampleDataExported(), exportModel.isExportI18NData(), exportModel.isExportUsers(),
 						exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword(), tableDefManager, metadataDefManager);
+
 					monitor.done();
 
 					if (dbDownErrors)
@@ -270,19 +271,17 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 				}
 				catch (final RepositoryException e)
 				{
-					ServoyLog.logError("Failed to export solution.", e);
-					monitor.done();
-					Display.getDefault().syncExec(new Runnable()
-					{
-						public void run()
-						{
-							String message;
-							// Try to be nice with the user when presenting error message.
-							if (e.getCause() != null) message = e.getCause().getMessage();
-							else message = e.getMessage();
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Failed to export the active solution", message);
-						}
-					});
+					handleExportException(e, null, monitor);
+					return Status.CANCEL_STATUS;
+				}
+				catch (final JSONException jsonex)
+				{
+					handleExportException(jsonex, "Bad JSON file structure.", monitor); //$NON-NLS-1$
+					return Status.CANCEL_STATUS;
+				}
+				catch (final IOException ioex)
+				{
+					handleExportException(ioex, "Exception getting metadata files.", monitor); //$NON-NLS-1$
 					return Status.CANCEL_STATUS;
 				}
 
@@ -297,6 +296,23 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 		return true;
 	}
 
+	private void handleExportException(final Exception ex, String extraMsg, IProgressMonitor monitor)
+	{
+		ServoyLog.logError("Failed to export solution. " + (extraMsg == null ? "" : extraMsg), ex); //$NON-NLS-1$ //$NON-NLS-2$
+		monitor.done();
+		Display.getDefault().syncExec(new Runnable()
+		{
+			public void run()
+			{
+				// Try to be nice with the user when presenting error message.
+				String message;
+				if (ex.getCause() != null) message = ex.getCause().getMessage();
+				else message = ex.getMessage();
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Failed to export the active solution", message); //$NON-NLS-1$
+			}
+		});
+	}
+
 	/**
 	 * This method takes care of minimal db info to be used in export in the case in which the db is down.
 	 * It will create and initialize the table def manager and the metadata manager, which will contain server and table and metadata info
@@ -305,8 +321,10 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 	 * NOTE: if there are no dbi files created export info will be empty
 	 * 
 	 * @throws CoreException
+	 * @throws JSONException 
+	 * @throws IOException 
 	 */
-	private void prepareDbDownExportData() throws CoreException
+	private void prepareDbDownExportData() throws CoreException, JSONException, IOException
 	{
 		// A. get only the needed servers (and tables) 
 		final Map<String, List<String>> neededServersTables = getNeededServerTables(activeSolution, exportModel.isExportReferencedModules(),
@@ -380,14 +398,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 								if (mdf != null && mdf.exists())
 								{
 									String wscontents = null;
-									try
-									{
-										wscontents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(mdf.getFullPath().toString());
-									}
-									catch (IOException e)
-									{
-										ServoyLog.logError("Error while getting metadata file", e);
-									}
+									wscontents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(mdf.getFullPath().toString());
 									if (wscontents != null)
 									{
 										MetadataDef mdd = new MetadataDef(ds, wscontents);
@@ -396,9 +407,13 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 								}
 							}
 						}
-						catch (JSONException e)
+						catch (IOException ioex)
 						{
-							e.printStackTrace();
+							throw ioex;
+						}
+						catch (JSONException jsonex)
+						{
+							throw jsonex;
 						}
 					}
 				}
