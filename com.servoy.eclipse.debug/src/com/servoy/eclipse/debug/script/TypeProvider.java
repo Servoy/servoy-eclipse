@@ -593,9 +593,12 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				{
 					EList<Member> members = type.getMembers();
 
-					members.add(createProperty(context, "allmethods", true, "Array", "Returns all global method names in an Array", SPECIAL_PROPERTY));
-					members.add(createProperty(context, "allvariables", true, "Array", "Returns all global variable names in an Array", SPECIAL_PROPERTY));
-					members.add(createProperty(context, "allrelations", true, "Array", "Returns all global relation names in an Array", SPECIAL_PROPERTY));
+
+					members.add(createProperty("allmethods", true, TypeUtil.arrayOf("String"), "Returns all global method names in an Array", SPECIAL_PROPERTY));
+					members.add(createProperty("allvariables", true, TypeUtil.arrayOf("String"), "Returns all global variable names in an Array",
+						SPECIAL_PROPERTY));
+					members.add(createProperty("allrelations", true, TypeUtil.arrayOf("String"), "Returns all global relation names in an Array",
+						SPECIAL_PROPERTY));
 				}
 
 				if (fs != null && (fs.getMainSolutionMetaData().getName().equals(solutionName) || fs.hasModule(solutionName)))
