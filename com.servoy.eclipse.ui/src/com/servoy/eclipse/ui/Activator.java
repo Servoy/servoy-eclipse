@@ -311,7 +311,7 @@ public class Activator extends AbstractUIPlugin
 		if (provisioningAgent == null)
 		{
 			BundleContext context = getBundle().getBundleContext();
-			ServiceReference sr = context.getServiceReference(IProvisioningAgentProvider.SERVICE_NAME);
+			ServiceReference< ? > sr = context.getServiceReference(IProvisioningAgentProvider.SERVICE_NAME);
 			if (sr != null)
 			{
 				IProvisioningAgentProvider agentProvider = (IProvisioningAgentProvider)context.getService(sr);
