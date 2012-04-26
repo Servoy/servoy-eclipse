@@ -1586,16 +1586,26 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												if (context instanceof Form) inForm = ((Form)context).getName();
 												ServoyMarker mk;
 												Pair<String, ProblemSeverity> problemPair;
+												String prefix = ""; //$NON-NLS-1$
+												if (scriptMethod.getScopeName() != null)
+												{
+													prefix = scriptMethod.getScopeName() + '.';
+												}
+												else if (scriptMethod.getParent() instanceof TableNode)
+												{
+													prefix = ((TableNode)scriptMethod.getParent()).getDataSource() + '/';
+												}
 												if (elementName == null)
 												{
 													if (inForm == null)
 													{
-														mk = MarkerMessages.PropertyTargetNotAccessible.fill(element.getName());
+														mk = MarkerMessages.PropertyTargetNotAccessible.fill(element.getName(), prefix + scriptMethod.getName());
 														problemPair = SOLUTION_PROPERTY_TARGET_NOT_ACCESSIBLE;
 													}
 													else
 													{
-														mk = MarkerMessages.PropertyInFormTargetNotAccessible.fill(element.getName(), inForm);
+														mk = MarkerMessages.PropertyInFormTargetNotAccessible.fill(element.getName(), inForm, prefix +
+															scriptMethod.getName());
 														problemPair = FORM_PROPERTY_IN_FORM_TARGET_NOT_ACCESIBLE;
 													}
 												}
@@ -1603,13 +1613,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												{
 													if (inForm == null)
 													{
-														mk = MarkerMessages.PropertyOnElementTargetNotAccessible.fill(element.getName(), elementName);
+														mk = MarkerMessages.PropertyOnElementTargetNotAccessible.fill(element.getName(), elementName, prefix +
+															scriptMethod.getName());
 														problemPair = SOLUTION_PROPERTY_TARGET_NOT_ACCESSIBLE;
 													}
 													else
 													{
 														mk = MarkerMessages.PropertyOnElementInFormTargetNotAccessible.fill(element.getName(), elementName,
-															inForm);
+															inForm, prefix + scriptMethod.getName());
 														problemPair = FORM_PROPERTY_IN_FORM_TARGET_NOT_ACCESIBLE;
 													}
 												}

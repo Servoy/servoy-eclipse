@@ -229,13 +229,13 @@ public class MarkerMessages
 	 * Private methods accessed from outside context.
 	 */
 	public static ServoyMarker PropertyTargetNotAccessible = new ServoyMarker(
-		"Property \"{0}\" is linked to a private method which is not accessible from the context.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$
+		"Property \"{0}\" is linked to a private method \"{1}\" which is not accessible from the context.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker PropertyOnElementTargetNotAccessible = new ServoyMarker(
-		"Property \"{0}\" from element \"{1}\" is linked to private method which is not accessible from the context.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$
+		"Property \"{0}\" from element \"{1}\" is linked to private method \"{2}\" which is not accessible from the context.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker PropertyInFormTargetNotAccessible = new ServoyMarker(
-		"Property \"{0}\" in form \"{1}\" is linked to a private method which is not accessible from the form.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Property \"{0}\" in form \"{1}\" is linked to a private method \"{2}\" which is not accessible from the form.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker PropertyOnElementInFormTargetNotAccessible = new ServoyMarker(
-		"Property \"{0}\" from element \"{1}\" in form \"{2}\" is linked to a private method which is not accessible from the context.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Property \"{0}\" from element \"{1}\" in form \"{2}\" is linked to a private method \"{3}\" which is not accessible from the context.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker FormTableNoPK = new ServoyMarker(
 		"Form \"{0}\" is based on table \"{1}\" which does not have a primary key.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
