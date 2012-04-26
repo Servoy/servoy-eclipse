@@ -73,6 +73,8 @@ import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.documentation.IParameter;
 import com.servoy.j2db.documentation.ScriptParameter;
+import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -575,26 +577,30 @@ public abstract class TypeCreator
 									parameter.setName(param.getName());
 									if (param.getType() != null)
 									{
-										String paramType = param.getType();
-										if (paramType.endsWith("[]"))
+										Class< ? > paramType = param.getRealType();
+										if (paramType != null && paramType.isArray())
 										{
-											String componentType = paramType.substring(0, paramType.length() - 2);
+											Class< ? > componentType = paramType.getComponentType();
 											if (param.isVarArgs())
 											{
-												parameter.setType(context.getTypeRef(componentType));
+												parameter.setType(getMemberTypeName(context, name, componentType, typeName));
 											}
-											else if (ITypeNames.OBJECT.equals(componentType))
+											else if (componentType == Object.class)
 											{
 												parameter.setType(context.getTypeRef(ITypeNames.ARRAY));
 											}
 											else
 											{
-												parameter.setType(TypeUtil.arrayOf(context.getTypeRef(SolutionExplorerListContentProvider.TYPES.get(componentType))));
+												parameter.setType(TypeUtil.arrayOf(getMemberTypeName(context, name, componentType, typeName)));
 											}
+										}
+										else if (paramType != null)
+										{
+											parameter.setType(getMemberTypeName(context, name, paramType, typeName));
 										}
 										else
 										{
-											parameter.setType(context.getTypeRef(SolutionExplorerListContentProvider.TYPES.get(paramType)));
+											parameter.setType(context.getTypeRef(SolutionExplorerListContentProvider.TYPES.get(param.getType())));
 										}
 									}
 									parameter.setKind(param.isVarArgs() ? ParameterKind.VARARGS : param.isOptional() ? ParameterKind.OPTIONAL
@@ -739,6 +745,17 @@ public abstract class TypeCreator
 	 */
 	protected static final Type getDataProviderType(ITypeInfoContext context, IDataProvider provider)
 	{
+		if (provider instanceof Column)
+		{
+			ColumnInfo columnInfo = ((Column)provider).getColumnInfo();
+			if (columnInfo != null)
+			{
+				if (columnInfo.hasFlag(Column.UUID_COLUMN))
+				{
+					return context.getType("UUID");
+				}
+			}
+		}
 		ComponentFormat componentFormat = ComponentFormat.getComponentFormat(null, provider, com.servoy.eclipse.core.Activator.getDefault().getDesignClient());
 		switch (componentFormat.dpType)
 		{

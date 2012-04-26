@@ -1324,6 +1324,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			while (dataproviders.hasNext())
 			{
 				IDataProvider provider = dataproviders.next();
+				boolean uuid = false;
 				if (columnsOnly)
 				{
 					if (provider instanceof AggregateVariable || provider instanceof ScriptCalculation) continue;
@@ -1331,6 +1332,10 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 					{
 						ColumnInfo ci = ((Column)provider).getColumnInfo();
 						if (ci != null && ci.isExcluded()) continue;
+						if (ci != null && ci.hasFlag(Column.UUID_COLUMN))
+						{
+							uuid = true;
+						}
 					}
 				}
 				else if (provider instanceof Column) continue;
@@ -1363,6 +1368,10 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 						// should be in sync with TypeCreater.getDataProviderType
 //						property.setType(TypeUtil.arrayOf("byte"));
 						break;
+				}
+				if (uuid)
+				{
+					property.setType(context.getTypeRef("UUID"));
 				}
 				ImageDescriptor image = COLUMN_IMAGE;
 				String description = "Column";
