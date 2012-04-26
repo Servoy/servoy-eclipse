@@ -50,6 +50,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.property.StringTokenizerConverter;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.Solution;
@@ -83,7 +84,8 @@ public class AddModuleAction extends Action implements ISelectionChangedListener
 		{
 			for (RootObjectMetaData rootObject : ServoyModel.getDeveloperRepository().getRootObjectMetaDatas())
 			{
-				if (!rootObject.getName().equals(servoyModel.getActiveProject().getSolution().getName()))
+				if (rootObject.getObjectTypeId() == IRepository.SOLUTIONS &&
+					!rootObject.getName().equals(servoyModel.getActiveProject().getSolution().getName()))
 				{
 					availableSolutions.add(rootObject.getName());
 				}
