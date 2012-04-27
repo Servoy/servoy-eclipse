@@ -42,6 +42,7 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.QuerySet;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.query.QueryAggregate;
+import com.servoy.j2db.query.QueryCustomSelect;
 import com.servoy.j2db.query.QuerySelect;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.ServoyException;
@@ -121,7 +122,8 @@ public class EclipseSequenceProvider implements ISequenceProvider
 					clientId = client.getClientID();
 				}
 
-				rs = dataServer.performCustomQuery(clientId, column.getTable().getServerName(), column.getTable().getName(), tid, maxSeqSelect, null, 0, -1);
+				rs = dataServer.performCustomQuery(clientId, column.getTable().getServerName(), column.getTable().getName(), tid, new QueryCustomSelect(
+					maxSeqSelect), 0, -1);
 				String val = null;
 				if (rs.getRowCount() == 1)
 				{
@@ -169,14 +171,14 @@ public class EclipseSequenceProvider implements ISequenceProvider
 						}
 						else
 						{
-							columnInfoSeqCache.put(column, new ColumnInfoSequence(nextSequence + sequenceStepSize, sequenceStepSize, seq_cache_size - 1,
-								System.currentTimeMillis()));
+							columnInfoSeqCache.put(column,
+								new ColumnInfoSequence(nextSequence + sequenceStepSize, sequenceStepSize, seq_cache_size - 1, System.currentTimeMillis()));
 						}
 					}
 					else
 					{
-						columnInfoSeqCache.put(column, new ColumnInfoSequence(nextSequence + sequenceStepSize, sequenceStepSize, seq_cache_size - 1,
-							System.currentTimeMillis()));
+						columnInfoSeqCache.put(column,
+							new ColumnInfoSequence(nextSequence + sequenceStepSize, sequenceStepSize, seq_cache_size - 1, System.currentTimeMillis()));
 					}
 				}
 			}
