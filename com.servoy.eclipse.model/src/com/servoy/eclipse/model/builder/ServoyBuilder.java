@@ -3808,11 +3808,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						public Object visit(IPersist o)
 						{
-							if (o instanceof BaseComponent || o instanceof Form)
+							if (o instanceof BaseComponent || o instanceof Form || o instanceof Part)
 							{
 								String styleClass = null;
 								if (o instanceof BaseComponent) styleClass = ((BaseComponent)o).getStyleClass();
 								else if (o instanceof Form) styleClass = ((Form)o).getStyleClass();
+								else if (o instanceof Part) styleClass = ((Part)o).getStyleClass();
 								if (styleClass != null)
 								{
 									String[] classes = ModelUtils.getStyleClasses(finalStyle, ModelUtils.getStyleLookupname(o), form.getStyleClass());
@@ -3820,7 +3821,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									if (!styleClasses.contains(styleClass))
 									{
 										ServoyMarker mk = MarkerMessages.StyleFormClassNotFound.fill(styleClass, form.getName());
-										if (o instanceof ISupportName && !(o instanceof Form) && (((ISupportName)o).getName() != null))
+										if (o instanceof Part)
+										{
+											mk = MarkerMessages.StyleElementClassNotFound.fill(styleClass, Part.getDisplayName(((Part)o).getPartType()),
+												form.getName());
+											addMarker(project, mk.getType(), mk.getText(), -1, STYLE_ELEMENT_CLASS_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, o);
+										}
+										else if (o instanceof ISupportName && !(o instanceof Form) && (((ISupportName)o).getName() != null))
 										{
 											mk = MarkerMessages.StyleElementClassNotFound.fill(styleClass, ((ISupportName)o).getName(), form.getName());
 											addMarker(project, mk.getType(), mk.getText(), -1, STYLE_ELEMENT_CLASS_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, o);

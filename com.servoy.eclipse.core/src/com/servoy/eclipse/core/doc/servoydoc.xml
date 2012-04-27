@@ -4582,11 +4582,6 @@ if (cancel) databaseManager.rollbackEditedRecords()
 //databaseManager.rollbackEditedRecords(foundset); // rollback all records from foundset
 //databaseManager.rollbackEditedRecords(foundset.getSelectedRecord()); // rollback only one record
 databaseManager.setAutoSave(true)]]></sample>
-          <parameters>
-            <parameter name="foundset/record" optional="true">
-              <description><![CDATA[A JSFoundset or a JSRecord to rollback]]></description>
-            </parameter>
-          </parameters>
         </function>
         <function name="rollbackEditedRecords">
           <argumentsTypes>
@@ -13309,7 +13304,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
 //-cannot contain 'group by', 'having' or 'union'
 //-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
-            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
+            <parameter name="querybuilder" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
               <description><![CDATA[query builder]]></description>
             </parameter>
           </parameters>
@@ -13380,7 +13375,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
 //-cannot contain 'group by', 'having' or 'union'
 //-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
-            <parameter name="pk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
+            <parameter name="uuidpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
               <description><![CDATA[single-column pk value]]></description>
             </parameter>
           </parameters>
@@ -13451,7 +13446,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
 //-cannot contain 'group by', 'having' or 'union'
 //-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
-            <parameter name="pk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
+            <parameter name="numberpk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[single-column pk value]]></description>
             </parameter>
           </parameters>
@@ -13522,7 +13517,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
 //-cannot contain 'group by', 'having' or 'union'
 //-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
-            <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+            <parameter name="queryString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[select statement]]></description>
             </parameter>
           </parameters>
@@ -13594,7 +13589,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
 //-cannot contain 'group by', 'having' or 'union'
 //-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
-            <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+            <parameter name="queryString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[select statement]]></description>
             </parameter>
             <parameter name="argumentsArray" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
@@ -15580,6 +15575,13 @@ trailingSubsummary.restartPageNumber = true;]]></sample>
 "sink" to the lowest part of the page when there is free space.]]></summary>
           <sample><![CDATA[var trailingGrandSummary = form.newPart(JSPart.TRAILING_GRAND_SUMMARY, 400);
 trailingGrandSummary.sinkWhenLast = true;]]></sample>
+        </property>
+        <property name="styleClass">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The Cascading Style Sheet (CSS) class name applied to the part.]]></description>
+          <summary><![CDATA[The Cascading Style Sheet (CSS) class name applied to the part.]]></summary>
+          <sample><![CDATA[var body = form.newPart(JSPart.BODY, 320);
+body.styleClass = 'myBody';]]></sample>
         </property>
       </properties>
       <functions>
@@ -19218,7 +19220,7 @@ open in a separate browser window.]]></description>
           <summary><![CDATA[Window type constant that identifies a non-modal dialog type.]]></summary>
           <sample><![CDATA[// create a non-modal dialog on top of current active form's window and show a form inside it
 var myWindow = application.createWindow("myName", JSWindow.DIALOG);
-forms.myForm.show(myWindow);]]></sample>
+myWindow.show(forms.myForm);]]></sample>
         </constant>
         <constant name="FULL_SCREEN">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -19238,7 +19240,7 @@ open in a separate browser window. NOTE: no code is executed in Smart Client aft
           <summary><![CDATA[Window type constant that identifies a modal dialog type.]]></summary>
           <sample><![CDATA[// create a modal dialog on top of current active form's window and show a form inside it
 var myWindow = application.createWindow("myName", JSWindow.MODAL_DIALOG);
-forms.myForm.show(myWindow);]]></sample>
+myWindow.show(forms.myForm);]]></sample>
         </constant>
         <constant name="WINDOW">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -19248,7 +19250,7 @@ open in a separate browser window.]]></description>
           <summary><![CDATA[Window type constant that identifies a window type.]]></summary>
           <sample><![CDATA[// create a window and show a form inside it
 var myWindow = application.createWindow("myName", JSWindow.WINDOW);
-forms.myForm.show(myWindow);]]></sample>
+myWindow.show(forms.myForm);]]></sample>
         </constant>
       </constants>
       <properties>
@@ -19512,7 +19514,7 @@ win1.title = "Window 1";
 win1.setInitialBounds(200, 200, 400, 600);
 win1.storeBounds = true;
 if (newSolutionVersion) win1.resetBounds();
-win1.show();]]></sample>
+win1.show(forms.myform);]]></sample>
         </function>
         <function name="setInitialBounds">
           <argumentsTypes>
@@ -24128,7 +24130,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
 //-cannot contain 'group by', 'having' or 'union'
 //-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
-            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
+            <parameter name="querybuilder" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
               <description><![CDATA[query builder]]></description>
             </parameter>
           </parameters>
@@ -24199,7 +24201,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
 //-cannot contain 'group by', 'having' or 'union'
 //-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
-            <parameter name="pk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
+            <parameter name="uuidpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
               <description><![CDATA[single-column pk value]]></description>
             </parameter>
           </parameters>
@@ -24270,7 +24272,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
 //-cannot contain 'group by', 'having' or 'union'
 //-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
-            <parameter name="pk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
+            <parameter name="numberpk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[single-column pk value]]></description>
             </parameter>
           </parameters>
@@ -24341,7 +24343,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
 //-cannot contain 'group by', 'having' or 'union'
 //-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
-            <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+            <parameter name="queryString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[select statement]]></description>
             </parameter>
           </parameters>
@@ -24413,7 +24415,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
 //-cannot contain 'group by', 'having' or 'union'
 //-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
-            <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+            <parameter name="queryString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[select statement]]></description>
             </parameter>
             <parameter name="argumentsArray" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">

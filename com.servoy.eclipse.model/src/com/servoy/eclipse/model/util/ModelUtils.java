@@ -38,6 +38,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
@@ -78,6 +79,10 @@ public class ModelUtils
 		if (persist instanceof Form)
 		{
 			return "form"; //$NON-NLS-1$
+		}
+		if (persist instanceof Part)
+		{
+			return Part.getCSSSelector(((Part)persist).getPartType());
 		}
 		return null;
 	}
