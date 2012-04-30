@@ -10,7 +10,7 @@ tabpanel {
 	border: 0px solid;
 }
 
-label, button, field, combobox, check, radio {
+label, button, field, combobox, check, radio, listbox, spinner {
 	font-family: "Trebuchet MS", Helvetica, sans-serif;
 	font-size: 10px;
 }
@@ -30,6 +30,8 @@ check {}
 radio {}
 
 listbox {}
+
+spinner {}
 
 label {
 	color: #727784;
@@ -74,6 +76,7 @@ field.gridcell,
 check.gridcell,
 radio.gridcell,
 listbox.gridcell,
+spinner.gridcell,
 combobox.gridcell,
 label.gridcell,
 button.gridcell {
