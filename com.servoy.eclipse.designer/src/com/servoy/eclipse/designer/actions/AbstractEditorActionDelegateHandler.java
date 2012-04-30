@@ -28,6 +28,8 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.ui.IActionDelegate2;
 import org.eclipse.ui.IEditorActionDelegate;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
@@ -40,10 +42,21 @@ import org.eclipse.ui.PlatformUI;
  *
  */
 
-public abstract class AbstractEditorActionDelegateHandler extends AbstractHandler implements IEditorActionDelegate
+public abstract class AbstractEditorActionDelegateHandler extends AbstractHandler implements IEditorActionDelegate, IActionDelegate2
 {
 	private IAction currentAction;
 	private IStructuredSelection selection = StructuredSelection.EMPTY;
+
+	public void init(IAction action)
+	{
+
+	}
+
+	public void runWithEvent(IAction action, Event event)
+	{
+		run(action);
+	}
+
 
 	public void run()
 	{
