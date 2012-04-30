@@ -1191,7 +1191,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 			{
 				try
 				{
-					Iterator<Relation> relations = fs.getRelations(fsAndTable.table, true, false, false, false);
+					Iterator<Relation> relations = fs.getRelations(fsAndTable.table, true, false, false, false, false);
 					while (relations.hasNext())
 					{
 						try
@@ -1253,7 +1253,7 @@ public class TypeProvider extends TypeCreator implements ITypeProvider
 				try
 				{
 					addRelations(context, fsAndTable.flattenedSolution, fsAndTable.scopeName, type.getMembers(),
-						fsAndTable.flattenedSolution.getRelations(fsAndTable.table, true, false, fsAndTable.table == null, false), isVisible());
+						fsAndTable.flattenedSolution.getRelations(fsAndTable.table, true, false, fsAndTable.table == null, false, false), isVisible());
 				}
 				catch (RepositoryException e)
 				{
