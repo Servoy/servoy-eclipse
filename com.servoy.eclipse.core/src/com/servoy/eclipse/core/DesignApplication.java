@@ -809,14 +809,14 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		getClient().setTitle(title);
 	}
 
-	public boolean setUIProperty(Object name, Object val)
+	public boolean putClientProperty(Object name, Object val)
 	{
-		return getClient().setUIProperty(name, val);
+		return getClient().putClientProperty(name, val);
 	}
 
-	public Object getUIProperty(Object name)
+	public Object getClientProperty(Object name)
 	{
-		return getClient().getUIProperty(name);
+		return getClient().getClientProperty(name);
 	}
 
 	public void setUserProperty(String name, String value)
