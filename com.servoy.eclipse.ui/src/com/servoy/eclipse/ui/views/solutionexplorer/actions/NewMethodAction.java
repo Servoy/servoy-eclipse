@@ -580,25 +580,19 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		if (persist == null) return simpleName;
 
 		DesignerPreferences dp = new DesignerPreferences();
-		if (dp.getDefaultFormEventHandlerNaming()) return simpleName;
-		else
+		if (dp.getFormEventHandlerNamingDefault()) return simpleName;
+
+		if (persist instanceof ISupportDataProviderID && ((ISupportDataProviderID)persist).getDataProviderID() != null &&
+			(dp.getIncludeFormElementDataProviderName() || dp.getIncludeFormElementDataProviderNameWithFallback()))
 		{
-			String prettyName = simpleName;
-			if (dp.getIncludeFormElementDataProviderName() || dp.getIncludeFormElementDataProviderNameWithFallback())
-			{
-				if (persist instanceof ISupportDataProviderID)
-				{
-					String dataProvider = ((ISupportDataProviderID)persist).getDataProviderID();
-					if (dataProvider != null) return makePrettyName(prettyName, dataProvider);
-				}
-			}
-			// does not support dataprovider OR dataprovider is null
-			if (dp.getIncludeFormElementName() || dp.getIncludeFormElementDataProviderNameWithFallback())
-			{
-				if (persist instanceof ISupportName) prettyName = makePrettyName(prettyName, ((ISupportName)persist).getName());
-			}
-			return prettyName;
+			return makePrettyName(simpleName, ((ISupportDataProviderID)persist).getDataProviderID());
 		}
+		// does not support dataprovider OR dataprovider is null
+		if ((persist instanceof ISupportName) && (dp.getIncludeFormElementName() || dp.getIncludeFormElementDataProviderNameWithFallback()))
+		{
+			return makePrettyName(simpleName, ((ISupportName)persist).getName());
+		}
+		return simpleName;
 	}
 
 	/**

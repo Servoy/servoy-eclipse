@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +44,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.wizards.LoadRelationsWizard;
 import com.servoy.eclipse.ui.wizards.LoadRelationsWizard.RelationData;
@@ -186,7 +186,7 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 					{
 						connection = server.getConnection();
 						DatabaseMetaData dbmd = connection.getMetaData();
-						Map<String, List<List<Object[]>>> relationInfo = new HashMap<String, List<List<Object[]>>>();
+						Map<String, List<List<String[]>>> relationInfo = new HashMap<String, List<List<String[]>>>();
 
 						resultSet = dbmd.getExportedKeys(server.getConfig().getCatalog(), server.getConfig().getSchema(), table.getSQLName());
 						while (resultSet.next())
@@ -203,15 +203,15 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 							Debug.trace("Found (export) rel: name: " + relname + "  keyseq = " + keySeq + ' ' + table.getSQLName() + ' ' + pcolumnName +
 								" -> " + ftableName + ' ' + fcolumnName);
 
-							List<List<Object[]>> rel_items_list = relationInfo.get(relname);
+							List<List<String[]>> rel_items_list = relationInfo.get(relname);
 							if (rel_items_list == null)
 							{
-								rel_items_list = new ArrayList<List<Object[]>>();
+								rel_items_list = new ArrayList<List<String[]>>();
 								relationInfo.put(relname, rel_items_list);
-								rel_items_list.add(new ArrayList<Object[]>());
+								rel_items_list.add(new ArrayList<String[]>());
 							}
 							// rel_items_list is a list of items-lists, we are adding items to the last of this list
-							rel_items_list.get(rel_items_list.size() - 1).add(new Object[] { pcolumnName, ftableName, fcolumnName });
+							rel_items_list.get(rel_items_list.size() - 1).add(new String[] { table.getSQLName(), pcolumnName, ftableName, fcolumnName, fkname });
 						}
 						resultSet = Utils.closeResultSet(resultSet);
 
@@ -229,10 +229,10 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 							Debug.trace("Found (import) rel: name: " + relname + " keyseq = " + keySeq + ' ' + table.getSQLName() + ' ' + pcolumnName + " -> " +
 								ptableName + ' ' + fcolumnName);
 
-							List<List<Object[]>> rel_items_list = relationInfo.get(relname);
+							List<List<String[]>> rel_items_list = relationInfo.get(relname);
 							if (rel_items_list == null)
 							{
-								rel_items_list = new ArrayList<List<Object[]>>();
+								rel_items_list = new ArrayList<List<String[]>>();
 								relationInfo.put(relname, rel_items_list);
 							}
 
@@ -240,35 +240,40 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 							// when KEY_SEQ is not increasing, we have a separate constraint between the same tables.
 							if (rel_items_list.size() == 0 || keySeq <= lastKeySeq)
 							{
-								rel_items_list.add(new ArrayList<Object[]>());
+								rel_items_list.add(new ArrayList<String[]>());
 							}
 							lastKeySeq = keySeq;
 
 							// add the item to the last list of rel_items_list
-							rel_items_list.get(rel_items_list.size() - 1).add(new Object[] { fcolumnName, ptableName, pcolumnName });
+							rel_items_list.get(rel_items_list.size() - 1).add(new String[] { table.getSQLName(), fcolumnName, ptableName, pcolumnName, null });
 						}
 						resultSet = Utils.closeResultSet(resultSet);
 
-						Iterator<Map.Entry<String, List<List<Object[]>>>> it = relationInfo.entrySet().iterator();
-						while (it.hasNext())
+						for (Map.Entry<String, List<List<String[]>>> entry : relationInfo.entrySet())
 						{
-							Map.Entry<String, List<List<Object[]>>> entry = it.next();
 							String rname = entry.getKey();
-							List<List<Object[]>> rel_items_list = entry.getValue();
+							List<List<String[]>> rel_items_list = entry.getValue();
 							// we may have multiple lists of items defined for the same relation name
 							for (int l = 0; l < rel_items_list.size(); l++)
 							{
 								List<Column> primaryColumns = new ArrayList<Column>();
 								List<Column> foreignColumns = new ArrayList<Column>();
 
-								List<Object[]> rel_items = rel_items_list.get(l);
+								String ptableName = null;
+								String pcolumnName = null;
+								String ftableName = null;
+								String fcolumnName = null;
+								String fkname = null;
+								List<String[]> rel_items = rel_items_list.get(l);
 								for (int i = 0; i < rel_items.size(); i++)
 								{
-									Object[] element = rel_items.get(i);
+									String[] element = rel_items.get(i);
 
-									String pcolumnName = (String)element[0];
-									String ftableName = (String)element[1];
-									String fcolumnName = (String)element[2];
+									ptableName = element[0];
+									pcolumnName = element[1];
+									ftableName = element[2];
+									fcolumnName = element[3];
+									fkname = element[4];
 
 									Table foreignTable = server.getTable(ftableName);
 									if (foreignTable == null || foreignTable.isMarkedAsHiddenInDeveloper()) continue;
@@ -288,6 +293,11 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 									if (rel_items_list.size() > 1)
 									{
 										relationName += "_" + (l + 1);
+									}
+									else if (fkname == null && rel_items_list.size() == 1 && new DesignerPreferences().getLoadeRelationsNamingIncludeColumn())
+									{
+										// orders$order_id_to_order_details
+										relationName = ptableName + '$' + fcolumnName + "_to_" + ftableName;
 									}
 
 									boolean defaultAdd = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getRelation(

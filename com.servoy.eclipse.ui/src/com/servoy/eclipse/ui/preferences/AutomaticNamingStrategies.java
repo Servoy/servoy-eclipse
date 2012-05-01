@@ -37,13 +37,16 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
  */
 public class AutomaticNamingStrategies extends PreferencePage implements IWorkbenchPreferencePage
 {
-	private Button defalutFormEventHandlerNaming;
+	private Button defaultFormEventHandlerNaming;
 	private Button includeFormElementNameRadio;
 	private Button includeFormElementDataProviderRadio;
 	private Button includeFormElementDataProviderWithFallbackRadio;
 
 	private Button defaultTableEventHandlerNaming;
 	private Button includeTableNameInEventHandlerRadio;
+
+	private Button defaultLoadedRelationsNaming;
+	private Button includeColumnNameLoadedRelationsRadio;
 
 	public void init(IWorkbench workbench)
 	{
@@ -63,8 +66,8 @@ public class AutomaticNamingStrategies extends PreferencePage implements IWorkbe
 		grpFormEventHandlerNaming.setLayout(new GridLayout(1, false));
 		grpFormEventHandlerNaming.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
-		defalutFormEventHandlerNaming = new Button(grpFormEventHandlerNaming, SWT.RADIO);
-		defalutFormEventHandlerNaming.setText("Default naming"); //$NON-NLS-1$
+		defaultFormEventHandlerNaming = new Button(grpFormEventHandlerNaming, SWT.RADIO);
+		defaultFormEventHandlerNaming.setText("Default naming"); //$NON-NLS-1$
 
 		includeFormElementNameRadio = new Button(grpFormEventHandlerNaming, SWT.RADIO);
 		includeFormElementNameRadio.setText("Include element name"); //$NON-NLS-1$
@@ -86,6 +89,18 @@ public class AutomaticNamingStrategies extends PreferencePage implements IWorkbe
 		includeTableNameInEventHandlerRadio = new Button(grpTableEventHandlerNaming, SWT.RADIO);
 		includeTableNameInEventHandlerRadio.setText("Include table name"); //$NON-NLS-1$
 
+		Group grpLoadedRelationsNaming = new Group(rootPanel, SWT.NONE);
+		grpLoadedRelationsNaming.setText("Loaded relations naming"); //$NON-NLS-1$
+		grpLoadedRelationsNaming.setLayout(new GridLayout(1, false));
+		grpLoadedRelationsNaming.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+
+		defaultLoadedRelationsNaming = new Button(grpLoadedRelationsNaming, SWT.RADIO);
+		defaultLoadedRelationsNaming.setText("Default naming"); //$NON-NLS-1$
+
+		includeColumnNameLoadedRelationsRadio = new Button(grpLoadedRelationsNaming, SWT.RADIO);
+		includeColumnNameLoadedRelationsRadio.setText("Include column name for single-item relations"); //$NON-NLS-1$
+		includeColumnNameLoadedRelationsRadio.setToolTipText("Create relations \n<primarytablename>$<fkcolumn>_to_<foreigntablename>");
+
 		initializeFields();
 
 		return rootPanel;
@@ -95,25 +110,31 @@ public class AutomaticNamingStrategies extends PreferencePage implements IWorkbe
 	{
 		DesignerPreferences prefs = new DesignerPreferences();
 
-		defalutFormEventHandlerNaming.setSelection(prefs.getDefaultFormEventHandlerNaming());
+		defaultFormEventHandlerNaming.setSelection(prefs.getFormEventHandlerNamingDefault());
 		includeFormElementNameRadio.setSelection(prefs.getIncludeFormElementName());
 		includeFormElementDataProviderRadio.setSelection(prefs.getIncludeFormElementDataProviderName());
 		includeFormElementDataProviderWithFallbackRadio.setSelection(prefs.getIncludeFormElementDataProviderNameWithFallback());
 
-		defaultTableEventHandlerNaming.setSelection(prefs.getDefaultTableEventHandlerNaming());
+		defaultTableEventHandlerNaming.setSelection(prefs.getTableEventHandlerNamingDefault());
 		includeTableNameInEventHandlerRadio.setSelection(prefs.getIncludeTableName());
+
+		defaultLoadedRelationsNaming.setSelection(prefs.getLoadeRelationsNamingDefault());
+		includeColumnNameLoadedRelationsRadio.setSelection(prefs.getLoadeRelationsNamingIncludeColumn());
 	}
 
 	@Override
 	protected void performDefaults()
 	{
-		defalutFormEventHandlerNaming.setSelection(DesignerPreferences.DEFAULT_FORM_EVENT_HANDLER_NAMING_DEFAULT);
-		includeFormElementNameRadio.setSelection(DesignerPreferences.INCLUDE_FORM_ELEMENT_NAME_DEFAULT);
-		includeFormElementDataProviderRadio.setSelection(DesignerPreferences.INCLUDE_FORM_ELEMENT_DATAPROVIDER_DEFAULT);
-		includeFormElementDataProviderWithFallbackRadio.setSelection(DesignerPreferences.INCLUDE_FORM_ELEMENT_DATAPROVIDER_FALLBACK_DEFAULT);
+		defaultFormEventHandlerNaming.setSelection(true);
+		includeFormElementNameRadio.setSelection(false);
+		includeFormElementDataProviderRadio.setSelection(false);
+		includeFormElementDataProviderWithFallbackRadio.setSelection(false);
 
-		defaultTableEventHandlerNaming.setSelection(DesignerPreferences.DEFAULT_TABLE_EVENT_HANDLER_NAMING_DEFAULT);
-		includeTableNameInEventHandlerRadio.setSelection(DesignerPreferences.INCLUDE_TABLE_NAME_DEFAULT);
+		defaultTableEventHandlerNaming.setSelection(true);
+		includeTableNameInEventHandlerRadio.setSelection(false);
+
+		defaultLoadedRelationsNaming.setSelection(true);
+		includeColumnNameLoadedRelationsRadio.setSelection(false);
 
 		super.performDefaults();
 	}
@@ -123,13 +144,18 @@ public class AutomaticNamingStrategies extends PreferencePage implements IWorkbe
 	{
 		DesignerPreferences prefs = new DesignerPreferences();
 
-		prefs.setDefaultFormEventHandlerNaming(defalutFormEventHandlerNaming.getSelection());
-		prefs.setIncludeFormElementName(includeFormElementNameRadio.getSelection());
-		prefs.setIncludeFormElementDataProviderName(includeFormElementDataProviderRadio.getSelection());
-		prefs.setIncludeFormElementDataProviderNameWithFallback(includeFormElementDataProviderWithFallbackRadio.getSelection());
+		int formNaming;
+		if (includeFormElementNameRadio.getSelection()) formNaming = DesignerPreferences.FORM_EVENT_HANDLER_NAMING_INCLUDE_FORM_ELEMENT_NAME;
+		else if (includeFormElementDataProviderRadio.getSelection()) formNaming = DesignerPreferences.FORM_EVENT_HANDLER_NAMING_INCLUDE_FORM_ELEMENT_DATAPROVIDER;
+		else if (includeFormElementDataProviderWithFallbackRadio.getSelection()) formNaming = DesignerPreferences.FORM_EVENT_HANDLER_NAMING_INCLUDE_FORM_ELEMENT_DATAPROVIDER_FALLBACK;
+		else formNaming = DesignerPreferences.FORM_EVENT_HANDLER_NAMING_DEFAULT;
+		prefs.setFormEventHandlerNaming(formNaming);
 
-		prefs.setDefaultTableEventHandlerNaming(defaultTableEventHandlerNaming.getSelection());
-		prefs.setIncludeTableName(includeTableNameInEventHandlerRadio.getSelection());
+		prefs.setTableEventHandlerNaming(includeTableNameInEventHandlerRadio.getSelection() ? DesignerPreferences.TABLE_EVENT_HANDLER_NAMING_INCLUDE_TABLE_NAME
+			: DesignerPreferences.TABLE_EVENT_HANDLER_NAMING_DEFAULT);
+
+		prefs.setLoadeRelationsNaming(includeColumnNameLoadedRelationsRadio.getSelection() ? DesignerPreferences.LOADED_RELATIONS_NAMING_INCLUDE_COLUMN
+			: DesignerPreferences.LOADED_RELATIONS_NAMING_DEFAULT);
 
 		prefs.save();
 

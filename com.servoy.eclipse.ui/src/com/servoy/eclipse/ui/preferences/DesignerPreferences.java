@@ -43,6 +43,7 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  * 
  */
+@SuppressWarnings("nls")
 public class DesignerPreferences
 {
 	public static final int PX = 0;
@@ -78,12 +79,9 @@ public class DesignerPreferences
 	public static final String PAINT_PAGEBREAKS_SETTING = "paintPageBreaks";
 	public static final String SHOW_RULERS_SETTING = "showRulers";
 	public static final String MARQUEE_SELECT_OUTER_SETTING = "marqueeSelectOuter";
-	public static final String DEFAULT_FORM_EVENT_HANDLER_NAMING_SETTING = "defaultFormEventHandlerNaming";
-	public static final String INCLUDE_FORM_ELEMENT_NAME_SETTING = "includeFormElementName";
-	public static final String INCLUDE_FORM_ELEMENT_DATAPROVIDER_SETTING = "includeFormElementDataProvider";
-	public static final String INCLUDE_FORM_ELEMENT_DATAPROVIDER_FALLBACK_SETTING = "includeormElementDataProviderFallback";
-	public static final String DEFAULT_TABLE_EVENT_HANDLER_NAMING_SETTING = "defaultTableEventHandlerNaming";
-	public static final String INCLUDE_TABLE_NAME_SETTING = "includeTableName";
+	public static final String FORM_EVENT_HANDLER_NAMING_SETTING = "formEventHandlerNaming";
+	public static final String TABLE_EVENT_HANDLER_NAMING_SETTING = "tableEventHandlerNaming";
+	public static final String LOADED_RELATIONS_NAMING_SETTING = "loadedRelationsNaming";
 	public static final String PK_SEQUENCE_TYPE_SETTING = "primaryKeySequenceType";
 	public static final String SHOW_NAVIGATOR_DEFAULT_SETTING = "showNavigatorDefault";
 
@@ -117,19 +115,24 @@ public class DesignerPreferences
 	public static final boolean PAINT_PAGEBREAKS_DEFAULT = false;
 	public static final boolean SHOW_RULERS_DEFAULT = true;
 	public static final boolean MARQUEE_SELECT_OUTER_DEFAULT = true;
-	public static final boolean DEFAULT_FORM_EVENT_HANDLER_NAMING_DEFAULT = true;
-	public static final boolean INCLUDE_FORM_ELEMENT_NAME_DEFAULT = false;
-	public static final boolean INCLUDE_FORM_ELEMENT_DATAPROVIDER_DEFAULT = false;
-	public static final boolean INCLUDE_FORM_ELEMENT_DATAPROVIDER_FALLBACK_DEFAULT = false;
-	public static final boolean DEFAULT_TABLE_EVENT_HANDLER_NAMING_DEFAULT = true;
-	public static final boolean INCLUDE_TABLE_NAME_DEFAULT = false;
+
+	public static final int FORM_EVENT_HANDLER_NAMING_DEFAULT = 0;
+	public static final int FORM_EVENT_HANDLER_NAMING_INCLUDE_FORM_ELEMENT_NAME = 1;
+	public static final int FORM_EVENT_HANDLER_NAMING_INCLUDE_FORM_ELEMENT_DATAPROVIDER = 2;
+	public static final int FORM_EVENT_HANDLER_NAMING_INCLUDE_FORM_ELEMENT_DATAPROVIDER_FALLBACK = 4;
+
+	public static final int TABLE_EVENT_HANDLER_NAMING_DEFAULT = 0;
+	public static final int TABLE_EVENT_HANDLER_NAMING_INCLUDE_TABLE_NAME = 1;
+
+	public static final int LOADED_RELATIONS_NAMING_DEFAULT = 0;
+	public static final int LOADED_RELATIONS_NAMING_INCLUDE_COLUMN = 1;
+
 	public static final boolean USE_SERVOY_SEQUENCE_DEFAULT = true;
 	public static final boolean USE_DATABASE_SEQUENCE_DEFAULT = false;
 	public static final int PK_SEQUENCE_TYPE_DEFAULT = ColumnInfo.SERVOY_SEQUENCE;
 	public static final boolean SHOW_NAVIGATOR_DEFAULT = true;
 
 	protected final IEclipsePreferences eclipsePreferences;
-
 
 	public DesignerPreferences()
 	{
@@ -483,66 +486,74 @@ public class DesignerPreferences
 		setProperty(FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING, formToolsOnMainToolbar);
 	}
 
-	public boolean getDefaultFormEventHandlerNaming()
+	public void setFormEventHandlerNaming(int value)
 	{
-		return getProperty(DEFAULT_FORM_EVENT_HANDLER_NAMING_SETTING, DEFAULT_FORM_EVENT_HANDLER_NAMING_DEFAULT);
+		setProperty(FORM_EVENT_HANDLER_NAMING_SETTING, value);
 	}
 
-	public void setDefaultFormEventHandlerNaming(boolean defaultEventHandlerNaming)
+	public int getFormEventHandlerNaming()
 	{
-		setProperty(DEFAULT_FORM_EVENT_HANDLER_NAMING_SETTING, defaultEventHandlerNaming);
+		return getProperty(FORM_EVENT_HANDLER_NAMING_SETTING, FORM_EVENT_HANDLER_NAMING_DEFAULT);
+	}
+
+	public boolean getFormEventHandlerNamingDefault()
+	{
+		return getFormEventHandlerNaming() == FORM_EVENT_HANDLER_NAMING_DEFAULT;
 	}
 
 	public boolean getIncludeFormElementName()
 	{
-		return getProperty(INCLUDE_FORM_ELEMENT_NAME_SETTING, INCLUDE_FORM_ELEMENT_NAME_DEFAULT);
-	}
-
-	public void setIncludeFormElementName(boolean includeElementName)
-	{
-		setProperty(INCLUDE_FORM_ELEMENT_NAME_SETTING, includeElementName);
+		return getFormEventHandlerNaming() == FORM_EVENT_HANDLER_NAMING_INCLUDE_FORM_ELEMENT_NAME;
 	}
 
 	public boolean getIncludeFormElementDataProviderName()
 	{
-		return getProperty(INCLUDE_FORM_ELEMENT_DATAPROVIDER_SETTING, INCLUDE_FORM_ELEMENT_DATAPROVIDER_DEFAULT);
-	}
-
-	public void setIncludeFormElementDataProviderName(boolean includeDataProviderName)
-	{
-		setProperty(INCLUDE_FORM_ELEMENT_DATAPROVIDER_SETTING, includeDataProviderName);
+		return getFormEventHandlerNaming() == FORM_EVENT_HANDLER_NAMING_INCLUDE_FORM_ELEMENT_DATAPROVIDER;
 	}
 
 	public boolean getIncludeFormElementDataProviderNameWithFallback()
 	{
-		return getProperty(INCLUDE_FORM_ELEMENT_DATAPROVIDER_FALLBACK_SETTING, INCLUDE_FORM_ELEMENT_DATAPROVIDER_FALLBACK_DEFAULT);
+		return getFormEventHandlerNaming() == FORM_EVENT_HANDLER_NAMING_INCLUDE_FORM_ELEMENT_DATAPROVIDER_FALLBACK;
 	}
 
-	public void setIncludeFormElementDataProviderNameWithFallback(boolean includeDataProviderNameFallback)
+	public void setTableEventHandlerNaming(int value)
 	{
-		setProperty(INCLUDE_FORM_ELEMENT_DATAPROVIDER_FALLBACK_SETTING, includeDataProviderNameFallback);
+		setProperty(TABLE_EVENT_HANDLER_NAMING_SETTING, value);
 	}
 
-	//getDefaultTableEventHandlerNaming
-	public boolean getDefaultTableEventHandlerNaming()
+	public int getTableEventHandlerNaming()
 	{
-		return getProperty(DEFAULT_TABLE_EVENT_HANDLER_NAMING_SETTING, DEFAULT_TABLE_EVENT_HANDLER_NAMING_DEFAULT);
+		return getProperty(TABLE_EVENT_HANDLER_NAMING_SETTING, TABLE_EVENT_HANDLER_NAMING_DEFAULT);
 	}
 
-	public void setDefaultTableEventHandlerNaming(boolean defaultTableEventHandling)
+	public boolean getTableEventHandlerNamingDefault()
 	{
-		setProperty(DEFAULT_TABLE_EVENT_HANDLER_NAMING_SETTING, defaultTableEventHandling);
+		return getTableEventHandlerNaming() == TABLE_EVENT_HANDLER_NAMING_DEFAULT;
 	}
 
-	//getIncludeTableNameInEventHandler
 	public boolean getIncludeTableName()
 	{
-		return getProperty(INCLUDE_TABLE_NAME_SETTING, INCLUDE_TABLE_NAME_DEFAULT);
+		return getTableEventHandlerNaming() == TABLE_EVENT_HANDLER_NAMING_INCLUDE_TABLE_NAME;
 	}
 
-	public void setIncludeTableName(boolean includeTableNameInEventHandler)
+	public void setLoadeRelationsNaming(int value)
 	{
-		setProperty(INCLUDE_TABLE_NAME_SETTING, includeTableNameInEventHandler);
+		setProperty(LOADED_RELATIONS_NAMING_SETTING, value);
+	}
+
+	public int getLoadeRelationsNaming()
+	{
+		return getProperty(LOADED_RELATIONS_NAMING_SETTING, LOADED_RELATIONS_NAMING_DEFAULT);
+	}
+
+	public boolean getLoadeRelationsNamingDefault()
+	{
+		return getLoadeRelationsNaming() == LOADED_RELATIONS_NAMING_DEFAULT;
+	}
+
+	public boolean getLoadeRelationsNamingIncludeColumn()
+	{
+		return getLoadeRelationsNaming() == LOADED_RELATIONS_NAMING_INCLUDE_COLUMN;
 	}
 
 	public int getPrimaryKeySequenceType()
