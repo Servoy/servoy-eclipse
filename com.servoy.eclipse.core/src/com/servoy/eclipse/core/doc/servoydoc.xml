@@ -6041,9 +6041,10 @@ label.rolloverCursor = SM_CURSOR.HAND_CURSOR;]]></sample>
         </property>
         <property name="rolloverImageMedia">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMedia" typecode="com.servoy.j2db.scripting.solutionmodel.JSMedia"/>
-          <description><![CDATA[The roll over image Media object used. When the mouse is moved over the component,
-this image Media will be displayed. When the mouse is moved out of the component,
-whatever text or image was being initially displayed will be restored.]]></description>
+          <description><![CDATA[The roll over image Media object used. It will only work if a property image is also used.
+When the mouse is moved over the component, this image Media will be displayed. 
+When the mouse is moved out of the component, whatever text or image was being initially 
+displayed will be restored.]]></description>
           <summary><![CDATA[The roll over image Media object used.]]></summary>
           <sample><![CDATA[var ballBytes = plugins.file.readFile('d:/ball.jpg');
 var ballImage = solutionModel.newMedia('ball.jpg', ballBytes);
@@ -14453,9 +14454,10 @@ label.rolloverCursor = SM_CURSOR.HAND_CURSOR;]]></sample>
         </property>
         <property name="rolloverImageMedia">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMedia" typecode="com.servoy.j2db.scripting.solutionmodel.JSMedia"/>
-          <description><![CDATA[The roll over image Media object used. When the mouse is moved over the component,
-this image Media will be displayed. When the mouse is moved out of the component,
-whatever text or image was being initially displayed will be restored.]]></description>
+          <description><![CDATA[The roll over image Media object used. It will only work if a property image is also used.
+When the mouse is moved over the component, this image Media will be displayed. 
+When the mouse is moved out of the component, whatever text or image was being initially 
+displayed will be restored.]]></description>
           <summary><![CDATA[The roll over image Media object used.]]></summary>
           <sample><![CDATA[var ballBytes = plugins.file.readFile('d:/ball.jpg');
 var ballImage = solutionModel.newMedia('ball.jpg', ballBytes);
@@ -15038,9 +15040,10 @@ label.rolloverCursor = SM_CURSOR.HAND_CURSOR;]]></sample>
         </property>
         <property name="rolloverImageMedia">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMedia" typecode="com.servoy.j2db.scripting.solutionmodel.JSMedia"/>
-          <description><![CDATA[The roll over image Media object used. When the mouse is moved over the component,
-this image Media will be displayed. When the mouse is moved out of the component,
-whatever text or image was being initially displayed will be restored.]]></description>
+          <description><![CDATA[The roll over image Media object used. It will only work if a property image is also used.
+When the mouse is moved over the component, this image Media will be displayed. 
+When the mouse is moved out of the component, whatever text or image was being initially 
+displayed will be restored.]]></description>
           <summary><![CDATA[The roll over image Media object used.]]></summary>
           <sample><![CDATA[var ballBytes = plugins.file.readFile('d:/ball.jpg');
 var ballImage = solutionModel.newMedia('ball.jpg', ballBytes);
@@ -29342,6 +29345,15 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
+        <property name="editable">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Gets or sets the editable/read-only state of a field; true - editable; false - read-only.
+
+NOTE the "!" operator can be used to invert the editable state.]]></description>
+          <summary><![CDATA[Gets or sets the editable/read-only state of a field; true - editable; false - read-only.]]></summary>
+          <sample><![CDATA[var currentState = %%prefix%%%%elementName%%.editable;
+%%prefix%%%%elementName%%.editable = !currentState;]]></sample>
+        </property>
         <property name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
@@ -29585,13 +29597,6 @@ forms.company.elements.faxBtn.setSize(w,h);
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <summary><![CDATA[Returns the width of the current element.]]></summary>
           <sample><![CDATA[var w = %%prefix%%%%elementName%%.getWidth();]]></sample>
-        </function>
-        <function name="isEditable">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if editable, false otherwise]]></return>
-          <description><![CDATA[Gets the editable/read-only state of a field; true - editable; false - read-only; ! - the editable/read-only state is inverted (the opposite).]]></description>
-          <summary><![CDATA[Gets the editable/read-only state of a field; true - editable; false - read-only; ! - the editable/read-only state is inverted (the opposite).]]></summary>
-          <sample><![CDATA[var currentState = %%prefix%%%%elementName%%.isEditable();]]></sample>
         </function>
         <function name="putClientProperty">
           <argumentsTypes>
