@@ -552,6 +552,7 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 	public String getDataProvidersIndex(int index, String s)
 	{
 		if (s == null || index < 0) return null;
+		if (s.startsWith(LiteralDataprovider.LITERAL_PREFIX)) return s;
 		String[] dps = getDataProviders(index);
 		if (dps != null)
 		{
