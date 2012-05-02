@@ -1057,4 +1057,14 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	{
 		return isFormElementsEditableInFindMode;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.j2db.IApplication#setValueListItems(java.lang.String, java.lang.Object[], java.lang.Object[], boolean)
+	 */
+	public void setValueListItems(String name, Object[] displayValues, Object[] realValues, boolean autoconvert)
+	{
+		client.setValueListItems(name, displayValues, realValues, autoconvert);
+	}
 }
