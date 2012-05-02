@@ -746,6 +746,28 @@ application.output('Including yourself, there are ' + count + ' client(s) runnin
             </parameter>
           </parameters>
         </function>
+        <function name="getClientProperty">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[the property value for the given name/key, null of nothing was found]]></return>
+          <description><![CDATA[Sets a UI property.]]></description>
+          <summary><![CDATA[Sets a UI property.]]></summary>
+          <sample><![CDATA[//Only use this function from the solution on open method!
+//In smart client, use this to set javax.swing.UIDefaults properties.
+application.putClientProperty('ToolTip.hideAccelerator', true)
+//To change the comboboxes selection background color, do this:
+application.putClientProperty('ComboBox.selectionBackground', new Packages.javax.swing.plaf.ColorUIResource(java.awt.Color.RED)) 
+
+//In web client, use this to change the template directory.
+//To change the default dir of templates/default to templates/green_skin, do this:
+application.putClientProperty('templates.dir','green_skin');]]></sample>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[Name of the client property]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function name="getClipboardString">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The string from the clipboard]]></return>
@@ -1292,6 +1314,32 @@ application.overrideStyle('mystyle','mystyle_mace')//in this case both styles sh
             </parameter>
           </parameters>
         </function>
+        <function name="putClientProperty">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[Boolean (true) if the client property was set with the new value]]></return>
+          <description><![CDATA[Sets a UI property.]]></description>
+          <summary><![CDATA[Sets a UI property.]]></summary>
+          <sample><![CDATA[//Only use this function from the solution on open method!
+//In smart client, use this to set javax.swing.UIDefaults properties.
+application.putClientProperty('ToolTip.hideAccelerator', true)
+//To change the comboboxes selection background color, do this:
+application.putClientProperty('ComboBox.selectionBackground', new Packages.javax.swing.plaf.ColorUIResource(java.awt.Color.RED)) 
+
+//In web client, use this to change the template directory.
+//To change the default dir of templates/default to templates/green_skin, do this:
+application.putClientProperty('templates.dir','green_skin');]]></sample>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[Name of the client property]]></description>
+            </parameter>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[New value of the client property]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function deprecated="true" name="readFile">
           <argumentsTypes>
             <argumentType typecode="[Ljava.lang.Object;"/>
@@ -1453,23 +1501,15 @@ application.setToolbarVisible('text',false);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="setUIProperty">
+        <function deprecated="true" name="setUIProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[Boolean (true) if the UI property was set with the new value]]></return>
-          <description><![CDATA[Sets a UI property.]]></description>
-          <summary><![CDATA[Sets a UI property.]]></summary>
-          <sample><![CDATA[//Only use this function from the solution on open method!
-//In smart client, use this to set javax.swing.UIDefaults properties.
-application.setUIProperty('ToolTip.hideAccelerator', true)
-//To change the comboboxes selection background color, do this:
-application.setUIProperty('ComboBox.selectionBackground', new Packages.javax.swing.plaf.ColorUIResource(java.awt.Color.RED)) 
-
-//In web client, use this to change the template directory.
-//To change the default dir of templates/default to templates/green_skin, do this:
-application.setUIProperty('templates.dir','green_skin');]]></sample>
+          <description/>
+          <deprecated><![CDATA[use putClientProperty(Object,Object)]]></deprecated>
+          <sample/>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[Name of the UI property]]></description>
@@ -2973,6 +3013,32 @@ if (cancel || !databaseManager.commitTransaction())
           <parameters>
             <parameter name="saveFirst" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[save edited records to the database first (default true)]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="commitTransaction">
+          <argumentsTypes>
+            <argumentType typecode="boolean"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[if the transaction could be committed.]]></return>
+          <description><![CDATA[Returns true if a transaction is committed; rollback if commit fails.]]></description>
+          <summary><![CDATA[Returns true if a transaction is committed; rollback if commit fails.]]></summary>
+          <sample><![CDATA[// starts a database transaction
+databaseManager.startTransaction()
+//Now let users input data
+
+//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.  
+if (cancel || !databaseManager.commitTransaction())
+{
+	databaseManager.rollbackTransaction();
+}]]></sample>
+          <parameters>
+            <parameter name="saveFirst" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[save edited records to the database first (default true)\]]></description>
+            </parameter>
+            <parameter name="revertSavedRecords" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[if a commit fails and a rollback is done, the when given false the records are not reverted to the database state (and are in edited records again)]]></description>
             </parameter>
           </parameters>
         </function>
@@ -4564,7 +4630,78 @@ return true if the locks are released.]]></description>
             </parameter>
           </parameters>
         </function>
-        <function name="rollbackEditedRecords">
+        <function name="revertEditedRecords">
+          <argumentsTypes/>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Reverts outstanding (not saved) in memory changes from edited records. 
+Can specify a record or foundset as parameter to rollback.
+Best used in combination with the function databaseManager.setAutoSave()
+This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
+          <summary><![CDATA[Reverts outstanding (not saved) in memory changes from edited records.]]></summary>
+          <sample><![CDATA[//Set autosave, if false then no saves will happen by the ui (not including deletes!). Until you call saveData or setAutoSave(true)
+//reverts in mem the records that were edited and not yet saved. Best used in combination with autosave false.
+databaseManager.setAutoSave(false)
+//Now let users input data
+
+//On save or cancel, when data has been entered:
+if (cancel) databaseManager.revertEditedRecords()
+//databaseManager.revertEditedRecords(foundset); // rollback all records from foundset
+//databaseManager.revertEditedRecords(foundset.getSelectedRecord()); // rollback only one record
+databaseManager.setAutoSave(true)]]></sample>
+        </function>
+        <function name="revertEditedRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Reverts outstanding (not saved) in memory changes from edited records. 
+Can specify a record or foundset as parameter to rollback.
+Best used in combination with the function databaseManager.setAutoSave()
+This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
+          <summary><![CDATA[Reverts outstanding (not saved) in memory changes from edited records.]]></summary>
+          <sample><![CDATA[//Set autosave, if false then no saves will happen by the ui (not including deletes!). Until you call saveData or setAutoSave(true)
+//reverts in mem the records that were edited and not yet saved. Best used in combination with autosave false.
+databaseManager.setAutoSave(false)
+//Now let users input data
+
+//On save or cancel, when data has been entered:
+if (cancel) databaseManager.revertEditedRecords()
+//databaseManager.revertEditedRecords(foundset); // rollback all records from foundset
+//databaseManager.revertEditedRecords(foundset.getSelectedRecord()); // rollback only one record
+databaseManager.setAutoSave(true)]]></sample>
+          <parameters>
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal">
+              <description><![CDATA[A JSFoundset to revert.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="revertEditedRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.IRecordInternal"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Reverts outstanding (not saved) in memory changes from edited records. 
+Can specify a record or foundset as parameter to rollback.
+Best used in combination with the function databaseManager.setAutoSave()
+This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
+          <summary><![CDATA[Reverts outstanding (not saved) in memory changes from edited records.]]></summary>
+          <sample><![CDATA[//Set autosave, if false then no saves will happen by the ui (not including deletes!). Until you call saveData or setAutoSave(true)
+//reverts in mem the records that were edited and not yet saved. Best used in combination with autosave false.
+databaseManager.setAutoSave(false)
+//Now let users input data
+
+//On save or cancel, when data has been entered:
+if (cancel) databaseManager.revertEditedRecords()
+//databaseManager.revertEditedRecords(foundset); // rollback all records from foundset
+//databaseManager.revertEditedRecords(foundset.getSelectedRecord()); // rollback only one record
+databaseManager.setAutoSave(true)]]></sample>
+          <parameters>
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal">
+              <description><![CDATA[A JSRecord to rollback.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function deprecated="true" name="rollbackEditedRecords">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Rolls back in memory edited records that are outstanding (not saved). 
@@ -4572,6 +4709,7 @@ Can specify a record or foundset as parameter to rollback.
 Best used in combination with the function databaseManager.setAutoSave()
 This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
           <summary><![CDATA[Rolls back in memory edited records that are outstanding (not saved).]]></summary>
+          <deprecated><![CDATA[As of release 6.1, renamed to #revertEditedRecords().]]></deprecated>
           <sample><![CDATA[//Set autosave, if false then no saves will happen by the ui (not including deletes!). Until you call saveData or setAutoSave(true)
 //Rollbacks in mem the records that were edited and not yet saved. Best used in combination with autosave false.
 databaseManager.setAutoSave(false)
@@ -4583,7 +4721,7 @@ if (cancel) databaseManager.rollbackEditedRecords()
 //databaseManager.rollbackEditedRecords(foundset.getSelectedRecord()); // rollback only one record
 databaseManager.setAutoSave(true)]]></sample>
         </function>
-        <function name="rollbackEditedRecords">
+        <function deprecated="true" name="rollbackEditedRecords">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal"/>
           </argumentsTypes>
@@ -4593,6 +4731,7 @@ Can specify a record or foundset as parameter to rollback.
 Best used in combination with the function databaseManager.setAutoSave()
 This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
           <summary><![CDATA[Rolls back in memory edited records that are outstanding (not saved).]]></summary>
+          <deprecated><![CDATA[As of release 6.1, renamed to #revertEditedRecords().]]></deprecated>
           <sample><![CDATA[//Set autosave, if false then no saves will happen by the ui (not including deletes!). Until you call saveData or setAutoSave(true)
 //Rollbacks in mem the records that were edited and not yet saved. Best used in combination with autosave false.
 databaseManager.setAutoSave(false)
@@ -4609,7 +4748,7 @@ databaseManager.setAutoSave(true)]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="rollbackEditedRecords">
+        <function deprecated="true" name="rollbackEditedRecords">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.dataprocessing.IRecordInternal"/>
           </argumentsTypes>
@@ -4619,6 +4758,7 @@ Can specify a record or foundset as parameter to rollback.
 Best used in combination with the function databaseManager.setAutoSave()
 This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
           <summary><![CDATA[Rolls back in memory edited records that are outstanding (not saved).]]></summary>
+          <deprecated><![CDATA[As of release 6.1, renamed to #revertEditedRecords().]]></deprecated>
           <sample><![CDATA[//Set autosave, if false then no saves will happen by the ui (not including deletes!). Until you call saveData or setAutoSave(true)
 //Rollbacks in mem the records that were edited and not yet saved. Best used in combination with autosave false.
 databaseManager.setAutoSave(false)
@@ -4640,7 +4780,8 @@ databaseManager.setAutoSave(true)]]></sample>
           <return type="void" typecode="void"/>
           <description><![CDATA[Rollback a transaction started by databaseManager.startTransaction().
 Note that when autosave is false, rollbackEditedRecords() will not handle deleted records, while rollbackTransaction() does.
-Also, rollbackEditedRecords() is called before rolling back the transaction.]]></description>
+Also, rollbackEditedRecords() is called before rolling back the transaction see rollbackTransaction(boolean) to controll that behavior
+and saved records within the transactions are restored to the database values, so user input is lost, to controll this see rollbackTransaction(boolean,boolean)]]></description>
           <summary><![CDATA[Rollback a transaction started by databaseManager.]]></summary>
           <sample><![CDATA[// starts a database transaction
 databaseManager.startTransaction()
@@ -4654,6 +4795,31 @@ if (cancel || !databaseManager.commitTransaction())
         </function>
         <function name="rollbackTransaction">
           <argumentsTypes>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Rollback a transaction started by databaseManager.startTransaction().
+Note that when autosave is false, rollbackEditedRecords() will not handle deleted records, while rollbackTransaction() does.
+Also, saved records within the transactions are restored to the database values, so user input is lost, to controll this see rollbackTransaction(boolean,boolean)]]></description>
+          <summary><![CDATA[Rollback a transaction started by databaseManager.]]></summary>
+          <sample><![CDATA[// starts a database transaction
+databaseManager.startTransaction()
+//Now let users input data
+
+//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.  
+if (cancel || !databaseManager.commitTransaction())
+{
+	databaseManager.rollbackTransaction();
+}]]></sample>
+          <parameters>
+            <parameter name="rollbackEdited" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[call rollbackEditedRecords() before rolling back the transaction]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="rollbackTransaction">
+          <argumentsTypes>
+            <argumentType typecode="boolean"/>
             <argumentType typecode="boolean"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
@@ -4672,6 +4838,9 @@ if (cancel || !databaseManager.commitTransaction())
           <parameters>
             <parameter name="rollbackEdited" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[call rollbackEditedRecords() before rolling back the transaction]]></description>
+            </parameter>
+            <parameter name="revertSavedRecords" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[if false then all records in the transaction do keep the user input and are back in the edited records list]]></description>
             </parameter>
           </parameters>
         </function>
@@ -16762,13 +16931,22 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
           <summary><![CDATA[Returns true or false if the record is being edited or not.]]></summary>
           <sample><![CDATA[var isEditing = foundset.getSelectedRecord().isEditing() // also foundset.getRecord can be used]]></sample>
         </function>
-        <function name="rollbackChanges">
+        <function name="revertChanges">
+          <argumentsTypes/>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Reverts the in memory outstanding (not saved) changes of the record.]]></description>
+          <summary><![CDATA[Reverts the in memory outstanding (not saved) changes of the record.]]></summary>
+          <sample><![CDATA[var record= %%prefix%%foundset.getSelectedRecord();
+record.revertChanges();]]></sample>
+        </function>
+        <function deprecated="true" name="rollbackChanges">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[If this record exists in underlying datasource it will do a re-query to fetch the latest data from the datasource.
 NOTE: If you use transactions then it will be the data of your last update of this record in the transaction,
 not the latest committed data of that record in the datasource.]]></description>
           <summary><![CDATA[If this record exists in underlying datasource it will do a re-query to fetch the latest data from the datasource.]]></summary>
+          <deprecated><![CDATA[As of release 6.1, replaced by #revertChanges(). Note that revertChanges does in memory revert of outstanding changes, does not query the database.]]></deprecated>
           <sample><![CDATA[var record= %%prefix%%foundset.getSelectedRecord();
 record.rollbackChanges();]]></sample>
         </function>
