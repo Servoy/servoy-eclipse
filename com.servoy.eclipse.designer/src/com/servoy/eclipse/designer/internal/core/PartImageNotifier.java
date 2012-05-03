@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.internal.core;
 import java.awt.Color;
 import java.awt.Component;
 
+import javax.swing.border.Border;
 import javax.swing.text.html.CSS;
 
 import com.servoy.j2db.IApplication;
@@ -74,9 +75,18 @@ public class PartImageNotifier extends AbstractImageNotifier
 
 		comp.setOpaque(!form.getTransparent() && !formHasBgImage);
 
-		if (pair != null && pair.getRight() != null && pair.getRight().hasAttribute(CSS.Attribute.BACKGROUND_IMAGE.toString()))
+		if (pair != null && pair.getRight() != null && pair.getLeft() != null)
 		{
-			comp.setCssRule(pair.getRight());
+			if (pair.getRight().hasAttribute(CSS.Attribute.BACKGROUND_IMAGE.toString()))
+			{
+				comp.setCssRule(pair.getRight());
+			}
+
+			Border border = pair.getLeft().getBorder(pair.getRight());
+			if (border != null)
+			{
+				comp.setBorder(border);
+			}
 		}
 
 		return comp;
