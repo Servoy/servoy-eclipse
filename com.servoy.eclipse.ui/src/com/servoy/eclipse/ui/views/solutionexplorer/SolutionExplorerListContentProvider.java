@@ -1731,10 +1731,13 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				if (scriptObject instanceof XMLScriptObjectAdapter && parameterTypes != null)
 				{
 					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, parameterTypes);
-					paramNames = new String[parameters.length];
-					for (int i = 0; i < parameters.length; i++)
+					if (parameters != null)
 					{
-						paramNames[i] = parameters[i].getName();
+						paramNames = new String[parameters.length];
+						for (int i = 0; i < parameters.length; i++)
+						{
+							paramNames[i] = parameters[i].getName();
+						}
 					}
 				}
 				else
@@ -1759,11 +1762,13 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				{
 					description = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, parameterTypes);
 					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, parameterTypes);
-
-					paramNames = new String[parameters.length];
-					for (int i = 0; i < parameters.length; i++)
+					if (parameters != null)
 					{
-						paramNames[i] = parameters[i].getName();
+						paramNames = new String[parameters.length];
+						for (int i = 0; i < parameters.length; i++)
+						{
+							paramNames[i] = parameters[i].getName();
+						}
 					}
 					tooltip = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, parameterTypes);
 				}
