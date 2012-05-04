@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import org.eclipse.core.runtime.Assert;
@@ -33,6 +33,8 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+
+import com.servoy.eclipse.ui.node.UserNodeType;
 
 /**
  * A decorating column label provider is a label provider which combines a nested column label provider and an optional decorator. The decorator decorates the
@@ -103,6 +105,12 @@ public class DecoratingColumnLabelProvider extends ColumnLabelProvider
 	public Image getImage(Object element)
 	{
 		Image image = provider.getImage(element);
+
+		if (element instanceof PlatformSimpleUserNode)
+		{
+			if (((PlatformSimpleUserNode)element).getType() == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE) return image;
+		}
+
 		if (decorator != null)
 		{
 			if (decorator instanceof LabelDecorator)
