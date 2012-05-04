@@ -1576,14 +1576,26 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					if (persist instanceof Relation && ((Relation)persist).getName() != null)
 					{
 						// refresh global relations node - if possible
-						node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Globals);
+						node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Scopes);
 						if (node != null)
 						{
-							node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_relations);
-							if (node != null)
+							String[] scopeNames = ((Solution)root).getRuntimeProperty(Solution.SCOPE_NAMES);
+							if (scopeNames != null) // when refreshScopes has not been called yet
 							{
-								addGlobalRelationsNodeChildren(node);
-								view.refreshTreeNodeFromModel(node);
+								PlatformSimpleUserNode scopeNode = null;
+								for (String scopeName : scopeNames)
+								{
+									scopeNode = (PlatformSimpleUserNode)findChildNode(node, scopeName);
+									if (scopeNode != null)
+									{
+										scopeNode = (PlatformSimpleUserNode)findChildNode(scopeNode, Messages.TreeStrings_relations);
+									}
+									if (scopeNode != null)
+									{
+										addGlobalRelationsNodeChildren(scopeNode);
+										view.refreshTreeNodeFromModel(scopeNode);
+									}
+								}
 							}
 						}
 						try
