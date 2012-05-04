@@ -2554,6 +2554,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								ServoyMarker mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(table.getDataSource(), "valuelist ", vl.getName());
 								problems.add(new Problem(mk.getType(), IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, mk.getText(), null));
 							}
+							else if (table.getRowIdentColumnsCount() == 0)
+							{
+								ServoyMarker mk = MarkerMessages.ValuelistDBTableNoPk.fill(vl.getName(), stn[1]);
+								problems.add(new Problem(mk.getType(), IMarker.SEVERITY_WARNING, IMarker.PRIORITY_LOW, mk.getText(), null));
+							}
 						} // server not found is reported elsewhere
 					}
 				}
