@@ -525,11 +525,24 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 
 	public void persistChanges(Collection<IPersist> changedPersists)
 	{
+		if (projectIsNoLongerActive())
+		{
+			ServoyLog.logWarning("Closing form editor for " + form.getName() + " because solution " + servoyProject + " is not part of the active solution",
+				null);
+			close(false);
+			return;
+		}
+
 		boolean full_refresh = false;
 		List<IPersist> changedChildren = new ArrayList<IPersist>();
 
 		// get all the uuids of the forms in the current hierarchy.
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
+		if (flattenedSolution == null)
+		{
+			ServoyLog.logWarning("Cannot read solution for form: " + form.getName(), null);
+			return;
+		}
 		Set<UUID> formUuids = new HashSet<UUID>();
 		for (Form f : flattenedSolution.getFormHierarchy(form))
 		{
