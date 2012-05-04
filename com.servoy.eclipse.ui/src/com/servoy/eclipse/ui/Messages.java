@@ -203,6 +203,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_noResourceReference;
 	public static String ErrorWarningPreferencePage_propertyMultipleMethodsOnSameTable;
 	public static String ErrorWarningPreferencePage_serverMissingDriver;
+	public static String ErrorWarningPreferencePage_dataproviderMissingConverter;
 	public static String ErrorWarningPreferencePage_userSecurityProblem;
 	public static String ErrorWarningPreferencePage_moduleDifferentResourceProject;
 	public static String ErrorWarningPreferencePage_loginFormWithDatasourceInLoginSolution;

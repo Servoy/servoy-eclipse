@@ -275,6 +275,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String MISSING_DRIVER = _PREFIX + ".missingDriver"; //$NON-NLS-1$
 	public static final String OBSOLETE_ELEMENT = _PREFIX + ".obsoleteElement"; //$NON-NLS-1$
 	public static final String HIDDEN_TABLE_STILL_IN_USE = _PREFIX + ".hiddenTableInUse"; //$NON-NLS-1$
+	public static final String MISSING_CONVERTER = _PREFIX + ".missingConverter"; //$NON-NLS-1$
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels"; //$NON-NLS-1$
@@ -304,6 +305,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> PROPERTY_MULTIPLE_METHODS_ON_SAME_TABLE = new Pair<String, ProblemSeverity>(
 		"propertyMultipleMethodsOnSameTable", ProblemSeverity.INFO); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> SERVER_MISSING_DRIVER = new Pair<String, ProblemSeverity>("severMissingDriver", ProblemSeverity.WARNING); //$NON-NLS-1$
+
+	public final static Pair<String, ProblemSeverity> DATAPROVIDER_MISSING_CONVERTER = new Pair<String, ProblemSeverity>(
+		"dataproviderMissingConverter", ProblemSeverity.WARNING); //$NON-NLS-1$
 
 	//login problems 
 	public final static Pair<String, ProblemSeverity> LOGIN_FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION = new Pair<String, ProblemSeverity>(
@@ -1783,7 +1787,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													ParsedFormat parsedFormat = FormatParser.parseFormatProperty(format);
 													if (parsedFormat.getDisplayFormat() != null && !parsedFormat.getDisplayFormat().startsWith("i18n:"))
 													{
-														int dataType = getDataType(dataProvider, parsedFormat);
+														int dataType = getDataType(project, dataProvider, parsedFormat);
 														try
 														{
 															if (dataType == IColumnTypes.DATETIME)
@@ -3658,7 +3662,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_UUID_FLAG_NOT_SET, IMarker.PRIORITY_NORMAL, null, null);
 							}
 							// check type defined by column converter
-							int dataProviderType = getDataType(column, null);
+							int dataProviderType = getDataType(res, column, null);
 							if ((column.getSequenceType() == ColumnInfo.UUID_GENERATOR && (dataProviderType != IColumnTypes.TEXT && dataProviderType != IColumnTypes.MEDIA)) ||
 								(column.getSequenceType() == ColumnInfo.SERVOY_SEQUENCE && (dataProviderType != IColumnTypes.INTEGER && dataProviderType != IColumnTypes.NUMBER)))
 							{
@@ -4568,7 +4572,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	 * @return
 	 * @throws IOException
 	 */
-	private int getDataType(IDataProvider dataProvider, ParsedFormat parsedFormat) throws IOException
+	private int getDataType(IResource resource, IDataProvider dataProvider, ParsedFormat parsedFormat) throws IOException
 	{
 		int dataType = dataProvider.getDataProviderType();
 		IServiceProvider serviceProvider = ServoyModelFinder.getServiceProvider();
@@ -4587,7 +4591,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 			else
 			{
-				// TODO report missing converter
+				ServoyMarker mk = MarkerMessages.MissingConverter.fill(uiConverterName, dataProvider);
+				addMarker(resource, mk.getType(), mk.getText(), -1, DATAPROVIDER_MISSING_CONVERTER, IMarker.PRIORITY_HIGH, null, null);
 			}
 		}
 		else if (dataProvider instanceof Column && ((Column)dataProvider).getColumnInfo() != null)
@@ -4608,7 +4613,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				else if (converter == null)
 				{
-					// TODO report missing converter
+					ServoyMarker mk = MarkerMessages.MissingConverter.fill(converterName, dataProvider);
+					addMarker(resource, mk.getType(), mk.getText(), -1, DATAPROVIDER_MISSING_CONVERTER, IMarker.PRIORITY_HIGH, null, null);
 				}
 			}
 		}

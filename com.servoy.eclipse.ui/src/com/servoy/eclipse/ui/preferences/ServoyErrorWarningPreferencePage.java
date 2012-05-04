@@ -487,6 +487,8 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.CALCULATION_FORM_ACCESS,
 				Messages.ErrorWarningPreferencePage_calculationFormAccess));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.IMAGE_MEDIA_NOT_SET, Messages.ErrorWarningPreferencePage_imageMediaNotSet));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.DATAPROVIDER_MISSING_CONVERTER,
+				Messages.ErrorWarningPreferencePage_dataproviderMissingConverter));
 		}
 		else if (ERROR_WARNING_LOGIN_PROBLEMS.equals(problemSection))
 		{
