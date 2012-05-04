@@ -1249,9 +1249,16 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		List<IActiveProjectListener> clone = new ArrayList<IActiveProjectListener>(activeProjectListeners);
 		for (IActiveProjectListener listener : clone)
 		{
-			if (!listener.activeProjectWillChange(activeProject, toProject))
+			try
 			{
-				return false;
+				if (!listener.activeProjectWillChange(activeProject, toProject))
+				{
+					return false;
+				}
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
 			}
 		}
 		return true;
@@ -1264,7 +1271,14 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		List<IActiveProjectListener> clone = new ArrayList<IActiveProjectListener>(activeProjectListeners);
 		for (IActiveProjectListener listener : clone)
 		{
-			listener.activeProjectChanged(activeProject);
+			try
+			{
+				listener.activeProjectChanged(activeProject);
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
+			}
 		}
 	}
 
@@ -1283,7 +1297,14 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		List<IActiveProjectListener> clone = new ArrayList<IActiveProjectListener>(activeProjectListeners);
 		for (IActiveProjectListener listener : clone)
 		{
-			listener.activeProjectUpdated(activeProject, updateInfo);
+			try
+			{
+				listener.activeProjectUpdated(activeProject, updateInfo);
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
+			}
 		}
 	}
 
@@ -1484,7 +1505,14 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		List<IPersistChangeListener> listeners = realSolution ? realPersistChangeListeners : editingPersistChangeListeners;
 		for (IPersistChangeListener listener : listeners.toArray(new IPersistChangeListener[listeners.size()]))
 		{
-			listener.persistChanges(changes);
+			try
+			{
+				listener.persistChanges(changes);
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
+			}
 		}
 	}
 
@@ -1493,7 +1521,14 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		ArrayList<I18NChangeListener> clone = new ArrayList<I18NChangeListener>(i18nChangeListeners);
 		for (I18NChangeListener listener : clone)
 		{
-			listener.i18nChanged();
+			try
+			{
+				listener.i18nChanged();
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
+			}
 		}
 	}
 
@@ -1502,7 +1537,14 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		ArrayList<ISolutionMetaDataChangeListener> clone = new ArrayList<ISolutionMetaDataChangeListener>(solutionMetaDataChangeListener);
 		for (ISolutionMetaDataChangeListener listener : clone)
 		{
-			listener.solutionMetaDataChanged(changedSolution);
+			try
+			{
+				listener.solutionMetaDataChanged(changedSolution);
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
+			}
 		}
 	}
 
