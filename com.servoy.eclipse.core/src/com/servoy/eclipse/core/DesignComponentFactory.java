@@ -93,21 +93,51 @@ public class DesignComponentFactory extends ComponentFactory
 				comp[0] = createDesignComponentEx(application, flattenedSolution, meta, form);
 
 				awtFinished.set(true);
-				display.asyncExec(new Runnable()
+				if (display != null)
 				{
-					public void run()
+					display.asyncExec(new Runnable()
 					{
-						// deliberately empty, this is only to wake up a
-						// potentially waiting SWT-thread below
+						public void run()
+						{
+							// deliberately empty, this is only to wake up a
+							// potentially waiting SWT-thread below
+						}
+					});
+				}
+				else
+				{
+					synchronized (awtFinished)
+					{
+						awtFinished.notifyAll();
 					}
-				});
+				}
 			}
 		});
 
-		while (!awtFinished.get())
+		if (display != null)
 		{
-			display.sleep();
+			while (!awtFinished.get())
+			{
+				display.sleep();
+			}
 		}
+		else
+		{
+			synchronized (awtFinished)
+			{
+				while (!awtFinished.get())
+				{
+					try
+					{
+						awtFinished.wait();
+					}
+					catch (InterruptedException e)
+					{
+					}
+				}
+			}
+		}
+
 
 		return comp[0];
 	}
