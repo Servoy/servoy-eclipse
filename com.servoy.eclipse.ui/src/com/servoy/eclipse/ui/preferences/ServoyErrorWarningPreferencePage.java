@@ -604,6 +604,8 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 				Messages.ErrorWarningPreferencePage_valuelistDBServerDuplicate));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_DB_TABLE_NOT_ACCESSIBLE,
 				Messages.ErrorWarningPreferencePage_valuelistDBTableNotAccessible));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_DB_TABLE_NO_PK,
+				Messages.ErrorWarningPreferencePage_valuelistDBTableNoPk));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_DB_WITH_CUSTOM_VALUES,
 				Messages.ErrorWarningPreferencePage_valuelistDBWithCustomValues));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_GENERIC_ERROR,

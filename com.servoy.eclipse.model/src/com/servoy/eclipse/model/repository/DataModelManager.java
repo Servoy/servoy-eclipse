@@ -662,7 +662,14 @@ public class DataModelManager implements IColumnInfoManager
 				addDifferenceMarkersIfNecessary(c, cid, t, cname);
 			}
 		}
-		s.setTableMarkedAsHiddenInDeveloper(t.getName(), tableInfo.hiddenInDeveloper);
+
+		if (t.getRowIdentColumnsCount() == 0)
+		{
+			t.setHiddenInDeveloperBecauseNoPk(true);
+			s.setTableMarkedAsHiddenInDeveloper(t.getName(), true);
+		}
+		else s.setTableMarkedAsHiddenInDeveloper(t.getName(), tableInfo.hiddenInDeveloper);
+
 		t.setMarkedAsMetaData(tableInfo.isMetaData);
 		return existingColumnInfo;
 	}

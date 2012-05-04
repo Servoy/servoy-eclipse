@@ -162,6 +162,8 @@ public class MarkerMessages
 		"Valuelist \"{0}\" is based on malformed table definition \"{1}\".", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ValuelistDBTableNotAccessible = new ServoyMarker(
 		"Valuelist \"{0}\" is based on table \"{1}\" which is not accessible.", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE); //$NON-NLS-1$
+	public static ServoyMarker ValuelistDBTableNoPk = new ServoyMarker(
+		"Valuelist \"{0}\" is based on table \"{1}\" which does not have a primary key.", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ValuelistDBDatasourceNotFound = new ServoyMarker(
 		"Valuelist \"{0}\" is based on inexisting column/calculation \"{1}\" from table \"{2}\".", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ValuelistRelationWithDatasource = new ServoyMarker(

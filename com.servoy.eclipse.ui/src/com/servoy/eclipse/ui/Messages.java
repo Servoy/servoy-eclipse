@@ -188,6 +188,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_valuelistDBMalformedTableDefinition;
 	public static String ErrorWarningPreferencePage_valuelistDBServerDuplicate;
 	public static String ErrorWarningPreferencePage_valuelistDBTableNotAccessible;
+	public static String ErrorWarningPreferencePage_valuelistDBTableNoPk;
 	public static String ErrorWarningPreferencePage_valuelistDBDatasourceNotFound;
 	public static String ErrorWarningPreferencePage_valuelistRelationWithDatasource;
 	public static String ErrorWarningPreferencePage_valuelistRelationNotFound;

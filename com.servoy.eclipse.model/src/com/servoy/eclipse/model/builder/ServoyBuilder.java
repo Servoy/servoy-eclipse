@@ -474,6 +474,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"valuelistDBServerDuplicate", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> VALUELIST_DB_TABLE_NOT_ACCESSIBLE = new Pair<String, ProblemSeverity>(
 		"valuelistDBTableNotAccessible", ProblemSeverity.ERROR); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> VALUELIST_DB_TABLE_NO_PK = new Pair<String, ProblemSeverity>(
+		"valuelistDBTableNoPk", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> VALUELIST_DB_DATASOURCE_NOT_FOUND = new Pair<String, ProblemSeverity>(
 		"valuelistDBDatasourceNotFound", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> VALUELIST_RELATION_WITH_DATASOURCE = new Pair<String, ProblemSeverity>(
@@ -3085,6 +3087,16 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									problems.add(new Problem(mk.getType(),
 										getTranslatedSeverity(customSeverity, TABLE_MARKED_AS_HIDDEN_BUT_USED_IN.getRight()), IMarker.PRIORITY_LOW,
 										mk.getText(), null));
+								}
+							}
+							else if (table.getRowIdentColumnsCount() == 0)
+							{
+								String customSeverity = getSeverity(VALUELIST_DB_TABLE_NO_PK.getLeft(), VALUELIST_DB_TABLE_NO_PK.getRight().name(), vl);
+								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+								{
+									ServoyMarker mk = MarkerMessages.ValuelistDBTableNoPk.fill(vl.getName(), stn[1]);
+									problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_DB_TABLE_NO_PK.getRight()),
+										IMarker.PRIORITY_LOW, mk.getText(), null));
 								}
 							}
 						} // server not found is reported elsewhere
