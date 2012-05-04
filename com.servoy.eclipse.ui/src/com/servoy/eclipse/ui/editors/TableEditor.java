@@ -514,6 +514,8 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		getContainer().setFocus();
 	}
 
+	private boolean tableIsMarkedHiddenBecauseOfNoPk = false;
+
 	@Override
 	public void doSave(IProgressMonitor monitor)
 	{
@@ -527,7 +529,14 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				}
 				if (table.getRowIdentColumnsCount() == 0)
 				{
-					MessageDialog.openWarning(getSite().getShell(), "Warning", "No primary key specified on table.");
+					MessageDialog.openWarning(getSite().getShell(), "Warning", "No primary key specified on table."); //$NON-NLS-1$//$NON-NLS-2$
+					tableIsMarkedHiddenBecauseOfNoPk = true;
+					server.setTableMarkedAsHiddenInDeveloper(table.getName(), true);
+				}
+				else if (tableIsMarkedHiddenBecauseOfNoPk)
+				{
+					tableIsMarkedHiddenBecauseOfNoPk = false;
+					server.setTableMarkedAsHiddenInDeveloper(table.getName(), false);
 				}
 
 				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
