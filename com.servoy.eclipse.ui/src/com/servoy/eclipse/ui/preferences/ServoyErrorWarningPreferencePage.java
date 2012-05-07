@@ -673,6 +673,8 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 				Messages.ErrorWarningPreferencePage_formElementOutsideBoundsOfPart));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_OBSOLETE_ELEMENT,
 				Messages.ErrorWarningPreferencePage_formObsoleteElement));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_REQUIRED_PROPERTY_MISSING,
+				Messages.ErrorWarningPreferencePage_formRequiredPropertyMissing));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_FIELD_FALLBACK_RELATED_VALUELIST,
 				Messages.ErrorWarningPreferencePage_formFieldFallbackRelatedValuelist));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_FIELD_RELATED_VALUELIST,

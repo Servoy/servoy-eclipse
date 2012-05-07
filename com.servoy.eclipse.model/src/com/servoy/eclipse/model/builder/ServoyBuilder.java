@@ -280,13 +280,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels"; //$NON-NLS-1$
 
-	//performance related
+	// performance related
 	public final static Pair<String, ProblemSeverity> LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW = new Pair<String, ProblemSeverity>(
 		"performanceTableColumns", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> LEVEL_PERFORMANCE_TABS_PORTALS = new Pair<String, ProblemSeverity>(
 		"performanceTabsPortals", ProblemSeverity.WARNING); //$NON-NLS-1$
 
-	//developer problems (this is for valuelist, for relations)
+	// developer problems
 	public final static Pair<String, ProblemSeverity> TABLE_MARKED_AS_HIDDEN_BUT_USED_IN = new Pair<String, ProblemSeverity>(
 		"tableMarkedAsHiddenButUsedIn", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> ITEM_REFERENCES_INVALID_TABLE = new Pair<String, ProblemSeverity>(
@@ -297,8 +297,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> CALCULATION_FORM_ACCESS = new Pair<String, ProblemSeverity>(
 		"calculationFormAccess", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> IMAGE_MEDIA_NOT_SET = new Pair<String, ProblemSeverity>("imageMediaNotSet", ProblemSeverity.ERROR); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> DATAPROVIDER_MISSING_CONVERTER = new Pair<String, ProblemSeverity>(
+		"dataproviderMissingConverter", ProblemSeverity.WARNING); //$NON-NLS-1$
 
-	//problems with resource projects 
+	// problems with resource projects 
 	public final static Pair<String, ProblemSeverity> REFERENCES_TO_MULTIPLE_RESOURCES = new Pair<String, ProblemSeverity>(
 		"referencesToMultipleResources", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> NO_RESOURCE_REFERENCE = new Pair<String, ProblemSeverity>("noResourceReference", ProblemSeverity.ERROR); //$NON-NLS-1$
@@ -306,24 +308,21 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"propertyMultipleMethodsOnSameTable", ProblemSeverity.INFO); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> SERVER_MISSING_DRIVER = new Pair<String, ProblemSeverity>("severMissingDriver", ProblemSeverity.WARNING); //$NON-NLS-1$
 
-	public final static Pair<String, ProblemSeverity> DATAPROVIDER_MISSING_CONVERTER = new Pair<String, ProblemSeverity>(
-		"dataproviderMissingConverter", ProblemSeverity.WARNING); //$NON-NLS-1$
-
-	//login problems 
+	// login problems 
 	public final static Pair<String, ProblemSeverity> LOGIN_FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION = new Pair<String, ProblemSeverity>(
 		"formWithDatasourceInLoginSolution", ProblemSeverity.WARNING); //$NON-NLS-1$
 
-	//deprecated properties usage problems
+	// deprecated properties usage problems
 	public final static Pair<String, ProblemSeverity> DEPRECATED_PROPERTY_USAGE_PROBLEM = new Pair<String, ProblemSeverity>(
 		"deprecatedPropertyUsage", ProblemSeverity.WARNING); //$NON-NLS-1$
 
-	//duplication problems
+	// duplication problems
 	public final static Pair<String, ProblemSeverity> DUPLICATION_UUID_DUPLICATE = new Pair<String, ProblemSeverity>(
 		"duplicationUUIDDuplicate", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> DUPLICATION_DUPLICATE_ENTITY_FOUND = new Pair<String, ProblemSeverity>(
 		"duplicationDuplicateEntityFound", ProblemSeverity.ERROR); //$NON-NLS-1$
 
-	//database information problems
+	// database information problems
 	public final static Pair<String, ProblemSeverity> DBI_BAD_INFO = new Pair<String, ProblemSeverity>("DBIBadDBInfo", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> DBI_COLUMN_MISSING_FROM_DB = new Pair<String, ProblemSeverity>(
 		"DBIColumnMissingFromDB", ProblemSeverity.ERROR); //$NON-NLS-1$
@@ -333,7 +332,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> DBI_TABLE_MISSING = new Pair<String, ProblemSeverity>("DBITableMissing", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> DBI_FILE_MISSING = new Pair<String, ProblemSeverity>("DBIFileMissing", ProblemSeverity.ERROR); //$NON-NLS-1$
 
-	//column problems
+	// column problems
 	public final static Pair<String, ProblemSeverity> COLUMN_UUID_FLAG_NOT_SET = new Pair<String, ProblemSeverity>(
 		"ColumnUUIDFlagNotSet", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> COLUMN_DATABASE_IDENTITY_PROBLEM = new Pair<String, ProblemSeverity>(
@@ -348,7 +347,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"ColumnInsufficientLengthForSequence", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> COLUMN_LOOKUP_INVALID = new Pair<String, ProblemSeverity>("ColumnLookupInvalid", ProblemSeverity.WARNING); //$NON-NLS-1$
 
-	//sort problems
+	// sort problems
 	public final static Pair<String, ProblemSeverity> INVALID_SORT_OPTIONS_RELATION_NOT_FOUND = new Pair<String, ProblemSeverity>(
 		"InvalidSortOptionsRelationNotFound", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> INVALID_SORT_OPTIONS_RELATION_DIFFERENT_PRIMARY_DATASOURCE = new Pair<String, ProblemSeverity>(
@@ -356,7 +355,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> INVALID_SORT_OPTIONS_COLUMN_NOT_FOUND = new Pair<String, ProblemSeverity>(
 		"InvalidSortOptionsColumnNotFound", ProblemSeverity.WARNING); //$NON-NLS-1$
 
-	//module problems
+	// module problems
 	public final static Pair<String, ProblemSeverity> MODULE_NOT_FOUND = new Pair<String, ProblemSeverity>("moduleNotFound", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> MODULE_MISPLACED = new Pair<String, ProblemSeverity>("moduleMisplaced", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> MODULE_DIFFERENT_I18N_TABLE = new Pair<String, ProblemSeverity>(
@@ -364,7 +363,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> MODULE_DIFFERENT_RESOURCE_PROJECT = new Pair<String, ProblemSeverity>(
 		"moduleDifferentResourceProject", ProblemSeverity.ERROR); //$NON-NLS-1$
 
-	//form problems
+	// form problems
 	public final static Pair<String, ProblemSeverity> FORM_COLUMN_LENGTH_TOO_SMALL = new Pair<String, ProblemSeverity>(
 		"formColumnLengthTooSmall", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> FORM_DATAPROVIDER_AGGREGATE_NOT_EDITABLE = new Pair<String, ProblemSeverity>(
@@ -435,7 +434,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> FORM_PROPERTY_MULTIPLE_METHODS_ON_SAME_ELEMENT = new Pair<String, ProblemSeverity>(
 		"formPropertyMultipleMethodsOnSameElement", ProblemSeverity.INFO); //$NON-NLS-1$
 
-	//relations related
+	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
 		"relationPrimaryServerWithProblems", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_DUPLICATE = new Pair<String, ProblemSeverity>(
@@ -467,7 +466,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"relationItemTypeProblem", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> RELATION_GENERIC_ERROR = new Pair<String, ProblemSeverity>("relationGenericError", ProblemSeverity.ERROR); //$NON-NLS-1$
 
-	//valuelist problems
+	// valuelist problems
 	public final static Pair<String, ProblemSeverity> VALUELIST_DB_WITH_CUSTOM_VALUES = new Pair<String, ProblemSeverity>(
 		"valuelistDBWithCustomValues", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> VALUELIST_DB_NOT_TABLE_OR_RELATION = new Pair<String, ProblemSeverity>(
@@ -500,7 +499,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> VALUELIST_GENERIC_ERROR = new Pair<String, ProblemSeverity>(
 		"valuelistGenericError", ProblemSeverity.ERROR); //$NON-NLS-1$
 
-	//styles
+	// styles
 	public final static Pair<String, ProblemSeverity> STYLE_NOT_FOUND = new Pair<String, ProblemSeverity>("styleNotFound", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> STYLE_ELEMENT_CLASS_NO_STYLE = new Pair<String, ProblemSeverity>(
 		"styleElementClassNoStyle", ProblemSeverity.WARNING); //$NON-NLS-1$
@@ -511,7 +510,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> STYLE_FORM_CLASS_NOT_FOUND = new Pair<String, ProblemSeverity>(
 		"styleFormClassNotFound", ProblemSeverity.WARNING); //$NON-NLS-1$
 
-	//solution problems
+	// solution problems
 	public final static Pair<String, ProblemSeverity> SOLUTION_BAD_STRUCTURE = new Pair<String, ProblemSeverity>("solutionBadStructure", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> SOLUTION_DESERIALIZE_ERROR = new Pair<String, ProblemSeverity>(
 		"solutionDeserializeError", ProblemSeverity.ERROR); //$NON-NLS-1$
