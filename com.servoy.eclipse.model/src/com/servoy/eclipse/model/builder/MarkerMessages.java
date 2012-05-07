@@ -251,7 +251,7 @@ public class MarkerMessages
 	 * This means that the sam tab sequence position is assigned to more than one element on a form.
 	 */
 	public static ServoyMarker FormUnnamedElementDuplicateTabSequence = new ServoyMarker(
-		"Form \"{0}\" contains an element which has duplicate tab sequence.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Form \"{0}\" contains an element which has a duplicate tab sequence.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	/** 
 	 * This means that the sam tab sequence position is assigned to more than one element on a form.
@@ -267,13 +267,13 @@ public class MarkerMessages
 		"Form \"{0}\" is based on table \"{1}\" which is not accessible.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker FormFileNameInconsistent = new ServoyMarker(
-		"Form \"{0}\" is saved on disk in a file with different name( \"{1}\" ).", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Form \"{0}\" is saved on disk in a file with a different name( \"{1}\" ).", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
 	 * This means that when using form inheritance a cycle was introduced in the dependency relation of some forms. This is not allowed.
 	 */
 	public static ServoyMarker FormExtendsCycle = new ServoyMarker(
-		"Form \"{0}\" is part of a cycle through \"extendsForm\" property.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Form \"{0}\" is part of a cycle through the \"extendsForm\" property.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormDerivedFormDifferentTable = new ServoyMarker(
 		"Form \"{0}\" which extends form \"{1}\" does not have the same table as its parent.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormNamedFoundsetIncorrectValue = new ServoyMarker(
@@ -349,7 +349,7 @@ public class MarkerMessages
 	 * sequence two relations are joined, but not on the same table.
 	 */
 	public static ServoyMarker FormPortalUnnamedInvalidRelationName = new ServoyMarker(
-		"Portal has invalid relationName (relation chain not correct).", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Portal has invalid relationName (relation chain is not correct).", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
 	 * This means that the relations that build up the relation sequence of the portal do not fit together properly. At some point in the 
@@ -384,7 +384,7 @@ public class MarkerMessages
 	public static ServoyMarker FormPropertyOnElementMethodNotAccessible = new ServoyMarker(
 		"Property \"{0}\" from element \"{1}\" in form \"{2}\" is linked to a non accessible method (method belongs to form \"{3}\").", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormDataproviderNotBasedOnFormTable = new ServoyMarker(
-		"Element in form \"{0}\" has dataprovider \"{1}\" that is not based on form table.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Element in form \"{0}\" has dataprovider \"{1}\" that is not based on the form table.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormDataproviderOnElementNotBasedOnFormTable = new ServoyMarker(
 		"Element \"{0}\" in form \"{1}\" has dataprovider \"{2}\" that is not based on form table.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
@@ -435,7 +435,7 @@ public class MarkerMessages
 	 * The HTML or RTF field has as dataprovider a column whose length may be too small.
 	 */
 	public static ServoyMarker FormColumnLengthTooSmall = new ServoyMarker(
-		"HTML/RTF element \"{0}\" in form \"{1}\" has column dataprovider with small length. This may cause unpredictable results(if length of value will get bigger than column length).", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"HTML/RTF element \"{0}\" in form \"{1}\" has column dataprovider with small length. This may cause unpredictable results(if length of the value will get bigger than the column length).", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
 	 * The dataprovider used by an element cannot be found. This can happen for example if the structure of a database is changed and columns are deleted or renamed.
@@ -447,7 +447,7 @@ public class MarkerMessages
 		"Table \"{0}\" is marked as hidden in developer, but it is still used in {1}\"{2}\".", ServoyBuilder.HIDDEN_TABLE_STILL_IN_USE); //$NON-NLS-1$
 
 	public static ServoyMarker ColumnUUIDFlagNotSet = new ServoyMarker(
-		"Table \"{0}\" has column \"{1}\" which is an UUID generator but does not have the UUID flag set.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
+		"Table \"{0}\" has column \"{1}\" which is a UUID generator but does not have the UUID flag set.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ColumnIncompatibleTypeForSequence = new ServoyMarker(
 		"Table \"{0}\" has column \"{1}\" which an incompatible type for its sequence.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ColumnInsufficientLengthForSequence = new ServoyMarker(
@@ -469,21 +469,21 @@ public class MarkerMessages
 		"Table \"{0}\" has column \"{1}\" which has duplicate name/dataProviderID as column \"{2}\".", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker DBIColumnMissingFromDB = new ServoyMarker(
-		"Column \"{0}\" appears in the DB information file, but it is missing from the DB table.", ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE); //$NON-NLS-1$
+		"Column \"{0}\" appears in the DB information file, but is missing from the DB table.", ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker DBIColumnMissingFromDBIFile = new ServoyMarker(
-		"Column \"{0}\" appears in the DB table, but it is missing from the DB information file.", ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE); //$NON-NLS-1$
+		"Column \"{0}\" appears in the DB table, but is missing from the DB information file.", ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker DBIColumnConflict = new ServoyMarker(
 		"\"{0}\" column difference. {1} in DB <-> {2} in DB information file. The DB information on this column differs from the actual column in the DB.", ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker DBITableMissing = new ServoyMarker(
 		"Table \"{0}\" is missing from the DB (there is a database information file for this table).", ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker DBIFileMissing = new ServoyMarker(
-		"Missing database information file for table \"{0}\" (table exists in the DB).", ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE); //$NON-NLS-1$
+		"Missing database information file for table \"{0}\" (the table exists in the DB).", ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker DBIGenericError = new ServoyMarker(
 		"Some kind of column difference between the DB and the DB information files for column \"{0}\".", ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker DBIBadDBInfo = new ServoyMarker("Bad database information: {0}", ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker ServerNotAccessibleFirstOccurence = new ServoyMarker(
-		"Solution \"{0}\" references server \"{1}\" which is not accessible (first occurence error).", ServoyBuilder.MISSING_SERVER); //$NON-NLS-1$
+		"Solution \"{0}\" references server \"{1}\" which is not accessible (first occurrence error).", ServoyBuilder.MISSING_SERVER); //$NON-NLS-1$
 	public static ServoyMarker ElementNameInvalidIdentifier = new ServoyMarker(
 		"Element has name \"{0}\" which is not a valid identifier.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$
 
