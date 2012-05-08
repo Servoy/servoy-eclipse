@@ -315,7 +315,7 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 			else
 			{
 				// parse as scopes string so globals.x gets changes to scopes.globals.x
-				ci_from = getDataProvidersIndex(CI_FROM, ScopesUtils.getScopeString(ScopesUtils.getVariableScope(persist.getPrimaryDataProviderID())));
+				ci_from = ScopesUtils.getScopeString(ScopesUtils.getVariableScope(persist.getPrimaryDataProviderID()));
 			}
 			String ci_to;
 			if (reuseDestination && row != null) ci_to = row.getCITo();
