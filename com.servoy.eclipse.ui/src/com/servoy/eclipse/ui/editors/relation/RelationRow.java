@@ -95,4 +95,9 @@ public class RelationRow
 		operator = op;
 	}
 
+	public String getRawCIFrom()
+	{
+		return ci_from;
+	}
+
 }

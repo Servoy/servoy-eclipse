@@ -23,6 +23,8 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.ui.editors.RelationEditor;
+import com.servoy.eclipse.ui.util.UnresolvedValue;
+import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.util.Utils;
 
@@ -61,11 +63,16 @@ public class RelationItemLabelProvider extends LabelProvider implements ITableLa
 		switch (columnIndex)
 		{
 			case RelationEditor.CI_FROM :
-				return info.getCIFrom() != null ? info.getCIFrom() : RelationEditor.EMPTY;
+				if (info.getCIFrom() == null) return RelationEditor.EMPTY;
+				if (info.getRawCIFrom().startsWith(LiteralDataprovider.LITERAL_PREFIX)) return info.getCIFrom();
+				String ci_from = relationEditor.getDataProvidersIndex(RelationEditor.CI_FROM, info.getCIFrom());
+				return ci_from != null ? info.getCIFrom() : UnresolvedValue.getUnresolvedMessage(info.getCIFrom());
 			case RelationEditor.CI_OP :
 				return (info.getOperator() != null ? RelationItem.getOperatorAsString(Utils.getAsInteger(info.getOperator())) : RelationEditor.EMPTY);
 			case RelationEditor.CI_TO :
-				return info.getCITo() != null ? info.getCITo() : RelationEditor.EMPTY;
+				if (info.getCITo() == null) return RelationEditor.EMPTY;
+				String ci_to = relationEditor.getDataProvidersIndex(RelationEditor.CI_TO, info.getCITo());
+				return ci_to != null ? info.getCITo() : UnresolvedValue.getUnresolvedMessage(info.getCITo());
 			case RelationEditor.CI_DELETE :
 				return "";
 			default :
