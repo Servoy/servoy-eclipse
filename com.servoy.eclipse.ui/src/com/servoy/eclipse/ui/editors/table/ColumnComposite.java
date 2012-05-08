@@ -292,6 +292,7 @@ public class ColumnComposite extends Composite
 					{
 						tableViewer.setSelection(new StructuredSelection(c), true);
 					}
+					tableViewer.editElement(c, 0);
 				}
 				catch (RepositoryException e1)
 				{
@@ -357,9 +358,7 @@ public class ColumnComposite extends Composite
 
 	public Column addColumn(Table t, String newName, int type, int length) throws RepositoryException
 	{
-		Column column = t.createNewColumn(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), newName, type, length);
-		tableViewer.editElement(column, 0);
-		return column;
+		return t.createNewColumn(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), newName, type, length);
 	}
 
 	private boolean hasDataProviderSet(Table table)

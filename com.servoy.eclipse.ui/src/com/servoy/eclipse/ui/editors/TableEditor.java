@@ -533,7 +533,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		{
 			public void iColumnChanged(IColumn column)
 			{
-				Display.getDefault().asyncExec(new Runnable()
+				Display.getDefault().syncExec(new Runnable()
 				{
 					public void run()
 					{
@@ -544,7 +544,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 			public void iColumnCreated(IColumn column)
 			{
-				Display.getDefault().asyncExec(new Runnable()
+				Display.getDefault().syncExec(new Runnable()
 				{
 					public void run()
 					{
@@ -555,7 +555,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 			public void iColumnRemoved(IColumn column)
 			{
-				Display.getDefault().asyncExec(new Runnable()
+				Display.getDefault().syncExec(new Runnable()
 				{
 					public void run()
 					{
