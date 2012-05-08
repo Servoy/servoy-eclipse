@@ -39,6 +39,7 @@ import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.TableEditorInput;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -533,35 +534,35 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		{
 			public void iColumnChanged(IColumn column)
 			{
-				Display.getDefault().syncExec(new Runnable()
+				UIUtils.runInUI(new Runnable()
 				{
 					public void run()
 					{
 						refresh();
 					}
-				});
+				}, false);
 			}
 
 			public void iColumnCreated(IColumn column)
 			{
-				Display.getDefault().syncExec(new Runnable()
+				UIUtils.runInUI(new Runnable()
 				{
 					public void run()
 					{
 						refresh();
 					}
-				});
+				}, false);
 			}
 
 			public void iColumnRemoved(IColumn column)
 			{
-				Display.getDefault().syncExec(new Runnable()
+				UIUtils.runInUI(new Runnable()
 				{
 					public void run()
 					{
 						refresh();
 					}
-				});
+				}, false);
 			}
 		};
 		table.addIColumnListener(columnListener);
