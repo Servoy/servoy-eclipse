@@ -113,8 +113,11 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 		}
 	}
 
+	private static String initialVal = "";
+
 	public static String askScopeName(Shell shell, String initialValue)
 	{
+		initialVal = initialValue;
 		InputDialog nameDialog = new InputDialog(shell, "Create new global scope", "New scope name", initialValue, new IInputValidator()
 		{
 			public String isValid(String newText)
@@ -130,7 +133,8 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 				Collection<String> scopeNames = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getScopeNames();
 				for (String scopeName : scopeNames)
 				{
-					if (scopeName.equals(newText))
+					if (scopeName.equals(newText) || (initialVal.equals("") && (scopeName.toLowerCase().equals(newText.toLowerCase()))) ||
+						(newText.toLowerCase().equals(scopeName.toLowerCase()) && !initialVal.toLowerCase().equals(scopeName.toLowerCase())))
 					{
 						return "Scope already exists";
 					}
