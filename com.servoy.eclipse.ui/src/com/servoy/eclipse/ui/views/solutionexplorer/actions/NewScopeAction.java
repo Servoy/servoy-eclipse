@@ -127,11 +127,10 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 				{
 					return "Invalid scope name";
 				}
-				String lowerCase = newText.toLowerCase();
 				Collection<String> scopeNames = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getScopeNames();
 				for (String scopeName : scopeNames)
 				{
-					if (scopeName.toLowerCase().equals(lowerCase))
+					if (scopeName.equals(newText))
 					{
 						return "Scope already exists";
 					}
