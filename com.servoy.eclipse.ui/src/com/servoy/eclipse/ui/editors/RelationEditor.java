@@ -319,7 +319,7 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 			}
 			String ci_to;
 			if (reuseDestination && row != null) ci_to = row.getCITo();
-			else ci_to = getDataProvidersIndex(CI_TO, persist.getForeignColumnName());
+			else ci_to = persist.getForeignColumnName();
 			input.add(new RelationRow(ci_from, Integer.valueOf(persist.getOperator()), ci_to, null));
 		}
 		String[] oldColumns = null;
