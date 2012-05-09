@@ -36,6 +36,7 @@ import com.servoy.j2db.dataprocessing.IPropertyDescriptor;
 import com.servoy.j2db.dataprocessing.IPropertyDescriptorProvider;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.ScopesUtils;
 
 public class RelayEditorProvider implements IRelayEditorProvider
 {
@@ -164,7 +165,7 @@ public class RelayEditorProvider implements IRelayEditorProvider
 							((MethodWithArguments)value).methodId);
 						if (scriptMethod != null)
 						{
-							realValue = scriptMethod.getName();
+							realValue = ScopesUtils.getScopeString(scriptMethod);
 						}
 						else
 						{
