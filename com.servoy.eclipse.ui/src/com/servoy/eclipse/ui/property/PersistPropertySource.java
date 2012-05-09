@@ -138,9 +138,9 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
-import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ITableDisplay;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
@@ -202,6 +202,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	public static final IPropertyController<Integer, Object> ENCAPSULATION_CONTROLLER;
 	public static final IPropertyController<String, PageFormat> PAGE_FORMAT_CONTROLLER;
 	public static final IPropertyController<String, String> LOGIN_SOLUTION_CONTROLLER;
+	public static final IPropertyController<Map<String, Object>, Map<String, Object>> DESIGN_PROPERTIES_CONTROLLER;
 	public static final IPropertyController<String, Object[]> COMMA_SEPARATED_CONTROLLER;
 
 	public static final IPropertyConverter<String, Border> BORDER_STRING_CONVERTER;
@@ -331,6 +332,37 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 		LOGIN_SOLUTION_CONTROLLER = new LoginSolutionPropertyController("loginSolutionName", RepositoryHelper.getDisplayName("loginSolutionName",
 			Solution.class));
+
+		DESIGN_PROPERTIES_CONTROLLER = new PropertySetterDelegatePropertyController<Map<String, Object>, Map<String, Object>>(new MapEntriesPropertyController(
+			"designProperties", RepositoryHelper.getDisplayName("designProperties", Form.class)), "designProperties")
+		{
+			@Override
+			public Map<String, Object> getProperty(IPropertySource propSource)
+			{
+				if (propSource instanceof PersistPropertySource)
+				{
+					IPersist persist = ((PersistPropertySource)propSource).getPersist();
+					if (persist instanceof AbstractBase)
+					{
+						return ((AbstractBase)persist).getCustomDesigntimeProperties();
+					}
+				}
+				return null;
+			}
+
+			public void setProperty(IPropertySource propSource, Map<String, Object> value)
+			{
+				if (propSource instanceof PersistPropertySource)
+				{
+					IPersist persist = ((PersistPropertySource)propSource).getPersist();
+					if (persist instanceof AbstractBase)
+					{
+						((AbstractBase)persist).setCustomDesigntimeProperties(value);
+					}
+				}
+			}
+		};
+
 		COMMA_SEPARATED_CONTROLLER = new PropertyController<String, Object[]>("groupbyDataProviderIDs", RepositoryHelper.getDisplayName(
 			"groupbyDataProviderIDs", Part.class), new StringTokenizerConverter(",", true), null, null);
 
@@ -559,6 +591,10 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		if (Solution.class == clazz)
 		{
 			return new String[] { "loginSolutionName" };
+		}
+		if (Form.class == clazz || IFormElement.class.isAssignableFrom(clazz))
+		{
+			return new String[] { "designProperties" };
 		}
 		return null;
 	}
@@ -1767,13 +1803,17 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				break;
 			}
 		}
+		Object propertyValue;
 		if (propertyDescriptor instanceof IPropertySetter)
 		{
 			// a combined property
-			return ((IPropertySetter)propertyDescriptor).getProperty(this);
+			propertyValue = ((IPropertySetter)propertyDescriptor).getProperty(this);
 		}
-
-		return convertGetPropertyValue(id, propertyDescriptor, getPersistPropertyValue(id));
+		else
+		{
+			propertyValue = getPersistPropertyValue(id);
+		}
+		return convertGetPropertyValue(id, propertyDescriptor, propertyValue);
 	}
 
 	public static Object convertGetPropertyValue(Object id, IPropertyDescriptor propertyDescriptor, Object rawValue)
@@ -2209,13 +2249,14 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					break;
 				}
 			}
+			Object convertedValue = convertSetPropertyValue(id, propertyDescriptor, val);
 			if (propertyDescriptor instanceof IPropertySetter)
 			{
-				((IPropertySetter)propertyDescriptor).setProperty(this, value);
+				((IPropertySetter)propertyDescriptor).setProperty(this, convertedValue);
 			}
 			else
 			{
-				setPersistPropertyValue(id, convertSetPropertyValue(id, propertyDescriptor, val));
+				setPersistPropertyValue(id, convertedValue);
 			}
 		}
 		catch (Exception e)
@@ -2734,30 +2775,22 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				new ComboboxPropertyModel<Integer>(integerTypes, stringTypes), Messages.LabelUnresolved), id)
 			{
 				// handle setting of this property via a IPropertySetter so that we can do additional stuff when the property is set.
-				public Integer getProperty(IPropertySource propertySource)
-				{
-					PersistPropertySource pp = (PersistPropertySource)propertySource;
-					return getConverter().convertProperty(id, (Integer)pp.getPersistPropertyValue(id));
-				}
-
 				public void setProperty(IPropertySource propertySource, Integer value)
 				{
-					PersistPropertySource pp = (PersistPropertySource)propertySource;
-					Integer convertedValue = getConverter().convertValue(id, value);
-					pp.setPersistPropertyValue(id, convertedValue);
+					((PersistPropertySource)propertySource).setPersistPropertyValue(id, value);
 
 					// the variable type is being set; the default value should change if incompatible
-					ScriptVariable variable = (ScriptVariable)pp.getPersist();
+					ScriptVariable variable = (ScriptVariable)((PersistPropertySource)propertySource).getPersist();
 					String defaultValue = variable.getDefaultValue();
 					if (defaultValue != null)
 					{
 						String newDefault = null;
-						int type = convertedValue.intValue();
+						int type = value.intValue();
 						if (type == IColumnTypes.TEXT)
 						{
 							if (!isQuoted(defaultValue))
 							{
-								newDefault = "'" + defaultValue + "'";
+								newDefault = Utils.makeJSExpression(defaultValue);
 							}
 						}
 						else if (type == IColumnTypes.INTEGER)
@@ -2806,20 +2839,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 							variable.setDefaultValue(newDefault);
 						}
 					}
-				}
-
-				public void resetPropertyValue(IPropertySource propertySource)
-				{
-					PersistPropertySource pp = (PersistPropertySource)propertySource;
-					pp.setPersistPropertyValue(id, pp.getDefaultPersistValue(id));
-				}
-
-				public boolean isPropertySet(IPropertySource propertySource)
-				{
-					PersistPropertySource pp = (PersistPropertySource)propertySource;
-					Object defaultValue = pp.getDefaultPersistValue(id);
-					Object propertyValue = pp.getPersistPropertyValue(id);
-					return defaultValue != propertyValue && (defaultValue == null || !defaultValue.equals(propertyValue));
 				}
 			};
 		}
@@ -3374,6 +3393,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		if (name.equals("loginSolutionName"))
 		{
 			return LOGIN_SOLUTION_CONTROLLER;
+		}
+
+		if (name.equals("designProperties"))
+		{
+			return DESIGN_PROPERTIES_CONTROLLER;
 		}
 
 		if ("location".equals(name))

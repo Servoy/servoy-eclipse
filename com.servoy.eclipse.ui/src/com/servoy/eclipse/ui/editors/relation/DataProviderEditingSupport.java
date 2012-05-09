@@ -254,7 +254,7 @@ public class DataProviderEditingSupport extends EditingSupport
 						if (parsed == null)
 						{
 							// not a bool, number or string, convert to quoted string
-							currentValue = "\'" + currentValue + '\''; //$NON-NLS-1$
+							currentValue = Utils.makeJSExpression(currentValue);
 						}
 						currentValue = LiteralDataprovider.LITERAL_PREFIX + currentValue;
 					}

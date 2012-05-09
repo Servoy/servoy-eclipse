@@ -293,11 +293,11 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			String value;
 			if (v instanceof String && ((String)v).length() > 0)
 			{
-				Object parsed = Utils.parseJSExpression((String)v);
+				Object parsed = Utils.parseJSExpression(v);
 				if (parsed == null)
 				{
 					// not a bool, number or string, convert to quoted string
-					value = '\'' + ((String)v).replaceAll("'", "\\\\$0") + '\''; //$NON-NLS-1$ //$NON-NLS-2$
+					value = Utils.makeJSExpression(v);
 				}
 				else
 				{

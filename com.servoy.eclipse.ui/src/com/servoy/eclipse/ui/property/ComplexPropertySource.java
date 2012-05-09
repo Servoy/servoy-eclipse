@@ -79,12 +79,16 @@ public class ComplexPropertySource<T> implements IPropertySource
 
 	public final boolean isPropertySet(Object id)
 	{
-		if (complexProperty != null && complexProperty.getPropertySource() != null)
+		if (complexProperty != null)
 		{
-			IPropertyDescriptor[] properties = complexProperty.getPropertySource().getPropertyDescriptors();
-			for (IPropertyDescriptor prop : properties)
+			IPropertySource propertySource = complexProperty.getPropertySource();
+			if (propertySource != null)
 			{
-				if (prop.getId().equals(id)) return true;
+				IPropertyDescriptor[] properties = propertySource.getPropertyDescriptors();
+				for (IPropertyDescriptor prop : properties)
+				{
+					if (prop.getId().equals(id)) return true;
+				}
 			}
 		}
 		return false;

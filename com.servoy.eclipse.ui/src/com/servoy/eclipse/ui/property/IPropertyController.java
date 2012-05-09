@@ -26,6 +26,8 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
 public interface IPropertyController<P, E> extends IPropertyDescriptor
 {
+	public static IPropertyDescriptor[] NO_DESCRIPTORS = new IPropertyDescriptor[0];
+
 	IPropertyConverter<P, E> getConverter();
 
 	/**

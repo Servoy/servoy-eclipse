@@ -13,10 +13,11 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.eclipse.ui.views.properties.IPropertySource;
 
 /**
  * Property descriptor wrapper that implements IPropertySetter.
@@ -27,5 +28,25 @@ public abstract class PropertySetterDelegatePropertyController<P, E> extends Del
 	public PropertySetterDelegatePropertyController(IPropertyDescriptor propertyDescriptor, Object id)
 	{
 		super(propertyDescriptor, id);
+	}
+
+	@SuppressWarnings("unchecked")
+	public E getProperty(IPropertySource propertySource)
+	{
+		return (E)((PersistPropertySource)propertySource).getPersistPropertyValue(getId());
+	}
+
+	public void resetPropertyValue(IPropertySource propertySource)
+	{
+		PersistPropertySource pp = (PersistPropertySource)propertySource;
+		pp.setPersistPropertyValue(getId(), pp.getDefaultPersistValue(getId()));
+	}
+
+	public boolean isPropertySet(IPropertySource propertySource)
+	{
+		PersistPropertySource pp = (PersistPropertySource)propertySource;
+		Object defaultValue = pp.getDefaultPersistValue(getId());
+		Object propertyValue = pp.getPersistPropertyValue(getId());
+		return defaultValue != propertyValue && (defaultValue == null || !defaultValue.equals(propertyValue));
 	}
 }
