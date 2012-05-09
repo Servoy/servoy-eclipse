@@ -1370,6 +1370,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, MISSING_DRIVER);
 		deleteMarkers(project, OBSOLETE_ELEMENT);
 		deleteMarkers(project, HIDDEN_TABLE_STILL_IN_USE);
+		deleteMarkers(project, MISSING_CONVERTER);
 
 		final ServoyProject servoyProject = getServoyProject(project);
 		boolean active = servoyModel.isSolutionActive(project.getName());
@@ -1784,9 +1785,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												if (format != null && format.length() > 0)
 												{
 													ParsedFormat parsedFormat = FormatParser.parseFormatProperty(format);
-													if (parsedFormat.getDisplayFormat() != null && !parsedFormat.getDisplayFormat().startsWith("i18n:"))
+													int dataType = getDataType(project, dataProvider, parsedFormat, o);
+													if (parsedFormat.getDisplayFormat() != null && !parsedFormat.getDisplayFormat().startsWith("i18n:")) //$NON-NLS-1$
 													{
-														int dataType = getDataType(project, dataProvider, parsedFormat);
 														try
 														{
 															if (dataType == IColumnTypes.DATETIME)
@@ -3661,7 +3662,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_UUID_FLAG_NOT_SET, IMarker.PRIORITY_NORMAL, null, null);
 							}
 							// check type defined by column converter
-							int dataProviderType = getDataType(res, column, null);
+							int dataProviderType = getDataType(res, column, null, null);
 							if ((column.getSequenceType() == ColumnInfo.UUID_GENERATOR && (dataProviderType != IColumnTypes.TEXT && dataProviderType != IColumnTypes.MEDIA)) ||
 								(column.getSequenceType() == ColumnInfo.SERVOY_SEQUENCE && (dataProviderType != IColumnTypes.INTEGER && dataProviderType != IColumnTypes.NUMBER)))
 							{
@@ -4571,7 +4572,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	 * @return
 	 * @throws IOException
 	 */
-	private int getDataType(IResource resource, IDataProvider dataProvider, ParsedFormat parsedFormat) throws IOException
+	private int getDataType(IResource resource, IDataProvider dataProvider, ParsedFormat parsedFormat, IPersist persist) throws IOException
 	{
 		int dataType = dataProvider.getDataProviderType();
 		IServiceProvider serviceProvider = ServoyModelFinder.getServiceProvider();
@@ -4591,7 +4592,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			else
 			{
 				ServoyMarker mk = MarkerMessages.MissingConverter.fill(uiConverterName, dataProvider);
-				addMarker(resource, mk.getType(), mk.getText(), -1, DATAPROVIDER_MISSING_CONVERTER, IMarker.PRIORITY_HIGH, null, null);
+				addMarker(resource, mk.getType(), mk.getText(), -1, DATAPROVIDER_MISSING_CONVERTER, IMarker.PRIORITY_HIGH, null, persist);
 			}
 		}
 		else if (dataProvider instanceof Column && ((Column)dataProvider).getColumnInfo() != null)
@@ -4613,7 +4614,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				else if (converter == null)
 				{
 					ServoyMarker mk = MarkerMessages.MissingConverter.fill(converterName, dataProvider);
-					addMarker(resource, mk.getType(), mk.getText(), -1, DATAPROVIDER_MISSING_CONVERTER, IMarker.PRIORITY_HIGH, null, null);
+					addMarker(resource, mk.getType(), mk.getText(), -1, DATAPROVIDER_MISSING_CONVERTER, IMarker.PRIORITY_HIGH, null, persist);
 				}
 			}
 		}
