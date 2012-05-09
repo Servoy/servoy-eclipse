@@ -740,16 +740,15 @@ public class ValueListEditor extends PersistEditor
 					{
 						return null;
 					}
-					Pair<String, String> scope = ScopesUtils.getVariableScope(fromObject.toString());
-					if (scope.getLeft() != null)
+
+					FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(getPersist());
+					ScriptMethod scriptMethod = fs.getScriptMethod(fromObject.toString());
+					if (scriptMethod != null)
 					{
-						FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(getPersist());
-						ScriptMethod scriptMethod = fs.getScriptMethod(scope.getLeft(), scope.getRight());
-						if (scriptMethod != null)
-						{
-							return MethodWithArguments.create(scriptMethod, null);
-						}
+						return MethodWithArguments.create(scriptMethod, null);
 					}
+
+					Pair<String, String> scope = ScopesUtils.getVariableScope(fromObject.toString());
 					return new MethodWithArguments.UnresolvedMethodWithArguments(ScopesUtils.getScopeString(scope));
 				}
 			}));
@@ -845,7 +844,7 @@ public class ValueListEditor extends PersistEditor
 			ScriptMethod scriptMethod = fs.getScriptMethod(methodWithArguments.methodId);
 			if (scriptMethod != null)
 			{
-				getValueList().setCustomValues(scriptMethod.getPrefixedName());
+				getValueList().setCustomValues(scriptMethod.getUUID().toString());
 			}
 		}
 	}

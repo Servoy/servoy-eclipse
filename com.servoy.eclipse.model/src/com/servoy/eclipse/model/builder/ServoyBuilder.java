@@ -3243,7 +3243,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				if (vl.getValueListType() == ValueList.GLOBAL_METHOD_VALUES)
 				{
-					ScriptMethod scriptMethod = flattenedSolution.getScriptMethod(null, vl.getCustomValues());
+					ScriptMethod scriptMethod = flattenedSolution.getScriptMethod(vl.getCustomValues());
 					if (scriptMethod == null)
 					{
 						String customSeverity = getSeverity(VALUELIST_GLOBAL_METHOD_NOT_FOUND.getLeft(), VALUELIST_GLOBAL_METHOD_NOT_FOUND.getRight().name(),
