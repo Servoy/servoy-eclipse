@@ -300,14 +300,22 @@ public class ValueListEditor extends PersistEditor
 			public IStructuredSelection openDialogBox(Control cellEditorWindow)
 			{
 				final MethodDialog dialog = new MethodDialog(cellEditorWindow.getShell(), (ILabelProvider)getLabelProvider(), getContentProvider(),
-					getSelection(), getInput(), SWT.NONE, "Select Method", null); //$NON-NLS-1$
+					getSelection(), getInput(), SWT.NONE, "Select Method", null);
 				dialog.setOptionsAreaFactory(new IControlFactory()
 				{
 					public Control createControl(Composite composite)
 					{
-						AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(composite, SWT.NONE);
+						final AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(composite, SWT.NONE);
 						buttons.setContext(context, "valueListGlobalMethod"); //$NON-NLS-1$
 						buttons.setDialog(dialog);
+						buttons.searchSelectedScope((IStructuredSelection)dialog.getTreeViewer().getViewer().getSelection());
+						dialog.getTreeViewer().addSelectionChangedListener(new ISelectionChangedListener()
+						{
+							public void selectionChanged(SelectionChangedEvent event)
+							{
+								buttons.searchSelectedScope((IStructuredSelection)event.getSelection());
+							}
+						});
 						return buttons;
 					}
 				});

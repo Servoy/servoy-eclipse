@@ -21,6 +21,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -233,5 +236,33 @@ public class AddMethodButtonsComposite extends Composite
 	protected Object getSelectionObject(ScriptMethod method)
 	{
 		return MethodWithArguments.create(method, null);
+	}
+
+	/**
+	 * @param selection
+	 */
+	public void searchSelectedScope(IStructuredSelection selection)
+	{
+		setSelectedScope(null);
+		if (selection != null && !selection.isEmpty() && selection.getFirstElement() instanceof Scope)
+		{
+			setSelectedScope((Scope)selection.getFirstElement());
+		}
+		else if (selection instanceof ITreeSelection)
+		{
+			TreePath[] paths = ((ITreeSelection)selection).getPaths();
+			if (paths != null && paths.length == 1)
+			{
+				for (int i = paths[0].getSegmentCount(); i-- > 0;)
+				{
+					if (paths[0].getSegment(i) instanceof Scope)
+					{
+						setSelectedScope((Scope)paths[0].getSegment(i));
+						break;
+					}
+				}
+			}
+		}
+
 	}
 }

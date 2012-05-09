@@ -41,7 +41,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.swt.SWTObservables;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -259,7 +262,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 				{
 					public Control createControl(Composite composite)
 					{
-						AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(composite, SWT.NONE)
+						final AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(composite, SWT.NONE)
 						{
 							@Override
 							protected Object getSelectionObject(ScriptMethod method)
@@ -269,6 +272,14 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 						};
 						buttons.setContext(PersistContext.create(ColumnAutoEnterComposite.this.flattenedSolution.getSolution()), "getLookupValue");
 						buttons.setDialog(dialog);
+						buttons.searchSelectedScope((IStructuredSelection)dialog.getTreeViewer().getViewer().getSelection());
+						dialog.getTreeViewer().addSelectionChangedListener(new ISelectionChangedListener()
+						{
+							public void selectionChanged(SelectionChangedEvent event)
+							{
+								buttons.searchSelectedScope((IStructuredSelection)event.getSelection());
+							}
+						});
 						return buttons;
 					}
 				});
