@@ -226,7 +226,7 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 				}
 			}
 		});
-		tableViewer.setInput(new String[][] { { "G", "Text", "Era designator" }, { "y", "Number", "Year" }, { "M", "Number/Text", "Month in year" }, { "w", "Number", "Week in year" }, { "W", "Number", "Week in month" }, { "D", "Number", "Day in year" }, { "d", "Number", "Day in month" }, { "F", "Number", "Day of week in month" }, { "E", "Number", "Day in week" }, { "a", "Text", "Am/Pm marker" }, { "H", "Number", "Hour in day (0-23)" }, { "k", "Number", "Hour in day (1-24)" }, { "K", "Number", "Hour in am/pm (0-11)" }, { "h", "Number", "Hour in am/pm (1-12)" }, { "m", "Number", "Minute in hour" }, { "s", "Number", "Second in minute" }, { "S", "Number", "Millisecond" }, { "z", "Text", "Time zone" }, { "Z", "Text", "RFC 822 Time zone" }, });
+		tableViewer.setInput(new String[][] { { "G", "Text", "Era designator" }, { "y", "Number", "Year" }, { "M", "Number/Text", "Month in year" }, { "w", "Number", "Week in year" }, { "W", "Number", "Week in month" }, { "D", "Number", "Day in year" }, { "d", "Number", "Day in month" }, { "F", "Number", "Day of week in month" }, { "E", "Text", "Day in week" }, { "a", "Text", "Am/Pm marker" }, { "H", "Number", "Hour in day (0-23)" }, { "k", "Number", "Hour in day (1-24)" }, { "K", "Number", "Hour in am/pm (0-11)" }, { "h", "Number", "Hour in am/pm (1-12)" }, { "m", "Number", "Minute in hour" }, { "s", "Number", "Second in minute" }, { "S", "Number", "Millisecond" }, { "z", "Text", "Time zone" }, { "Z", "Text", "RFC 822 Time zone" }, });
 	}
 
 	/**
