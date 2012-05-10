@@ -495,7 +495,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 
 	public ILAFManager getLAFManager()
 	{
-		return getClient().getLAFManager();
+		return ApplicationServerSingleton.get().getLafManager();
 	}
 
 	public Locale getLocale()
