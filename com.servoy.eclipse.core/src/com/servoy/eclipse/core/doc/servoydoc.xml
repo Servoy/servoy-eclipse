@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -12317,6 +12317,8 @@ forms['newForm1'].controller.show();]]></sample>
           <sample><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
 var variable = form.newVariable('myVar', JSVariable.TEXT);
 variable.defaultValue = "'This is a default value (with tripple quotes)!'";
+//variable.defaultValue = "{a:'First letter',b:'Second letter'}"
+
 var field = form.newField(variable, JSField.TEXT_FIELD, 100, 100, 200, 200);
 forms['newForm1'].controller.show();]]></sample>
           <parameters>
@@ -40103,7 +40105,8 @@ myForm.newTextField('dataProviderNameHere', 140, 20, 140,20)]]></sample>
 NOTE: The global variable number type is based on the value assigned from the SolutionModel-JSVariable node; for example: JSVariable.INTEGER.]]></description>
           <summary><![CDATA[Creates a new global variable with the specified name and number type.]]></summary>
           <sample><![CDATA[var myGlobalVariable = solutionModel.newGlobalVariable('globals', 'newGlobalVariable', JSVariable.INTEGER); 
-myGlobalVariable.defaultValue = 12;]]></sample>
+myGlobalVariable.defaultValue = 12;
+	//myGlobalVariable.defaultValue = "{a:'First letter',b:'Second letter'}"]]></sample>
           <parameters>
             <parameter name="scopeName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the scope in which the variable is created]]></description>
