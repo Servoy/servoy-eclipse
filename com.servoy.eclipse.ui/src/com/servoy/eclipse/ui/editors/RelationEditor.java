@@ -310,7 +310,7 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 			String ci_from;
 			if (reuseSource && row != null)
 			{
-				ci_from = row.getCIFrom();
+				ci_from = row.getRawCIFrom();
 			}
 			else
 			{
@@ -335,21 +335,15 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 						RelationRow row = (RelationRow)oldInput.get(i);
 						if (reuseSource)
 						{
-							input.add(new RelationRow(row.getCIFrom(), Integer.valueOf(0), null, null));
+							input.add(new RelationRow(row.getRawCIFrom(), Integer.valueOf(0), null, null));
 							continue;
 						}
 						else if (reuseDestination)
 						{
-							if (row.getCIFrom() != null && oldColumns != null && ScopesUtils.isVariableScope(row.getCIFrom()))
+							if (row.getCIFrom() != null && oldColumns != null &&
+								(ScopesUtils.isVariableScope(row.getCIFrom()) || row.getRawCIFrom().startsWith(LiteralDataprovider.LITERAL_PREFIX)))
 							{
-								String name = row.getCIFrom();
-								Integer fromIndex = null;
-								String[] newColumns = getDataProviders(CI_FROM);
-								for (int j = 0; j < newColumns.length; j++)
-								{
-									if (newColumns[j].equals(name)) fromIndex = Integer.valueOf(j);
-								}
-								input.add(new RelationRow(name, Integer.valueOf(0), row.getCITo(), null));
+								input.add(new RelationRow(row.getRawCIFrom(), Integer.valueOf(0), row.getCITo(), null));
 							}
 							else input.add(new RelationRow(null, Integer.valueOf(0), row.getCITo(), null));
 							continue;
@@ -423,13 +417,14 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 					List<Column> rowIdentColumns = primaryTable.getRowIdentColumns();
 					if (rowIdentColumns != null)
 					{
-						String[] columns = getDataProviders(CI_FROM);
 						for (Column column : rowIdentColumns)
 						{
 							if (input.size() > rowIdentColumns.indexOf(column))
 							{
 								int index = rowIdentColumns.indexOf(column);
-								if (input.get(index).getCIFrom() == null || !ScopesUtils.isVariableScope(input.get(index).getCIFrom()))
+								if (input.get(index).getCIFrom() == null ||
+									!(ScopesUtils.isVariableScope(input.get(index).getCIFrom()) || input.get(index).getRawCIFrom().startsWith(
+										LiteralDataprovider.LITERAL_PREFIX)))
 								{
 									input.get(index).setCIFrom(column.getDataProviderID());
 								}
@@ -461,7 +456,6 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 					getRelation().getForeignTableName());
 				if (foreignTable != null)
 				{
-					String[] columns = getDataProviders(CI_FROM);
 					for (RelationRow row : input)
 					{
 						if (row.getCIFrom() != null)
