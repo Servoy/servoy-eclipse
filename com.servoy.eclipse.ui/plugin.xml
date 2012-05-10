@@ -757,6 +757,13 @@
             id="com.servoy.eclipse.ui.ImportSolutionWizard"
             name="Import Solution">
       </wizard>
+      <wizard
+            category="com.servoy.eclipse.ui.ImportCategory"
+            class="com.servoy.eclipse.ui.wizards.extension.InstallExtensionWizard"
+            icon="icons/marketplace.gif"
+            id="com.servoy.eclipse.ui.InstallExtensionWizard"
+            name="Install Extension Package">
+      </wizard>
    </extension>
    <extension
          point="org.eclipse.ui.cheatsheets.cheatSheetContent">

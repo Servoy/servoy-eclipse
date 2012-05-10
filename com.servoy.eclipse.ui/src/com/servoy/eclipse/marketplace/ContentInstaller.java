@@ -52,6 +52,9 @@ public class ContentInstaller
 		this.contentWrapper = new ContentWrapper(expFile, content, getInstallDir());
 	}
 
+	/**
+	 * This should only be called from the SWT UI thread.
+	 */
 	public void installAll()
 	{
 		install(getAllInstallItems());
