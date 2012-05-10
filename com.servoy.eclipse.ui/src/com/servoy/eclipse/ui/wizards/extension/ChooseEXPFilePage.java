@@ -227,7 +227,7 @@ public class ChooseEXPFilePage extends WizardPage
 
 		if (useMarketplace.getSelection() == true)
 		{
-			state.extensionProvider = new ComposedExtensionProvider(fbep, new MarketPlaceExtensionProvider());
+			state.extensionProvider = new ComposedExtensionProvider(fbep, new MarketPlaceExtensionProvider(state.installDir));
 		}
 		else
 		{

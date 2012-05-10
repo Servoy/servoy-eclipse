@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.ui.wizards.extension;
 
+import java.io.File;
+
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -27,6 +29,7 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.extension.MarketPlaceExtensionProvider;
 import com.servoy.extension.Message;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 
 /**
@@ -68,6 +71,11 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 		dialogOptions = new InstallExtensionWizardOptions(getDialogSettings());
 		state = new InstallExtensionState();
 		state.display = workbench.getDisplay();
+		String appServerDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
+		if (appServerDir != null)
+		{
+			state.installDir = new File(appServerDir).getParentFile();
+		}
 	}
 
 	@Override
@@ -80,7 +88,7 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 		{
 			state.extensionID = idToInstallFromMP;
 			// only show first page if there is more then one version available for this extension in the MP
-			marketplaceProvider = new MarketPlaceExtensionProvider();
+			marketplaceProvider = new MarketPlaceExtensionProvider(state.installDir);
 			String[] versions = marketplaceProvider.getAvailableVersions(idToInstallFromMP);
 			if (versions == null || versions.length == 0)
 			{
