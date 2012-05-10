@@ -55,10 +55,17 @@ public class ScriptVariableSearch extends DLTKSearchEngineSearch
 {
 
 	private final ScriptVariable variable;
+	private final boolean searchInJavaScript;
 
 	public ScriptVariableSearch(ScriptVariable variable)
 	{
+		this(variable, true);
+	}
+
+	public ScriptVariableSearch(ScriptVariable variable, boolean searchInJavaScript)
+	{
 		this.variable = variable;
+		this.searchInJavaScript = searchInJavaScript;
 	}
 
 	/*
@@ -94,12 +101,14 @@ public class ScriptVariableSearch extends DLTKSearchEngineSearch
 			TextSearchEngine.create().search(scope, collector, Pattern.compile("dataProviderID:\"" + variable.getName() + "\""), monitor);
 			((VariableSearchResultCollector)collector).setFormToMatch(null);
 		}
-
-		String scriptPath = SolutionSerializer.getScriptPath(variable, false);
-		IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
-		ISourceModule sourceModule = DLTKCore.createSourceModuleFrom(file);
-		IField variableElement = sourceModule.getField(variable.getName());
-		callDLTKSearchEngine(monitor, collector, variableElement, IDLTKSearchConstants.REFERENCES, (Solution)variable.getRootObject());
+		if (searchInJavaScript)
+		{
+			String scriptPath = SolutionSerializer.getScriptPath(variable, false);
+			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
+			ISourceModule sourceModule = DLTKCore.createSourceModuleFrom(file);
+			IField variableElement = sourceModule.getField(variable.getName());
+			callDLTKSearchEngine(monitor, collector, variableElement, IDLTKSearchConstants.REFERENCES, (Solution)variable.getRootObject());
+		}
 		return Status.OK_STATUS;
 	}
 
@@ -122,6 +131,11 @@ public class ScriptVariableSearch extends DLTKSearchEngineSearch
 	protected TextSearchResultCollector createTextSearchCollector(AbstractTextSearchResult searchResult)
 	{
 		return new VariableSearchResultCollector(searchResult);
+	}
+
+	public int getMatchCount()
+	{
+		return ((AbstractTextSearchResult)getSearchResult()).getMatchCount();
 	}
 
 	/**

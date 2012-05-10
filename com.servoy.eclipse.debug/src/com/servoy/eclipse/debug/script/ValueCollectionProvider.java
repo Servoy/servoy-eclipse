@@ -96,7 +96,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		{
 			if (typeName.startsWith(FoundSet.JS_FOUNDSET + '<') && typeName.endsWith(">"))
 			{
-				FlattenedSolution editingFlattenedSolution = TypeCreator.getFlattenedSolution(context);
+				FlattenedSolution editingFlattenedSolution = ElementResolver.getFlattenedSolution(context);
 				if (editingFlattenedSolution != null)
 				{
 					String config = typeName.substring(FoundSet.JS_FOUNDSET.length() + 1, typeName.length() - 1);
@@ -137,7 +137,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			else if (typeName.startsWith("Scope<") && typeName.endsWith(">"))
 			{
 				// Scope<solutionName/scopeName>
-				FlattenedSolution editingFlattenedSolution = TypeCreator.getFlattenedSolution(context);
+				FlattenedSolution editingFlattenedSolution = ElementResolver.getFlattenedSolution(context);
 				if (editingFlattenedSolution != null)
 				{
 					String config = typeName.substring("Scope<".length(), typeName.length() - 1);
@@ -192,7 +192,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	{
 		if (form.getExtendsID() > 0)
 		{
-			FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
+			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 			if (fs != null)
 			{
 				IValueCollection superForms = null;
@@ -257,7 +257,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			if (resource != null && resource.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 			{
 				// javascript file
-				FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
+				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 				if (fs != null)
 				{
 					IPath path = resource.getProjectRelativePath();

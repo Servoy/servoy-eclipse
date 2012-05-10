@@ -16,20 +16,37 @@
  */
 package com.servoy.eclipse.debug.script;
 
+import org.eclipse.dltk.javascript.typeinfo.ITypeInferenceExtensionFactory;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInferenceHandler;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInferenceHandlerFactory;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInferencerVisitor;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
+import org.eclipse.dltk.javascript.validation.IValidatorExtension;
 
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 
-public class CalculationsTypeInferenceHandlerFactory implements ITypeInferenceHandlerFactory
+public class ServoyTypeInferenceFactory implements ITypeInferenceHandlerFactory, ITypeInferenceExtensionFactory
 {
 	public ITypeInferenceHandler create(ITypeInfoContext context, ITypeInferencerVisitor visitor)
 	{
 		if (SolutionSerializer.getDataSourceForCalculationJSFile(context.getModelElement().getResource()) != null)
 		{
 			return new CalculationsTypeInferenceHandler(visitor);
+		}
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.dltk.javascript.typeinfo.ITypeInferenceExtensionFactory#createExtension(org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext,
+	 * org.eclipse.dltk.javascript.typeinfo.ITypeInferencerVisitor, java.lang.Class)
+	 */
+	public Object createExtension(ITypeInfoContext context, ITypeInferencerVisitor visitor, Class< ? > extensionClass)
+	{
+		if (extensionClass == IValidatorExtension.class)
+		{
+			return new ServoyScriptValidator(context, visitor);
 		}
 		return null;
 	}

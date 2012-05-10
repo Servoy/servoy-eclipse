@@ -20,6 +20,7 @@ package com.servoy.eclipse.debug.script;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,16 +28,21 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.eclipse.core.resources.IResource;
+import javax.swing.Icon;
+
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
+import org.eclipse.dltk.javascript.typeinfo.TypeCache;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
@@ -49,51 +55,137 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.EMap;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.mozilla.javascript.JavaMembers;
 import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 
+import com.servoy.eclipse.core.DesignApplication;
 import com.servoy.eclipse.core.IPersistChangeListener;
+import com.servoy.eclipse.core.JSDeveloperSolutionModel;
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.FormController.JSForm;
+import com.servoy.j2db.FormManager.HistoryProvider;
+import com.servoy.j2db.IApplication;
+import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFormat;
+import com.servoy.j2db.dataprocessing.DataException;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.IFoundSet;
+import com.servoy.j2db.dataprocessing.JSDataSet;
+import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
+import com.servoy.j2db.dataprocessing.ValidationFailedException;
 import com.servoy.j2db.documentation.IParameter;
 import com.servoy.j2db.documentation.ScriptParameter;
+import com.servoy.j2db.persistence.AggregateVariable;
+import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.FormEncapsulation;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.MethodArgument;
+import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.persistence.RelationItem;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.plugins.IBeanClassProvider;
+import com.servoy.j2db.plugins.IClientPlugin;
+import com.servoy.j2db.plugins.IClientPluginAccess;
+import com.servoy.j2db.plugins.IPluginManager;
+import com.servoy.j2db.querybuilder.impl.QBAggregate;
+import com.servoy.j2db.querybuilder.impl.QBColumn;
+import com.servoy.j2db.querybuilder.impl.QBColumns;
+import com.servoy.j2db.querybuilder.impl.QBCondition;
+import com.servoy.j2db.querybuilder.impl.QBFactory;
+import com.servoy.j2db.querybuilder.impl.QBFunction;
+import com.servoy.j2db.querybuilder.impl.QBFunctions;
+import com.servoy.j2db.querybuilder.impl.QBGroupBy;
+import com.servoy.j2db.querybuilder.impl.QBJoin;
+import com.servoy.j2db.querybuilder.impl.QBJoins;
+import com.servoy.j2db.querybuilder.impl.QBLogicalCondition;
+import com.servoy.j2db.querybuilder.impl.QBParameter;
+import com.servoy.j2db.querybuilder.impl.QBParameters;
+import com.servoy.j2db.querybuilder.impl.QBPart;
+import com.servoy.j2db.querybuilder.impl.QBResult;
+import com.servoy.j2db.querybuilder.impl.QBSelect;
+import com.servoy.j2db.querybuilder.impl.QBSort;
+import com.servoy.j2db.querybuilder.impl.QBSorts;
+import com.servoy.j2db.querybuilder.impl.QBTableClause;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IDeprecated;
+import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.IJavaScriptType;
 import com.servoy.j2db.scripting.IPrefixedConstantsObject;
 import com.servoy.j2db.scripting.IReturnedTypesProvider;
 import com.servoy.j2db.scripting.IScriptObject;
+import com.servoy.j2db.scripting.IScriptable;
 import com.servoy.j2db.scripting.ITypedScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
+import com.servoy.j2db.scripting.JSApplication;
+import com.servoy.j2db.scripting.JSI18N;
+import com.servoy.j2db.scripting.JSSecurity;
+import com.servoy.j2db.scripting.JSUnitAssertFunctions;
+import com.servoy.j2db.scripting.JSUtils;
+import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
+import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
+import com.servoy.j2db.ui.IScriptDataLabelMethods;
+import com.servoy.j2db.ui.IScriptPortalComponentMethods;
+import com.servoy.j2db.ui.IScriptScriptLabelMethods;
+import com.servoy.j2db.ui.IScriptTabPanelMethods;
+import com.servoy.j2db.ui.runtime.IRuntimeButton;
+import com.servoy.j2db.ui.runtime.IRuntimeCalendar;
+import com.servoy.j2db.ui.runtime.IRuntimeCheck;
+import com.servoy.j2db.ui.runtime.IRuntimeChecks;
+import com.servoy.j2db.ui.runtime.IRuntimeCombobox;
 import com.servoy.j2db.ui.runtime.IRuntimeComponent;
+import com.servoy.j2db.ui.runtime.IRuntimeDataButton;
+import com.servoy.j2db.ui.runtime.IRuntimeHtmlArea;
+import com.servoy.j2db.ui.runtime.IRuntimeImageMedia;
+import com.servoy.j2db.ui.runtime.IRuntimeListBox;
+import com.servoy.j2db.ui.runtime.IRuntimePassword;
+import com.servoy.j2db.ui.runtime.IRuntimeRadio;
+import com.servoy.j2db.ui.runtime.IRuntimeRadios;
+import com.servoy.j2db.ui.runtime.IRuntimeRtfArea;
+import com.servoy.j2db.ui.runtime.IRuntimeSpinner;
+import com.servoy.j2db.ui.runtime.IRuntimeSplitPane;
+import com.servoy.j2db.ui.runtime.IRuntimeTextArea;
+import com.servoy.j2db.ui.runtime.IRuntimeTextField;
+import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Utils;
 
@@ -102,8 +194,11 @@ import com.servoy.j2db.util.Utils;
  *
  */
 @SuppressWarnings("nls")
-public abstract class TypeCreator
+public class TypeCreator extends TypeCache
 {
+	private static final String SCOPE_QBCOLUMNS = "scope:qbcolumns";
+	private static final String SCOPE_TABLES = "scope:tables";
+
 	private static final int INSTANCE_METHOD = 1;
 	private static final int STATIC_METHOD = 2;
 	private static final int INSTANCE_FIELD = 3;
@@ -193,11 +288,322 @@ public abstract class TypeCreator
 
 	public TypeCreator()
 	{
-		super();
+		super("servoy", "javascript");
+		addType("JSDataSet", JSDataSet.class);
+		addType(IExecutingEnviroment.TOPLEVEL_SERVOY_EXCEPTION, ServoyException.class);
+		addType(DataException.class.getSimpleName(), DataException.class);
+		addType(ValidationFailedException.class.getSimpleName(), ValidationFailedException.class);
+
+		addAnonymousClassType("Controller", JSForm.class);
+		addAnonymousClassType("JSApplication", JSApplication.class);
+		addAnonymousClassType("JSI18N", JSI18N.class);
+		addAnonymousClassType("HistoryProvider", HistoryProvider.class);
+		addAnonymousClassType("JSUtils", JSUtils.class);
+		addAnonymousClassType("JSUnit", JSUnitAssertFunctions.class);
+		addAnonymousClassType("JSSolutionModel", JSSolutionModel.class);
+		addAnonymousClassType("JSDatabaseManager", JSDatabaseManager.class);
+		addAnonymousClassType("JSDeveloperSolutionModel", JSDeveloperSolutionModel.class);
+		addAnonymousClassType("JSSecurity", JSSecurity.class);
+		ElementResolver.registerConstantType("JSSecurity", "JSSecurity");
+
+
+		addScopeType(Record.JS_RECORD, new RecordCreator());
+		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
+		addScopeType("JSDataSet", new JSDataSetCreator());
+		addScopeType("Form", new FormScopeCreator());
+		addScopeType("RuntimeForm", new FormScopeCreator());
+		addScopeType("Elements", new ElementsScopeCreator());
+		addScopeType("Plugins", new PluginsScopeCreator());
+		addScopeType("Forms", new FormsScopeCreator());
+		addScopeType("Relations", new RelationsScopeCreator());
+		addScopeType("Dataproviders", new DataprovidersScopeCreator());
+		addScopeType("InvisibleRelations", new InvisibleRelationsScopeCreator());
+		addScopeType("InvisibleDataproviders", new InvisibleDataprovidersScopeCreator());
+		addScopeType("Scopes", new ScopesScopeCreator());
+		addScopeType("Scope", new ScopeScopeCreator());
+		addScopeType(QBAggregate.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBColumn.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBCondition.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBFactory.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBFunction.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBGroupBy.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBJoin.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBJoins.class.getSimpleName(), new QueryBuilderJoinsCreator());
+		addScopeType(QBLogicalCondition.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBResult.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBSelect.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBSort.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBSorts.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBTableClause.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBPart.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBParameter.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBParameters.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBColumns.class.getSimpleName(), new QueryBuilderColumnsCreator());
+		addScopeType(QBFunctions.class.getSimpleName(), new QueryBuilderCreator());
+
 	}
+
+
+	private final ConcurrentHashMap<String, Boolean> ignorePackages = new ConcurrentHashMap<String, Boolean>();
+
+	@Override
+	protected Type createType(String typeName)
+	{
+		if (BASE_TYPES.contains(typeName) || typeName.startsWith("Array<")) return null;
+		if (!initialized) initalize();
+
+		Type type = null;
+		if (typeName.startsWith("java.") || typeName.startsWith("javax."))
+		{
+			if (ignorePackages.containsKey(typeName)) return null;
+			try
+			{
+				ClassLoader cl = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getBeanManager().getClassLoader();
+				if (cl == null) cl = Thread.currentThread().getContextClassLoader();
+				Class< ? > clz = Class.forName(typeName, false, cl);
+				type = getClassType(clz, typeName);
+			}
+			catch (ClassNotFoundException e)
+			{
+				ignorePackages.put(typeName, Boolean.FALSE);
+			}
+			return null;
+		}
+		else if (typeName.equals("Continuation"))
+		{
+			type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVASCRIPT);
+			type.setSuperType(getType("Function"));
+		}
+		else if (typeName.equals("byte"))
+		{
+			// special support for byte type (mostly used in Array<byte>)
+			type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVASCRIPT);
+			type.setSuperType(getType("Object"));
+		}
+		if (type != null)
+		{
+			return addType(null, type);
+		}
+
+
+		String realTypeName = typeName;
+		if (realTypeName.equals("JSFoundset")) realTypeName = FoundSet.JS_FOUNDSET;
+		type = createType(realTypeName, realTypeName);
+		if (type != null)
+		{
+			return addType(null, type);
+		}
+		else
+		{
+			FlattenedSolution fs = getFlattenedSolution();
+			if (fs != null)
+			{
+				DynamicTypeCache tc = getTypeCache(fs);
+				type = tc.findInBucket(fs.getSolution().getName(), realTypeName);
+				if (type == null)
+				{
+					type = findInBucket(SCOPE_TABLES, realTypeName);
+					if (type == null)
+					{
+						type = findInBucket(SCOPE_QBCOLUMNS, realTypeName);
+					}
+					if (type == null)
+					{
+						type = createDynamicType(realTypeName, realTypeName);
+						if (type != null && realTypeName.indexOf('<') != -1 && type.eResource() == null)
+						{
+							tc.addType(fs.getSolution().getName(), type);
+							invariantScopes.put(fs.getSolution().getName(), Boolean.TRUE);
+						}
+					}
+				}
+			}
+			else
+			{
+				type = createDynamicType(realTypeName, realTypeName);
+			}
+		}
+		return type;
+	}
+
+	private static final ConcurrentMap<String, DynamicTypeCache> typeCache = new ConcurrentHashMap<String, DynamicTypeCache>();
+
+	/**
+	 * @param fs
+	 */
+	private DynamicTypeCache getTypeCache(FlattenedSolution fs)
+	{
+		final String name = fs.getSolution().getName();
+		DynamicTypeCache tc = typeCache.get(name);
+		if (tc == null)
+		{
+			tc = new DynamicTypeCache("servoy", name, name);
+			DynamicTypeCache previous = typeCache.putIfAbsent(name, tc);
+			if (previous != null) tc = previous;
+		}
+		return tc;
+	}
+
+	private Type getClassType(Class< ? > clz, String name)
+	{
+		Type type = TypeInfoModelFactory.eINSTANCE.createType();
+		type.setName(name);
+		type.setKind(TypeKind.JAVA);
+		type.setAttribute(JavaClassRuntimeTypeFactory.JAVA_CLASS, clz);
+
+		java.lang.reflect.Method[] methods = clz.getMethods();
+		Field[] fields = clz.getFields();
+
+		EList<Member> members = type.getMembers();
+
+		for (Field field : fields)
+		{
+			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+			property.setName(field.getName());
+			property.setType(getJSType(field.getType()));
+			if (Modifier.isStatic(field.getModifiers()))
+			{
+				property.setStatic(true);
+			}
+			members.add(property);
+		}
+		for (java.lang.reflect.Method method : methods)
+		{
+			org.eclipse.dltk.javascript.typeinfo.model.Method m = TypeInfoModelFactory.eINSTANCE.createMethod();
+			m.setName(method.getName());
+			m.setType(getJSType(method.getReturnType()));
+
+			EList<Parameter> parameters = m.getParameters();
+			Class< ? >[] parameterTypes = method.getParameterTypes();
+			for (int i = 0; i < parameterTypes.length; i++)
+			{
+				Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
+				parameter.setName("arg" + i);
+				parameter.setType(getJSType(parameterTypes[i]));
+				parameters.add(parameter);
+			}
+			if (Modifier.isStatic(method.getModifiers()))
+			{
+				m.setStatic(true);
+			}
+			members.add(m);
+		}
+		return type;
+	}
+
+	private JSType getJSType(Class< ? > type)
+	{
+		if (type != null && type != Void.class && type != void.class)
+		{
+			if (type == Object.class) return getTypeRef(ITypeNames.OBJECT);
+			if (type.isArray())
+			{
+				Class< ? > componentType = type.getComponentType();
+				JSType componentJSType = getJSType(componentType);
+				if (componentJSType != null)
+				{
+					return TypeUtil.arrayOf(componentJSType);
+				}
+				return getTypeRef(ITypeNames.ARRAY);
+			}
+			else if (type == Boolean.class || type == boolean.class)
+			{
+				return getTypeRef(ITypeNames.BOOLEAN);
+			}
+			else if (type == Byte.class || type == byte.class)
+			{
+				return getTypeRef("byte");
+			}
+			else if (Number.class.isAssignableFrom(type) || type.isPrimitive())
+			{
+				return getTypeRef(ITypeNames.NUMBER);
+			}
+			else if (type == String.class || type == CharSequence.class)
+			{
+				return getTypeRef(ITypeNames.STRING);
+			}
+			else
+			{
+
+				return getTypeRef("Packages." + type.getName());
+			}
+		}
+		return null;
+	}
+
 
 	protected void initalize()
 	{
+
+		DesignApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
+		synchronized (this)
+		{
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class), null);
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class), null);
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class), null);
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class), null);
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(ServoyException.class), null);
+
+			List<IClientPlugin> lst = application.getPluginManager().getPlugins(IClientPlugin.class);
+			for (IClientPlugin clientPlugin : lst)
+			{
+				// for now cast to deprecated interface
+				try
+				{
+					java.lang.reflect.Method method = clientPlugin.getClass().getMethod("getScriptObject", (Class[])null);
+					if (method != null)
+					{
+						IScriptable scriptObject = (IScriptable)method.invoke(clientPlugin, (Object[])null);
+						if (scriptObject instanceof IReturnedTypesProvider)
+						{
+							String prefix = "plugins." + clientPlugin.getName() + ".";
+							registerConstantsForScriptObject((IReturnedTypesProvider)scriptObject, prefix);
+							if (((IReturnedTypesProvider)scriptObject).getAllReturnedTypes() != null &&
+								((IReturnedTypesProvider)scriptObject).getAllReturnedTypes().length > 0)
+							{
+								linkedTypes.put(scriptObject.getClass(), ((IReturnedTypesProvider)scriptObject).getAllReturnedTypes());
+							}
+						}
+					}
+				}
+				catch (Throwable e)
+				{
+					Debug.error("error registering constants for client plugin ", e); //$NON-NLS-1$
+				}
+			}
+		}
+		IBeanClassProvider beanManager = (IBeanClassProvider)application.getBeanManager();
+		Class< ? >[] allBeanClasses = beanManager.getAllBeanClasses();
+		for (Class< ? > beanClass : allBeanClasses)
+		{
+			if (IServoyBeanFactory.class.isAssignableFrom(beanClass))
+			{
+				try
+				{
+					IServoyBeanFactory beanFactory = (IServoyBeanFactory)beanClass.newInstance();
+					Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(), (IClientPluginAccess)application.getPluginAccess(),
+						new Object[] { "developer", "developer", null });
+					addType(beanClass.getSimpleName(), beanInstance.getClass());
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("error creating bean for in the js type provider", e);
+				}
+				catch (NoClassDefFoundError e)
+				{
+					ServoyLog.logError("error creating bean for in the js type provider", e);
+				}
+			}
+			else
+			{
+				addType(beanClass.getSimpleName(), beanClass);
+			}
+		}
+
 		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 		synchronized (this)
 		{
@@ -246,49 +652,6 @@ public abstract class TypeCreator
 		return names;
 	}
 
-
-	public Type getType(ITypeInfoContext context, String typeName)
-	{
-		if (BASE_TYPES.contains(typeName) || typeName.startsWith("Array<")) return null;
-		if (!initialized) initalize();
-		String realTypeName = typeName;
-		if (realTypeName.equals("JSFoundset")) realTypeName = FoundSet.JS_FOUNDSET;
-		Type type = createType(context, realTypeName, realTypeName);
-		if (type != null)
-		{
-			context.markInvariant(type);
-		}
-		else
-		{
-			FlattenedSolution fs = getFlattenedSolution(context);
-			if (fs != null)
-			{
-				type = context.getInvariantType(realTypeName, fs.getSolution().getName());
-				if (type == null)
-				{
-					type = context.getInvariantType(realTypeName, "scope:tables");
-					if (type == null)
-					{
-						type = context.getInvariantType(realTypeName, "scope:qbcolumns");
-					}
-					if (type == null)
-					{
-						type = createDynamicType(context, realTypeName, realTypeName);
-						if (type != null && realTypeName.indexOf('<') != -1)
-						{
-							context.markInvariant(type, fs.getSolution().getName());
-							invariantScopes.put(fs.getSolution().getName(), Boolean.TRUE);
-						}
-					}
-				}
-			}
-			else
-			{
-				type = createDynamicType(context, realTypeName, realTypeName);
-			}
-		}
-		return type;
-	}
 
 	protected final void registerConstantsForScriptObject(IReturnedTypesProvider scriptObject, String prefix)
 	{
@@ -381,12 +744,28 @@ public abstract class TypeCreator
 		}
 	}
 
-	protected Type createDynamicType(ITypeInfoContext context, String typeNameClassName, String fullTypeName)
+	protected Type createDynamicType(String typeNameClassName, String fullTypeName)
 	{
+		// is it a 'generified' type
+		int index = typeNameClassName.indexOf('<');
+		if (index != -1 && (typeNameClassName.indexOf('>', index)) != -1)
+		{
+			String fullClassName = typeNameClassName;
+			String classType = fullClassName.substring(0, index);
+			if (classType.equals("JSFoundset"))
+			{
+				classType = FoundSet.JS_FOUNDSET;
+				fullClassName = classType + fullClassName.substring(index);
+			}
+			Type type = createDynamicType(classType, fullClassName);
+			if (type == null) type = createType(classType, fullClassName);
+			return type;
+		}
+
 		IScopeTypeCreator creator = scopeTypes.get(typeNameClassName);
 		if (creator != null)
 		{
-			return creator.createType(context, fullTypeName);
+			return creator.createType(fullTypeName);
 		}
 		return null;
 	}
@@ -395,12 +774,12 @@ public abstract class TypeCreator
 	 * @param typeNameClassName
 	 * @return
 	 */
-	protected final Type createType(ITypeInfoContext context, String typeNameClassName, String fullTypeName)
+	protected final Type createType(String typeNameClassName, String fullTypeName)
 	{
 		Class< ? > cls = getTypeClass(typeNameClassName);
 		if (cls != null)
 		{
-			return createType(context, fullTypeName, cls);
+			return createType(fullTypeName, cls);
 		}
 		return null;
 	}
@@ -411,14 +790,14 @@ public abstract class TypeCreator
 	 * @param cls
 	 * @return
 	 */
-	protected final Type createType(ITypeInfoContext context, String typeName, Class< ? > cls)
+	protected final Type createType(String typeName, Class< ? > cls)
 	{
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(typeName);
 		type.setKind(TypeKind.JAVA);
 		EList<Member> members = type.getMembers();
 
-		fill(context, members, cls, typeName);
+		fill(members, cls, typeName);
 
 		if (cls != ServoyException.class && !IFoundSet.class.isAssignableFrom(cls))
 		{
@@ -432,7 +811,7 @@ public abstract class TypeCreator
 		}
 		if (cls != IRuntimeComponent.class && IRuntimeComponent.class.isAssignableFrom(cls))
 		{
-			type.setSuperType(context.getType("RuntimeComponent"));
+			type.setSuperType(getType("RuntimeComponent"));
 		}
 		Class< ? >[] returnTypes = linkedTypes.get(cls);
 		if (returnTypes != null)
@@ -460,7 +839,7 @@ public abstract class TypeCreator
 					}
 				}
 				String prefix = TYPE_PREFIX + config + ".";
-				members.add(createProperty(name, true, TypeUtil.classType(context.getType(prefix + name)), null, null));
+				members.add(createProperty(name, true, TypeUtil.classType(getType(prefix + name)), null, null));
 			}
 		}
 		return type;
@@ -471,7 +850,7 @@ public abstract class TypeCreator
 	 * @param members
 	 * @param class1
 	 */
-	private final void fill(ITypeInfoContext context, EList<Member> membersList, Class< ? > scriptObjectClass, String typeName)
+	private final void fill(EList<Member> membersList, Class< ? > scriptObjectClass, String typeName)
 	{
 		ArrayList<String> al = new ArrayList<String>();
 		JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(scriptObjectClass, null);
@@ -562,7 +941,7 @@ public abstract class TypeCreator
 							method.setDescription(getDoc(name, scriptObjectClass, name, parameterTypes)); // TODO name should be of parent.
 							if (returnTypeClz != null)
 							{
-								method.setType(getMemberTypeName(context, name, returnTypeClz, typeName));
+								method.setType(getMemberTypeName(name, returnTypeClz, typeName));
 							}
 							method.setAttribute(IMAGE_DESCRIPTOR, METHOD);
 							method.setStatic(type == STATIC_METHOD);
@@ -583,24 +962,24 @@ public abstract class TypeCreator
 											Class< ? > componentType = paramType.getComponentType();
 											if (param.isVarArgs())
 											{
-												parameter.setType(getMemberTypeName(context, name, componentType, typeName));
+												parameter.setType(getMemberTypeName(name, componentType, typeName));
 											}
 											else if (componentType == Object.class)
 											{
-												parameter.setType(context.getTypeRef(ITypeNames.ARRAY));
+												parameter.setType(getTypeRef(ITypeNames.ARRAY));
 											}
 											else
 											{
-												parameter.setType(TypeUtil.arrayOf(getMemberTypeName(context, name, componentType, typeName)));
+												parameter.setType(TypeUtil.arrayOf(getMemberTypeName(name, componentType, typeName)));
 											}
 										}
 										else if (paramType != null)
 										{
-											parameter.setType(getMemberTypeName(context, name, paramType, typeName));
+											parameter.setType(getMemberTypeName(name, paramType, typeName));
 										}
 										else
 										{
-											parameter.setType(context.getTypeRef(SolutionExplorerListContentProvider.TYPES.get(param.getType())));
+											parameter.setType(getTypeRef(SolutionExplorerListContentProvider.TYPES.get(param.getType())));
 										}
 									}
 									parameter.setKind(param.isVarArgs() ? ParameterKind.VARARGS : param.isOptional() ? ParameterKind.OPTIONAL
@@ -618,12 +997,12 @@ public abstract class TypeCreator
 									{
 										Class< ? > componentType = paramClass.getComponentType();
 										parameter.setName(SolutionExplorerListContentProvider.TYPES.get(componentType.getName()));
-										parameter.setType(TypeUtil.arrayOf(context.getTypeRef(SolutionExplorerListContentProvider.TYPES.get(componentType.getName()))));
+										parameter.setType(TypeUtil.arrayOf(getTypeRef(SolutionExplorerListContentProvider.TYPES.get(componentType.getName()))));
 									}
 									else
 									{
 										parameter.setName(SolutionExplorerListContentProvider.TYPES.get(paramClass.getName()));
-										parameter.setType(context.getTypeRef(SolutionExplorerListContentProvider.TYPES.get(paramClass.getName())));
+										parameter.setType(getTypeRef(SolutionExplorerListContentProvider.TYPES.get(paramClass.getName())));
 									}
 									parameter.setKind(ParameterKind.NORMAL);
 									parameters.add(parameter);
@@ -637,7 +1016,7 @@ public abstract class TypeCreator
 						JSType returnType = null;
 						if (returnTypeClz != null)
 						{
-							returnType = getMemberTypeName(context, name, returnTypeClz, typeName);
+							returnType = getMemberTypeName(name, returnTypeClz, typeName);
 						}
 						ImageDescriptor descriptor = IconProvider.instance().descriptor(returnTypeClz);
 						if (descriptor == null)
@@ -658,7 +1037,7 @@ public abstract class TypeCreator
 		}
 	}
 
-	protected final JSType getMemberTypeName(ITypeInfoContext context, String memberName, Class< ? > memberReturnType, String objectTypeName)
+	protected final JSType getMemberTypeName(String memberName, Class< ? > memberReturnType, String objectTypeName)
 	{
 		int index = objectTypeName.indexOf('<');
 		int index2;
@@ -668,7 +1047,7 @@ public abstract class TypeCreator
 
 			if (memberReturnType == Record.class)
 			{
-				return context.getTypeRef(Record.JS_RECORD + '<' + config + '>');
+				return getTypeRef(Record.JS_RECORD + '<' + config + '>');
 			}
 			if (memberReturnType == FoundSet.class)
 			{
@@ -677,19 +1056,19 @@ public abstract class TypeCreator
 					if (config.indexOf('.') == -1)
 					{
 						// its really a relation, unrelate it.
-						FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
+						FlattenedSolution fs = TypeCreator.getFlattenedSolution();
 						if (fs != null)
 						{
 							Relation relation = fs.getRelation(config);
 							if (relation != null)
 							{
-								return context.getTypeRef(FoundSet.JS_FOUNDSET + '<' + relation.getForeignDataSource() + '>');
+								return getTypeRef(FoundSet.JS_FOUNDSET + '<' + relation.getForeignDataSource() + '>');
 							}
 						}
-						return context.getTypeRef(FoundSet.JS_FOUNDSET);
+						return getTypeRef(FoundSet.JS_FOUNDSET);
 					}
 				}
-				return context.getTypeRef(FoundSet.JS_FOUNDSET + '<' + config + '>');
+				return getTypeRef(FoundSet.JS_FOUNDSET + '<' + config + '>');
 			}
 		}
 		if (memberReturnType.isArray())
@@ -697,13 +1076,13 @@ public abstract class TypeCreator
 			Class< ? > returnType = getReturnType(memberReturnType.getComponentType());
 			if (returnType != null)
 			{
-				JSType componentJSType = getMemberTypeName(context, memberName, returnType, objectTypeName);
+				JSType componentJSType = getMemberTypeName(memberName, returnType, objectTypeName);
 				if (componentJSType != null)
 				{
 					return TypeUtil.arrayOf(componentJSType);
 				}
 			}
-			return context.getTypeRef(ITypeNames.ARRAY);
+			return getTypeRef(ITypeNames.ARRAY);
 		}
 
 		String typeName = null;
@@ -716,7 +1095,7 @@ public abstract class TypeCreator
 			typeName = SolutionExplorerListContentProvider.TYPES.get(memberReturnType.getSimpleName());
 			addAnonymousClassType(typeName, memberReturnType);
 		}
-		return context.getTypeRef(typeName);
+		return getTypeRef(typeName);
 	}
 
 	public final void addType(String name, Class< ? > cls)
@@ -779,9 +1158,64 @@ public abstract class TypeCreator
 	}
 
 
+	/**
+	 * @author jcompagner
+	 *
+	 */
+	private final class DynamicTypeCache extends TypeCache
+	{
+		private final String name;
+
+		/**
+		 * @param scheme
+		 * @param authority
+		 * @param name
+		 */
+		private DynamicTypeCache(String scheme, String authority, String name)
+		{
+			super(scheme, authority);
+			this.name = name;
+		}
+
+		@Override
+		protected Type createType(String typeName)
+		{
+			CONTEXT.set(ElementResolver.getFlattenedSolution(name));
+			try
+			{
+				return TypeCreator.this.createType(typeName);
+			}
+			finally
+			{
+				CONTEXT.remove();
+			}
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.dltk.javascript.typeinfo.TypeCache#findInBucket(java.lang.String, java.lang.String)
+		 */
+		@Override
+		public Type findInBucket(String bucket, String typeName)
+		{
+			return super.findInBucket(bucket, typeName);
+		}
+
+		@Override
+		public Type addType(String bucket, Type type)
+		{
+			if (bucket == null || "".equals(bucket))
+			{
+				return TypeCreator.this.addType(bucket, type);
+			}
+			return super.addType(bucket, type);
+		}
+	}
+
 	protected interface IScopeTypeCreator
 	{
-		Type createType(ITypeInfoContext context, String fullTypeName);
+		Type createType(String fullTypeName);
 	}
 
 	public IParameter[] getParameters(String key, Class< ? > scriptObjectClass, MemberBox member)
@@ -917,63 +1351,35 @@ public abstract class TypeCreator
 	protected void flushCache()
 	{
 		//if (changes.contains(tables))
-		ITypeInfoContext.INVARIANTS.reset("scope:tables");
-		ITypeInfoContext.INVARIANTS.reset("scope:qbcolumns");
+		clear(SCOPE_TABLES);
+		clear(SCOPE_QBCOLUMNS);
 
 		Set<String> keySet = invariantScopes.keySet();
 		for (String context : keySet)
 		{
-			ITypeInfoContext.INVARIANTS.reset(context);
+			clear(context);
 		}
+
+		relationCache.clear();
 	}
 
-	public static FlattenedSolution getFlattenedSolution(ITypeInfoContext context)
+	public static ThreadLocal<FlattenedSolution> CONTEXT = new ThreadLocal<FlattenedSolution>();
+
+	public static FlattenedSolution getFlattenedSolution()
 	{
-		String name = context.getContext();
-		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
-		if (name == null && context.getModelElement() != null)
-		{
-			IResource resource = context.getModelElement().getResource();
-			if (resource != null)
-			{
-				name = resource.getProject().getName();
-			}
-		}
-		if (name != null && servoyModel.isSolutionActive(name))
-		{
-			ServoyProject servoyProject = servoyModel.getServoyProject(name);
-			if (servoyProject != null)
-			{
-				return servoyProject.getEditingFlattenedSolution();
-			}
-		}
-		return null;
+		return CONTEXT.get();
 	}
 
-	public static Form getForm(ITypeInfoContext context)
+	protected Member createMethod(ScriptMethod sm, ImageDescriptor image)
 	{
-		String formName = SolutionSerializer.getFormNameForJSFile(context.getModelElement().getResource());
-		if (formName != null)
-		{
-			FlattenedSolution fs = getFlattenedSolution(context);
-			if (fs != null)
-			{
-				return fs.getForm(formName);
-			}
-		}
-		return null;
-	}
-
-	protected static Member createMethod(ITypeInfoContext context, ScriptMethod sm, ImageDescriptor image)
-	{
-		return createMethod(context, sm, image, null);
+		return createMethod(sm, image, null);
 	}
 
 	/**
 	 * @param sm
 	 * @return
 	 */
-	protected static Member createMethod(ITypeInfoContext context, ScriptMethod sm, ImageDescriptor image, String fileName)
+	protected Member createMethod(ScriptMethod sm, ImageDescriptor image, String fileName)
 	{
 		Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
 		method.setName(sm.getName());
@@ -987,7 +1393,7 @@ public abstract class TypeCreator
 				Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
 				parameter.setKind(ParameterKind.NORMAL);
 				parameter.setName(argument.getName());
-				parameter.setType(context.getTypeRef(argument.getType().getName()));
+				parameter.setType(getTypeRef(argument.getType().getName()));
 				parameters.add(parameter);
 			}
 		}
@@ -996,7 +1402,7 @@ public abstract class TypeCreator
 		String type = sm.getSerializableRuntimeProperty(IScriptProvider.TYPE);
 		if (type != null)
 		{
-			method.setType(context.getTypeRef(type));
+			method.setType(getTypeRef(type));
 		}
 		String comment = sm.getRuntimeProperty(IScriptProvider.COMMENT);
 		if (comment == null)
@@ -1029,29 +1435,28 @@ public abstract class TypeCreator
 		return method;
 	}
 
-	public static Property createProperty(ITypeInfoContext context, String name, boolean readonly, String typeName, String description, ImageDescriptor image)
+	public Property createProperty(String name, boolean readonly, String typeName, String description, ImageDescriptor image)
 	{
-		return createProperty(context, name, readonly, typeName, description, image, null);
+		return createProperty(name, readonly, typeName, description, image, null);
 	}
 
-	public static Property createProperty(ITypeInfoContext context, String name, boolean readonly, String typeName, String description, ImageDescriptor image,
-		Object resource)
+	public Property createProperty(String name, boolean readonly, String typeName, String description, ImageDescriptor image, Object resource)
 	{
 		SimpleType type = null;
 		if (typeName != null)
 		{
-			type = context.getTypeRef(typeName);
+			type = getTypeRef(typeName);
 		}
 		return createProperty(name, readonly, type, description, image, resource);
 	}
 
 
-	public static Property createProperty(ITypeInfoContext context, String name, boolean readonly, String typeName, ImageDescriptor image)
+	public Property createProperty(String name, boolean readonly, String typeName, ImageDescriptor image)
 	{
 		SimpleType type = null;
 		if (typeName != null)
 		{
-			type = context.getTypeRef(typeName);
+			type = getTypeRef(typeName);
 		}
 		return createProperty(name, readonly, type, null, image);
 	}
@@ -1365,4 +1770,1504 @@ public abstract class TypeCreator
 			return true;
 		}
 	}
+
+
+	/**
+	 * @param recordType
+	 * @return
+	 */
+	private static Type getRecordType(String type)
+	{
+		String recordType = type;
+		if (recordType.startsWith("{") && recordType.endsWith("}"))
+		{
+			recordType = recordType.substring(1, recordType.length() - 1);
+		}
+		Type t = TypeInfoModelFactory.eINSTANCE.createType();
+		t.setKind(TypeKind.JAVA);
+
+		EList<Member> members = t.getMembers();
+		StringTokenizer st = new StringTokenizer(recordType, ",");
+		while (st.hasMoreTokens())
+		{
+			String typeName = "Object";
+			String propertyName = st.nextToken();
+			int typeSeparator = propertyName.indexOf(':');
+			if (typeSeparator != -1)
+			{
+				typeName = propertyName.substring(typeSeparator + 1);
+				propertyName = propertyName.substring(0, typeSeparator);
+			}
+
+			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+			property.setName(propertyName);
+			property.setType(TypeUtil.ref(typeName));
+			members.add(property);
+		}
+		return t;
+	}
+
+
+	private class ScopesScopeCreator implements IScopeTypeCreator
+	{
+		/**
+		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
+		 */
+		public Type createType(String fullTypeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setKind(TypeKind.JAVA);
+			type.setAttribute(IMAGE_DESCRIPTOR, SCOPES);
+			type.setName(fullTypeName);
+
+			FlattenedSolution fs;
+			if ("Scopes".equals(fullTypeName) || (fs = getFlattenedSolution()) == null)
+			{
+				// special array lookup property so that scopes[xxx]. does code complete.
+				Property arrayProp = createProperty("[]", true, "Scope", PROPERTY);
+				arrayProp.setVisible(false);
+				type.getMembers().add(arrayProp);
+				// quickly add this one to the static types. context.markInvariant(type); 
+			}
+			else
+			{
+				type.setSuperType(getType("Scopes"));
+				EList<Member> members = type.getMembers();
+
+				for (Pair<String, IRootObject> scope : fs.getScopes())
+				{
+					Property scopeProperty = createProperty(scope.getLeft(), true, getTypeRef("Scope<" + scope.getRight().getRootObject().getName() + '/' +
+						scope.getLeft() + '>'), "Global scope " + scope.getLeft() + " defined in solution " + scope.getRight().getRootObject().getName(),
+						SCOPES);
+//					scopeProperty.setAttribute(LAZY_VALUECOLLECTION, persist); // currently not needed, solution name from config is used
+					members.add(scopeProperty);
+				}
+			}
+			return type;
+		}
+	}
+
+	private class ScopeScopeCreator implements IScopeTypeCreator
+	{
+		public Type createType(String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+
+			if (typeName.endsWith(">"))
+			{
+				// Scope<solutionname/scopeName>
+				FlattenedSolution fs = getFlattenedSolution();
+				String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
+				String[] split = config.split("/");
+				String solutionName = split[0];
+				String scopeName = split[1];
+
+				if (ScriptVariable.GLOBAL_SCOPE.equals(scopeName))
+				{
+					EList<Member> members = type.getMembers();
+
+
+					members.add(createProperty("allmethods", true, TypeUtil.arrayOf("String"), "Returns all global method names in an Array", SPECIAL_PROPERTY));
+					members.add(createProperty("allvariables", true, TypeUtil.arrayOf("String"), "Returns all global variable names in an Array",
+						SPECIAL_PROPERTY));
+					members.add(createProperty("allrelations", true, TypeUtil.arrayOf("String"), "Returns all global relation names in an Array",
+						SPECIAL_PROPERTY));
+				}
+
+				if (fs != null && (fs.getMainSolutionMetaData().getName().equals(solutionName) || fs.hasModule(solutionName)))
+				{
+					type.setSuperType(getType("Relations<" + config + '>')); // Relations<solutionName/scopeName>
+				}
+			}
+
+			return type;
+		}
+	}
+
+	private class FormsScopeCreator implements IScopeTypeCreator
+	{
+		private final ConcurrentMap<String, String> descriptions = new ConcurrentHashMap<String, String>();
+
+		/**
+		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
+		 */
+		public Type createType(String fullTypeName)
+		{
+			Type type = null;
+			if ("Forms".equals(fullTypeName))
+			{
+				type = TypeInfoModelFactory.eINSTANCE.createType();
+				type.setKind(TypeKind.JAVA);
+				type.setAttribute(IMAGE_DESCRIPTOR, FORMS);
+
+				EList<Member> members = type.getMembers();
+				members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "All form names as an array", SPECIAL_PROPERTY));
+				members.add(createProperty("length", true, "Number", "Number of forms", PROPERTY));
+
+				// special array lookup property so that forms[xxx]. does code complete.
+				Property arrayProp = createProperty("[]", true, "RuntimeForm", PROPERTY);
+				arrayProp.setVisible(false);
+				members.add(arrayProp);
+				type.setName("Forms");
+				// quickly add this one to the static types.
+				addType(null, type);
+			}
+			else
+			{
+				FlattenedSolution fs = getFlattenedSolution();
+				if (fs == null) return getType("Forms");
+				type = TypeInfoModelFactory.eINSTANCE.createType();
+				type.setSuperType(getType("Forms"));
+				type.setName("Forms<" + fs.getMainSolutionMetaData().getName() + '>');
+				type.setKind(TypeKind.JAVA);
+				type.setAttribute(IMAGE_DESCRIPTOR, FORMS);
+				EList<Member> members = type.getMembers();
+				Iterator<Form> forms = fs.getForms(false);
+				while (forms.hasNext())
+				{
+					Form form = forms.next();
+					Property formProperty = createProperty(form.getName(), true, getTypeRef("RuntimeForm<" + form.getName() + '>'),
+						getDescription(form.getDataSource()), FORM_IMAGE);
+					formProperty.setAttribute(LAZY_VALUECOLLECTION, form);
+					if (FormEncapsulation.isPrivate(form, fs))
+					{
+						formProperty.setVisible(false);
+					}
+					members.add(formProperty);
+				}
+			}
+			return type;
+		}
+
+		/**
+		 * @param dataSource
+		 * @return
+		 */
+		private String getDescription(String ds)
+		{
+			String datasource = ds;
+			if (datasource == null) datasource = "<no datasource>";
+			String description = descriptions.get(datasource);
+			if (description == null)
+			{
+				description = "Form based on datasource: " + datasource;
+				descriptions.putIfAbsent(datasource, description);
+			}
+			return description;
+		}
+
+	}
+
+	private class FoundSetCreator implements IScopeTypeCreator
+	{
+		private Type cachedSuperTypeTemplateType = null;
+
+		public Type createType(String fullTypeName)
+		{
+			Type type;
+			if (fullTypeName.equals(FoundSet.JS_FOUNDSET))
+			{
+				type = createBaseType(fullTypeName);
+
+				// quickly add this one to the static types.
+				addType(null, type);
+			}
+			else
+			{
+				FlattenedSolution fs = TypeCreator.getFlattenedSolution();
+				String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
+				if (cachedSuperTypeTemplateType == null)
+				{
+					cachedSuperTypeTemplateType = createBaseType(FoundSet.JS_FOUNDSET);
+				}
+				EList<Member> members = cachedSuperTypeTemplateType.getMembers();
+				List<Member> overwrittenMembers = new ArrayList<Member>();
+				for (Member member : members)
+				{
+					JSType memberType = member.getType();
+					if (memberType != null)
+					{
+						if (memberType.getName().equals("Array<" + Record.JS_RECORD + '>'))
+						{
+							overwrittenMembers.add(TypeCreator.clone(member, TypeUtil.arrayOf(Record.JS_RECORD + '<' + config + '>')));
+						}
+						else if (memberType.getName().equals(Record.JS_RECORD) || memberType.getName().equals(QBSelect.class.getSimpleName()))
+						{
+							overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(memberType.getName() + '<' + config + '>')));
+						}
+						else if (memberType.getName().equals(FoundSet.JS_FOUNDSET))
+						{
+							if (member.getName().equals("unrelate"))
+							{
+								// its really a relation, unrelate it.
+								if (fs != null)
+								{
+									Relation relation = fs.getRelation(config);
+									if (relation != null)
+									{
+										overwrittenMembers.add(TypeCreator.clone(member,
+											getTypeRef(FoundSet.JS_FOUNDSET + '<' + relation.getForeignDataSource() + '>')));
+									}
+									else
+									{
+										overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(FoundSet.JS_FOUNDSET + '<' + config + '>')));
+									}
+								}
+							}
+							else
+							{
+								overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(FoundSet.JS_FOUNDSET + '<' + config + '>')));
+							}
+						}
+					}
+				}
+				type = getCombinedType(fullTypeName, config, overwrittenMembers, getType(FoundSet.JS_FOUNDSET), FOUNDSET_IMAGE, true);
+			}
+			return type;
+		}
+
+		/**
+		 * @param context
+		 * @param fullTypeName
+		 * @return
+		 */
+		private Type createBaseType(String fullTypeName)
+		{
+			Type type;
+			type = TypeCreator.this.createType(fullTypeName, FoundSet.class);
+			//type.setAttribute(IMAGE_DESCRIPTOR, FOUNDSET_IMAGE);
+
+			Property alldataproviders = TypeInfoModelFactory.eINSTANCE.createProperty();
+			alldataproviders.setName("alldataproviders");
+			alldataproviders.setDescription("the dataproviders array of this foundset");
+			alldataproviders.setAttribute(IMAGE_DESCRIPTOR, SPECIAL_PROPERTY);
+			type.getMembers().add(makeDeprected(alldataproviders));
+
+			Property maxRecordIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
+			maxRecordIndex.setName("maxRecordIndex");
+			type.getMembers().add(makeDeprected(maxRecordIndex));
+
+			Property selectedIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
+			selectedIndex.setName("selectedIndex");
+			type.getMembers().add(makeDeprected(selectedIndex));
+			return type;
+		}
+	}
+
+	private class JSDataSetCreator implements IScopeTypeCreator
+	{
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.servoy.eclipse.debug.script.TypeCreator.IScopeTypeCreator#createType(org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext,
+		 * java.lang.String)
+		 */
+		public Type createType(String fullTypeName)
+		{
+			Type type = getType("JSDataSet");
+			int index = fullTypeName.indexOf('<');
+			if (index != -1 && fullTypeName.endsWith(">"))
+			{
+				String recordType = fullTypeName.substring(index + 1, fullTypeName.length() - 1);
+				Type t = getRecordType(recordType);
+				t.setName(fullTypeName);
+				t.setSuperType(type);
+				type = t;
+			}
+			return type;
+		}
+
+	}
+
+
+	private class RecordCreator extends FoundSetCreator
+	{
+		private Type cachedSuperTypeTemplateType;
+
+		@Override
+		public Type createType(String fullTypeName)
+		{
+			Type type;
+			if (fullTypeName.equals(Record.JS_RECORD))
+			{
+				type = TypeCreator.this.createType(fullTypeName, Record.class);
+				ImageDescriptor desc = IconProvider.instance().descriptor(Record.class);
+				type.setAttribute(IMAGE_DESCRIPTOR, desc);
+				// quickly add this one to the static types.
+				addType(null, type);
+			}
+			else
+			{
+				String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
+				if (cachedSuperTypeTemplateType == null)
+				{
+					cachedSuperTypeTemplateType = createType(Record.JS_RECORD);
+				}
+				EList<Member> members = cachedSuperTypeTemplateType.getMembers();
+				List<Member> overwrittenMembers = new ArrayList<Member>();
+				for (Member member : members)
+				{
+					JSType memberType = member.getType();
+					if (memberType != null)
+					{
+						if (memberType.getName().equals(FoundSet.JS_FOUNDSET))
+						{
+							overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(FoundSet.JS_FOUNDSET + '<' + config + '>')));
+						}
+					}
+				}
+				type = getCombinedType(fullTypeName, config, overwrittenMembers, getType(Record.JS_RECORD), IconProvider.instance().descriptor(Record.class),
+					true);
+			}
+			return type;
+		}
+	}
+
+	private class PluginsScopeCreator implements IScopeTypeCreator
+	{
+		private final Map<String, Image> images = new ConcurrentHashMap<String, Image>();
+
+		/**
+		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
+		 */
+		public Type createType(String fullTypeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(fullTypeName);
+			type.setKind(TypeKind.JAVA);
+			type.setAttribute(IMAGE_DESCRIPTOR, PLUGINS);
+
+			EList<Member> members = type.getMembers();
+			members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "All plugin names as an array", SPECIAL_PROPERTY));
+			members.add(createProperty("length", true, "Number", "Number of plugins", PROPERTY));
+
+			IPluginManager pluginManager = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getPluginManager();
+			List<IClientPlugin> clientPlugins = pluginManager.getPlugins(IClientPlugin.class);
+			for (IClientPlugin clientPlugin : clientPlugins)
+			{
+				IScriptable scriptObject = null;
+				try
+				{
+					java.lang.reflect.Method method = clientPlugin.getClass().getMethod("getScriptObject", (Class[])null);
+					if (method != null)
+					{
+						scriptObject = (IScriptable)method.invoke(clientPlugin, (Object[])null);
+					}
+				}
+				catch (Throwable t)
+				{
+					Debug.error("Could not get scriptobject from plugin " + clientPlugin.getName());
+				}
+				if (scriptObject != null)
+				{
+					ScriptObjectRegistry.registerScriptObjectForClass(scriptObject.getClass(), scriptObject);
+					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+					property.setName(clientPlugin.getName());
+					property.setReadOnly(true);
+					addAnonymousClassType("Plugin<" + clientPlugin.getName() + '>', scriptObject.getClass());
+					property.setType(getTypeRef("Plugin<" + clientPlugin.getName() + '>'));
+
+					if (clientPlugin.getName().equals("window"))
+					{
+						Property deprecatedPluginProperty = createProperty("kioskmode", true, getTypeRef("Plugin<" + clientPlugin.getName() + '>'),
+							"Window plugin", null);
+						deprecatedPluginProperty.setDeprecated(true);
+						deprecatedPluginProperty.setVisible(false);
+						members.add(deprecatedPluginProperty);
+						deprecatedPluginProperty = createProperty("popupmenu", true, getTypeRef("Plugin<" + clientPlugin.getName() + '>'), "Window plugin",
+							null);
+						deprecatedPluginProperty.setDeprecated(true);
+						deprecatedPluginProperty.setVisible(false);
+						members.add(deprecatedPluginProperty);
+						deprecatedPluginProperty = createProperty("menubar", true, getTypeRef("Plugin<" + clientPlugin.getName() + '>'), "Window plugin", null);
+						deprecatedPluginProperty.setDeprecated(true);
+						deprecatedPluginProperty.setVisible(false);
+						members.add(deprecatedPluginProperty);
+						deprecatedPluginProperty = createProperty("it2be_menubar", true, getTypeRef("Plugin<" + clientPlugin.getName() + '>'), "Window plugin",
+							null);
+						deprecatedPluginProperty.setDeprecated(true);
+						deprecatedPluginProperty.setVisible(false);
+						members.add(deprecatedPluginProperty);
+
+					}
+
+					Image clientImage = null;
+					Icon icon = clientPlugin.getImage();
+					if (icon != null)
+					{
+						clientImage = images.get(clientPlugin.getName());
+						if (clientImage == null)
+						{
+							clientImage = UIUtils.getSWTImageFromSwingIcon(icon, Display.getDefault());
+						}
+						if (clientImage != null)
+						{
+							com.servoy.eclipse.debug.Activator.getDefault().registerImage(clientImage);
+							images.put(clientPlugin.getName(), clientImage);
+						}
+					}
+					if (clientImage == null)
+					{
+						property.setAttribute(IMAGE_DESCRIPTOR, PLUGIN_DEFAULT);
+					}
+					else
+					{
+						property.setAttribute(IMAGE_DESCRIPTOR, ImageDescriptor.createFromImage(clientImage));
+					}
+
+					members.add(property);
+				}
+			}
+			// quickly add this one to the static types.
+			addType(null, type);
+			return type;
+		}
+	}
+
+	private class FormScopeCreator implements IScopeTypeCreator
+	{
+		public Type createType(String typeName)
+		{
+			Type type;
+			if (typeName.equals("Form") || typeName.equals("RuntimeForm"))
+			{
+				type = TypeInfoModelFactory.eINSTANCE.createType();
+				type.setName("RuntimeForm");
+				type.setKind(TypeKind.JAVA);
+
+				EList<Member> members = type.getMembers();
+
+				members.add(makeDeprected(createProperty("allnames", true, TypeUtil.arrayOf("String"), "Array with all the names in this form scope",
+					SPECIAL_PROPERTY)));
+				members.add(makeDeprected(createProperty("alldataproviders", true, TypeUtil.arrayOf("String"), "Array with all the dataprovider names",
+					SPECIAL_PROPERTY)));
+				members.add(makeDeprected(createProperty("allmethods", true, TypeUtil.arrayOf("String"), "Array with all the method names", SPECIAL_PROPERTY)));
+				members.add(makeDeprected(createProperty("allrelations", true, TypeUtil.arrayOf("String"), "Array with all the relation names",
+					SPECIAL_PROPERTY)));
+				members.add(makeDeprected(createProperty("allvariables", true, TypeUtil.arrayOf("String"), "Array with all the variable names",
+					SPECIAL_PROPERTY)));
+
+				// controller and foundset and elements
+				members.add(createProperty("controller", true, "Controller", IconProvider.instance().descriptor(JSForm.class)));
+				members.add(createProperty("foundset", true, FoundSet.JS_FOUNDSET, FOUNDSET_IMAGE));
+				members.add(createProperty("elements", true, "Elements", ELEMENTS));
+
+				//type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
+				// quickly add this one to the static types.
+				addType(null, type);
+			}
+			else
+			{
+				FlattenedSolution fs = getFlattenedSolution();
+				if (fs == null) return getType("Form");
+				String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
+				Form form = fs.getForm(config);
+				if (form == null) return getType("Form");
+				Form formToUse = fs.getFlattenedForm(form);
+				Type superForm = getType("Form");
+				if (form.getExtendsID() > 0)
+				{
+					Form extendsForm = fs.getForm(form.getExtendsID());
+					if (extendsForm != null) superForm = getType("Form<" + extendsForm.getName() + '>');
+				}
+
+				String ds = formToUse.getDataSource();
+				List<Member> overwrittenMembers = new ArrayList<Member>();
+
+				if (ds != null || FormEncapsulation.hideFoundset(formToUse))
+				{
+					String foundsetType = FoundSet.JS_FOUNDSET;
+					if (ds != null) foundsetType += '<' + ds + '>';
+					Member clone = createProperty("foundset", true, foundsetType, FOUNDSET_IMAGE);
+					overwrittenMembers.add(clone);
+					clone.setVisible(!FormEncapsulation.hideFoundset(formToUse));
+				}
+				if (FormEncapsulation.hideController(formToUse))
+				{
+					Member clone = createProperty("controller", true, "Controller", IconProvider.instance().descriptor(JSForm.class));
+					overwrittenMembers.add(clone);
+					clone.setVisible(false);
+				}
+				if (FormEncapsulation.hideDataproviders(formToUse))
+				{
+					Member clone = createProperty("alldataproviders", true, TypeUtil.arrayOf("String"), "Array with all the dataprovider names",
+						SPECIAL_PROPERTY);
+					overwrittenMembers.add(clone);
+					clone.setVisible(false);
+
+					clone = createProperty("allrelations", true, TypeUtil.arrayOf("String"), "Array with all the relation names", SPECIAL_PROPERTY);
+					overwrittenMembers.add(clone);
+					clone.setVisible(false);
+				}
+
+				Member clone = createProperty("elements", true, "Elements<" + config + '>', ELEMENTS);
+				overwrittenMembers.add(clone);
+				clone.setVisible(!FormEncapsulation.hideElements(formToUse));
+
+				type = getCombinedType(typeName, ds, overwrittenMembers, superForm, FORM_IMAGE, !FormEncapsulation.hideDataproviders(formToUse));
+				if (type != null) type.setAttribute(LAZY_VALUECOLLECTION, form);
+			}
+			return type;
+		}
+	}
+
+	private class QueryBuilderCreator implements IScopeTypeCreator
+	{
+		private Type cachedSuperTypeTemplateType = null;
+
+		private final Map<String, Class< ? >> qbClasses = new ConcurrentHashMap<String, Class< ? >>();
+
+		QueryBuilderCreator()
+		{
+			addClass(QBAggregate.class);
+			addClass(QBColumn.class);
+			addClass(QBColumns.class);
+			addClass(QBCondition.class);
+			addClass(QBFactory.class);
+			addClass(QBFunction.class);
+			addClass(QBGroupBy.class);
+			addClass(QBJoin.class);
+			addClass(QBJoins.class);
+			addClass(QBLogicalCondition.class);
+			addClass(QBResult.class);
+			addClass(QBSelect.class);
+			addClass(QBSort.class);
+			addClass(QBSorts.class);
+			addClass(QBPart.class);
+			addClass(QBTableClause.class);
+			addClass(QBParameter.class);
+			addClass(QBParameters.class);
+			addClass(QBFunctions.class);
+		}
+
+		private void addClass(Class< ? > clazz)
+		{
+			qbClasses.put(clazz.getSimpleName(), clazz);
+		}
+
+		public Type createType(String fullTypeName)
+		{
+			int indexOf = fullTypeName.indexOf('<');
+			if (indexOf == -1)
+			{
+				Type type = createBaseType(fullTypeName);
+
+				// quickly add this one to the static types.
+				addType(null, type);
+				return type;
+			}
+
+			String config = fullTypeName.substring(indexOf + 1, fullTypeName.length() - 1);
+			if (cachedSuperTypeTemplateType == null)
+			{
+				cachedSuperTypeTemplateType = createType(fullTypeName.substring(0, indexOf));
+			}
+			EList<Member> members = cachedSuperTypeTemplateType.getMembers();
+			List<Member> overwrittenMembers = new ArrayList<Member>();
+			for (Member member : members)
+			{
+				JSType memberType = member.getType();
+				if (memberType != null && qbClasses.containsKey(memberType.getName()))
+				{
+					overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(memberType.getName() + '<' + config + '>')));
+				}
+			}
+
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.getMembers().addAll(overwrittenMembers);
+			type.setName(fullTypeName);
+			type.setKind(TypeKind.JAVA);
+//			type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
+			type.setSuperType(cachedSuperTypeTemplateType);
+			return type;
+		}
+
+		/**
+		 * @param context
+		 * @param fullTypeName
+		 * @return
+		 */
+		private Type createBaseType(String fullTypeName)
+		{
+			Class< ? > cls = qbClasses.get(fullTypeName);
+			Type type = TypeCreator.this.createType(fullTypeName, cls);
+			String superclass = cls.getSuperclass().getSimpleName();
+			if (qbClasses.containsKey(superclass))
+			{
+				type.setSuperType(getType(superclass));
+			}
+			return type;
+
+		}
+	}
+
+	private class QueryBuilderColumnsCreator implements IScopeTypeCreator
+	{
+
+		public Type createType(String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+
+			TypeConfig fsAndTable = getFlattenedSolutonAndTable(typeName);
+			if (fsAndTable != null && fsAndTable.table != null)
+			{
+				addDataProviders(fsAndTable.table.getColumns().iterator(), type.getMembers(), fsAndTable.table.getDataSource());
+				addType(SCOPE_QBCOLUMNS, type);
+			}
+
+			return type;
+		}
+
+		private void addDataProviders(Iterator< ? extends IDataProvider> dataproviders, EList<Member> members, String dataSource)
+		{
+			while (dataproviders.hasNext())
+			{
+				IDataProvider provider = dataproviders.next();
+				Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+				property.setName(provider.getDataProviderID());
+				property.setAttribute(RESOURCE, provider);
+				property.setVisible(true);
+				property.setType(getTypeRef(QBColumn.class.getSimpleName() + '<' + dataSource + '>'));
+				ImageDescriptor image = COLUMN_IMAGE;
+				String description = "Column";
+				if (provider instanceof AggregateVariable)
+				{
+					image = COLUMN_AGGR_IMAGE;
+					description = "Aggregate (" + ((AggregateVariable)provider).getRootObject().getName() + ")";
+				}
+				else if (provider instanceof ScriptCalculation)
+				{
+					image = COLUMN_CALC_IMAGE;
+					description = "Calculation (" + ((ScriptCalculation)provider).getRootObject().getName() + ")";
+				}
+				property.setAttribute(IMAGE_DESCRIPTOR, image);
+				property.setDescription(description.intern());
+				members.add(property);
+			}
+		}
+	}
+
+	private class QueryBuilderJoinsCreator extends QueryBuilderCreator
+	{
+		@Override
+		public Type createType(String fullTypeName)
+		{
+			Type type = super.createType(fullTypeName);
+
+			TypeConfig fsAndTable = getFlattenedSolutonAndTable(fullTypeName);
+			FlattenedSolution fs = getFlattenedSolution();
+			if (fsAndTable != null && fs != null && fsAndTable.table != null)
+			{
+				try
+				{
+					Iterator<Relation> relations = fs.getRelations(fsAndTable.table, true, false, false, false, false);
+					while (relations.hasNext())
+					{
+						try
+						{
+							Relation relation = relations.next();
+							if (relation.isValid())
+							{
+								Property property = createProperty(relation.getName(), true,
+									getTypeRef(QBJoin.class.getSimpleName() + '<' + relation.getForeignDataSource() + '>'),
+									getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE,
+									relation);
+								property.setVisible(true);
+								type.getMembers().add(property);
+							}
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+
+			return type;
+		}
+	}
+
+	private class InvisibleRelationsScopeCreator extends RelationsScopeCreator
+	{
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.servoy.eclipse.debug.script.TypeProvider.RelationsScopeCreator#isVisible()
+		 */
+		@Override
+		protected boolean isVisible()
+		{
+			return false;
+		}
+	}
+
+	private class RelationsScopeCreator implements IScopeTypeCreator
+	{
+		public Type createType(String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+
+			TypeConfig fsAndTable = getFlattenedSolutonAndTable(typeName);
+			if (fsAndTable != null && fsAndTable.flattenedSolution != null)
+			{
+				// do not set Relations<solutionName> as supertype when table is not null, if you do then in a table 
+				// context (like forms.x.foundset) global relations show up.
+				try
+				{
+					addRelations(fsAndTable.flattenedSolution, fsAndTable.scopeName, type.getMembers(),
+						fsAndTable.flattenedSolution.getRelations(fsAndTable.table, true, false, fsAndTable.table == null, false, false), isVisible());
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+
+			return type;
+		}
+
+		protected boolean isVisible()
+		{
+			return true;
+		}
+	}
+
+	private class InvisibleDataprovidersScopeCreator extends DataprovidersScopeCreator
+	{
+		@Override
+		protected boolean isVisible()
+		{
+			return false;
+		}
+
+	}
+
+	private class DataprovidersScopeCreator implements IScopeTypeCreator
+	{
+		public Type createType(String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+
+			TypeConfig fsAndTable = getFlattenedSolutonAndTable(typeName);
+			if (fsAndTable != null && fsAndTable.table != null)
+			{
+				if (fsAndTable.flattenedSolution != null)
+				{
+					type.setSuperType(getType(typeName.substring(0, typeName.indexOf('<') + 1) + fsAndTable.table.getDataSource() + '>'));
+					try
+					{
+						Map<String, IDataProvider> allDataProvidersForTable = fsAndTable.flattenedSolution.getAllDataProvidersForTable(fsAndTable.table);
+						if (allDataProvidersForTable != null)
+						{
+							addDataProviders(allDataProvidersForTable.values().iterator(), type.getMembers(), fsAndTable.table.isMarkedAsHiddenInDeveloper(),
+								isVisible(), false);
+						}
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+				else
+				{
+					addDataProviders(fsAndTable.table.getColumns().iterator(), type.getMembers(), false, isVisible(), true);
+					addType(SCOPE_TABLES, type);
+
+				}
+			}
+
+			return type;
+		}
+
+		private void addDataProviders(Iterator< ? extends IDataProvider> dataproviders, EList<Member> members, boolean hiddenTable, boolean visible,
+			boolean columnsOnly)
+		{
+			while (dataproviders.hasNext())
+			{
+				IDataProvider provider = dataproviders.next();
+				boolean uuid = false;
+				if (columnsOnly)
+				{
+					if (provider instanceof AggregateVariable || provider instanceof ScriptCalculation) continue;
+					if (provider instanceof Column)
+					{
+						ColumnInfo ci = ((Column)provider).getColumnInfo();
+						if (ci != null && ci.isExcluded()) continue;
+						if (ci != null && ci.hasFlag(Column.UUID_COLUMN))
+						{
+							uuid = true;
+						}
+					}
+				}
+				else if (provider instanceof Column) continue;
+
+				Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+				property.setName(provider.getDataProviderID());
+				property.setAttribute(RESOURCE, provider);
+				property.setVisible(visible);
+
+				ComponentFormat componentFormat = ComponentFormat.getComponentFormat(null, provider,
+					com.servoy.eclipse.core.Activator.getDefault().getDesignClient());
+				switch (componentFormat.dpType)
+				{
+					case IColumnTypes.DATETIME :
+						property.setType(getTypeRef("Date"));
+						break;
+
+					case IColumnTypes.INTEGER :
+					case IColumnTypes.NUMBER :
+						property.setType(getTypeRef("Number"));
+						break;
+
+					case IColumnTypes.TEXT :
+						property.setType(getTypeRef("String"));
+						break;
+
+					case IColumnTypes.MEDIA :
+						// for now don't return a type (so that anything is valid)
+						// mamybe we should return Array<byte> but then we also have to check column converters.
+						// should be in sync with TypeCreater.getDataProviderType
+//						property.setType(TypeUtil.arrayOf("byte"));
+						break;
+				}
+				if (uuid)
+				{
+					property.setType(getTypeRef("UUID"));
+				}
+				ImageDescriptor image = COLUMN_IMAGE;
+				String description = "Column";
+				if (provider instanceof AggregateVariable)
+				{
+					image = COLUMN_AGGR_IMAGE;
+					description = "Aggregate (" + ((AggregateVariable)provider).getRootObject().getName() + ")".intern();
+				}
+				else if (provider instanceof ScriptCalculation)
+				{
+					image = COLUMN_CALC_IMAGE;
+					description = "Calculation (" + ((ScriptCalculation)provider).getRootObject().getName() + ")".intern();
+				}
+				if (provider instanceof Column && ((Column)provider).getColumnInfo() != null)
+				{
+					String columnDesc = ((Column)provider).getColumnInfo().getDescription();
+					if (columnDesc != null)
+					{
+						description += "<br/>" + columnDesc.replace("\n", "<br/>");
+					}
+				}
+				property.setAttribute(IMAGE_DESCRIPTOR, image);
+				property.setDescription(description);
+				if (hiddenTable)
+				{
+					property.setDeprecated(true);
+					property.setDescription(property.getDescription() + " <b>of table marked as HIDDEN in developer</b>");
+				}
+				members.add(property);
+			}
+		}
+
+		protected boolean isVisible()
+		{
+			return true;
+		}
+	}
+
+	/**
+	 * Parse the config for a type. Possible combinations: 
+	 *
+	 * <br>* Typename&lt;solutionName;dataSource&gt;
+	 * 
+	 * <br>* Typename&lt;dataSource&gt;
+	 * 
+	 * <br>* Typename&lt;solutionName&gt;
+	 * 
+	 * <br>* Typename&lt;solutionName/scopeName&gt;
+	 */
+	private static TypeConfig getFlattenedSolutonAndTable(String typeName)
+	{
+		if (typeName.endsWith(">"))
+		{
+			IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+			int index = typeName.indexOf('<');
+			if (index > 0)
+			{
+				String config = typeName.substring(index + 1, typeName.length() - 1);
+				int sep = config.indexOf(';');
+				if (sep > 0)
+				{
+					// solutionName;dataSource
+					ServoyProject servoyProject = servoyModel.getServoyProject(config.substring(0, sep));
+					if (servoyProject != null && servoyModel.isSolutionActive(servoyProject.getProject().getName()) &&
+						servoyModel.getFlattenedSolution().getSolution() != null)
+					{
+						try
+						{
+							FlattenedSolution fs = servoyProject.getEditingFlattenedSolution();
+							String[] dbServernameTablename = DataSourceUtils.getDBServernameTablename(config.substring(sep + 1));
+							if (dbServernameTablename != null)
+							{
+								IServer server = fs.getSolution().getRepository().getServer(dbServernameTablename[0]);
+								if (server != null)
+								{
+									Table table = (Table)server.getTable(dbServernameTablename[1]);
+									if (table != null)
+									{
+										return new TypeConfig(fs, table);
+									}
+								}
+							}
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+				}
+				else
+				{
+					// this is only dataSource or solutionname[/scope]
+					if (servoyModel.getFlattenedSolution().getSolution() != null)
+					{
+						String[] dbServernameTablename = DataSourceUtils.getDBServernameTablename(config);
+						if (dbServernameTablename != null)
+						{
+							try
+							{
+								IServer server = servoyModel.getFlattenedSolution().getSolution().getRepository().getServer(dbServernameTablename[0]);
+								if (server != null)
+								{
+									Table table = (Table)server.getTable(dbServernameTablename[1]);
+									if (table != null)
+									{
+										return new TypeConfig(table);
+									}
+								}
+							}
+							catch (Exception e)
+							{
+								ServoyLog.logError(e);
+							}
+						}
+						else
+						{
+							// solutionName[/scopeName]
+							String[] split = config.split("/");
+							ServoyProject servoyProject = servoyModel.getServoyProject(split[0]);
+							if (servoyProject != null && servoyModel.isSolutionActive(servoyProject.getProject().getName()) &&
+								servoyModel.getFlattenedSolution().getSolution() != null)
+							{
+								return new TypeConfig(servoyProject.getEditingFlattenedSolution(), split.length == 1 ? null : split[1]);
+							}
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * @param createProperty
+	 * @return
+	 */
+	private static Member makeDeprected(Property property)
+	{
+		property.setDeprecated(true);
+		property.setVisible(false);
+		return property;
+	}
+
+
+	public class ElementsScopeCreator implements IScopeTypeCreator
+	{
+		private final Map<String, String> typeNames = new ConcurrentHashMap<String, String>();
+
+		private ElementsScopeCreator()
+		{
+			typeNames.put(IRuntimeButton.class.getSimpleName(), "RuntimeButton");
+			addType("RuntimeButton", IRuntimeButton.class);
+			typeNames.put(IRuntimeDataButton.class.getSimpleName(), "RuntimeDataButton");
+			addType("RuntimeDataButton", IRuntimeDataButton.class);
+			typeNames.put(IScriptScriptLabelMethods.class.getSimpleName(), "RuntimeLabel");
+			addType("RuntimeLabel", IScriptScriptLabelMethods.class);
+			typeNames.put(IScriptDataLabelMethods.class.getSimpleName(), "RuntimeDataLabel");
+			addType("RuntimeDataLabel", IScriptDataLabelMethods.class);
+			typeNames.put(IRuntimePassword.class.getSimpleName(), "RuntimePassword");
+			addType("RuntimePassword", IRuntimePassword.class);
+			typeNames.put(IRuntimeHtmlArea.class.getSimpleName(), "RuntimeHtmlArea");
+			addType("RuntimeHtmlArea", IRuntimeHtmlArea.class);
+			typeNames.put(IRuntimeRtfArea.class.getSimpleName(), "RuntimeRtfArea");
+			addType("RuntimeRtfArea", IRuntimeRtfArea.class);
+			typeNames.put(IRuntimeTextArea.class.getSimpleName(), "RuntimeTextArea");
+			addType("RuntimeTextArea", IRuntimeTextArea.class);
+			typeNames.put(IRuntimeChecks.class.getSimpleName(), "RuntimeChecks");
+			addType("RuntimeChecks", IRuntimeChecks.class);
+			typeNames.put(IRuntimeCheck.class.getSimpleName(), "RuntimeCheck");
+			addType("RuntimeCheck", IRuntimeCheck.class);
+			typeNames.put(IRuntimeRadios.class.getSimpleName(), "RuntimeRadios");
+			addType("RuntimeRadios", IRuntimeRadios.class);
+			typeNames.put(IRuntimeRadio.class.getSimpleName(), "RuntimeRadio");
+			addType("RuntimeRadio", IRuntimeRadio.class);
+			typeNames.put(IRuntimeCombobox.class.getSimpleName(), "RuntimeComboBox");
+			addType("RuntimeComboBox", IRuntimeCombobox.class);
+			typeNames.put(IRuntimeCalendar.class.getSimpleName(), "RuntimeCalendar");
+			addType("RuntimeCalendar", IRuntimeCalendar.class);
+			typeNames.put(IRuntimeImageMedia.class.getSimpleName(), "RuntimeImageMedia");
+			addType("RuntimeImageMedia", IRuntimeImageMedia.class);
+			typeNames.put(IRuntimeTextField.class.getSimpleName(), "RuntimeTypeAhead");
+			typeNames.put(IRuntimeTextField.class.getSimpleName(), "RuntimeTextField");
+			addType("RuntimeTextField", IRuntimeTextField.class);
+			typeNames.put(IScriptTabPanelMethods.class.getSimpleName(), "RuntimeTabPanel");
+			addType("RuntimeTabPanel", IScriptTabPanelMethods.class);
+			typeNames.put(IRuntimeSplitPane.class.getSimpleName(), "RuntimeSplitPane");
+			addType("RuntimeSplitPane", IRuntimeSplitPane.class);
+			typeNames.put(IScriptPortalComponentMethods.class.getSimpleName(), "RuntimePortal");
+			addType("RuntimePortal", IScriptPortalComponentMethods.class);
+			typeNames.put(IRuntimeListBox.class.getSimpleName(), "RuntimeListBox");
+			addType("RuntimeListBox", IRuntimeListBox.class);
+			typeNames.put(IScriptAccordionPanelMethods.class.getSimpleName(), "RuntimeAccordionPanel");
+			addType("RuntimeAccordionPanel", IScriptAccordionPanelMethods.class);
+			typeNames.put(IRuntimeSpinner.class.getSimpleName(), "RuntimeSpinner");
+			addType("RuntimeSpinner", IRuntimeSpinner.class);
+			addType("RuntimeComponent", IRuntimeComponent.class);
+		}
+
+		public Type createType(String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+			type.setAttribute(IMAGE_DESCRIPTOR, ELEMENTS);
+			if (typeName.equals("Elements"))
+			{
+				EList<Member> members = type.getMembers();
+				members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "Array with all the element names", SPECIAL_PROPERTY));
+				members.add(createProperty("length", true, "Number", PROPERTY));
+				Property arrayProp = createProperty("[]", true, "RuntimeComponent", PROPERTY);
+				arrayProp.setVisible(false);
+				members.add(arrayProp);
+				// quickly add this one to the static types.
+				addType(null, type);
+			}
+			else
+			{
+				FlattenedSolution fs = getFlattenedSolution();
+				if (fs != null)
+				{
+					String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
+					Form form = fs.getForm(config);
+					if (form != null)
+					{
+						type.setSuperType(getType("Elements"));
+						try
+						{
+							EList<Member> members = type.getMembers();
+							Form formToUse = form;
+							if (form.getExtendsID() > 0)
+							{
+								formToUse = fs.getFlattenedForm(form);
+							}
+							IApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
+							Iterator<IPersist> formObjects = formToUse.getAllObjects();
+							createFormElementProperties(application, members, formObjects);
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+				}
+			}
+			return type;
+		}
+
+		/**
+		 * @param application
+		 * @param context
+		 * @param members
+		 * @param formObjects
+		 */
+		private void createFormElementProperties(IApplication application, EList<Member> members, Iterator<IPersist> formObjects)
+		{
+			while (formObjects.hasNext())
+			{
+				IPersist persist = formObjects.next();
+				if (persist instanceof IFormElement)
+				{
+					IFormElement formElement = (IFormElement)persist;
+					if (!Utils.stringIsEmpty(formElement.getName()))
+					{
+						Class< ? > persistClass = ElementUtil.getPersistScriptClass(application, persist);
+						if (persistClass != null && formElement instanceof Bean)
+						{
+							String beanClassName = ((Bean)formElement).getBeanClassName();
+							if (beanClassName != null)
+							{
+								// map the persist class that is registered in the initialize() method under the beanclassname under that same name.
+								// So SwingDBTreeView class/name points to "DBTreeView" which points to that class again of the class types 
+								typeNames.put(persistClass.getSimpleName(), beanClassName.substring(beanClassName.lastIndexOf('.') + 1));
+							}
+						}
+						members.add(createProperty(formElement.getName(), true, getElementType(persistClass), null, PROPERTY));
+					}
+					if (formElement.getGroupID() != null)
+					{
+						String groupName = FormElementGroup.getName(formElement.getGroupID());
+						if (groupName != null)
+						{
+							members.add(createProperty(groupName, true, getElementType(RuntimeGroup.class), null, PROPERTY));
+						}
+					}
+					if (formElement instanceof Portal)
+					{
+						createFormElementProperties(application, members, ((Portal)formElement).getAllObjects());
+					}
+				}
+			}
+		}
+
+		private SimpleType getElementType(Class< ? > cls)
+		{
+			if (cls == null) return null;
+			String name = typeNames.get(cls.getSimpleName());
+			if (name == null)
+			{
+				Debug.log("no element name found for " + cls.getSimpleName()); // TODO make trace, this will always be hit by beans.
+				name = cls.getSimpleName();
+				addAnonymousClassType(name, cls);
+			}
+			return getTypeRef(name);
+		}
+
+	}
+
+	/**
+	 * @param context
+	 * @param fs
+	 * @param members
+	 * @param relations
+	 * @param visible 
+	 * @throws RepositoryException
+	 */
+	private void addRelations(FlattenedSolution fs, String scopeName, EList<Member> members, Iterator<Relation> relations, boolean visible)
+	{
+		while (relations.hasNext())
+		{
+			try
+			{
+				Relation relation = relations.next();
+				// show only relations that are valid and defined for this scope
+				if (relation.isValid() && (scopeName == null || relation.usesScope(scopeName)))
+				{
+					Property property = createProperty(relation.getName(), true, getTypeRef(FoundSet.JS_FOUNDSET + '<' + relation.getName() + '>'),
+						getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE, relation);
+					if (visible)
+					{
+						IServerInternal sp = ((IServerInternal)relation.getPrimaryServer());
+						IServerInternal sf = ((IServerInternal)relation.getForeignServer());
+						if ((sp != null && sp.isTableMarkedAsHiddenInDeveloper(relation.getPrimaryTableName())) ||
+							(sf != null && sf.isTableMarkedAsHiddenInDeveloper(relation.getForeignTableName())))
+						{
+							property.setDeprecated(true);
+							property.setDescription(property.getDescription() + "<br><b>This relation is based on a table marked as HIDDEN in developer</b>.");
+						}
+					}
+
+					property.setVisible(visible);
+					members.add(property);
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+	}
+
+	private static final ConcurrentMap<Relation, String> relationCache = new ConcurrentHashMap<Relation, String>(64, 0.9f, 16);
+
+	static String getRelationDescription(Relation relation, IDataProvider[] primaryDataProviders, Column[] foreignColumns)
+	{
+		String str = relationCache.get(relation);
+		if (str != null) return str;
+		StringBuilder sb = new StringBuilder(150);
+		if (relation.isGlobal())
+		{
+			sb.append("Global relation defined in solution: "); //$NON-NLS-1$
+		}
+		else if (primaryDataProviders.length == 0)
+		{
+			sb.append("Self referencing relation defined in solution:"); //$NON-NLS-1$
+		}
+		else
+		{
+			sb.append("Relation defined in solution: "); //$NON-NLS-1$
+		}
+		sb.append(relation.getRootObject().getName());
+		if (relation.isGlobal() || primaryDataProviders.length == 0)
+		{
+			sb.append("<br/>On table: "); //$NON-NLS-1$
+			sb.append(relation.getForeignServerName() + "->" + relation.getForeignTableName()); //$NON-NLS-1$
+		}
+		else
+		{
+			sb.append("<br/>From: "); //$NON-NLS-1$
+//			sb.append(relation.getPrimaryDataSource());
+			sb.append(relation.getPrimaryServerName() + " -> " + relation.getPrimaryTableName()); //$NON-NLS-1$
+			sb.append("<br/>To: "); //$NON-NLS-1$
+			sb.append(relation.getForeignServerName() + " -> " + relation.getForeignTableName()); //$NON-NLS-1$
+		}
+		sb.append("<br/>"); //$NON-NLS-1$
+		if (primaryDataProviders.length != 0)
+		{
+			for (int i = 0; i < foreignColumns.length; i++)
+			{
+				sb.append("&nbsp;&nbsp;"); //$NON-NLS-1$
+				if (primaryDataProviders[i] instanceof LiteralDataprovider)
+				{
+					sb.append(((LiteralDataprovider)primaryDataProviders[i]).getValue());
+					sb.append("&nbsp;"); //$NON-NLS-1$
+					sb.append(RelationItem.getOperatorAsString(relation.getOperators()[i]));
+					sb.append("&nbsp;"); //$NON-NLS-1$
+				}
+				else
+				{
+					sb.append((primaryDataProviders[i] != null) ? primaryDataProviders[i].getDataProviderID() : "unresolved");
+					sb.append(" -> "); //$NON-NLS-1$
+				}
+				sb.append((foreignColumns[i] != null) ? foreignColumns[i].getDataProviderID() : "unresolved");
+				sb.append("<br/>"); //$NON-NLS-1$
+			}
+		}
+		str = sb.toString();
+		relationCache.put(relation, str);
+		return str;
+	}
+
+
+	/**
+	 * @param member
+	 * @param config
+	 * @return
+	 */
+	private static Member clone(Member member, JSType type)
+	{
+		Member clone = null;
+		if (member instanceof Property)
+		{
+			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+			property.setReadOnly(((Property)member).isReadOnly());
+			clone = property;
+		}
+		else
+		{
+			org.eclipse.dltk.javascript.typeinfo.model.Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+			EList<Parameter> cloneParameters = method.getParameters();
+			EList<Parameter> parameters = ((org.eclipse.dltk.javascript.typeinfo.model.Method)member).getParameters();
+			for (Parameter parameter : parameters)
+			{
+				cloneParameters.add(clone(parameter));
+			}
+			clone = method;
+		}
+
+		EMap<String, Object> attributes = member.getAttributes();
+		for (Entry<String, Object> entry : attributes)
+		{
+			clone.setAttribute(entry.getKey(), entry.getValue());
+		}
+		clone.setDeprecated(member.isDeprecated());
+		clone.setStatic(member.isStatic());
+		clone.setVisible(member.isVisible());
+		clone.setDescription(member.getDescription());
+		clone.setName(member.getName());
+		if (type == null)
+		{
+			if (member.getDirectType() != null)
+			{
+				SimpleType typeRef = TypeInfoModelFactory.eINSTANCE.createSimpleType();
+				typeRef.setTarget(member.getDirectType());
+				clone.setType(typeRef);
+			}
+		}
+		else
+		{
+			clone.setType(type);
+		}
+
+		return clone;
+	}
+
+	/**
+	 * @param parameter
+	 * @return
+	 */
+	private static Parameter clone(Parameter parameter)
+	{
+		Parameter clone = TypeInfoModelFactory.eINSTANCE.createParameter();
+		clone.setKind(parameter.getKind());
+		clone.setName(parameter.getName());
+		if (parameter.getDirectType() != null)
+		{
+			SimpleType typeRef = TypeInfoModelFactory.eINSTANCE.createSimpleType();
+			typeRef.setTarget(parameter.getDirectType());
+			clone.setType(typeRef);
+		}
+		return clone;
+	}
+
+	private Type getCombinedType(String fullTypeName, String config, List<Member> members, Type superType, ImageDescriptor imageDescriptor, boolean visible)
+	{
+		if (config == null)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(fullTypeName);
+			type.setKind(TypeKind.JAVA);
+			type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
+			type.setSuperType(superType);
+			type.getMembers().addAll(members);
+			return type;
+		}
+
+		FlattenedSolution fs = getFlattenedSolution();
+		if (fs == null) return superType;
+
+
+		String serverName = null;
+		String tableName = null;
+		String[] serverAndTableName = DataSourceUtils.getDBServernameTablename(config);
+		if (serverAndTableName != null)
+		{
+			serverName = serverAndTableName[0];
+			tableName = serverAndTableName[1];
+		}
+		else
+		{
+			int index = config.indexOf('.');
+			if (index != -1)
+			{
+				// table foundset
+				serverName = config.substring(0, index);
+				tableName = config.substring(index + 1);
+			}
+		}
+
+		Table table = null;
+		if (serverName != null)
+		{
+			try
+			{
+				IServer server = fs.getSolution().getRepository().getServer(serverName);
+				if (server != null)
+				{
+					table = (Table)server.getTable(tableName);
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
+
+		}
+		else
+		{
+			// relation
+			try
+			{
+				Relation relation = fs.getRelation(config);
+				if (relation != null && relation.isValid())
+				{
+					table = relation.getForeignTable();
+					superType = getType(superType.getName() + '<' + table.getDataSource() + '>');
+					table = null;
+				}
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+
+		Type type;
+		if (table == null && config.startsWith("{") && config.endsWith("}"))
+		{
+			type = getRecordType(config);
+		}
+		else
+		{
+			type = TypeInfoModelFactory.eINSTANCE.createType();
+		}
+		type.getMembers().addAll(members);
+		type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
+		type.setSuperType(superType);
+		type.setName(fullTypeName);
+		type.setKind(TypeKind.JAVA);
+
+		if (table != null)
+		{
+			String traitsConfig = fs.getSolution().getName() + ';' + table.getDataSource();
+			String relationsType = "Relations<" + traitsConfig + '>';
+			String dataproviderType = "Dataproviders<" + traitsConfig + '>';
+			if (!visible)
+			{
+				relationsType = "Invisible" + relationsType;
+				dataproviderType = "Invisible" + dataproviderType;
+			}
+
+			EList<Type> traits = type.getTraits();
+			traits.add(getType(dataproviderType));
+			traits.add(getType(relationsType));
+
+			if (table.isMarkedAsHiddenInDeveloper())
+			{
+				type.setDescription("<b>Based on a table that is marked as HIDDEN in developer</b>");
+				type.setDeprecated(true);
+			}
+		}
+
+		return type;
+	}
+
+	public static class TypeConfig
+	{
+		public final FlattenedSolution flattenedSolution;
+		public final Table table;
+		public final String scopeName;
+
+		public TypeConfig(FlattenedSolution flattenedSolution, String scopeName, Table table)
+		{
+			this.flattenedSolution = flattenedSolution;
+			this.scopeName = scopeName;
+			this.table = table;
+		}
+
+		public TypeConfig(FlattenedSolution flattenedSolution, Table table)
+		{
+			this(flattenedSolution, null, table);
+		}
+
+		public TypeConfig(FlattenedSolution flattenedSolution, String scopeName)
+		{
+			this(flattenedSolution, scopeName, null);
+		}
+
+		public TypeConfig(Table table)
+		{
+			this(null, null, table);
+		}
+	}
+
 }

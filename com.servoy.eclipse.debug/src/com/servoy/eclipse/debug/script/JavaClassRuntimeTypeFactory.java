@@ -12,9 +12,12 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
 
 public class JavaClassRuntimeTypeFactory implements IRTypeFactory
 {
+	public static final String JAVA_CLASS = "JAVA_CLASS";
+
+
 	public IRType create(Type type)
 	{
-		if (type.getAttribute(TypeProvider.JAVA_CLASS) != null)
+		if (type.getAttribute(JAVA_CLASS) != null)
 		{
 			return new JavaRuntimeType(type);
 		}
@@ -64,8 +67,8 @@ public class JavaClassRuntimeTypeFactory implements IRTypeFactory
 		{
 			if (runtimeType instanceof JavaRuntimeType)
 			{
-				Class< ? > cls = (Class< ? >)type.getAttribute(TypeProvider.JAVA_CLASS);
-				Class< ? > other = (Class< ? >)((JavaRuntimeType)runtimeType).type.getAttribute(TypeProvider.JAVA_CLASS);
+				Class< ? > cls = (Class< ? >)type.getAttribute(JAVA_CLASS);
+				Class< ? > other = (Class< ? >)((JavaRuntimeType)runtimeType).type.getAttribute(JAVA_CLASS);
 				return cls.isAssignableFrom(other) ? TypeCompatibility.TRUE : TypeCompatibility.FALSE;
 			}
 			if (runtimeType instanceof IRSimpleType)

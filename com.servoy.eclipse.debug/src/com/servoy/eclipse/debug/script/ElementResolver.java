@@ -38,6 +38,9 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IServoyModel;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
@@ -116,7 +119,7 @@ public class ElementResolver implements IElementResolver
 	public Set<String> listGlobals(ITypeInfoContext context, String prefix)
 	{
 		Set<String> typeNames = getTypeNames(prefix);
-		FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
+		FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 		IResource resource = context.getModelElement().getResource();
 		if (resource != null && fs != null)
 		{
@@ -148,7 +151,7 @@ public class ElementResolver implements IElementResolver
 			else if (path.segmentCount() == 2 && path.segment(0).equals(SolutionSerializer.FORMS_DIR))
 			{
 				// forms/formname.js
-				Form form = TypeCreator.getForm(context);
+				Form form = getForm(context);
 				if (form != null)
 				{
 					typeNames.add(ScriptVariable.GLOBAL_SCOPE);
@@ -303,7 +306,7 @@ public class ElementResolver implements IElementResolver
 	{
 		if (TypeCreator.BASE_TYPES.contains(name)) return null;
 
-		FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
+		FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 		if (ScriptVariable.GLOBAL_SCOPE.equals(name))
 		{
 			if (fs == null || fs.getSolution() == null)
@@ -320,11 +323,11 @@ public class ElementResolver implements IElementResolver
 
 		if ("_super".equals(name))
 		{
-			Form form = TypeCreator.getForm(context);
+			Form form = getForm(context);
 			if (form != null && form.getExtendsID() > 0 && fs != null)
 			{
 				Form superForm = fs.getForm(form.getExtendsID());
-				Property property = TypeCreator.createProperty(context, "_super", true, null, TypeCreator.FORM_IMAGE);
+				Property property = TypeCreator.createProperty("_super", true, (JSType)null, null, TypeCreator.FORM_IMAGE);
 				property.setDescription(TypeCreator.getDoc("_super", com.servoy.j2db.documentation.scripting.docs.Form.class, "", null));
 				property.setAttribute(TypeCreator.LAZY_VALUECOLLECTION, superForm);
 				property.setAttribute(IReferenceAttributes.SUPER_SCOPE, Boolean.TRUE);
@@ -381,7 +384,7 @@ public class ElementResolver implements IElementResolver
 					resource = relation;
 					try
 					{
-						description = TypeProvider.getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns());
+						description = TypeCreator.getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns());
 					}
 					catch (RepositoryException e)
 					{
@@ -390,7 +393,7 @@ public class ElementResolver implements IElementResolver
 				}
 				else
 				{
-					Form form = TypeCreator.getForm(context);
+					Form form = getForm(context);
 					Table table = null;
 					if (form != null)
 					{
@@ -448,8 +451,8 @@ public class ElementResolver implements IElementResolver
 							}
 							if (type == null)
 							{
-								// for now type can be null for media 
-								Property property = TypeCreator.createProperty(name, readOnly, null, null, image, resource);
+								// for now type can be null for media
+								Property property = TypeCreator.createProperty(name, readOnly, (JSType)null, null, image, resource);
 								property.setHideAllowed(hideAllowed);
 								return property;
 							}
@@ -552,7 +555,7 @@ public class ElementResolver implements IElementResolver
 		 */
 		public String getTypeName(ITypeInfoContext context, String fullTypeName)
 		{
-			Form form = TypeCreator.getForm(context);
+			Form form = getForm(context);
 			if (form != null)
 			{
 				return "Elements<" + form.getName() + '>';
@@ -568,7 +571,7 @@ public class ElementResolver implements IElementResolver
 		 */
 		public String getTypeName(ITypeInfoContext context, String fullTypeName)
 		{
-			FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
+			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 			if (fs != null)
 			{
 				return "Scopes<" + fs.getMainSolutionMetaData().getName() + '>';
@@ -584,7 +587,7 @@ public class ElementResolver implements IElementResolver
 		 */
 		public String getTypeName(ITypeInfoContext context, String fullTypeName)
 		{
-			FlattenedSolution fs = TypeCreator.getFlattenedSolution(context);
+			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 			if (fs != null)
 			{
 				return "Forms<" + fs.getMainSolutionMetaData().getName() + '>';
@@ -618,7 +621,7 @@ public class ElementResolver implements IElementResolver
 		 */
 		public String getTypeName(ITypeInfoContext context, String fullTypeName)
 		{
-			Form form = TypeCreator.getForm(context);
+			Form form = getForm(context);
 			if (form != null && form.getDataSource() != null)
 			{
 				return FoundSet.JS_FOUNDSET + '<' + form.getDataSource() + '>';
@@ -630,5 +633,58 @@ public class ElementResolver implements IElementResolver
 	public interface ITypeNameCreator
 	{
 		public String getTypeName(ITypeInfoContext context, String typeName);
+	}
+
+
+	/**
+	 * @param context
+	 */
+	public static FlattenedSolution getFlattenedSolution(ITypeInfoContext context)
+	{
+		String name = context.getContext();
+		if (name == null && context.getModelElement() != null)
+		{
+			IResource resource = context.getModelElement().getResource();
+			if (resource != null)
+			{
+				name = resource.getProject().getName();
+			}
+		}
+		return getFlattenedSolution(name);
+	}
+
+
+	/**
+	 * @param name
+	 */
+	public static FlattenedSolution getFlattenedSolution(String name)
+	{
+		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+		if (name != null && servoyModel.isSolutionActive(name))
+		{
+			ServoyProject servoyProject = servoyModel.getServoyProject(name);
+			if (servoyProject != null)
+			{
+				return servoyProject.getEditingFlattenedSolution();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * @param context
+	 */
+	public static Form getForm(ITypeInfoContext context)
+	{
+		String formName = SolutionSerializer.getFormNameForJSFile(context.getModelElement().getResource());
+		if (formName != null)
+		{
+			FlattenedSolution fs = getFlattenedSolution(context);
+			if (fs != null)
+			{
+				return fs.getForm(formName);
+			}
+		}
+		return null;
 	}
 }
