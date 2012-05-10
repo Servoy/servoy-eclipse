@@ -335,9 +335,11 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 		ids.add(ProblemSeverity.INFO.name());
 		ids.add(ProblemSeverity.IGNORE.name());
 
+		boolean first = true;
 		for (String problemSection : getProblemSections())
 		{
-			Composite inner = addPreferenceComposite(composite, sc1, problemSection);
+			Composite inner = addPreferenceComposite(composite, sc1, problemSection, first);
+			first = false;
 			for (ErrorWarningPreferenceItem problemItem : getAssociatedProblemMarkers(problemSection))
 			{
 				String defaultValue = problemItem.problem.getRight().name();
@@ -361,13 +363,14 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 		return fConfigurationBlockControl;
 	}
 
-	protected Composite addPreferenceComposite(Composite parent, ScrolledPage sc, String problemSectionName)
+	protected Composite addPreferenceComposite(Composite parent, ScrolledPage sc, String problemSectionName, boolean first)
 	{
 		final ExpandableComposite excomposite = createStyleSection(parent, sc, problemSectionName, 2);
 		final Composite inner = new Composite(excomposite, SWT.NONE);
 		inner.setFont(parent.getFont());
 		inner.setLayout(new GridLayout(2, false));
 		excomposite.setClient(inner);
+		if (first) excomposite.setExpanded(true);
 
 		return inner;
 	}
