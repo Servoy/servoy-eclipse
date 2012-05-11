@@ -283,7 +283,6 @@ public class TypeCreator extends TypeCache
 	protected final ConcurrentMap<Class< ? >, Class< ? >[]> linkedTypes = new ConcurrentHashMap<Class< ? >, Class< ? >[]>();
 	protected final ConcurrentMap<Class< ? >, String> prefixedTypes = new ConcurrentHashMap<Class< ? >, String>();
 	private volatile boolean initialized;
-	private final ConcurrentMap<String, Boolean> invariantScopes = new ConcurrentHashMap<String, Boolean>();
 	protected static final List<String> objectMethods = Arrays.asList(new String[] { "wait", "toString", "hashCode", "equals", "notify", "notifyAll", "getClass" });
 
 	public TypeCreator()
@@ -417,7 +416,6 @@ public class TypeCreator extends TypeCache
 						if (type != null && realTypeName.indexOf('<') != -1 && type.eResource() == null)
 						{
 							tc.addType(fs.getSolution().getName(), type);
-							invariantScopes.put(fs.getSolution().getName(), Boolean.TRUE);
 						}
 					}
 				}
@@ -1354,11 +1352,7 @@ public class TypeCreator extends TypeCache
 		clear(SCOPE_TABLES);
 		clear(SCOPE_QBCOLUMNS);
 
-		Set<String> keySet = invariantScopes.keySet();
-		for (String context : keySet)
-		{
-			clear(context);
-		}
+		typeCache.clear();
 
 		relationCache.clear();
 	}
