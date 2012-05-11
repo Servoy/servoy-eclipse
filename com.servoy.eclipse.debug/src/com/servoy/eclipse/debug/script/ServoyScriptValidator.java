@@ -79,7 +79,7 @@ public class ServoyScriptValidator implements IValidatorExtension
 	 * @see org.eclipse.dltk.javascript.validation.IValidatorExtension#canValidateUnusedVariable(org.eclipse.dltk.javascript.typeinference.IValueCollection,
 	 * org.eclipse.dltk.javascript.typeinference.IValueReference)
 	 */
-	public boolean canValidateUnusedVariable(IValueCollection collection, IValueReference reference)
+	public UnusedVariableValidation canValidateUnusedVariable(IValueCollection collection, IValueReference reference)
 	{
 		Form form = ElementResolver.getForm(context);
 		if (form != null)
@@ -96,15 +96,15 @@ public class ServoyScriptValidator implements IValidatorExtension
 						search.run(null);
 						if (search.getMatchCount() > 0)
 						{
-							return false;
+							return UnusedVariableValidation.FALSE;
 						}
 					}
 				}
-				else return false;
+				else return UnusedVariableValidation.FALSE;
 			}
 
 		}
-		return true;
+		return null;
 	}
 
 	/*
