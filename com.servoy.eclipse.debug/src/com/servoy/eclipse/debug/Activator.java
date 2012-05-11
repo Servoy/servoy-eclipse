@@ -23,17 +23,10 @@ import java.util.List;
 
 import javax.swing.Action;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.dltk.compiler.problem.DefaultProblemIdentifier;
-import org.eclipse.dltk.compiler.problem.ProblemSeverity;
-import org.eclipse.dltk.core.PreferencesLookupDelegate;
-import org.eclipse.dltk.javascript.core.JavaScriptProblems;
-import org.eclipse.dltk.ui.preferences.PreferenceKey;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -81,17 +74,6 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			// GTK LaF causes crashes or hangs on linux in developer
 			System.setProperty("swing.defaultlaf", "javax.swing.plaf.metal.MetalLookAndFeel"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-
-		// For now disable by default the UNUSED_VARIABLE check by default.
-		// people can override this in the errors/warning preference page.
-		JavaScriptProblems problemId = JavaScriptProblems.UNUSED_VARIABLE;
-		final String severity = new PreferencesLookupDelegate((IProject)null).getString(problemId.contributor(), DefaultProblemIdentifier.encode(problemId));
-		if (severity == null || "".equals(severity)) //$NON-NLS-1$
-		{
-			new PreferenceKey(problemId.contributor(), DefaultProblemIdentifier.encode(problemId)).setStoredValue(new InstanceScope(),
-				ProblemSeverity.IGNORE.name());
-		}
-
 	}
 
 	/*
