@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -12318,7 +12318,6 @@ forms['newForm1'].controller.show();]]></sample>
 var variable = form.newVariable('myVar', JSVariable.TEXT);
 variable.defaultValue = "'This is a default value (with tripple quotes)!'";
 //variable.defaultValue = "{a:'First letter',b:'Second letter'}"
-
 var field = form.newField(variable, JSField.TEXT_FIELD, 100, 100, 200, 200);
 forms['newForm1'].controller.show();]]></sample>
           <parameters>

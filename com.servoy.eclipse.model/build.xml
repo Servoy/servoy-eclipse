@@ -7,7 +7,7 @@
 	<property name="basearch" value="${arch}"/>
 	<property name="basenl" value="${nl}"/>
 	<property name="bundleId" value="com.servoy.eclipse.model"/>
-	<property name="bundleVersion" value="6.1.0.1411"/>
+	<property name="bundleVersion" value="6.1.0.1412"/>
 	<property name="p2.publishonerror" value="false"/>
 
 	<!-- Compiler settings. -->
@@ -47,7 +47,7 @@
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="pluginTemp" value="${basedir}"/>
-		<condition property="build.result.folder" value="${pluginTemp}/com.servoy.eclipse.model_6.1.0.1411"		>
+		<condition property="build.result.folder" value="${pluginTemp}/com.servoy.eclipse.model_6.1.0.1412"		>
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="build.result.folder" value="${basedir}"/>
@@ -77,7 +77,7 @@
 		<antcall target="gather.bin.parts">
 			<param name="destination.temp.folder" value="${temp.folder}/"/>
 		</antcall>
-		<jar destfile="${plugin.destination}/com.servoy.eclipse.model_6.1.0.1411.jar" basedir="${temp.folder}/com.servoy.eclipse.model_6.1.0.1411" filesetmanifest="merge"/>
+		<jar destfile="${plugin.destination}/com.servoy.eclipse.model_6.1.0.1412.jar" basedir="${temp.folder}/com.servoy.eclipse.model_6.1.0.1412" filesetmanifest="merge"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
@@ -227,8 +227,8 @@
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.common.emfworkbench.integration_1.2.2.v201008242000.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.emf.edit_2.7.1.v20110913-1526.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.emf.ecore.change_2.7.1.v20110829-1916.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.parser_4.0.0.201205102246.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core_4.0.0.201205102246.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.parser_4.0.0.201205111125.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core_4.0.0.201205111125.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.antlr.runtime_3.0.0.v200803061811.jar"/>
 		</path>
 		<!-- compile the source code -->
@@ -275,12 +275,12 @@
 	</target>
 
 	<target name="checkCompilationResults" if="compilation.error.occured">
-		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.model_6.1.0.1411${line.separator}compilation.error.occured=${compilation.error.occured}"/>
-		<eclipse.logCompileError bundle="com.servoy.eclipse.model_6.1.0.1411" log="${compilation.prereq.log}">
+		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.model_6.1.0.1412${line.separator}compilation.error.occured=${compilation.error.occured}"/>
+		<eclipse.logCompileError bundle="com.servoy.eclipse.model_6.1.0.1412" log="${compilation.prereq.log}">
 			<include name="C:/Users/Administrator/dev_trunk/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
-			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_6.1.0.1411/compilation.problem"/>
+			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_6.1.0.1412/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_trunk/servoy_shared/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_shared_6.1.0.1411/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_shared_6.1.0.1412/compilation.problem"/>
 		</eclipse.logCompileError>
 	</target>
 
@@ -290,7 +290,7 @@
 	</target>
 
 	<target name="publish.bin.parts" depends="init" if="p2.publish.parts" unless="compilation.problem.marker.exists">
-		<mkdir dir="${build.result.folder}/com.servoy.eclipse.model_6.1.0.1411"/>
+		<mkdir dir="${build.result.folder}/com.servoy.eclipse.model_6.1.0.1412"/>
 		<copy todir="${build.result.folder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="META-INF/MANIFEST.MF"/>
@@ -314,20 +314,20 @@
 	</target>
 
 	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1411"/>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1411" failonerror="true" overwrite="false">
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1412"/>
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1412" failonerror="true" overwrite="false">
 			<fileset dir="${build.result.folder}/@dot">
 				<include name="**"/>
 			</fileset>
 		</copy>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1411" failonerror="true" overwrite="true">
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1412" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="META-INF/"/>
 				<include name="plugin.xml"/>
 			</fileset>
 		</copy>
 		<antcall target="apitools.generation">
-			<param name="target.folder" value="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1411"/>
+			<param name="target.folder" value="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1412"/>
 			<param name="projectLocation" value="${basedir}"/>
 			<param name="binary.folders" value="${build.result.folder}/@dot"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
@@ -338,10 +338,10 @@
 	</target>
 
 	<target name="gather.sources" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1411"/>
-		<copy file="${build.result.folder}/src.zip" todir="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1411" failonerror="false" overwrite="false"/>
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1412"/>
+		<copy file="${build.result.folder}/src.zip" todir="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1412" failonerror="false" overwrite="false"/>
 		<antcall target="copy.src.includes">
-			<param name="source.destination.folder" value="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1411"/>
+			<param name="source.destination.folder" value="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1412"/>
 		</antcall>
 	</target>
 
@@ -358,8 +358,8 @@
 	</target>
 
 	<target name="gather.logs" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1411"/>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1411" failonerror="false" overwrite="false">
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1412"/>
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.model_6.1.0.1412" failonerror="false" overwrite="false">
 			<fileset dir="${build.result.folder}">
 				<include name="@dot${logExtension}"/>
 			</fileset>
@@ -369,8 +369,8 @@
 	<target name="clean" depends="init" description="Clean the plug-in: com.servoy.eclipse.model of all the zips, jars and logs created.">
 		<delete dir="${build.result.folder}/@dot"/>
 		<delete file="${build.result.folder}/src.zip"/>
-		<delete file="${plugin.destination}/com.servoy.eclipse.model_6.1.0.1411.jar"/>
-		<delete file="${plugin.destination}/com.servoy.eclipse.model_6.1.0.1411.zip"/>
+		<delete file="${plugin.destination}/com.servoy.eclipse.model_6.1.0.1412.jar"/>
+		<delete file="${plugin.destination}/com.servoy.eclipse.model_6.1.0.1412.zip"/>
 		<delete dir="${temp.folder}"/>
 		<delete file="${compilation.problem.marker}" quiet="true"/>
 	</target>
@@ -396,7 +396,7 @@
 				<include name="**/*.bin${logExtension}"/>
 			</fileset>
 		</delete>
-		<zip destfile="${plugin.destination}/com.servoy.eclipse.model_6.1.0.1411.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="${plugin.destination}/com.servoy.eclipse.model_6.1.0.1412.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
