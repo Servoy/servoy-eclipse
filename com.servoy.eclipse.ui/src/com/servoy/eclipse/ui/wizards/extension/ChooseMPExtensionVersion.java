@@ -168,7 +168,6 @@ public class ChooseMPExtensionVersion extends WizardPage
 						versionCombo.setVisible(true);
 
 						canGoToNext = true;
-						getWizard().getContainer().updateButtons();
 					}
 				});
 			}
@@ -182,6 +181,7 @@ public class ChooseMPExtensionVersion extends WizardPage
 				try
 				{
 					getWizard().getContainer().run(true, false, toRun);
+					getContainer().updateButtons();
 				}
 				catch (InvocationTargetException e)
 				{

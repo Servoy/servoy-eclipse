@@ -45,15 +45,30 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 	protected String idToInstallFromMP;
 	protected InstallExtensionWizardOptions dialogOptions;
 	protected InstallExtensionState state;
+	protected boolean continueWithPendingAfterRestart;
 
 	public InstallExtensionWizard()
 	{
 		this(null);
 	}
 
+	/**
+	 * Start the wizard based on an extension id received from Servoy Marketplace.
+	 * @param idToInstallFromMP if non-null, this will be a Marketplace install. Null will just show the normal import wizard.
+	 */
 	public InstallExtensionWizard(String idToInstallFromMP)
 	{
 		this.idToInstallFromMP = idToInstallFromMP;
+	}
+
+	/**
+	 * Start the wizard to continue an install after restart.
+	 * @param continueWithPendingAfterRestart if true, it will continue with pending install, false will just show the normal import wizard.
+	 */
+	public InstallExtensionWizard(boolean continueWithPendingAfterRestart)
+	{
+		this();
+		this.continueWithPendingAfterRestart = continueWithPendingAfterRestart;
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
@@ -81,48 +96,65 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 	@Override
 	public void addPages()
 	{
-		MarketPlaceExtensionProvider marketplaceProvider = null;
-
-		// first page is either the install from MP page, or install from file
-		if (idToInstallFromMP != null)
+		if (continueWithPendingAfterRestart)
 		{
-			state.extensionID = idToInstallFromMP;
-			// only show first page if there is more then one version available for this extension in the MP
-			marketplaceProvider = new MarketPlaceExtensionProvider(state.installDir);
-			String[] versions = marketplaceProvider.getAvailableVersions(idToInstallFromMP);
-			if (versions == null || versions.length == 0)
-			{
-				// this shouldn't happen in normal circumstances; maybe a network error caused this...
-				Message[] messages = marketplaceProvider.getMessages();
-				if (messages == null || messages.length == 0)
-				{
-					messages = new Message[] { new Message("Unknown error", Message.ERROR) }; //$NON-NLS-1$
-				}
-				addPage(new ShowMessagesPage(
-					"Error page", "Cannot install extension", "A problem was encountered during available versions lookup.", null, messages, false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-			}
-			else
-			{
-				state.extensionProvider = marketplaceProvider;
-				if (versions.length == 1)
-				{
-					state.version = versions[0];
-					addPage(new DependencyResolvingPage("DepResolver", state, dialogOptions, false)); //$NON-NLS-1$
-				}
-				else
-				{
-					// show a page that allows the user to choose a version and auto-selects the most appropriate one (highest compatible)
-					addPage(new ChooseMPExtensionVersion("MPver", state, dialogOptions, marketplaceProvider, versions)); //$NON-NLS-1$
-				}
-			}
+			// called at startup to continue installing after a needed restart
+			ActualInstallPage installPage = new ActualInstallPage("PendingInst", state, true); //$NON-NLS-1$
+			addPage(installPage);
 		}
 		else
 		{
-			addPage(new ChooseEXPFilePage("EXPchooser", state, dialogOptions)); //$NON-NLS-1$
-		}
+			// normal start of installation
+			MarketPlaceExtensionProvider marketplaceProvider = null;
 
-		// all other pages are not added here because they vary depending on what's going on;
-		// the next/previous page implementation for these dynamic pages is contained in the pages, they don't use the wizard's list of pages
+			// first page is either the install from MP page, or install from file
+			if (idToInstallFromMP != null)
+			{
+				state.extensionID = idToInstallFromMP;
+				// only show first page if there is more then one version available for this extension in the MP
+				marketplaceProvider = new MarketPlaceExtensionProvider(state.installDir);
+				String[] versions = marketplaceProvider.getAvailableVersions(idToInstallFromMP);
+				if (versions == null || versions.length == 0)
+				{
+					// this shouldn't happen in normal circumstances; maybe a network error caused this...
+					Message[] messages = marketplaceProvider.getMessages();
+					if (messages == null || messages.length == 0)
+					{
+						messages = new Message[] { new Message("Unknown error", Message.ERROR) }; //$NON-NLS-1$
+					}
+					addPage(new ShowMessagesPage(
+						"Error page", "Cannot install extension", "A problem was encountered during available versions lookup.", null, messages, false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+				}
+				else
+				{
+					state.extensionProvider = marketplaceProvider;
+					if (versions.length == 1)
+					{
+						state.version = versions[0];
+						addPage(new DependencyResolvingPage("DepResolver", state, dialogOptions, false)); //$NON-NLS-1$
+					}
+					else
+					{
+						// show a page that allows the user to choose a version and auto-selects the most appropriate one (highest compatible)
+						addPage(new ChooseMPExtensionVersion("MPver", state, dialogOptions, marketplaceProvider, versions)); //$NON-NLS-1$
+					}
+				}
+			}
+			else
+			{
+				addPage(new ChooseEXPFilePage("EXPchooser", state, dialogOptions)); //$NON-NLS-1$
+			}
+
+
+			// all other pages are not added here because they vary depending on what's going on;
+			// the next/previous page implementation for these dynamic pages is contained in the pages, they don't use the wizard's list of pages
+		}
+	}
+
+	@Override
+	public boolean needsPreviousAndNextButtons()
+	{
+		return true;
 	}
 
 	@Override
@@ -137,7 +169,12 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 	public boolean performFinish()
 	{
 		if (dialogOptions != null) dialogOptions.saveOptions(getDialogSettings());
-		if (state.mustRestart) return PlatformUI.getWorkbench().restart();
+		if (state.mustRestart)
+		{
+			disposeInternal();
+			PlatformUI.getWorkbench().restart();
+			return false; // false because otherwise wizard dialog will try to close when it's already closed and disposed (because of above call) => stack traces
+		}
 		return true;
 	}
 
@@ -151,6 +188,11 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 	public void dispose()
 	{
 		super.dispose();
+		disposeInternal();
+	}
+
+	private void disposeInternal()
+	{
 		if (state != null) state.dispose();
 	}
 

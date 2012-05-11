@@ -44,7 +44,7 @@ import com.servoy.j2db.util.Utils;
 public class MarketplaceBrowserEditor extends EditorPart
 {
 	public static final String MARKETPLACE_BROWSER_EDITOR_ID = "com.servoy.eclipse.marketplace.MarketplaceBrowserEditor"; //$NON-NLS-1$
-	public static final String MARKETPLACE_URL = "http://localhost:8080/servoy-webclient/ss/s/marketplace/m/onOpenFromDeveloper/a/dev"; //$NON-NLS-1$
+	public static final String MARKETPLACE_URL = "http://192.168.1.16:8080/servoy-webclient/ss/s/marketplace/m/onOpenFromDeveloper/a/dev"; //$NON-NLS-1$
 	private static final String PARAM_SERVOY_VERSION = "servoyVersion"; //$NON-NLS-1$ 
 	private static final String PARAM_PLATFORM = "platform"; //$NON-NLS-1$
 	public static final MarketplaceBrowserEditorInput INPUT = new MarketplaceBrowserEditorInput();
@@ -119,14 +119,13 @@ public class MarketplaceBrowserEditor extends EditorPart
 					event.doit = false;
 					final String extensionId = event.location.substring(MarketPlaceExtensionProvider.MARKETPLACE_WS.length());
 
-					Display.getDefault().syncExec(new Runnable()
+					Display.getDefault().asyncExec(new Runnable()
 					{
 						public void run()
 						{
 							InstallExtensionWizard installExtensionWizard = new InstallExtensionWizard(extensionId);
 							installExtensionWizard.init(PlatformUI.getWorkbench(), null);
 							WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), installExtensionWizard);
-							dialog.create();
 							dialog.open();
 						}
 					});

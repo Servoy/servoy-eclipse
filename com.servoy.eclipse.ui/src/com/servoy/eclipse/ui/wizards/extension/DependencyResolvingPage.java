@@ -339,7 +339,7 @@ public class DependencyResolvingPage extends WizardPage
 				try
 				{
 					// TODO show more detailed progress for download (more needs to change for that to happen - currently the info is not available)
-					monitor.beginTask("Getting extension information", 11); //$NON-NLS-1$
+					monitor.beginTask("Getting extension", 11); //$NON-NLS-1$
 
 					monitor.subTask("acquiring extension name..."); //$NON-NLS-1$
 					DependencyMetadata[] dmds = state.extensionProvider.getDependencyMetadata(new ExtensionDependencyDeclaration(state.extensionID,
@@ -533,7 +533,7 @@ public class DependencyResolvingPage extends WizardPage
 		}
 
 		final String[] failMessage = new String[1]; // array [1] to be able to alter it in runnable
-		final String[][] warnings = new String[1][]; // array [1] to be able to alter it in runnable
+		final Message[][] warnings = new Message[1][]; // array [1] to be able to alter it in runnable
 		state.chosenPath = null;
 
 		// prepare & start dependency resolving
@@ -570,7 +570,7 @@ public class DependencyResolvingPage extends WizardPage
 
 									monitor.subTask("Resolving dependencies..."); //$NON-NLS-1$
 									resolver.resolveDependencies(state.extensionID, state.version);
-									String[] resolveWarnings = resolver.getFailReasons();
+									Message[] resolveWarnings = resolver.getMessages();
 									if (resolveWarnings != null) Debug.trace(Arrays.asList(resolveWarnings).toString());
 									monitor.worked(4);
 
@@ -603,8 +603,16 @@ public class DependencyResolvingPage extends WizardPage
 									}
 									else
 									{
-										// no dependency path found; either because of dependency options (disallow lib conflicts) or because the dependency cannot be resolved
-										failMessage[0] = "Cannot resolve dependencies. Potential reasons:\n(NOTE: the reasons below may not (all) be actual problems)"; //$NON-NLS-1$
+										if (resolveWarnings != null && resolveWarnings.length == 1 && resolveWarnings[0].severity == Message.INFO)
+										{
+											// the extension is already installed probably; less alarming message needs to be shown
+											failMessage[0] = resolveWarnings[0].message;
+										}
+										else
+										{
+											// no dependency path found; either because of dependency options (disallow lib conflicts) or because the dependency cannot be resolved
+											failMessage[0] = "Cannot resolve dependencies. Potential reasons:\n(NOTE: the reasons below may not (all) be actual problems)"; //$NON-NLS-1$
+										}
 										warnings[0] = resolveWarnings;
 									}
 								}
@@ -679,15 +687,9 @@ public class DependencyResolvingPage extends WizardPage
 			// show problems page with failMessage as description and warnings as list (which could be null)
 			List<Message> allWarnings = new ArrayList<Message>((warnings[0] != null ? warnings[0].length : 0) + (exp1W != null ? exp1W.length : 0) +
 				(exp2W != null ? exp2W.length : 0));
+			if (warnings[0] != null) allWarnings.addAll(Arrays.asList(warnings[0]));
 			if (exp2W != null) allWarnings.addAll(Arrays.asList(exp2W));
 			if (exp1W != null) allWarnings.addAll(Arrays.asList(exp1W));
-			if (warnings[0] != null)
-			{
-				for (String s : warnings[0])
-				{
-					allWarnings.add(new Message(s, Message.WARNING));
-				}
-			}
 
 			Message[] messages;
 			if (allWarnings.size() > 0)
@@ -706,7 +708,7 @@ public class DependencyResolvingPage extends WizardPage
 			// dependency resolving succeeded
 
 			// prepare install page; afterwards, we might postpone it for after some dummy info/warning page
-			nextPage = new ActualInstallPage("DoInstall", state); //$NON-NLS-1$
+			nextPage = new ActualInstallPage("DoInstall", state, false); //$NON-NLS-1$
 			nextPage.setWizard(getWizard());
 
 			if (state.chosenPath.extensionPath.length > 1 ||

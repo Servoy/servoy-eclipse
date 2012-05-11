@@ -17,61 +17,33 @@
 
 package com.servoy.eclipse.ui.wizards.extension;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-
-import com.servoy.extension.FileBasedExtensionProvider;
-import com.servoy.extension.IExtensionProvider;
-import com.servoy.extension.dependency.DependencyPath;
-import com.servoy.extension.parser.EXPParser;
-import com.servoy.extension.parser.IEXPParserPool;
 
 /**
  * This class holds the state that needs to be shared across multiple install extension wizard pages.
  * @author acostescu
  */
-public class InstallExtensionState implements IEXPParserPool
+public class InstallExtensionState extends RestartState
 {
 
 	public String extensionID;
 	public String version;
-	public IExtensionProvider extensionProvider;
-	public FileBasedExtensionProvider installedExtensionsProvider;
 
 	public String expFile;
-	public Map<File, EXPParser> expParsers = new HashMap<File, EXPParser>();
 	public List<Image> allocatedImages = new ArrayList<Image>();
-	public File installDir = null;
 	public Display display;
 
 	public boolean canFinish = false;
-	public DependencyPath chosenPath;
 	public boolean mustRestart = false;
-	public boolean disallowCancel = false;
-
-	public EXPParser getOrCreateParser(File f)
-	{
-		EXPParser parser = expParsers.get(f);
-		if (parser == null)
-		{
-			if (f != null)
-			{
-				parser = new EXPParser(f);
-				expParsers.put(f, parser);
-			}
-		}
-		return parser;
-	}
 
 	public void dispose()
 	{
 		if (extensionProvider != null) extensionProvider.dispose();
+		if (installedExtensionsProvider != null) installedExtensionsProvider.dispose();
 		for (Image img : allocatedImages)
 		{
 			img.dispose();
