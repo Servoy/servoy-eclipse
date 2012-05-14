@@ -386,7 +386,7 @@ public class UIUtils
 	}
 
 	/**
-	 * Since Eclipse 3.2, Display.asyncExec() during startup will just postpone all tasks until Eclipse startup is completed.
+	 * Since Eclipse 3.2, Display.asyncExec() during startup will just postpone all tasks until Eclipse startup is completed.<br>
 	 * So you can't use that if you want to do UI tasks before Eclipse startup completes.
 	 * @author acostescu
 	 */
@@ -409,7 +409,6 @@ public class UIUtils
 			// this is in the UI thread
 			public void run()
 			{
-				r.run();
 				LinkedRunnable toRunNext;
 				synchronized (lock)
 				{
@@ -421,8 +420,11 @@ public class UIUtils
 				}
 				if (toRunNext != null)
 				{
-					toRunNext.run();
+					display.timerExec(1, toRunNext); // we can't rely in successive calls to this timerExec with same delay or different delays to execute in the correct order
+					// the order would depend on the OS timer representation see https://bugs.eclipse.org/bugs/show_bug.cgi?id=297768
+					// if we could, all this implementation would not be needed
 				}
+				r.run();
 			}
 
 		}

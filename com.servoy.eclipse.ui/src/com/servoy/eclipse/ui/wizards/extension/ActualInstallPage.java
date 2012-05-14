@@ -78,7 +78,7 @@ public class ActualInstallPage extends WizardPage
 	protected IWizardPage nextPage = null;
 
 	protected boolean afterRestart;
-	
+
 	protected StartupAsyncUIRunner asyncUIRunner;
 
 	public ActualInstallPage(String pageName, InstallExtensionState state, boolean afterRestart)

@@ -157,7 +157,7 @@ public class DependencyResolvingPage extends WizardPage
 		descriptionComposite.setAlwaysShowScrollBars(false);
 		descriptionComposite.setExpandHorizontal(true);
 		descriptionComposite.setMinWidth(10);
-		final Text descriptionText = new Text(descriptionComposite, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP);
+		final Label descriptionText = new Label(descriptionComposite, SWT.WRAP);
 		descriptionText.setText(""); //$NON-NLS-1$
 		descriptionComposite.setContent(descriptionText);
 
@@ -204,10 +204,6 @@ public class DependencyResolvingPage extends WizardPage
 		final Button restoreDefaults = new Button(advancedResolvingComposite, SWT.FLAT);
 		final Button allowDowngrades = new Button(advancedResolvingComposite, SWT.CHECK);
 
-		allowUpgrades.setForeground(state.display.getSystemColor(SWT.COLOR_DARK_GRAY));
-		allowDowngrades.setForeground(state.display.getSystemColor(SWT.COLOR_DARK_GRAY));
-		restoreDefaults.setForeground(state.display.getSystemColor(SWT.COLOR_DARK_GRAY));
-
 		restoreDefaults.setText("Restore defaults"); //$NON-NLS-1$
 		allowUpgrades.setText("allow extension upgrades"); //$NON-NLS-1$
 		allowDowngrades.setText("allow extension downgrades"); //$NON-NLS-1$
@@ -235,7 +231,6 @@ public class DependencyResolvingPage extends WizardPage
 		});
 
 		final Button onlyFinal = new Button(advancedResolvingComposite, SWT.CHECK);
-		onlyFinal.setForeground(state.display.getSystemColor(SWT.COLOR_DARK_GRAY));
 		onlyFinal.setText("only use final (numeric) versions"); //$NON-NLS-1$
 		onlyFinal.setSelection(dialogOptions.allowOnlyFinalVersions);
 		onlyFinal.addSelectionListener(new SelectionAdapter()
@@ -248,7 +243,6 @@ public class DependencyResolvingPage extends WizardPage
 		});
 
 		final Button allowLibConflicts = new Button(advancedResolvingComposite, SWT.CHECK);
-		allowLibConflicts.setForeground(state.display.getSystemColor(SWT.COLOR_DARK_GRAY));
 		allowLibConflicts.setText("allow library conflicts"); //$NON-NLS-1$
 		allowLibConflicts.setSelection(dialogOptions.allowLibConflicts);
 		allowLibConflicts.addSelectionListener(new SelectionAdapter()
