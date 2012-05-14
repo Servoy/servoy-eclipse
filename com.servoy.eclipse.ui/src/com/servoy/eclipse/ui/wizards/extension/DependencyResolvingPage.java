@@ -756,7 +756,7 @@ public class DependencyResolvingPage extends WizardPage
 			{
 				// user should know about these; or should we just consider this step failed directly?
 				nextPage = new ShowMessagesPage(
-					"DepWarnings", "Some problems encountered", "However, you can continue with the install process.", null, exp1W, true, nextPage); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+					"DepWarnings", "Some items require your attention", "However, you can continue with the install process.", null, exp1W, true, nextPage); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 				nextPage.setWizard(getWizard());
 			}
 		}

@@ -420,7 +420,7 @@ public class ActualInstallPage extends WizardPage
 			appendTextToLog("Done."); //$NON-NLS-1$
 			if (messages != null)
 			{
-				nextPage = new ShowMessagesPage("InstErr", "Install finished", "Some problems were encountered.", null, messages, false, null); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+				nextPage = new ShowMessagesPage("InstErr", "Install finished", "Some items require your attention.", null, messages, false, null); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 				nextPage.setWizard(getWizard());
 			}
 			else
