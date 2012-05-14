@@ -27,8 +27,10 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.extension.FileBasedExtensionProvider;
 import com.servoy.extension.MarketPlaceExtensionProvider;
 import com.servoy.extension.Message;
+import com.servoy.extension.install.CopyZipEntryImporter;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 
@@ -85,11 +87,20 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 		setNeedsProgressMonitor(true);
 		dialogOptions = new InstallExtensionWizardOptions(getDialogSettings());
 		state = new InstallExtensionState();
+
 		state.display = workbench.getDisplay();
+
 		String appServerDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
 		if (appServerDir != null)
 		{
 			state.installDir = new File(appServerDir).getParentFile();
+		}
+
+		File extDir = new File(state.installDir, CopyZipEntryImporter.EXPFILES_FOLDER);
+		if (!extDir.exists()) extDir.mkdir();
+		if (extDir.exists() && extDir.canRead() && extDir.isDirectory())
+		{
+			if (state.installedExtensionsProvider == null) state.installedExtensionsProvider = new FileBasedExtensionProvider(extDir, true, state);
 		}
 	}
 

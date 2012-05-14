@@ -757,6 +757,13 @@
             id="com.servoy.eclipse.ui.ImportSolutionWizard"
             name="Import Solution">
       </wizard>
+      <wizard
+            category="com.servoy.eclipse.ui.ImportCategory"
+            class="com.servoy.eclipse.ui.wizards.extension.InstallExtensionWizard"
+            icon="icons/marketplace.gif"
+            id="com.servoy.eclipse.ui.InstallExtensionWizard"
+            name="Install Extension Package">
+      </wizard>
    </extension>
    <extension
          point="org.eclipse.ui.cheatsheets.cheatSheetContent">
@@ -1091,5 +1098,13 @@
             class="com.servoy.eclipse.ui.quickfix.jsexternalize.PostSaveNLSRemover"
             nature="org.eclipse.dltk.javascript.core.nature">
       </saveParticipant>      
+   </extension>
+   <extension
+         point="com.servoy.eclipse.core.preInitializeJob">
+      <job
+            class="com.servoy.eclipse.ui.wizards.extension.ProcessPendingInstall"
+            id="com.servoy.eclipse.ui.ProcessPendingInstalls"
+            name="Checks for pending installs and if any is found continues by using the extension install wizard.">
+      </job>
    </extension>
 </plugin>

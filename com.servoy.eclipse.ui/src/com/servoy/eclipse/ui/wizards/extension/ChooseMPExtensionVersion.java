@@ -120,7 +120,8 @@ public class ChooseMPExtensionVersion extends WizardPage
 		// layout the page
 		FormLayout formLayout = new FormLayout();
 		formLayout.spacing = 5;
-		formLayout.marginWidth = formLayout.marginHeight = 20;
+		formLayout.marginWidth = 10;
+		formLayout.marginHeight = 10;
 		topLevel.setLayout(formLayout);
 
 		FormData formData = new FormData();

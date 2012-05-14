@@ -386,6 +386,92 @@ public class UIUtils
 	}
 
 	/**
+	 * Since Eclipse 3.2, Display.asyncExec() during startup will just postpone all tasks until Eclipse startup is completed.
+	 * So you can't use that if you want to do UI tasks before Eclipse startup completes.
+	 * @author acostescu
+	 */
+	public static class StartupAsyncUIRunner
+	{
+		private final Object lock = new Object();
+		private LinkedRunnable toBeRan;
+
+		private class LinkedRunnable implements Runnable
+		{
+
+			private final Runnable r;
+			public LinkedRunnable next;
+
+			public LinkedRunnable(Runnable r)
+			{
+				this.r = r;
+			}
+
+			// this is in the UI thread
+			public void run()
+			{
+				r.run();
+				LinkedRunnable toRunNext;
+				synchronized (lock)
+				{
+					toRunNext = next;
+					if (next == null)
+					{
+						toBeRan = null;
+					}
+				}
+				if (toRunNext != null)
+				{
+					toRunNext.run();
+				}
+			}
+
+		}
+
+		protected Display display;
+
+		public StartupAsyncUIRunner(Display display)
+		{
+			this.display = display;
+		}
+
+		/**
+		 * You should be careful about which locks you are already holding cause this might use a Display.syncExec()...
+		 */
+		public void asyncExec(Runnable r)
+		{
+			boolean mustStart;
+			synchronized (lock)
+			{
+				if (toBeRan == null)
+				{
+					toBeRan = new LinkedRunnable(r);
+					mustStart = true;
+				}
+				else
+				{
+					toBeRan.next = new LinkedRunnable(r);
+					toBeRan = toBeRan.next;
+					mustStart = false;
+				}
+			}
+
+			if (mustStart)
+			{
+				runInUI(new Runnable()
+				{
+					public void run()
+					{
+						display.timerExec(1, toBeRan); // we can't rely in successive calls to this timerExec with same delay or different delays to execute in the correct order
+						// the order would depend on the OS timer representation see https://bugs.eclipse.org/bugs/show_bug.cgi?id=297768
+						// if we could, all this implementation would not be needed
+					}
+				}, true);
+			}
+		}
+
+	}
+
+	/**
 	 * Class that is able to manage a question dialog with "Yes/Yes to all/No/No to all" options and it's state.
 	 */
 	public static class YesYesToAllNoNoToAllAsker

@@ -18,7 +18,6 @@
 package com.servoy.eclipse.marketplace;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
@@ -33,7 +32,6 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.extension.ExtensionUtils;
 import com.servoy.extension.parser.Content;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.Debug;
 
 
@@ -47,9 +45,9 @@ public class ContentInstaller
 {
 	private final ContentWrapper contentWrapper;
 
-	public ContentInstaller(File expFile, Content content)
+	public ContentInstaller(File expFile, Content content, File installDir)
 	{
-		this.contentWrapper = new ContentWrapper(expFile, content, getInstallDir());
+		this.contentWrapper = new ContentWrapper(expFile, content, installDir);
 	}
 
 	/**
@@ -159,23 +157,13 @@ public class ContentInstaller
 		return teamProjectSetInstallItems;
 	}
 
-
-	private String getInstallDir()
-	{
-		String installDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
-		installDir = installDir.substring(0, installDir.indexOf("application_server/"));
-
-		return installDir;
-	}
-
-
 	class ContentWrapper
 	{
 		private final File expFileObj;
 		private final Content contentObj;
-		private final String installDir;
+		private final File installDir;
 
-		ContentWrapper(File expFile, Content content, String installDir)
+		ContentWrapper(File expFile, Content content, File installDir)
 		{
 			expFileObj = expFile;
 			contentObj = content;
@@ -194,25 +182,7 @@ public class ContentInstaller
 
 		File[] getStyleFiles()
 		{
-			ArrayList<String> stylePaths = new ArrayList<String>();
-
-			try
-			{
-				String[] zipEntryNames = ExtensionUtils.getZipEntryNames(expFileObj);
-
-				for (String zipEntry : zipEntryNames)
-				{
-					if (zipEntry.startsWith("application_server/styles/")) stylePaths.add(zipEntry); //$NON-NLS-1$
-				}
-			}
-			catch (IOException ex)
-			{
-				Debug.error(ex);
-			}
-
-			String[] styleToImportPaths = stylePaths.size() > 0 ? stylePaths.toArray(new String[stylePaths.size()]) : null;
-
-			return getFilesForImportPaths(styleToImportPaths);
+			return getFilesForImportPaths(contentObj.styleToImportPaths);
 		}
 
 		String[] getEclipseUpdateSiteURLs()
@@ -229,7 +199,7 @@ public class ContentInstaller
 				files = new File[paths.length];
 				for (int i = 0; i < paths.length; i++)
 				{
-					File file = new File(installDir + paths[i]);
+					File file = new File(installDir, paths[i]);
 					if (!file.exists())
 					{
 						try

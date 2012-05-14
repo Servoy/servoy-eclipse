@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
 
 /**
  * This class holds the state that needs to be shared across multiple install extension wizard pages.
@@ -35,7 +34,6 @@ public class InstallExtensionState extends RestartState
 
 	public String expFile;
 	public List<Image> allocatedImages = new ArrayList<Image>();
-	public Display display;
 
 	public boolean canFinish = false;
 	public boolean mustRestart = false;

@@ -54,7 +54,6 @@ import com.servoy.extension.DependencyMetadata;
 import com.servoy.extension.ExtensionDependencyDeclaration;
 import com.servoy.extension.ExtensionUtils;
 import com.servoy.extension.ExtensionUtils.EntryInputStreamRunner;
-import com.servoy.extension.FileBasedExtensionProvider;
 import com.servoy.extension.Message;
 import com.servoy.extension.VersionStringUtils;
 import com.servoy.extension.dependency.DependencyPath;
@@ -63,7 +62,6 @@ import com.servoy.extension.dependency.DisallowVersionReplacementFilter;
 import com.servoy.extension.dependency.ExtensionNode;
 import com.servoy.extension.dependency.MultipleCriteriaChooser;
 import com.servoy.extension.dependency.OnlyFinalVersionsFilter;
-import com.servoy.extension.install.CopyZipEntryImporter;
 import com.servoy.extension.parser.EXPParser;
 import com.servoy.extension.parser.ExtensionConfiguration;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
@@ -114,7 +112,8 @@ public class DependencyResolvingPage extends WizardPage
 
 		Composite infoComposite = new Composite(topLevel, SWT.NONE);
 		GridLayout gridLayout = new GridLayout(2, false);
-		gridLayout.horizontalSpacing = 20;
+		gridLayout.horizontalSpacing = 15;
+		gridLayout.marginWidth = gridLayout.marginHeight = 0;
 		infoComposite.setLayout(gridLayout);
 
 		final Label imgLbl = new Label(infoComposite, SWT.NONE);
@@ -123,7 +122,8 @@ public class DependencyResolvingPage extends WizardPage
 
 		Composite textInfo = new Composite(infoComposite, SWT.NONE);
 		gridLayout = new GridLayout(2, false);
-		gridLayout.verticalSpacing = gridLayout.horizontalSpacing = 5;
+		gridLayout.horizontalSpacing = 10;
+		gridLayout.verticalSpacing = 5;
 		gridLayout.marginHeight = gridLayout.marginWidth = 0;
 		textInfo.setLayout(gridLayout);
 		textInfo.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
@@ -139,6 +139,7 @@ public class DependencyResolvingPage extends WizardPage
 		extensionID.setText("Id:"); //$NON-NLS-1$
 		Text extensionIDText = new Text(textInfo, SWT.READ_ONLY | SWT.BORDER);
 		extensionIDText.setText(state.extensionID);
+		extensionIDText.setBackground(state.display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 
 		extensionID.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		extensionIDText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -147,6 +148,7 @@ public class DependencyResolvingPage extends WizardPage
 		version.setText("Version:"); //$NON-NLS-1$
 		Text versionText = new Text(textInfo, SWT.READ_ONLY | SWT.BORDER);
 		versionText.setText(state.version);
+		versionText.setBackground(state.display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 
 		version.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		versionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -306,13 +308,13 @@ public class DependencyResolvingPage extends WizardPage
 		// layout the page
 		gridLayout = new GridLayout(1, false);
 		gridLayout.horizontalSpacing = gridLayout.verticalSpacing = 0;
-		gridLayout.marginWidth = 20;
+		gridLayout.marginWidth = 10;
 		gridLayout.marginHeight = 10;
 		topLevel.setLayout(gridLayout);
 
 		infoComposite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.verticalIndent = 5;
+		gd.verticalIndent = 15;
 		descriptionComposite.setLayoutData(gd);
 		separator1.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
 		advancedResolvingCollapser.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
@@ -411,7 +413,7 @@ public class DependencyResolvingPage extends WizardPage
 							{
 								public void run()
 								{
-									descriptionText.setText(xml.getInfo().description);
+									descriptionText.setText(xml.getInfo().description.replace("\r\n", "\n").replace("\n", System.getProperty("line.separator"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 									descriptionText.setSize(descriptionText.computeSize(descriptionText.getParent().getSize().x, SWT.DEFAULT));
 								}
 							});
@@ -556,13 +558,8 @@ public class DependencyResolvingPage extends WizardPage
 								monitor.beginTask("Preparing to install", 10); //$NON-NLS-1$
 								monitor.subTask("Checking installed extensions..."); //$NON-NLS-1$
 
-								File extDir = new File(state.installDir, CopyZipEntryImporter.EXPFILES_FOLDER);
-								if (!extDir.exists()) extDir.mkdir();
-								if (extDir.exists() && extDir.canRead() && extDir.isDirectory())
+								if (state.installedExtensionsProvider != null)
 								{
-									if (state.installedExtensionsProvider == null) state.installedExtensionsProvider = new FileBasedExtensionProvider(extDir,
-										true, state);
-
 									final DependencyResolver resolver = new DependencyResolver(state.extensionProvider);
 									resolver.setInstalledExtensions(state.installedExtensionsProvider.getAllAvailableExtensions());
 									resolver.setIgnoreLibConflicts(dialogOptions.allowLibConflicts);

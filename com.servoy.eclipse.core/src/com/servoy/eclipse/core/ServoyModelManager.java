@@ -18,6 +18,12 @@ package com.servoy.eclipse.core;
 
 import java.util.concurrent.CountDownLatch;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -35,6 +41,9 @@ public class ServoyModelManager
 	 */
 	private static ServoyModelManager MANAGER = new ServoyModelManager();
 	private volatile ServoyModel servoyModel = null;
+	private boolean preInitializeRunning = false;
+
+	private static final String PRE_INITIALIZE_EXTENSION_ID = Activator.PLUGIN_ID + ".preInitializeJob"; //$NON-NLS-1$
 
 	/**
 	 * Constructs a new manager
@@ -67,6 +76,17 @@ public class ServoyModelManager
 					{
 						if (servoyModel == null)
 						{
+							// notify pre initialize extensions and avoid initialization cycles
+							if (!preInitializeRunning)
+							{
+								preInitializeRunning = true;
+								notifyPreInitializeExtensions();
+							}
+							else
+							{
+								throw new RuntimeException("Detected pre initialize cycle..."); //$NON-NLS-1$
+							}
+							
 							servoyModel = new ServoyModel();
 							servoyModel.initialize();
 							latch.countDown();
@@ -100,6 +120,43 @@ public class ServoyModelManager
 			}
 		}
 		return servoyModel;
+	}
+
+	protected void notifyPreInitializeExtensions()
+	{
+		IExtensionRegistry reg = Platform.getExtensionRegistry();
+		IExtensionPoint ep = reg.getExtensionPoint(PRE_INITIALIZE_EXTENSION_ID);
+		IExtension[] extensions = ep.getExtensions();
+
+		if (extensions != null && extensions.length > 0)
+		{
+			for (IExtension extension : extensions)
+			{
+				IConfigurationElement[] ce = extension.getConfigurationElements();
+				if (ce != null && ce.length > 0)
+				{
+					try
+					{
+						Runnable job = (Runnable)ce[0].createExecutableExtension("class"); //$NON-NLS-1$
+						if (job != null)
+						{
+							try
+							{
+								job.run();
+							}
+							catch (Throwable e)
+							{
+								ServoyLog.logError(e);
+							}
+						}
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError("Could not a pre-initialize job.", e); //$NON-NLS-1$
+					}
+				}
+			}
+		}
 	}
 
 	public synchronized boolean isServoyModelCreated()

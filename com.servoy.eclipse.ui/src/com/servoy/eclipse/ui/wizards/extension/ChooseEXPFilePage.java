@@ -134,7 +134,8 @@ public class ChooseEXPFilePage extends WizardPage
 		// layout the page
 		FormLayout formLayout = new FormLayout();
 		formLayout.spacing = 5;
-		formLayout.marginWidth = formLayout.marginHeight = 20;
+		formLayout.marginWidth = 10;
+		formLayout.marginHeight = 10;
 		topLevel.setLayout(formLayout);
 
 		FormData formData = new FormData();
@@ -150,13 +151,13 @@ public class ChooseEXPFilePage extends WizardPage
 		browseButton.setLayoutData(formData);
 
 		formData = new FormData();
-		formData.left = new FormAttachment(0, 0);
+		formData.left = new FormAttachment(0, 10);
 		formData.top = new FormAttachment(filePath, 0);
 		formData.right = new FormAttachment(100, 0);
 		useFolder.setLayoutData(formData);
 
 		formData = new FormData();
-		formData.left = new FormAttachment(0, 0);
+		formData.left = new FormAttachment(0, 10);
 		formData.top = new FormAttachment(useFolder, 0);
 		formData.right = new FormAttachment(100, 0);
 		useMarketplace.setLayoutData(formData);

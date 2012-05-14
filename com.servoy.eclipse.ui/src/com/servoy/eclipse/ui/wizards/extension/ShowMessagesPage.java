@@ -26,7 +26,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -134,7 +133,7 @@ public class ShowMessagesPage extends WizardPage
 
 		Composite topLevel = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout(1, false);
-		gl.marginHeight = gl.marginWidth = 0;
+		gl.marginHeight = gl.marginWidth = 10;
 		topLevel.setLayout(gl);
 		setControl(topLevel);
 
@@ -183,14 +182,13 @@ public class ShowMessagesPage extends WizardPage
 						try
 						{
 							columns[colCount - 1].pack();
-							ScrollBar vBar = table.getVerticalBar();
 							int allOtherColumnWidths = 0;
 							for (int i = colCount - 2; i >= 0; i--)
 							{
 								allOtherColumnWidths += columns[i].getWidth();
 							}
 
-							int w = table.getClientArea().width - (vBar.isVisible() ? vBar.getSize().x : 0) - allOtherColumnWidths;
+							int w = table.getClientArea().width - allOtherColumnWidths;
 							if (w > columns[colCount - 1].getWidth())
 							{
 								columns[colCount - 1].setWidth(w);

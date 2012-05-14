@@ -26,6 +26,8 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.swt.widgets.Display;
+
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.extension.FileBasedExtensionProvider;
 import com.servoy.extension.IExtensionProvider;
@@ -50,6 +52,7 @@ public class RestartState implements IEXPParserPool
 	public DependencyPath chosenPath; // MAIN PERSISTED THING
 
 	public boolean disallowCancel = false; // not persisted but used at actual install
+	public Display display;
 
 	public Map<File, EXPParser> expParsers = new HashMap<File, EXPParser>(); // not persisted but used at actual install
 
@@ -108,6 +111,9 @@ public class RestartState implements IEXPParserPool
 		{
 			in = new ObjectInputStream(new FileInputStream(sourceFile));
 			chosenPath = (DependencyPath)in.readObject();
+
+			// recreate stuff needed to continue install but do not need persisting
+			extensionProvider = new FileBasedExtensionProvider(pendingDir, true, this);
 		}
 		catch (IOException e)
 		{

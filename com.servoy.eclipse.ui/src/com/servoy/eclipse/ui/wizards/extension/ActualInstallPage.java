@@ -39,11 +39,13 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.core.util.UIUtils.StartupAsyncUIRunner;
 import com.servoy.eclipse.marketplace.ContentInstaller;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.extension.DependencyMetadata;
@@ -73,11 +75,11 @@ public class ActualInstallPage extends WizardPage
 
 	protected boolean installStarted = false;
 	protected Text installLog;
-	protected ScrolledComposite scroll;
 	protected IWizardPage nextPage = null;
 
 	protected boolean afterRestart;
-
+	
+	protected StartupAsyncUIRunner asyncUIRunner;
 
 	public ActualInstallPage(String pageName, InstallExtensionState state, boolean afterRestart)
 	{
@@ -88,25 +90,34 @@ public class ActualInstallPage extends WizardPage
 		setTitle("Installing extension"); //$NON-NLS-1$
 		setDescription("The extension is being installed. Please wait."); //$NON-NLS-1$
 		setPageComplete(false);
+
+		asyncUIRunner = new StartupAsyncUIRunner(state.display);
 	}
 
 	public void createControl(Composite parent)
 	{
 		initializeDialogUnits(parent);
 
-		scroll = new ScrolledComposite(parent, SWT.V_SCROLL);
+		final Composite topLevel = new Composite(parent, SWT.NONE);
+		topLevel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
+		GridLayout gl = new GridLayout(1, false);
+		gl.marginWidth = 10;
+		gl.marginHeight = 10;
+		topLevel.setLayout(gl);
+		setControl(topLevel);
+
+		ScrolledComposite scroll = new ScrolledComposite(topLevel, SWT.V_SCROLL | SWT.BORDER);
+		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		scroll.setAlwaysShowScrollBars(false);
 		scroll.setExpandHorizontal(true);
 		scroll.setMinWidth(10);
 		installLog = new Text(scroll, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP);
-		installLog.setText(""); //$NON-NLS-1$
 		installLog.setBackground(state.display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		scroll.setBackground(state.display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		installLog.setForeground(state.display.getSystemColor(SWT.COLOR_LIST_FOREGROUND));
 		scroll.setContent(installLog);
+		installLog.setText(""); //$NON-NLS-1$
 
-		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL));
-
-		setControl(scroll);
 		startInstallProcessIfNecessary();
 	}
 
@@ -123,13 +134,13 @@ public class ActualInstallPage extends WizardPage
 	 */
 	protected void startInstallProcessIfNecessary()
 	{
-		state.display.asyncExec(new Runnable()
+		asyncUIRunner.asyncExec(new Runnable()
 		{
 			public void run()
 			{
 				if (!installStarted)
 				{
-					if (getContainer().getCurrentPage() == ActualInstallPage.this)
+					if (getContainer() != null && getContainer().getCurrentPage() == ActualInstallPage.this)
 					{
 						installStarted = true;
 						boolean error = false;
@@ -166,7 +177,7 @@ public class ActualInstallPage extends WizardPage
 
 	protected void showPageInUIThread(final ShowMessagesPage page)
 	{
-		state.display.asyncExec(new Runnable()
+		asyncUIRunner.asyncExec(new Runnable()
 		{
 			public void run()
 			{
@@ -186,9 +197,9 @@ public class ActualInstallPage extends WizardPage
 			state.extensionProvider.clearMessages();
 			state.installedExtensionsProvider.clearMessages();
 
-			String tmp = "getting extension package" + (state.chosenPath.extensionPath.length > 1 ? "s" : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-			monitor.beginTask("Install progress - " + tmp, state.chosenPath.extensionPath.length * 10 - 5 + 5); // download (6) & install (4) combo - download main extension that already happened + check restart flag //$NON-NLS-1$
-			appendTextToLog(tmp + "..."); //$NON-NLS-1$
+			String tmp = "etting extension package" + (state.chosenPath.extensionPath.length > 1 ? "s" : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+			monitor.beginTask("Install progress - g" + tmp, state.chosenPath.extensionPath.length * 10 - 5 + 5); // download (6) & install (4) combo - download main extension that already happened + check restart flag //$NON-NLS-1$
+			appendTextToLog("G" + tmp + "..."); //$NON-NLS-1$ //$NON-NLS-2$
 
 			File destinationDir = new File(new File(state.installDir, CopyZipEntryImporter.EXPFILES_FOLDER), TO_BE_INSTALLED_FOLDER);
 			try
@@ -238,7 +249,7 @@ public class ActualInstallPage extends WizardPage
 								Utils.closeInputStream(is);
 								Utils.closeOutputStream(os);
 							}
-							appendTextToLog("     [x] " + name); //$NON-NLS-1$
+							appendTextToLog("           [•] " + name); //$NON-NLS-1$
 							monitor.worked(1);
 						}
 						if (monitor.isCanceled())
@@ -252,6 +263,7 @@ public class ActualInstallPage extends WizardPage
 					{
 						// check to see if restart is needed...
 						monitor.setTaskName("Install progress - verifying the need for restart"); //$NON-NLS-1$
+						monitor.subTask(""); //$NON-NLS-1$
 						for (ExtensionNode n : state.chosenPath.extensionPath)
 						{
 							if (n.resolveType != ExtensionNode.SIMPLE_DEPENDENCY_RESOLVE)
@@ -339,27 +351,37 @@ public class ActualInstallPage extends WizardPage
 			String[] error = new String[1];
 			List<Message> allMessages = new ArrayList<Message>();
 
-			String tmp = "preparing pending install"; //$NON-NLS-1$ 
-			monitor.beginTask("Install progress - " + tmp, 10); // restore state (1) and install (9) //$NON-NLS-1$
-			appendTextToLog(tmp + "..."); //$NON-NLS-1$
+			String tmp = "reparing pending install"; //$NON-NLS-1$ 
+			monitor.beginTask("Install progress - p" + tmp, 100); // 60% already done before restart, restore state (4) and install (36) //$NON-NLS-1$
+			monitor.worked(60); // stuff already done before restart
+			appendTextToLog("P" + tmp + "..."); //$NON-NLS-1$ //$NON-NLS-2$
 
-			File destinationDir = new File(new File(state.installDir, CopyZipEntryImporter.EXPFILES_FOLDER), TO_BE_INSTALLED_FOLDER);
-			error[0] = state.recreateFromPending(destinationDir);
-
-			monitor.worked(1);
-
-			try
+			if (state.installedExtensionsProvider != null)
 			{
-				if (error[0] == null)
+
+				File destinationDir = new File(new File(state.installDir, CopyZipEntryImporter.EXPFILES_FOLDER), TO_BE_INSTALLED_FOLDER);
+				error[0] = state.recreateFromPending(destinationDir);
+
+				monitor.worked(4);
+
+				try
 				{
-					// start installing!
-					monitor.setTaskName("Install progress"); //$NON-NLS-1$
-					doInstall(new SubProgressMonitor(monitor, 9), allMessages, state);
+					if (error[0] == null)
+					{
+						// start installing!
+						monitor.setTaskName("Install progress"); //$NON-NLS-1$
+						doInstall(new SubProgressMonitor(monitor, 36), allMessages, state);
+					}
+				}
+				finally
+				{
+					FileUtils.deleteQuietly(destinationDir);
 				}
 			}
-			finally
+			else
 			{
-				FileUtils.deleteQuietly(destinationDir);
+				// should never happen
+				error[0] = "Cannot access installed extensions."; //$NON-NLS-1$
 			}
 
 			monitor.done();
@@ -394,30 +416,28 @@ public class ActualInstallPage extends WizardPage
 		}
 		else
 		{
-			state.canFinish = true;
+			appendTextToLog(""); // new line //$NON-NLS-1$
+			appendTextToLog("Done."); //$NON-NLS-1$
 			if (messages != null)
 			{
-				ShowMessagesPage someProblems = new ShowMessagesPage(
-					"InstErr", "Install finished", "Some problems were encountered.", null, messages, false, null); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-				someProblems.setWizard(getWizard());
-				showPageInUIThread(someProblems);
+				nextPage = new ShowMessagesPage("InstErr", "Install finished", "Some problems were encountered.", null, messages, false, null); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+				nextPage.setWizard(getWizard());
 			}
 			else
 			{
-				nextPage = new ShowMessagesPage("InstOK", "Install successful", "The extension was successfully installed.", false, null); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-				nextPage.setWizard(getWizard());
+				state.canFinish = true;
 			}
 		}
 	}
 
 	protected void appendTextToLog(final String toAppend)
 	{
-		state.display.asyncExec(new Runnable()
+		asyncUIRunner.asyncExec(new Runnable()
 		{
 			public void run()
 			{
-				installLog.setText(installLog.getText() + toAppend + '\n');
-				scroll.layout(true, true);
+				installLog.setText(installLog.getText() + toAppend + System.getProperty("line.separator")); //$NON-NLS-1$
+				installLog.setSize(installLog.computeSize(installLog.getParent().getSize().x, SWT.DEFAULT));
 			}
 		});
 	}
@@ -432,9 +452,10 @@ public class ActualInstallPage extends WizardPage
 		// this can no longer be cancelled
 		state.disallowCancel = true;
 
-		String tmp = "installing extension" + (state.chosenPath.extensionPath.length > 1 ? "s" : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-		monitor.beginTask("Install progress - " + tmp, state.chosenPath.installSequence.length + 1); //$NON-NLS-1$
-		appendTextToLog(tmp + "..."); //$NON-NLS-1$
+		String tmp = "nstalling extension" + (state.chosenPath.extensionPath.length > 1 ? "s" : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+		monitor.beginTask("Install progress - i" + tmp, state.chosenPath.installSequence.length + 1); //$NON-NLS-1$
+		appendTextToLog(""); // new line //$NON-NLS-1$
+		appendTextToLog("I" + tmp + "..."); //$NON-NLS-1$ //$NON-NLS-2$
 
 		for (InstallStep step : state.chosenPath.installSequence)
 		{
@@ -442,7 +463,7 @@ public class ActualInstallPage extends WizardPage
 				step.extension.version, step.extension.version))[0];
 			if (step.type == InstallStep.INSTALL)
 			{
-				monitor.subTask("'" + dmd.extensionName + "' [INSTALL]..."); //$NON-NLS-1$//$NON-NLS-2$
+				monitor.subTask("installing '" + dmd.extensionName + "'..."); //$NON-NLS-1$//$NON-NLS-2$
 				File f = state.extensionProvider.getEXPFile(step.extension.id, step.extension.version);
 
 				// default install
@@ -462,26 +483,37 @@ public class ActualInstallPage extends WizardPage
 				if (problems != null) allMessages.addAll(Arrays.asList(problems));
 				if (whole.getContent() != null)
 				{
-					final ContentInstaller developerSpecific = new ContentInstaller(f, whole.getContent());
-					UIUtils.runInUI(new Runnable()
+					final ContentInstaller developerSpecific = new ContentInstaller(f, whole.getContent(), state.installDir);
+					Runnable r = new Runnable()
 					{
 						public void run()
 						{
 							developerSpecific.installAll();
 						}
-					}, true);
+					};
+					if (afterRestart)
+					{
+						// cannot run sync and wait, because at restart, the developer specific install might need ServoyModel, which
+						// is not available at that time (during preInitialize that executes before ServoyModel is created)
+						allMessages.add(new Message("Developer specific install tasks posponed until developer is fully started.", Message.INFO)); //$NON-NLS-1$
+						state.display.asyncExec(r);
+					}
+					else
+					{
+						UIUtils.runInUI(r, true); // wait for it
+					}
 				}
 
-				appendTextToLog("     [INSTALLED] " + dmd.extensionName); //$NON-NLS-1$
+				appendTextToLog("           [+] " + dmd.extensionName); //$NON-NLS-1$
 				monitor.worked(1);
 			}
 			else if (step.type == InstallStep.UNINSTALL)
 			{
-				monitor.subTask("'" + dmd.extensionName + "' [UNINSTALL]..."); //$NON-NLS-1$//$NON-NLS-2$
+				monitor.subTask("uninstalling '" + dmd.extensionName + "'..."); //$NON-NLS-1$//$NON-NLS-2$
 
 				// TODO uninstall
 
-				appendTextToLog("     [REMOVED] " + dmd.extensionName); //$NON-NLS-1$
+				appendTextToLog("           [-] " + dmd.extensionName); //$NON-NLS-1$
 				monitor.worked(1);
 			}
 			else
@@ -516,8 +548,15 @@ public class ActualInstallPage extends WizardPage
 	}
 
 	@Override
+	public boolean canFlipToNextPage()
+	{
+		return nextPage != null;
+	}
+
+	@Override
 	public IWizardPage getNextPage()
 	{
+		if (nextPage != null) state.canFinish = true;
 		return nextPage;
 	}
 
