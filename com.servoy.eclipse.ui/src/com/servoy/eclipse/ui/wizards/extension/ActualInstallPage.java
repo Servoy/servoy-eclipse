@@ -468,7 +468,7 @@ public class ActualInstallPage extends WizardPage
 
 				// default install
 				CopyZipEntryImporter defaultInstaller = new CopyZipEntryImporter(f, state.installDir, step.extension.id);
-				defaultInstaller.importFile();
+				defaultInstaller.handleFile();
 				Message[] problems = defaultInstaller.getMessages();
 				if (problems != null)
 				{
