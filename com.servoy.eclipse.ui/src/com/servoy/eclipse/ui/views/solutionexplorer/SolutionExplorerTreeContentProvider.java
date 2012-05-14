@@ -1860,7 +1860,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		{
 			projectNode = activeSolutionNode;
 		}
-		else
+		else if (modulesOfActiveSolution != null && modulesOfActiveSolution.children != null)
 		{
 			for (SimpleUserNode node : modulesOfActiveSolution.children)
 			{

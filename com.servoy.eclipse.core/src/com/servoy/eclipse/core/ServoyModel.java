@@ -99,7 +99,6 @@ import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -2820,7 +2819,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				{
 					Comment documentation = expression.getDocumentation();
 
-					JSDocScriptTemplates prefs = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject().getProject());
+					JSDocScriptTemplates prefs = new JSDocScriptTemplates(scriptFile.getProject());
 					String userTemplate = (persist instanceof IVariable) ? prefs.getVariableTemplate() : prefs.getMethodTemplate();
 
 					String comment = SolutionSerializer.getComment(persist, userTemplate, getDeveloperRepository());
