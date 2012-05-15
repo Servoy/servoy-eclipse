@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -60,6 +61,7 @@ import com.servoy.extension.DependencyMetadata;
 import com.servoy.extension.ExtensionDependencyDeclaration;
 import com.servoy.extension.ExtensionUtils;
 import com.servoy.extension.ExtensionUtils.EntryInputStreamRunner;
+import com.servoy.extension.IProgress;
 import com.servoy.extension.Message;
 import com.servoy.extension.VersionStringUtils;
 import com.servoy.extension.dependency.DependencyPath;
@@ -404,8 +406,32 @@ public class DependencyResolvingPage extends WizardPage
 					}
 
 					monitor.subTask("acquiring package..."); //$NON-NLS-1$
-					File f = state.extensionProvider.getEXPFile(state.extensionID, state.version);
-					monitor.worked(8);
+					final SubProgressMonitor m = new SubProgressMonitor(monitor, 8);
+					IProgress progress = new IProgress()
+					{
+						public void start(int totalWork)
+						{
+							m.beginTask("", totalWork); //$NON-NLS-1$
+						}
+
+						public void worked(int worked)
+						{
+							m.worked(worked);
+						}
+
+						public void setStatusMessage(String message)
+						{
+							m.subTask("acquiring package - " + message); //$NON-NLS-1$
+						}
+
+						public boolean shouldCancelOperation()
+						{
+							return m.isCanceled();
+						}
+					};
+
+					File f = state.extensionProvider.getEXPFile(state.extensionID, state.version, progress);
+					m.done();
 
 					synchronized (longRunningLock)
 					{
