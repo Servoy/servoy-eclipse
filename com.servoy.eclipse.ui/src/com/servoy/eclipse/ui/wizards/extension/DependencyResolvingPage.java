@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,11 +42,15 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -120,7 +126,7 @@ public class DependencyResolvingPage extends WizardPage
 		imgLbl.setImage(null); // will be set by a runnable that provides progress
 		imgLbl.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
 
-		Composite textInfo = new Composite(infoComposite, SWT.NONE);
+		final Composite textInfo = new Composite(infoComposite, SWT.NONE);
 		gridLayout = new GridLayout(2, false);
 		gridLayout.horizontalSpacing = 10;
 		gridLayout.verticalSpacing = 5;
@@ -136,22 +142,49 @@ public class DependencyResolvingPage extends WizardPage
 //		extensionNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 		Label extensionID = new Label(textInfo, SWT.NONE);
-		extensionID.setText("Id:"); //$NON-NLS-1$
+		extensionID.setText("Id"); //$NON-NLS-1$
 		Text extensionIDText = new Text(textInfo, SWT.READ_ONLY | SWT.BORDER);
 		extensionIDText.setText(state.extensionID);
 		extensionIDText.setBackground(state.display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 
 		extensionID.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		extensionIDText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		extensionIDText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		Label version = new Label(textInfo, SWT.NONE);
-		version.setText("Version:"); //$NON-NLS-1$
+		version.setText("Version"); //$NON-NLS-1$
 		Text versionText = new Text(textInfo, SWT.READ_ONLY | SWT.BORDER);
 		versionText.setText(state.version);
 		versionText.setBackground(state.display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 
 		version.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		versionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		versionText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+		final Label productUrl = new Label(textInfo, SWT.NONE);
+		productUrl.setText("Product URL"); //$NON-NLS-1$
+		final Link productUrlLink = new Link(textInfo, SWT.NONE);
+		productUrlLink.addListener(SWT.Selection, new Listener()
+		{
+			public void handleEvent(Event event)
+			{
+				try
+				{
+					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(event.text));
+				}
+				catch (PartInitException e)
+				{
+					ServoyLog.logError(e);
+				}
+				catch (MalformedURLException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		});
+
+		productUrl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		productUrl.setVisible(false);
+		productUrlLink.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		productUrlLink.setVisible(false);
 
 		ScrolledComposite descriptionComposite = new ScrolledComposite(topLevel, SWT.V_SCROLL);
 		descriptionComposite.setAlwaysShowScrollBars(false);
@@ -401,14 +434,24 @@ public class DependencyResolvingPage extends WizardPage
 					monitor.subTask("getting extension icon and description..."); //$NON-NLS-1$
 					if (xml != null && xml.getInfo() != null)
 					{
-						if (xml.getInfo().description != null)
+						if (xml.getInfo().description != null || xml.getInfo().url != null)
 						{
 							state.display.asyncExec(new Runnable()
 							{
 								public void run()
 								{
-									descriptionText.setText(xml.getInfo().description.replace("\r\n", "\n").replace("\n", System.getProperty("line.separator"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-									descriptionText.setSize(descriptionText.computeSize(descriptionText.getParent().getSize().x, SWT.DEFAULT));
+									if (xml.getInfo().description != null)
+									{
+										descriptionText.setText(xml.getInfo().description.replace("\r\n", "\n").replace("\n", System.getProperty("line.separator"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+										descriptionText.setSize(descriptionText.computeSize(descriptionText.getParent().getSize().x, SWT.DEFAULT));
+									}
+									if (xml.getInfo().url != null)
+									{
+										productUrl.setVisible(true);
+										productUrlLink.setText("<a href=\"" + xml.getInfo().url + "\">" + xml.getInfo().url + "</a>"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+										productUrlLink.setVisible(true);
+										textInfo.layout(true, true);
+									}
 								}
 							});
 						}
