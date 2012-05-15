@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -467,6 +468,12 @@ public class ActualInstallPage extends WizardPage
 			else
 			{
 				state.canFinish = true;
+				if (afterRestart && getContainer() instanceof WizardDialog)
+				{
+					// just close the wizard if there are no messages to continue with developer startup
+					state.disallowCancel = false; // so that we can close
+					((WizardDialog)getContainer()).close();
+				}
 			}
 		}
 	}
