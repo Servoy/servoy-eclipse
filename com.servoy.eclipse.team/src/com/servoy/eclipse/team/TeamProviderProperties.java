@@ -21,12 +21,16 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Properties;
 
+import org.eclipse.equinox.security.storage.ISecurePreferences;
+import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
+
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.util.Debug;
 
 public class TeamProviderProperties
 {
 	private static final String FILE_NAME = ".teamprovider";
+	private static final String SECURE_STORAGE_NODE = "STP";
 
 	private static final String SERVER_ADDRESS_KEY = "SERVER_ADDRESS";
 	private static final String USER_KEY = "USER";
@@ -47,10 +51,13 @@ public class TeamProviderProperties
 
 	private String protectionPasswordHash;
 
+	private final String secureStorageNode;
+
 	public TeamProviderProperties(File projectFolder)
 	{
 		this.projectFolder = projectFolder;
 		teamProviderPropertyFile = new File(projectFolder, FILE_NAME);
+		secureStorageNode = projectFolder.toString().replace(File.separatorChar, '_');
 	}
 
 	public String getServerAddress()
@@ -125,18 +132,59 @@ public class TeamProviderProperties
 
 	public boolean load()
 	{
+		// check for secure storage
+		ISecurePreferences securePreferences = null;
+		try
+		{
+			securePreferences = SecurePreferencesFactory.getDefault().node(SECURE_STORAGE_NODE).node(secureStorageNode);
+			String[] keys = securePreferences.keys();
+			if (keys != null && keys.length > 0)
+			{
+				setServerAddress(securePreferences.get(SERVER_ADDRESS_KEY, "localhost"));
+				String uuid = securePreferences.get(IRepository.REPOSITORY_UUID_PROPERTY_NAME, null);
+				if (uuid == null)
+				{
+					//backwards compatible get
+					uuid = securePreferences.get(IRepository.REPOSITORY_UUID_PROPERTY_NAME.toUpperCase(), null);
+				}
+				setRepositoryUUID(uuid);
+				setUser(securePreferences.get(USER_KEY, null));
+				setPassword(securePreferences.get(PASSWORD_KEY, null));
+				setSolutionName(securePreferences.get(SOLUTION_NAME_KEY, null));
+				setSolutionVersion(Integer.parseInt(securePreferences.get(SOLUTION_VERSION_KEY, null)));
+				setProtectionPasswordHash(securePreferences.get(PROTECTION_PASSWORD_HASH_KEY, null));
+				return true;
+			}
+			else
+			{
+				// load from old prop file
+				if (loadV1())
+				{
+					// clear hash password & write prop to secure storage
+					setPassword(null);
+					save();
+					deleteV1();
+					return true;
+				}
+				else return false;
+			}
+		}
+		catch (Exception ex)
+		{
+			Debug.error(ex);
+		}
+
+		return false;
+	}
+
+	private boolean loadV1()
+	{
 		Properties prop = new Properties();
 		try
 		{
 			prop.load(new FileInputStream(teamProviderPropertyFile));
 			setServerAddress(prop.getProperty(SERVER_ADDRESS_KEY, "localhost"));
-			String uuid = prop.getProperty(IRepository.REPOSITORY_UUID_PROPERTY_NAME);
-			if (uuid == null)
-			{
-				//backwards compatible get
-				uuid = prop.getProperty(IRepository.REPOSITORY_UUID_PROPERTY_NAME.toUpperCase());
-			}
-			setRepositoryUUID(uuid);
+			setRepositoryUUID(prop.getProperty(IRepository.REPOSITORY_UUID_PROPERTY_NAME));
 			setUser(prop.getProperty(USER_KEY));
 			setPassword(prop.getProperty(PASSWORD_KEY));
 			setSolutionName(prop.getProperty(SOLUTION_NAME_KEY));
@@ -153,6 +201,28 @@ public class TeamProviderProperties
 	}
 
 	public void save()
+	{
+		ISecurePreferences securePreferences = SecurePreferencesFactory.getDefault().node(SECURE_STORAGE_NODE).node(secureStorageNode);
+		try
+		{
+			securePreferences.put(SERVER_ADDRESS_KEY, getServerAddress(), false);
+			securePreferences.put(IRepository.REPOSITORY_UUID_PROPERTY_NAME, getRepositoryUUID(), false);
+			securePreferences.put(USER_KEY, getUser(), false);
+			securePreferences.put(PASSWORD_KEY, getPassword(), true);
+			securePreferences.put(SOLUTION_NAME_KEY, getSolutionName(), false);
+			securePreferences.put(SOLUTION_VERSION_KEY, String.valueOf(getSolutionVersion()), false);
+			String ph = getProtectionPasswordHash();
+			if (ph != null) securePreferences.put(PROTECTION_PASSWORD_HASH_KEY, getProtectionPasswordHash(), false);
+			else securePreferences.remove(PROTECTION_PASSWORD_HASH_KEY);
+			securePreferences.flush();
+		}
+		catch (Exception ex)
+		{
+			Debug.error(ex);
+		}
+	}
+
+	private void saveV1()
 	{
 		Properties prop = new Properties();
 
@@ -179,6 +249,13 @@ public class TeamProviderProperties
 
 	public void delete()
 	{
-		teamProviderPropertyFile.delete();
+		deleteV1();
+		ISecurePreferences securePreferences = SecurePreferencesFactory.getDefault().node(SECURE_STORAGE_NODE).node(secureStorageNode);
+		securePreferences.removeNode();
+	}
+
+	private void deleteV1()
+	{
+		if (teamProviderPropertyFile.exists()) teamProviderPropertyFile.delete();
 	}
 }

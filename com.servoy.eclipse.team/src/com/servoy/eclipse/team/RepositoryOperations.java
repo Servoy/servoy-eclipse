@@ -46,12 +46,15 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.javascript.core.JavaScriptNature;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.team.core.Team;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.core.variants.IResourceVariant;
 import org.eclipse.team.core.variants.IResourceVariantComparator;
 import org.eclipse.team.core.variants.ThreeWaySynchronizer;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.IOFileAccess;
 import com.servoy.eclipse.core.ServoyModel;
@@ -72,6 +75,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.team.subscriber.SolutionResourceVariant;
 import com.servoy.eclipse.team.subscriber.SolutionSubscriber;
+import com.servoy.eclipse.team.ui.PasswordInputDialog;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -132,13 +136,46 @@ public class RepositoryOperations
 		if (!repositoryUUID.equals(teamRepositoryUUID)) throw new Exception("Repository has been changed on the server.");
 	}
 
+	private void checkUserAndPasswd()
+	{
+		if (projectTeamProperties.getPassword() == null)
+		{
+			// ask for passwd
+			Display.getDefault().syncExec(new Runnable()
+			{
+				public void run()
+				{
+					final PasswordInputDialog repoPasswdDlg = new PasswordInputDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+						"Servoy Team Provider", "Please enter password for '" + projectTeamProperties.getUser() + "@" +
+							projectTeamProperties.getServerAddress() + "'", "", null);
+					repoPasswdDlg.setBlockOnOpen(true);
+					if (repoPasswdDlg.open() == Window.OK)
+					{
+						projectTeamProperties.setPassword(repoPasswdDlg.getValue());
+					}
+				}
+			});
+		}
+	}
+
 	/**
 	 * Checks remote repository for correct UUID and version
 	 */
 	public void checkRemoteRepository() throws Exception
 	{
-		checkRepositoryChanged();
-		repositoryAP.checkRemoteRepositoryVersion();
+		try
+		{
+			checkUserAndPasswd();
+			checkRepositoryChanged();
+			repositoryAP.checkRemoteRepositoryVersion();
+		}
+		catch (RepositoryAccessException ex)
+		{
+			// ask for passwd again on next request
+			projectTeamProperties.setPassword(null);
+			throw ex;
+		}
+
 	}
 
 	public void checkoutProject() throws Exception

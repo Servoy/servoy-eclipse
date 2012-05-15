@@ -47,7 +47,6 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITeamRepository;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.util.Utils;
 
 public class NewSolutionWizard extends Wizard implements INewWizard
 {
@@ -285,7 +284,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		String user = repositoryPage.getUser();
 		String password = repositoryPage.getPassword();
 
-		repositoryAP = RepositoryAccessPoint.getInstance(serverAddress, user, Utils.calculateMD5HashBase64(password));
+		repositoryAP = RepositoryAccessPoint.getInstance(serverAddress, user, password);
 
 		if (solutionsListJob != null)
 		{
