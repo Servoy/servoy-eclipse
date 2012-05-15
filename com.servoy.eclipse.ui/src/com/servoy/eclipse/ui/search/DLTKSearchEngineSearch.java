@@ -82,6 +82,12 @@ public abstract class DLTKSearchEngineSearch extends AbstractPersistSearch
 		super();
 	}
 
+	public DLTKSearchEngineSearch(boolean updateSearchResults)
+	{
+		super(updateSearchResults);
+	}
+
+
 	@Override
 	protected TextSearchResultCollector createTextSearchCollector(AbstractTextSearchResult searchResult)
 	{

@@ -41,6 +41,7 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 {
 
 	private FileSearchResult fResult;
+	private final boolean updateSearchResults;
 
 	/**
 	 * 
@@ -48,6 +49,13 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 	public AbstractPersistSearch()
 	{
 		super();
+		updateSearchResults = true;
+	}
+
+	public AbstractPersistSearch(boolean updateSearchResults)
+	{
+		super();
+		this.updateSearchResults = updateSearchResults;
 	}
 
 	/**
@@ -138,7 +146,11 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 		if (fResult == null)
 		{
 			fResult = new FileSearchResult(this);
-			new SearchResultUpdater(fResult);
+			if (updateSearchResults)
+			{
+				new SearchResultUpdater(fResult);
+			}
+
 		}
 		return fResult;
 	}

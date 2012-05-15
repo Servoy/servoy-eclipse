@@ -62,8 +62,16 @@ public class ScriptVariableSearch extends DLTKSearchEngineSearch
 		this(variable, true);
 	}
 
+	/**
+	 * If search in javascript is false then it won't ask the javascript engine and it assumes that it is not used in a search view/ui
+	 * so the results are not updated.
+	 * 
+	 * @param variable
+	 * @param searchInJavaScript
+	 */
 	public ScriptVariableSearch(ScriptVariable variable, boolean searchInJavaScript)
 	{
+		super(searchInJavaScript);
 		this.variable = variable;
 		this.searchInJavaScript = searchInJavaScript;
 	}
