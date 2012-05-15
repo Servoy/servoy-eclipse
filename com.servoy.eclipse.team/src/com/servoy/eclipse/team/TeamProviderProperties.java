@@ -18,7 +18,6 @@ package com.servoy.eclipse.team;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.util.Properties;
 
 import org.eclipse.equinox.security.storage.ISecurePreferences;
@@ -219,31 +218,6 @@ public class TeamProviderProperties
 		catch (Exception ex)
 		{
 			Debug.error(ex);
-		}
-	}
-
-	private void saveV1()
-	{
-		Properties prop = new Properties();
-
-		prop.setProperty(SERVER_ADDRESS_KEY, getServerAddress());
-		prop.setProperty(IRepository.REPOSITORY_UUID_PROPERTY_NAME, getRepositoryUUID());
-		prop.setProperty(USER_KEY, getUser());
-		prop.setProperty(PASSWORD_KEY, getPassword());
-		prop.setProperty(SOLUTION_NAME_KEY, getSolutionName());
-		prop.setProperty(SOLUTION_VERSION_KEY, String.valueOf(getSolutionVersion()));
-
-		String ph = getProtectionPasswordHash();
-		if (ph != null) prop.setProperty(PROTECTION_PASSWORD_HASH_KEY, getProtectionPasswordHash());
-		else prop.remove(PROTECTION_PASSWORD_HASH_KEY);
-
-		try
-		{
-			prop.store(new FileOutputStream(teamProviderPropertyFile), "Servoy team file");
-		}
-		catch (Exception ex)
-		{
-			Debug.error("Error saving team provider properties " + FILE_NAME, ex);
 		}
 	}
 
