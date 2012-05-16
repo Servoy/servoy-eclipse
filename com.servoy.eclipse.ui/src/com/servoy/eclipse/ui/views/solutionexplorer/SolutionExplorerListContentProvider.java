@@ -125,6 +125,7 @@ import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.ui.IComponent;
 import com.servoy.j2db.ui.IScriptRenderMethods;
+import com.servoy.j2db.ui.IScriptRenderMethodsWithFormat;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ITagResolver;
@@ -192,7 +193,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		TYPES.put(IForm.class.getSimpleName(), "RuntimeForm"); //$NON-NLS-1$
 		TYPES.put("org.mozilla.javascript.NativeArray", "Array"); //$NON-NLS-1$ //$NON-NLS-2$
 		TYPES.put("JSWindowImpl$JSWindow", "JSWindow"); //$NON-NLS-1$ //$NON-NLS-2$
-		TYPES.put(IScriptRenderMethods.class.getSimpleName(), IScriptRenderMethods.JS_RENDERABLE);
+		TYPES.put(IScriptRenderMethodsWithFormat.class.getSimpleName(), IScriptRenderMethodsWithFormat.JS_RENDERABLE);
+		TYPES.put(IScriptRenderMethods.class.getSimpleName(), IScriptRenderMethodsWithFormat.JS_RENDERABLE);
 		TYPES.put(IComponent.class.getSimpleName(), "RuntimeComponent"); //$NON-NLS-1$ 
 		TYPES.put(IDataSet.class.getSimpleName(), "JSDataSet"); //$NON-NLS-1$ 
 		TYPES.put(Scriptable.class.getSimpleName(), "Object"); //$NON-NLS-1$ 

@@ -17570,7 +17570,7 @@ fld.removeDesigntimeProperty('myprop')]]></sample>
       <functions>
         <function deprecated="true" name="getElement" undocumented="true">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.ui.IScriptRenderMethods" typecode="com.servoy.j2db.ui.IScriptRenderMethods"/>
+          <return type="com.servoy.j2db.ui.IScriptRenderMethodsWithFormat" typecode="com.servoy.j2db.ui.IScriptRenderMethods"/>
         </function>
         <function name="getRecord">
           <argumentsTypes/>
@@ -17591,7 +17591,7 @@ var record = event.getRecord();]]></sample>
         </function>
         <function name="getRenderable">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.ui.IScriptRenderMethods" typecode="com.servoy.j2db.ui.IScriptRenderMethods"><![CDATA[Renderable the element that is being rendered]]></return>
+          <return type="com.servoy.j2db.ui.IScriptRenderMethodsWithFormat" typecode="com.servoy.j2db.ui.IScriptRenderMethods"><![CDATA[Renderable the element that is being rendered]]></return>
           <description><![CDATA[Returns the element that is being rendered.]]></description>
           <summary><![CDATA[Returns the element that is being rendered.]]></summary>
           <sample><![CDATA[event.getRenderable();]]></sample>
@@ -25406,7 +25406,12 @@ If the current foundset is not related, no copy will made.]]></description>
         </function>
       </functions>
     </object>
-    <object publicName="Renderable" qualifiedName="com.servoy.j2db.ui.IScriptRenderMethods" scriptingName="Renderable">
+    <object publicName="Renderable" qualifiedName="com.servoy.j2db.ui.IScriptRenderMethodsWithFormat" scriptingName="Renderable">
+      <constants>
+        <constant name="JS_RENDERABLE" undocumented="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+        </constant>
+      </constants>
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -25477,6 +25482,16 @@ style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3)
 size - the size of the font (in points).]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
+        </property>
+        <property name="format">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></description>
+          <summary><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></summary>
+          <sample><![CDATA[//sets the display formatting of the field
+%%prefix%%%%elementName%%.format = '###';
+
+//gets the display formatting of the field
+var format = %%prefix%%%%elementName%%.format;]]></sample>
         </property>
         <property name="toolTipText">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
