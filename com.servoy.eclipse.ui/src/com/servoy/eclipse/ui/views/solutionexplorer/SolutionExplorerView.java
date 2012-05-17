@@ -258,6 +258,7 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ServerConfig;
@@ -1717,7 +1718,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 			public void hiddenTableChanged(IServerInternal server, Table table)
 			{
-				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
+				if (table.getTableType() == ITable.VIEW)
+				{
+					((SolutionExplorerListContentProvider)list.getContentProvider()).refreshContent();
+				}
+				else
+				{
+					((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
+				}
 			}
 
 			public void serverStateChanged(IServerInternal server, int oldState, int newState)
