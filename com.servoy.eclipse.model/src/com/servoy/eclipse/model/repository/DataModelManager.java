@@ -556,13 +556,6 @@ public class DataModelManager implements IColumnInfoManager
 			throw new RepositoryException("Table name does not match dbi file name for " + t.getName());
 		}
 
-		if (t.getRowIdentColumnsCount() == 0)
-		{
-			t.setHiddenInDeveloperBecauseNoPk(true);
-			s.setTableMarkedAsHiddenInDeveloper(t.getName(), true);
-		}
-		else s.setTableMarkedAsHiddenInDeveloper(t.getName(), tableInfo.hiddenInDeveloper);
-
 		if (tableInfo.columnInfoDefSet.size() > 0)
 		{
 			for (int j = 0; j < tableInfo.columnInfoDefSet.size(); j++)
@@ -600,6 +593,14 @@ public class DataModelManager implements IColumnInfoManager
 				}
 			}
 		}
+
+		if (t.getRowIdentColumnsCount() == 0)
+		{
+			t.setHiddenInDeveloperBecauseNoPk(true);
+			s.setTableMarkedAsHiddenInDeveloper(t.getName(), true);
+		}
+		else s.setTableMarkedAsHiddenInDeveloper(t.getName(), tableInfo.hiddenInDeveloper);
+
 		return existingColumnInfo;
 	}
 
