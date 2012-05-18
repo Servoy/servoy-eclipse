@@ -1594,6 +1594,7 @@ public class TypeCreator extends TypeCache
 				}
 				if (sample != null)
 				{
+					if (Utils.getPlatform() == Utils.PLATFORM_WINDOWS) sample = sample.replaceAll("\n", "\r\n");
 					docBuilder.append("<br/><pre>");
 					docBuilder.append(HtmlUtils.escapeMarkup(sample));
 					docBuilder.append("</pre>");
