@@ -472,7 +472,13 @@ public class ActualInstallPage extends WizardPage
 				{
 					// just close the wizard if there are no messages to continue with developer startup
 					state.disallowCancel = false; // so that we can close
-					((WizardDialog)getContainer()).close();
+					asyncUIRunner.asyncExec(new Runnable()
+					{
+						public void run()
+						{
+							((WizardDialog)getContainer()).close();
+						}
+					});
 				}
 			}
 		}
