@@ -1594,7 +1594,6 @@ public class TypeCreator extends TypeCache
 				}
 				if (sample != null)
 				{
-					if (Utils.getPlatform() == Utils.PLATFORM_WINDOWS) sample = sample.replaceAll("\n", "\r\n");
 					docBuilder.append("<br/><pre>");
 					docBuilder.append(HtmlUtils.escapeMarkup(sample));
 					docBuilder.append("</pre>");
@@ -1633,8 +1632,7 @@ public class TypeCreator extends TypeCache
 						docBuilder.append(deprecatedText);
 					}
 					else if (deprecated) docBuilder.append("<br/><br/><b>@deprecated</b>");
-					doc = Utils.stringReplace(docBuilder.toString(), "\n", "<br/>"); //$NON-NLS-1$ //$NON-NLS-2$
-					doc = Utils.stringReplace(doc, "%%prefix%%", ""); //$NON-NLS-1$ //$NON-NLS-2$
+					doc = Utils.stringReplace(docBuilder.toString(), "%%prefix%%", ""); //$NON-NLS-1$ //$NON-NLS-2$
 					doc = Utils.stringReplace(doc, "%%elementName%%", "elements.elem"); //$NON-NLS-1$
 				}
 			}
