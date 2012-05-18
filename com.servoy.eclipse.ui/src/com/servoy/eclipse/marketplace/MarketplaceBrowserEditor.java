@@ -44,7 +44,7 @@ import com.servoy.j2db.util.Utils;
 public class MarketplaceBrowserEditor extends EditorPart
 {
 	public static final String MARKETPLACE_BROWSER_EDITOR_ID = "com.servoy.eclipse.marketplace.MarketplaceBrowserEditor"; //$NON-NLS-1$
-	public static final String MARKETPLACE_URL = "https://crm.servoy.com/servoy-webclient/ss/s/marketplace"; //$NON-NLS-1$
+	public static final String MARKETPLACE_URL = MarketPlaceExtensionProvider.MARKETPLACE_HOST + "/servoy-webclient/ss/s/marketplace"; //$NON-NLS-1$
 	private static final String PARAM_SERVOY_VERSION = "servoyVersion"; //$NON-NLS-1$ 
 	private static final String PARAM_PLATFORM = "platform"; //$NON-NLS-1$
 	public static final MarketplaceBrowserEditorInput INPUT = new MarketplaceBrowserEditorInput();
@@ -105,8 +105,7 @@ public class MarketplaceBrowserEditor extends EditorPart
 	public void createPartControl(Composite parent)
 	{
 		browser = new Browser(parent, SWT.NONE);
-		String marketPlaceBase = System.getProperty("servoy_marketplace_url", MARKETPLACE_URL); //$NON-NLS-1$
-		url = new StringBuffer(marketPlaceBase).append("/").append(PARAM_SERVOY_VERSION).append("/").append(ClientVersion.getBundleVersion()).append("/").append(PARAM_PLATFORM).append("/").append(Utils.getPlatformAsString()).toString(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+		url = new StringBuffer(MARKETPLACE_URL).append("/").append(PARAM_SERVOY_VERSION).append("/").append(ClientVersion.getBundleVersion()).append("/").append(PARAM_PLATFORM).append("/").append(Utils.getPlatformAsString()).toString(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 		browser.setUrl(url, null, new String[] { "Cache-Control: no-cache" }); //$NON-NLS-1$
 
 		browser.addLocationListener(new LocationAdapter()
