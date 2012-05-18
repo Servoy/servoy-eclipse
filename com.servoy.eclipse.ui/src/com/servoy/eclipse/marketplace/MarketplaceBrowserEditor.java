@@ -105,7 +105,8 @@ public class MarketplaceBrowserEditor extends EditorPart
 	public void createPartControl(Composite parent)
 	{
 		browser = new Browser(parent, SWT.NONE);
-		url = new StringBuffer(MARKETPLACE_URL).append("/").append(PARAM_SERVOY_VERSION).append("/").append(ClientVersion.getBundleVersion()).append("/").append(PARAM_PLATFORM).append("/").append(Utils.getPlatformAsString()).toString(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+		String marketPlaceBase = System.getProperty("servoy_marketplace_url", MARKETPLACE_URL); //$NON-NLS-1$
+		url = new StringBuffer(marketPlaceBase).append("/").append(PARAM_SERVOY_VERSION).append("/").append(ClientVersion.getBundleVersion()).append("/").append(PARAM_PLATFORM).append("/").append(Utils.getPlatformAsString()).toString(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 		browser.setUrl(url, null, new String[] { "Cache-Control: no-cache" }); //$NON-NLS-1$
 
 		browser.addLocationListener(new LocationAdapter()
