@@ -27,6 +27,8 @@ public class ProcessPendingInstall implements Runnable
 					InstallExtensionWizard installExtensionWizard = new InstallExtensionWizard(true);
 					installExtensionWizard.init(PlatformUI.getWorkbench(), null);
 					final WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), installExtensionWizard);
+
+					// async exec would not work here; see StartupAsyncUIRunner comments
 					Display.getCurrent().timerExec(1, new Runnable()
 					{
 						public void run()

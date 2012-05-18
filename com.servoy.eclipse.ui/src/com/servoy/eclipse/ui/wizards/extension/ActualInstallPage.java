@@ -82,6 +82,7 @@ public class ActualInstallPage extends WizardPage
 	protected boolean afterRestart;
 
 	protected StartupAsyncUIRunner asyncUIRunner;
+	protected boolean automaticClose = false; // cannot try to close the wizard automatically while a ui progress job is running
 
 	public ActualInstallPage(String pageName, InstallExtensionState state, boolean afterRestart)
 	{
@@ -151,6 +152,7 @@ public class ActualInstallPage extends WizardPage
 							IRunnableWithProgress runnable = (afterRestart ? new ContinueInstallRunnableWithProgress() : new InstallRunnableWithProgress());
 							getContainer().run(true, true, runnable);
 							getContainer().updateButtons();
+							if (automaticClose) ((WizardDialog)getContainer()).close();
 						}
 						catch (InvocationTargetException e)
 						{
@@ -470,15 +472,9 @@ public class ActualInstallPage extends WizardPage
 				state.canFinish = true;
 				if (afterRestart && getContainer() instanceof WizardDialog)
 				{
-					// just close the wizard if there are no messages to continue with developer startup
+					// just try to close the wizard if there are no messages to continue with developer startup
 					state.disallowCancel = false; // so that we can close
-					asyncUIRunner.asyncExec(new Runnable()
-					{
-						public void run()
-						{
-							((WizardDialog)getContainer()).close();
-						}
-					});
+					automaticClose = true;
 				}
 			}
 		}
