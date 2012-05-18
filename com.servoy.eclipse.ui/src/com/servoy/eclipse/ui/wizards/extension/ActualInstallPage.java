@@ -59,6 +59,7 @@ import com.servoy.extension.dependency.MaxVersionLibChooser;
 import com.servoy.extension.install.CopyZipEntryImporter;
 import com.servoy.extension.install.LibActivationHandler;
 import com.servoy.extension.install.LibChoiceHandler;
+import com.servoy.extension.install.UninstallZipEntries;
 import com.servoy.extension.parser.EXPParser;
 import com.servoy.extension.parser.ExtensionConfiguration;
 import com.servoy.j2db.util.Utils;
@@ -486,8 +487,11 @@ public class ActualInstallPage extends WizardPage
 		{
 			public void run()
 			{
-				installLog.setText(installLog.getText() + toAppend + System.getProperty("line.separator")); //$NON-NLS-1$
-				installLog.setSize(installLog.computeSize(installLog.getParent().getSize().x, SWT.DEFAULT));
+				if (!installLog.isDisposed()) // can be already disposed when on restart there are not messages to show and the wizard closes itself
+				{
+					installLog.setText(installLog.getText() + toAppend + System.getProperty("line.separator")); //$NON-NLS-1$
+					installLog.setSize(installLog.computeSize(installLog.getParent().getSize().x, SWT.DEFAULT));
+				}
 			}
 		});
 	}
@@ -561,7 +565,14 @@ public class ActualInstallPage extends WizardPage
 			{
 				monitor.subTask("uninstalling '" + dmd.extensionName + "'..."); //$NON-NLS-1$//$NON-NLS-2$
 
-				// TODO uninstall
+				File f = state.installedExtensionsProvider.getEXPFile(step.extension.id, step.extension.installedVersion, null);
+				UninstallZipEntries uninstaller = new UninstallZipEntries(f, state.installDir, step.extension.id);
+				uninstaller.handleFile();
+				Message[] problems = uninstaller.getMessages();
+				if (problems != null)
+				{
+					allMessages.addAll(Arrays.asList(problems));
+				}
 
 				appendTextToLog("           [-] " + dmd.extensionName); //$NON-NLS-1$
 				monitor.worked(1);

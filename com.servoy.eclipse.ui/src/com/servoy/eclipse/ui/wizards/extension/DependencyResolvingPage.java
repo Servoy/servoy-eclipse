@@ -235,7 +235,7 @@ public class DependencyResolvingPage extends WizardPage
 		gridLayout.verticalSpacing = 5;
 		advancedResolvingComposite.setLayout(gridLayout);
 
-		// fix for a Linux (Ubuntu) bug (that I think has to do with ExpandBar's implementation)
+		// partial fix for a Linux (Ubuntu) bug (that I think has to do with ExpandBar's implementation)
 		advancedResolvingComposite.addControlListener(new ControlAdapter()
 		{
 			@Override
