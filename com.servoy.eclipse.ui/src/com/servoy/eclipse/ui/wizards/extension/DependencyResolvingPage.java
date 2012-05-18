@@ -74,7 +74,6 @@ import com.servoy.extension.dependency.MultipleCriteriaChooser;
 import com.servoy.extension.dependency.OnlyFinalVersionsFilter;
 import com.servoy.extension.parser.EXPParser;
 import com.servoy.extension.parser.ExtensionConfiguration;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -616,132 +615,122 @@ public class DependencyResolvingPage extends WizardPage
 		// prepare & start dependency resolving
 
 		// acquire already installed extensions
-		String appServerDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
-		if (appServerDir != null)
+		if (state.installDir != null)
 		{
-			state.installDir = new File(appServerDir).getParentFile();
-			if (state.installDir != null)
+			try
 			{
-				try
+				getWizard().getContainer().run(true, false, new IRunnableWithProgress()
 				{
-					getWizard().getContainer().run(true, false, new IRunnableWithProgress()
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 					{
-						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+						try
 						{
-							try
+							monitor.beginTask("Preparing to install", 10); //$NON-NLS-1$
+							monitor.subTask("Checking installed extensions..."); //$NON-NLS-1$
+
+							if (state.installedExtensionsProvider != null)
 							{
-								monitor.beginTask("Preparing to install", 10); //$NON-NLS-1$
-								monitor.subTask("Checking installed extensions..."); //$NON-NLS-1$
+								final DependencyResolver resolver = new DependencyResolver(state.extensionProvider);
+								resolver.setInstalledExtensions(state.installedExtensionsProvider.getAllAvailableExtensions());
+								resolver.setIgnoreLibConflicts(dialogOptions.allowLibConflicts);
+								monitor.worked(4);
 
-								if (state.installedExtensionsProvider != null)
+								monitor.subTask("Resolving dependencies..."); //$NON-NLS-1$
+								resolver.resolveDependencies(state.extensionID, state.version);
+								Message[] resolveWarnings = resolver.getMessages();
+								if (resolveWarnings != null) Debug.trace(Arrays.asList(resolveWarnings).toString());
+								monitor.worked(4);
+
+								List<DependencyPath> installPaths = resolver.getResults();
+								if (installPaths != null && installPaths.size() > 0)
 								{
-									final DependencyResolver resolver = new DependencyResolver(state.extensionProvider);
-									resolver.setInstalledExtensions(state.installedExtensionsProvider.getAllAvailableExtensions());
-									resolver.setIgnoreLibConflicts(dialogOptions.allowLibConflicts);
-									monitor.worked(4);
-
-									monitor.subTask("Resolving dependencies..."); //$NON-NLS-1$
-									resolver.resolveDependencies(state.extensionID, state.version);
-									Message[] resolveWarnings = resolver.getMessages();
-									if (resolveWarnings != null) Debug.trace(Arrays.asList(resolveWarnings).toString());
-									monitor.worked(4);
-
-									List<DependencyPath> installPaths = resolver.getResults();
-									if (installPaths != null && installPaths.size() > 0)
+									monitor.subTask("Filtering configurations..."); //$NON-NLS-1$
+									if (!dialogOptions.allowUpgrades || !dialogOptions.allowDowngrades)
 									{
-										monitor.subTask("Filtering configurations..."); //$NON-NLS-1$
-										if (!dialogOptions.allowUpgrades || !dialogOptions.allowDowngrades)
-										{
-											new DisallowVersionReplacementFilter(dialogOptions.allowUpgrades).filterResolvePaths(installPaths);
-										}
-										if (dialogOptions.allowOnlyFinalVersions)
-										{
-											new OnlyFinalVersionsFilter().filterResolvePaths(installPaths);
-										}
+										new DisallowVersionReplacementFilter(dialogOptions.allowUpgrades).filterResolvePaths(installPaths);
+									}
+									if (dialogOptions.allowOnlyFinalVersions)
+									{
+										new OnlyFinalVersionsFilter().filterResolvePaths(installPaths);
+									}
+									monitor.worked(1);
+									if (installPaths.size() > 0)
+									{
+										// dependency resolving successful
+										monitor.subTask("Choosing best configuration..."); //$NON-NLS-1$
+										MultipleCriteriaChooser chooser = new MultipleCriteriaChooser();
+										state.chosenPath = chooser.pickResolvePath(installPaths); // we have a winner
 										monitor.worked(1);
-										if (installPaths.size() > 0)
-										{
-											// dependency resolving successful
-											monitor.subTask("Choosing best configuration..."); //$NON-NLS-1$
-											MultipleCriteriaChooser chooser = new MultipleCriteriaChooser();
-											state.chosenPath = chooser.pickResolvePath(installPaths); // we have a winner
-											monitor.worked(1);
-										}
-										else
-										{
-											// a path was found, but dependency options denied it
-											failMessage[0] = "Cannot resolve dependencies.\nTry changing dependency resolve options."; //$NON-NLS-1$
-										}
 									}
 									else
 									{
-										if (resolveWarnings != null && resolveWarnings.length == 1 && resolveWarnings[0].severity == Message.INFO)
-										{
-											// the extension is already installed probably; less alarming message needs to be shown
-											failMessage[0] = resolveWarnings[0].message;
-										}
-										else
-										{
-											// no dependency path found; either because of dependency options (disallow lib conflicts) or because the dependency cannot be resolved
-											failMessage[0] = "Cannot resolve dependencies. Potential reasons:\n(NOTE: the reasons below may not (all) be actual problems)"; //$NON-NLS-1$
-										}
-										warnings[0] = resolveWarnings;
+										// a path was found, but dependency options denied it
+										failMessage[0] = "Cannot resolve dependencies.\nTry changing dependency resolve options."; //$NON-NLS-1$
 									}
 								}
 								else
 								{
-									// should never happen
-									failMessage[0] = "Cannot access installed extensions."; //$NON-NLS-1$
+									if (resolveWarnings != null && resolveWarnings.length == 1 && resolveWarnings[0].severity == Message.INFO)
+									{
+										// the extension is already installed probably; less alarming message needs to be shown
+										failMessage[0] = resolveWarnings[0].message;
+									}
+									else
+									{
+										// no dependency path found; either because of dependency options (disallow lib conflicts) or because the dependency cannot be resolved
+										failMessage[0] = "Cannot resolve dependencies. Potential reasons:\n(NOTE: the reasons below may not (all) be actual problems)"; //$NON-NLS-1$
+									}
+									warnings[0] = resolveWarnings;
 								}
-								monitor.done();
 							}
-							finally
+							else
 							{
-								synchronized (longRunningLock)
-								{
-									longRunningOpInProgress2 = false;
-									longRunningLock.notifyAll();
-								}
+								// should never happen
+								failMessage[0] = "Cannot access installed extensions."; //$NON-NLS-1$
+							}
+							monitor.done();
+						}
+						finally
+						{
+							synchronized (longRunningLock)
+							{
+								longRunningOpInProgress2 = false;
+								longRunningLock.notifyAll();
 							}
 						}
-					});
-				}
-				catch (InvocationTargetException e)
+					}
+				});
+			}
+			catch (InvocationTargetException e)
+			{
+				longRunningOpInProgress2 = false;
+				ServoyLog.logError(e);
+				failMessage[0] = e.getMessage();
+			}
+			catch (InterruptedException e)
+			{
+				longRunningOpInProgress2 = false;
+				ServoyLog.logError(e);
+				failMessage[0] = e.getMessage();
+			}
+
+			synchronized (longRunningLock)
+			{
+				if (longRunningOpInProgress2) try
 				{
-					longRunningOpInProgress2 = false;
-					ServoyLog.logError(e);
-					failMessage[0] = e.getMessage();
+					longRunningLock.wait();
 				}
 				catch (InterruptedException e)
 				{
-					longRunningOpInProgress2 = false;
 					ServoyLog.logError(e);
 					failMessage[0] = e.getMessage();
 				}
-
-				synchronized (longRunningLock)
-				{
-					if (longRunningOpInProgress2) try
-					{
-						longRunningLock.wait();
-					}
-					catch (InterruptedException e)
-					{
-						ServoyLog.logError(e);
-						failMessage[0] = e.getMessage();
-					}
-				}
-			}
-			else
-			{
-				// should never happen
-				failMessage[0] = "Problem accessing install directory."; //$NON-NLS-1$
 			}
 		}
 		else
 		{
 			// should never happen
-			failMessage[0] = "Problem accessing application server directory."; //$NON-NLS-1$
+			failMessage[0] = "Problem accessing install directory."; //$NON-NLS-1$
 		}
 
 		IWizardPage nextPage;

@@ -46,7 +46,7 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 
 	protected String idToInstallFromMP;
 	protected InstallExtensionWizardOptions dialogOptions;
-	protected InstallExtensionState state;
+	protected InstallExtensionState state = new InstallExtensionState();
 	protected boolean continueWithPendingAfterRestart;
 
 	public InstallExtensionWizard()
@@ -67,10 +67,11 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 	 * Start the wizard to continue an install after restart.
 	 * @param continueWithPendingAfterRestart if true, it will continue with pending install, false will just show the normal import wizard.
 	 */
-	public InstallExtensionWizard(boolean continueWithPendingAfterRestart)
+	public InstallExtensionWizard(boolean continueWithPendingAfterRestart, File installDir)
 	{
 		this();
 		this.continueWithPendingAfterRestart = continueWithPendingAfterRestart;
+		state.installDir = installDir;
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
@@ -86,14 +87,17 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 		setDialogSettings(section);
 		setNeedsProgressMonitor(true);
 		dialogOptions = new InstallExtensionWizardOptions(getDialogSettings());
-		state = new InstallExtensionState();
 
 		state.display = workbench.getDisplay();
 
-		String appServerDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
-		if (appServerDir != null)
+		if (state.installDir == null)
 		{
-			state.installDir = new File(appServerDir).getParentFile();
+			// ApplicationServerSingleton.get() should never be called in this wizard elsewhere at restart, otherwise restart-install will not work correctly
+			String appServerDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
+			if (appServerDir != null)
+			{
+				state.installDir = new File(appServerDir).getParentFile();
+			}
 		}
 
 		File extDir = new File(state.installDir, CopyZipEntryImporter.EXPFILES_FOLDER);

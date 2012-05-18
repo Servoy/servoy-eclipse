@@ -113,6 +113,9 @@ import com.servoy.j2db.util.Utils;
  */
 public class Activator extends Plugin
 {
+
+	public static final String PRE_INITIALIZE_EXTENSION_ID = Activator.PLUGIN_ID + ".preInitializeJob"; //$NON-NLS-1$
+
 	private volatile boolean defaultAccessed = false;
 
 	private Boolean sqlExplorerLoaded = null;
@@ -120,6 +123,8 @@ public class Activator extends Plugin
 	private DesignApplication designClient;
 
 	private IDesignerCallback designerCallback;
+
+	private boolean preInitializeRunning = false;
 
 	/**
 	 * @author jcompagner
@@ -522,6 +527,17 @@ public class Activator extends Plugin
 	@SuppressWarnings("restriction")
 	private void initialize()
 	{
+		// notify pre initialize extensions and avoid initialization cycles
+		if (!preInitializeRunning)
+		{
+			preInitializeRunning = true;
+			notifyPreInitializeExtensions();
+		}
+		else
+		{
+			throw new RuntimeException("Detected pre initialize cycle..."); //$NON-NLS-1$
+		}
+
 		defaultAccessed = true;
 
 		XMLScriptObjectAdapterLoader.loadCoreDocumentationFromXML();
@@ -718,6 +734,43 @@ public class Activator extends Plugin
 				for (String actionSetId : actionIds)
 				{
 					if (Utils.stringSafeEquals(element.getId(), actionSetId)) element.setInitiallyVisible(false);
+				}
+			}
+		}
+	}
+
+	protected void notifyPreInitializeExtensions()
+	{
+		IExtensionRegistry reg = Platform.getExtensionRegistry();
+		IExtensionPoint ep = reg.getExtensionPoint(PRE_INITIALIZE_EXTENSION_ID);
+		IExtension[] extensions = ep.getExtensions();
+
+		if (extensions != null && extensions.length > 0)
+		{
+			for (IExtension extension : extensions)
+			{
+				IConfigurationElement[] ce = extension.getConfigurationElements();
+				if (ce != null && ce.length > 0)
+				{
+					try
+					{
+						Runnable job = (Runnable)ce[0].createExecutableExtension("class"); //$NON-NLS-1$
+						if (job != null)
+						{
+							try
+							{
+								job.run();
+							}
+							catch (Throwable e)
+							{
+								ServoyLog.logError(e);
+							}
+						}
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError("Could not a pre-initialize job.", e); //$NON-NLS-1$
+					}
 				}
 			}
 		}
