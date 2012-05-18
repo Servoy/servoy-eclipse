@@ -34,6 +34,8 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ExpandEvent;
 import org.eclipse.swt.events.ExpandListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -147,7 +149,7 @@ public class DependencyResolvingPage extends WizardPage
 		extensionID.setText("Id"); //$NON-NLS-1$
 		Text extensionIDText = new Text(textInfo, SWT.READ_ONLY | SWT.BORDER);
 		extensionIDText.setText(state.extensionID);
-		extensionIDText.setBackground(state.display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+//		extensionIDText.setBackground(state.display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 
 		extensionID.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		extensionIDText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -156,7 +158,7 @@ public class DependencyResolvingPage extends WizardPage
 		version.setText("Version"); //$NON-NLS-1$
 		Text versionText = new Text(textInfo, SWT.READ_ONLY | SWT.BORDER);
 		versionText.setText(state.version);
-		versionText.setBackground(state.display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+//		versionText.setBackground(state.display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 
 		version.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		versionText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -233,6 +235,16 @@ public class DependencyResolvingPage extends WizardPage
 		gridLayout.verticalSpacing = 5;
 		advancedResolvingComposite.setLayout(gridLayout);
 
+		// fix for a Linux (Ubuntu) bug (that I think has to do with ExpandBar's implementation)
+		advancedResolvingComposite.addControlListener(new ControlAdapter()
+		{
+			@Override
+			public void controlResized(ControlEvent e)
+			{
+				topLevel.layout(true, true);
+			}
+		});
+
 		Label separator3 = new Label(advancedResolvingComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 
 		final Button allowUpgrades = new Button(advancedResolvingComposite, SWT.CHECK);
@@ -240,8 +252,8 @@ public class DependencyResolvingPage extends WizardPage
 		final Button allowDowngrades = new Button(advancedResolvingComposite, SWT.CHECK);
 
 		restoreDefaults.setText("Restore defaults"); //$NON-NLS-1$
-		allowUpgrades.setText("allow extension upgrades"); //$NON-NLS-1$
-		allowDowngrades.setText("allow extension downgrades"); //$NON-NLS-1$
+		allowUpgrades.setText("allow dependency upgrades"); //$NON-NLS-1$
+		allowDowngrades.setText("allow dependency downgrades"); //$NON-NLS-1$
 
 		allowUpgrades.setSelection(dialogOptions.allowUpgrades);
 		allowDowngrades.setSelection(dialogOptions.allowUpgrades && dialogOptions.allowDowngrades);
@@ -266,7 +278,7 @@ public class DependencyResolvingPage extends WizardPage
 		});
 
 		final Button onlyFinal = new Button(advancedResolvingComposite, SWT.CHECK);
-		onlyFinal.setText("only use final (numeric) versions"); //$NON-NLS-1$
+		onlyFinal.setText("only use final (numeric) dependency versions"); //$NON-NLS-1$
 		onlyFinal.setSelection(dialogOptions.allowOnlyFinalVersions);
 		onlyFinal.addSelectionListener(new SelectionAdapter()
 		{
