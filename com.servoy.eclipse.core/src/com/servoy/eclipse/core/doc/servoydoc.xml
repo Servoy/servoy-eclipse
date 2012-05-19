@@ -17591,7 +17591,7 @@ var record = event.getRecord();]]></sample>
         </function>
         <function name="getRenderable">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.ui.IScriptRenderMethodsWithFormat" typecode="com.servoy.j2db.ui.IScriptRenderMethods"><![CDATA[Renderable the element that is being rendered]]></return>
+          <return type="com.servoy.j2db.ui.IScriptRenderMethodsWithFormat" typecode="com.servoy.j2db.ui.IScriptRenderMethodsWithFormat"><![CDATA[Renderable the element that is being rendered]]></return>
           <description><![CDATA[Returns the element that is being rendered.]]></description>
           <summary><![CDATA[Returns the element that is being rendered.]]></summary>
           <sample><![CDATA[event.getRenderable();]]></sample>
