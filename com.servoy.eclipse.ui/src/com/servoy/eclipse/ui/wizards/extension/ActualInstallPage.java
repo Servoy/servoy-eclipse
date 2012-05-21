@@ -294,7 +294,7 @@ public class ActualInstallPage extends WizardPage
 								Utils.closeInputStream(is);
 								Utils.closeOutputStream(os);
 							}
-							appendTextToLog("           [•] " + name); //$NON-NLS-1$
+							appendTextToLog("           [" + '\u2022' + "] " + name); //$NON-NLS-1$ //$NON-NLS-2$
 							monitor.worked(10);
 						}
 						if (monitor.isCanceled())
