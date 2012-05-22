@@ -13333,6 +13333,16 @@ for (var i = 1; i <= %%prefix%%foundset.getSize(); i++)
           <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource().]]></deprecated>
           <sample/>
         </function>
+        <function name="hasConditions">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[wether the foundset has foind-conditions]]></return>
+          <description><![CDATA[Check wether the foundset has any conditions from a previous find action.]]></description>
+          <summary><![CDATA[Check wether the foundset has any conditions from a previous find action.]]></summary>
+          <sample><![CDATA[if (%%prefix%%foundset.hasConditions())
+{
+		// foundset had find actions
+}]]></sample>
+        </function>
         <function name="invertRecords">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
@@ -24407,6 +24417,16 @@ for (var i = 1; i <= %%prefix%%foundset.getSize(); i++)
           <summary><![CDATA[Gets the name of the table used.]]></summary>
           <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource().]]></deprecated>
           <sample/>
+        </function>
+        <function name="hasConditions">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[wether the foundset has foind-conditions]]></return>
+          <description><![CDATA[Check wether the foundset has any conditions from a previous find action.]]></description>
+          <summary><![CDATA[Check wether the foundset has any conditions from a previous find action.]]></summary>
+          <sample><![CDATA[if (%%prefix%%foundset.hasConditions())
+{
+		// foundset had find actions
+}]]></sample>
         </function>
         <function name="invertRecords">
           <argumentsTypes/>
