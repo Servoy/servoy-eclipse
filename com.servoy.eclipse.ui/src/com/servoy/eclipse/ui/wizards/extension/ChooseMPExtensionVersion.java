@@ -43,7 +43,6 @@ import com.servoy.extension.MarketPlaceExtensionProvider;
 import com.servoy.extension.Message;
 import com.servoy.extension.ServoyDependencyDeclaration;
 import com.servoy.extension.VersionStringUtils;
-import com.servoy.j2db.util.Debug;
 
 /**
  * A page that is presented when installing from the marketplace, and there are multiple versions to choose from. 
@@ -240,7 +239,7 @@ public class ChooseMPExtensionVersion extends WizardPage
 			{
 				// else something went wrong... connection failure? anyway just continue cause we do have a version selected anyway
 				Message[] w = marketplaceProvider.getMessages();
-				Debug.warn("Problems when trying to pre-select best version: " + (w != null ? w[w.length - 1].message : "<unknown>")); //$NON-NLS-1$ //$NON-NLS-2$
+				ServoyLog.logWarning("Problems when trying to pre-select best version: " + (w != null ? w[w.length - 1].message : "<unknown>"), null); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			marketplaceProvider.clearMessages();
 		}
