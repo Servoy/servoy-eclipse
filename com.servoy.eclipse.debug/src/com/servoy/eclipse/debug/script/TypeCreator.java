@@ -413,7 +413,7 @@ public class TypeCreator extends TypeCache
 					if (type == null)
 					{
 						type = createDynamicType(realTypeName, realTypeName);
-						if (type != null && realTypeName.indexOf('<') != -1 && type.eResource() == null)
+						if (type != null && realTypeName.indexOf('<') != -1 && type.eResource() == null && !type.isProxy())
 						{
 							tc.addType(fs.getSolution().getName(), type);
 						}
