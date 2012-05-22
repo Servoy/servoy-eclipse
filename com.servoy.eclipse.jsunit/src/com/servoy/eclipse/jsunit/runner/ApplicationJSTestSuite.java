@@ -33,6 +33,8 @@ import org.mozilla.javascript.Scriptable;
 
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.IServiceProvider;
+import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectReference;
@@ -425,31 +427,40 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 	@Override
 	public void run(final TestResult result)
 	{
-		if (SwingUtilities.isEventDispatchThread())
+		// temporary set global app to jsunit app while running the unit tests
+		IServiceProvider prevServiceProvider = J2DBGlobals.setSingletonServiceProvider(staticSuiteApplication);
+		try
 		{
-			super.run(result);
-		}
-		else
-		{
-			try
+			if (SwingUtilities.isEventDispatchThread())
 			{
-				SwingUtilities.invokeAndWait(new Runnable()
+				super.run(result);
+			}
+			else
+			{
+				try
 				{
-					public void run()
+					SwingUtilities.invokeAndWait(new Runnable()
 					{
-						ApplicationJSTestSuite.super.run(result);
-					}
-				});
+						public void run()
+						{
+							ApplicationJSTestSuite.super.run(result);
+						}
+					});
+				}
+				catch (InterruptedException e)
+				{
+					Debug.log(e);
+				}
+				catch (InvocationTargetException e)
+				{
+					Debug.log(e);
+					if (e.getTargetException() instanceof RuntimeException) throw (RuntimeException)e.getTargetException();
+				}
 			}
-			catch (InterruptedException e)
-			{
-				Debug.log(e);
-			}
-			catch (InvocationTargetException e)
-			{
-				Debug.log(e);
-				if (e.getTargetException() instanceof RuntimeException) throw (RuntimeException)e.getTargetException();
-			}
+		}
+		finally
+		{
+			J2DBGlobals.setSingletonServiceProvider(prevServiceProvider);
 		}
 	}
 }
