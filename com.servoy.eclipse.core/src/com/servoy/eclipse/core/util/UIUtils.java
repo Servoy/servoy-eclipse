@@ -952,7 +952,7 @@ public class UIUtils
 	{
 		// show resource project choice dialog
 		final ResourceProjectChoiceDialog dialog = new ResourceProjectChoiceDialog(parentShell, "Resources project for solution '" + sp.getProject().getName() +
-			"'", sp.getResourcesProject());
+			"'", sp.getResourcesProject(), false);
 
 		if (dialog.open() == Window.OK)
 		{

@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.model.util;
 
 import java.io.BufferedInputStream;
@@ -87,7 +87,7 @@ public class WorkspaceFileAccess implements IFileAccess
 		InputStreamReader contents = null;
 		try
 		{
-			contents = new InputStreamReader(file.getContents(true), "UTF8");
+			contents = new InputStreamReader(file.getContents(true), "UTF-8");
 			StringWriter stringWriter = new StringWriter();
 			Utils.readerWriterCopy(contents, stringWriter);
 			return stringWriter.toString();
@@ -157,7 +157,7 @@ public class WorkspaceFileAccess implements IFileAccess
 		{
 			IFile file = workspaceRoot.getFile(new Path(relativeFilePath));
 			mkdirs(file.getParent());
-
+			file.refreshLocal(1, null);
 			if (file.exists())
 			{
 				file.setContents(inputStream, true, true, null);

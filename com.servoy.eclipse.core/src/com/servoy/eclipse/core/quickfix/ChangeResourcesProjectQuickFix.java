@@ -88,7 +88,7 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 
 				// show resource project choice dialog
 				final ResourceProjectChoiceDialog dialog = new ResourceProjectChoiceDialog(Display.getCurrent().getActiveShell(),
-					"Resources project for solution '" + servoyProject.getProject().getName() + "'", servoyProject.getResourcesProject());
+					"Resources project for solution '" + servoyProject.getProject().getName() + "'", servoyProject.getResourcesProject(), false);
 
 				if (dialog.open() == Window.OK)
 				{
@@ -133,12 +133,14 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 		private Label errorText;
 		private Label errorIcon;
 		private final String titleText;
+		private final boolean allowInitialSelection;
 
-		public ResourceProjectChoiceDialog(Shell parentShell, String titleText, ServoyResourcesProject initialSelection)
+		public ResourceProjectChoiceDialog(Shell parentShell, String titleText, ServoyResourcesProject initialSelection, boolean allowInitialSelection)
 		{
 			super(parentShell);
 			this.initialSelection = initialSelection;
 			this.titleText = titleText;
+			this.allowInitialSelection = allowInitialSelection;
 			setBlockOnOpen(true);
 			setShellStyle(getShellStyle() | SWT.RESIZE);
 		}
@@ -152,11 +154,24 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 		protected Control createDialogArea(Composite parent)
 		{
 			Composite composite = (Composite)super.createDialogArea(parent);
+			GridLayout tgl = (GridLayout)composite.getLayout();
+			tgl.marginBottom = 0;
 
 			// set up error labels & icon
 			GridData gd;
+			// resource chooser
+			gd = new GridData();
+			gd.horizontalAlignment = SWT.FILL;
+			gd.verticalAlignment = SWT.FILL;
+			gd.grabExcessHorizontalSpace = true;
+			gd.grabExcessVerticalSpace = true;
+			chooserComposite = new ResourcesProjectChooserComposite(composite, SWT.NONE, this, "Please select the resources project", initialSelection);
+			chooserComposite.setLayoutData(gd);
+
 			Composite errorComposite = new Composite(composite, SWT.NONE);
-			errorComposite.setLayout(new GridLayout(2, false));
+			GridLayout gl = new GridLayout(2, false);
+			errorComposite.setLayout(gl);
+			gl.marginHeight = gl.marginWidth = 0;
 
 			errorIcon = new Label(errorComposite, SWT.NONE);
 			errorIcon.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK));
@@ -169,6 +184,7 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 			Color c = new Color(null, 255, 0, 0);
 			errorText.setForeground(c);
 			c.dispose();
+
 			gd = new GridData();
 			gd.horizontalAlignment = SWT.FILL;
 			gd.grabExcessHorizontalSpace = true;
@@ -178,14 +194,7 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 			gd.horizontalAlignment = SWT.FILL;
 			errorComposite.setLayoutData(gd);
 
-			// resource chooser
-			gd = new GridData();
-			gd.horizontalAlignment = SWT.FILL;
-			gd.verticalAlignment = SWT.FILL;
-			gd.grabExcessHorizontalSpace = true;
-			gd.grabExcessVerticalSpace = true;
-			chooserComposite = new ResourcesProjectChooserComposite(composite, SWT.NONE, this, "Please select the resources project", initialSelection);
-			chooserComposite.setLayoutData(gd);
+			applyDialogFont(composite);
 			return composite;
 		}
 
@@ -193,7 +202,7 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 		{
 			if (chooserComposite == null) return null;
 			String errorMessage = chooserComposite.validate();
-			if (errorMessage == null && chooserComposite.getExistingResourceProject() == initialSelection && initialSelection != null)
+			if (errorMessage == null && chooserComposite.getExistingResourceProject() == initialSelection && initialSelection != null && !allowInitialSelection)
 			{
 				errorMessage = "The selected resources project is already used by the solution";
 			}
@@ -249,16 +258,8 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 		{
 			monitor.beginTask(getName(), 2);
 			// create Resource project if needed
-			if (!newResourcesProject.exists())
-			{
-				// create a new resource project
-				monitor.setTaskName("Creating new resources project");
-				newResourcesProject.create(null);
-				newResourcesProject.open(null);
-				IProjectDescription resourceProjectDescription = newResourcesProject.getDescription();
-				resourceProjectDescription.setNatureIds(new String[] { ServoyResourcesProject.NATURE_ID });
-				newResourcesProject.setDescription(resourceProjectDescription, null);
-			}
+			monitor.setTaskName("Creating new resources project");
+			createResourcesProject(newResourcesProject);
 			monitor.worked(1);
 
 			// link active solution project to the resource project; store project description
@@ -292,6 +293,19 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 
 			monitor.done();
 			return Status.OK_STATUS;
+		}
+
+		public static void createResourcesProject(IProject newResourcesProject) throws CoreException
+		{
+			if (!newResourcesProject.exists())
+			{
+				// create a new resource project
+				newResourcesProject.create(null);
+				newResourcesProject.open(null);
+				IProjectDescription resourceProjectDescription = newResourcesProject.getDescription();
+				resourceProjectDescription.setNatureIds(new String[] { ServoyResourcesProject.NATURE_ID });
+				newResourcesProject.setDescription(resourceProjectDescription, null);
+			}
 		}
 
 	}

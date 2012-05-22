@@ -18,18 +18,31 @@
 package com.servoy.eclipse.marketplace;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.nio.charset.Charset;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourceProjectChoiceDialog;
+import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.repository.StringResourceDeserializer;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.j2db.persistence.IDeveloperRepository;
+import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.Style;
+import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -54,45 +67,83 @@ public class StylesInstall implements InstallItem
 			{
 				// show resource project choice dialog
 				final ResourceProjectChoiceDialog dialog = new ResourceProjectChoiceDialog(UIUtils.getActiveShell(), "Import style" + //$NON-NLS-1$
-					(stylesFile.length > 1 ? "s" : "") + ": select resources project", null); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+					(stylesFile.length > 1 ? "s" : "") + ": select resources project", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject(), true);
 
 				if (dialog.open() == Window.OK)
 				{
-					IProject newResourcesProject;
+					final IProject resourcesProject;
 					if (dialog.getResourceProjectData().getNewResourceProjectName() != null)
 					{
-						newResourcesProject = ServoyModel.getWorkspace().getRoot().getProject(dialog.getResourceProjectData().getNewResourceProjectName());
+						resourcesProject = ServoyModel.getWorkspace().getRoot().getProject(dialog.getResourceProjectData().getNewResourceProjectName());
 					}
 					else
 					{
-						newResourcesProject = dialog.getResourceProjectData().getExistingResourceProject().getProject();
+						resourcesProject = dialog.getResourceProjectData().getExistingResourceProject().getProject();
 					}
 
-					WorkspaceFileAccess wfa = new WorkspaceFileAccess(newResourcesProject.getWorkspace());
-
-					for (File styleFile : stylesFile)
+					IDeveloperRepository repository = ServoyModel.getDeveloperRepository();
+					if (repository instanceof EclipseRepository)
 					{
-						FileInputStream fis = null;
-						try
+						final EclipseRepository rep = (EclipseRepository)repository;
+						final WorkspaceFileAccess wfa = new WorkspaceFileAccess(resourcesProject.getWorkspace());
+						for (File styleFile : stylesFile)
 						{
-							fis = new FileInputStream(styleFile);
-							wfa.setContents(newResourcesProject.getName() + "/styles/" + styleFile.getName(), fis); //$NON-NLS-1$
+							final String txtContent = Utils.getTXTFileContent(styleFile, Charset.forName("UTF-8")); //$NON-NLS-1$
+							if (txtContent != null)
+							{
+								final String styleName;
+								if (styleFile.getName().indexOf('.') >= 0) styleName = styleFile.getName().substring(0, styleFile.getName().lastIndexOf('.'));
+								else styleName = styleFile.getName();
+								WorkspaceJob writeContentsJob = new WorkspaceJob("Persisting installed style: " + styleName)
+								{
+									@Override
+									public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+									{
+										try
+										{
+											// if it's a new resources project, create it
+											if (!resourcesProject.exists()) ResourcesProjectSetupJob.createResourcesProject(resourcesProject);
+
+											// create a style object without caching it or adding it to the rep., because it might be for another resources project
+											// not for the active one
+											UUID uuid = UUID.randomUUID();
+											// the new element ID will not be serialized anyway, so we could even use -1 there...
+											Style style = (Style)rep.createRootObject(rep.createRootObjectMetaData(rep.getNewElementID(uuid), uuid, styleName,
+												IRepository.STYLES, 1, 1));
+											style.setContent(txtContent);
+											StringResourceDeserializer.writeStringResource(style, wfa, resourcesProject.getName());
+										}
+										catch (final Exception ex)
+										{
+											ServoyLog.logError(ex);
+											UIUtils.runInUI(new Runnable()
+											{
+
+												public void run()
+												{
+													MessageDialog.openError(UIUtils.getActiveShell(), "Servoy Marketplace", "Error installing style: " +
+														styleName + ".\n\n" + ex.getMessage());
+												}
+											}, false);
+										}
+										return Status.OK_STATUS;
+									}
+								};
+								writeContentsJob.setSystem(true);
+								writeContentsJob.setUser(false);
+								writeContentsJob.schedule();
+							}
 						}
-						catch (Exception ex)
-						{
-							MessageDialog.openError(UIUtils.getActiveShell(), "Servoy Marketplace",
-								"Error installing " + styleFile.getName() + ".\n\n" + ex.getMessage());
-						}
-						finally
-						{
-							Utils.closeInputStream(fis);
-						}
+					}
+					else
+					{
+						ServoyLog.logError("Cannot install styles", new RuntimeException("Internal error: unexpected repo. type")); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				}
 			}
 		});
 	}
-
 
 	public String getName()
 	{

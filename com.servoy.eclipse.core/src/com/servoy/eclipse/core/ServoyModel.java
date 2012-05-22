@@ -2512,7 +2512,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				{
 					try
 					{
-						EclipseRepository repository = (EclipseRepository)getDeveloperRepository();
+						final EclipseRepository repository = (EclipseRepository)getDeveloperRepository();
 						// see if this style already has metadata and only needs loading into the repository
 						IResource metaDataFile = file.getParent().findMember(name + SolutionSerializer.JSON_DEFAULT_FILE_EXTENSION);
 						RootObjectMetaData md = null;
@@ -2529,14 +2529,23 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 							File f = new File(file.getLocationURI());
 							resource.loadFromFile(f);// read the contents into memory
 							resource.clearChanged();
-							repository.updateRootObject(resource);
-							Display.getDefault().asyncExec(new Runnable()
+
+							// we are running in a resources change listener - where workspace is locked for writes
+							// so we must do the write later when we are allowed
+							final StringResource res = resource;
+							WorkspaceJob writeObjJob = new WorkspaceJob("Updating string persist")
 							{
-								public void run()
+								@Override
+								public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 								{
 									try
 									{
+										repository.updateRootObject(res);
 										file.getProject().refreshLocal(IResource.DEPTH_INFINITE, null); // as a new file could have been added with java.io - refresh the workspace resource
+									}
+									catch (RepositoryException e)
+									{
+										ServoyLog.logError("While trying to add a new manually created text file to the repository, an exception occured", e);
 									}
 									catch (CoreException e)
 									{
@@ -2544,8 +2553,12 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 											"While trying to refresh resources project after manually creating text file + adding metadata, an exception occured",
 											e);
 									}
+									return Status.OK_STATUS;
 								}
-							});
+							};
+							writeObjJob.setUser(false);
+							writeObjJob.setSystem(true);
+							writeObjJob.schedule();
 						}
 						else
 						{

@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core;
 
 import java.io.BufferedOutputStream;
@@ -60,7 +60,7 @@ public class IOFileAccess implements IFileAccess
 			{
 				file.getParentFile().mkdirs();
 			}
-			OutputStreamWriter ow = new OutputStreamWriter(new FileOutputStream(file), "UTF8");
+			OutputStreamWriter ow = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
 			bw = new BufferedWriter(ow);
 			bw.write(contents);
 		}
@@ -94,7 +94,7 @@ public class IOFileAccess implements IFileAccess
 		InputStreamReader contents = null;
 		try
 		{
-			contents = new InputStreamReader(new FileInputStream(getFile(relativeFilePath)), "UTF8");
+			contents = new InputStreamReader(new FileInputStream(getFile(relativeFilePath)), "UTF-8");
 			StringWriter stringWriter = new StringWriter();
 			Utils.readerWriterCopy(contents, stringWriter);
 			return stringWriter.toString();
