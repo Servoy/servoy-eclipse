@@ -212,7 +212,7 @@ public class ActualInstallPage extends WizardPage
 				// download & copy .exp files to .pending folder
 				if (destinationDir.exists())
 				{
-					allMessages.add(new Message("An existing pending install was canceled.", Message.WARNING)); //$NON-NLS-1$
+					allMessages.add(new Message("An existing pending install was cancelled.", Message.WARNING)); //$NON-NLS-1$
 					FileUtils.deleteQuietly(destinationDir);
 				}
 				destinationDir.mkdirs();
@@ -521,7 +521,7 @@ public class ActualInstallPage extends WizardPage
 				File f = state.extensionProvider.getEXPFile(step.extension.id, step.extension.version, null);
 
 				// default install
-				CopyZipEntryImporter defaultInstaller = new CopyZipEntryImporter(f, state.installDir, step.extension.id);
+				CopyZipEntryImporter defaultInstaller = new CopyZipEntryImporter(f, state.installDir, step.extension.id, step.extension.version);
 				defaultInstaller.handleFile();
 				Message[] problems = defaultInstaller.getMessages();
 				if (problems != null)
@@ -566,7 +566,7 @@ public class ActualInstallPage extends WizardPage
 				monitor.subTask("uninstalling '" + dmd.extensionName + "'..."); //$NON-NLS-1$//$NON-NLS-2$
 
 				File f = state.installedExtensionsProvider.getEXPFile(step.extension.id, step.extension.installedVersion, null);
-				UninstallZipEntries uninstaller = new UninstallZipEntries(f, state.installDir, step.extension.id);
+				UninstallZipEntries uninstaller = new UninstallZipEntries(f, state.installDir, step.extension.id, step.extension.installedVersion);
 				uninstaller.handleFile();
 				Message[] problems = uninstaller.getMessages();
 				if (problems != null)

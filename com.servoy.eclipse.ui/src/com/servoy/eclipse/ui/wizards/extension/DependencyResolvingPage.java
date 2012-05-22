@@ -65,11 +65,11 @@ import com.servoy.extension.ExtensionUtils;
 import com.servoy.extension.ExtensionUtils.EntryInputStreamRunner;
 import com.servoy.extension.IProgress;
 import com.servoy.extension.Message;
-import com.servoy.extension.VersionStringUtils;
 import com.servoy.extension.dependency.DependencyPath;
 import com.servoy.extension.dependency.DependencyResolver;
 import com.servoy.extension.dependency.DisallowVersionReplacementFilter;
 import com.servoy.extension.dependency.ExtensionNode;
+import com.servoy.extension.dependency.IDependencyPathFilter;
 import com.servoy.extension.dependency.MultipleCriteriaChooser;
 import com.servoy.extension.dependency.OnlyFinalVersionsFilter;
 import com.servoy.extension.parser.EXPParser;
@@ -380,7 +380,6 @@ public class DependencyResolvingPage extends WizardPage
 				}
 				try
 				{
-					// TODO show more detailed progress for download (more needs to change for that to happen - currently the info is not available)
 					monitor.beginTask("Getting extension", 11); //$NON-NLS-1$
 
 					monitor.subTask("acquiring extension name..."); //$NON-NLS-1$
@@ -645,13 +644,21 @@ public class DependencyResolvingPage extends WizardPage
 								if (installPaths != null && installPaths.size() > 0)
 								{
 									monitor.subTask("Filtering configurations..."); //$NON-NLS-1$
+									int prevSize = installPaths.size();
+									String s1 = null, s2 = null;
+									IDependencyPathFilter filter;
 									if (!dialogOptions.allowUpgrades || !dialogOptions.allowDowngrades)
 									{
-										new DisallowVersionReplacementFilter(dialogOptions.allowUpgrades).filterResolvePaths(installPaths);
+										filter = new DisallowVersionReplacementFilter(dialogOptions.allowUpgrades);
+										filter.filterResolvePaths(installPaths);
+										if (prevSize != installPaths.size()) s1 = filter.getFilterMessage();
 									}
 									if (dialogOptions.allowOnlyFinalVersions)
 									{
-										new OnlyFinalVersionsFilter().filterResolvePaths(installPaths);
+										prevSize = installPaths.size();
+										filter = new OnlyFinalVersionsFilter();
+										filter.filterResolvePaths(installPaths);
+										if (prevSize != installPaths.size()) s2 = filter.getFilterMessage();
 									}
 									monitor.worked(1);
 									if (installPaths.size() > 0)
@@ -666,6 +673,11 @@ public class DependencyResolvingPage extends WizardPage
 									{
 										// a path was found, but dependency options denied it
 										failMessage[0] = "Cannot resolve dependencies.\nTry changing dependency resolve options."; //$NON-NLS-1$
+										int tmp = (s1 != null ? 1 : 0) + (s2 != null ? 1 : 0);
+										warnings[0] = new Message[tmp];
+										tmp = 0;
+										if (s1 != null) warnings[0][tmp++] = new Message(s1, Message.INFO);
+										if (s2 != null) warnings[0][tmp] = new Message(s2, Message.INFO);
 									}
 								}
 								else
@@ -786,16 +798,9 @@ public class DependencyResolvingPage extends WizardPage
 				for (int i = state.chosenPath.extensionPath.length - 1; i >= 0; i--)
 				{
 					ExtensionNode ext = state.chosenPath.extensionPath[i];
-					DependencyMetadata[] installed = state.installedExtensionsProvider.getDependencyMetadata(new ExtensionDependencyDeclaration(ext.id,
-						VersionStringUtils.UNBOUNDED, VersionStringUtils.UNBOUNDED));
-					DependencyMetadata[] newOne = state.extensionProvider.getDependencyMetadata(new ExtensionDependencyDeclaration(ext.id, state.version,
-						state.version));
+					DependencyMetadata[] newOne = state.extensionProvider.getDependencyMetadata(new ExtensionDependencyDeclaration(ext.id, ext.version,
+						ext.version));
 					String name = ""; //$NON-NLS-1$
-					String installedVersion = "-"; //$NON-NLS-1$
-					if (installed != null && installed.length == 1)
-					{
-						installedVersion = installed[0].version;
-					}
 					if (newOne != null && newOne.length == 1)
 					{
 						name = newOne[0].extensionName;
@@ -814,7 +819,7 @@ public class DependencyResolvingPage extends WizardPage
 						default :
 							icon = addIcon;
 					}
-					messages[i] = new UIMessage(icon, new String[] { installedVersion, state.version, name, ext.id });
+					messages[i] = new UIMessage(icon, new String[] { ext.installedVersion != null ? ext.installedVersion : "-", ext.version, name, ext.id }); //$NON-NLS-1$
 				}
 
 				nextPage = new ShowMessagesPage("DepReview", "Changes", "Review installation changes.", header, messages, true, nextPage); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$

@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Text;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.extension.ComposedExtensionProvider;
 import com.servoy.extension.DependencyMetadata;
 import com.servoy.extension.FileBasedExtensionProvider;
@@ -185,7 +186,7 @@ public class ChooseEXPFilePage extends WizardPage
 				if (dependencyMetadata == null)
 				{
 					Message[] warn = parser.getMessages();
-					error = (warn != null && warn.length > 0 ? warn[0].message : "Cannot parse selected .exp file."); //$NON-NLS-1$
+					error = "Cannot parse selected .exp file." + System.getProperty("line.separator") + (warn != null && warn.length > 0 ? shortenIfNeeded(warn[0].message) : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 				else
 				{
@@ -197,6 +198,17 @@ public class ChooseEXPFilePage extends WizardPage
 		}
 
 		setErrorMessage(error);
+	}
+
+	@SuppressWarnings("nls")
+	private String shortenIfNeeded(String message)
+	{
+		String shortened = message.replace("\n", " ").replace("\r", ""); // flatten to 1 line
+		if (shortened.length() > 71) shortened = "(...) " + shortened.substring(shortened.length() - 71); // keep last part
+
+		if (message.length() > shortened.length()) ServoyLog.logInfo("Shortened error message when validating .exp file: " + message);
+
+		return shortened;
 	}
 
 	@Override

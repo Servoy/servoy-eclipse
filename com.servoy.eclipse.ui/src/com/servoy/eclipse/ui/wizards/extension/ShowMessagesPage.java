@@ -132,6 +132,9 @@ public class ShowMessagesPage extends WizardPage
 		initializeDialogUnits(parent);
 
 		Composite topLevel = new Composite(parent, SWT.NONE);
+		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
+		topLevel.setLayoutData(data);
+
 		GridLayout gl = new GridLayout(1, false);
 		gl.marginHeight = gl.marginWidth = 10;
 		topLevel.setLayout(gl);
@@ -202,7 +205,7 @@ public class ShowMessagesPage extends WizardPage
 				}
 			});
 
-			GridData data = new GridData(SWT.FILL, SWT.TOP, true, true);
+			data = new GridData(SWT.FILL, SWT.FILL, true, true);
 			table.setLayoutData(data);
 		}
 	}
