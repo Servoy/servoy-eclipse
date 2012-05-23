@@ -157,7 +157,7 @@ public class WorkspaceFileAccess implements IFileAccess
 		{
 			IFile file = workspaceRoot.getFile(new Path(relativeFilePath));
 			mkdirs(file.getParent());
-			file.refreshLocal(1, null);
+
 			if (file.exists())
 			{
 				file.setContents(inputStream, true, true, null);
