@@ -13799,6 +13799,19 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             </parameter>
           </parameters>
         </function>
+        <function deprecated="true" name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Method to handle old foundset loadRecords calls.
+Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecords([1]), this was called with vargs=[1] in stead of vargs=[[1]].]]></description>
+          <summary><![CDATA[Method to handle old foundset loadRecords calls.]]></summary>
+          <sample/>
+          <parameters>
+            <parameter name="vargs" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"/>
+          </parameters>
+        </function>
         <function name="loadRecords">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
@@ -24882,6 +24895,19 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             <parameter name="numberpk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[single-column pk value]]></description>
             </parameter>
+          </parameters>
+        </function>
+        <function deprecated="true" name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Method to handle old foundset loadRecords calls.
+Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecords([1]), this was called with vargs=[1] in stead of vargs=[[1]].]]></description>
+          <summary><![CDATA[Method to handle old foundset loadRecords calls.]]></summary>
+          <sample/>
+          <parameters>
+            <parameter name="vargs" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"/>
           </parameters>
         </function>
         <function name="loadRecords">
