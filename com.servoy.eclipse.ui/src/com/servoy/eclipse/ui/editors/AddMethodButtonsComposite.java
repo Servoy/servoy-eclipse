@@ -35,10 +35,10 @@ import org.eclipse.swt.widgets.Label;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.dialogs.Scope;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.util.ScopeWithContext;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -60,7 +60,7 @@ import com.servoy.j2db.persistence.TableNode;
 public class AddMethodButtonsComposite extends Composite
 {
 	private PersistContext persistContext;
-	private Scope selectedScope = null;
+	private ScopeWithContext selectedScope = null;
 	private String methodKey;
 
 	private TreeSelectDialog dialog;
@@ -152,7 +152,7 @@ public class AddMethodButtonsComposite extends Composite
 					}
 					else if (scopes.size() == 1)
 					{
-						selectedScope = new Scope(scopes.iterator().next(), (Solution)persistContext.getContext().getAncestor(IRepository.SOLUTIONS));
+						selectedScope = new ScopeWithContext(scopes.iterator().next(), (Solution)persistContext.getContext().getAncestor(IRepository.SOLUTIONS));
 					}
 				}
 				ScriptMethod method = createMethod(persistContext.getContext().getAncestor(IRepository.SOLUTIONS));
@@ -220,7 +220,7 @@ public class AddMethodButtonsComposite extends Composite
 			persistContext.getContext().getAncestor(IRepository.TABLENODES) != null);
 	}
 
-	public void setSelectedScope(Scope scope)
+	public void setSelectedScope(ScopeWithContext scope)
 	{
 		this.selectedScope = scope;
 	}
@@ -244,9 +244,9 @@ public class AddMethodButtonsComposite extends Composite
 	public void searchSelectedScope(IStructuredSelection selection)
 	{
 		setSelectedScope(null);
-		if (selection != null && !selection.isEmpty() && selection.getFirstElement() instanceof Scope)
+		if (selection != null && !selection.isEmpty() && selection.getFirstElement() instanceof ScopeWithContext)
 		{
-			setSelectedScope((Scope)selection.getFirstElement());
+			setSelectedScope((ScopeWithContext)selection.getFirstElement());
 		}
 		else if (selection instanceof ITreeSelection)
 		{
@@ -255,9 +255,9 @@ public class AddMethodButtonsComposite extends Composite
 			{
 				for (int i = paths[0].getSegmentCount(); i-- > 0;)
 				{
-					if (paths[0].getSegment(i) instanceof Scope)
+					if (paths[0].getSegment(i) instanceof ScopeWithContext)
 					{
-						setSelectedScope((Scope)paths[0].getSegment(i));
+						setSelectedScope((ScopeWithContext)paths[0].getSegment(i));
 						break;
 					}
 				}

@@ -51,6 +51,7 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
+import com.servoy.eclipse.ui.util.ScopeWithContext;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFormat;
@@ -269,7 +270,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					// scope variables
 					if (options.includeScopes)
 					{
-						input.add(new DataProviderNodeWrapper(SCOPE_VARIABLES, (Scope)null, (String)null));
+						input.add(new DataProviderNodeWrapper(SCOPE_VARIABLES, (ScopeWithContext)null, (String)null));
 					}
 
 					// aggregates
@@ -392,14 +393,14 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					Collection<Pair<String, IRootObject>> scopes = flattenedSolution.getScopes();
 					Iterator<Pair<String, IRootObject>> it = scopes.iterator();
 
-					SortedList<Scope> scopesList = new SortedList<Scope>(Scope.SCOPE_COMPARATOR);
+					SortedList<ScopeWithContext> scopesList = new SortedList<ScopeWithContext>(ScopeWithContext.SCOPE_COMPARATOR);
 					while (it.hasNext())
 					{
 						Pair<String, IRootObject> sc = it.next();
-						scopesList.add(new Scope(sc.getLeft(), sc.getRight()));
+						scopesList.add(new ScopeWithContext(sc.getLeft(), sc.getRight()));
 					}
 					children = new ArrayList<Object>();
-					for (Scope scope : scopesList)
+					for (ScopeWithContext scope : scopesList)
 					{
 						children.add(new DataProviderNodeWrapper(scope.getName(), scope, VARIABLES));
 					}
@@ -601,7 +602,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				}
 				if (var.getParent() instanceof Solution)
 				{
-					return new DataProviderNodeWrapper(var.getScopeName(), new Scope(var.getScopeName(), (Solution)var.getParent()), VARIABLES);
+					return new DataProviderNodeWrapper(var.getScopeName(), new ScopeWithContext(var.getScopeName(), (Solution)var.getParent()), VARIABLES);
 				}
 			}
 			if (value instanceof AggregateVariable)
@@ -627,7 +628,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				}
 				if (wrapper.scope != null && wrapper.type == VARIABLES)
 				{
-					return new DataProviderNodeWrapper(SCOPE_VARIABLES, (Scope)null);
+					return new DataProviderNodeWrapper(SCOPE_VARIABLES, (ScopeWithContext)null);
 				}
 			}
 			return null;
@@ -712,7 +713,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 
 		public final RelationList relations;
 
-		public Scope scope;
+		public ScopeWithContext scope;
 
 		private int hashcode;
 
@@ -741,17 +742,17 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			this.type = null;
 		}
 
-		public DataProviderNodeWrapper(String node, Scope scope)
+		public DataProviderNodeWrapper(String node, ScopeWithContext scope)
 		{
 			this(node, null, scope, null);
 		}
 
-		public DataProviderNodeWrapper(String node, Scope scope, String type)
+		public DataProviderNodeWrapper(String node, ScopeWithContext scope, String type)
 		{
 			this(node, null, scope, type);
 		}
 
-		public DataProviderNodeWrapper(String node, RelationList relations, Scope scope, String type)
+		public DataProviderNodeWrapper(String node, RelationList relations, ScopeWithContext scope, String type)
 		{
 			this.node = node;
 			this.relations = relations;

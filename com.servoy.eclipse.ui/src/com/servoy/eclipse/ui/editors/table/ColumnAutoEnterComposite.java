@@ -71,7 +71,6 @@ import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentP
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider.UnresolvedDataProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderNodeWrapper;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
-import com.servoy.eclipse.ui.dialogs.Scope;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.editors.AddMethodButtonsComposite;
 import com.servoy.eclipse.ui.editors.table.ColumnDetailsComposite.NotSameValidator;
@@ -81,6 +80,7 @@ import com.servoy.eclipse.ui.property.DataProviderConverter;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.IControlFactory;
+import com.servoy.eclipse.ui.util.ScopeWithContext;
 import com.servoy.eclipse.ui.views.TreeSelectObservableValue;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.j2db.FlattenedSolution;
@@ -196,14 +196,14 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 							Collection<Pair<String, IRootObject>> scopes = ColumnAutoEnterComposite.this.flattenedSolution.getScopes();
 							Iterator<Pair<String, IRootObject>> it = scopes.iterator();
 
-							SortedList<Scope> scopesList = new SortedList<Scope>(Scope.SCOPE_COMPARATOR);
+							SortedList<ScopeWithContext> scopesList = new SortedList<ScopeWithContext>(ScopeWithContext.SCOPE_COMPARATOR);
 							while (it.hasNext())
 							{
 								Pair<String, IRootObject> sc = it.next();
-								scopesList.add(new Scope(sc.getLeft(), sc.getRight()));
+								scopesList.add(new ScopeWithContext(sc.getLeft(), sc.getRight()));
 							}
 							List<Object> children = new ArrayList<Object>();
-							for (Scope scope : scopesList)
+							for (ScopeWithContext scope : scopesList)
 							{
 								children.add(new DataProviderNodeWrapper(scope.getName(), scope, DataProviderTreeViewer.METHODS));
 							}
@@ -238,13 +238,13 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 						if (value instanceof ScriptMethod)
 						{
 							ScriptMethod scriptMethod = (ScriptMethod)value;
-							return new DataProviderNodeWrapper(scriptMethod.getScopeName(), new Scope(scriptMethod.getScopeName(),
+							return new DataProviderNodeWrapper(scriptMethod.getScopeName(), new ScopeWithContext(scriptMethod.getScopeName(),
 								(Solution)scriptMethod.getParent()), DataProviderTreeViewer.METHODS);
 						}
 						if (value instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)value).scope != null &&
 							((DataProviderNodeWrapper)value).type == DataProviderTreeViewer.METHODS)
 						{
-							return new DataProviderNodeWrapper(DataProviderTreeViewer.SCOPE_METHODS, (Scope)null);
+							return new DataProviderNodeWrapper(DataProviderTreeViewer.SCOPE_METHODS, (ScopeWithContext)null);
 						}
 						return super.getParent(value);
 					}

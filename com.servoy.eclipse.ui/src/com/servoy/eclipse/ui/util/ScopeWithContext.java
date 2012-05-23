@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.ui.dialogs;
+package com.servoy.eclipse.ui.util;
 
 import java.util.Comparator;
 
@@ -26,14 +26,14 @@ import com.servoy.j2db.persistence.ScriptVariable;
  * @author hhardut
  *
  */
-public class Scope
+public class ScopeWithContext
 {
 	private final String name;
 	private final IRootObject rootObject;
 
-	public static final Comparator<Scope> SCOPE_COMPARATOR = new Comparator<Scope>()
+	public static final Comparator<ScopeWithContext> SCOPE_COMPARATOR = new Comparator<ScopeWithContext>()
 	{
-		public int compare(Scope sc1, Scope sc2)
+		public int compare(ScopeWithContext sc1, ScopeWithContext sc2)
 		{
 
 			String sc1Name = sc1.getName();
@@ -44,7 +44,7 @@ public class Scope
 		}
 	};
 
-	public Scope(String name, IRootObject rootObject)
+	public ScopeWithContext(String name, IRootObject rootObject)
 	{
 		this.name = name;
 		this.rootObject = rootObject;
@@ -86,7 +86,7 @@ public class Scope
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		Scope other = (Scope)obj;
+		ScopeWithContext other = (ScopeWithContext)obj;
 		if (name == null)
 		{
 			if (other.name != null) return false;
@@ -100,5 +100,11 @@ public class Scope
 		return true;
 	}
 
+	@Override
+	public String toString()
+	{
+		// Will be printed when this is used as model in viewers
+		return ScriptVariable.SCOPES_DOT_PREFIX + name;
+	}
 
 }

@@ -46,6 +46,7 @@ import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
+import com.servoy.eclipse.ui.util.ScopeWithContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -217,13 +218,13 @@ public class MethodDialog extends TreeSelectDialog
 				Solution solution = (Solution)context.getAncestor(IRepository.SOLUTIONS);
 				Collection<Pair<String, IRootObject>> scopes = ModelUtils.getEditingFlattenedSolution(solution).getScopes();
 				Iterator<Pair<String, IRootObject>> it = scopes.iterator();
-				SortedList<Object> scopesList = new SortedList<Object>(Scope.SCOPE_COMPARATOR);
+				SortedList<ScopeWithContext> scopesList = new SortedList<ScopeWithContext>(ScopeWithContext.SCOPE_COMPARATOR);
 				while (it.hasNext())
 				{
 					Pair<String, IRootObject> sc = it.next();
 					if (sc.getRight().getName().equals(solution.getName()))
 					{
-						scopesList.add(new Scope(sc.getLeft(), sc.getRight()));
+						scopesList.add(new ScopeWithContext(sc.getLeft(), sc.getRight()));
 					}
 				}
 
@@ -241,9 +242,10 @@ public class MethodDialog extends TreeSelectDialog
 					scriptMethods = ModelUtils.getEditingFlattenedSolution(context).getFlattenedForm(parent).getScriptMethods(true);
 				}
 			}
-			else if (parentElement instanceof Scope)
+			else if (parentElement instanceof ScopeWithContext)
 			{
-				scriptMethods = ((Solution)((Scope)parentElement).getRootObject()).getScriptMethods(((Scope)parentElement).getName(), true);
+				scriptMethods = ((Solution)((ScopeWithContext)parentElement).getRootObject()).getScriptMethods(((ScopeWithContext)parentElement).getName(),
+					true);
 			}
 			else if (parentElement instanceof ITable)
 			{
@@ -269,7 +271,7 @@ public class MethodDialog extends TreeSelectDialog
 				while (it.hasNext())
 				{
 					Pair<String, IRootObject> sc = it.next();
-					scopesArray[i++] = new Scope(sc.getLeft(), sc.getRight());
+					scopesArray[i++] = new ScopeWithContext(sc.getLeft(), sc.getRight());
 				}
 
 				return scopesArray;
@@ -301,7 +303,8 @@ public class MethodDialog extends TreeSelectDialog
 
 		public boolean hasChildren(Object element)
 		{
-			return FORM_METHODS == element || SCOPE_METHODS == element || element instanceof Solution || element instanceof ITable || element instanceof Scope;
+			return FORM_METHODS == element || SCOPE_METHODS == element || element instanceof Solution || element instanceof ITable ||
+				element instanceof ScopeWithContext;
 		}
 
 		public boolean isKeyword(Object element)
@@ -370,14 +373,14 @@ public class MethodDialog extends TreeSelectDialog
 			if (FORM_METHODS == value) return "form methods";
 			if (SCOPE_METHODS == value) return "scope methods";
 			if (value instanceof ITable) return "entity methods";
-			if (value instanceof Scope) return ((Scope)value).getName();
+			if (value instanceof ScopeWithContext) return ((ScopeWithContext)value).getName();
 			if (value instanceof Solution) return ((Solution)value).getName();
 			return null;
 		}
 
 		public Font getFont(Object value)
 		{
-			if (FORM_METHODS == value || SCOPE_METHODS == value || value instanceof Solution || value instanceof ITable || value instanceof Scope)
+			if (FORM_METHODS == value || SCOPE_METHODS == value || value instanceof Solution || value instanceof ITable || value instanceof ScopeWithContext)
 			{
 				return FontResource.getDefaultFont(SWT.ITALIC, 1);
 			}
@@ -407,7 +410,7 @@ public class MethodDialog extends TreeSelectDialog
 			if (value instanceof Solution) return solutionImage;
 			if (FORM_METHODS == value) return formMethodsImage;
 			if (SCOPE_METHODS == value) return scopeMethodsImage;
-			if (value instanceof Scope) return scopeMethodsImage;
+			if (value instanceof ScopeWithContext) return scopeMethodsImage;
 			if (value instanceof ITable) return foundsetMethodsImage;
 			return null;
 		}
