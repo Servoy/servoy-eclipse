@@ -73,14 +73,19 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			Form form = (Form)attribute;
 			String scriptPath = SolutionSerializer.getScriptPath(form, false);
 			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
-			IValueCollection collection = ValueCollectionFactory.createValueCollection();
-			ValueCollectionFactory.copyInto(collection, getValueCollection(file));
-			collection = getSuperFormContext(context, form, collection);
-			if (member.getAttribute(IReferenceAttributes.SUPER_SCOPE) != null)
+			IValueCollection valueCollection = getValueCollection(file);
+			if (valueCollection != null)
 			{
-				((IValueProvider)collection).getValue().setAttribute(IReferenceAttributes.SUPER_SCOPE, Boolean.TRUE);
+				IValueCollection collection = ValueCollectionFactory.createValueCollection();
+				ValueCollectionFactory.copyInto(collection, valueCollection);
+				collection = getSuperFormContext(context, form, collection);
+				if (member.getAttribute(IReferenceAttributes.SUPER_SCOPE) != null)
+				{
+					((IValueProvider)collection).getValue().setAttribute(IReferenceAttributes.SUPER_SCOPE, Boolean.TRUE);
+				}
+				return collection;
 			}
-			return collection;
+			return null;
 		}
 
 		String typeName = null;
@@ -407,13 +412,11 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				{
 					collection = pair.getRight();
 				}
-
 			}
 			catch (Exception e)
 			{
 				ServoyLog.logError(e);
 			}
-
 		}
 
 		return collection;
