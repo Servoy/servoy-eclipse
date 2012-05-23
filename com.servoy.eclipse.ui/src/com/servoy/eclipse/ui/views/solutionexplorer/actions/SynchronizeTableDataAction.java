@@ -176,7 +176,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			if (!MetaDataUtils.canBeMarkedAsMetaData(table))
 			{
 				UIUtils.showInformation(shell, "Table not marked as metadata table", "Table '" + table.getName() +
-					"' can't be a metadata table because it must have a UUID primairy key, a " + MetaDataUtils.METADATA_MODIFICATION_COLUMN + " and a " +
+					"' can't be a metadata table because it must have a UUID primary key, a " + MetaDataUtils.METADATA_MODIFICATION_COLUMN + " and a " +
 					MetaDataUtils.METADATA_DELETION_COLUMN + " date column");
 				continue;
 			}

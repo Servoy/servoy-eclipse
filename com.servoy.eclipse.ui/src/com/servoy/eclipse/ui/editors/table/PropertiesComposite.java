@@ -135,7 +135,7 @@ public class PropertiesComposite extends Composite
 		}
 		else
 		{
-			btnMetadataTable.setText("Metadata table (Table can't be a metadata table because it must have a UUID primairy key, a " +
+			btnMetadataTable.setText("Metadata table (Table can't be a metadata table because it must have a UUID primary key, a " +
 				MetaDataUtils.METADATA_MODIFICATION_COLUMN + " and a " + MetaDataUtils.METADATA_DELETION_COLUMN + " date column)");
 			btnMetadataTable.setEnabled(false);
 		}
