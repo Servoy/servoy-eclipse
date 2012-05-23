@@ -51,14 +51,7 @@ public class TypeProvider implements ITypeProvider
 		TypeCreator.CONTEXT.set(ElementResolver.getFlattenedSolution(context));
 		try
 		{
-			if (typeName.startsWith("Packages."))
-			{
-				return TYPES.findType(typeName.substring("Packages.".length()));
-			}
-			else
-			{
-				return TYPES.findType(typeName);
-			}
+			return TYPES.findType(typeName);
 		}
 		finally
 		{

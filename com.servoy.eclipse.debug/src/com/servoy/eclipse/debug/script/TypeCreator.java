@@ -352,21 +352,27 @@ public class TypeCreator extends TypeCache
 		if (!initialized) initalize();
 
 		Type type = null;
-		if (typeName.startsWith("java.") || typeName.startsWith("javax."))
+		if (typeName.startsWith("Packages.") || typeName.startsWith("java.") || typeName.startsWith("javax."))
 		{
-			if (ignorePackages.containsKey(typeName)) return null;
+			String name = typeName;
+			if (name.startsWith("Packages."))
+			{
+				name = name.substring("Packages.".length());
+				type = findType(name);
+				if (type != null) return type;
+			}
+			if (ignorePackages.containsKey(name)) return null;
 			try
 			{
 				ClassLoader cl = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getBeanManager().getClassLoader();
 				if (cl == null) cl = Thread.currentThread().getContextClassLoader();
-				Class< ? > clz = Class.forName(typeName, false, cl);
-				type = getClassType(clz, typeName);
+				Class< ? > clz = Class.forName(name, false, cl);
+				type = getClassType(clz, name);
 			}
 			catch (ClassNotFoundException e)
 			{
-				ignorePackages.put(typeName, Boolean.FALSE);
+				ignorePackages.put(name, Boolean.FALSE);
 			}
-			return null;
 		}
 		else if (typeName.equals("Continuation"))
 		{
