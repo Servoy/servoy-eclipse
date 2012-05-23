@@ -5842,7 +5842,7 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -5851,7 +5851,7 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-var prop = fld.getDesigntimeProperty('myprop')]]></sample>
+var prop = fld.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getUUID">
           <argumentsTypes/>
@@ -5861,7 +5861,7 @@ var prop = fld.getDesigntimeProperty('myprop')]]></sample>
           <sample><![CDATA[var button_uuid = solutionModel.getForm("my_form").getButton("my_button").getUUID();
 application.output(button_uuid.toString());]]></sample>
         </function>
-        <function name="putDesigntimeProperty">
+        <function name="putDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
@@ -5871,9 +5871,9 @@ application.output(button_uuid.toString());]]></sample>
           <summary><![CDATA[Set a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
+fld.putDesignTimeProperty('myprop', 'strawberry')]]></sample>
         </function>
-        <function name="removeDesigntimeProperty">
+        <function name="removeDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -5882,7 +5882,7 @@ fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
           <summary><![CDATA[Clear a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.removeDesigntimeProperty('myprop')]]></sample>
+fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
@@ -6435,7 +6435,7 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -6444,7 +6444,7 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-var prop = fld.getDesigntimeProperty('myprop')]]></sample>
+var prop = fld.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getUUID">
           <argumentsTypes/>
@@ -6454,7 +6454,7 @@ var prop = fld.getDesigntimeProperty('myprop')]]></sample>
           <sample><![CDATA[var button_uuid = solutionModel.getForm("my_form").getButton("my_button").getUUID();
 application.output(button_uuid.toString());]]></sample>
         </function>
-        <function name="putDesigntimeProperty">
+        <function name="putDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
@@ -6464,9 +6464,9 @@ application.output(button_uuid.toString());]]></sample>
           <summary><![CDATA[Set a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
+fld.putDesignTimeProperty('myprop', 'strawberry')]]></sample>
         </function>
-        <function name="removeDesigntimeProperty">
+        <function name="removeDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -6475,7 +6475,7 @@ fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
           <summary><![CDATA[Clear a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.removeDesigntimeProperty('myprop')]]></sample>
+fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
         <function deprecated="true" name="setOnActionMethod">
           <argumentsTypes>
@@ -7814,7 +7814,7 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -7823,7 +7823,7 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-var prop = fld.getDesigntimeProperty('myprop')]]></sample>
+var prop = fld.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getUUID">
           <argumentsTypes/>
@@ -7833,7 +7833,7 @@ var prop = fld.getDesigntimeProperty('myprop')]]></sample>
           <sample><![CDATA[var button_uuid = solutionModel.getForm("my_form").getButton("my_button").getUUID();
 application.output(button_uuid.toString());]]></sample>
         </function>
-        <function name="putDesigntimeProperty">
+        <function name="putDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
@@ -7843,9 +7843,9 @@ application.output(button_uuid.toString());]]></sample>
           <summary><![CDATA[Set a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
+fld.putDesignTimeProperty('myprop', 'strawberry')]]></sample>
         </function>
-        <function name="removeDesigntimeProperty">
+        <function name="removeDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -7854,7 +7854,7 @@ fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
           <summary><![CDATA[Clear a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.removeDesigntimeProperty('myprop')]]></sample>
+fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
@@ -9807,7 +9807,7 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -9816,7 +9816,7 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-var prop = fld.getDesigntimeProperty('myprop')]]></sample>
+var prop = fld.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getUUID">
           <argumentsTypes/>
@@ -9826,7 +9826,7 @@ var prop = fld.getDesigntimeProperty('myprop')]]></sample>
           <sample><![CDATA[var button_uuid = solutionModel.getForm("my_form").getButton("my_button").getUUID();
 application.output(button_uuid.toString());]]></sample>
         </function>
-        <function name="putDesigntimeProperty">
+        <function name="putDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
@@ -9836,9 +9836,9 @@ application.output(button_uuid.toString());]]></sample>
           <summary><![CDATA[Set a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
+fld.putDesignTimeProperty('myprop', 'strawberry')]]></sample>
         </function>
-        <function name="removeDesigntimeProperty">
+        <function name="removeDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -9847,7 +9847,7 @@ fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
           <summary><![CDATA[Clear a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.removeDesigntimeProperty('myprop')]]></sample>
+fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
         <function deprecated="true" name="setOnActionMethod">
           <argumentsTypes>
@@ -10904,7 +10904,7 @@ for (var i in components)
             </parameter>
           </parameters>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -10912,7 +10912,7 @@ for (var i in components)
           <description><![CDATA[Get a design-time property of a form.]]></description>
           <summary><![CDATA[Get a design-time property of a form.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
-var prop = frm.getDesigntimeProperty('myprop')]]></sample>
+var prop = frm.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getField">
           <argumentsTypes>
@@ -12329,7 +12329,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="putDesigntimeProperty">
+        <function name="putDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
@@ -12338,7 +12338,7 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Set a design-time property of a form.]]></description>
           <summary><![CDATA[Set a design-time property of a form.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
-frm.putDesigntimeProperty('myprop', 'lemon')]]></sample>
+frm.putDesignTimeProperty('myprop', 'lemon')]]></sample>
         </function>
         <function name="removeBean">
           <argumentsTypes>
@@ -12413,7 +12413,7 @@ forms['newFormX'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="removeDesigntimeProperty">
+        <function name="removeDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -12421,7 +12421,7 @@ forms['newFormX'].controller.show();]]></sample>
           <description><![CDATA[Clear a design-time property of a form.]]></description>
           <summary><![CDATA[Clear a design-time property of a form.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
-frm.removeDesigntimeProperty('myprop')]]></sample>
+frm.removeDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="removeField">
           <argumentsTypes>
@@ -14992,7 +14992,7 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -15001,7 +15001,7 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-var prop = fld.getDesigntimeProperty('myprop')]]></sample>
+var prop = fld.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getUUID">
           <argumentsTypes/>
@@ -15011,7 +15011,7 @@ var prop = fld.getDesigntimeProperty('myprop')]]></sample>
           <sample><![CDATA[var button_uuid = solutionModel.getForm("my_form").getButton("my_button").getUUID();
 application.output(button_uuid.toString());]]></sample>
         </function>
-        <function name="putDesigntimeProperty">
+        <function name="putDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
@@ -15021,9 +15021,9 @@ application.output(button_uuid.toString());]]></sample>
           <summary><![CDATA[Set a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
+fld.putDesignTimeProperty('myprop', 'strawberry')]]></sample>
         </function>
-        <function name="removeDesigntimeProperty">
+        <function name="removeDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -15032,7 +15032,7 @@ fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
           <summary><![CDATA[Clear a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.removeDesigntimeProperty('myprop')]]></sample>
+fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
         <function deprecated="true" name="setOnActionMethod">
           <argumentsTypes>
@@ -15612,7 +15612,7 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -15621,7 +15621,7 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-var prop = fld.getDesigntimeProperty('myprop')]]></sample>
+var prop = fld.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getUUID">
           <argumentsTypes/>
@@ -15631,7 +15631,7 @@ var prop = fld.getDesigntimeProperty('myprop')]]></sample>
           <sample><![CDATA[var button_uuid = solutionModel.getForm("my_form").getButton("my_button").getUUID();
 application.output(button_uuid.toString());]]></sample>
         </function>
-        <function name="putDesigntimeProperty">
+        <function name="putDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
@@ -15641,9 +15641,9 @@ application.output(button_uuid.toString());]]></sample>
           <summary><![CDATA[Set a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
+fld.putDesignTimeProperty('myprop', 'strawberry')]]></sample>
         </function>
-        <function name="removeDesigntimeProperty">
+        <function name="removeDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -15652,7 +15652,7 @@ fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
           <summary><![CDATA[Clear a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.removeDesigntimeProperty('myprop')]]></sample>
+fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
         <function deprecated="true" name="setOnActionMethod">
           <argumentsTypes>
@@ -16003,7 +16003,7 @@ body.styleClass = 'myBody';]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -16012,7 +16012,7 @@ body.styleClass = 'myBody';]]></sample>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-var prop = fld.getDesigntimeProperty('myprop')]]></sample>
+var prop = fld.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getPartType">
           <argumentsTypes/>
@@ -16044,7 +16044,7 @@ for (var i=0; i<allParts.length; i++) {
           <sample><![CDATA[var button_uuid = solutionModel.getForm("my_form").getButton("my_button").getUUID();
 application.output(button_uuid.toString());]]></sample>
         </function>
-        <function name="putDesigntimeProperty">
+        <function name="putDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
@@ -16054,9 +16054,9 @@ application.output(button_uuid.toString());]]></sample>
           <summary><![CDATA[Set a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
+fld.putDesignTimeProperty('myprop', 'strawberry')]]></sample>
         </function>
-        <function name="removeDesigntimeProperty">
+        <function name="removeDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -16065,7 +16065,7 @@ fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
           <summary><![CDATA[Clear a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.removeDesigntimeProperty('myprop')]]></sample>
+fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
@@ -16562,7 +16562,7 @@ var allButtons = childrenPortal.getButtons();
 var btnBackAgain = allButtons[0];
 btnBackAgain.foreground = 'red';]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -16571,7 +16571,7 @@ btnBackAgain.foreground = 'red';]]></sample>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-var prop = fld.getDesigntimeProperty('myprop')]]></sample>
+var prop = fld.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getField">
           <argumentsTypes>
@@ -17137,7 +17137,7 @@ tahead.valuelist = vlist;]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="putDesigntimeProperty">
+        <function name="putDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
@@ -17147,9 +17147,9 @@ tahead.valuelist = vlist;]]></sample>
           <summary><![CDATA[Set a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
+fld.putDesignTimeProperty('myprop', 'strawberry')]]></sample>
         </function>
-        <function name="removeDesigntimeProperty">
+        <function name="removeDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -17158,7 +17158,7 @@ fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
           <summary><![CDATA[Clear a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.removeDesigntimeProperty('myprop')]]></sample>
+fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="setIntercellSpacing">
           <argumentsTypes>
@@ -17532,7 +17532,7 @@ criteria.operator = '<';]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -17541,7 +17541,7 @@ criteria.operator = '<';]]></sample>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-var prop = fld.getDesigntimeProperty('myprop')]]></sample>
+var prop = fld.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getUUID">
           <argumentsTypes/>
@@ -17551,7 +17551,7 @@ var prop = fld.getDesigntimeProperty('myprop')]]></sample>
           <sample><![CDATA[var button_uuid = solutionModel.getForm("my_form").getButton("my_button").getUUID();
 application.output(button_uuid.toString());]]></sample>
         </function>
-        <function name="putDesigntimeProperty">
+        <function name="putDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
@@ -17561,9 +17561,9 @@ application.output(button_uuid.toString());]]></sample>
           <summary><![CDATA[Set a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
+fld.putDesignTimeProperty('myprop', 'strawberry')]]></sample>
         </function>
-        <function name="removeDesigntimeProperty">
+        <function name="removeDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -17572,7 +17572,7 @@ fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
           <summary><![CDATA[Clear a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.removeDesigntimeProperty('myprop')]]></sample>
+fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
@@ -17913,7 +17913,7 @@ secondTab.y = 0;]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -17922,7 +17922,7 @@ secondTab.y = 0;]]></sample>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-var prop = fld.getDesigntimeProperty('myprop')]]></sample>
+var prop = fld.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getUUID">
           <argumentsTypes/>
@@ -17932,7 +17932,7 @@ var prop = fld.getDesigntimeProperty('myprop')]]></sample>
           <sample><![CDATA[var button_uuid = solutionModel.getForm("my_form").getButton("my_button").getUUID();
 application.output(button_uuid.toString());]]></sample>
         </function>
-        <function name="putDesigntimeProperty">
+        <function name="putDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
@@ -17942,9 +17942,9 @@ application.output(button_uuid.toString());]]></sample>
           <summary><![CDATA[Set a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
+fld.putDesignTimeProperty('myprop', 'strawberry')]]></sample>
         </function>
-        <function name="removeDesigntimeProperty">
+        <function name="removeDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -17953,7 +17953,7 @@ fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
           <summary><![CDATA[Clear a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.removeDesigntimeProperty('myprop')]]></sample>
+fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
@@ -18263,7 +18263,7 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -18272,7 +18272,7 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-var prop = fld.getDesigntimeProperty('myprop')]]></sample>
+var prop = fld.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getTab">
           <argumentsTypes>
@@ -18388,7 +18388,7 @@ tabPanel.newTab('tab2', 'Child Two', childTwo);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="putDesigntimeProperty">
+        <function name="putDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
@@ -18398,9 +18398,9 @@ tabPanel.newTab('tab2', 'Child Two', childTwo);]]></sample>
           <summary><![CDATA[Set a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
+fld.putDesignTimeProperty('myprop', 'strawberry')]]></sample>
         </function>
-        <function name="removeDesigntimeProperty">
+        <function name="removeDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -18409,7 +18409,7 @@ fld.putDesigntimeProperty('myprop', 'strawberry')]]></sample>
           <summary><![CDATA[Clear a design-time property of an element.]]></summary>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
-fld.removeDesigntimeProperty('myprop')]]></sample>
+fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="removeTab">
           <argumentsTypes>
@@ -25896,14 +25896,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
             </parameter>
           </parameters>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -26448,14 +26448,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -26852,14 +26852,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -27210,14 +27210,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -27597,14 +27597,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -28062,14 +28062,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -28424,14 +28424,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
             </parameter>
           </parameters>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -28796,14 +28796,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -29218,14 +29218,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -29730,14 +29730,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -30192,14 +30192,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -30635,14 +30635,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -31019,14 +31019,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -31481,14 +31481,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -31866,14 +31866,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
             </parameter>
           </parameters>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -32327,14 +32327,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -32714,14 +32714,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -33142,14 +33142,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
             </parameter>
           </parameters>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -33528,14 +33528,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -34000,14 +34000,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -34415,14 +34415,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
             </parameter>
           </parameters>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -34868,14 +34868,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
             </parameter>
           </parameters>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -35434,14 +35434,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -35915,14 +35915,14 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <summary><![CDATA[Get the data provider this UI element (display) is showing.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.getDataProviderID();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of an element.]]></description>
           <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getElementType">
           <argumentsTypes/>
@@ -42299,14 +42299,14 @@ if (dialogOrWindowName != null) {
           <summary><![CDATA[Returns the state of this form designmode.]]></summary>
           <sample><![CDATA[var success = %%prefix%%controller.getDesignMode();]]></sample>
         </function>
-        <function name="getDesigntimeProperty">
+        <function name="getDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of a form.]]></description>
           <summary><![CDATA[Get a design-time property of a form.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.getDesigntimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getFormContext">
           <argumentsTypes/>

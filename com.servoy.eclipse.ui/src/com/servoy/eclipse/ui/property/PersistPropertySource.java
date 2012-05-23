@@ -334,7 +334,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			Solution.class));
 
 		DESIGN_PROPERTIES_CONTROLLER = new PropertySetterDelegatePropertyController<Map<String, Object>, Map<String, Object>>(new MapEntriesPropertyController(
-			"designProperties", RepositoryHelper.getDisplayName("designProperties", Form.class)), "designProperties")
+			"designTimeProperties", RepositoryHelper.getDisplayName("designTimeProperties", Form.class)), "designTimeProperties")
 		{
 			@Override
 			public Map<String, Object> getProperty(IPropertySource propSource)
@@ -344,7 +344,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					IPersist persist = ((PersistPropertySource)propSource).getPersist();
 					if (persist instanceof AbstractBase)
 					{
-						return ((AbstractBase)persist).getCustomDesigntimeProperties();
+						return ((AbstractBase)persist).getCustomDesignTimeProperties();
 					}
 				}
 				return null;
@@ -357,7 +357,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					IPersist persist = ((PersistPropertySource)propSource).getPersist();
 					if (persist instanceof AbstractBase)
 					{
-						((AbstractBase)persist).setCustomDesigntimeProperties(value);
+						((AbstractBase)persist).setCustomDesignTimeProperties(value);
 					}
 				}
 			}
@@ -594,7 +594,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 		if (Form.class == clazz || IFormElement.class.isAssignableFrom(clazz))
 		{
-			return new String[] { "designProperties" };
+			return new String[] { "designTimeProperties" };
 		}
 		return null;
 	}
@@ -3395,7 +3395,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return LOGIN_SOLUTION_CONTROLLER;
 		}
 
-		if (name.equals("designProperties"))
+		if (name.equals("designTimeProperties"))
 		{
 			return DESIGN_PROPERTIES_CONTROLLER;
 		}
