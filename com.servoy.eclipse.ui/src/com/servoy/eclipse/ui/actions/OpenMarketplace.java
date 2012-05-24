@@ -60,7 +60,7 @@ public class OpenMarketplace implements IWorkbenchWindowActionDelegate, IStartPa
 				p = (MarketplaceBrowserEditor)activePage.openEditor(MarketplaceBrowserEditor.INPUT, MarketplaceBrowserEditor.MARKETPLACE_BROWSER_EDITOR_ID);
 				if (param != null)
 				{
-					p.deepLink("&m=deepLinkProduct&a=" + param); //$NON-NLS-1$
+					p.deepLink("/filter/" + param); //$NON-NLS-1$
 				}
 			}
 			else
