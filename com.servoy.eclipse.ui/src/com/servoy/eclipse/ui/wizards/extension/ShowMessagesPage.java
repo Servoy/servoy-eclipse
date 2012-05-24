@@ -137,6 +137,7 @@ public class ShowMessagesPage extends WizardPage
 
 		GridLayout gl = new GridLayout(1, false);
 		gl.marginHeight = gl.marginWidth = 10;
+		gl.verticalSpacing = 10;
 		topLevel.setLayout(gl);
 		setControl(topLevel);
 
@@ -208,6 +209,18 @@ public class ShowMessagesPage extends WizardPage
 			data = new GridData(SWT.FILL, SWT.FILL, true, true);
 			table.setLayoutData(data);
 		}
+
+		createCustomControl(topLevel);
+	}
+
+	/**
+	 * Assume that parent control has a GridLayout layout with 1 column.
+	 * The custom controll will appear after the messages section (if it exists).
+	 * @param parent the parent control.
+	 */
+	protected void createCustomControl(Composite parent)
+	{
+		// does nothing by default
 	}
 
 	@Override

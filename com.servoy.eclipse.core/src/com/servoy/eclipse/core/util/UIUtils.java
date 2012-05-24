@@ -420,7 +420,7 @@ public class UIUtils
 				}
 				if (toRunNext != null)
 				{
-					display.timerExec(1, toRunNext); // we can't rely in successive calls to this timerExec with same delay or different delays to execute in the correct order
+					display.timerExec(0, toRunNext); // we can't rely in successive calls to this timerExec with same delay or different delays to execute in the correct order
 					// the order would depend on the OS timer representation see https://bugs.eclipse.org/bugs/show_bug.cgi?id=297768
 					// if we could, all this implementation would not be needed
 				}
@@ -463,7 +463,7 @@ public class UIUtils
 				{
 					public void run()
 					{
-						display.timerExec(1, toBeRan); // we can't rely in successive calls to this timerExec with same delay or different delays to execute in the correct order
+						display.timerExec(0, toBeRan); // we can't rely in successive calls to this timerExec with same delay or different delays to execute in the correct order
 						// the order would depend on the OS timer representation see https://bugs.eclipse.org/bugs/show_bug.cgi?id=297768
 						// if we could, all this implementation would not be needed
 					}

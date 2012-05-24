@@ -637,7 +637,7 @@ public class DependencyResolvingPage extends WizardPage
 								monitor.subTask("Resolving dependencies..."); //$NON-NLS-1$
 								resolver.resolveDependencies(state.extensionID, state.version);
 								Message[] resolveWarnings = resolver.getMessages();
-								if (resolveWarnings != null) Debug.trace(Arrays.asList(resolveWarnings).toString());
+								if (resolveWarnings.length > 0) Debug.trace(Arrays.asList(resolveWarnings).toString());
 								monitor.worked(4);
 
 								List<DependencyPath> installPaths = resolver.getResults();
@@ -682,7 +682,7 @@ public class DependencyResolvingPage extends WizardPage
 								}
 								else
 								{
-									if (resolveWarnings != null && resolveWarnings.length == 1 && resolveWarnings[0].severity == Message.INFO)
+									if (resolveWarnings.length == 1 && resolveWarnings[0].severity == Message.INFO)
 									{
 										// the extension is already installed probably; less alarming message needs to be shown
 										failMessage[0] = resolveWarnings[0].message;
@@ -749,7 +749,7 @@ public class DependencyResolvingPage extends WizardPage
 		// show correct next page based on 'failMessage' and 'warnings'
 		Message[] exp1W = state.extensionProvider.getMessages();
 		Message[] exp2W = state.installedExtensionsProvider.getMessages();
-		if (failMessage[0] != null || exp2W != null || state.chosenPath == null)
+		if (failMessage[0] != null || exp2W.length > 0 || state.chosenPath == null)
 		{
 			if (failMessage[0] == null)
 			{
@@ -758,11 +758,10 @@ public class DependencyResolvingPage extends WizardPage
 				failMessage[0] = "Dependency resolve failed."; //$NON-NLS-1$
 			}
 			// show problems page with failMessage as description and warnings as list (which could be null)
-			List<Message> allWarnings = new ArrayList<Message>((warnings[0] != null ? warnings[0].length : 0) + (exp1W != null ? exp1W.length : 0) +
-				(exp2W != null ? exp2W.length : 0));
+			List<Message> allWarnings = new ArrayList<Message>((warnings[0] != null ? warnings[0].length : 0) + exp1W.length + exp2W.length);
 			if (warnings[0] != null) allWarnings.addAll(Arrays.asList(warnings[0]));
-			if (exp2W != null) allWarnings.addAll(Arrays.asList(exp2W));
-			if (exp1W != null) allWarnings.addAll(Arrays.asList(exp1W));
+			allWarnings.addAll(Arrays.asList(exp2W));
+			allWarnings.addAll(Arrays.asList(exp1W));
 
 			Message[] messages;
 			if (allWarnings.size() > 0)
@@ -827,7 +826,7 @@ public class DependencyResolvingPage extends WizardPage
 			} // else just use nextPage to install
 
 			// check to see if extension provider has any warnings (for example connection failures for some of the required data)
-			if (exp1W != null && exp1W.length > 0)
+			if (exp1W.length > 0)
 			{
 				// user should know about these; or should we just consider this step failed directly?
 				nextPage = new ShowMessagesPage(

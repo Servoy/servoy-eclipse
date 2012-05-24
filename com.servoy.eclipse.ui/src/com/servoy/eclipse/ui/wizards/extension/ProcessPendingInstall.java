@@ -8,8 +8,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.marketplace.InstalledWithPendingExtensionProvider;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.extension.install.CopyZipEntryImporter;
+import com.servoy.extension.ExtensionUtils;
 import com.servoy.j2db.util.Utils;
 
 public class ProcessPendingInstall implements Runnable
@@ -23,7 +24,7 @@ public class ProcessPendingInstall implements Runnable
 			public void run()
 			{
 				File installDir = getInstallDir();
-				File f = new File(new File(installDir, CopyZipEntryImporter.EXPFILES_FOLDER), ActualInstallPage.TO_BE_INSTALLED_FOLDER);
+				File f = new File(new File(installDir, ExtensionUtils.EXPFILES_FOLDER), InstalledWithPendingExtensionProvider.PENDING_FOLDER);
 				if (f.exists())
 				{
 					InstallExtensionWizard installExtensionWizard = new InstallExtensionWizard(true, installDir);

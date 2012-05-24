@@ -186,7 +186,7 @@ public class ChooseEXPFilePage extends WizardPage
 				if (dependencyMetadata == null)
 				{
 					Message[] warn = parser.getMessages();
-					error = "Cannot parse selected .exp file." + System.getProperty("line.separator") + (warn != null && warn.length > 0 ? shortenIfNeeded(warn[0].message) : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					error = "Cannot parse selected .exp file." + System.getProperty("line.separator") + (warn.length > 0 ? shortenIfNeeded(warn[0].message) : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 				else
 				{

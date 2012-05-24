@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Display;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.extension.FileBasedExtensionProvider;
 import com.servoy.extension.IExtensionProvider;
+import com.servoy.extension.IFileBasedExtensionProvider;
 import com.servoy.extension.dependency.DependencyPath;
 import com.servoy.extension.parser.EXPParser;
 import com.servoy.extension.parser.IEXPParserPool;
@@ -46,8 +47,8 @@ public class RestartState implements IEXPParserPool
 	protected final static String PERSISTED_STATE_FILENAME = "pending.pgo"; //$NON-NLS-1$
 
 	public File installDir = null; // this one does not need to be persisted; can be recreated
-	public IExtensionProvider extensionProvider; // recreated based on "pending" folder, not persisted
-	public FileBasedExtensionProvider installedExtensionsProvider; // recreated, not persisted
+	public IExtensionProvider extensionProvider; // after restart (if needed) it's recreated based on ".pending/.#" folder where # is an int, not persisted
+	public IFileBasedExtensionProvider installedExtensionsProvider; // recreated, not persisted
 
 	public DependencyPath chosenPath; // MAIN PERSISTED THING
 
@@ -104,6 +105,9 @@ public class RestartState implements IEXPParserPool
 	 */
 	public String recreateFromPending(File pendingDir)
 	{
+		chosenPath = null;
+		extensionProvider = null;
+
 		String err = null;
 		File sourceFile = new File(pendingDir, PERSISTED_STATE_FILENAME);
 		ObjectInputStream in = null;
@@ -114,6 +118,7 @@ public class RestartState implements IEXPParserPool
 
 			// recreate stuff needed to continue install but do not need persisting
 			extensionProvider = new FileBasedExtensionProvider(pendingDir, true, this);
+			installedExtensionsProvider.flushCache(); // after last pending dir was processed, the installed extensions dir probably changed
 		}
 		catch (IOException e)
 		{

@@ -82,7 +82,7 @@ public class ContentInstaller
 								{
 									Throwable cause = ex.getCause();
 									String msg = cause != null ? cause.getMessage() : ex.getMessage();
-									MessageDialog.openError(UIUtils.getActiveShell(), "Servoy Marketplace", "Error installing " + installItem.getName() +
+									MessageDialog.openError(UIUtils.getActiveShell(), "Extension install task", "Error installing " + installItem.getName() +
 										".\n\n" + msg);
 								}
 							});
@@ -234,7 +234,7 @@ public class ContentInstaller
 		protected void configureShell(final Shell shell)
 		{
 			super.configureShell(shell);
-			shell.setText("Servoy Marketplace - Installing " + installName + " ...");
+			shell.setText("Extension install task: '" + installName + "'...");
 		}
 	}
 }

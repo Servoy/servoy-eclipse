@@ -67,7 +67,7 @@ public class UpdateURLInstall implements InstallItem
 					}
 					catch (Exception ex)
 					{
-						MessageDialog.openError(UIUtils.getActiveShell(), "Servoy Marketplace",
+						MessageDialog.openError(UIUtils.getActiveShell(), "Extension install task",
 							"Error installing update url: " + updateURL + ".\n\n" + ex.getMessage());
 					}
 				}

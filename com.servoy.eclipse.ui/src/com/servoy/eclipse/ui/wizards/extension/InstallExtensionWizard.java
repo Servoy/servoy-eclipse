@@ -26,11 +26,12 @@ import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.marketplace.InstalledWithPendingExtensionProvider;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.extension.ExtensionUtils;
 import com.servoy.extension.FileBasedExtensionProvider;
 import com.servoy.extension.MarketPlaceExtensionProvider;
 import com.servoy.extension.Message;
-import com.servoy.extension.install.CopyZipEntryImporter;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 
@@ -100,11 +101,20 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 			}
 		}
 
-		File extDir = new File(state.installDir, CopyZipEntryImporter.EXPFILES_FOLDER);
+		File extDir = new File(state.installDir, ExtensionUtils.EXPFILES_FOLDER);
 		if (!extDir.exists()) extDir.mkdir();
 		if (extDir.exists() && extDir.canRead() && extDir.isDirectory())
 		{
-			if (state.installedExtensionsProvider == null) state.installedExtensionsProvider = new FileBasedExtensionProvider(extDir, true, state);
+			if (continueWithPendingAfterRestart)
+			{
+				state.installedExtensionsProvider = new FileBasedExtensionProvider(extDir, true, state);
+			}
+			else
+			{
+				InstalledWithPendingExtensionProvider tmp = new InstalledWithPendingExtensionProvider(extDir, state);
+				state.mustRestart = (tmp.getFolderCount() > 1); // check if we already have pending install operations
+				state.installedExtensionsProvider = tmp;
+			}
 		}
 	}
 
@@ -133,7 +143,7 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 				{
 					// this shouldn't happen in normal circumstances; maybe a network error caused this...
 					Message[] messages = marketplaceProvider.getMessages();
-					if (messages == null || messages.length == 0)
+					if (messages.length == 0)
 					{
 						messages = new Message[] { new Message("Unknown error", Message.ERROR) }; //$NON-NLS-1$
 					}
@@ -175,7 +185,7 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 	@Override
 	public boolean performCancel()
 	{
-		if (state.disallowCancel || state.mustRestart) return false;
+		if (state.disallowCancel) return false;
 		if (dialogOptions != null) dialogOptions.saveOptions(getDialogSettings());
 		return super.performCancel();
 	}

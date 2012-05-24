@@ -239,7 +239,7 @@ public class ChooseMPExtensionVersion extends WizardPage
 			{
 				// else something went wrong... connection failure? anyway just continue cause we do have a version selected anyway
 				Message[] w = marketplaceProvider.getMessages();
-				ServoyLog.logWarning("Problems when trying to pre-select best version: " + (w != null ? w[w.length - 1].message : "<unknown>"), null); //$NON-NLS-1$ //$NON-NLS-2$
+				ServoyLog.logWarning("Problems when trying to pre-select best version: " + (w.length > 0 ? w[w.length - 1].message : "<unknown>"), null); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			marketplaceProvider.clearMessages();
 		}

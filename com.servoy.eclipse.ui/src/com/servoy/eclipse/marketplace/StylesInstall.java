@@ -122,7 +122,7 @@ public class StylesInstall implements InstallItem
 
 												public void run()
 												{
-													MessageDialog.openError(UIUtils.getActiveShell(), "Servoy Marketplace", "Error installing style: " +
+													MessageDialog.openError(UIUtils.getActiveShell(), "Extension install task", "Error installing style: " +
 														styleName + ".\n\n" + ex.getMessage());
 												}
 											}, false);
