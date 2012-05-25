@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFolder;
@@ -38,6 +37,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IMediaProvider;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Class used to represent a solution media folder or image in the developer
@@ -149,11 +149,8 @@ public class MediaNode
 		MediaNode node = null;
 
 		String mediaFolder = getPath();
-		Iterator<Media> medias = mediaProvider.getMedias(false);
-
-		while (medias.hasNext())
+		for (Media mediaItem : Utils.asList(mediaProvider.getMedias(false)))
 		{
-			Media mediaItem = medias.next();
 			String mediaName = mediaItem.getName();
 
 			if (mediaName != null && (mediaFolder == null || mediaName.startsWith(mediaFolder)))
