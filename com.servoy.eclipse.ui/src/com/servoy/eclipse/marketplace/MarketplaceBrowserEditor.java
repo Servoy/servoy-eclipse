@@ -124,7 +124,7 @@ public class MarketplaceBrowserEditor extends EditorPart
 					{
 						public void run()
 						{
-							InstallExtensionWizard installExtensionWizard = new InstallExtensionWizard(extensionId);
+							InstallExtensionWizard installExtensionWizard = new InstallExtensionWizard(extensionId, null);
 							installExtensionWizard.init(PlatformUI.getWorkbench(), null);
 							WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), installExtensionWizard);
 							dialog.open();

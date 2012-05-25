@@ -466,8 +466,8 @@ public class ActualInstallPage extends WizardPage
 
 	protected void finalizeInstall(String[] error, List<Message> allMessages)
 	{
-		allMessages.addAll(Arrays.asList(state.extensionProvider.getMessages()));
-		allMessages.addAll(Arrays.asList(state.installedExtensionsProvider.getMessages()));
+		if (state.extensionProvider != null) allMessages.addAll(Arrays.asList(state.extensionProvider.getMessages()));
+		if (state.installedExtensionsProvider != null) allMessages.addAll(Arrays.asList(state.installedExtensionsProvider.getMessages()));
 		Message messages[] = allMessages.size() > 0 ? allMessages.toArray(new Message[allMessages.size()]) : null;
 
 		if (error[0] != null)

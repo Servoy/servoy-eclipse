@@ -161,7 +161,7 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 			}
 		};
 
-		generateJob.setRule(new SerialRule());
+		generateJob.setRule(SerialRule.INSTANCE);
 		generateJob.setUser(true);
 		generateJob.schedule();
 

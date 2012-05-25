@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -181,7 +180,6 @@ public class NewStyleWizard extends Wizard implements INewWizard
 		if (activeProject != null)
 		{
 			WorkspaceJob job;
-			ISchedulingRule rule = new SerialRule();
 			// if there is an active resource project, the new style will be added to it; else we must add a reference to the chosen (maybe new) resource project
 			if (activeProject.getResourcesProject() == null)
 			{
@@ -196,7 +194,7 @@ public class NewStyleWizard extends Wizard implements INewWizard
 				}
 				// create new resource project if necessary and reference it from active project
 				job = new ResourcesProjectSetupJob("Setting up resources project for active solution", newResourcesProject, null, activeProject, false);
-				job.setRule(rule);
+				job.setRule(SerialRule.INSTANCE);
 				job.setUser(true);
 				job.schedule();
 			}
@@ -244,7 +242,7 @@ public class NewStyleWizard extends Wizard implements INewWizard
 				}
 
 			};
-			job.setRule(rule);
+			job.setRule(SerialRule.INSTANCE);
 			job.setUser(true);
 			job.schedule();
 
@@ -273,7 +271,7 @@ public class NewStyleWizard extends Wizard implements INewWizard
 				}
 
 			};
-			job.setRule(rule);
+			job.setRule(SerialRule.INSTANCE);
 			job.setUser(true);
 			job.schedule();
 

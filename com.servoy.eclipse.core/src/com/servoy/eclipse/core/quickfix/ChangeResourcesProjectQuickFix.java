@@ -154,6 +154,11 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 		protected Control createDialogArea(Composite parent)
 		{
 			Composite composite = (Composite)super.createDialogArea(parent);
+			GridLayout gl = ((GridLayout)composite.getLayout());
+			if (gl.marginTop == 0) gl.marginTop = gl.marginHeight;
+			gl.marginHeight = 0;
+			gl.marginBottom = 0;
+
 			GridLayout tgl = (GridLayout)composite.getLayout();
 			tgl.marginBottom = 0;
 
@@ -169,7 +174,7 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 			chooserComposite.setLayoutData(gd);
 
 			Composite errorComposite = new Composite(composite, SWT.NONE);
-			GridLayout gl = new GridLayout(2, false);
+			gl = new GridLayout(2, false);
 			errorComposite.setLayout(gl);
 			gl.marginHeight = gl.marginWidth = 0;
 

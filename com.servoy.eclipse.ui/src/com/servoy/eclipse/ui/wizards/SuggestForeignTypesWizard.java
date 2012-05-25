@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TreeColumnLayout;
@@ -195,15 +194,16 @@ public class SuggestForeignTypesWizard extends Wizard
 			}
 		};
 
-		ISchedulingRule rule = new SerialRule();
-		exportJob.setRule(rule);
+		exportJob.setRule(SerialRule.INSTANCE);
 		exportJob.setUser(true); // we want the progress to be visible in a dialog, not to stay in the status bar
 		exportJob.schedule();
 
 		return true;
 	}
 
-	public void init(@SuppressWarnings("unused") IWorkbench workbench, @SuppressWarnings("unused") IStructuredSelection selection)
+	public void init(@SuppressWarnings("unused")
+	IWorkbench workbench, @SuppressWarnings("unused")
+	IStructuredSelection selection)
 	{
 		if (!hasServer) serverSelectionPage = new ServerSelectionPage("serverSelection"); //$NON-NLS-1$
 		suggestionPage = new SuggestionPage("suggestionPage"); //$NON-NLS-1$
@@ -580,8 +580,7 @@ public class SuggestForeignTypesWizard extends Wizard
 					}
 				};
 
-				ISchedulingRule rule = new SerialRule();
-				foreignTypesComputationJob.setRule(rule);
+				foreignTypesComputationJob.setRule(SerialRule.INSTANCE);
 				foreignTypesComputationJob.setUser(false);
 				foreignTypesComputationJob.schedule();
 

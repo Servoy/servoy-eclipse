@@ -146,7 +146,7 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 			}
 		};
 
-		loadDataAndShowWizardJob.setRule(new SerialRule());
+		loadDataAndShowWizardJob.setRule(SerialRule.INSTANCE);
 		loadDataAndShowWizardJob.setUser(true);
 		loadDataAndShowWizardJob.schedule();
 	}

@@ -20,8 +20,6 @@ package com.servoy.eclipse.ui.wizards.extension;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ControlAdapter;
-import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -32,6 +30,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.ui.util.GrabExcessSpaceIn1ColumnTableListener;
 import com.servoy.extension.Message;
 
 /**
@@ -173,38 +172,7 @@ public class ShowMessagesPage extends WizardPage
 				columns[i].pack();
 			}
 
-			table.addControlListener(new ControlAdapter()
-			{
-				boolean resizingColumn = false;
-
-				@Override
-				public void controlResized(ControlEvent e)
-				{
-					if (!resizingColumn) // avoid loops
-					{
-						resizingColumn = true;
-						try
-						{
-							columns[colCount - 1].pack();
-							int allOtherColumnWidths = 0;
-							for (int i = colCount - 2; i >= 0; i--)
-							{
-								allOtherColumnWidths += columns[i].getWidth();
-							}
-
-							int w = table.getClientArea().width - allOtherColumnWidths;
-							if (w > columns[colCount - 1].getWidth())
-							{
-								columns[colCount - 1].setWidth(w);
-							}
-						}
-						finally
-						{
-							resizingColumn = false;
-						}
-					}
-				}
-			});
+			table.addControlListener(new GrabExcessSpaceIn1ColumnTableListener(table, colCount - 1));
 
 			data = new GridData(SWT.FILL, SWT.FILL, true, true);
 			table.setLayoutData(data);

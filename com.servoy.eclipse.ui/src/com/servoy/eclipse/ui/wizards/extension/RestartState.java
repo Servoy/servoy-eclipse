@@ -23,12 +23,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.extension.EXPParserPool;
 import com.servoy.extension.FileBasedExtensionProvider;
 import com.servoy.extension.IExtensionProvider;
 import com.servoy.extension.IFileBasedExtensionProvider;
@@ -55,20 +54,11 @@ public class RestartState implements IEXPParserPool
 	public boolean disallowCancel = false; // not persisted but used at actual install
 	public Display display;
 
-	public Map<File, EXPParser> expParsers = new HashMap<File, EXPParser>(); // not persisted but used at actual install
+	public EXPParserPool parserPool = new EXPParserPool(); // not persisted but used at actual install
 
 	public EXPParser getOrCreateParser(File f)
 	{
-		EXPParser parser = expParsers.get(f);
-		if (parser == null)
-		{
-			if (f != null)
-			{
-				parser = new EXPParser(f);
-				expParsers.put(f, parser);
-			}
-		}
-		return parser;
+		return parserPool.getOrCreateParser(f);
 	}
 
 	/**

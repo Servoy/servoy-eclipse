@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.util;
 
 import org.eclipse.core.resources.IResource;
@@ -24,10 +24,15 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
  */
 public class SerialRule implements ISchedulingRule
 {
-	public static final SerialRule INSTANCE = new SerialRule();
+	public static final SerialRule INSTANCE = new SerialRule(0);
+	private final int id;
 
-	public SerialRule()
+	/**
+	 * Serial rules with the same id conflict. INSTANCE has id 0.
+	 */
+	public SerialRule(int id)
 	{
+		this.id = id;
 	}
 
 	public boolean contains(ISchedulingRule rule)
@@ -37,6 +42,13 @@ public class SerialRule implements ISchedulingRule
 
 	public boolean isConflicting(ISchedulingRule rule)
 	{
-		return rule instanceof SerialRule;
+		return rule instanceof SerialRule && ((SerialRule)rule).id == id;
 	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		return obj instanceof SerialRule && ((SerialRule)obj).id == id;
+	}
+
 }

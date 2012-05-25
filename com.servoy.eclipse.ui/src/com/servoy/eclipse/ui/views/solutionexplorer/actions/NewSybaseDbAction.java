@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -335,8 +334,7 @@ public class NewSybaseDbAction extends Action
 						}
 					};
 
-					ISchedulingRule rule = new SerialRule();
-					createDbJob.setRule(rule);
+					createDbJob.setRule(SerialRule.INSTANCE);
 					createDbJob.setUser(true); // we want the progress to be visible in a dialog, not to stay in the status bar
 					createDbJob.schedule();
 				}

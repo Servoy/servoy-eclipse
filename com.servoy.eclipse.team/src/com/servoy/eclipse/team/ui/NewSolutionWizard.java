@@ -344,8 +344,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 		solutionPage.setDescription("Loading solutions ...");
 		solutionPage.setRepositorySolutionInfos(new SolutionInfo[0]);
-		ISchedulingRule rule = new SerialRule();
-		solutionsListJob.setRule(rule);
+		solutionsListJob.setRule(SerialRule.INSTANCE);
 		solutionsListJob.schedule();
 	}
 

@@ -46,22 +46,25 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 	protected static final String TITLE = "Extension install"; //$NON-NLS-1$
 
 	protected String idToInstallFromMP;
+	protected String versionToInstallFromMP;
 	protected InstallExtensionWizardOptions dialogOptions;
 	protected InstallExtensionState state = new InstallExtensionState();
 	protected boolean continueWithPendingAfterRestart;
 
 	public InstallExtensionWizard()
 	{
-		this(null);
+		this(null, null);
 	}
 
 	/**
 	 * Start the wizard based on an extension id received from Servoy Marketplace.
 	 * @param idToInstallFromMP if non-null, this will be a Marketplace install. Null will just show the normal import wizard.
+	 * @param versionToInstallFromMP if started from the installed extensions dialog in order to update, we already know the version to install.
 	 */
-	public InstallExtensionWizard(String idToInstallFromMP)
+	public InstallExtensionWizard(String idToInstallFromMP, String versionToInstallFromMP)
 	{
 		this.idToInstallFromMP = idToInstallFromMP;
+		this.versionToInstallFromMP = versionToInstallFromMP;
 	}
 
 	/**
@@ -138,31 +141,40 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 				state.extensionID = idToInstallFromMP;
 				// only show first page if there is more then one version available for this extension in the MP
 				marketplaceProvider = new MarketPlaceExtensionProvider(state.installDir);
-				String[] versions = marketplaceProvider.getAvailableVersions(idToInstallFromMP);
-				if (versions == null || versions.length == 0)
+				if (versionToInstallFromMP == null)
 				{
-					// this shouldn't happen in normal circumstances; maybe a network error caused this...
-					Message[] messages = marketplaceProvider.getMessages();
-					if (messages.length == 0)
+					String[] versions = marketplaceProvider.getAvailableVersions(idToInstallFromMP);
+					if (versions == null || versions.length == 0)
 					{
-						messages = new Message[] { new Message("Unknown error", Message.ERROR) }; //$NON-NLS-1$
+						// this shouldn't happen in normal circumstances; maybe a network error caused this...
+						Message[] messages = marketplaceProvider.getMessages();
+						if (messages.length == 0)
+						{
+							messages = new Message[] { new Message("Unknown error", Message.ERROR) }; //$NON-NLS-1$
+						}
+						addPage(new ShowMessagesPage(
+							"Error page", "Cannot install extension", "A problem was encountered during available versions lookup.", null, messages, false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 					}
-					addPage(new ShowMessagesPage(
-						"Error page", "Cannot install extension", "A problem was encountered during available versions lookup.", null, messages, false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+					else
+					{
+						state.extensionProvider = marketplaceProvider;
+						if (versions.length == 1)
+						{
+							state.version = versions[0];
+							addPage(new DependencyResolvingPage("DepResolver", state, dialogOptions, false)); //$NON-NLS-1$
+						}
+						else
+						{
+							// show a page that allows the user to choose a version and auto-selects the most appropriate one (highest compatible)
+							addPage(new ChooseMPExtensionVersion("MPver", state, dialogOptions, marketplaceProvider, versions)); //$NON-NLS-1$
+						}
+					}
 				}
 				else
 				{
 					state.extensionProvider = marketplaceProvider;
-					if (versions.length == 1)
-					{
-						state.version = versions[0];
-						addPage(new DependencyResolvingPage("DepResolver", state, dialogOptions, false)); //$NON-NLS-1$
-					}
-					else
-					{
-						// show a page that allows the user to choose a version and auto-selects the most appropriate one (highest compatible)
-						addPage(new ChooseMPExtensionVersion("MPver", state, dialogOptions, marketplaceProvider, versions)); //$NON-NLS-1$
-					}
+					state.version = versionToInstallFromMP;
+					addPage(new DependencyResolvingPage("DepResolver", state, dialogOptions, false)); //$NON-NLS-1$
 				}
 			}
 			else

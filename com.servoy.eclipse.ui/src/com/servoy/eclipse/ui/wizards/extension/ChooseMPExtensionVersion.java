@@ -75,8 +75,8 @@ public class ChooseMPExtensionVersion extends WizardPage
 		this.versions = versions;
 		this.marketplaceProvider = marketplaceProvider;
 
-		setTitle("Select a version to be installed"); //$NON-NLS-1$
-		setDescription("An extension will be installed from the Marketplace.\nPlease select one of the available versions."); //$NON-NLS-1$
+		setTitle("Install extension from Marketplace"); //$NON-NLS-1$
+		setDescription("You can choose one of the available versions (or use suggested version)."); //$NON-NLS-1$
 		canGoToNext = false;
 	}
 
@@ -144,7 +144,7 @@ public class ChooseMPExtensionVersion extends WizardPage
 		formData = new FormData();
 		formData.left = new FormAttachment(versionLabel, 0);
 		formData.top = new FormAttachment(versionLabel, 0, SWT.CENTER);
-		formData.right = new FormAttachment(100, 0);
+//		formData.right = new FormAttachment(100, 0);
 		versionCombo.setLayoutData(formData);
 
 		final IRunnableWithProgress toRun = new IRunnableWithProgress()
