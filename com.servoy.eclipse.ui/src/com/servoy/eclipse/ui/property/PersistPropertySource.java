@@ -344,7 +344,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					IPersist persist = ((PersistPropertySource)propSource).getPersist();
 					if (persist instanceof AbstractBase)
 					{
-						return ((AbstractBase)persist).getCustomDesignTimeProperties();
+						Map<String, Object> map = ((AbstractBase)persist).getMergedCustomDesignTimeProperties();
+						// Always make a copy of the map here so that writes are not shared between superform and subformn
+						return map == null ? new HashMap<String, Object>() : new HashMap<String, Object>(map);
 					}
 				}
 				return null;
@@ -357,7 +359,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					IPersist persist = ((PersistPropertySource)propSource).getPersist();
 					if (persist instanceof AbstractBase)
 					{
-						((AbstractBase)persist).setCustomDesignTimeProperties(value);
+						((AbstractBase)persist).setUnmergedCustomDesignTimeProperties(value);
 					}
 				}
 			}

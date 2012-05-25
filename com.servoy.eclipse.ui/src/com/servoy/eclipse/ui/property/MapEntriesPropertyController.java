@@ -82,7 +82,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 			@Override
 			public Object convertProperty(final Object id, Map<String, Object> value)
 			{
-				return new ComplexProperty<Map<String, Object>>(value == null ? new HashMap<String, Object>() : value)
+				return new ComplexProperty<Map<String, Object>>(value)
 				{
 					@Override
 					public IPropertySource getPropertySource()
