@@ -151,8 +151,8 @@ public class TreeBuilder
 
 	private static UserNode fdoc2usernode(IFunctionDocumentation fdoc, UserNodeType type, Object functionIcon)
 	{
-		String tooltip = "<html><body><b>" + fdoc.getFullSignature() + "</b> " + fdoc.getDescription() + "</body></html>"; //$NON-NLS-1$//$NON-NLS-2$
-		UserNode un = new UserNode(fdoc.getMainName(), type, fdoc.getSignature("."), fdoc.getSample(), tooltip, null, //$NON-NLS-1$
+		String tooltip = "<html><body><b>" + fdoc.getFullSignature(true, true) + "</b><br>" + fdoc.getDescription() + "</body></html>"; //$NON-NLS-1$//$NON-NLS-2$
+		UserNode un = new UserNode(fdoc.getFullSignature(false, true), type, fdoc.getSignature("."), fdoc.getSample(), tooltip, null, //$NON-NLS-1$
 			functionIcon);
 		return un;
 	}

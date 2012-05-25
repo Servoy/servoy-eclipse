@@ -34,6 +34,24 @@
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </argumentsTypes>
+          <description><![CDATA[Constructs a new array that contains the given values.]]></description>
+          <summary><![CDATA[Constructs a new array that contains the given values.]]></summary>
+          <sample><![CDATA[var array = new Array(value1,value2);]]></sample>
+          <parameters>
+            <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array</url>
+            </link>
+          </links>
+        </constructor>
+        <constructor name="Array">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
           <description><![CDATA[Constructs a new array that contains the given values.]]></description>
@@ -42,13 +60,8 @@
           <parameters>
             <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
-            <parameter name="valueN" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="valueN" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array</url>
-            </link>
-          </links>
         </constructor>
       </constructors>
       <properties>
@@ -74,6 +87,22 @@
         <function name="concat">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+          <description><![CDATA[Returns a new array comprised of this array joined with other array(s) and/or value(s).]]></description>
+          <summary><![CDATA[Returns a new array comprised of this array joined with other array(s) and/or value(s).]]></summary>
+          <sample><![CDATA[array.concat();]]></sample>
+          <parameters>
+            <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/concat</url>
+            </link>
+          </links>
+        </function>
+        <function name="concat">
+          <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
@@ -83,12 +112,43 @@
           <sample><![CDATA[array.concat();]]></sample>
           <parameters>
             <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
-            <parameter name="value2" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
-            <parameter name="valueN" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </parameters>
+        </function>
+        <function name="concat">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+          <description><![CDATA[Returns a new array comprised of this array joined with other array(s) and/or value(s).]]></description>
+          <summary><![CDATA[Returns a new array comprised of this array joined with other array(s) and/or value(s).]]></summary>
+          <sample><![CDATA[array.concat();]]></sample>
+          <parameters>
+            <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="valueN" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </parameters>
+        </function>
+        <function name="every">
+          <argumentsTypes>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="com.servoy.j2db.documentation.scripting.docs.Boolean"/>
+          <description><![CDATA[Runs a function on items in the array while that function is returning true. It returns true if the function returns true for every item it could visit.]]></description>
+          <summary><![CDATA[Runs a function on items in the array while that function is returning true.]]></summary>
+          <sample><![CDATA[function isNumber(value) { return typeof value == 'number'; }
+var a1 = [1, 2, 3];
+application.output(a1.every(isNumber));
+var a2 = [1, '2', 3]; 
+application.output(a2.every(isNumber));]]></sample>
+          <parameters>
+            <parameter name="callback" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function"/>
           </parameters>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/concat</url>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/every</url>
             </link>
           </links>
         </function>
@@ -107,11 +167,25 @@ var a2 = [1, '2', 3];
 application.output(a2.every(isNumber));]]></sample>
           <parameters>
             <parameter name="callback" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function"/>
-            <parameter name="thisObject" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+            <parameter name="thisObject" type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+          </parameters>
+        </function>
+        <function name="filter">
+          <argumentsTypes>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+          <description><![CDATA[Runs a function on every item in the array and returns an array of all items for which the function returns true.]]></description>
+          <summary><![CDATA[Runs a function on every item in the array and returns an array of all items for which the function returns true.]]></summary>
+          <sample><![CDATA[var a1 = ['a', 10, 'b', 20, 'c', 30];
+var a2 = a1.filter(function(item) { return typeof item == 'number'; });
+application.output(a2);]]></sample>
+          <parameters>
+            <parameter name="callback" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function"/>
           </parameters>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/every</url>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/filter</url>
             </link>
           </links>
         </function>
@@ -128,11 +202,25 @@ var a2 = a1.filter(function(item) { return typeof item == 'number'; });
 application.output(a2);]]></sample>
           <parameters>
             <parameter name="callback" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function"/>
-            <parameter name="thisObject" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+            <parameter name="thisObject" type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+          </parameters>
+        </function>
+        <function name="forEach">
+          <argumentsTypes>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Runs a function on every item in the array.]]></description>
+          <summary><![CDATA[Runs a function on every item in the array.]]></summary>
+          <sample><![CDATA[function printThemOut(params) {	application.output(params);} 
+var a = ['a', 'b', 'c'];	
+a.forEach(printThemOut);]]></sample>
+          <parameters>
+            <parameter name="callback" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function"/>
           </parameters>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/filter</url>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/forEach</url>
             </link>
           </links>
         </function>
@@ -149,11 +237,26 @@ var a = ['a', 'b', 'c'];
 a.forEach(printThemOut);]]></sample>
           <parameters>
             <parameter name="callback" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function"/>
-            <parameter name="thisObject" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+            <parameter name="thisObject" type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+          </parameters>
+        </function>
+        <function name="indexOf">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Returns the first index at which a given element can be found in the array, or -1 if it is not present.]]></description>
+          <summary><![CDATA[Returns the first index at which a given element can be found in the array, or -1 if it is not present.]]></summary>
+          <sample><![CDATA[var a = ['a', 'b', 'a', 'b', 'a'];
+application.output(a.indexOf('b'));
+application.output(a.indexOf('b', 2));
+application.output(a.indexOf('z'));]]></sample>
+          <parameters>
+            <parameter name="searchElement" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </parameters>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/forEach</url>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/indexOf</url>
             </link>
           </links>
         </function>
@@ -171,13 +274,8 @@ application.output(a.indexOf('b', 2));
 application.output(a.indexOf('z'));]]></sample>
           <parameters>
             <parameter name="searchElement" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
-            <parameter name="fromIndex" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="fromIndex" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/indexOf</url>
-            </link>
-          </links>
         </function>
         <function name="join">
           <argumentsTypes>
@@ -200,6 +298,26 @@ var jwords = words.join(";");]]></sample>
         <function name="lastIndexOf">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array is searched backwards, starting at fromIndex.]]></description>
+          <summary><![CDATA[Returns the last index at which a given element can be found in the array, or -1 if it is not present.]]></summary>
+          <sample><![CDATA[var a = ['a', 'b', 'c', 'd', 'a', 'b'];
+application.output(a.lastIndexOf('b'));
+application.output(a.lastIndexOf('b', 4));
+application.output(a.lastIndexOf('z'));]]></sample>
+          <parameters>
+            <parameter name="searchElement" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/lastIndexOf</url>
+            </link>
+          </links>
+        </function>
+        <function name="lastIndexOf">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -211,11 +329,25 @@ application.output(a.lastIndexOf('b', 4));
 application.output(a.lastIndexOf('z'));]]></sample>
           <parameters>
             <parameter name="searchElement" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
-            <parameter name="fromIndex" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="fromIndex" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+        </function>
+        <function name="map">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+          <description><![CDATA[Runs a function on every item in the array and returns the results in an array.]]></description>
+          <summary><![CDATA[Runs a function on every item in the array and returns the results in an array.]]></summary>
+          <sample><![CDATA[var a = ['a', 'b', 'c'];	
+var a2 = a.map(function(item) { return item.toUpperCase(); });	
+application.output(a2);]]></sample>
+          <parameters>
+            <parameter name="callback" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </parameters>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/lastIndexOf</url>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/map</url>
             </link>
           </links>
         </function>
@@ -232,13 +364,8 @@ var a2 = a.map(function(item) { return item.toUpperCase(); });
 application.output(a2);]]></sample>
           <parameters>
             <parameter name="callback" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
-            <parameter name="thisObject" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+            <parameter name="thisObject" type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/map</url>
-            </link>
-          </links>
         </function>
         <function name="pop">
           <argumentsTypes/>
@@ -256,6 +383,23 @@ var lastword = words.pop();]]></sample>
         <function name="push">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Mutates an array by appending the given elements and returning the new length of the array.]]></description>
+          <summary><![CDATA[Mutates an array by appending the given elements and returning the new length of the array.]]></summary>
+          <sample><![CDATA[var words = new Array("limit","lines","finish","complete");
+words.push("In","Out");]]></sample>
+          <parameters>
+            <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/push</url>
+            </link>
+          </links>
+        </function>
+        <function name="push">
+          <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
@@ -266,14 +410,25 @@ var lastword = words.pop();]]></sample>
 words.push("In","Out");]]></sample>
           <parameters>
             <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
-            <parameter name="value2" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
-            <parameter name="valueN" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/push</url>
-            </link>
-          </links>
+        </function>
+        <function name="push">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Mutates an array by appending the given elements and returning the new length of the array.]]></description>
+          <summary><![CDATA[Mutates an array by appending the given elements and returning the new length of the array.]]></summary>
+          <sample><![CDATA[var words = new Array("limit","lines","finish","complete");
+words.push("In","Out");]]></sample>
+          <parameters>
+            <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="valueN" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </parameters>
         </function>
         <function name="reverse">
           <argumentsTypes/>
@@ -304,6 +459,24 @@ words.shift();]]></sample>
         <function name="slice">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+          <description><![CDATA[The slice method creates a new array from a selected section of an array.]]></description>
+          <summary><![CDATA[The slice method creates a new array from a selected section of an array.]]></summary>
+          <sample><![CDATA[var words = new Array("limit","lines","finish","complete","In","Out");
+var nwords1 = words.slice(3, 5);]]></sample>
+          <parameters>
+            <parameter name="begin" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/slice</url>
+            </link>
+          </links>
+        </function>
+        <function name="slice">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
@@ -313,11 +486,27 @@ words.shift();]]></sample>
 var nwords1 = words.slice(3, 5);]]></sample>
           <parameters>
             <parameter name="begin" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
-            <parameter name="end" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="end" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </parameters>
+        </function>
+        <function name="some">
+          <argumentsTypes>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="com.servoy.j2db.documentation.scripting.docs.Boolean"/>
+          <description><![CDATA[Runs a function on items in the array while that function returns false. It returns true if the function returns true for any item it could visit.]]></description>
+          <summary><![CDATA[Runs a function on items in the array while that function returns false.]]></summary>
+          <sample><![CDATA[function isNumber(value) { return typeof value == 'number'; }  
+var a1 = [1, 2, 3];    
+application.output(a1.some(isNumber)); 
+var a2 = [1, '2', 3];  
+application.output(a2.some(isNumber));]]></sample>
+          <parameters>
+            <parameter name="callback" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function"/>
           </parameters>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/slice</url>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/some</url>
             </link>
           </links>
         </function>
@@ -336,11 +525,19 @@ var a2 = [1, '2', 3];
 application.output(a2.some(isNumber));]]></sample>
           <parameters>
             <parameter name="callback" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function"/>
-            <parameter name="thisObject" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+            <parameter name="thisObject" type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           </parameters>
+        </function>
+        <function name="sort">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+          <description><![CDATA[Sorts the array elements in dictionary order or using a compare function passed to the method.]]></description>
+          <summary><![CDATA[Sorts the array elements in dictionary order or using a compare function passed to the method.]]></summary>
+          <sample><![CDATA[var words = new Array("limit","lines","finish","complete","In","Out");
+words.sort();]]></sample>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/some</url>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/sort</url>
             </link>
           </links>
         </function>
@@ -354,13 +551,64 @@ application.output(a2.some(isNumber));]]></sample>
           <sample><![CDATA[var words = new Array("limit","lines","finish","complete","In","Out");
 words.sort();]]></sample>
           <parameters>
-            <parameter name="function" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function"/>
+            <parameter name="function" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function"/>
+          </parameters>
+        </function>
+        <function name="splice">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+          <description><![CDATA[It is used to take elements out of an array and replace them with those specified.]]></description>
+          <summary><![CDATA[It is used to take elements out of an array and replace them with those specified.]]></summary>
+          <sample><![CDATA[var words = new Array("limit","lines","finish","complete","In","Out");
+var nwords1 = words.splice(3, 2, "done", "On");]]></sample>
+          <parameters>
+            <parameter name="arrayIndex" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="length" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </parameters>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/sort</url>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/splice</url>
             </link>
           </links>
+        </function>
+        <function name="splice">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+          <description><![CDATA[It is used to take elements out of an array and replace them with those specified.]]></description>
+          <summary><![CDATA[It is used to take elements out of an array and replace them with those specified.]]></summary>
+          <sample><![CDATA[var words = new Array("limit","lines","finish","complete","In","Out");
+var nwords1 = words.splice(3, 2, "done", "On");]]></sample>
+          <parameters>
+            <parameter name="arrayIndex" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="length" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </parameters>
+        </function>
+        <function name="splice">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+          <description><![CDATA[It is used to take elements out of an array and replace them with those specified.]]></description>
+          <summary><![CDATA[It is used to take elements out of an array and replace them with those specified.]]></summary>
+          <sample><![CDATA[var words = new Array("limit","lines","finish","complete","In","Out");
+var nwords1 = words.splice(3, 2, "done", "On");]]></sample>
+          <parameters>
+            <parameter name="arrayIndex" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="length" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </parameters>
         </function>
         <function name="splice">
           <argumentsTypes>
@@ -378,15 +626,10 @@ var nwords1 = words.splice(3, 2, "done", "On");]]></sample>
           <parameters>
             <parameter name="arrayIndex" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <parameter name="length" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
-            <parameter name="value1" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
-            <parameter name="value2" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
-            <parameter name="valueN" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <parameter name="valueN" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/splice</url>
-            </link>
-          </links>
         </function>
         <function name="unshift">
           <argumentsTypes>
@@ -503,7 +746,259 @@ words.unshift("limit","lines");]]></sample>
           </parameters>
         </constructor>
       </constructors>
+      <properties>
+        <property name="fullYear">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the full year of the date.]]></description>
+          <summary><![CDATA[Gets the full year of the date.]]></summary>
+          <sample><![CDATA[date.getFullYear();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getFullYear</url>
+            </link>
+          </links>
+        </property>
+        <property name="hours">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the hours of the date.]]></description>
+          <summary><![CDATA[Gets the hours of the date.]]></summary>
+          <sample><![CDATA[date.getHours();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getHours</url>
+            </link>
+          </links>
+        </property>
+        <property name="minutes">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the minutes of the date.]]></description>
+          <summary><![CDATA[Gets the minutes of the date.]]></summary>
+          <sample><![CDATA[date.getMinutes();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getMinutes</url>
+            </link>
+          </links>
+        </property>
+        <property name="month">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the month of the date.]]></description>
+          <summary><![CDATA[Gets the month of the date.]]></summary>
+          <sample><![CDATA[date.getMonth();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getMonth</url>
+            </link>
+          </links>
+        </property>
+        <property name="seconds">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the seconds of the date.]]></description>
+          <summary><![CDATA[Gets the seconds of the date.]]></summary>
+          <sample><![CDATA[date.getSeconds();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getSeconds</url>
+            </link>
+          </links>
+        </property>
+        <property name="uTCFullYear">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the full year in UTC time.]]></description>
+          <summary><![CDATA[Gets the full year in UTC time.]]></summary>
+          <sample><![CDATA[date.getUTCFullYear();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCFullYear</url>
+            </link>
+          </links>
+        </property>
+        <property name="uTCHours">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the hours in UTC time.]]></description>
+          <summary><![CDATA[Gets the hours in UTC time.]]></summary>
+          <sample><![CDATA[date.getUTCHours();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCHours</url>
+            </link>
+          </links>
+        </property>
+        <property name="uTCMinutes">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the minutes in UTC time.]]></description>
+          <summary><![CDATA[Gets the minutes in UTC time.]]></summary>
+          <sample><![CDATA[date.getUTCMinutes();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCMinutes</url>
+            </link>
+          </links>
+        </property>
+        <property name="uTCMonth">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the month in UTC time.]]></description>
+          <summary><![CDATA[Gets the month in UTC time.]]></summary>
+          <sample><![CDATA[date.getUTCMonth();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCMonth</url>
+            </link>
+          </links>
+        </property>
+        <property name="uTCSeconds">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the seconds in UTC time.]]></description>
+          <summary><![CDATA[Gets the seconds in UTC time.]]></summary>
+          <sample><![CDATA[date.getUTCSeconds();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCSeconds</url>
+            </link>
+          </links>
+        </property>
+      </properties>
       <functions>
+        <function name="UTC">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="com.servoy.j2db.documentation.scripting.docs.Date"/>
+          <description><![CDATA[Takes comma-delimited date parameters and returns the number of milliseconds between January 1, 1970, 00:00:00, universal time and the specified time.]]></description>
+          <summary><![CDATA[Takes comma-delimited date parameters and returns the number of milliseconds between January 1, 1970, 00:00:00, universal time and the specified time.]]></summary>
+          <sample><![CDATA[// The number of milliseconds in the first minute after 1970 January 1st.
+application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]></sample>
+          <parameters>
+            <parameter name="year" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A year after 1900.]]></description>
+            </parameter>
+            <parameter name="month" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A number between 0 and 11.]]></description>
+            </parameter>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/UTC</url>
+            </link>
+          </links>
+        </function>
+        <function name="UTC">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="com.servoy.j2db.documentation.scripting.docs.Date"/>
+          <description><![CDATA[Takes comma-delimited date parameters and returns the number of milliseconds between January 1, 1970, 00:00:00, universal time and the specified time.]]></description>
+          <summary><![CDATA[Takes comma-delimited date parameters and returns the number of milliseconds between January 1, 1970, 00:00:00, universal time and the specified time.]]></summary>
+          <sample><![CDATA[// The number of milliseconds in the first minute after 1970 January 1st.
+application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]></sample>
+          <parameters>
+            <parameter name="year" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A year after 1900.]]></description>
+            </parameter>
+            <parameter name="month" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A number between 0 and 11.]]></description>
+            </parameter>
+            <parameter name="date" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A number between 1 and 31.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="UTC">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="com.servoy.j2db.documentation.scripting.docs.Date"/>
+          <description><![CDATA[Takes comma-delimited date parameters and returns the number of milliseconds between January 1, 1970, 00:00:00, universal time and the specified time.]]></description>
+          <summary><![CDATA[Takes comma-delimited date parameters and returns the number of milliseconds between January 1, 1970, 00:00:00, universal time and the specified time.]]></summary>
+          <sample><![CDATA[// The number of milliseconds in the first minute after 1970 January 1st.
+application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]></sample>
+          <parameters>
+            <parameter name="year" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A year after 1900.]]></description>
+            </parameter>
+            <parameter name="month" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A number between 0 and 11.]]></description>
+            </parameter>
+            <parameter name="date" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A number between 1 and 31.]]></description>
+            </parameter>
+            <parameter name="hrs" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A number between 0 and 23.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="UTC">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="com.servoy.j2db.documentation.scripting.docs.Date"/>
+          <description><![CDATA[Takes comma-delimited date parameters and returns the number of milliseconds between January 1, 1970, 00:00:00, universal time and the specified time.]]></description>
+          <summary><![CDATA[Takes comma-delimited date parameters and returns the number of milliseconds between January 1, 1970, 00:00:00, universal time and the specified time.]]></summary>
+          <sample><![CDATA[// The number of milliseconds in the first minute after 1970 January 1st.
+application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]></sample>
+          <parameters>
+            <parameter name="year" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A year after 1900.]]></description>
+            </parameter>
+            <parameter name="month" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A number between 0 and 11.]]></description>
+            </parameter>
+            <parameter name="date" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A number between 1 and 31.]]></description>
+            </parameter>
+            <parameter name="hrs" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A number between 0 and 23.]]></description>
+            </parameter>
+            <parameter name="min" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A number between 0 and 59.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="UTC">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="com.servoy.j2db.documentation.scripting.docs.Date"/>
+          <description><![CDATA[Takes comma-delimited date parameters and returns the number of milliseconds between January 1, 1970, 00:00:00, universal time and the specified time.]]></description>
+          <summary><![CDATA[Takes comma-delimited date parameters and returns the number of milliseconds between January 1, 1970, 00:00:00, universal time and the specified time.]]></summary>
+          <sample><![CDATA[// The number of milliseconds in the first minute after 1970 January 1st.
+application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]></sample>
+          <parameters>
+            <parameter name="year" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A year after 1900.]]></description>
+            </parameter>
+            <parameter name="month" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A number between 0 and 11.]]></description>
+            </parameter>
+            <parameter name="date" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A number between 1 and 31.]]></description>
+            </parameter>
+            <parameter name="hrs" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A number between 0 and 23.]]></description>
+            </parameter>
+            <parameter name="min" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A number between 0 and 59.]]></description>
+            </parameter>
+            <parameter name="sec" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[A number between 0 and 59.]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function name="UTC">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -526,27 +1021,22 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             <parameter name="month" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
               <description><![CDATA[A number between 0 and 11.]]></description>
             </parameter>
-            <parameter name="date" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+            <parameter name="date" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
               <description><![CDATA[A number between 1 and 31.]]></description>
             </parameter>
-            <parameter name="hrs" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+            <parameter name="hrs" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
               <description><![CDATA[A number between 0 and 23.]]></description>
             </parameter>
-            <parameter name="min" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+            <parameter name="min" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
               <description><![CDATA[A number between 0 and 59.]]></description>
             </parameter>
-            <parameter name="sec" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+            <parameter name="sec" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
               <description><![CDATA[A number between 0 and 59.]]></description>
             </parameter>
-            <parameter name="ms" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+            <parameter name="ms" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
               <description><![CDATA[A number between 0 and 999.]]></description>
             </parameter>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/UTC</url>
-            </link>
-          </links>
         </function>
         <function name="getDate">
           <argumentsTypes/>
@@ -572,30 +1062,6 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getFullYear">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the full year of the date.]]></description>
-          <summary><![CDATA[Gets the full year of the date.]]></summary>
-          <sample><![CDATA[date.getFullYear();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getFullYear</url>
-            </link>
-          </links>
-        </function>
-        <function name="getHours">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the hours of the date.]]></description>
-          <summary><![CDATA[Gets the hours of the date.]]></summary>
-          <sample><![CDATA[date.getHours();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getHours</url>
-            </link>
-          </links>
-        </function>
         <function name="getMilliseconds">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -605,42 +1071,6 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
           <links>
             <link>
               <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getMilliseconds</url>
-            </link>
-          </links>
-        </function>
-        <function name="getMinutes">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the minutes of the date.]]></description>
-          <summary><![CDATA[Gets the minutes of the date.]]></summary>
-          <sample><![CDATA[date.getMinutes();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getMinutes</url>
-            </link>
-          </links>
-        </function>
-        <function name="getMonth">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the month of the date.]]></description>
-          <summary><![CDATA[Gets the month of the date.]]></summary>
-          <sample><![CDATA[date.getMonth();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getMonth</url>
-            </link>
-          </links>
-        </function>
-        <function name="getSeconds">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the seconds of the date.]]></description>
-          <summary><![CDATA[Gets the seconds of the date.]]></summary>
-          <sample><![CDATA[date.getSeconds();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getSeconds</url>
             </link>
           </links>
         </function>
@@ -692,30 +1122,6 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getUTCFullYear">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the full year in UTC time.]]></description>
-          <summary><![CDATA[Gets the full year in UTC time.]]></summary>
-          <sample><![CDATA[date.getUTCFullYear();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCFullYear</url>
-            </link>
-          </links>
-        </function>
-        <function name="getUTCHours">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the hours in UTC time.]]></description>
-          <summary><![CDATA[Gets the hours in UTC time.]]></summary>
-          <sample><![CDATA[date.getUTCHours();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCHours</url>
-            </link>
-          </links>
-        </function>
         <function name="getUTCMilliseconds">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -725,42 +1131,6 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
           <links>
             <link>
               <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCMilliseconds</url>
-            </link>
-          </links>
-        </function>
-        <function name="getUTCMinutes">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the minutes in UTC time.]]></description>
-          <summary><![CDATA[Gets the minutes in UTC time.]]></summary>
-          <sample><![CDATA[date.getUTCMinutes();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCMinutes</url>
-            </link>
-          </links>
-        </function>
-        <function name="getUTCMonth">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the month in UTC time.]]></description>
-          <summary><![CDATA[Gets the month in UTC time.]]></summary>
-          <sample><![CDATA[date.getUTCMonth();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCMonth</url>
-            </link>
-          </links>
-        </function>
-        <function name="getUTCSeconds">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the seconds in UTC time.]]></description>
-          <summary><![CDATA[Gets the seconds in UTC time.]]></summary>
-          <sample><![CDATA[date.getUTCSeconds();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCSeconds</url>
             </link>
           </links>
         </function>
@@ -825,6 +1195,20 @@ application.output(str);]]></sample>
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the full year of the date.]]></description>
+          <summary><![CDATA[Sets the full year of the date.]]></summary>
+          <sample><![CDATA[date.setFullYear(integer);]]></sample>
+          <parameters>
+            <parameter name="yearValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="monthValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+        </function>
+        <function name="setFullYear">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
@@ -833,14 +1217,39 @@ application.output(str);]]></sample>
           <sample><![CDATA[date.setFullYear(integer);]]></sample>
           <parameters>
             <parameter name="yearValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="monthValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="dayValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="monthValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="dayValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setFullYear</url>
-            </link>
-          </links>
+        </function>
+        <function name="setHours">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the hours of the date.]]></description>
+          <summary><![CDATA[Sets the hours of the date.]]></summary>
+          <sample><![CDATA[date.setHours(integer);]]></sample>
+          <parameters>
+            <parameter name="hoursValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="minutesValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+        </function>
+        <function name="setHours">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the hours of the date.]]></description>
+          <summary><![CDATA[Sets the hours of the date.]]></summary>
+          <sample><![CDATA[date.setHours(integer);]]></sample>
+          <parameters>
+            <parameter name="hoursValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="minutesValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="secondsValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
         </function>
         <function name="setHours">
           <argumentsTypes>
@@ -855,15 +1264,10 @@ application.output(str);]]></sample>
           <sample><![CDATA[date.setHours(integer);]]></sample>
           <parameters>
             <parameter name="hoursValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="minutesValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="secondsValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="msValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="minutesValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="secondsValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="msValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setHours</url>
-            </link>
-          </links>
         </function>
         <function name="setMilliseconds">
           <argumentsTypes>
@@ -886,6 +1290,20 @@ application.output(str);]]></sample>
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the minutes of the date.]]></description>
+          <summary><![CDATA[Sets the minutes of the date.]]></summary>
+          <sample><![CDATA[date.setMinutes(integer);]]></sample>
+          <parameters>
+            <parameter name="minutesValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="secondsValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+        </function>
+        <function name="setMinutes">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
@@ -894,14 +1312,9 @@ application.output(str);]]></sample>
           <sample><![CDATA[date.setMinutes(integer);]]></sample>
           <parameters>
             <parameter name="minutesValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="secondsValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="msValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="secondsValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="msValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setMinutes</url>
-            </link>
-          </links>
         </function>
         <function name="setMonth">
           <argumentsTypes>
@@ -914,13 +1327,8 @@ application.output(str);]]></sample>
           <sample><![CDATA[date.setMonth(integr);]]></sample>
           <parameters>
             <parameter name="monthValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="dayValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="dayValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setMonth</url>
-            </link>
-          </links>
         </function>
         <function name="setSeconds">
           <argumentsTypes>
@@ -933,13 +1341,8 @@ application.output(str);]]></sample>
           <sample><![CDATA[date.setSeconds(integer);]]></sample>
           <parameters>
             <parameter name="secondsValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="msValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="msValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setSeconds</url>
-            </link>
-          </links>
         </function>
         <function name="setTime">
           <argumentsTypes>
@@ -979,6 +1382,20 @@ application.output(str);]]></sample>
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the year in UTC time.]]></description>
+          <summary><![CDATA[Sets the year in UTC time.]]></summary>
+          <sample><![CDATA[date.setUTCFullYear(integer);]]></sample>
+          <parameters>
+            <parameter name="yearValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="monthValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+        </function>
+        <function name="setUTCFullYear">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
@@ -987,14 +1404,39 @@ application.output(str);]]></sample>
           <sample><![CDATA[date.setUTCFullYear(integer);]]></sample>
           <parameters>
             <parameter name="yearValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="monthValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="dayValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="monthValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="dayValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setUTCFullYear</url>
-            </link>
-          </links>
+        </function>
+        <function name="setUTCHours">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the hours in UTC time.]]></description>
+          <summary><![CDATA[Sets the hours in UTC time.]]></summary>
+          <sample><![CDATA[date.setUTCHours(integer);]]></sample>
+          <parameters>
+            <parameter name="hoursValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="minutesValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+        </function>
+        <function name="setUTCHours">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the hours in UTC time.]]></description>
+          <summary><![CDATA[Sets the hours in UTC time.]]></summary>
+          <sample><![CDATA[date.setUTCHours(integer);]]></sample>
+          <parameters>
+            <parameter name="hoursValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="minutesValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="secondsValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
         </function>
         <function name="setUTCHours">
           <argumentsTypes>
@@ -1009,15 +1451,10 @@ application.output(str);]]></sample>
           <sample><![CDATA[date.setUTCHours(integer);]]></sample>
           <parameters>
             <parameter name="hoursValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="minutesValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="secondsValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="msValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="minutesValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="secondsValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="msValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setUTCHours</url>
-            </link>
-          </links>
         </function>
         <function name="setUTCMilliseconds">
           <argumentsTypes>
@@ -1040,6 +1477,20 @@ application.output(str);]]></sample>
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the minutes in UTC time.]]></description>
+          <summary><![CDATA[Sets the minutes in UTC time.]]></summary>
+          <sample><![CDATA[date.setUTCMinutes(integer);]]></sample>
+          <parameters>
+            <parameter name="minutesValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="secondsValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+        </function>
+        <function name="setUTCMinutes">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
@@ -1048,14 +1499,9 @@ application.output(str);]]></sample>
           <sample><![CDATA[date.setUTCMinutes(integer);]]></sample>
           <parameters>
             <parameter name="minutesValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="secondsValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="msValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="secondsValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="msValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setUTCMinutes</url>
-            </link>
-          </links>
         </function>
         <function name="setUTCMonth">
           <argumentsTypes>
@@ -1068,13 +1514,8 @@ application.output(str);]]></sample>
           <sample><![CDATA[date.setUTCMonth(integer);]]></sample>
           <parameters>
             <parameter name="monthValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="dayValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="dayValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setUTCMonth</url>
-            </link>
-          </links>
         </function>
         <function name="setUTCSeconds">
           <argumentsTypes>
@@ -1087,13 +1528,8 @@ application.output(str);]]></sample>
           <sample><![CDATA[date.setUTCSeconds(integer);]]></sample>
           <parameters>
             <parameter name="secondsValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="msValue" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="msValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setUTCSeconds</url>
-            </link>
-          </links>
         </function>
         <function deprecated="true" name="setYear">
           <argumentsTypes>
@@ -1825,6 +2261,25 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
             </link>
           </links>
         </function>
+        <function name="max">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Returns the greater of two (or more) numbers.]]></description>
+          <summary><![CDATA[Returns the greater of two (or more) numbers.]]></summary>
+          <sample><![CDATA[Math.max(number,number,number)]]></sample>
+          <parameters>
+            <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Math/max</url>
+            </link>
+          </links>
+        </function>
         <function name="max" varargs="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1838,11 +2293,25 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
           <parameters>
             <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="valueN" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
+            <parameter name="valueN" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
+          </parameters>
+        </function>
+        <function name="min">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Returns the lesser of two (or more) numbers.]]></description>
+          <summary><![CDATA[Returns the lesser of two (or more) numbers.]]></summary>
+          <sample><![CDATA[Math.min(number,number,number)]]></sample>
+          <parameters>
+            <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Math/max</url>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Math/min</url>
             </link>
           </links>
         </function>
@@ -1859,13 +2328,8 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
           <parameters>
             <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="valueN" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
+            <parameter name="valueN" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Math/min</url>
-            </link>
-          </links>
         </function>
         <function name="pow">
           <argumentsTypes>
@@ -2060,6 +2524,19 @@ application.output("URI: " + namespace.uri); //will output: 'http://www.w3.org/1
       </properties>
       <functions>
         <function name="toExponential">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"><![CDATA[A string representing the number in exponential notation.]]></return>
+          <description><![CDATA[Returns a string representing the number in exponential notation.]]></description>
+          <summary><![CDATA[Returns a string representing the number in exponential notation.]]></summary>
+          <sample><![CDATA[var n = 123.45678;
+application.output(n.toExponential(3));]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Number/toExponential</url>
+            </link>
+          </links>
+        </function>
+        <function name="toExponential">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2069,13 +2546,21 @@ application.output("URI: " + namespace.uri); //will output: 'http://www.w3.org/1
           <sample><![CDATA[var n = 123.45678;
 application.output(n.toExponential(3));]]></sample>
           <parameters>
-            <parameter name="fractionDigits" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+            <parameter name="fractionDigits" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
               <description><![CDATA[An integer specifying the number of digits after the decimal point. Defaults to as many digits as necessary to specify the number.]]></description>
             </parameter>
           </parameters>
+        </function>
+        <function name="toFixed">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"><![CDATA[A string representing the number in fixed-point notation.]]></return>
+          <description><![CDATA[Returns a string representing the number in fixed-point notation.]]></description>
+          <summary><![CDATA[Returns a string representing the number in fixed-point notation.]]></summary>
+          <sample><![CDATA[var n = 123.45678;
+application.output(n.toFixed(3));]]></sample>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Number/toExponential</url>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Number/toFixed</url>
             </link>
           </links>
         </function>
@@ -2089,15 +2574,10 @@ application.output(n.toExponential(3));]]></sample>
           <sample><![CDATA[var n = 123.45678;
 application.output(n.toFixed(3));]]></sample>
           <parameters>
-            <parameter name="digits" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+            <parameter name="digits" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
               <description><![CDATA[The number of digits to appear after the decimal point. Defaults to 0.]]></description>
             </parameter>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Number/toFixed</url>
-            </link>
-          </links>
         </function>
         <function name="toLocaleString">
           <argumentsTypes/>
@@ -2113,6 +2593,19 @@ application.output(n.toLocaleString());]]></sample>
           </links>
         </function>
         <function name="toPrecision">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"><![CDATA[A string representing the number to a specified precision in fixed-point or exponential notation.]]></return>
+          <description><![CDATA[Returns a string representing the number to a specified precision in fixed-point or exponential notation.]]></description>
+          <summary><![CDATA[Returns a string representing the number to a specified precision in fixed-point or exponential notation.]]></summary>
+          <sample><![CDATA[var n = 123.45678;
+application.output(n.toPrecision(5));]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Number/toPrecision</url>
+            </link>
+          </links>
+        </function>
+        <function name="toPrecision">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2122,13 +2615,22 @@ application.output(n.toLocaleString());]]></sample>
           <sample><![CDATA[var n = 123.45678;
 application.output(n.toPrecision(5));]]></sample>
           <parameters>
-            <parameter name="precision" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+            <parameter name="precision" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
               <description><![CDATA[An integer specifying the number of significant digits.]]></description>
             </parameter>
           </parameters>
+        </function>
+        <function name="toString">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"><![CDATA[A string representing the specified Number object.]]></return>
+          <description><![CDATA[Returns a string representing the specified Number object.]]></description>
+          <summary><![CDATA[Returns a string representing the specified Number object.]]></summary>
+          <sample><![CDATA[var n = 7;
+application.output(n.toString()); //displays "7"
+application.output(n.toString(2)); //displays "111"]]></sample>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Number/toPrecision</url>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Number/toString</url>
             </link>
           </links>
         </function>
@@ -2143,15 +2645,10 @@ application.output(n.toPrecision(5));]]></sample>
 application.output(n.toString()); //displays "7"
 application.output(n.toString(2)); //displays "111"]]></sample>
           <parameters>
-            <parameter name="radix" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+            <parameter name="radix" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
               <description><![CDATA[An integer between 2 and 36 specifying the base to use for representing numeric values]]></description>
             </parameter>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Number/toString</url>
-            </link>
-          </links>
         </function>
       </functions>
     </object>
@@ -2659,6 +3156,23 @@ default:
         <function name="concat">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <description><![CDATA[returns a string that appends the parameter string to the string.]]></description>
+          <summary><![CDATA[returns a string that appends the parameter string to the string.]]></summary>
+          <sample><![CDATA[string.concat(string);]]></sample>
+          <parameters>
+            <parameter name="string2" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/String/concat</url>
+            </link>
+          </links>
+        </function>
+        <function name="concat">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
@@ -2667,13 +3181,8 @@ default:
           <sample><![CDATA[string.concat(string);]]></sample>
           <parameters>
             <parameter name="string2" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
-            <parameter name="stringN" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+            <parameter name="stringN" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/String/concat</url>
-            </link>
-          </links>
         </function>
         <function name="equals">
           <argumentsTypes>
@@ -2885,6 +3394,24 @@ application.output(s.localeCompare("Hello"));]]></sample>
         <function name="slice">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <description><![CDATA[returns a substring of the string.]]></description>
+          <summary><![CDATA[returns a substring of the string.]]></summary>
+          <sample><![CDATA[string.slice(start,end);]]></sample>
+          <parameters>
+            <parameter name="beginSlice" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="endSlice"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/String/slice</url>
+            </link>
+          </links>
+        </function>
+        <function name="slice">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
@@ -2893,13 +3420,8 @@ application.output(s.localeCompare("Hello"));]]></sample>
           <sample><![CDATA[string.slice(start,end);]]></sample>
           <parameters>
             <parameter name="beginSlice" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="endSlice" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="endSlice" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/String/slice</url>
-            </link>
-          </links>
         </function>
         <function name="small">
           <argumentsTypes/>
@@ -2959,6 +3481,23 @@ application.output(s.localeCompare("Hello"));]]></sample>
         <function name="substr">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <description><![CDATA[returns a substring of the string from the start with the number of chars specified.]]></description>
+          <summary><![CDATA[returns a substring of the string from the start with the number of chars specified.]]></summary>
+          <sample><![CDATA[string.substr(start, number_of_chars);]]></sample>
+          <parameters>
+            <parameter name="start" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/String/substr</url>
+            </link>
+          </links>
+        </function>
+        <function name="substr">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
@@ -2967,11 +3506,23 @@ application.output(s.localeCompare("Hello"));]]></sample>
           <sample><![CDATA[string.substr(start, number_of_chars);]]></sample>
           <parameters>
             <parameter name="start" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="length" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="length" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+        </function>
+        <function name="substring">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <description><![CDATA[Returns a substring of the string from the start index until the end index.]]></description>
+          <summary><![CDATA[Returns a substring of the string from the start index until the end index.]]></summary>
+          <sample><![CDATA[string.substring(start, end);]]></sample>
+          <parameters>
+            <parameter name="indexA" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/String/substr</url>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/String/substring</url>
             </link>
           </links>
         </function>
@@ -2986,13 +3537,8 @@ application.output(s.localeCompare("Hello"));]]></sample>
           <sample><![CDATA[string.substring(start, end);]]></sample>
           <parameters>
             <parameter name="indexA" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="indexB" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="indexB" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/String/substring</url>
-            </link>
-          </links>
         </function>
         <function name="sup">
           <argumentsTypes/>
@@ -3308,6 +3854,20 @@ position the object has in the context of its parent is returned.]]></summary>
           </links>
         </function>
         <function name="descendants">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.XMLList" typecode="com.servoy.j2db.documentation.scripting.docs.XMLList"/>
+          <description><![CDATA[Returns an XMLList with the descendants matching the passed name argument or with all descendants 
+if no argument is passed.]]></description>
+          <summary><![CDATA[Returns an XMLList with the descendants matching the passed name argument or with all descendants 
+if no argument is passed.]]></summary>
+          <sample><![CDATA[xml.descendants([name])]]></sample>
+          <links>
+            <link>
+              <url>http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-357.pdf</url>
+            </link>
+          </links>
+        </function>
+        <function name="descendants">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -3318,8 +3878,17 @@ if no argument is passed.]]></description>
 if no argument is passed.]]></summary>
           <sample><![CDATA[xml.descendants([name])]]></sample>
           <parameters>
-            <parameter name="name" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </parameters>
+        </function>
+        <function name="elements">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.XMLList" typecode="com.servoy.j2db.documentation.scripting.docs.XMLList"/>
+          <description><![CDATA[Takes one optional argument, the name of elements you are looking for, and returns an XMLList with 
+all matching child elements.]]></description>
+          <summary><![CDATA[Takes one optional argument, the name of elements you are looking for, and returns an XMLList with 
+all matching child elements.]]></summary>
+          <sample><![CDATA[xml.elements([name])]]></sample>
           <links>
             <link>
               <url>http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-357.pdf</url>
@@ -3337,13 +3906,8 @@ all matching child elements.]]></description>
 all matching child elements.]]></summary>
           <sample><![CDATA[xml.elements([name])]]></sample>
           <parameters>
-            <parameter name="name" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </parameters>
-          <links>
-            <link>
-              <url>http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-357.pdf</url>
-            </link>
-          </links>
         </function>
         <function name="hasComplexContent">
           <argumentsTypes/>
@@ -3479,6 +4043,21 @@ containing exactly one value.]]></description>
           </links>
         </function>
         <function name="namespace">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Namespace" typecode="com.servoy.j2db.documentation.scripting.docs.Namespace"/>
+          <description><![CDATA[If no argument is passed to the method then it returns the namespace associated with the qualified 
+name of this XML object. If a prefix is passed to the method then it looks for a matching namespace 
+in the in scope namespace of this XML object and returns it when found, otherwise undefined is returned.]]></description>
+          <summary><![CDATA[If no argument is passed to the method then it returns the namespace associated with the qualified 
+name of this XML object.]]></summary>
+          <sample><![CDATA[xml.namespace([prefix])]]></sample>
+          <links>
+            <link>
+              <url>http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-357.pdf</url>
+            </link>
+          </links>
+        </function>
+        <function name="namespace">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -3490,13 +4069,8 @@ in the in scope namespace of this XML object and returns it when found, otherwis
 name of this XML object.]]></summary>
           <sample><![CDATA[xml.namespace([prefix])]]></sample>
           <parameters>
-            <parameter name="prefix" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+            <parameter name="prefix" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </parameters>
-          <links>
-            <link>
-              <url>http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-357.pdf</url>
-            </link>
-          </links>
         </function>
         <function name="namespaceDeclarations">
           <argumentsTypes/>
@@ -3565,6 +4139,22 @@ name of this XML object.]]></summary>
           </links>
         </function>
         <function name="processingInstructions">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.XMLList" typecode="com.servoy.j2db.documentation.scripting.docs.XMLList"/>
+          <description><![CDATA[If no argument is passed in then the method returns an XMLList with all the children of the XML 
+object which are processing instructions. If an argument is passed in then the method returns an 
+XMLList with all children of the XML object which are processing instructions where the name 
+matches the argument.]]></description>
+          <summary><![CDATA[If no argument is passed in then the method returns an XMLList with all the children of the XML 
+object which are processing instructions.]]></summary>
+          <sample><![CDATA[xml.processingInstructions([name])]]></sample>
+          <links>
+            <link>
+              <url>http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-357.pdf</url>
+            </link>
+          </links>
+        </function>
+        <function name="processingInstructions">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -3577,13 +4167,8 @@ matches the argument.]]></description>
 object which are processing instructions.]]></summary>
           <sample><![CDATA[xml.processingInstructions([name])]]></sample>
           <parameters>
-            <parameter name="name" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </parameters>
-          <links>
-            <link>
-              <url>http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-357.pdf</url>
-            </link>
-          </links>
         </function>
         <function name="propertyIsEnumerable">
           <argumentsTypes>
@@ -3712,6 +4297,18 @@ is called on.]]></description>
           </links>
         </function>
         <function name="setSettings">
+          <argumentsTypes/>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Allows the global XML settings to be adjusted or restored to their default values.]]></description>
+          <summary><![CDATA[Allows the global XML settings to be adjusted or restored to their default values.]]></summary>
+          <sample><![CDATA[xml.setSettings(settings)]]></sample>
+          <links>
+            <link>
+              <url>http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-357.pdf</url>
+            </link>
+          </links>
+        </function>
+        <function name="setSettings">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
@@ -3720,15 +4317,10 @@ is called on.]]></description>
           <summary><![CDATA[Allows the global XML settings to be adjusted or restored to their default values.]]></summary>
           <sample><![CDATA[xml.setSettings(settings)]]></sample>
           <parameters>
-            <parameter name="settings" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
+            <parameter name="settings" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
               <description><![CDATA[The new settings that should be applied globally to the XML object.]]></description>
             </parameter>
           </parameters>
-          <links>
-            <link>
-              <url>http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-357.pdf</url>
-            </link>
-          </links>
         </function>
         <function name="settings">
           <argumentsTypes/>
@@ -3901,6 +4493,18 @@ with the matching children in order.]]></summary>
           </links>
         </function>
         <function name="descendants">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.XMLList" typecode="com.servoy.j2db.documentation.scripting.docs.XMLList"/>
+          <description><![CDATA[Returns an XMLList with all of the matching descendants of all XML objects.]]></description>
+          <summary><![CDATA[Returns an XMLList with all of the matching descendants of all XML objects.]]></summary>
+          <sample><![CDATA[xmlList.descendants([name])]]></sample>
+          <links>
+            <link>
+              <url>http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-357.pdf</url>
+            </link>
+          </links>
+        </function>
+        <function name="descendants">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -3909,13 +4513,8 @@ with the matching children in order.]]></summary>
           <summary><![CDATA[Returns an XMLList with all of the matching descendants of all XML objects.]]></summary>
           <sample><![CDATA[xmlList.descendants([name])]]></sample>
           <parameters>
-            <parameter name="name" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </parameters>
-          <links>
-            <link>
-              <url>http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-357.pdf</url>
-            </link>
-          </links>
         </function>
         <function name="elements">
           <argumentsTypes>
@@ -4020,6 +4619,20 @@ have the same parent.]]></summary>
           </links>
         </function>
         <function name="processingInstructions">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.XMLList" typecode="com.servoy.j2db.documentation.scripting.docs.XMLList"/>
+          <description><![CDATA[Returns an XMLList with all the matching processing instruction child nodes of all 
+XML objects in this XMLList.]]></description>
+          <summary><![CDATA[Returns an XMLList with all the matching processing instruction child nodes of all 
+XML objects in this XMLList.]]></summary>
+          <sample><![CDATA[xmlList.processingInstructions([name])]]></sample>
+          <links>
+            <link>
+              <url>http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-357.pdf</url>
+            </link>
+          </links>
+        </function>
+        <function name="processingInstructions">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -4030,13 +4643,8 @@ XML objects in this XMLList.]]></description>
 XML objects in this XMLList.]]></summary>
           <sample><![CDATA[xmlList.processingInstructions([name])]]></sample>
           <parameters>
-            <parameter name="name" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </parameters>
-          <links>
-            <link>
-              <url>http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-357.pdf</url>
-            </link>
-          </links>
         </function>
         <function name="propertyIsEnumerable">
           <argumentsTypes>
