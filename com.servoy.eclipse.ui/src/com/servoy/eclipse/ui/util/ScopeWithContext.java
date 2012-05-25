@@ -38,6 +38,7 @@ public class ScopeWithContext
 
 			String sc1Name = sc1.getName();
 			String sc2Name = sc2.getName();
+			if (sc1Name.equalsIgnoreCase(sc2Name)) return sc1.getRootObject().getName().compareTo(sc2.getRootObject().getName());
 			if (sc1Name.toLowerCase().equals(ScriptVariable.GLOBAL_SCOPE)) return -1;
 			if (sc2Name.toLowerCase().equals(ScriptVariable.GLOBAL_SCOPE)) return 1;
 			return sc1Name.compareToIgnoreCase(sc2Name);
