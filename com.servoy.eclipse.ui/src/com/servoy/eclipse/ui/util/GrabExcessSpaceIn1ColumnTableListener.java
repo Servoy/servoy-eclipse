@@ -39,10 +39,10 @@ public class GrabExcessSpaceIn1ColumnTableListener extends ControlAdapter
 	 * @param columns
 	 * @param grabberIndex
 	 */
-	public GrabExcessSpaceIn1ColumnTableListener(Table table, int grabberIndex)
+	public GrabExcessSpaceIn1ColumnTableListener(Table table, TableColumn cols[], int grabberIndex)
 	{
 		this.table = table;
-		columns = table.getColumns();
+		columns = cols; // using table.getColumns() doesn't work here on linux, because columns seem to be shuffled in the result
 		this.grabberIndex = grabberIndex;
 	}
 

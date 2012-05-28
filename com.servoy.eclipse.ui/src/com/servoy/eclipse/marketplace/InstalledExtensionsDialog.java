@@ -65,7 +65,6 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.GrabExcessSpaceIn1ColumnTableListener;
 import com.servoy.eclipse.ui.wizards.extension.InstallExtensionWizard;
 import com.servoy.extension.DependencyMetadata;
-import com.servoy.extension.EXPParserPool;
 import com.servoy.extension.ExtensionDependencyDeclaration;
 import com.servoy.extension.ExtensionUtils;
 import com.servoy.extension.ExtensionUtils.EntryInputStreamRunner;
@@ -73,6 +72,7 @@ import com.servoy.extension.MarketPlaceExtensionProvider;
 import com.servoy.extension.Message;
 import com.servoy.extension.VersionStringUtils;
 import com.servoy.extension.parser.EXPParser;
+import com.servoy.extension.parser.EXPParserPool;
 import com.servoy.extension.parser.ExtensionConfiguration;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.Pair;
@@ -279,15 +279,16 @@ public class InstalledExtensionsDialog extends TrayDialog
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);
 
-		TableColumn col = new TableColumn(table, SWT.NONE); // icon
-		col = new TableColumn(table, SWT.NONE);
-		col.setText("Extension name"); //$NON-NLS-1$
-		col = new TableColumn(table, SWT.NONE);
-		col.setText("Version"); //$NON-NLS-1$
-		col = new TableColumn(table, SWT.NONE); // upgrade button
-		col = new TableColumn(table, SWT.NONE); // remove button
+		TableColumn cols[] = new TableColumn[5];
+		cols[0] = new TableColumn(table, SWT.NONE); // icon
+		cols[1] = new TableColumn(table, SWT.NONE);
+		cols[1].setText("Extension name"); //$NON-NLS-1$
+		cols[2] = new TableColumn(table, SWT.NONE);
+		cols[2].setText("Version"); //$NON-NLS-1$
+		cols[3] = new TableColumn(table, SWT.NONE); // upgrade button
+		cols[4] = new TableColumn(table, SWT.NONE); // remove button
 
-		grabExcessSpaceInColumnListener = new GrabExcessSpaceIn1ColumnTableListener(table, 1);
+		grabExcessSpaceInColumnListener = new GrabExcessSpaceIn1ColumnTableListener(table, cols, 1);
 		readInstalledExtensions(); // else they are already there
 
 		table.addControlListener(grabExcessSpaceInColumnListener); // Name column grabs excess space
