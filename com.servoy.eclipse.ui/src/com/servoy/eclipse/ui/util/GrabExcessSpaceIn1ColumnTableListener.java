@@ -39,10 +39,10 @@ public class GrabExcessSpaceIn1ColumnTableListener extends ControlAdapter
 	 * @param columns
 	 * @param grabberIndex
 	 */
-	public GrabExcessSpaceIn1ColumnTableListener(Table table, TableColumn cols[], int grabberIndex)
+	public GrabExcessSpaceIn1ColumnTableListener(Table table, int grabberIndex)
 	{
 		this.table = table;
-		columns = cols; // using table.getColumns() doesn't work here on linux, because columns seem to be shuffled in the result
+		columns = table.getColumns();
 		this.grabberIndex = grabberIndex;
 	}
 
@@ -60,10 +60,10 @@ public class GrabExcessSpaceIn1ColumnTableListener extends ControlAdapter
 			table.setVisible(false);
 			try
 			{
-				columns[grabberIndex].pack();
 				int allOtherColumnWidths = 0;
 				for (int i = columns.length - 1; i >= 0; i--)
 				{
+					columns[i].pack();
 					if (i != grabberIndex) allOtherColumnWidths += columns[i].getWidth();
 				}
 

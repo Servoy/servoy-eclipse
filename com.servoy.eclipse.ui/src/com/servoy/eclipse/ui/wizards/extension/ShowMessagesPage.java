@@ -151,6 +151,7 @@ public class ShowMessagesPage extends WizardPage
 			for (int i = 0; i < colCount; i++)
 			{
 				columns[i] = new TableColumn(table, SWT.NONE);
+				columns[i].setResizable(false);
 				if (headers != null)
 				{
 					columns[i].setText(headers[i]);
@@ -172,7 +173,7 @@ public class ShowMessagesPage extends WizardPage
 				columns[i].pack();
 			}
 
-			table.addControlListener(new GrabExcessSpaceIn1ColumnTableListener(table, columns, colCount - 1));
+			table.addControlListener(new GrabExcessSpaceIn1ColumnTableListener(table, colCount - 1));
 
 			data = new GridData(SWT.FILL, SWT.FILL, true, true);
 			table.setLayoutData(data);

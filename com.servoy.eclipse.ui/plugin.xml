@@ -472,7 +472,7 @@
          icon="icons/extension16.png"
          id="com.servoy.eclipse.ui.manageExtensions"
          label="Manage Servoy Extensions"
-         menubarPath="help/about"
+         menubarPath="help/updates"
          style="push">
    </action>      
       </actionSet>

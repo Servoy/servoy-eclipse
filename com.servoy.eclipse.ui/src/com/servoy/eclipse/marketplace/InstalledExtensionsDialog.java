@@ -279,16 +279,20 @@ public class InstalledExtensionsDialog extends TrayDialog
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);
 
-		TableColumn cols[] = new TableColumn[5];
-		cols[0] = new TableColumn(table, SWT.NONE); // icon
-		cols[1] = new TableColumn(table, SWT.NONE);
-		cols[1].setText("Extension name"); //$NON-NLS-1$
-		cols[2] = new TableColumn(table, SWT.NONE);
-		cols[2].setText("Version"); //$NON-NLS-1$
-		cols[3] = new TableColumn(table, SWT.NONE); // upgrade button
-		cols[4] = new TableColumn(table, SWT.NONE); // remove button
+		TableColumn col = new TableColumn(table, SWT.NONE); // icon
+		col.setResizable(false);
+		col = new TableColumn(table, SWT.NONE);
+		col.setText("Extension name"); //$NON-NLS-1$
+		col.setResizable(false);
+		col = new TableColumn(table, SWT.NONE);
+		col.setResizable(false);
+		col.setText("Version"); //$NON-NLS-1$
+		col = new TableColumn(table, SWT.NONE); // upgrade button
+		col.setResizable(false);
+		col = new TableColumn(table, SWT.NONE); // remove button
+		col.setResizable(false);
 
-		grabExcessSpaceInColumnListener = new GrabExcessSpaceIn1ColumnTableListener(table, cols, 1);
+		grabExcessSpaceInColumnListener = new GrabExcessSpaceIn1ColumnTableListener(table, 1);
 		readInstalledExtensions(); // else they are already there
 
 		table.addControlListener(grabExcessSpaceInColumnListener); // Name column grabs excess space
@@ -357,6 +361,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 			{
 				File extDir = new File(new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory()).getParentFile(),
 					ExtensionUtils.EXPFILES_FOLDER);
+				if (!extDir.exists()) extDir.mkdirs();
 				installedProvider = new InstalledWithPendingExtensionProvider(extDir, parserPool);
 				populateInstalledExtensions();
 			}
@@ -469,7 +474,10 @@ public class InstalledExtensionsDialog extends TrayDialog
 								createButton(upgradeIcon, item, 3, extension.getRight()).addSelectionListener(upgradeListener);
 //							item.setImage(3, upgradeIcon);
 							}
-							createButton(uninstallIcon, item, 4, extension.getLeft()).addSelectionListener(uninstallListener);
+							Button b = createButton(uninstallIcon, item, 4, extension.getLeft());
+							b.addSelectionListener(uninstallListener);
+							b.setEnabled(false);
+
 //						item.setImage(4, uninstallIcon);
 						}
 					}
@@ -479,13 +487,13 @@ public class InstalledExtensionsDialog extends TrayDialog
 					{
 						column.pack();
 					}
+
+					if (grabExcessSpaceInColumnListener != null) grabExcessSpaceInColumnListener.grabExcessSpaceInColumn();
 				}
 				finally
 				{
 					table.setVisible(true);
 				}
-
-				if (grabExcessSpaceInColumnListener != null) grabExcessSpaceInColumnListener.grabExcessSpaceInColumn();
 			}
 
 			protected Button createButton(Image img, TableItem item, int col, DependencyMetadata dmd)
