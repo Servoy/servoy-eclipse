@@ -27,12 +27,12 @@ import java.io.ObjectOutputStream;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.extension.EXPParserPool;
 import com.servoy.extension.FileBasedExtensionProvider;
 import com.servoy.extension.IExtensionProvider;
 import com.servoy.extension.IFileBasedExtensionProvider;
 import com.servoy.extension.dependency.DependencyPath;
 import com.servoy.extension.parser.EXPParser;
+import com.servoy.extension.parser.EXPParserPool;
 import com.servoy.extension.parser.IEXPParserPool;
 import com.servoy.j2db.util.Utils;
 
