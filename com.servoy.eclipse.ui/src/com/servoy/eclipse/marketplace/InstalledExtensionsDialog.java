@@ -36,18 +36,19 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -86,6 +87,12 @@ public class InstalledExtensionsDialog extends TrayDialog
 
 	protected static final String INSTALLED_EXTENSIONS_SECTION = "InstalledExtensionsDialog"; //$NON-NLS-1$
 	protected static final int UPDATE_CHECK_BUTTON_ID = 1017;
+	protected static final int CI_UPDATE = 3;
+	protected static final int CI_UNINSTALL = 4;
+	protected static final String SPLIT_AT = "splitAt"; //$NON-NLS-1$
+	protected static final String WIDTH = "shellWidth"; //$NON-NLS-1$
+	protected static final String HEIGHT = "shellHeight"; //$NON-NLS-1$
+
 	public static final int SERIAL_RULE_ID = 1017;
 
 	public static WeakReference<InstalledExtensionsDialog> createdInstance;
@@ -98,6 +105,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 	protected Pair<DependencyMetadata, DependencyMetadata>[] extensions;
 	protected EXPParserPool parserPool = new EXPParserPool();
 	protected List<Image> allocatedImages = new ArrayList<Image>();
+	protected SashForm split;
 
 	protected Table table;
 
@@ -140,6 +148,9 @@ public class InstalledExtensionsDialog extends TrayDialog
 			section = workbenchSettings.addNewSection(INSTALLED_EXTENSIONS_SECTION);
 		}
 		dialogSettings = section;
+
+		if (dialogSettings.get(SPLIT_AT) == null) dialogSettings.put(SPLIT_AT, 85);
+
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 
@@ -147,6 +158,18 @@ public class InstalledExtensionsDialog extends TrayDialog
 	public void create()
 	{
 		super.create();
+		if (dialogSettings.get(WIDTH) != null && dialogSettings.get(HEIGHT) != null)
+		{
+			try
+			{
+				getShell().setSize(dialogSettings.getInt(WIDTH), dialogSettings.getInt(HEIGHT));
+			}
+			catch (NumberFormatException e)
+			{
+				// wrong values; ignore
+			}
+		}
+
 		getShell().setText("Installed Servoy Extensions"); //$NON-NLS-1$
 		Image i1 = Activator.getDefault().loadImageFromBundle("extension16.png"); //$NON-NLS-1$
 		Image i2 = Activator.getDefault().loadImageFromBundle("extension32.png"); //$NON-NLS-1$
@@ -154,6 +177,8 @@ public class InstalledExtensionsDialog extends TrayDialog
 		Image i4 = Activator.getDefault().loadImageFromBundle("extension128.png"); //$NON-NLS-1$
 
 		getShell().setImages(new Image[] { i1, i2, i3, i4 });
+
+		refreshInstalledExtensions();
 	}
 
 	/**
@@ -267,7 +292,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 		gl.marginHeight = 0;
 		gl.marginBottom = 0;
 
-		SashForm split = new SashForm(topLevel, SWT.VERTICAL);
+		split = new SashForm(topLevel, SWT.VERTICAL);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.heightHint = 350;
 		gd.widthHint = 450;
@@ -279,23 +304,41 @@ public class InstalledExtensionsDialog extends TrayDialog
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);
 
-		TableColumn col = new TableColumn(table, SWT.NONE); // icon
+		TableColumn col = new TableColumn(table, SWT.CENTER); // icon
 		col.setResizable(false);
 		col = new TableColumn(table, SWT.NONE);
 		col.setText("Extension name"); //$NON-NLS-1$
 		col.setResizable(false);
-		col = new TableColumn(table, SWT.NONE);
+		col = new TableColumn(table, SWT.CENTER);
 		col.setResizable(false);
 		col.setText("Version"); //$NON-NLS-1$
-		col = new TableColumn(table, SWT.NONE); // upgrade button
+		col = new TableColumn(table, SWT.CENTER, CI_UPDATE); // upgrade button
 		col.setResizable(false);
-		col = new TableColumn(table, SWT.NONE); // remove button
+		col = new TableColumn(table, SWT.CENTER, CI_UNINSTALL); // remove button
 		col.setResizable(false);
 
-		grabExcessSpaceInColumnListener = new GrabExcessSpaceIn1ColumnTableListener(table, 1);
+		grabExcessSpaceInColumnListener = new GrabExcessSpaceIn1ColumnTableListener(table, 1, new int[] { -1, -1, -1, 20, 20 });
 		readInstalledExtensions(); // else they are already there
 
 		table.addControlListener(grabExcessSpaceInColumnListener); // Name column grabs excess space
+
+		table.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseDown(MouseEvent event)
+			{
+				Point pt = new Point(event.x, event.y);
+				TableItem item = table.getItem(pt);
+				if (item != null && item.getBounds(CI_UPDATE).contains(pt))
+				{
+					onUpdate((Pair<DependencyMetadata, DependencyMetadata>)item.getData());
+				}
+				else if (item != null && item.getBounds(CI_UNINSTALL).contains(pt))
+				{
+					onUninstall((Pair<DependencyMetadata, DependencyMetadata>)item.getData());
+				}
+			}
+		});
 
 		// ----------- Description area
 		final ScrolledComposite scroller = new ScrolledComposite(split, SWT.V_SCROLL | SWT.BORDER);
@@ -349,8 +392,33 @@ public class InstalledExtensionsDialog extends TrayDialog
 			}
 		});
 
-		split.setWeights(new int[] { 85, 15 });
+		int saved = dialogSettings.getInt(SPLIT_AT);
+		if (saved < 1 || saved > 99) saved = 85;
+		split.setWeights(new int[] { saved, 100 - saved });
 		return topLevel;
+	}
+
+	protected void onUninstall(Pair<DependencyMetadata, DependencyMetadata> data)
+	{
+		DependencyMetadata dmd = data.getLeft();
+		// start uninstall process
+		// TODO
+		MessageDialog.openInformation(getShell(), "Feature unavailable", "Uninstall will be available in upcoming Servoy versions."); //$NON-NLS-1$ //$NON-NLS-2$
+		refreshInstalledExtensions();
+	}
+
+	protected void onUpdate(Pair<DependencyMetadata, DependencyMetadata> data)
+	{
+		DependencyMetadata dmd = data.getRight();
+		// start upgrade
+		if (dmd != null)
+		{
+			InstallExtensionWizard installExtensionWizard = new InstallExtensionWizard(dmd.id, dmd.version);
+			installExtensionWizard.init(PlatformUI.getWorkbench(), null);
+			WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), installExtensionWizard);
+			dialog.open();
+			refreshInstalledExtensions();
+		}
 	}
 
 	protected synchronized void readInstalledExtensions()
@@ -373,9 +441,12 @@ public class InstalledExtensionsDialog extends TrayDialog
 	{
 		synchronized (dataLock)
 		{
-			parserPool.flushCache();
-			installedProvider.flushCache();
-			populateInstalledExtensions();
+			if (installedProvider != null)
+			{
+				parserPool.flushCache();
+				installedProvider.flushCache();
+				populateInstalledExtensions();
+			}
 		}
 
 		updateTableUI();
@@ -390,13 +461,29 @@ public class InstalledExtensionsDialog extends TrayDialog
 
 			Message[] msgs = installedProvider.getMessages();
 			if (msgs.length > ml) ServoyLog.logWarning(
-				"When gettint all items for installed extensions dialog, problems were encountered: " + Arrays.asList(msgs).toString(), null); //$NON-NLS-1$
+				"When getting all items for installed extensions dialog, problems were encountered: " + Arrays.asList(msgs).toString(), null); //$NON-NLS-1$
 
+			Pair<DependencyMetadata, DependencyMetadata>[] oldExtensions = extensions;
 			extensions = new Pair[allInstalled.length];
 
 			for (int i = allInstalled.length - 1; i >= 0; i--)
 			{
 				extensions[i] = new Pair<DependencyMetadata, DependencyMetadata>(allInstalled[i], null);
+				if (oldExtensions != null) seeIfOldHasUpdate(extensions[i], oldExtensions);
+			}
+		}
+	}
+
+	protected void seeIfOldHasUpdate(Pair<DependencyMetadata, DependencyMetadata> item, Pair<DependencyMetadata, DependencyMetadata>[] oldExtensions)
+	{
+		for (Pair<DependencyMetadata, DependencyMetadata> oldPair : oldExtensions)
+		{
+			if (item.getLeft().id.equals(oldPair.getLeft().id) && oldPair.getRight() != null)
+			{
+				if (VersionStringUtils.compareVersions(item.getLeft().version, oldPair.getRight().version) < 0)
+				{
+					item.setRight(oldPair.getRight());
+				}
 			}
 		}
 	}
@@ -408,7 +495,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 		{
 			public void run()
 			{
-				if (getShell().isDisposed()) return;
+				if (table == null || getShell().isDisposed()) return;
 
 				Image upgradeIcon = Activator.getDefault().loadImageFromBundle("upgrade.gif"); //$NON-NLS-1$
 				Image uninstallIcon = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ELCL_REMOVE);
@@ -426,59 +513,26 @@ public class InstalledExtensionsDialog extends TrayDialog
 					}
 					cleanAllocatedImages();
 
-					SelectionListener upgradeListener = new SelectionListener()
-					{
-						public void widgetSelected(SelectionEvent e)
-						{
-							widgetDefaultSelected(e);
-						}
-
-						public void widgetDefaultSelected(SelectionEvent e)
-						{
-							DependencyMetadata dmd = (DependencyMetadata)e.widget.getData();
-							// start upgrade
-							InstallExtensionWizard installExtensionWizard = new InstallExtensionWizard(dmd.id, dmd.version);
-							installExtensionWizard.init(PlatformUI.getWorkbench(), null);
-							WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), installExtensionWizard);
-							dialog.open();
-						}
-					};
-
-					SelectionListener uninstallListener = new SelectionListener()
-					{
-						public void widgetSelected(SelectionEvent e)
-						{
-							widgetDefaultSelected(e);
-						}
-
-						public void widgetDefaultSelected(SelectionEvent e)
-						{
-							DependencyMetadata dmd = (DependencyMetadata)e.widget.getData();
-							// start uninstall process
-							// TODO
-							MessageDialog.openInformation(getShell(), "Feature unavailable", "Uninstall will be available in upcoming Servoy versions."); //$NON-NLS-1$ //$NON-NLS-2$
-						}
-					};
-
 					synchronized (dataLock)
 					{
 						for (Pair<DependencyMetadata, DependencyMetadata> extension : extensions)
 						{
 							TableItem item = new TableItem(table, SWT.NONE);
+							item.setData(extension);
 							Image img = getInstalledExtensionIcon(extension.getLeft());
 							if (img != null) item.setImage(0, img);
 							item.setText(1, extension.getLeft().extensionName);
 							item.setText(2, extension.getLeft().version);
 							if (extension.getRight() != null)
 							{
-								createButton(upgradeIcon, item, 3, extension.getRight()).addSelectionListener(upgradeListener);
-//							item.setImage(3, upgradeIcon);
+//								createButton(upgradeIcon, item, 3, extension.getRight()).addSelectionListener(upgradeListener);
+								item.setImage(3, upgradeIcon);
 							}
-							Button b = createButton(uninstallIcon, item, 4, extension.getLeft());
-							b.addSelectionListener(uninstallListener);
-							b.setEnabled(false);
+//							Button b = createButton(uninstallIcon, item, 4, extension.getLeft());
+//							b.addSelectionListener(uninstallListener);
+//							b.setEnabled(false);
 
-//						item.setImage(4, uninstallIcon);
+							item.setImage(4, uninstallIcon);
 						}
 					}
 
@@ -496,17 +550,18 @@ public class InstalledExtensionsDialog extends TrayDialog
 				}
 			}
 
-			protected Button createButton(Image img, TableItem item, int col, DependencyMetadata dmd)
-			{
-				TableEditor editor = new TableEditor(table);
-				Button button = new Button(table, SWT.PUSH | SWT.FLAT);
-				button.setImage(img);
-				button.setData(dmd);
-				button.pack();
-				editor.minimumWidth = button.getSize().x;
-				editor.setEditor(button, item, col);
-				return button;
-			}
+			// reverted to plain images instead of buttons, cause editors, buttons did not work well with column.pack on Linux
+//			protected Button createButton(Image img, TableItem item, int col, DependencyMetadata dmd)
+//			{
+//				TableEditor editor = new TableEditor(table);
+//				Button button = new Button(table, SWT.PUSH | SWT.FLAT);
+//				button.setImage(img);
+//				button.setData(dmd);
+//				button.pack();
+//				editor.minimumWidth = button.getSize().x;
+//				editor.setEditor(button, item, col);
+//				return button;
+//			}
 
 		}, false);
 	}
@@ -650,15 +705,19 @@ public class InstalledExtensionsDialog extends TrayDialog
 	}
 
 	@Override
-	public boolean close()
+	protected void handleShellCloseEvent()
 	{
-		boolean b = super.close();
-		if (b && installedProvider != null)
+		dialogSettings.put(SPLIT_AT, (int)(split.getWeights()[0] * 100d / (split.getWeights()[0] + split.getWeights()[1])));
+		dialogSettings.put(WIDTH, getShell().getSize().x);
+		dialogSettings.put(HEIGHT, getShell().getSize().y);
+
+		if (installedProvider != null)
 		{
 			cleanAllocatedImages();
 			installedProvider.dispose();
+			installedProvider = null;
 		}
-		return b;
+		super.handleShellCloseEvent();
 	}
 
 }

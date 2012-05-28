@@ -33,17 +33,19 @@ public class GrabExcessSpaceIn1ColumnTableListener extends ControlAdapter
 	protected TableColumn[] columns;
 	protected Table table;
 	protected final int grabberIndex;
+	protected int[] fixedWidths;
 
 	/**
-	 * Creates a new instance. the
-	 * @param columns
-	 * @param grabberIndex
+	 * Creates a new instance.
+	 * @param grabberIndex the column index that grabs all the extra space.
+	 * @param fixedWidth array with one item for each column. If >= 0, it's a fixed column width, otherwise it will be packed. Can be null.
 	 */
-	public GrabExcessSpaceIn1ColumnTableListener(Table table, int grabberIndex)
+	public GrabExcessSpaceIn1ColumnTableListener(Table table, int grabberIndex, int[] fixedWidths)
 	{
 		this.table = table;
 		columns = table.getColumns();
 		this.grabberIndex = grabberIndex;
+		this.fixedWidths = fixedWidths;
 	}
 
 	@Override
@@ -63,7 +65,8 @@ public class GrabExcessSpaceIn1ColumnTableListener extends ControlAdapter
 				int allOtherColumnWidths = 0;
 				for (int i = columns.length - 1; i >= 0; i--)
 				{
-					columns[i].pack();
+					if (fixedWidths == null || fixedWidths[i] < 0) columns[i].pack();
+					else columns[i].setWidth(fixedWidths[i]);
 					if (i != grabberIndex) allOtherColumnWidths += columns[i].getWidth();
 				}
 
