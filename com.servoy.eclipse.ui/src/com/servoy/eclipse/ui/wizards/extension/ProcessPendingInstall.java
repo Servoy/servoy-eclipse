@@ -1,8 +1,10 @@
 package com.servoy.eclipse.ui.wizards.extension;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
@@ -10,6 +12,7 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.marketplace.InstalledWithPendingExtensionProvider;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.wizards.extension.ActualInstallPage.ContinueInstallRunnableWithProgress;
 import com.servoy.extension.ExtensionUtils;
 import com.servoy.j2db.util.Utils;
 
@@ -18,32 +21,83 @@ public class ProcessPendingInstall implements Runnable
 
 	public void run()
 	{
-		// we should already be running in the SWT display thread, but make sure anyway
-		UIUtils.runInUI(new Runnable()
-		{
-			public void run()
-			{
-				File installDir = getInstallDir();
-				File f = new File(new File(installDir, ExtensionUtils.EXPFILES_FOLDER), InstalledWithPendingExtensionProvider.PENDING_FOLDER);
-				if (f.exists())
-				{
-					InstallExtensionWizard installExtensionWizard = new InstallExtensionWizard(true, installDir);
-					installExtensionWizard.init(PlatformUI.getWorkbench(), null);
-					final WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), installExtensionWizard);
+		File installDir = getInstallDir();
+		File f = new File(new File(installDir, ExtensionUtils.EXPFILES_FOLDER), InstalledWithPendingExtensionProvider.PENDING_FOLDER);
 
-					// async exec would not work here; see StartupAsyncUIRunner comments
-					Display.getCurrent().timerExec(1, new Runnable()
+		if (f.exists())
+		{
+			InstallExtensionWizard installExtensionWizard = new InstallExtensionWizard(true, installDir);
+			installExtensionWizard.init(PlatformUI.getWorkbench(), null);
+			final WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), installExtensionWizard);
+			// we should already be running in the SWT display thread; if not, don't try to block and show UI right now (would lead to potential deadlocks)
+			if (Display.getCurrent() != null)
+			{
+				// async exec would not work here; see StartupAsyncUIRunner comments
+				Display.getCurrent().timerExec(1, new Runnable()
+				{
+					public void run()
+					{
+						dialog.getShell().forceActive();
+					}
+				});
+				dialog.open();
+			}
+			else
+			{
+				boolean error = false;
+
+				// just run it without UI for now
+				installExtensionWizard.addPages();
+				IWizardPage[] pages = installExtensionWizard.getPages();
+				if (pages != null && pages.length == 1 && pages[0] instanceof ActualInstallPage)
+				{
+					ActualInstallPage installPage = (ActualInstallPage)pages[0];
+					ContinueInstallRunnableWithProgress runner = installPage.new ContinueInstallRunnableWithProgress(false);
+					try
+					{
+						runner.run(null);
+					}
+					catch (InvocationTargetException e)
+					{
+						ServoyLog.logError(e);
+						error = true;
+					}
+					catch (InterruptedException e)
+					{
+						ServoyLog.logError(e);
+						error = true;
+					}
+					if (installPage.getNextPage() != null)
+					{
+						// so the user should be aware of some things that happened (but we can show those later)
+						UIUtils.runInUI(new Runnable()
+						{
+							public void run()
+							{
+								dialog.open();
+							}
+						}, false);
+					}
+				}
+				else
+				{
+					ServoyLog.logError("Internal error: Cannot continue with pending install: [" + (pages != null ? pages.length : -1) + "]", null); //$NON-NLS-1$ //$NON-NLS-2$
+					error = true;
+				}
+
+				if (error)
+				{
+					UIUtils.runInUI(new Runnable()
 					{
 						public void run()
 						{
-							dialog.getShell().forceActive();
+							MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+								"Extension install failed", "Internal error. Check logs for more details."); //$NON-NLS-1$//$NON-NLS-2$
 						}
-					});
-					dialog.open();
+					}, false);
 				}
 			}
-
-		}, true);
+		}
 	}
 
 	protected File getInstallDir()

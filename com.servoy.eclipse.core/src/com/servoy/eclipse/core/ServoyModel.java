@@ -476,6 +476,8 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 
 	public static void startAppServer()
 	{
+		PreInitializeTaskHandler.runTasksIfNeeded();
+
 		if (ApplicationServerSingleton.get() != null)
 		{
 			if (!ApplicationServerSingleton.waitForInstanceStarted())
