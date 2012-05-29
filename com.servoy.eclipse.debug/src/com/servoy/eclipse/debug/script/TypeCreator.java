@@ -90,7 +90,6 @@ import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
-import com.servoy.j2db.dataprocessing.ValidationFailedException;
 import com.servoy.j2db.documentation.IParameter;
 import com.servoy.j2db.documentation.ScriptParameter;
 import com.servoy.j2db.persistence.AggregateVariable;
@@ -291,7 +290,6 @@ public class TypeCreator extends TypeCache
 		addType("JSDataSet", JSDataSet.class);
 		addType(IExecutingEnviroment.TOPLEVEL_SERVOY_EXCEPTION, ServoyException.class);
 		addType(DataException.class.getSimpleName(), DataException.class);
-		addType(ValidationFailedException.class.getSimpleName(), ValidationFailedException.class);
 
 		addAnonymousClassType("Controller", JSForm.class);
 		addAnonymousClassType("JSApplication", JSApplication.class);

@@ -2521,16 +2521,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -2572,16 +2562,6 @@ if (ex instanceof ServoyException)
 			}
 		}
 		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
 	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
@@ -2667,16 +2647,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -2759,16 +2729,6 @@ if (ex instanceof ServoyException)
 			}
 		}
 		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
 	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
@@ -37511,16 +37471,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -37563,16 +37513,6 @@ if (ex instanceof ServoyException)
 			}
 		}
 		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
 	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
@@ -37617,16 +37557,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -37669,16 +37599,6 @@ if (ex instanceof ServoyException)
 			}
 		}
 		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
 	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
@@ -37723,16 +37643,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -37775,16 +37685,6 @@ if (ex instanceof ServoyException)
 			}
 		}
 		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
 	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
@@ -37829,16 +37729,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -37881,16 +37771,6 @@ if (ex instanceof ServoyException)
 			}
 		}
 		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
 	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
@@ -37935,16 +37815,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -37988,16 +37858,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -38040,16 +37900,6 @@ if (ex instanceof ServoyException)
 			}
 		}
 		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
 	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
@@ -38102,16 +37952,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -38154,16 +37994,6 @@ if (ex instanceof ServoyException)
 			}
 		}
 		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
 	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
@@ -38208,16 +38038,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -38260,16 +38080,6 @@ if (ex instanceof ServoyException)
 			}
 		}
 		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
 	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
@@ -38314,16 +38124,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -38366,16 +38166,6 @@ if (ex instanceof ServoyException)
 			}
 		}
 		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
 	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
@@ -38420,16 +38210,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -38472,16 +38252,6 @@ if (ex instanceof ServoyException)
 			}
 		}
 		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
 	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
@@ -38526,16 +38296,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -38578,16 +38338,6 @@ if (ex instanceof ServoyException)
 			}
 		}
 		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
 	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
@@ -38632,16 +38382,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -38685,16 +38425,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -38737,16 +38467,6 @@ if (ex instanceof ServoyException)
 			}
 		}
 		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
 	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
@@ -38792,16 +38512,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -38844,16 +38554,6 @@ if (ex instanceof ServoyException)
 			}
 		}
 		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
 	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
@@ -38899,16 +38599,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -38950,16 +38640,6 @@ if (ex instanceof ServoyException)
 			}
 		}
 		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
 	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
@@ -39003,16 +38683,6 @@ if (ex instanceof ServoyException)
 		}
 		return false
 	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
 //by default error report means logging the error, in smart client an error dialog will also show up
@@ -39055,16 +38725,6 @@ if (ex instanceof ServoyException)
 			}
 		}
 		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
 	}
 }
 //if returns false or no return, error is not reported to client; if returns true error is reported
@@ -41636,375 +41296,6 @@ NOTE: PBKDF2 is the key hash function for the PKCS (Public-Key Cryptography) sta
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
         </constant>
       </constants>
-    </object>
-    <object publicName="ValidationFailedException" qualifiedName="com.servoy.j2db.dataprocessing.ValidationFailedException">
-      <functions>
-        <function name="getErrorCode">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the error code for this ServoyException. Can be one of the constants declared in ServoyException.]]></return>
-          <description><![CDATA[Returns the error code for this ServoyException. Can be one of the constants declared in ServoyException.]]></description>
-          <summary><![CDATA[Returns the error code for this ServoyException.]]></summary>
-          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
-application.output('Exception Object: '+ex)
-application.output('MSG: '+ex.getMessage())
-if (ex instanceof ServoyException)
-{
-	/** @type {ServoyException} */
-	var servoyException = ex;
-	application.output("is a ServoyException")
-	application.output("Errorcode: "+servoyException.getErrorCode())
-	var trace = "";
-	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
-	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
-	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
-	{
-		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
-		//Get the failed records after a save
-		var array = databaseManager.getFailedRecords()
-		for( var i = 0 ; i < array.length ; i++ )
-		{
-			var record = array[i];
-			application.output(record.exception);
-			if (record.exception instanceof DataException)
-			{
-				/** @type {DataException} */
-				var dataException = record.exception;
-				application.output('SQL: '+dataException.getSQL())
-				application.output('SQLState: '+dataException.getSQLState())
-				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
-			}
-		}
-		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
-}
-//if returns false or no return, error is not reported to client; if returns true error is reported
-//by default error report means logging the error, in smart client an error dialog will also show up
-return true]]></sample>
-        </function>
-        <function name="getEvent">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent"/>
-          <description><![CDATA[Validation failed event(contains user interface trigger).]]></description>
-          <summary><![CDATA[Validation failed event(contains user interface trigger).]]></summary>
-          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
-application.output('Exception Object: '+ex)
-application.output('MSG: '+ex.getMessage())
-if (ex instanceof ServoyException)
-{
-	/** @type {ServoyException} */
-	var servoyException = ex;
-	application.output("is a ServoyException")
-	application.output("Errorcode: "+servoyException.getErrorCode())
-	var trace = "";
-	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
-	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
-	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
-	{
-		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
-		//Get the failed records after a save
-		var array = databaseManager.getFailedRecords()
-		for( var i = 0 ; i < array.length ; i++ )
-		{
-			var record = array[i];
-			application.output(record.exception);
-			if (record.exception instanceof DataException)
-			{
-				/** @type {DataException} */
-				var dataException = record.exception;
-				application.output('SQL: '+dataException.getSQL())
-				application.output('SQLState: '+dataException.getSQLState())
-				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
-			}
-		}
-		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
-}
-//if returns false or no return, error is not reported to client; if returns true error is reported
-//by default error report means logging the error, in smart client an error dialog will also show up
-return true]]></sample>
-        </function>
-        <function name="getMessage">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the string message for this ServoyException.]]></return>
-          <description><![CDATA[Returns the string message for this ServoyException.]]></description>
-          <summary><![CDATA[Returns the string message for this ServoyException.]]></summary>
-          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
-application.output('Exception Object: '+ex)
-application.output('MSG: '+ex.getMessage())
-if (ex instanceof ServoyException)
-{
-	/** @type {ServoyException} */
-	var servoyException = ex;
-	application.output("is a ServoyException")
-	application.output("Errorcode: "+servoyException.getErrorCode())
-	var trace = "";
-	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
-	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
-	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
-	{
-		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
-		//Get the failed records after a save
-		var array = databaseManager.getFailedRecords()
-		for( var i = 0 ; i < array.length ; i++ )
-		{
-			var record = array[i];
-			application.output(record.exception);
-			if (record.exception instanceof DataException)
-			{
-				/** @type {DataException} */
-				var dataException = record.exception;
-				application.output('SQL: '+dataException.getSQL())
-				application.output('SQLState: '+dataException.getSQLState())
-				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
-			}
-		}
-		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
-}
-//if returns false or no return, error is not reported to client; if returns true error is reported
-//by default error report means logging the error, in smart client an error dialog will also show up
-return true]]></sample>
-        </function>
-        <function name="getNewValue">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-          <description><![CDATA[New value for the element(that causes failed validation).]]></description>
-          <summary><![CDATA[New value for the element(that causes failed validation).]]></summary>
-          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
-application.output('Exception Object: '+ex)
-application.output('MSG: '+ex.getMessage())
-if (ex instanceof ServoyException)
-{
-	/** @type {ServoyException} */
-	var servoyException = ex;
-	application.output("is a ServoyException")
-	application.output("Errorcode: "+servoyException.getErrorCode())
-	var trace = "";
-	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
-	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
-	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
-	{
-		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
-		//Get the failed records after a save
-		var array = databaseManager.getFailedRecords()
-		for( var i = 0 ; i < array.length ; i++ )
-		{
-			var record = array[i];
-			application.output(record.exception);
-			if (record.exception instanceof DataException)
-			{
-				/** @type {DataException} */
-				var dataException = record.exception;
-				application.output('SQL: '+dataException.getSQL())
-				application.output('SQLState: '+dataException.getSQLState())
-				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
-			}
-		}
-		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
-}
-//if returns false or no return, error is not reported to client; if returns true error is reported
-//by default error report means logging the error, in smart client an error dialog will also show up
-return true]]></sample>
-        </function>
-        <function name="getOldValue">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-          <description><![CDATA[Old value for the element.]]></description>
-          <summary><![CDATA[Old value for the element.]]></summary>
-          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
-application.output('Exception Object: '+ex)
-application.output('MSG: '+ex.getMessage())
-if (ex instanceof ServoyException)
-{
-	/** @type {ServoyException} */
-	var servoyException = ex;
-	application.output("is a ServoyException")
-	application.output("Errorcode: "+servoyException.getErrorCode())
-	var trace = "";
-	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
-	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
-	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
-	{
-		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
-		//Get the failed records after a save
-		var array = databaseManager.getFailedRecords()
-		for( var i = 0 ; i < array.length ; i++ )
-		{
-			var record = array[i];
-			application.output(record.exception);
-			if (record.exception instanceof DataException)
-			{
-				/** @type {DataException} */
-				var dataException = record.exception;
-				application.output('SQL: '+dataException.getSQL())
-				application.output('SQLState: '+dataException.getSQLState())
-				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
-			}
-		}
-		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
-}
-//if returns false or no return, error is not reported to client; if returns true error is reported
-//by default error report means logging the error, in smart client an error dialog will also show up
-return true]]></sample>
-        </function>
-        <function name="getStackTrace">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the string stack trace for this ServoyException.]]></return>
-          <description><![CDATA[Returns the stack trace for this ServoyException.]]></description>
-          <summary><![CDATA[Returns the stack trace for this ServoyException.]]></summary>
-          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
-application.output('Exception Object: '+ex)
-application.output('MSG: '+ex.getMessage())
-if (ex instanceof ServoyException)
-{
-	/** @type {ServoyException} */
-	var servoyException = ex;
-	application.output("is a ServoyException")
-	application.output("Errorcode: "+servoyException.getErrorCode())
-	var trace = "";
-	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
-	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
-	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
-	{
-		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
-		//Get the failed records after a save
-		var array = databaseManager.getFailedRecords()
-		for( var i = 0 ; i < array.length ; i++ )
-		{
-			var record = array[i];
-			application.output(record.exception);
-			if (record.exception instanceof DataException)
-			{
-				/** @type {DataException} */
-				var dataException = record.exception;
-				application.output('SQL: '+dataException.getSQL())
-				application.output('SQLState: '+dataException.getSQLState())
-				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
-			}
-		}
-		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
-}
-//if returns false or no return, error is not reported to client; if returns true error is reported
-//by default error report means logging the error, in smart client an error dialog will also show up
-return true]]></sample>
-        </function>
-        <function deprecated="true" name="isServoyException">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true.]]></return>
-          <description><![CDATA[Always true; it makes the distinction between ServoyException and DataException.]]></description>
-          <summary><![CDATA[Always true; it makes the distinction between ServoyException and DataException.]]></summary>
-          <deprecated><![CDATA[Use "typeof" operator instead.]]></deprecated>
-          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
-application.output('Exception Object: '+ex)
-application.output('MSG: '+ex.getMessage())
-if (ex instanceof ServoyException)
-{
-	/** @type {ServoyException} */
-	var servoyException = ex;
-	application.output("is a ServoyException")
-	application.output("Errorcode: "+servoyException.getErrorCode())
-	var trace = "";
-	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
-	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
-	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
-	{
-		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
-		//Get the failed records after a save
-		var array = databaseManager.getFailedRecords()
-		for( var i = 0 ; i < array.length ; i++ )
-		{
-			var record = array[i];
-			application.output(record.exception);
-			if (record.exception instanceof DataException)
-			{
-				/** @type {DataException} */
-				var dataException = record.exception;
-				application.output('SQL: '+dataException.getSQL())
-				application.output('SQLState: '+dataException.getSQLState())
-				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
-			}
-		}
-		return false
-	}
-	if (ex instanceof ValidationFailedException)
-	{
-		/** @type {ValidationFailedException} */
-		var validationException = ex;
-		application.output('Old value: '+ validationException.getOldValue())
-		application.output('New value: '+ validationException.getNewValue())
-		application.output('Element name: '+ validationException.getEvent().getElementName())
-		application.output('Form name: '+ validationException.getEvent().getFormName())
-		return false;
-	}
-}
-//if returns false or no return, error is not reported to client; if returns true error is reported
-//by default error report means logging the error, in smart client an error dialog will also show up
-return true]]></sample>
-        </function>
-      </functions>
     </object>
     <object publicName="WEBCONSTANTS" qualifiedName="com.servoy.j2db.scripting.info.WEBCONSTANTS">
       <constants>
