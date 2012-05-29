@@ -2261,18 +2261,16 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
             </link>
           </links>
         </function>
-        <function name="max">
+        <function name="max" varargs="true">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <argumentType typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Returns the greater of two (or more) numbers.]]></description>
           <summary><![CDATA[Returns the greater of two (or more) numbers.]]></summary>
           <sample><![CDATA[Math.max(number,number,number)]]></sample>
           <parameters>
-            <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
           </parameters>
           <links>
             <link>
@@ -2280,56 +2278,22 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
             </link>
           </links>
         </function>
-        <function name="max" varargs="true">
+        <function name="min" varargs="true">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Returns the greater of two (or more) numbers.]]></description>
-          <summary><![CDATA[Returns the greater of two (or more) numbers.]]></summary>
-          <sample><![CDATA[Math.max(number,number,number)]]></sample>
-          <parameters>
-            <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="valueN" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
-          </parameters>
-        </function>
-        <function name="min">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Returns the lesser of two (or more) numbers.]]></description>
           <summary><![CDATA[Returns the lesser of two (or more) numbers.]]></summary>
           <sample><![CDATA[Math.min(number,number,number)]]></sample>
           <parameters>
-            <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
           </parameters>
           <links>
             <link>
               <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Math/min</url>
             </link>
           </links>
-        </function>
-        <function name="min" varargs="true">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <argumentType typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Returns the lesser of two (or more) numbers.]]></description>
-          <summary><![CDATA[Returns the lesser of two (or more) numbers.]]></summary>
-          <sample><![CDATA[Math.min(number,number,number)]]></sample>
-          <parameters>
-            <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="valueN" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
-          </parameters>
         </function>
         <function name="pow">
           <argumentsTypes>
