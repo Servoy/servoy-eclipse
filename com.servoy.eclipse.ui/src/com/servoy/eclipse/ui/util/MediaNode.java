@@ -244,8 +244,13 @@ public class MediaNode
 	@Override
 	public int hashCode()
 	{
-		if (path == null) return 0;
-		else return path.hashCode();
+		if (path == null && name == null) return 0;
+		if (path == null) return name.hashCode();
+		if (name == null) return path.hashCode();
+		StringBuilder string = new StringBuilder();
+		string.append(path);
+		string.append(name);
+		return string.hashCode();
 	}
 
 	@Override
@@ -254,7 +259,10 @@ public class MediaNode
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		if (!((MediaNode)obj).getName().equals(this.getName())) return false;
+		if (((MediaNode)obj).getName() != null && this.getName() != null)
+		{
+			if (!((MediaNode)obj).getName().equals(this.getName())) return false;
+		}
 		return path != null ? path.equals(((MediaNode)obj).getPath()) : ((MediaNode)obj).getPath() == null;
 	}
 
