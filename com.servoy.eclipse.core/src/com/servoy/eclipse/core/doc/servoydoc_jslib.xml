@@ -3401,7 +3401,6 @@ application.output(s.localeCompare("Hello"));]]></sample>
           <sample><![CDATA[string.slice(start,end);]]></sample>
           <parameters>
             <parameter name="beginSlice" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-            <parameter name="endSlice"/>
           </parameters>
           <links>
             <link>
