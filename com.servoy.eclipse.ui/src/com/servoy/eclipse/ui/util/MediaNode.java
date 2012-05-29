@@ -112,7 +112,7 @@ public class MediaNode
 
 	public MediaNode getParent()
 	{
-		if (path.length() > 0)
+		if (path != null && path.length() > 0)
 		{
 			int idx = path.length() - 1;
 			if (path.charAt(idx) == '/') idx--;
@@ -254,7 +254,7 @@ public class MediaNode
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-
+		if (!((MediaNode)obj).getName().equals(this.getName())) return false;
 		return path != null ? path.equals(((MediaNode)obj).getPath()) : ((MediaNode)obj).getPath() == null;
 	}
 
