@@ -244,13 +244,11 @@ public class MediaNode
 	@Override
 	public int hashCode()
 	{
-		if (path == null && name == null) return 0;
-		if (path == null) return name.hashCode();
-		if (name == null) return path.hashCode();
-		StringBuilder string = new StringBuilder();
-		string.append(path);
-		string.append(name);
-		return string.hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((path == null) ? 0 : path.hashCode());
+		return result;
 	}
 
 	@Override
@@ -259,11 +257,18 @@ public class MediaNode
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		if (((MediaNode)obj).getName() != null && this.getName() != null)
+		MediaNode other = (MediaNode)obj;
+		if (name == null)
 		{
-			if (!((MediaNode)obj).getName().equals(this.getName())) return false;
+			if (other.name != null) return false;
 		}
-		return path != null ? path.equals(((MediaNode)obj).getPath()) : ((MediaNode)obj).getPath() == null;
+		else if (!name.equals(other.name)) return false;
+		if (path == null)
+		{
+			if (other.path != null) return false;
+		}
+		else if (!path.equals(other.path)) return false;
+		return true;
 	}
 
 	private static final MediaNodeComparator mediaNodeComparator = new MediaNodeComparator();
