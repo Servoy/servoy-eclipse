@@ -488,13 +488,13 @@ public class MarkerMessages
 		"Element has name \"{0}\" which is not a valid identifier.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker RelationPrimaryTableNotFound = new ServoyMarker(
-		"Relation \"{0}\" is referring to inexistent primary table with name \"{1}\" on server \"{2}\".", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
+		"Relation \"{0}\" refers to a non-existing primary table \"{1}\" in server \"{2}\".", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker RelationPrimaryTableWithoutPK = new ServoyMarker(
 		"Relation \"{0}\" is referring to primary table with name \"{1}\" on server \"{2}\" but the primary table does not have a primary key.", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker RelationPrimaryServerDuplicate = new ServoyMarker(
 		"Relation \"{0}\" is referring to duplicate primary server \"{1}\".", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker RelationForeignTableNotFound = new ServoyMarker(
-		"Relation \"{0}\" is referring to inexistent foreign table with name \"{1}\" on server \"{2}\".", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
+		"Relation \"{0}\" refers to a non-existing foreign table \"{1}\" in server \"{2}\".", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker RelationForeignTableWithoutPK = new ServoyMarker(
 		"Relation \"{0}\" is referring to foreign table with name \"{1}\" on server \"{2}\" but the foreign table does not have a primary key.", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker RelationForeignServerDuplicate = new ServoyMarker(
