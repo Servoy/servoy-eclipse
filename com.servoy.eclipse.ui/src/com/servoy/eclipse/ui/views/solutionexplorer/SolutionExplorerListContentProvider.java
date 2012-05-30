@@ -1495,11 +1495,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 			for (MemberBox method : njm.getMethods())
 			{
+				String displayName = null;
+
 				if (adapter != null)
 				{
 					if (adapter instanceof ITypedScriptObject)
 					{
 						if (((ITypedScriptObject)adapter).isDeprecated(id, method.getParameterTypes())) continue;
+						displayName = ((ITypedScriptObject)adapter).getSignature(id, method.getParameterTypes());
 					}
 					else
 					{
@@ -1508,14 +1511,20 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					}
 				}
 
-				String paramTypes = "";
-				for (Class param : method.getParameterTypes())
+				if (displayName == null)
 				{
-					paramTypes += TYPES.get(param.getSimpleName()) + ",";
+					String paramTypes = "";
+					for (Class param : method.getParameterTypes())
+					{
+						paramTypes += TYPES.get(param.getSimpleName()) + ",";
+					}
+					paramTypes = "(" + (method.getParameterTypes().length > 0 ? paramTypes.substring(0, paramTypes.length() - 1) : "") + ")";
+					displayName = id + paramTypes + " - " + TYPES.get(method.getReturnType().getSimpleName());
 				}
-				paramTypes = "(" + (method.getParameterTypes().length > 0 ? paramTypes.substring(0, paramTypes.length() - 1) : "") + ")";
-				SimpleUserNode node = new UserNode(id + paramTypes + " - " + TYPES.get(method.getReturnType().getSimpleName()), actionType, new MethodFeedback(
-					id, method.getParameterTypes(), elementName, resolver, scriptObject, njm), (Object)null, functionIcon);
+
+				SimpleUserNode node = new UserNode(displayName, actionType, new MethodFeedback(id, method.getParameterTypes(), elementName, resolver,
+					scriptObject, njm), (Object)null, functionIcon);
+
 				dlm.add(node);
 			}
 		}
