@@ -1022,7 +1022,9 @@ public class VisualFormEditorPartsPage extends Composite
 					list.add(part);
 					int prevHeight = -1;
 					int nextHeight = 0;
-					Iterator<Part> it = form.getParts();
+
+					// flattened form for this form does not contain new part yet
+					Iterator<Part> it = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form, false).getParts();
 					while (it.hasNext())
 					{
 						Part element = it.next();
