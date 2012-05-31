@@ -68,7 +68,7 @@ public class TypeProvider implements ITypeProvider
 			String prefixLower = prefix.toLowerCase();
 			if (Record.JS_RECORD.toLowerCase().startsWith(prefixLower)) names.add(Record.JS_RECORD);
 			if (FoundSet.JS_FOUNDSET.toLowerCase().startsWith(prefixLower)) names.add(FoundSet.JS_FOUNDSET);
-			if ("form".startsWith(prefixLower)) names.add("Form");
+			if ("form".startsWith(prefixLower)) names.add("RuntimeForm");
 			if ("runtimeform".startsWith(prefixLower)) names.add("RuntimeForm");
 			if ("continuation".startsWith(prefixLower)) names.add("Continuation");
 		}
@@ -76,7 +76,7 @@ public class TypeProvider implements ITypeProvider
 		{
 			names.add(Record.JS_RECORD);
 			names.add(FoundSet.JS_FOUNDSET);
-			names.add("Form");
+//			names.add("Form");
 			names.add("RuntimeForm");
 			names.add("Continuation");
 		}
