@@ -357,7 +357,10 @@ public class TypeCreator extends TypeCache
 			{
 				name = name.substring("Packages.".length());
 				type = findType(name);
-				if (type != null) return type;
+				if (type != null)
+				{
+					return type;
+				}
 			}
 			if (ignorePackages.containsKey(name)) return null;
 			try
@@ -419,7 +422,7 @@ public class TypeCreator extends TypeCache
 						type = createDynamicType(realTypeName, realTypeName);
 						if (type != null && realTypeName.indexOf('<') != -1 && type.eResource() == null && !type.isProxy())
 						{
-							tc.addType(fs.getSolution().getName(), type);
+							return tc.addType(fs.getSolution().getName(), type);
 						}
 					}
 				}
@@ -1909,7 +1912,7 @@ public class TypeCreator extends TypeCache
 				members.add(arrayProp);
 				type.setName("Forms");
 				// quickly add this one to the static types.
-				addType(null, type);
+				return addType(null, type);
 			}
 			else
 			{
@@ -1969,7 +1972,7 @@ public class TypeCreator extends TypeCache
 				type = createBaseType(fullTypeName);
 
 				// quickly add this one to the static types.
-				addType(null, type);
+				return addType(null, type);
 			}
 			else
 			{
@@ -2094,7 +2097,7 @@ public class TypeCreator extends TypeCache
 				ImageDescriptor desc = IconProvider.instance().descriptor(Record.class);
 				type.setAttribute(IMAGE_DESCRIPTOR, desc);
 				// quickly add this one to the static types.
-				addType(null, type);
+				return addType(null, type);
 			}
 			else
 			{
@@ -2219,8 +2222,7 @@ public class TypeCreator extends TypeCache
 				}
 			}
 			// quickly add this one to the static types.
-			addType(null, type);
-			return type;
+			return addType(null, type);
 		}
 	}
 
@@ -2254,21 +2256,21 @@ public class TypeCreator extends TypeCache
 
 				//type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
 				// quickly add this one to the static types.
-				addType(null, type);
+				return addType(null, type);
 			}
 			else
 			{
 				FlattenedSolution fs = getFlattenedSolution();
-				if (fs == null) return getType("Form");
+				if (fs == null) return null;
 				String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
 				Form form = fs.getForm(config);
-				if (form == null) return getType("Form");
+				if (form == null) return null;
 				Form formToUse = fs.getFlattenedForm(form);
-				Type superForm = getType("Form");
+				Type superForm = getType("RuntimeForm");
 				if (form.getExtendsID() > 0)
 				{
 					Form extendsForm = fs.getForm(form.getExtendsID());
-					if (extendsForm != null) superForm = getType("Form<" + extendsForm.getName() + '>');
+					if (extendsForm != null) superForm = getType("RuntimeForm<" + extendsForm.getName() + '>');
 				}
 
 				String ds = formToUse.getDataSource();
@@ -2353,8 +2355,7 @@ public class TypeCreator extends TypeCache
 				Type type = createBaseType(fullTypeName);
 
 				// quickly add this one to the static types.
-				addType(null, type);
-				return type;
+				return addType(null, type);
 			}
 
 			String config = fullTypeName.substring(indexOf + 1, fullTypeName.length() - 1);
@@ -2414,7 +2415,7 @@ public class TypeCreator extends TypeCache
 			if (fsAndTable != null && fsAndTable.table != null)
 			{
 				addDataProviders(fsAndTable.table.getColumns().iterator(), type.getMembers(), fsAndTable.table.getDataSource());
-				addType(SCOPE_QBCOLUMNS, type);
+				return addType(SCOPE_QBCOLUMNS, type);
 			}
 
 			return type;
@@ -2582,7 +2583,7 @@ public class TypeCreator extends TypeCache
 				else
 				{
 					addDataProviders(fsAndTable.table.getColumns().iterator(), type.getMembers(), false, isVisible(), true);
-					addType(SCOPE_TABLES, type);
+					return addType(SCOPE_TABLES, type);
 
 				}
 			}
@@ -2857,7 +2858,7 @@ public class TypeCreator extends TypeCache
 				arrayProp.setVisible(false);
 				members.add(arrayProp);
 				// quickly add this one to the static types.
-				addType(null, type);
+				return addType(null, type);
 			}
 			else
 			{
@@ -3140,7 +3141,7 @@ public class TypeCreator extends TypeCache
 		}
 
 		FlattenedSolution fs = getFlattenedSolution();
-		if (fs == null) return superType;
+		if (fs == null) return null;
 
 
 		String serverName = null;
@@ -3177,7 +3178,7 @@ public class TypeCreator extends TypeCache
 			{
 				ServoyLog.logError(e);
 			}
-
+			if (table == null) return null;
 		}
 		else
 		{
@@ -3191,6 +3192,7 @@ public class TypeCreator extends TypeCache
 					superType = getType(superType.getName() + '<' + table.getDataSource() + '>');
 					table = null;
 				}
+				else return null;
 			}
 			catch (RepositoryException e)
 			{
