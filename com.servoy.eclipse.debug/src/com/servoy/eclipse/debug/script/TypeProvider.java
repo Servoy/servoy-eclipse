@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.debug.script;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
@@ -23,8 +25,14 @@ import org.eclipse.dltk.javascript.typeinfo.ITypeProvider;
 import org.eclipse.dltk.javascript.typeinfo.TypeMode;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 
+import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.Record;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IServerManagerInternal;
+import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Utils;
 
 @SuppressWarnings("nls")
 public class TypeProvider implements ITypeProvider
@@ -66,10 +74,50 @@ public class TypeProvider implements ITypeProvider
 		if (prefix != null)
 		{
 			String prefixLower = prefix.toLowerCase();
-			if (Record.JS_RECORD.toLowerCase().startsWith(prefixLower)) names.add(Record.JS_RECORD);
-			if (FoundSet.JS_FOUNDSET.toLowerCase().startsWith(prefixLower)) names.add(FoundSet.JS_FOUNDSET);
-			if ("form".startsWith(prefixLower)) names.add("RuntimeForm");
-			if ("runtimeform".startsWith(prefixLower)) names.add("RuntimeForm");
+			String datasourcePrefix = null;
+			if (Record.JS_RECORD.toLowerCase().startsWith(prefixLower))
+			{
+				names.add(Record.JS_RECORD);
+				datasourcePrefix = Record.JS_RECORD + '<';
+			}
+			if (FoundSet.JS_FOUNDSET.toLowerCase().startsWith(prefixLower))
+			{
+				names.add(FoundSet.JS_FOUNDSET);
+				datasourcePrefix = FoundSet.JS_FOUNDSET + '<';
+			}
+			if (datasourcePrefix != null && mode == TypeMode.JSDOC)
+			{
+				IServerManagerInternal serverManager = ServoyModel.getServerManager();
+				String[] serverNames = serverManager.getServerNames(true, true, false, false);
+				for (String serverName : serverNames)
+				{
+					try
+					{
+						List<String> tableAndViewNames = serverManager.getServer(serverName).getTableAndViewNames(true);
+						for (String tableName : tableAndViewNames)
+						{
+							names.add(datasourcePrefix + "db:/" + serverName + '/' + tableName + '>');
+						}
+					}
+					catch (Exception e)
+					{
+						Debug.error(e);
+					}
+				}
+			}
+			if ("form".startsWith(prefixLower) || "runtimeform".startsWith(prefixLower))
+			{
+				names.add("RuntimeForm");
+				if (mode == TypeMode.JSDOC)
+				{
+					FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
+					Iterator<Form> forms = fs.getForms(false);
+					for (Form form : Utils.iterate(forms))
+					{
+						names.add("RuntimeForm<" + form.getName() + '>');
+					}
+				}
+			}
 			if ("continuation".startsWith(prefixLower)) names.add("Continuation");
 		}
 		else
