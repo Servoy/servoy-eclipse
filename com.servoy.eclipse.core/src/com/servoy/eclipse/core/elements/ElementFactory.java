@@ -677,7 +677,7 @@ public class ElementFactory
 		Insets borderInsets;
 		if (border != null)
 		{
-			borderInsets = border.getBorderInsets(null);
+			borderInsets = ComponentFactoryHelper.getBorderInsetsForNoComponent(border);
 		}
 		else
 		{

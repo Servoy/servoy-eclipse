@@ -42,6 +42,7 @@ import com.servoy.eclipse.designer.util.BoundsImageFigure;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.util.ComponentFactoryHelper;
 
 /**
  * Edit part for painting the form border.
@@ -149,7 +150,7 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 		javax.swing.border.Border border = ElementFactory.getFormBorder(application, getModel().flattenedForm);
 		if (border != null)
 		{
-			java.awt.Insets borderInsets = border.getBorderInsets(null);
+			java.awt.Insets borderInsets = ComponentFactoryHelper.getBorderInsetsForNoComponent(border);
 			insets = new Insets(borderInsets.top, borderInsets.left, borderInsets.bottom, borderInsets.right);
 		}
 
