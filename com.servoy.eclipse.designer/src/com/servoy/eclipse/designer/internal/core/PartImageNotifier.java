@@ -56,7 +56,7 @@ public class PartImageNotifier extends AbstractImageNotifier
 		comp.setSize(form.getWidth(), part.getHeight() - form.getPartStartYPos(part.getID()));
 
 		Color bg = ComponentFactory.getPartBackground(application, part, form);
-		comp.setBackground(bg == null ? Color.white : bg);
+		comp.setBackground(bg == null && !form.getTransparent() ? Color.white : bg);
 
 		Pair<IStyleSheet, IStyleRule> formStyle = ComponentFactory.getCSSPairStyleForForm(application, form);
 		boolean formHasBgImage = formStyle != null && formStyle.getRight() != null &&
