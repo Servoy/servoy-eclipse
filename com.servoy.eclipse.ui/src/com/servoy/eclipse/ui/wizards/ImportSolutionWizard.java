@@ -315,8 +315,14 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					}
 					catch (final RepositoryException ex)
 					{
-						// Don't show an error message if the import was canceled.
-						if (!ex.hasErrorCode(ServoyException.InternalCodes.OPERATION_CANCELLED))
+						finishPage.setTitle("Solution not imported"); //$NON-NLS-1$
+						if (ex.hasErrorCode(ServoyException.InternalCodes.OPERATION_CANCELLED))
+						{
+							// Don't show an error message if the import was canceled.
+							finishPage.setErrorMessage("Import cancelled"); //$NON-NLS-1$
+							importMessageDetails = "Import solution was cancelled"; //$NON-NLS-1$
+						}
+						else
 						{
 							// Don't show an stack trace for CRC related messages.
 							if (!ex.hasErrorCode(ServoyException.InternalCodes.CHECKSUM_FAILURE))
@@ -324,7 +330,6 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 								ServoyLog.logError(ex);
 							}
 							finishPage.setErrorMessage("Import failed"); //$NON-NLS-1$
-							finishPage.setTitle("Solution not imported"); //$NON-NLS-1$
 							importMessageDetails = "Could not import solution: " + ex.getMessage(); //$NON-NLS-1$
 						}
 					}
@@ -338,7 +343,6 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 						finishPage.setErrorMessage("Import failed"); //$NON-NLS-1$
 						finishPage.setTitle("Solution not imported"); //$NON-NLS-1$
 						importMessageDetails = "Could not import solution: " + mymsg; //$NON-NLS-1$
-
 					}
 				}
 			};
