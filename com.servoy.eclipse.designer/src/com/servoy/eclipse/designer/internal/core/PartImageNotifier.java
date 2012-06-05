@@ -55,9 +55,6 @@ public class PartImageNotifier extends AbstractImageNotifier
 		StyledEnablePanel comp = new StyledEnablePanel(application);
 		comp.setSize(form.getWidth(), part.getHeight() - form.getPartStartYPos(part.getID()));
 
-		Color bg = ComponentFactory.getPartBackground(application, part, form);
-		comp.setBackground(bg == null && !form.getTransparent() ? Color.white : bg);
-
 		Pair<IStyleSheet, IStyleRule> formStyle = ComponentFactory.getCSSPairStyleForForm(application, form);
 		boolean formHasBgImage = formStyle != null && formStyle.getRight() != null &&
 			formStyle.getRight().hasAttribute(CSS.Attribute.BACKGROUND_IMAGE.toString());
@@ -72,6 +69,9 @@ public class PartImageNotifier extends AbstractImageNotifier
 		{
 			comp.setPaintBackgroundOnTopOfFormImage(true);
 		}
+
+		Color bg = ComponentFactory.getPartBackground(application, part, form);
+		comp.setBackground(bg == null && !formHasBgImage && !form.getTransparent() ? Color.white : bg);
 
 		comp.setOpaque(!form.getTransparent() && !formHasBgImage);
 
