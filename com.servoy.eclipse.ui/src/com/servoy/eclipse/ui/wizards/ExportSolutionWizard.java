@@ -52,6 +52,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -71,6 +72,7 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 import org.json.JSONException;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -513,6 +515,13 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 			}
 		}
 
+		// needed for setting modules to export in case of File -> Export
+		Object dlg = PlatformUI.getWorkbench().getDisplay().getActiveShell().getData();
+		if (dlg instanceof WizardDialog)
+		{
+			WizardDialog wizDlg = (WizardDialog)dlg;
+			if (wizDlg != null) wizDlg.addPageChangedListener(this);
+		}
 	}
 
 	private ExportConfirmationPage exportConfirmationPage;
