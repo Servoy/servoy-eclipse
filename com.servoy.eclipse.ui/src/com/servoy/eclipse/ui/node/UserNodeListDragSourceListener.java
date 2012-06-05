@@ -27,6 +27,13 @@ import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.dnd.IDragData;
 import com.servoy.eclipse.ui.Activator;
@@ -39,7 +46,7 @@ import com.servoy.j2db.persistence.Media;
 public class UserNodeListDragSourceListener implements DragSourceListener
 {
 	public static IDragData[] dragObjects;
-	private String textDrag = null;
+	private final ArrayList<String> mediaNamesDragged = new ArrayList<String>();
 
 	private final ISelectionProvider list;
 	private final Transfer transfer;
@@ -56,7 +63,7 @@ public class UserNodeListDragSourceListener implements DragSourceListener
 	public void dragFinished(DragSourceEvent event)
 	{
 		dragObjects = null;
-		textDrag = null;
+		mediaNamesDragged.clear();
 	}
 
 	/**
@@ -68,9 +75,49 @@ public class UserNodeListDragSourceListener implements DragSourceListener
 		{
 			event.data = dragObjects;
 		}
-		else if (textDrag != null && TextTransfer.getInstance().isSupportedType(event.dataType))
+		else if (mediaNamesDragged.size() > 0 && TextTransfer.getInstance().isSupportedType(event.dataType))
 		{
-			event.data = textDrag;
+			String targetEditorPluginID = null;
+			IWorkbench wb = PlatformUI.getWorkbench();
+			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+			if (win != null)
+			{
+				IWorkbenchPage page = win.getActivePage();
+				if (page != null)
+				{
+					IWorkbenchPart part = page.getActivePart();
+					if (part != null)
+					{
+						IEditorPart editor = page.getActiveEditor();
+						if (editor != null)
+						{
+							IEditorSite site = editor.getEditorSite();
+							if (site != null)
+							{
+								targetEditorPluginID = site.getPluginId();
+							}
+						}
+					}
+				}
+			}
+
+			StringBuilder mediaData = new StringBuilder();
+			boolean isCSSEditorTarget = "org.eclipse.wst.css.ui".equals(targetEditorPluginID); //$NON-NLS-1$
+			int mediaNamesCount = mediaNamesDragged.size();
+			for (int i = 0; i < mediaNamesCount; i++)
+			{
+				if (i > 0) mediaData.append(", "); //$NON-NLS-1$
+				if (isCSSEditorTarget)
+				{
+					mediaData.append("url(media:///").append(mediaNamesDragged.get(i)).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				else
+				{
+					mediaData.append("\"media:///").append(mediaNamesDragged.get(i)).append("\""); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
+
+			event.data = mediaData.toString();
 		}
 	}
 
@@ -97,9 +144,7 @@ public class UserNodeListDragSourceListener implements DragSourceListener
 					}
 					if (real instanceof Media)
 					{
-						if (textDrag != null) textDrag += ", "; //$NON-NLS-1$
-						else textDrag = ""; //$NON-NLS-1$
-						textDrag += "\"media:///" + ((Media)real).getName() + '"'; //$NON-NLS-1$
+						mediaNamesDragged.add(((Media)real).getName());
 					}
 				}
 			}
@@ -111,6 +156,6 @@ public class UserNodeListDragSourceListener implements DragSourceListener
 			event.image = Activator.getDefault().loadImageFromBundle("empty.png");
 		}
 
-		event.doit = (dragObjects != null) || (textDrag != null);
+		event.doit = (dragObjects != null) || (mediaNamesDragged.size() > 0);
 	}
 }
