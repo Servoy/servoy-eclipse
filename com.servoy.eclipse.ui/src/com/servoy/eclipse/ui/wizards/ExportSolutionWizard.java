@@ -50,6 +50,7 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -72,7 +73,6 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
 import org.json.JSONException;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -107,7 +107,7 @@ import com.servoy.j2db.util.xmlxport.IXMLExporter;
 import com.servoy.j2db.util.xmlxport.MetadataDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
-public class ExportSolutionWizard extends Wizard implements IExportWizard, IPageChangedListener
+public class ExportSolutionWizard extends Wizard implements IExportWizard
 {
 	private Solution activeSolution;
 	private ExportSolutionModel exportModel;
@@ -506,6 +506,9 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 		}
 		exportModel.setFileName(initialFileName);
 
+		exportModel.setExportReferencedModules(activeSolution.getModulesNames() != null);
+
+
 		int hasErrs = getMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
 		if (hasErrs == HAS_ERROR_MARKERS)
 		{
@@ -514,14 +517,32 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 				dbDownErrors = true;
 			}
 		}
+	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jface.wizard.Wizard#setContainer(org.eclipse.jface.wizard.IWizardContainer)
+	 */
+	@Override
+	public void setContainer(IWizardContainer wizardContainer)
+	{
+		super.setContainer(wizardContainer);
 		// needed for setting modules to export in case of File -> Export
-		Object dlg = PlatformUI.getWorkbench().getDisplay().getActiveShell().getData();
-		if (dlg instanceof WizardDialog)
+		if (wizardContainer instanceof WizardDialog)
 		{
-			WizardDialog wizDlg = (WizardDialog)dlg;
-			if (wizDlg != null) wizDlg.addPageChangedListener(this);
+			((WizardDialog)wizardContainer).addPageChangedListener(new IPageChangedListener()
+			{
+				public void pageChanged(PageChangedEvent event)
+				{
+					if (event.getSelectedPage() == modulesSelectionPage)
+					{
+						modulesSelectionPage.checkStateChanged(null);
+					}
+				}
+			});
 		}
+
 	}
 
 	private ExportConfirmationPage exportConfirmationPage;
@@ -544,21 +565,21 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard, IPage
 		addPage(passwordPage);
 	}
 
-	public void pageChanged(PageChangedEvent event)
-	{
-		if (event.getSelectedPage() == modulesSelectionPage)
-		{
-			modulesSelectionPage.checkStateChanged(null);
-		}
-	}
-
 	@Override
 	public boolean canFinish()
 	{
-		if (this.getContainer().getCurrentPage() == exportConfirmationPage) return false;
-		if (modulesSelectionPage.projectProblemsType == HAS_ERROR_MARKERS && !dbDownErrors) return false;
-		if (this.getContainer().getCurrentPage() == fileSelectionPage) return false;
-		if (exportModel.isExportReferencedModules() && this.getContainer().getCurrentPage() == exportOptionsPage) return false;
+		IWizardPage currentPage = this.getContainer().getCurrentPage();
+		if (currentPage == fileSelectionPage) return false;
+		if (currentPage == exportConfirmationPage) return false;
+		if (exportModel.isExportReferencedModules() && currentPage == exportOptionsPage)
+		{
+			modulesSelectionPage.checkStateChanged(null);
+			if (modulesSelectionPage.projectProblemsType == HAS_ERROR_MARKERS && !dbDownErrors) return false;
+		}
+		if (currentPage == modulesSelectionPage)
+		{
+			if (modulesSelectionPage.projectProblemsType == HAS_ERROR_MARKERS && !dbDownErrors) return false;
+		}
 		return exportModel.canFinish();
 	}
 
