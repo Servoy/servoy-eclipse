@@ -2291,20 +2291,35 @@ elements['element_1'].putClientProperty(CLIENTDESIGN.SELECTABLE, false);]]></sam
     </object>
     <object deprecated="true" publicName="COLUMNTYPE" qualifiedName="com.servoy.j2db.scripting.info.COLUMNTYPE">
       <constants>
-        <constant name="DATETIME" undocumented="true">
+        <constant deprecated="true" name="DATETIME">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSColumn.DATETIME]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="INTEGER" undocumented="true">
+        <constant deprecated="true" name="INTEGER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSColumn.INTEGER]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="MEDIA" undocumented="true">
+        <constant deprecated="true" name="MEDIA">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSColumn.MEDIA]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="NUMBER" undocumented="true">
+        <constant deprecated="true" name="NUMBER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSColumn.NUMBER]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="TEXT" undocumented="true">
+        <constant deprecated="true" name="TEXT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSColumn.TEXT]]></deprecated>
+          <sample/>
         </constant>
       </constants>
     </object>
@@ -2378,38 +2393,71 @@ form.navigator = SM_DEFAULTS.NONE; // Hide the navigator on the form.]]></sample
     </object>
     <object deprecated="true" publicName="DISPLAYTYPE" qualifiedName="com.servoy.j2db.scripting.solutionmodel.DISPLAYTYPE">
       <constants>
-        <constant name="CALENDAR" undocumented="true">
+        <constant deprecated="true" name="CALENDAR">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSField.CALENDAR]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="CHECKS" undocumented="true">
+        <constant deprecated="true" name="CHECKS">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSField.CHECKS]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="COMBOBOX" undocumented="true">
+        <constant deprecated="true" name="COMBOBOX">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSField.COMBOBOX]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="HTML_AREA" undocumented="true">
+        <constant deprecated="true" name="HTML_AREA">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSField.HTML_AREA]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="IMAGE_MEDIA" undocumented="true">
+        <constant deprecated="true" name="IMAGE_MEDIA">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSField.IMAGE_MEDIA]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="PASSWORD" undocumented="true">
+        <constant deprecated="true" name="PASSWORD">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSField.PASSWORD]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="RADIOS" undocumented="true">
+        <constant deprecated="true" name="RADIOS">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSField.RADIOS]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="RTF_AREA" undocumented="true">
+        <constant deprecated="true" name="RTF_AREA">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSField.RTF_AREA]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="TEXT_AREA" undocumented="true">
+        <constant deprecated="true" name="TEXT_AREA">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSField.TEXT_AREA]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="TEXT_FIELD" undocumented="true">
+        <constant deprecated="true" name="TEXT_FIELD">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSField.TEXT_FIELD]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="TYPE_AHEAD" undocumented="true">
+        <constant deprecated="true" name="TYPE_AHEAD">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSField.TYPE_AHEAD]]></deprecated>
+          <sample/>
         </constant>
       </constants>
     </object>
@@ -5252,11 +5300,17 @@ component.fontType = solutionModel.createFont('Arial',SM_FONTSTYLE.PLAIN,10);]]>
     </object>
     <object deprecated="true" publicName="FORMSECURITY" qualifiedName="com.servoy.j2db.scripting.info.FORMSECURITY">
       <constants>
-        <constant name="ACCESSIBLE" undocumented="true">
+        <constant deprecated="true" name="ACCESSIBLE">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSSecurity.ACCESSIBLE]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="VIEWABLE" undocumented="true">
+        <constant deprecated="true" name="VIEWABLE">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSSecurity.VIEWABLE]]></deprecated>
+          <sample/>
         </constant>
       </constants>
     </object>
@@ -5442,11 +5496,17 @@ Will return false when the form can't be removed, this can happen in certain sit
     </object>
     <object deprecated="true" publicName="JOINTYPE" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JOINTYPE">
       <constants>
-        <constant name="INNER_JOIN" undocumented="true">
+        <constant deprecated="true" name="INNER_JOIN">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSRelation.INNER_JOIN]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="LEFT_OUTER_JOIN" undocumented="true">
+        <constant deprecated="true" name="LEFT_OUTER_JOIN">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSRelation.LEFT_OUTER_JOIN]]></deprecated>
+          <sample/>
         </constant>
       </constants>
     </object>
@@ -10569,6 +10629,7 @@ The default is -none-.
 
 NOTE: This property has been deprecated and is kept visible for legacy purposes. Use CSS Row Styling & onRender event instead.]]></description>
           <summary><![CDATA[The calculation dataprovider used to add background color and highlight selected or alternate rows.]]></summary>
+          <deprecated><![CDATA[onRender event replaces rowBGColorCalculation functionality]]></deprecated>
           <sample><![CDATA[var form = solutionModel.newForm('myForm',myDatasource,null,true,800,600);
 //assign the global method as a string. Or use a calculation name as the string.
 form.rowBGColorCalculation = "scopes.globals.calculationDataProvider";]]></sample>
@@ -17177,6 +17238,7 @@ childrenPortal.setIntercellSpacing(5,10);]]></sample>
           <return type="void" typecode="void"/>
           <description><![CDATA[Delete this record from the Foundset and the underlying datasource.]]></description>
           <summary><![CDATA[Delete this record from the Foundset and the underlying datasource.]]></summary>
+          <deprecated><![CDATA[Use foundset.deleteRecord(record)]]></deprecated>
           <sample><![CDATA[var record= %%prefix%%foundset.getRecord(index);
 record.deleteRecord();]]></sample>
         </function>
@@ -17240,6 +17302,7 @@ record.rollbackChanges();]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the save was done without an error.]]></return>
           <description><![CDATA[Saves this record to the datasource if it had changes.]]></description>
           <summary><![CDATA[Saves this record to the datasource if it had changes.]]></summary>
+          <deprecated><![CDATA[Use databasemanager.saveData(record)]]></deprecated>
           <sample><![CDATA[var record= %%prefix%%foundset.getSelectedRecord();
 record.save();]]></sample>
         </function>
@@ -20408,32 +20471,59 @@ form.defaultPageFormat = solutionModel.createPageFormat(792,612,72,72,72,72,SM_O
     </object>
     <object deprecated="true" publicName="PARTS" qualifiedName="com.servoy.j2db.scripting.solutionmodel.PARTS">
       <constants>
-        <constant name="BODY" undocumented="true">
+        <constant deprecated="true" name="BODY">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSPart.BODY]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="FOOTER" undocumented="true">
+        <constant deprecated="true" name="FOOTER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSPart.FOOTER]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="HEADER" undocumented="true">
+        <constant deprecated="true" name="HEADER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSPart.HEADER]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="LEADING_GRAND_SUMMARY" undocumented="true">
+        <constant deprecated="true" name="LEADING_GRAND_SUMMARY">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSPart.LEADING_GRAND_SUMMARY]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="LEADING_SUBSUMMARY" undocumented="true">
+        <constant deprecated="true" name="LEADING_SUBSUMMARY">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSPart.LEADING_SUBSUMMARY]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="TITLE_FOOTER" undocumented="true">
+        <constant deprecated="true" name="TITLE_FOOTER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSPart.TITLE_FOOTER]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="TITLE_HEADER" undocumented="true">
+        <constant deprecated="true" name="TITLE_HEADER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSPart.TITLE_HEADER]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="TRAILING_GRAND_SUMMARY" undocumented="true">
+        <constant deprecated="true" name="TRAILING_GRAND_SUMMARY">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSPart.TRAILING_GRAND_SUMMARY]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="TRAILING_SUBSUMMARY" undocumented="true">
+        <constant deprecated="true" name="TRAILING_SUBSUMMARY">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSPart.TRAILING_SUBSUMMARY]]></deprecated>
+          <sample/>
         </constant>
       </constants>
     </object>
@@ -39011,8 +39101,10 @@ form.defaultPageFormat = solutionModel.createPageFormat(612,792,72,72,72,72,SM_O
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[clonedesc js_createPageFormat(double, double, double, double, double, double)]]></description>
-          <summary><![CDATA[clonedesc js_createPageFormat(double, double, double, double, double, double)]]></summary>
+          <description><![CDATA[Create a page format string.
+
+Note: The unit specified for width, height and all margins MUST be the same.]]></description>
+          <summary><![CDATA[Create a page format string.]]></summary>
           <sample><![CDATA[var form = solutionModel.getForm("someForm");
 form.defaultPageFormat = solutionModel.createPageFormat(612,792,72,72,72,72,SM_ORIENTATION.PORTRAIT,SM_UNITS.PIXELS);]]></sample>
           <parameters>
@@ -39051,8 +39143,10 @@ form.defaultPageFormat = solutionModel.createPageFormat(612,792,72,72,72,72,SM_O
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[clonedesc js_createPageFormat(double, double, double, double, double, double)]]></description>
-          <summary><![CDATA[clonedesc js_createPageFormat(double, double, double, double, double, double)]]></summary>
+          <description><![CDATA[Create a page format string.
+
+Note: The unit specified for width, height and all margins MUST be the same.]]></description>
+          <summary><![CDATA[Create a page format string.]]></summary>
           <sample><![CDATA[var form = solutionModel.getForm("someForm");
 form.defaultPageFormat = solutionModel.createPageFormat(612,792,72,72,72,72,SM_ORIENTATION.PORTRAIT,SM_UNITS.PIXELS);]]></sample>
           <parameters>
@@ -39230,6 +39324,7 @@ form.borderType = solutionModel.createTitledBorder('Test',solutionModel.createFo
           <return type="com.servoy.j2db.scripting.solutionmodel.JSCalculation" typecode="com.servoy.j2db.scripting.solutionmodel.JSCalculation"/>
           <description><![CDATA[Get an existing calculation for the given name and datasource.]]></description>
           <summary><![CDATA[Get an existing calculation for the given name and datasource.]]></summary>
+          <deprecated><![CDATA[replaced with solutionModel.getDataSourceNode(dataSource).getCalculation(name)]]></deprecated>
           <sample><![CDATA[var calc = solutionModel.newCalculation("function myCalculation() { return 123; }", JSVariable.INTEGER, "db:/example_data/customers");
 var calc2 = solutionModel.newCalculation("function myCalculation2() { return '20'; }", "db:/example_data/customers");
 var calc3 = solutionModel.newCalculation("function myCalculation3() { return 'Hello World!'; }",	JSVariable.TEXT, "db:/example_data/employees");
@@ -39257,6 +39352,7 @@ for (var i = 0; i < allCalcs.length; i++) {
           <return type="com.servoy.j2db.scripting.solutionmodel.JSCalculation[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSCalculation;"/>
           <description><![CDATA[Gets all the calculations for the given datasource.]]></description>
           <summary><![CDATA[Gets all the calculations for the given datasource.]]></summary>
+          <deprecated><![CDATA[replaced with solutionModel.getDataSourceNode(dataSource).getCalculations()]]></deprecated>
           <sample><![CDATA[var calc = solutionModel.newCalculation("function myCalculation() { return 123; }", JSVariable.INTEGER, "db:/example_data/customers");
 var calc2 = solutionModel.newCalculation("function myCalculation2() { return '20'; }", "db:/example_data/customers");
 var calc3 = solutionModel.newCalculation("function myCalculation3() { return 'Hello World!'; }",	JSVariable.TEXT, "db:/example_data/employees");
@@ -39603,6 +39699,7 @@ if (valueLists != null && valueLists.length != 0)
           <return type="com.servoy.j2db.scripting.solutionmodel.JSCalculation" typecode="com.servoy.j2db.scripting.solutionmodel.JSCalculation"/>
           <description><![CDATA[Creates a new calculation for the given code and the type, if it builds on a column (name is a column name) then type will be ignored.]]></description>
           <summary><![CDATA[Creates a new calculation for the given code and the type, if it builds on a column (name is a column name) then type will be ignored.]]></summary>
+          <deprecated><![CDATA[replaced with solutionModel.getDataSourceNode(dataSource).newCalculation(code, type)]]></deprecated>
           <sample><![CDATA[var calc = solutionModel.newCalculation("function myCalculation() { return 123; }", JSVariable.INTEGER, "db:/example_data/customers");
 var calc2 = solutionModel.newCalculation("function myCalculation2() { return '20'; }", "db:/example_data/customers");
 var calc3 = solutionModel.newCalculation("function myCalculation3() { return 'Hello World!'; }",	JSVariable.TEXT, "db:/example_data/employees");
@@ -39636,6 +39733,7 @@ for (var i = 0; i < allCalcs.length; i++) {
 else it will default to JSVariable.TEXT;]]></description>
           <summary><![CDATA[Creates a new calculation for the given code, the type will be the column where it could be build on (if name is a column name),
 else it will default to JSVariable.]]></summary>
+          <deprecated><![CDATA[replaced with solutionModel.getDataSourceNode(dataSource).newCalculation(code)]]></deprecated>
           <sample><![CDATA[var calc = solutionModel.newCalculation("function myCalculation() { return 123; }", JSVariable.INTEGER, "db:/example_data/customers");
 var calc2 = solutionModel.newCalculation("function myCalculation2() { return '20'; }", "db:/example_data/customers");
 var calc3 = solutionModel.newCalculation("function myCalculation3() { return 'Hello World!'; }",	JSVariable.TEXT, "db:/example_data/employees");
@@ -40016,6 +40114,7 @@ combo2.valuelist = vl2;]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the removal was successful, false otherwise]]></return>
           <description><![CDATA[Removes the calculation specified by name and datasource.]]></description>
           <summary><![CDATA[Removes the calculation specified by name and datasource.]]></summary>
+          <deprecated><![CDATA[replaced with solutionModel.getDataSourceNode(dataSource).removeCalculation(name)]]></deprecated>
           <sample><![CDATA[var calc1 = solutionModel.newCalculation("function myCalculation1() { return 123; }", JSVariable.INTEGER, "db:/example_data/customers");
 var calc2 = solutionModel.newCalculation("function myCalculation2() { return '20'; }", "db:/example_data/customers");
 
@@ -40280,20 +40379,35 @@ button.onAction = solutionModel.wrapMethodWithArguments(method, [null, true, 42,
     </object>
     <object deprecated="true" publicName="TABLESECURITY" qualifiedName="com.servoy.j2db.scripting.info.TABLESECURITY">
       <constants>
-        <constant name="DELETE" undocumented="true">
+        <constant deprecated="true" name="DELETE">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSSecurity.DELETE]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="INSERT" undocumented="true">
+        <constant deprecated="true" name="INSERT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSSecurity.INSERT]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="READ" undocumented="true">
+        <constant deprecated="true" name="READ">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSSecurity.READ]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="TRACKING" undocumented="true">
+        <constant deprecated="true" name="TRACKING">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSSecurity.TRACKING]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="UPDATE" undocumented="true">
+        <constant deprecated="true" name="UPDATE">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSSecurity.UPDATE]]></deprecated>
+          <sample/>
         </constant>
       </constants>
     </object>
@@ -41243,55 +41357,97 @@ NOTE: PBKDF2 is the key hash function for the PKCS (Public-Key Cryptography) sta
     </object>
     <object deprecated="true" publicName="VALUELIST" qualifiedName="com.servoy.j2db.scripting.solutionmodel.VALUELIST">
       <constants>
-        <constant name="CUSTOM_VALUES" undocumented="true">
+        <constant deprecated="true" name="CUSTOM_VALUES">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSValueList.CUSTOM_VALUES]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="DATABASE_VALUES" undocumented="true">
+        <constant deprecated="true" name="DATABASE_VALUES">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSValueList.DATABASE_VALUES]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="EMPTY_VALUE_ALWAYS" undocumented="true">
+        <constant deprecated="true" name="EMPTY_VALUE_ALWAYS">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSValueList.EMPTY_VALUE_ALWAYS]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="EMPTY_VALUE_NEVER" undocumented="true">
+        <constant deprecated="true" name="EMPTY_VALUE_NEVER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSValueList.EMPTY_VALUE_NEVER]]></deprecated>
+          <sample/>
         </constant>
       </constants>
     </object>
     <object deprecated="true" publicName="VARIABLETYPE" qualifiedName="com.servoy.j2db.scripting.solutionmodel.VARIABLETYPE">
       <constants>
-        <constant name="DATETIME" undocumented="true">
+        <constant deprecated="true" name="DATETIME">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSColumn.DATETIME]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="INTEGER" undocumented="true">
+        <constant deprecated="true" name="INTEGER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSColumn.INTEGER]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="MEDIA" undocumented="true">
+        <constant deprecated="true" name="MEDIA">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSColumn.MEDIA]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="NUMBER" undocumented="true">
+        <constant deprecated="true" name="NUMBER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSColumn.NUMBER]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="TEXT" undocumented="true">
+        <constant deprecated="true" name="TEXT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSColumn.TEXT]]></deprecated>
+          <sample/>
         </constant>
       </constants>
     </object>
     <object deprecated="true" publicName="VIEW" qualifiedName="com.servoy.j2db.scripting.solutionmodel.VIEW">
       <constants>
-        <constant name="LIST_VIEW" undocumented="true">
+        <constant deprecated="true" name="LIST_VIEW">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSForm.LIST_VIEW]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="LOCKED_LIST_VIEW" undocumented="true">
+        <constant deprecated="true" name="LOCKED_LIST_VIEW">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSForm.LOCKED_LIST_VIEW]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="LOCKED_RECORD_VIEW" undocumented="true">
+        <constant deprecated="true" name="LOCKED_RECORD_VIEW">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSForm.LOCKED_RECORD_VIEW]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="LOCKED_TABLE_VIEW" undocumented="true">
+        <constant deprecated="true" name="LOCKED_TABLE_VIEW">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSForm.LOCKED_TABLE_VIEW]]></deprecated>
+          <sample/>
         </constant>
-        <constant name="RECORD_VIEW" undocumented="true">
+        <constant deprecated="true" name="RECORD_VIEW">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[replaced by JSForm.RECORD_VIEW]]></deprecated>
+          <sample/>
         </constant>
       </constants>
     </object>
