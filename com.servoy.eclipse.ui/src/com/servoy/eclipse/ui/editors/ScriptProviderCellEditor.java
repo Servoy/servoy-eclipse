@@ -77,7 +77,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 	public ScriptProviderCellEditor(Composite parent, Table table, PersistContext persistContext, String methodKey, boolean readOnly)
 	{
 		super(parent, new SolutionContextDelegateLabelProvider(new ScriptDialogLabelProvider(persistContext, table, true), persistContext.getContext()),
-			new ScriptProviderValueEditor(persistContext.getPersist(), table), readOnly, SWT.NONE);
+			new ScriptProviderValueEditor(persistContext.getPersist()), readOnly, SWT.NONE);
 		this.table = table;
 		this.persistContext = persistContext;
 		this.methodKey = methodKey;
@@ -86,9 +86,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 	@Override
 	public Object openDialogBox(Control cellEditorWindow)
 	{
-
 		final ScriptDialog dialog = new ScriptDialog(cellEditorWindow.getShell(), persistContext, table, getSelection(), SWT.NONE, "Select script");
-
 		dialog.setOptionsAreaFactory(new IControlFactory()
 		{
 			public Control createControl(Composite composite)
@@ -207,7 +205,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 			{
 				if (value instanceof MethodWithArguments)
 				{
-					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persistContext.getContext(), persistContext.getPersist(),
+					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(),
 						((MethodWithArguments)value).table, ((MethodWithArguments)value).methodId);
 					if (scriptProvider instanceof ScriptCalculation)
 					{
@@ -235,12 +233,10 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 		public static class ScriptProviderValueEditor implements IValueEditor<Object>
 		{
 			private final IPersist persist;
-			private final Table table;
 
-			public ScriptProviderValueEditor(IPersist persist, Table table)
+			public ScriptProviderValueEditor(IPersist persist)
 			{
 				this.persist = persist;
-				this.table = table;
 			}
 
 			public boolean canEdit(Object value)
