@@ -2021,7 +2021,7 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
         <function name="parse">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
-            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Function"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           <description><![CDATA[Parses a string as JSON and returns the parsed value.]]></description>
@@ -2031,8 +2031,8 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
             <parameter name="text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String">
               <description><![CDATA[The string to parse as JSON.  See the JSON object for a description of JSON syntax.]]></description>
             </parameter>
-            <parameter name="reviver" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
-              <description><![CDATA[If a function, prescribes how the value originally produced by parsing is transformed, before being returned.]]></description>
+            <parameter name="reviver" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="com.servoy.j2db.documentation.scripting.docs.Function">
+              <description><![CDATA[A function, prescribes how the value originally produced by parsing is transformed, before being returned.]]></description>
             </parameter>
           </parameters>
           <links>
@@ -2095,7 +2095,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
-            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified]]></description>
@@ -2108,8 +2108,8 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             <parameter name="replacer" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
               <description><![CDATA[If a function, transforms values and properties encountered while stringifying; if an array, specifies the set of properties included in objects in the final string.]]></description>
             </parameter>
-            <parameter name="space" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String">
-              <description><![CDATA[Causes the resulting string to be pretty-printed]]></description>
+            <parameter name="space" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
+              <description><![CDATA[The space argument may be used to control spacing in the final string. If it is a number, successive levels in the stringification will each be indented by this many space characters (up to 10). If it is a string, successive levels will indented by this string (or the first ten characters of it).]]></description>
             </parameter>
           </parameters>
           <links>
