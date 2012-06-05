@@ -22,6 +22,8 @@ import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
 
+import com.servoy.eclipse.core.extension.RestartState;
+
 /**
  * This class holds the state that needs to be shared across multiple install extension wizard pages.
  * @author acostescu

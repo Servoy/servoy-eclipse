@@ -99,7 +99,7 @@ public class PreInitializeTaskHandler
 					}
 					catch (CoreException e)
 					{
-						ServoyLog.logError("Could not a pre-initialize job.", e); //$NON-NLS-1$
+						ServoyLog.logError("Failed to run a pre-initialize job.", e); //$NON-NLS-1$
 					}
 				}
 			}

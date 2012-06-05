@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.ui.wizards.extension;
+package com.servoy.eclipse.core.extension;
 
 import java.io.File;
 import java.io.FileInputStream;

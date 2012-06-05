@@ -49,6 +49,14 @@ Hooks registered with this extension point will be executed before ServoyModel i
    </element>
 
    <element name="job">
+      <annotation>
+         <documentation>
+            A pre-initialize job extension. This job will run before Servoy application server is initialized.
+IMPORTANT: the pre-initialize job MUST limit it&apos;s interactions with Servoy code (do not use ApplicationServerSingleton, ServoyModel, ...) so as not to require the Servoy application server to be initialized. Otherwise a &quot;pre initialize cycle&quot; exception will be thrown.
+
+The same restriction applies to the job&apos;s bundle &quot;start&quot; method - it must not try to initialize the app. server.
+         </documentation>
+      </annotation>
       <complexType>
          <attribute name="id" type="string" use="required">
             <annotation>
@@ -67,7 +75,10 @@ Hooks registered with this extension point will be executed before ServoyModel i
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  This job will run before Servoy application server is initialized.
+IMPORTANT: the pre-initialize job MUST limit it&apos;s interactions with Servoy code (do not use ApplicationServerSingleton, ServoyModel, ...) so as not to require the Servoy application server to be initialized. Otherwise a &quot;pre initialize cycle&quot; exception will be thrown.
+
+The same restriction applies to the job&apos;s bundle &quot;start&quot; method - it must not try to initialize the app. server.
                </documentation>
                <appInfo>
                   <meta.attribute kind="java" basedOn=":java.lang.Runnable"/>

@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.marketplace;
+package com.servoy.eclipse.core.extension;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -55,7 +55,18 @@ public class InstalledWithPendingExtensionProvider implements IFileBasedExtensio
 	protected FileBasedExtensionProvider[] folderProviders;
 	protected MessageKeeper messages = new MessageKeeper();
 
+	protected File extDir;
+	protected IEXPParserPool parserSource;
+
 	public InstalledWithPendingExtensionProvider(File extDir, IEXPParserPool parserSource)
+	{
+		this.extDir = extDir;
+		this.parserSource = parserSource;
+
+		createFolderProviderList();
+	}
+
+	protected void createFolderProviderList()
 	{
 		File[] pendingDirs = getPendingDirsAscending(extDir);
 		folderProviders = new FileBasedExtensionProvider[pendingDirs.length + 1];
@@ -226,10 +237,8 @@ public class InstalledWithPendingExtensionProvider implements IFileBasedExtensio
 
 	public void flushCache()
 	{
-		for (FileBasedExtensionProvider exp : folderProviders)
-		{
-			exp.flushCache();
-		}
+		// recreate whole list (maybe pending dirs changed)
+		createFolderProviderList();
 	}
 
 	public DependencyMetadata[] getAllAvailableExtensions()

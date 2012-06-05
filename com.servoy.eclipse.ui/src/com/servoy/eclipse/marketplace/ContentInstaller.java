@@ -45,9 +45,9 @@ public class ContentInstaller
 {
 	private final ContentWrapper contentWrapper;
 
-	public ContentInstaller(File expFile, Content content, File installDir)
+	public ContentInstaller(File expFile, Content content, File installDir, boolean noFilesCopiedYet)
 	{
-		this.contentWrapper = new ContentWrapper(expFile, content, installDir);
+		this.contentWrapper = new ContentWrapper(expFile, content, installDir, noFilesCopiedYet);
 	}
 
 	/**
@@ -162,11 +162,13 @@ public class ContentInstaller
 		private final File expFileObj;
 		private final Content contentObj;
 		private final File installDir;
+		private final boolean noFilesCopiedYet;
 
-		ContentWrapper(File expFile, Content content, File installDir)
+		ContentWrapper(File expFile, Content content, File installDir, boolean noFilesCopiedYet)
 		{
 			expFileObj = expFile;
 			contentObj = content;
+			this.noFilesCopiedYet = noFilesCopiedYet;
 			this.installDir = installDir;
 		}
 
@@ -200,7 +202,7 @@ public class ContentInstaller
 				for (int i = 0; i < paths.length; i++)
 				{
 					File file = new File(installDir, paths[i]);
-					if (!file.exists())
+					if (noFilesCopiedYet || !file.exists())
 					{
 						try
 						{

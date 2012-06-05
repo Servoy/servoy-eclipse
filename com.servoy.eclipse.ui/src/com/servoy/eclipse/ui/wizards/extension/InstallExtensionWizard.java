@@ -26,13 +26,13 @@ import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.marketplace.InstalledWithPendingExtensionProvider;
+import com.servoy.eclipse.core.extension.InstalledWithPendingExtensionProvider;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.extension.ExtensionUtils;
-import com.servoy.extension.FileBasedExtensionProvider;
 import com.servoy.extension.MarketPlaceExtensionProvider;
 import com.servoy.extension.Message;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.util.Pair;
 
 
 /**
@@ -45,15 +45,17 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 	protected static final String WIZARD_SETTINGS_SECTION = "ExtensionInstallWizard"; //$NON-NLS-1$
 	protected static final String TITLE = "Extension install"; //$NON-NLS-1$
 
+	private Pair<String, Message[]> errorAndMsgs;
+
 	protected String idToInstallFromMP;
 	protected String versionToInstallFromMP;
+
 	protected InstallExtensionWizardOptions dialogOptions;
 	protected InstallExtensionState state = new InstallExtensionState();
-	protected boolean continueWithPendingAfterRestart;
 
 	public InstallExtensionWizard()
 	{
-		this(null, null);
+		// when started from the "Import" menu item; file based import
 	}
 
 	/**
@@ -68,14 +70,12 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 	}
 
 	/**
-	 * Start the wizard to continue an install after restart.
-	 * @param continueWithPendingAfterRestart if true, it will continue with pending install, false will just show the normal import wizard.
+	 * Start the wizard only for showing an error/warning/info page (for example needed after a restart install was run).
+	 * @param errorAndMsgs an error message (can be null) and an array of messages to show to the user.
 	 */
-	public InstallExtensionWizard(boolean continueWithPendingAfterRestart, File installDir)
+	public InstallExtensionWizard(Pair<String, Message[]> errorAndMsgs)
 	{
-		this();
-		this.continueWithPendingAfterRestart = continueWithPendingAfterRestart;
-		state.installDir = installDir;
+		this.errorAndMsgs = errorAndMsgs;
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
@@ -93,51 +93,45 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 		dialogOptions = new InstallExtensionWizardOptions(getDialogSettings());
 
 		state.display = workbench.getDisplay();
-
-		if (state.installDir == null)
-		{
-			// ApplicationServerSingleton.get() should never be called in this wizard elsewhere at restart, otherwise restart-install will not work correctly
-			String appServerDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
-			if (appServerDir != null)
-			{
-				state.installDir = new File(appServerDir).getParentFile();
-			}
-		}
-
-		File extDir = new File(state.installDir, ExtensionUtils.EXPFILES_FOLDER);
-		if (!extDir.exists()) extDir.mkdir();
-		if (extDir.exists() && extDir.canRead() && extDir.isDirectory())
-		{
-			if (continueWithPendingAfterRestart)
-			{
-				state.installedExtensionsProvider = new FileBasedExtensionProvider(extDir, true, state);
-			}
-			else
-			{
-				InstalledWithPendingExtensionProvider tmp = new InstalledWithPendingExtensionProvider(extDir, state);
-				state.mustRestart = (tmp.getFolderCount() > 1); // check if we already have pending install operations
-				state.installedExtensionsProvider = tmp;
-			}
-		}
 	}
 
 	@Override
 	public void addPages()
 	{
-		if (continueWithPendingAfterRestart)
+		if (errorAndMsgs != null)
 		{
-			// called at startup to continue installing after a needed restart
-			ActualInstallPage installPage = new ActualInstallPage("PendingInst", state, true); //$NON-NLS-1$
-			addPage(installPage);
+			state.canFinish = true;
+			state.disallowCancel = true; // install is over, it can't be cancelled
+			addPage(new ShowMessagesPage(
+				"Error page", "Extension install", errorAndMsgs.getLeft() != null ? errorAndMsgs.getLeft() : "Some items may need your attention.", null, errorAndMsgs.getRight(), false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		}
 		else
 		{
-			// normal start of installation
-			MarketPlaceExtensionProvider marketplaceProvider = null;
-
 			// first page is either the install from MP page, or install from file
+
+			if (state.installDir == null)
+			{
+				// ApplicationServerSingleton.get() should never be called in this wizard elsewhere at restart, otherwise restart-install will not work correctly
+				String appServerDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
+				if (appServerDir != null)
+				{
+					state.installDir = new File(appServerDir).getParentFile();
+				}
+			}
+
+			File extDir = new File(state.installDir, ExtensionUtils.EXPFILES_FOLDER);
+			if (!extDir.exists()) extDir.mkdir();
+			if (extDir.exists() && extDir.canRead() && extDir.isDirectory())
+			{
+				InstalledWithPendingExtensionProvider tmp = new InstalledWithPendingExtensionProvider(extDir, state);
+				state.mustRestart = (tmp.getFolderCount() > 1); // check if we already have pending install operations
+				state.installedExtensionsProvider = tmp;
+			}
+
 			if (idToInstallFromMP != null)
 			{
+				MarketPlaceExtensionProvider marketplaceProvider = null;
+
 				state.extensionID = idToInstallFromMP;
 				// only show first page if there is more then one version available for this extension in the MP
 				marketplaceProvider = new MarketPlaceExtensionProvider(state.installDir);
@@ -147,13 +141,13 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 					if (versions == null || versions.length == 0)
 					{
 						// this shouldn't happen in normal circumstances; maybe a network error caused this...
-						Message[] messages = marketplaceProvider.getMessages();
-						if (messages.length == 0)
+						Message[] msgs = marketplaceProvider.getMessages();
+						if (msgs.length == 0)
 						{
-							messages = new Message[] { new Message("Unknown error", Message.ERROR) }; //$NON-NLS-1$
+							msgs = new Message[] { new Message("Unknown error", Message.ERROR) }; //$NON-NLS-1$
 						}
 						addPage(new ShowMessagesPage(
-							"Error page", "Cannot install extension", "A problem was encountered during available versions lookup.", null, messages, false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+							"Error page", "Cannot install extension", "A problem was encountered during available versions lookup.", null, msgs, false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 					}
 					else
 					{
@@ -181,11 +175,10 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 			{
 				addPage(new ChooseEXPFilePage("EXPchooser", state, dialogOptions)); //$NON-NLS-1$
 			}
-
-
-			// all other pages are not added here because they vary depending on what's going on;
-			// the next/previous page implementation for these dynamic pages is contained in the pages, they don't use the wizard's list of pages
 		}
+
+		// all other pages are not added here because they vary depending on what's going on;
+		// the next/previous page implementation for these dynamic pages is contained in the pages, they don't use the wizard's list of pages
 	}
 
 	@Override

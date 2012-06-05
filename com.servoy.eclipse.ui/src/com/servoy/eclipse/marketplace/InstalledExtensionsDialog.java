@@ -59,6 +59,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.extension.InstalledWithPendingExtensionProvider;
 import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -373,7 +374,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 					String descriptionText = "Extension ID: " + dmd.id + System.getProperty("line.separator"); //$NON-NLS-1$//$NON-NLS-2$
 					if (whole.getInfo() != null)
 					{
-						if (whole.getInfo().description != null) descriptionText += whole.getInfo().description;
+						if (whole.getInfo().description != null) descriptionText += whole.getInfo().description.replace("\r\n", "\n").replace("\n", System.getProperty("line.separator")); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
 					}
 
 					description.setText(descriptionText);

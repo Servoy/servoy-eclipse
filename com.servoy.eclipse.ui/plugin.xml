@@ -1110,11 +1110,9 @@
       </saveParticipant>      
    </extension>
    <extension
-         point="com.servoy.eclipse.core.preInitializeJob">
-      <job
-            class="com.servoy.eclipse.ui.wizards.extension.ProcessPendingInstall"
-            id="com.servoy.eclipse.ui.ProcessPendingInstalls"
-            name="Checks for pending installs and if any is found continues by using the extension install wizard.">
-      </job>
+         point="org.eclipse.ui.startup">
+      <startup
+            class="com.servoy.eclipse.ui.wizards.extension.AfterRestartMessages">
+      </startup>
    </extension>
 </plugin>

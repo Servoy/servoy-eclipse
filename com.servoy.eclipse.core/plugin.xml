@@ -340,4 +340,11 @@
             nature="org.eclipse.dltk.javascript.core.nature">
       </saveParticipant>
    </extension>
+   <extension
+         point="com.servoy.eclipse.core.preInitializeJob">
+      <job
+            class="com.servoy.eclipse.core.extension.ProcessPendingInstall"
+            id="com.servoy.eclipse.core.pendingInstall">
+      </job>
+   </extension>
 </plugin>
