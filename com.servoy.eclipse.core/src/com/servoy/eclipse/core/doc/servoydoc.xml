@@ -478,7 +478,8 @@ application.closeSolution();
           <sample><![CDATA[var ok = application.createNewFormInstance('orders','orders_view');
 if (ok)
 {
-	application.showFormInDialog(forms.orders_view)
+	var dialog = application.createWindow("myDialog", JSWindow.DIALOG);
+ dialog.show('orders_view')
 	//forms['orders_view'].controller.show()
 	//forms.xyz.elements.myTabPanel.addTab(forms['orders_view'])
 	//forms['orders_view'].elements.mylabel.setLocation(10,20)
@@ -2216,7 +2217,7 @@ things, you can give an number in ms how long this can take.]]></description>
           <sample><![CDATA[application.updateUI(500);
 //continue doing things]]></sample>
           <parameters>
-            <parameter name="milliseconds" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+            <parameter name="milliseconds" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[How long the update should take in milliseconds]]></description>
             </parameter>
           </parameters>
@@ -4174,7 +4175,7 @@ for (var i = 0; params != null && i < params.length; i++)
             <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The name of the database server connection.]]></description>
             </parameter>
-            <parameter name="filterName" optional="true" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+            <parameter name="filterName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The filter name for which to get the array.]]></description>
             </parameter>
           </parameters>
@@ -4390,9 +4391,6 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
           <parameters>
             <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal">
               <description><![CDATA[A JSFoundset to test.]]></description>
-            </parameter>
-            <parameter name="qualifiedRelationString" optional="true">
-              <description><![CDATA[The relationname if the first param is a JSRecord.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -6489,7 +6487,7 @@ application.output(calc.getName());]]></sample>
           <return type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID"/>
           <description><![CDATA[Returns the UUID of the calculation.]]></description>
           <summary><![CDATA[Returns the UUID of the calculation.]]></summary>
-          <sample><![CDATA[var calc = solutionModel.newCalculation("function myCalculation() { return 123; }", JSVariable.INTEGER, "db:/example_data/customers");
+          <sample><![CDATA[var calc = solutionModel.getDataSourceNode("db:/example_data/customers").newCalculation("function myCalculation() { return 123; }", JSVariable.INTEGER);
 application.output(calc.getUUID().toString());]]></sample>
         </function>
         <function name="isStored">
@@ -6497,7 +6495,7 @@ application.output(calc.getUUID().toString());]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the calculation is stored, false otherwise]]></return>
           <description><![CDATA[Returns whether this calculation is a stored one or not.]]></description>
           <summary><![CDATA[Returns whether this calculation is a stored one or not.]]></summary>
-          <sample><![CDATA[var calc = solutionModel.newCalculation("function myCalculation() { return 123; }", JSVariable.INTEGER, "db:/example_data/customers");
+          <sample><![CDATA[var calc = solutionModel.getDataSourceNode("db:/example_data/customers").newCalculation("function myCalculation() { return 123; }", JSVariable.INTEGER);
 if (calc.isStored()) application.output("The calculation is stored");
 else application.output("The calculation is not stored");]]></sample>
         </function>
@@ -13295,7 +13293,7 @@ for (var i = 1; i <= %%prefix%%foundset.getSize(); i++)
         </function>
         <function name="hasConditions">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[wether the foundset has foind-conditions]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[wether the foundset has find-conditions]]></return>
           <description><![CDATA[Check wether the foundset has any conditions from a previous find action.]]></description>
           <summary><![CDATA[Check wether the foundset has any conditions from a previous find action.]]></summary>
           <sample><![CDATA[if (%%prefix%%foundset.hasConditions())
@@ -24393,7 +24391,7 @@ for (var i = 1; i <= %%prefix%%foundset.getSize(); i++)
         </function>
         <function name="hasConditions">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[wether the foundset has foind-conditions]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[wether the foundset has find-conditions]]></return>
           <description><![CDATA[Check wether the foundset has any conditions from a previous find action.]]></description>
           <summary><![CDATA[Check wether the foundset has any conditions from a previous find action.]]></summary>
           <sample><![CDATA[if (%%prefix%%foundset.hasConditions())
@@ -26513,7 +26511,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <description><![CDATA[Returns the image data in .jpg format from an icon; thumbnailing only works in record view.]]></description>
           <summary><![CDATA[Returns the image data in .]]></summary>
           <sample><![CDATA[var jpgData = %%prefix%%%%elementName%%.getThumbnailJPGImage();
-application.writeFile("mypicture.jpg", jpgData);]]></sample>
+plugins.file.writeFile("mypicture.jpg", jpgData);]]></sample>
         </function>
         <function name="getThumbnailJPGImage">
           <argumentsTypes>
@@ -26524,7 +26522,7 @@ application.writeFile("mypicture.jpg", jpgData);]]></sample>
           <description><![CDATA[Returns the image data in .jpg format from an icon; thumbnailing only works in record view.]]></description>
           <summary><![CDATA[Returns the image data in .]]></summary>
           <sample><![CDATA[var jpgData = %%prefix%%%%elementName%%.getThumbnailJPGImage(50, 50);
-application.writeFile("mypicture.jpg", jpgData);]]></sample>
+plugins.file.writeFile("mypicture.jpg", jpgData);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[The target width, use -1 for original image width.]]></description>
@@ -26591,7 +26589,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <sample><![CDATA[//request the focus in this %%prefix%%%%elementName%% (focus is also a text cursor on text components), skip on focus gained method call
 %%prefix%%%%elementName%%.requestFocus(false);]]></sample>
           <parameters>
-            <parameter name="mustExecuteOnFocusGainedMethod" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+            <parameter name="mustExecuteOnFocusGainedMethod" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[If true will execute onFocusGained method, else will not; default value is true.]]></description>
             </parameter>
           </parameters>
@@ -26968,7 +26966,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <sample><![CDATA[//request the focus in this %%prefix%%%%elementName%% (focus is also a text cursor on text components), skip on focus gained method call
 %%prefix%%%%elementName%%.requestFocus(false);]]></sample>
           <parameters>
-            <parameter name="mustExecuteOnFocusGainedMethod" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+            <parameter name="mustExecuteOnFocusGainedMethod" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[If true will execute onFocusGained method, else will not; default value is true.]]></description>
             </parameter>
           </parameters>
@@ -27333,7 +27331,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <sample><![CDATA[//request the focus in this %%prefix%%%%elementName%% (focus is also a text cursor on text components), skip on focus gained method call
 %%prefix%%%%elementName%%.requestFocus(false);]]></sample>
           <parameters>
-            <parameter name="mustExecuteOnFocusGainedMethod" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+            <parameter name="mustExecuteOnFocusGainedMethod" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[If true will execute onFocusGained method, else will not; default value is true.]]></description>
             </parameter>
           </parameters>
@@ -27752,7 +27750,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <sample><![CDATA[//request the focus in this %%prefix%%%%elementName%% (focus is also a text cursor on text components), skip on focus gained method call
 %%prefix%%%%elementName%%.requestFocus(false);]]></sample>
           <parameters>
-            <parameter name="mustExecuteOnFocusGainedMethod" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+            <parameter name="mustExecuteOnFocusGainedMethod" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[If true will execute onFocusGained method, else will not; default value is true.]]></description>
             </parameter>
           </parameters>
@@ -28185,7 +28183,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <sample><![CDATA[//request the focus in this %%prefix%%%%elementName%% (focus is also a text cursor on text components), skip on focus gained method call
 %%prefix%%%%elementName%%.requestFocus(false);]]></sample>
           <parameters>
-            <parameter name="mustExecuteOnFocusGainedMethod" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+            <parameter name="mustExecuteOnFocusGainedMethod" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[If true will execute onFocusGained method, else will not; default value is true.]]></description>
             </parameter>
           </parameters>
@@ -28861,7 +28859,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <description><![CDATA[Returns the image data in .jpg format from an icon; thumbnailing only works in record view.]]></description>
           <summary><![CDATA[Returns the image data in .]]></summary>
           <sample><![CDATA[var jpgData = %%prefix%%%%elementName%%.getThumbnailJPGImage();
-application.writeFile("mypicture.jpg", jpgData);]]></sample>
+plugins.file.writeFile("mypicture.jpg", jpgData);]]></sample>
         </function>
         <function name="getThumbnailJPGImage">
           <argumentsTypes>
@@ -28872,7 +28870,7 @@ application.writeFile("mypicture.jpg", jpgData);]]></sample>
           <description><![CDATA[Returns the image data in .jpg format from an icon; thumbnailing only works in record view.]]></description>
           <summary><![CDATA[Returns the image data in .]]></summary>
           <sample><![CDATA[var jpgData = %%prefix%%%%elementName%%.getThumbnailJPGImage(50, 50);
-application.writeFile("mypicture.jpg", jpgData);]]></sample>
+plugins.file.writeFile("mypicture.jpg", jpgData);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[The target width, use -1 for original image width.]]></description>
@@ -28939,7 +28937,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <sample><![CDATA[//request the focus in this %%prefix%%%%elementName%% (focus is also a text cursor on text components), skip on focus gained method call
 %%prefix%%%%elementName%%.requestFocus(false);]]></sample>
           <parameters>
-            <parameter name="mustExecuteOnFocusGainedMethod" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+            <parameter name="mustExecuteOnFocusGainedMethod" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[If true will execute onFocusGained method, else will not; default value is true.]]></description>
             </parameter>
           </parameters>
@@ -29305,7 +29303,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <description><![CDATA[Returns the image data in .jpg format from an icon; thumbnailing only works in record view.]]></description>
           <summary><![CDATA[Returns the image data in .]]></summary>
           <sample><![CDATA[var jpgData = %%prefix%%%%elementName%%.getThumbnailJPGImage();
-application.writeFile("mypicture.jpg", jpgData);]]></sample>
+plugins.file.writeFile("mypicture.jpg", jpgData);]]></sample>
         </function>
         <function name="getThumbnailJPGImage">
           <argumentsTypes>
@@ -29316,7 +29314,7 @@ application.writeFile("mypicture.jpg", jpgData);]]></sample>
           <description><![CDATA[Returns the image data in .jpg format from an icon; thumbnailing only works in record view.]]></description>
           <summary><![CDATA[Returns the image data in .]]></summary>
           <sample><![CDATA[var jpgData = %%prefix%%%%elementName%%.getThumbnailJPGImage(50, 50);
-application.writeFile("mypicture.jpg", jpgData);]]></sample>
+plugins.file.writeFile("mypicture.jpg", jpgData);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[The target width, use -1 for original image width.]]></description>
@@ -29907,7 +29905,7 @@ var my_text = %%prefix%%%%elementName%%.getSelectedText();
           <sample><![CDATA[//request the focus in this %%prefix%%%%elementName%% (focus is also a text cursor on text components), skip on focus gained method call
 %%prefix%%%%elementName%%.requestFocus(false);]]></sample>
           <parameters>
-            <parameter name="mustExecuteOnFocusGainedMethod" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+            <parameter name="mustExecuteOnFocusGainedMethod" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[If true will execute onFocusGained method, else will not; default value is true.]]></description>
             </parameter>
           </parameters>
@@ -30722,7 +30720,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <description><![CDATA[Returns the image data in .jpg format from an icon; thumbnailing only works in record view.]]></description>
           <summary><![CDATA[Returns the image data in .]]></summary>
           <sample><![CDATA[var jpgData = %%prefix%%%%elementName%%.getThumbnailJPGImage();
-application.writeFile("mypicture.jpg", jpgData);]]></sample>
+plugins.file.writeFile("mypicture.jpg", jpgData);]]></sample>
         </function>
         <function name="getThumbnailJPGImage">
           <argumentsTypes>
@@ -30733,7 +30731,7 @@ application.writeFile("mypicture.jpg", jpgData);]]></sample>
           <description><![CDATA[Returns the image data in .jpg format from an icon; thumbnailing only works in record view.]]></description>
           <summary><![CDATA[Returns the image data in .]]></summary>
           <sample><![CDATA[var jpgData = %%prefix%%%%elementName%%.getThumbnailJPGImage(50, 50);
-application.writeFile("mypicture.jpg", jpgData);]]></sample>
+plugins.file.writeFile("mypicture.jpg", jpgData);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[The target width, use -1 for original image width.]]></description>
@@ -31181,7 +31179,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <sample><![CDATA[//request the focus in this %%prefix%%%%elementName%% (focus is also a text cursor on text components), skip on focus gained method call
 %%prefix%%%%elementName%%.requestFocus(false);]]></sample>
           <parameters>
-            <parameter name="mustExecuteOnFocusGainedMethod" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+            <parameter name="mustExecuteOnFocusGainedMethod" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[If true will execute onFocusGained method, else will not; default value is true.]]></description>
             </parameter>
           </parameters>
@@ -31597,7 +31595,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <sample><![CDATA[//request the focus in this %%prefix%%%%elementName%% (focus is also a text cursor on text components), skip on focus gained method call
 %%prefix%%%%elementName%%.requestFocus(false);]]></sample>
           <parameters>
-            <parameter name="mustExecuteOnFocusGainedMethod" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+            <parameter name="mustExecuteOnFocusGainedMethod" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[If true will execute onFocusGained method, else will not; default value is true.]]></description>
             </parameter>
           </parameters>
@@ -32450,7 +32448,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <sample><![CDATA[//request the focus in this %%prefix%%%%elementName%% (focus is also a text cursor on text components), skip on focus gained method call
 %%prefix%%%%elementName%%.requestFocus(false);]]></sample>
           <parameters>
-            <parameter name="mustExecuteOnFocusGainedMethod" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+            <parameter name="mustExecuteOnFocusGainedMethod" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[If true will execute onFocusGained method, else will not; default value is true.]]></description>
             </parameter>
           </parameters>
@@ -32876,7 +32874,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <sample><![CDATA[//request the focus in this %%prefix%%%%elementName%% (focus is also a text cursor on text components), skip on focus gained method call
 %%prefix%%%%elementName%%.requestFocus(false);]]></sample>
           <parameters>
-            <parameter name="mustExecuteOnFocusGainedMethod" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+            <parameter name="mustExecuteOnFocusGainedMethod" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[If true will execute onFocusGained method, else will not; default value is true.]]></description>
             </parameter>
           </parameters>
@@ -33705,7 +33703,7 @@ var my_text = %%prefix%%%%elementName%%.getSelectedText();
           <sample><![CDATA[//request the focus in this %%prefix%%%%elementName%% (focus is also a text cursor on text components), skip on focus gained method call
 %%prefix%%%%elementName%%.requestFocus(false);]]></sample>
           <parameters>
-            <parameter name="mustExecuteOnFocusGainedMethod" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+            <parameter name="mustExecuteOnFocusGainedMethod" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[If true will execute onFocusGained method, else will not; default value is true.]]></description>
             </parameter>
           </parameters>
@@ -34123,7 +34121,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           <sample><![CDATA[//request the focus in this %%prefix%%%%elementName%% (focus is also a text cursor on text components), skip on focus gained method call
 %%prefix%%%%elementName%%.requestFocus(false);]]></sample>
           <parameters>
-            <parameter name="mustExecuteOnFocusGainedMethod" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+            <parameter name="mustExecuteOnFocusGainedMethod" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[If true will execute onFocusGained method, else will not; default value is true.]]></description>
             </parameter>
           </parameters>
@@ -35611,7 +35609,7 @@ var my_text = %%prefix%%%%elementName%%.getSelectedText();
           <sample><![CDATA[//request the focus in this %%prefix%%%%elementName%% (focus is also a text cursor on text components), skip on focus gained method call
 %%prefix%%%%elementName%%.requestFocus(false);]]></sample>
           <parameters>
-            <parameter name="mustExecuteOnFocusGainedMethod" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+            <parameter name="mustExecuteOnFocusGainedMethod" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[If true will execute onFocusGained method, else will not; default value is true.]]></description>
             </parameter>
           </parameters>
@@ -36067,7 +36065,7 @@ var my_text = %%prefix%%%%elementName%%.getSelectedText();
           <sample><![CDATA[//request the focus in this %%prefix%%%%elementName%% (focus is also a text cursor on text components), skip on focus gained method call
 %%prefix%%%%elementName%%.requestFocus(false);]]></sample>
           <parameters>
-            <parameter name="mustExecuteOnFocusGainedMethod" optional="true" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+            <parameter name="mustExecuteOnFocusGainedMethod" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[If true will execute onFocusGained method, else will not; default value is true.]]></description>
             </parameter>
           </parameters>
@@ -40403,7 +40401,7 @@ form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTI
       <constants>
         <constant name="COMBOBOX_SHOW_POPUP_ON_FOCUS_GAIN">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Property that can be set using application.setUIProperty() or element.putClientProperty().
+          <description><![CDATA[Property that can be set using application.putClientProperty() or element.putClientProperty().
 
 If set on application it will affect all COMBOBOX fields. If set on an element it will affect only that COMBOBOX element/field (with priority over the application property).
 Value can be true/false/null.
@@ -40412,13 +40410,13 @@ If set to true, the affected COMBOBOX will show the pop-up when gaining focus.
 DEFAULT: true.]]></description>
           <summary><![CDATA[Property that can be set using application.]]></summary>
           <sample><![CDATA[// make all COMBOBOX fields not show the pop-up when gaining focus
-application.setUIProperty(APP_UI_PROPERTY.COMBOBOX_SHOW_POPUP_ON_FOCUS_GAIN, false);
+application.putClientProperty(APP_UI_PROPERTY.COMBOBOX_SHOW_POPUP_ON_FOCUS_GAIN, false);
 // make one COMBOBOX field show the pop-up when gaining focus - overrides the application property set
 forms.someForm.elements.comboboxElement.putClientProperty(APP_UI_PROPERTY.COMBOBOX_SHOW_POPUP_ON_FOCUS_GAIN, true);]]></sample>
         </constant>
         <constant name="DATE_FORMATTERS_LENIENT">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Property that can be set using application.setUIProperty() or element.putClientProperty().
+          <description><![CDATA[Property that can be set using application.putClientProperty() or element.putClientProperty().
 
 If set on application it will affect all date formatted fields. CAUTION: this property must be set on application before the fields are created (for example in solution onOpen handler). Changing it after fields were created will not affect these existing fields.
 If set on an element it will affect only that date formatted element/field (with priority over the application property).
@@ -40428,13 +40426,13 @@ If set to false, date formatted fields will not allow input of out-of-bounds val
 DEFAULT: true.]]></description>
           <summary><![CDATA[Property that can be set using application.]]></summary>
           <sample><![CDATA[// make all date formatted fields (created after this line is executed) not use lenient mode
-application.setUIProperty(APP_UI_PROPERTY.DATE_FORMATTERS_LENIENT, false);
+application.putClientProperty(APP_UI_PROPERTY.DATE_FORMATTERS_LENIENT, false);
 // make one date formatted field use lenient mode - overrides the application property set
 forms.someForm.elements.typeAheadElement.putClientProperty(APP_UI_PROPERTY.DATE_FORMATTERS_LENIENT, true);]]></sample>
         </constant>
         <constant name="DATE_FORMATTERS_ROLL_INSTEAD_OF_ADD">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Property that can be set using application.setUIProperty() or element.putClientProperty(). It is used only in Smart Client.
+          <description><![CDATA[Property that can be set using application.putClientProperty() or element.putClientProperty(). It is used only in Smart Client.
 
 If set on application it will affect all date formatted fields. If set on an element it will affect only that date formatted element/field (with priority over the application property).
 Value can be true/false/null.
@@ -40443,7 +40441,7 @@ If set to true, only selected part of the date will be affected when using up/do
 DEFAULT: false.]]></description>
           <summary><![CDATA[Property that can be set using application.]]></summary>
           <sample><![CDATA[// make all date formatted fields use roll instead of add
-application.setUIProperty(APP_UI_PROPERTY.DATE_FORMATTERS_ROLL_INSTEAD_OF_ADD, true);
+application.putClientProperty(APP_UI_PROPERTY.DATE_FORMATTERS_ROLL_INSTEAD_OF_ADD, true);
 // make one date formatted field use add instead of roll - overrides the application property set
 forms.someForm.elements.typeAheadElement.putClientProperty(APP_UI_PROPERTY.DATE_FORMATTERS_ROLL_INSTEAD_OF_ADD, false);]]></sample>
         </constant>
@@ -40465,7 +40463,7 @@ forms.someForm.elements.typeAheadElement.putClientProperty(APP_UI_PROPERTY.DATE_
         </constant>
         <constant name="LEAVE_FIELDS_READONLY_IN_FIND_MODE">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Property than can be set using application.setUIProperty().
+          <description><![CDATA[Property than can be set using application.putClientProperty().
 
 If set to true, fields that are read-only won't be editable in find mode
 If set to false, fields that are read-only will be editable in find mode
@@ -40473,11 +40471,11 @@ If set to false, fields that are read-only will be editable in find mode
 The value can be true/false
 DEFAULT: false]]></description>
           <summary><![CDATA[Property than can be set using application.]]></summary>
-          <sample><![CDATA[application.setUIProperty(APP_UI_PROPERTY.LEAVE_FIELDS_READONLY_IN_FIND_MODE, true)]]></sample>
+          <sample><![CDATA[application.putClientProperty(APP_UI_PROPERTY.LEAVE_FIELDS_READONLY_IN_FIND_MODE, true)]]></sample>
         </constant>
         <constant name="TABLEVIEW_WC_DEFAULT_SCROLLABLE">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Property than can be set using application.setUIProperty().
+          <description><![CDATA[Property than can be set using application.putClientProperty().
 
 If set to true, table views in web client are scrollable by default
 If set to false, table views in web client are not scrollable, but pageable by default
@@ -40485,25 +40483,25 @@ If set to false, table views in web client are not scrollable, but pageable by d
 The value can be true/false
 DEFAULT: false]]></description>
           <summary><![CDATA[Property than can be set using application.]]></summary>
-          <sample><![CDATA[application.setUIProperty(APP_UI_PROPERTY.TABLEVIEW_WC_DEFAULT_SCROLLABLE, true)]]></sample>
+          <sample><![CDATA[application.putClientProperty(APP_UI_PROPERTY.TABLEVIEW_WC_DEFAULT_SCROLLABLE, true)]]></sample>
         </constant>
         <constant name="TOOLTIP_DISMISS_DELAY">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Property than can be set using application.setUIProperty() and
+          <description><![CDATA[Property than can be set using application.putClientProperty() and
 indicates the delay in milliseconds after the tooltip is dismissed.]]></description>
           <summary><![CDATA[Property than can be set using application.]]></summary>
-          <sample><![CDATA[application.setUIProperty(APP_UI_PROPERTY.TOOLTIP_DISMISS_DELAY, 4000)]]></sample>
+          <sample><![CDATA[application.putClientProperty(APP_UI_PROPERTY.TOOLTIP_DISMISS_DELAY, 4000)]]></sample>
         </constant>
         <constant name="TOOLTIP_INITIAL_DELAY">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Property than can be set using application.setUIProperty() and
+          <description><![CDATA[Property than can be set using application.putClientProperty() and
 indicates the delay in milliseconds before the tooltip is shown.]]></description>
           <summary><![CDATA[Property than can be set using application.]]></summary>
-          <sample><![CDATA[application.setUIProperty(APP_UI_PROPERTY.TOOLTIP_INITIAL_DELAY, 2000)]]></sample>
+          <sample><![CDATA[application.putClientProperty(APP_UI_PROPERTY.TOOLTIP_INITIAL_DELAY, 2000)]]></sample>
         </constant>
         <constant name="TYPE_AHEAD_SHOW_POPUP_ON_FOCUS_GAIN">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Property that can be set using application.setUIProperty() or element.putClientProperty().
+          <description><![CDATA[Property that can be set using application.putClientProperty() or element.putClientProperty().
 
 If set on application it will affect all TYPE-AHEAD fields. If set on an element it will affect only that TYPE-AHEAD element/field (with priority over the application property).
 Value can be true/false/null.
@@ -40512,13 +40510,13 @@ If set to true, the affected TYPE_AHEAD(s) will show the pop-up when gaining foc
 DEFAULT: true.]]></description>
           <summary><![CDATA[Property that can be set using application.]]></summary>
           <sample><![CDATA[// make all TYPE-AHEAD fields not show the pop-up when gaining focus
-application.setUIProperty(APP_UI_PROPERTY.TYPE_AHEAD_SHOW_POPUP_ON_FOCUS_GAIN, false);
+application.putClientProperty(APP_UI_PROPERTY.TYPE_AHEAD_SHOW_POPUP_ON_FOCUS_GAIN, false);
 // make one TYPE-AHEAD field show the pop-up when gaining focus - overrides the application property set
 forms.someForm.elements.typeAheadElement.putClientProperty(APP_UI_PROPERTY.TYPE_AHEAD_SHOW_POPUP_ON_FOCUS_GAIN, true);]]></sample>
         </constant>
         <constant name="TYPE_AHEAD_SHOW_POPUP_WHEN_EMPTY">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Property that can be set using application.setUIProperty() or element.putClientProperty().
+          <description><![CDATA[Property that can be set using application.putClientProperty() or element.putClientProperty().
 
 If set on application it will affect all TYPE-AHEAD fields. If set on an element it will affect only that TYPE-AHEAD element/field (with priority over the application property).
 Value can be true/false/null.
@@ -40527,13 +40525,13 @@ If set to true, the affected TYPE_AHEAD(s) will show the pop-up when the field c
 DEFAULT: true.]]></description>
           <summary><![CDATA[Property that can be set using application.]]></summary>
           <sample><![CDATA[// make all TYPE-AHEAD fields not show the pop-up when there is empty content in the field
-application.setUIProperty(APP_UI_PROPERTY.TYPE_AHEAD_SHOW_POPUP_WHEN_EMPTY, false);
+application.putClientProperty(APP_UI_PROPERTY.TYPE_AHEAD_SHOW_POPUP_WHEN_EMPTY, false);
 // make one TYPE-AHEAD field show the pop-up when there is empty content in the field - overrides the application property set
 forms.someForm.elements.typeAheadElement.putClientProperty(APP_UI_PROPERTY.TYPE_AHEAD_SHOW_POPUP_WHEN_EMPTY, true);]]></sample>
         </constant>
         <constant name="USE_SYSTEM_PRINT_DIALOG">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Property than can be set using application.setUIProperty().
+          <description><![CDATA[Property than can be set using application.putClientProperty().
 
 If set to true, the system standard Printing dialog will be used when printing is needed.
 If set to false, the Servoy Printing dialog will be used.
@@ -40541,7 +40539,7 @@ If set to false, the Servoy Printing dialog will be used.
 The value can be true/false/null.
 DEFAULT: false]]></description>
           <summary><![CDATA[Property than can be set using application.]]></summary>
-          <sample><![CDATA[application.setUIProperty(APP_UI_PROPERTY.USE_SYSTEM_PRINT_DIALOG, true)]]></sample>
+          <sample><![CDATA[application.putClientProperty(APP_UI_PROPERTY.USE_SYSTEM_PRINT_DIALOG, true)]]></sample>
         </constant>
       </constants>
     </object>
@@ -41301,13 +41299,13 @@ NOTE: PBKDF2 is the key hash function for the PKCS (Public-Key Cryptography) sta
       <constants>
         <constant name="WEBCLIENT_TEMPLATES_DIR">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Property that can be set using application.setUIProperty(), it sets the servoy_web_client_default.css location directory in the templates dir for this client]]></description>
+          <description><![CDATA[Property that can be set using application.putClientProperty(), it sets the servoy_web_client_default.css location directory in the templates dir for this client]]></description>
           <summary><![CDATA[Property that can be set using application.]]></summary>
           <sample><![CDATA[// set this if you want to set the css path to the servoy_web_client_default.css file that you can specify per client
 // by default this file resides in '/servoy-webclient/templates/default/servoy_web_client_default.css'
 // and you will override the 'default' in that url so setting it to myclient1 will result in:
 // by default this file resides in '/servoy-webclient/templates/myclient1/servoy_web_client_default.css'
-application.setUIProperty(APP_WEB_PROPERTY.WEBCLIENT_TEMPLATES_DIR, 'myclient1');]]></sample>
+application.putClientProperty(APP_WEB_PROPERTY.WEBCLIENT_TEMPLATES_DIR, 'myclient1');]]></sample>
         </constant>
       </constants>
     </object>
