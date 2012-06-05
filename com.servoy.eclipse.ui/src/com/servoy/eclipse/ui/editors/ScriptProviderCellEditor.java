@@ -207,8 +207,8 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 			{
 				if (value instanceof MethodWithArguments)
 				{
-					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persistContext.getContext(), null, ((MethodWithArguments)value).table,
-						((MethodWithArguments)value).methodId);
+					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persistContext.getContext(), persistContext.getPersist(),
+						((MethodWithArguments)value).table, ((MethodWithArguments)value).methodId);
 					if (scriptProvider instanceof ScriptCalculation)
 					{
 						return ScriptDialog.CALCULATIONS;

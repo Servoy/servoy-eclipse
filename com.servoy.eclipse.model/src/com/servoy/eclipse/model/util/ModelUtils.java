@@ -236,7 +236,7 @@ public class ModelUtils
 		}
 
 		// is it a global method?
-		FlattenedSolution editingFlattenedSolution = getEditingFlattenedSolution(persist);
+		FlattenedSolution editingFlattenedSolution = getEditingFlattenedSolution(persist, context);
 		ScriptMethod sm = editingFlattenedSolution.getScriptMethod(methodId);
 		if (sm != null)
 		{
