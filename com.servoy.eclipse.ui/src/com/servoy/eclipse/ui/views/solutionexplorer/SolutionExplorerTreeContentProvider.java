@@ -207,8 +207,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			com.servoy.j2db.documentation.scripting.docs.RegExp.class));
 		PlatformSimpleUserNode jsnumber = new PlatformSimpleUserNode(Messages.TreeStrings_Number, UserNodeType.NUMBER, null, IconProvider.instance().image(
 			com.servoy.j2db.documentation.scripting.docs.Number.class));
+		PlatformSimpleUserNode json = new PlatformSimpleUserNode(Messages.TreeStrings_JSON, UserNodeType.JSON, null, IconProvider.instance().image(
+			com.servoy.j2db.documentation.scripting.docs.JSON.class));
 
-		jslib.children = new PlatformSimpleUserNode[] { jsarray, jsdate, jsstring, jsnumber, jsmath, jsregexp, jsstatements, jsspecialops, jsxml, jsxmllist };
+		jslib.children = new PlatformSimpleUserNode[] { jsarray, jsdate, jsstring, jsnumber, jsmath, jsregexp, jsstatements, jsspecialops, json, jsxml, jsxmllist };
 		jsarray.parent = jslib;
 		jsdate.parent = jslib;
 		jsstring.parent = jslib;

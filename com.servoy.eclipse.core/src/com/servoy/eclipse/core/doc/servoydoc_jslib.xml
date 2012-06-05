@@ -1997,6 +1997,129 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
         </function>
       </functions>
     </object>
+    <object publicName="JSON" qualifiedName="com.servoy.j2db.documentation.scripting.docs.JSON" scriptingName="JSON">
+      <functions>
+        <function name="parse">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          <description><![CDATA[Parses a string as JSON and returns the parsed value.]]></description>
+          <summary><![CDATA[Parses a string as JSON and returns the parsed value.]]></summary>
+          <sample><![CDATA[JSON.parse('[1, 5, "false"]');]]></sample>
+          <parameters>
+            <parameter name="text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String">
+              <description><![CDATA[The string to parse as JSON.  See the JSON object for a description of JSON syntax.]]></description>
+            </parameter>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/JSON/parse</url>
+            </link>
+          </links>
+        </function>
+        <function name="parse">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          <description><![CDATA[Parses a string as JSON and returns the parsed value.]]></description>
+          <summary><![CDATA[Parses a string as JSON and returns the parsed value.]]></summary>
+          <sample><![CDATA[var transformed = JSON.parse('{"p": 5}', function(k, v) { if (k === "") return v; return v * 2; });]]></sample>
+          <parameters>
+            <parameter name="text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String">
+              <description><![CDATA[The string to parse as JSON.  See the JSON object for a description of JSON syntax.]]></description>
+            </parameter>
+            <parameter name="reviver" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
+              <description><![CDATA[If a function, prescribes how the value originally produced by parsing is transformed, before being returned.]]></description>
+            </parameter>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/JSON/parse</url>
+            </link>
+          </links>
+        </function>
+        <function name="stringify">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <description><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified]]></description>
+          <summary><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified]]></summary>
+          <sample><![CDATA[JSON.stringify([1, "false", false])]]></sample>
+          <parameters>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
+              <description><![CDATA[The value to convert to a JSON string.]]></description>
+            </parameter>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/JSON/stringify</url>
+            </link>
+          </links>
+        </function>
+        <function name="stringify">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <description><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified]]></description>
+          <summary><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified]]></summary>
+          <sample><![CDATA[function censor(key, value) {  
+ if (typeof(value) == "string") {  
+   return undefined;  
+ }   
+ return value;  
+}  
+      
+var foo = {foundation: "Mozilla", model: "box", week: 45, transport: "car", month: 7};  
+var jsonString = JSON.stringify(foo, censor);]]></sample>
+          <parameters>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
+              <description><![CDATA[The value to convert to a JSON string.]]></description>
+            </parameter>
+            <parameter name="replacer" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
+              <description><![CDATA[If a function, transforms values and properties encountered while stringifying; if an array, specifies the set of properties included in objects in the final string.]]></description>
+            </parameter>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/JSON/stringify</url>
+            </link>
+          </links>
+        </function>
+        <function name="stringify">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <description><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified]]></description>
+          <summary><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified]]></summary>
+          <sample><![CDATA[JSON.stringify({ uno: 1, dos : 2 }, null, '\t')]]></sample>
+          <parameters>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
+              <description><![CDATA[The value to convert to a JSON string.]]></description>
+            </parameter>
+            <parameter name="replacer" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
+              <description><![CDATA[If a function, transforms values and properties encountered while stringifying; if an array, specifies the set of properties included in objects in the final string.]]></description>
+            </parameter>
+            <parameter name="space" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String">
+              <description><![CDATA[Causes the resulting string to be pretty-printed]]></description>
+            </parameter>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/JSON/stringify</url>
+            </link>
+          </links>
+        </function>
+      </functions>
+    </object>
     <object publicName="Math" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Math" scriptingName="Math">
       <properties>
         <property name="E">

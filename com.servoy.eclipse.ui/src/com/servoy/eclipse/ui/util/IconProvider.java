@@ -66,6 +66,7 @@ public class IconProvider
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.Date.class, "day_obj.gif"); //$NON-NLS-1$
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.String.class, "jslibstring.gif"); //$NON-NLS-1$
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.Math.class, "sum.gif"); //$NON-NLS-1$
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.JSON.class, "json.gif"); //$NON-NLS-1$
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.Statements.class, "statements.gif"); //$NON-NLS-1$
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, "special_operators.gif"); //$NON-NLS-1$
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.XML.class, "xml_image.gif"); //$NON-NLS-1$
