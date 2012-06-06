@@ -1563,25 +1563,38 @@ public class TypeCreator extends TypeCache
 			{
 				StringBuilder docBuilder = new StringBuilder(200);
 				String sample = null;
-				boolean deprecated = false;
-				String deprecatedText = null;
 				IParameter[] parameters = null;
 				String returnText = null;
 				if (scriptObject instanceof ITypedScriptObject)
 				{
-					String toolTip = ((ITypedScriptObject)scriptObject).getToolTip(key, parameterTypes);
-					if (toolTip != null) docBuilder.append(toolTip);
-					sample = ((ITypedScriptObject)scriptObject).getSample(key, parameterTypes);
-					deprecated = ((ITypedScriptObject)scriptObject).isDeprecated(key, parameterTypes);
-					if (deprecated)
+					if (((ITypedScriptObject)scriptObject).isDeprecated(key, parameterTypes))
 					{
-						deprecatedText = ((ITypedScriptObject)scriptObject).getDeprecatedText(key, parameterTypes);
+						String deprecatedText = ((ITypedScriptObject)scriptObject).getDeprecatedText(key, parameterTypes);
+						if (deprecatedText != null)
+						{
+							docBuilder.append("<br/><b>@deprecated</b>&nbsp;");
+							docBuilder.append(deprecatedText);
+							docBuilder.append("<br/>");
+						}
+						else
+						{
+							docBuilder.append("<br/><b>@deprecated</b><br/>");
+						}
 					}
+					String toolTip = ((ITypedScriptObject)scriptObject).getToolTip(key, parameterTypes);
+					if (toolTip != null && toolTip.trim().length() != 0)
+					{
+						docBuilder.append("<br/>");
+						docBuilder.append(toolTip);
+						docBuilder.append("<br/>");
+					}
+					sample = ((ITypedScriptObject)scriptObject).getSample(key, parameterTypes);
 
 					if (parameterTypes != null)
 					{
 						parameters = ((ITypedScriptObject)scriptObject).getParameters(key, parameterTypes);
 					}
+
 
 					Class< ? > returnedType = ((ITypedScriptObject)scriptObject).getReturnedType(key, parameterTypes);
 					String returnDescription = ((ITypedScriptObject)scriptObject).getReturnDescription(key, parameterTypes);
@@ -1594,16 +1607,25 @@ public class TypeCreator extends TypeCache
 				}
 				else
 				{
+					if (scriptObject.isDeprecated(key))
+					{
+						docBuilder.append("<br/><b>@deprecated</b><br/>");
+					}
 					String toolTip = scriptObject.getToolTip(name);
-					if (toolTip != null) docBuilder.append(toolTip);
+					if (toolTip != null && toolTip.trim().length() != 0)
+					{
+						docBuilder.append("<br/>");
+						docBuilder.append(toolTip);
+						docBuilder.append("<br/>");
+					}
 					sample = scriptObject.getSample(key);
-					deprecated = scriptObject.isDeprecated(key);
 				}
-				if (sample != null)
+
+				if (sample != null && sample.trim().length() != 0)
 				{
-					docBuilder.append("<br/><pre>");
+					docBuilder.append("<pre>");
 					docBuilder.append(HtmlUtils.escapeMarkup(sample));
-					docBuilder.append("</pre>");
+					docBuilder.append("</pre><br/>");
 				}
 				if (docBuilder.length() > 0)
 				{
@@ -1612,7 +1634,7 @@ public class TypeCreator extends TypeCache
 						StringBuilder sb = new StringBuilder(parameters.length * 30);
 						for (IParameter parameter : parameters)
 						{
-							sb.append("<br/><b>@param</b> ");
+							sb.append("<b>@param</b> ");
 							if (parameter.getType() != null)
 							{
 								sb.append("{");
@@ -1625,20 +1647,15 @@ public class TypeCreator extends TypeCache
 								sb.append(" ");
 								sb.append(parameter.getDescription());
 							}
+							sb.append("<br/>");
 						}
 						docBuilder.append(sb);
 					}
 					if (returnText != null)
 					{
-						docBuilder.append("<br/></br>");
+						docBuilder.append("</br>");
 						docBuilder.append(returnText);
 					}
-					if (deprecatedText != null)
-					{
-						docBuilder.append("<br/><br/><b>@deprecated</b> ");
-						docBuilder.append(deprecatedText);
-					}
-					else if (deprecated) docBuilder.append("<br/><br/><b>@deprecated</b>");
 					doc = Utils.stringReplace(docBuilder.toString(), "%%prefix%%", ""); //$NON-NLS-1$ //$NON-NLS-2$
 					doc = Utils.stringReplace(doc, "%%elementName%%", "elements.elem"); //$NON-NLS-1$
 				}
