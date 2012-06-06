@@ -19,8 +19,14 @@ package com.servoy.eclipse.jsunit;
 import org.eclipse.core.runtime.IAdapterFactory;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Pair;
 
 /**
  * Adapter factory that allows the "Run JS Unit Tests" action to appear on solution nodes.
@@ -29,34 +35,72 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 public class AdapterFactory implements IAdapterFactory
 {
 
-	private class DummySolutionUnitTestTarget implements SolutionUnitTestTarget
+	// this class is used for attaching
+	// the "run unit tests" action to the correct node
+	private class NodeSolutionUnitTestTarget implements SolutionUnitTestTarget
 	{
-		// for now only active solutions can be the test target of such a run, so this class is only for attaching
-		// the "run unit tests" action to the correct node - no other info is needed 
+
+		private final SimpleUserNode node;
+
+		public NodeSolutionUnitTestTarget(SimpleUserNode node)
+		{
+			this.node = node;
+		}
+
+		public TestTarget getTestTarget()
+		{
+			TestTarget retVal = null;
+			switch (node.getType())
+			{
+				case SOLUTION_ITEM :
+					retVal = new TestTarget(((ServoyProject)node.getRealObject()).getSolution());
+					break;
+				case FORM :
+					retVal = new TestTarget((Form)node.getRealObject());
+					break;
+				case GLOBALS_ITEM :
+					retVal = new TestTarget((Pair<Solution, String>)node.getRealObject());
+					break;
+				case FORM_METHOD :
+				case GLOBAL_METHOD_ITEM :
+					retVal = new TestTarget((ScriptMethod)node.getRealObject());
+					break;
+				default : // remains null
+			}
+			return retVal;
+		}
+
 	}
 
 	private static Class[] ADAPTERS = new Class[] { SolutionUnitTestTarget.class };
 
 	public Object getAdapter(Object object, Class adapterType)
 	{
+		Object retVal = null;
 		if (adapterType == SolutionUnitTestTarget.class)
 		{
 			if (object instanceof SimpleUserNode)
 			{
 				SimpleUserNode node = (SimpleUserNode)object;
-				if (node.getRealObject() == ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject())
+				UserNodeType type = node.getType();
+
+
+				if (type == UserNodeType.SOLUTION || type == UserNodeType.SOLUTION_ITEM)
 				{
 					ServoyProject sp = (ServoyProject)node.getRealObject();
-					if (sp != null)
+					if (sp != null && ServoyModelManager.getServoyModelManager().getServoyModel().isSolutionActive(sp.getProject().getName()))
 					{
-						// if other nodes can be targeted in the future, the SolutionUnitTestTarget obj. created here
-						// should be able to identify the target (should contain some data)
-						return new DummySolutionUnitTestTarget();
+						retVal = new NodeSolutionUnitTestTarget(node);
 					}
+				}
+				else if (type == UserNodeType.FORM || type == UserNodeType.GLOBALS_ITEM || type == UserNodeType.FORM_METHOD ||
+					type == UserNodeType.GLOBAL_METHOD_ITEM)
+				{
+					retVal = new NodeSolutionUnitTestTarget(node);
 				}
 			}
 		}
-		return null;
+		return retVal;
 	}
 
 	public Class[] getAdapterList()

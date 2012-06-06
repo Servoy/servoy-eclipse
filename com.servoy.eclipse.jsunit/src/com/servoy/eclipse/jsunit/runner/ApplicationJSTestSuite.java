@@ -51,7 +51,7 @@ import com.servoy.j2db.util.Pair;
 public class ApplicationJSTestSuite extends JSUnitSuite
 {
 
-	private static final String INVALID_APP_SUITE = "CannotRunSolutionTests";
+	private static final String INVALID_APP_SUITE = "CannotRunJSUnitTests";
 
 	public static final String TEST_METHOD_PREFIX = "test";
 	public static final String SET_UP_METHOD = "setUp";
@@ -59,6 +59,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 	public static final String SOLUTION_TEST_JS_NAME = "solutionTestSuite.js";
 
 	private static IApplication staticSuiteApplication;
+	private static TestTarget staticTarget;
 
 	private static class TestIdentifier
 	{
@@ -94,16 +95,17 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 
 	/**
 	 * Creates a new application test Suite.
+	 * @param target 
 	 * 
 	 * @param app the application that will be used to create a JSUnit test suite. The application must have a loaded solution in order for the tests to be
 	 *            performed.
 	 */
-	public ApplicationJSTestSuite(IApplication application)
+	public ApplicationJSTestSuite(IApplication application, TestTarget target)
 	{
 		super();
 		setUseFileForJavaQualifiedNameInStack(true);
 		setStackElementFilters(new String[] { "\\A" + SOLUTION_TEST_JS_NAME + "\\z" });
-		init(application);
+		init(application, target);
 	}
 
 	/**
@@ -120,9 +122,9 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		super.init(new StringReader(jsTestCode.getLeft()), jsTestCode.getRight(), SOLUTION_TEST_JS_NAME, null, false);
 	}
 
-	protected void init(IApplication application)
+	protected void init(IApplication application, TestTarget target)
 	{
-		Pair<String, String> jsTestCodeAndClassName = getSolutionTestSuiteCode(application);
+		Pair<String, String> jsTestCodeAndClassName = getSolutionTestSuiteCode(application, target);
 		Scriptable scope = initScope(application);
 		jsTestCode = jsTestCodeAndClassName.getLeft();
 		super.init(new StringReader(jsTestCode), jsTestCodeAndClassName.getRight(), SOLUTION_TEST_JS_NAME, scope, scope != null);
@@ -149,17 +151,19 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 
 	public static Test suite()
 	{
-		return new ApplicationJSTestSuite(staticSuiteApplication);
+		return new ApplicationJSTestSuite(staticSuiteApplication, staticTarget);
 	}
 
 	/**
 	 * Sets the application that will be used to create a JSUnit test suite. The application must have a loaded solution in order for the tests to be performed.
 	 * 
 	 * @param app the application that has the solution to be tested already loaded.
+	 * @param target specifies what test sub-tree should be run from the solution loaded in app.
 	 */
-	public static void setApplication(IApplication app)
+	public static void setTestTarget(IApplication app, TestTarget target)
 	{
 		staticSuiteApplication = app;
+		staticTarget = target;
 	}
 
 	private Scriptable getTestScope(IApplication application)
@@ -171,7 +175,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		return application.getScriptEngine().getSolutionScope();
 	}
 
-	private Pair<String, String> getSolutionTestSuiteCode(IApplication application)
+	private Pair<String, String> getSolutionTestSuiteCode(IApplication application, TestTarget target)
 	{
 		if (application == null)
 		{
@@ -195,20 +199,23 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		//       ... same as Solution suite structure
 		StringBuffer testCode = new StringBuffer(1024);
 		HashSet<Solution> inspectedModules = new HashSet<Solution>();
-		TestIdentifier testIdentifier = appendSolutionTestCode(application.getSolution(), testCode, inspectedModules, application.getFlattenedSolution());
+		TestIdentifier testIdentifier = appendSolutionTestCode(application.getSolution(), target, testCode, inspectedModules,
+			application.getFlattenedSolution(), target == null);
 		if (testIdentifier == null)
 		{
-			return getErrorSuite("This solution does not have jsunit tests: " + application.getSolution().getName());
+			return getErrorSuite("Th" + (target == null ? "is solution" : "e selection") + " does not have jsunit tests" +
+				(target == null ? ": " + application.getSolution().getName() : "."));
 		}
 		return new Pair<String, String>(testCode.toString(), testIdentifier.getTestClassName());
 	}
 
-	private TestIdentifier appendSolutionTestCode(Solution solution, StringBuffer testCode, HashSet<Solution> inspectedModules,
-		FlattenedSolution flattenedSolution)
+	private TestIdentifier appendSolutionTestCode(Solution solution, TestTarget target, StringBuffer testCode, HashSet<Solution> inspectedModules,
+		FlattenedSolution flattenedSolution, boolean partOfTargetModuleSubtree)
 	{
 		TestIdentifier resultingSuiteId = null;
 		if (solution != null && !inspectedModules.contains(solution))
 		{
+			boolean thisSolutionShouldBeTested = (partOfTargetModuleSubtree || target.moduleToTest == null || target.moduleToTest == solution);
 			boolean addedTestCode = false;
 			inspectedModules.add(solution);
 
@@ -223,7 +230,8 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 					if (ref.getMetaData() != null)
 					{
 						Solution module = (Solution)solution.getRepository().getActiveRootObject(ref.getMetaData().getRootObjectId());
-						TestIdentifier tmp = appendSolutionTestCode(module, testCode, inspectedModules, flattenedSolution);
+						TestIdentifier tmp = appendSolutionTestCode(module, target, testCode, inspectedModules, flattenedSolution,
+							(partOfTargetModuleSubtree || module == target.moduleToTest));
 						if (tmp != null)
 						{
 							modulesThatAddedTests.add(tmp);
@@ -246,90 +254,134 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 				Debug.log(e);
 			}
 
-			// really create the solution test code now that module test code has been created
-
-			// first globals/form testcases
-			List<TestIdentifier> globalAndFormTestIds = new ArrayList<TestIdentifier>();
-			TestIdentifier globalTestCaseId = addGlobalTests(solution, testCode);
-			if (globalTestCaseId != null)
+			TestIdentifier globalSuiteId = null;
+			List<TestIdentifier> formTestIds = new ArrayList<TestIdentifier>();
+			if (thisSolutionShouldBeTested)
 			{
-				globalAndFormTestIds.add(globalTestCaseId);
+				// really create the solution test code now that module test code has been created
+				// first globals/form testcases
+				if (target == null || target.formToTest == null) globalSuiteId = addGlobalTests(solution, target, testCode);
+				if (target == null || target.globalScopeToTest == null) formTestIds.addAll(addAllFormTests(solution, target, flattenedSolution, testCode));
+				addedTestCode = addedTestCode || (formTestIds.size() > 0) || globalSuiteId != null;
 			}
-			globalAndFormTestIds.addAll(addAllFormTests(solution, flattenedSolution, testCode));
-			addedTestCode = addedTestCode || (globalAndFormTestIds.size() > 0);
 
 			// second create the solution suite
 			if (addedTestCode)
 			{
-				resultingSuiteId = addSolutionSuite(solution, globalAndFormTestIds, modulesTestSuiteId, testCode);
+				resultingSuiteId = addSolutionSuite(solution, globalSuiteId, formTestIds, modulesTestSuiteId, testCode);
 			}
 		} // else this module was already inspected before - either loop in module hierarchy or the module is a child module of 2 different parent modules
 		return resultingSuiteId;
 	}
 
-	private TestIdentifier addGlobalTests(Solution solution, StringBuffer testCode)
+	private TestIdentifier addGlobalTests(Solution solution, TestTarget target, StringBuffer testCode)
 	{
-		Iterator<ScriptMethod> it = solution.getScriptMethods(null, true);
-		// prefix the name so that we have no name conflicts with other form/module/global tests
-		return addTestCaseIfNecessary(it, "Global tests", "scopes", testCode);
+		// create scope test suites
+		List<TestIdentifier> allGlobalIdentifiers = new ArrayList<TestIdentifier>();
+		for (String scopeName : solution.getScopeNames())
+		{
+			if (target == null || target.globalScopeToTest == null ||
+				(target.globalScopeToTest.getRight().equals(scopeName) && target.globalScopeToTest.getLeft() == solution))
+			{
+				Iterator<ScriptMethod> it = solution.getScriptMethods(scopeName, true);
+				// prefix the name so that we have no name conflicts with other form/module/global tests
+				TestIdentifier tmp = addTestCaseIfNecessary(it, target, scopeName, "scopes", testCode);
+				if (tmp != null) allGlobalIdentifiers.add(tmp);
+			}
+		}
+
+		// add "Scopes" suite
+		TestIdentifier suiteId = null;
+		if (allGlobalIdentifiers.size() > 0)
+		{
+			suiteId = new TestIdentifier("Scope tests");
+			testCode.append("function ");
+			testCode.append(suiteId.getTestClassName());
+			testCode.append("() {\n\tTestSuite.call(this, null);\n\tthis.setName(\"");
+			testCode.append(suiteId.getTestName());
+			testCode.append("\");\n\tvar ts;\n");
+			for (TestIdentifier testCasesId : allGlobalIdentifiers)
+			{
+				testCode.append("\tts = new TestSuite(");
+				testCode.append(testCasesId.getTestClassName());
+				testCode.append(");\n\tts.setName(\"");
+				testCode.append(testCasesId.getTestName());
+				testCode.append("\");\n\tthis.addTest(ts);\n");
+			}
+			testCode.append("}\n");
+			testCode.append(suiteId.getTestClassName());
+			testCode.append(".prototype = new TestSuite();\n");
+			testCode.append(suiteId.getTestClassName());
+			testCode.append(".prototype.suite = function () { return new ");
+			testCode.append(suiteId.getTestClassName());
+			testCode.append("(); }\n\n");
+		}
+
+		return suiteId;
 	}
 
-	private List<TestIdentifier> addAllFormTests(Solution solution, FlattenedSolution flattenedSolution, StringBuffer testCode)
+	private List<TestIdentifier> addAllFormTests(Solution solution, TestTarget target, FlattenedSolution flattenedSolution, StringBuffer testCode)
 	{
 		List<TestIdentifier> allFormTestNames = new ArrayList<TestIdentifier>();
 		Iterator<Form> it = solution.getForms(null, true);
 		while (it.hasNext())
 		{
 			Form form = it.next();
-			TestIdentifier formTestIdentifier = addFormTests(flattenedSolution.getFlattenedForm(form), testCode);
-			if (formTestIdentifier != null)
+			if (target == null || target.formToTest == null || target.formToTest == form)
 			{
-				allFormTestNames.add(formTestIdentifier);
+				TestIdentifier formTestIdentifier = addFormTests(flattenedSolution.getFlattenedForm(form), target, testCode);
+				if (formTestIdentifier != null)
+				{
+					allFormTestNames.add(formTestIdentifier);
+				}
 			}
 		}
 		return allFormTestNames;
 	}
 
-	private TestIdentifier addFormTests(Form form, StringBuffer testCode)
+	private TestIdentifier addFormTests(Form form, TestTarget target, StringBuffer testCode)
 	{
 		Iterator<ScriptMethod> it = form.getScriptMethods(true);
 		// prefix the name so that we have no name conflicts with other form/module/global tests
-		return addTestCaseIfNecessary(it, "Form '" + form.getName() + "' tests", "forms." + form.getName(), testCode);
+		return addTestCaseIfNecessary(it, target, "Form '" + form.getName() + "' tests", "forms." + form.getName(), testCode);
 	}
 
-	private TestIdentifier addTestCaseIfNecessary(Iterator<ScriptMethod> it, String nameOfTest, String callPrefix, StringBuffer testCode)
+	private TestIdentifier addTestCaseIfNecessary(Iterator<ScriptMethod> it, TestTarget target, String nameOfTest, String callPrefix, StringBuffer testCode)
 	{
 		TestIdentifier testIdentifier = null;
 		while (it.hasNext())
 		{
 			ScriptMethod method = it.next();
-			if (method.getName().startsWith(TEST_METHOD_PREFIX) || method.getName().equals(SET_UP_METHOD) || method.getName().equals(TEAR_DOWN_METHOD))
+			if (target == null || target.testMethodToTest == null || target.testMethodToTest == method)
 			{
-				if (testIdentifier == null)
+				if (method.getName().startsWith(TEST_METHOD_PREFIX) || method.getName().equals(SET_UP_METHOD) || method.getName().equals(TEAR_DOWN_METHOD))
 				{
-					// create globals TestCase class
-					testIdentifier = new TestIdentifier(nameOfTest);
+					if (testIdentifier == null)
+					{
+						// create globals TestCase class
+						testIdentifier = new TestIdentifier(nameOfTest);
+						testCode.append("function ");
+						testCode.append(testIdentifier.getTestClassName());
+						testCode.append("(name) { TestCase.call(this, name); }\n");
+					}
 					testCode.append("function ");
 					testCode.append(testIdentifier.getTestClassName());
-					testCode.append("(name) { TestCase.call(this, name); }\n");
+					testCode.append("_");
+					testCode.append(method.getName());
+					testCode.append("() { ");
+					testCode.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
+					testCode.append(" = this; ");
+					testCode.append(callPrefix);
+					testCode.append(".");
+					if (method.getParent() instanceof Solution)
+					{
+						testCode.append(method.getScopeName()).append('.');
+					}
+					testCode.append(method.getName());
+					testCode.append("(); ");
+					testCode.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
+					testCode.append(" = null; }\n");
 				}
-				testCode.append("function ");
-				testCode.append(testIdentifier.getTestClassName());
-				testCode.append("_");
-				testCode.append(method.getName());
-				testCode.append("() { ");
-				testCode.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
-				testCode.append(" = this; ");
-				testCode.append(callPrefix);
-				testCode.append(".");
-				if (method.getParent() instanceof Solution)
-				{
-					testCode.append(method.getScopeName()).append('.');
-				}
-				testCode.append(method.getName());
-				testCode.append("(); ");
-				testCode.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
-				testCode.append(" = null; }\n");
 			}
 		}
 		if (testIdentifier != null)
@@ -349,10 +401,10 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		testCode.append(suiteId.getTestClassName());
 		testCode.append("() {\n\tTestSuite.call(this, null);\n\tthis.setName(\"");
 		testCode.append(suiteId.getTestName());
-		testCode.append("\");\n\t");
+		testCode.append("\");\n");
 		for (TestIdentifier moduleSuiteId : modulesThatAddedTests)
 		{
-			testCode.append("this.addTest(");
+			testCode.append("\tthis.addTest(");
 			testCode.append(moduleSuiteId.getTestClassName());
 			testCode.append(".prototype.suite());\n");
 		}
@@ -366,23 +418,35 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		return suiteId;
 	}
 
-	private TestIdentifier addSolutionSuite(Solution solution, List<TestIdentifier> globalAndFormTestCaseIds, TestIdentifier modulesTestSuiteId,
-		StringBuffer testCode)
+	private TestIdentifier addSolutionSuite(Solution solution, TestIdentifier globalSuiteId, List<TestIdentifier> formTestCaseIds,
+		TestIdentifier modulesTestSuiteId, StringBuffer testCode)
 	{
 		TestIdentifier suiteId = new TestIdentifier("Solution '" + solution.getName() + "' tests");
 		testCode.append("function ");
 		testCode.append(suiteId.getTestClassName());
 		testCode.append("() {\n\tTestSuite.call(this, null);\n\tthis.setName(\"");
 		testCode.append(suiteId.getTestName());
-		testCode.append("\");\n\tvar ts;\n");
-		for (TestIdentifier testCasesId : globalAndFormTestCaseIds)
+		testCode.append("\");\n");
+		if (globalSuiteId != null)
 		{
-			testCode.append("\tts = new TestSuite(");
-			testCode.append(testCasesId.getTestClassName());
-			testCode.append(");\n\tts.setName(\"");
-			testCode.append(testCasesId.getTestName());
-			testCode.append("\");\n\tthis.addTest(ts);\n");
+			testCode.append("\tthis.addTest(");
+			testCode.append(globalSuiteId.getTestClassName());
+			testCode.append(".prototype.suite());\n");
 		}
+
+		if (formTestCaseIds.size() > 0)
+		{
+			testCode.append("\tvar ts;\n");
+			for (TestIdentifier testCasesId : formTestCaseIds)
+			{
+				testCode.append("\tts = new TestSuite(");
+				testCode.append(testCasesId.getTestClassName());
+				testCode.append(");\n\tts.setName(\"");
+				testCode.append(testCasesId.getTestName());
+				testCode.append("\");\n\tthis.addTest(ts);\n");
+			}
+		}
+
 		if (modulesTestSuiteId != null)
 		{
 			testCode.append("\tthis.addTest(");
@@ -463,4 +527,5 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 			J2DBGlobals.setSingletonServiceProvider(prevServiceProvider);
 		}
 	}
+
 }

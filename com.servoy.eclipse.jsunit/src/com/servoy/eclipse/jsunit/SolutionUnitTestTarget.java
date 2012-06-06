@@ -16,11 +16,20 @@
  */
 package com.servoy.eclipse.jsunit;
 
+import com.servoy.eclipse.jsunit.runner.TestTarget;
+
 /**
- * Classes that implement this interface should be able to run JS unit tests.
+ * Classes that implement this interface should be able to run provide a target for running JS Unit tests inside the active solution.
  * @author acostescu
  */
 public interface SolutionUnitTestTarget
 {
+
+	/**
+	 * Specifies what parts of the active solution the tests should run on (null for whole solution, or a test target to specify
+	 * finer level testing (methods, forms, scopes, modules)).
+	 * @return null for whole solution, or a test target to specify finer level testing (methods, forms, scopes, modules).
+	 */
+	TestTarget getTestTarget();
 
 }

@@ -5,9 +5,9 @@
          point="org.eclipse.ui.commands">
       <command
             categoryId="com.servoy.eclipse.ui"
-            description="Run Solution Javascript Unit Tests"
+            description="Run Solution/Scope/Form/Method Javascript Unit Test(s)"
             id="com.servoy.eclipse.jsunit.actions.runJSTests"
-            name="Run Solution Unit Tests">
+            name="Run JS Unit Test(s)">
       </command>
    </extension>
    <extension
@@ -20,11 +20,12 @@
                class="com.servoy.eclipse.jsunit.actions.RunJSTests"
                definitionId="com.servoy.eclipse.jsunit.actions.runJSTests"
                enablesFor="1"
+               icon="icons/jsunit.png"
                id="com.servoy.eclipse.jsunit.actions.runJSTestsMenuContribution"
-               label="Run &amp;Unit Tests"
+               label="Run JS &amp;Unit Test(s)"
                menubarPath="additions"
                style="push"
-               tooltip="Run Solution Javascript Unit Tests">
+               tooltip="Run Solution/Scope/Form/Method Javascript Unit Test(s)">
          </action>
       </objectContribution>
    </extension>
@@ -32,14 +33,15 @@
          point="org.eclipse.ui.actionSets">
       <actionSet
             id="com.servoy.eclipse.jsunit.RunJSTests"
-            label="Run Solution Unit Tests">
+            label="Run JS Unit Test(s)">
          <action
                class="com.servoy.eclipse.jsunit.actions.RunJSTests"
                definitionId="com.servoy.eclipse.jsunit.actions.runJSTests"
+               icon="icons/jsunit.png"
                id="com.servoy.eclipse.jsunit.actions.runJSTests"
-               label="Run Solution Unit Tests"
+               label="Run JS Unit Test(s)"
                style="push"
-               tooltip="Run Solution Javascript Unit Tests">
+               tooltip="Run Solution/Scope/Form/Method Javascript Unit Test(s)">
          </action>
       </actionSet>
    </extension>

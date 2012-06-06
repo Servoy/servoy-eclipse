@@ -64,13 +64,14 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.debug.actions.StartJsUnitClientActionDelegate;
 import com.servoy.eclipse.jsunit.SolutionRemoteTestRunner;
+import com.servoy.eclipse.jsunit.SolutionUnitTestTarget;
 import com.servoy.eclipse.jsunit.runner.ApplicationJSTestSuite;
 import com.servoy.eclipse.jsunit.runner.JSUnitTestListenerHandler;
+import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
-import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 
 /**
@@ -85,6 +86,7 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 
 	private IWorkbenchWindow window;
 	private boolean cancelCleanupShutDown = false;
+	private IStructuredSelection structuredSelection;
 
 //	/* Here is what this method is supposed to do (without details):
 //	 *    - if SmartClient is open then close it.
@@ -174,7 +176,7 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 									testApp.shutDown(true);
 									testApp.getClientInfo().clearUserInfo();
 
-									final Job waitForSolutionToLoad = new Job("Running solution unit tests")
+									final Job waitForSolutionToLoad = new Job("Running unit tests")
 									{
 										@Override
 										protected IStatus run(IProgressMonitor monitor)
@@ -237,7 +239,8 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 												{
 													public void run()
 													{
-														ApplicationJSTestSuite.setApplication(testApp);
+
+														ApplicationJSTestSuite.setTestTarget(testApp, getTestTarget());
 														try
 														{
 															SolutionRemoteTestRunner.main(new String[] { "-version", "3", "-port", String.valueOf(port), "-testLoaderClass", "org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestLoader", "loaderpluginname", "org.eclipse.jdt.junit.runtime", "-classNames", ApplicationJSTestSuite.class.getCanonicalName() });
@@ -254,6 +257,7 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 															}
 														}
 													}
+
 												});
 											}
 											catch (InterruptedException e)
@@ -474,26 +478,24 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 	{
 		if (selection instanceof IStructuredSelection)
 		{
-			IStructuredSelection s = (IStructuredSelection)selection;
-			if (s.size() == 1)
+			this.structuredSelection = (IStructuredSelection)selection;
+		}
+	}
+
+	protected TestTarget getTestTarget()
+	{
+		if (structuredSelection != null)
+		{
+			if (structuredSelection.size() == 1)
 			{
-				if (s.getFirstElement() instanceof Solution)
+				Object fe = structuredSelection.getFirstElement();
+				if (fe instanceof SolutionUnitTestTarget)
 				{
-					ServoyProject activeSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-					if (activeSolution != null &&
-						(activeSolution.getSolution() == s.getFirstElement() || activeSolution.getEditingSolution() == s.getFirstElement()))
-					{
-						action.setEnabled(true);
-					}
-					else
-					{
-						action.setEnabled(false);
-					}
+					return ((SolutionUnitTestTarget)fe).getTestTarget();
 				}
-				// else ... this event is already restricted by extension point to only be called for Solution
-				// objects or other objects that can adapt to solution - only alter enablement state if we get the solution obj.
 			}
 		}
+		return null;
 	}
 
 	public void setActivePart(IAction action, IWorkbenchPart targetPart)
@@ -504,7 +506,7 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 
 	public void dispose()
 	{
-		// nothing to do
+		structuredSelection = null;
 	}
 
 	public void init(IWorkbenchWindow window)
