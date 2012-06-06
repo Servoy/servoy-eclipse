@@ -855,6 +855,7 @@ public class TypeCreator extends TypeCache
 	 * @param members
 	 * @param class1
 	 */
+	@SuppressWarnings("deprecation")
 	private final void fill(EList<Member> membersList, Class< ? > scriptObjectClass, String typeName)
 	{
 		ArrayList<String> al = new ArrayList<String>();
@@ -1223,6 +1224,7 @@ public class TypeCreator extends TypeCache
 		Type createType(String fullTypeName);
 	}
 
+	@SuppressWarnings("deprecation")
 	public IParameter[] getParameters(String key, Class< ? > scriptObjectClass, MemberBox member)
 	{
 		if (scriptObjectClass == null) return null;
@@ -1549,6 +1551,7 @@ public class TypeCreator extends TypeCache
 	 * @param name
 	 * @return
 	 */
+	@SuppressWarnings("deprecation")
 	public static String getDoc(String key, Class< ? > scriptObjectClass, String name, Class< ? >[] parameterTypes)
 	{
 		if (scriptObjectClass == null) return null;
@@ -1653,7 +1656,7 @@ public class TypeCreator extends TypeCache
 					}
 					if (returnText != null)
 					{
-						docBuilder.append("</br>");
+						docBuilder.append("<br/>");
 						docBuilder.append(returnText);
 					}
 					doc = Utils.stringReplace(docBuilder.toString(), "%%prefix%%", ""); //$NON-NLS-1$ //$NON-NLS-2$
