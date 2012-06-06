@@ -41,6 +41,7 @@ import com.servoy.j2db.util.Pair;
 public class FormImageNotifier extends AbstractImageNotifier
 {
 	private final Form flattenedForm;
+	private static final Insets DEFAULT_INSETS = new Insets(0, 0, 0, 0);
 
 	public FormImageNotifier(IApplication application, Form flattenedForm)
 	{
@@ -52,10 +53,6 @@ public class FormImageNotifier extends AbstractImageNotifier
 	protected Component createComponent()
 	{
 		Border border = ElementFactory.getFormBorder(application, flattenedForm);
-		if (border == null)
-		{
-			return null;
-		}
 		Pair<IStyleSheet, IStyleRule> formStyle = ComponentFactory.getCSSPairStyleForForm(application, flattenedForm);
 
 		StyledEnablePanel comp = new StyledEnablePanel(application);
@@ -64,7 +61,7 @@ public class FormImageNotifier extends AbstractImageNotifier
 		Dimension size = flattenedForm.getSize();
 
 		// add border insets
-		Insets insets = border.getBorderInsets(comp);
+		Insets insets = border != null ? border.getBorderInsets(comp) : DEFAULT_INSETS;
 		comp.setSize(new Dimension(size.width + insets.left + insets.right, size.height + insets.top + insets.bottom));
 
 		if (formStyle != null && formStyle.getRight() != null && formStyle.getRight().hasAttribute(CSS.Attribute.BACKGROUND_IMAGE.toString()))
