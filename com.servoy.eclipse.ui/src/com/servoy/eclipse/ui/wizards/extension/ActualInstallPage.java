@@ -465,14 +465,15 @@ public class ActualInstallPage extends WizardPage
 				monitor.subTask("installing '" + dmd.extensionName + "'..."); //$NON-NLS-1$//$NON-NLS-2$
 				File f = state.extensionProvider.getEXPFile(step.extension.id, step.extension.version, null);
 
+				EXPParser parser = state.getOrCreateParser(f);
+				ExtensionConfiguration whole = parser.parseWholeXML();
+
 				// default install
-				CopyZipEntryImporter defaultInstaller = new CopyZipEntryImporter(f, state.installDir, step.extension.id, step.extension.version);
+				CopyZipEntryImporter defaultInstaller = new CopyZipEntryImporter(f, state.installDir, step.extension.id, step.extension.version, whole);
 				defaultInstaller.handleFile();
 				allMessages.addAll(Arrays.asList(defaultInstaller.getMessages()));
 
 				// developer specific install
-				EXPParser parser = state.getOrCreateParser(f);
-				ExtensionConfiguration whole = parser.parseWholeXML();
 				allMessages.addAll(Arrays.asList(parser.getMessages()));
 				parser.clearMessages();
 				if (whole.getContent() != null)
@@ -496,7 +497,11 @@ public class ActualInstallPage extends WizardPage
 				monitor.subTask("uninstalling '" + dmd.extensionName + "'..."); //$NON-NLS-1$//$NON-NLS-2$
 
 				File f = state.installedExtensionsProvider.getEXPFile(step.extension.id, step.extension.installedVersion, null);
-				UninstallZipEntries uninstaller = new UninstallZipEntries(f, state.installDir, step.extension.id, step.extension.installedVersion);
+
+				EXPParser parser = state.getOrCreateParser(f);
+				ExtensionConfiguration whole = parser.parseWholeXML();
+
+				UninstallZipEntries uninstaller = new UninstallZipEntries(f, state.installDir, step.extension.id, step.extension.installedVersion, whole);
 				uninstaller.handleFile();
 
 				allMessages.addAll(Arrays.asList(uninstaller.getMessages()));

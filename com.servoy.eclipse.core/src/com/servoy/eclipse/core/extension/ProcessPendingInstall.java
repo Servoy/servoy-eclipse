@@ -18,6 +18,8 @@ import com.servoy.extension.install.CopyZipEntryImporter;
 import com.servoy.extension.install.LibActivationHandler;
 import com.servoy.extension.install.LibChoiceHandler;
 import com.servoy.extension.install.UninstallZipEntries;
+import com.servoy.extension.parser.EXPParser;
+import com.servoy.extension.parser.ExtensionConfiguration;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
@@ -135,15 +137,22 @@ public class ProcessPendingInstall implements Runnable
 			{
 				File f = state.extensionProvider.getEXPFile(step.extension.id, step.extension.version, null);
 
+				EXPParser parser = state.getOrCreateParser(f);
+				ExtensionConfiguration whole = parser.parseWholeXML();
+
 				// default install
-				CopyZipEntryImporter defaultInstaller = new CopyZipEntryImporter(f, state.installDir, step.extension.id, step.extension.version);
+				CopyZipEntryImporter defaultInstaller = new CopyZipEntryImporter(f, state.installDir, step.extension.id, step.extension.version, whole);
 				defaultInstaller.handleFile();
 				allMessages.addAll(Arrays.asList(defaultInstaller.getMessages()));
 			}
 			else if (step.type == InstallStep.UNINSTALL)
 			{
 				File f = state.installedExtensionsProvider.getEXPFile(step.extension.id, step.extension.installedVersion, null);
-				UninstallZipEntries uninstaller = new UninstallZipEntries(f, state.installDir, step.extension.id, step.extension.installedVersion);
+
+				EXPParser parser = state.getOrCreateParser(f);
+				ExtensionConfiguration whole = parser.parseWholeXML();
+
+				UninstallZipEntries uninstaller = new UninstallZipEntries(f, state.installDir, step.extension.id, step.extension.installedVersion, whole);
 				uninstaller.handleFile();
 
 				allMessages.addAll(Arrays.asList(uninstaller.getMessages()));
