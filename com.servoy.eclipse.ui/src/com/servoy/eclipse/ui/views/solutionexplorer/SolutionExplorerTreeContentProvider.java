@@ -266,6 +266,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		newChildren[children.length].parent = databaseManager;
 		newChildren[children.length + 1] = new PlatformSimpleUserNode(Record.JS_RECORD, UserNodeType.RETURNTYPE, Record.class, null);
 		newChildren[children.length + 1].parent = databaseManager;
+		Arrays.sort(newChildren, new Comparator<PlatformSimpleUserNode>()
+		{
+			public int compare(PlatformSimpleUserNode o1, PlatformSimpleUserNode o2)
+			{
+				return o1.getName().compareTo(o2.getName());
+			}
+		});
 		databaseManager.children = newChildren;
 
 		PlatformSimpleUserNode utils = new PlatformSimpleUserNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, null, IconProvider.instance().image(
