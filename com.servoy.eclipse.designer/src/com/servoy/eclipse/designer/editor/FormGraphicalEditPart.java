@@ -94,7 +94,7 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		for (Part part : Utils.iterate(flattenedForm.getParts()))
 		{
 			// separate editparts for painting part backgrounds
-			list.add(new PartpanelModel(part));
+			list.add(new PartpanelModel(part, editorPart.getForm()));
 		}
 
 		Set<FormElementGroup> groups = new HashSet<FormElementGroup>();

@@ -67,7 +67,7 @@ public class FormPartpanelGraphicalEditPart extends AbstractGraphicalEditPart
 
 	protected IFigure updateFigure(IFigure fig)
 	{
-		Form flattenedForm = application.getFlattenedSolution().getFlattenedForm(getModel().part);
+		Form flattenedForm = application.getFlattenedSolution().getFlattenedForm(getModel().context);
 		int start = flattenedForm.getPartStartYPos(getModel().part.getID());
 		fig.setBounds(new Rectangle(0, start, flattenedForm.getWidth(), getModel().part.getHeight() - start));
 
@@ -115,7 +115,7 @@ public class FormPartpanelGraphicalEditPart extends AbstractGraphicalEditPart
 	{
 		if (partImageNotifier == null)
 		{
-			partImageNotifier = new PartImageNotifier(application, getModel().part);
+			partImageNotifier = new PartImageNotifier(application, getModel().part, getModel().context);
 		}
 		return partImageNotifier;
 	}
@@ -130,13 +130,15 @@ public class FormPartpanelGraphicalEditPart extends AbstractGraphicalEditPart
 	public static class PartpanelModel
 	{
 		public final Part part;
+		public final Form context;
 
 		/**
 		 * @param flattenedForm
 		 */
-		public PartpanelModel(Part part)
+		public PartpanelModel(Part part, Form context)
 		{
 			this.part = part;
+			this.context = context;
 		}
 	}
 }

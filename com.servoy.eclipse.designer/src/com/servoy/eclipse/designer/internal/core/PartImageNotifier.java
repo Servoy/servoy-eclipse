@@ -40,17 +40,19 @@ import com.servoy.j2db.util.Pair;
 public class PartImageNotifier extends AbstractImageNotifier
 {
 	private final Part part;
+	private final Form context;
 
-	public PartImageNotifier(IApplication application, Part part)
+	public PartImageNotifier(IApplication application, Part part, Form context)
 	{
 		super(application);
 		this.part = part;
+		this.context = context;
 	}
 
 	@Override
 	protected Component createComponent()
 	{
-		Form form = application.getFlattenedSolution().getFlattenedForm(part);
+		Form form = application.getFlattenedSolution().getFlattenedForm(context);
 
 		StyledEnablePanel comp = new StyledEnablePanel(application);
 		comp.setSize(form.getWidth(), part.getHeight() - form.getPartStartYPos(part.getID()));
