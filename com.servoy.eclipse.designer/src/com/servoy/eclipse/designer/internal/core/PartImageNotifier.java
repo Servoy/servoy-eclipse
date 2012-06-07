@@ -66,11 +66,10 @@ public class PartImageNotifier extends AbstractImageNotifier
 
 		Color bg = ComponentFactory.getPartBackground(application, part, form);
 
-		boolean paintPartBackgroundOnTopOfImage = (formHasBgImage || partHasBgImage) && bg != null;
-
-		if (paintPartBackgroundOnTopOfImage)
+		if (formHasBgImage || partHasBgImage)
 		{
 			comp.setPaintBackgroundOnTopOfImage(true);
+			comp.setBgColor(bg);
 		}
 
 		comp.setBackground(bg == null && !formHasBgImage && !form.getTransparent() ? Color.white : bg);
