@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
@@ -60,6 +61,7 @@ import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.eclipse.ui.wizards.SuggestForeignTypesWizard;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.RepositoryException;
 
 @SuppressWarnings("nls")
@@ -173,6 +175,23 @@ public class ColumnDetailsComposite extends Composite
 
 		excludedCheckBox = new Button(this, SWT.CHECK);
 		uuidCheckBox = new Button(this, SWT.CHECK);
+
+		uuidCheckBox.addListener(SWT.Selection, new Listener()
+		{
+			public void handleEvent(Event event)
+			{
+				if (Column.mapToDefaultType(column.getType()) != IColumnTypes.MEDIA && Column.mapToDefaultType(column.getType()) != IColumnTypes.TEXT)
+				{
+					UIUtils.reportWarning("Warning", "Invalid UUID: The column must be of type TEXT or MEDIA.");
+					uuidCheckBox.setSelection(false);
+				}
+				else if (column.getLength() < 36)
+				{
+					UIUtils.reportWarning("Warning", "Invalid UUID: The column must be of length >= 36.");
+					uuidCheckBox.setSelection(false);
+				}
+			}
+		});
 
 		excludedCheckBox.setText("excluded");
 		uuidCheckBox.setText("UUID");
