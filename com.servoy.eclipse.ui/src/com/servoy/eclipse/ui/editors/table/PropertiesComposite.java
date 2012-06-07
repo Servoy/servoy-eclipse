@@ -99,7 +99,7 @@ public class PropertiesComposite extends Composite
 		fd_button.top = new FormAttachment(btnMetadataTable, 6);
 		fd_button.left = new FormAttachment(0, 37);
 		createMetaDataColumnsButton.setLayoutData(fd_button);
-		createMetaDataColumnsButton.setText("add metadata columns");
+		createMetaDataColumnsButton.setText("add metadata date columns");
 		createMetaDataColumnsButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
