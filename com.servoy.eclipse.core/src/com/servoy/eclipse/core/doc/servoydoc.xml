@@ -40808,7 +40808,7 @@ if (%%elementName%%.hasRecords(orders_to_orderitems))
 	//a date calculation
 }]]></sample>
         </function>
-        <function name="numberformat">
+        <function name="numberFormat">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="java.lang.Object"/>
