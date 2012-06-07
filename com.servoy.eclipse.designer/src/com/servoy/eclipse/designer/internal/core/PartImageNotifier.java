@@ -62,26 +62,25 @@ public class PartImageNotifier extends AbstractImageNotifier
 			formStyle.getRight().hasAttribute(CSS.Attribute.BACKGROUND_IMAGE.toString());
 
 		Pair<IStyleSheet, IStyleRule> pair = ComponentFactory.getStyleForBasicComponent(application, part, form);
-		boolean partHasBgImage = (pair != null && pair.getRight() != null && pair.getRight().hasAttribute(CSS.Attribute.BACKGROUND_IMAGE.toString()));
+		boolean partHasBgColor = (part.getBackground() != null) ||
+			(pair != null && pair.getRight() != null && pair.getRight().hasAttribute(CSS.Attribute.BACKGROUND_COLOR.toString()));
 
-		Color bg = ComponentFactory.getPartBackground(application, part, form);
+		boolean paintPartBackgroundOnTopOfImage = formHasBgImage && !form.getTransparent() && partHasBgColor;
 
-		if (formHasBgImage || partHasBgImage)
+		if (paintPartBackgroundOnTopOfImage)
 		{
-			comp.setPaintBackgroundOnTopOfImage(true);
-			comp.setBgColor(bg);
+			comp.setPaintBackgroundOnTopOfFormImage(true);
 		}
 
-		comp.setBackground(bg == null && !formHasBgImage && !form.getTransparent() ? Color.white : bg);
+		Color bg = ComponentFactory.getPartBackground(application, part, form);
+		comp.setBackground(bg == null && !formHasBgImage ? Color.white : bg);
 
 		comp.setOpaque(!form.getTransparent() && !formHasBgImage);
+		comp.setBgColor(part.getBackground());
 
 		if (pair != null && pair.getRight() != null && pair.getLeft() != null)
 		{
-			if (pair.getRight().hasAttribute(CSS.Attribute.BACKGROUND_IMAGE.toString()))
-			{
-				comp.setCssRule(pair.getRight());
-			}
+			comp.setCssRule(pair.getRight());
 
 			Border border = pair.getLeft().getBorder(pair.getRight());
 			if (border != null)

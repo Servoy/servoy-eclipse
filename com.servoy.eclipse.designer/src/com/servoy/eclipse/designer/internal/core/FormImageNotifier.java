@@ -67,6 +67,10 @@ public class FormImageNotifier extends AbstractImageNotifier
 		if (formStyle != null && formStyle.getRight() != null && formStyle.getRight().hasAttribute(CSS.Attribute.BACKGROUND_IMAGE.toString()))
 		{
 			comp.setCssRule(formStyle.getRight());
+			if (!flattenedForm.getTransparent() && formStyle.getRight().hasAttribute(CSS.Attribute.BACKGROUND_COLOR.toString()))
+			{
+				comp.setBackground(formStyle.getLeft().getBackground(formStyle.getRight()));
+			}
 		}
 		return comp;
 	}
