@@ -124,6 +124,17 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException
 	{
 		super.init(site, convertInput(input));
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() == null)
+		{
+			closeEditor(true);
+			Display.getCurrent().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					UIUtils.reportWarning("Warning", "The table editor cannot be opened since there is no active solution.");
+				}
+			});
+		}
 		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(this);
 	}
 
