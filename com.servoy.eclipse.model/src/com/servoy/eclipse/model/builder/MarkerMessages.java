@@ -129,7 +129,7 @@ public class MarkerMessages
 	public static ServoyMarker InvalidSortOptionsRelationNotFound = new ServoyMarker(
 		"{0} \"{1}\" has invalid sort options \"{2}\" , relation \"{3}\" can not be found.", ServoyBuilder.INVALID_SORT_OPTION); //$NON-NLS-1$
 	public static ServoyMarker InvalidSortOptionsRelationDifferentPrimaryDatasource = new ServoyMarker(
-		"{0} \"{1}\" has invalid sort options \"{2}\" , relation \"{3}\" has different primary datasource than expected.", ServoyBuilder.INVALID_SORT_OPTION); //$NON-NLS-1$
+		"{0} \"{1}\" has invalid sort options \"{2}\" , relation \"{3}\" has a different primary datasource than expected.", ServoyBuilder.INVALID_SORT_OPTION); //$NON-NLS-1$
 	public static ServoyMarker InvalidSortOptionsColumnNotFound = new ServoyMarker(
 		"{0} \"{1}\" has invalid sort options \"{2}\" , column \"{3}\" does not exist.", ServoyBuilder.INVALID_SORT_OPTION); //$NON-NLS-1$
 
@@ -165,7 +165,7 @@ public class MarkerMessages
 	public static ServoyMarker ValuelistDBTableNoPk = new ServoyMarker(
 		"Valuelist \"{0}\" is based on table \"{1}\" which does not have a primary key.", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ValuelistDBDatasourceNotFound = new ServoyMarker(
-		"Valuelist \"{0}\" is based on inexisting column/calculation \"{1}\" from table \"{2}\".", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE); //$NON-NLS-1$
+		"Valuelist \"{0}\" is based on nonexisting column/calculation \"{1}\" from table \"{2}\".", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ValuelistRelationWithDatasource = new ServoyMarker(
 		"Valuelist \"{0}\" is relation based so it should not specify a datasource.", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE, "Removed datasource."); //$NON-NLS-1$ //$NON-NLS-2$
 	public static ServoyMarker ValuelistRelationNotFound = new ServoyMarker(
@@ -173,13 +173,13 @@ public class MarkerMessages
 	public static ServoyMarker ValuelistRelationSequenceInconsistent = new ServoyMarker(
 		"Valuelist \"{0}\" is based on relation sequence \"{1}\" which is not consistent.", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ValuelistCustomValuesWithDBInfo = new ServoyMarker(
-		"Valuelist \"{0}\" is custom values valuelist so it should not specify table, server or relation.", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE, "Removed table, server and relation."); //$NON-NLS-1$ //$NON-NLS-2$
+		"Valuelist \"{0}\" is a custom valuelist so it should not specify table, server or relation.", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE, "Removed table, server and relation."); //$NON-NLS-1$ //$NON-NLS-2$
 	public static ServoyMarker ValuelistGlobalMethodNotFound = new ServoyMarker(
-		"Valuelist \"{0}\" references an inexisting global method.", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE); //$NON-NLS-1$
+		"Valuelist \"{0}\" references a nonexisting global method.", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ValuelistGlobalMethodNotAccessible = new ServoyMarker(
 		"Valuelist \"{0}\" references a private global method that is not accessible from this solution.", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ValuelistInvalidCustomValues = new ServoyMarker(
-		"Valuelist \"{0}\" has invalid custom value (all or none rows should have real value).", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE); //$NON-NLS-1$
+		"Valuelist \"{0}\" has invalid custom value (either all rows or no rows should have a real value).", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker StyleNotFound = new ServoyMarker("Style \"{0}\" used in form \"{1}\" does not exist.", ServoyBuilder.MISSING_STYLE); //$NON-NLS-1$
 	public static ServoyMarker StyleFormClassNotFound = new ServoyMarker(
@@ -257,7 +257,7 @@ public class MarkerMessages
 	 * This means that the sam tab sequence position is assigned to more than one element on a form.
 	 */
 	public static ServoyMarker FormNamedElementDuplicateTabSequence = new ServoyMarker(
-		"Form \"{0}\" contains an element \"{1}\" which has duplicate tab sequence.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Form \"{0}\" contains an element \"{1}\" which has a duplicate tab sequence.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker FormDerivedFormRedefinedVariable = new ServoyMarker(
 		"Form \"{0}\" has a variable \"{1}\" which is also present in the parent hierarchy of the form.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
@@ -279,9 +279,9 @@ public class MarkerMessages
 	public static ServoyMarker FormNamedFoundsetIncorrectValue = new ServoyMarker(
 		"\"namedFoundSet\" property of form \"{0}\" is incorrect.{1}", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormUnnamedElementOutsideBoundsOfForm = new ServoyMarker(
-		"Element in form \"{0}\" is outside the bounds of form.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Element in form \"{0}\" is outside the bounds of the form.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormNamedElementOutsideBoundsOfForm = new ServoyMarker(
-		"Element \"{0}\" in form \"{1}\" is outside the bounds of form.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Element \"{0}\" in form \"{1}\" is outside the bounds of the form.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormUnnamedElementOutsideBoundsOfPart = new ServoyMarker(
 		"Element in form \"{0}\" is outside the bounds of part {1}.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormNamedElementOutsideBoundsOfPart = new ServoyMarker(
@@ -302,9 +302,9 @@ public class MarkerMessages
 		"Field has attached a related valuelist \"{0}\" that doesn't have the same datasource as form \"{1}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker FormNamedFieldFallbackRelatedValuelist = new ServoyMarker(
-		"Field \"{0}\" has attached a valuelist \"{1}\" whose fallback valuelist \"{2}\" is related but that doesn't have the same datasource as form \"{3}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Field \"{0}\" has attached a valuelist \"{1}\" whose fallback valuelist \"{2}\" is related but doesn't have the same datasource as form \"{3}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormUnnamedFieldFallbackRelatedValuelist = new ServoyMarker(
-		"Field has attached a valuelist \"{0}\" whose fallback valuelist \"{1}\" is related but that doesn't have the same datasource as form \"{2}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Field has attached a valuelist \"{0}\" whose fallback valuelist \"{1}\" is related but doesn't have the same datasource as form \"{2}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	/**
 	 * The labelfor element used by a label cannot be found.
 	 */
@@ -315,7 +315,7 @@ public class MarkerMessages
 		"Form \"{0}\" extends a form that cannot be found.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker ObsoleteElement = new ServoyMarker(
-		"Form \"{0}\" contains obsolete element type, this should be removed.", ServoyBuilder.OBSOLETE_ELEMENT); //$NON-NLS-1$
+		"Form \"{0}\" contains an obsolete element type, this should be removed.", ServoyBuilder.OBSOLETE_ELEMENT); //$NON-NLS-1$
 	/**
 	 * This means that inside a portal you placed an element which is based on a relation sequence that is different from the relation sequence of the portal.
 	 * This is not supported.
@@ -363,7 +363,7 @@ public class MarkerMessages
 	 * that is different from the child table of the relation.
 	 */
 	public static ServoyMarker FormRelatedTabDifferentTable = new ServoyMarker(
-		"Related tab error: form \"{0}\" is based on a different table then relation \"{1}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Related tab error: form \"{0}\" is based on a different table than relation \"{1}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
 	 * This means that the relation sequence of a tab inside a tabpanel is invalid. This can happen when a relation from the relation sequence
@@ -406,9 +406,9 @@ public class MarkerMessages
 		"Element \"{0}\" in form \"{1}\" has invalid format: \"{2}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker FormFormatIncompatible = new ServoyMarker(
-		"Format not supported on element from form \"{0}\" as it has valuelist with real and display values.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Format not supported on element from form \"{0}\" as it has a valuelist with real and display values.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormFormatOnElementIncompatible = new ServoyMarker(
-		"Format not supported on element \"{0}\" from form \"{1}\" as it has valuelist with real and display values.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Format not supported on element \"{0}\" from form \"{1}\" as it has a valuelist with real and display values.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker RequiredPropertyMissingOnElement = new ServoyMarker(
 		"Property \"{0}\" must be set on element \"{1}\", in form \"{2}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
@@ -417,19 +417,19 @@ public class MarkerMessages
 	 * The dataprovider used by an element cannot be found. This can happen for example if the structure of a database is changed and columns are deleted or renamed.
 	 */
 	public static ServoyMarker FormDataproviderNotFound = new ServoyMarker(
-		"Element in form \"{0}\" has dataprovider \"{1}\" that does not exist.", ServoyBuilder.INVALID_DATAPROVIDERID); //$NON-NLS-1$
+		"Element in form \"{0}\" has a dataprovider \"{1}\" that does not exist.", ServoyBuilder.INVALID_DATAPROVIDERID); //$NON-NLS-1$
 
 	/**
 	 * The dataprovider used by an element cannot be found. This can happen for example if the structure of a database is changed and columns are deleted or renamed.
 	 */
 	public static ServoyMarker FormIncompatibleElementType = new ServoyMarker(
-		"Element \"{0}\" in form \"{1}\" has incompatible dataprovider type (MEDIA).", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Element \"{0}\" in form \"{1}\" has an incompatible dataprovider type (MEDIA).", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
 	 * The roll over image Media will only work if an image property is also set.
 	 */
 	public static ServoyMarker ImageMediaNotSet = new ServoyMarker(
-		"Element in form \"{0}\" has 'rolloverImageMedia' property while no 'imageMedia' property is set.", ServoyBuilder.MEDIA_MARKER_TYPE); //$NON-NLS-1$
+		"Element in form \"{0}\" has a 'rolloverImageMedia' property while no 'imageMedia' property is set.", ServoyBuilder.MEDIA_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
 	 * The HTML or RTF field has as dataprovider a column whose length may be too small.
@@ -441,7 +441,7 @@ public class MarkerMessages
 	 * The dataprovider used by an element cannot be found. This can happen for example if the structure of a database is changed and columns are deleted or renamed.
 	 */
 	public static ServoyMarker FormDataproviderOnElementNotFound = new ServoyMarker(
-		"Element \"{0}\" in form \"{1}\" has dataprovider \"{2}\" that does not exist.", ServoyBuilder.INVALID_DATAPROVIDERID); //$NON-NLS-1$
+		"Element \"{0}\" in form \"{1}\" has a dataprovider \"{2}\" that does not exist.", ServoyBuilder.INVALID_DATAPROVIDERID); //$NON-NLS-1$
 
 	public static ServoyMarker TableMarkedAsHiddenButUsedIn = new ServoyMarker(
 		"Table \"{0}\" is marked as hidden in developer, but it is still used in {1}\"{2}\".", ServoyBuilder.HIDDEN_TABLE_STILL_IN_USE); //$NON-NLS-1$
@@ -449,13 +449,13 @@ public class MarkerMessages
 	public static ServoyMarker ColumnUUIDFlagNotSet = new ServoyMarker(
 		"Table \"{0}\" has column \"{1}\" which is a UUID generator but does not have the UUID flag set.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ColumnIncompatibleTypeForSequence = new ServoyMarker(
-		"Table \"{0}\" has column \"{1}\" which an incompatible type for its sequence.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
+		"Table \"{0}\" has column \"{1}\" which is an incompatible type for its sequence.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ColumnInsufficientLengthForSequence = new ServoyMarker(
 		"Table \"{0}\" has column \"{1}\" whose length is insufficient for its sequence.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ColumnDatabaseIdentityProblem = new ServoyMarker(
 		"Table \"{0}\" has column \"{1}\" which is a database identity but is not a primary key in the table.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ColumnForeignTypeProblem = new ServoyMarker(
-		"Table \"{0}\" has column \"{1}\" which has invalid foreign type suggestion: \"{2}\".", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
+		"Table \"{0}\" has column \"{1}\" which has an invalid foreign type suggestion: \"{2}\".", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
 	 * The lookup value used for a column is invalid. This can happen when the lookup points to a global identifier that does not exist,
@@ -463,10 +463,10 @@ public class MarkerMessages
 	 * that does not exist.
 	 */
 	public static ServoyMarker ColumnLookupInvalid = new ServoyMarker(
-		"Table \"{0}\" has column \"{1}\" which has invalid lookup value.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
+		"Table \"{0}\" has column \"{1}\" which has an invalid lookup value.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker ColumnDuplicateNameDPID = new ServoyMarker(
-		"Table \"{0}\" has column \"{1}\" which has duplicate name/dataProviderID as column \"{2}\".", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
+		"Table \"{0}\" has column \"{1}\" which has a duplicate name/dataProviderID as column \"{2}\".", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker DBIColumnMissingFromDB = new ServoyMarker(
 		"Column \"{0}\" appears in the DB information file, but is missing from the DB table.", ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE); //$NON-NLS-1$
@@ -488,15 +488,15 @@ public class MarkerMessages
 		"Element has name \"{0}\" which is not a valid identifier.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker RelationPrimaryTableNotFound = new ServoyMarker(
-		"Relation \"{0}\" refers to a non-existing primary table \"{1}\" in server \"{2}\".", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
+		"Relation \"{0}\" is referring to a primary table \"{1}\" which does not exist on server \"{2}\".", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker RelationPrimaryTableWithoutPK = new ServoyMarker(
-		"Relation \"{0}\" is referring to primary table with name \"{1}\" on server \"{2}\" but the primary table does not have a primary key.", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
+		"Relation \"{0}\" is referring to a primary table \"{1}\" on server \"{2}\" but the primary table does not have a primary key.", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker RelationPrimaryServerDuplicate = new ServoyMarker(
 		"Relation \"{0}\" is referring to duplicate primary server \"{1}\".", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker RelationForeignTableNotFound = new ServoyMarker(
-		"Relation \"{0}\" refers to a non-existing foreign table \"{1}\" in server \"{2}\".", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
+		"Relation \"{0}\" is referring to a foreign table \"{1}\" which does not exist on server \"{2}\".", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker RelationForeignTableWithoutPK = new ServoyMarker(
-		"Relation \"{0}\" is referring to foreign table with name \"{1}\" on server \"{2}\" but the foreign table does not have a primary key.", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
+		"Relation \"{0}\" is referring to a foreign table \"{1}\" on server \"{2}\" but the foreign table does not have a primary key.", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker RelationForeignServerDuplicate = new ServoyMarker(
 		"Relation \"{0}\" is referring to a duplicate foreign server \"{1}\".", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker RelationItemNoPrimaryDataprovider = new ServoyMarker(
@@ -519,10 +519,10 @@ public class MarkerMessages
 	public static ServoyMarker RelationItemTypeProblem = new ServoyMarker(
 		"Relation \"{0}\" has a relation item with mismatched keys: {1}.", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker RelationItemUUIDProblem = new ServoyMarker(
-		"Relation \"{0}\" has a relation item where UUID flag is set for only one column (\"{1}\" - \"{2}\"). Either none or both columns should have the UUID flag set.", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
+		"Relation \"{0}\" has a relation item where UUID flag is set for only one column (\"{1}\" - \"{2}\"). Either both columns or neither column should have the UUID flag set.", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker MethodEventParameters = new ServoyMarker(
-		"Event parameter is passed to event method, make sure it is used with right type (change method signature).", ServoyBuilder.EVENT_METHOD_MARKER_TYPE); //$NON-NLS-1$
+		"Event parameter is passed to event method; make sure it is used with right type (change method signature).", ServoyBuilder.EVENT_METHOD_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker MissingDriver = new ServoyMarker("Server \"{0}\" has invalid/missing driver ( \"{1}\" ).", ServoyBuilder.MISSING_DRIVER); //$NON-NLS-1$
 
