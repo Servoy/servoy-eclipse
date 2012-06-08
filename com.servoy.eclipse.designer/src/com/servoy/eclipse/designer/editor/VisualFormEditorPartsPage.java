@@ -476,7 +476,7 @@ public class VisualFormEditorPartsPage extends Composite
 	 */
 	private void addAvailablePartType(int partType, Part lastSuperPart, Set<Integer> currentTypes, List<Integer> partTypes)
 	{
-		if (lastSuperPart != null && (lastSuperPart.getPartType() > partType || (!lastSuperPart.canBeMoved() && lastSuperPart.getPartType() == partType)))
+		if (lastSuperPart != null && (!lastSuperPart.canBeMoved() && lastSuperPart.getPartType() == partType))
 		{
 			// may not be added to current form
 			return;
