@@ -1939,7 +1939,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	{
 		openModeToggleButton = new MenuItem(lowertbmenu, SWT.CHECK);
 		openModeToggleButton.setText("Use 'open' as default action"); //$NON-NLS-1$
-		openModeToggleButton.setSelection(fDialogSettings.getBoolean(USE_OPEN_AS_DEFAULT));
+		openModeToggleButton.setSelection(fDialogSettings.get(USE_OPEN_AS_DEFAULT) == null ? true : fDialogSettings.getBoolean(USE_OPEN_AS_DEFAULT));
 		openModeToggleButton.addSelectionListener(new SelectionListener()
 		{
 
