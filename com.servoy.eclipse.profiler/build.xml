@@ -482,25 +482,25 @@
 	<target name="checkCompilationResults" if="compilation.error.occured">
 		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.profiler_6.1.0.1415${line.separator}compilation.error.occured=${compilation.error.occured}"/>
 		<eclipse.logCompileError bundle="com.servoy.eclipse.profiler_6.1.0.1415" log="${compilation.prereq.log}">
-			<include name="C:/Users/Administrator/dev_trunk/com.servoy.eclipse.appserver/compilation.problem"/>
+			<include name="E:/Workspaces/HEAD/com.servoy.eclipse.appserver/compilation.problem"/>
 			<include name="${pluginTemp}/com.servoy.eclipse.appserver_6.1.0.1415/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_trunk/com.servoy.eclipse.core/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.core_6.1.0.1415/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_trunk/servoy_headless_client/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_headless_client_6.1.0.1415/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_trunk/com.servoy.eclipse.model/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.model_6.1.0.1415/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_trunk/com.servoy.eclipse.ui/compilation.problem"/>
+			<include name="E:/Workspaces/HEAD/com.servoy.eclipse.ui/compilation.problem"/>
 			<include name="${pluginTemp}/com.servoy.eclipse.ui_6.1.0.1415/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_trunk/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
+			<include name="E:/Workspaces/HEAD/com.servoy.eclipse.model/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.model_6.1.0.1415/compilation.problem"/>
+			<include name="E:/Workspaces/HEAD/servoy_headless_client/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_headless_client_6.1.0.1415/compilation.problem"/>
+			<include name="E:/Workspaces/HEAD/com.servoy.eclipse.core/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.core_6.1.0.1415/compilation.problem"/>
+			<include name="E:/Workspaces/HEAD/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
 			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_6.1.0.1415/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_trunk/servoy_debug/compilation.problem"/>
+			<include name="E:/Workspaces/HEAD/servoy_debug/compilation.problem"/>
 			<include name="${pluginTemp}/servoy_debug_6.1.0.1415/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_trunk/servoy_smart_client/compilation.problem"/>
+			<include name="E:/Workspaces/HEAD/servoy_smart_client/compilation.problem"/>
 			<include name="${pluginTemp}/servoy_smart_client_6.1.0.1415/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_trunk/servoy_shared/compilation.problem"/>
+			<include name="E:/Workspaces/HEAD/servoy_shared/compilation.problem"/>
 			<include name="${pluginTemp}/servoy_shared_6.1.0.1415/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_trunk/eclipse_target/compile_target/optional/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/compilation.problem"/>
+			<include name="E:/Workspaces/HEAD/eclipse_target/compile_target/optional/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/compilation.problem"/>
 			<include name="${pluginTemp}/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/compilation.problem"/>
 		</eclipse.logCompileError>
 	</target>
@@ -598,7 +598,7 @@
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="C:/Users/Administrator/dev_trunk/com.servoy.eclipse.profiler" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="E:/Workspaces/HEAD/com.servoy.eclipse.profiler" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 	</target>
 
