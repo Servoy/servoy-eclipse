@@ -61,6 +61,7 @@ import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.eclipse.ui.wizards.SuggestForeignTypesWizard;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.RepositoryException;
 
@@ -180,14 +181,17 @@ public class ColumnDetailsComposite extends Composite
 		{
 			public void handleEvent(Event event)
 			{
-				if (Column.mapToDefaultType(column.getType()) != IColumnTypes.MEDIA && Column.mapToDefaultType(column.getType()) != IColumnTypes.TEXT)
+				if ((column.getSequenceType() == ColumnInfo.UUID_GENERATOR && (Column.mapToDefaultType(column.getType()) != IColumnTypes.TEXT && Column.mapToDefaultType(column.getType()) != IColumnTypes.MEDIA)) ||
+					(column.getSequenceType() == ColumnInfo.SERVOY_SEQUENCE && (Column.mapToDefaultType(column.getType()) != IColumnTypes.INTEGER && Column.mapToDefaultType(column.getType()) != IColumnTypes.NUMBER)))
 				{
-					UIUtils.reportWarning("Warning", "Invalid UUID: The column must be of type TEXT or MEDIA.");
+					UIUtils.reportWarning("Warning", "The column has incompatible type.");
 					uuidCheckBox.setSelection(false);
 				}
-				else if (column.getLength() < 36)
+				else if (column.getSequenceType() == ColumnInfo.UUID_GENERATOR &&
+					column.getConfiguredColumnType().getLength() > 0 &&
+					((Column.mapToDefaultType(column.getType()) == IColumnTypes.MEDIA && column.getLength() < 16) || (Column.mapToDefaultType(column.getType()) == IColumnTypes.TEXT && column.getLength() < 36)))
 				{
-					UIUtils.reportWarning("Warning", "Invalid UUID: The column must be of length >= 36.");
+					UIUtils.reportWarning("Warning", "The column has invalid length.");
 					uuidCheckBox.setSelection(false);
 				}
 			}
