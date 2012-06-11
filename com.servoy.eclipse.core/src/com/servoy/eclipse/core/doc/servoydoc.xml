@@ -40702,23 +40702,31 @@ form.defaultPageFormat = solutionModel.createPageFormat(612,792,72,72,72,72,SM_O
     </object>
     <object publicName="Utils" qualifiedName="com.servoy.j2db.scripting.JSUtils" scriptingName="utils">
       <functions>
-        <function name="dateFormat">
+        <function deprecated="true" name="dateFormat">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
-            <argumentType typecode="java.lang.Object"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[the date as text or date object]]></return>
-          <description><![CDATA[Format a date object to a text representation or a parses a datestring to a date object.]]></description>
-          <summary><![CDATA[Format a date object to a text representation or a parses a datestring to a date object.]]></summary>
-          <sample><![CDATA[var parsedDate = utils.dateFormat(datestring,'EEE, d MMM yyyy HH:mm:ss'); 
-
-var formattedDateString = utils.dateFormat(dateobject,'EEE, d MMM yyyy HH:mm:ss');]]></sample>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          <description/>
+          <deprecated><![CDATA[replaced by parseDate(String, String) or dateFormat(Date, String)]]></deprecated>
+          <sample/>
+        </function>
+        <function name="dateFormat">
+          <argumentsTypes>
+            <argumentType typecode="java.util.Date"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the date as text]]></return>
+          <description><![CDATA[Format a date object to a text representation.]]></description>
+          <summary><![CDATA[Format a date object to a text representation.]]></summary>
+          <sample><![CDATA[var formattedDateString = utils.dateFormat(dateobject,'EEE, d MMM yyyy HH:mm:ss');]]></sample>
           <parameters>
-            <parameter name="date" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[the date as text or date object]]></description>
+            <parameter name="date" type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="java.util.Date">
+              <description><![CDATA[the date]]></description>
             </parameter>
-            <parameter name="format" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[the format to output or parse the to date]]></description>
+            <parameter name="format" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the format to output]]></description>
             </parameter>
           </parameters>
         </function>
@@ -40743,7 +40751,7 @@ var dot = utils.getUnicodeCharacter(9679);]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description/>
-          <deprecated><![CDATA[As of release 2.0, replaced by #hasRecords(Object[]).]]></deprecated>
+          <deprecated><![CDATA[As of release 2.0, replaced by #hasRecords(JSFoundSet).]]></deprecated>
           <sample/>
         </function>
         <function name="hasRecords">
@@ -40810,20 +40818,65 @@ if (%%elementName%%.hasRecords(orders_to_orderitems))
         </function>
         <function name="numberFormat">
           <argumentsTypes>
+            <argumentType typecode="java.lang.Number"/>
+            <argumentType typecode="java.lang.Number"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the resulting number in text]]></return>
+          <description><![CDATA[Format a number to have a defined fraction.]]></description>
+          <summary><![CDATA[Format a number to have a defined fraction.]]></summary>
+          <sample><![CDATA[var textalNumber = utils.numberFormat(16.749, 2); //returns 16.75]]></sample>
+          <parameters>
+            <parameter name="number" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
+              <description><![CDATA[the number to format]]></description>
+            </parameter>
+            <parameter name="digits" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
+              <description><![CDATA[nr of digits]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="numberFormat">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Number"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the resulting number in text]]></return>
+          <description><![CDATA[Format a number to specification.]]></description>
+          <summary><![CDATA[Format a number to specification.]]></summary>
+          <sample><![CDATA[var textalNumber2 = utils.numberFormat(100006.749, '#,###.00'); //returns 100,006.75]]></sample>
+          <parameters>
+            <parameter name="number" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
+              <description><![CDATA[the number to format]]></description>
+            </parameter>
+            <parameter name="format" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the format]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function deprecated="true" name="numberFormat">
+          <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the resulting number in text]]></return>
-          <description><![CDATA[Format a number to specification (or to have a defined fraction).]]></description>
-          <summary><![CDATA[Format a number to specification (or to have a defined fraction).]]></summary>
-          <sample><![CDATA[var textalNumber = utils.numberFormat(16.749, 2); //returns 16.75
-var textalNumber2 = utils.numberFormat(100006.749, '#,###.00'); //returns 100,006.75]]></sample>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description/>
+          <deprecated><![CDATA[use numberFormat(Number, String) or numberFormat(Number, Number)]]></deprecated>
+          <sample/>
+        </function>
+        <function name="parseDate">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="java.util.Date"><![CDATA[the date as date object]]></return>
+          <description><![CDATA[Parse a string to a date object.]]></description>
+          <summary><![CDATA[Parse a string to a date object.]]></summary>
+          <sample><![CDATA[var parsedDate = utils.parseDate(datestring,'EEE, d MMM yyyy HH:mm:ss');]]></sample>
           <parameters>
-            <parameter name="number" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[the number to format]]></description>
+            <parameter name="date" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the date as text]]></description>
             </parameter>
-            <parameter name="digitsOrFormat" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[the format or digits]]></description>
+            <parameter name="format" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the format to parse the to date]]></description>
             </parameter>
           </parameters>
         </function>
@@ -40943,16 +40996,28 @@ utils.stringFormat('Today is: %tF',new Array(new Date())) // returns current dat
             </parameter>
           </parameters>
         </function>
-        <function name="stringIndexReplace">
+        <function deprecated="true" name="stringIndexReplace">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Number"/>
             <argumentType typecode="java.lang.Number"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description/>
+          <deprecated><![CDATA[use stringIndexReplace(String, Number, Number, String)]]></deprecated>
+          <sample/>
+        </function>
+        <function name="stringIndexReplace">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.Number"/>
+            <argumentType typecode="java.lang.Number"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the changed text string]]></return>
-          <description><![CDATA[Replaces a portion of a string with replacement text from a specfied index.]]></description>
-          <summary><![CDATA[Replaces a portion of a string with replacement text from a specfied index.]]></summary>
+          <description><![CDATA[Replaces a portion of a string with replacement text from a specified index.]]></description>
+          <summary><![CDATA[Replaces a portion of a string with replacement text from a specified index.]]></summary>
           <sample><![CDATA[//returns 'this was a test'
 var retval = utils.stringIndexReplace('this is a test',6,2,'was');]]></sample>
           <parameters>
@@ -40965,7 +41030,7 @@ var retval = utils.stringIndexReplace('this is a test',6,2,'was');]]></sample>
             <parameter name="i_size" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[the size of the text to replace]]></description>
             </parameter>
-            <parameter name="replacement_text" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+            <parameter name="replacement_text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the replacement text]]></description>
             </parameter>
           </parameters>
@@ -41138,10 +41203,20 @@ NOTE: PBKDF2 is the key hash function for the PKCS (Public-Key Cryptography) sta
             </parameter>
           </parameters>
         </function>
-        <function name="stringPatternCount">
+        <function deprecated="true" name="stringPatternCount">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[use stringPatternCount(String text, String searchString)]]></deprecated>
+          <sample/>
+        </function>
+        <function name="stringPatternCount">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the occurrenceCount that the search string is found in the text]]></return>
           <description><![CDATA[Returns the number of times searchString appears in textString.]]></description>
@@ -41152,28 +41227,40 @@ var count = utils.stringPatternCount('this is a test','is');]]></sample>
             <parameter name="text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the text to process]]></description>
             </parameter>
-            <parameter name="searchString" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+            <parameter name="search" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the string to search]]></description>
             </parameter>
           </parameters>
         </function>
-        <function name="stringPosition">
+        <function deprecated="true" name="stringPosition">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="java.lang.Number"/>
             <argumentType typecode="java.lang.Number"/>
           </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[use stringPosition(String, String, Number, Number)]]></deprecated>
+          <sample/>
+        </function>
+        <function name="stringPosition">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.Number"/>
+            <argumentType typecode="java.lang.Number"/>
+          </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the position]]></return>
-          <description><![CDATA[Returns the position of the string to seach for, from a certain start position and occurrence.]]></description>
-          <summary><![CDATA[Returns the position of the string to seach for, from a certain start position and occurrence.]]></summary>
+          <description><![CDATA[Returns the position of the string to search for, from a certain start position and occurrence.]]></description>
+          <summary><![CDATA[Returns the position of the string to search for, from a certain start position and occurrence.]]></summary>
           <sample><![CDATA[//returns 4 as position
 var pos = utils.stringPosition('This is a test','s',1,1)]]></sample>
           <parameters>
             <parameter name="textString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the text to process]]></description>
             </parameter>
-            <parameter name="searchString" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+            <parameter name="search" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the string to search]]></description>
             </parameter>
             <parameter name="i_start" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
@@ -41184,11 +41271,22 @@ var pos = utils.stringPosition('This is a test','s',1,1)]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="stringReplace">
+        <function deprecated="true" name="stringReplace">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description/>
+          <deprecated><![CDATA[use stringReplace(String, String, String)]]></deprecated>
+          <sample/>
+        </function>
+        <function name="stringReplace">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the changed text string]]></return>
           <description><![CDATA[Replaces a portion of a string with replacement text.]]></description>
@@ -41202,7 +41300,7 @@ var retval = utils.stringReplace('these are test 1 and test 2.','test','cow');]]
             <parameter name="search_text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the string to search]]></description>
             </parameter>
-            <parameter name="replacement_text" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+            <parameter name="replacement_text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the replacement text]]></description>
             </parameter>
           </parameters>
@@ -41272,9 +41370,18 @@ var retval = utils.stringRightWords('this is a test',3);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="stringToNumber">
+        <function deprecated="true" name="stringToNumber">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double"/>
+          <description/>
+          <deprecated><![CDATA[use stringToNumber(String)]]></deprecated>
+          <sample/>
+        </function>
+        <function name="stringToNumber">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double"><![CDATA[the resulting number]]></return>
           <description><![CDATA[Filters characters out of from a string and leaves digits, returns the number. Uses locale decimal separator.]]></description>
@@ -41282,14 +41389,23 @@ var retval = utils.stringRightWords('this is a test',3);]]></sample>
           <sample><![CDATA[//returns '65567'
 var retval = utils.stringToNumber('fg65gf567');]]></sample>
           <parameters>
-            <parameter name="textString" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+            <parameter name="textString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the text to process]]></description>
             </parameter>
           </parameters>
         </function>
-        <function name="stringTrim">
+        <function deprecated="true" name="stringTrim">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description/>
+          <deprecated><![CDATA[use stringTrim(String)]]></deprecated>
+          <sample/>
+        </function>
+        <function name="stringTrim">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the resulting trimmed string]]></return>
           <description><![CDATA[Returns the string without leading or trailing spaces.]]></description>
@@ -41297,7 +41413,7 @@ var retval = utils.stringToNumber('fg65gf567');]]></sample>
           <sample><![CDATA[//returns 'text'
 var retval = utils.stringTrim('   text   ');]]></sample>
           <parameters>
-            <parameter name="textString" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+            <parameter name="textString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the text to process]]></description>
             </parameter>
           </parameters>
