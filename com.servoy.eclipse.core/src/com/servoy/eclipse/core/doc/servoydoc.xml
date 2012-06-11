@@ -13826,6 +13826,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
           <description><![CDATA[Method to handle old foundset loadRecords calls.
 Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecords([1]), this was called with vargs=[1] in stead of vargs=[[1]].]]></description>
           <summary><![CDATA[Method to handle old foundset loadRecords calls.]]></summary>
+          <deprecated><![CDATA[use loadRecords with single typed argument]]></deprecated>
           <sample/>
           <parameters>
             <parameter name="vargs" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"/>
@@ -24953,6 +24954,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
           <description><![CDATA[Method to handle old foundset loadRecords calls.
 Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecords([1]), this was called with vargs=[1] in stead of vargs=[[1]].]]></description>
           <summary><![CDATA[Method to handle old foundset loadRecords calls.]]></summary>
+          <deprecated><![CDATA[use loadRecords with single typed argument]]></deprecated>
           <sample/>
           <parameters>
             <parameter name="vargs" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"/>
@@ -42161,6 +42163,21 @@ limitations/requirements for sqlstring are:
             </parameter>
           </parameters>
         </function>
+        <function deprecated="true" name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Method to handle old foundset loadRecords calls with ignored argumentsaray.]]></description>
+          <summary><![CDATA[Method to handle old foundset loadRecords calls with ignored argumentsaray.]]></summary>
+          <deprecated><![CDATA[use loadRecords(FoundSet)]]></deprecated>
+          <sample/>
+          <parameters>
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          </parameters>
+        </function>
         <function name="loadRecords">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
@@ -42203,6 +42220,21 @@ limitations/requirements for sqlstring are:
             <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
               <description><![CDATA[to load]]></description>
             </parameter>
+          </parameters>
+        </function>
+        <function deprecated="true" name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Method to handle old foundset loadRecords calls with ignored argumentsaray.]]></description>
+          <summary><![CDATA[Method to handle old foundset loadRecords calls with ignored argumentsaray.]]></summary>
+          <deprecated><![CDATA[use loadRecords(JSDataSet)]]></deprecated>
+          <sample/>
+          <parameters>
+            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           </parameters>
         </function>
         <function name="loadRecords">
@@ -42249,6 +42281,21 @@ limitations/requirements for sqlstring are:
             </parameter>
           </parameters>
         </function>
+        <function deprecated="true" name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.util.UUID"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Method to handle old foundset loadRecords calls with ignored argumentsaray.]]></description>
+          <summary><![CDATA[Method to handle old foundset loadRecords calls with ignored argumentsaray.]]></summary>
+          <deprecated><![CDATA[use loadRecords(UUID)]]></deprecated>
+          <sample/>
+          <parameters>
+            <parameter name="UUIDpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID"/>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          </parameters>
+        </function>
         <function name="loadRecords">
           <argumentsTypes>
             <argumentType typecode="java.lang.Number"/>
@@ -42291,6 +42338,21 @@ limitations/requirements for sqlstring are:
             <parameter name="singlenNmber_pk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[to load]]></description>
             </parameter>
+          </parameters>
+        </function>
+        <function deprecated="true" name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Number"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Method to handle old foundset loadRecords calls with ignored argumentsaray.]]></description>
+          <summary><![CDATA[Method to handle old foundset loadRecords calls with ignored argumentsaray.]]></summary>
+          <deprecated><![CDATA[use loadRecords(Number)]]></deprecated>
+          <sample/>
+          <parameters>
+            <parameter name="singlenNmber_pk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number"/>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           </parameters>
         </function>
         <function name="loadRecords">
@@ -42574,7 +42636,7 @@ Lookups are defined in the dataprovider (columns) auto-enter setting and are nor
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description/>
-          <deprecated><![CDATA[As of release 3.0, replaced by databaseManager#saveData(Object[])]]></deprecated>
+          <deprecated><![CDATA[As of release 3.0, replaced by databaseManager#saveData()]]></deprecated>
           <sample/>
         </function>
         <function name="search">
