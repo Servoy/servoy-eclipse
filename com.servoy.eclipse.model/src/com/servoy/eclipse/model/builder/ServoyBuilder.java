@@ -343,8 +343,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"ColumnForeignTypeProblem", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> COLUMN_INCOMPATIBLE_TYPE_FOR_SEQUENCE = new Pair<String, ProblemSeverity>(
 		"ColumnIncompatibleTypeForSequence", ProblemSeverity.WARNING); //$NON-NLS-1$
-	public final static Pair<String, ProblemSeverity> COLUMN_INSUFFICIENT_LENGTH_FOR_SEQUENCE = new Pair<String, ProblemSeverity>(
-		"ColumnInsufficientLengthForSequence", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> COLUMN_INSUFFICIENT_LENGTH_FOR_UUID = new Pair<String, ProblemSeverity>(
+		"ColumnInsufficientLengthForUUID", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> COLUMN_LOOKUP_INVALID = new Pair<String, ProblemSeverity>("ColumnLookupInvalid", ProblemSeverity.WARNING); //$NON-NLS-1$
 
 	// sort problems
@@ -3669,12 +3669,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								ServoyMarker mk = MarkerMessages.ColumnIncompatibleTypeForSequence.fill(tableName, column.getName());
 								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INCOMPATIBLE_TYPE_FOR_SEQUENCE, IMarker.PRIORITY_NORMAL, null, null);
 							}
-							else if (column.getSequenceType() == ColumnInfo.UUID_GENERATOR &&
+							else if (column.hasFlag(Column.UUID_COLUMN) &&
 								column.getConfiguredColumnType().getLength() > 0 &&
 								((dataProviderType == IColumnTypes.MEDIA && column.getLength() < 16) || (dataProviderType == IColumnTypes.TEXT && column.getLength() < 36)))
 							{
-								ServoyMarker mk = MarkerMessages.ColumnInsufficientLengthForSequence.fill(tableName, column.getName());
-								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INSUFFICIENT_LENGTH_FOR_SEQUENCE, IMarker.PRIORITY_NORMAL, null, null);
+								ServoyMarker mk = MarkerMessages.ColumnInsufficientLengthForUUID.fill(tableName, column.getName());
+								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INSUFFICIENT_LENGTH_FOR_UUID, IMarker.PRIORITY_NORMAL, null, null);
 							}
 							if (column.getSequenceType() == ColumnInfo.DATABASE_IDENTITY && !column.isDatabasePK())
 							{
