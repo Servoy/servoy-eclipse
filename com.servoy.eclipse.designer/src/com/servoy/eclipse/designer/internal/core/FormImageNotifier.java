@@ -57,14 +57,14 @@ public class FormImageNotifier extends AbstractImageNotifier
 
 		StyledEnablePanel comp = new StyledEnablePanel(application);
 		comp.setBorder(border);
-		comp.setOpaque(false);
+		comp.setOpaque(!flattenedForm.getTransparent());
 		Dimension size = flattenedForm.getSize();
 
 		// add border insets
 		Insets insets = border != null ? border.getBorderInsets(comp) : DEFAULT_INSETS;
 		comp.setSize(new Dimension(size.width + insets.left + insets.right, size.height + insets.top + insets.bottom));
 
-		if (formStyle != null && formStyle.getRight() != null && formStyle.getRight().hasAttribute(CSS.Attribute.BACKGROUND_IMAGE.toString()))
+		if (formStyle != null && formStyle.getRight() != null)
 		{
 			comp.setCssRule(formStyle.getRight());
 			if (!flattenedForm.getTransparent() && formStyle.getRight().hasAttribute(CSS.Attribute.BACKGROUND_COLOR.toString()))
