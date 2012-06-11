@@ -61,7 +61,6 @@ import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.eclipse.ui.wizards.SuggestForeignTypesWizard;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.Column;
-import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.RepositoryException;
 
@@ -181,14 +180,12 @@ public class ColumnDetailsComposite extends Composite
 		{
 			public void handleEvent(Event event)
 			{
-				if ((column.getSequenceType() == ColumnInfo.UUID_GENERATOR && (Column.mapToDefaultType(column.getType()) != IColumnTypes.TEXT && Column.mapToDefaultType(column.getType()) != IColumnTypes.MEDIA)) ||
-					(column.getSequenceType() == ColumnInfo.SERVOY_SEQUENCE && (Column.mapToDefaultType(column.getType()) != IColumnTypes.INTEGER && Column.mapToDefaultType(column.getType()) != IColumnTypes.NUMBER)))
+				if (Column.mapToDefaultType(column.getType()) != IColumnTypes.TEXT && Column.mapToDefaultType(column.getType()) != IColumnTypes.MEDIA)
 				{
 					UIUtils.reportWarning("Warning", "The column has incompatible type.");
 					uuidCheckBox.setSelection(false);
 				}
-				else if (column.getSequenceType() == ColumnInfo.UUID_GENERATOR &&
-					column.getConfiguredColumnType().getLength() > 0 &&
+				else if (column.getConfiguredColumnType().getLength() > 0 &&
 					((Column.mapToDefaultType(column.getType()) == IColumnTypes.MEDIA && column.getLength() < 16) || (Column.mapToDefaultType(column.getType()) == IColumnTypes.TEXT && column.getLength() < 36)))
 				{
 					UIUtils.reportWarning("Warning", "The column has invalid length.");
