@@ -26,10 +26,13 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.smart.dataui.StyledEnablePanel;
 import com.servoy.j2db.util.IStyleRule;
 import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistHelper;
 
 /**
  * Handles painting of part backgrounds using awt printing.
@@ -57,31 +60,58 @@ public class PartImageNotifier extends AbstractImageNotifier
 		StyledEnablePanel comp = new StyledEnablePanel(application);
 		comp.setSize(form.getWidth(), part.getHeight() - form.getPartStartYPos(part.getID()));
 
-		Pair<IStyleSheet, IStyleRule> formStyle = ComponentFactory.getCSSPairStyleForForm(application, form);
-		boolean formHasBgImage = formStyle != null && formStyle.getRight() != null &&
-			formStyle.getRight().hasAttribute(CSS.Attribute.BACKGROUND_IMAGE.toString());
-
 		Pair<IStyleSheet, IStyleRule> pair = ComponentFactory.getStyleForBasicComponent(application, part, form);
-		boolean partHasBgColor = (part.getBackground() != null) ||
-			(pair != null && pair.getRight() != null && pair.getRight().hasAttribute(CSS.Attribute.BACKGROUND_COLOR.toString()));
 
-		Color bg = ComponentFactory.getPartBackground(application, part, form);
-		comp.setBackground(bg == null && !formHasBgImage ? Color.white : bg);
-
-		boolean paintPartBackgroundOnTopOfImage = !form.getTransparent() && (formHasBgImage || (partHasBgColor && bg.getAlpha() < 255));
-
-		if (paintPartBackgroundOnTopOfImage)
+		if ((part.getRootObject() instanceof Solution) &&
+			(((Solution)(part.getRootObject())).getSolutionType() == SolutionMetaData.SOLUTION || ((Solution)(part.getRootObject())).getSolutionType() == SolutionMetaData.WEB_CLIENT_ONLY))
 		{
-			comp.setPaintBackgroundOnTopOfFormImage(true);
+			Pair<IStyleSheet, IStyleRule> formStyle = ComponentFactory.getCSSPairStyleForForm(application, form);
+			boolean formHasBgImage = formStyle != null && formStyle.getRight() != null &&
+				formStyle.getRight().hasAttribute(CSS.Attribute.BACKGROUND_IMAGE.toString());
+
+			boolean partHasBgColor = (part.getBackground() != null) ||
+				(pair != null && pair.getRight() != null && pair.getRight().hasAttribute(CSS.Attribute.BACKGROUND_COLOR.toString()));
+			Color bg = null;
+			if (!form.getTransparent())
+			{
+				bg = part.getBackground();
+				if (bg == null)
+				{
+					if (partHasBgColor)
+					{
+						bg = PersistHelper.createColorWithTransparencySupport(pair.getRight().getValue(CSS.Attribute.BACKGROUND_COLOR.toString()));
+					}
+					else if (formStyle != null && formStyle.getRight() != null && formStyle.getRight().hasAttribute(CSS.Attribute.BACKGROUND_COLOR.toString()))
+					{
+						bg = PersistHelper.createColorWithTransparencySupport(formStyle.getRight().getValue(CSS.Attribute.BACKGROUND_COLOR.toString()));
+					}
+				}
+			}
+
+			comp.setBackground(bg == null && !formHasBgImage ? Color.white : bg);
+
+			boolean paintPartBackgroundOnTopOfImage = !form.getTransparent() && (formHasBgImage || (partHasBgColor && bg.getAlpha() < 255));
+
+			if (paintPartBackgroundOnTopOfImage)
+			{
+				comp.setPaintBackgroundOnTopOfFormImage(true);
+			}
+
+			comp.setOpaque(!form.getTransparent() && !formHasBgImage && !(partHasBgColor && bg.getAlpha() < 255));
+			comp.setBgColor(part.getBackground());
+			if (pair != null)
+			{
+				comp.setCssRule(pair.getRight());
+			}
+
 		}
-
-		comp.setOpaque(!form.getTransparent() && !formHasBgImage && !(partHasBgColor && bg.getAlpha() < 255));
-		comp.setBgColor(part.getBackground());
-
+		else
+		{
+			Color bg = ComponentFactory.getPartBackground(application, part, form);
+			comp.setBackground(bg == null ? Color.white : bg);
+		}
 		if (pair != null && pair.getRight() != null && pair.getLeft() != null)
 		{
-			comp.setCssRule(pair.getRight());
-
 			Border border = pair.getLeft().getBorder(pair.getRight());
 			if (border != null)
 			{

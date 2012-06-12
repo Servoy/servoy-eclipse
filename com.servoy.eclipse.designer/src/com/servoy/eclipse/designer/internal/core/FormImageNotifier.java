@@ -27,10 +27,13 @@ import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.smart.dataui.StyledEnablePanel;
 import com.servoy.j2db.util.IStyleRule;
 import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistHelper;
 
 /**
  * Handles painting of form borders using awt printing.
@@ -64,12 +67,16 @@ public class FormImageNotifier extends AbstractImageNotifier
 		Insets insets = border != null ? border.getBorderInsets(comp) : DEFAULT_INSETS;
 		comp.setSize(new Dimension(size.width + insets.left + insets.right, size.height + insets.top + insets.bottom));
 
-		if (formStyle != null && formStyle.getRight() != null)
+		if ((flattenedForm.getRootObject() instanceof Solution) &&
+			(((Solution)(flattenedForm.getRootObject())).getSolutionType() == SolutionMetaData.SOLUTION || ((Solution)(flattenedForm.getRootObject())).getSolutionType() == SolutionMetaData.WEB_CLIENT_ONLY))
 		{
-			comp.setCssRule(formStyle.getRight());
-			if (!flattenedForm.getTransparent() && formStyle.getRight().hasAttribute(CSS.Attribute.BACKGROUND_COLOR.toString()))
+			if (formStyle != null && formStyle.getRight() != null)
 			{
-				comp.setBackground(formStyle.getLeft().getBackground(formStyle.getRight()));
+				comp.setCssRule(formStyle.getRight());
+				if (!flattenedForm.getTransparent() && formStyle.getRight().hasAttribute(CSS.Attribute.BACKGROUND_COLOR.toString()))
+				{
+					comp.setBackground(PersistHelper.createColorWithTransparencySupport(formStyle.getRight().getValue(CSS.Attribute.BACKGROUND_COLOR.toString())));
+				}
 			}
 		}
 		return comp;
