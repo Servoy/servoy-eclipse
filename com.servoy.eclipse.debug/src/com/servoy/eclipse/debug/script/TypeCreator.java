@@ -24,6 +24,8 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -890,6 +892,8 @@ public class TypeCreator extends TypeCache
 				al.removeAll(objectMethods);
 			}
 
+
+			List<Member> newMembers = new ArrayList<Member>();
 			for (String name : al)
 			{
 				int type = 0;
@@ -1014,7 +1018,7 @@ public class TypeCreator extends TypeCache
 									parameters.add(parameter);
 								}
 							}
-							membersList.add(method);
+							newMembers.add(method);
 						}
 					}
 					else
@@ -1036,10 +1040,26 @@ public class TypeCreator extends TypeCache
 							property.setDeprecated(true);
 							property.setVisible(false);
 						}
-						membersList.add(property);
+						newMembers.add(property);
 					}
 				}
 			}
+
+			// Make sure that deprecated methods are added at the end, when multiple methods match, the non-deprecated ones should first be considered.
+			Collections.sort(newMembers, new Comparator<Member>()
+			{
+				public int compare(Member member1, Member member2)
+				{
+					if (member1.isDeprecated() == member2.isDeprecated())
+					{
+						return 0;
+					}
+
+					return member1.isDeprecated() ? 1 : -1;
+				}
+			});
+
+			membersList.addAll(newMembers);
 		}
 	}
 
