@@ -387,21 +387,6 @@ public class VisualFormEditorPartsPage extends Composite
 		ISelection currentPartsSelection = currentParts.getSelection();
 		ISelection availablePartsSelection = availableParts.getSelection();
 
-		Part lastSuperPart = null;
-		if (editor.getForm().getExtendsID() > 0)
-		{
-			// there is a super-form, can only add parts on the bottom
-			Iterator<Part> flattenedParts = flattenedForm.getParts();
-			while (flattenedParts.hasNext())
-			{
-				Part p = flattenedParts.next();
-				if (p.getParent() != editor.getForm() || PersistHelper.isOverrideOrphanElement(p))
-				{
-					lastSuperPart = p;
-				}
-			}
-		}
-
 		Set<Integer> currentTypes = new HashSet<Integer>();
 		List<Part> currentPartList = new ArrayList<Part>();
 
@@ -421,15 +406,15 @@ public class VisualFormEditorPartsPage extends Composite
 
 		// available parts
 		List<Integer> partTypes = new ArrayList<Integer>();
-		addAvailablePartType(Part.TITLE_HEADER, lastSuperPart, currentTypes, partTypes);
-		addAvailablePartType(Part.HEADER, lastSuperPart, currentTypes, partTypes);
-		addAvailablePartType(Part.LEADING_GRAND_SUMMARY, lastSuperPart, currentTypes, partTypes);
-		addAvailablePartType(Part.LEADING_SUBSUMMARY, lastSuperPart, currentTypes, partTypes);
-		addAvailablePartType(Part.BODY, lastSuperPart, currentTypes, partTypes);
-		addAvailablePartType(Part.TRAILING_SUBSUMMARY, lastSuperPart, currentTypes, partTypes);
-		addAvailablePartType(Part.TRAILING_GRAND_SUMMARY, lastSuperPart, currentTypes, partTypes);
-		addAvailablePartType(Part.FOOTER, lastSuperPart, currentTypes, partTypes);
-		addAvailablePartType(Part.TITLE_FOOTER, lastSuperPart, currentTypes, partTypes);
+		addAvailablePartType(Part.TITLE_HEADER, currentTypes, partTypes);
+		addAvailablePartType(Part.HEADER, currentTypes, partTypes);
+		addAvailablePartType(Part.LEADING_GRAND_SUMMARY, currentTypes, partTypes);
+		addAvailablePartType(Part.LEADING_SUBSUMMARY, currentTypes, partTypes);
+		addAvailablePartType(Part.BODY, currentTypes, partTypes);
+		addAvailablePartType(Part.TRAILING_SUBSUMMARY, currentTypes, partTypes);
+		addAvailablePartType(Part.TRAILING_GRAND_SUMMARY, currentTypes, partTypes);
+		addAvailablePartType(Part.FOOTER, currentTypes, partTypes);
+		addAvailablePartType(Part.TITLE_FOOTER, currentTypes, partTypes);
 
 		// keep selection even is a part was overriden/unoverriden (can't simply use part type below because of subsummaries)
 		ISelection newCurrentPartsSelection = currentPartsSelection;
@@ -474,14 +459,8 @@ public class VisualFormEditorPartsPage extends Composite
 	 * @param currentTypes
 	 * @param partTypes
 	 */
-	private void addAvailablePartType(int partType, Part lastSuperPart, Set<Integer> currentTypes, List<Integer> partTypes)
+	private void addAvailablePartType(int partType, Set<Integer> currentTypes, List<Integer> partTypes)
 	{
-		if (lastSuperPart != null && (!lastSuperPart.canBeMoved() && lastSuperPart.getPartType() == partType))
-		{
-			// may not be added to current form
-			return;
-		}
-
 		if (Part.canBeMoved(partType) || !currentTypes.contains(new Integer(partType)))
 		{
 			partTypes.add(new Integer(partType));
