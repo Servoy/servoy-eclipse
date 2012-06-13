@@ -21,6 +21,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -51,11 +52,26 @@ public class ContentInstaller
 	}
 
 	/**
-	 * This should only be called from the SWT UI thread.
+	 * This should only be called from the SWT UI thread. After installing all items it will perform a clean.
 	 */
 	public void installAll()
 	{
-		install(getAllInstallItems());
+		try
+		{
+			install(getAllInstallItems());
+		}
+		finally
+		{
+			clean();
+		}
+	}
+
+	/**
+	 * Disposes of any temporary used resources.
+	 */
+	public void clean()
+	{
+		contentWrapper.cleanTemp();
 	}
 
 	public void install(ArrayList<InstallItem> installItems)
@@ -159,6 +175,8 @@ public class ContentInstaller
 
 	class ContentWrapper
 	{
+		private final static String CONTENT_TMP = ".tmpContent"; //$NON-NLS-1$
+
 		private final File expFileObj;
 		private final Content contentObj;
 		private final File installDir;
@@ -170,6 +188,7 @@ public class ContentInstaller
 			contentObj = content;
 			this.noFilesCopiedYet = noFilesCopiedYet;
 			this.installDir = installDir;
+			cleanTemp();
 		}
 
 		File[] getTeamProjectSets()
@@ -192,6 +211,14 @@ public class ContentInstaller
 			return contentObj.eclipseUpdateSiteURLs;
 		}
 
+		void cleanTemp()
+		{
+			// cleanup any temporary files that we might have created
+			File tmpFolder = new File(installDir, ExtensionUtils.EXPFILES_FOLDER);
+			tmpFolder = new File(tmpFolder, CONTENT_TMP);
+			FileUtils.deleteQuietly(tmpFolder);
+		}
+
 		private File[] getFilesForImportPaths(String[] paths)
 		{
 			File[] files = null;
@@ -204,6 +231,10 @@ public class ContentInstaller
 					File file = new File(installDir, paths[i]);
 					if (noFilesCopiedYet || !file.exists())
 					{
+						// extract file to a temporary location
+						file = new File(installDir, ExtensionUtils.EXPFILES_FOLDER);
+						file = new File(file, CONTENT_TMP);
+						file = new File(file, paths[i]);
 						try
 						{
 							file.getParentFile().mkdirs();
