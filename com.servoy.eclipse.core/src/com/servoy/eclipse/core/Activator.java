@@ -88,6 +88,7 @@ import com.servoy.j2db.IDebugClientHandler;
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.IDesignerCallback;
+import com.servoy.j2db.dataprocessing.ClientInfo;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
@@ -358,30 +359,60 @@ public class Activator extends Plugin
 			{
 				((RemoteDebugScriptEngine)debugReadyClient.getScriptEngine()).getDebugger().close();
 			}
-			SwingUtilities.invokeAndWait(new Runnable() // wait until webserver is stopped for case of
-			// restart (webserver cannot re-start when port is still in use, this may even cause a freeze after restart)
+
+			// shutdown all non-swing clients; no need to run this in AWT EDT
+			try
 			{
-				public void run()
+				List<ClientState> nonSwingApps = getDebugClientHandler().getActiveDebugClients();
+				for (ClientState application : nonSwingApps)
 				{
-					try
-					{
-						if (Settings.getInstance() != null)
-						{
-							List<ClientState> applications = getDebugClientHandler().getActiveDebugClients();
-							for (ClientState application : applications)
-							{
-								application.shutDown(true);
-							}
-							Settings.getInstance().save();
-						}
-						ApplicationServerSingleton.get().shutDown();
-					}
-					catch (Exception e)
-					{
-						ServoyLog.logError(e);
-					}
+					ClientInfo ci = application.getClientInfo();
+					if (ci != null && !Utils.isSwingClient(ci.getApplicationType())) application.shutDown(true);
 				}
-			});
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
+
+			// shutdown swing clients
+			boolean interrupted = false;
+			try
+			{
+				SwingUtilities.invokeAndWait(new Runnable()
+				{
+					public void run()
+					{
+						try
+						{
+							List<ClientState> swingApps = getDebugClientHandler().getActiveDebugClients();
+							for (ClientState application : swingApps)
+							{
+								ClientInfo ci = application.getClientInfo();
+								if (ci != null && Utils.isSwingClient(ci.getApplicationType())) application.shutDown(true);
+							}
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+				});
+			}
+			catch (InterruptedException e)
+			{
+				ServoyLog.logWarning("Interrupted while waiting for clients to shut down on stop. Continuing with server shutdown.", null); //$NON-NLS-1$
+				interrupted = true;
+			}
+
+
+			Settings.getInstance().save();
+
+			// wait until webserver is stopped for case of
+			// restart (webserver cannot re-start when port is still in use, this may even cause a freeze after restart)
+			ApplicationServerSingleton.get().shutDown();
+
+			if (interrupted) Thread.interrupted(); // someone is in a hurry, let callers know about that
 		}
 	}
 
