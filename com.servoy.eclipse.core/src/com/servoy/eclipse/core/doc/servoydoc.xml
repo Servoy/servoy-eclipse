@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -6501,7 +6501,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnAction(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnAction(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnDoubleClickMethod">
@@ -6510,7 +6510,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnDoubleClick(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnDoubleClick(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnRightClickMethod">
@@ -6519,18 +6519,27 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnRightClick(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnRightClick(JSMethod).]]></deprecated>
           <sample/>
         </function>
       </functions>
     </object>
     <object publicName="JSCalculation" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSCalculation">
       <properties>
-        <property name="code" undocumented="true">
+        <property name="code">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The full source code of this method (including doc and function declaration).]]></description>
+          <summary><![CDATA[The full source code of this method (including doc and function declaration).]]></summary>
+          <sample><![CDATA[var calc = solutionModel.getDataSourceNode("db:/example_data/customers").getCalculation("myCalculation");
+calc.code = "function myCalculation() { return 123; }";]]></sample>
         </property>
-        <property name="variableType" undocumented="true">
+        <property name="variableType">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Get or set the sql type of this variable.
+
+Type should be one of JSVariable.DATETIME, JSVariable.TEXT, JSVariable.NUMBER , JSVariable.INTEGER or JSVariable.MEDIA.]]></description>
+          <summary><![CDATA[Get or set the sql type of this variable.]]></summary>
+          <sample/>
         </property>
       </properties>
       <functions>
@@ -9711,7 +9720,7 @@ fieldThree.tabSeq = 1;]]></sample>
         <property deprecated="true" name="text">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #getTitleText()]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by getTitleText()]]></deprecated>
           <sample/>
         </property>
         <property name="titleText">
@@ -9873,7 +9882,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnAction(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnAction(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnDataChangeMethod">
@@ -9882,7 +9891,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnDataChange(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnDataChange(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnFocusGainedMethod">
@@ -9891,7 +9900,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnFocusGained(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnFocusGained(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnFocusLostMethod">
@@ -9900,7 +9909,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnFocusLost(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnFocusLost(JSMethod).]]></deprecated>
           <sample/>
         </function>
       </functions>
@@ -9935,7 +9944,8 @@ myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sampl
         </constant>
         <constant name="EMPTY_FOUNDSET">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description/>
+          <description><![CDATA[Constant used for form namedFoundset property. The form that uses empty namedFoundset will initially have an empty (cleared) foundset.]]></description>
+          <summary><![CDATA[Constant used for form namedFoundset property.]]></summary>
           <sample><![CDATA[// form with empty foundset
 var frmEmpty = solutionModel.newForm('products_empty', 'example_data', 'products', null, true, 640, 480);
 frmEmpty.newLabel("Empty FoundSet",10,10,200,20);
@@ -10222,7 +10232,8 @@ myForm.selectionMode = JSForm.SELECTION_MODE_SINGLE;]]></sample>
         </constant>
         <constant name="SEPARATE_FOUNDSET">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description/>
+          <description><![CDATA[Constant used for form namedFoundset property. The form that uses a separate namedFoundset will initially have an separate (not shared with other forms) foundset.]]></description>
+          <summary><![CDATA[Constant used for form namedFoundset property.]]></summary>
           <sample><![CDATA[// form with separate foundset
 var frmSeparate = solutionModel.newForm('products_separate', 'example_data', 'products', null, true, 640, 480);
 frmSeparate.newLabel("Separate FoundSet",10,10,200,20);
@@ -10260,7 +10271,11 @@ form.defaultPageFormat = solutionModel.createPageFormat(612,792,72,72,72,72,SM_O
         </property>
         <property name="encapsulation">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description/>
+          <description><![CDATA[Get or set the encapsulation level for the form.
+
+Encapsulation is one of constants JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION, JSForm.MODULE_PRIVATE_ENCAPSULATION,
+JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION, JSForm.HIDE_FOUNDSET_ENCAPSULATION, JSForm.HIDE_CONTROLLER_ENCAPSULATION or JSForm.HIDE_ELEMENTS_ENCAPSULATION]]></description>
+          <summary><![CDATA[Get or set the encapsulation level for the form.]]></summary>
           <sample><![CDATA[var myForm = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
 myForm.encapsulation = JSForm.HIDE_CONTROLLER_ENCAPSULATION;]]></sample>
         </property>
@@ -10664,7 +10679,7 @@ if (myForm.selectionMode == JSForm.SELECTION_MODE_MULTI) myForm.selectionMode = 
           <summary><![CDATA[Get the server name used by this form.]]></summary>
           <sample><![CDATA[var form = solutionModel.newForm('myForm',myDatasource,null,true,800,600);
 form.serverName = 'anotherServerName';
-var theServerName = form.getServerName();
+var theServerName = form.serverName;
 application.output(theServerName);]]></sample>
         </property>
         <property name="showInMenu">
@@ -11649,7 +11664,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summary><![CDATA[Creates a new JSField object on the form - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
           <sample><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
 var variable = form.newVariable('myVar', JSVariable.TEXT);
-variable.defaultValue = "'This is a default value (with tripple quotes)!'";
+variable.defaultValue = "'This is a default value (with triple quotes)!'";
 var field = form.newField(variable, JSField.TEXT_FIELD, 100, 100, 200, 200);
 forms['newForm1'].controller.show();]]></sample>
           <parameters>
@@ -11723,7 +11738,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summary><![CDATA[Creates a new JSField object on the form with the displayType of HTML_AREA - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
           <sample><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
 var textProvider = form.newVariable('myVar',JSVariable.TEXT);
-textProvider.defaultValue = "'This is a tripple quotted text!'";
+textProvider.defaultValue = "'This is a triple quoted text!'";
 var htmlArea = myListViewForm.newHtmlArea(textProvider,100,100,100,100);
 forms['newForm1'].controller.show();]]></sample>
           <parameters>
@@ -12335,7 +12350,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summary><![CDATA[Creates a new form JSVariable - based on the name of the variable object and the number type, uses the SolutionModel JSVariable constants.]]></summary>
           <sample><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
 var variable = form.newVariable('myVar', JSVariable.TEXT);
-variable.defaultValue = "'This is a default value (with tripple quotes)!'";
+variable.defaultValue = "'This is a default value (with triple quotes)!'";
 //variable.defaultValue = "{a:'First letter',b:'Second letter'}"
 var field = form.newField(variable, JSField.TEXT_FIELD, 100, 100, 200, 200);
 forms['newForm1'].controller.show();]]></sample>
@@ -12574,7 +12589,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnDeleteAllRecordsCmd(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnDeleteAllRecordsCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnDeleteRecordCmdMethod">
@@ -12583,7 +12598,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnDeleteRecordCmd(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnDeleteRecordCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnDuplicateRecordCmdMethod">
@@ -12592,7 +12607,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnDuplicateRecordCmd(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnDuplicateRecordCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnFindCmdMethod">
@@ -12601,7 +12616,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnFindCmd(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnFindCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnHideMethod">
@@ -12610,7 +12625,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnHideCmd(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnHideCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnInvertRecordsCmdMethod">
@@ -12619,7 +12634,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnInvertRecordsCmd(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnInvertRecordsCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnLoadMethod">
@@ -12628,7 +12643,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnLoad(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnLoad(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnNewRecordCmdMethod">
@@ -12637,7 +12652,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnNewRecordCmd(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnNewRecordCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnNextRecordCmdMethod">
@@ -12646,7 +12661,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnNextRecordCmd(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnNextRecordCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnOmitRecordCmdMethod">
@@ -12655,7 +12670,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnOmitRecordCmd(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnOmitRecordCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnPreviousRecordCmdMethod">
@@ -12664,7 +12679,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnPreviousRecordCmd(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnPreviousRecordCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnPrintPreviewCmdMethod">
@@ -12673,7 +12688,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnPrintPreviewCmd(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnPrintPreviewCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnRecordEditStartMethod">
@@ -12682,7 +12697,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnRecordEditStart(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnRecordEditStart(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnRecordEditStopMethod">
@@ -12691,7 +12706,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnRecordEditStop(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnRecordEditStop(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnRecordSelectionMethod">
@@ -12700,7 +12715,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnRecordSelection(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnRecordSelection(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnSearchCmdMethod">
@@ -12709,7 +12724,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnSearchCmd(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnSearchCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnShowAllRecordsCmdMethod">
@@ -12718,7 +12733,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnShowAllRecordsCmd(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnShowAllRecordsCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnShowMethod">
@@ -12727,7 +12742,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnShow(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnShow(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnShowOmittedRecordsCmdMethod">
@@ -12736,7 +12751,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnShowOmittedRecordsCmd(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnShowOmittedRecordsCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnSortCmdMethod">
@@ -12745,7 +12760,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnSortCmd(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnSortCmd(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnUnLoadMethod">
@@ -12754,7 +12769,7 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnUnLoad(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnUnLoad(JSMethod).]]></deprecated>
           <sample/>
         </function>
       </functions>
@@ -15073,7 +15088,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnAction(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnAction(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnDoubleClickMethod">
@@ -15082,7 +15097,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnDoubleClick(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnDoubleClick(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnRightClickMethod">
@@ -15091,7 +15106,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnRightClick(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnRightClick(JSMethod).]]></deprecated>
           <sample/>
         </function>
       </functions>
@@ -15693,7 +15708,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnAction(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnAction(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnDoubleClickMethod">
@@ -15702,7 +15717,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnDoubleClick(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnDoubleClick(JSMethod).]]></deprecated>
           <sample/>
         </function>
         <function deprecated="true" name="setOnRightClickMethod">
@@ -15711,7 +15726,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by #setOnRightClick(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 4.1, replaced by setOnRightClick(JSMethod).]]></deprecated>
           <sample/>
         </function>
       </functions>
@@ -17367,23 +17382,15 @@ relation.foreignDataSource = 'db:/user_data/another_child_table';]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the server where the foreign table is located.]]></description>
           <summary><![CDATA[The name of the server where the foreign table is located.]]></summary>
-          <deprecated><![CDATA[As of release 5.1, replaced by #getForeignDataSource().]]></deprecated>
-          <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
-relation.primaryTableName = 'another_parent_table';
-relation.primaryServerName = 'user_data';
-relation.foreignTableName = 'another_child_table';
-relation.foreignServerName = 'user_data';]]></sample>
+          <deprecated><![CDATA[As of release 5.1, replaced by foreignDataSource property.]]></deprecated>
+          <sample/>
         </property>
         <property deprecated="true" name="foreignTableName">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the foreign table.]]></description>
           <summary><![CDATA[The name of the foreign table.]]></summary>
-          <deprecated><![CDATA[As of release 5.1, replaced by #getForeignDataSource().]]></deprecated>
-          <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
-relation.primaryTableName = 'another_parent_table';
-relation.primaryServerName = 'user_data';
-relation.foreignTableName = 'another_child_table';
-relation.foreignServerName = 'user_data';]]></sample>
+          <deprecated><![CDATA[As of release 5.1, replaced by foreignDataSource property.]]></deprecated>
+          <sample/>
         </property>
         <property name="initialSort">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -17426,7 +17433,7 @@ relation.foreignDataSource = 'db:/user_data/another_child_table';]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the server where the primary table is located.]]></description>
           <summary><![CDATA[The name of the server where the primary table is located.]]></summary>
-          <deprecated><![CDATA[As of release 5.1, replaced by #getPrimaryDataSource().]]></deprecated>
+          <deprecated><![CDATA[As of release 5.1, replaced by primaryDataSource property.]]></deprecated>
           <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
 relation.primaryTableName = 'another_parent_table';
 relation.primaryServerName = 'user_data';
@@ -17437,12 +17444,8 @@ relation.foreignServerName = 'user_data';]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the primary table.]]></description>
           <summary><![CDATA[The name of the primary table.]]></summary>
-          <deprecated><![CDATA[As of release 5.1, replaced by #getPrimaryDataSource().]]></deprecated>
-          <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
-relation.primaryTableName = 'another_parent_table';
-relation.primaryServerName = 'user_data';
-relation.foreignTableName = 'another_child_table';
-relation.foreignServerName = 'user_data';]]></sample>
+          <deprecated><![CDATA[As of release 5.1, replaced by primaryDataSource property.]]></deprecated>
+          <sample/>
         </property>
       </properties>
       <functions>
@@ -18139,12 +18142,8 @@ tabPanel.onChange = onChangeMethod;]]></sample>
         <property deprecated="true" name="onTabChange">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
           <description/>
-          <deprecated><![CDATA[As of release 5.0, replaced by #getOnChange().]]></deprecated>
-          <sample><![CDATA[var onTabChangeMethod = form.newMethod('function onTabChange(previousIndex, event) { application.output("Tab changed from previous index " + previousIndex + " at " + event.getTimestamp()); }');
-var tabPanel = form.newTabPanel('tabs', 10, 10, 620, 460);
-tabPanel.newTab('tab1', 'Child Two', childOne);
-tabPanel.newTab('tab2', 'Child Two', childTwo);
-tabPanel.onTabChange = onTabChangeMethod;]]></sample>
+          <deprecated><![CDATA[As of release 5.0, replaced by onChange property.]]></deprecated>
+          <sample/>
         </property>
         <property name="printSliding">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -18350,7 +18349,7 @@ application.output(button_uuid.toString());]]></sample>
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.j2db.scripting.solutionmodel.JSForm"/>
+            <argumentType typecode="com.servoy.j2db.solutionmodel.ISMForm"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSTab" typecode="com.servoy.j2db.scripting.solutionmodel.JSTab"><![CDATA[A JSTab instance representing the newly created and added tab.]]></return>
           <description><![CDATA[Adds a new tab with the text label and JSForm.]]></description>
@@ -18377,7 +18376,7 @@ tabPanel.newTab('tab2', 'Child Two', childTwo);]]></sample>
             <parameter name="text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The text to be displayed on the new tab.]]></description>
             </parameter>
-            <parameter name="form" type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.scripting.solutionmodel.JSForm">
+            <parameter name="form" type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.solutionmodel.ISMForm">
               <description><![CDATA[The JSForm instance that should be displayed in the new tab.]]></description>
             </parameter>
           </parameters>
@@ -18386,7 +18385,7 @@ tabPanel.newTab('tab2', 'Child Two', childTwo);]]></sample>
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.j2db.scripting.solutionmodel.JSForm"/>
+            <argumentType typecode="com.servoy.j2db.solutionmodel.ISMForm"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSTab" typecode="com.servoy.j2db.scripting.solutionmodel.JSTab"><![CDATA[A JSTab instance representing the newly created and added tab.]]></return>
@@ -18414,7 +18413,7 @@ tabPanel.newTab('tab2', 'Child Two', childTwo);]]></sample>
             <parameter name="text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The text to be displayed on the new tab.]]></description>
             </parameter>
-            <parameter name="form" type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.scripting.solutionmodel.JSForm">
+            <parameter name="form" type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.solutionmodel.ISMForm">
               <description><![CDATA[The JSForm instance that should be displayed in the new tab.]]></description>
             </parameter>
             <parameter name="relation" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
@@ -18469,7 +18468,7 @@ tabPanel.removeTab('tab1');]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 5.0, replaced by #setOnChange(JSMethod).]]></deprecated>
+          <deprecated><![CDATA[As of release 5.0, replaced by onChange property.]]></deprecated>
           <sample/>
         </function>
       </functions>
@@ -38829,7 +38828,7 @@ return true]]></sample>
         <function name="cloneComponent">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.j2db.scripting.solutionmodel.JSComponent"/>
+            <argumentType typecode="com.servoy.j2db.solutionmodel.ISMComponent"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSComponent"><![CDATA[the exact copy of the given component]]></return>
           <description><![CDATA[Makes an exact copy of the given component (JSComponent/JSField/JSLabel) and gives it a new name.]]></description>
@@ -38842,7 +38841,7 @@ var clone = solutionModel.cloneComponent("clonedField",field);]]></sample>
             <parameter name="newName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the new name of the cloned component]]></description>
             </parameter>
-            <parameter name="component" type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSComponent">
+            <parameter name="component" type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.solutionmodel.ISMComponent">
               <description><![CDATA[the component to clone]]></description>
             </parameter>
           </parameters>
@@ -38850,8 +38849,8 @@ var clone = solutionModel.cloneComponent("clonedField",field);]]></sample>
         <function name="cloneComponent">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.j2db.scripting.solutionmodel.JSComponent"/>
-            <argumentType typecode="com.servoy.j2db.scripting.solutionmodel.JSForm"/>
+            <argumentType typecode="com.servoy.j2db.solutionmodel.ISMComponent"/>
+            <argumentType typecode="com.servoy.j2db.solutionmodel.ISMForm"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSComponent"><![CDATA[the exact copy of the given component]]></return>
           <description><![CDATA[Makes an exact copy of the given component (JSComponent/JSField/JSLabel), gives it a new name and moves it to a new parent form, specified as a parameter.]]></description>
@@ -38868,10 +38867,10 @@ forms["targetForm"].controller.show();]]></sample>
             <parameter name="newName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the new name of the cloned component]]></description>
             </parameter>
-            <parameter name="component" type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSComponent">
+            <parameter name="component" type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.solutionmodel.ISMComponent">
               <description><![CDATA[the component to clone]]></description>
             </parameter>
-            <parameter name="newParentForm" type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.scripting.solutionmodel.JSForm">
+            <parameter name="newParentForm" type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.solutionmodel.ISMForm">
               <description><![CDATA[the new parent form]]></description>
             </parameter>
           </parameters>
@@ -38879,7 +38878,7 @@ forms["targetForm"].controller.show();]]></sample>
         <function name="cloneForm">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.j2db.scripting.solutionmodel.JSForm"/>
+            <argumentType typecode="com.servoy.j2db.solutionmodel.ISMForm"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.scripting.solutionmodel.JSForm"><![CDATA[a JSForm]]></return>
           <description><![CDATA[Makes an exact copy of the given form and gives it the new name.]]></description>
@@ -38896,7 +38895,7 @@ forms["clonedForm"].controller.show();]]></sample>
             <parameter name="newName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the new name for the form clone]]></description>
             </parameter>
-            <parameter name="jsForm" type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.scripting.solutionmodel.JSForm">
+            <parameter name="jsForm" type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.solutionmodel.ISMForm">
               <description><![CDATA[the form to be cloned]]></description>
             </parameter>
           </parameters>
@@ -39328,17 +39327,7 @@ form.borderType = solutionModel.createTitledBorder('Test',solutionModel.createFo
           <description><![CDATA[Get an existing calculation for the given name and datasource.]]></description>
           <summary><![CDATA[Get an existing calculation for the given name and datasource.]]></summary>
           <deprecated><![CDATA[replaced with solutionModel.getDataSourceNode(dataSource).getCalculation(name)]]></deprecated>
-          <sample><![CDATA[var calc = solutionModel.newCalculation("function myCalculation() { return 123; }", JSVariable.INTEGER, "db:/example_data/customers");
-var calc2 = solutionModel.newCalculation("function myCalculation2() { return '20'; }", "db:/example_data/customers");
-var calc3 = solutionModel.newCalculation("function myCalculation3() { return 'Hello World!'; }",	JSVariable.TEXT, "db:/example_data/employees");
-
-var c = solutionModel.getCalculation("myCalculation","db:/example_data/customers");
-application.output("Name: " + c.getName() + ", Stored: " + c.isStored());
-
-var allCalcs = solutionModel.getCalculations("db:/example_data/customers");
-for (var i = 0; i < allCalcs.length; i++) {
-	application.output(allCalcs[i]);
-}]]></sample>
+          <sample/>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The name of the calculation]]></description>
@@ -39356,17 +39345,7 @@ for (var i = 0; i < allCalcs.length; i++) {
           <description><![CDATA[Gets all the calculations for the given datasource.]]></description>
           <summary><![CDATA[Gets all the calculations for the given datasource.]]></summary>
           <deprecated><![CDATA[replaced with solutionModel.getDataSourceNode(dataSource).getCalculations()]]></deprecated>
-          <sample><![CDATA[var calc = solutionModel.newCalculation("function myCalculation() { return 123; }", JSVariable.INTEGER, "db:/example_data/customers");
-var calc2 = solutionModel.newCalculation("function myCalculation2() { return '20'; }", "db:/example_data/customers");
-var calc3 = solutionModel.newCalculation("function myCalculation3() { return 'Hello World!'; }",	JSVariable.TEXT, "db:/example_data/employees");
-
-var c = solutionModel.getCalculation("myCalculation","db:/example_data/customers");
-application.output("Name: " + c.getName() + ", Stored: " + c.isStored());
-
-var allCalcs = solutionModel.getCalculations("db:/example_data/customers");
-for (var i = 0; i < allCalcs.length; i++) {
-	application.output(allCalcs[i]);
-}]]></sample>
+          <sample/>
           <parameters>
             <parameter name="datasource" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The datasource the calculations belong to.]]></description>
@@ -39737,17 +39716,7 @@ else it will default to JSVariable.TEXT;]]></description>
           <summary><![CDATA[Creates a new calculation for the given code, the type will be the column where it could be build on (if name is a column name),
 else it will default to JSVariable.]]></summary>
           <deprecated><![CDATA[replaced with solutionModel.getDataSourceNode(dataSource).newCalculation(code)]]></deprecated>
-          <sample><![CDATA[var calc = solutionModel.newCalculation("function myCalculation() { return 123; }", JSVariable.INTEGER, "db:/example_data/customers");
-var calc2 = solutionModel.newCalculation("function myCalculation2() { return '20'; }", "db:/example_data/customers");
-var calc3 = solutionModel.newCalculation("function myCalculation3() { return 'Hello World!'; }",	JSVariable.TEXT, "db:/example_data/employees");
-
-var c = solutionModel.getCalculation("myCalculation","db:/example_data/customers");
-application.output("Name: " + c.getName() + ", Stored: " + c.isStored());
-
-var allCalcs = solutionModel.getCalculations("db:/example_data/customers");
-for (var i = 0; i < allCalcs.length; i++) {
-	application.output(allCalcs[i]);
-}]]></sample>
+          <sample/>
           <parameters>
             <parameter name="code" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The code of the calculation, this must be a full function declaration.]]></description>
@@ -39760,7 +39729,7 @@ for (var i = 0; i < allCalcs.length; i++) {
         <function name="newForm">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.j2db.scripting.solutionmodel.JSForm"/>
+            <argumentType typecode="com.servoy.j2db.solutionmodel.ISMForm"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.scripting.solutionmodel.JSForm"><![CDATA[a new JSForm object]]></return>
           <description><![CDATA[Creates a new form with the given JSForm as its super form.]]></description>
@@ -39782,7 +39751,7 @@ forms['mySubForm'].controller.show();]]></sample>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The name of the new form]]></description>
             </parameter>
-            <parameter name="superForm" type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.scripting.solutionmodel.JSForm">
+            <parameter name="superForm" type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.solutionmodel.ISMForm">
               <description><![CDATA[the super form that will extended from, see JSform.setExtendsForm();]]></description>
             </parameter>
           </parameters>
@@ -40355,7 +40324,7 @@ forms.myForm.controller.recreateUI();]]></sample>
         </function>
         <function name="wrapMethodWithArguments" varargs="true">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
+            <argumentType typecode="com.servoy.j2db.solutionmodel.ISMMethod"/>
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"><![CDATA[a JSMethod]]></return>
@@ -40370,7 +40339,7 @@ var quotedString = "'"+utils.stringReplace(str, "'", "\\'")+"'"
 // list all arguments the method has, use nulls for fixed arguments (like event)
 button.onAction = solutionModel.wrapMethodWithArguments(method, [null, true, 42, quotedString])]]></sample>
           <parameters>
-            <parameter name="method" type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod">
+            <parameter name="method" type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.solutionmodel.ISMMethod">
               <description><![CDATA[JSMethod to be assigned to an event]]></description>
             </parameter>
             <parameter name="args" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">

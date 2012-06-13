@@ -105,7 +105,7 @@ public class JSDeveloperSolutionModel
 		}
 		else if (form instanceof JSForm)
 		{
-			name = ((JSForm)form).js_getName();
+			name = ((JSForm)form).getName();
 		}
 		if (name != null)
 		{
@@ -169,7 +169,7 @@ public class JSDeveloperSolutionModel
 		}
 		else if (form instanceof JSForm)
 		{
-			name = ((JSForm)form).js_getName();
+			name = ((JSForm)form).getName();
 		}
 		else if (form instanceof IForm)
 		{

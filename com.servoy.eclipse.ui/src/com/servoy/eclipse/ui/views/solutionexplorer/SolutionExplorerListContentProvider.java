@@ -122,7 +122,12 @@ import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
+import com.servoy.j2db.scripting.solutionmodel.JSComponent;
+import com.servoy.j2db.scripting.solutionmodel.JSMethod;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.solutionmodel.ISMComponent;
+import com.servoy.j2db.solutionmodel.ISMForm;
+import com.servoy.j2db.solutionmodel.ISMMethod;
 import com.servoy.j2db.ui.IComponent;
 import com.servoy.j2db.ui.IScriptRenderMethods;
 import com.servoy.j2db.ui.IScriptRenderMethodsWithFormat;
@@ -203,6 +208,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		TYPES.put(IDataSet.class.getSimpleName(), "JSDataSet"); //$NON-NLS-1$ 
 		TYPES.put(Scriptable.class.getSimpleName(), "Object"); //$NON-NLS-1$ 
 		TYPES.put(JSMap.class.getSimpleName(), "Object"); //$NON-NLS-1$
+		TYPES.put(ISMMethod.class.getSimpleName(), JSMethod.class.getSimpleName());
+		TYPES.put(ISMForm.class.getSimpleName(), com.servoy.j2db.scripting.solutionmodel.JSForm.class.getSimpleName());
+		TYPES.put(ISMComponent.class.getSimpleName(), JSComponent.class.getSimpleName());
+
 		Method[] methods = Object.class.getMethods();
 		for (Method method : methods)
 		{
