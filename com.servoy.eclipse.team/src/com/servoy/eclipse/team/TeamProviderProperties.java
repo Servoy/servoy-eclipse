@@ -22,6 +22,7 @@ import java.util.Properties;
 
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
+import org.eclipse.equinox.security.storage.StorageException;
 
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.util.Debug;
@@ -139,7 +140,7 @@ public class TeamProviderProperties
 			String[] keys = securePreferences.keys();
 			if (keys != null && keys.length > 0)
 			{
-				setServerAddress(securePreferences.get(SERVER_ADDRESS_KEY, "localhost"));
+				setServerAddress(securePreferences.get(SERVER_ADDRESS_KEY, RepositoryAccessPoint.LOCALHOST));
 				String uuid = securePreferences.get(IRepository.REPOSITORY_UUID_PROPERTY_NAME, null);
 				if (uuid == null)
 				{
@@ -182,7 +183,7 @@ public class TeamProviderProperties
 		try
 		{
 			prop.load(new FileInputStream(teamProviderPropertyFile));
-			setServerAddress(prop.getProperty(SERVER_ADDRESS_KEY, "localhost"));
+			setServerAddress(prop.getProperty(SERVER_ADDRESS_KEY, RepositoryAccessPoint.LOCALHOST));
 			setRepositoryUUID(prop.getProperty(IRepository.REPOSITORY_UUID_PROPERTY_NAME));
 			setUser(prop.getProperty(USER_KEY));
 			setPassword(prop.getProperty(PASSWORD_KEY));
@@ -207,7 +208,17 @@ public class TeamProviderProperties
 			securePreferences.put(SERVER_ADDRESS_KEY, getServerAddress(), false);
 			securePreferences.put(IRepository.REPOSITORY_UUID_PROPERTY_NAME, getRepositoryUUID(), false);
 			securePreferences.put(USER_KEY, getUser(), false);
-			securePreferences.put(PASSWORD_KEY, getPassword(), true);
+			try
+			{
+				// only secure pwd for remote connections, as for localhost it is not used/needed
+				securePreferences.put(PASSWORD_KEY, getPassword(), !RepositoryAccessPoint.LOCALHOST.equals(getServerAddress()));
+			}
+			catch (StorageException ex1)
+			{
+				// error during encryption of passwd,
+				// skip saving this then
+				Debug.error(ex1);
+			}
 			securePreferences.put(SOLUTION_NAME_KEY, getSolutionName(), false);
 			securePreferences.put(SOLUTION_VERSION_KEY, String.valueOf(getSolutionVersion()), false);
 			String ph = getProtectionPasswordHash();

@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.team.ui;
 
 import org.eclipse.core.runtime.Preferences;
@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.team.Activator;
+import com.servoy.eclipse.team.RepositoryAccessPoint;
 
 
 public class RepositoryWizardPage extends WizardPage
@@ -60,7 +61,7 @@ public class RepositoryWizardPage extends WizardPage
 
 		Util.createLabel(cp, "Server address");
 		txServerAddress = Util.createTextField(cp);
-		txServerAddress.setText(tServerAddress.length() < 1 ? "localhost" : tServerAddress);
+		txServerAddress.setText(tServerAddress.length() < 1 ? RepositoryAccessPoint.LOCALHOST : tServerAddress);
 
 		Util.createLabel(cp, "User");
 		txUser = Util.createTextField(cp);

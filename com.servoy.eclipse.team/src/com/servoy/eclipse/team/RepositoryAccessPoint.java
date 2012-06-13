@@ -48,6 +48,8 @@ import com.servoy.j2db.util.rmi.IReconnectListener;
 
 public class RepositoryAccessPoint
 {
+	public static final String LOCALHOST = "localhost"; //$NON-NLS-1$
+
 	private static final AtomicReference<RepositoryAccessPoint> instanceRef = new AtomicReference<RepositoryAccessPoint>();
 
 	private final String serverAddress;
@@ -66,7 +68,7 @@ public class RepositoryAccessPoint
 	private RepositoryAccessPoint(String serverAddress, String user, String password)
 	{
 		String serverAddr = serverAddress;
-		if (serverAddr == null) serverAddr = "localhost";
+		if (serverAddr == null) serverAddr = LOCALHOST;
 		else serverAddr = serverAddr.trim();
 		int dblDotIdx = serverAddr.indexOf(":");
 		if (dblDotIdx != -1)
@@ -96,7 +98,7 @@ public class RepositoryAccessPoint
 			usedRMIPort = Utils.getAsInteger(settings.getProperty("usedRMIRegistryPort", "1099")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
-		if (serverAddr.equals("localhost"))
+		if (serverAddr.equals(LOCALHOST))
 		{
 			isInprocessApplicationServer = true;
 		}
@@ -274,7 +276,7 @@ public class RepositoryAccessPoint
 	{
 		IApplicationServerAccess asa = null;
 
-		if (serverAddress.equals("localhost"))//try inproces //$NON-NLS-1$
+		if (serverAddress.equals(LOCALHOST))//try inproces 
 		{
 			IApplicationServer as = (IApplicationServer)LocalhostRMIRegistry.getService(IApplicationServer.NAME);
 			try
