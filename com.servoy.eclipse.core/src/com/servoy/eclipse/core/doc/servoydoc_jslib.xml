@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <servoydoc>
   <jslib>
     <object publicName="Array" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Array" scriptingName="Array">
@@ -2802,13 +2802,14 @@ application.output(patt1.ignoreCase);]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[The string on which the pattern match is performed.]]></description>
           <summary><![CDATA[The string on which the pattern match is performed.]]></summary>
+          <deprecated><![CDATA[please refer to https://developer.mozilla.org/en/JavaScript/Reference/Deprecated_and_obsolete_features]]></deprecated>
           <sample><![CDATA[var patt1 = new RegExp('www');	
 var str = 'visit www.servoy.com';	
 patt1.test(str);	
 application.output(RegExp.input);]]></sample>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Deprecated_Features</url>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Deprecated_Features</url>
             </link>
           </links>
         </property>
@@ -2830,13 +2831,14 @@ application.output('Match found. index now at: ' + patt1.lastIndex);]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[The last matched characters.]]></description>
           <summary><![CDATA[The last matched characters.]]></summary>
+          <deprecated><![CDATA[please refer to https://developer.mozilla.org/en/JavaScript/Reference/Deprecated_and_obsolete_features]]></deprecated>
           <sample><![CDATA[var str = 'The rain in Spain stays mainly in the plain';	
 var patt1 = new RegExp('ain');	
 patt1.test(str);	
 application.output('Match found: ' + RegExp.lastMatch);]]></sample>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Deprecated_Features</url>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Deprecated_Features</url>
             </link>
           </links>
         </property>
@@ -2844,13 +2846,14 @@ application.output('Match found: ' + RegExp.lastMatch);]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[The last matched parenthesized substring.]]></description>
           <summary><![CDATA[The last matched parenthesized substring.]]></summary>
+          <deprecated><![CDATA[please refer to https://developer.mozilla.org/en/JavaScript/Reference/Deprecated_Features]]></deprecated>
           <sample><![CDATA[var str = 'Visit www.servoy.com (now)';	
 var patt1 = new RegExp('(now)', 'g');	
 patt1.test(str);	
 application.output('Last parenthesized substring is: ' + RegExp.lastParen);]]></sample>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Deprecated_Features</url>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Deprecated_Features</url>
             </link>
           </links>
         </property>
@@ -2858,13 +2861,14 @@ application.output('Last parenthesized substring is: ' + RegExp.lastParen);]]></
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[The substring in front of the characters most recently matched.]]></description>
           <summary><![CDATA[The substring in front of the characters most recently matched.]]></summary>
+          <deprecated><![CDATA[please refer to https://developer.mozilla.org/en/JavaScript/Reference/Deprecated_Features]]></deprecated>
           <sample><![CDATA[var str = 'The rain in Spain stays mainly in the plain';	
 var patt1 = new RegExp('ain');	
 patt1.test(str);	
 application.output('Text before match: ' + RegExp.leftContext);]]></sample>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Deprecated_Features</url>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Deprecated_Features</url>
             </link>
           </links>
         </property>
@@ -2885,13 +2889,14 @@ application.output(patt1.multiline);]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[The substring after the characters most recently matched]]></description>
           <summary><![CDATA[The substring after the characters most recently matched]]></summary>
+          <deprecated><![CDATA[please refer to https://developer.mozilla.org/en/JavaScript/Reference/Deprecated_Features]]></deprecated>
           <sample><![CDATA[var str = 'The rain in Spain stays mainly in the plain';	
 var patt1 = new RegExp('ain');	
 patt1.test(str);	
 application.output('Text after match: ' + RegExp.rightContext);]]></sample>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Deprecated_Features</url>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Deprecated_Features</url>
             </link>
           </links>
         </property>
@@ -2917,6 +2922,7 @@ application.output('The regular expression is: ' + patt1.source);]]></sample>
           <return type="void" typecode="void"/>
           <description><![CDATA[Change the regular expression.]]></description>
           <summary><![CDATA[Change the regular expression.]]></summary>
+          <deprecated><![CDATA[use only the RegExp constructor (see also https://developer.mozilla.org/en/JavaScript/Reference/Deprecated_and_obsolete_features)]]></deprecated>
           <sample><![CDATA[var str='Visit www.servoy.com'; 
 var patt=new RegExp('soft'); 
 application.output(patt.test(str)==true);

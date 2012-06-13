@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -38002,6 +38002,7 @@ return true]]></sample>
 
 This code is not used.]]></description>
           <summary><![CDATA[Exception code for INVALID_INPUT_FORMAT.]]></summary>
+          <deprecated><![CDATA[This code is not used]]></deprecated>
           <sample/>
         </constant>
         <constant name="INVALID_RESULTSET_ACCESS">
@@ -42169,8 +42170,8 @@ limitations/requirements for sqlstring are:
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[Method to handle old foundset loadRecords calls with ignored argumentsaray.]]></description>
-          <summary><![CDATA[Method to handle old foundset loadRecords calls with ignored argumentsaray.]]></summary>
+          <description><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></description>
+          <summary><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></summary>
           <deprecated><![CDATA[use loadRecords(FoundSet)]]></deprecated>
           <sample/>
           <parameters>
@@ -42228,8 +42229,8 @@ limitations/requirements for sqlstring are:
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[Method to handle old foundset loadRecords calls with ignored argumentsaray.]]></description>
-          <summary><![CDATA[Method to handle old foundset loadRecords calls with ignored argumentsaray.]]></summary>
+          <description><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></description>
+          <summary><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></summary>
           <deprecated><![CDATA[use loadRecords(JSDataSet)]]></deprecated>
           <sample/>
           <parameters>
@@ -42287,8 +42288,8 @@ limitations/requirements for sqlstring are:
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[Method to handle old foundset loadRecords calls with ignored argumentsaray.]]></description>
-          <summary><![CDATA[Method to handle old foundset loadRecords calls with ignored argumentsaray.]]></summary>
+          <description><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></description>
+          <summary><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></summary>
           <deprecated><![CDATA[use loadRecords(UUID)]]></deprecated>
           <sample/>
           <parameters>
@@ -42346,8 +42347,8 @@ limitations/requirements for sqlstring are:
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[Method to handle old foundset loadRecords calls with ignored argumentsaray.]]></description>
-          <summary><![CDATA[Method to handle old foundset loadRecords calls with ignored argumentsaray.]]></summary>
+          <description><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></description>
+          <summary><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></summary>
           <deprecated><![CDATA[use loadRecords(Number)]]></deprecated>
           <sample/>
           <parameters>
