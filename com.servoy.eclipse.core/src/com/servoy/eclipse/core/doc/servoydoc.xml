@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -6103,7 +6103,7 @@ labelOne.mnemonic = 'O';]]></sample>
         <property name="margin">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The margins of the component. They are specified in this order, 
-separated by commas: top, right, bottom, left.]]></description>
+separated by commas: top, left, bottom, right.]]></description>
           <summary><![CDATA[The margins of the component.]]></summary>
           <sample><![CDATA[var label = form.newLabel('Label', 10, 10, 150, 150);
 label.background = 'yellow';
@@ -9551,7 +9551,7 @@ rightAlignedLabel.horizontalAlignment = SM_ALIGNMENT.RIGHT;]]></sample>
         <property name="margin">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The margins of the component. They are specified in this order, 
-separated by commas: top, right, bottom, left.]]></description>
+separated by commas: top, left, bottom, right.]]></description>
           <summary><![CDATA[The margins of the component.]]></summary>
           <sample><![CDATA[var label = form.newLabel('Label', 10, 10, 150, 150);
 label.background = 'yellow';
@@ -13557,6 +13557,21 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
           </parameters>
         </function>
+        <function deprecated="true" name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></description>
+          <summary><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></summary>
+          <deprecated><![CDATA[use loadRecords(FoundSet)]]></deprecated>
+          <sample/>
+          <parameters>
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          </parameters>
+        </function>
         <function name="loadRecords">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
@@ -13626,6 +13641,21 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             <parameter name="dataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
               <description><![CDATA[pkdataset]]></description>
             </parameter>
+          </parameters>
+        </function>
+        <function deprecated="true" name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></description>
+          <summary><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></summary>
+          <deprecated><![CDATA[use loadRecords(JSDataSet)]]></deprecated>
+          <sample/>
+          <parameters>
+            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           </parameters>
         </function>
         <function name="loadRecords">
@@ -13770,6 +13800,21 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             </parameter>
           </parameters>
         </function>
+        <function deprecated="true" name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.util.UUID"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></description>
+          <summary><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></summary>
+          <deprecated><![CDATA[use loadRecords(UUID)]]></deprecated>
+          <sample/>
+          <parameters>
+            <parameter name="uuidpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID"/>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          </parameters>
+        </function>
         <function name="loadRecords">
           <argumentsTypes>
             <argumentType typecode="java.lang.Number"/>
@@ -13839,6 +13884,21 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             <parameter name="numberpk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[single-column pk value]]></description>
             </parameter>
+          </parameters>
+        </function>
+        <function deprecated="true" name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Number"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></description>
+          <summary><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></summary>
+          <deprecated><![CDATA[use loadRecords(Number)]]></deprecated>
+          <sample/>
+          <parameters>
+            <parameter name="numberpk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number"/>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           </parameters>
         </function>
         <function deprecated="true" name="loadRecords">
@@ -14691,7 +14751,7 @@ labelOne.mnemonic = 'O';]]></sample>
         <property name="margin">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The margins of the component. They are specified in this order, 
-separated by commas: top, right, bottom, left.]]></description>
+separated by commas: top, left, bottom, right.]]></description>
           <summary><![CDATA[The margins of the component.]]></summary>
           <sample><![CDATA[var label = form.newLabel('Label', 10, 10, 150, 150);
 label.background = 'yellow';
@@ -15311,7 +15371,7 @@ labelOne.mnemonic = 'O';]]></sample>
         <property name="margin">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The margins of the component. They are specified in this order, 
-separated by commas: top, right, bottom, left.]]></description>
+separated by commas: top, left, bottom, right.]]></description>
           <summary><![CDATA[The margins of the component.]]></summary>
           <sample><![CDATA[var label = form.newLabel('Label', 10, 10, 150, 150);
 label.background = 'yellow';
@@ -24669,6 +24729,21 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
           </parameters>
         </function>
+        <function deprecated="true" name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></description>
+          <summary><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></summary>
+          <deprecated><![CDATA[use loadRecords(FoundSet)]]></deprecated>
+          <sample/>
+          <parameters>
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          </parameters>
+        </function>
         <function name="loadRecords">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
@@ -24738,6 +24813,21 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             <parameter name="dataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
               <description><![CDATA[pkdataset]]></description>
             </parameter>
+          </parameters>
+        </function>
+        <function deprecated="true" name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></description>
+          <summary><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></summary>
+          <deprecated><![CDATA[use loadRecords(JSDataSet)]]></deprecated>
+          <sample/>
+          <parameters>
+            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           </parameters>
         </function>
         <function name="loadRecords">
@@ -24882,6 +24972,21 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             </parameter>
           </parameters>
         </function>
+        <function deprecated="true" name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.util.UUID"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></description>
+          <summary><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></summary>
+          <deprecated><![CDATA[use loadRecords(UUID)]]></deprecated>
+          <sample/>
+          <parameters>
+            <parameter name="uuidpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID"/>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          </parameters>
+        </function>
         <function name="loadRecords">
           <argumentsTypes>
             <argumentType typecode="java.lang.Number"/>
@@ -24951,6 +25056,21 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             <parameter name="numberpk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[single-column pk value]]></description>
             </parameter>
+          </parameters>
+        </function>
+        <function deprecated="true" name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Number"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></description>
+          <summary><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></summary>
+          <deprecated><![CDATA[use loadRecords(Number)]]></deprecated>
+          <sample/>
+          <parameters>
+            <parameter name="numberpk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number"/>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           </parameters>
         </function>
         <function deprecated="true" name="loadRecords">
