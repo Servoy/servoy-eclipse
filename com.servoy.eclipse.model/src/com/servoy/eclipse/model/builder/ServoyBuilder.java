@@ -343,8 +343,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"ColumnForeignTypeProblem", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> COLUMN_INCOMPATIBLE_TYPE_FOR_SEQUENCE = new Pair<String, ProblemSeverity>(
 		"ColumnIncompatibleTypeForSequence", ProblemSeverity.WARNING); //$NON-NLS-1$
-	public final static Pair<String, ProblemSeverity> COLUMN_INSUFFICIENT_LENGTH_FOR_UUID = new Pair<String, ProblemSeverity>(
-		"ColumnInsufficientLengthForUUID", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> COLUMN_INCOMPATIBLE_WITH_UUID = new Pair<String, ProblemSeverity>(
+		"ColumnIncompatbleWithUUID", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> COLUMN_LOOKUP_INVALID = new Pair<String, ProblemSeverity>("ColumnLookupInvalid", ProblemSeverity.WARNING); //$NON-NLS-1$
 
 	// sort problems
@@ -3669,12 +3669,24 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								ServoyMarker mk = MarkerMessages.ColumnIncompatibleTypeForSequence.fill(tableName, column.getName());
 								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INCOMPATIBLE_TYPE_FOR_SEQUENCE, IMarker.PRIORITY_NORMAL, null, null);
 							}
-							else if (column.hasFlag(Column.UUID_COLUMN) &&
-								column.getConfiguredColumnType().getLength() > 0 &&
-								((dataProviderType == IColumnTypes.MEDIA && column.getLength() < 16) || (dataProviderType == IColumnTypes.TEXT && column.getLength() < 36)))
+							if (column.hasFlag(Column.UUID_COLUMN))
 							{
-								ServoyMarker mk = MarkerMessages.ColumnInsufficientLengthForUUID.fill(tableName, column.getName());
-								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INSUFFICIENT_LENGTH_FOR_UUID, IMarker.PRIORITY_NORMAL, null, null);
+								int length = columnHasConvertedType(column) ? 0 : column.getConfiguredColumnType().getLength();
+								boolean compatibleForUUID = false;
+								switch (dataProviderType)
+								{
+									case IColumnTypes.MEDIA :
+										compatibleForUUID = length == 0 || length >= 16;
+										break;
+									case IColumnTypes.TEXT :
+										compatibleForUUID = length == 0 || length >= 36;
+										break;
+								}
+								if (!compatibleForUUID)
+								{
+									ServoyMarker mk = MarkerMessages.ColumnIncompatbleWithUUID.fill(tableName, column.getName());
+									addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INCOMPATIBLE_WITH_UUID, IMarker.PRIORITY_NORMAL, null, null);
+								}
 							}
 							if (column.getSequenceType() == ColumnInfo.DATABASE_IDENTITY && !column.isDatabasePK())
 							{
@@ -4619,6 +4631,30 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 		}
 		return dataType;
+	}
+
+	private boolean columnHasConvertedType(Column column) throws IOException
+	{
+		IServiceProvider serviceProvider = ServoyModelFinder.getServiceProvider();
+		if (serviceProvider != null)
+		{
+			ColumnInfo columnInfo = column.getColumnInfo();
+			if (columnInfo != null)
+			{
+				String converterName = columnInfo.getConverterName();
+				if (converterName != null)
+				{
+					// check type defined by column converter
+					IColumnConverter converter = serviceProvider.getFoundSetManager().getColumnConverterManager().getConverter(converterName);
+					if (converter instanceof ITypedColumnConverter)
+					{
+						int convType = ((ITypedColumnConverter)converter).getToObjectType(ComponentFactory.<String> parseJSonProperties(columnInfo.getConverterProperties()));
+						return convType != Integer.MAX_VALUE;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/**

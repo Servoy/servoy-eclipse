@@ -545,8 +545,8 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 				Messages.ErrorWarningPreferencePage_columnForeignTypeProblem));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.COLUMN_INCOMPATIBLE_TYPE_FOR_SEQUENCE,
 				Messages.ErrorWarningPreferencePage_columnIncompatibleTypeForSequence));
-			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.COLUMN_INSUFFICIENT_LENGTH_FOR_UUID,
-				Messages.ErrorWarningPreferencePage_columnInsufficientLengthForUUID));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.COLUMN_INCOMPATIBLE_WITH_UUID,
+				Messages.ErrorWarningPreferencePage_columnIncompatbleWithUUID));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.COLUMN_LOOKUP_INVALID,
 				Messages.ErrorWarningPreferencePage_columnLookupInvalid));
 		}

@@ -166,6 +166,7 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 			int index = Integer.parseInt(value.toString());
 			String newSeqType = comboSeqTypes[index];
 			int[] types = ColumnInfo.allDefinedSeqTypes;
+			int configuredLength = pi.getConfiguredColumnType().getLength();
 			for (int i : types)
 			{
 				if (ColumnInfo.getSeqDisplayTypeString(i).equals(newSeqType))
@@ -174,7 +175,7 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 					pi.setSequenceType(i);
 					pi.setFlag(Column.UUID_COLUMN, i == ColumnInfo.UUID_GENERATOR);
 					column = pi;
-					int dpType = pi.getDataProviderType();
+					int dpType = Column.mapToDefaultType(pi.getConfiguredColumnType().getSqlType());
 					changeSupport.fireEvent(new ChangeEvent(observable));
 					if (i == ColumnInfo.DATABASE_IDENTITY && i != previousSeqType && pi.getTable().getExistInDB())
 					{
@@ -193,7 +194,8 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 							MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
 								"UUID generator sequence is only supported for text and media column types.");
 						}
-						else if (pi.getLength() > 0 && pi.getLength() < 36)
+						else if (configuredLength > 0 &&
+							((dpType == IColumnTypes.MEDIA && configuredLength < 16) || (dpType == IColumnTypes.TEXT && configuredLength < 36)))
 						{
 							MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
 								"UUID generator column has too small length.");
@@ -211,5 +213,4 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 	{
 		return column;
 	}
-
 }

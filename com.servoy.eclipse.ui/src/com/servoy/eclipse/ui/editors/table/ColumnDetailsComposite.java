@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
+import java.io.IOException;
+
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.PojoObservables;
@@ -59,10 +61,16 @@ import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.views.TreeSelectObservableValue;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.eclipse.ui.wizards.SuggestForeignTypesWizard;
+import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.component.ComponentFormat;
+import com.servoy.j2db.dataprocessing.IColumnConverter;
+import com.servoy.j2db.dataprocessing.ITypedColumnConverter;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.util.Debug;
 
 @SuppressWarnings("nls")
 public class ColumnDetailsComposite extends Composite
@@ -180,16 +188,44 @@ public class ColumnDetailsComposite extends Composite
 		{
 			public void handleEvent(Event event)
 			{
-				if (Column.mapToDefaultType(column.getType()) != IColumnTypes.TEXT && Column.mapToDefaultType(column.getType()) != IColumnTypes.MEDIA)
+				if (uuidCheckBox.getSelection())
 				{
-					UIUtils.reportWarning("Warning", "The column has incompatible type.");
-					uuidCheckBox.setSelection(false);
-				}
-				else if (column.getConfiguredColumnType().getLength() > 0 &&
-					((Column.mapToDefaultType(column.getType()) == IColumnTypes.MEDIA && column.getLength() < 16) || (Column.mapToDefaultType(column.getType()) == IColumnTypes.TEXT && column.getLength() < 36)))
-				{
-					UIUtils.reportWarning("Warning", "The column has invalid length.");
-					uuidCheckBox.setSelection(false);
+					int length = column.getConfiguredColumnType().getLength();
+					int datatype = column.getConfiguredColumnType().getSqlType();
+					// use converted type if available
+					ITypedColumnConverter columnConverter = getColumnConverter(column);
+					if (columnConverter != null)
+					{
+						try
+						{
+							int convType = columnConverter.getToObjectType(ComponentFactory.<String> parseJSonProperties(column.getColumnInfo().getConverterProperties()));
+							if (convType != Integer.MAX_VALUE)
+							{
+								length = 0;
+								datatype = convType;
+							}
+						}
+						catch (IOException e)
+						{
+							Debug.error(e);
+						}
+					}
+
+					boolean compatibleForUUID = false;
+					switch (Column.mapToDefaultType(datatype))
+					{
+						case IColumnTypes.MEDIA :
+							compatibleForUUID = length == 0 || length >= 16;
+							break;
+						case IColumnTypes.TEXT :
+							compatibleForUUID = length == 0 || length >= 36;
+							break;
+					}
+					if (!compatibleForUUID)
+					{
+						UIUtils.reportWarning("Warning", "The column type and/or length are not compatible with UUID (MEDIA:16 or TEXT:36).");
+						uuidCheckBox.setSelection(false);
+					}
 				}
 			}
 		});
@@ -281,6 +317,26 @@ public class ColumnDetailsComposite extends Composite
 
 		setLayout(groupLayout);
 	}
+
+	private static ITypedColumnConverter getColumnConverter(Column column)
+	{
+		ColumnInfo columnInfo = column.getColumnInfo();
+		if (columnInfo != null)
+		{
+			String converterName = columnInfo.getConverterName();
+			if (converterName != null)
+			{
+				// check type defined by column converter
+				IColumnConverter converter = ApplicationServerSingleton.get().getPluginManager().getColumnConverterManager().getConverter(converterName);
+				if (converter instanceof ITypedColumnConverter)
+				{
+					return (ITypedColumnConverter)converter;
+				}
+			}
+		}
+		return null;
+	}
+
 
 	public void refresh()
 	{

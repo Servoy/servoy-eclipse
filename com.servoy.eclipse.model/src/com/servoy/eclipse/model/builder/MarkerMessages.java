@@ -450,8 +450,8 @@ public class MarkerMessages
 		"Table \"{0}\" has column \"{1}\" which is a UUID generator but does not have the UUID flag set.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ColumnIncompatibleTypeForSequence = new ServoyMarker(
 		"Table \"{0}\" has column \"{1}\" which has an incompatible type for its sequence.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
-	public static ServoyMarker ColumnInsufficientLengthForUUID = new ServoyMarker(
-		"Table \"{0}\" has column \"{1}\" marked as UUID, but the length is insufficient (16 for MEDIA, 36 for TEXT).", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
+	public static ServoyMarker ColumnIncompatbleWithUUID = new ServoyMarker(
+		"Table \"{0}\" has column \"{1}\" marked as UUID, but the type and/or length are not compatible with UUID (MEDIA:16 or TEXT:36).", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ColumnDatabaseIdentityProblem = new ServoyMarker(
 		"Table \"{0}\" has column \"{1}\" which is a database identity but is not a primary key in the table.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker ColumnForeignTypeProblem = new ServoyMarker(
