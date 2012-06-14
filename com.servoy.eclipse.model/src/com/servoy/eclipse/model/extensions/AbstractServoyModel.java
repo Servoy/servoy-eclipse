@@ -285,6 +285,11 @@ public abstract class AbstractServoyModel implements IServoyModel
 
 	public void buildActiveProjects(IProgressMonitor m)
 	{
+		buildActiveProjects(m, false);
+	}
+
+	public void buildActiveProjects(IProgressMonitor m, boolean onlyServoyBuild)
+	{
 		try
 		{
 			ServoyProject[] modules = getModulesOfActiveProject();
@@ -299,7 +304,14 @@ public abstract class AbstractServoyModel implements IServoyModel
 					SubMonitor cm = monitor.newChild(10);
 					if (module.getProject() != null)
 					{
-						module.getProject().build(IncrementalProjectBuilder.FULL_BUILD, cm);
+						if (onlyServoyBuild)
+						{
+							module.getProject().build(IncrementalProjectBuilder.FULL_BUILD, ServoyBuilder.BUILDER_ID, null, cm);
+						}
+						else
+						{
+							module.getProject().build(IncrementalProjectBuilder.FULL_BUILD, cm);
+						}
 					}
 				}
 			}
