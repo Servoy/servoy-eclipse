@@ -5657,7 +5657,7 @@ stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sa
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The background color of the component.]]></description>
           <summary><![CDATA[The background color of the component.]]></summary>
-          <deprecated><![CDATA[please refer to JSComponent.background]]></deprecated>
+          <deprecated><![CDATA[the background is handled by the bean class implementation; this solution model property is ignored]]></deprecated>
           <sample><![CDATA[// This property can be used on all types of components.
 // Here it is illustrated only for labels and fields.
 var greenLabel = form.newLabel('Green',10,10,100,50);
@@ -5669,7 +5669,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The type, color and style of border of the component.]]></description>
           <summary><![CDATA[The type, color and style of border of the component.]]></summary>
-          <deprecated><![CDATA[please refer to JSComponent.borderType]]></deprecated>
+          <deprecated><![CDATA[the border type is handled by the bean class implementation; this solution model property is ignored]]></deprecated>
           <sample><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
@@ -5693,7 +5693,7 @@ field.enabled = false;]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The font type of the component.]]></description>
           <summary><![CDATA[The font type of the component.]]></summary>
-          <deprecated><![CDATA[please refer to JSComponent.fontType]]></deprecated>
+          <deprecated><![CDATA[the font type is handled by the bean class implementation; this solution model property is ignored]]></deprecated>
           <sample><![CDATA[var label = form.newLabel('Text here', 10, 50, 100, 20);
 label.fontType = solutionModel.createFont('Times New Roman',1,14);]]></sample>
         </property>
@@ -5701,7 +5701,7 @@ label.fontType = solutionModel.createFont('Times New Roman',1,14);]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The foreground color of the component.]]></description>
           <summary><![CDATA[The foreground color of the component.]]></summary>
-          <deprecated><![CDATA[please refer to JSComponent.foreground]]></deprecated>
+          <deprecated><![CDATA[the foreground is handled by the bean class implementation; this solution model property is ignored]]></deprecated>
           <sample><![CDATA[// This property can be used on all types of components.
 // Here it is illustrated only for labels and fields.
 var labelWithBlueText = form.newLabel('Blue text', 10, 10, 100, 30);
@@ -5767,7 +5767,7 @@ The component can move horizontally or vertically and can grow or shrink in
 height and width, based on its content and the content of neighboring 
 components.]]></description>
           <summary><![CDATA[Enables an element to resize based on its content and/or move when printing.]]></summary>
-          <deprecated><![CDATA[please refer to JSComponent.printSliding]]></deprecated>
+          <deprecated><![CDATA[print sliding is handled by the bean class implementation; this solution model property is ignored]]></deprecated>
           <sample><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
 var slidingLabel = form.newLabel('Some long text here', 10, 10, 5, 5);
 slidingLabel.printSliding = SM_PRINT_SLIDING.GROW_HEIGHT | SM_PRINT_SLIDING.GROW_WIDTH;
@@ -5798,7 +5798,7 @@ intended for labels, then it would be named 'label.fancy'. When specifying
 the class name for a component, the prefix is dropped however. Thus the
 field or the label will have its styleClass property set to 'fancy' only.]]></description>
           <summary><![CDATA[The name of the style class that should be applied to this component.]]></summary>
-          <deprecated><![CDATA[please refer to JSComponent.styleClass]]></deprecated>
+          <deprecated><![CDATA[the stlye class is handled by the bean class implementation; this solution model property is ignored]]></deprecated>
           <sample><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 var style = solutionModel.newStyle('myStyle','field.fancy { background-color: yellow; }');
@@ -5812,7 +5812,7 @@ field.styleClass = 'fancy'; // Then set the style class on the field.]]></sample
 The default value is "false", that is the components 
 are not transparent.]]></description>
           <summary><![CDATA[Flag that tells if the component is transparent or not.]]></summary>
-          <deprecated><![CDATA[please refer to JSComponent.transparent]]></deprecated>
+          <deprecated><![CDATA[transparency is handled by the bean class implementation; this solution model property is ignored]]></deprecated>
           <sample><![CDATA[// Load an image from disk an create a Media object based on it.
 var imageBytes = plugins.file.readFile('d:/ball.jpg');
 var media = solutionModel.newMedia('ball.jpg', imageBytes);
@@ -9792,7 +9792,7 @@ TOP, CENTER or BOTTOM.
 Note that this property does not refer to the vertical alignment of the
 component inside the form.]]></description>
           <summary><![CDATA[The vertical alignment of the text inside the component.]]></summary>
-          <deprecated><![CDATA[please refer to JSLabel.verticalAlignment]]></deprecated>
+          <deprecated><![CDATA[not used (is ignored) on fields]]></deprecated>
           <sample><![CDATA[var topAlignedLabel = form.newLabel('TOP', 400, 10, 50, 300);
 topAlignedLabel.verticalAlignment = SM_ALIGNMENT.TOP;
 var vCenterAlignedLabel = form.newLabel('CENTER', 460, 10, 50, 300);
