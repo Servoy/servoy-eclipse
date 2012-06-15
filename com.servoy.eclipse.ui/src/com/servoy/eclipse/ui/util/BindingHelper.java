@@ -55,7 +55,7 @@ public class BindingHelper
 		return null;
 	}
 
-	public static void addGlobalChangeListener(DataBindingContext bindingContext, IChangeListener lisnter)
+	public static void addGlobalChangeListener(DataBindingContext bindingContext, IChangeListener listener)
 	{
 		if (bindingContext != null)
 		{
@@ -63,7 +63,7 @@ public class BindingHelper
 			while (it.hasNext())
 			{
 				Binding binding = (Binding)it.next();
-				binding.getTarget().addChangeListener(lisnter);
+				binding.getTarget().addChangeListener(listener);
 			}
 		}
 	}
