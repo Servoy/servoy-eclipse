@@ -74,35 +74,39 @@ public class CopyAction extends Action implements ISelectionChangedListener
 		if (sel instanceof StructuredSelection)
 		{
 			StructuredSelection s = (StructuredSelection)sel;
-			Iterator<SimpleUserNode> it = s.iterator();
-			int persistType = -1;
-			while (it.hasNext() && enabled)
+			if (s.size() == 0) enabled = false;
+			else
 			{
-				SimpleUserNode node = it.next();
-				Object realObject = node.getRealObject();
-				if (node.getType() == UserNodeType.SOLUTION && realObject != null)
+				Iterator<SimpleUserNode> it = s.iterator();
+				int persistType = -1;
+				while (it.hasNext() && enabled)
 				{
-					realObject = ((ServoyProject)realObject).getSolution();
-				}
-				if (node.getType() == UserNodeType.FORM_ELEMENTS_ITEM)
-				{
-					realObject = ((Object[])realObject)[0];
-				}
+					SimpleUserNode node = it.next();
+					Object realObject = node.getRealObject();
+					if (node.getType() == UserNodeType.SOLUTION && realObject != null)
+					{
+						realObject = ((ServoyProject)realObject).getSolution();
+					}
+					if (node.getType() == UserNodeType.FORM_ELEMENTS_ITEM)
+					{
+						realObject = ((Object[])realObject)[0];
+					}
 
-				if ((!(realObject instanceof IPersist)) ||
-					(node.getType() != UserNodeType.SOLUTION && node.getType() != UserNodeType.SOLUTION_ITEM &&
-						node.getType() != UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE && node.getType() != UserNodeType.FORM &&
-						node.getType() != UserNodeType.FORM_ELEMENTS_ITEM && node.getType() != UserNodeType.RELATION))
-				{
-					enabled = false;
-				}
-				else
-				{
-					if (persistType != -1 && persistType != ((IPersist)realObject).getTypeID())
+					if ((!(realObject instanceof IPersist)) ||
+						(node.getType() != UserNodeType.SOLUTION && node.getType() != UserNodeType.SOLUTION_ITEM &&
+							node.getType() != UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE && node.getType() != UserNodeType.FORM &&
+							node.getType() != UserNodeType.FORM_ELEMENTS_ITEM && node.getType() != UserNodeType.RELATION))
 					{
 						enabled = false;
 					}
-					persistType = ((IPersist)realObject).getTypeID();
+					else
+					{
+						if (persistType != -1 && persistType != ((IPersist)realObject).getTypeID())
+						{
+							enabled = false;
+						}
+						persistType = ((IPersist)realObject).getTypeID();
+					}
 				}
 			}
 		}

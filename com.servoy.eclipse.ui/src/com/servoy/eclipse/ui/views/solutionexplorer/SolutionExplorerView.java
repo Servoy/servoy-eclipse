@@ -710,7 +710,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		IStatusLineManager slManager = getViewSite().getActionBars().getStatusLineManager();
 		statusBarUpdater = new StatusBarUpdater(slManager);
-		list.addSelectionChangedListener(statusBarUpdater);
+		addListSelectionChangedListener(statusBarUpdater);
 		getSite().setSelectionProvider(fSelectionProviderMediator);
 
 		initializeEditmenuActions();
@@ -805,9 +805,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		textActionHandler.setDeleteAction(deleteActionInTree);
 		textActionHandler.setSelectAllAction(selectAllActionInTree);
 
-		tree.addSelectionChangedListener(cutAction);
-		tree.addSelectionChangedListener(copyAction);
-		tree.addSelectionChangedListener(pasteAction);
+		addTreeSelectionChangedListener(cutAction);
+		addTreeSelectionChangedListener(copyAction);
+		addTreeSelectionChangedListener(pasteAction);
 
 		cutAction.setActionDefinitionId("org.eclipse.ui.edit.cut"); //$NON-NLS-1$
 		copyAction.setActionDefinitionId("org.eclipse.ui.edit.copy"); //$NON-NLS-1$
@@ -1109,16 +1109,12 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		fPartListener.addActiveEditorListener(moveCode);
 		fPartListener.addActiveEditorListener(moveSample);
 
-		moveCode.activeEditorChanged(fPartListener.getActiveEditor());
-		moveSample.activeEditorChanged(fPartListener.getActiveEditor());
-
 		// the contents of the tree are different when a calculation.js file is
 		// being edited;
 		// so we must monitor the active editor
 		SolutionExplorerTreeContentProvider treeContentProvider = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
 		CalculationTracker ct = new CalculationTracker(treeContentProvider);
 		fPartListener.addActiveEditorListener(ct);
-		ct.activeEditorChanged(fPartListener.getActiveEditor());
 
 		// update needed nodes in tree if the editor changes (for example active form highlighting)
 		fPartListener.addActiveEditorListener(new HighlightNodeUpdater(tree, treeContentProvider));
@@ -2630,58 +2626,59 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		setActive = new ActivateSolutionAction();
 
 		// let the actions decide when they are enabled or disabled
-		list.addSelectionChangedListener(moveCode);
-		list.addSelectionChangedListener(moveSample);
-		list.addSelectionChangedListener(deleteActionInList);
-		list.addSelectionChangedListener(openAction);
-		list.addSelectionChangedListener(editVariableAction);
-		list.addSelectionChangedListener(debugMethodAction);
-		list.addSelectionChangedListener(newActionInListSecondary);
-		list.addSelectionChangedListener(renameMediaAction);
-		list.addSelectionChangedListener(searchListAction);
-		list.addSelectionChangedListener(movePersistAction);
-		list.addSelectionChangedListener(duplicatePersistAction);
-		list.addSelectionChangedListener(copyTable);
-		list.addSelectionChangedListener(overrideMethod);
-		list.addSelectionChangedListener(openSqlEditorAction);
-		list.addSelectionChangedListener(hideUnhideTablesAction);
-		list.addSelectionChangedListener(synchronizeTableDataAction);
+		addListSelectionChangedListener(moveCode);
+		addListSelectionChangedListener(moveCode);
+		addListSelectionChangedListener(moveSample);
+		addListSelectionChangedListener(deleteActionInList);
+		addListSelectionChangedListener(openAction);
+		addListSelectionChangedListener(editVariableAction);
+		addListSelectionChangedListener(debugMethodAction);
+		addListSelectionChangedListener(newActionInListSecondary);
+		addListSelectionChangedListener(renameMediaAction);
+		addListSelectionChangedListener(searchListAction);
+		addListSelectionChangedListener(movePersistAction);
+		addListSelectionChangedListener(duplicatePersistAction);
+		addListSelectionChangedListener(copyTable);
+		addListSelectionChangedListener(overrideMethod);
+		addListSelectionChangedListener(openSqlEditorAction);
+		addListSelectionChangedListener(hideUnhideTablesAction);
+		addListSelectionChangedListener(synchronizeTableDataAction);
 
-		tree.addSelectionChangedListener(importMediaFolder);
-		tree.addSelectionChangedListener(synchronizeTablesWithDBAction);
-		tree.addSelectionChangedListener(synchronizeTableDataTreeAction);
-		tree.addSelectionChangedListener(loadRelationsAction);
-		tree.addSelectionChangedListener(newActionInTreePrimary);
-		tree.addSelectionChangedListener(newActionInTreeSecondary);
+		addTreeSelectionChangedListener(importMediaFolder);
+		addTreeSelectionChangedListener(synchronizeTablesWithDBAction);
+		addTreeSelectionChangedListener(synchronizeTableDataTreeAction);
+		addTreeSelectionChangedListener(loadRelationsAction);
+		addTreeSelectionChangedListener(newActionInTreePrimary);
+		addTreeSelectionChangedListener(newActionInTreeSecondary);
 
-		tree.addSelectionChangedListener(newActionInListPrimary);
+		addTreeSelectionChangedListener(newActionInListPrimary);
 
-		tree.addSelectionChangedListener(openActionInTree);
-		tree.addSelectionChangedListener(searchTreeAction);
-		tree.addSelectionChangedListener(deleteActionInTree);
-		tree.addSelectionChangedListener(addAsModuleAction);
-		tree.addSelectionChangedListener(renameActionInTree);
-		tree.addSelectionChangedListener(removeModuleAction);
-		tree.addSelectionChangedListener(addModuleAction);
-		tree.addSelectionChangedListener(setActive);
-		tree.addSelectionChangedListener(replaceActionInTree);
-		tree.addSelectionChangedListener(replaceServerAction);
-		tree.addSelectionChangedListener(openSqlEditorAction);
-		tree.addSelectionChangedListener(duplicateFormAction);
-		tree.addSelectionChangedListener(moveFormAction);
-		tree.addSelectionChangedListener(changeResourcesProjectAction);
-		tree.addSelectionChangedListener(removeSolutionProtectionAction);
-		tree.addSelectionChangedListener(reloadTablesOfServerAction);
-		tree.addSelectionChangedListener(updateServoySequencesAction);
-		tree.addSelectionChangedListener(duplicateServer);
-		tree.addSelectionChangedListener(enableServer);
-		tree.addSelectionChangedListener(toggleFormCommandsActions);
-		tree.addSelectionChangedListener(expandNodeAction);
+		addTreeSelectionChangedListener(openActionInTree);
+		addTreeSelectionChangedListener(searchTreeAction);
+		addTreeSelectionChangedListener(deleteActionInTree);
+		addTreeSelectionChangedListener(addAsModuleAction);
+		addTreeSelectionChangedListener(renameActionInTree);
+		addTreeSelectionChangedListener(removeModuleAction);
+		addTreeSelectionChangedListener(addModuleAction);
+		addTreeSelectionChangedListener(setActive);
+		addTreeSelectionChangedListener(replaceActionInTree);
+		addTreeSelectionChangedListener(replaceServerAction);
+		addTreeSelectionChangedListener(openSqlEditorAction);
+		addTreeSelectionChangedListener(duplicateFormAction);
+		addTreeSelectionChangedListener(moveFormAction);
+		addTreeSelectionChangedListener(changeResourcesProjectAction);
+		addTreeSelectionChangedListener(removeSolutionProtectionAction);
+		addTreeSelectionChangedListener(reloadTablesOfServerAction);
+		addTreeSelectionChangedListener(updateServoySequencesAction);
+		addTreeSelectionChangedListener(duplicateServer);
+		addTreeSelectionChangedListener(enableServer);
+		addTreeSelectionChangedListener(toggleFormCommandsActions);
+		addTreeSelectionChangedListener(expandNodeAction);
 
-		tree.addSelectionChangedListener(openFormEditorAction);
+		addTreeSelectionChangedListener(openFormEditorAction);
 
-		tree.addSelectionChangedListener(createMediaFolderAction);
-		tree.addSelectionChangedListener(renameMediaFolderAction);
+		addTreeSelectionChangedListener(createMediaFolderAction);
+		addTreeSelectionChangedListener(renameMediaFolderAction);
 
 		fRefreshAction = new RefreshAction(this);
 		collapseTreeAction = new CollapseTreeAction(tree);
@@ -2696,6 +2693,24 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		filePropertiesAction = new PropertyDialogAction(getSite(), getSite().getSelectionProvider());
 		filePropertiesAction.setActionDefinitionId(IWorkbenchCommandConstants.FILE_PROPERTIES);
+	}
+
+	/**
+	 * Adds a new listener to the list, and makes it aware of the current selection.
+	 */
+	protected void addListSelectionChangedListener(ISelectionChangedListener listener)
+	{
+		listener.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
+		list.addSelectionChangedListener(listener);
+	}
+
+	/**
+	 * Adds a new listener to the tree, and makes it aware of the current selection.
+	 */
+	protected void addTreeSelectionChangedListener(ISelectionChangedListener listener)
+	{
+		listener.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
+		tree.addSelectionChangedListener(listener);
 	}
 
 	private void hookTreeDoubleClickAction()

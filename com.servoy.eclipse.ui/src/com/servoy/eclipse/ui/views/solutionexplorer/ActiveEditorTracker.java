@@ -80,6 +80,7 @@ public class ActiveEditorTracker implements IPartListener
 	{
 		if (!listeners.contains(l))
 		{
+			l.activeEditorChanged(getActiveEditor());
 			listeners.add(l);
 		}
 	}
