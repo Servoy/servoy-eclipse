@@ -41327,8 +41327,8 @@ var count = utils.stringPatternCount('this is a test','is');]]></sample>
             <parameter name="text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the text to process]]></description>
             </parameter>
-            <parameter name="search" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the string to search]]></description>
+            <parameter name="toSearchFor" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the string to search for]]></description>
             </parameter>
           </parameters>
         </function>
@@ -41360,7 +41360,7 @@ var pos = utils.stringPosition('This is a test','s',1,1)]]></sample>
             <parameter name="textString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the text to process]]></description>
             </parameter>
-            <parameter name="search" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+            <parameter name="toSearchFor" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the string to search]]></description>
             </parameter>
             <parameter name="i_start" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
