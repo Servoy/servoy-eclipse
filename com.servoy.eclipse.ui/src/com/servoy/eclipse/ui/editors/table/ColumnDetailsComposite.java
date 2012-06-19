@@ -436,7 +436,13 @@ public class ColumnDetailsComposite extends Composite
 		{
 			public void handleChange(ChangeEvent event)
 			{
-				c.flagColumnInfoChanged();
+				getShell().getDisplay().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						c.flagColumnInfoChanged();
+					}
+				});
 			}
 		});
 	}
