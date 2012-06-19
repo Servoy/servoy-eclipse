@@ -3203,49 +3203,52 @@ public class TypeCreator extends TypeCache
 			}
 		}
 
+		Type type = null;
 		Table table = null;
-		if (serverName != null)
-		{
-			try
-			{
-				IServer server = fs.getSolution().getRepository().getServer(serverName);
-				if (server != null)
-				{
-					table = (Table)server.getTable(tableName);
-				}
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError(e);
-			}
-			if (table == null) return null;
-		}
-		else
-		{
-			// relation
-			try
-			{
-				Relation relation = fs.getRelation(config);
-				if (relation != null && relation.isValid())
-				{
-					table = relation.getForeignTable();
-					superType = getType(superType.getName() + '<' + table.getDataSource() + '>');
-					table = null;
-				}
-				else return null;
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-			}
-		}
-
-		Type type;
-		if (table == null && config.startsWith("{") && config.endsWith("}"))
+		if (serverName == null && config.startsWith("{") && config.endsWith("}"))
 		{
 			type = getRecordType(config);
 		}
 		else
+		{
+			if (serverName != null)
+			{
+				try
+				{
+					IServer server = fs.getSolution().getRepository().getServer(serverName);
+					if (server != null)
+					{
+						table = (Table)server.getTable(tableName);
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+				if (table == null) return null;
+			}
+			else
+			{
+				// relation
+				try
+				{
+					Relation relation = fs.getRelation(config);
+					if (relation != null && relation.isValid())
+					{
+						table = relation.getForeignTable();
+						superType = getType(superType.getName() + '<' + table.getDataSource() + '>');
+						table = null;
+					}
+					else return null;
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		}
+
+		if (type == null)
 		{
 			type = TypeInfoModelFactory.eINSTANCE.createType();
 		}
