@@ -2190,7 +2190,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				fireSolutionMetaDataChanged(solution);
 				continue;
 			}
-			else if (file.getPath().startsWith(mediaDir.getPath() + File.separator))
+			else if (file.getPath().startsWith(mediaDir.getPath() + File.separator) && file.exists())
 			{
 				String name = file.getPath().substring(mediaDir.getPath().length() + 1).replace('\\', '/');
 				Solution editingSolution = servoyProject.getEditingSolution();

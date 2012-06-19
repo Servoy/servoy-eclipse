@@ -192,6 +192,11 @@ public class DeleteMediaAction extends Action implements ISelectionChangedListen
 									try
 									{
 										wsa.delete(rootObject.getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + mediaFolder.getPath());
+										// for the folders remove we must rebuild the tree
+										if (mediaFolder.getType() == MediaNode.TYPE.FOLDER)
+										{
+											viewer.refreshTreeCompletely();
+										}
 									}
 									catch (IOException ex)
 									{
