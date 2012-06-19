@@ -19,12 +19,15 @@ package com.servoy.eclipse.ui.preferences;
 
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -46,7 +49,8 @@ public class AutomaticNamingStrategies extends PreferencePage implements IWorkbe
 	private Button includeTableNameInEventHandlerRadio;
 
 	private Button defaultLoadedRelationsNaming;
-	private Button includeColumnNameLoadedRelationsRadio;
+	private Button customLoadedRelationsNamingPattern;
+	private Text loadRelationsNamingPatternText;
 
 	public void init(IWorkbench workbench)
 	{
@@ -96,10 +100,33 @@ public class AutomaticNamingStrategies extends PreferencePage implements IWorkbe
 
 		defaultLoadedRelationsNaming = new Button(grpLoadedRelationsNaming, SWT.RADIO);
 		defaultLoadedRelationsNaming.setText("Default naming"); //$NON-NLS-1$
+		defaultLoadedRelationsNaming.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				if (defaultLoadedRelationsNaming.getSelection())
+				{
+					loadRelationsNamingPatternText.setText("");
+				}
+			}
+		});
 
-		includeColumnNameLoadedRelationsRadio = new Button(grpLoadedRelationsNaming, SWT.RADIO);
-		includeColumnNameLoadedRelationsRadio.setText("Include column name for single-item relations"); //$NON-NLS-1$
-		includeColumnNameLoadedRelationsRadio.setToolTipText("Create relations \n<primarytablename>$<fkcolumn>_to_<foreigntablename>");
+		customLoadedRelationsNamingPattern = new Button(grpLoadedRelationsNaming, SWT.RADIO);
+		customLoadedRelationsNamingPattern.setText("Use custom pattern for single-item relations"); //$NON-NLS-1$
+		customLoadedRelationsNamingPattern.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				loadRelationsNamingPatternText.setEnabled(customLoadedRelationsNamingPattern.getSelection());
+				loadRelationsNamingPatternText.setText("${primarytable}_to_${foreigntable}");
+			}
+		});
+
+		loadRelationsNamingPatternText = new Text(grpLoadedRelationsNaming, SWT.NONE);
+		loadRelationsNamingPatternText.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, true));
+		loadRelationsNamingPatternText.setToolTipText("Define custom pattern, use ${primarytable}, ${foreigntable}, ${primarycolumn} and ${foreigncolumn} for substitution");
 
 		initializeFields();
 
@@ -118,8 +145,11 @@ public class AutomaticNamingStrategies extends PreferencePage implements IWorkbe
 		defaultTableEventHandlerNaming.setSelection(prefs.getTableEventHandlerNamingDefault());
 		includeTableNameInEventHandlerRadio.setSelection(prefs.getIncludeTableName());
 
-		defaultLoadedRelationsNaming.setSelection(prefs.getLoadeRelationsNamingDefault());
-		includeColumnNameLoadedRelationsRadio.setSelection(prefs.getLoadeRelationsNamingIncludeColumn());
+		String loadedRelationsNamingPattern = prefs.getLoadedRelationsNamingPattern();
+		defaultLoadedRelationsNaming.setSelection(loadedRelationsNamingPattern == null);
+		customLoadedRelationsNamingPattern.setSelection(!defaultLoadedRelationsNaming.getSelection());
+		loadRelationsNamingPatternText.setText(loadedRelationsNamingPattern == null ? "" : loadedRelationsNamingPattern);
+		loadRelationsNamingPatternText.setEnabled(customLoadedRelationsNamingPattern.getSelection());
 	}
 
 	@Override
@@ -134,7 +164,9 @@ public class AutomaticNamingStrategies extends PreferencePage implements IWorkbe
 		includeTableNameInEventHandlerRadio.setSelection(false);
 
 		defaultLoadedRelationsNaming.setSelection(true);
-		includeColumnNameLoadedRelationsRadio.setSelection(false);
+		customLoadedRelationsNamingPattern.setSelection(false);
+		loadRelationsNamingPatternText.setText("");
+		loadRelationsNamingPatternText.setEnabled(false);
 
 		super.performDefaults();
 	}
@@ -154,12 +186,19 @@ public class AutomaticNamingStrategies extends PreferencePage implements IWorkbe
 		prefs.setTableEventHandlerNaming(includeTableNameInEventHandlerRadio.getSelection() ? DesignerPreferences.TABLE_EVENT_HANDLER_NAMING_INCLUDE_TABLE_NAME
 			: DesignerPreferences.TABLE_EVENT_HANDLER_NAMING_DEFAULT);
 
-		prefs.setLoadeRelationsNaming(includeColumnNameLoadedRelationsRadio.getSelection() ? DesignerPreferences.LOADED_RELATIONS_NAMING_INCLUDE_COLUMN
-			: DesignerPreferences.LOADED_RELATIONS_NAMING_DEFAULT);
+		String loadedRelationsNamingPattern = null;
+		if (customLoadedRelationsNamingPattern.getSelection())
+		{
+			loadedRelationsNamingPattern = loadRelationsNamingPatternText.getText();
+			if (loadedRelationsNamingPattern != null && loadedRelationsNamingPattern.trim().length() == 0)
+			{
+				loadedRelationsNamingPattern = null;
+			}
+		}
+		prefs.setLoadedRelationsNamingPattern(loadedRelationsNamingPattern);
 
 		prefs.save();
 
 		return true;
 	}
-
 }

@@ -81,7 +81,7 @@ public class DesignerPreferences
 	public static final String MARQUEE_SELECT_OUTER_SETTING = "marqueeSelectOuter";
 	public static final String FORM_EVENT_HANDLER_NAMING_SETTING = "formEventHandlerNaming";
 	public static final String TABLE_EVENT_HANDLER_NAMING_SETTING = "tableEventHandlerNaming";
-	public static final String LOADED_RELATIONS_NAMING_SETTING = "loadedRelationsNaming";
+	public static final String LOADED_RELATIONS_NAMING_PATTERN_SETTING = "loadedRelationsNamingPattern";
 	public static final String PK_SEQUENCE_TYPE_SETTING = "primaryKeySequenceType";
 	public static final String SHOW_NAVIGATOR_DEFAULT_SETTING = "showNavigatorDefault";
 
@@ -124,9 +124,6 @@ public class DesignerPreferences
 	public static final int TABLE_EVENT_HANDLER_NAMING_DEFAULT = 0;
 	public static final int TABLE_EVENT_HANDLER_NAMING_INCLUDE_TABLE_NAME = 1;
 
-	public static final int LOADED_RELATIONS_NAMING_DEFAULT = 0;
-	public static final int LOADED_RELATIONS_NAMING_INCLUDE_COLUMN = 1;
-
 	public static final boolean USE_SERVOY_SEQUENCE_DEFAULT = true;
 	public static final boolean USE_DATABASE_SEQUENCE_DEFAULT = false;
 	public static final int PK_SEQUENCE_TYPE_DEFAULT = ColumnInfo.SERVOY_SEQUENCE;
@@ -168,7 +165,14 @@ public class DesignerPreferences
 
 	protected void setProperty(String key, String value)
 	{
-		eclipsePreferences.put(DESIGNER_SETTINGS_PREFIX + key, value);
+		if (value == null)
+		{
+			removeProperty(key);
+		}
+		else
+		{
+			eclipsePreferences.put(DESIGNER_SETTINGS_PREFIX + key, value);
+		}
 	}
 
 	protected void setProperty(String key, int value)
@@ -536,24 +540,14 @@ public class DesignerPreferences
 		return getTableEventHandlerNaming() == TABLE_EVENT_HANDLER_NAMING_INCLUDE_TABLE_NAME;
 	}
 
-	public void setLoadeRelationsNaming(int value)
+	public void setLoadedRelationsNamingPattern(String value)
 	{
-		setProperty(LOADED_RELATIONS_NAMING_SETTING, value);
+		setProperty(LOADED_RELATIONS_NAMING_PATTERN_SETTING, value);
 	}
 
-	public int getLoadeRelationsNaming()
+	public String getLoadedRelationsNamingPattern()
 	{
-		return getProperty(LOADED_RELATIONS_NAMING_SETTING, LOADED_RELATIONS_NAMING_DEFAULT);
-	}
-
-	public boolean getLoadeRelationsNamingDefault()
-	{
-		return getLoadeRelationsNaming() == LOADED_RELATIONS_NAMING_DEFAULT;
-	}
-
-	public boolean getLoadeRelationsNamingIncludeColumn()
-	{
-		return getLoadeRelationsNaming() == LOADED_RELATIONS_NAMING_INCLUDE_COLUMN;
+		return getProperty(LOADED_RELATIONS_NAMING_PATTERN_SETTING, null);
 	}
 
 	public int getPrimaryKeySequenceType()

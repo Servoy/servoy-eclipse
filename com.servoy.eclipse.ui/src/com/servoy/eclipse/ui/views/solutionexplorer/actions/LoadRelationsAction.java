@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -294,10 +296,28 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 									{
 										relationName += "_" + (l + 1);
 									}
-									else if (fkname == null && rel_items_list.size() == 1 && new DesignerPreferences().getLoadeRelationsNamingIncludeColumn())
+									else if (fkname == null && rel_items_list.size() == 1)
 									{
-										// orders$order_id_to_order_details
-										relationName = ptableName + '$' + fcolumnName + "_to_" + ftableName;
+										String loadedRelationsNamingPattern = new DesignerPreferences().getLoadedRelationsNamingPattern();
+										if (loadedRelationsNamingPattern != null && loadedRelationsNamingPattern.trim().length() > 0)
+										{
+											Map<String, String> substitutions = new HashMap<String, String>(4);
+											substitutions.put("primarytable", ptableName);
+											substitutions.put("primarycolumn", pcolumnName);
+											substitutions.put("foreigntable", ftableName);
+											substitutions.put("foreigncolumn", fcolumnName);
+
+											Matcher matcher = Pattern.compile("\\$\\{(\\w+)\\}").matcher(loadedRelationsNamingPattern.trim());
+											StringBuffer stringBuffer = new StringBuffer();
+											while (matcher.find())
+											{
+												String key = matcher.group(1);
+												String value = substitutions.get(key);
+												matcher.appendReplacement(stringBuffer, value == null ? "??" + key + "??" : value);
+											}
+											matcher.appendTail(stringBuffer);
+											relationName = stringBuffer.toString().toLowerCase();
+										}
 									}
 
 									boolean defaultAdd = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getRelation(
