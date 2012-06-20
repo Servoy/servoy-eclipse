@@ -40,6 +40,7 @@ public abstract class BaseSetPropertyQuickFix implements IMarkerResolution
 	private final String uuid;
 	private final String propertyName;
 	private final String displayName;
+	private String label;
 
 	public BaseSetPropertyQuickFix(String solutionName, String uuid, String propertyName, String displayName)
 	{
@@ -55,6 +56,25 @@ public abstract class BaseSetPropertyQuickFix implements IMarkerResolution
 	public String getDisplayName()
 	{
 		return displayName == null ? propertyName : displayName;
+	}
+
+	/**
+	 * @param label the label to set
+	 */
+	public BaseSetPropertyQuickFix setLabel(String label)
+	{
+		this.label = label;
+		return this;
+	}
+
+	public String getLabel()
+	{
+		return label == null ? getDefaultLabel() : label;
+	}
+
+	protected String getDefaultLabel()
+	{
+		return "Set property " + getDisplayName();
 	}
 
 	/**

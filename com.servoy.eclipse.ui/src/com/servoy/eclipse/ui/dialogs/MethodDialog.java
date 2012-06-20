@@ -70,9 +70,6 @@ import com.servoy.j2db.util.Utils;
 @SuppressWarnings("nls")
 public class MethodDialog extends TreeSelectDialog
 {
-	public static final MethodWithArguments METHOD_NONE = new MethodWithArguments(-1, null);
-	public static final MethodWithArguments METHOD_DEFAULT = new MethodWithArguments(0, null);
-
 	// used only in the dialog, are never selected
 	public static final Object FORM_METHODS = new Object();
 	public static final Object SCOPE_METHODS = new Object();
@@ -148,12 +145,12 @@ public class MethodDialog extends TreeSelectDialog
 
 				if (options.includeNone)
 				{
-					lst.add(METHOD_NONE);
+					lst.add(MethodWithArguments.METHOD_NONE);
 				}
 
 				if (options.includeDefault)
 				{
-					lst.add(METHOD_DEFAULT);
+					lst.add(MethodWithArguments.METHOD_DEFAULT);
 				}
 
 				int n = 0;

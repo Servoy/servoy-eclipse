@@ -29,6 +29,7 @@ import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.ScopesUtils;
@@ -100,7 +101,10 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				String uuid = (String)marker.getAttribute("Uuid");
 				String dataSource = (String)marker.getAttribute("DataSource");
 
-				resolutions.add(new ClearPropertyQuickFix(solName, uuid, eventName, eventName));
+				BaseSetPropertyQuickFix quickfix = type.equals(ServoyBuilder.INVALID_EVENT_METHOD) ? new SetPropertyQuickFix(solName, uuid, eventName,
+					eventName, MethodWithArguments.METHOD_NONE) : new ClearPropertyQuickFix(solName, uuid, eventName, eventName);
+				quickfix.setLabel("Clear property " + quickfix.getDisplayName());
+				resolutions.add(quickfix);
 				resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, null, eventName, IRepository.FORMS, "form"));
 				resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, null, eventName, IRepository.SOLUTIONS, "global"));
 				if (dataSource != null) resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName, IRepository.TABLENODES,

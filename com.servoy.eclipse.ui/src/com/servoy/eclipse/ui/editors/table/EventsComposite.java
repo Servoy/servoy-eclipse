@@ -48,7 +48,6 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.labelproviders.AccesCheckingContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
@@ -379,7 +378,7 @@ public class EventsComposite extends Composite
 			{
 				for (EventNodeType tp : EventNodeType.values())
 				{
-					children.add(new EventNode(tp, tableNode == null ? MethodDialog.METHOD_DEFAULT : new MethodWithArguments(
+					children.add(new EventNode(tp, tableNode == null ? MethodWithArguments.METHOD_DEFAULT : new MethodWithArguments(
 						((Integer)tableNode.getProperty(tp.getProperty().getPropertyName())).intValue(), tableNode.getTable()), solution, table));
 				}
 			}

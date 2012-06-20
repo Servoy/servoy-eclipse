@@ -29,7 +29,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodListOptions;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.editors.MethodCellEditor;
@@ -249,7 +248,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 
 				int methodId;
 				IPersist persist = persistContext.getPersist();
-				if (MethodDialog.METHOD_DEFAULT.equals(mwa) && persist instanceof Form && ((Form)persist).getExtendsID() > 0)
+				if (MethodWithArguments.METHOD_DEFAULT.equals(mwa) && persist instanceof Form && ((Form)persist).getExtendsID() > 0)
 				{
 					// look for method in superform
 					Form flattenedForm = ModelUtils.getEditingFlattenedSolution(persist).getFlattenedForm(persist);

@@ -24,7 +24,6 @@ import org.eclipse.swt.graphics.Font;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
-import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.MethodWithArguments.UnresolvedMethodWithArguments;
@@ -80,12 +79,12 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 
 	public static String getMethodText(MethodWithArguments mwa, PersistContext persistContext, boolean showPrefix, boolean showNoneForDefault)
 	{
-		if (MethodDialog.METHOD_DEFAULT.equals(mwa))
+		if (MethodWithArguments.METHOD_DEFAULT.equals(mwa))
 		{
 			return showNoneForDefault ? Messages.LabelNone : Messages.LabelDefault;
 		}
 
-		if (MethodDialog.METHOD_NONE.equals(mwa))
+		if (MethodWithArguments.METHOD_NONE.equals(mwa))
 		{
 			return Messages.LabelNone;
 		}
@@ -148,7 +147,7 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 
 	public Font getFont(Object value)
 	{
-		if (MethodDialog.METHOD_DEFAULT.equals(value) || MethodDialog.METHOD_NONE.equals(value))
+		if (MethodWithArguments.METHOD_DEFAULT.equals(value) || MethodWithArguments.METHOD_NONE.equals(value))
 		{
 			return FontResource.getDefaultFont(SWT.BOLD, -1);
 		}

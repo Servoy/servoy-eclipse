@@ -31,6 +31,9 @@ import com.servoy.j2db.util.SafeArrayList;
  */
 public class MethodWithArguments
 {
+	public static final MethodWithArguments METHOD_NONE = new MethodWithArguments(-1, null);
+	public static final MethodWithArguments METHOD_DEFAULT = new MethodWithArguments(0, null);
+
 	public final int methodId;
 	public final SafeArrayList<Object> arguments;
 	public final ITable table;

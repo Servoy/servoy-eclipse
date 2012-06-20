@@ -45,7 +45,8 @@ public class ResolveUuidRelationNameQuickFix extends BaseSetPropertyQuickFix
 		super(solutionName, uuid, propertyName, displayName);
 	}
 
-	public String getLabel()
+	@Override
+	protected String getDefaultLabel()
 	{
 		return "Resolve " + getDisplayName() + " from uuid.";
 	}

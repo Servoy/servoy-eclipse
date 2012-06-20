@@ -24,7 +24,6 @@ import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.TableViewer;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodListOptions;
 import com.servoy.eclipse.ui.editors.MethodCellEditor;
 import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
@@ -110,7 +109,7 @@ public class RelayEditorProvider implements IRelayEditorProvider
 			{
 				if (propertyDescriptor.getType() == IPropertyDescriptor.GLOBAL_METHOD)
 				{
-					realValue = value instanceof MethodWithArguments ? value : MethodDialog.METHOD_NONE;
+					realValue = value instanceof MethodWithArguments ? value : MethodWithArguments.METHOD_NONE;
 					if (value instanceof String)
 					{
 						ScriptMethod scriptMethod = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getScriptMethod(null,

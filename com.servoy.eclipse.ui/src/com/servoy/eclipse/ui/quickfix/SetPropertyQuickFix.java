@@ -1,5 +1,5 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2010 Servoy BV
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2012 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -20,27 +20,24 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 
 /**
- * Quickfix for properties by resetting them.
+ * Quickfix for properties by assigning a value.
  * 
  * @author rgansevles
  *
  */
-public class ClearPropertyQuickFix extends BaseSetPropertyQuickFix
+public class SetPropertyQuickFix extends BaseSetPropertyQuickFix
 {
-	public ClearPropertyQuickFix(String solutionName, String uuid, String propertyName, String displayName)
+	private final Object value;
+
+	public SetPropertyQuickFix(String solutionName, String uuid, String propertyName, String displayName, Object value)
 	{
 		super(solutionName, uuid, propertyName, displayName);
-	}
-
-	@Override
-	protected String getDefaultLabel()
-	{
-		return "Clear property " + getDisplayName();
+		this.value = value;
 	}
 
 	@Override
 	protected void setPropertyValue(IPropertySource propertySource)
 	{
-		propertySource.resetPropertyValue(getPropertyName());
+		propertySource.setPropertyValue(getPropertyName(), value);
 	}
 }
