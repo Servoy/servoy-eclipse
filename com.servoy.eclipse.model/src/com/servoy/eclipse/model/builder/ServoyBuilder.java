@@ -1413,13 +1413,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						try
 						{
 							final Map<String, Method> methods = ((EclipseRepository)ApplicationServerSingleton.get().getDeveloperRepository()).getGettersViaIntrospection(o);
-							Iterator<ContentSpec.Element> iterator = ((EclipseRepository)ApplicationServerSingleton.get().getDeveloperRepository()).getContentSpec().getPropertiesForObjectType(
-								o.getTypeID());
-							while (iterator.hasNext())
+							for (ContentSpec.Element element : Utils.iterate(((EclipseRepository)ApplicationServerSingleton.get().getDeveloperRepository()).getContentSpec().getPropertiesForObjectType(
+								o.getTypeID())))
 							{
-								final ContentSpec.Element element = iterator.next();
 								// Don't set meta data properties.
 								if (element.isMetaData() || element.isDeprecated()) continue;
+
+								if (o instanceof AbstractBase && !((AbstractBase)o).hasProperty(element.getName()))
+								{
+									// property is not defined on object itself, check will be done on super element that defines the property
+									continue;
+								}
+
 								// Get default property value as an object.
 								final int typeId = element.getTypeID();
 
