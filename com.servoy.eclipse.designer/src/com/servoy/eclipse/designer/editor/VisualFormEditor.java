@@ -47,6 +47,7 @@ import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
@@ -58,7 +59,6 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.ITabbedEditor;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Field;
@@ -500,7 +500,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 			if (changed.getTypeID() == IRepository.VALUELISTS)
 			{
 				ValueList valueList = (ValueList)changed;
-				ComponentFactory.flushValueList(valueList);
+				Activator.getDefault().getDebugClientHandler().flushValueList(valueList);
 				for (Form f : formHierarchy)
 				{
 					Iterator<Field> formFieldsIte = f.getFields();
