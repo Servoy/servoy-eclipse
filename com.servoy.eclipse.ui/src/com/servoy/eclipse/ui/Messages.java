@@ -167,11 +167,9 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_tooManyColumns;
 	public static String ErrorWarningPreferencePage_tooManyTabsPortals;
 	public static String ErrorWarningPreferencePageDescription;
-	public static String ErrorWarningPreferencePage_relationPrimaryServerWithProblems;
 	public static String ErrorWarningPreferencePage_relationPrimaryServerDuplicate;
 	public static String ErrorWarningPreferencePage_relationPrimaryTableNotFound;
 	public static String ErrorWarningPreferencePage_relationPrimaryTableWithoutPK;
-	public static String ErrorWarningPreferencePage_relationForeignServerWithProblems;
 	public static String ErrorWarningPreferencePage_relationForeignServerDuplicate;
 	public static String ErrorWarningPreferencePage_relationForeignTableNotFound;
 	public static String ErrorWarningPreferencePage_relationForeignTableWithoutPK;
@@ -182,7 +180,6 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_relationItemForeignDataproviderNotFound;
 	public static String ErrorWarningPreferencePage_relationItemUUIDProblem;
 	public static String ErrorWarningPreferencePage_relationItemTypeProblem;
-	public static String ErrorWarningPreferencePage_relationGenericError;
 	public static String ErrorWarningPreferencePage_valuelistDBWithCustomValues;
 	public static String ErrorWarningPreferencePage_valuelistDBNotTableOrRelation;
 	public static String ErrorWarningPreferencePage_valuelistDBMalformedTableDefinition;
@@ -197,10 +194,6 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_valuelistInvalidCustomValues;
 	public static String ErrorWarningPreferencePage_valuelistGlobalMethodNotFound;
 	public static String ErrorWarningPreferencePage_valuelistGlobalMethodNotAccessible;
-	public static String ErrorWarningPreferencePage_valuelistTypeUnknown;
-	public static String ErrorWarningPreferencePage_valuelistGenericError;
-	public static String ErrorWarningPreferencePage_referencesToMultipleResources;
-	public static String ErrorWarningPreferencePage_noResourceReference;
 	public static String ErrorWarningPreferencePage_propertyMultipleMethodsOnSameTable;
 	public static String ErrorWarningPreferencePage_serverMissingDriver;
 	public static String ErrorWarningPreferencePage_dataproviderMissingConverter;
@@ -208,15 +201,6 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_moduleDifferentResourceProject;
 	public static String ErrorWarningPreferencePage_loginFormWithDatasourceInLoginSolution;
 	public static String ErrorWarningPreferencePage_deprecatedPropertyUsageProblem;
-	public static String ErrorWarningPreferencePage_duplicationUUIDDuplicate;
-	public static String ErrorWarningPreferencePage_duplicationDuplicateEntityFound;
-	public static String ErrorWarningPreferencePage_DBIBadDBInfo;
-	public static String ErrorWarningPreferencePage_DBIColumnMissingFromDB;
-	public static String ErrorWarningPreferencePage_DBIColumnMissingFromDBIFile;
-	public static String ErrorWarningPreferencePage_DBIColumnConflict;
-	public static String ErrorWarningPreferencePage_DBITableMissing;
-	public static String ErrorWarningPreferencePage_DBIFileMissing;
-	public static String ErrorWarningPreferencePage_DBIGenericError;
 	public static String ErrorWarningPreferencePage_columnUUIDFlagNotSet;
 	public static String ErrorWarningPreferencePage_columnDatabaseIdentityProblem;
 	public static String ErrorWarningPreferencePage_columnDuplicateNameDPID;
@@ -252,7 +236,6 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_formRequiredPropertyMissing;
 	public static String ErrorWarningPreferencePage_formFieldFallbackRelatedValuelist;
 	public static String ErrorWarningPreferencePage_formFieldRelatedValuelist;
-	public static String ErrorWarningPreferencePage_formFoundsetIncorrectValue;
 	public static String ErrorWarningPreferencePage_formPortalInvalidRelationName;
 	public static String ErrorWarningPreferencePage_formPortalElementMismatchedRelation;
 	public static String ErrorWarningPreferencePage_formPropertyMethodNotAccessible;
@@ -267,13 +250,10 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_formVariableTableCol;
 	public static String ErrorWarningPreferencePage_formPropertyInFormTargetNotAccessible;
 	public static String ErrorWarningPreferencePage_formPropertyInFormTargetNotFound;
-	public static String ErrorWarningPreferencePage_solutionDeserializeError;
-	public static String ErrorWarningPreferencePage_solutionBadStructure;
 	public static String ErrorWarningPreferencePage_solutionElementNameInvalidIdentifier;
 	public static String ErrorWarningPreferencePage_solutionPropertyFormCannotBeInstantiated;
 	public static String ErrorWarningPreferencePage_solutionPropertyTargetNotAccessible;
 	public static String ErrorWarningPreferencePage_solutionPropertyTargetNotFound;
-	public static String ErrorWarningPreferencePage_serverNotAccessibleFirstOccurence;
 	public static String ErrorWarningPreferencePage_constantsUsed;
 	public static String ErrorWarningPreferencePage_styleNotFound;
 	public static String ErrorWarningPreferencePage_styleElementClassNoStyle;
