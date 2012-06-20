@@ -149,7 +149,15 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 
 	public static Test suite()
 	{
-		return new ApplicationJSTestSuite(staticSuiteApplication);
+		IServiceProvider prevServiceProvider = J2DBGlobals.setSingletonServiceProvider(staticSuiteApplication);
+		try
+		{
+			return new ApplicationJSTestSuite(staticSuiteApplication);
+		}
+		finally
+		{
+			J2DBGlobals.setSingletonServiceProvider(prevServiceProvider);
+		}
 	}
 
 	/**
