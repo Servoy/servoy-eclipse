@@ -1717,8 +1717,13 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 		if (name.equals("labelFor") && persistContext.getPersist() instanceof GraphicalComponent)
 		{
-			return ((GraphicalComponent)persistContext.getPersist()).getOnActionMethodID() < 1 ||
-				!((GraphicalComponent)persistContext.getPersist()).getShowClick();
+			GraphicalComponent gc = (GraphicalComponent)persistContext.getPersist();
+			if (gc.getOnActionMethodID() >= 1 && gc.getShowClick())
+			{
+				//if it's a button, then we only show the property if it has a value (probably to be cleared via quickfix)
+				return gc.getLabelFor() != null && !gc.getLabelFor().equals("");
+			}
+			else return true;
 		}
 		if (name.endsWith("printSliding") && !(persistContext.getPersist().getParent() instanceof Form))
 		{

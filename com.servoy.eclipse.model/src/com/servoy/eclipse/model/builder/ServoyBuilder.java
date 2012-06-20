@@ -4423,6 +4423,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				marker.setAttribute("Uuid", persist.getUUID().toString()); //$NON-NLS-1$
 				marker.setAttribute("SolutionName", persist.getRootObject().getName()); //$NON-NLS-1$
 			}
+			else if (type.equals(PROJECT_FORM_MARKER_TYPE))
+			{
+				marker.setAttribute("SolutionName", persist.getRootObject().getName()); //$NON-NLS-1$
+			}
 
 			return marker;
 		}
