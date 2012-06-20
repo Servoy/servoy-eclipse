@@ -60,5 +60,6 @@ public class DeveloperServerConfigSyncer implements IServerConfigListener
 		{
 			newServer.fireStateChanged(oldState, newServer.getState());
 		}
+		ServoyModelManager.getServoyModelManager().getServoyModel().buildActiveProjectsInJob();
 	}
 }

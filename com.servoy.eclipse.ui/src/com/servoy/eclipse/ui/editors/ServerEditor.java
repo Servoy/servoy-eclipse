@@ -510,8 +510,6 @@ public class ServerEditor extends EditorPart
 					"You should add a 'schema' for Oracle servers = the Oracle user name.\n\nNot specifying a schema will probably result in seing lots of system tables/views in this server, not just user tables/views.");
 			}
 
-			// manually trigger a build here as it doesn't modify files on disk
-			servoyModel.buildActiveProjectsInJob();
 		}
 		catch (Exception e)
 		{
