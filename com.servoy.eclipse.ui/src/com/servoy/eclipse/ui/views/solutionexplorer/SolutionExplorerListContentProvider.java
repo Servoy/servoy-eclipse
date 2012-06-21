@@ -1519,7 +1519,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					if (adapter instanceof ITypedScriptObject)
 					{
 						if (((ITypedScriptObject)adapter).isDeprecated(id, method.getParameterTypes())) continue;
-						displayName = ((ITypedScriptObject)adapter).getSignature(id, method.getParameterTypes());
+						displayName = ((XMLScriptObjectAdapter)adapter).getSignature(id, method.getParameterTypes(), TYPES);
 					}
 					else
 					{
