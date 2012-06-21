@@ -109,6 +109,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
@@ -473,46 +474,14 @@ public class SolutionDeserializer
 				String jsFileName = jsFile.getName();
 				if (jsFileName.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 				{
-					ISupportChilds scriptParent = null;
-					if (jsFile.getParentFile().getName().equals(SolutionSerializer.FORMS_DIR))
-					{
-						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0, jsFileName.length() - SolutionSerializer.JS_FILE_EXTENSION.length()) +
-							SolutionSerializer.FORM_FILE_EXTENSION);
-					}
-					else if (jsFile.getParentFile().getParentFile() != null &&
-						jsFile.getParentFile().getParentFile().getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME) &&
-						(jsFileName.endsWith(SolutionSerializer.CALCULATIONS_POSTFIX) || jsFileName.endsWith(SolutionSerializer.FOUNDSET_POSTFIX)))
-					{
-						// tablenode
-						if (jsFileName.endsWith(SolutionSerializer.CALCULATIONS_POSTFIX))
-						{
-							// calculations
-							jsonFile = new File(jsFile.getParent(), jsFileName.substring(0,
-								jsFileName.length() - SolutionSerializer.CALCULATIONS_POSTFIX.length()) +
-								SolutionSerializer.TABLENODE_FILE_EXTENSION);
-						}
-						else
-						// if (jsFileName.endsWith(SolutionSerializer.FOUNDSET_POSTFIX))
-						{
-							// foundset methods
-							jsonFile = new File(jsFile.getParent(),
-								jsFileName.substring(0, jsFileName.length() - SolutionSerializer.FOUNDSET_POSTFIX.length()) +
-									SolutionSerializer.TABLENODE_FILE_EXTENSION);
-						}
-						if (!jsonFile.exists())
-						{
-							// tbl file does not exist yet, create a table node
-							scriptParent = ((Solution)parent.getAncestor(IRepository.SOLUTIONS)).getOrCreateTableNode(DataSourceUtils.createDBTableDataSource(
-								jsFile.getParentFile().getName(),
-								jsonFile.getName().substring(0, jsonFile.getName().length() - SolutionSerializer.TABLENODE_FILE_EXTENSION.length())));
-						}
-					}
-					else
+					Pair<File, ISupportChilds> tmp = getJSONFileFromJS(jsFile, jsFileName, parent);
+					jsonFile = tmp.getLeft();
+					if (jsonFile == null)
 					{
 						errorKeeper.addError(jsFile, new Exception("Unrecognized javascript file name '" + jsFile.getName() + "'."));
 						continue;
 					}
-
+					ISupportChilds scriptParent = tmp.getRight();
 					if (scriptParent == null) // scriptParent may have been created when jsonfile does not exist
 					{
 						scriptParent = (ISupportChilds)persistFileMap.get(jsonFile);
@@ -597,6 +566,45 @@ public class SolutionDeserializer
 				}
 			}
 		}
+	}
+
+	public static Pair<File, ISupportChilds> getJSONFileFromJS(File jsFile, String jsFileName, ISupportChilds parent) throws RepositoryException
+	{
+		File jsonFile = null;
+		ISupportChilds scriptParent = null;
+		if (jsFile.getParentFile().getName().equals(SolutionSerializer.FORMS_DIR))
+		{
+			jsonFile = new File(jsFile.getParent(), jsFileName.substring(0, jsFileName.length() - SolutionSerializer.JS_FILE_EXTENSION.length()) +
+				SolutionSerializer.FORM_FILE_EXTENSION);
+		}
+		else if (jsFile.getParentFile().getParentFile() != null &&
+			jsFile.getParentFile().getParentFile().getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME) &&
+			(jsFileName.endsWith(SolutionSerializer.CALCULATIONS_POSTFIX) || jsFileName.endsWith(SolutionSerializer.FOUNDSET_POSTFIX)))
+		{
+			// tablenode
+			if (jsFileName.endsWith(SolutionSerializer.CALCULATIONS_POSTFIX))
+			{
+				// calculations
+				jsonFile = new File(jsFile.getParent(), jsFileName.substring(0, jsFileName.length() - SolutionSerializer.CALCULATIONS_POSTFIX.length()) +
+					SolutionSerializer.TABLENODE_FILE_EXTENSION);
+			}
+			else
+			// if (jsFileName.endsWith(SolutionSerializer.FOUNDSET_POSTFIX))
+			{
+				// foundset methods
+				jsonFile = new File(jsFile.getParent(), jsFileName.substring(0, jsFileName.length() - SolutionSerializer.FOUNDSET_POSTFIX.length()) +
+					SolutionSerializer.TABLENODE_FILE_EXTENSION);
+			}
+			if (!jsonFile.exists() && parent != null)
+			{
+				// tbl file does not exist yet, create a table node
+				scriptParent = ((Solution)parent.getAncestor(IRepository.SOLUTIONS)).getOrCreateTableNode(DataSourceUtils.createDBTableDataSource(
+					jsFile.getParentFile().getName(),
+					jsonFile.getName().substring(0, jsonFile.getName().length() - SolutionSerializer.TABLENODE_FILE_EXTENSION.length())));
+			}
+		}
+
+		return new Pair<File, ISupportChilds>(jsonFile, scriptParent);
 	}
 
 	/**
@@ -1918,10 +1926,24 @@ public class SolutionDeserializer
 						return ((ServoyProject)nature).getEditingSolution().getMedia(segments[1]);
 					}
 				}
-
 				File file = f.getLocation().toFile();
-				UUID uuid = getUUID(file);
-				return AbstractRepository.searchPersist(((ServoyProject)nature).getSolution(), uuid);
+				if (f.getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT))
+				{
+					try
+					{
+						file = getJSONFileFromJS(file, f.getName(), null).getLeft();
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logWarning("Error paring js to json", e); //$NON-NLS-1$
+					}
+				}
+
+				if (file != null && file.exists())
+				{
+					UUID uuid = getUUID(file);
+					return AbstractRepository.searchPersist(((ServoyProject)nature).getSolution(), uuid);
+				}
 			}
 		}
 		catch (CoreException e)
@@ -1930,7 +1952,6 @@ public class SolutionDeserializer
 		}
 		return null;
 	}
-
 
 	public static SolutionMetaData deserializeRootMetaData(IDeveloperRepository repository, File wsd, String name) throws RepositoryException
 	{
