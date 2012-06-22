@@ -48,7 +48,7 @@ public class JSUnitToJavaRunner
 
 	public final static Object NEXT_CHILD_GROUP = null;
 	public final static String ASSERTION_EXCEPTION_MESSAGE = "just for stack";
-	private final static String testListenerName = "javaTestListener";
+	private final static String TEST_LISTENER_NAME = "javaTestListener";
 
 	private Scriptable baseScope;
 	private Scriptable testCodeScope;
@@ -280,14 +280,14 @@ public class JSUnitToJavaRunner
 		Context context = Context.enter();
 
 		Object wrappedOut = Context.javaToJS(testListener, testCodeScope);
-		ScriptableObject.putProperty(testCodeScope, testListenerName, wrappedOut);
+		ScriptableObject.putProperty(testCodeScope, TEST_LISTENER_NAME, wrappedOut);
 
 		try
 		{
 			try
 			{
-				context.evaluateString(testCodeScope, "var result = new TestResult();\nresult.addListener(" + testListenerName + ");\n" + suiteClassName +
-					".prototype.suite().run(result)", "suiteName", 1, null);
+				context.evaluateString(testCodeScope, "var result = new TestResult();\n" + TEST_LISTENER_NAME + ".setResult(result);\nresult.addListener(" +
+					TEST_LISTENER_NAME + ");\n" + suiteClassName + ".prototype.suite().run(result)", "suiteName", 1, null);
 			}
 			catch (final EcmaError e)
 			{

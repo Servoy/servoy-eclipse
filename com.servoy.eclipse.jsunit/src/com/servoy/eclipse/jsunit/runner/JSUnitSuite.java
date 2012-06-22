@@ -272,12 +272,16 @@ public class JSUnitSuite extends TestSuite
 		try
 		{
 			runner.runSuite(testListener, jsSuiteClassName);
+			if (result.shouldStop())
+			{
+				result.addError(this, new Exception("Unit tests stopped by user..."));
+			}
 		}
 		catch (RuntimeException e)
 		{
 			// finish nicely - if jUnit tests result in an exception being thrown instead of normally,
 			// the tools that display results might end up in an un-determined state (for example the jUnit eclipse result view)
-			if (!"Current script terminated".equals(e.getMessage()))
+			if (!"Current script terminated".equals(e.getMessage()) && !"Script execution stopped".equals(e.getMessage()))
 			{
 				result.addError(this, e);
 				e.printStackTrace();
@@ -285,7 +289,7 @@ public class JSUnitSuite extends TestSuite
 			else
 			{
 				// else intentional shut down of the javascript engine, probably due to an user action
-				result.addError(this, new Exception("Unit tests canceled..."));
+				result.addError(this, new Exception("Unit tests stopped by user..."));
 			}
 		}
 	}

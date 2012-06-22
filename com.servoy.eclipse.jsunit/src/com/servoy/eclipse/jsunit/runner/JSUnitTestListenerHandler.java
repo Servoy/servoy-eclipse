@@ -45,6 +45,7 @@ import org.mozilla.javascript.ScriptableObject;
  * @author acostescu
  * 
  */
+@SuppressWarnings("nls")
 public class JSUnitTestListenerHandler
 {
 
@@ -56,6 +57,8 @@ public class JSUnitTestListenerHandler
 	private int startedTestsCount;
 	private final boolean useFileInStackQualifiedName;
 	private final Pattern[] stackElementFilters;
+
+	private Scriptable jsResult;
 
 	public JSUnitTestListenerHandler(TestResult result, List<Test> testList, boolean useFileInStackQualifiedName)
 	{
@@ -95,6 +98,7 @@ public class JSUnitTestListenerHandler
 		Context context = Context.enter();
 		try
 		{
+			applyShouldStopToJSIfNeeded(context);
 			if (test instanceof Scriptable)
 			{
 				testName = context.evaluateString((Scriptable)test, "this.getName()", "Get test name", 1, null).toString();
@@ -130,6 +134,7 @@ public class JSUnitTestListenerHandler
 		Context context = Context.enter();
 		try
 		{
+			applyShouldStopToJSIfNeeded(context);
 			if (test instanceof Scriptable)
 			{
 				testName = context.evaluateString((Scriptable)test, "this.getName()", "Get test name", 1, null).toString();
@@ -310,6 +315,7 @@ public class JSUnitTestListenerHandler
 		Context context = Context.enter();
 		try
 		{
+			applyShouldStopToJSIfNeeded(context);
 			if (test instanceof Scriptable)
 			{
 				testName = context.evaluateString((Scriptable)test, "this.getName()", "Get test name", 1, null).toString();
@@ -337,6 +343,7 @@ public class JSUnitTestListenerHandler
 		Context context = Context.enter();
 		try
 		{
+			applyShouldStopToJSIfNeeded(context);
 			if (test instanceof Scriptable)
 			{
 				testName = context.evaluateString((Scriptable)test, "this.getName()", "Get test name", 1, null).toString();
@@ -380,6 +387,20 @@ public class JSUnitTestListenerHandler
 			name = ((TestSuite)test).getName();
 		}
 		return name;
+	}
+
+	public void setJSResult(Scriptable jsResult)
+	{
+		this.jsResult = jsResult;
+	}
+
+	public void applyShouldStopToJSIfNeeded(Context context)
+	{
+		if (jsResult != null && result.shouldStop())
+		{
+			context.evaluateString(jsResult, "this.stop()", "Stopped by user", 1, null);
+			jsResult = null; // stopping it once is enough
+		}
 	}
 
 }
