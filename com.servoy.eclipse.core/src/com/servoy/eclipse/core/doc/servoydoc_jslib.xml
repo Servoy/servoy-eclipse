@@ -746,118 +746,6 @@ words.unshift("limit","lines");]]></sample>
           </parameters>
         </constructor>
       </constructors>
-      <properties>
-        <property name="fullYear">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the full year of the date.]]></description>
-          <summary><![CDATA[Gets the full year of the date.]]></summary>
-          <sample><![CDATA[date.getFullYear();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getFullYear</url>
-            </link>
-          </links>
-        </property>
-        <property name="hours">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the hours of the date.]]></description>
-          <summary><![CDATA[Gets the hours of the date.]]></summary>
-          <sample><![CDATA[date.getHours();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getHours</url>
-            </link>
-          </links>
-        </property>
-        <property name="minutes">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the minutes of the date.]]></description>
-          <summary><![CDATA[Gets the minutes of the date.]]></summary>
-          <sample><![CDATA[date.getMinutes();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getMinutes</url>
-            </link>
-          </links>
-        </property>
-        <property name="month">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the month of the date.]]></description>
-          <summary><![CDATA[Gets the month of the date.]]></summary>
-          <sample><![CDATA[date.getMonth();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getMonth</url>
-            </link>
-          </links>
-        </property>
-        <property name="seconds">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the seconds of the date.]]></description>
-          <summary><![CDATA[Gets the seconds of the date.]]></summary>
-          <sample><![CDATA[date.getSeconds();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getSeconds</url>
-            </link>
-          </links>
-        </property>
-        <property name="uTCFullYear">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the full year in UTC time.]]></description>
-          <summary><![CDATA[Gets the full year in UTC time.]]></summary>
-          <sample><![CDATA[date.getUTCFullYear();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCFullYear</url>
-            </link>
-          </links>
-        </property>
-        <property name="uTCHours">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the hours in UTC time.]]></description>
-          <summary><![CDATA[Gets the hours in UTC time.]]></summary>
-          <sample><![CDATA[date.getUTCHours();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCHours</url>
-            </link>
-          </links>
-        </property>
-        <property name="uTCMinutes">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the minutes in UTC time.]]></description>
-          <summary><![CDATA[Gets the minutes in UTC time.]]></summary>
-          <sample><![CDATA[date.getUTCMinutes();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCMinutes</url>
-            </link>
-          </links>
-        </property>
-        <property name="uTCMonth">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the month in UTC time.]]></description>
-          <summary><![CDATA[Gets the month in UTC time.]]></summary>
-          <sample><![CDATA[date.getUTCMonth();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCMonth</url>
-            </link>
-          </links>
-        </property>
-        <property name="uTCSeconds">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Gets the seconds in UTC time.]]></description>
-          <summary><![CDATA[Gets the seconds in UTC time.]]></summary>
-          <sample><![CDATA[date.getUTCSeconds();]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCSeconds</url>
-            </link>
-          </links>
-        </property>
-      </properties>
       <functions>
         <function name="UTC">
           <argumentsTypes>
@@ -1062,6 +950,30 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
+        <function name="getFullYear">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the full year of the date.]]></description>
+          <summary><![CDATA[Gets the full year of the date.]]></summary>
+          <sample><![CDATA[date.getFullYear();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getFullYear</url>
+            </link>
+          </links>
+        </function>
+        <function name="getHours">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the hours of the date.]]></description>
+          <summary><![CDATA[Gets the hours of the date.]]></summary>
+          <sample><![CDATA[date.getHours();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getHours</url>
+            </link>
+          </links>
+        </function>
         <function name="getMilliseconds">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1071,6 +983,42 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
           <links>
             <link>
               <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getMilliseconds</url>
+            </link>
+          </links>
+        </function>
+        <function name="getMinutes">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the minutes of the date.]]></description>
+          <summary><![CDATA[Gets the minutes of the date.]]></summary>
+          <sample><![CDATA[date.getMinutes();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getMinutes</url>
+            </link>
+          </links>
+        </function>
+        <function name="getMonth">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the month of the date.]]></description>
+          <summary><![CDATA[Gets the month of the date.]]></summary>
+          <sample><![CDATA[date.getMonth();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getMonth</url>
+            </link>
+          </links>
+        </function>
+        <function name="getSeconds">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the seconds of the date.]]></description>
+          <summary><![CDATA[Gets the seconds of the date.]]></summary>
+          <sample><![CDATA[date.getSeconds();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getSeconds</url>
             </link>
           </links>
         </function>
@@ -1122,6 +1070,30 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
+        <function name="getUTCFullYear">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the full year in UTC time.]]></description>
+          <summary><![CDATA[Gets the full year in UTC time.]]></summary>
+          <sample><![CDATA[date.getUTCFullYear();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCFullYear</url>
+            </link>
+          </links>
+        </function>
+        <function name="getUTCHours">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the hours in UTC time.]]></description>
+          <summary><![CDATA[Gets the hours in UTC time.]]></summary>
+          <sample><![CDATA[date.getUTCHours();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCHours</url>
+            </link>
+          </links>
+        </function>
         <function name="getUTCMilliseconds">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1131,6 +1103,42 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
           <links>
             <link>
               <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCMilliseconds</url>
+            </link>
+          </links>
+        </function>
+        <function name="getUTCMinutes">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the minutes in UTC time.]]></description>
+          <summary><![CDATA[Gets the minutes in UTC time.]]></summary>
+          <sample><![CDATA[date.getUTCMinutes();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCMinutes</url>
+            </link>
+          </links>
+        </function>
+        <function name="getUTCMonth">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the month in UTC time.]]></description>
+          <summary><![CDATA[Gets the month in UTC time.]]></summary>
+          <sample><![CDATA[date.getUTCMonth();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCMonth</url>
+            </link>
+          </links>
+        </function>
+        <function name="getUTCSeconds">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Gets the seconds in UTC time.]]></description>
+          <summary><![CDATA[Gets the seconds in UTC time.]]></summary>
+          <sample><![CDATA[date.getUTCSeconds();]]></sample>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/getUTCSeconds</url>
             </link>
           </links>
         </function>
@@ -1194,6 +1202,23 @@ application.output(str);]]></sample>
         <function name="setFullYear">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the full year of the date.]]></description>
+          <summary><![CDATA[Sets the full year of the date.]]></summary>
+          <sample><![CDATA[date.setFullYear(integer);]]></sample>
+          <parameters>
+            <parameter name="yearValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setFullYear</url>
+            </link>
+          </links>
+        </function>
+        <function name="setFullYear">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
@@ -1220,6 +1245,23 @@ application.output(str);]]></sample>
             <parameter name="monthValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <parameter name="dayValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
+        </function>
+        <function name="setHours">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the hours of the date.]]></description>
+          <summary><![CDATA[Sets the hours of the date.]]></summary>
+          <sample><![CDATA[date.setHours(integer);]]></sample>
+          <parameters>
+            <parameter name="hoursValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setHours</url>
+            </link>
+          </links>
         </function>
         <function name="setHours">
           <argumentsTypes>
@@ -1289,6 +1331,23 @@ application.output(str);]]></sample>
         <function name="setMinutes">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the minutes of the date.]]></description>
+          <summary><![CDATA[Sets the minutes of the date.]]></summary>
+          <sample><![CDATA[date.setMinutes(integer);]]></sample>
+          <parameters>
+            <parameter name="minutesValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setMinutes</url>
+            </link>
+          </links>
+        </function>
+        <function name="setMinutes">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
@@ -1319,6 +1378,23 @@ application.output(str);]]></sample>
         <function name="setMonth">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the month of the date.]]></description>
+          <summary><![CDATA[Sets the month of the date.]]></summary>
+          <sample><![CDATA[date.setMonth(integr);]]></sample>
+          <parameters>
+            <parameter name="monthValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setMonth</url>
+            </link>
+          </links>
+        </function>
+        <function name="setMonth">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
@@ -1329,6 +1405,23 @@ application.output(str);]]></sample>
             <parameter name="monthValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <parameter name="dayValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
+        </function>
+        <function name="setSeconds">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the seconds of the date.]]></description>
+          <summary><![CDATA[Sets the seconds of the date.]]></summary>
+          <sample><![CDATA[date.setSeconds(integer);]]></sample>
+          <parameters>
+            <parameter name="secondsValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setSeconds</url>
+            </link>
+          </links>
         </function>
         <function name="setSeconds">
           <argumentsTypes>
@@ -1381,6 +1474,23 @@ application.output(str);]]></sample>
         <function name="setUTCFullYear">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the year in UTC time.]]></description>
+          <summary><![CDATA[Sets the year in UTC time.]]></summary>
+          <sample><![CDATA[date.setUTCFullYear(integer);]]></sample>
+          <parameters>
+            <parameter name="yearValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setUTCFullYear</url>
+            </link>
+          </links>
+        </function>
+        <function name="setUTCFullYear">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
@@ -1407,6 +1517,23 @@ application.output(str);]]></sample>
             <parameter name="monthValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <parameter name="dayValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
+        </function>
+        <function name="setUTCHours">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the hours in UTC time.]]></description>
+          <summary><![CDATA[Sets the hours in UTC time.]]></summary>
+          <sample><![CDATA[date.setUTCHours(integer);]]></sample>
+          <parameters>
+            <parameter name="hoursValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setUTCHours</url>
+            </link>
+          </links>
         </function>
         <function name="setUTCHours">
           <argumentsTypes>
@@ -1476,6 +1603,23 @@ application.output(str);]]></sample>
         <function name="setUTCMinutes">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the minutes in UTC time.]]></description>
+          <summary><![CDATA[Sets the minutes in UTC time.]]></summary>
+          <sample><![CDATA[date.setUTCMinutes(integer);]]></sample>
+          <parameters>
+            <parameter name="minutesValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setUTCMinutes</url>
+            </link>
+          </links>
+        </function>
+        <function name="setUTCMinutes">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
@@ -1506,6 +1650,23 @@ application.output(str);]]></sample>
         <function name="setUTCMonth">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the month in UTC time.]]></description>
+          <summary><![CDATA[Sets the month in UTC time.]]></summary>
+          <sample><![CDATA[date.setUTCMonth(integer);]]></sample>
+          <parameters>
+            <parameter name="monthValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setUTCMonth</url>
+            </link>
+          </links>
+        </function>
+        <function name="setUTCMonth">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
@@ -1516,6 +1677,23 @@ application.output(str);]]></sample>
             <parameter name="monthValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <parameter name="dayValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
+        </function>
+        <function name="setUTCSeconds">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the seconds in UTC time.]]></description>
+          <summary><![CDATA[Sets the seconds in UTC time.]]></summary>
+          <sample><![CDATA[date.setUTCSeconds(integer);]]></sample>
+          <parameters>
+            <parameter name="secondsValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date/setUTCSeconds</url>
+            </link>
+          </links>
         </function>
         <function name="setUTCSeconds">
           <argumentsTypes>
