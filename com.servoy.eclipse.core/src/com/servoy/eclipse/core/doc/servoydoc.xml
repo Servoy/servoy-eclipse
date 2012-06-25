@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -420,7 +420,7 @@ application.closeSolution();
             <parameter name="solutionToLoad" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[Name of the solution to load]]></description>
             </parameter>
-            <parameter name="method">
+            <parameter name="methodName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[Name of the global method to call]]></description>
             </parameter>
           </parameters>
@@ -448,7 +448,7 @@ application.closeSolution();
             <parameter name="solutionToLoad" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[Name of the solution to load]]></description>
             </parameter>
-            <parameter name="method">
+            <parameter name="methodName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[Name of the global method to call]]></description>
             </parameter>
             <parameter name="methodArgument" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
@@ -2164,7 +2164,7 @@ application.showFormInWindow(forms.contacts,100,80,500,300,'my own window title'
             <parameter name="url" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[URL to show]]></description>
             </parameter>
-            <parameter name="webclientTarget">
+            <parameter name="webclientTarget" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[Target frame or named dialog/window]]></description>
             </parameter>
             <parameter name="webclientTargetOptions" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -2899,10 +2899,10 @@ var success = databaseManager.addTableFilterParam('crm', 'orders', 'countrycode'
 // you can use modifiers in the operator as well, filter on companies where companyname is null or equals-ignore-case 'servoy'
 var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyname', '#^||=', 'servoy')]]></sample>
           <parameters>
-            <parameter name="server_name">
+            <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The name of the database server connection for the specified table name.]]></description>
             </parameter>
-            <parameter name="table_name">
+            <parameter name="tableName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The name of the specified table.]]></description>
             </parameter>
             <parameter name="dataprovider" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -3260,10 +3260,10 @@ controller.saveData();
 //	controller.saveData();
 //}]]></sample>
           <parameters>
-            <parameter name="src">
+            <parameter name="source" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[The source record or object to be copied.]]></description>
             </parameter>
-            <parameter name="dest_record">
+            <parameter name="destination" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal">
               <description><![CDATA[The destination record to copy to.]]></description>
             </parameter>
           </parameters>
@@ -3828,19 +3828,13 @@ for( var i = 0 ; i < array.length ; i++ )
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"><![CDATA[A new JSFoundset for that datasource.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"><![CDATA[A new JSFoundset for that query.]]></return>
           <description><![CDATA[Returns a foundset object for a specified pk query.]]></description>
           <summary><![CDATA[Returns a foundset object for a specified pk query.]]></summary>
-          <sample><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
-/** @type {JSFoundset<db:/servername/tablename>} */
-var fs = databaseManager.getFoundSet(controller.getDataSource())
-var ridx = fs.newRecord()
-var record = fs.getRecord(ridx)
-record.emp_name = 'John'
-databaseManager.saveData()]]></sample>
+          <sample/>
           <parameters>
-            <parameter name="dataSource">
-              <description><![CDATA[The datasource to get a JSFoundset for.]]></description>
+            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
+              <description><![CDATA[The query to get the JSFoundset for.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -3872,13 +3866,7 @@ databaseManager.saveData()]]></sample>
           <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"><![CDATA[A new JSFoundset for that datasource.]]></return>
           <description><![CDATA[Returns a foundset object for a specified datasource or server and tablename.]]></description>
           <summary><![CDATA[Returns a foundset object for a specified datasource or server and tablename.]]></summary>
-          <sample><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
-/** @type {JSFoundset<db:/servername/tablename>} */
-var fs = databaseManager.getFoundSet(controller.getDataSource())
-var ridx = fs.newRecord()
-var record = fs.getRecord(ridx)
-record.emp_name = 'John'
-databaseManager.saveData()]]></sample>
+          <sample/>
           <parameters>
             <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The servername to get a JSFoundset for.]]></description>
@@ -4397,7 +4385,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
             <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal">
               <description><![CDATA[The JSFoundset to test if it has changes.]]></description>
             </parameter>
-            <parameter name="foundset_index">
+            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[The record index in the foundset to test (not specified means has the foundset any changed records)]]></description>
             </parameter>
           </parameters>
@@ -12899,7 +12887,7 @@ If the foundset is in multiselect mode, all selected records are deleted.]]></de
 //can return false incase of related foundset having records and orphans records are not allowed by the relation]]></sample>
           <parameters>
             <parameter name="record" type="com.servoy.j2db.dataprocessing.IRecord" typecode="com.servoy.j2db.dataprocessing.IRecord">
-              <description><![CDATA[record to delete.]]></description>
+              <description><![CDATA[The record to delete from the foundset.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -12914,7 +12902,7 @@ If the foundset is in multiselect mode, all selected records are deleted.]]></de
 //can return false incase of related foundset having records and orphans records are not allowed by the relation]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[index of record to delete.]]></description>
+              <description><![CDATA[The index of the record to delete.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -12943,11 +12931,6 @@ if (count == 0)
 %%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
 //duplicates the record (record index 3), adds on top and selects the record
 %%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
-          <parameters>
-            <parameter name="index">
-              <description><![CDATA[index of record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
-            </parameter>
-          </parameters>
         </function>
         <function name="duplicateRecord">
           <argumentsTypes>
@@ -13003,7 +12986,7 @@ if (count == 0)
 %%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[index of record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
+              <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -13022,7 +13005,7 @@ if (count == 0)
 %%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[index of record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
+              <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
             </parameter>
             <parameter name="onTop" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[when true the new record is added as the topmost record.]]></description>
@@ -13045,7 +13028,7 @@ if (count == 0)
 %%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[index of record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
+              <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
             </parameter>
             <parameter name="onTop" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[when true the new record is added as the topmost record.]]></description>
@@ -13070,7 +13053,7 @@ if (count == 0)
 %%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[index of record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
+              <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
             </parameter>
             <parameter name="location" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the new record is added at specified index]]></description>
@@ -13093,7 +13076,7 @@ if (count == 0)
 %%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[index of record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
+              <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
             </parameter>
             <parameter name="location" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the new record is added at specified index]]></description>
@@ -13554,7 +13537,9 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
 //-cannot contain 'group by', 'having' or 'union'
 //-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
+              <description><![CDATA[The foundset to load records from]]></description>
+            </parameter>
           </parameters>
         </function>
         <function deprecated="true" name="loadRecords">
@@ -13568,8 +13553,12 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
           <deprecated><![CDATA[use loadRecords(FoundSet)]]></deprecated>
           <sample/>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
-            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
+              <description><![CDATA[The foundset to load record from]]></description>
+            </parameter>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[True for ignoring the argument array]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="loadRecords">
@@ -13654,8 +13643,12 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
           <deprecated><![CDATA[use loadRecords(JSDataSet)]]></deprecated>
           <sample/>
           <parameters>
-            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
-            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
+              <description><![CDATA[The dataset to load records from]]></description>
+            </parameter>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[True for ignoring the argument array]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="loadRecords">
@@ -13725,7 +13718,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
 //-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
             <parameter name="querybuilder" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
-              <description><![CDATA[query builder]]></description>
+              <description><![CDATA[the query builder]]></description>
             </parameter>
           </parameters>
         </function>
@@ -13811,8 +13804,12 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
           <deprecated><![CDATA[use loadRecords(UUID)]]></deprecated>
           <sample/>
           <parameters>
-            <parameter name="uuidpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID"/>
-            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+            <parameter name="uuidpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
+              <description><![CDATA[single-column pk value]]></description>
+            </parameter>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[true to ignore argument array]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="loadRecords">
@@ -13897,8 +13894,12 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
           <deprecated><![CDATA[use loadRecords(Number)]]></deprecated>
           <sample/>
           <parameters>
-            <parameter name="numberpk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number"/>
-            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+            <parameter name="numberpk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
+              <description><![CDATA[single-column pk value]]></description>
+            </parameter>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[true to ignore arguments array]]></description>
+            </parameter>
           </parameters>
         </function>
         <function deprecated="true" name="loadRecords">
@@ -13912,7 +13913,9 @@ Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecor
           <deprecated><![CDATA[use loadRecords with single typed argument]]></deprecated>
           <sample/>
           <parameters>
-            <parameter name="vargs" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"/>
+            <parameter name="vargs" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
+              <description><![CDATA[the arguments]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="loadRecords">
@@ -14205,7 +14208,7 @@ Note: The omitted records list is discarded when these functions are executed: l
           <sample><![CDATA[var success = %%prefix%%foundset.omitRecord();]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[index of record to omit.]]></description>
+              <description><![CDATA[The index of the record to omit.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -14217,11 +14220,6 @@ Lookups are defined in the dataprovider (columns) auto-enter setting and are nor
           <summary><![CDATA[Perform a relookup for the current records
 Lookups are defined in the dataprovider (columns) auto-enter setting and are normally performed over a relation upon record creation.]]></summary>
           <sample><![CDATA[%%prefix%%foundset.relookup(1);]]></sample>
-          <parameters>
-            <parameter name="index">
-              <description><![CDATA[record index (1-based)]]></description>
-            </parameter>
-          </parameters>
         </function>
         <function name="relookup">
           <argumentsTypes>
@@ -21091,7 +21089,9 @@ Operator: like]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
           <sample><![CDATA[query.where.add(query.columns.companyname.like('Serv%'))]]></sample>
           <parameters>
-            <parameter name="value"/>
+            <parameter name="pattern" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the string value of the pattern]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="like">
@@ -21105,11 +21105,11 @@ Operator: like, with escape character]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
           <sample><![CDATA[query.where.add(query.columns.companyname.like('X_%', '_'))]]></sample>
           <parameters>
-            <parameter name="value">
-              <description><![CDATA[string value]]></description>
+            <parameter name="pattern" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the string value of the pattern]]></description>
             </parameter>
-            <parameter name="ecape">
-              <description><![CDATA[escape char]]></description>
+            <parameter name="escape" type="char" typecode="char">
+              <description><![CDATA[the escape char]]></description>
             </parameter>
           </parameters>
         </function>
@@ -21634,7 +21634,9 @@ Operator: like]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
           <sample><![CDATA[query.where.add(query.columns.companyname.like('Serv%'))]]></sample>
           <parameters>
-            <parameter name="value"/>
+            <parameter name="pattern" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the string value of the pattern]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="like">
@@ -21648,11 +21650,11 @@ Operator: like, with escape character]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
           <sample><![CDATA[query.where.add(query.columns.companyname.like('X_%', '_'))]]></sample>
           <parameters>
-            <parameter name="value">
-              <description><![CDATA[string value]]></description>
+            <parameter name="pattern" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the string value of the pattern]]></description>
             </parameter>
-            <parameter name="ecape">
-              <description><![CDATA[escape char]]></description>
+            <parameter name="escape" type="char" typecode="char">
+              <description><![CDATA[the escape char]]></description>
             </parameter>
           </parameters>
         </function>
@@ -22211,7 +22213,9 @@ Operator: like]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
           <sample><![CDATA[query.where.add(query.columns.companyname.like('Serv%'))]]></sample>
           <parameters>
-            <parameter name="value"/>
+            <parameter name="pattern" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the string value of the pattern]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="like">
@@ -22225,11 +22229,11 @@ Operator: like, with escape character]]></description>
           <summary><![CDATA[Compare column with a value or another column.]]></summary>
           <sample><![CDATA[query.where.add(query.columns.companyname.like('X_%', '_'))]]></sample>
           <parameters>
-            <parameter name="value">
-              <description><![CDATA[string value]]></description>
+            <parameter name="pattern" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the string value of the pattern]]></description>
             </parameter>
-            <parameter name="ecape">
-              <description><![CDATA[escape char]]></description>
+            <parameter name="escape" type="char" typecode="char">
+              <description><![CDATA[the escape char]]></description>
             </parameter>
           </parameters>
         </function>
@@ -22819,8 +22823,12 @@ var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1
 query.where.add(query.columns.shipname.substring(3).eq(query.functions.substring('Sample', 3))) 
 foundset.loadRecords(query);]]></sample>
           <parameters>
-            <parameter name="value"/>
-            <parameter name="pos" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+            <parameter name="arg" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[column name]]></description>
+            </parameter>
+            <parameter name="pos" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[position]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="substring">
@@ -22837,9 +22845,15 @@ var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1
 query.where.add(query.columns.shipname.substring(3, 2).eq(query.functions.substring('Sample', 3, 2))) 
 foundset.loadRecords(query);]]></sample>
           <parameters>
-            <parameter name="value"/>
-            <parameter name="pos" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-            <parameter name="len" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+            <parameter name="arg" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[column name]]></description>
+            </parameter>
+            <parameter name="pos" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[position]]></description>
+            </parameter>
+            <parameter name="len" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[length]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="trim">
@@ -24071,7 +24085,7 @@ If the foundset is in multiselect mode, all selected records are deleted.]]></de
 //can return false incase of related foundset having records and orphans records are not allowed by the relation]]></sample>
           <parameters>
             <parameter name="record" type="com.servoy.j2db.dataprocessing.IRecord" typecode="com.servoy.j2db.dataprocessing.IRecord">
-              <description><![CDATA[record to delete.]]></description>
+              <description><![CDATA[The record to delete from the foundset.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -24086,7 +24100,7 @@ If the foundset is in multiselect mode, all selected records are deleted.]]></de
 //can return false incase of related foundset having records and orphans records are not allowed by the relation]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[index of record to delete.]]></description>
+              <description><![CDATA[The index of the record to delete.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -24115,11 +24129,6 @@ if (count == 0)
 %%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
 //duplicates the record (record index 3), adds on top and selects the record
 %%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
-          <parameters>
-            <parameter name="index">
-              <description><![CDATA[index of record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
-            </parameter>
-          </parameters>
         </function>
         <function name="duplicateRecord">
           <argumentsTypes>
@@ -24175,7 +24184,7 @@ if (count == 0)
 %%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[index of record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
+              <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -24194,7 +24203,7 @@ if (count == 0)
 %%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[index of record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
+              <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
             </parameter>
             <parameter name="onTop" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[when true the new record is added as the topmost record.]]></description>
@@ -24217,7 +24226,7 @@ if (count == 0)
 %%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[index of record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
+              <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
             </parameter>
             <parameter name="onTop" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[when true the new record is added as the topmost record.]]></description>
@@ -24242,7 +24251,7 @@ if (count == 0)
 %%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[index of record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
+              <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
             </parameter>
             <parameter name="location" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the new record is added at specified index]]></description>
@@ -24265,7 +24274,7 @@ if (count == 0)
 %%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[index of record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
+              <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
             </parameter>
             <parameter name="location" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the new record is added at specified index]]></description>
@@ -24726,7 +24735,9 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
 //-cannot contain 'group by', 'having' or 'union'
 //-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
+              <description><![CDATA[The foundset to load records from]]></description>
+            </parameter>
           </parameters>
         </function>
         <function deprecated="true" name="loadRecords">
@@ -24740,8 +24751,12 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
           <deprecated><![CDATA[use loadRecords(FoundSet)]]></deprecated>
           <sample/>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
-            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
+              <description><![CDATA[The foundset to load record from]]></description>
+            </parameter>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[True for ignoring the argument array]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="loadRecords">
@@ -24826,8 +24841,12 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
           <deprecated><![CDATA[use loadRecords(JSDataSet)]]></deprecated>
           <sample/>
           <parameters>
-            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
-            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
+              <description><![CDATA[The dataset to load records from]]></description>
+            </parameter>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[True for ignoring the argument array]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="loadRecords">
@@ -24897,7 +24916,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
 //-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
             <parameter name="querybuilder" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
-              <description><![CDATA[query builder]]></description>
+              <description><![CDATA[the query builder]]></description>
             </parameter>
           </parameters>
         </function>
@@ -24983,8 +25002,12 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
           <deprecated><![CDATA[use loadRecords(UUID)]]></deprecated>
           <sample/>
           <parameters>
-            <parameter name="uuidpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID"/>
-            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+            <parameter name="uuidpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
+              <description><![CDATA[single-column pk value]]></description>
+            </parameter>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[true to ignore argument array]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="loadRecords">
@@ -25069,8 +25092,12 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
           <deprecated><![CDATA[use loadRecords(Number)]]></deprecated>
           <sample/>
           <parameters>
-            <parameter name="numberpk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number"/>
-            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+            <parameter name="numberpk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
+              <description><![CDATA[single-column pk value]]></description>
+            </parameter>
+            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[true to ignore arguments array]]></description>
+            </parameter>
           </parameters>
         </function>
         <function deprecated="true" name="loadRecords">
@@ -25084,7 +25111,9 @@ Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecor
           <deprecated><![CDATA[use loadRecords with single typed argument]]></deprecated>
           <sample/>
           <parameters>
-            <parameter name="vargs" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"/>
+            <parameter name="vargs" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
+              <description><![CDATA[the arguments]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="loadRecords">
@@ -25377,7 +25406,7 @@ Note: The omitted records list is discarded when these functions are executed: l
           <sample><![CDATA[var success = %%prefix%%foundset.omitRecord();]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[index of record to omit.]]></description>
+              <description><![CDATA[The index of the record to omit.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -25389,11 +25418,6 @@ Lookups are defined in the dataprovider (columns) auto-enter setting and are nor
           <summary><![CDATA[Perform a relookup for the current records
 Lookups are defined in the dataprovider (columns) auto-enter setting and are normally performed over a relation upon record creation.]]></summary>
           <sample><![CDATA[%%prefix%%foundset.relookup(1);]]></sample>
-          <parameters>
-            <parameter name="index">
-              <description><![CDATA[record index (1-based)]]></description>
-            </parameter>
-          </parameters>
         </function>
         <function name="relookup">
           <argumentsTypes>
@@ -40102,16 +40126,16 @@ application.output(rel.getRelationItems());]]></sample>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the specified name of the new relation]]></description>
             </parameter>
-            <parameter name="primary_server_name|primary_datasource">
+            <parameter name="primaryDataSourceOrServer" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the specified name of the primary server]]></description>
             </parameter>
-            <parameter name="primary_table_name|foreign_servername">
+            <parameter name="primaryTableNameOrForeignServer" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the specified name of the primary table]]></description>
             </parameter>
-            <parameter name="foreign_table_name|foreing_datasource">
+            <parameter name="foreignDataSourceOrTable" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the specified name of the foreign server]]></description>
             </parameter>
-            <parameter name="join_type">
+            <parameter name="joinType" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the type of join for the new relation; JSRelation.INNER_JOIN, JSRelation.LEFT_OUTER_JOIN]]></description>
             </parameter>
           </parameters>
@@ -43348,7 +43372,7 @@ var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
 var w = application.getWindow("mydialog"); // use null name for main app. window
 %%prefix%%controller.showRecords(foundset, w);]]></sample>
           <parameters>
-            <parameter name="founset">
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
               <description><![CDATA[the foundset to load before showing the form.]]></description>
             </parameter>
             <parameter name="window" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
@@ -43488,17 +43512,33 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             </parameter>
           </parameters>
         </function>
-        <function deprecated="true" name="showRecords" undocumented="true">
+        <function deprecated="true" name="showRecords">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <deprecated><![CDATA[see showRecords(FoundSet, Object)]]></deprecated>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);]]></sample>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-            <parameter name="dialogName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-            <parameter name="modal" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+            <parameter name="foundset" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the foundset to load before showing the form]]></description>
+            </parameter>
+            <parameter name="dialogName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the name of the dialog in which to show the form]]></description>
+            </parameter>
+            <parameter name="modal" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[true for modal dialog, false for non-modal]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="showRecords">
@@ -43789,7 +43829,7 @@ for(var i=1;i<=set.getMaxRowIndex();i++)
           <summary><![CDATA[Returns the offset (in milliseconds) of this time zone from UTC for the current date or at the specified date.]]></summary>
           <sample><![CDATA[var timeZoneOffset = i18n.getTimeZoneOffset('America/Los_Angeles');]]></sample>
           <parameters>
-            <parameter name="timezone">
+            <parameter name="timeZoneId" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The time zone to get the offset for.]]></description>
             </parameter>
           </parameters>
@@ -43804,7 +43844,7 @@ for(var i=1;i<=set.getMaxRowIndex();i++)
           <summary><![CDATA[Returns the offset (in milliseconds) of this time zone from UTC for the current date or at the specified date.]]></summary>
           <sample><![CDATA[var timeZoneOffset = i18n.getTimeZoneOffset('America/Los_Angeles');]]></sample>
           <parameters>
-            <parameter name="timezone">
+            <parameter name="timeZoneId" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The time zone to get the offset for.]]></description>
             </parameter>
             <parameter name="date" type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="java.util.Date">
