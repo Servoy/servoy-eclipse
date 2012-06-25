@@ -302,10 +302,10 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 										if (loadedRelationsNamingPattern != null && loadedRelationsNamingPattern.trim().length() > 0)
 										{
 											Map<String, String> substitutions = new HashMap<String, String>(4);
-											substitutions.put("primarytable", ptableName);
-											substitutions.put("primarycolumn", pcolumnName);
-											substitutions.put("foreigntable", ftableName);
-											substitutions.put("foreigncolumn", fcolumnName);
+											substitutions.put("childtable", ptableName);
+											substitutions.put("childcolumn", pcolumnName);
+											substitutions.put("parenttable", ftableName);
+											substitutions.put("parentcolumn", fcolumnName);
 
 											Matcher matcher = Pattern.compile("\\$\\{(\\w+)\\}").matcher(loadedRelationsNamingPattern.trim());
 											StringBuffer stringBuffer = new StringBuffer();

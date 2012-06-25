@@ -120,13 +120,13 @@ public class AutomaticNamingStrategies extends PreferencePage implements IWorkbe
 			public void widgetSelected(SelectionEvent e)
 			{
 				loadRelationsNamingPatternText.setEnabled(customLoadedRelationsNamingPattern.getSelection());
-				loadRelationsNamingPatternText.setText("${primarytable}_to_${foreigntable}");
+				loadRelationsNamingPatternText.setText("${childtable}_to_${parenttable}");
 			}
 		});
 
 		loadRelationsNamingPatternText = new Text(grpLoadedRelationsNaming, SWT.NONE);
 		loadRelationsNamingPatternText.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, true));
-		loadRelationsNamingPatternText.setToolTipText("Define custom pattern, use ${primarytable}, ${foreigntable}, ${primarycolumn} and ${foreigncolumn} for substitution");
+		loadRelationsNamingPatternText.setToolTipText("Define custom pattern, use ${childtable}, ${parenttable}, ${childcolumn} and ${parentcolumn} for substitution");
 
 		initializeFields();
 
