@@ -23,11 +23,11 @@ import java.awt.Insets;
 import javax.swing.border.Border;
 import javax.swing.text.html.CSS;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.smart.dataui.StyledEnablePanel;
 import com.servoy.j2db.util.IStyleRule;
@@ -67,8 +67,12 @@ public class FormImageNotifier extends AbstractImageNotifier
 		Insets insets = border != null ? border.getBorderInsets(comp) : DEFAULT_INSETS;
 		comp.setSize(new Dimension(size.width + insets.left + insets.right, size.height + insets.top + insets.bottom));
 
-		if ((flattenedForm.getRootObject() instanceof Solution) &&
-			(((Solution)(flattenedForm.getRootObject())).getSolutionType() == SolutionMetaData.SOLUTION || ((Solution)(flattenedForm.getRootObject())).getSolutionType() == SolutionMetaData.WEB_CLIENT_ONLY))
+		SolutionMetaData solution = null;
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
+		{
+			solution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolutionMetaData();
+		}
+		if (solution != null && (solution.getSolutionType() == SolutionMetaData.SOLUTION || solution.getSolutionType() == SolutionMetaData.WEB_CLIENT_ONLY))
 		{
 			if (formStyle != null && formStyle.getRight() != null)
 			{

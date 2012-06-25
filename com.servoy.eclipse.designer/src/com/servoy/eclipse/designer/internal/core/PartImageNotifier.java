@@ -22,11 +22,11 @@ import java.awt.Component;
 import javax.swing.border.Border;
 import javax.swing.text.html.CSS;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Part;
-import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.smart.dataui.StyledEnablePanel;
 import com.servoy.j2db.util.IStyleRule;
@@ -61,9 +61,12 @@ public class PartImageNotifier extends AbstractImageNotifier
 		comp.setSize(form.getWidth(), part.getHeight() - form.getPartStartYPos(part.getID()));
 
 		Pair<IStyleSheet, IStyleRule> pair = ComponentFactory.getStyleForBasicComponent(application, part, form);
-
-		if ((part.getRootObject() instanceof Solution) &&
-			(((Solution)(part.getRootObject())).getSolutionType() == SolutionMetaData.SOLUTION || ((Solution)(part.getRootObject())).getSolutionType() == SolutionMetaData.WEB_CLIENT_ONLY))
+		SolutionMetaData solution = null;
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
+		{
+			solution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolutionMetaData();
+		}
+		if (solution != null && (solution.getSolutionType() == SolutionMetaData.SOLUTION || solution.getSolutionType() == SolutionMetaData.WEB_CLIENT_ONLY))
 		{
 			Pair<IStyleSheet, IStyleRule> formStyle = ComponentFactory.getCSSPairStyleForForm(application, form);
 			boolean formHasBgImage = formStyle != null && formStyle.getRight() != null &&
