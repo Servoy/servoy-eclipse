@@ -73,4 +73,9 @@ public class HighlightNodeUpdater implements ActiveEditorListener
 			}
 		}
 	}
+
+	public IPersist getActiveEditorPersist()
+	{
+		return currentActiveEditorPersist;
+	}
 }

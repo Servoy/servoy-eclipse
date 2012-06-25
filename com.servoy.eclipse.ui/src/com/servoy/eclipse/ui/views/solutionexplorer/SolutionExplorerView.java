@@ -420,6 +420,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private ActiveEditorTracker fPartListener;
 
+	private HighlightNodeUpdater activeEditorPersistListener;
+
 	private final IDialogSettings fDialogSettings;
 
 	private OrientationAction[] fToggleOrientationActions;
@@ -607,7 +609,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						IEditorPart ep = fPartListener.getActiveEditor();
 						if (ep != null)
 						{
-							IPersist persist = (IPersist)ep.getAdapter(IPersist.class);
+							IPersist persist = activeEditorPersistListener.getActiveEditorPersist();
 							if (persist != null && ((IPersist)real).getUUID().equals(persist.getUUID()))
 							{
 								return yellow;// Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND);
@@ -1044,7 +1046,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		ct.activeEditorChanged(fPartListener.getActiveEditor());
 
 		// update needed nodes in tree if the editor changes (for example active form highlighting)
-		fPartListener.addActiveEditorListener(new HighlightNodeUpdater(tree, treeContentProvider));
+		activeEditorPersistListener = new HighlightNodeUpdater(tree, treeContentProvider);
+		fPartListener.addActiveEditorListener(activeEditorPersistListener);
 
 		getViewSite().getPage().addPartListener(fPartListener);
 	}

@@ -107,6 +107,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
@@ -462,70 +463,61 @@ public class SolutionDeserializer
 				String jsFileName = jsFile.getName();
 				if (jsFileName.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 				{
-					if (jsFile.getParentFile().getName().equals(SolutionSerializer.FORMS_DIR))
-					{
-						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0, jsFileName.length() - SolutionSerializer.JS_FILE_EXTENSION.length()) +
-							SolutionSerializer.FORM_FILE_EXTENSION);
-					}
-					else if (jsFileName.endsWith(SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT))
-					{
-						// tablenode
-						jsonFile = new File(jsFile.getParent(), jsFileName.substring(0,
-							jsFileName.length() - SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length()) +
-							SolutionSerializer.TABLENODE_FILE_EXTENSION);
-					}
-					else
+					Pair<File, ISupportChilds> tmp = getJSONFileFromJS(jsFile, jsFileName, parent);
+					jsonFile = tmp.getLeft();
+					if (jsonFile == null)
 					{
 						jsonFile = null;
 						errorKeeper.addError(jsFile, new Exception("Unrecognized javascript file name '" + jsFile.getName() + "'."));
 					}
+					ISupportChilds scriptParent = tmp.getRight();
 
-					if (jsonFile != null && jsonFile.exists())
+					if (scriptParent == null) // scriptParent may have been created when jsonfile does not exist
 					{
-						ISupportChilds parentForm = (ISupportChilds)persistFileMap.get(jsonFile);
-						if (parentForm != null)
+						scriptParent = (ISupportChilds)persistFileMap.get(jsonFile);
+					}
+					if (scriptParent != null)
+					{
+						List<JSONObject> childrenJSObjects = childrenJSObjectMapEntry.getValue();
+						if (!readAll)
 						{
-							List<JSONObject> childrenJSObjects = childrenJSObjectMapEntry.getValue();
-							if (!readAll)
+							testDuplicates(scriptParent, childrenJSObjects);
+						}
+						if (childrenJSObjects != null)
+						{
+							scriptFiles.add(jsFile);
+							for (JSONObject object : childrenJSObjects)
 							{
-								testDuplicates(parentForm, childrenJSObjects);
-							}
-							if (childrenJSObjects != null)
-							{
-								scriptFiles.add(jsFile);
-								for (JSONObject object : childrenJSObjects)
+								setMissingTypeOnScriptObject(object, scriptParent);
+								IPersist persist = null;
+								try
 								{
-									setMissingTypeOnScriptObject(object, parentForm);
-									IPersist persist = null;
-									try
-									{
-										persist = deserializePersist(repository, parentForm, persist_json_map, object, strayCats, jsFile, saved,
-											useFilesForDirtyMark);
-									}
-									catch (JSONException e)
-									{
-										ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e); //$NON-NLS-1$ //$NON-NLS-2$
-									}
-									catch (RepositoryException e)
-									{
-										ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e); //$NON-NLS-1$//$NON-NLS-2$
-									}
-									if (persist != null)
-									{
-										saved.add(persist.getUUID());
-									}
+									persist = deserializePersist(repository, scriptParent, persist_json_map, object, strayCats, jsFile, saved,
+										useFilesForDirtyMark);
 								}
-								if (jsFile != null)
+								catch (JSONException e)
 								{
-									jsParentFileMap.put(jsFile, parentForm);
+									ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e); //$NON-NLS-1$ //$NON-NLS-2$
+								}
+								catch (RepositoryException e)
+								{
+									ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e); //$NON-NLS-1$//$NON-NLS-2$
+								}
+								if (persist != null)
+								{
+									saved.add(persist.getUUID());
 								}
 							}
+							if (jsFile != null)
+							{
+								jsParentFileMap.put(jsFile, scriptParent);
+							}
 						}
-						else
-						{
-							errorKeeper.addError(jsFile, new Exception("Invalid javascript file name '" + jsFile.getName() +
-								"', doesn't have a corresponding form."));
-						}
+					}
+					else
+					{
+						errorKeeper.addError(jsFile, new Exception("Invalid javascript file name '" + jsFile.getName() +
+							"', doesn't have a corresponding form."));
 					}
 				}
 			}
@@ -564,6 +556,25 @@ public class SolutionDeserializer
 				}
 			}
 		}
+	}
+
+	public static Pair<File, ISupportChilds> getJSONFileFromJS(File jsFile, String jsFileName, ISupportChilds parent) throws RepositoryException
+	{
+		File jsonFile = null;
+		ISupportChilds scriptParent = null;
+		if (jsFile.getParentFile().getName().equals(SolutionSerializer.FORMS_DIR))
+		{
+			jsonFile = new File(jsFile.getParent(), jsFileName.substring(0, jsFileName.length() - SolutionSerializer.JS_FILE_EXTENSION.length()) +
+				SolutionSerializer.FORM_FILE_EXTENSION);
+		}
+		else if (jsFileName.endsWith(SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT))
+		{
+			// tablenode
+			jsonFile = new File(jsFile.getParent(), jsFileName.substring(0, jsFileName.length() - SolutionSerializer.CALCULATIONS_POSTFIX_WITH_EXT.length()) +
+				SolutionSerializer.TABLENODE_FILE_EXTENSION);
+		}
+
+		return new Pair<File, ISupportChilds>(jsonFile, scriptParent);
 	}
 
 	/**
@@ -1885,8 +1896,23 @@ public class SolutionDeserializer
 				}
 
 				File file = f.getLocation().toFile();
-				UUID uuid = getUUID(file);
-				return AbstractRepository.searchPersist(((ServoyProject)nature).getSolution(), uuid);
+				if (f.getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT))
+				{
+					try
+					{
+						file = getJSONFileFromJS(file, f.getName(), null).getLeft();
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logWarning("Error paring js to json", e); //$NON-NLS-1$
+					}
+				}
+
+				if (file != null && file.exists())
+				{
+					UUID uuid = getUUID(file);
+					return AbstractRepository.searchPersist(((ServoyProject)nature).getSolution(), uuid);
+				}
 			}
 		}
 		catch (CoreException e)

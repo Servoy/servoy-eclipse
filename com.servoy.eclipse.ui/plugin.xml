@@ -960,4 +960,14 @@
             nature="org.eclipse.dltk.javascript.core.nature">
       </keywordProvider>
    </extension>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.eclipse.ui.IEditorPart"
+            class="com.servoy.eclipse.ui.editors.EditorPartAdapter">
+         <adapter
+               type="com.servoy.j2db.persistence.IPersist">
+         </adapter>
+      </factory>
+   </extension>
 </plugin>
