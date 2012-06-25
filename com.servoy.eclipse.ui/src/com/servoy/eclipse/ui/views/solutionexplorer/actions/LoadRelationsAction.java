@@ -219,35 +219,40 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 
 						resultSet = dbmd.getImportedKeys(server.getConfig().getCatalog(), server.getConfig().getSchema(), table.getSQLName());
 						int lastKeySeq = Integer.MAX_VALUE;
+						List<List<String[]>> fk_rel_items_list = new ArrayList<List<String[]>>();
 						while (resultSet.next())
 						{
 							String pcolumnName = resultSet.getString("PKCOLUMN_NAME"); //$NON-NLS-1$
 							String ptableName = resultSet.getString("PKTABLE_NAME"); //$NON-NLS-1$
 							String fcolumnName = resultSet.getString("FKCOLUMN_NAME"); //$NON-NLS-1$
 
-							String relname = table.getSQLName() + "_to_" + ptableName; //$NON-NLS-1$
-
 							int keySeq = resultSet.getInt("KEY_SEQ"); //$NON-NLS-1$
-							Debug.trace("Found (import) rel: name: " + relname + " keyseq = " + keySeq + ' ' + table.getSQLName() + ' ' + pcolumnName + " -> " +
-								ptableName + ' ' + fcolumnName);
-
-							List<List<String[]>> rel_items_list = relationInfo.get(relname);
-							if (rel_items_list == null)
-							{
-								rel_items_list = new ArrayList<List<String[]>>();
-								relationInfo.put(relname, rel_items_list);
-							}
+							Debug.trace("Found (import) rel: name: " + table.getSQLName() + "_to_" + ptableName + " keyseq = " + keySeq + ' ' +
+								table.getSQLName() + ' ' + pcolumnName + " -> " + ptableName + ' ' + fcolumnName);
 
 							// assume KEY_SEQ ascending ordered, do not assume 0 or 1 based (jdbc spec is not clear on this).
 							// when KEY_SEQ is not increasing, we have a separate constraint between the same tables.
-							if (rel_items_list.size() == 0 || keySeq <= lastKeySeq)
+							if (fk_rel_items_list.size() == 0 || keySeq <= lastKeySeq)
 							{
-								rel_items_list.add(new ArrayList<String[]>());
+								fk_rel_items_list.add(new ArrayList<String[]>());
 							}
 							lastKeySeq = keySeq;
 
 							// add the item to the last list of rel_items_list
-							rel_items_list.get(rel_items_list.size() - 1).add(new String[] { table.getSQLName(), fcolumnName, ptableName, pcolumnName, null });
+							fk_rel_items_list.get(fk_rel_items_list.size() - 1).add(
+								new String[] { table.getSQLName(), fcolumnName, ptableName, pcolumnName, null });
+						}
+
+						// generate relation names for the inversed fk constraints
+						for (List<String[]> rel_items_list : fk_rel_items_list)
+						{
+							String relationName = createInversedFKRelationName(table, rel_items_list);
+							List<List<String[]>> rel_items = relationInfo.get(relationName);
+							if (rel_items == null)
+							{
+								relationInfo.put(relationName, rel_items = new ArrayList<List<String[]>>());
+							}
+							rel_items.add(rel_items_list);
 						}
 						resultSet = Utils.closeResultSet(resultSet);
 
@@ -261,21 +266,13 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 								List<Column> primaryColumns = new ArrayList<Column>();
 								List<Column> foreignColumns = new ArrayList<Column>();
 
-								String ptableName = null;
-								String pcolumnName = null;
-								String ftableName = null;
-								String fcolumnName = null;
-								String fkname = null;
-								List<String[]> rel_items = rel_items_list.get(l);
-								for (int i = 0; i < rel_items.size(); i++)
+								for (String[] element : rel_items_list.get(l))
 								{
-									String[] element = rel_items.get(i);
-
-									ptableName = element[0];
-									pcolumnName = element[1];
-									ftableName = element[2];
-									fcolumnName = element[3];
-									fkname = element[4];
+//									String ptableName = element[0];
+									String pcolumnName = element[1];
+									String ftableName = element[2];
+									String fcolumnName = element[3];
+//									String fkname = element[4];
 
 									Table foreignTable = server.getTable(ftableName);
 									if (foreignTable == null || foreignTable.isMarkedAsHiddenInDeveloper()) continue;
@@ -295,29 +292,6 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 									if (rel_items_list.size() > 1)
 									{
 										relationName += "_" + (l + 1);
-									}
-									else if (fkname == null && rel_items_list.size() == 1)
-									{
-										String loadedRelationsNamingPattern = new DesignerPreferences().getLoadedRelationsNamingPattern();
-										if (loadedRelationsNamingPattern != null && loadedRelationsNamingPattern.trim().length() > 0)
-										{
-											Map<String, String> substitutions = new HashMap<String, String>(4);
-											substitutions.put("childtable", ptableName);
-											substitutions.put("childcolumn", pcolumnName);
-											substitutions.put("parenttable", ftableName);
-											substitutions.put("parentcolumn", fcolumnName);
-
-											Matcher matcher = Pattern.compile("\\$\\{(\\w+)\\}").matcher(loadedRelationsNamingPattern.trim());
-											StringBuffer stringBuffer = new StringBuffer();
-											while (matcher.find())
-											{
-												String key = matcher.group(1);
-												String value = substitutions.get(key);
-												matcher.appendReplacement(stringBuffer, value == null ? "??" + key + "??" : value);
-											}
-											matcher.appendTail(stringBuffer);
-											relationName = stringBuffer.toString().toLowerCase();
-										}
 									}
 
 									boolean defaultAdd = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getRelation(
@@ -350,6 +324,48 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 				ServoyLog.logError(ex);
 			}
 			return relations;
+		}
+
+		private String createInversedFKRelationName(Table table, List<String[]> rel_items_list)
+		{
+			if (rel_items_list.size() == 0)
+			{
+				return null;
+			}
+			String fkname = rel_items_list.get(0)[4];
+			if (fkname != null)
+			{
+				return fkname;
+			}
+
+			String[] element = rel_items_list.get(0);
+			String ftableName = element[0];
+			String fcolumnName = element[1];
+			String ptableName = element[2];
+			String pcolumnName = element[3];
+
+			String loadedRelationsNamingPattern = new DesignerPreferences().getLoadedRelationsNamingPattern();
+			if (rel_items_list.size() > 1 || loadedRelationsNamingPattern == null || loadedRelationsNamingPattern.trim().length() == 0)
+			{
+				return table.getSQLName() + "_to_" + ptableName;
+			}
+
+			Map<String, String> substitutions = new HashMap<String, String>(4);
+			substitutions.put("childtable", ftableName);
+			substitutions.put("childcolumn", fcolumnName);
+			substitutions.put("parenttable", ptableName);
+			substitutions.put("parentcolumn", pcolumnName);
+
+			Matcher matcher = Pattern.compile("\\$\\{(\\w+)\\}").matcher(loadedRelationsNamingPattern.trim());
+			StringBuffer stringBuffer = new StringBuffer();
+			while (matcher.find())
+			{
+				String key = matcher.group(1);
+				String value = substitutions.get(key);
+				matcher.appendReplacement(stringBuffer, value == null ? "??" + key + "??" : value);
+			}
+			matcher.appendTail(stringBuffer);
+			return stringBuffer.toString().toLowerCase();
 		}
 	}
 }
