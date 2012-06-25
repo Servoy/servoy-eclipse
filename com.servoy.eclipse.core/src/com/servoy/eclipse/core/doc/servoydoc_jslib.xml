@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <servoydoc>
   <jslib>
     <object publicName="Array" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Array" scriptingName="Array">
@@ -1938,42 +1938,42 @@ application.output(printHello.toString());]]></sample>
     </object>
     <object publicName="JS Lib" qualifiedName="com.servoy.j2db.documentation.scripting.docs.JSLib">
       <properties>
-        <property name="Infinity">
+        <property name="Infinity" staticCall="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Numeric value representing infinity.]]></description>
           <summary><![CDATA[Numeric value representing infinity.]]></summary>
           <sample><![CDATA[Infinity]]></sample>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Properties/Infinity</url>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Infinity</url>
             </link>
           </links>
         </property>
-        <property name="NaN">
+        <property name="NaN" staticCall="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Value representing Not-a-Number.]]></description>
           <summary><![CDATA[Value representing Not-a-Number.]]></summary>
           <sample><![CDATA[NaN]]></sample>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Properties/NaN</url>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Nan</url>
             </link>
           </links>
         </property>
-        <property name="undefined">
+        <property name="undefined" staticCall="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           <description><![CDATA[The value undefined.]]></description>
           <summary><![CDATA[The value undefined.]]></summary>
           <sample><![CDATA[undefined]]></sample>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Properties/undefined</url>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/undefined</url>
             </link>
           </links>
         </property>
       </properties>
       <functions>
-        <function name="decodeURI">
+        <function name="decodeURI" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -1985,13 +1985,16 @@ var encoded = encodeURI(str);
 var decoded = decodeURI(encoded);
 application.output(encoded);//http://www.mysite.com/my%20code.asp?name=%5bcool%5d
 application.output(decoded);//http://www.mysite.com/my code.asp?name=[cool]]]></sample>
+          <parameters>
+            <parameter name="encodedURI" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </parameters>
           <links>
             <link>
               <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/decodeURI</url>
             </link>
           </links>
         </function>
-        <function name="decodeURIComponent">
+        <function name="decodeURIComponent" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -2008,11 +2011,11 @@ application.output(decoded); //my code.asp?name=[cool]]]></sample>
           </parameters>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Functions/decodeURIComponent</url>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/decodeURIComponent</url>
             </link>
           </links>
         </function>
-        <function name="encodeURI">
+        <function name="encodeURI" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -2024,13 +2027,16 @@ var encoded = encodeURI(str);
 var decoded = decodeURI(encoded);
 application.output(encoded);//http://www.mysite.com/my%20code.asp?name=%5bcool%5d
 application.output(decoded);//http://www.mysite.com/my code.asp?name=[cool]]]></sample>
+          <parameters>
+            <parameter name="URI" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </parameters>
           <links>
             <link>
               <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/encodeURI</url>
             </link>
           </links>
         </function>
-        <function name="encodeURIComponent">
+        <function name="encodeURIComponent" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -2042,6 +2048,9 @@ var encoded = encodeURIComponent(str);
 var decoded = decodeURIComponent(encoded);
 application.output(encoded); //my%20code.asp%3fname%3d%5bcool%5d
 application.output(decoded); //my code.asp?name=[cool]]]></sample>
+          <parameters>
+            <parameter name="URI" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </parameters>
           <links>
             <link>
               <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/encodeURIComponent</url>
@@ -2065,7 +2074,7 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
             </link>
           </links>
         </function>
-        <function name="eval">
+        <function name="eval" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -2074,13 +2083,16 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
           <summary><![CDATA[Evaluates JavaScript code passed as a string.]]></summary>
           <sample><![CDATA[eval("var x = 2 + 3;");
 application.output(x); // prints: 5.0]]></sample>
+          <parameters>
+            <parameter name="expression" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </parameters>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Functions/eval</url>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/eval</url>
             </link>
           </links>
         </function>
-        <function name="isFinite">
+        <function name="isFinite" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2090,25 +2102,33 @@ application.output(x); // prints: 5.0]]></sample>
           <sample><![CDATA[application.output(isFinite(1)); // prints: true
 application.output(isFinite(Infinity)); // prints: false
 application.output(isFinite(isNaN)); // prints: false]]></sample>
+          <parameters>
+            <parameter name="n" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </parameters>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Functions/isFinite</url>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/isFinite</url>
             </link>
           </links>
         </function>
-        <function name="isNaN">
-          <argumentsTypes/>
+        <function name="isNaN" staticCall="true">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[The NaN property indicates that a value is 'Not a Number'.]]></description>
           <summary><![CDATA[The NaN property indicates that a value is 'Not a Number'.]]></summary>
           <sample><![CDATA[isNaN( value )]]></sample>
+          <parameters>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </parameters>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Predefined_Functions/isNaN_Function</url>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/isNaN</url>
             </link>
           </links>
         </function>
-        <function name="isXMLName">
+        <function name="isXMLName" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -2117,33 +2137,65 @@ application.output(isFinite(isNaN)); // prints: false]]></sample>
           <summary><![CDATA[Returns true if the given name can be used as a valid name for an XML element or attribute.]]></summary>
           <sample><![CDATA[application.output(isXMLName("good_name")); // prints: true
 application.output(isXMLName("bad name")); // because of the space, prints: false]]></sample>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </parameters>
           <links>
             <link>
               <url>http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-357.pdf</url>
             </link>
           </links>
         </function>
-        <function name="parseFloat">
-          <argumentsTypes/>
+        <function name="parseFloat" staticCall="true">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Makes a floating point number from the starting numbers in a given string.]]></description>
           <summary><![CDATA[Makes a floating point number from the starting numbers in a given string.]]></summary>
           <sample><![CDATA[parseFloat('string')]]></sample>
+          <parameters>
+            <parameter name="text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </parameters>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Predefined_Functions/parseInt_and_parseFloat_Functions</url>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/parseFloat</url>
             </link>
           </links>
         </function>
-        <function name="parseInt">
-          <argumentsTypes/>
+        <function name="parseInt" staticCall="true">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <description><![CDATA[Makes a integer from the starting numbers in a given string in the base specified.]]></description>
+          <summary><![CDATA[Makes a integer from the starting numbers in a given string in the base specified.]]></summary>
+          <sample><![CDATA[parseInt('0774')]]></sample>
+          <parameters>
+            <parameter name="text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/parseInt</url>
+            </link>
+          </links>
+        </function>
+        <function name="parseInt" staticCall="true">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Makes a integer from the starting numbers in a given string in the base specified.]]></description>
           <summary><![CDATA[Makes a integer from the starting numbers in a given string in the base specified.]]></summary>
           <sample><![CDATA[parseInt('0774' , 8)]]></sample>
+          <parameters>
+            <parameter name="text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+            <parameter name="radix" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          </parameters>
           <links>
             <link>
-              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Predefined_Functions/parseInt_and_parseFloat_Functions</url>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/parseInt</url>
             </link>
           </links>
         </function>
@@ -2164,7 +2216,7 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
             </link>
           </links>
         </function>
-        <function name="uneval">
+        <function name="uneval" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
@@ -2172,6 +2224,9 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
           <description><![CDATA[Returns the string representation behind a given object.]]></description>
           <summary><![CDATA[Returns the string representation behind a given object.]]></summary>
           <sample><![CDATA[application.output(uneval(isNaN)); // prints something like: function isNaN() { [native code for isNaN, arity=1] }]]></sample>
+          <parameters>
+            <parameter name="obj" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </parameters>
         </function>
       </functions>
     </object>
@@ -3159,18 +3214,18 @@ application.output(patt.test(str)==true)]]></sample>
     </object>
     <object publicName="Special Operators" qualifiedName="com.servoy.j2db.documentation.scripting.docs.SpecialOperators">
       <functions>
-        <function name="typeof">
+        <function name="typeof" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Returns the type of the given object, one of these get returned: number, string, boolean, object, function, undefined.]]></description>
           <summary><![CDATA[Returns the type of the given object, one of these get returned: number, string, boolean, object, function, undefined.]]></summary>
-          <sample><![CDATA[application.output(typeof("abc")); // string
-application.output(typeof(10)); // number
-application.output(typeof(10.1)); // number
-application.output(typeof(true)); // boolean
-application.output(typeof(parseInt)); // function
-application.output(typeof(application)); // object
-application.output(typeof(somethingInexisting)); // undefined]]></sample>
+          <sample><![CDATA[application.output(typeof "abc"); // string
+application.output(typeof 10); // number
+application.output(typeof 10.1); // number
+application.output(typeof true); // boolean
+application.output(typeof parseInt); // function
+application.output(typeof application); // object
+application.output(typeof somethingInexisting); // undefined]]></sample>
           <links>
             <link>
               <url>https://developer.mozilla.org/en/JavaScript/Reference/Operators/typeof</url>
@@ -3181,56 +3236,60 @@ application.output(typeof(somethingInexisting)); // undefined]]></sample>
     </object>
     <object publicName="Statements" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Statements">
       <functions>
-        <function name="break">
+        <function name="break" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
-          <description/>
+          <description><![CDATA[Break statement exits a loop.]]></description>
+          <summary><![CDATA[Break statement exits a loop.]]></summary>
           <sample><![CDATA[break]]></sample>
         </function>
-        <function name="const">
+        <function name="const" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
-          <description/>
+          <description><![CDATA[Constant declaration.]]></description>
+          <summary><![CDATA[Constant declaration.]]></summary>
           <sample><![CDATA[const #;]]></sample>
         </function>
-        <function name="continue">
+        <function name="continue" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
-          <description/>
+          <description><![CDATA[Continue statement, jumps to next iteration of the loop.]]></description>
+          <summary><![CDATA[Continue statement, jumps to next iteration of the loop.]]></summary>
           <sample><![CDATA[continue]]></sample>
         </function>
-        <function name="do while">
+        <function name="do while" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
-          <description><![CDATA[loop]]></description>
-          <summary><![CDATA[loop]]></summary>
+          <description><![CDATA[do while loop]]></description>
+          <summary><![CDATA[do while loop]]></summary>
           <sample><![CDATA[do
 {
 }
 while ( # )]]></sample>
         </function>
-        <function name="for each in">
+        <function name="for each in" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
-          <description><![CDATA[loop]]></description>
-          <summary><![CDATA[loop]]></summary>
+          <description><![CDATA[foreach loop]]></description>
+          <summary><![CDATA[foreach loop]]></summary>
           <sample><![CDATA[for ( var item in obj )
 {
 }]]></sample>
         </function>
-        <function name="for">
+        <function name="for" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
-          <description><![CDATA[loop]]></description>
-          <summary><![CDATA[loop]]></summary>
+          <description><![CDATA[for loop]]></description>
+          <summary><![CDATA[for loop]]></summary>
           <sample><![CDATA[for ( var i = 0 ; i < # ; i++ )
 {
 }]]></sample>
         </function>
-        <function name="if else">
+        <function name="if else" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
-          <description/>
+          <description><![CDATA[If/Else statement.]]></description>
+          <summary><![CDATA[If/Else statement.]]></summary>
           <sample><![CDATA[if ( # )
 {
 }
@@ -3238,15 +3297,16 @@ else
 {
 }]]></sample>
         </function>
-        <function name="if">
+        <function name="if" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
-          <description/>
+          <description><![CDATA[If statement]]></description>
+          <summary><![CDATA[If statement]]></summary>
           <sample><![CDATA[if ( # )
 {
 }]]></sample>
         </function>
-        <function name="label">
+        <function name="label" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Provides a statement with an identifier that you can refer to using a break or continue statement.
@@ -3265,20 +3325,22 @@ outer_loop: while (i < 10) {
 	}
 }]]></sample>
         </function>
-        <function name="switch">
+        <function name="switch" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
-          <description/>
+          <description><![CDATA[Switch statement.]]></description>
+          <summary><![CDATA[Switch statement.]]></summary>
           <sample><![CDATA[switch( # )
 {
 case:
 default:
 }]]></sample>
         </function>
-        <function name="try catch finally">
+        <function name="try catch finally" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
-          <description/>
+          <description><![CDATA[try/catch/finally statement]]></description>
+          <summary><![CDATA[try/catch/finally statement]]></summary>
           <sample><![CDATA[try 
 {
 	#
@@ -3291,10 +3353,11 @@ default:
 	#
 }]]></sample>
         </function>
-        <function name="try catch">
+        <function name="try catch" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
-          <description/>
+          <description><![CDATA[try/catch statement]]></description>
+          <summary><![CDATA[try/catch statement]]></summary>
           <sample><![CDATA[try 
 {
 	#
@@ -3304,17 +3367,18 @@ default:
 	#
 }]]></sample>
         </function>
-        <function name="var">
+        <function name="var" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
-          <description/>
+          <description><![CDATA[Variable declaration]]></description>
+          <summary><![CDATA[Variable declaration]]></summary>
           <sample><![CDATA[var #;]]></sample>
         </function>
-        <function name="while">
+        <function name="while" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
-          <description><![CDATA[loop]]></description>
-          <summary><![CDATA[loop]]></summary>
+          <description><![CDATA[while loop]]></description>
+          <summary><![CDATA[while loop]]></summary>
           <sample><![CDATA[while ( # )
 {
 	#
