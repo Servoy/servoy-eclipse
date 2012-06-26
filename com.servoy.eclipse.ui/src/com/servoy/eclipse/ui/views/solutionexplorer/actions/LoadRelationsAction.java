@@ -59,6 +59,10 @@ import com.servoy.j2db.util.Utils;
 
 public class LoadRelationsAction extends Action implements ISelectionChangedListener
 {
+	public static final String CHILD_TABLE_KEYWORD = "childtable";
+	public static final String PARENT_TABLE_KEYWORD = "parenttable";
+	public static final String CHILD_COLUMN_KEYWORD = "childcolumn";
+	public static final String PARENT_COLUMN_KEYWORD = "parentcolumn";
 
 	private final SolutionExplorerView viewer;
 
@@ -332,11 +336,6 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 			{
 				return null;
 			}
-			String fkname = rel_items_list.get(0)[4];
-			if (fkname != null)
-			{
-				return fkname;
-			}
 
 			String[] element = rel_items_list.get(0);
 			String ftableName = element[0];
@@ -351,10 +350,10 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 			}
 
 			Map<String, String> substitutions = new HashMap<String, String>(4);
-			substitutions.put("childtable", ftableName);
-			substitutions.put("childcolumn", fcolumnName);
-			substitutions.put("parenttable", ptableName);
-			substitutions.put("parentcolumn", pcolumnName);
+			substitutions.put(CHILD_TABLE_KEYWORD, ftableName);
+			substitutions.put(CHILD_COLUMN_KEYWORD, fcolumnName);
+			substitutions.put(PARENT_TABLE_KEYWORD, ptableName);
+			substitutions.put(PARENT_COLUMN_KEYWORD, pcolumnName);
 
 			Matcher matcher = Pattern.compile("\\$\\{(\\w+)\\}").matcher(loadedRelationsNamingPattern.trim());
 			StringBuffer stringBuffer = new StringBuffer();
