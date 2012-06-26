@@ -261,6 +261,16 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			IResource resource = context.getModelElement().getResource();
 			if (resource != null && resource.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 			{
+				SoftReference<Pair<Long, IValueCollection>> sr = scriptCache.get(resource);
+				Pair<Long, IValueCollection> pair = null;
+				if (sr != null)
+				{
+					pair = sr.get();
+					if (pair != null && pair.getLeft().longValue() != resource.getModificationStamp())
+					{
+						scriptCache.clear();
+					}
+				}
 				// javascript file
 				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 				if (fs != null)
@@ -369,6 +379,8 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		}
 	};
 
+	private static final ThreadLocal<Boolean> resolve = new ThreadLocal<Boolean>();
+
 	public static IValueCollection getValueCollection(IFile file)
 	{
 		IValueCollection collection = null;
@@ -395,9 +407,16 @@ public class ValueCollectionProvider implements IMemberEvaluator
 						scriptCache.clear();
 					}
 					set.add(file);
+					boolean doResolve = false;
+					Boolean resolving = resolve.get();
+					if (resolving == null)
+					{
+						doResolve = true;
+						resolve.set(Boolean.TRUE);
+					}
 					try
 					{
-						collection = ValueCollectionFactory.createValueCollection(file, false);
+						collection = ValueCollectionFactory.createValueCollection(file, doResolve);
 						collection = ValueCollectionFactory.makeImmutable(collection);
 						scriptCache.put(
 							file,
@@ -406,6 +425,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 					finally
 					{
 						set.remove(file);
+						if (doResolve) resolve.remove();
 					}
 				}
 				else
