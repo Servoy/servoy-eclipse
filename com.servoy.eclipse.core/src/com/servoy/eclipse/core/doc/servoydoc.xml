@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -4119,8 +4119,21 @@ var isPrimaryKey = jscolumn.isRowIdentifier();]]></sample>
             <argumentType typecode="com.servoy.j2db.dataprocessing.IRecordInternal"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.dataprocessing.JSTable" typecode="com.servoy.j2db.dataprocessing.JSTable"><![CDATA[the JSTable get from the input.]]></return>
-          <description/>
-          <sample/>
+          <description><![CDATA[Returns the JSTable object from which more info can be obtained (like columns).
+The parameter can be a JSFoundset,JSRecord,datasource string or server/tablename combination.]]></description>
+          <summary><![CDATA[Returns the JSTable object from which more info can be obtained (like columns).]]></summary>
+          <sample><![CDATA[var jstable = databaseManager.getTable(controller.getDataSource());
+//var jstable = databaseManager.getTable(foundset);
+//var jstable = databaseManager.getTable(record);
+//var jstable = databaseManager.getTable(datasource);
+var tableSQLName = jstable.getSQLName();
+var columnNamesArray = jstable.getColumnNames();
+var firstColumnName = columnNamesArray[0];
+var jscolumn = jstable.getColumn(firstColumnName);
+var columnLength = jscolumn.getLength();
+var columnType = jscolumn.getTypeAsString();
+var columnSQLName = jscolumn.getSQLName();
+var isPrimaryKey = jscolumn.isRowIdentifier();]]></sample>
           <parameters>
             <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal">
               <description><![CDATA[The record where the table can be get from.]]></description>
@@ -4132,8 +4145,21 @@ var isPrimaryKey = jscolumn.isRowIdentifier();]]></sample>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.dataprocessing.JSTable" typecode="com.servoy.j2db.dataprocessing.JSTable"><![CDATA[the JSTable get from the input.]]></return>
-          <description/>
-          <sample/>
+          <description><![CDATA[Returns the JSTable object from which more info can be obtained (like columns).
+The parameter can be a JSFoundset,JSRecord,datasource string or server/tablename combination.]]></description>
+          <summary><![CDATA[Returns the JSTable object from which more info can be obtained (like columns).]]></summary>
+          <sample><![CDATA[var jstable = databaseManager.getTable(controller.getDataSource());
+//var jstable = databaseManager.getTable(foundset);
+//var jstable = databaseManager.getTable(record);
+//var jstable = databaseManager.getTable(datasource);
+var tableSQLName = jstable.getSQLName();
+var columnNamesArray = jstable.getColumnNames();
+var firstColumnName = columnNamesArray[0];
+var jscolumn = jstable.getColumn(firstColumnName);
+var columnLength = jscolumn.getLength();
+var columnType = jscolumn.getTypeAsString();
+var columnSQLName = jscolumn.getSQLName();
+var isPrimaryKey = jscolumn.isRowIdentifier();]]></sample>
           <parameters>
             <parameter name="dataSource" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The datasource where the table can be get from.]]></description>
@@ -4146,8 +4172,21 @@ var isPrimaryKey = jscolumn.isRowIdentifier();]]></sample>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.dataprocessing.JSTable" typecode="com.servoy.j2db.dataprocessing.JSTable"><![CDATA[the JSTable get from the input.]]></return>
-          <description/>
-          <sample/>
+          <description><![CDATA[Returns the JSTable object from which more info can be obtained (like columns).
+The parameter can be a JSFoundset,JSRecord,datasource string or server/tablename combination.]]></description>
+          <summary><![CDATA[Returns the JSTable object from which more info can be obtained (like columns).]]></summary>
+          <sample><![CDATA[var jstable = databaseManager.getTable(controller.getDataSource());
+//var jstable = databaseManager.getTable(foundset);
+//var jstable = databaseManager.getTable(record);
+//var jstable = databaseManager.getTable(datasource);
+var tableSQLName = jstable.getSQLName();
+var columnNamesArray = jstable.getColumnNames();
+var firstColumnName = columnNamesArray[0];
+var jscolumn = jstable.getColumn(firstColumnName);
+var columnLength = jscolumn.getLength();
+var columnType = jscolumn.getTypeAsString();
+var columnSQLName = jscolumn.getSQLName();
+var isPrimaryKey = jscolumn.isRowIdentifier();]]></sample>
           <parameters>
             <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[Server name.]]></description>
@@ -6624,7 +6663,12 @@ break;
           <description><![CDATA[Constant used when setting or getting the flags of columns.
 This flag identifies columns that are skipped in the sql.]]></description>
           <summary><![CDATA[Constant used when setting or getting the flags of columns.]]></summary>
-          <sample/>
+          <sample><![CDATA[var table = databaseManager.getTable('db:/example_data/orders')
+var column = table.getColumn('customerid')
+if (column.hasFlag(JSColumn.UUID_COLUMN))
+{
+	// handle uuid column
+}]]></sample>
         </constant>
         <constant name="INTEGER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -6666,7 +6710,18 @@ break;
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for column information indicating unset values.]]></description>
           <summary><![CDATA[Constant for column information indicating unset values.]]></summary>
-          <sample/>
+          <sample><![CDATA[var table = databaseManager.getTable('db:/example_data/orders')
+var column = table.getColumn('customerid')
+switch (column.getSequenceType())
+{
+case JSColumn.NONE:
+	// handle column with no sequence
+break;
+
+case JSColumn.UUID_GENERATOR:
+	// handle uuid generated column
+break;
+}]]></sample>
         </constant>
         <constant name="NUMBER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -6770,7 +6825,12 @@ break;
           <description><![CDATA[Constant used when setting or getting the flags of columns.
 This flag identifies columns whose values are treated as UUID.]]></description>
           <summary><![CDATA[Constant used when setting or getting the flags of columns.]]></summary>
-          <sample/>
+          <sample><![CDATA[var table = databaseManager.getTable('db:/example_data/orders')
+var column = table.getColumn('customerid')
+if (column.hasFlag(JSColumn.UUID_COLUMN))
+{
+	// handle uuid column
+}]]></sample>
         </constant>
         <constant name="UUID_GENERATOR">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -7079,7 +7139,12 @@ break;
           <description><![CDATA[Constant used when setting or getting the flags of columns.
 This flag identifies columns that are skipped in the sql.]]></description>
           <summary><![CDATA[Constant used when setting or getting the flags of columns.]]></summary>
-          <sample/>
+          <sample><![CDATA[var table = databaseManager.getTable('db:/example_data/orders')
+var column = table.getColumn('customerid')
+if (column.hasFlag(JSColumn.UUID_COLUMN))
+{
+	// handle uuid column
+}]]></sample>
         </constant>
         <constant name="INTEGER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -7121,7 +7186,18 @@ break;
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for column information indicating unset values.]]></description>
           <summary><![CDATA[Constant for column information indicating unset values.]]></summary>
-          <sample/>
+          <sample><![CDATA[var table = databaseManager.getTable('db:/example_data/orders')
+var column = table.getColumn('customerid')
+switch (column.getSequenceType())
+{
+case JSColumn.NONE:
+	// handle column with no sequence
+break;
+
+case JSColumn.UUID_GENERATOR:
+	// handle uuid generated column
+break;
+}]]></sample>
         </constant>
         <constant name="NUMBER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -7225,7 +7301,12 @@ break;
           <description><![CDATA[Constant used when setting or getting the flags of columns.
 This flag identifies columns whose values are treated as UUID.]]></description>
           <summary><![CDATA[Constant used when setting or getting the flags of columns.]]></summary>
-          <sample/>
+          <sample><![CDATA[var table = databaseManager.getTable('db:/example_data/orders')
+var column = table.getColumn('customerid')
+if (column.hasFlag(JSColumn.UUID_COLUMN))
+{
+	// handle uuid column
+}]]></sample>
         </constant>
         <constant name="UUID_GENERATOR">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -8851,7 +8932,7 @@ for (var i = 0; i < allCalcs.length; i++) {
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the dataSource]]></return>
           <description><![CDATA[Get the data source for this node.]]></description>
           <summary><![CDATA[Get the data source for this node.]]></summary>
-          <sample/>
+          <sample><![CDATA[var nodeDataSource = solutionModel.getDataSourceNode("db:/example_data/customers").getDataSource();]]></sample>
         </function>
         <function name="getMethod">
           <argumentsTypes>
@@ -10755,8 +10836,11 @@ if (form.transparent == false)
 var field = form.newField('columnTextDataProvider',JSField.TEXT_FIELD,100,100,100,50);
 forms['myForm'].controller.show();]]></sample>
         </property>
-        <property deprecated="true" name="useSeparateFoundSet" undocumented="true">
+        <property deprecated="true" name="useSeparateFoundSet">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description/>
+          <deprecated><![CDATA[see getNamedFoundSet()]]></deprecated>
+          <sample/>
         </property>
         <property name="view">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -11117,9 +11201,12 @@ for (var i in labels)
           <summary><![CDATA[Retrieves the Leading Grand Summary part of the form.]]></summary>
           <sample><![CDATA[form.getLeadingGrandSummaryPart().background = 'yellow';]]></sample>
         </function>
-        <function deprecated="true" name="getLeadingSubSummaryPart" undocumented="true">
+        <function deprecated="true" name="getLeadingSubSummaryPart">
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSPart" typecode="com.servoy.j2db.scripting.solutionmodel.JSPart"/>
+          <description/>
+          <deprecated><![CDATA[see getLeadingSubSummaryParts()]]></deprecated>
+          <sample/>
         </function>
         <function name="getLeadingSubSummaryParts">
           <argumentsTypes/>
@@ -11415,9 +11502,12 @@ for (var i in tabPanels)
           <summary><![CDATA[Retrieves the Trailing Grand Summary part of the form.]]></summary>
           <sample><![CDATA[form.getTrailingGrandSummaryPart().background = 'yellow';]]></sample>
         </function>
-        <function deprecated="true" name="getTrailingSubSummaryPart" undocumented="true">
+        <function deprecated="true" name="getTrailingSubSummaryPart">
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSPart" typecode="com.servoy.j2db.scripting.solutionmodel.JSPart"/>
+          <description/>
+          <deprecated><![CDATA[getTrailingSubSummaryParts()]]></deprecated>
+          <sample/>
         </function>
         <function name="getTrailingSubSummaryParts">
           <argumentsTypes/>
@@ -13557,7 +13647,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
               <description><![CDATA[The foundset to load record from]]></description>
             </parameter>
             <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[True for ignoring the argument array]]></description>
+              <description><![CDATA[true for ignoring the argument array]]></description>
             </parameter>
           </parameters>
         </function>
@@ -13647,7 +13737,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
               <description><![CDATA[The dataset to load records from]]></description>
             </parameter>
             <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[True for ignoring the argument array]]></description>
+              <description><![CDATA[true for ignoring the argument array]]></description>
             </parameter>
           </parameters>
         </function>
@@ -17682,9 +17772,12 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
     </object>
     <object publicName="JSRenderEvent" qualifiedName="com.servoy.j2db.scripting.JSRenderEvent">
       <functions>
-        <function deprecated="true" name="getElement" undocumented="true">
+        <function deprecated="true" name="getElement">
           <argumentsTypes/>
           <return type="com.servoy.j2db.ui.IScriptRenderMethodsWithFormat" typecode="com.servoy.j2db.ui.IScriptRenderMethods"/>
+          <description/>
+          <deprecated><![CDATA[replaced by getRenderable()]]></deprecated>
+          <sample/>
         </function>
         <function name="getRecord">
           <argumentsTypes/>
@@ -17916,8 +18009,11 @@ application.output(st.getUUID().toString());]]></sample>
     </object>
     <object publicName="JSTab" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSTab">
       <properties>
-        <property deprecated="true" name="background" undocumented="true">
+        <property deprecated="true" name="background">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description/>
+          <deprecated><![CDATA[obsolete; not supported]]></deprecated>
+          <sample/>
         </property>
         <property name="containsForm">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.scripting.solutionmodel.JSForm"/>
@@ -17935,8 +18031,11 @@ firstTab.containsForm = anotherChildForm;]]></sample>
           <sample><![CDATA[var firstTab = tabs.newTab('firstTab', 'Child Form', childForm, relation);
 firstTab.foreground = '#FF0000';]]></sample>
         </property>
-        <property deprecated="true" name="height" undocumented="true">
+        <property deprecated="true" name="height">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[obsolete; not supported]]></deprecated>
+          <sample/>
         </property>
         <property name="imageMedia">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMedia" typecode="com.servoy.j2db.scripting.solutionmodel.JSMedia"/>
@@ -17983,8 +18082,11 @@ valid HTML tags to format tooltip text. For example:
           <sample><![CDATA[var firstTab = tabs.newTab('firstTab', 'Child Form', childForm, relation);
 firstTab.toolTipText = 'Tooltip';]]></sample>
         </property>
-        <property deprecated="true" name="width" undocumented="true">
+        <property deprecated="true" name="width">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[obsolete; not supported]]></deprecated>
+          <sample/>
         </property>
         <property name="x">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -18115,8 +18217,11 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
         </property>
-        <property deprecated="true" name="closeOnTabs" undocumented="true">
+        <property deprecated="true" name="closeOnTabs">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description/>
+          <deprecated><![CDATA[not used]]></deprecated>
+          <sample/>
         </property>
         <property name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -18248,8 +18353,11 @@ tabPanel.newTab('tab1', 'Child Two', childOne, parentToChild); // The first form
 tabPanel.newTab('tab2', 'Child Two', childTwo);
 tabPanel.scrollTabs = true;]]></sample>
         </property>
-        <property deprecated="true" name="selectedTabColor" undocumented="true">
+        <property deprecated="true" name="selectedTabColor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Color"/>
+          <description/>
+          <deprecated><![CDATA[not supported]]></deprecated>
+          <sample/>
         </property>
         <property name="styleClass">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -19456,8 +19564,11 @@ vlist.setReturnDataProviderIds('valuelist_data');
 vlist.useTableFilter = true;
 vlist.name = 'two';]]></sample>
         </property>
-        <property deprecated="true" name="relationNMName" undocumented="true">
+        <property deprecated="true" name="relationNMName">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description/>
+          <deprecated><![CDATA[relationName supports multiple levels relations]]></deprecated>
+          <sample/>
         </property>
         <property name="relationName">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -19988,7 +20099,23 @@ controller.show(win1);]]></sample>
           <description><![CDATA[Gets/Sets the undecorated property.
 If set then this window will not have any decoration and can't be moved/resized or closed.]]></description>
           <summary><![CDATA[Gets/Sets the undecorated property.]]></summary>
-          <sample/>
+          <sample><![CDATA[var someWindow = application.createWindow("someWindowName", JSWindow.WINDOW, null);
+someWindow.setInitialBounds(200, 200, 450, 350);
+controller.show(someWindow);
+
+var name = "Name: " + someWindow.getName() + "\n"
+var parent = "Parent: " + (someWindow.getParent() == null ? "none" : someWindow.getParent()) + "\n"
+var type = "TypeNumber: " + someWindow.getType() + "\n"
+var height = "Height: " + someWindow.getHeight() + "\n"
+var width = "Width: " + someWindow.getWidth() + "\n"
+var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
+var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
+var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
+var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
+var closeMsg = "Press 'Ok' to close this dialog."
+
+var infoDialog = plugins.dialogs.showInfoDialog("Window Info", info + closeMsg, "Ok");
+if (infoDialog == "Ok") someWindow.close()]]></sample>
         </property>
       </properties>
       <functions>
@@ -20037,9 +20164,10 @@ var parent = "Parent: " + (someWindow.getParent() == null ? "none" : someWindow.
 var type = "TypeNumber: " + someWindow.getType() + "\n"
 var height = "Height: " + someWindow.getHeight() + "\n"
 var width = "Width: " + someWindow.getWidth() + "\n"
+var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
 var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
 var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
-var info = name + parent + type + height + width + locationX + locationY + "\n"
+var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
 var closeMsg = "Press 'Ok' to close this dialog."
 
 var infoDialog = plugins.dialogs.showInfoDialog("Window Info", info + closeMsg, "Ok");
@@ -20059,9 +20187,10 @@ var parent = "Parent: " + (someWindow.getParent() == null ? "none" : someWindow.
 var type = "TypeNumber: " + someWindow.getType() + "\n"
 var height = "Height: " + someWindow.getHeight() + "\n"
 var width = "Width: " + someWindow.getWidth() + "\n"
+var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
 var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
 var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
-var info = name + parent + type + height + width + locationX + locationY + "\n"
+var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
 var closeMsg = "Press 'Ok' to close this dialog."
 
 var infoDialog = plugins.dialogs.showInfoDialog("Window Info", info + closeMsg, "Ok");
@@ -20081,9 +20210,10 @@ var parent = "Parent: " + (someWindow.getParent() == null ? "none" : someWindow.
 var type = "TypeNumber: " + someWindow.getType() + "\n"
 var height = "Height: " + someWindow.getHeight() + "\n"
 var width = "Width: " + someWindow.getWidth() + "\n"
+var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
 var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
 var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
-var info = name + parent + type + height + width + locationX + locationY + "\n"
+var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
 var closeMsg = "Press 'Ok' to close this dialog."
 
 var infoDialog = plugins.dialogs.showInfoDialog("Window Info", info + closeMsg, "Ok");
@@ -20103,9 +20233,10 @@ var parent = "Parent: " + (someWindow.getParent() == null ? "none" : someWindow.
 var type = "TypeNumber: " + someWindow.getType() + "\n"
 var height = "Height: " + someWindow.getHeight() + "\n"
 var width = "Width: " + someWindow.getWidth() + "\n"
+var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
 var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
 var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
-var info = name + parent + type + height + width + locationX + locationY + "\n"
+var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
 var closeMsg = "Press 'Ok' to close this dialog."
 
 var infoDialog = plugins.dialogs.showInfoDialog("Window Info", info + closeMsg, "Ok");
@@ -20125,9 +20256,10 @@ var parent = "Parent: " + (someWindow.getParent() == null ? "none" : someWindow.
 var type = "TypeNumber: " + someWindow.getType() + "\n"
 var height = "Height: " + someWindow.getHeight() + "\n"
 var width = "Width: " + someWindow.getWidth() + "\n"
+var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
 var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
 var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
-var info = name + parent + type + height + width + locationX + locationY + "\n"
+var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
 var closeMsg = "Press 'Ok' to close this dialog."
 
 var infoDialog = plugins.dialogs.showInfoDialog("Window Info", info + closeMsg, "Ok");
@@ -20147,9 +20279,10 @@ var parent = "Parent: " + (someWindow.getParent() == null ? "none" : someWindow.
 var type = "TypeNumber: " + someWindow.getType() + "\n"
 var height = "Height: " + someWindow.getHeight() + "\n"
 var width = "Width: " + someWindow.getWidth() + "\n"
+var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
 var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
 var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
-var info = name + parent + type + height + width + locationX + locationY + "\n"
+var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
 var closeMsg = "Press 'Ok' to close this dialog."
 
 var infoDialog = plugins.dialogs.showInfoDialog("Window Info", info + closeMsg, "Ok");
@@ -20169,9 +20302,10 @@ var parent = "Parent: " + (someWindow.getParent() == null ? "none" : someWindow.
 var type = "TypeNumber: " + someWindow.getType() + "\n"
 var height = "Height: " + someWindow.getHeight() + "\n"
 var width = "Width: " + someWindow.getWidth() + "\n"
+var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
 var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
 var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
-var info = name + parent + type + height + width + locationX + locationY + "\n"
+var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
 var closeMsg = "Press 'Ok' to close this dialog."
 
 var infoDialog = plugins.dialogs.showInfoDialog("Window Info", info + closeMsg, "Ok");
@@ -20595,17 +20729,29 @@ form.defaultPageFormat = solutionModel.createPageFormat(792,612,72,72,72,72,SM_O
     </object>
     <object publicName="PRINTSLIDING" qualifiedName="com.servoy.j2db.scripting.solutionmodel.PRINTSLIDING">
       <constants>
-        <constant deprecated="true" name="ALLOW_MOVE_MIN_X" undocumented="true">
+        <constant deprecated="true" name="ALLOW_MOVE_MIN_X">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[refer to PRINTSLIDING#ALLOW_MOVE_X]]></deprecated>
+          <sample/>
         </constant>
-        <constant deprecated="true" name="ALLOW_MOVE_MIN_Y" undocumented="true">
+        <constant deprecated="true" name="ALLOW_MOVE_MIN_Y">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[refer to PRINTSLIDING#ALLOW_MOVE_Y]]></deprecated>
+          <sample/>
         </constant>
-        <constant deprecated="true" name="ALLOW_MOVE_PLUS_X" undocumented="true">
+        <constant deprecated="true" name="ALLOW_MOVE_PLUS_X">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[refer to PRINTSLIDING#ALLOW_MOVE_X]]></deprecated>
+          <sample/>
         </constant>
-        <constant deprecated="true" name="ALLOW_MOVE_PLUS_Y" undocumented="true">
+        <constant deprecated="true" name="ALLOW_MOVE_PLUS_Y">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[refer to PRINTSLIDING#ALLOW_MOVE_Y]]></deprecated>
+          <sample/>
         </constant>
         <constant name="ALLOW_MOVE_X">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -24809,7 +24955,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
               <description><![CDATA[The foundset to load record from]]></description>
             </parameter>
             <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[True for ignoring the argument array]]></description>
+              <description><![CDATA[true for ignoring the argument array]]></description>
             </parameter>
           </parameters>
         </function>
@@ -24899,7 +25045,7 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
               <description><![CDATA[The dataset to load records from]]></description>
             </parameter>
             <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[True for ignoring the argument array]]></description>
+              <description><![CDATA[true for ignoring the argument array]]></description>
             </parameter>
           </parameters>
         </function>
@@ -25708,11 +25854,6 @@ If the current foundset is not related, no copy will made.]]></description>
       </functions>
     </object>
     <object publicName="Renderable" qualifiedName="com.servoy.j2db.ui.IScriptRenderMethodsWithFormat" scriptingName="Renderable">
-      <constants>
-        <constant name="JS_RENDERABLE" undocumented="true">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-        </constant>
-      </constants>
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -29795,7 +29936,328 @@ for (var i=0; i<elems.length; i++)
         </property>
       </properties>
     </object>
-    <object publicName="RuntimeGroup" qualifiedName="com.servoy.j2db.scripting.RuntimeGroup"/>
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeGroup" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeGroup">
+      <properties>
+        <property name="bgcolor">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
+          <sample><![CDATA[//sets the background color of the field
+%%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
+//gets the background color of the field
+var c = %%prefix%%%%elementName%%.bgcolor;]]></sample>
+        </property>
+        <property name="border">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the border attribute(s) of a specified element. 
+
+The border attributes:
+
+borderType - EmptyBorder, EtchedBorder, BevelBorder, LineBorder, TitleBorder, MatteBorder, SpecialMatteBorder.
+size - (numeric value) for: bottom, left, right, top.
+color - (hexadecimal value) for: bottom, left, right, top.
+dash pattern - (numeric value) for selected side(s).
+rounding radius - (numeric value) for selected side(s).
+
+NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
+          <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
+          <sample><![CDATA[//sets the border type to "LineBorder"
+//sets a 1 px line width for the bottom and left side of the border
+//sets the hexadecimal color of the border to "#ccffcc"
+%%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
+          <parameters>
+            <parameter name="spec">
+              <description><![CDATA[the border attributes]]></description>
+            </parameter>
+          </parameters>
+        </property>
+        <property name="enabled">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
+true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
+
+NOTE: A disabled element cannot be selected by clicking the element (or by pressing the TAB key even if this option is supported by the operating system).
+
+NOTE: A label or button element will not disable if the "displayType" design time property for a field is set to HTML_AREA.
+
+NOTE: The disabled "grayed" color is dependent on the LAF set in the Servoy Client Application Preferences. For more information see Preferences: Look And Feel in the Servoy Developer User's Guide.]]></description>
+          <summary><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".]]></summary>
+          <sample><![CDATA[//gets the enabled state of the field
+var currState = %%prefix%%%%elementName%%.enabled;
+
+//sets the enabled state of the field
+%%prefix%%%%elementName%%.enabled = !currentState;]]></sample>
+        </property>
+        <property name="fgcolor">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
+          <sample><![CDATA[//sets the foreground color of the field
+%%prefix%%%%elementName%%.fgcolor = "#000000";
+
+//gets the foreground color of the field
+var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
+        </property>
+        <property name="font">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the font name, style, and size of an element. 
+
+font name - the name of the font family.
+style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
+size - the size of the font (in points).]]></description>
+          <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
+        </property>
+        <property name="readOnly">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Gets or sets the editable/read-only state of a field; true - read-only; false - editable; ! - the editable/read-only state is inverted (the opposite). 
+
+NOTE: A field set as read-only can be selected by clicking (or pressing the TAB key if this option is supported by the operating system) and the field data can be copied.]]></description>
+          <summary><![CDATA[Gets or sets the editable/read-only state of a field; true - read-only; false - editable; ! - the editable/read-only state is inverted (the opposite).]]></summary>
+          <sample><![CDATA[//gets the editable/read-only state of the field
+var currentState = %%prefix%%%%elementName%%.readOnly;
+
+//sets the editable/read-only state of the field
+%%prefix%%%%elementName%%.readOnly = !currentState;]]></sample>
+        </property>
+        <property name="toolTipText">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the tool tip text of an element; text displays when the mouse cursor hovers over an element. 
+
+NOTE: HTML should be used for multi-line tooltips; you can also use any valid HTML tags to format tooltip text.]]></description>
+          <summary><![CDATA[Gets or sets the tool tip text of an element; text displays when the mouse cursor hovers over an element.]]></summary>
+          <sample><![CDATA[//gets the tooltip text of the element
+var toolTip = %%prefix%%%%elementName%%.toolTipText;
+
+//sets the tooltip text of the element
+%%prefix%%%%elementName%%.toolTipText = "New tip";
+%%prefix%%%%elementName%%.toolTipText = "<html>This includes <b>bolded text</b> and <font color='blue'>BLUE</font> text as well.";]]></sample>
+        </property>
+        <property name="transparent">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Gets or sets the transparency of an element; true - transparent; false - not transparent.
+
+NOTE: transparency can be inverted using ! operator: elements.elementName.transparent = !elements.elementName.transparent;
+
+NOTE: transparency will be mostly used for background color, a transparent element will receive the background of the element "beneath" it, a non transparent one will use its own background color]]></description>
+          <summary><![CDATA[Gets or sets the transparency of an element; true - transparent; false - not transparent.]]></summary>
+          <sample><![CDATA[//gets the transparency of the element
+var currentState = %%prefix%%%%elementName%%.transparent;
+
+//sets the transparency of the element
+%%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
+        </property>
+        <property name="visible">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
+
+NOTE: The visibility of an element is not persistent; the state of visibility only applies to the current user in his/her current session.]]></description>
+          <summary><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).]]></summary>
+          <sample><![CDATA[//sets the element as visible
+forms.company.elements.faxBtn.visible = true;
+
+//gets the visibility of the element
+var currentState = forms.company.elements.faxBtn.visible;
+
+//sets the element as not visible when the current state is visible
+forms.company.elements.faxBtn.visible = !currentState;]]></sample>
+        </property>
+      </properties>
+      <functions>
+        <function name="getAbsoluteFormLocationY">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the form in pixels.]]></return>
+          <description><![CDATA[Returns the absolute form (designed) Y location.]]></description>
+          <summary><![CDATA[Returns the absolute form (designed) Y location.]]></summary>
+          <sample><![CDATA[var absolute_y = %%prefix%%%%elementName%%.getAbsoluteFormLocationY();]]></sample>
+        </function>
+        <function name="getClientProperty">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[The value of the property for specified key.]]></return>
+          <description><![CDATA[Gets the specified client property for the element based on a key.
+
+NOTE: Depending on the operating system, a user interface property name may be available.]]></description>
+          <summary><![CDATA[Gets the specified client property for the element based on a key.]]></summary>
+          <sample><![CDATA[var property = %%prefix%%%%elementName%%.getClientProperty('ToolTipText');]]></sample>
+          <parameters>
+            <parameter name="key" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[user interface key (depends on operating system)]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getDesignTimeProperty">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          <description><![CDATA[Get a design-time property of an element.]]></description>
+          <summary><![CDATA[Get a design-time property of an element.]]></summary>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
+        </function>
+        <function name="getElementType">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The display type of the element as String.]]></return>
+          <description><![CDATA[Returns the type of a specified element.]]></description>
+          <summary><![CDATA[Returns the type of a specified element.]]></summary>
+          <sample><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+        </function>
+        <function name="getHeight">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The height of the element in pixels.]]></return>
+          <description><![CDATA[Returns the height of the current element. 
+NOTE: getHeight() can be used with getWidth() to set the size of an element using the setSize function. For example:
+
+//returns the width (w) and height (h)
+var w = forms.company.elements.faxBtn.getWidth();
+var h = forms.company.elements.faxBtn.getHeight();
+
+//sets the new size
+forms.company.elements.faxBtn.setSize(w,h);
+
+//sets the new size and adds 1 px to both the width and height
+forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
+          <summary><![CDATA[Returns the height of the current element.]]></summary>
+          <sample><![CDATA[var ht = %%prefix%%%%elementName%%.getHeight();]]></sample>
+        </function>
+        <function name="getLocationX">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The x location of the element in pixels.]]></return>
+          <description><![CDATA[Returns the x location of the current element. 
+
+NOTE: getLocationX() can be used with getLocationY() to set the location of an element using the setLocation function. For Example:
+
+//returns the X and Y coordinates
+var x = forms.company.elements.faxBtn.getLocationX();
+var y = forms.company.elements.faxBtn.getLocationY();
+
+//sets the new location 10 px to the right; 10 px down from the current location
+forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
+          <summary><![CDATA[Returns the x location of the current element.]]></summary>
+          <sample><![CDATA[var x = %%prefix%%%%elementName%%.getLocationX();]]></sample>
+        </function>
+        <function name="getLocationY">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
+          <description><![CDATA[Returns the y location of the current element. 
+
+NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
+
+//returns the X and Y coordinates
+var x = forms.company.elements.faxBtn.getLocationX();
+var y = forms.company.elements.faxBtn.getLocationY();
+
+//sets the new location 10 px to the right; 10 px down from the current location
+forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
+          <summary><![CDATA[Returns the y location of the current element.]]></summary>
+          <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
+        </function>
+        <function name="getName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
+          <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
+          <summary><![CDATA[Returns the name of an element.]]></summary>
+          <sample><![CDATA[var name = %%prefix%%%%elementName%%.getName();]]></sample>
+        </function>
+        <function name="getWidth">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The width of the element in pixels.]]></return>
+          <description><![CDATA[Returns the width of the current element. 
+
+NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example:
+
+//returns the width (w) and height (h)
+var w = forms.company.elements.faxBtn.getWidth();
+var h = forms.company.elements.faxBtn.getHeight();
+
+//sets the new size
+forms.company.elements.faxBtn.setSize(w,h);
+
+//sets the new size and adds 1 px to both the width and height
+forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
+          <summary><![CDATA[Returns the width of the current element.]]></summary>
+          <sample><![CDATA[var w = %%prefix%%%%elementName%%.getWidth();]]></sample>
+        </function>
+        <function name="putClientProperty">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the value for the specified element client property key.
+
+NOTE: Depending on the operating system, a user interface property name may be available.]]></description>
+          <summary><![CDATA[Sets the value for the specified element client property key.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.putClientProperty('ToolTipText','some text');]]></sample>
+          <parameters>
+            <parameter name="key" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[user interface key (depends on operating system)]]></description>
+            </parameter>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[a predefined value for the key]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setLocation">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+
+NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
+
+//returns the X and Y coordinates
+var x = forms.company.elements.faxBtn.getLocationX();
+var y = forms.company.elements.faxBtn.getLocationY();
+
+//sets the new location 10 px to the right; 10 px down from the current location
+forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
+          <summary><![CDATA[Sets the location of an element.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.setLocation(200,200);]]></sample>
+          <parameters>
+            <parameter name="x" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the X coordinate of the element in pixels.]]></description>
+            </parameter>
+            <parameter name="y" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the Y coordinate of the element in pixels.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setSize">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+
+NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
+
+//returns the width (w) and height (h)
+var w = forms.company.elements.faxBtn.getWidth();
+var h = forms.company.elements.faxBtn.getHeight();
+
+//sets the new size
+forms.company.elements.faxBtn.setSize(w,h);
+
+//sets the new size and adds 1 px to both the width and height
+forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
+          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
+          <parameters>
+            <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the width of the element in pixels.]]></description>
+            </parameter>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the height of the element in pixels.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+      </functions>
+    </object>
     <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeHtmlArea" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeHtmlArea">
       <properties>
         <property name="URL">
@@ -36851,15 +37313,22 @@ ok = security.authenticate(null, null, [scopes.globals.userName, scopes.globals.
             </parameter>
           </parameters>
         </function>
-        <function deprecated="true" name="canDelete" undocumented="true">
+        <function deprecated="true" name="canDelete">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description/>
+          <deprecated><![CDATA[replaced by canDelete(String)]]></deprecated>
+          <sample/>
           <parameters>
-            <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-            <parameter name="tableName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+            <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the server name]]></description>
+            </parameter>
+            <parameter name="tableName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the table name]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="canDelete">
@@ -36884,15 +37353,22 @@ application.output("Can read? " + canRead);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function deprecated="true" name="canInsert" undocumented="true">
+        <function deprecated="true" name="canInsert">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description/>
+          <deprecated><![CDATA[replaced by canInsert(String)]]></deprecated>
+          <sample/>
           <parameters>
-            <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-            <parameter name="tableName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+            <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the server name]]></description>
+            </parameter>
+            <parameter name="tableName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the table name]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="canInsert">
@@ -36917,15 +37393,22 @@ application.output("Can read? " + canRead);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function deprecated="true" name="canRead" undocumented="true">
+        <function deprecated="true" name="canRead">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description/>
+          <deprecated><![CDATA[replaced by canRead(String)]]></deprecated>
+          <sample/>
           <parameters>
-            <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-            <parameter name="tableName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+            <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the server name]]></description>
+            </parameter>
+            <parameter name="tableName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the table name]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="canRead">
@@ -36950,15 +37433,22 @@ application.output("Can read? " + canRead);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function deprecated="true" name="canUpdate" undocumented="true">
+        <function deprecated="true" name="canUpdate">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description/>
+          <deprecated><![CDATA[replaced by canUpdate(String)]]></deprecated>
+          <sample/>
           <parameters>
-            <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-            <parameter name="tableName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+            <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the server name]]></description>
+            </parameter>
+            <parameter name="tableName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the parameter name]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="canUpdate">
@@ -37054,7 +37544,26 @@ else
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the created groupname]]></return>
           <description><![CDATA[Creates a group, returns the groupname (or null when group couldn't be created).]]></description>
           <summary><![CDATA[Creates a group, returns the groupname (or null when group couldn't be created).]]></summary>
-          <sample/>
+          <sample><![CDATA[var deleteGroup = true;
+//ceate a group
+var groupName = security.creategroup('myGroup');
+if (groupName)
+{
+	//create a user
+	var uid = security.createUser('myusername', 'mypassword');
+	if (uid) //test if user was created
+	{
+		//set a newUID for the user
+		var isChanged = security.setUserUID(uid,'myUserUID')
+		// add user to group
+		security.addUserToGroup(uid, groupName);
+		// if not delete group, do delete group
+		if (deleteGroup) 
+		{
+			security.deleteGroup(groupName);
+		}
+	}
+}]]></sample>
           <parameters>
             <parameter name="groupName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the group name to create]]></description>
@@ -37172,7 +37681,26 @@ if (uid) //test if user was created
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if deleted]]></return>
           <description><![CDATA[Deletes a group, returns true if no error was reported.]]></description>
           <summary><![CDATA[Deletes a group, returns true if no error was reported.]]></summary>
-          <sample/>
+          <sample><![CDATA[var deleteGroup = true;
+//ceate a group
+var groupName = security.creategroup('myGroup');
+if (groupName)
+{
+	//create a user
+	var uid = security.createUser('myusername', 'mypassword');
+	if (uid) //test if user was created
+	{
+		//set a newUID for the user
+		var isChanged = security.setUserUID(uid,'myUserUID')
+		// add user to group
+		security.addUserToGroup(uid, groupName);
+		// if not delete group, do delete group
+		if (deleteGroup) 
+		{
+			security.deleteGroup(groupName);
+		}
+	}
+}]]></sample>
           <parameters>
             <parameter name="groupName" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[the name of the group to delete]]></description>
@@ -37263,7 +37791,39 @@ if (uid) //test if user was created
           <description><![CDATA[Get all the groups (returns a dataset).
 first id column is deprecated!, use only the group name column.]]></description>
           <summary><![CDATA[Get all the groups (returns a dataset).]]></summary>
-          <sample/>
+          <sample><![CDATA[var removeUser = true;
+//create a user
+var uid = security.createUser('myusername', 'mypassword');
+if (uid) //test if user was created
+{
+	// Get all the groups
+	var set = security.getGroups();
+	for(var p = 1 ; p <= set.getMaxRowIndex() ; p++)
+	{
+		// output name of the group
+		application.output(set.getValue(p, 2));
+		// add user to group
+		security.addUserToGroup(uid, set.getValue(p,2));
+	}
+	// if not remove user, remove user from all the groups
+	if(!removeUser)
+	{
+		// get now all the groups that that users has (all if above did go well)
+		var set =security.getUserGroups(uid);
+		for(var p = 1;p<=set.getMaxRowIndex();p++)
+		{
+			// output name of the group
+			application.output(set.getValue(p, 2));
+			// remove the user from the group
+			security.removeUserFromGroup(uid, set.getValue(p,2));
+		}
+	}
+	else
+	{
+		// delete the user (the user will be removed from the groups)
+		security.deleteUser(uid);
+	}
+}]]></sample>
         </function>
         <function name="getSystemUserName">
           <argumentsTypes/>
@@ -37629,7 +38189,39 @@ security.logout();
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if removed]]></return>
           <description><![CDATA[Removes an user from a group.]]></description>
           <summary><![CDATA[Removes an user from a group.]]></summary>
-          <sample/>
+          <sample><![CDATA[var removeUser = true;
+//create a user
+var uid = security.createUser('myusername', 'mypassword');
+if (uid) //test if user was created
+{
+	// Get all the groups
+	var set = security.getGroups();
+	for(var p = 1 ; p <= set.getMaxRowIndex() ; p++)
+	{
+		// output name of the group
+		application.output(set.getValue(p, 2));
+		// add user to group
+		security.addUserToGroup(uid, set.getValue(p,2));
+	}
+	// if not remove user, remove user from all the groups
+	if(!removeUser)
+	{
+		// get now all the groups that that users has (all if above did go well)
+		var set =security.getUserGroups(uid);
+		for(var p = 1;p<=set.getMaxRowIndex();p++)
+		{
+			// output name of the group
+			application.output(set.getValue(p, 2));
+			// remove the user from the group
+			security.removeUserFromGroup(uid, set.getValue(p,2));
+		}
+	}
+	else
+	{
+		// delete the user (the user will be removed from the groups)
+		security.deleteUser(uid);
+	}
+}]]></sample>
           <parameters>
             <parameter name="a_userUID" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[the user UID to be removed]]></description>
@@ -37714,7 +38306,26 @@ security.setSecuritySettings(dataset);//to be called in solution startup method]
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if changed]]></return>
           <description><![CDATA[Set a new userUID for the given userUID.]]></description>
           <summary><![CDATA[Set a new userUID for the given userUID.]]></summary>
-          <sample/>
+          <sample><![CDATA[var deleteGroup = true;
+//ceate a group
+var groupName = security.creategroup('myGroup');
+if (groupName)
+{
+	//create a user
+	var uid = security.createUser('myusername', 'mypassword');
+	if (uid) //test if user was created
+	{
+		//set a newUID for the user
+		var isChanged = security.setUserUID(uid,'myUserUID')
+		// add user to group
+		security.addUserToGroup(uid, groupName);
+		// if not delete group, do delete group
+		if (deleteGroup) 
+		{
+			security.deleteGroup(groupName);
+		}
+	}
+}]]></sample>
           <parameters>
             <parameter name="a_userUID" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[the userUID to set the new user UID for]]></description>
@@ -42332,7 +42943,35 @@ limitations/requirements for sqlstring are:
 -cannot contain 'group by', 'having' or 'union'
 -all columns must be fully qualified like 'orders.order_id']]></description>
           <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
-          <sample/>
+          <sample><![CDATA[//Load records can be used in 5 different ways
+//1) to load a (related)foundset into the form.
+//the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
+//%%prefix%%controller.loadRecords(order_to_orderdetails);
+
+//2) to load a primary key dataset, will remove related sort!
+//var dataset = databaseManager.getDataSetByQuery(...);
+// dataset must match the table primary key columns (alphabetically ordered)
+//%%prefix%%controller.loadRecords(dataset);
+
+//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
+//%%prefix%%controller.loadRecords(123);
+//%%prefix%%controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
+
+//4) to reload all last related records again, if for example after a search in related tabpanel
+//%%prefix%%controller.loadRecords();
+
+//5) to load records in to the form based on a query (also known as 'Form by query')
+//%%prefix%%controller.loadRecords(sqlstring,parameters);
+//limitations/requirements for sqlstring are:
+//-must start with 'select'
+//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
+//-can contain '?' which are replaced with values from the array supplied to parameters argument
+// if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
+//-must contain 'from' keyword
+//-the 'from' must be a comma separated list of table names
+//-must at least select from the table used in Servoy Form
+//-cannot contain 'group by', 'having' or 'union'
+//-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
             <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
               <description><![CDATA[to load]]></description>
@@ -42391,7 +43030,35 @@ limitations/requirements for sqlstring are:
 -cannot contain 'group by', 'having' or 'union'
 -all columns must be fully qualified like 'orders.order_id']]></description>
           <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
-          <sample/>
+          <sample><![CDATA[//Load records can be used in 5 different ways
+//1) to load a (related)foundset into the form.
+//the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
+//%%prefix%%controller.loadRecords(order_to_orderdetails);
+
+//2) to load a primary key dataset, will remove related sort!
+//var dataset = databaseManager.getDataSetByQuery(...);
+// dataset must match the table primary key columns (alphabetically ordered)
+//%%prefix%%controller.loadRecords(dataset);
+
+//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
+//%%prefix%%controller.loadRecords(123);
+//%%prefix%%controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
+
+//4) to reload all last related records again, if for example after a search in related tabpanel
+//%%prefix%%controller.loadRecords();
+
+//5) to load records in to the form based on a query (also known as 'Form by query')
+//%%prefix%%controller.loadRecords(sqlstring,parameters);
+//limitations/requirements for sqlstring are:
+//-must start with 'select'
+//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
+//-can contain '?' which are replaced with values from the array supplied to parameters argument
+// if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
+//-must contain 'from' keyword
+//-the 'from' must be a comma separated list of table names
+//-must at least select from the table used in Servoy Form
+//-cannot contain 'group by', 'having' or 'union'
+//-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
             <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
               <description><![CDATA[to load]]></description>
@@ -42450,7 +43117,35 @@ limitations/requirements for sqlstring are:
 -cannot contain 'group by', 'having' or 'union'
 -all columns must be fully qualified like 'orders.order_id']]></description>
           <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
-          <sample/>
+          <sample><![CDATA[//Load records can be used in 5 different ways
+//1) to load a (related)foundset into the form.
+//the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
+//%%prefix%%controller.loadRecords(order_to_orderdetails);
+
+//2) to load a primary key dataset, will remove related sort!
+//var dataset = databaseManager.getDataSetByQuery(...);
+// dataset must match the table primary key columns (alphabetically ordered)
+//%%prefix%%controller.loadRecords(dataset);
+
+//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
+//%%prefix%%controller.loadRecords(123);
+//%%prefix%%controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
+
+//4) to reload all last related records again, if for example after a search in related tabpanel
+//%%prefix%%controller.loadRecords();
+
+//5) to load records in to the form based on a query (also known as 'Form by query')
+//%%prefix%%controller.loadRecords(sqlstring,parameters);
+//limitations/requirements for sqlstring are:
+//-must start with 'select'
+//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
+//-can contain '?' which are replaced with values from the array supplied to parameters argument
+// if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
+//-must contain 'from' keyword
+//-the 'from' must be a comma separated list of table names
+//-must at least select from the table used in Servoy Form
+//-cannot contain 'group by', 'having' or 'union'
+//-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
             <parameter name="UUIDpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
               <description><![CDATA[to load]]></description>
@@ -42509,7 +43204,35 @@ limitations/requirements for sqlstring are:
 -cannot contain 'group by', 'having' or 'union'
 -all columns must be fully qualified like 'orders.order_id']]></description>
           <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
-          <sample/>
+          <sample><![CDATA[//Load records can be used in 5 different ways
+//1) to load a (related)foundset into the form.
+//the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
+//%%prefix%%controller.loadRecords(order_to_orderdetails);
+
+//2) to load a primary key dataset, will remove related sort!
+//var dataset = databaseManager.getDataSetByQuery(...);
+// dataset must match the table primary key columns (alphabetically ordered)
+//%%prefix%%controller.loadRecords(dataset);
+
+//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
+//%%prefix%%controller.loadRecords(123);
+//%%prefix%%controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
+
+//4) to reload all last related records again, if for example after a search in related tabpanel
+//%%prefix%%controller.loadRecords();
+
+//5) to load records in to the form based on a query (also known as 'Form by query')
+//%%prefix%%controller.loadRecords(sqlstring,parameters);
+//limitations/requirements for sqlstring are:
+//-must start with 'select'
+//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
+//-can contain '?' which are replaced with values from the array supplied to parameters argument
+// if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
+//-must contain 'from' keyword
+//-the 'from' must be a comma separated list of table names
+//-must at least select from the table used in Servoy Form
+//-cannot contain 'group by', 'having' or 'union'
+//-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
             <parameter name="singlenNmber_pk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[to load]]></description>
@@ -42568,7 +43291,35 @@ limitations/requirements for sqlstring are:
 -cannot contain 'group by', 'having' or 'union'
 -all columns must be fully qualified like 'orders.order_id']]></description>
           <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
-          <sample/>
+          <sample><![CDATA[//Load records can be used in 5 different ways
+//1) to load a (related)foundset into the form.
+//the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
+//%%prefix%%controller.loadRecords(order_to_orderdetails);
+
+//2) to load a primary key dataset, will remove related sort!
+//var dataset = databaseManager.getDataSetByQuery(...);
+// dataset must match the table primary key columns (alphabetically ordered)
+//%%prefix%%controller.loadRecords(dataset);
+
+//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
+//%%prefix%%controller.loadRecords(123);
+//%%prefix%%controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
+
+//4) to reload all last related records again, if for example after a search in related tabpanel
+//%%prefix%%controller.loadRecords();
+
+//5) to load records in to the form based on a query (also known as 'Form by query')
+//%%prefix%%controller.loadRecords(sqlstring,parameters);
+//limitations/requirements for sqlstring are:
+//-must start with 'select'
+//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
+//-can contain '?' which are replaced with values from the array supplied to parameters argument
+// if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
+//-must contain 'from' keyword
+//-the 'from' must be a comma separated list of table names
+//-must at least select from the table used in Servoy Form
+//-cannot contain 'group by', 'having' or 'union'
+//-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
             <parameter name="queryString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[to load]]></description>
@@ -42613,7 +43364,35 @@ limitations/requirements for sqlstring are:
 -cannot contain 'group by', 'having' or 'union'
 -all columns must be fully qualified like 'orders.order_id']]></description>
           <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
-          <sample/>
+          <sample><![CDATA[//Load records can be used in 5 different ways
+//1) to load a (related)foundset into the form.
+//the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
+//%%prefix%%controller.loadRecords(order_to_orderdetails);
+
+//2) to load a primary key dataset, will remove related sort!
+//var dataset = databaseManager.getDataSetByQuery(...);
+// dataset must match the table primary key columns (alphabetically ordered)
+//%%prefix%%controller.loadRecords(dataset);
+
+//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
+//%%prefix%%controller.loadRecords(123);
+//%%prefix%%controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
+
+//4) to reload all last related records again, if for example after a search in related tabpanel
+//%%prefix%%controller.loadRecords();
+
+//5) to load records in to the form based on a query (also known as 'Form by query')
+//%%prefix%%controller.loadRecords(sqlstring,parameters);
+//limitations/requirements for sqlstring are:
+//-must start with 'select'
+//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
+//-can contain '?' which are replaced with values from the array supplied to parameters argument
+// if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
+//-must contain 'from' keyword
+//-the 'from' must be a comma separated list of table names
+//-must at least select from the table used in Servoy Form
+//-cannot contain 'group by', 'having' or 'union'
+//-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
             <parameter name="queryString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[to load]]></description>
@@ -43283,15 +44062,22 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             </parameter>
           </parameters>
         </function>
-        <function deprecated="true" name="show" undocumented="true">
+        <function deprecated="true" name="show">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
+          <description/>
+          <deprecated><![CDATA[replaced by show(Object)]]></deprecated>
+          <sample/>
           <parameters>
-            <parameter name="window" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-            <parameter name="isModal" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+            <parameter name="window" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the window in which this form should be shown]]></description>
+            </parameter>
+            <parameter name="isModal" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[true for a modal window, false otherwise]]></description>
+            </parameter>
           </parameters>
         </function>
         <function deprecated="true" name="showAllRecords">
