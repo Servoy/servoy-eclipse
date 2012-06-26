@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -23862,109 +23862,163 @@ query.getParameter("myvar").setvalue(new Integer(1));
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
         <constant name="TYPE_BIG_INTEGER">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
         <constant name="TYPE_BINARY">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
         <constant name="TYPE_BLOB">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
         <constant name="TYPE_BOOLEAN">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
         <constant name="TYPE_BYTE">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
         <constant name="TYPE_CHARACTER">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
         <constant name="TYPE_CLOB">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
         <constant name="TYPE_DATE">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
         <constant name="TYPE_DOUBLE">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
         <constant name="TYPE_FLOAT">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
         <constant name="TYPE_IMAGE">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
         <constant name="TYPE_INTEGER">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
         <constant name="TYPE_SHORT">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
         <constant name="TYPE_STRING">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
         <constant name="TYPE_TEXT">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
         <constant name="TYPE_TIME">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
         <constant name="TYPE_TIMESTAMP">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for casting.]]></description>
           <summary><![CDATA[Constant used for casting.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
       </constants>
     </object>
