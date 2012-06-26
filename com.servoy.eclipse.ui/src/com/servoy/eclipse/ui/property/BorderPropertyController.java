@@ -75,7 +75,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 {
 	public static enum BorderType
 	{
-		Default, Empty, Etched, Bevel, Line, Title, Matte, SpecialMatte, RoundedBorder
+		Default, Empty, Etched, Bevel, Line, Title, Matte, SpecialMatte, RoundedWebBorder
 	}
 
 	public static HashMap<BorderType, Border> defaultBorderValues = new HashMap<BorderType, Border>();
@@ -109,7 +109,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		defaultBorderValues.put(BorderType.Title, new TitledBorder("Title")); //$NON-NLS-1$
 		defaultBorderValues.put(BorderType.Matte, new MatteBorder(0, 0, 0, 0, Color.BLACK));
 		defaultBorderValues.put(BorderType.SpecialMatte, new SpecialMatteBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK));
-		defaultBorderValues.put(BorderType.RoundedBorder, new RoundedBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK));
+		defaultBorderValues.put(BorderType.RoundedWebBorder, new RoundedBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK));
 	}
 
 	private static BorderType getBorderTypeConstant(Border border)
@@ -124,7 +124,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			if (cls == javax.swing.border.TitledBorder.class) return BorderType.Title;
 			if (cls == javax.swing.border.MatteBorder.class) return BorderType.Matte;
 			if (cls == com.servoy.j2db.util.gui.SpecialMatteBorder.class) return BorderType.SpecialMatte;
-			if (cls == com.servoy.j2db.util.gui.RoundedBorder.class) return BorderType.RoundedBorder;
+			if (cls == com.servoy.j2db.util.gui.RoundedBorder.class) return BorderType.RoundedWebBorder;
 		}
 		return BorderType.Default;
 	}
@@ -155,7 +155,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 				return new MatteBorder(0, 0, 0, 0, Color.BLACK);
 			case SpecialMatte :
 				return new SpecialMatteBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK);
-			case RoundedBorder :
+			case RoundedWebBorder :
 				return new RoundedBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK);
 		}
 		return null;
@@ -190,7 +190,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			case SpecialMatte :
 				propertySource = new SpecialMatteBorderPropertySource((ComplexProperty<SpecialMatteBorder>)complexProperty);
 				break;
-			case RoundedBorder :
+			case RoundedWebBorder :
 				propertySource = new RoundedBorderPropertySource((ComplexProperty<SpecialMatteBorder>)complexProperty);
 				break;
 		}
@@ -930,7 +930,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			RoundedBorder border = (RoundedBorder)getEditableValue();
 			if (border == null)
 			{
-				border = (RoundedBorder)createBorder(BorderType.RoundedBorder);
+				border = (RoundedBorder)createBorder(BorderType.RoundedWebBorder);
 			}
 
 			SpecialMatteBorder smb = super.setComplexPropertyValue(id, v);
@@ -971,7 +971,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		@Override
 		public Object resetComplexPropertyValue(Object id)
 		{
-			RoundedBorder defVal = (RoundedBorder)defaultBorderValues.get(BorderType.RoundedBorder);
+			RoundedBorder defVal = (RoundedBorder)defaultBorderValues.get(BorderType.RoundedWebBorder);
 			if (ROUNDING_RADIUS.equals(id))
 			{
 				return defVal.getRadius();
