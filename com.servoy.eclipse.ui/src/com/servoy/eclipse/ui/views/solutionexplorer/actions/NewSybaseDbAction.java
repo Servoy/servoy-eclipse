@@ -95,7 +95,7 @@ public class NewSybaseDbAction extends Action
 		for (ServerConfig sc : serverConfigs)
 		{
 			String serverURL = sc.getServerUrl();
-			if (serverURL.contains("sybase"))
+			if (serverURL.contains("sybase") && sc.isEnabled())
 			{
 				serverURL = serverURL.replaceFirst("jdbc:sybase:Tds:", "");
 				serverURL = serverURL.replaceFirst("\\" + "?ServiceName=.*", "");

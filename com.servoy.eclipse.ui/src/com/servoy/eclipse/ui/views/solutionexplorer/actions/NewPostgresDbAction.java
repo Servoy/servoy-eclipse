@@ -87,7 +87,7 @@ public class NewPostgresDbAction extends Action
 		for (ServerConfig sc : serverConfigs)
 		{
 			String serverURL = sc.getServerUrl();
-			if (serverURL.contains("postgresql"))
+			if (serverURL.contains("postgresql") && sc.isEnabled())
 			{
 				serverURL = serverURL.replaceFirst(".*//", "");
 				serverURL = serverURL.replaceFirst("/.*", "");
