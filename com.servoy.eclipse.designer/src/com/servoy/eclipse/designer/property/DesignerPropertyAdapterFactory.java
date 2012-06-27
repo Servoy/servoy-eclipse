@@ -28,6 +28,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.FormGraphicalEditPart;
+import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -95,7 +96,13 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 		{
 			return new FormElementGroupPropertySource((FormElementGroup)obj, null);
 		}
-		if (obj instanceof SimpleUserNode)
+
+		if (obj instanceof VisualFormEditor)
+		{
+			persist = ((VisualFormEditor)obj).getForm();
+			retargetToEditor = false;
+		}
+		else if (obj instanceof SimpleUserNode)
 		{
 			SimpleUserNode userNode = (SimpleUserNode)obj;
 			if (userNode.isEnabled())

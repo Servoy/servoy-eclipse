@@ -105,6 +105,11 @@
             <adapter type="com.servoy.j2db.persistence.IPersist"/>
       </factory>
       <factory
+            adaptableType="com.servoy.eclipse.designer.editor.VisualFormEditor"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="com.servoy.eclipse.ui.actions.Openable"/>
+      </factory>
+      <factory
             adaptableType="org.eclipse.gef.EditPart"
             class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
             <adapter type="com.servoy.eclipse.ui.actions.Openable"/>
