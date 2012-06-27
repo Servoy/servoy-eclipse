@@ -18,6 +18,8 @@ package com.servoy.eclipse.ui.views;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
@@ -40,6 +42,7 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.ISaveablePart;
 import org.eclipse.ui.views.properties.IPropertySheetEntry;
 import org.eclipse.ui.views.properties.IPropertySheetEntryListener;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -50,6 +53,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.editors.DialogCellEditor;
 import com.servoy.eclipse.ui.resource.FontResource;
+import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.Utils;
@@ -92,6 +96,15 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 					}
 				}
 				return super.compare(entryA, entryB);
+			}
+		});
+		getSite().setSelectionProvider(new SelectionProviderAdapter()
+		{
+			@Override
+			public ISelection getSelection()
+			{
+				ISaveablePart sourcePart = getSaveablePart();
+				return sourcePart == null ? StructuredSelection.EMPTY : new StructuredSelection(sourcePart);
 			}
 		});
 
