@@ -44,6 +44,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.ActiveEditorListener;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.ITagResolver;
 import com.servoy.j2db.util.Text;
 
@@ -154,7 +155,10 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 		}
 		else
 		{
-			txt = NewMethodAction.format(txt, (IFile)ed.getEditorInput().getAdapter(IFile.class), caretOffset).trim();
+			if (!txt.startsWith(DataSourceUtils.DB_DATASOURCE_SCHEME_COLON_SLASH))
+			{
+				txt = NewMethodAction.format(txt, (IFile)ed.getEditorInput().getAdapter(IFile.class), caretOffset).trim();
+			}
 		}
 		st.replaceTextRange(textSelection.x, textSelection.y, txt);
 		int index = txt.indexOf('(');
