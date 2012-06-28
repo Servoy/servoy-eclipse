@@ -947,7 +947,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				else
 				{
-					dlm.add(new UserNode(tableName, UserNodeType.TABLE, new TableWrapper(s.getName(), tableName), uiActivator.loadImageFromBundle("portal.gif")));
+					dlm.add(new UserNode(tableName, UserNodeType.TABLE, new TableFeedback(s.getName(), tableName), new TableWrapper(s.getName(), tableName),
+						uiActivator.loadImageFromBundle("portal.gif")));
 				}
 			}
 			if (hiddenTables != null)
@@ -1710,6 +1711,39 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			ServoyLog.logError(e);
 		}
+	}
+
+	private static class TableFeedback implements IDeveloperFeedback
+	{
+
+		private final String serverName;
+		private final String tableName;
+
+		/**
+		 * @param name
+		 * @param tableName
+		 */
+		public TableFeedback(String serverName, String tableName)
+		{
+			this.serverName = serverName;
+			this.tableName = tableName;
+		}
+
+		public String getSample()
+		{
+			return "/** @type {JSFoundSet<" + getCode() + ">} */";
+		}
+
+		public String getCode()
+		{
+			return DataSourceUtils.DB_DATASOURCE_SCHEME_COLON_SLASH + serverName + '/' + tableName;
+		}
+
+		public String getToolTipText()
+		{
+			return "Table with datasource: '" + getCode() + '\'';
+		}
+
 	}
 
 
