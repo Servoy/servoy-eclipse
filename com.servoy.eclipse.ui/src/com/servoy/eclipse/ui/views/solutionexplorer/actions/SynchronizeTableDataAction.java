@@ -35,7 +35,6 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
-import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -72,7 +71,10 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 	public SynchronizeTableDataAction(Shell shell)
 	{
 		this.shell = shell;
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("sync_tables.png")); //$NON-NLS-1$
+
+		// it appears right next to another action with the same icon - it's a bit confusing
+//		setImageDescriptor(Activator.loadImageDescriptorFromBundle("sync_tables.png")); //$NON-NLS-1$
+
 		setToolTipText("Synchronize meta data for table marked as meta data table between database and workspace");
 		setText("Synchronize Meta Data ...");
 	}
@@ -102,8 +104,15 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			else if (type == UserNodeType.SERVER && sel.size() == 1)
 			{
 				IServerInternal server = (IServerInternal)userNode.getRealObject();
-				getServerMetadataTables(server);
-				state = dataSources.size() > 0;
+				dataSources.clear(); // they will be computed when running
+				try
+				{
+					state = server.getTableNames(true).size() > 0;
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logWarning("Cannot get table list for server: " + server.getName(), e); //$NON-NLS-1$
+				}
 				if (state) selectedServer = server;
 				break;
 			}
@@ -115,9 +124,6 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		setEnabled(state);
 	}
 
-	/**
-	 * @param server
-	 */
 	private void getServerMetadataTables(IServerInternal server)
 	{
 		try
@@ -145,7 +151,13 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		{
 			dataSources.clear();
 			getServerMetadataTables(selectedServer);
+
+			if (dataSources.size() == 0)
+			{
+				UIUtils.showInformation(shell, "Metadata Synchronize", "The server you selected does not have any metadata tables."); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 		}
+
 		List<Table> tables = new ArrayList<Table>();
 		for (String dataSource : dataSources)
 		{
@@ -177,13 +189,13 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			{
 				UIUtils.showInformation(shell, "Table not marked as metadata table", "Table '" + table.getName() +
 					"' can't be a metadata table because it must have a UUID primary key, a " + MetaDataUtils.METADATA_MODIFICATION_COLUMN + " and a " +
-					MetaDataUtils.METADATA_DELETION_COLUMN + " date column");
+					MetaDataUtils.METADATA_DELETION_COLUMN + " date column.");
 				continue;
 			}
 			if (!table.isMarkedAsMetaData())
 			{
 				if (!UIUtils.askQuestion(shell, "Table not marked as metadata table", "Table " + table.getName() + " in server " + table.getServerName() +
-					" is not marked as metadata table, mark now?"))
+					" is not marked as metadata table; mark now?"))
 				{
 					// well, then not
 					continue;
@@ -212,10 +224,6 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		}
 	}
 
-	/**
-	 * @param table
-	 * @param dataFile
-	 */
 	private void importTableData(List<Table> tables)
 	{
 		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
@@ -284,10 +292,6 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		UIUtils.showInformation(shell, "Table synchronization", sb.toString());
 	}
 
-	/**
-	 * @param table
-	 * @param dataFile
-	 */
 	private void generateTableDataFile(List<Table> tables)
 	{
 		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
