@@ -1851,7 +1851,23 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					if (!namesOnly)
 					{
 						paramTypes.append(':');
-						paramTypes.append(TYPES.get(parameterTypes[i].getSimpleName()));
+						if (i == parameterTypes.length - 1 && parameterTypes[i].isArray() && scriptObject instanceof XMLScriptObjectAdapter)
+						{
+							IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(this.name, parameterTypes);
+							if (parameters != null && parameters[i].isVarArgs())
+							{
+								paramTypes.append(TYPES.get(parameterTypes[i].getComponentType().getSimpleName()));
+								paramTypes.append("...");
+							}
+							else
+							{
+								paramTypes.append(TYPES.get(parameterTypes[i].getSimpleName()));
+							}
+						}
+						else
+						{
+							paramTypes.append(TYPES.get(parameterTypes[i].getSimpleName()));
+						}
 					}
 					paramTypes.append(',');
 				}
