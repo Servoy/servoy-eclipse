@@ -16,17 +16,21 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -124,11 +128,12 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		setEnabled(state);
 	}
 
-	private void getServerMetadataTables(IServerInternal server)
+	private void getServerMetadataTables(IServerInternal server, IProgressMonitor monitor)
 	{
 		try
 		{
 			List<String> tableNames = server.getTableNames(true);
+			monitor.beginTask("Checking for metadata tables", tableNames.size()); //$NON-NLS-1$
 			for (String tableName : tableNames)
 			{
 				Table table = server.getTable(tableName);
@@ -136,6 +141,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 				{
 					dataSources.add(table.getDataSource());
 				}
+				monitor.worked(1);
 			}
 		}
 		catch (RepositoryException e)
@@ -150,7 +156,28 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		if (selectedServer != null)
 		{
 			dataSources.clear();
-			getServerMetadataTables(selectedServer);
+			try
+			{
+				PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress()
+				{
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+					{
+						getServerMetadataTables(selectedServer, monitor);
+					}
+				});
+			}
+			catch (InvocationTargetException e)
+			{
+				ServoyLog.logError(e);
+				dataSources.clear();
+				return;
+			}
+			catch (InterruptedException e)
+			{
+				ServoyLog.logError(e);
+				dataSources.clear();
+				return;
+			}
 
 			if (dataSources.size() == 0)
 			{
