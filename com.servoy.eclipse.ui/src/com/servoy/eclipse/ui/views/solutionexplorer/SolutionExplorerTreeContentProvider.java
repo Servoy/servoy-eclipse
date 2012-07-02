@@ -1457,6 +1457,19 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 			// add returnTypes if needed
 			IScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectForClass(beanClass);
+			if ((scriptObject == null || scriptObject.getAllReturnedTypes() == null) && IReturnedTypesProvider.class.isAssignableFrom(beanClass))
+			{
+				final Class< ? >[] allReturnedTypes = ((IReturnedTypesProvider)beanClass.newInstance()).getAllReturnedTypes();
+				ScriptObjectRegistry.registerReturnedTypesProviderForClass(beanClass, new IReturnedTypesProvider()
+				{
+
+					public Class< ? >[] getAllReturnedTypes()
+					{
+						return allReturnedTypes;
+					}
+				});
+				scriptObject = ScriptObjectRegistry.getScriptObjectForClass(beanClass);
+			}
 			if (scriptObject != null)
 			{
 				addReturnTypeNodes(node, scriptObject.getAllReturnedTypes());

@@ -110,6 +110,7 @@ import com.servoy.j2db.scripting.FormScope;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.IPrefixedConstantsObject;
+import com.servoy.j2db.scripting.IReturnedTypesProvider;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.IScriptable;
 import com.servoy.j2db.scripting.ITypedScriptObject;
@@ -683,6 +684,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				if (real instanceof IScriptObject)
 				{
 					ScriptObjectRegistry.registerScriptObjectForClass(real.getClass(), (IScriptObject)real);
+				}
+				else if (real instanceof IReturnedTypesProvider)
+				{
+					ScriptObjectRegistry.registerReturnedTypesProviderForClass(real.getClass(), (IReturnedTypesProvider)real);
 				}
 
 				Class cls = null;
