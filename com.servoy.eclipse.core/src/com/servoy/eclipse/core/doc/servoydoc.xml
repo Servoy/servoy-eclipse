@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -3831,7 +3831,13 @@ for( var i = 0 ; i < array.length ; i++ )
           <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"><![CDATA[A new JSFoundset for that query.]]></return>
           <description><![CDATA[Returns a foundset object for a specified pk query.]]></description>
           <summary><![CDATA[Returns a foundset object for a specified pk query.]]></summary>
-          <sample/>
+          <sample><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
+/** @type {JSFoundset<db:/servername/tablename>} */
+var fs = databaseManager.getFoundSet(controller.getDataSource())
+var ridx = fs.newRecord()
+var record = fs.getRecord(ridx)
+record.emp_name = 'John'
+databaseManager.saveData()]]></sample>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
               <description><![CDATA[The query to get the JSFoundset for.]]></description>
@@ -3866,7 +3872,13 @@ databaseManager.saveData()]]></sample>
           <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"><![CDATA[A new JSFoundset for that datasource.]]></return>
           <description><![CDATA[Returns a foundset object for a specified datasource or server and tablename.]]></description>
           <summary><![CDATA[Returns a foundset object for a specified datasource or server and tablename.]]></summary>
-          <sample/>
+          <sample><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
+/** @type {JSFoundset<db:/servername/tablename>} */
+var fs = databaseManager.getFoundSet(controller.getDataSource())
+var ridx = fs.newRecord()
+var record = fs.getRecord(ridx)
+record.emp_name = 'John'
+databaseManager.saveData()]]></sample>
           <parameters>
             <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The servername to get a JSFoundset for.]]></description>
@@ -6570,10 +6582,10 @@ calc.code = "function myCalculation() { return 123; }";]]></sample>
         <property name="variableType">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Get or set the sql type of this variable.
-
 Type should be one of JSVariable.DATETIME, JSVariable.TEXT, JSVariable.NUMBER , JSVariable.INTEGER or JSVariable.MEDIA.]]></description>
           <summary><![CDATA[Get or set the sql type of this variable.]]></summary>
-          <sample/>
+          <sample><![CDATA[var calc = solutionModel.getDataSourceNode("db:/example_data/customers").getCalculation("myCalculation");
+calc.variableType = JSVariable.DATETIME;]]></sample>
         </property>
       </properties>
       <functions>
@@ -8323,7 +8335,7 @@ scopes.globals.html_field = '<html>'+dataset.getAsHTML()+'</html>';]]></sample>
           <summary><![CDATA[Add a row to the dataset.]]></summary>
           <sample><![CDATA[//assuming the variable dataset contains a dataset
 dataset.addRow(new Array(1,2,3,4,5,6,7,7)); //adds a row with 8 columns
-dataset.addRow(2, new Array(1,2,3,4,5,6,7,7)); //adds a row with 8 columns after row 2]]></sample>
+dataset.addRow(2, new Array(1,2,3,4,5,6,7,7)); //adds a row with 8 columns at row 2]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[index to add row (1-based)]]></description>
@@ -8342,7 +8354,7 @@ dataset.addRow(2, new Array(1,2,3,4,5,6,7,7)); //adds a row with 8 columns after
           <summary><![CDATA[Add a row to the dataset.]]></summary>
           <sample><![CDATA[//assuming the variable dataset contains a dataset
 dataset.addRow(new Array(1,2,3,4,5,6,7,7)); //adds a row with 8 columns
-dataset.addRow(2, new Array(1,2,3,4,5,6,7,7)); //adds a row with 8 columns after row 2]]></sample>
+dataset.addRow(2, new Array(1,2,3,4,5,6,7,7)); //adds a row with 8 columns at row 2]]></sample>
           <parameters>
             <parameter name="array" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
               <description><![CDATA[row data]]></description>
@@ -16227,17 +16239,6 @@ body.styleClass = 'myBody';]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="getDesignTimeProperty">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-          <description><![CDATA[Get a design-time property of an element.]]></description>
-          <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var frm = solutionModel.getForm('orders')
-var fld = frm.getField('fld')
-var prop = fld.getDesignTimeProperty('myprop')]]></sample>
-        </function>
         <function name="getPartType">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[A number representing the type of the form part.]]></return>
@@ -16267,29 +16268,6 @@ for (var i=0; i<allParts.length; i++) {
           <summary><![CDATA[Returns the UUID of this component.]]></summary>
           <sample><![CDATA[var button_uuid = solutionModel.getForm("my_form").getButton("my_button").getUUID();
 application.output(button_uuid.toString());]]></sample>
-        </function>
-        <function name="putDesignTimeProperty">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.Object"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-          <description><![CDATA[Set a design-time property of an element.]]></description>
-          <summary><![CDATA[Set a design-time property of an element.]]></summary>
-          <sample><![CDATA[var frm = solutionModel.getForm('orders')
-var fld = frm.getField('fld')
-fld.putDesignTimeProperty('myprop', 'strawberry')]]></sample>
-        </function>
-        <function name="removeDesignTimeProperty">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-          <description><![CDATA[Clear a design-time property of an element.]]></description>
-          <summary><![CDATA[Clear a design-time property of an element.]]></summary>
-          <sample><![CDATA[var frm = solutionModel.getForm('orders')
-var fld = frm.getField('fld')
-fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
@@ -17746,17 +17724,6 @@ criteria.operator = '<';]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="getDesignTimeProperty">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-          <description><![CDATA[Get a design-time property of an element.]]></description>
-          <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var frm = solutionModel.getForm('orders')
-var fld = frm.getField('fld')
-var prop = fld.getDesignTimeProperty('myprop')]]></sample>
-        </function>
         <function name="getUUID">
           <argumentsTypes/>
           <return type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID"/>
@@ -17764,29 +17731,6 @@ var prop = fld.getDesignTimeProperty('myprop')]]></sample>
           <summary><![CDATA[Returns the UUID of this component.]]></summary>
           <sample><![CDATA[var button_uuid = solutionModel.getForm("my_form").getButton("my_button").getUUID();
 application.output(button_uuid.toString());]]></sample>
-        </function>
-        <function name="putDesignTimeProperty">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.Object"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-          <description><![CDATA[Set a design-time property of an element.]]></description>
-          <summary><![CDATA[Set a design-time property of an element.]]></summary>
-          <sample><![CDATA[var frm = solutionModel.getForm('orders')
-var fld = frm.getField('fld')
-fld.putDesignTimeProperty('myprop', 'strawberry')]]></sample>
-        </function>
-        <function name="removeDesignTimeProperty">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-          <description><![CDATA[Clear a design-time property of an element.]]></description>
-          <summary><![CDATA[Clear a design-time property of an element.]]></summary>
-          <sample><![CDATA[var frm = solutionModel.getForm('orders')
-var fld = frm.getField('fld')
-fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
@@ -18139,17 +18083,6 @@ secondTab.y = 0;]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="getDesignTimeProperty">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-          <description><![CDATA[Get a design-time property of an element.]]></description>
-          <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var frm = solutionModel.getForm('orders')
-var fld = frm.getField('fld')
-var prop = fld.getDesignTimeProperty('myprop')]]></sample>
-        </function>
         <function name="getUUID">
           <argumentsTypes/>
           <return type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID"/>
@@ -18157,29 +18090,6 @@ var prop = fld.getDesignTimeProperty('myprop')]]></sample>
           <summary><![CDATA[Returns the UUID of this component.]]></summary>
           <sample><![CDATA[var button_uuid = solutionModel.getForm("my_form").getButton("my_button").getUUID();
 application.output(button_uuid.toString());]]></sample>
-        </function>
-        <function name="putDesignTimeProperty">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.Object"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-          <description><![CDATA[Set a design-time property of an element.]]></description>
-          <summary><![CDATA[Set a design-time property of an element.]]></summary>
-          <sample><![CDATA[var frm = solutionModel.getForm('orders')
-var fld = frm.getField('fld')
-fld.putDesignTimeProperty('myprop', 'strawberry')]]></sample>
-        </function>
-        <function name="removeDesignTimeProperty">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-          <description><![CDATA[Clear a design-time property of an element.]]></description>
-          <summary><![CDATA[Clear a design-time property of an element.]]></summary>
-          <sample><![CDATA[var frm = solutionModel.getForm('orders')
-var fld = frm.getField('fld')
-fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
