@@ -43144,7 +43144,7 @@ limitations/requirements for sqlstring are:
         </function>
         <function name="loadRecords">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
           <description><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.
@@ -43209,14 +43209,14 @@ limitations/requirements for sqlstring are:
 //-cannot contain 'group by', 'having' or 'union'
 //-all columns must be fully qualified like 'orders.order_id']]></sample>
           <parameters>
-            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
+            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
               <description><![CDATA[to load]]></description>
             </parameter>
           </parameters>
         </function>
         <function deprecated="true" name="loadRecords">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -43225,7 +43225,7 @@ limitations/requirements for sqlstring are:
           <deprecated><![CDATA[use loadRecords(JSDataSet)]]></deprecated>
           <sample/>
           <parameters>
-            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
+            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
             <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           </parameters>
         </function>
@@ -43401,6 +43401,22 @@ limitations/requirements for sqlstring are:
           <parameters>
             <parameter name="singlenNmber_pk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number"/>
             <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          </parameters>
+        </function>
+        <function deprecated="true" name="loadRecords">
+          <argumentsTypes>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Method to handle old loadRecords calls.
+Deprecated method to handle pre-6.1 calls to varargs function controller.loadRecords([1]), this was called with vargs=[1] in stead of vargs=[[1]].]]></description>
+          <summary><![CDATA[Method to handle old loadRecords calls.]]></summary>
+          <deprecated><![CDATA[use loadRecords with single typed argument]]></deprecated>
+          <sample/>
+          <parameters>
+            <parameter name="vargs" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
+              <description><![CDATA[the arguments]]></description>
+            </parameter>
           </parameters>
         </function>
         <function name="loadRecords">
