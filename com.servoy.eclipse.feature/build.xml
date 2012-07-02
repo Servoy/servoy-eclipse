@@ -46,17 +46,17 @@
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
-		<ant antfile="build.xml" dir="../com.servoy.eclipse.warexporter" target="${target}">
-			<property name="arch" value="x86"/>
-			<property name="ws" value="win32"/>
-			<property name="os" value="win32"/>
-		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.model" target="${target}">
 			<property name="arch" value="x86"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.exporter" target="${target}">
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
+		</ant>
+		<ant antfile="build.xml" dir="../com.servoy.eclipse.warexporter" target="${target}">
 			<property name="arch" value="x86"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
@@ -86,11 +86,6 @@
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
-		<ant antfile="build.xml" dir="../com.servoy.eclipse.jsunit" target="${target}">
-			<property name="arch" value="x86"/>
-			<property name="ws" value="win32"/>
-			<property name="os" value="win32"/>
-		</ant>
 		<ant antfile="build.xml" dir="../j2db_documentation" target="${target}">
 			<property name="arch" value="x86"/>
 			<property name="ws" value="win32"/>
@@ -107,6 +102,11 @@
 			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.team" target="${target}">
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
+		</ant>
+		<ant antfile="build.xml" dir="../com.servoy.eclipse.jsunit" target="${target}">
 			<property name="arch" value="x86"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
@@ -170,7 +170,7 @@
 				<include name="feature.properties"/>
 			</fileset>
 		</copy>
-		<eclipse.idReplacer featureFilePath="${feature.temp.folder}/features/com.servoy.eclipse.feature_6.1.0.1417/feature.xml"  selfVersion="6.1.0.1417" featureIds="com.servoy.css.core:0.0.0,1.0.0.201003231300,org.eclipse.dltk.core.servoy:0.0.0,4.0.0.201206271017,org.eclipse.dltk.javascript.servoy:0.0.0,4.0.0.201206271017,org.eclipse.draw2d:0.0.0,3.7.1.v20110830-1143-4607w3122194102254,org.eclipse.gef:0.0.0,3.7.1.v20110830-1143-777D181B3Bz06C853D8863365," pluginIds="com.servoy.eclipse.core:0.0.0,6.1.0.1417,com.servoy.eclipse.debug:0.0.0,6.1.0.1417,com.servoy.eclipse.designer:0.0.0,6.1.0.1417,com.servoy.eclipse.team:0.0.0,6.1.0.1417,com.servoy.eclipse.ui:0.0.0,6.1.0.1417,com.servoy.eclipse.appserver:0.0.0,6.1.0.1417,com.servoy.eclipse.jsunit:0.0.0,6.1.0.1417,com.servoy.eclipse.profiler:0.0.0,6.1.0.1417,org.eclipse.dltk.javascript.rhino:0.0.0,6.1.0.1417,j2db_documentation:0.0.0,6.1.0.1417,j2db_tunnel:0.0.0,6.1.0.1417,j2db_runtime:0.0.0,6.1.0.1417,j2db_server:0.0.0,6.1.0.1417,servoy_debug:0.0.0,6.1.0.1417,servoy_headless_client:0.0.0,6.1.0.1417,servoy_shared:0.0.0,6.1.0.1417,servoy_smart_client:0.0.0,6.1.0.1417,com.servoy.eclipse.model:0.0.0,6.1.0.1417,com.servoy.eclipse.exporter:0.0.0,6.1.0.1417,org.eclipse.equinox.transforms.hook:0.0.0,1.0.300.201106061129,org.eclipse.equinox.transforms.xslt:0.0.0,1.0.200.201106061129,org.eclipse.equinox.transforms.xslt.plugin:0.0.0,1.0.0.201106061413,com.servoy.eclipse.warexporter:0.0.0,6.1.0.1417,"/>
+		<eclipse.idReplacer featureFilePath="${feature.temp.folder}/features/com.servoy.eclipse.feature_6.1.0.1417/feature.xml"  selfVersion="6.1.0.1417" featureIds="com.servoy.css.core:0.0.0,1.0.0.201003231300,org.eclipse.dltk.core.servoy:0.0.0,4.0.0.201207021328,org.eclipse.dltk.javascript.servoy:0.0.0,4.0.0.201207021328,org.eclipse.draw2d:0.0.0,3.7.1.v20110830-1143-4607w3122194102254,org.eclipse.gef:0.0.0,3.7.1.v20110830-1143-777D181B3Bz06C853D8863365," pluginIds="com.servoy.eclipse.core:0.0.0,6.1.0.1417,com.servoy.eclipse.debug:0.0.0,6.1.0.1417,com.servoy.eclipse.designer:0.0.0,6.1.0.1417,com.servoy.eclipse.team:0.0.0,6.1.0.1417,com.servoy.eclipse.ui:0.0.0,6.1.0.1417,com.servoy.eclipse.appserver:0.0.0,6.1.0.1417,com.servoy.eclipse.jsunit:0.0.0,6.1.0.1417,com.servoy.eclipse.profiler:0.0.0,6.1.0.1417,org.eclipse.dltk.javascript.rhino:0.0.0,6.1.0.1417,j2db_documentation:0.0.0,6.1.0.1417,j2db_tunnel:0.0.0,6.1.0.1417,j2db_runtime:0.0.0,6.1.0.1417,j2db_server:0.0.0,6.1.0.1417,servoy_debug:0.0.0,6.1.0.1417,servoy_headless_client:0.0.0,6.1.0.1417,servoy_shared:0.0.0,6.1.0.1417,servoy_smart_client:0.0.0,6.1.0.1417,com.servoy.eclipse.model:0.0.0,6.1.0.1417,com.servoy.eclipse.exporter:0.0.0,6.1.0.1417,org.eclipse.equinox.transforms.hook:0.0.0,1.0.300.201106061129,org.eclipse.equinox.transforms.xslt:0.0.0,1.0.200.201106061129,org.eclipse.equinox.transforms.xslt.plugin:0.0.0,1.0.0.201106061413,com.servoy.eclipse.warexporter:0.0.0,6.1.0.1417,"/>
 		<eclipse.gatherFeature 
 		   metadataRepository="${p2.build.repo}"
 		   artifactRepository="${p2.build.repo}"
@@ -191,7 +191,7 @@
 				<include name="feature.properties"/>
 			</fileset>
 		</copy>
-		<eclipse.idReplacer featureFilePath="${feature.base}/features/com.servoy.eclipse.feature_6.1.0.1417/feature.xml"  selfVersion="6.1.0.1417" featureIds="com.servoy.css.core:0.0.0,1.0.0.201003231300,org.eclipse.dltk.core.servoy:0.0.0,4.0.0.201206271017,org.eclipse.dltk.javascript.servoy:0.0.0,4.0.0.201206271017,org.eclipse.draw2d:0.0.0,3.7.1.v20110830-1143-4607w3122194102254,org.eclipse.gef:0.0.0,3.7.1.v20110830-1143-777D181B3Bz06C853D8863365," pluginIds="com.servoy.eclipse.core:0.0.0,6.1.0.1417,com.servoy.eclipse.debug:0.0.0,6.1.0.1417,com.servoy.eclipse.designer:0.0.0,6.1.0.1417,com.servoy.eclipse.team:0.0.0,6.1.0.1417,com.servoy.eclipse.ui:0.0.0,6.1.0.1417,com.servoy.eclipse.appserver:0.0.0,6.1.0.1417,com.servoy.eclipse.jsunit:0.0.0,6.1.0.1417,com.servoy.eclipse.profiler:0.0.0,6.1.0.1417,org.eclipse.dltk.javascript.rhino:0.0.0,6.1.0.1417,j2db_documentation:0.0.0,6.1.0.1417,j2db_tunnel:0.0.0,6.1.0.1417,j2db_runtime:0.0.0,6.1.0.1417,j2db_server:0.0.0,6.1.0.1417,servoy_debug:0.0.0,6.1.0.1417,servoy_headless_client:0.0.0,6.1.0.1417,servoy_shared:0.0.0,6.1.0.1417,servoy_smart_client:0.0.0,6.1.0.1417,com.servoy.eclipse.model:0.0.0,6.1.0.1417,com.servoy.eclipse.exporter:0.0.0,6.1.0.1417,org.eclipse.equinox.transforms.hook:0.0.0,1.0.300.201106061129,org.eclipse.equinox.transforms.xslt:0.0.0,1.0.200.201106061129,org.eclipse.equinox.transforms.xslt.plugin:0.0.0,1.0.0.201106061413,com.servoy.eclipse.warexporter:0.0.0,6.1.0.1417,"/>
+		<eclipse.idReplacer featureFilePath="${feature.base}/features/com.servoy.eclipse.feature_6.1.0.1417/feature.xml"  selfVersion="6.1.0.1417" featureIds="com.servoy.css.core:0.0.0,1.0.0.201003231300,org.eclipse.dltk.core.servoy:0.0.0,4.0.0.201207021328,org.eclipse.dltk.javascript.servoy:0.0.0,4.0.0.201207021328,org.eclipse.draw2d:0.0.0,3.7.1.v20110830-1143-4607w3122194102254,org.eclipse.gef:0.0.0,3.7.1.v20110830-1143-777D181B3Bz06C853D8863365," pluginIds="com.servoy.eclipse.core:0.0.0,6.1.0.1417,com.servoy.eclipse.debug:0.0.0,6.1.0.1417,com.servoy.eclipse.designer:0.0.0,6.1.0.1417,com.servoy.eclipse.team:0.0.0,6.1.0.1417,com.servoy.eclipse.ui:0.0.0,6.1.0.1417,com.servoy.eclipse.appserver:0.0.0,6.1.0.1417,com.servoy.eclipse.jsunit:0.0.0,6.1.0.1417,com.servoy.eclipse.profiler:0.0.0,6.1.0.1417,org.eclipse.dltk.javascript.rhino:0.0.0,6.1.0.1417,j2db_documentation:0.0.0,6.1.0.1417,j2db_tunnel:0.0.0,6.1.0.1417,j2db_runtime:0.0.0,6.1.0.1417,j2db_server:0.0.0,6.1.0.1417,servoy_debug:0.0.0,6.1.0.1417,servoy_headless_client:0.0.0,6.1.0.1417,servoy_shared:0.0.0,6.1.0.1417,servoy_smart_client:0.0.0,6.1.0.1417,com.servoy.eclipse.model:0.0.0,6.1.0.1417,com.servoy.eclipse.exporter:0.0.0,6.1.0.1417,org.eclipse.equinox.transforms.hook:0.0.0,1.0.300.201106061129,org.eclipse.equinox.transforms.xslt:0.0.0,1.0.200.201106061129,org.eclipse.equinox.transforms.xslt.plugin:0.0.0,1.0.0.201106061413,com.servoy.eclipse.warexporter:0.0.0,6.1.0.1417,"/>
 		<antcall target="rootFiles">
 			<param name="rootTarget" value="rootFiles${os}_${ws}_${arch}"/>
 		</antcall>
