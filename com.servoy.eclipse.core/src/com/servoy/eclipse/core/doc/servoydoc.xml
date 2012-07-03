@@ -27359,6 +27359,17 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <summary><![CDATA[Returns the height of the current element.]]></summary>
           <sample><![CDATA[var ht = %%prefix%%%%elementName%%.getHeight();]]></sample>
         </function>
+        <function name="getLabelForElementNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[An array with element names.]]></return>
+          <description><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></description>
+          <summary><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></summary>
+          <sample><![CDATA[var array = elements.name_first.getLabelForElementNames();
+for (var i = 0; i<array.length; i++)
+{
+	elements[array[i]].fgcolor = "#ff00ff";
+}]]></sample>
+        </function>
         <function name="getLocationX">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The x location of the element in pixels.]]></return>
@@ -27716,6 +27727,17 @@ forms.company.elements.faxBtn.setSize(w,h);
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <summary><![CDATA[Returns the height of the current element.]]></summary>
           <sample><![CDATA[var ht = %%prefix%%%%elementName%%.getHeight();]]></sample>
+        </function>
+        <function name="getLabelForElementNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[An array with element names.]]></return>
+          <description><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></description>
+          <summary><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></summary>
+          <sample><![CDATA[var array = elements.name_first.getLabelForElementNames();
+for (var i = 0; i<array.length; i++)
+{
+	elements[array[i]].fgcolor = "#ff00ff";
+}]]></sample>
         </function>
         <function name="getLocationX">
           <argumentsTypes/>
@@ -28103,6 +28125,17 @@ forms.company.elements.faxBtn.setSize(w,h);
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <summary><![CDATA[Returns the height of the current element.]]></summary>
           <sample><![CDATA[var ht = %%prefix%%%%elementName%%.getHeight();]]></sample>
+        </function>
+        <function name="getLabelForElementNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[An array with element names.]]></return>
+          <description><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></description>
+          <summary><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></summary>
+          <sample><![CDATA[var array = elements.name_first.getLabelForElementNames();
+for (var i = 0; i<array.length; i++)
+{
+	elements[array[i]].fgcolor = "#ff00ff";
+}]]></sample>
         </function>
         <function name="getLocationX">
           <argumentsTypes/>
@@ -28568,6 +28601,17 @@ forms.company.elements.faxBtn.setSize(w,h);
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <summary><![CDATA[Returns the height of the current element.]]></summary>
           <sample><![CDATA[var ht = %%prefix%%%%elementName%%.getHeight();]]></sample>
+        </function>
+        <function name="getLabelForElementNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[An array with element names.]]></return>
+          <description><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></description>
+          <summary><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></summary>
+          <sample><![CDATA[var array = elements.name_first.getLabelForElementNames();
+for (var i = 0; i<array.length; i++)
+{
+	elements[array[i]].fgcolor = "#ff00ff";
+}]]></sample>
         </function>
         <function name="getLocationX">
           <argumentsTypes/>
@@ -30558,6 +30602,17 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <summary><![CDATA[Returns the height of the current element.]]></summary>
           <sample><![CDATA[var ht = %%prefix%%%%elementName%%.getHeight();]]></sample>
         </function>
+        <function name="getLabelForElementNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[An array with element names.]]></return>
+          <description><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></description>
+          <summary><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></summary>
+          <sample><![CDATA[var array = elements.name_first.getLabelForElementNames();
+for (var i = 0; i<array.length; i++)
+{
+	elements[array[i]].fgcolor = "#ff00ff";
+}]]></sample>
+        </function>
         <function name="getLocationX">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The x location of the element in pixels.]]></return>
@@ -31847,6 +31902,17 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <summary><![CDATA[Returns the height of the current element.]]></summary>
           <sample><![CDATA[var ht = %%prefix%%%%elementName%%.getHeight();]]></sample>
         </function>
+        <function name="getLabelForElementNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[An array with element names.]]></return>
+          <description><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></description>
+          <summary><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></summary>
+          <sample><![CDATA[var array = elements.name_first.getLabelForElementNames();
+for (var i = 0; i<array.length; i++)
+{
+	elements[array[i]].fgcolor = "#ff00ff";
+}]]></sample>
+        </function>
         <function name="getLocationX">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The x location of the element in pixels.]]></return>
@@ -32308,6 +32374,17 @@ forms.company.elements.faxBtn.setSize(w,h);
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <summary><![CDATA[Returns the height of the current element.]]></summary>
           <sample><![CDATA[var ht = %%prefix%%%%elementName%%.getHeight();]]></sample>
+        </function>
+        <function name="getLabelForElementNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[An array with element names.]]></return>
+          <description><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></description>
+          <summary><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></summary>
+          <sample><![CDATA[var array = elements.name_first.getLabelForElementNames();
+for (var i = 0; i<array.length; i++)
+{
+	elements[array[i]].fgcolor = "#ff00ff";
+}]]></sample>
         </function>
         <function name="getLocationX">
           <argumentsTypes/>
@@ -33155,6 +33232,17 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <summary><![CDATA[Returns the height of the current element.]]></summary>
           <sample><![CDATA[var ht = %%prefix%%%%elementName%%.getHeight();]]></sample>
         </function>
+        <function name="getLabelForElementNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[An array with element names.]]></return>
+          <description><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></description>
+          <summary><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></summary>
+          <sample><![CDATA[var array = elements.name_first.getLabelForElementNames();
+for (var i = 0; i<array.length; i++)
+{
+	elements[array[i]].fgcolor = "#ff00ff";
+}]]></sample>
+        </function>
         <function name="getLocationX">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The x location of the element in pixels.]]></return>
@@ -33541,6 +33629,17 @@ forms.company.elements.faxBtn.setSize(w,h);
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <summary><![CDATA[Returns the height of the current element.]]></summary>
           <sample><![CDATA[var ht = %%prefix%%%%elementName%%.getHeight();]]></sample>
+        </function>
+        <function name="getLabelForElementNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[An array with element names.]]></return>
+          <description><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></description>
+          <summary><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></summary>
+          <sample><![CDATA[var array = elements.name_first.getLabelForElementNames();
+for (var i = 0; i<array.length; i++)
+{
+	elements[array[i]].fgcolor = "#ff00ff";
+}]]></sample>
         </function>
         <function name="getLocationX">
           <argumentsTypes/>
@@ -34356,6 +34455,17 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <summary><![CDATA[Returns the height of the current element.]]></summary>
           <sample><![CDATA[var ht = %%prefix%%%%elementName%%.getHeight();]]></sample>
         </function>
+        <function name="getLabelForElementNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[An array with element names.]]></return>
+          <description><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></description>
+          <summary><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></summary>
+          <sample><![CDATA[var array = elements.name_first.getLabelForElementNames();
+for (var i = 0; i<array.length; i++)
+{
+	elements[array[i]].fgcolor = "#ff00ff";
+}]]></sample>
+        </function>
         <function name="getLocationX">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The x location of the element in pixels.]]></return>
@@ -34827,6 +34937,17 @@ forms.company.elements.faxBtn.setSize(w,h);
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <summary><![CDATA[Returns the height of the current element.]]></summary>
           <sample><![CDATA[var ht = %%prefix%%%%elementName%%.getHeight();]]></sample>
+        </function>
+        <function name="getLabelForElementNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[An array with element names.]]></return>
+          <description><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></description>
+          <summary><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></summary>
+          <sample><![CDATA[var array = elements.name_first.getLabelForElementNames();
+for (var i = 0; i<array.length; i++)
+{
+	elements[array[i]].fgcolor = "#ff00ff";
+}]]></sample>
         </function>
         <function name="getLocationX">
           <argumentsTypes/>
@@ -36262,6 +36383,17 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <summary><![CDATA[Returns the height of the current element.]]></summary>
           <sample><![CDATA[var ht = %%prefix%%%%elementName%%.getHeight();]]></sample>
         </function>
+        <function name="getLabelForElementNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[An array with element names.]]></return>
+          <description><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></description>
+          <summary><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></summary>
+          <sample><![CDATA[var array = elements.name_first.getLabelForElementNames();
+for (var i = 0; i<array.length; i++)
+{
+	elements[array[i]].fgcolor = "#ff00ff";
+}]]></sample>
+        </function>
         <function name="getLocationX">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The x location of the element in pixels.]]></return>
@@ -36742,6 +36874,17 @@ forms.company.elements.faxBtn.setSize(w,h);
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <summary><![CDATA[Returns the height of the current element.]]></summary>
           <sample><![CDATA[var ht = %%prefix%%%%elementName%%.getHeight();]]></sample>
+        </function>
+        <function name="getLabelForElementNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[An array with element names.]]></return>
+          <description><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></description>
+          <summary><![CDATA[Returns an Array of label element names that has this field filled in as the labelFor.]]></summary>
+          <sample><![CDATA[var array = elements.name_first.getLabelForElementNames();
+for (var i = 0; i<array.length; i++)
+{
+	elements[array[i]].fgcolor = "#ff00ff";
+}]]></sample>
         </function>
         <function name="getLocationX">
           <argumentsTypes/>
@@ -42741,7 +42884,7 @@ if (dialogOrWindowName != null) {
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of a form.]]></description>
           <summary><![CDATA[Get a design-time property of a form.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.getDesignTimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.controller.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getFormContext">
           <argumentsTypes/>
