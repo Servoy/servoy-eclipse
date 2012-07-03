@@ -56,6 +56,7 @@ public class ColumnTypeEditingSupport extends EditingSupport
 				length = 0;
 			}
 			pi.getColumnInfo().setConfiguredColumnType(ColumnType.getInstance(type, length, 0));
+			if (!pi.getExistInDB()) pi.updateColumnType(type, length, 0);
 
 			getViewer().update(element, null);
 			getViewer().refresh();
