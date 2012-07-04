@@ -326,12 +326,17 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 		composite.setLayout(layout);
 		composite.setFont(parent.getFont());
 
-		String[] names = new String[] { "Warning", "Error", "Info", "Ignore" }; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
-		List<String> ids = new ArrayList<String>(4);
-		ids.add(ProblemSeverity.WARNING.name());
-		ids.add(ProblemSeverity.ERROR.name());
-		ids.add(ProblemSeverity.INFO.name());
-		ids.add(ProblemSeverity.IGNORE.name());
+		String[] names1 = new String[] { "Warning", "Error", "Info", "Ignore" }; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
+		List<String> ids1 = new ArrayList<String>(4);
+		ids1.add(ProblemSeverity.WARNING.name());
+		ids1.add(ProblemSeverity.ERROR.name());
+		ids1.add(ProblemSeverity.INFO.name());
+		ids1.add(ProblemSeverity.IGNORE.name());
+
+		String[] names2 = new String[] { "Warning", "Error" }; //$NON-NLS-1$//$NON-NLS-2$
+		List<String> ids2 = new ArrayList<String>(4);
+		ids2.add(ProblemSeverity.WARNING.name());
+		ids2.add(ProblemSeverity.ERROR.name());
 
 		boolean first = true;
 		for (String problemSection : getProblemSections())
@@ -345,7 +350,14 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 				{
 					defaultValue = InstanceScope.INSTANCE.getNode(ServoyBuilder.ERROR_WARNING_PREFERENCES_NODE).get(problemItem.problem.getLeft(), defaultValue);
 				}
-				addPreferenceItem(inner, problemItem.problem.getLeft(), problemItem.description, names, ids, defaultValue);
+				if (problemItem.fullyConfigurable)
+				{
+					addPreferenceItem(inner, problemItem.problem.getLeft(), problemItem.description, names1, ids1, defaultValue);
+				}
+				else
+				{
+					addPreferenceItem(inner, problemItem.problem.getLeft(), problemItem.description, names2, ids2, defaultValue);
+				}
 			}
 		}
 
@@ -447,11 +459,13 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 	{
 		Pair<String, ProblemSeverity> problem;
 		String description;
+		boolean fullyConfigurable;
 
-		public ErrorWarningPreferenceItem(Pair<String, ProblemSeverity> problem, String description)
+		public ErrorWarningPreferenceItem(Pair<String, ProblemSeverity> problem, String description, boolean fullyConfigurable)
 		{
 			this.problem = problem;
 			this.description = description;
+			this.fullyConfigurable = fullyConfigurable;
 		}
 	}
 
@@ -470,188 +484,193 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 		if (ERROR_WARNING_POTENTIAL_DRAWBACKS.equals(problemSection))
 		{
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW,
-				Messages.ErrorWarningPreferencePage_tooManyColumns));
+				Messages.ErrorWarningPreferencePage_tooManyColumns, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.LEVEL_PERFORMANCE_TABS_PORTALS,
-				Messages.ErrorWarningPreferencePage_tooManyTabsPortals));
+				Messages.ErrorWarningPreferencePage_tooManyTabsPortals, true));
 		}
 		else if (ERROR_WARNING_DEVELOPER_PROBLEMS.equals(problemSection)) //RENAME or reorganize THIS!!!!!!
 		{
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.INVALID_TABLE_REFERENCE,
-				Messages.ErrorWarningPreferencePage_invalidTableReference));
+				Messages.ErrorWarningPreferencePage_invalidTableReference, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.METHOD_EVENT_PARAMETERS,
-				Messages.ErrorWarningPreferencePage_methodEventParameters));
-			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.MEDIA_TIFF, Messages.ErrorWarningPreferencePage_mediaTiff));
+				Messages.ErrorWarningPreferencePage_methodEventParameters, true));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.MEDIA_TIFF, Messages.ErrorWarningPreferencePage_mediaTiff, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.CALCULATION_FORM_ACCESS,
-				Messages.ErrorWarningPreferencePage_calculationFormAccess));
-			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.IMAGE_MEDIA_NOT_SET, Messages.ErrorWarningPreferencePage_imageMediaNotSet));
+				Messages.ErrorWarningPreferencePage_calculationFormAccess, true));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.IMAGE_MEDIA_NOT_SET,
+				Messages.ErrorWarningPreferencePage_imageMediaNotSet, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.DATAPROVIDER_MISSING_CONVERTER,
-				Messages.ErrorWarningPreferencePage_dataproviderMissingConverter));
+				Messages.ErrorWarningPreferencePage_dataproviderMissingConverter, false));
 		}
 		else if (ERROR_WARNING_LOGIN_PROBLEMS.equals(problemSection))
 		{
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.LOGIN_FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION,
-				Messages.ErrorWarningPreferencePage_loginFormWithDatasourceInLoginSolution));
+				Messages.ErrorWarningPreferencePage_loginFormWithDatasourceInLoginSolution, true));
 		}
 		else if (ERROR_WARNING_RESOURCE_PROJECT_PROBLEMS.equals(problemSection))
 		{
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.PROPERTY_MULTIPLE_METHODS_ON_SAME_TABLE,
-				Messages.ErrorWarningPreferencePage_propertyMultipleMethodsOnSameTable));
+				Messages.ErrorWarningPreferencePage_propertyMultipleMethodsOnSameTable, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.SERVER_MISSING_DRIVER,
-				Messages.ErrorWarningPreferencePage_serverMissingDriver));
+				Messages.ErrorWarningPreferencePage_serverMissingDriver, false));
 		}
 		else if (ERROR_WARNING_DEPRECATED_PROPERTIES_USAGE_PROBLEMS.equals(problemSection))
 		{
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.DEPRECATED_PROPERTY_USAGE_PROBLEM,
-				Messages.ErrorWarningPreferencePage_deprecatedPropertyUsageProblem));
+				Messages.ErrorWarningPreferencePage_deprecatedPropertyUsageProblem, true));
 		}
 		else if (ERROR_WARNING_COLUMNS_PROBLEMS.equals(problemSection))
 		{
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.COLUMN_UUID_FLAG_NOT_SET,
-				Messages.ErrorWarningPreferencePage_columnUUIDFlagNotSet));
+				Messages.ErrorWarningPreferencePage_columnUUIDFlagNotSet, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.COLUMN_DATABASE_IDENTITY_PROBLEM,
-				Messages.ErrorWarningPreferencePage_columnDatabaseIdentityProblem));
+				Messages.ErrorWarningPreferencePage_columnDatabaseIdentityProblem, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.COLUMN_DUPLICATE_NAME_DPID,
-				Messages.ErrorWarningPreferencePage_columnDuplicateNameDPID));
+				Messages.ErrorWarningPreferencePage_columnDuplicateNameDPID, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.COLUMN_FOREIGN_TYPE_PROBLEM,
-				Messages.ErrorWarningPreferencePage_columnForeignTypeProblem));
+				Messages.ErrorWarningPreferencePage_columnForeignTypeProblem, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.COLUMN_INCOMPATIBLE_TYPE_FOR_SEQUENCE,
-				Messages.ErrorWarningPreferencePage_columnIncompatibleTypeForSequence));
+				Messages.ErrorWarningPreferencePage_columnIncompatibleTypeForSequence, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.COLUMN_INCOMPATIBLE_WITH_UUID,
-				Messages.ErrorWarningPreferencePage_columnIncompatbleWithUUID));
+				Messages.ErrorWarningPreferencePage_columnIncompatbleWithUUID, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.COLUMN_LOOKUP_INVALID,
-				Messages.ErrorWarningPreferencePage_columnLookupInvalid));
+				Messages.ErrorWarningPreferencePage_columnLookupInvalid, false));
 		}
 		else if (ERROR_WARNING_SORT_PROBLEMS.equals(problemSection))
 		{
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.INVALID_SORT_OPTIONS_COLUMN_NOT_FOUND,
-				Messages.ErrorWarningPreferencePage_invalidSortOptionsColumnNotFound));
+				Messages.ErrorWarningPreferencePage_invalidSortOptionsColumnNotFound, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.INVALID_SORT_OPTIONS_RELATION_DIFFERENT_PRIMARY_DATASOURCE,
-				Messages.ErrorWarningPreferencePage_invalidSortOptionsRelationDifferentPrimaryDatasource));
+				Messages.ErrorWarningPreferencePage_invalidSortOptionsRelationDifferentPrimaryDatasource, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.INVALID_SORT_OPTIONS_RELATION_NOT_FOUND,
-				Messages.ErrorWarningPreferencePage_invalidSortOptionsRelationNotFound));
+				Messages.ErrorWarningPreferencePage_invalidSortOptionsRelationNotFound, false));
 		}
 		else if (ERROR_WARNING_RELATIONS_PROBLEMS.equals(problemSection))
 		{
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.RELATION_SERVER_DUPLICATE,
-				Messages.ErrorWarningPreferencePage_relationServerDuplicate));
+				Messages.ErrorWarningPreferencePage_relationServerDuplicate, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.RELATION_TABLE_NOT_FOUND,
-				Messages.ErrorWarningPreferencePage_relationTableNotFound));
+				Messages.ErrorWarningPreferencePage_relationTableNotFound, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.RELATION_TABLE_WITHOUT_PK,
-				Messages.ErrorWarningPreferencePage_relationTableWithoutPK));
-			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.RELATION_EMPTY, Messages.ErrorWarningPreferencePage_relationEmpty));
+				Messages.ErrorWarningPreferencePage_relationTableWithoutPK, false));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.RELATION_EMPTY, Messages.ErrorWarningPreferencePage_relationEmpty, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.RELATION_ITEM_DATAPROVIDER_NOT_FOUND,
-				Messages.ErrorWarningPreferencePage_relationItemDataproviderNotFound));
+				Messages.ErrorWarningPreferencePage_relationItemDataproviderNotFound, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.RELATION_ITEM_UUID_PROBLEM,
-				Messages.ErrorWarningPreferencePage_relationItemUUIDProblem));
+				Messages.ErrorWarningPreferencePage_relationItemUUIDProblem, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.RELATION_ITEM_TYPE_PROBLEM,
-				Messages.ErrorWarningPreferencePage_relationItemTypeProblem));
+				Messages.ErrorWarningPreferencePage_relationItemTypeProblem, true));
 		}
 		else if (ERROR_WARNING_VALUELIST_PROBLEMS.equals(problemSection))
 		{
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_CUSTOM_VALUES_WITH_DB_INFO,
-				Messages.ErrorWarningPreferencePage_valuelistCustomValuesWithDBInfo));
+				Messages.ErrorWarningPreferencePage_valuelistCustomValuesWithDBInfo, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_INVALID_CUSTOM_VALUES,
-				Messages.ErrorWarningPreferencePage_valuelistInvalidCustomValues));
+				Messages.ErrorWarningPreferencePage_valuelistInvalidCustomValues, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_ENTITY_NOT_FOUND,
-				Messages.ErrorWarningPreferencePage_valuelistEntityNotFound));
+				Messages.ErrorWarningPreferencePage_valuelistEntityNotFound, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_DB_MALFORMED_TABLE_DEFINITION,
-				Messages.ErrorWarningPreferencePage_valuelistDBMalformedTableDefinition));
+				Messages.ErrorWarningPreferencePage_valuelistDBMalformedTableDefinition, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_DB_NOT_TABLE_OR_RELATION,
-				Messages.ErrorWarningPreferencePage_valuelistDBNotTableOrRelation));
+				Messages.ErrorWarningPreferencePage_valuelistDBNotTableOrRelation, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_DB_SERVER_DUPLICATE,
-				Messages.ErrorWarningPreferencePage_valuelistDBServerDuplicate));
+				Messages.ErrorWarningPreferencePage_valuelistDBServerDuplicate, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_DB_TABLE_NO_PK,
-				Messages.ErrorWarningPreferencePage_valuelistDBTableNoPk));
+				Messages.ErrorWarningPreferencePage_valuelistDBTableNoPk, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_DB_WITH_CUSTOM_VALUES,
-				Messages.ErrorWarningPreferencePage_valuelistDBWithCustomValues));
+				Messages.ErrorWarningPreferencePage_valuelistDBWithCustomValues, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_RELATION_SEQUENCE_INCONSISTENT,
-				Messages.ErrorWarningPreferencePage_valuelistRelationSequenceInconsistent));
+				Messages.ErrorWarningPreferencePage_valuelistRelationSequenceInconsistent, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_RELATION_WITH_DATASOURCE,
-				Messages.ErrorWarningPreferencePage_valuelistRelationWithDatasource));
+				Messages.ErrorWarningPreferencePage_valuelistRelationWithDatasource, false));
 		}
 		else if (ERROR_WARNING_MODULES_PROBLEMS.equals(problemSection))
 		{
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.MODULE_DIFFERENT_I18N_TABLE,
-				Messages.ErrorWarningPreferencePage_moduleDifferentI18NTable));
+				Messages.ErrorWarningPreferencePage_moduleDifferentI18NTable, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.MODULE_DIFFERENT_RESOURCE_PROJECT,
-				Messages.ErrorWarningPreferencePage_moduleDifferentResourceProject));
-			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.MODULE_MISPLACED, Messages.ErrorWarningPreferencePage_moduleMisplaced));
-			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.MODULE_NOT_FOUND, Messages.ErrorWarningPreferencePage_moduleNotFound));
+				Messages.ErrorWarningPreferencePage_moduleDifferentResourceProject, false));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.MODULE_MISPLACED, Messages.ErrorWarningPreferencePage_moduleMisplaced,
+				true));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.MODULE_NOT_FOUND, Messages.ErrorWarningPreferencePage_moduleNotFound,
+				false));
 		}
 		else if (ERROR_WARNING_FORM_PROBLEMS.equals(problemSection))
 		{
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_COLUMN_LENGTH_TOO_SMALL,
-				Messages.ErrorWarningPreferencePage_formColumnLengthTooSmall));
+				Messages.ErrorWarningPreferencePage_formColumnLengthTooSmall, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_DATAPROVIDER_AGGREGATE_NOT_EDITABLE,
-				Messages.ErrorWarningPreferencePage_formDataproviderAggregateNotEditable));
+				Messages.ErrorWarningPreferencePage_formDataproviderAggregateNotEditable, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_INVALID_DATAPROVIDER,
-				Messages.ErrorWarningPreferencePage_formInvalidDataprovider));
+				Messages.ErrorWarningPreferencePage_formInvalidDataprovider, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_DERIVED_FORM_DIFFERENT_TABLE,
-				Messages.ErrorWarningPreferencePage_formDerivedFormDifferentTable));
+				Messages.ErrorWarningPreferencePage_formDerivedFormDifferentTable, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_DERIVED_FORM_REDEFINED_VARIABLE,
-				Messages.ErrorWarningPreferencePage_formDerivedFormRedefinedVariable));
+				Messages.ErrorWarningPreferencePage_formDerivedFormRedefinedVariable, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_DUPLICATE_PART,
-				Messages.ErrorWarningPreferencePage_formDuplicatePart));
+				Messages.ErrorWarningPreferencePage_formDuplicatePart, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_EDITABLE_COMBOBOX_CUSTOM_VALUELIST,
-				Messages.ErrorWarningPreferencePage_formEditableComboboxCustomValuelist));
-			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_EXTENDS_CYCLE, Messages.ErrorWarningPreferencePage_formExtendsCycle));
+				Messages.ErrorWarningPreferencePage_formEditableComboboxCustomValuelist, false));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_EXTENDS_CYCLE, Messages.ErrorWarningPreferencePage_formExtendsCycle,
+				true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_EXTENDS_FORM_ELEMENT_NOT_FOUND,
-				Messages.ErrorWarningPreferencePage_formExtendsFormElementNotFound));
+				Messages.ErrorWarningPreferencePage_formExtendsFormElementNotFound, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_FILE_NAME_INCONSISTENT,
-				Messages.ErrorWarningPreferencePage_formFileNameInconsistent));
+				Messages.ErrorWarningPreferencePage_formFileNameInconsistent, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_FORMAT_INVALID,
-				Messages.ErrorWarningPreferencePage_formFormatInvalid));
+				Messages.ErrorWarningPreferencePage_formFormatInvalid, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_INCOMPATIBLE_ELEMENT_TYPE,
-				Messages.ErrorWarningPreferencePage_formIncompatibleElementType));
+				Messages.ErrorWarningPreferencePage_formIncompatibleElementType, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_LABEL_FOR_ELEMENT_NOT_FOUND,
-				Messages.ErrorWarningPreferencePage_formLabelForElementNotFound));
+				Messages.ErrorWarningPreferencePage_formLabelForElementNotFound, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_ELEMENT_DUPLICATE_TAB_SEQUENCE,
-				Messages.ErrorWarningPreferencePage_formElementDuplicateTabSequence));
+				Messages.ErrorWarningPreferencePage_formElementDuplicateTabSequence, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_ELEMENT_OUTSIDE_BOUNDS,
-				Messages.ErrorWarningPreferencePage_formElementOutsideBounds));
+				Messages.ErrorWarningPreferencePage_formElementOutsideBounds, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_OBSOLETE_ELEMENT,
-				Messages.ErrorWarningPreferencePage_formObsoleteElement));
+				Messages.ErrorWarningPreferencePage_formObsoleteElement, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_REQUIRED_PROPERTY_MISSING,
-				Messages.ErrorWarningPreferencePage_formRequiredPropertyMissing));
+				Messages.ErrorWarningPreferencePage_formRequiredPropertyMissing, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_FIELD_RELATED_VALUELIST,
-				Messages.ErrorWarningPreferencePage_formFieldRelatedValuelist));
+				Messages.ErrorWarningPreferencePage_formFieldRelatedValuelist, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_PORTAL_INVALID_RELATION_NAME,
-				Messages.ErrorWarningPreferencePage_formPortalInvalidRelationName));
+				Messages.ErrorWarningPreferencePage_formPortalInvalidRelationName, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_PROPERTY_METHOD_NOT_ACCESIBLE,
-				Messages.ErrorWarningPreferencePage_formPropertyMethodNotAccessible));
+				Messages.ErrorWarningPreferencePage_formPropertyMethodNotAccessible, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_PROPERTY_MULTIPLE_METHODS_ON_SAME_ELEMENT,
-				Messages.ErrorWarningPreferencePage_formPropertyMultipleMethodsOnSameElement));
+				Messages.ErrorWarningPreferencePage_formPropertyMultipleMethodsOnSameElement, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_RELATED_TAB_DIFFERENT_TABLE,
-				Messages.ErrorWarningPreferencePage_formRelatedTabDifferentTable));
+				Messages.ErrorWarningPreferencePage_formRelatedTabDifferentTable, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_RELATED_TAB_UNSOLVED_RELATION,
-				Messages.ErrorWarningPreferencePage_formRelatedTabUnsolvedRelation));
+				Messages.ErrorWarningPreferencePage_formRelatedTabUnsolvedRelation, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_RELATED_TAB_UNSOLVED_UUID,
-				Messages.ErrorWarningPreferencePage_formRelatedTabUnsolvedUuid));
+				Messages.ErrorWarningPreferencePage_formRelatedTabUnsolvedUuid, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
-				Messages.ErrorWarningPreferencePage_formPropertyTargetNotFound));
-			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_INVALID_TABLE, Messages.ErrorWarningPreferencePage_formInvalidTable));
+				Messages.ErrorWarningPreferencePage_formPropertyTargetNotFound, true));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_INVALID_TABLE, Messages.ErrorWarningPreferencePage_formInvalidTable,
+				false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_TYPEAHEAD_UNSTORED_CALCULATION,
-				Messages.ErrorWarningPreferencePage_formTypeAheadUnstoredCalculation));
+				Messages.ErrorWarningPreferencePage_formTypeAheadUnstoredCalculation, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_VARIABLE_TYPE_COL,
-				Messages.ErrorWarningPreferencePage_formVariableTableCol));
+				Messages.ErrorWarningPreferencePage_formVariableTableCol, true));
 		}
 		else if (ERROR_WARNING_STYLES_PROBLEMS.equals(problemSection))
 		{
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.STYLE_CLASS_NO_STYLE,
-				Messages.ErrorWarningPreferencePage_styleClassNoStyle));
+				Messages.ErrorWarningPreferencePage_styleClassNoStyle, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.STYLE_CLASS_NOT_FOUND,
-				Messages.ErrorWarningPreferencePage_styleClassNotFound));
-			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.STYLE_NOT_FOUND, Messages.ErrorWarningPreferencePage_styleNotFound));
+				Messages.ErrorWarningPreferencePage_styleClassNotFound, true));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.STYLE_NOT_FOUND, Messages.ErrorWarningPreferencePage_styleNotFound, true));
 		}
 		else if (ERROR_WARNING_SOLUTION_PROBLEMS.equals(problemSection))
 		{
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.SOLUTION_ELEMENT_NAME_INVALID_IDENTIFIER,
-				Messages.ErrorWarningPreferencePage_solutionElementNameInvalidIdentifier));
+				Messages.ErrorWarningPreferencePage_solutionElementNameInvalidIdentifier, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.SOLUTION_PROPERTY_FORM_CANNOT_BE_INSTANTIATED,
-				Messages.ErrorWarningPreferencePage_solutionPropertyFormCannotBeInstantiated));
+				Messages.ErrorWarningPreferencePage_solutionPropertyFormCannotBeInstantiated, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.SOLUTION_PROPERTY_TARGET_NOT_FOUND,
-				Messages.ErrorWarningPreferencePage_solutionPropertyTargetNotFound));
-			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.CONSTANTS_USED, Messages.ErrorWarningPreferencePage_constantsUsed));
+				Messages.ErrorWarningPreferencePage_solutionPropertyTargetNotFound, false));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.CONSTANTS_USED, Messages.ErrorWarningPreferencePage_constantsUsed, false));
 		}
 
 		Collections.sort(associatedProblemMarkers, descriptionComparator);
