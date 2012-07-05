@@ -92,8 +92,10 @@ public class BackgroundTableLoader implements IActiveProjectListener
 	{
 		try
 		{
+			boolean buildAlreadyRun = false;
 			if (!tableListsLoaded)
 			{
+				boolean invalidServersFound = false;
 				String[] serverNames = serverManager.getServerNames(true, false, false, false);
 
 				// move repository in front
@@ -137,7 +139,15 @@ public class BackgroundTableLoader implements IActiveProjectListener
 							((IServerInternal)s).flagInvalid();
 							Debug.trace(ex); //report only when tracing 
 						}
+						if (!s.isValid()) invalidServersFound = true;
 					}
+				}
+
+				if (invalidServersFound)
+				{
+					// a server might be invalid only at this startup - we need to run build in order to generate problem markers
+					buildAlreadyRun = true;
+					ServoyModelManager.getServoyModelManager().getServoyModel().buildActiveProjectsInJob();
 				}
 				tableListsLoaded = true;
 			}
@@ -145,6 +155,7 @@ public class BackgroundTableLoader implements IActiveProjectListener
 			ServoyProject[] modulesInUse = null;
 			Iterator<String> it = null;
 			String dataSource = null;
+			boolean missingTablesUsedByActive = false;
 			synchronized (this)
 			{
 				modulesInUse = modules;
@@ -171,20 +182,30 @@ public class BackgroundTableLoader implements IActiveProjectListener
 						{
 							while (paused)
 								wait();
-							s.getTable(serverAndTable[1]); // loads all columns names as well
+							if (s.getTable(serverAndTable[1]) == null) // loads all columns names as well - this is the main purpose
+							{
+								missingTablesUsedByActive = true;
+							}
 						}
 					}
 					catch (Exception e)
 					{
 						((IServerInternal)s).flagInvalid();
+						missingTablesUsedByActive = true;
 						Debug.error(e);
 					}
+				}
+				else
+				{
+					missingTablesUsedByActive = true;
 				}
 				synchronized (this)
 				{
 					if (modulesInUse != modules)
 					{
 						// the active solution changed - we must load another set of tables
+						missingTablesUsedByActive = false;
+						buildAlreadyRun = false;
 						modulesInUse = modules;
 						if (modulesInUse != null)
 						{
@@ -205,6 +226,12 @@ public class BackgroundTableLoader implements IActiveProjectListener
 						running = false;
 					}
 				}
+			}
+
+			if (!buildAlreadyRun && missingTablesUsedByActive)
+			{
+				// a might have become missing only at this startup - we need to run build in order to generate problem markers
+				ServoyModelManager.getServoyModelManager().getServoyModel().buildActiveProjectsInJob();
 			}
 		}
 		catch (Exception e)

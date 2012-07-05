@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.model.util;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,26 +26,32 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.ServerProxy;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.ui.ISupportRowStyling;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
@@ -338,4 +345,57 @@ public class ModelUtils
 		// child of this form, not of a inherited form
 		return false;
 	}
+
+	/**
+	 * Updates the solution's server (proxy) cache.
+	 */
+	public static void updateSolutionServerProxies(final Solution solution, IDeveloperRepository repository)
+	{
+		DataSourceCollectorVisitor datasourceCollector = new DataSourceCollectorVisitor();
+		solution.acceptVisitor(datasourceCollector);
+
+		Map<String, IServer> serverProxies = new HashMap<String, IServer>();
+		for (String serverName : DataSourceUtils.getServerNames(datasourceCollector.getDataSources()))
+		{
+			try
+			{
+				IServer s = repository.getServer(serverName);
+				if (s != null)
+				{
+					serverProxies.put(serverName, new ServerProxy(s)
+					{
+						@Override
+						public ITable getTable(String tableName) throws RepositoryException, RemoteException
+						{
+							// do not use the caching, in developer a table may have been deleted, proxies are needed for databasemanager.getServerNames() in developer
+							return server.getTable(tableName);
+						}
+					});
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
+
+			solution.setServerProxies(serverProxies);
+		}
+	}
+
+	/**
+	 * Updates server proxies for all active solutions/modules.
+	 */
+	public static void updateActiveSolutionServerProxies(IDeveloperRepository repository)
+	{
+		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+		for (ServoyProject active : servoyModel.getModulesOfActiveProject())
+		{
+			Solution solution = active.getSolution();
+			if (solution != null)
+			{
+				updateSolutionServerProxies(solution, repository);
+			}
+		}
+	}
+
 }

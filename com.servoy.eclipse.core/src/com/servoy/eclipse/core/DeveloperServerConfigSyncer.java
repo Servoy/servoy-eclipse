@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.core;
 
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.persistence.IServerConfigListener;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -48,6 +49,7 @@ public class DeveloperServerConfigSyncer implements IServerConfigListener
 			if (oldServer != null) oldState = oldServer.getState();
 
 			serverManager.deleteServer(oldServerConfig);
+			ModelUtils.updateActiveSolutionServerProxies(ServoyModel.getDeveloperRepository());
 		}
 
 		IServerInternal newServer = null;

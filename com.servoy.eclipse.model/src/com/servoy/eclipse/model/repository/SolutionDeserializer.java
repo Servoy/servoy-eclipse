@@ -18,7 +18,6 @@ package com.servoy.eclipse.model.repository;
 
 import java.io.File;
 import java.nio.charset.Charset;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -75,6 +74,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ErrorKeeper;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractPersistFactory;
@@ -83,7 +83,6 @@ import com.servoy.j2db.persistence.AbstractScriptProvider;
 import com.servoy.j2db.persistence.ArgumentType;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ContentSpec;
-import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDeveloperRepository;
@@ -92,17 +91,14 @@ import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.IScriptProvider;
-import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
-import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RuntimeProperty;
 import com.servoy.j2db.persistence.ScriptVariable;
-import com.servoy.j2db.persistence.ServerProxy;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
@@ -272,35 +268,7 @@ public class SolutionDeserializer
 
 			});
 
-			DataSourceCollectorVisitor datasourceCollector = new DataSourceCollectorVisitor();
-			solution.acceptVisitor(datasourceCollector);
-
-			Map<String, IServer> serverProxies = new HashMap<String, IServer>();
-			for (String serverName : DataSourceUtils.getServerNames(datasourceCollector.getDataSources()))
-			{
-				try
-				{
-					IServer s = repository.getServer(serverName);
-					if (s != null)
-					{
-						serverProxies.put(serverName, new ServerProxy(s)
-						{
-							@Override
-							public ITable getTable(String tableName) throws RepositoryException, RemoteException
-							{
-								// do not use the caching, in developer a table may have been deleted, proxies are needed for databasemanager.getServerNames() in developer
-								return server.getTable(tableName);
-							}
-						});
-					}
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError(e);
-				}
-
-				solution.setServerProxies(serverProxies);
-			}
+			ModelUtils.updateSolutionServerProxies(solution, repository);
 
 			return changedFilesCopy; // what remains of the day
 		}

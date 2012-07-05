@@ -466,7 +466,6 @@ public class ServerEditor extends EditorPart
 	{
 		try
 		{
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			IServerManagerInternal serverManager = ServoyModel.getServerManager();
 			ServerConfig serverConfig = serverConfigObservable.getObject();
 			String currentServerName = serverConfig.getServerName();
