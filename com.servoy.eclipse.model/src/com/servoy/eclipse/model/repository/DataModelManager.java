@@ -204,7 +204,7 @@ public class DataModelManager implements IColumnInfoManager
 
 	public void loadAllColumnInfo(final Table t) throws RepositoryException
 	{
-		if (t == null) return;
+		if (t == null || !t.getExistInDB()) return;
 		removeErrorMarker(t.getServerName(), t.getName());
 		Iterator<Column> it = t.getColumns().iterator();
 		while (it.hasNext())
