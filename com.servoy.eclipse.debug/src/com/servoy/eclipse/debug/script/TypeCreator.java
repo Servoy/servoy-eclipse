@@ -845,6 +845,10 @@ public class TypeCreator extends TypeCache
 						ServoyLog.logError(e);
 					}
 				}
+				else if (!(IConstantsObject.class.isAssignableFrom(returnTypeClass) || IJavaScriptType.class.isAssignableFrom(returnTypeClass)))
+				{
+					continue;
+				}
 				String prefix = TYPE_PREFIX + config + ".";
 				members.add(createProperty(name, true, TypeUtil.classType(getType(prefix + name)), null, null));
 			}
