@@ -24,6 +24,7 @@ import org.eclipse.dltk.javascript.typeinfo.model.Method;
 import org.eclipse.dltk.javascript.typeinfo.model.Parameter;
 import org.eclipse.dltk.javascript.typeinfo.model.ParameterKind;
 import org.eclipse.dltk.javascript.typeinfo.model.Property;
+import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.ui.typeinfo.IElementLabelProvider;
 import org.eclipse.jface.resource.ImageDescriptor;
 
@@ -120,6 +121,15 @@ public class ElementLabelProvider implements IElementLabelProvider
 				nameBuffer.append(method.getType().getName());
 			}
 			return nameBuffer.toString();
+		}
+		else if (element instanceof Type)
+		{
+			int lastDotIndex = element.getName().lastIndexOf('.');
+			if (lastDotIndex != -1)
+			{
+				String name = element.getName().substring(lastDotIndex + 1);
+				return name + " - " + element.getName().substring(0, lastDotIndex);
+			}
 		}
 		return null;
 	}
