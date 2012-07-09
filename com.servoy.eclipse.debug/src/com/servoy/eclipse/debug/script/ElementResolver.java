@@ -265,7 +265,7 @@ public class ElementResolver implements IElementResolver
 			while (iterator.hasNext())
 			{
 				String name = iterator.next();
-				if (name.startsWith(TypeCreator.TYPE_PREFIX)) name = name.substring(name.lastIndexOf(".") + 1);
+				if (name.startsWith(TypeCreator.PLUGIN_TYPE_PREFIX)) name = name.substring(name.lastIndexOf(".") + 1);
 				if (!name.toLowerCase().startsWith(lowerCasePrefix)) iterator.remove();
 			}
 		}

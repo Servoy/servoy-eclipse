@@ -205,7 +205,7 @@ public class TypeCreator extends TypeCache
 	private static final int INSTANCE_FIELD = 3;
 	private static final int STATIC_FIELD = 4;
 
-	public static final String TYPE_PREFIX = "plugins.";
+	public static final String PLUGIN_TYPE_PREFIX = "plugins.";
 
 	protected final static ImageDescriptor METHOD = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
 		new Path("/icons/function.gif"), null));
@@ -652,7 +652,7 @@ public class TypeCreator extends TypeCache
 			while (iterator.hasNext())
 			{
 				String name = iterator.next();
-				if (name.startsWith(TYPE_PREFIX)) name = name.substring(name.lastIndexOf(".") + 1);
+				if (!PLUGIN_TYPE_PREFIX.startsWith(prefix) && name.startsWith(PLUGIN_TYPE_PREFIX)) name = name.substring(name.lastIndexOf(".") + 1);
 				if (!name.toLowerCase().startsWith(lowerCasePrefix)) iterator.remove();
 			}
 		}
@@ -849,7 +849,7 @@ public class TypeCreator extends TypeCache
 				{
 					continue;
 				}
-				String prefix = TYPE_PREFIX + config + ".";
+				String prefix = PLUGIN_TYPE_PREFIX + config + ".";
 				members.add(createProperty(name, true, TypeUtil.classType(getType(prefix + name)), null, null));
 			}
 		}
