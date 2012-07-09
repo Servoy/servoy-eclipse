@@ -42884,7 +42884,7 @@ if (dialogOrWindowName != null) {
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of a form.]]></description>
           <summary><![CDATA[Get a design-time property of a form.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.controller.getDesignTimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getFormContext">
           <argumentsTypes/>

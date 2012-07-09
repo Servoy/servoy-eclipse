@@ -66,14 +66,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.IForm;
-import com.servoy.j2db.dataprocessing.FoundSet;
-import com.servoy.j2db.dataprocessing.IDataSet;
-import com.servoy.j2db.dataprocessing.IFoundSetInternal;
-import com.servoy.j2db.dataprocessing.IRecord;
-import com.servoy.j2db.dataprocessing.IRecordInternal;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
-import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
 import com.servoy.j2db.documentation.IParameter;
 import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
@@ -106,7 +99,6 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.scripting.DeclaringClassJavaMembers;
-import com.servoy.j2db.scripting.FormScope;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.IPrefixedConstantsObject;
@@ -117,21 +109,12 @@ import com.servoy.j2db.scripting.ITypedScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSI18N;
-import com.servoy.j2db.scripting.JSMap;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
-import com.servoy.j2db.scripting.solutionmodel.JSComponent;
-import com.servoy.j2db.scripting.solutionmodel.JSMethod;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
-import com.servoy.j2db.solutionmodel.ISMComponent;
-import com.servoy.j2db.solutionmodel.ISMForm;
-import com.servoy.j2db.solutionmodel.ISMMethod;
-import com.servoy.j2db.ui.IComponent;
-import com.servoy.j2db.ui.IScriptRenderMethods;
-import com.servoy.j2db.ui.IScriptRenderMethodsWithFormat;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ITagResolver;
@@ -140,6 +123,7 @@ import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Text;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 
 public class SolutionExplorerListContentProvider implements IStructuredContentProvider, IImageLookup, IPersistChangeListener, IColumnListener
 {
@@ -154,65 +138,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	public static Set<String> ignoreMethodsFromPrefixedConstants = new TreeSet<String>();
 
 	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
+	public final static Map<String, String> TYPES = Utils.getDocumentationTypesTranslator(null);
 
-	public static HashMap<String, String> TYPES = new HashMap<String, String>()
-	{
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public String get(Object name)
-		{
-			String o = super.get(name);
-			if (o == null)
-			{
-				String str = (String)name;
-				int i = str.lastIndexOf("."); //$NON-NLS-1$
-				if (i >= 0)
-				{
-					str = str.substring(i + 1);
-				}
-				i = str.lastIndexOf("["); //$NON-NLS-1$
-				if (i >= 0)
-				{
-					o = super.get(str.substring(0, i));
-					if (o != null) o += str.substring(i);
-				}
-				else o = super.get(str);
-				if (o == null) o = str;
-			}
-			return o;
-		}
-	};
 	static
 	{
-		TYPES.put("boolean", "Boolean"); //$NON-NLS-1$ //$NON-NLS-2$
-		TYPES.put("double", "Number"); //$NON-NLS-1$ //$NON-NLS-2$
-		TYPES.put("Double", "Number"); //$NON-NLS-1$ //$NON-NLS-2$
-		TYPES.put("float", "Number"); //$NON-NLS-1$ //$NON-NLS-2$
-		TYPES.put("Float", "Number"); //$NON-NLS-1$ //$NON-NLS-2$
-		TYPES.put("int", "Number"); //$NON-NLS-1$ //$NON-NLS-2$
-		TYPES.put("Integer", "Number"); //$NON-NLS-1$ //$NON-NLS-2$
-		TYPES.put("long", "Number"); //$NON-NLS-1$ //$NON-NLS-2$
-		TYPES.put("Long", "Number"); //$NON-NLS-1$ //$NON-NLS-2$
-		TYPES.put(Record.class.getSimpleName(), Record.JS_RECORD);
-		TYPES.put(IRecordInternal.class.getSimpleName(), Record.JS_RECORD);
-		TYPES.put(IRecord.class.getSimpleName(), Record.JS_RECORD);
-		TYPES.put(IFoundSetInternal.class.getSimpleName(), FoundSet.JS_FOUNDSET);
-		TYPES.put(FoundSet.class.getSimpleName(), FoundSet.JS_FOUNDSET);
-		TYPES.put(FormScope.class.getSimpleName(), "RuntimeForm"); //$NON-NLS-1$
-		TYPES.put(IForm.class.getSimpleName(), "RuntimeForm"); //$NON-NLS-1$
-		TYPES.put("org.mozilla.javascript.NativeArray", "Array"); //$NON-NLS-1$ //$NON-NLS-2$
-		TYPES.put("JSWindowImpl$JSWindow", "JSWindow"); //$NON-NLS-1$ //$NON-NLS-2$
-		TYPES.put(IScriptRenderMethodsWithFormat.class.getSimpleName(), IScriptRenderMethodsWithFormat.JS_RENDERABLE);
-		TYPES.put(IScriptRenderMethods.class.getSimpleName(), IScriptRenderMethodsWithFormat.JS_RENDERABLE);
-		TYPES.put(IComponent.class.getSimpleName(), "RuntimeComponent"); //$NON-NLS-1$ 
-		TYPES.put(IDataSet.class.getSimpleName(), "JSDataSet"); //$NON-NLS-1$ 
-		TYPES.put(Scriptable.class.getSimpleName(), "Object"); //$NON-NLS-1$ 
-		TYPES.put(JSMap.class.getSimpleName(), "Object"); //$NON-NLS-1$
-		TYPES.put(ISMMethod.class.getSimpleName(), JSMethod.class.getSimpleName());
-		TYPES.put(ISMForm.class.getSimpleName(), com.servoy.j2db.scripting.solutionmodel.JSForm.class.getSimpleName());
-		TYPES.put(ISMComponent.class.getSimpleName(), JSComponent.class.getSimpleName());
-
 		Method[] methods = Object.class.getMethods();
 		for (Method method : methods)
 		{
