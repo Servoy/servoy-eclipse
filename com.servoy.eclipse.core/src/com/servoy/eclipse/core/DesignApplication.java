@@ -45,7 +45,6 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IBeanManager;
-import com.servoy.j2db.IClientUIProperties;
 import com.servoy.j2db.IDataRendererFactory;
 import com.servoy.j2db.IFormManager;
 import com.servoy.j2db.ILAFManager;
@@ -1069,13 +1068,13 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		client.setValueListItems(name, displayValues, realValues, autoconvert);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.j2db.IApplication#onSolutionOpen()
+	 */
 	public void onSolutionOpen()
 	{
-		getClient().onSolutionOpen();
-	}
-
-	public IClientUIProperties getClientUIProperties()
-	{
-		return getClient().getClientUIProperties();
+		//nop
 	}
 }
