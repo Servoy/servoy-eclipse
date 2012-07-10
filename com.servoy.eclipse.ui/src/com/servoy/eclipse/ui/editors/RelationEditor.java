@@ -242,7 +242,8 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 
 	protected void initDataBindings()
 	{
-		datasourceSelectComposite.initDataBindings(this);
+		datasourceSelectComposite.initDataBindings(this, datasourceSelectComposite.new NameFiller(nameField, getRelation().getPrimaryTableName(),
+			getRelation().getForeignTableName()));
 		optionsComposite.initDataBindings(this);
 
 		m_bindingContext = BindingHelper.dispose(m_bindingContext);
@@ -879,11 +880,6 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 		{
 			return e.getMessage();
 		}
-	}
-
-	public Text getNameField()
-	{
-		return nameField;
 	}
 
 	public Relation getRelation()

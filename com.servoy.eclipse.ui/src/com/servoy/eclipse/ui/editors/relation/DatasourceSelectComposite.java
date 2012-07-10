@@ -37,6 +37,7 @@ import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.editors.RelationEditor;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.eclipse.ui.property.TableValueEditor;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -108,7 +109,7 @@ public class DatasourceSelectComposite extends Composite
 
 	}
 
-	private class NameFiller
+	public class NameFiller
 	{
 		private final Text nameFieldToModify;
 		private String oldSourceTable;
@@ -125,7 +126,8 @@ public class DatasourceSelectComposite extends Composite
 		{
 			if (sourceTable.getSelection() != null && !sourceTable.getSelection().isEmpty())
 			{
-				if ((oldSourceTable + "_to_" + oldDestinationTable).equals(nameFieldToModify.getText()) || "untitled".equals(nameFieldToModify.getText()))
+				String oldRelationName = getRelationNameWithDefaultDefault(oldSourceTable, oldDestinationTable);
+				if (oldRelationName.equals(nameFieldToModify.getText()) || "untitled".equals(nameFieldToModify.getText()))
 				{
 					IStructuredSelection selection = (IStructuredSelection)destinationTable.getSelection();
 					if (!selection.isEmpty())
@@ -140,10 +142,20 @@ public class DatasourceSelectComposite extends Composite
 					selection = (IStructuredSelection)sourceTable.getSelection();
 					TableWrapper tableWrapper = ((TableWrapper)selection.getFirstElement());
 					oldSourceTable = tableWrapper.getTableName();
-					nameFieldToModify.setText(oldSourceTable + "_to_" + oldDestinationTable);
+					nameFieldToModify.setText(getRelationNameWithDefaultDefault(oldSourceTable, oldDestinationTable));
 				}
 			}
 
+		}
+
+		private String getRelationNameWithDefaultDefault(String primaryTable, String foreignTable)
+		{
+			String relationName = EditorUtil.getRelationName(primaryTable, foreignTable, null, null);
+			if (relationName == null)
+			{
+				relationName = oldSourceTable + "_to_" + oldDestinationTable; //$NON-NLS-1$
+			}
+			return relationName;
 		}
 	}
 
@@ -176,11 +188,9 @@ public class DatasourceSelectComposite extends Composite
 		}
 	}
 
-	public void initDataBindings(final RelationEditor relationEditor)
+	public void initDataBindings(final RelationEditor relationEditor, final NameFiller filler)
 	{
 		setSelection(relationEditor);
-		final NameFiller filler = new NameFiller(relationEditor.getNameField(), relationEditor.getRelation().getPrimaryTableName(),
-			relationEditor.getRelation().getForeignTableName());
 		sourceListener = new ISelectionChangedListener()
 		{
 			public void selectionChanged(SelectionChangedEvent event)

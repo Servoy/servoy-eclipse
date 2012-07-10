@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.LoadRelationsAction;
+import com.servoy.eclipse.ui.util.EditorUtil;
 
 /**
  * Preference page for automatic naming strategies settings.
@@ -96,7 +96,7 @@ public class AutomaticNamingStrategies extends PreferencePage implements IWorkbe
 		includeTableNameInEventHandlerRadio.setText("Include table name"); //$NON-NLS-1$
 
 		Group grpLoadedRelationsNaming = new Group(rootPanel, SWT.NONE);
-		grpLoadedRelationsNaming.setText("Loaded relations naming"); //$NON-NLS-1$
+		grpLoadedRelationsNaming.setText("Relations naming"); //$NON-NLS-1$
 		grpLoadedRelationsNaming.setLayout(new GridLayout(1, false));
 		grpLoadedRelationsNaming.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
@@ -122,16 +122,14 @@ public class AutomaticNamingStrategies extends PreferencePage implements IWorkbe
 			public void widgetSelected(SelectionEvent e)
 			{
 				loadRelationsNamingPatternText.setEnabled(customLoadedRelationsNamingPattern.getSelection());
-				loadRelationsNamingPatternText.setText("${" + LoadRelationsAction.CHILD_TABLE_KEYWORD + "}_to_${" + LoadRelationsAction.PARENT_TABLE_KEYWORD +
-					"}");
+				loadRelationsNamingPatternText.setText("${" + EditorUtil.CHILD_TABLE_KEYWORD + "}_to_${" + EditorUtil.PARENT_TABLE_KEYWORD + "}");
 			}
 		});
 
 		loadRelationsNamingPatternText = new Text(grpLoadedRelationsNaming, SWT.NONE);
 		loadRelationsNamingPatternText.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, true));
-		loadRelationsNamingPatternText.setToolTipText("Define custom pattern, use ${" + LoadRelationsAction.CHILD_TABLE_KEYWORD + "}, ${" +
-			LoadRelationsAction.PARENT_TABLE_KEYWORD + "}, ${" + LoadRelationsAction.CHILD_COLUMN_KEYWORD + "} and ${" +
-			LoadRelationsAction.PARENT_COLUMN_KEYWORD + "} for substitution");
+		loadRelationsNamingPatternText.setToolTipText("Define custom pattern, use ${" + EditorUtil.CHILD_TABLE_KEYWORD + "}, ${" +
+			EditorUtil.PARENT_TABLE_KEYWORD + "}, ${" + EditorUtil.CHILD_COLUMN_KEYWORD + "} and ${" + EditorUtil.PARENT_COLUMN_KEYWORD + "} for substitution");
 
 		initializeFields();
 

@@ -25,8 +25,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -46,7 +44,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.wizards.LoadRelationsWizard;
 import com.servoy.eclipse.ui.wizards.LoadRelationsWizard.RelationData;
@@ -59,11 +57,6 @@ import com.servoy.j2db.util.Utils;
 
 public class LoadRelationsAction extends Action implements ISelectionChangedListener
 {
-	public static final String CHILD_TABLE_KEYWORD = "childtable";
-	public static final String PARENT_TABLE_KEYWORD = "parenttable";
-	public static final String CHILD_COLUMN_KEYWORD = "childcolumn";
-	public static final String PARENT_COLUMN_KEYWORD = "parentcolumn";
-
 	private final SolutionExplorerView viewer;
 
 	public LoadRelationsAction(SolutionExplorerView sev)
@@ -343,28 +336,13 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 			String ptableName = element[2];
 			String pcolumnName = element[3];
 
-			String loadedRelationsNamingPattern = new DesignerPreferences().getLoadedRelationsNamingPattern();
-			if (rel_items_list.size() > 1 || loadedRelationsNamingPattern == null || loadedRelationsNamingPattern.trim().length() == 0)
+			String relationName = EditorUtil.getRelationName(ptableName, ftableName, pcolumnName, fcolumnName);
+			if (rel_items_list.size() > 1 || relationName == null || relationName.trim().length() == 0)
 			{
 				return table.getSQLName() + "_to_" + ptableName;
 			}
 
-			Map<String, String> substitutions = new HashMap<String, String>(4);
-			substitutions.put(CHILD_TABLE_KEYWORD, ftableName);
-			substitutions.put(CHILD_COLUMN_KEYWORD, fcolumnName);
-			substitutions.put(PARENT_TABLE_KEYWORD, ptableName);
-			substitutions.put(PARENT_COLUMN_KEYWORD, pcolumnName);
-
-			Matcher matcher = Pattern.compile("\\$\\{(\\w+)\\}").matcher(loadedRelationsNamingPattern.trim());
-			StringBuffer stringBuffer = new StringBuffer();
-			while (matcher.find())
-			{
-				String key = matcher.group(1);
-				String value = substitutions.get(key);
-				matcher.appendReplacement(stringBuffer, value == null ? "??" + key + "??" : value);
-			}
-			matcher.appendTail(stringBuffer);
-			return stringBuffer.toString().toLowerCase();
+			return relationName;
 		}
 	}
 }

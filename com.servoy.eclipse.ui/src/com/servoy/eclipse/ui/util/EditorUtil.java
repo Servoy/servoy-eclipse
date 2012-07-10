@@ -21,8 +21,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
@@ -705,5 +709,35 @@ public class EditorUtil
 		}
 		// columns sorted by name (PK always first)
 		return table.getColumnsSortedByName();
+	}
+
+	public static final String CHILD_TABLE_KEYWORD = "childtable";
+	public static final String PARENT_TABLE_KEYWORD = "parenttable";
+	public static final String CHILD_COLUMN_KEYWORD = "childcolumn";
+	public static final String PARENT_COLUMN_KEYWORD = "parentcolumn";
+
+	public static String getRelationName(String parentTable, String childTable, String parentColumn, String childColumn)
+	{
+		String loadedRelationsNamingPattern = new DesignerPreferences().getLoadedRelationsNamingPattern();
+		if (loadedRelationsNamingPattern != null && loadedRelationsNamingPattern.length() > 0)
+		{
+			Map<String, String> substitutions = new HashMap<String, String>(4);
+			substitutions.put(CHILD_TABLE_KEYWORD, childTable != null ? childTable : ""); //$NON-NLS-1$
+			substitutions.put(CHILD_COLUMN_KEYWORD, childColumn != null ? childColumn : "");//$NON-NLS-1$
+			substitutions.put(PARENT_TABLE_KEYWORD, parentTable != null ? parentTable : "");//$NON-NLS-1$ 
+			substitutions.put(PARENT_COLUMN_KEYWORD, parentColumn != null ? parentColumn : "");//$NON-NLS-1$ 
+
+			Matcher matcher = Pattern.compile("\\$\\{(\\w+)\\}").matcher(loadedRelationsNamingPattern.trim());
+			StringBuffer stringBuffer = new StringBuffer();
+			while (matcher.find())
+			{
+				String key = matcher.group(1);
+				String value = substitutions.get(key);
+				matcher.appendReplacement(stringBuffer, value == null ? "??" + key + "??" : value);
+			}
+			matcher.appendTail(stringBuffer);
+			return stringBuffer.toString().toLowerCase();
+		}
+		return null;
 	}
 }
