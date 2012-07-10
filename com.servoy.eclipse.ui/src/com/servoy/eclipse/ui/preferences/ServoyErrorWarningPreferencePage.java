@@ -639,6 +639,8 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 				Messages.ErrorWarningPreferencePage_formPropertyMethodNotAccessible, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_PROPERTY_MULTIPLE_METHODS_ON_SAME_ELEMENT,
 				Messages.ErrorWarningPreferencePage_formPropertyMultipleMethodsOnSameElement, true));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_TABPANEL_TAB_IMAGE_TOO_LARGE,
+				Messages.ErrorWarningPreferencePage_formTabPanelTabImageTooLarge, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_RELATED_TAB_DIFFERENT_TABLE,
 				Messages.ErrorWarningPreferencePage_formRelatedTabDifferentTable, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_RELATED_TAB_UNSOLVED_RELATION,

@@ -36,6 +36,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import javax.swing.ImageIcon;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -131,6 +132,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Tab;
+import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
@@ -276,6 +278,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String OBSOLETE_ELEMENT = _PREFIX + ".obsoleteElement"; //$NON-NLS-1$
 	public static final String HIDDEN_TABLE_STILL_IN_USE = _PREFIX + ".hiddenTableInUse"; //$NON-NLS-1$
 	public static final String MISSING_CONVERTER = _PREFIX + ".missingConverter"; //$NON-NLS-1$
+	public static final String LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE = _PREFIX + ".labelForElementProblem"; //$NON-NLS-1$
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels"; //$NON-NLS-1$
@@ -400,6 +403,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"formPortalInvalidRelationName", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> FORM_PROPERTY_METHOD_NOT_ACCESIBLE = new Pair<String, ProblemSeverity>(
 		"formPropertyMethodNotAccessible", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> FORM_TABPANEL_TAB_IMAGE_TOO_LARGE = new Pair<String, ProblemSeverity>(
+		"formTabPanelTabImageTooLarge", ProblemSeverity.WARNING); //$NON-NLS-1$	
 	public final static Pair<String, ProblemSeverity> FORM_RELATED_TAB_DIFFERENT_TABLE = new Pair<String, ProblemSeverity>(
 		"formRelatedTabDifferentTable", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> FORM_RELATED_TAB_UNSOLVED_RELATION = new Pair<String, ProblemSeverity>(
@@ -2443,6 +2448,21 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												tab);
 										}
 									}
+								}
+							}
+							if (tab.getImageMediaID() > 0)
+							{
+								Media media = getServoyModel().getFlattenedSolution().getMedia(tab.getImageMediaID());
+								ImageIcon mediaImageIcon = new ImageIcon(media.getMediaData());
+								if (mediaImageIcon.getIconWidth() > 20 || mediaImageIcon.getIconHeight() > 20)
+								{
+									String formName = ((Form)tab.getAncestor(IRepository.FORMS)).getName();
+									String tabPanelName = ((TabPanel)tab.getAncestor(IRepository.TABPANELS)).getName();
+									String tabName = tab.getName();
+
+									ServoyMarker mk = MarkerMessages.FormTabPanelTabImageTooLarge.fill(tabName != null ? tabName : "", tabPanelName != null //$NON-NLS-1$
+										? tabPanelName : "", formName != null ? formName : ""); //$NON-NLS-1$ //$NON-NLS-2$
+									addMarker(project, mk.getType(), mk.getText(), -1, FORM_TABPANEL_TAB_IMAGE_TOO_LARGE, IMarker.PRIORITY_NORMAL, null, tab);
 								}
 							}
 						}

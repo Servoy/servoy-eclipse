@@ -309,7 +309,7 @@ public class MarkerMessages
 	 * The labelfor element used by a label cannot be found.
 	 */
 	public static ServoyMarker FormLabelForElementNotFound = new ServoyMarker(
-		"Label in form \"{0}\" has labelfor property \"{1}\" that does not exist.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Label in form \"{0}\" has labelfor property \"{1}\" that does not exist.", ServoyBuilder.LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker FormExtendsFormElementNotFound = new ServoyMarker(
 		"Form \"{0}\" extends a form that cannot be found.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
@@ -357,6 +357,12 @@ public class MarkerMessages
 	 */
 	public static ServoyMarker FormPortalNamedInvalidRelationName = new ServoyMarker("Portal \"{0}\" has invalid relationName (relation chain not correct).", //$NON-NLS-1$
 		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
+
+	/**
+	 * This means that in a tabpanel you have a tab with an image larger then 20x20 pixels
+	 */
+	public static ServoyMarker FormTabPanelTabImageTooLarge = new ServoyMarker(
+		"Tab \"{0}\" of tab panel \"{1}\" in form \"{2}\" has an image larger then 20x20 pixels", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
 	 * This means that in a tabpanel you have a tab based on a certain relation, but the form displayed in the tab is based on a table

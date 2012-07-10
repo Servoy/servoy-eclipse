@@ -225,6 +225,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_formPortalInvalidRelationName;
 	public static String ErrorWarningPreferencePage_formPropertyMethodNotAccessible;
 	public static String ErrorWarningPreferencePage_formPropertyMultipleMethodsOnSameElement;
+	public static String ErrorWarningPreferencePage_formTabPanelTabImageTooLarge;
 	public static String ErrorWarningPreferencePage_formRelatedTabDifferentTable;
 	public static String ErrorWarningPreferencePage_formRelatedTabUnsolvedRelation;
 	public static String ErrorWarningPreferencePage_formRelatedTabUnsolvedUuid;
