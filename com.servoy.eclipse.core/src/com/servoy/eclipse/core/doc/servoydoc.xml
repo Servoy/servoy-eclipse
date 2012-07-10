@@ -18010,6 +18010,15 @@ var ballImage = solutionModel.newMedia('ball.jpg', bytes);
 var firstTab = tabs.newTab('firstTab', 'Child Form', childForm, relation);
 firstTab.imageMedia = ballImage;]]></sample>
         </property>
+        <property name="mnemonic">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Mnemonic used to switch to tab.]]></description>
+          <summary><![CDATA[Mnemonic used to switch to tab.]]></summary>
+          <sample><![CDATA[var childForm = solutionModel.newForm('childForm', 'db:/example_data/child_table', null, false, 400, 300);
+var anotherChildForm = solutionModel.newForm('anotherChildForm', 'db:/example_data/child_table', null, false, 400, 300);
+var firstTab = tabs.newTab('firstTab', 'Child Form', childForm, relation);
+firstTab.mnemonic = 'a';]]></sample>
+        </property>
         <property name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the tab.]]></description>
@@ -26442,6 +26451,20 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the maximum tab index for a specified tabpanel.]]></summary>
           <sample><![CDATA[var max = %%prefix%%%%elementName%%.getMaxTabIndex();]]></sample>
         </function>
+        <function name="getMnemonicAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The mnemonic.]]></return>
+          <description><![CDATA[Returns the mnemonic for a specified tab of a tabpanel.]]></description>
+          <summary><![CDATA[Returns the mnemonic for a specified tab of a tabpanel.]]></summary>
+          <sample><![CDATA[var mnemonic = %%prefix%%%%elementName%%.getMnemonicAt(3);]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The number of the specified tab.]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
@@ -26619,6 +26642,24 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             </parameter>
             <parameter name="y" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the Y coordinate of the element in pixels.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setMnemonicAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the mnemonic for a specified tab in a tabpanel.]]></description>
+          <summary><![CDATA[Sets the mnemonic for a specified tab in a tabpanel.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.setMnemonicAt(3,'a');]]></sample>
+          <parameters>
+            <parameter name="index">
+              <description><![CDATA[the number of the specified tab]]></description>
+            </parameter>
+            <parameter name="text">
+              <description><![CDATA[the text to be set for the specified tab]]></description>
             </parameter>
           </parameters>
         </function>
@@ -35856,6 +35897,20 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the maximum tab index for a specified tabpanel.]]></summary>
           <sample><![CDATA[var max = %%prefix%%%%elementName%%.getMaxTabIndex();]]></sample>
         </function>
+        <function name="getMnemonicAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The mnemonic.]]></return>
+          <description><![CDATA[Returns the mnemonic for a specified tab of a tabpanel.]]></description>
+          <summary><![CDATA[Returns the mnemonic for a specified tab of a tabpanel.]]></summary>
+          <sample><![CDATA[var mnemonic = %%prefix%%%%elementName%%.getMnemonicAt(3);]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The number of the specified tab.]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
@@ -36058,6 +36113,24 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             </parameter>
             <parameter name="y" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the Y coordinate of the element in pixels.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setMnemonicAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the mnemonic for a specified tab in a tabpanel.]]></description>
+          <summary><![CDATA[Sets the mnemonic for a specified tab in a tabpanel.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.setMnemonicAt(3,'a');]]></sample>
+          <parameters>
+            <parameter name="index">
+              <description><![CDATA[the number of the specified tab]]></description>
+            </parameter>
+            <parameter name="text">
+              <description><![CDATA[the text to be set for the specified tab]]></description>
             </parameter>
           </parameters>
         </function>
