@@ -118,7 +118,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		showRulersCheck = new Button(rulerMetricsPanel, SWT.CHECK);
 		showRulersCheck.setText("Show rulers"); //$NON-NLS-1$
-		GridData metricsPanelGridData = new GridData(SWT.END, SWT.CENTER, true, true);
+		GridData metricsPanelGridData = new GridData(SWT.LEFT, SWT.CENTER, true, true);
 
 		Composite metricsComboPanel = new Composite(rulerMetricsPanel, SWT.NONE);
 		metricsComboPanel.setLayout(new GridLayout(2, false));
@@ -133,7 +133,10 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		metricsCombo.setInput(new ObjectWrapper[] { new ObjectWrapper("pixels", Integer.valueOf(DesignerPreferences.PX)), new ObjectWrapper("centimeters", //$NON-NLS-1$//$NON-NLS-2$
 			Integer.valueOf(DesignerPreferences.CM)), new ObjectWrapper("inches", Integer.valueOf(DesignerPreferences.IN)) }); //$NON-NLS-1$
 
-		Group grpFeedbackSettings = new Group(rootPanel, SWT.NONE);
+		Composite settingsPanel = new Composite(rootPanel, SWT.NONE);
+		settingsPanel.setLayout(new GridLayout(2, false));
+
+		Group grpFeedbackSettings = new Group(settingsPanel, SWT.NONE);
 		grpFeedbackSettings.setText("Feedback Settings"); //$NON-NLS-1$
 		grpFeedbackSettings.setLayout(new GridLayout(1, false));
 		grpFeedbackSettings.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
@@ -202,7 +205,10 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		paintPagebreaksCheck = new Button(grpFeedbackSettings, SWT.CHECK);
 		paintPagebreaksCheck.setText("Paint page breaks"); //$NON-NLS-1$
 
-		Group grpAlignmentSettings = new Group(rootPanel, SWT.NONE);
+		Composite guideKeyPanel = new Composite(settingsPanel, SWT.NONE);
+		guideKeyPanel.setLayout(new GridLayout(1, true));
+
+		Group grpAlignmentSettings = new Group(guideKeyPanel, SWT.NONE);
 		grpAlignmentSettings.setText("Guide Settings"); //$NON-NLS-1$
 		grpAlignmentSettings.setLayout(new GridLayout(1, false));
 		grpAlignmentSettings.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
@@ -300,10 +306,9 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		anchorCheck.setBounds(19, 230, 175, 26);
 		anchorCheck.setText("Enable Smart Anchoring"); //$NON-NLS-1$
 
-
-		Group grpResizing = new Group(rootPanel, SWT.NONE);
+		Group grpResizing = new Group(guideKeyPanel, SWT.NONE);
 		grpResizing.setText("Keyboard resize/move step sizes"); //$NON-NLS-1$
-		grpResizing.setLayout(new GridLayout(1, false));
+		grpResizing.setLayout(new GridLayout(2, false));
 		grpResizing.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		Composite smallStepPanel = new Composite(grpResizing, SWT.NONE);
