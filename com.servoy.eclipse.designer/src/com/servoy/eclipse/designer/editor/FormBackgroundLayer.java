@@ -74,7 +74,8 @@ public class FormBackgroundLayer extends FreeformLayer
 
 		if (editorPart.getForm() == null || editorPart.isClosing()) return;
 
-		paintTransparencyFormPattern(graphics, ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).getSize());
+		if (ModelUtils.getEditingFlattenedSolution(editorPart.getForm()) != null) paintTransparencyFormPattern(graphics,
+			ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).getSize());
 		paintPagebreaks(graphics);
 	}
 
