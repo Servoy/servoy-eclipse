@@ -836,6 +836,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private static final Integer RELATION_DUPLICATION = Integer.valueOf(3);
 	private static final Integer VALUELIST_DUPLICATION = Integer.valueOf(4);
 	private static final Integer MEDIA_DUPLICATION = Integer.valueOf(5);
+	private static final Integer TABLE_CALCULATION_DUPLICATION = Integer.valueOf(6);
+	private static final Integer TABLE_AGREGATION_DUPLICATION = Integer.valueOf(7);
+	private static final Integer TABLE_SCRIPT_METHOD_DUPLICATION = Integer.valueOf(8);
 
 	private void addDuplicatePersist(final IPersist persist, Map<String, Map<Integer, Set<Pair<String, ISupportChilds>>>> duplicationMap, final IProject project)
 	{
@@ -937,6 +940,108 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				parents.add(new Pair<String, ISupportChilds>(scopeName, persist.getParent()));
 			}
+		}
+		//Table entities 
+		/*
+		 * private static final Integer TABLE_CALCULATION_DUPLICATION = Integer.valueOf(6); private static final Integer TABLE_AGREGATION_DUPLICATION =
+		 * Integer.valueOf(7); private static final Integer TABLE_SCRIPT_METHOD_DUPLICATION = Integer.valueOf(8);
+		 */
+		if (persist.getParent() instanceof TableNode)
+		{
+			String name = ((ISupportName)persist).getName();
+			if (name != null)
+			{
+				Map<Integer, Set<Pair<String, ISupportChilds>>> persistSet = duplicationMap.get(name);
+				if (persistSet == null)
+				{
+					persistSet = new HashMap<Integer, Set<Pair<String, ISupportChilds>>>();
+					duplicationMap.put(name, persistSet);
+				}
+
+				Integer type = TABLE_CALCULATION_DUPLICATION; // ScriptCalculation
+				if (persist instanceof AggregateVariable)
+				{
+					type = TABLE_AGREGATION_DUPLICATION;
+				}
+				else if (persist instanceof ScriptMethod)
+				{
+					type = TABLE_SCRIPT_METHOD_DUPLICATION;
+				}
+				Set<Pair<String, ISupportChilds>> parentSet = persistSet.get(type);
+				if (parentSet != null)
+				{
+					String parentsName = ""; //$NON-NLS-1$
+					if (persist.getParent().getParent() instanceof ISupportName)
+					{
+						parentsName = ((ISupportName)persist.getParent().getParent()).getName();
+					}
+					for (Pair<String, ISupportChilds> parent : parentSet)
+					{
+						if (parent.getRight() instanceof TableNode)
+						{
+							TableNode tableNode = (TableNode)parent.getRight();
+
+							if (persist instanceof ScriptCalculation)
+							{
+								ScriptCalculation duplicateScriptCalculation = tableNode.getScriptCalculation(name);
+								if (duplicateScriptCalculation != null)
+								{
+									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
+										"table calculation", name, parentsName + "   on table  " + tableNode.getServerName() + " -> " + tableNode.getTableName()); //$NON-NLS-1$
+									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
+										duplicateScriptCalculation);
+								}
+								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
+									"table calculation ", name, tableNode.getParent() + "  on table  " + tableNode.getServerName() + " -> " + tableNode.getTableName()); //$NON-NLS-1$								
+								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
+							}
+							else if (persist instanceof AggregateVariable)
+							{
+								AggregateVariable duplicateAggregate = tableNode.getAggregateVariable(name);
+								if (duplicateAggregate != null)
+								{
+									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
+										"aggregate variable", name, parentsName + "   on table  " + tableNode.getServerName() + " -> " + tableNode.getTableName()); //$NON-NLS-1$
+									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
+										duplicateAggregate);
+								}
+								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
+									"aggregate variable", name, tableNode.getParent() + "  on table  " + tableNode.getServerName() + " -> " + tableNode.getTableName()); //$NON-NLS-1$								
+								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
+							}
+							else if (persist instanceof ScriptMethod)
+							{
+								ScriptMethod duplicateFoundSetMethod = tableNode.getFoundsetMethod(name);
+								if (duplicateFoundSetMethod != null)
+								{
+									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
+										"table method", name, parentsName + "   on table  " + tableNode.getServerName() + " -> " + tableNode.getTableName()); //$NON-NLS-1$
+									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
+										duplicateFoundSetMethod);
+								}
+								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
+									"table method", name, tableNode.getParent() + "  on table  " + tableNode.getServerName() + " -> " + tableNode.getTableName()); //$NON-NLS-1$								
+								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
+							}
+						}
+					}
+				}
+				Set<Pair<String, ISupportChilds>> parents = parentSet;
+				if (parents == null)
+				{
+					parents = new HashSet<Pair<String, ISupportChilds>>();
+					persistSet.put(type, parents);
+				}
+				parents.add(new Pair<String, ISupportChilds>(null, persist.getParent()));
+
+			}
+
+
+			/*
+			 * ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(otherChildsType, name, duplicateParentsName); addMarker(project, mk.getType(),
+			 * mk.getText(), lineNumber, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
+			 */
+
 		}
 		if (persist instanceof Form)
 		{
