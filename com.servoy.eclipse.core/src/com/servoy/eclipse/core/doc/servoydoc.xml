@@ -14544,7 +14544,10 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
 The comparator function is called to compare
 two records, that are passed as arguments, and
 it will return -1/0/1 if the first record is less/equal/greater
-then the second record.]]></description>
+then the second record.
+
+The function based sorting does not work with printing.
+It is just a temporary in-memory sort.]]></description>
           <summary><![CDATA[Sorts the foundset based on the given record comparator function.]]></summary>
           <sample><![CDATA[%%prefix%%foundset.sort(mySortFunction);
 
@@ -19888,7 +19891,7 @@ It is interpreted as a JS expression.
 For INTEGER variables it can be an integer constant, like 10 for example.
 For NUMBER variables it can be a real constant, like 22.41. For DATETIME
 variables it can be "now", or a JS expression like "new Date()". For TEXT 
-variables it can be any string surrounded with quotes, like 'some text'.]]></description>
+variables it can be any string surrounded with quotes, like "'some text'".]]></description>
           <summary><![CDATA[The default value of the variable.]]></summary>
           <sample><![CDATA[var intVar = solutionModel.newGlobalVariable('globals', 'gInt', JSVariable.INTEGER);
 intVar.defaultValue = 997;
@@ -19900,7 +19903,7 @@ var dateVar = solutionModel.newGlobalVariable('globals', 'gDate', JSVariable.DAT
 dateVar.defaultValue = 'now';
 application.output(scopes.globals.gDate); // Prints the current date and time.
 var txtVar = solutionModel.newGlobalVariable('globals', 'gText', JSVariable.TEXT);
-txtVar.defaultValue = '"some text"'; // Use two pairs of quotes if you want to assing a String as default value.
+txtVar.defaultValue = '"some text"'; // Use two pairs of quotes if you want to assign a String as default value.
 application.output(scopes.globals.gText); // Prints 'some text' (without quotes).
 var mediaVar = solutionModel.newGlobalVariable('globals', 'gMedia', JSVariable.MEDIA);
 mediaVar.defaultValue = 'new Array(1, 2, 3, 4)';
@@ -23854,7 +23857,17 @@ query.getParameter("myvar").setvalue(new Integer(1));
             <argumentType typecode="com.servoy.j2db.querybuilder.IQueryBuilderLogicalCondition"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
-          <description/>
+          <description><![CDATA[Create an negated condition.
+<pre>
+// where not (order_date is null or order_date > ?)
+  query.where().add(query.not(
+	       query.or()
+	          .add(query.getColumn("order_date").isNull())
+	          .add(query.getColumn("order_date").gt(new Date()))
+	     )
+	   );
+</pre>]]></description>
+          <summary><![CDATA[Create an negated condition.]]></summary>
           <sample><![CDATA[foundset.query.where.add(query.not(query.columns.flag.eq(1)))]]></sample>
           <parameters>
             <parameter name="cond" type="com.servoy.j2db.querybuilder.impl.QBLogicalCondition" typecode="com.servoy.j2db.querybuilder.IQueryBuilderLogicalCondition">
@@ -25880,7 +25893,10 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
 The comparator function is called to compare
 two records, that are passed as arguments, and
 it will return -1/0/1 if the first record is less/equal/greater
-then the second record.]]></description>
+then the second record.
+
+The function based sorting does not work with printing.
+It is just a temporary in-memory sort.]]></description>
           <summary><![CDATA[Sorts the foundset based on the given record comparator function.]]></summary>
           <sample><![CDATA[%%prefix%%foundset.sort(mySortFunction);
 
@@ -40978,7 +40994,8 @@ NOTE: The global variable number type is based on the value assigned from the So
           <summary><![CDATA[Creates a new global variable with the specified name and number type.]]></summary>
           <sample><![CDATA[var myGlobalVariable = solutionModel.newGlobalVariable('globals', 'newGlobalVariable', JSVariable.INTEGER); 
 myGlobalVariable.defaultValue = 12;
-	//myGlobalVariable.defaultValue = "{a:'First letter',b:'Second letter'}"]]></sample>
+//myGlobalVariable.defaultValue = "{a:'First letter',b:'Second letter'}" // an js object, type must be media.
+//myGlobalVariable.defaultValue = '"some text"'; // Use two pairs of quotes if you want to assign a String as default value.]]></sample>
           <parameters>
             <parameter name="scopeName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the scope in which the variable is created]]></description>
@@ -42957,7 +42974,7 @@ if (dialogOrWindowName != null) {
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[Get a design-time property of a form.]]></description>
           <summary><![CDATA[Get a design-time property of a form.]]></summary>
-          <sample><![CDATA[var prop = forms.orders.getDesignTimeProperty('myprop')]]></sample>
+          <sample><![CDATA[var prop = forms.orders.controller.getDesignTimeProperty('myprop')]]></sample>
         </function>
         <function name="getFormContext">
           <argumentsTypes/>
