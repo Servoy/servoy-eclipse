@@ -76,33 +76,7 @@
 		<delete dir="${temp.folder}"/>
 	</target>
 
-	<target name="@dot.nestedJars">
-		<mkdir dir="${buildDirectory}/nestedJars/org.eclipse.equinox.registry_3.5.101.R37x_v20110810-1611"/>
-		<unzip src="../eclipse_target/compile_target/install/plugins/org.eclipse.equinox.registry_3.5.101.R37x_v20110810-1611.jar" dest="${buildDirectory}/nestedJars/org.eclipse.equinox.registry_3.5.101.R37x_v20110810-1611" overwrite="false">
-			<patternset includes="runtime_registry_compatibility.jar"/>
-		</unzip>
-		<mkdir dir="${buildDirectory}/nestedJars/com.ibm.icu_4.4.2.v20110823"/>
-		<unzip src="../eclipse_target/compile_target/install/plugins/com.ibm.icu_4.4.2.v20110823.jar" dest="${buildDirectory}/nestedJars/com.ibm.icu_4.4.2.v20110823" overwrite="false">
-			<patternset includes="icu-data.jar"/>
-		</unzip>
-		<mkdir dir="${buildDirectory}/nestedJars/org.eclipse.ui.workbench_3.7.1.v20120104-1859"/>
-		<unzip src="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.workbench_3.7.1.v20120104-1859.jar" dest="${buildDirectory}/nestedJars/org.eclipse.ui.workbench_3.7.1.v20120104-1859" overwrite="false">
-			<patternset includes="e4-workbench.jar"/>
-		</unzip>
-		<mkdir dir="${buildDirectory}/nestedJars/org.eclipse.ui.workbench_3.7.1.v20120104-1859"/>
-		<unzip src="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.workbench_3.7.1.v20120104-1859.jar" dest="${buildDirectory}/nestedJars/org.eclipse.ui.workbench_3.7.1.v20120104-1859" overwrite="false">
-			<patternset includes="compatibility.jar"/>
-		</unzip>
-		<mkdir dir="${buildDirectory}/nestedJars/org.eclipse.ui.ide_3.7.0.v20110928-1505"/>
-		<unzip src="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.ide_3.7.0.v20110928-1505.jar" dest="${buildDirectory}/nestedJars/org.eclipse.ui.ide_3.7.0.v20110928-1505" overwrite="false">
-			<patternset includes="e4-ide.jar"/>
-		</unzip>
-		<mkdir dir="${buildDirectory}/nestedJars/org.eclipse.ui.win32_3.2.200.v20110928-1505"/>
-		<unzip src="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.win32_3.2.200.v20110928-1505.jar" dest="${buildDirectory}/nestedJars/org.eclipse.ui.win32_3.2.200.v20110928-1505" overwrite="false">
-			<patternset includes="e4-ide.jar"/>
-		</unzip>
-	</target>
-	<target name="@dot" depends="init,@dot.nestedJars" unless="@dot" description="Create jar: com.servoy.eclipse.profiler @dot.">
+	<target name="@dot" depends="init" unless="@dot" description="Create jar: com.servoy.eclipse.profiler @dot.">
 		<delete dir="${build.result.folder}/@dot"/>
 		<mkdir dir="${build.result.folder}/@dot"/>
 		<path id="@dot.classpath">
@@ -197,7 +171,6 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.jobs_3.5.101.v20120113-1953.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.runtime.compatibility.registry_3.5.0.v20110505/runtime_registry_compatibility.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.runtime.compatibility.registry_3.5.0.v20110505"/>
-			<pathelement path="${buildDirectory}/nestedJars/org.eclipse.equinox.registry_3.5.101.R37x_v20110810-1611/runtime_registry_compatibility.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.equinox.registry_3.5.101.R37x_v20110810-1611.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.equinox.preferences_3.4.2.v20120111-2020.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.contenttype_3.4.100.v20110423-0524.jar"/>
@@ -216,7 +189,6 @@
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.solaris.sparc_1.2.0.v20110423-0524.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.win32.x86_64_1.1.300.v20110423-0524.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.css.core_1.1.401.v201008161749.jar"/>
-			<pathelement path="${buildDirectory}/nestedJars/com.ibm.icu_4.4.2.v20110823/icu-data.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/com.ibm.icu_4.4.2.v20110823.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.apache.xerces_2.9.0.v200909240008.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/javax.xml_1.3.4.v200902170245.jar"/>
@@ -242,8 +214,8 @@
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.common.emfworkbench.integration_1.2.2.v201008242000.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.emf.edit_2.7.1.v20110913-1526.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.emf.ecore.change_2.7.1.v20110829-1916.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.parser_4.0.0.201207021328.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core_4.0.0.201207021328.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.parser_4.0.0.201207161417.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core_4.0.0.201207161417.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.antlr.runtime_3.0.0.v200803061811.jar"/>
 			<pathelement path="../servoy_debug/bin/"/>
 			
@@ -280,8 +252,6 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui_3.7.0.v20110928-1505.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.ui.carbon_4.0.100.I20101109-0800.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.ui.cocoa_1.1.0.I20101109-0800.jar"/>
-			<pathelement path="${buildDirectory}/nestedJars/org.eclipse.ui.workbench_3.7.1.v20120104-1859/e4-workbench.jar"/>
-			<pathelement path="${buildDirectory}/nestedJars/org.eclipse.ui.workbench_3.7.1.v20120104-1859/compatibility.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.workbench_3.7.1.v20120104-1859.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.workbench.compatibility_3.2.100.I20110413-1600/compatibility.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.workbench.compatibility_3.2.100.I20110413-1600/e4-workbench.jar"/>
@@ -291,12 +261,10 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.databinding.observable_1.4.0.I20110222-0800.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.databinding.property_1.4.0.I20110222-0800.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.databinding_1.4.0.I20110111-0800.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.ui_4.0.0.201207021328.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.ui_4.0.0.201207161417.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.editors_3.7.0.v20110928-1504.jar"/>
-			<pathelement path="${buildDirectory}/nestedJars/org.eclipse.ui.ide_3.7.0.v20110928-1505/e4-ide.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.ide_3.7.0.v20110928-1505.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.win32_3.2.200.v20110928-1505.jar"/>
-			<pathelement path="${buildDirectory}/nestedJars/org.eclipse.ui.win32_3.2.200.v20110928-1505/e4-ide.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.views_3.6.0.v20110928-1505.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.forms_3.5.101.v20111011-1919.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.equinox.p2.engine_2.1.1.R37x_v20111003.jar"/>
@@ -315,15 +283,15 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.compare_3.5.202.R37x_v20111109-0800.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.team.ui_3.6.101.R37x_v20111109-0800.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.search_3.7.0.v20110928-1504.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.launching_4.0.0.201207021328.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.launching_4.0.0.201207161417.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.debug.core_3.7.1.v20111129-2031.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.debug_4.0.0.201207021328.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core.manipulation_4.0.0.201207021328.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.debug_4.0.0.201207161417.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core.manipulation_4.0.0.201207161417.jar"/>
 			<pathelement path="../com.servoy.eclipse.core/bin"/>
 			
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.core/@dot"/>
 			
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.core_4.0.0.201207021328.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.core_4.0.0.201207161417.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.intro_3.4.100.v20110425.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.help.base_3.6.2.v201202080800.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.equinox.http.jetty_2.0.100.v20110502.jar"/>
@@ -361,11 +329,11 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.apache.lucene.analysis_2.9.1.v201101211721.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.cheatsheets_3.4.100.v20110425.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.help.ui_3.5.101.r37_20110819.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.debug.ui_4.0.0.201207021328.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.debug.ui_4.0.0.201207161417.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.debug.ui_3.7.102.v20111129-1423_r372.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.console_3.5.100.v20111007_r372.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.console_4.0.0.201207021328.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.console.ui_4.0.0.201207021328.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.console_4.0.0.201207161417.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.console.ui_4.0.0.201207161417.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.css.ui_1.0.501.v201008232042.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.xml.ui_1.1.102.v201008251905.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.sse.ui_1.2.2.v201008232126.jar"/>
@@ -395,8 +363,8 @@
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.net.linux.x86_1.1.200.I20110419-0800.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.net.linux.x86_64_1.1.0.I20110331-0827.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.net.win32.x86_64_1.0.100.I20110331-0827.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.ui_4.0.0.201207021328.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.core.manipulation_4.0.0.201207021328.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.ui_4.0.0.201207161417.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.core.manipulation_4.0.0.201207161417.jar"/>
 			<pathelement path="../com.servoy.eclipse.ui/bin"/>
 			
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.ui/@dot"/>
@@ -405,7 +373,7 @@
 			
 			<pathelement path="../com.servoy.eclipse.ui/swt-grouplayout.jar"/>
 			
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.debug_4.0.0.201207021328.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.debug_4.0.0.201207161417.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.jdt.debug.ui_3.6.1.v20111006_r372.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.jdt.core_3.7.3.v20120119-1537.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.jdt.compiler.apt_1.0.400.v0110816-0800.jar"/>
@@ -418,11 +386,11 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.navigator.resources_3.4.300.v20110928-1505.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.views.properties.tabbed_3.5.200.v20110928-1505.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.jdt.core.manipulation_1.4.0.v20110928-1453.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.debug.ui_4.0.0.201207021328.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.launching_4.0.0.201207021328.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.debug.ui_4.0.0.201207161417.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.launching_4.0.0.201207161417.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.databinding.beans_1.2.100.I20100824-0800.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.formatter_4.0.0.201207021328.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.formatter_4.0.0.201207021328.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.formatter_4.0.0.201207161417.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.formatter_4.0.0.201207161417.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.browser_3.3.101.v20111019-1723.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.externaltools_3.2.0.v20111007_r372.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.externaltools_1.0.100.v20111007_r372.jar"/>
@@ -623,7 +591,7 @@
 	</target>
 
 	<target name="apitools.generation" if="generateAPIDescription">
-		<apitooling.apigeneration  projectName="${projectName}" project="${projectLocation}" binary="${binary.folders}" target="${target.folder}" extramanifests="${extraManifests}" allownonapiproject="${allowNonApiProject}"		/>
+		<apitooling.apigeneration  projectName="${projectName}" project="${projectLocation}" binary="${binary.folders}" target="${target.folder}" extramanifests="${extraManifests}"		/>
 	</target>
 
 </project>
