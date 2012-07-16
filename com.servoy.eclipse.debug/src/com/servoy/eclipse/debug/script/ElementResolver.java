@@ -28,6 +28,7 @@ import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
 import org.eclipse.dltk.javascript.typeinfo.IElementResolver;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
+import org.eclipse.dltk.javascript.typeinfo.ReferenceSource;
 import org.eclipse.dltk.javascript.typeinfo.TypeMemberQuery;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
@@ -641,14 +642,20 @@ public class ElementResolver implements IElementResolver
 	 */
 	public static FlattenedSolution getFlattenedSolution(ITypeInfoContext context)
 	{
-		String name = context.getContext();
-		if (name == null && context.getModelElement() != null)
+		IResource resource = null;
+		ReferenceSource rs = context.getSource();
+		if (rs != null)
 		{
-			IResource resource = context.getModelElement().getResource();
-			if (resource != null)
-			{
-				name = resource.getProject().getName();
-			}
+			resource = rs.getSourceModule().getResource();
+		}
+		if (resource == null && context.getModelElement() != null)
+		{
+			resource = context.getModelElement().getResource();
+		}
+		String name = null;
+		if (resource != null)
+		{
+			name = resource.getProject().getName();
 		}
 		return getFlattenedSolution(name);
 	}

@@ -345,8 +345,19 @@ public class TypeCreator extends TypeCache
 
 	private final ConcurrentHashMap<String, Boolean> ignorePackages = new ConcurrentHashMap<String, Boolean>();
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.dltk.javascript.typeinfo.TypeCache#getAccessibleBuckets(java.lang.String)
+	 */
 	@Override
-	protected Type createType(String typeName)
+	protected String[] getAccessibleBuckets(String context)
+	{
+		return new String[] { null, SCOPE_TABLES, SCOPE_QBCOLUMNS };
+	}
+
+	@Override
+	protected Type createType(String context, String typeName)
 	{
 		if (BASE_TYPES.contains(typeName) || typeName.startsWith("Array<")) return null;
 		if (!initialized) initalize();
@@ -358,7 +369,7 @@ public class TypeCreator extends TypeCache
 			if (name.startsWith("Packages."))
 			{
 				name = name.substring("Packages.".length());
-				type = findType(name);
+				type = findType(context, name);
 				if (type != null)
 				{
 					return type;
@@ -370,7 +381,7 @@ public class TypeCreator extends TypeCache
 				ClassLoader cl = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getBeanManager().getClassLoader();
 				if (cl == null) cl = Thread.currentThread().getContextClassLoader();
 				Class< ? > clz = Class.forName(name, false, cl);
-				type = getClassType(clz, name);
+				type = getClassType(context, clz, name);
 			}
 			catch (ClassNotFoundException e)
 			{
@@ -382,7 +393,7 @@ public class TypeCreator extends TypeCache
 			type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVASCRIPT);
-			type.setSuperType(getType("Function"));
+			type.setSuperType(getType(context, "Function"));
 		}
 		else if (typeName.equals("byte"))
 		{
@@ -390,7 +401,7 @@ public class TypeCreator extends TypeCache
 			type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVASCRIPT);
-			type.setSuperType(getType("Object"));
+			type.setSuperType(getType(context, "Object"));
 		}
 		if (type != null)
 		{
@@ -400,62 +411,31 @@ public class TypeCreator extends TypeCache
 
 		String realTypeName = typeName;
 		if (realTypeName.equals("JSFoundset")) realTypeName = FoundSet.JS_FOUNDSET;
-		type = createType(realTypeName, realTypeName);
+		type = createClassType(context, realTypeName, realTypeName);
 		if (type != null)
 		{
 			return addType(null, type);
 		}
 		else
 		{
-			FlattenedSolution fs = getFlattenedSolution();
+			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 			if (fs != null)
 			{
-				DynamicTypeCache tc = getTypeCache(fs);
-				type = tc.findInBucket(fs.getSolution().getName(), realTypeName);
-				if (type == null)
+				type = createDynamicType(context, realTypeName, realTypeName);
+				if (type != null && realTypeName.indexOf('<') != -1 && type.eResource() == null && !type.isProxy())
 				{
-					type = findInBucket(SCOPE_TABLES, realTypeName);
-					if (type == null)
-					{
-						type = findInBucket(SCOPE_QBCOLUMNS, realTypeName);
-					}
-					if (type == null)
-					{
-						type = createDynamicType(realTypeName, realTypeName);
-						if (type != null && realTypeName.indexOf('<') != -1 && type.eResource() == null && !type.isProxy())
-						{
-							return tc.addType(fs.getSolution().getName(), type);
-						}
-					}
+					return addType(fs.getSolution().getName(), type);
 				}
 			}
 			else
 			{
-				type = createDynamicType(realTypeName, realTypeName);
+				type = createDynamicType(context, realTypeName, realTypeName);
 			}
 		}
 		return type;
 	}
 
-	private static final ConcurrentMap<String, DynamicTypeCache> typeCache = new ConcurrentHashMap<String, DynamicTypeCache>();
-
-	/**
-	 * @param fs
-	 */
-	private DynamicTypeCache getTypeCache(FlattenedSolution fs)
-	{
-		final String name = fs.getSolution().getName();
-		DynamicTypeCache tc = typeCache.get(name);
-		if (tc == null)
-		{
-			tc = new DynamicTypeCache("servoy", name, name);
-			DynamicTypeCache previous = typeCache.putIfAbsent(name, tc);
-			if (previous != null) tc = previous;
-		}
-		return tc;
-	}
-
-	private Type getClassType(Class< ? > clz, String name)
+	private Type getClassType(String context, Class< ? > clz, String name)
 	{
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(name);
@@ -471,7 +451,7 @@ public class TypeCreator extends TypeCache
 		{
 			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 			property.setName(field.getName());
-			property.setType(getJSType(field.getType()));
+			property.setType(getJSType(context, field.getType()));
 			if (Modifier.isStatic(field.getModifiers()))
 			{
 				property.setStatic(true);
@@ -482,7 +462,7 @@ public class TypeCreator extends TypeCache
 		{
 			org.eclipse.dltk.javascript.typeinfo.model.Method m = TypeInfoModelFactory.eINSTANCE.createMethod();
 			m.setName(method.getName());
-			m.setType(getJSType(method.getReturnType()));
+			m.setType(getJSType(context, method.getReturnType()));
 
 			EList<Parameter> parameters = m.getParameters();
 			Class< ? >[] parameterTypes = method.getParameterTypes();
@@ -490,7 +470,7 @@ public class TypeCreator extends TypeCache
 			{
 				Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
 				parameter.setName("arg" + i);
-				parameter.setType(getJSType(parameterTypes[i]));
+				parameter.setType(getJSType(context, parameterTypes[i]));
 				parameters.add(parameter);
 			}
 			if (Modifier.isStatic(method.getModifiers()))
@@ -502,41 +482,41 @@ public class TypeCreator extends TypeCache
 		return type;
 	}
 
-	private JSType getJSType(Class< ? > type)
+	private JSType getJSType(String context, Class< ? > type)
 	{
 		if (type != null && type != Void.class && type != void.class)
 		{
-			if (type == Object.class) return getTypeRef(ITypeNames.OBJECT);
+			if (type == Object.class) return getTypeRef(context, ITypeNames.OBJECT);
 			if (type.isArray())
 			{
 				Class< ? > componentType = type.getComponentType();
-				JSType componentJSType = getJSType(componentType);
+				JSType componentJSType = getJSType(context, componentType);
 				if (componentJSType != null)
 				{
 					return TypeUtil.arrayOf(componentJSType);
 				}
-				return getTypeRef(ITypeNames.ARRAY);
+				return getTypeRef(context, ITypeNames.ARRAY);
 			}
 			else if (type == Boolean.class || type == boolean.class)
 			{
-				return getTypeRef(ITypeNames.BOOLEAN);
+				return getTypeRef(context, ITypeNames.BOOLEAN);
 			}
 			else if (type == Byte.class || type == byte.class)
 			{
-				return getTypeRef("byte");
+				return getTypeRef(context, "byte");
 			}
 			else if (Number.class.isAssignableFrom(type) || type.isPrimitive())
 			{
-				return getTypeRef(ITypeNames.NUMBER);
+				return getTypeRef(context, ITypeNames.NUMBER);
 			}
 			else if (type == String.class || type == CharSequence.class)
 			{
-				return getTypeRef(ITypeNames.STRING);
+				return getTypeRef(context, ITypeNames.STRING);
 			}
 			else
 			{
 
-				return getTypeRef("Packages." + type.getName());
+				return getTypeRef(context, "Packages." + type.getName());
 			}
 		}
 		return null;
@@ -751,7 +731,7 @@ public class TypeCreator extends TypeCache
 		}
 	}
 
-	protected Type createDynamicType(String typeNameClassName, String fullTypeName)
+	protected Type createDynamicType(String context, String typeNameClassName, String fullTypeName)
 	{
 		// is it a 'generified' type
 		int index = typeNameClassName.indexOf('<');
@@ -764,15 +744,15 @@ public class TypeCreator extends TypeCache
 				classType = FoundSet.JS_FOUNDSET;
 				fullClassName = classType + fullClassName.substring(index);
 			}
-			Type type = createDynamicType(classType, fullClassName);
-			if (type == null) type = createType(classType, fullClassName);
+			Type type = createDynamicType(context, classType, fullClassName);
+			if (type == null) type = createClassType(context, classType, fullClassName);
 			return type;
 		}
 
 		IScopeTypeCreator creator = scopeTypes.get(typeNameClassName);
 		if (creator != null)
 		{
-			return creator.createType(fullTypeName);
+			return creator.createType(context, fullTypeName);
 		}
 		return null;
 	}
@@ -781,12 +761,12 @@ public class TypeCreator extends TypeCache
 	 * @param typeNameClassName
 	 * @return
 	 */
-	protected final Type createType(String typeNameClassName, String fullTypeName)
+	protected final Type createClassType(String context, String typeNameClassName, String fullTypeName)
 	{
 		Class< ? > cls = getTypeClass(typeNameClassName);
 		if (cls != null)
 		{
-			return createType(fullTypeName, cls);
+			return createType(context, fullTypeName, cls);
 		}
 		return null;
 	}
@@ -797,14 +777,14 @@ public class TypeCreator extends TypeCache
 	 * @param cls
 	 * @return
 	 */
-	protected final Type createType(String typeName, Class< ? > cls)
+	protected final Type createType(String context, String typeName, Class< ? > cls)
 	{
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(typeName);
 		type.setKind(TypeKind.JAVA);
 		EList<Member> members = type.getMembers();
 
-		fill(members, cls, typeName);
+		fill(context, members, cls, typeName);
 
 		if (cls != ServoyException.class && !IFoundSet.class.isAssignableFrom(cls))
 		{
@@ -818,7 +798,7 @@ public class TypeCreator extends TypeCache
 		}
 		if (cls != IRuntimeComponent.class && IRuntimeComponent.class.isAssignableFrom(cls))
 		{
-			type.setSuperType(getType("RuntimeComponent"));
+			type.setSuperType(getType(context, "RuntimeComponent"));
 		}
 		Class< ? >[] returnTypes = linkedTypes.get(cls);
 		if (returnTypes != null)
@@ -850,7 +830,7 @@ public class TypeCreator extends TypeCache
 					continue;
 				}
 				String prefix = PLUGIN_TYPE_PREFIX + config + ".";
-				members.add(createProperty(name, true, TypeUtil.classType(getType(prefix + name)), null, null));
+				members.add(createProperty(name, true, TypeUtil.classType(getType(context, prefix + name)), null, null));
 			}
 		}
 		return type;
@@ -862,7 +842,7 @@ public class TypeCreator extends TypeCache
 	 * @param class1
 	 */
 	@SuppressWarnings("deprecation")
-	private final void fill(EList<Member> membersList, Class< ? > scriptObjectClass, String typeName)
+	private final void fill(String context, EList<Member> membersList, Class< ? > scriptObjectClass, String typeName)
 	{
 		ArrayList<String> al = new ArrayList<String>();
 		JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(scriptObjectClass, null);
@@ -955,7 +935,7 @@ public class TypeCreator extends TypeCache
 							method.setDescription(getDoc(name, scriptObjectClass, name, parameterTypes)); // TODO name should be of parent.
 							if (returnTypeClz != null)
 							{
-								method.setType(getMemberTypeName(name, returnTypeClz, typeName));
+								method.setType(getMemberTypeName(context, name, returnTypeClz, typeName));
 							}
 							method.setAttribute(IMAGE_DESCRIPTOR, METHOD);
 							method.setStatic(type == STATIC_METHOD);
@@ -976,24 +956,24 @@ public class TypeCreator extends TypeCache
 											Class< ? > componentType = paramType.getComponentType();
 											if (param.isVarArgs())
 											{
-												parameter.setType(getMemberTypeName(name, componentType, typeName));
+												parameter.setType(getMemberTypeName(context, name, componentType, typeName));
 											}
 											else if (componentType == Object.class)
 											{
-												parameter.setType(getTypeRef(ITypeNames.ARRAY));
+												parameter.setType(getTypeRef(context, ITypeNames.ARRAY));
 											}
 											else
 											{
-												parameter.setType(TypeUtil.arrayOf(getMemberTypeName(name, componentType, typeName)));
+												parameter.setType(TypeUtil.arrayOf(getMemberTypeName(context, name, componentType, typeName)));
 											}
 										}
 										else if (paramType != null)
 										{
-											parameter.setType(getMemberTypeName(name, paramType, typeName));
+											parameter.setType(getMemberTypeName(context, name, paramType, typeName));
 										}
 										else
 										{
-											parameter.setType(getTypeRef(SolutionExplorerListContentProvider.TYPES.get(param.getType())));
+											parameter.setType(getTypeRef(context, SolutionExplorerListContentProvider.TYPES.get(param.getType())));
 										}
 									}
 									parameter.setKind(param.isVarArgs() ? ParameterKind.VARARGS : param.isOptional() ? ParameterKind.OPTIONAL
@@ -1011,12 +991,13 @@ public class TypeCreator extends TypeCache
 									{
 										Class< ? > componentType = paramClass.getComponentType();
 										parameter.setName(SolutionExplorerListContentProvider.TYPES.get(componentType.getName()));
-										parameter.setType(TypeUtil.arrayOf(getTypeRef(SolutionExplorerListContentProvider.TYPES.get(componentType.getName()))));
+										parameter.setType(TypeUtil.arrayOf(getTypeRef(context,
+											SolutionExplorerListContentProvider.TYPES.get(componentType.getName()))));
 									}
 									else
 									{
 										parameter.setName(SolutionExplorerListContentProvider.TYPES.get(paramClass.getName()));
-										parameter.setType(getTypeRef(SolutionExplorerListContentProvider.TYPES.get(paramClass.getName())));
+										parameter.setType(getTypeRef(context, SolutionExplorerListContentProvider.TYPES.get(paramClass.getName())));
 									}
 									parameter.setKind(ParameterKind.NORMAL);
 									parameters.add(parameter);
@@ -1030,7 +1011,7 @@ public class TypeCreator extends TypeCache
 						JSType returnType = null;
 						if (returnTypeClz != null)
 						{
-							returnType = getMemberTypeName(name, returnTypeClz, typeName);
+							returnType = getMemberTypeName(context, name, returnTypeClz, typeName);
 						}
 						ImageDescriptor descriptor = IconProvider.instance().descriptor(returnTypeClz);
 						if (descriptor == null)
@@ -1067,7 +1048,7 @@ public class TypeCreator extends TypeCache
 		}
 	}
 
-	protected final JSType getMemberTypeName(String memberName, Class< ? > memberReturnType, String objectTypeName)
+	protected final JSType getMemberTypeName(String context, String memberName, Class< ? > memberReturnType, String objectTypeName)
 	{
 		int index = objectTypeName.indexOf('<');
 		int index2;
@@ -1077,7 +1058,7 @@ public class TypeCreator extends TypeCache
 
 			if (memberReturnType == Record.class)
 			{
-				return getTypeRef(Record.JS_RECORD + '<' + config + '>');
+				return getTypeRef(context, Record.JS_RECORD + '<' + config + '>');
 			}
 			if (memberReturnType == FoundSet.class)
 			{
@@ -1086,19 +1067,19 @@ public class TypeCreator extends TypeCache
 					if (config.indexOf('.') == -1)
 					{
 						// its really a relation, unrelate it.
-						FlattenedSolution fs = TypeCreator.getFlattenedSolution();
+						FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 						if (fs != null)
 						{
 							Relation relation = fs.getRelation(config);
 							if (relation != null)
 							{
-								return getTypeRef(FoundSet.JS_FOUNDSET + '<' + relation.getForeignDataSource() + '>');
+								return getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + relation.getForeignDataSource() + '>');
 							}
 						}
-						return getTypeRef(FoundSet.JS_FOUNDSET);
+						return getTypeRef(context, FoundSet.JS_FOUNDSET);
 					}
 				}
-				return getTypeRef(FoundSet.JS_FOUNDSET + '<' + config + '>');
+				return getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + config + '>');
 			}
 		}
 		if (memberReturnType.isArray())
@@ -1106,13 +1087,13 @@ public class TypeCreator extends TypeCache
 			Class< ? > returnType = getReturnType(memberReturnType.getComponentType());
 			if (returnType != null)
 			{
-				JSType componentJSType = getMemberTypeName(memberName, returnType, objectTypeName);
+				JSType componentJSType = getMemberTypeName(context, memberName, returnType, objectTypeName);
 				if (componentJSType != null)
 				{
 					return TypeUtil.arrayOf(componentJSType);
 				}
 			}
-			return getTypeRef(ITypeNames.ARRAY);
+			return getTypeRef(context, ITypeNames.ARRAY);
 		}
 
 		String typeName = null;
@@ -1125,7 +1106,7 @@ public class TypeCreator extends TypeCache
 			typeName = SolutionExplorerListContentProvider.TYPES.get(memberReturnType.getSimpleName());
 			addAnonymousClassType(typeName, memberReturnType);
 		}
-		return getTypeRef(typeName);
+		return getTypeRef(context, typeName);
 	}
 
 	public final void addType(String name, Class< ? > cls)
@@ -1188,64 +1169,9 @@ public class TypeCreator extends TypeCache
 	}
 
 
-	/**
-	 * @author jcompagner
-	 *
-	 */
-	private final class DynamicTypeCache extends TypeCache
-	{
-		private final String name;
-
-		/**
-		 * @param scheme
-		 * @param authority
-		 * @param name
-		 */
-		private DynamicTypeCache(String scheme, String authority, String name)
-		{
-			super(scheme, authority);
-			this.name = name;
-		}
-
-		@Override
-		protected Type createType(String typeName)
-		{
-			CONTEXT.set(ElementResolver.getFlattenedSolution(name));
-			try
-			{
-				return TypeCreator.this.createType(typeName);
-			}
-			finally
-			{
-				CONTEXT.remove();
-			}
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.dltk.javascript.typeinfo.TypeCache#findInBucket(java.lang.String, java.lang.String)
-		 */
-		@Override
-		public Type findInBucket(String bucket, String typeName)
-		{
-			return super.findInBucket(bucket, typeName);
-		}
-
-		@Override
-		public Type addType(String bucket, Type type)
-		{
-			if (bucket == null || "".equals(bucket))
-			{
-				return TypeCreator.this.addType(bucket, type);
-			}
-			return super.addType(bucket, type);
-		}
-	}
-
 	protected interface IScopeTypeCreator
 	{
-		Type createType(String fullTypeName);
+		Type createType(String context, String fullTypeName);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1376,37 +1302,46 @@ public class TypeCreator extends TypeCache
 		return parameters;
 	}
 
+	private final ConcurrentMap<String, String> buckets = new ConcurrentHashMap<String, String>();
+
 	/**
 	 * 
 	 */
 	protected void flushCache()
 	{
-		//if (changes.contains(tables))
-		clear(SCOPE_TABLES);
-		clear(SCOPE_QBCOLUMNS);
-
-		typeCache.clear();
-
+		// TODO, maybe only flush solution buckets and SCOPE_TABLES only when a table change?
+		for (String bucket : buckets.keySet())
+		{
+			clear(bucket);
+		}
 		relationCache.clear();
 	}
 
-	public static ThreadLocal<FlattenedSolution> CONTEXT = new ThreadLocal<FlattenedSolution>();
-
-	public static FlattenedSolution getFlattenedSolution()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.dltk.javascript.typeinfo.TypeCache#addType(java.lang.String, org.eclipse.dltk.javascript.typeinfo.model.Type)
+	 */
+	@Override
+	protected Type addType(String bucket, Type type)
 	{
-		return CONTEXT.get();
+		if (bucket != null && !bucket.equals(""))
+		{
+			buckets.put(bucket, bucket);
+		}
+		return super.addType(bucket, type);
 	}
 
-	protected Member createMethod(ScriptMethod sm, ImageDescriptor image)
+	protected Member createMethod(String context, ScriptMethod sm, ImageDescriptor image)
 	{
-		return createMethod(sm, image, null);
+		return createMethod(context, sm, image, null);
 	}
 
 	/**
 	 * @param sm
 	 * @return
 	 */
-	protected Member createMethod(ScriptMethod sm, ImageDescriptor image, String fileName)
+	protected Member createMethod(String context, ScriptMethod sm, ImageDescriptor image, String fileName)
 	{
 		Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
 		method.setName(sm.getName());
@@ -1420,7 +1355,7 @@ public class TypeCreator extends TypeCache
 				Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
 				parameter.setKind(ParameterKind.NORMAL);
 				parameter.setName(argument.getName());
-				parameter.setType(getTypeRef(argument.getType().getName()));
+				parameter.setType(getTypeRef(context, argument.getType().getName()));
 				parameters.add(parameter);
 			}
 		}
@@ -1429,7 +1364,7 @@ public class TypeCreator extends TypeCache
 		String type = sm.getSerializableRuntimeProperty(IScriptProvider.TYPE);
 		if (type != null)
 		{
-			method.setType(getTypeRef(type));
+			method.setType(getTypeRef(context, type));
 		}
 		String comment = sm.getRuntimeProperty(IScriptProvider.COMMENT);
 		if (comment == null)
@@ -1462,28 +1397,28 @@ public class TypeCreator extends TypeCache
 		return method;
 	}
 
-	public Property createProperty(String name, boolean readonly, String typeName, String description, ImageDescriptor image)
+	public Property createProperty(String context, String name, boolean readonly, String typeName, String description, ImageDescriptor image)
 	{
-		return createProperty(name, readonly, typeName, description, image, null);
+		return createProperty(context, name, readonly, typeName, description, image, null);
 	}
 
-	public Property createProperty(String name, boolean readonly, String typeName, String description, ImageDescriptor image, Object resource)
+	public Property createProperty(String context, String name, boolean readonly, String typeName, String description, ImageDescriptor image, Object resource)
 	{
 		SimpleType type = null;
 		if (typeName != null)
 		{
-			type = getTypeRef(typeName);
+			type = getTypeRef(context, typeName);
 		}
 		return createProperty(name, readonly, type, description, image, resource);
 	}
 
 
-	public Property createProperty(String name, boolean readonly, String typeName, ImageDescriptor image)
+	public Property createProperty(String context, String name, boolean readonly, String typeName, ImageDescriptor image)
 	{
 		SimpleType type = null;
 		if (typeName != null)
 		{
-			type = getTypeRef(typeName);
+			type = getTypeRef(context, typeName);
 		}
 		return createProperty(name, readonly, type, null, image);
 	}
@@ -1857,7 +1792,7 @@ public class TypeCreator extends TypeCache
 		/**
 		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
 		 */
-		public Type createType(String fullTypeName)
+		public Type createType(String context, String fullTypeName)
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setKind(TypeKind.JAVA);
@@ -1865,24 +1800,24 @@ public class TypeCreator extends TypeCache
 			type.setName(fullTypeName);
 
 			FlattenedSolution fs;
-			if ("Scopes".equals(fullTypeName) || (fs = getFlattenedSolution()) == null)
+			if ("Scopes".equals(fullTypeName) || (fs = ElementResolver.getFlattenedSolution(context)) == null)
 			{
 				// special array lookup property so that scopes[xxx]. does code complete.
-				Property arrayProp = createProperty("[]", true, "Scope", PROPERTY);
+				Property arrayProp = createProperty(context, "[]", true, "Scope", PROPERTY);
 				arrayProp.setVisible(false);
 				type.getMembers().add(arrayProp);
 				// quickly add this one to the static types. context.markInvariant(type); 
 			}
 			else
 			{
-				type.setSuperType(getType("Scopes"));
+				type.setSuperType(getType(context, "Scopes"));
 				EList<Member> members = type.getMembers();
 
 				for (Pair<String, IRootObject> scope : fs.getScopes())
 				{
-					Property scopeProperty = createProperty(scope.getLeft(), true, getTypeRef("Scope<" + scope.getRight().getRootObject().getName() + '/' +
-						scope.getLeft() + '>'), "Global scope " + scope.getLeft() + " defined in solution " + scope.getRight().getRootObject().getName(),
-						SCOPES);
+					Property scopeProperty = createProperty(scope.getLeft(), true,
+						getTypeRef(context, "Scope<" + scope.getRight().getRootObject().getName() + '/' + scope.getLeft() + '>'),
+						"Global scope " + scope.getLeft() + " defined in solution " + scope.getRight().getRootObject().getName(), SCOPES);
 //					scopeProperty.setAttribute(LAZY_VALUECOLLECTION, persist); // currently not needed, solution name from config is used
 					members.add(scopeProperty);
 				}
@@ -1893,7 +1828,7 @@ public class TypeCreator extends TypeCache
 
 	private class ScopeScopeCreator implements IScopeTypeCreator
 	{
-		public Type createType(String typeName)
+		public Type createType(String context, String typeName)
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
@@ -1902,7 +1837,7 @@ public class TypeCreator extends TypeCache
 			if (typeName.endsWith(">"))
 			{
 				// Scope<solutionname/scopeName>
-				FlattenedSolution fs = getFlattenedSolution();
+				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 				String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
 				String[] split = config.split("/");
 				String solutionName = split[0];
@@ -1922,7 +1857,7 @@ public class TypeCreator extends TypeCache
 
 				if (fs != null && (fs.getMainSolutionMetaData().getName().equals(solutionName) || fs.hasModule(solutionName)))
 				{
-					type.setSuperType(getType("Relations<" + config + '>')); // Relations<solutionName/scopeName>
+					type.setSuperType(getType(context, "Relations<" + config + '>')); // Relations<solutionName/scopeName>
 				}
 			}
 
@@ -1937,7 +1872,7 @@ public class TypeCreator extends TypeCache
 		/**
 		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
 		 */
-		public Type createType(String fullTypeName)
+		public Type createType(String context, String fullTypeName)
 		{
 			Type type = null;
 			if ("Forms".equals(fullTypeName))
@@ -1948,10 +1883,10 @@ public class TypeCreator extends TypeCache
 
 				EList<Member> members = type.getMembers();
 				members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "All form names as an array", SPECIAL_PROPERTY));
-				members.add(createProperty("length", true, "Number", "Number of forms", PROPERTY));
+				members.add(createProperty(context, "length", true, "Number", "Number of forms", PROPERTY));
 
 				// special array lookup property so that forms[xxx]. does code complete.
-				Property arrayProp = createProperty("[]", true, "RuntimeForm", PROPERTY);
+				Property arrayProp = createProperty(context, "[]", true, "RuntimeForm", PROPERTY);
 				arrayProp.setVisible(false);
 				members.add(arrayProp);
 				type.setName("Forms");
@@ -1960,10 +1895,10 @@ public class TypeCreator extends TypeCache
 			}
 			else
 			{
-				FlattenedSolution fs = getFlattenedSolution();
-				if (fs == null) return getType("Forms");
+				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
+				if (fs == null) return getType(context, "Forms");
 				type = TypeInfoModelFactory.eINSTANCE.createType();
-				type.setSuperType(getType("Forms"));
+				type.setSuperType(getType(context, "Forms"));
 				type.setName("Forms<" + fs.getMainSolutionMetaData().getName() + '>');
 				type.setKind(TypeKind.JAVA);
 				type.setAttribute(IMAGE_DESCRIPTOR, FORMS);
@@ -1972,7 +1907,7 @@ public class TypeCreator extends TypeCache
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					Property formProperty = createProperty(form.getName(), true, getTypeRef("RuntimeForm<" + form.getName() + '>'),
+					Property formProperty = createProperty(form.getName(), true, getTypeRef(context, "RuntimeForm<" + form.getName() + '>'),
 						getDescription(form.getDataSource()), FORM_IMAGE);
 					formProperty.setAttribute(LAZY_VALUECOLLECTION, form);
 					if (FormEncapsulation.isPrivate(form, fs))
@@ -2008,23 +1943,23 @@ public class TypeCreator extends TypeCache
 	{
 		private Type cachedSuperTypeTemplateType = null;
 
-		public Type createType(String fullTypeName)
+		public Type createType(String context, String fullTypeName)
 		{
 			Type type;
 			if (fullTypeName.equals(FoundSet.JS_FOUNDSET))
 			{
-				type = createBaseType(fullTypeName);
+				type = createBaseType(context, fullTypeName);
 
 				// quickly add this one to the static types.
 				return addType(null, type);
 			}
 			else
 			{
-				FlattenedSolution fs = TypeCreator.getFlattenedSolution();
+				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 				String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 				if (cachedSuperTypeTemplateType == null)
 				{
-					cachedSuperTypeTemplateType = createBaseType(FoundSet.JS_FOUNDSET);
+					cachedSuperTypeTemplateType = createBaseType(context, FoundSet.JS_FOUNDSET);
 				}
 				EList<Member> members = cachedSuperTypeTemplateType.getMembers();
 				List<Member> overwrittenMembers = new ArrayList<Member>();
@@ -2039,7 +1974,7 @@ public class TypeCreator extends TypeCache
 						}
 						else if (memberType.getName().equals(Record.JS_RECORD) || memberType.getName().equals(QBSelect.class.getSimpleName()))
 						{
-							overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(memberType.getName() + '<' + config + '>')));
+							overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + config + '>')));
 						}
 						else if (memberType.getName().equals(FoundSet.JS_FOUNDSET))
 						{
@@ -2052,22 +1987,22 @@ public class TypeCreator extends TypeCache
 									if (relation != null)
 									{
 										overwrittenMembers.add(TypeCreator.clone(member,
-											getTypeRef(FoundSet.JS_FOUNDSET + '<' + relation.getForeignDataSource() + '>')));
+											getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + relation.getForeignDataSource() + '>')));
 									}
 									else
 									{
-										overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(FoundSet.JS_FOUNDSET + '<' + config + '>')));
+										overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + config + '>')));
 									}
 								}
 							}
 							else
 							{
-								overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(FoundSet.JS_FOUNDSET + '<' + config + '>')));
+								overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + config + '>')));
 							}
 						}
 					}
 				}
-				type = getCombinedType(fullTypeName, config, overwrittenMembers, getType(FoundSet.JS_FOUNDSET), FOUNDSET_IMAGE, true);
+				type = getCombinedType(fs, context, fullTypeName, config, overwrittenMembers, getType(context, FoundSet.JS_FOUNDSET), FOUNDSET_IMAGE, true);
 			}
 			return type;
 		}
@@ -2077,10 +2012,10 @@ public class TypeCreator extends TypeCache
 		 * @param fullTypeName
 		 * @return
 		 */
-		private Type createBaseType(String fullTypeName)
+		private Type createBaseType(String context, String fullTypeName)
 		{
 			Type type;
-			type = TypeCreator.this.createType(fullTypeName, FoundSet.class);
+			type = TypeCreator.this.createType(context, fullTypeName, FoundSet.class);
 			//type.setAttribute(IMAGE_DESCRIPTOR, FOUNDSET_IMAGE);
 
 			Property alldataproviders = TypeInfoModelFactory.eINSTANCE.createProperty();
@@ -2109,9 +2044,9 @@ public class TypeCreator extends TypeCache
 		 * @see com.servoy.eclipse.debug.script.TypeCreator.IScopeTypeCreator#createType(org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext,
 		 * java.lang.String)
 		 */
-		public Type createType(String fullTypeName)
+		public Type createType(String context, String fullTypeName)
 		{
-			Type type = getType("JSDataSet");
+			Type type = getType(context, "JSDataSet");
 			int index = fullTypeName.indexOf('<');
 			if (index != -1 && fullTypeName.endsWith(">"))
 			{
@@ -2132,12 +2067,12 @@ public class TypeCreator extends TypeCache
 		private Type cachedSuperTypeTemplateType;
 
 		@Override
-		public Type createType(String fullTypeName)
+		public Type createType(String context, String fullTypeName)
 		{
 			Type type;
 			if (fullTypeName.equals(Record.JS_RECORD))
 			{
-				type = TypeCreator.this.createType(fullTypeName, Record.class);
+				type = TypeCreator.this.createType(context, fullTypeName, Record.class);
 				ImageDescriptor desc = IconProvider.instance().descriptor(Record.class);
 				type.setAttribute(IMAGE_DESCRIPTOR, desc);
 				// quickly add this one to the static types.
@@ -2148,7 +2083,7 @@ public class TypeCreator extends TypeCache
 				String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 				if (cachedSuperTypeTemplateType == null)
 				{
-					cachedSuperTypeTemplateType = createType(Record.JS_RECORD);
+					cachedSuperTypeTemplateType = createType(context, Record.JS_RECORD);
 				}
 				EList<Member> members = cachedSuperTypeTemplateType.getMembers();
 				List<Member> overwrittenMembers = new ArrayList<Member>();
@@ -2159,12 +2094,12 @@ public class TypeCreator extends TypeCache
 					{
 						if (memberType.getName().equals(FoundSet.JS_FOUNDSET))
 						{
-							overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(FoundSet.JS_FOUNDSET + '<' + config + '>')));
+							overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + config + '>')));
 						}
 					}
 				}
-				type = getCombinedType(fullTypeName, config, overwrittenMembers, getType(Record.JS_RECORD), IconProvider.instance().descriptor(Record.class),
-					true);
+				type = getCombinedType(ElementResolver.getFlattenedSolution(context), context, fullTypeName, config, overwrittenMembers,
+					getType(context, Record.JS_RECORD), IconProvider.instance().descriptor(Record.class), true);
 			}
 			return type;
 		}
@@ -2177,7 +2112,7 @@ public class TypeCreator extends TypeCache
 		/**
 		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
 		 */
-		public Type createType(String fullTypeName)
+		public Type createType(String context, String fullTypeName)
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(fullTypeName);
@@ -2186,7 +2121,7 @@ public class TypeCreator extends TypeCache
 
 			EList<Member> members = type.getMembers();
 			members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "All plugin names as an array", SPECIAL_PROPERTY));
-			members.add(createProperty("length", true, "Number", "Number of plugins", PROPERTY));
+			members.add(createProperty(context, "length", true, "Number", "Number of plugins", PROPERTY));
 
 			IPluginManager pluginManager = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getPluginManager();
 			List<IClientPlugin> clientPlugins = pluginManager.getPlugins(IClientPlugin.class);
@@ -2212,26 +2147,27 @@ public class TypeCreator extends TypeCache
 					property.setName(clientPlugin.getName());
 					property.setReadOnly(true);
 					addAnonymousClassType("Plugin<" + clientPlugin.getName() + '>', scriptObject.getClass());
-					property.setType(getTypeRef("Plugin<" + clientPlugin.getName() + '>'));
+					property.setType(getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'));
 
 					if (clientPlugin.getName().equals("window"))
 					{
-						Property deprecatedPluginProperty = createProperty("kioskmode", true, getTypeRef("Plugin<" + clientPlugin.getName() + '>'),
+						Property deprecatedPluginProperty = createProperty("kioskmode", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'),
 							"Window plugin", null);
 						deprecatedPluginProperty.setDeprecated(true);
 						deprecatedPluginProperty.setVisible(false);
 						members.add(deprecatedPluginProperty);
-						deprecatedPluginProperty = createProperty("popupmenu", true, getTypeRef("Plugin<" + clientPlugin.getName() + '>'), "Window plugin",
-							null);
+						deprecatedPluginProperty = createProperty("popupmenu", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'),
+							"Window plugin", null);
 						deprecatedPluginProperty.setDeprecated(true);
 						deprecatedPluginProperty.setVisible(false);
 						members.add(deprecatedPluginProperty);
-						deprecatedPluginProperty = createProperty("menubar", true, getTypeRef("Plugin<" + clientPlugin.getName() + '>'), "Window plugin", null);
+						deprecatedPluginProperty = createProperty("menubar", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'),
+							"Window plugin", null);
 						deprecatedPluginProperty.setDeprecated(true);
 						deprecatedPluginProperty.setVisible(false);
 						members.add(deprecatedPluginProperty);
-						deprecatedPluginProperty = createProperty("it2be_menubar", true, getTypeRef("Plugin<" + clientPlugin.getName() + '>'), "Window plugin",
-							null);
+						deprecatedPluginProperty = createProperty("it2be_menubar", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'),
+							"Window plugin", null);
 						deprecatedPluginProperty.setDeprecated(true);
 						deprecatedPluginProperty.setVisible(false);
 						members.add(deprecatedPluginProperty);
@@ -2272,7 +2208,7 @@ public class TypeCreator extends TypeCache
 
 	private class FormScopeCreator implements IScopeTypeCreator
 	{
-		public Type createType(String typeName)
+		public Type createType(String context, String typeName)
 		{
 			Type type;
 			if (typeName.equals("Form") || typeName.equals("RuntimeForm"))
@@ -2294,9 +2230,9 @@ public class TypeCreator extends TypeCache
 					SPECIAL_PROPERTY)));
 
 				// controller and foundset and elements
-				members.add(createProperty("controller", true, "Controller", IconProvider.instance().descriptor(JSForm.class)));
-				members.add(createProperty("foundset", true, FoundSet.JS_FOUNDSET, FOUNDSET_IMAGE));
-				members.add(createProperty("elements", true, "Elements", ELEMENTS));
+				members.add(createProperty(context, "controller", true, "Controller", IconProvider.instance().descriptor(JSForm.class)));
+				members.add(createProperty(context, "foundset", true, FoundSet.JS_FOUNDSET, FOUNDSET_IMAGE));
+				members.add(createProperty(context, "elements", true, "Elements", ELEMENTS));
 
 				//type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
 				// quickly add this one to the static types.
@@ -2304,17 +2240,17 @@ public class TypeCreator extends TypeCache
 			}
 			else
 			{
-				FlattenedSolution fs = getFlattenedSolution();
+				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 				if (fs == null) return null;
 				String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
 				Form form = fs.getForm(config);
 				if (form == null) return null;
 				Form formToUse = fs.getFlattenedForm(form);
-				Type superForm = getType("RuntimeForm");
+				Type superForm = getType(context, "RuntimeForm");
 				if (form.getExtendsID() > 0)
 				{
 					Form extendsForm = fs.getForm(form.getExtendsID());
-					if (extendsForm != null) superForm = getType("RuntimeForm<" + extendsForm.getName() + '>');
+					if (extendsForm != null) superForm = getType(context, "RuntimeForm<" + extendsForm.getName() + '>');
 				}
 
 				String ds = formToUse.getDataSource();
@@ -2324,13 +2260,13 @@ public class TypeCreator extends TypeCache
 				{
 					String foundsetType = FoundSet.JS_FOUNDSET;
 					if (ds != null) foundsetType += '<' + ds + '>';
-					Member clone = createProperty("foundset", true, foundsetType, FOUNDSET_IMAGE);
+					Member clone = createProperty(context, "foundset", true, foundsetType, FOUNDSET_IMAGE);
 					overwrittenMembers.add(clone);
 					clone.setVisible(!FormEncapsulation.hideFoundset(formToUse));
 				}
 				if (FormEncapsulation.hideController(formToUse))
 				{
-					Member clone = createProperty("controller", true, "Controller", IconProvider.instance().descriptor(JSForm.class));
+					Member clone = createProperty(context, "controller", true, "Controller", IconProvider.instance().descriptor(JSForm.class));
 					overwrittenMembers.add(clone);
 					clone.setVisible(false);
 				}
@@ -2346,11 +2282,11 @@ public class TypeCreator extends TypeCache
 					clone.setVisible(false);
 				}
 
-				Member clone = createProperty("elements", true, "Elements<" + config + '>', ELEMENTS);
+				Member clone = createProperty(context, "elements", true, "Elements<" + config + '>', ELEMENTS);
 				overwrittenMembers.add(clone);
 				clone.setVisible(!FormEncapsulation.hideElements(formToUse));
 
-				type = getCombinedType(typeName, ds, overwrittenMembers, superForm, FORM_IMAGE, !FormEncapsulation.hideDataproviders(formToUse));
+				type = getCombinedType(fs, context, typeName, ds, overwrittenMembers, superForm, FORM_IMAGE, !FormEncapsulation.hideDataproviders(formToUse));
 				if (type != null) type.setAttribute(LAZY_VALUECOLLECTION, form);
 			}
 			return type;
@@ -2391,12 +2327,12 @@ public class TypeCreator extends TypeCache
 			qbClasses.put(clazz.getSimpleName(), clazz);
 		}
 
-		public Type createType(String fullTypeName)
+		public Type createType(String context, String fullTypeName)
 		{
 			int indexOf = fullTypeName.indexOf('<');
 			if (indexOf == -1)
 			{
-				Type type = createBaseType(fullTypeName);
+				Type type = createBaseType(context, fullTypeName);
 
 				// quickly add this one to the static types.
 				return addType(null, type);
@@ -2405,7 +2341,7 @@ public class TypeCreator extends TypeCache
 			String config = fullTypeName.substring(indexOf + 1, fullTypeName.length() - 1);
 			if (cachedSuperTypeTemplateType == null)
 			{
-				cachedSuperTypeTemplateType = createType(fullTypeName.substring(0, indexOf));
+				cachedSuperTypeTemplateType = createType(context, fullTypeName.substring(0, indexOf));
 			}
 			EList<Member> members = cachedSuperTypeTemplateType.getMembers();
 			List<Member> overwrittenMembers = new ArrayList<Member>();
@@ -2414,7 +2350,7 @@ public class TypeCreator extends TypeCache
 				JSType memberType = member.getType();
 				if (memberType != null && qbClasses.containsKey(memberType.getName()))
 				{
-					overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(memberType.getName() + '<' + config + '>')));
+					overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + config + '>')));
 				}
 			}
 
@@ -2432,14 +2368,14 @@ public class TypeCreator extends TypeCache
 		 * @param fullTypeName
 		 * @return
 		 */
-		private Type createBaseType(String fullTypeName)
+		private Type createBaseType(String context, String fullTypeName)
 		{
 			Class< ? > cls = qbClasses.get(fullTypeName);
-			Type type = TypeCreator.this.createType(fullTypeName, cls);
+			Type type = TypeCreator.this.createType(context, fullTypeName, cls);
 			String superclass = cls.getSuperclass().getSimpleName();
 			if (qbClasses.containsKey(superclass))
 			{
-				type.setSuperType(getType(superclass));
+				type.setSuperType(getType(context, superclass));
 			}
 			return type;
 
@@ -2449,7 +2385,7 @@ public class TypeCreator extends TypeCache
 	private class QueryBuilderColumnsCreator implements IScopeTypeCreator
 	{
 
-		public Type createType(String typeName)
+		public Type createType(String context, String typeName)
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
@@ -2458,14 +2394,14 @@ public class TypeCreator extends TypeCache
 			TypeConfig fsAndTable = getFlattenedSolutonAndTable(typeName);
 			if (fsAndTable != null && fsAndTable.table != null)
 			{
-				addDataProviders(fsAndTable.table.getColumns().iterator(), type.getMembers(), fsAndTable.table.getDataSource());
+				addDataProviders(context, fsAndTable.table.getColumns().iterator(), type.getMembers(), fsAndTable.table.getDataSource());
 				return addType(SCOPE_QBCOLUMNS, type);
 			}
 
 			return type;
 		}
 
-		private void addDataProviders(Iterator< ? extends IDataProvider> dataproviders, EList<Member> members, String dataSource)
+		private void addDataProviders(String context, Iterator< ? extends IDataProvider> dataproviders, EList<Member> members, String dataSource)
 		{
 			while (dataproviders.hasNext())
 			{
@@ -2474,7 +2410,7 @@ public class TypeCreator extends TypeCache
 				property.setName(provider.getDataProviderID());
 				property.setAttribute(RESOURCE, provider);
 				property.setVisible(true);
-				property.setType(getTypeRef(QBColumn.class.getSimpleName() + '<' + dataSource + '>'));
+				property.setType(getTypeRef(context, QBColumn.class.getSimpleName() + '<' + dataSource + '>'));
 				ImageDescriptor image = COLUMN_IMAGE;
 				String description = "Column";
 				if (provider instanceof AggregateVariable)
@@ -2497,12 +2433,12 @@ public class TypeCreator extends TypeCache
 	private class QueryBuilderJoinsCreator extends QueryBuilderCreator
 	{
 		@Override
-		public Type createType(String fullTypeName)
+		public Type createType(String context, String fullTypeName)
 		{
-			Type type = super.createType(fullTypeName);
+			Type type = super.createType(context, fullTypeName);
 
 			TypeConfig fsAndTable = getFlattenedSolutonAndTable(fullTypeName);
-			FlattenedSolution fs = getFlattenedSolution();
+			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 			if (fsAndTable != null && fs != null && fsAndTable.table != null)
 			{
 				try
@@ -2516,7 +2452,7 @@ public class TypeCreator extends TypeCache
 							if (relation.isValid())
 							{
 								Property property = createProperty(relation.getName(), true,
-									getTypeRef(QBJoin.class.getSimpleName() + '<' + relation.getForeignDataSource() + '>'),
+									getTypeRef(context, QBJoin.class.getSimpleName() + '<' + relation.getForeignDataSource() + '>'),
 									getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE,
 									relation);
 								property.setVisible(true);
@@ -2555,7 +2491,7 @@ public class TypeCreator extends TypeCache
 
 	private class RelationsScopeCreator implements IScopeTypeCreator
 	{
-		public Type createType(String typeName)
+		public Type createType(String context, String typeName)
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
@@ -2568,7 +2504,7 @@ public class TypeCreator extends TypeCache
 				// context (like forms.x.foundset) global relations show up.
 				try
 				{
-					addRelations(fsAndTable.flattenedSolution, fsAndTable.scopeName, type.getMembers(),
+					addRelations(context, fsAndTable.flattenedSolution, fsAndTable.scopeName, type.getMembers(),
 						fsAndTable.flattenedSolution.getRelations(fsAndTable.table, true, false, fsAndTable.table == null, false, false), isVisible());
 				}
 				catch (RepositoryException e)
@@ -2598,7 +2534,7 @@ public class TypeCreator extends TypeCache
 
 	private class DataprovidersScopeCreator implements IScopeTypeCreator
 	{
-		public Type createType(String typeName)
+		public Type createType(String context, String typeName)
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
@@ -2609,14 +2545,14 @@ public class TypeCreator extends TypeCache
 			{
 				if (fsAndTable.flattenedSolution != null)
 				{
-					type.setSuperType(getType(typeName.substring(0, typeName.indexOf('<') + 1) + fsAndTable.table.getDataSource() + '>'));
+					type.setSuperType(getType(context, typeName.substring(0, typeName.indexOf('<') + 1) + fsAndTable.table.getDataSource() + '>'));
 					try
 					{
 						Map<String, IDataProvider> allDataProvidersForTable = fsAndTable.flattenedSolution.getAllDataProvidersForTable(fsAndTable.table);
 						if (allDataProvidersForTable != null)
 						{
-							addDataProviders(allDataProvidersForTable.values().iterator(), type.getMembers(), fsAndTable.table.isMarkedAsHiddenInDeveloper(),
-								isVisible(), false);
+							addDataProviders(context, allDataProvidersForTable.values().iterator(), type.getMembers(),
+								fsAndTable.table.isMarkedAsHiddenInDeveloper(), isVisible(), false);
 						}
 					}
 					catch (RepositoryException e)
@@ -2626,7 +2562,7 @@ public class TypeCreator extends TypeCache
 				}
 				else
 				{
-					addDataProviders(fsAndTable.table.getColumns().iterator(), type.getMembers(), false, isVisible(), true);
+					addDataProviders(context, fsAndTable.table.getColumns().iterator(), type.getMembers(), false, isVisible(), true);
 					return addType(SCOPE_TABLES, type);
 
 				}
@@ -2635,8 +2571,8 @@ public class TypeCreator extends TypeCache
 			return type;
 		}
 
-		private void addDataProviders(Iterator< ? extends IDataProvider> dataproviders, EList<Member> members, boolean hiddenTable, boolean visible,
-			boolean columnsOnly)
+		private void addDataProviders(String context, Iterator< ? extends IDataProvider> dataproviders, EList<Member> members, boolean hiddenTable,
+			boolean visible, boolean columnsOnly)
 		{
 			while (dataproviders.hasNext())
 			{
@@ -2667,16 +2603,16 @@ public class TypeCreator extends TypeCache
 				switch (componentFormat.dpType)
 				{
 					case IColumnTypes.DATETIME :
-						property.setType(getTypeRef("Date"));
+						property.setType(getTypeRef(context, "Date"));
 						break;
 
 					case IColumnTypes.INTEGER :
 					case IColumnTypes.NUMBER :
-						property.setType(getTypeRef("Number"));
+						property.setType(getTypeRef(context, "Number"));
 						break;
 
 					case IColumnTypes.TEXT :
-						property.setType(getTypeRef("String"));
+						property.setType(getTypeRef(context, "String"));
 						break;
 
 					case IColumnTypes.MEDIA :
@@ -2688,7 +2624,7 @@ public class TypeCreator extends TypeCache
 				}
 				if (uuid)
 				{
-					property.setType(getTypeRef("UUID"));
+					property.setType(getTypeRef(context, "UUID"));
 				}
 				ImageDescriptor image = COLUMN_IMAGE;
 				String description = "Column";
@@ -2887,7 +2823,7 @@ public class TypeCreator extends TypeCache
 			addType("RuntimeComponent", IRuntimeComponent.class);
 		}
 
-		public Type createType(String typeName)
+		public Type createType(String context, String typeName)
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
@@ -2897,8 +2833,8 @@ public class TypeCreator extends TypeCache
 			{
 				EList<Member> members = type.getMembers();
 				members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "Array with all the element names", SPECIAL_PROPERTY));
-				members.add(createProperty("length", true, "Number", PROPERTY));
-				Property arrayProp = createProperty("[]", true, "RuntimeComponent", PROPERTY);
+				members.add(createProperty(context, "length", true, "Number", PROPERTY));
+				Property arrayProp = createProperty(context, "[]", true, "RuntimeComponent", PROPERTY);
 				arrayProp.setVisible(false);
 				members.add(arrayProp);
 				// quickly add this one to the static types.
@@ -2906,14 +2842,14 @@ public class TypeCreator extends TypeCache
 			}
 			else
 			{
-				FlattenedSolution fs = getFlattenedSolution();
+				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 				if (fs != null)
 				{
 					String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
 					Form form = fs.getForm(config);
 					if (form != null)
 					{
-						type.setSuperType(getType("Elements"));
+						type.setSuperType(getType(context, "Elements"));
 						try
 						{
 							EList<Member> members = type.getMembers();
@@ -2924,7 +2860,7 @@ public class TypeCreator extends TypeCache
 							}
 							IApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
 							Iterator<IPersist> formObjects = formToUse.getAllObjects();
-							createFormElementProperties(application, members, formObjects);
+							createFormElementProperties(context, application, members, formObjects);
 						}
 						catch (Exception e)
 						{
@@ -2942,7 +2878,7 @@ public class TypeCreator extends TypeCache
 		 * @param members
 		 * @param formObjects
 		 */
-		private void createFormElementProperties(IApplication application, EList<Member> members, Iterator<IPersist> formObjects)
+		private void createFormElementProperties(String context, IApplication application, EList<Member> members, Iterator<IPersist> formObjects)
 		{
 			while (formObjects.hasNext())
 			{
@@ -2963,25 +2899,25 @@ public class TypeCreator extends TypeCache
 								typeNames.put(persistClass.getSimpleName(), beanClassName.substring(beanClassName.lastIndexOf('.') + 1));
 							}
 						}
-						members.add(createProperty(formElement.getName(), true, getElementType(persistClass), null, PROPERTY));
+						members.add(createProperty(formElement.getName(), true, getElementType(context, persistClass), null, PROPERTY));
 					}
 					if (formElement.getGroupID() != null)
 					{
 						String groupName = FormElementGroup.getName(formElement.getGroupID());
 						if (groupName != null)
 						{
-							members.add(createProperty(groupName, true, getElementType(RuntimeGroup.class), null, PROPERTY));
+							members.add(createProperty(groupName, true, getElementType(context, RuntimeGroup.class), null, PROPERTY));
 						}
 					}
 					if (formElement instanceof Portal)
 					{
-						createFormElementProperties(application, members, ((Portal)formElement).getAllObjects());
+						createFormElementProperties(context, application, members, ((Portal)formElement).getAllObjects());
 					}
 				}
 			}
 		}
 
-		private SimpleType getElementType(Class< ? > cls)
+		private SimpleType getElementType(String context, Class< ? > cls)
 		{
 			if (cls == null) return null;
 			String name = typeNames.get(cls.getSimpleName());
@@ -2991,7 +2927,7 @@ public class TypeCreator extends TypeCache
 				name = cls.getSimpleName();
 				addAnonymousClassType(name, cls);
 			}
-			return getTypeRef(name);
+			return getTypeRef(context, name);
 		}
 
 	}
@@ -3004,7 +2940,7 @@ public class TypeCreator extends TypeCache
 	 * @param visible 
 	 * @throws RepositoryException
 	 */
-	private void addRelations(FlattenedSolution fs, String scopeName, EList<Member> members, Iterator<Relation> relations, boolean visible)
+	private void addRelations(String context, FlattenedSolution fs, String scopeName, EList<Member> members, Iterator<Relation> relations, boolean visible)
 	{
 		while (relations.hasNext())
 		{
@@ -3014,7 +2950,7 @@ public class TypeCreator extends TypeCache
 				// show only relations that are valid and defined for this scope
 				if (relation.isValid() && (scopeName == null || relation.usesScope(scopeName)))
 				{
-					Property property = createProperty(relation.getName(), true, getTypeRef(FoundSet.JS_FOUNDSET + '<' + relation.getName() + '>'),
+					Property property = createProperty(relation.getName(), true, getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + relation.getName() + '>'),
 						getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE, relation);
 					if (visible)
 					{
@@ -3171,7 +3107,8 @@ public class TypeCreator extends TypeCache
 		return clone;
 	}
 
-	private Type getCombinedType(String fullTypeName, String config, List<Member> members, Type superType, ImageDescriptor imageDescriptor, boolean visible)
+	private Type getCombinedType(FlattenedSolution fs, String context, String fullTypeName, String config, List<Member> members, Type superType,
+		ImageDescriptor imageDescriptor, boolean visible)
 	{
 		if (config == null)
 		{
@@ -3184,9 +3121,7 @@ public class TypeCreator extends TypeCache
 			return type;
 		}
 
-		FlattenedSolution fs = getFlattenedSolution();
 		if (fs == null) return null;
-
 
 		String serverName = null;
 		String tableName = null;
@@ -3240,7 +3175,7 @@ public class TypeCreator extends TypeCache
 					if (relation != null && relation.isValid())
 					{
 						table = relation.getForeignTable();
-						superType = getType(superType.getName() + '<' + table.getDataSource() + '>');
+						superType = getType(context, superType.getName() + '<' + table.getDataSource() + '>');
 						table = null;
 					}
 					else return null;
@@ -3274,8 +3209,8 @@ public class TypeCreator extends TypeCache
 			}
 
 			EList<Type> traits = type.getTraits();
-			traits.add(getType(dataproviderType));
-			traits.add(getType(relationsType));
+			traits.add(getType(context, dataproviderType));
+			traits.add(getType(context, relationsType));
 
 			if (table.isMarkedAsHiddenInDeveloper())
 			{

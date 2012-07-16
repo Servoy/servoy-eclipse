@@ -56,16 +56,13 @@ public class TypeProvider implements ITypeProvider
 	 */
 	public Type getType(ITypeInfoContext context, TypeMode mode, String typeName)
 	{
-		TypeCreator.CONTEXT.set(ElementResolver.getFlattenedSolution(context));
-		try
+		String contextString = null;
+		FlattenedSolution flattenedSolution = ElementResolver.getFlattenedSolution(context);
+		if (flattenedSolution != null)
 		{
-			return TYPES.findType(typeName);
+			contextString = flattenedSolution.getSolution().getName();
 		}
-		finally
-		{
-			TypeCreator.CONTEXT.remove();
-		}
-
+		return TYPES.findType(contextString, typeName);
 	}
 
 	public Set<String> listTypes(ITypeInfoContext context, TypeMode mode, String prefix)
@@ -78,12 +75,12 @@ public class TypeProvider implements ITypeProvider
 			if (Record.JS_RECORD.toLowerCase().startsWith(prefixLower))
 			{
 				names.add(Record.JS_RECORD);
-				datasourcePrefix = Record.JS_RECORD + '<';
+				if (prefixLower.equalsIgnoreCase(Record.JS_RECORD)) datasourcePrefix = Record.JS_RECORD + '<';
 			}
 			if (FoundSet.JS_FOUNDSET.toLowerCase().startsWith(prefixLower))
 			{
 				names.add(FoundSet.JS_FOUNDSET);
-				datasourcePrefix = FoundSet.JS_FOUNDSET + '<';
+				if (prefixLower.equalsIgnoreCase(FoundSet.JS_FOUNDSET)) datasourcePrefix = FoundSet.JS_FOUNDSET + '<';
 			}
 			if (datasourcePrefix != null && mode == TypeMode.JSDOC)
 			{
