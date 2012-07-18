@@ -19877,7 +19877,7 @@ application.output(scopes.globals.gNumber); // Prints 192.334]]></sample>
           <description><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></description>
           <summary><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></summary>
           <sample><![CDATA[var txtVar = solutionModel.newGlobalVariable('globals', 'gText', JSVariable.TEXT);
-txtVar.defaultValue = '"some text"'; // Use two pairs of quotes if you want to assing a String as default value.
+txtVar.defaultValue = '"some text"'; // Use two pairs of quotes if you want to assign a String as default value.
 application.output(scopes.globals.gText); // Prints 'some text' (without quotes).]]></sample>
         </constant>
       </constants>
@@ -41671,6 +41671,18 @@ The value can be true/false
 DEFAULT: false]]></description>
           <summary><![CDATA[Property than can be set using application.]]></summary>
           <sample><![CDATA[application.putClientProperty(APP_UI_PROPERTY.TABLEVIEW_WC_DEFAULT_SCROLLABLE, true)]]></sample>
+        </constant>
+        <constant name="TABLEVIEW_WC_SCROLLABLE_KEEP_LOADED_ROWS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Property than can be set using application.putClientProperty().
+
+If set to true, scrollable table views in web client will keep the already loaded rows in the view
+If set to false, scrollable table views in web client will unload not visible rows in the view
+
+The value can be true/false
+DEFAULT: false]]></description>
+          <summary><![CDATA[Property than can be set using application.]]></summary>
+          <sample><![CDATA[application.putClientProperty(APP_UI_PROPERTY.TABLEVIEW_WC_SCROLLABLE_KEEP_LOADED_ROWS, true)]]></sample>
         </constant>
         <constant name="TOOLTIP_DISMISS_DELAY">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
