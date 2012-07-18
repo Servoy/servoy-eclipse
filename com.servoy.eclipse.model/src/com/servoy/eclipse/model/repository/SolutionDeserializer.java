@@ -1663,6 +1663,11 @@ public class SolutionDeserializer
 					String type = obj.getString(JS_TYPE_JSON_ATTRIBUTE);
 					((ScriptVariable)retval).setSerializableRuntimeProperty(IScriptProvider.TYPE, type);
 				}
+				else
+				//this else is introduced for SVY-2537 
+				{
+					((ScriptVariable)retval).setSerializableRuntimeProperty(IScriptProvider.TYPE, null);
+				}
 			}
 			else if (retval instanceof AbstractScriptProvider)
 			{
