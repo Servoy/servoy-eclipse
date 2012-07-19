@@ -948,14 +948,17 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		 */
 		if (persist.getParent() instanceof TableNode)
 		{
-			String name = ((ISupportName)persist).getName();
-			if (name != null)
+			String entityName = ((ISupportName)persist).getName();
+			String dataSource = ((TableNode)persist.getParent()).getDataSource();
+
+			if (entityName != null && dataSource != null)
 			{
-				Map<Integer, Set<Pair<String, ISupportChilds>>> persistSet = duplicationMap.get(name);
+				String entityName_plus_dataSource = entityName + '~' + dataSource;
+				Map<Integer, Set<Pair<String, ISupportChilds>>> persistSet = duplicationMap.get(entityName_plus_dataSource);
 				if (persistSet == null)
 				{
 					persistSet = new HashMap<Integer, Set<Pair<String, ISupportChilds>>>();
-					duplicationMap.put(name, persistSet);
+					duplicationMap.put(entityName_plus_dataSource, persistSet);
 				}
 
 				Integer type = TABLE_CALCULATION_DUPLICATION; // ScriptCalculation
@@ -983,45 +986,58 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 							if (persist instanceof ScriptCalculation)
 							{
-								ScriptCalculation duplicateScriptCalculation = tableNode.getScriptCalculation(name);
-								if (duplicateScriptCalculation != null)
+								ScriptCalculation duplicateScriptCalculation = tableNode.getScriptCalculation(entityName);
+								if (dataSource.equals(tableNode.getDataSource()))
 								{
+									if (duplicateScriptCalculation != null)
+									{
+										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
+											"table calculation", entityName, parentsName + "   on table  " + tableNode.getDataSource()); //$NON-NLS-1$
+										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
+											duplicateScriptCalculation);
+									}
 									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
-										"table calculation", name, parentsName + "   on table  " + tableNode.getServerName() + " -> " + tableNode.getTableName()); //$NON-NLS-1$
+										"table calculation ", entityName, tableNode.getParent() + "  on table  " + tableNode.getDataSource()); //$NON-NLS-1$								
 									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-										duplicateScriptCalculation);
+										persist);
 								}
-								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
-									"table calculation ", name, tableNode.getParent() + "  on table  " + tableNode.getServerName() + " -> " + tableNode.getTableName()); //$NON-NLS-1$								
-								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
+
 							}
 							else if (persist instanceof AggregateVariable)
 							{
-								AggregateVariable duplicateAggregate = tableNode.getAggregateVariable(name);
-								if (duplicateAggregate != null)
+								AggregateVariable duplicateAggregate = tableNode.getAggregateVariable(entityName);
+								if (dataSource.equals(tableNode.getDataSource()))
 								{
+									if (duplicateAggregate != null)
+									{
+										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
+											"aggregate variable", entityName, parentsName + "   on table  " + tableNode.getDataSource()); //$NON-NLS-1$
+										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
+											duplicateAggregate);
+									}
 									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
-										"aggregate variable", name, parentsName + "   on table  " + tableNode.getServerName() + " -> " + tableNode.getTableName()); //$NON-NLS-1$
+										"aggregate variable", entityName, tableNode.getParent() + "  on table  " + tableNode.getDataSource()); //$NON-NLS-1$								
 									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-										duplicateAggregate);
+										persist);
 								}
-								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
-									"aggregate variable", name, tableNode.getParent() + "  on table  " + tableNode.getServerName() + " -> " + tableNode.getTableName()); //$NON-NLS-1$								
-								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
 							}
 							else if (persist instanceof ScriptMethod)
 							{
-								ScriptMethod duplicateFoundSetMethod = tableNode.getFoundsetMethod(name);
-								if (duplicateFoundSetMethod != null)
+								ScriptMethod duplicateFoundSetMethod = tableNode.getFoundsetMethod(entityName);
+								if (dataSource.equals(tableNode.getDataSource()))
 								{
+									if (duplicateFoundSetMethod != null)
+									{
+										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
+											"table method", entityName, parentsName + "   on table  " + tableNode.getDataSource()); //$NON-NLS-1$
+										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
+											duplicateFoundSetMethod);
+									}
 									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
-										"table method", name, parentsName + "   on table  " + tableNode.getServerName() + " -> " + tableNode.getTableName()); //$NON-NLS-1$
+										"table method", entityName, tableNode.getParent() + "  on table  " + tableNode.getDataSource()); //$NON-NLS-1$								
 									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-										duplicateFoundSetMethod);
+										persist);
 								}
-								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
-									"table method", name, tableNode.getParent() + "  on table  " + tableNode.getServerName() + " -> " + tableNode.getTableName()); //$NON-NLS-1$								
-								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
 							}
 						}
 					}
