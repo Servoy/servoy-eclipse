@@ -66,7 +66,7 @@
       </constructors>
       <properties>
         <property name="[index]">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           <description><![CDATA[Get an element by index.]]></description>
           <summary><![CDATA[Get an element by index.]]></summary>
           <sample><![CDATA[array[0]]]></sample>

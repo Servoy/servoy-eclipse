@@ -68,11 +68,11 @@ import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
+import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IParameter;
 import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
 import com.servoy.j2db.documentation.scripting.docs.FormElements;
 import com.servoy.j2db.documentation.scripting.docs.Forms;
-import com.servoy.j2db.documentation.scripting.docs.Globals;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
@@ -123,7 +123,6 @@ import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Text;
 import com.servoy.j2db.util.UUID;
-import com.servoy.j2db.util.Utils;
 
 public class SolutionExplorerListContentProvider implements IStructuredContentProvider, IImageLookup, IPersistChangeListener, IColumnListener
 {
@@ -138,7 +137,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	public static Set<String> ignoreMethodsFromPrefixedConstants = new TreeSet<String>();
 
 	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
-	public final static Map<String, String> TYPES = Utils.getDocumentationTypesTranslator(null);
+
+	private final Object propertiesIcon;
+	private final Object specialPropertiesIcon;
+	private final Object functionIcon;
+
+	private boolean includeModules = false;
+
+	private final Map<Table, List<Object>> usedTables = new HashMap<Table, List<Object>>();
 
 	static
 	{
@@ -188,6 +194,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	{
 		view = v;
 		propertiesIcon = loadImage("properties_icon.gif");
+		specialPropertiesIcon = loadImage("special_properties_icon.gif");
 		functionIcon = uiActivator.loadImageFromBundle("function.gif");
 	}
 
@@ -253,14 +260,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 		return EMPTY_LIST;
 	}
-
-	private final Object propertiesIcon;
-
-	private final Object functionIcon;
-
-	private boolean includeModules = false;
-
-	private final Map<Table, List<Object>> usedTables = new HashMap<Table, List<Object>>();
 
 	protected Object[] getList(SimpleUserNode un) throws RepositoryException
 	{
@@ -364,7 +363,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.TABLE_COLUMNS)
 			{
-				lm = createTableColumns((Table)un.getRealObject(), un.getSolution());
+				lm = createTableColumns((Table)un.getRealObject(), un);
 			}
 			else if (type == UserNodeType.SERVER && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
@@ -401,17 +400,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.RELATIONS)
 			{
-				Object realObject = un != null ? un.getRealObject() : null; // Form
-				// (normal
-				// edit
-				// mode)
-				// or
-				// Table
-				// (calculation
-				// edit
-				// mode)
-				lm = TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.ARRAY, null, null,
-					"allrelations", realObject, null).toArray(); //$NON-NLS-1$
+				// allrelations DEPRECATED in favour of solutionModel
 			}
 			else if (type == UserNodeType.RELATION)
 			{
@@ -420,9 +409,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.GLOBALRELATIONS)
 			{
-				Pair<Solution, String> pair = (Pair<Solution, String>)un.getRealObject();
-				lm = TreeBuilder.docToOneNode(Globals.class, this, UserNodeType.ARRAY, ScriptVariable.SCOPES_DOT_PREFIX + pair.getRight() + '.', null,
-					"allrelations", pair, null).toArray(); //$NON-NLS-1$
+				// allrelations DEPRECATED in favour of solutionModel
 			}
 			else if (type == UserNodeType.ALL_RELATIONS)
 			{
@@ -901,13 +888,13 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return dlm.toArray();
 	}
 
-	private Object[] createTableColumns(Table table, Solution solution) throws RepositoryException
+	private Object[] createTableColumns(Table table, SimpleUserNode un) throws RepositoryException
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
 
 		if (table != null)
 		{
-			genTableColumns(table, dlm, UserNodeType.TABLE_COLUMNS_ITEM, solution, null);
+			genTableColumns(table, dlm, UserNodeType.TABLE_COLUMNS_ITEM, un.getSolution(), null);
 		}
 
 		return dlm.toArray();
@@ -930,7 +917,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		HashMap<String, Solution> modulesOfSolution = new HashMap<String, Solution>();
 		solution.getReferencedModulesRecursive(modulesOfSolution);
 		modulesOfSolution.put(solution.getName(), solution);
-		TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.ARRAY, prefix, dlm, "alldataproviders", null, null);
 
 		Iterator<Column> cols = EditorUtil.getTableColumns(table);
 		while (cols.hasNext())
@@ -985,7 +971,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				uiActivator.loadImageFromBundle("designer.gif"))); //$NON-NLS-1$
 			TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.FOUNDSET_ITEM, null, dlm, "foundset", form,
 				uiActivator.loadImageFromBundle("foundset.gif"));
-			TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.ARRAY, null, dlm, "allmethods", form, null);
 			FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 			if (flatSolution != null)
 			{
@@ -1038,8 +1023,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
 		Pair<Solution, String> pair = (Pair<Solution, String>)un.getRealObject();
-		TreeBuilder.docToOneNode(Globals.class, this, UserNodeType.GLOBAL_VARIABLES, ScriptVariable.SCOPES_DOT_PREFIX + pair.getRight() + '.', dlm,
-			"allvariables", pair, null);
 		List<IPersist> persists = getPersists(pair.getLeft(), UserNodeType.GLOBAL_VARIABLES, pair.getRight());
 		for (IPersist persist : persists)
 		{
@@ -1070,7 +1053,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					form = flatForm;
 				}
 			}
-			TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.ARRAY, null, dlm, "allvariables", form, null);
 
 			Iterator<ScriptVariable> it = form.getScriptVariables(true);
 			String nodeText;
@@ -1101,8 +1083,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
 
 		Pair<Solution, String> pair = (Pair<Solution, String>)un.getRealObject();
-		TreeBuilder.docToOneNode(Globals.class, this, UserNodeType.GLOBALS_ITEM, ScriptVariable.SCOPES_DOT_PREFIX + pair.getRight() + '.', dlm, "allmethods",
-			pair, null);
 		List<IPersist> persists = getPersists(pair.getLeft(), UserNodeType.GLOBALS_ITEM, pair.getRight());
 		for (IPersist persist : persists)
 		{
@@ -1171,9 +1151,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			dlm.add(new UserNode(r.getName(), UserNodeType.RELATION, r.getName(), r.getName(), r, uiActivator.loadImageFromBundle("foundset.gif")));
 			SimpleUserNode[] methods = getJSMethods(RelatedFoundSet.class, r.getName(), null, UserNodeType.RELATION_METHODS, null, exludeMethods);
 
-			dlm.addAll(Arrays.asList(methods));
-
 			genTableColumns(r.getForeignTable(), dlm, UserNodeType.RELATION_COLUMN, (Solution)r.getRootObject(), r);
+			dlm.addAll(Arrays.asList(methods));
 		}
 		catch (Exception e)
 		{
@@ -1404,15 +1383,22 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			String name = (String)element;
 
+			Object pIcon = propertiesIcon;
 			if (adapter != null)
 			{
 				if (adapter.isDeprecated(name)) continue;
 				if (adapter.isDeprecated(elementName + name)) continue;
-
+				if (adapter instanceof ITypedScriptObject)
+				{
+					if (((ITypedScriptObject)adapter).isSpecial(name))
+					{
+						pIcon = specialPropertiesIcon;
+					}
+				}
 			}
 			Object bp = ijm.getField(name, false);
 			if (bp == null) continue;
-			dlm.add(new UserNode(name, actionType, new FieldFeedback(name, elementName, resolver, scriptObject, ijm), real, propertiesIcon));
+			dlm.add(new UserNode(name, actionType, new FieldFeedback(name, elementName, resolver, scriptObject, ijm), real, pIcon));
 		}
 
 		List names = ijm.getMethodIds(false);
@@ -1454,7 +1440,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					if (adapter instanceof ITypedScriptObject)
 					{
 						if (((ITypedScriptObject)adapter).isDeprecated(id, method.getParameterTypes())) continue;
-						displayName = ((ITypedScriptObject)adapter).getSignature(id, method.getParameterTypes(), TYPES);
+						displayName = ((ITypedScriptObject)adapter).getJSTranslatedSignature(id, method.getParameterTypes());
 					}
 					else
 					{
@@ -1468,10 +1454,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					String paramTypes = "";
 					for (Class param : method.getParameterTypes())
 					{
-						paramTypes += TYPES.get(param.getSimpleName()) + ",";
+						paramTypes += DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(param) + ", ";
 					}
-					paramTypes = "(" + (method.getParameterTypes().length > 0 ? paramTypes.substring(0, paramTypes.length() - 1) : "") + ")";
-					displayName = id + paramTypes + " - " + TYPES.get(method.getReturnType().getSimpleName());
+					paramTypes = "(" + (method.getParameterTypes().length > 0 ? paramTypes.substring(0, paramTypes.length() - 2) : "") + ")";
+					displayName = id + paramTypes + " - " +
+						DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(method.getReturnType());
 				}
 
 				SimpleUserNode node = new UserNode(displayName, actionType, new MethodFeedback(id, method.getParameterTypes(), elementName, resolver,
@@ -1777,16 +1764,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			if (tooltip == null) tooltip = ""; //$NON-NLS-1$
 
-			Class returnType = njm.getMethods()[0].getReturnType();
-			StringBuffer returnTypeStringBuffer = new StringBuffer();
-			while (returnType.isArray())
-			{
-				returnTypeStringBuffer.append("[]"); //$NON-NLS-1$
-				returnType = returnType.getComponentType();
-			}
-			returnTypeStringBuffer.insert(0, TYPES.get(returnType.getName()));
-
-			String tmp = "<html><body><b>" + returnTypeStringBuffer.toString() + " " + name + "(" + getPrettyParameterTypesString(paramNames, false) + ")</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			String tmp = "<html><body><b>" + getReturnTypeString(njm.getMethods()[0].getReturnType()) + " " + name + "(" + getPrettyParameterTypesString(paramNames, false) + ")</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			if ("".equals(tooltip)) //$NON-NLS-1$
 			{
 				tooltip = tmp + "</body></html>"; //$NON-NLS-1$
@@ -1807,7 +1785,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				for (Class param : parameterTypes)
 				{
-					paramTypes.append(TYPES.get(param.getSimpleName()));
+					paramTypes.append(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(param));
 					paramTypes.append(',');
 				}
 			}
@@ -1824,17 +1802,18 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(this.name, parameterTypes);
 							if (parameters != null && parameters[i].isVarArgs())
 							{
-								paramTypes.append(TYPES.get(parameterTypes[i].getComponentType().getSimpleName()));
+								paramTypes.append(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(
+									parameterTypes[i].getComponentType()));
 								paramTypes.append("...");
 							}
 							else
 							{
-								paramTypes.append(TYPES.get(parameterTypes[i].getSimpleName()));
+								paramTypes.append(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(parameterTypes[i]));
 							}
 						}
 						else
 						{
-							paramTypes.append(TYPES.get(parameterTypes[i].getSimpleName()));
+							paramTypes.append(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(parameterTypes[i]));
 						}
 					}
 					paramTypes.append(',');
@@ -1900,23 +1879,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			String tmp = ""; //$NON-NLS-1$
 			if (bp instanceof JavaMembers.BeanProperty)
 			{
-				Class returnType = ((JavaMembers.BeanProperty)bp).getGetter().getReturnType();
-				boolean returnTypeIsArray = returnType.isArray();
-				String sReturnType = ""; //$NON-NLS-1$
-				while (returnTypeIsArray)
-				{
-					returnType = returnType.getComponentType();
-					sReturnType += "[]"; //$NON-NLS-1$
-					returnTypeIsArray = returnType.isArray();
-				}
-
-				sReturnType = TYPES.get(returnType.getName()) + sReturnType;
-
-				tmp = "<html><body><b>" + sReturnType + " " + name + "</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				tmp = "<html><body><b>" + getReturnTypeString(((JavaMembers.BeanProperty)bp).getGetter().getReturnType()) + " " + name + "</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			else if (bp instanceof Field)
 			{
-				tmp = "<html><body><b>" + TYPES.get(((Field)bp).getType().getName()) + " " + name + "</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				tmp = "<html><body><b>" + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(((Field)bp).getType()) + " " + name + "</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			else if (bp == null)
 			{
@@ -1976,4 +1943,17 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 
 	}
+
+	public static String getReturnTypeString(Class returnType)
+	{
+		StringBuffer returnTypeStringBuffer = new StringBuffer();
+		while (returnType.isArray())
+		{
+			returnTypeStringBuffer.append("[]"); //$NON-NLS-1$
+			returnType = returnType.getComponentType();
+		}
+		returnTypeStringBuffer.insert(0, DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnType));
+		return returnTypeStringBuffer.toString();
+	}
+
 }

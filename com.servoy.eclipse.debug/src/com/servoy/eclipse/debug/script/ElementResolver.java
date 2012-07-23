@@ -329,12 +329,56 @@ public class ElementResolver implements IElementResolver
 			{
 				Form superForm = fs.getForm(form.getExtendsID());
 				Property property = TypeCreator.createProperty("_super", true, (JSType)null, null, TypeCreator.FORM_IMAGE);
-				property.setDescription(TypeCreator.getDoc("_super", com.servoy.j2db.documentation.scripting.docs.Form.class, "", null));
+				property.setDescription(TypeCreator.getDoc("_super", com.servoy.j2db.documentation.scripting.docs.Form.class, null));
 				property.setAttribute(TypeCreator.LAZY_VALUECOLLECTION, superForm);
 				property.setAttribute(IReferenceAttributes.SUPER_SCOPE, Boolean.TRUE);
 				return property;
 			}
 			return null;
+		}
+
+		// try to resolve first based on existing types as defined by TypeCreator (so that deprecated & other things are in sync)
+		IResource ctxResource = context.getModelElement().getResource();
+		if (ctxResource != null && fs != null && fs.getSolution() != null)
+		{
+			IPath path = ctxResource.getProjectRelativePath();
+			if (path.segmentCount() == 1)
+			{
+				// globals.js (or other scope)
+				Type type = context.getType("Scope<" + fs.getSolution().getName() + "/" +
+					path.segment(0).substring(0, path.segment(0).length() - SolutionSerializer.JS_FILE_EXTENSION.length()) + '>');
+				Member m = TypeCreator.getMember(name, type);
+				if (m != null) return m;
+			}
+			else if (path.segmentCount() == 2 && path.segment(0).equals(SolutionSerializer.FORMS_DIR))
+			{
+				// forms/formname.js
+				Form form = getForm(context);
+				if (form != null)
+				{
+					Type type = context.getType("RuntimeForm<" + form.getName() + '>');
+					Member m = TypeCreator.getMember(name, type);
+					if (m != null) return m;
+				}
+			}
+			else if (path.segmentCount() == 3 && path.segment(0).equals(SolutionSerializer.DATASOURCES_DIR_NAME))
+			{
+				// datasources/server/table_foundset.js or datasources/server/table_calculations.js
+				Table table = getDatasourceTable(context, fs);
+				if (table != null)
+				{
+					if (path.segment(2).endsWith(SolutionSerializer.FOUNDSET_POSTFIX))
+					{
+						// datasources/server/table_foundset.js
+						Type type = context.getType(FoundSet.JS_FOUNDSET + '<' + table.getDataSource() + '>');
+						if (type != null)
+						{
+							Member m = TypeCreator.getMember(name, type);
+							if (m != null) return m;
+						}
+					}
+				}
+			}
 		}
 
 		String typeName;

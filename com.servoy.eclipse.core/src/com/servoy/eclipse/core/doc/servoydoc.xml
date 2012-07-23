@@ -5355,8 +5355,8 @@ component.fontType = solutionModel.createFont('Arial',SM_FONTSTYLE.PLAIN,10);]]>
     </object>
     <object publicName="Forms" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Forms" scriptingName="forms">
       <properties>
-        <property name="['name']">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+        <property name="[name]">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Form" typecode="com.servoy.j2db.scripting.FormScope"/>
           <description><![CDATA[Get a form by name.]]></description>
           <summary><![CDATA[Get a form by name.]]></summary>
           <sample><![CDATA[var allFormNames = forms.allnames;
@@ -5367,10 +5367,11 @@ for (var i=0; i<allFormNames.length; i++)
 	application.output("Form " + allFormNames[i] + " has selected index " + f.controller.getSelectedIndex());
 }]]></sample>
         </property>
-        <property name="allnames" special="true">
+        <property deprecated="true" name="allnames" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           <description><![CDATA[Get all form names of the current solution.]]></description>
           <summary><![CDATA[Get all form names of the current solution.]]></summary>
+          <deprecated><![CDATA[use solutionModel.getForms().]]></deprecated>
           <sample><![CDATA[var allFormNames = forms.allnames;
 application.output("There are " + allFormNames.length + " forms.");
 for (var i=0; i<allFormNames.length; i++) 
@@ -5389,28 +5390,31 @@ for (var i=0; i<allFormNames.length; i++)
     </object>
     <object publicName="Globals" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Globals" scriptingName="globals">
       <properties>
-        <property name="allmethods" special="true">
+        <property deprecated="true" name="allmethods" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
-          <description><![CDATA[Get all global script names of the current solution.]]></description>
-          <summary><![CDATA[Get all global script names of the current solution.]]></summary>
+          <description><![CDATA[Get all script names of this global scope.]]></description>
+          <summary><![CDATA[Get all script names of this global scope.]]></summary>
+          <deprecated><![CDATA[use solutionModel.getGlobalMethods("scopeName") instead.]]></deprecated>
           <sample><![CDATA[var allMethodNames = scopes.globals.allmethods;
 application.output("There are " + allMethodNames.length + " global methods.");
 for (var i=0; i<allMethodNames.length; i++)
 	application.output(allMethodNames[i]);]]></sample>
         </property>
-        <property name="allrelations" special="true">
+        <property deprecated="true" name="allrelations" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           <description><![CDATA[Get all global relation names of the current solution.]]></description>
           <summary><![CDATA[Get all global relation names of the current solution.]]></summary>
+          <deprecated><![CDATA[use solutionModel.getRelations(null) instead.]]></deprecated>
           <sample><![CDATA[var allRelationNames = scopes.globals.allrelations;
 application.output("There are " + allRelationNames.length + " global relations.");
 for (var i=0; i<allRelationNames.length; i++)
 	application.output(allRelationNames[i]);]]></sample>
         </property>
-        <property name="allvariables" special="true">
+        <property deprecated="true" name="allvariables" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
-          <description><![CDATA[Get all global variable names of the current solution.]]></description>
-          <summary><![CDATA[Get all global variable names of the current solution.]]></summary>
+          <description><![CDATA[Get all variable names of this global scope.]]></description>
+          <summary><![CDATA[Get all variable names of this global scope.]]></summary>
+          <deprecated><![CDATA[use solutionModel.getGlobalVariables("scopeName") instead.]]></deprecated>
           <sample><![CDATA[var allVarNames = scopes.globals.allvariables;
 application.output("There are " + allVarNames.length + " global variables.");
 for (var i=0; i<allVarNames.length; i++)
@@ -12894,6 +12898,15 @@ forms['newFormX'].controller.show();]]></sample>
     </object>
     <object publicName="JSFoundSet" qualifiedName="com.servoy.j2db.dataprocessing.FoundSet">
       <properties>
+        <property name="alldataproviders" special="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="org.mozilla.javascript.NativeJavaArray"/>
+          <description><![CDATA[Get all dataproviders of the foundset.]]></description>
+          <summary><![CDATA[Get all dataproviders of the foundset.]]></summary>
+          <sample><![CDATA[var dataprovidersNames = %%prefix%%alldataproviders;
+application.output("This foundset has " + dataprovidersNames.length + " data providers.")
+for (var i=0; i<dataprovidersNames.length; i++)
+	application.output(dataprovidersNames[i]);]]></sample>
+        </property>
         <property name="multiSelect">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Get or set the multiSelect flag of the foundset.]]></description>
@@ -24243,6 +24256,15 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
     </object>
     <object publicName="Relation" qualifiedName="com.servoy.j2db.dataprocessing.RelatedFoundSet">
       <properties>
+        <property name="alldataproviders" special="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="org.mozilla.javascript.NativeJavaArray"/>
+          <description><![CDATA[Get all dataproviders of the foundset.]]></description>
+          <summary><![CDATA[Get all dataproviders of the foundset.]]></summary>
+          <sample><![CDATA[var dataprovidersNames = %%prefix%%alldataproviders;
+application.output("This foundset has " + dataprovidersNames.length + " data providers.")
+for (var i=0; i<dataprovidersNames.length; i++)
+	application.output(dataprovidersNames[i]);]]></sample>
+        </property>
         <property name="multiSelect">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Get or set the multiSelect flag of the foundset.]]></description>
@@ -30015,51 +30037,56 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
     <object publicName="RuntimeForm" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Form" scriptingName="Form">
       <properties>
         <property name="_super">
-          <return type="com.servoy.j2db.FormController$JSForm" typecode="com.servoy.j2db.FormController$JSForm"/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Form" typecode="com.servoy.j2db.scripting.FormScope"/>
           <description><![CDATA[Provides access to the methods of the parent of this form.]]></description>
           <summary><![CDATA[Provides access to the methods of the parent of this form.]]></summary>
           <sample><![CDATA[%%prefix%%_super.some_method();]]></sample>
         </property>
-        <property name="alldataproviders" special="true">
+        <property deprecated="true" name="alldataproviders" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
-          <description><![CDATA[Get all dataproviders of the form.]]></description>
-          <summary><![CDATA[Get all dataproviders of the form.]]></summary>
+          <description><![CDATA[Get all dataproviders of the form's foundset.]]></description>
+          <summary><![CDATA[Get all dataproviders of the form's foundset.]]></summary>
+          <deprecated><![CDATA[use foundset.alldataproviders instead.]]></deprecated>
           <sample><![CDATA[var dataprovidersNames = %%prefix%%alldataproviders;
 application.output("This form has " + dataprovidersNames.length + " data providers.")
 for (var i=0; i<dataprovidersNames.length; i++)
 	application.output(dataprovidersNames[i]);]]></sample>
         </property>
-        <property name="allmethods" special="true">
+        <property deprecated="true" name="allmethods" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           <description><![CDATA[Get all script names of the form.]]></description>
           <summary><![CDATA[Get all script names of the form.]]></summary>
+          <deprecated><![CDATA[use solutionModel - JSForm.getMethods(Boolean) or JSForm.getMethods().]]></deprecated>
           <sample><![CDATA[var methodNames = %%prefix%%allmethods;
 application.output("This form has " + methodNames.length + " methods defined.")
 for (var i=0; i<methodNames.length; i++)
 	application.output(methodNames[i]);]]></sample>
         </property>
-        <property name="allnames" special="true">
+        <property deprecated="true" name="allnames" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           <description><![CDATA[Get the names of all elements on the form as an array.]]></description>
           <summary><![CDATA[Get the names of all elements on the form as an array.]]></summary>
+          <deprecated><![CDATA[use elements.allnames.]]></deprecated>
           <sample><![CDATA[var names = %%prefix%%allnames;
 application.output("This form has " + names.length + " named items.")
 for (var i=0; i<names.length; i++)
 	application.output(names[i]);]]></sample>
         </property>
-        <property name="allrelations" special="true">
+        <property deprecated="true" name="allrelations" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           <description><![CDATA[Get all relation names of the form.]]></description>
           <summary><![CDATA[Get all relation names of the form.]]></summary>
+          <deprecated><![CDATA[use solutionModel.getRelations(dataSource) where dataSource is provided by solution model's JSForm.dataSource or controller.getDataSource().]]></deprecated>
           <sample><![CDATA[var relationsNames = %%prefix%%allrelations;
 application.output("This form has " + relationsNames.length + " relations.")
 for (var i=0; i<relationsNames.length; i++)
 	application.output(relationsNames[i]);]]></sample>
         </property>
-        <property name="allvariables" special="true">
+        <property deprecated="true" name="allvariables" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           <description><![CDATA[Get all form variable names.]]></description>
           <summary><![CDATA[Get all form variable names.]]></summary>
+          <deprecated><![CDATA[use solutionModel - JSForm.getVariables(Boolean) or JSForm.getVariables().]]></deprecated>
           <sample><![CDATA[var varNames = %%prefix%%allvariables;
 application.output("This form has " + varNames.length + " variables defined.")
 for (var i=0; i<varNames.length; i++)
@@ -35423,7 +35450,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
         <function name="getLeftForm">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.FormController$JSForm" typecode="com.servoy.j2db.scripting.FormScope"><![CDATA[left form of the split pane]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Form" typecode="com.servoy.j2db.scripting.FormScope"><![CDATA[left form of the split pane]]></return>
           <description><![CDATA[Returns the left form of the split pane.]]></description>
           <summary><![CDATA[Returns the left form of the split pane.]]></summary>
           <sample><![CDATA[var leftForm = %%prefix%%%%elementName%%.getLeftForm();]]></sample>
@@ -35469,7 +35496,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
         </function>
         <function name="getRightForm">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.FormController$JSForm" typecode="com.servoy.j2db.scripting.FormScope"><![CDATA[right form of the split pane]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Form" typecode="com.servoy.j2db.scripting.FormScope"><![CDATA[right form of the split pane]]></return>
           <description><![CDATA[Returns the right form of the split pane.]]></description>
           <summary><![CDATA[Returns the right form of the split pane.]]></summary>
           <sample><![CDATA[var rightForm = %%prefix%%%%elementName%%.getRightForm();]]></sample>
@@ -44813,8 +44840,18 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
     </object>
     <object publicName="elements" qualifiedName="com.servoy.j2db.documentation.scripting.docs.FormElements" scriptingName="elements">
       <properties>
-        <property name="['name']">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+        <property name="[index]">
+          <return type="com.servoy.j2db.ui.runtime.IRuntimeComponent" typecode="com.servoy.j2db.ui.runtime.IRuntimeComponent"/>
+          <description><![CDATA[Get an element of the form by its index.]]></description>
+          <summary><![CDATA[Get an element of the form by its index.]]></summary>
+          <sample><![CDATA[for (var i=0; i<%%prefix%%elements.length; i++)
+{
+	var elem = %%prefix%%elements[i];
+	application.output(elem.getName() + ": " + elem.getDataProviderID());
+}]]></sample>
+        </property>
+        <property name="[name]">
+          <return type="com.servoy.j2db.ui.runtime.IRuntimeComponent" typecode="com.servoy.j2db.ui.runtime.IRuntimeComponent"/>
           <description><![CDATA[Get an element of the form by its name.]]></description>
           <summary><![CDATA[Get an element of the form by its name.]]></summary>
           <sample><![CDATA[for (var i=0; i<%%prefix%%elements.allnames.length; i++)
@@ -44822,16 +44859,6 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
 	var name = %%prefix%%elements.allnames[i];
 	var elem = %%prefix%%elements[name];
 	application.output(name + ": " + elem.getDataProviderID());	
-}]]></sample>
-        </property>
-        <property name="[index]">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <description><![CDATA[Get an element of the form by its index.]]></description>
-          <summary><![CDATA[Get an element of the form by its index.]]></summary>
-          <sample><![CDATA[for (var i=0; i<%%prefix%%elements.length; i++)
-{
-	var elem = %%prefix%%elements[i];
-	application.output(elem.getName() + ": " + elem.getDataProviderID());
 }]]></sample>
         </property>
         <property name="allnames" special="true">

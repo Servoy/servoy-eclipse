@@ -41,10 +41,12 @@ import javax.swing.Icon;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
 import org.eclipse.dltk.javascript.typeinfo.TypeCache;
+import org.eclipse.dltk.javascript.typeinfo.TypeMemberQuery;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
@@ -79,7 +81,6 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
-import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
@@ -92,8 +93,12 @@ import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
+import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IParameter;
 import com.servoy.j2db.documentation.ScriptParameter;
+import com.servoy.j2db.documentation.scripting.docs.FormElements;
+import com.servoy.j2db.documentation.scripting.docs.Forms;
+import com.servoy.j2db.documentation.scripting.docs.Globals;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
@@ -117,7 +122,6 @@ import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
-import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IBeanClassProvider;
 import com.servoy.j2db.plugins.IClientPlugin;
@@ -159,6 +163,8 @@ import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
+import com.servoy.j2db.scripting.annotations.AnnotationManager;
+import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
 import com.servoy.j2db.ui.IScriptDataLabelMethods;
@@ -256,6 +262,8 @@ public class TypeCreator extends TypeCache
 
 	protected final static ImageDescriptor PLUGIN_DEFAULT = ImageDescriptor.createFromURL(FileLocator.find(
 		com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/plugin_conn.gif"), null));
+
+	public static final String ARRAY_INDEX_PROPERTY_PREFIX = "array__indexedby_";
 
 	public static final String IMAGE_DESCRIPTOR = "servoy.IMAGEDESCRIPTOR";
 	public static final String RESOURCE = "servoy.RESOURCE";
@@ -912,7 +920,7 @@ public class TypeCreator extends TypeCache
 						{
 							memberbox = ((NativeJavaMethod)object).getMethods();
 						}
-						int membersSize = memberbox == null ? 1 : memberbox.length;
+						int membersSize = memberbox == null ? 0 : memberbox.length;
 						for (int i = 0; i < membersSize; i++)
 						{
 							Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
@@ -932,7 +940,7 @@ public class TypeCreator extends TypeCache
 								method.setDeprecated(true);
 								method.setVisible(false);
 							}
-							method.setDescription(getDoc(name, scriptObjectClass, name, parameterTypes)); // TODO name should be of parent.
+							method.setDescription(getDoc(name, scriptObjectClass, parameterTypes)); // TODO name should be of parent.
 							if (returnTypeClz != null)
 							{
 								method.setType(getMemberTypeName(context, name, returnTypeClz, typeName));
@@ -973,7 +981,7 @@ public class TypeCreator extends TypeCache
 										}
 										else
 										{
-											parameter.setType(getTypeRef(context, SolutionExplorerListContentProvider.TYPES.get(param.getType())));
+											parameter.setType(getTypeRef(context, param.getType()));
 										}
 									}
 									parameter.setKind(param.isVarArgs() ? ParameterKind.VARARGS : param.isOptional() ? ParameterKind.OPTIONAL
@@ -990,14 +998,15 @@ public class TypeCreator extends TypeCache
 									if (paramClass.isArray())
 									{
 										Class< ? > componentType = paramClass.getComponentType();
-										parameter.setName(SolutionExplorerListContentProvider.TYPES.get(componentType.getName()));
+										parameter.setName(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(componentType));
 										parameter.setType(TypeUtil.arrayOf(getTypeRef(context,
-											SolutionExplorerListContentProvider.TYPES.get(componentType.getName()))));
+											DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(componentType))));
 									}
 									else
 									{
-										parameter.setName(SolutionExplorerListContentProvider.TYPES.get(paramClass.getName()));
-										parameter.setType(getTypeRef(context, SolutionExplorerListContentProvider.TYPES.get(paramClass.getName())));
+										parameter.setName(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(paramClass));
+										parameter.setType(getTypeRef(context,
+											DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(paramClass)));
 									}
 									parameter.setKind(ParameterKind.NORMAL);
 									parameters.add(parameter);
@@ -1013,13 +1022,38 @@ public class TypeCreator extends TypeCache
 						{
 							returnType = getMemberTypeName(context, name, returnTypeClz, typeName);
 						}
+
+						boolean xmlDocumentedProperty = (scriptObject instanceof ITypedScriptObject);
+						String propertyName = name;
+						boolean visible = true;
+						if (name.toLowerCase().startsWith(ARRAY_INDEX_PROPERTY_PREFIX)) // see also MethodStoragePlace.ARRAY_INDEX_PROPERTY_PREFIX which serves the same purpose
+						{
+							propertyName = "[]"; // it must be resolved to an array access in this case
+							if (xmlDocumentedProperty) name = "[" + name.substring(ARRAY_INDEX_PROPERTY_PREFIX.length()) + "]"; // in the doc xmls this property's name is converted to "[something]"; use that when trying to get info
+							visible = false;
+						}
+
 						ImageDescriptor descriptor = IconProvider.instance().descriptor(returnTypeClz);
 						if (descriptor == null)
 						{
-							descriptor = type == STATIC_FIELD ? CONSTANT : PROPERTY;
+							boolean isSpecial = false;
+							if (xmlDocumentedProperty)
+							{
+								isSpecial = ((ITypedScriptObject)scriptObject).isSpecial(name);
+							}
+							descriptor = (type == STATIC_FIELD) ? CONSTANT : (isSpecial ? SPECIAL_PROPERTY : PROPERTY);
 						}
-						Property property = createProperty(name, false, returnType, getDoc(name, scriptObjectClass, name, null), descriptor);
+
+						boolean readOnly = false;
+						if (object instanceof BeanProperty)
+						{
+							readOnly = AnnotationManager.getInstance().isAnnotationPresent(((BeanProperty)object).getGetter(), JSReadonlyProperty.class);
+						}
+
+						Property property = createProperty(propertyName, readOnly, returnType, getDoc(name, scriptObjectClass, null), descriptor);
+						if (!visible) property.setVisible(false);
 						property.setStatic(type == STATIC_FIELD);
+
 						if (scriptObject != null && scriptObject.isDeprecated(name))
 						{
 							property.setDeprecated(true);
@@ -1103,7 +1137,7 @@ public class TypeCreator extends TypeCache
 		}
 		else
 		{
-			typeName = SolutionExplorerListContentProvider.TYPES.get(memberReturnType.getSimpleName());
+			typeName = DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(memberReturnType);
 			addAnonymousClassType(typeName, memberReturnType);
 		}
 		return getTypeRef(context, typeName);
@@ -1192,14 +1226,16 @@ public class TypeCreator extends TypeCache
 
 		if (parameterNames != null && parameters == null)
 		{
-			int memberParamLength = member.getParameterTypes().length;
+			// so this is old type docs - not xml based; can have optional args.
+			int memberParamLength = member.getParameterTypes().length; // parameters used in script (editor)
 			if (memberParamLength < parameterNames.length)
 			{
-				boolean removeOptional = false;
+				boolean removeOptional;
 				// if parameterNames bigger then the members parameter types and it is not a vararg, just get the first names.
 				if (memberParamLength == 1 && member.getParameterTypes()[0].isArray())
 				{
 					parameters = new IParameter[parameterNames.length];
+					removeOptional = false;
 				}
 				else
 				{
@@ -1229,26 +1265,14 @@ public class TypeCreator extends TypeCache
 					{
 						name = name.substring(1, name.length() - 1);
 					}
-					String type = null;
-					if (removeOptional && i < member.getParameterTypes().length)
+					String typePrefix = null;
+					Class< ? > realType = null;
+					if (removeOptional && i < memberParamLength)
 					{
-						Class< ? > paramClass = member.getParameterTypes()[i];
-						String className = (paramClass.isArray()) ? paramClass.getComponentType().getName() : paramClass.getName();
-						if (prefixedTypes.containsKey((paramClass.isArray()) ? paramClass.getComponentType() : paramClass))
-						{
-							className = prefixedTypes.get((paramClass.isArray()) ? paramClass.getComponentType() : paramClass) + className;
-						}
-						if (paramClass.isArray())
-						{
-							type = SolutionExplorerListContentProvider.TYPES.get(className) + "[]";
-						}
-						else
-						{
-							type = SolutionExplorerListContentProvider.TYPES.get(className);
-						}
+						realType = member.getParameterTypes()[i];
+						typePrefix = getTypePrefix(realType);
 					}
-					parameters[i] = new ScriptParameter(name, type, i < member.getParameterTypes().length ? member.getParameterTypes()[i] : null, optional,
-						vararg);
+					parameters[i] = new ScriptParameter(name, typePrefix, realType, optional, vararg);
 				}
 			}
 			else if (memberParamLength == parameterNames.length)
@@ -1258,48 +1282,34 @@ public class TypeCreator extends TypeCache
 				{
 					Class< ? > paramClass = member.getParameterTypes()[i];
 					String name = null;
-					String type = null;
+					String typePrefix = null;
 					boolean optional = false;
-					if (parameterNames != null)
-					{
-						name = parameterNames[i];
-						if (name.startsWith("[") && name.endsWith("]"))
-						{
-							name = name.substring(1, name.length() - 1);
-							optional = true;
-						}
-						else if (paramClass.isArray())
-						{
-							type = SolutionExplorerListContentProvider.TYPES.get((prefixedTypes.containsKey(paramClass.getComponentType())
-								? prefixedTypes.get(paramClass.getComponentType()) : "") + paramClass.getComponentType().getName()) +
-								"[]";
-						}
-						else
-						{
-							type = SolutionExplorerListContentProvider.TYPES.get((prefixedTypes.containsKey(paramClass) ? prefixedTypes.get(paramClass) : "") +
-								paramClass.getName());
-						}
 
-					}
-					else if (paramClass.isArray())
+					name = parameterNames[i];
+					if (name.startsWith("[") && name.endsWith("]"))
 					{
-						type = SolutionExplorerListContentProvider.TYPES.get((prefixedTypes.containsKey(paramClass.getComponentType())
-							? prefixedTypes.get(paramClass.getComponentType()) : "") + paramClass.getComponentType().getName()) +
-							"[]";
-						name = type;
-
+						name = name.substring(1, name.length() - 1);
+						optional = true;
 					}
 					else
 					{
-						type = SolutionExplorerListContentProvider.TYPES.get((prefixedTypes.containsKey(paramClass) ? prefixedTypes.get(paramClass) : "") +
-							paramClass.getName());
-						name = type;
+						typePrefix = getTypePrefix(paramClass);
 					}
-					parameters[i] = new ScriptParameter(name, type, paramClass, optional, false);
+
+					parameters[i] = new ScriptParameter(name, typePrefix, paramClass, optional, false);
 				}
 			}
 		}
 		return parameters;
+	}
+
+	/**
+	 * Gets the prefix for a class of an array with a prefixed type elements.
+	 * If given class does not use a prefix, it returns null.
+	 */
+	private String getTypePrefix(Class< ? > realType)
+	{
+		return prefixedTypes.get((realType.isArray()) ? realType.getComponentType() : realType);
 	}
 
 	private final ConcurrentMap<String, String> buckets = new ConcurrentHashMap<String, String>();
@@ -1511,7 +1521,7 @@ public class TypeCreator extends TypeCache
 	 * @return
 	 */
 	@SuppressWarnings("deprecation")
-	public static String getDoc(String key, Class< ? > scriptObjectClass, String name, Class< ? >[] parameterTypes)
+	public static String getDoc(String name, Class< ? > scriptObjectClass, Class< ? >[] parameterTypes)
 	{
 		if (scriptObjectClass == null) return null;
 
@@ -1519,7 +1529,7 @@ public class TypeCreator extends TypeCache
 		String doc = docCache.get(cacheKey);
 		if (doc == null)
 		{
-			doc = key;
+			doc = name;
 			IScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectForClass(scriptObjectClass);
 			if (scriptObject != null)
 			{
@@ -1529,9 +1539,9 @@ public class TypeCreator extends TypeCache
 				String returnText = null;
 				if (scriptObject instanceof ITypedScriptObject)
 				{
-					if (((ITypedScriptObject)scriptObject).isDeprecated(key, parameterTypes))
+					if (((ITypedScriptObject)scriptObject).isDeprecated(name, parameterTypes))
 					{
-						String deprecatedText = ((ITypedScriptObject)scriptObject).getDeprecatedText(key, parameterTypes);
+						String deprecatedText = ((ITypedScriptObject)scriptObject).getDeprecatedText(name, parameterTypes);
 						if (deprecatedText != null)
 						{
 							docBuilder.append("<br/><b>@deprecated</b>&nbsp;");
@@ -1543,33 +1553,33 @@ public class TypeCreator extends TypeCache
 							docBuilder.append("<br/><b>@deprecated</b><br/>");
 						}
 					}
-					String toolTip = ((ITypedScriptObject)scriptObject).getToolTip(key, parameterTypes);
+					String toolTip = ((ITypedScriptObject)scriptObject).getToolTip(name, parameterTypes);
 					if (toolTip != null && toolTip.trim().length() != 0)
 					{
 						docBuilder.append("<br/>");
 						docBuilder.append(toolTip);
 						docBuilder.append("<br/>");
 					}
-					sample = ((ITypedScriptObject)scriptObject).getSample(key, parameterTypes);
+					sample = ((ITypedScriptObject)scriptObject).getSample(name, parameterTypes);
 
 					if (parameterTypes != null)
 					{
-						parameters = ((ITypedScriptObject)scriptObject).getParameters(key, parameterTypes);
+						parameters = ((ITypedScriptObject)scriptObject).getParameters(name, parameterTypes);
 					}
 
 
-					Class< ? > returnedType = ((ITypedScriptObject)scriptObject).getReturnedType(key, parameterTypes);
-					String returnDescription = ((ITypedScriptObject)scriptObject).getReturnDescription(key, parameterTypes);
+					Class< ? > returnedType = ((ITypedScriptObject)scriptObject).getReturnedType(name, parameterTypes);
+					String returnDescription = ((ITypedScriptObject)scriptObject).getReturnDescription(name, parameterTypes);
 					if ((returnedType != Void.class && returnedType != void.class && returnedType != null) || returnDescription != null)
 					{
 						returnText = "<b>@return</b> ";
-						if (returnedType != null) returnText += returnedType.getSimpleName() + ' ';
+						if (returnedType != null) returnText += DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnedType) + ' ';
 						if (returnDescription != null) returnText += returnDescription;
 					}
 				}
 				else
 				{
-					if (scriptObject.isDeprecated(key))
+					if (scriptObject.isDeprecated(name))
 					{
 						docBuilder.append("<br/><b>@deprecated</b><br/>");
 					}
@@ -1580,7 +1590,7 @@ public class TypeCreator extends TypeCache
 						docBuilder.append(toolTip);
 						docBuilder.append("<br/>");
 					}
-					sample = scriptObject.getSample(key);
+					sample = scriptObject.getSample(name);
 				}
 
 				if (sample != null && sample.trim().length() != 0)
@@ -1600,7 +1610,7 @@ public class TypeCreator extends TypeCache
 							if (parameter.getType() != null)
 							{
 								sb.append("{");
-								sb.append(SolutionExplorerListContentProvider.TYPES.get(parameter.getType()));
+								sb.append(parameter.getType());
 								sb.append("} ");
 							}
 							sb.append(parameter.getName());
@@ -1828,6 +1838,8 @@ public class TypeCreator extends TypeCache
 
 	private class ScopeScopeCreator implements IScopeTypeCreator
 	{
+		private Type docGlobalsType = null;
+
 		public Type createType(String context, String typeName)
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
@@ -1843,17 +1855,12 @@ public class TypeCreator extends TypeCache
 				String solutionName = split[0];
 				String scopeName = split[1];
 
-				if (ScriptVariable.GLOBAL_SCOPE.equals(scopeName))
-				{
-					EList<Member> members = type.getMembers();
+				EList<Member> members = type.getMembers();
 
-
-					members.add(createProperty("allmethods", true, TypeUtil.arrayOf("String"), "Returns all global method names in an Array", SPECIAL_PROPERTY));
-					members.add(createProperty("allvariables", true, TypeUtil.arrayOf("String"), "Returns all global variable names in an Array",
-						SPECIAL_PROPERTY));
-					members.add(createProperty("allrelations", true, TypeUtil.arrayOf("String"), "Returns all global relation names in an Array",
-						SPECIAL_PROPERTY));
-				}
+				if (docGlobalsType == null) docGlobalsType = TypeCreator.this.createType(context, "globals", Globals.class);
+				members.add(TypeCreator.clone(getMember("allmethods", docGlobalsType), null));
+				members.add(TypeCreator.clone(getMember("allvariables", docGlobalsType), null));
+				members.add(TypeCreator.clone(getMember("allrelations", docGlobalsType), null));
 
 				if (fs != null && (fs.getMainSolutionMetaData().getName().equals(solutionName) || fs.hasModule(solutionName)))
 				{
@@ -1877,19 +1884,8 @@ public class TypeCreator extends TypeCache
 			Type type = null;
 			if ("Forms".equals(fullTypeName))
 			{
-				type = TypeInfoModelFactory.eINSTANCE.createType();
-				type.setKind(TypeKind.JAVA);
+				type = TypeCreator.this.createType(context, "Forms", Forms.class);
 				type.setAttribute(IMAGE_DESCRIPTOR, FORMS);
-
-				EList<Member> members = type.getMembers();
-				members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "All form names as an array", SPECIAL_PROPERTY));
-				members.add(createProperty(context, "length", true, "Number", "Number of forms", PROPERTY));
-
-				// special array lookup property so that forms[xxx]. does code complete.
-				Property arrayProp = createProperty(context, "[]", true, "RuntimeForm", PROPERTY);
-				arrayProp.setVisible(false);
-				members.add(arrayProp);
-				type.setName("Forms");
 				// quickly add this one to the static types.
 				return addType(null, type);
 			}
@@ -2017,12 +2013,6 @@ public class TypeCreator extends TypeCache
 			Type type;
 			type = TypeCreator.this.createType(context, fullTypeName, FoundSet.class);
 			//type.setAttribute(IMAGE_DESCRIPTOR, FOUNDSET_IMAGE);
-
-			Property alldataproviders = TypeInfoModelFactory.eINSTANCE.createProperty();
-			alldataproviders.setName("alldataproviders");
-			alldataproviders.setDescription("the dataproviders array of this foundset");
-			alldataproviders.setAttribute(IMAGE_DESCRIPTOR, SPECIAL_PROPERTY);
-			type.getMembers().add(makeDeprected(alldataproviders));
 
 			Property maxRecordIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
 			maxRecordIndex.setName("maxRecordIndex");
@@ -2213,26 +2203,8 @@ public class TypeCreator extends TypeCache
 			Type type;
 			if (typeName.equals("Form") || typeName.equals("RuntimeForm"))
 			{
-				type = TypeInfoModelFactory.eINSTANCE.createType();
-				type.setName("RuntimeForm");
+				type = TypeCreator.this.createType(context, "RuntimeForm", com.servoy.j2db.documentation.scripting.docs.Form.class);
 				type.setKind(TypeKind.JAVA);
-
-				EList<Member> members = type.getMembers();
-
-				members.add(makeDeprected(createProperty("allnames", true, TypeUtil.arrayOf("String"), "Array with all the names in this form scope",
-					SPECIAL_PROPERTY)));
-				members.add(makeDeprected(createProperty("alldataproviders", true, TypeUtil.arrayOf("String"), "Array with all the dataprovider names",
-					SPECIAL_PROPERTY)));
-				members.add(makeDeprected(createProperty("allmethods", true, TypeUtil.arrayOf("String"), "Array with all the method names", SPECIAL_PROPERTY)));
-				members.add(makeDeprected(createProperty("allrelations", true, TypeUtil.arrayOf("String"), "Array with all the relation names",
-					SPECIAL_PROPERTY)));
-				members.add(makeDeprected(createProperty("allvariables", true, TypeUtil.arrayOf("String"), "Array with all the variable names",
-					SPECIAL_PROPERTY)));
-
-				// controller and foundset and elements
-				members.add(createProperty(context, "controller", true, "Controller", IconProvider.instance().descriptor(JSForm.class)));
-				members.add(createProperty(context, "foundset", true, FoundSet.JS_FOUNDSET, FOUNDSET_IMAGE));
-				members.add(createProperty(context, "elements", true, "Elements", ELEMENTS));
 
 				//type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
 				// quickly add this one to the static types.
@@ -2246,10 +2218,12 @@ public class TypeCreator extends TypeCache
 				Form form = fs.getForm(config);
 				if (form == null) return null;
 				Form formToUse = fs.getFlattenedForm(form);
-				Type superForm = getType(context, "RuntimeForm");
+				Type baseType = findType(context, "RuntimeForm");
+				Type superForm = baseType;
+				Form extendsForm = null;
 				if (form.getExtendsID() > 0)
 				{
-					Form extendsForm = fs.getForm(form.getExtendsID());
+					extendsForm = fs.getForm(form.getExtendsID());
 					if (extendsForm != null) superForm = getType(context, "RuntimeForm<" + extendsForm.getName() + '>');
 				}
 
@@ -2260,29 +2234,39 @@ public class TypeCreator extends TypeCache
 				{
 					String foundsetType = FoundSet.JS_FOUNDSET;
 					if (ds != null) foundsetType += '<' + ds + '>';
-					Member clone = createProperty(context, "foundset", true, foundsetType, FOUNDSET_IMAGE);
+					Member clone = TypeCreator.clone(getMember("foundset", baseType), getTypeRef(context, foundsetType));
 					overwrittenMembers.add(clone);
 					clone.setVisible(!FormEncapsulation.hideFoundset(formToUse));
 				}
 				if (FormEncapsulation.hideController(formToUse))
 				{
-					Member clone = createProperty(context, "controller", true, "Controller", IconProvider.instance().descriptor(JSForm.class));
+					Member clone = TypeCreator.clone(getMember("controller", baseType), null);
 					overwrittenMembers.add(clone);
 					clone.setVisible(false);
 				}
 				if (FormEncapsulation.hideDataproviders(formToUse))
 				{
-					Member clone = createProperty("alldataproviders", true, TypeUtil.arrayOf("String"), "Array with all the dataprovider names",
-						SPECIAL_PROPERTY);
+					Member clone = TypeCreator.clone(getMember("alldataproviders", baseType), TypeUtil.arrayOf("String"));
 					overwrittenMembers.add(clone);
 					clone.setVisible(false);
 
-					clone = createProperty("allrelations", true, TypeUtil.arrayOf("String"), "Array with all the relation names", SPECIAL_PROPERTY);
+					clone = TypeCreator.clone(getMember("allrelations", baseType), TypeUtil.arrayOf("String"));
 					overwrittenMembers.add(clone);
 					clone.setVisible(false);
 				}
 
-				Member clone = createProperty(context, "elements", true, "Elements<" + config + '>', ELEMENTS);
+				// currently _super is hardcoded in ElementResolver for when in the form's JS... hide it in other places
+				Member clone = TypeCreator.clone(getMember("_super", baseType), null);
+				clone.setType(null);
+				if (extendsForm != null)
+				{
+					clone.setAttribute(TypeCreator.LAZY_VALUECOLLECTION, extendsForm);
+					clone.setAttribute(IReferenceAttributes.SUPER_SCOPE, Boolean.TRUE);
+				}
+				clone.setVisible(false);
+				overwrittenMembers.add(clone);
+
+				clone = TypeCreator.clone(getMember("elements", baseType), getTypeRef(context, "Elements<" + config + '>'));
 				overwrittenMembers.add(clone);
 				clone.setVisible(!FormEncapsulation.hideElements(formToUse));
 
@@ -2758,6 +2742,24 @@ public class TypeCreator extends TypeCache
 	}
 
 	/**
+	 * Gets a member by name from a type.
+	 */
+	public static Member getMember(String memberName, Type existingType)
+	{
+		Member result = null;
+		Iterator<Member> members = new TypeMemberQuery(existingType).ignoreDuplicates().iterator();
+		while (result == null && members.hasNext())
+		{
+			Member member = members.next();
+			if (memberName.equals(member.getName()))
+			{
+				result = member;
+			}
+		}
+		return result;
+	}
+
+	/**
 	 * @param createProperty
 	 * @return
 	 */
@@ -2825,23 +2827,21 @@ public class TypeCreator extends TypeCache
 
 		public Type createType(String context, String typeName)
 		{
-			Type type = TypeInfoModelFactory.eINSTANCE.createType();
-			type.setName(typeName);
-			type.setKind(TypeKind.JAVA);
-			type.setAttribute(IMAGE_DESCRIPTOR, ELEMENTS);
+			Type type;
 			if (typeName.equals("Elements"))
 			{
-				EList<Member> members = type.getMembers();
-				members.add(createProperty("allnames", true, TypeUtil.arrayOf("String"), "Array with all the element names", SPECIAL_PROPERTY));
-				members.add(createProperty(context, "length", true, "Number", PROPERTY));
-				Property arrayProp = createProperty(context, "[]", true, "RuntimeComponent", PROPERTY);
-				arrayProp.setVisible(false);
-				members.add(arrayProp);
+				type = TypeCreator.this.createType(context, "Elements", FormElements.class);
+				type.setAttribute(IMAGE_DESCRIPTOR, ELEMENTS);
+
 				// quickly add this one to the static types.
 				return addType(null, type);
 			}
 			else
 			{
+				type = TypeInfoModelFactory.eINSTANCE.createType();
+				type.setName(typeName);
+				type.setKind(TypeKind.JAVA);
+				type.setAttribute(IMAGE_DESCRIPTOR, ELEMENTS);
 				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 				if (fs != null)
 				{

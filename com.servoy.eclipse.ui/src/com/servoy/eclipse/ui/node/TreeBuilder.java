@@ -26,6 +26,7 @@ import java.util.SortedSet;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.XMLScriptObjectAdapterLoader;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
 import com.servoy.j2db.documentation.IDocumentationManager;
 import com.servoy.j2db.documentation.IFunctionDocumentation;
 import com.servoy.j2db.documentation.IObjectDocumentation;
@@ -210,12 +211,23 @@ public class TreeBuilder
 		for (IFunctionDocumentation fdoc : fdocs)
 		{
 			String answeredName = answersTo(fdoc, onlyThese);
-			if ((onlyThese == null || answeredName != null) && fdoc.getType() == typeFilter)
+			if ((onlyThese == null || answeredName != null) && fdoc.getType() == typeFilter && !fdoc.isDeprecated())
 			{
 				Object realObject = null;
 				if (answeredName != null) realObject = onlyThese.get(answeredName);
-				dlm.add(new UserNode(fdoc.getMainName(), type, fdoc.getSignature(codePrefix != null ? codePrefix : null), fdoc.getSample(),
-					fdoc.getDescription(), realObject, fdoc.isSpecial() ? specialIcon : icon));
+
+				String toolTip = fdoc.getDescription();
+				String tmp = "<html><body><b>" + SolutionExplorerListContentProvider.getReturnTypeString(fdoc.getReturnedType()) + " " + fdoc.getMainName() + "</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				if ("".equals(toolTip)) //$NON-NLS-1$
+				{
+					toolTip = tmp + "</body></html>"; //$NON-NLS-1$
+				}
+				else
+				{
+					toolTip = tmp + "<br><pre>" + toolTip + "</pre></body></html>"; //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				dlm.add(new UserNode(fdoc.getMainName(), type, fdoc.getSignature(codePrefix != null ? codePrefix : null), fdoc.getSample(), toolTip,
+					realObject, fdoc.isSpecial() ? specialIcon : icon));
 			}
 		}
 	}
