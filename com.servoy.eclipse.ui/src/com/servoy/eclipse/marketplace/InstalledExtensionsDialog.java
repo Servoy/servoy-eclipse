@@ -51,6 +51,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -524,6 +525,10 @@ public class InstalledExtensionsDialog extends TrayDialog
 							if (img != null) item.setImage(0, img);
 							item.setText(1, extension.getLeft().extensionName);
 							item.setText(2, extension.getLeft().version);
+							if (extension.getLeft().getServoyDependency() != null && !extension.getLeft().getServoyDependency().isCompatibleVersion())
+							{
+								item.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
+							}
 							if (extension.getRight() != null)
 							{
 //								createButton(upgradeIcon, item, 3, extension.getRight()).addSelectionListener(upgradeListener);
