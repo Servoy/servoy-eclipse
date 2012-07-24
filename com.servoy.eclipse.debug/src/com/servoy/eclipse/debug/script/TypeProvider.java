@@ -105,7 +105,7 @@ public class TypeProvider implements ITypeProvider
 			if ("form".startsWith(prefixLower) || "runtimeform".startsWith(prefixLower))
 			{
 				names.add("RuntimeForm");
-				if (mode == TypeMode.JSDOC)
+				if (mode == TypeMode.JSDOC && (prefixLower.equals("form") || prefixLower.equals("runtimeform")))
 				{
 					FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 					Iterator<Form> forms = fs.getForms(false);
